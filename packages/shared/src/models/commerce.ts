@@ -115,6 +115,8 @@ export const PREVIEW_ILLUSTRATED_PAGES = 2;
 export const bookPreviewSchema = z.object({
   title: z.string(),
   cover: z.object({ imagePath: z.string(), previewImagePath: z.string() }),
+  /** Lámina del personaje (referencia interna de cada ilustración; el cliente no la ve). */
+  characterImagePath: z.string().nullable().optional(),
   pages: z.array(bookPageSchema),
   /** Con qué se generó, para saber si quedó desactualizada tras editar el borrador. */
   storyId: z.string(),

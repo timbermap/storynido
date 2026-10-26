@@ -435,7 +435,7 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
   - **`gemini-3-pro-image`:** con la portada como referencia, repitió la portada en lugar de dibujar las escenas pedidas. Además cuesta el doble (~USD 0,14 por imagen).
   - **`gemini-3.1-flash-image`:** sigue las escenas (~USD 0,07 por imagen), pero copió elementos del fondo de la portada, como planetas en la playa.
 - **Decisión:** `gemini-3.1-flash-image` como modelo por defecto. El prompt ahora aclara que las referencias son solo para el aspecto del personaje y del estilo, y que la escena es nueva (sin copiar composición, fondo ni objetos).
-- **Pendiente:** verificar la corrección con una corrida corta solo de flash (~USD 0,41). Requiere aprobación.
+- **Verificación (USD 0,41):** mejora parcial. Con la portada completa como referencia, el modelo igual arrastró elementos de su fondo en algunas escenas, como el cohete en la escena del huevo. Ver 057.
 - **Estimación del script:** ahora incluye los tokens de entrada (foto y portada de referencia), que la primera estimación no contaba.
 
 ## 056 · Crear sin cuenta: sesión anónima que se convierte en cuenta
@@ -454,3 +454,11 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 - **Pendiente:**
   - Habilitar el proveedor anónimo en Firebase Auth de staging y producción. Sin él, `/crear` vuelve a pedir inicio de sesión.
   - La vinculación por Google y Apple no tiene E2E: el emulador no permite popups en modo headless.
+
+## 057 · Lámina del personaje como referencia
+
+- **Fecha:** 2026-10-26 · **Fase:** 07
+- **Problema:** con la portada completa como referencia, el modelo copia partes de su fondo en las páginas, aun con instrucciones explícitas de no hacerlo (verificación de la decisión 055).
+- **Decisión:** cada muestra genera primero una **lámina del personaje** (el chico solo, de cuerpo entero, sobre fondo crema liso y en el estilo elegido; `CHARACTER_REFERENCE_SCENE`). Esa lámina es la referencia de la portada, de las páginas y de las regeneraciones. Se guarda en `preview.characterImagePath`, solo para uso interno; el cliente no la ve.
+- **Costo:** 1 imagen más por muestra, unos USD 0,07, para un total de ~USD 0,28 en imágenes por muestra con flash.
+- **Evaluación:** `pnpm eval:character --reference sheet` (por defecto) reproduce el mismo método; `--reference cover` compara con el anterior. Falta la corrida de verificación (~USD 0,55).

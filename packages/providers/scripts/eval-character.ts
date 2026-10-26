@@ -6,6 +6,7 @@
  *   pnpm eval:character --photo retrato.jpg --yes            # genera (cuesta dinero)
  *
  * Opciones: --models a,b · --styles acuarela,cartoon-3d · --scenes 3 · --budget 2 (USD, tope)
+ *           --reference sheet|cover (referencia: lámina del personaje o la primera escena)
  * Credenciales: token de gcloud con la configuración "storynido" (nunca la de Timbermap).
  * La foto debe ser de un chico con consentimiento del adulto, o un retrato sintético.
  */
@@ -14,7 +15,11 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { describeCharacterSheet, type ImageData } from '@storynido/shared';
+import {
+  CHARACTER_REFERENCE_SCENE,
+  describeCharacterSheet,
+  type ImageData,
+} from '@storynido/shared';
 import sharp from 'sharp';
 
 import {
@@ -51,6 +56,8 @@ const { values } = parseArgs({
     styles: { type: 'string', default: 'acuarela,cartoon-3d' },
     scenes: { type: 'string', default: '3' },
     budget: { type: 'string', default: '2' },
+    /** sheet: lámina del personaje como referencia (como la app) · cover: la primera escena. */
+    reference: { type: 'string', default: 'sheet' },
     project: { type: 'string', default: 'storynido-staging' },
     out: { type: 'string', default: 'eval-reports' },
     yes: { type: 'boolean', default: false },
@@ -68,7 +75,12 @@ if (values.project.startsWith('timbermap')) {
 
 const models = values.models.split(',').filter(Boolean);
 const styles = values.styles.split(',').filter(Boolean);
-const scenes = SCENES.slice(0, Math.min(Number(values.scenes), SCENES.length));
+const sceneCount = Math.min(Number(values.scenes), SCENES.length);
+// Con "sheet", la primera imagen de cada estilo es la lámina y sirve de referencia al resto.
+const scenes = [
+  ...(values.reference === 'sheet' ? [CHARACTER_REFERENCE_SCENE] : []),
+  ...SCENES.slice(0, sceneCount),
+];
 const budgetUsd = Number(values.budget);
 
 for (const style of styles) {

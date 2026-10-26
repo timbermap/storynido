@@ -364,7 +364,7 @@ export class VertexImageProvider implements AIImageProvider {
     for (const reference of request.references) parts.push(imagePart(reference));
     if (request.references.length > 0) {
       notes.push(
-        'The other images are earlier illustrations of this same book. Use them ONLY to keep the main character identical (face, hair, outfit) and the same art style. Draw a completely NEW scene as described above: do not copy their composition, background, objects or pose.',
+        'The other images are reference illustrations of the main character for this same book. Use them ONLY to keep the character identical (face, hair, outfit) and the same art style. Draw a completely NEW scene as described above: do not copy their composition, background, objects or pose.',
       );
     }
     parts.push({

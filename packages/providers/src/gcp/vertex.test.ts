@@ -126,7 +126,7 @@ describe('Vertex AI', () => {
     expect(image.usage.costUsdMicros).toBe(Math.ceil(600 * 0.5 + 1120 * 60));
     const parts = calls[0]?.contents[0]?.parts ?? [];
     expect(parts.filter((part) => 'inlineData' in part)).toHaveLength(2);
-    expect(String(parts.at(-1)?.text)).toContain('earlier illustrations');
+    expect(String(parts.at(-1)?.text)).toContain('reference illustrations of the main character');
   });
 
   it('reintenta ante un 429 y después responde', async () => {

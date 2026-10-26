@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { encodeIllustration, watermarkPreview, type ProviderRegistry } from '@storynido/providers';
 import {
   COLLECTIONS,
+  CHARACTER_REFERENCE_SCENE,
   PREVIEW_ILLUSTRATED_PAGES,
   ProviderError,
   buildIllustrationPrompt,
@@ -368,19 +369,29 @@ export class PreviewService {
       });
 
     const firstScene = pages.pages[0]?.illustrationPrompt ?? story.title.en;
+    // La lámina del personaje se genera primero y es la referencia de todas las demás.
+    const character = await illustrate(CHARACTER_REFERENCE_SCENE, [], 0);
     const cover = await illustrate(
       `Book cover illustration for "${pages.title}": the main character as the hero of the story, joyful and centered, leaving clear space at the top for the title. ${firstScene}`,
-      [],
+      [character.image],
       1,
     );
     const illustrated = await Promise.all(
       pages.pages
         .slice(0, PREVIEW_ILLUSTRATED_PAGES)
-        .map((page) => illustrate(page.illustrationPrompt, [cover.image], page.index + 2)),
+        .map((page) => illustrate(page.illustrationPrompt, [character.image], page.index + 2)),
     );
 
     const folder = `previews/${uid}/${bookId}`;
     const version = Date.now().toString(36);
+    const characterPath = `${folder}/character-${version}.webp`;
+    await this.providers
+      .storage()
+      .upload(
+        { bucket: 'assets', path: characterPath },
+        await encodeIllustration(character.image.bytes),
+        'image/webp',
+      );
     const coverPaths = await this.store(`${folder}/cover-${version}`, cover.image);
     const bookPages: BookPage[] = await Promise.all(
       pages.pages.map(async (page, index) => {
@@ -401,6 +412,7 @@ export class PreviewService {
     return {
       title: pages.title,
       cover: { imagePath: coverPaths.clean, previewImagePath: coverPaths.preview },
+      characterImagePath: characterPath,
       pages: bookPages,
       storyId: story.slug,
       styleId: style.slug,
@@ -569,8 +581,12 @@ export class PreviewService {
       const { photo, sheet } = await this.characterFor(uid, preview.photoId, ai, track);
       const description = `${String(childSnap.get('name'))}: ${describeCharacterSheet(sheet)}`;
       const storage = this.providers.storage();
-      const coverImage: ImageData = {
-        bytes: await storage.download({ bucket: 'assets', path: preview.cover.imagePath }),
+      // Referencia: la lámina del personaje (las muestras anteriores a ella usan la portada).
+      const reference: ImageData = {
+        bytes: await storage.download({
+          bucket: 'assets',
+          path: preview.characterImagePath ?? preview.cover.imagePath,
+        }),
         mimeType: 'image/webp',
       };
       const scene =
@@ -586,7 +602,7 @@ export class PreviewService {
         }),
         stylePrompt: style.promptModifier,
         character: { description, photo },
-        references: target === 'cover' ? [] : [coverImage],
+        references: [reference],
         aspectRatio: '3:4',
         seed: Date.now() % 100_000,
       });

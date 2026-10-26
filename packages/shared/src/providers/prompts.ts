@@ -86,3 +86,10 @@ export function buildIllustrationPrompt(input: IllustrationPromptInput): string 
     style: input.style,
   });
 }
+
+/**
+ * Lámina del personaje: el protagonista solo, sobre fondo liso, en el estilo elegido.
+ * Es la referencia de la portada y de cada página (la portada completa arrastraba su fondo).
+ */
+export const CHARACTER_REFERENCE_SCENE =
+  'Character reference sheet: the main character alone, full body, standing in a front three-quarter view with a friendly neutral pose, on a plain flat warm cream background. No scenery, no props, no other characters.';
