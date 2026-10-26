@@ -69,6 +69,7 @@ describe('mocks: comportamiento específico', () => {
       prompt: MOCK_UNSAFE_MARKER,
       stylePrompt: '',
       character: { description: '', photo: null },
+      references: [],
       aspectRatio: '1:1',
       seed: null,
     });

@@ -19,6 +19,12 @@ variable "delete_after_days" {
   description = "Si se define, los objetos se borran automáticamente después de esta cantidad de días."
 }
 
+variable "delete_prefixes_after_days" {
+  type        = map(number)
+  default     = {}
+  description = "Borrado automático por prefijo: { \"previews/\" = 30 }."
+}
+
 variable "soft_delete_retention_seconds" {
   type        = number
   default     = 604800
@@ -77,6 +83,19 @@ resource "google_storage_bucket" "this" {
     content {
       condition {
         age = lifecycle_rule.value
+      }
+      action {
+        type = "Delete"
+      }
+    }
+  }
+
+  dynamic "lifecycle_rule" {
+    for_each = var.delete_prefixes_after_days
+    content {
+      condition {
+        age            = lifecycle_rule.value
+        matches_prefix = [lifecycle_rule.key]
       }
       action {
         type = "Delete"

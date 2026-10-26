@@ -2,6 +2,7 @@ import type {
   AIImageProvider,
   AITextProvider,
   AiUsage,
+  CharacterSheetResult,
   GeneratedImage,
   GeneratedStory,
   IllustrationRequest,
@@ -29,8 +30,8 @@ const usage = (model: string): AiUsage => ({ provider: 'mock', model, costUsdMic
 
 function moderate(text: string): ModerationResult {
   return text.includes(MOCK_UNSAFE_MARKER)
-    ? { allowed: false, categories: ['mock_unsafe'] }
-    : { allowed: true, categories: [] };
+    ? { allowed: false, categories: ['mock_unsafe'], usage: usage('mock-moderation') }
+    : { allowed: true, categories: [], usage: usage('mock-moderation') };
 }
 
 export class MockAITextProvider implements AITextProvider {
@@ -43,9 +44,12 @@ export class MockAITextProvider implements AITextProvider {
     const pages = Array.from({ length: request.pageCount }, (_, index) => {
       const like =
         request.likes[index % Math.max(request.likes.length, 1)] ?? DEFAULT_LIKE[request.language];
+      const lesson = index === 1 ? request.lessons[0] : undefined;
       return {
         index,
-        text: PHRASES[request.language](request.childName, like, index + 1),
+        text:
+          PHRASES[request.language](request.childName, like, index + 1) +
+          (lesson ? ` (${lesson.name})` : ''),
         illustrationPrompt: `${request.childName}, ${request.age} años, escena ${index + 1} de "${request.storyTitle}" con ${like}`,
       };
     });
@@ -70,6 +74,24 @@ export class MockAITextProvider implements AITextProvider {
 
   moderateText(text: string): Promise<ModerationResult> {
     return Promise.resolve(moderate(text));
+  }
+
+  /** Ficha fija y verosímil: alcanza para probar el flujo sin enviar la foto a ningún lado. */
+  describeCharacter(photo: ImageData): Promise<CharacterSheetResult> {
+    const shade = parseInt(sha256Hex(photo.bytes).slice(0, 2), 16) % 3;
+    return Promise.resolve({
+      sheet: {
+        apparentAge: 'about 5 years old',
+        hair:
+          ['short curly dark brown hair', 'straight light brown hair', 'wavy black hair'][shade] ??
+          '',
+        eyes: 'brown eyes',
+        skinTone: ['light olive skin', 'fair skin', 'warm brown skin'][shade] ?? '',
+        distinctiveFeatures: ['rosy cheeks'],
+        clothing: 'a striped t-shirt',
+      },
+      usage: usage('mock-text'),
+    });
   }
 }
 

@@ -17,6 +17,10 @@ export const COLLECTIONS = {
   promotions: 'promotions',
   siteConfig: 'siteConfig',
   aiConfig: 'aiConfig',
+  aiUsage: 'aiUsage',
+  aiBudget: 'aiBudget',
+  /** previewQuota/{uid_AAAA-MM-DD} y previewQuota/ip_{ip}_{AAAA-MM-DD}: vistas previas del día. */
+  previewQuota: 'previewQuota',
   content: 'content',
   auditLog: 'auditLog',
 } as const;

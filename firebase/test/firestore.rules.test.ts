@@ -350,6 +350,9 @@ describe('catálogo y configuración', () => {
     await seed('coupons/BIENVENIDA', { active: true });
     await seed('aiConfig/global', { textProvider: 'mock' });
     await seed('auditLog/a1', { action: 'test' });
+    await seed('aiUsage/u1', { kind: 'story', costUsdMicros: 10 });
+    await seed('aiBudget/2026-10-26', { spentUsdMicros: 10 });
+    await seed('previewQuota/alice_2026-10-26', { count: 1 });
   });
 
   it('cualquiera lee lo activo o publicado; lo inactivo solo un admin', async () => {
@@ -380,6 +383,17 @@ describe('catálogo y configuración', () => {
       await assertSucceeds(getDoc(doc(admin(), path)));
     }
     await assertFails(setDoc(doc(admin(), 'auditLog', 'a2'), { action: 'falso' }));
+  });
+
+  it('uso y gasto de IA: solo lectura para admins; las cuotas no las ve nadie', async () => {
+    for (const path of ['aiUsage/u1', 'aiBudget/2026-10-26']) {
+      await assertFails(getDoc(doc(alice(), path)));
+      await assertSucceeds(getDoc(doc(admin(), path)));
+      await assertFails(setDoc(doc(admin(), path), { spentUsdMicros: 0 }));
+    }
+    await assertFails(getDoc(doc(alice(), 'previewQuota', 'alice_2026-10-26')));
+    await assertFails(getDoc(doc(admin(), 'previewQuota', 'alice_2026-10-26')));
+    await assertFails(setDoc(doc(alice(), 'previewQuota', 'alice_2026-10-26'), { count: 0 }));
   });
 
   it('un superadmin tiene los mismos permisos de lectura que un admin', async () => {

@@ -368,7 +368,42 @@
       "customLesson": "Mensagem própria",
       "edit": "Editar",
       "generate": "Criar a prévia grátis",
-      "comingSoon": "A prévia ilustrada estará disponível muito em breve. Seu rascunho fica salvo."
+      "generateNote": "É grátis e sem compromisso de compra. Leva cerca de um minuto.",
+      "viewPreview": "Ver a amostra"
+    },
+    "preview": {
+      "badge": "Amostra da história",
+      "generatingTitle": "Estamos criando a história…",
+      "generatingText": "Escrevemos a história e ilustramos a capa e as primeiras páginas. Leva cerca de um minuto; você pode ficar nesta página.",
+      "cover": "Capa",
+      "page": "Página {number}",
+      "coverAlt": "Capa ilustrada da história “{title}”",
+      "pageAlt": "Ilustração da página {number}",
+      "regenerate": "Tentar outra ilustração",
+      "regenerating": "Criando outra ilustração…",
+      "regenerationsLeft": "{count, plural, =0 {Você já usou a nova tentativa grátis} one {Resta # nova tentativa grátis} other {Restam # novas tentativas grátis}}",
+      "editText": "Editar texto",
+      "saveText": "Salvar texto",
+      "cancel": "Cancelar",
+      "textLabel": "Texto da página {number}",
+      "differencesTitle": "O que muda no livro final",
+      "differencesPages": "O livro completo tem {total} páginas; aqui você vê a capa e as primeiras {shown} ilustradas.",
+      "differencesWatermark": "A marca d’água da StoryNido só aparece nesta amostra.",
+      "differencesEdit": "Você pode editar os textos e mudar de novo a história, o estilo ou a foto.",
+      "staleTitle": "Você mudou suas escolhas",
+      "staleText": "Esta amostra corresponde à versão anterior. Crie de novo para ver as mudanças.",
+      "regenerateAll": "Criar a amostra de novo",
+      "editChoices": "Mudar minhas escolhas",
+      "continue": "Escolher formato",
+      "continueSoon": "Em breve você poderá escolher o formato e comprar. Sua amostra fica salva.",
+      "failedTitle": "Não conseguimos criar a amostra",
+      "errors": {
+        "limit_reached": "Você chegou ao limite de amostras ou novas tentativas de hoje. Poderá criar outra amanhã.",
+        "ai_unavailable": "Não conseguimos criar as ilustrações agora. Tente de novo em alguns minutos; seu rascunho fica salvo.",
+        "validation_failed": "Esse texto não é adequado para uma história infantil. Mude e tente de novo.",
+        "bad_request": "Confira se o protagonista, a foto, a história e o estilo estão completos.",
+        "generic": "Algo deu errado. Tente de novo em alguns minutos."
+      }
     }
   }
 }

@@ -7,13 +7,15 @@ import type { IllustrationStyle, Story } from '@storynido/shared';
 type SeedStory = Omit<Story, 'createdAt' | 'updatedAt'>;
 type SeedStyle = Omit<IllustrationStyle, 'createdAt' | 'updatedAt'>;
 
-const TEXT_PROMPT = `Escribí un cuento infantil en {{language}} de {{pageCount}} páginas sobre "{{storyTitle}}".
-Protagonista: {{childName}}, {{age}} años ({{pronouns}}). Le gusta: {{likes}}.
-Mascota: {{petName}}. Mejor amigo/a: {{bestFriendName}}.
-Enseñanza o mensaje: {{lesson}} — {{lessonGuidance}}
-Tono cálido, frases cortas adecuadas a la edad, sin violencia ni miedo. Cada página: 2 a 4 oraciones y una descripción de la escena para ilustrar.`;
+const TEXT_PROMPT = `Escribe un cuento infantil de {{pageCount}} páginas titulado "{{storyTitle}}".
+Protagonista: {{childName}}, {{age}} años (pronombre: {{pronouns}}). Le gusta: {{likes}}.
+Mascota: {{petName}}. Mejor amigo o amiga: {{bestFriendName}}.
+Enseñanzas para tejer en la trama:
+{{lessons}}
+Tono cálido y luminoso, frases cortas adecuadas a la edad, un pequeño desafío y un final feliz.
+Cada página: de 2 a 4 oraciones y la escena para ilustrar.`;
 
-const IMAGE_PROMPT = `Ilustración de libro infantil: {{scene}}. Protagonista: {{character}}. Estilo: {{style}}. Composición clara, colores cálidos, sin texto en la imagen.`;
+const IMAGE_PROMPT = `Children's picture book illustration: {{scene}}. Main character: {{character}}. Art style: {{style}}. Clear composition, warm light, no text in the image.`;
 
 export const SEED_STORIES: SeedStory[] = [
   {

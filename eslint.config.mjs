@@ -52,7 +52,7 @@ export default tseslint.config(
   },
   {
     // Scripts de terminal: imprimir es su salida.
-    files: ['firebase/src/**/*.ts'],
+    files: ['firebase/src/**/*.ts', 'packages/*/scripts/**/*.ts'],
     rules: { 'no-console': 'off' },
   },
   {

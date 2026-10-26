@@ -79,12 +79,16 @@ export class FirestoreLiveConfig implements SiteConfigSource {
         .doc(GLOBAL_DOC_ID)
         .onSnapshot(
           (snapshot) => {
-            const text: unknown = snapshot.get('textProvider');
-            const image: unknown = snapshot.get('imageProvider');
+            const field = (name: string) => {
+              const value: unknown = snapshot.get(name);
+              return typeof value === 'string' && value !== '' ? value : undefined;
+            };
             try {
               this.providers.setAiOverride({
-                text: typeof text === 'string' ? text : undefined,
-                image: typeof image === 'string' ? image : undefined,
+                text: field('textProvider'),
+                image: field('imageProvider'),
+                textModel: field('textModel'),
+                imageModel: field('imageModel'),
               });
               this.log.info({ providers: this.providers.describe().active }, 'ai config updated');
             } catch (error) {

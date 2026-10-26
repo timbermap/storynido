@@ -2,6 +2,8 @@ import sharp from 'sharp';
 
 import type { FaceBox } from '@storynido/shared';
 
+import { WATERMARK_TILE_PNG_BASE64 } from './watermark-tile';
+
 /** Lado máximo con el que se analiza y guarda una foto (suficiente para ilustrar). */
 const MAX_SIDE = 2048;
 
@@ -57,6 +59,27 @@ export async function cropPortrait(
     .modulate({ saturation: 1.05 })
     .sharpen({ sigma: 0.6 })
     .jpeg({ quality: 90, mozjpeg: true })
+    .toBuffer();
+  return new Uint8Array(data);
+}
+
+/** Ilustración final sin marca, en WebP de alta calidad (se usa para el libro comprado). */
+export async function encodeIllustration(input: Uint8Array): Promise<Uint8Array> {
+  const data = await sharp(input, { failOn: 'error' }).webp({ quality: 92 }).toBuffer();
+  return new Uint8Array(data);
+}
+
+/**
+ * Versión de la vista previa: lado máximo 1024 px y la marca de agua en mosaico.
+ * Es la única versión que ve el cliente antes de comprar.
+ */
+export async function watermarkPreview(input: Uint8Array): Promise<Uint8Array> {
+  const resized = await sharp(input, { failOn: 'error' })
+    .resize({ width: 1024, height: 1024, fit: 'inside', withoutEnlargement: true })
+    .toBuffer();
+  const data = await sharp(resized)
+    .composite([{ input: Buffer.from(WATERMARK_TILE_PNG_BASE64, 'base64'), tile: true }])
+    .webp({ quality: 80 })
     .toBuffer();
   return new Uint8Array(data);
 }

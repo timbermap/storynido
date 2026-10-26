@@ -5,7 +5,7 @@ import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 import { BOOK_FORMATS } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
-import { CONTENT_KEYS, SITE_MODES } from '../models/config';
+import { CONTENT_KEYS, SITE_MODES, aiConfigSchema } from '../models/config';
 import { PHOTO_STATUSES } from '../models/users';
 import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
 import { roleSchema } from '../roles';
@@ -20,6 +20,10 @@ export const API_ERROR_CODES = [
   'rate_limited',
   'maintenance',
   'unavailable_in_mode',
+  /** Se alcanzó un límite (regeneraciones, vistas previas por día). */
+  'limit_reached',
+  /** La IA está pausada (presupuesto diario agotado o moderación fallida dos veces). */
+  'ai_unavailable',
   'internal',
 ] as const;
 
@@ -66,6 +70,57 @@ export const providersResponseSchema = z.object({
   active: providerSettingsSchema,
   available: z.record(z.string(), z.array(z.string())),
 });
+
+// --- Configuración de IA (admin) -----------------------------------------------
+
+export const aiConfigUpdateSchema = aiConfigSchema
+  .omit({ updatedAt: true, updatedBy: true })
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, { message: 'Nada para cambiar' });
+
+export const adminAiConfigResponseSchema = z.object({
+  config: aiConfigSchema.omit({ updatedAt: true, updatedBy: true }).extend({
+    updatedAt: z.string().nullable(),
+    updatedBy: z.string().nullable(),
+  }),
+  spentTodayUsd: z.number(),
+  available: z.object({ text: z.array(z.string()), image: z.array(z.string()) }),
+});
+
+// --- Vista previa ---------------------------------------------------------------
+
+export const PREVIEW_PAGE_TEXT_MAX = 800;
+
+const bookParamsSchema = z.object({ bookId: z.string().min(1).max(128) });
+
+/** "cover" o el índice de una página ilustrada ("0", "1"). */
+export const previewTargetSchema = z.union([
+  z.literal('cover'),
+  z.coerce.number().int().min(0).max(40),
+]);
+
+export const publicPreviewSchema = z.object({
+  bookId: z.string(),
+  status: z.enum(['draft', 'preview_generating', 'preview_ready', 'ordered']),
+  /** Motivo del último intento fallido, si lo hubo. */
+  error: z.string().nullable(),
+  preview: z
+    .object({
+      title: z.string(),
+      coverUrl: z.string(),
+      pages: z.array(
+        z.object({ index: z.number().int(), text: z.string(), imageUrl: z.string().nullable() }),
+      ),
+      totalPages: z.number().int(),
+      /** El borrador cambió (historia, estilo o foto) después de generarla. */
+      stale: z.boolean(),
+      generatedAt: z.string(),
+    })
+    .nullable(),
+  regenerationsLeft: z.number().int().nonnegative(),
+});
+
+export type PublicPreview = z.infer<typeof publicPreviewSchema>;
 
 // --- Catálogo público -----------------------------------------------------------
 
@@ -308,6 +363,56 @@ export const apiRoutes = {
     summary: 'Borra la foto de inmediato (archivo original, procesado y metadatos)',
     params: z.object({ photoId: z.string().min(1) }),
     response: z.object({ deleted: z.literal(true) }),
+  },
+  generatePreview: {
+    method: 'POST',
+    path: '/v1/books/:bookId/preview',
+    access: 'user',
+    summary:
+      'Genera la vista previa gratis (texto, portada y dos páginas con marca de agua). Responde al terminar',
+    params: bookParamsSchema,
+    response: publicPreviewSchema,
+  },
+  bookPreview: {
+    method: 'GET',
+    path: '/v1/books/:bookId/preview',
+    access: 'user',
+    summary: 'Vista previa con URLs de imágenes de corta duración',
+    params: bookParamsSchema,
+    response: publicPreviewSchema,
+  },
+  updatePreviewPage: {
+    method: 'PATCH',
+    path: '/v1/books/:bookId/preview/pages/:index',
+    access: 'user',
+    summary: 'Edita el texto de una página (se modera antes de guardarlo)',
+    params: bookParamsSchema.extend({ index: z.coerce.number().int().min(0).max(40) }),
+    body: z.object({ text: z.string().trim().min(1).max(PREVIEW_PAGE_TEXT_MAX) }),
+    response: publicPreviewSchema,
+  },
+  regeneratePreviewIllustration: {
+    method: 'POST',
+    path: '/v1/books/:bookId/preview/illustrations/:target/regenerate',
+    access: 'user',
+    summary: 'Regenera la portada o una página ilustrada (con límite por libro)',
+    params: bookParamsSchema.extend({ target: previewTargetSchema }),
+    response: publicPreviewSchema,
+  },
+  adminAiConfig: {
+    method: 'GET',
+    path: '/v1/admin/ai-config',
+    access: 'admin',
+    summary: 'Configuración de IA vigente, gasto de hoy y modelos disponibles',
+    response: adminAiConfigResponseSchema,
+  },
+  updateAiConfig: {
+    method: 'PATCH',
+    path: '/v1/admin/ai-config',
+    access: 'superadmin',
+    summary:
+      'Cambia proveedor, modelos, límites o presupuesto de IA (efecto inmediato, queda en auditoría)',
+    body: aiConfigUpdateSchema,
+    response: adminAiConfigResponseSchema,
   },
   adminProviders: {
     method: 'GET',

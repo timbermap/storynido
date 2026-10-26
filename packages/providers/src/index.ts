@@ -1,5 +1,6 @@
 export * from './defaults';
 export * from './gcp/storage';
+export * from './gcp/vertex';
 export * from './gcp/vision';
 export * from './images';
 export * from './mock/photo';

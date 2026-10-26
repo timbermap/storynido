@@ -41,3 +41,6 @@ pnpm-debug.log*
 tfplan
 errored.tfstate
 firebase/.emulator-data/
+
+# Reportes de evaluación de IA (pueden incluir fotos de prueba)
+eval-reports/

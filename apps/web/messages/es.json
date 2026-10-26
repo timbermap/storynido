@@ -368,7 +368,42 @@
       "customLesson": "Mensaje propio",
       "edit": "Editar",
       "generate": "Crear la vista previa gratis",
-      "comingSoon": "La vista previa con ilustraciones estará disponible muy pronto. Tu borrador queda guardado."
+      "generateNote": "Es gratis y sin compromiso de compra. Tarda alrededor de un minuto.",
+      "viewPreview": "Ver la muestra"
+    },
+    "preview": {
+      "badge": "Muestra de la historia",
+      "generatingTitle": "Estamos creando su cuento…",
+      "generatingText": "Escribimos la historia e ilustramos la portada y las primeras páginas. Tarda alrededor de un minuto; puedes quedarte en esta página.",
+      "cover": "Portada",
+      "page": "Página {number}",
+      "coverAlt": "Portada ilustrada del cuento «{title}»",
+      "pageAlt": "Ilustración de la página {number}",
+      "regenerate": "Probar otra ilustración",
+      "regenerating": "Creando otra ilustración…",
+      "regenerationsLeft": "{count, plural, =0 {Ya usaste la regeneración gratis} one {Te queda # regeneración gratis} other {Te quedan # regeneraciones gratis}}",
+      "editText": "Editar texto",
+      "saveText": "Guardar texto",
+      "cancel": "Cancelar",
+      "textLabel": "Texto de la página {number}",
+      "differencesTitle": "Qué cambia en el libro final",
+      "differencesPages": "El libro completo tiene {total} páginas; aquí ves la portada y las primeras {shown} ilustradas.",
+      "differencesWatermark": "La marca de agua de StoryNido solo aparece en esta muestra.",
+      "differencesEdit": "Puedes editar los textos y volver a cambiar la historia, el estilo o la foto.",
+      "staleTitle": "Cambiaste tus elecciones",
+      "staleText": "Esta muestra corresponde a la versión anterior. Créala de nuevo para ver los cambios.",
+      "regenerateAll": "Crear la muestra de nuevo",
+      "editChoices": "Cambiar mis elecciones",
+      "continue": "Elegir formato",
+      "continueSoon": "Muy pronto podrás elegir el formato y comprar. Tu muestra queda guardada.",
+      "failedTitle": "No pudimos crear la muestra",
+      "errors": {
+        "limit_reached": "Llegaste al límite de muestras o regeneraciones por hoy. Podrás crear otra mañana.",
+        "ai_unavailable": "No pudimos generar las ilustraciones en este momento. Intenta de nuevo en unos minutos; tu borrador queda guardado.",
+        "validation_failed": "Ese texto no es apto para un cuento infantil. Cámbialo e intenta de nuevo.",
+        "bad_request": "Revisa que estén completos el protagonista, la foto, la historia y el estilo.",
+        "generic": "Algo salió mal. Intenta de nuevo en unos minutos."
+      }
     }
   }
 }

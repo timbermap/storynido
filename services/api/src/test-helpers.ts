@@ -1,3 +1,4 @@
+import pino from 'pino';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -9,6 +10,7 @@ import { buildApp } from './app';
 import { InMemoryCatalog } from './catalog';
 import { initFirebaseAdmin } from './firebase';
 import { PhotoService } from './photos/service';
+import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
 import {
   StaticSiteConfigSource,
@@ -37,6 +39,9 @@ export const fakeAppCheck: AppCheckVerifier = {
 
 export const auth = (token: string) => ({ authorization: `Bearer ${token}` });
 
+/** Logger mudo para servicios construidos fuera de Fastify en los tests. */
+export const silentLogger = pino({ level: 'silent' });
+
 export async function createTestApp(
   overrides: Partial<ApiDeps> = {},
   env: Record<string, string> = {},
@@ -53,6 +58,8 @@ export async function createTestApp(
       secret: 'test-storage-secret',
     },
   });
+  const db = getFirestore(initFirebaseAdmin('demo-storynido-test'));
+  const catalog = overrides.catalog ?? new InMemoryCatalog();
   const deps: ApiDeps = {
     config,
     version: 'test',
@@ -60,9 +67,11 @@ export async function createTestApp(
     appCheck: fakeAppCheck,
     siteConfig,
     providers,
-    catalog: new InMemoryCatalog(),
+    catalog,
     // Los tests corren con los emuladores de test (with-test-emulators.sh).
-    photos: new PhotoService(getFirestore(initFirebaseAdmin('demo-storynido-test')), providers),
+    photos: new PhotoService(db, providers),
+    previews: new PreviewService(db, overrides.providers ?? providers, catalog, silentLogger),
+    db,
     ...overrides,
   };
   const app = await buildApp({ deps, extend });

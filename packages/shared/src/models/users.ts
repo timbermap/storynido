@@ -51,6 +51,16 @@ export const childSchema = timestampsSchema.extend({
 
 export type Child = z.infer<typeof childSchema>;
 
+/** Rasgos visibles del chico; se borra junto con la foto. */
+export const characterSheetSchema = z.object({
+  apparentAge: z.string().max(80),
+  hair: z.string().max(200),
+  eyes: z.string().max(120),
+  skinTone: z.string().max(120),
+  distinctiveFeatures: z.array(z.string().max(120)).max(8),
+  clothing: z.string().max(200),
+});
+
 /** pending_upload → (subida) → valid | rejected. Al borrarse, el documento se elimina. */
 export const PHOTO_STATUSES = ['pending_upload', 'valid', 'rejected'] as const;
 
@@ -65,6 +75,8 @@ export const photoSchema = timestampsSchema.extend({
   status: z.enum(PHOTO_STATUSES),
   rejectionReasons: z.array(photoRejectionReasonSchema),
   consentId: z.string().min(1),
+  /** Ficha del personaje extraída por la IA (se calcula al generar la primera vista previa). */
+  characterSheet: characterSheetSchema.nullable().optional(),
   /** Borrado automático a los 30 días (regla de ciclo de vida del bucket). */
   expiresAt: z.date(),
 });

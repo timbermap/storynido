@@ -98,8 +98,32 @@ export const BOOK_CLIENT_EDITABLE_FIELDS = [
 export const bookPageSchema = z.object({
   index: z.number().int().nonnegative(),
   text: z.string(),
+  /** Escena para ilustrar (en inglés). */
+  illustrationPrompt: z.string(),
+  /** Ilustración limpia en el bucket de assets (solo servidor; se entrega al comprar). */
   imagePath: z.string().nullable(),
+  /** Versión con marca de agua que ve el cliente en la vista previa. */
+  previewImagePath: z.string().nullable(),
 });
+
+export type BookPage = z.infer<typeof bookPageSchema>;
+
+/** Páginas ilustradas en la vista previa gratis (además de la portada). */
+export const PREVIEW_ILLUSTRATED_PAGES = 2;
+
+/** Vista previa: texto completo del cuento, portada y las primeras páginas ilustradas. */
+export const bookPreviewSchema = z.object({
+  title: z.string(),
+  cover: z.object({ imagePath: z.string(), previewImagePath: z.string() }),
+  pages: z.array(bookPageSchema),
+  /** Con qué se generó, para saber si quedó desactualizada tras editar el borrador. */
+  storyId: z.string(),
+  styleId: z.string(),
+  photoId: z.string(),
+  generatedAt: z.date(),
+});
+
+export type BookPreview = z.infer<typeof bookPreviewSchema>;
 
 /** books/{bookId}: borrador del wizard y libro generado. */
 export const bookSchema = timestampsSchema
@@ -118,9 +142,15 @@ export const bookSchema = timestampsSchema
     wizardStep: z.number().int().min(0).max(10),
     photoIds: z.array(z.string()).max(3),
     /** Solo servidor. */
-    preview: z.object({ pages: z.array(bookPageSchema) }).nullable(),
+    preview: bookPreviewSchema.nullable(),
     /** Solo servidor. */
     regenerationsUsed: z.number().int().nonnegative(),
+    /** Solo servidor: motivo legible del último intento fallido de vista previa. */
+    previewError: z.string().nullable().optional(),
+    /** Solo servidor: inicio de la generación en curso (para destrabar intentos colgados). */
+    previewStartedAt: z.date().nullable().optional(),
+    /** Solo servidor: costo de IA acumulado del libro, en millonésimas de dólar. */
+    aiCostUsdMicros: z.number().int().nonnegative().optional(),
   })
   .refine(
     (book) => book.lessonIds.length + (book.customLesson ? 1 : 0) <= CHILD_LIMITS.maxLessons,

@@ -4,9 +4,11 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
+import { api } from '@/lib/api';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { subscribeBook, subscribeChild, updateBook, type ChildFields } from '@/lib/firebase/drafts';
 
+import { PreviewPanel, previewErrorKey } from './preview-panel';
 import { SignInGate } from './sign-in-gate';
 import { StepChild } from './step-child';
 import { StepLesson } from './step-lesson';
@@ -27,6 +29,10 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
   const [child, setChild] = useState<ChildFields | null>(null);
   const [stepIndex, setStepIndex] = useState<number | null>(null);
   const [saveState, setSaveState] = useState<SaveState>('idle');
+  // La muestra se abre sola si el libro ya tiene una (o se está generando).
+  const [view, setView] = useState<'steps' | 'preview' | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -60,6 +66,21 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
 
   // Al abrir el borrador se retoma en el último paso alcanzado.
   if (book && stepIndex === null) setStepIndex(Math.min(book.wizardStep, WIZARD_STEPS.length - 1));
+  if (book && view === null) setView(book.status === 'draft' ? 'steps' : 'preview');
+
+  const generatePreview = useCallback(async () => {
+    setView('preview');
+    setGenerating(true);
+    setGenerateError(null);
+    window.scrollTo({ top: 0 });
+    try {
+      await api('generatePreview', { params: { bookId } });
+    } catch (error) {
+      setGenerateError(previewErrorKey(error));
+    } finally {
+      setGenerating(false);
+    }
+  }, [bookId]);
 
   const save = useCallback(async (action: () => Promise<void>) => {
     setSaveState('saving');
@@ -120,6 +141,21 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
   }
 
   const data: WizardData = { book, child, ...catalog };
+  if (view === 'preview') {
+    return (
+      <PreviewPanel
+        book={book}
+        generating={generating}
+        generateError={generateError}
+        onRegenerateAll={() => void generatePreview()}
+        onEditChoices={() => {
+          setView('steps');
+          setStepIndex(WIZARD_STEPS.length - 1);
+          window.scrollTo({ top: 0 });
+        }}
+      />
+    );
+  }
   // Cada paso se monta de nuevo al cambiar (estado del formulario fresco).
   switch (WIZARD_STEPS[current]) {
     case 'child':
@@ -133,6 +169,20 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
     case 'style':
       return <StepStyle key="style" nav={nav} data={data} />;
     default:
-      return <StepReview key="review" nav={nav} data={data} />;
+      return (
+        <StepReview
+          key="review"
+          nav={nav}
+          data={data}
+          onGenerate={() => void generatePreview()}
+          onViewPreview={
+            book.preview
+              ? () => {
+                  setView('preview');
+                }
+              : undefined
+          }
+        />
+      );
   }
 }

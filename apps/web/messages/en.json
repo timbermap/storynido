@@ -368,7 +368,42 @@
       "customLesson": "Your own message",
       "edit": "Edit",
       "generate": "Create the free preview",
-      "comingSoon": "The illustrated preview will be available very soon. Your draft is saved."
+      "generateNote": "It's free, with no obligation to buy. It takes about a minute.",
+      "viewPreview": "See the sample"
+    },
+    "preview": {
+      "badge": "Story sample",
+      "generatingTitle": "We're creating their story…",
+      "generatingText": "We're writing the story and illustrating the cover and the first pages. It takes about a minute; you can stay on this page.",
+      "cover": "Cover",
+      "page": "Page {number}",
+      "coverAlt": "Illustrated cover of the story “{title}”",
+      "pageAlt": "Illustration for page {number}",
+      "regenerate": "Try another illustration",
+      "regenerating": "Creating another illustration…",
+      "regenerationsLeft": "{count, plural, =0 {You already used the free redo} one {# free redo left} other {# free redos left}}",
+      "editText": "Edit text",
+      "saveText": "Save text",
+      "cancel": "Cancel",
+      "textLabel": "Text for page {number}",
+      "differencesTitle": "What changes in the final book",
+      "differencesPages": "The full book has {total} pages; here you see the cover and the first {shown} illustrated.",
+      "differencesWatermark": "The StoryNido watermark only appears on this sample.",
+      "differencesEdit": "You can edit the text and change the story, style or photo again.",
+      "staleTitle": "You changed your choices",
+      "staleText": "This sample matches the previous version. Create it again to see your changes.",
+      "regenerateAll": "Create the sample again",
+      "editChoices": "Change my choices",
+      "continue": "Choose a format",
+      "continueSoon": "Soon you'll be able to choose a format and order. Your sample is saved.",
+      "failedTitle": "We couldn't create the sample",
+      "errors": {
+        "limit_reached": "You've reached today's limit of samples or redos. You can create another one tomorrow.",
+        "ai_unavailable": "We couldn't create the illustrations right now. Please try again in a few minutes; your draft is saved.",
+        "validation_failed": "That text isn't suitable for a children's story. Please change it and try again.",
+        "bad_request": "Make sure the main character, photo, story and style are complete.",
+        "generic": "Something went wrong. Please try again in a few minutes."
+      }
     }
   }
 }

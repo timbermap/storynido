@@ -1,4 +1,8 @@
-import { createProviderRegistry, providerSettingsFromEnv } from '@storynido/providers';
+import {
+  aiModelSettingsFromEnv,
+  createProviderRegistry,
+  providerSettingsFromEnv,
+} from '@storynido/providers';
 import { cloudLoggingOptions } from '@storynido/shared/server';
 import pino from 'pino';
 
@@ -7,6 +11,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { buildApp } from './app';
 import { FirestoreCatalog } from './catalog';
 import { PhotoService } from './photos/service';
+import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
 import {
   FirebaseAppCheckVerifier,
@@ -38,6 +43,9 @@ const providers = createProviderRegistry({
           pdfs: config.env.BUCKET_PDFS,
         }
       : undefined,
+  vertexProjectId: config.env.GCP_PROJECT_ID || undefined,
+  vertexLocation: config.env.VERTEX_LOCATION,
+  aiModels: aiModelSettingsFromEnv(process.env),
   localStorage: {
     rootDir: config.env.LOCAL_STORAGE_DIR,
     publicBaseUrl: config.env.PUBLIC_API_URL,
@@ -49,8 +57,11 @@ const providers = createProviderRegistry({
 });
 
 const firebase = initFirebaseAdmin(config.projectId);
+const db = getFirestore(firebase);
 const liveConfig = new FirestoreLiveConfig(firebase, providers, log);
 liveConfig.start();
+
+const catalog = new FirestoreCatalog(db);
 
 const app = await buildApp({
   logger: loggerOptions,
@@ -61,8 +72,10 @@ const app = await buildApp({
     appCheck: new FirebaseAppCheckVerifier(firebase),
     siteConfig: liveConfig,
     providers,
-    catalog: new FirestoreCatalog(getFirestore(firebase)),
-    photos: new PhotoService(getFirestore(firebase), providers),
+    catalog,
+    photos: new PhotoService(db, providers),
+    previews: new PreviewService(db, providers, catalog, log),
+    db,
   },
 });
 

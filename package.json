@@ -15,7 +15,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "emulators": "pnpm --filter @storynido/firebase emulators",
-    "seed": "pnpm --filter @storynido/firebase seed"
+    "seed": "pnpm --filter @storynido/firebase seed",
+    "eval:character": "pnpm --filter @storynido/providers eval:character"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",

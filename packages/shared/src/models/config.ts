@@ -24,6 +24,8 @@ export const aiConfigSchema = z.object({
   imageProvider: z.enum(AI_IMAGE_PROVIDERS),
   imageModel: z.string().min(1),
   maxRegenerationsPerBook: z.number().int().min(0).max(50),
+  /** Vistas previas completas por usuario y por día (anti abuso). */
+  maxPreviewsPerUserPerDay: z.number().int().min(1).max(100),
   dailyBudgetUsd: z.number().nonnegative(),
   budgetAlertPercent: z.number().int().min(1).max(100),
   updatedAt: z.date(),
@@ -31,6 +33,46 @@ export const aiConfigSchema = z.object({
 });
 
 export type AiConfig = z.infer<typeof aiConfigSchema>;
+
+export const AI_USAGE_KINDS = [
+  'character',
+  'story',
+  'review',
+  'illustration',
+  'moderation',
+] as const;
+
+/** aiUsage/{id}: una llamada de IA con su costo estimado. Solo servidor. */
+export const aiUsageSchema = z.object({
+  /** Día UTC (AAAA-MM-DD) para agrupar contra el presupuesto diario. */
+  day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  kind: z.enum(AI_USAGE_KINDS),
+  provider: z.string(),
+  model: z.string(),
+  costUsdMicros: z.number().int().nonnegative(),
+  ownerUid: uidSchema.nullable(),
+  bookId: z.string().nullable(),
+  orderId: z.string().nullable(),
+  at: z.date(),
+});
+
+export type AiUsageRecord = z.infer<typeof aiUsageSchema>;
+
+/** aiBudget/{AAAA-MM-DD}: gasto acumulado del día. Solo servidor. */
+export const aiBudgetDaySchema = z.object({
+  spentUsdMicros: z.number().int().nonnegative(),
+  calls: z.number().int().nonnegative(),
+  /** Ya se avisó que se pasó el porcentaje de alerta. */
+  alertSent: z.boolean(),
+  updatedAt: z.date(),
+});
+
+export type AiBudgetDay = z.infer<typeof aiBudgetDaySchema>;
+
+/** Día UTC en formato AAAA-MM-DD. */
+export function utcDay(date: Date = new Date()): string {
+  return date.toISOString().slice(0, 10);
+}
 
 export const CONTENT_KEYS = [
   'terms',

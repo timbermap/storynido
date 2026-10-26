@@ -257,5 +257,23 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if false;
     }
+
+    // ------------------------------------------------ costos y cuotas de IA
+
+    // Uso y gasto de IA: solo el servidor escribe; el admin lo consulta.
+    match /aiUsage/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /aiBudget/{day} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Contadores anti abuso (por usuario y por hash de IP): nadie los lee desde el cliente.
+    match /previewQuota/{id} {
+      allow read, write: if false;
+    }
   }
 }

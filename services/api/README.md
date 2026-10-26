@@ -25,6 +25,9 @@ pnpm --filter @storynido/api dev    # http://localhost:8080
 | Formato único de error                                        | [`src/plugins/error-handler.ts`](src/plugins/error-handler.ts) |
 | Proveedores (IA, pagos, imprenta, mails, storage)             | `@storynido/providers`                                         |
 | Firebase Admin y configuración en vivo (siteConfig, aiConfig) | [`src/firebase.ts`](src/firebase.ts)                           |
+| Vista previa (cuento, ilustraciones, marca de agua, edición)  | [`src/preview/service.ts`](src/preview/service.ts)             |
+| Presupuesto diario de IA, registro de costos y alerta         | [`src/ai/budget.ts`](src/ai/budget.ts)                         |
+| Configuración de IA (ver: admin; cambiar: superadmin)         | [`src/routes/ai-config.ts`](src/routes/ai-config.ts)           |
 
 ### Agregar una ruta
 

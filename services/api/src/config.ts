@@ -22,6 +22,8 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   /** Firmas de URLs locales y webhooks simulados: no son claves reales, solo sirven fuera de producción. */
   LOCAL_STORAGE_SECRET: z.string().min(8).default('local-dev-storage-secret'),
   MOCK_WEBHOOK_SECRET: z.string().min(8).default('local-dev-webhook-secret'),
+  /** Región de Vertex AI ("global" tiene los modelos de Gemini más nuevos). */
+  VERTEX_LOCATION: z.string().default('global'),
   /** Buckets reales (los define Terraform en Cloud Run). */
   BUCKET_PHOTOS: z.string().optional(),
   BUCKET_ASSETS: z.string().optional(),

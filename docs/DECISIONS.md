@@ -360,3 +360,68 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 - **Personajes:** son niños inventados, no fotos ni retratos de niños reales. Ninguna imagen tiene texto.
 - **Costo:** 11 imágenes, sin regeneraciones. Unos USD 0,75 a precio de lista; peor caso estimado USD 1,51 (tope aprobado: USD 2).
 - **Pendiente:** cuando estén el admin y el bucket de assets, estas imágenes pasan a `generated-assets` y se editan desde ahí.
+
+## 050 · Estrategia comercial: diagnóstico antes de construir y analítica fuera del creador
+
+- **Fecha:** 2026-10-26 · **Fase:** estrategia comercial, Fase 0
+- **Decisión:** la estrategia comercial (`PROMPT-MAESTRO-PARA-CLAUDE.md`) se implementa sobre la arquitectura existente, después de un diagnóstico (`docs/STORYNIDO-GAP-ANALYSIS.md`) y en el orden propuesto ahí.
+- **Arreglo P0:** GA4 y Meta Pixel no envían ningún hit en el creador, la cuenta ni el acceso, aunque haya consentimiento:
+  - Las vistas de página se mandan a mano y solo en rutas públicas, con origen y ruta, sin parámetros.
+  - En las rutas privadas se activa `ga-disable-<ID>`.
+  - Meta no sigue el historial automáticamente (`fbq.disablePushState`).
+  - La lista de rutas privadas sale de `routing.pathnames` (`apps/web/src/lib/tracking.ts`), así que cubre los 3 idiomas.
+- **Pendiente de decisión del dueño:** mapeo de las 3 colecciones, entidad cobradora y procesador de pagos, imprenta y SKU, y primer mercado.
+
+## 051 · Motor de IA: Gemini en Vertex AI, con modelos cambiables en vivo
+
+- **Fecha:** 2026-10-26 · **Fase:** 07
+- **Texto:** `gemini-3.5-flash` escribe, revisa y extrae la ficha del personaje, con salida JSON por esquema. `gemini-3.1-flash-lite` modera textos e imágenes (barato y suficiente para clasificar).
+- **Imagen:** `gemini-3.1-flash-image` por defecto. Para comparar está disponible `gemini-3-pro-image`. Imagen 4/5 no está habilitado para el proyecto, así que no se evalúa.
+- **Modelo definitivo:** se elige con el reporte de `pnpm eval:character`, que todavía no se corrió (cuesta dinero).
+- **Cambios en vivo:** `aiConfig` define proveedor, modelos, límites y presupuesto; la API escucha el documento y los aplica sin redeploy.
+  - Los admins lo ven con `GET /v1/admin/ai-config`.
+  - Solo el superadmin lo cambia con `PATCH /v1/admin/ai-config`, que valida que el proveedor exista en el ambiente y registra el antes y el después en `auditLog`.
+- **Staging:** arranca en `mock` (gratis). Para probar con IA real se activa Vertex desde `aiConfig` con un presupuesto diario bajo.
+- **Capa gratuita de la API de Gemini (AI Studio): descartada.** Google puede usar esos datos para mejorar sus productos, y acá se envían fotos de chicos. Vertex no entrena con los datos del cliente.
+- **Alternativas:** Claude para texto y Flux para imágenes tienen la interfaz y el ID en el registro; la implementación queda pendiente hasta que haga falta.
+
+## 052 · Consistencia del personaje
+
+- **Fecha:** 2026-10-26 · **Fase:** 07
+- **Decisión:** cada ilustración recibe 3 cosas:
+  - el retrato procesado de la foto;
+  - la ficha del personaje: rasgos visibles en inglés, sin inferir identidad ni etnia;
+  - la portada ya generada, como referencia para las páginas.
+- **Ficha:** se calcula una vez por foto y se guarda en el documento de la foto. Se borra junto con ella.
+
+## 053 · Vista previa gratis ("Muestra de la historia")
+
+- **Fecha:** 2026-10-26 · **Fase:** 07 + estrategia comercial (Fase 1)
+- **Contenido:**
+  - El cuento completo se escribe y se revisa (el texto es barato y permite editarlo).
+  - Se ilustran la portada y las 2 primeras páginas.
+  - Cada imagen se guarda limpia (para el libro comprado) y con marca de agua (la única que ve el cliente, servida por URL firmada de 30 minutos).
+- **Marca de agua:** mosaico "StoryNido ✦" rasterizado de antemano y embebido (`packages/providers/src/watermark-tile.ts`), porque la imagen de Cloud Run no trae fuentes.
+- **Moderación:**
+  - El mensaje propio del adulto se modera antes de usarse.
+  - El texto generado y cada imagen se moderan; si no pasan, se regenera 1 vez y, si vuelve a fallar, se informa con un mensaje claro.
+  - Los textos que edita el adulto también se moderan.
+- **Límites (en `aiConfig`):**
+  - `maxRegenerationsPerBook = 1`, como pide la estrategia. La regeneración se reserva antes de gastar y se devuelve si falla.
+  - `maxPreviewsPerUserPerDay = 5`, y el triple por IP. La IP se guarda solo como hash con el día.
+  - App Check obligatorio en producción para generar, editar y regenerar.
+- **Generación síncrona:** la API responde al terminar (alrededor de 1 minuto con modelos reales) y el cliente sigue el estado en vivo por Firestore. Si una instancia se reinicia a mitad de camino, el libro queda en `preview_generating` y se puede reintentar a los 10 minutos. El libro completo (fase 08) va por el worker.
+- **Honestidad:** la muestra explica qué cambia en el libro final (cantidad de páginas y marca de agua). No promete una revisión antes de imprimir, porque todavía no existe.
+
+## 054 · Presupuesto diario de IA y registro de costos
+
+- **Fecha:** 2026-10-26 · **Fase:** 07
+- **Decisión:**
+  - Cada llamada de IA se registra en `aiUsage` con su costo estimado: tokens informados por Vertex por precio de lista (`VERTEX_PRICES`). Un modelo desconocido se cobra con el peor caso.
+  - El gasto se acumula en `aiBudget/{día UTC}` y en `books.aiCostUsdMicros`.
+  - Antes de cada llamada cara se verifica el tope `dailyBudgetUsd`; al alcanzarlo se corta con un mensaje claro y el borrador no se toca.
+  - Al pasar `budgetAlertPercent` se escribe un único log de error por día (`alert: ai_budget_threshold`) para la alerta de Monitoring.
+- **Retención:**
+  - Las ilustraciones de vista previa (`generated-assets/previews/`) se borran a los 30 días, sin papelera.
+  - Los contadores de cuota (`previewQuota`) vencen con el TTL de Firestore.
+  - Las dos reglas están en Terraform, pendientes de aplicar en staging.

@@ -168,7 +168,9 @@ batch.set(
     textModel: 'mock-text',
     imageProvider: 'mock',
     imageModel: 'mock-image',
-    maxRegenerationsPerBook: 3,
+    // Estrategia comercial: 1 regeneración gratis por vista previa (configurable).
+    maxRegenerationsPerBook: 1,
+    maxPreviewsPerUserPerDay: 5,
     dailyBudgetUsd: 20,
     budgetAlertPercent: 80,
     updatedAt: now,

@@ -26,9 +26,24 @@ export const sampleStoryRequest: StoryRequest = {
   bestFriendName: 'Tomi',
   dedication: 'Para Martina, con amor',
   storyTitle: 'La gran aventura espacial',
-  promptTemplate: 'Escribí un cuento para {{childName}} de {{age}} años sobre {{likes}}.',
+  lessons: [{ name: 'Compartir', guidance: 'Descubre que compartir multiplica la diversión.' }],
+  prompt:
+    'Escribe un cuento infantil en español de 4 páginas para Martina, de 5 años, a quien le gustan los dinosaurios y el espacio. Enseñanza: compartir.',
   pageCount: 4,
 };
+
+/** Foto mínima válida (JPEG 1×1) para probar la interfaz sin fotos reales de chicos. */
+export function sampleCharacterPhoto(): { bytes: Uint8Array; mimeType: string } {
+  return {
+    bytes: new Uint8Array(
+      Buffer.from(
+        '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==',
+        'base64',
+      ),
+    ),
+    mimeType: 'image/jpeg',
+  };
+}
 
 export const sampleAddress: PrintAddress = {
   name: 'Ana Pérez',
@@ -64,6 +79,15 @@ export function describeAITextContract(name: string, create: () => AITextProvide
       expect(typeof review.approved).toBe('boolean');
     });
 
+    it('extrae una ficha del personaje completa', async () => {
+      const { sheet, usage } = await provider.describeCharacter(sampleCharacterPhoto());
+      for (const field of [sheet.apparentAge, sheet.hair, sheet.eyes, sheet.skinTone]) {
+        expect(field.trim().length).toBeGreaterThan(0);
+      }
+      expect(Array.isArray(sheet.distinctiveFeatures)).toBe(true);
+      expect(usage.provider).toBe(provider.id);
+    });
+
     it('permite texto apto para chicos', async () => {
       const result = await provider.moderateText('Martina juega con su perro en el parque.');
       expect(result.allowed).toBe(true);
@@ -80,6 +104,7 @@ export function describeAIImageContract(name: string, create: () => AIImageProvi
         prompt: 'Una nena de 5 años mirando las estrellas',
         stylePrompt: 'acuarela suave',
         character: { description: 'pelo castaño con rulos, ojos marrones', photo: null },
+        references: [],
         aspectRatio: '1:1',
         seed: 42,
       });

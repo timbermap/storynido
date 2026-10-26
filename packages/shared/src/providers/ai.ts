@@ -17,9 +17,18 @@ export interface StoryRequest {
   bestFriendName: string | null;
   dedication: string | null;
   storyTitle: string;
-  /** Plantilla editable desde el admin (stories.textPromptTemplate). */
-  promptTemplate: string;
+  /** Enseñanzas en orden de importancia (la primera es la principal). */
+  lessons: readonly LessonPrompt[];
+  /** Prompt ya armado con la plantilla de la historia (stories.textPromptTemplate). */
+  prompt: string;
   pageCount: number;
+}
+
+/** Enseñanza que la IA teje en la trama sin sermonear. */
+export interface LessonPrompt {
+  name: string;
+  /** Indicaciones (lessons.promptGuidance) o el mensaje propio del adulto, ya moderado. */
+  guidance: string;
 }
 
 export interface StoryPage {
@@ -47,11 +56,38 @@ export interface ModerationResult {
   allowed: boolean;
   /** Categorías que motivaron el rechazo (vacío si se permite). */
   categories: string[];
+  /** Costo de la moderación (sin costo en los mocks). */
+  usage?: AiUsage;
 }
 
 export interface ImageData {
   bytes: Uint8Array;
   mimeType: string;
+}
+
+/** Ficha del personaje: rasgos visibles extraídos de la foto, en inglés para los modelos de imagen. */
+export interface CharacterSheet {
+  apparentAge: string;
+  hair: string;
+  eyes: string;
+  skinTone: string;
+  /** Rasgos distintivos (anteojos, pecas, hoyuelos...). Vacío si no hay. */
+  distinctiveFeatures: string[];
+  /** Ropa de la foto, como sugerencia de vestuario. */
+  clothing: string;
+}
+
+export interface CharacterSheetResult {
+  sheet: CharacterSheet;
+  usage: AiUsage;
+}
+
+/** Ficha en una frase, para incluir en los prompts de imagen. */
+export function describeCharacterSheet(sheet: CharacterSheet): string {
+  const features = sheet.distinctiveFeatures.length
+    ? `; distinctive features: ${sheet.distinctiveFeatures.join(', ')}`
+    : '';
+  return `child, ${sheet.apparentAge}; hair: ${sheet.hair}; eyes: ${sheet.eyes}; skin tone: ${sheet.skinTone}${features}; usually wears ${sheet.clothing}`;
 }
 
 /** Referencia del protagonista para que se vea igual en todas las páginas. */
@@ -66,6 +102,8 @@ export interface IllustrationRequest {
   /** Modificador del estilo elegido (illustrationStyles.promptModifier). */
   stylePrompt: string;
   character: CharacterReference;
+  /** Ilustraciones ya generadas del mismo libro (p. ej. la portada) para mantener la consistencia. */
+  references: readonly ImageData[];
   aspectRatio: '1:1' | '3:4' | '4:3';
   /** Semilla para reproducibilidad, si el proveedor la soporta. */
   seed: number | null;
@@ -77,6 +115,8 @@ export interface GeneratedImage extends ImageData {
 
 export interface AITextProvider {
   readonly id: string;
+  /** Extrae la ficha del personaje a partir de la foto procesada. */
+  describeCharacter(photo: ImageData): Promise<CharacterSheetResult>;
   generateStory(request: StoryRequest): Promise<GeneratedStory>;
   reviewStory(story: GeneratedStory, request: StoryRequest): Promise<StoryReview>;
   moderateText(text: string): Promise<ModerationResult>;

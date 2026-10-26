@@ -8,7 +8,18 @@ import { Button } from '@/components/ui/button';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
-export function StepReview({ nav, data }: { nav: StepNav; data: WizardData }) {
+export function StepReview({
+  nav,
+  data,
+  onGenerate,
+  onViewPreview,
+}: {
+  nav: StepNav;
+  data: WizardData;
+  onGenerate: () => void;
+  /** Solo si ya hay una muestra generada. */
+  onViewPreview?: () => void;
+}) {
   const t = useTranslations('Wizard.review');
   const { book, child } = data;
   const story = data.stories.find((s) => s.slug === book.storyId);
@@ -53,13 +64,18 @@ export function StepReview({ nav, data }: { nav: StepNav; data: WizardData }) {
         ))}
       </dl>
       <div className="mt-8 grid gap-2">
-        <Button size="lg" disabled aria-describedby="preview-soon">
+        <Button size="lg" onClick={onGenerate} aria-describedby="preview-note">
           <Sparkles aria-hidden="true" />
           {t('generate')}
         </Button>
-        <p id="preview-soon" className="text-sm text-muted-foreground">
-          {t('comingSoon')}
+        <p id="preview-note" className="text-sm text-muted-foreground">
+          {t('generateNote')}
         </p>
+        {onViewPreview && (
+          <Button variant="outline" onClick={onViewPreview}>
+            {t('viewPreview')}
+          </Button>
+        )}
       </div>
     </WizardShell>
   );

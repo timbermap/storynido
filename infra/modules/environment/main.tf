@@ -162,6 +162,18 @@ resource "google_firestore_database" "default" {
   depends_on = [module.apis]
 }
 
+# Contadores de cuota de vistas previas: Firestore los borra solo al vencer expiresAt.
+resource "google_firestore_field" "preview_quota_ttl" {
+  project    = var.project_id
+  database   = google_firestore_database.default.name
+  collection = "previewQuota"
+  field      = "expiresAt"
+
+  ttl_config {}
+  # Sin índices: el campo solo se usa para el TTL.
+  index_config {}
+}
+
 module "bucket_photos" {
   source     = "../storage_bucket"
   depends_on = [module.apis]
@@ -191,12 +203,18 @@ module "bucket_assets" {
   project_id    = var.project_id
   name          = "${var.project_id}-generated-assets"
   location      = var.region
-  labels        = local.labels
+  labels        = merge(local.labels, { data = "minors-derived" })
   cors_origins  = var.cors_origins
   force_destroy = !var.deletion_protection
 
+  # Ilustraciones de vistas previas (derivadas de fotos de menores): se borran a los 30 días.
+  # Al comprar, el pipeline copia las del pedido a orders/ (fase 08).
+  delete_prefixes_after_days    = { "previews/" = 30 }
+  soft_delete_retention_seconds = 0
+
   iam = {
-    api    = { role = "roles/storage.objectViewer", member = local.member["sn-api"] }
+    # La API escribe las ilustraciones de la vista previa.
+    api    = { role = "roles/storage.objectAdmin", member = local.member["sn-api"] }
     worker = { role = "roles/storage.objectAdmin", member = local.member["sn-worker"] }
   }
 }

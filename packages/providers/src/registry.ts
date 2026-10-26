@@ -34,6 +34,24 @@ export const providerSettingsSchema = z.object({
   photoAnalyzer: z.enum(PROVIDER_IDS.photoAnalyzer).default('mock'),
 });
 
+/** Modelos por defecto de IA (aiConfig.textModel / imageModel los pisan en vivo). */
+export const aiModelSettingsSchema = z.object({
+  text: z.string().min(1).default('gemini-3.5-flash'),
+  image: z.string().min(1).default('gemini-3.1-flash-image'),
+});
+
+export type AiModelSettings = z.infer<typeof aiModelSettingsSchema>;
+
+export function aiModelSettingsFromEnv(
+  env: Readonly<Record<string, string | undefined>>,
+): AiModelSettings {
+  const value = (key: string) => (env[key] === '' ? undefined : env[key]);
+  return aiModelSettingsSchema.parse({
+    text: value('AI_TEXT_MODEL'),
+    image: value('AI_IMAGE_MODEL'),
+  });
+}
+
 export type ProviderSettings = z.infer<typeof providerSettingsSchema>;
 
 /** Configuración inicial desde variables de entorno (ver .env.example). */
@@ -69,6 +87,9 @@ export type ProviderFactories = {
 export interface AiOverride {
   text?: string;
   image?: string;
+  /** Modelos (solo aplican a proveedores reales; los mocks los ignoran). */
+  textModel?: string;
+  imageModel?: string;
 }
 
 /**
@@ -83,6 +104,7 @@ export class ProviderRegistry {
   constructor(
     private readonly factories: ProviderFactories,
     private readonly settings: ProviderSettings,
+    private readonly defaultModels: AiModelSettings = aiModelSettingsSchema.parse({}),
   ) {
     // Falla al arrancar si la configuración pide algo que no existe.
     for (const kind of Object.keys(PROVIDER_IDS) as ProviderKind[]) {
@@ -113,6 +135,14 @@ export class ProviderRegistry {
     if (override.text) this.factory('aiText', override.text);
     if (override.image) this.factory('aiImage', override.image);
     this.aiOverride = override;
+  }
+
+  /** Modelos de IA vigentes. */
+  aiModels(): AiModelSettings {
+    return {
+      text: this.aiOverride.textModel ?? this.defaultModels.text,
+      image: this.aiOverride.imageModel ?? this.defaultModels.image,
+    };
   }
 
   active(): Record<ProviderKind, string> {

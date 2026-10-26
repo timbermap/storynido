@@ -8,9 +8,11 @@ import { registerDocs } from './plugins/docs';
 import { registerErrorHandling } from './plugins/error-handler';
 import { registerSecurity } from './plugins/security';
 import { registerSiteMode } from './plugins/site-mode';
+import { registerAiConfigRoutes } from './routes/ai-config';
 import { registerCatalogRoutes } from './routes/catalog';
 import { registerDevStorageRoutes } from './routes/dev-storage';
 import { registerPhotoRoutes } from './routes/photos';
+import { registerPreviewRoutes } from './routes/previews';
 import { registerV1Routes } from './routes/v1';
 import './types';
 
@@ -43,6 +45,8 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   registerV1Routes(app);
   registerCatalogRoutes(app, deps.catalog);
   registerPhotoRoutes(app, deps.photos);
+  registerPreviewRoutes(app, deps.previews);
+  registerAiConfigRoutes(app, deps.db);
   extend?.(app);
 
   const storage = deps.providers.storage();
