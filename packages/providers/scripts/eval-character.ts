@@ -41,6 +41,8 @@ const SCENES = [
 
 /** Tokens de salida típicos de una imagen 1K. */
 const IMAGE_TOKENS = 1120;
+/** Entrada típica: foto + portada de referencia + texto (cada imagen ~1.100 tokens). */
+const INPUT_TOKENS = 2600;
 
 const { values } = parseArgs({
   options: {
@@ -75,7 +77,8 @@ for (const style of styles) {
 
 const estimate = models.reduce((total, model) => {
   const price = VERTEX_PRICES[model] ?? { input: 2, output: 120 };
-  return total + (styles.length * scenes.length * IMAGE_TOKENS * price.output) / 1_000_000;
+  const perImage = IMAGE_TOKENS * price.output + INPUT_TOKENS * price.input;
+  return total + (styles.length * scenes.length * perImage) / 1_000_000;
 }, 0);
 const images = models.length * styles.length * scenes.length;
 

@@ -425,3 +425,15 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
   - Las ilustraciones de vista previa (`generated-assets/previews/`) se borran a los 30 días, sin papelera.
   - Los contadores de cuota (`previewQuota`) vencen con el TTL de Firestore.
   - Las dos reglas están en Terraform, pendientes de aplicar en staging.
+
+## 055 · Modelo de imagen: gemini-3.1-flash-image (resultado de la evaluación)
+
+- **Fecha:** 2026-10-26 · **Fase:** 07
+- **Evaluación:** `pnpm eval:character` con un retrato fotográfico sintético de una nena inventada (generado con IA; no es una persona real). 2 modelos × 2 estilos (acuarela, cartoon 3D) × 3 escenas, con la portada como referencia. Costo: USD 1,43, más USD 0,07 del retrato.
+- **Resultado:**
+  - **Consistencia del personaje:** buena en los 2 modelos. Rulos, pecas, tono de piel y ropa se mantienen en todas las escenas.
+  - **`gemini-3-pro-image`:** con la portada como referencia, repitió la portada en lugar de dibujar las escenas pedidas. Además cuesta el doble (~USD 0,14 por imagen).
+  - **`gemini-3.1-flash-image`:** sigue las escenas (~USD 0,07 por imagen), pero copió elementos del fondo de la portada, como planetas en la playa.
+- **Decisión:** `gemini-3.1-flash-image` como modelo por defecto. El prompt ahora aclara que las referencias son solo para el aspecto del personaje y del estilo, y que la escena es nueva (sin copiar composición, fondo ni objetos).
+- **Pendiente:** verificar la corrección con una corrida corta solo de flash (~USD 0,41). Requiere aprobación.
+- **Estimación del script:** ahora incluye los tokens de entrada (foto y portada de referencia), que la primera estimación no contaba.

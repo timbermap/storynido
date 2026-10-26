@@ -364,11 +364,11 @@ export class VertexImageProvider implements AIImageProvider {
     for (const reference of request.references) parts.push(imagePart(reference));
     if (request.references.length > 0) {
       notes.push(
-        'The other images are earlier illustrations of this same book: keep the main character identical (face, hair, outfit) and the same art style.',
+        'The other images are earlier illustrations of this same book. Use them ONLY to keep the main character identical (face, hair, outfit) and the same art style. Draw a completely NEW scene as described above: do not copy their composition, background, objects or pose.',
       );
     }
     parts.push({
-      text: `${request.prompt}
+      text: `Scene to draw: ${request.prompt}
 
 Art style: ${request.stylePrompt}
 Main character: ${request.character.description}
