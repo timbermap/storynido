@@ -1,0 +1,1 @@
+bucket = "storynido-staging-tfstate"

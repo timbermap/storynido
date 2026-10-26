@@ -35,3 +35,5 @@ ui-debug.log*
 !.vscode/extensions.json
 npm-debug.log*
 pnpm-debug.log*
+*.tfplan
+tfplan

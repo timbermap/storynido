@@ -9,16 +9,16 @@ locals {
 
   services = [
     "aiplatform.googleapis.com",
-    "apphosting.googleapis.com",
     "artifactregistry.googleapis.com",
     "billingbudgets.googleapis.com",
     "cloudbuild.googleapis.com",
+    "clouderrorreporting.googleapis.com",
     "cloudscheduler.googleapis.com",
     "cloudtasks.googleapis.com",
     "cloudtrace.googleapis.com",
-    "clouderrorreporting.googleapis.com",
     "developerconnect.googleapis.com",
     "firebase.googleapis.com",
+    "firebaseapphosting.googleapis.com",
     "firebaserules.googleapis.com",
     "firestore.googleapis.com",
     "iam.googleapis.com",
