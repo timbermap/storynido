@@ -351,3 +351,12 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
   - A los componentes de cliente del creador les faltaban sus textos traducidos.
   - El enlace mágico se procesaba dos veces en desarrollo.
 - **Pendiente:** la suite E2E permanente se arma con Playwright en la fase 17.
+
+## 049 · Ilustraciones del catálogo generadas con Gemini en Vertex AI
+
+- **Fecha:** 2026-10-26 · **Fase:** 06
+- **Decisión:** las portadas de las 7 historias y las muestras de los 4 estilos se generaron con `gemini-3.1-flash-image` (Vertex AI, proyecto `storynido-staging`). Como referencia de estilo se usó la acuarela del hero, para que todo el sitio tenga la misma mano.
+- **Archivos:** `apps/web/public/samples/<historia>.webp` (600×800) y `apps/web/public/styles/<estilo>.webp` (800×600), referenciados desde `coverImage` y `sampleImage` en el seed. Las muestras de estilo muestran la misma escena (un chico leyendo bajo un árbol con un zorro) para comparar solo el estilo.
+- **Personajes:** son niños inventados, no fotos ni retratos de niños reales. Ninguna imagen tiene texto.
+- **Costo:** 11 imágenes, sin regeneraciones. Unos USD 0,75 a precio de lista; peor caso estimado USD 1,51 (tope aprobado: USD 2).
+- **Pendiente:** cuando estén el admin y el bucket de assets, estas imágenes pasan a `generated-assets` y se editan desde ahí.

@@ -77,6 +77,7 @@ Flotación suave del libro del hero (CSS), transiciones de 150 a 250 ms. Siempre
 ## Pendiente de la guía
 
 - Ilustración del hero: en uso `apps/web/public/brand/hero-acuarela.webp` (608×404, recortada de la maqueta). Se reutiliza en la sección foto→personaje (primer plano) y en la portada de muestra. Pedir el original en alta resolución y sumar 2 o 3 acuarelas más (sin texto) para variar.
+- Portadas del catálogo y muestras de estilo: generadas con la acuarela del hero como referencia (ver DECISIONS 049). Las nuevas ilustraciones siguen esa línea: acuarela suave, fondo crema, lavanda y pasteles, niños inventados y sin texto.
 - Portadas reales en acuarela generadas por el pipeline (fase 07).
 - Wizard (fase 06) y checkout (fase 11) con este sistema: un objetivo por pantalla, progreso visible, checkout sereno.
 - Experimentos de copy y CTA (A/B) cuando haya tráfico.

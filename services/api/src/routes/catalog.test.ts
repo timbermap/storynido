@@ -24,7 +24,7 @@ const story = (
   title: t(`Título ${slug}`),
   summary: t('Resumen'),
   excerpt: t('Fragmento'),
-  coverImage: `/samples/${slug}.svg`,
+  coverImage: `/samples/${slug}.webp`,
   samplePages: [],
   textPromptTemplate: 'x',
   imagePromptTemplate: 'y',

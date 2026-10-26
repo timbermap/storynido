@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -10,7 +11,7 @@ import { OptionCard } from './option-card';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
-/** Muestra de color por estilo hasta tener ilustraciones de ejemplo (fase 07). */
+/** Respaldo de color si un estilo todavía no tiene ilustración de muestra. */
 const SWATCHES: Record<string, string> = {
   acuarela: 'bg-[radial-gradient(circle_at_30%_30%,#eadcf2,#c9d9ff_45%,#f5d9c9)]',
   'cartoon-3d': 'bg-[linear-gradient(135deg,#ffb36b,#ff7a8a_50%,#7a6cff)]',
@@ -57,10 +58,22 @@ export function StepStyle({ nav, data }: { nav: StepNav; data: WizardData }) {
                 setError(null);
               }}
             >
-              <span
-                aria-hidden="true"
-                className={`block aspect-[4/3] w-full ${SWATCHES[style.slug] ?? 'bg-muted'}`}
-              />
+              {style.sampleImage ? (
+                <Image
+                  src={style.sampleImage}
+                  alt=""
+                  width={800}
+                  height={600}
+                  sizes="(min-width: 640px) 320px, 45vw"
+                  unoptimized
+                  className="block aspect-[4/3] w-full object-cover"
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className={`block aspect-[4/3] w-full ${SWATCHES[style.slug] ?? 'bg-muted'}`}
+                />
+              )}
               <span className="p-3 font-display text-lg font-semibold">{style.name}</span>
             </OptionCard>
           ))}

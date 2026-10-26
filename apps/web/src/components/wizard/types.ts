@@ -19,6 +19,7 @@ export interface StepNav {
 export interface StyleOption {
   slug: string;
   name: string;
+  sampleImage: string | null;
 }
 
 export interface WizardData {
