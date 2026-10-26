@@ -13,7 +13,7 @@ import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { formatPrice } from '@/lib/format';
 import { localizedAlternates } from '@/lib/seo';
-import { getOffer, getStory } from '@/lib/server/api';
+import { getLessons, getOffer, getStory } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
 
@@ -45,11 +45,13 @@ export default async function StoryPage({ params }: Props) {
   const locale = rawLocale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [story, offer, t, tSwitch] = await Promise.all([
+  const [story, offer, lessons, t, tSwitch, tLessons] = await Promise.all([
     getStory(locale, slug),
     getOffer(display.country, locale),
+    getLessons(locale).catch(() => []),
     getTranslations('Stories'),
     getTranslations('Switchers'),
+    getTranslations('Lessons'),
   ]);
   if (!story) notFound();
 
@@ -125,6 +127,32 @@ export default async function StoryPage({ params }: Props) {
             </blockquote>
             <p className="mt-3 text-sm text-muted-foreground">{t('sampleNote')}</p>
           </section>
+
+          {lessons.length > 0 && (
+            <section aria-labelledby="lessons">
+              <h2 id="lessons" className="text-xl font-semibold">
+                {tLessons('storyCombine')}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">{tLessons('storyCombineText')}</p>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {lessons
+                  .filter(
+                    (lesson) => lesson.ageMin <= story.ageMax && lesson.ageMax >= story.ageMin,
+                  )
+                  .slice(0, 6)
+                  .map((lesson) => (
+                    <li key={lesson.slug}>
+                      <Link
+                        href={{ pathname: '/lessons/[slug]', params: { slug: lesson.slug } }}
+                        className="inline-block rounded-full bg-secondary px-3.5 py-1.5 text-sm font-bold text-primary hover:underline"
+                      >
+                        {lesson.name}
+                      </Link>
+                    </li>
+                  ))}
+              </ul>
+            </section>
+          )}
 
           <section aria-labelledby="formats">
             <h2 id="formats" className="text-xl font-semibold">

@@ -110,6 +110,24 @@ export function registerCatalogRoutes(app: FastifyInstance, catalog: CatalogRepo
     return toPublicStory(story, locale);
   });
 
+  addRoute(app, apiRoutes.catalogLessons, {}, async (request) => {
+    const { locale, age } = query<'catalogLessons'>(request);
+    const lessons = await catalog.lessons();
+    return {
+      lessons: lessons
+        .filter((lesson) => age === undefined || (lesson.ageMin <= age && age <= lesson.ageMax))
+        .map((lesson) => ({
+          slug: lesson.slug,
+          group: lesson.group,
+          name: lesson.name[locale],
+          headline: lesson.headline[locale],
+          description: lesson.description[locale],
+          ageMin: lesson.ageMin,
+          ageMax: lesson.ageMax,
+        })),
+    };
+  });
+
   addRoute(app, apiRoutes.catalogStyles, {}, async (request) => {
     const { locale } = query<'catalogStyles'>(request);
     return {

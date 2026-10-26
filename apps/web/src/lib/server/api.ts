@@ -48,6 +48,14 @@ export async function getStory(locale: Locale, slug: string) {
   }
 }
 
+export async function getLessons(locale: Locale, age?: number) {
+  return (await catalogApi('catalogLessons', { query: { locale, age } })).lessons;
+}
+
+export async function getLesson(locale: Locale, slug: string) {
+  return (await getLessons(locale)).find((lesson) => lesson.slug === slug) ?? null;
+}
+
 export async function getActiveCountries() {
   try {
     return (await catalogApi('catalogCountries')).countries;

@@ -86,6 +86,8 @@ export const BOOK_CLIENT_EDITABLE_FIELDS = [
   'childId',
   'storyId',
   'styleId',
+  'lessonId',
+  'customLesson',
   'language',
   'dedication',
   'wizardStep',
@@ -106,6 +108,10 @@ export const bookSchema = timestampsSchema.extend({
   childId: z.string().nullable(),
   storyId: z.string().nullable(),
   styleId: z.string().nullable(),
+  /** Enseñanza elegida (lessons) o null. */
+  lessonId: z.string().nullable(),
+  /** Mensaje propio del adulto (alternativa a lessonId), moderado antes de usarse. */
+  customLesson: z.string().trim().max(CHILD_LIMITS.customLessonMaxLength).nullable(),
   language: localeSchema,
   dedication: z.string().max(CHILD_LIMITS.dedicationMaxLength).nullable(),
   wizardStep: z.number().int().min(0).max(10),

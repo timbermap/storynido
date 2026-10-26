@@ -1,4 +1,4 @@
-import type { Content, CountryConfig, Price, Product, Story } from '@storynido/shared';
+import type { Content, CountryConfig, Lesson, Price, Product, Story } from '@storynido/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { InMemoryCatalog } from '../catalog';
@@ -30,6 +30,23 @@ const story = (
   imagePromptTemplate: 'y',
   createdAt: now,
   updatedAt: now,
+});
+
+const lesson = (slug: string, order: number, opts: Partial<Lesson> = {}): Lesson => ({
+  slug,
+  active: true,
+  order,
+  group: 'values',
+  ageMin: 2,
+  ageMax: 8,
+  name: t(`Nombre ${slug}`),
+  headline: t('Titular'),
+  description: t('Descripción'),
+  promptGuidance: 'g',
+  sensitive: false,
+  createdAt: now,
+  updatedAt: now,
+  ...opts,
 });
 
 const mx: CountryConfig = {
@@ -79,6 +96,12 @@ describe('catálogo', () => {
     ctx = await createTestApp({
       catalog: new InMemoryCatalog({
         stories: [story('b', 2, 4, 10), story('a', 1, 3, 6), story('oculta', 3, 3, 8, false)],
+        lessons: [
+          lesson('compartir', 2),
+          lesson('llega-un-hermanito', 1, { group: 'life', ageMax: 5 }),
+          lesson('perdida', 3, { sensitive: true }),
+          lesson('inactiva', 4, { active: false }),
+        ],
         countries: [mx],
         prices: [price('digital', 34900), price('softcover', 79900), price('hardcover', 99900)],
         products: [product('digital'), product('softcover'), product('hardcover')],
@@ -138,6 +161,18 @@ describe('catálogo', () => {
       formats: unknown[];
     }>();
     expect(offer).toMatchObject({ available: false, formats: [] });
+  });
+
+  it('enseñanzas: activas, en orden, sin temas sensibles y filtradas por edad', async () => {
+    const { lessons } = (await get('/v1/catalog/lessons?locale=pt')).json<{
+      lessons: { slug: string; name: string }[];
+    }>();
+    expect(lessons.map((l) => l.slug)).toEqual(['llega-un-hermanito', 'compartir']);
+    expect(lessons[1]?.name).toBe('Nombre compartir (pt)');
+    const forSeven = (await get('/v1/catalog/lessons?locale=es&age=7')).json<{
+      lessons: { slug: string }[];
+    }>();
+    expect(forSeven.lessons.map((l) => l.slug)).toEqual(['compartir']);
   });
 
   it('países activos', async () => {

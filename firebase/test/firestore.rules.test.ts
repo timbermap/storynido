@@ -67,6 +67,8 @@ const draftBook = (ownerUid: string, childId: string | null = null) => ({
   childId,
   storyId: null,
   styleId: null,
+  lessonId: null,
+  customLesson: null,
   language: 'es',
   dedication: null,
   wizardStep: 0,
@@ -231,6 +233,21 @@ describe('books', () => {
     await assertFails(updateDoc(ref, { wizardStep: 99, updatedAt: serverTimestamp() }));
   });
 
+  it('elige una enseñanza o escribe un mensaje propio de hasta 150 caracteres', async () => {
+    await seed('books/b1', { ...draftBook(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    const ref = doc(alice(), 'books', 'b1');
+    await assertSucceeds(updateDoc(ref, { lessonId: 'compartir', updatedAt: serverTimestamp() }));
+    await assertSucceeds(
+      updateDoc(ref, {
+        customLesson: 'Que sepa que el abuelo lo quiere mucho',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(ref, { customLesson: 'x'.repeat(151), updatedAt: serverTimestamp() }),
+    );
+  });
+
   it('no edita libros ya pedidos', async () => {
     await seed('books/b1', {
       ...draftBook(ALICE),
@@ -306,6 +323,8 @@ describe('catálogo y configuración', () => {
   beforeEach(async () => {
     await seed('stories/activa', { active: true });
     await seed('stories/inactiva', { active: false });
+    await seed('lessons/compartir', { active: true });
+    await seed('lessons/borrador', { active: false });
     await seed('prices/MX_hardcover', { active: true, amountMinor: 79900 });
     await seed('content/terms_es', { published: true });
     await seed('content/faq_es', { published: false });
@@ -319,6 +338,9 @@ describe('catálogo y configuración', () => {
     await assertSucceeds(getDoc(doc(anon(), 'stories', 'activa')));
     await assertFails(getDoc(doc(anon(), 'stories', 'inactiva')));
     await assertSucceeds(getDoc(doc(admin(), 'stories', 'inactiva')));
+    await assertSucceeds(getDoc(doc(anon(), 'lessons', 'compartir')));
+    await assertFails(getDoc(doc(anon(), 'lessons', 'borrador')));
+    await assertFails(setDoc(doc(admin(), 'lessons', 'nueva'), { active: true }));
     await assertSucceeds(getDoc(doc(anon(), 'content', 'terms_es')));
     await assertFails(getDoc(doc(anon(), 'content', 'faq_es')));
     await assertSucceeds(getDoc(doc(anon(), 'siteConfig', 'global')));

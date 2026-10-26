@@ -28,7 +28,7 @@ export function LanguageSwitcher({ id }: { id: string }) {
       } else if (pathname === '/blog/[slug]') {
         // Los artículos no tienen el mismo slug en cada idioma: se va al índice del blog.
         router.replace('/blog', { locale: next });
-      } else if (pathname === '/stories/[slug]') {
+      } else if (pathname === '/stories/[slug]' || pathname === '/lessons/[slug]') {
         router.replace({ pathname, params: { slug: params.slug ?? '' } }, { locale: next });
       } else {
         router.replace(pathname, { locale: next });

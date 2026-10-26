@@ -17,13 +17,14 @@ import type { Locale } from '@storynido/shared';
 import { HeroArt } from '@/components/home/hero-art';
 import { FaqList, parseFaq } from '@/components/home/faq-list';
 import { JsonLd } from '@/components/json-ld';
+import { LessonGroups } from '@/components/lessons/lesson-groups';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { StoryCard } from '@/components/stories/story-card';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { lowestPrice } from '@/lib/offer';
-import { getContent, getOffer, getStories } from '@/lib/server/api';
+import { getContent, getLessons, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
 
@@ -31,10 +32,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const locale = (await params).locale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [t, tSwitch, stories, offer, faq] = await Promise.all([
+  const [t, tSwitch, tLessons, stories, lessons, offer, faq] = await Promise.all([
     getTranslations('Home'),
     getTranslations('Switchers'),
+    getTranslations('Lessons'),
     getStories(locale).catch(() => []),
+    getLessons(locale).catch(() => []),
     getOffer(display.country, locale),
     getContent('faq', locale).catch(() => null),
   ]);
@@ -175,10 +178,26 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </Link>
             </div>
             <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-              {stories.map((story) => (
+              {/* Hasta 6 en la home (dos filas completas); el resto, en el catálogo. */}
+              {stories.slice(0, 6).map((story) => (
                 <StoryCard key={story.slug} story={story} fromPrice={fromPrice} />
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Enseñanzas */}
+      {lessons.length > 0 && (
+        <section className="container-page py-20 lg:py-24">
+          <div className="max-w-2xl">
+            <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
+              {tLessons('title')}
+            </h2>
+            <p className="mt-3 text-lg text-muted-foreground">{tLessons('subtitle')}</p>
+          </div>
+          <div className="mt-10">
+            <LessonGroups lessons={lessons} />
           </div>
         </section>
       )}

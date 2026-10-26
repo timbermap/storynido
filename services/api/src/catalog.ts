@@ -5,6 +5,7 @@ import {
   countrySchema,
   createConverter,
   illustrationStyleSchema,
+  lessonSchema,
   priceSchema,
   productSchema,
   storySchema,
@@ -12,6 +13,7 @@ import {
   type CountryCode,
   type CountryConfig,
   type IllustrationStyle,
+  type Lesson,
   type Locale,
   type Price,
   type Product,
@@ -23,6 +25,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 export interface CatalogRepository {
   stories(): Promise<Story[]>;
   styles(): Promise<IllustrationStyle[]>;
+  lessons(): Promise<Lesson[]>;
   countries(): Promise<CountryConfig[]>;
   prices(country: CountryCode): Promise<Price[]>;
   products(): Promise<Product[]>;
@@ -47,6 +50,7 @@ class TtlCache {
 const converters = {
   stories: createConverter(storySchema),
   styles: createConverter(illustrationStyleSchema),
+  lessons: createConverter(lessonSchema),
   countries: createConverter(countrySchema),
   prices: createConverter(priceSchema),
   products: createConverter(productSchema),
@@ -84,6 +88,19 @@ export class FirestoreCatalog implements CatalogRepository {
         .orderBy('order')
         .get();
       return snapshot.docs.map((doc) => doc.data());
+    });
+  }
+
+  lessons(): Promise<Lesson[]> {
+    return this.cache.get('lessons', async () => {
+      const snapshot = await this.db
+        .collection(COLLECTIONS.lessons)
+        .withConverter(converters.lessons)
+        .where('active', '==', true)
+        .orderBy('order')
+        .get();
+      // Los temas sensibles requieren revisión humana: no se ofrecen todavía.
+      return snapshot.docs.map((doc) => doc.data()).filter((lesson) => !lesson.sensitive);
     });
   }
 
@@ -140,6 +157,7 @@ export class InMemoryCatalog implements CatalogRepository {
     private readonly data: {
       stories?: Story[];
       styles?: IllustrationStyle[];
+      lessons?: Lesson[];
       countries?: CountryConfig[];
       prices?: Price[];
       products?: Product[];
@@ -156,6 +174,14 @@ export class InMemoryCatalog implements CatalogRepository {
   styles() {
     return Promise.resolve(
       (this.data.styles ?? []).filter((s) => s.active).sort((a, b) => a.order - b.order),
+    );
+  }
+
+  lessons() {
+    return Promise.resolve(
+      (this.data.lessons ?? [])
+        .filter((l) => l.active && !l.sensitive)
+        .sort((a, b) => a.order - b.order),
     );
   }
 

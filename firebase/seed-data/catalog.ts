@@ -1,5 +1,5 @@
 /**
- * Catálogo de ejemplo: 6 historias y 4 estilos en los tres idiomas.
+ * Catálogo de ejemplo: 7 aventuras y 4 estilos en los tres idiomas. Las enseñanzas están en lessons.ts.
  * Es el punto de partida; después se edita desde el panel admin (fase 14).
  */
 import type { IllustrationStyle, Story } from '@storynido/shared';
@@ -10,6 +10,7 @@ type SeedStyle = Omit<IllustrationStyle, 'createdAt' | 'updatedAt'>;
 const TEXT_PROMPT = `Escribí un cuento infantil en {{language}} de {{pageCount}} páginas sobre "{{storyTitle}}".
 Protagonista: {{childName}}, {{age}} años ({{pronouns}}). Le gusta: {{likes}}.
 Mascota: {{petName}}. Mejor amigo/a: {{bestFriendName}}.
+Enseñanza o mensaje: {{lesson}} — {{lessonGuidance}}
 Tono cálido, frases cortas adecuadas a la edad, sin violencia ni miedo. Cada página: 2 a 4 oraciones y una descripción de la escena para ilustrar.`;
 
 const IMAGE_PROMPT = `Ilustración de libro infantil: {{scene}}. Protagonista: {{character}}. Estilo: {{style}}. Composición clara, colores cálidos, sin texto en la imagen.`;
@@ -144,29 +145,53 @@ export const SEED_STORIES: SeedStory[] = [
     imagePromptTemplate: IMAGE_PROMPT,
   },
   {
-    slug: 'primer-dia-de-clases',
+    slug: 'amigos-de-la-selva',
     active: true,
     order: 6,
-    ageMin: 3,
-    ageMax: 6,
-    tags: ['escuela', 'emociones'],
+    ageMin: 2,
+    ageMax: 7,
+    tags: ['animales', 'naturaleza', 'amistad'],
     pageCount: 12,
-    title: {
-      es: 'Mi primer día de clases',
-      en: 'My First Day of School',
-      pt: 'Meu primeiro dia de aula',
-    },
+    title: { es: 'Amigos de la selva', en: 'Jungle Friends', pt: 'Amigos da selva' },
     summary: {
-      es: 'Mochila nueva, nervios y muchas preguntas. Un cuento para acompañar el primer día de escuela y transformar los miedos en ganas de aprender y hacer amigos.',
-      en: 'A new backpack, butterflies in the tummy, and lots of questions. A story to accompany the first day of school and turn fears into excitement for learning and making friends.',
-      pt: 'Mochila nova, frio na barriga e muitas perguntas. Um conto para acompanhar o primeiro dia de aula e transformar o medo em vontade de aprender e fazer amigos.',
+      es: 'Un tucán parlanchín invita a tu peque a recorrer la selva: monos acróbatas, un jaguar dormilón y un río lleno de sorpresas.',
+      en: 'A chatty toucan invites your little one to explore the jungle: acrobatic monkeys, a sleepy jaguar and a river full of surprises.',
+      pt: 'Um tucano tagarela convida seu pequeno para explorar a selva: macacos acrobatas, uma onça dorminhoca e um rio cheio de surpresas.',
     },
     excerpt: {
-      es: 'En la puerta de la escuela, Emma apretó fuerte la mano de mamá. Entonces vio a una nena con una mochila de dinosaurios, igual que la suya. —¿Quieres ser mi amiga? —le preguntó.',
-      en: 'At the school door, Emma squeezed Mom\'s hand. Then she saw a girl with a dinosaur backpack, just like hers. "Do you want to be my friend?" she asked.',
-      pt: 'Na porta da escola, Emma apertou forte a mão da mamãe. Então viu uma menina com uma mochila de dinossauros, igualzinha à dela. — Quer ser minha amiga? — perguntou.',
+      es: '—¡Por aquí! —gritó el tucán desde una rama. Valentina apartó unas hojas enormes y vio un río que brillaba como un espejo. Del otro lado, tres monitos la saludaban.',
+      en: '"This way!" called the toucan from a branch. Valentina pushed aside some huge leaves and saw a river shining like a mirror. On the other side, three little monkeys were waving at her.',
+      pt: '— Por aqui! — gritou o tucano de um galho. Valentina afastou umas folhas enormes e viu um rio que brilhava como um espelho. Do outro lado, três macaquinhos acenavam para ela.',
     },
-    coverImage: '/samples/primer-dia-de-clases.svg',
+    coverImage: '/samples/amigos-de-la-selva.svg',
+    samplePages: [],
+    textPromptTemplate: TEXT_PROMPT,
+    imagePromptTemplate: IMAGE_PROMPT,
+  },
+  {
+    slug: 'secreto-del-fondo-del-mar',
+    active: true,
+    order: 7,
+    ageMin: 3,
+    ageMax: 8,
+    tags: ['mar', 'aventura', 'naturaleza'],
+    pageCount: 12,
+    title: {
+      es: 'El secreto del fondo del mar',
+      en: 'The Secret of the Deep Sea',
+      pt: 'O segredo do fundo do mar',
+    },
+    summary: {
+      es: 'Con una burbuja mágica para respirar bajo el agua, tu peque nada entre delfines, tortugas y corales para descubrir un tesoro muy especial.',
+      en: 'With a magic bubble to breathe underwater, your little one swims with dolphins, turtles and corals to discover a very special treasure.',
+      pt: 'Com uma bolha mágica para respirar debaixo d’água, seu pequeno nada entre golfinhos, tartarugas e corais para descobrir um tesouro muito especial.',
+    },
+    excerpt: {
+      es: 'La burbuja hizo «plop» y, de pronto, Martín podía respirar bajo el agua. Una tortuga muy anciana le guiñó un ojo: —Te estábamos esperando. El tesoro necesita a alguien como tú.',
+      en: 'The bubble went "plop" and suddenly Martín could breathe underwater. A very old turtle winked at him: "We were waiting for you. The treasure needs someone like you."',
+      pt: 'A bolha fez "plop" e, de repente, Martín conseguia respirar debaixo d’água. Uma tartaruga bem velhinha piscou para ele: — Estávamos esperando você. O tesouro precisa de alguém como você.',
+    },
+    coverImage: '/samples/secreto-del-fondo-del-mar.svg',
     samplePages: [],
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,

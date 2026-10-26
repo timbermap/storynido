@@ -24,6 +24,10 @@ Resumen operativo de la guía de marca v2 ("magia editorial + confianza") aproba
 - Las maquetas de branding (portadas "Emilia", "Mateo", etc.) son conceptuales: **no se publican como libros reales**. Los ejemplos del sitio salen del pipeline real (fase 07).
 - No posicionar la IA como protagonista del copy ("La IA crea su historia" no; "Elige una aventura" sí).
 
+## Producto: aventura + enseñanza
+
+Cada cuento combina una **aventura** (escenario) con una **enseñanza** (el mensaje): compartir, valentía, llega un hermanito, dormir solo… o un mensaje propio del adulto. Comunicarlo como "Un cuento para cada momento". El mensaje se transmite con lo que el héroe vive, **nunca con sermones ni moralejas explícitas**.
+
 ## Paleta (tokens en `apps/web/src/app/globals.css`)
 
 | Token                                          | Hex                                               | Uso                                  |

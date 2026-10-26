@@ -13,6 +13,8 @@ export const CHILD_LIMITS = {
   maxLikes: 10,
   likeMaxLength: 40,
   dedicationMaxLength: 500,
+  /** Mensaje o enseñanza propia que escribe el adulto. */
+  customLessonMaxLength: 150,
 } as const;
 
 /** users/{uid} */

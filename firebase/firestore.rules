@@ -151,6 +151,8 @@ service cloud.firestore {
       let d = incoming();
       return (d.storyId == null || d.storyId is string)
         && (d.styleId == null || d.styleId is string)
+        && (d.lessonId == null || d.lessonId is string)
+        && optString(d.customLesson, 150)
         && validLocale(d.language)
         && optString(d.dedication, 500)
         && d.wizardStep is int && d.wizardStep >= 0 && d.wizardStep <= 10
@@ -163,7 +165,7 @@ service cloud.firestore {
 
       // Solo se crean borradores; preview, estado y regeneraciones los maneja el servidor.
       allow create: if ownsIncoming()
-        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'language', 'dedication', 'wizardStep', 'photoIds', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
+        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'lessonId', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
         && incoming().status == 'draft'
         && incoming().preview == null
         && incoming().regenerationsUsed == 0
@@ -173,7 +175,7 @@ service cloud.firestore {
 
       allow update: if ownsExisting()
         && resource.data.status in ['draft', 'preview_ready']
-        && changesOnly(['childId', 'storyId', 'styleId', 'language', 'dedication', 'wizardStep', 'photoIds', 'updatedAt'])
+        && changesOnly(['childId', 'storyId', 'styleId', 'lessonId', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'updatedAt'])
         && isNow('updatedAt')
         && validBookEdits();
 
@@ -196,6 +198,11 @@ service cloud.firestore {
     // ------------------------------------------- catálogo y configuración
 
     match /stories/{id} {
+      allow read: if activeOrAdmin();
+      allow write: if false;
+    }
+
+    match /lessons/{id} {
       allow read: if activeOrAdmin();
       allow write: if false;
     }

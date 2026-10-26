@@ -4,7 +4,7 @@ import type { MetadataRoute } from 'next';
 import { postSlugs } from '@/content/blog';
 import { getPathname } from '@/i18n/navigation';
 import { LEGAL_DOCUMENTS, LEGAL_SLUGS } from '@/lib/legal';
-import { getStories } from '@/lib/server/api';
+import { getLessons, getStories } from '@/lib/server/api';
 import { absoluteUrl } from '@/lib/site';
 
 type Href = Parameters<typeof getPathname>[0]['href'];
@@ -26,7 +26,10 @@ function entry(hrefFor: (locale: Locale) => Href, priority: number): MetadataRou
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const stories = await getStories('es').catch(() => []);
+  const [stories, lessons] = await Promise.all([
+    getStories('es').catch(() => []),
+    getLessons('es').catch(() => []),
+  ]);
   const posts = LOCALES.flatMap((locale) =>
     postSlugs(locale).map((slug) => ({
       url: absoluteUrl(
@@ -42,6 +45,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...entry(() => '/stories', 0.9),
     ...stories.flatMap((story) =>
       entry(() => ({ pathname: '/stories/[slug]', params: { slug: story.slug } }), 0.8),
+    ),
+    ...lessons.flatMap((lesson) =>
+      entry(() => ({ pathname: '/lessons/[slug]', params: { slug: lesson.slug } }), 0.8),
     ),
     ...entry(() => '/blog', 0.6),
     ...posts,

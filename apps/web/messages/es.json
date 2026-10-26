@@ -203,5 +203,21 @@
     "title": "Algo salió mal",
     "text": "Ocurrió un error inesperado. Inténtalo de nuevo.",
     "retry": "Reintentar"
+  },
+  "Lessons": {
+    "title": "Un cuento para cada momento",
+    "subtitle": "Elige qué quieres que aprenda: la aventura y la enseñanza se combinan en una historia única.",
+    "groups": {
+      "values": "Valores",
+      "confidence": "Confianza",
+      "life": "Momentos de la vida",
+      "emotions": "Emociones"
+    },
+    "combineTitle": "Combínalo con cualquier aventura",
+    "combineText": "Elige la aventura que más le guste: la historia se escribe con este mensaje, adaptado a su edad.",
+    "custom": "¿Prefieres otro mensaje? Al crear el cuento puedes escribir el tuyo, en hasta 150 caracteres.",
+    "back": "Todas las enseñanzas",
+    "storyCombine": "Combínala con una enseñanza",
+    "storyCombineText": "Al crear el cuento eliges qué mensaje quieres que tenga. Por ejemplo:"
   }
 }

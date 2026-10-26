@@ -40,6 +40,36 @@ export const illustrationStyleSchema = timestampsSchema.extend({
 
 export type IllustrationStyle = z.infer<typeof illustrationStyleSchema>;
 
+export const LESSON_GROUPS = ['values', 'confidence', 'life', 'emotions'] as const;
+
+export const lessonGroupSchema = z.enum(LESSON_GROUPS);
+
+export type LessonGroup = z.infer<typeof lessonGroupSchema>;
+
+/**
+ * lessons/{lessonId}: enseñanza o mensaje que la IA teje en cualquier aventura
+ * ("compartir", "llega un hermanito"). Se combina con la historia elegida.
+ */
+export const lessonSchema = timestampsSchema.extend({
+  slug: slugSchema,
+  active: z.boolean(),
+  order: z.number().int(),
+  group: lessonGroupSchema,
+  ageMin: z.number().int().min(CHILD_LIMITS.minAge).max(CHILD_LIMITS.maxAge),
+  ageMax: z.number().int().min(CHILD_LIMITS.minAge).max(CHILD_LIMITS.maxAge),
+  /** Nombre corto ("Llega un hermanito"). */
+  name: localizedSchema(z.string().min(1)),
+  /** Titular para su página ("Un cuento para recibir a su hermanito"). */
+  headline: localizedSchema(z.string().min(1)),
+  description: localizedSchema(z.string().min(1)),
+  /** Indicaciones para la IA: cómo integrar el mensaje sin sermonear. */
+  promptGuidance: z.string().min(1),
+  /** Temas que requieren revisión humana (pérdidas, separaciones). Fuera del lanzamiento. */
+  sensitive: z.boolean(),
+});
+
+export type Lesson = z.infer<typeof lessonSchema>;
+
 /** products/{productId}: formato vendible. */
 export const productSchema = timestampsSchema.extend({
   format: bookFormatSchema,

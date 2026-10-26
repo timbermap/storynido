@@ -22,6 +22,7 @@ import {
   contentSchema,
   countrySchema,
   illustrationStyleSchema,
+  lessonSchema,
   priceDocId,
   priceSchema,
   productSchema,
@@ -35,6 +36,7 @@ import {
 } from '@storynido/shared';
 
 import { SEED_STORIES, SEED_STYLES } from '../seed-data/catalog';
+import { SEED_LESSONS } from '../seed-data/lessons';
 import { initAdmin, isUsingEmulators } from './admin';
 
 if (!isUsingEmulators()) {
@@ -181,6 +183,25 @@ for (const story of SEED_STORIES) {
   );
 }
 
+for (const lesson of SEED_LESSONS) {
+  batch.set(
+    db.collection(COLLECTIONS.lessons).doc(lesson.slug),
+    lessonSchema.parse({
+      ...lesson,
+      active: true,
+      sensitive: false,
+      createdAt: now,
+      updatedAt: now,
+    }),
+  );
+}
+
+// Historias que ya no están en el catálogo de ejemplo (p. ej. las que pasaron a ser enseñanzas).
+const seededSlugs = new Set(SEED_STORIES.map((story) => story.slug));
+for (const doc of await db.collection(COLLECTIONS.stories).listDocuments()) {
+  if (!seededSlugs.has(doc.id)) batch.delete(doc);
+}
+
 for (const style of SEED_STYLES) {
   batch.set(
     db.collection(COLLECTIONS.illustrationStyles).doc(style.slug),
@@ -216,5 +237,5 @@ console.info('Seed listo:');
 for (const { email, role } of USERS) console.info(`  ${email} (${role})`);
 console.info('  países MX y US activos, precios de ejemplo, sitio en vivo, IA en mock');
 console.info(
-  `  ${String(SEED_STORIES.length)} historias, ${String(SEED_STYLES.length)} estilos, textos legales y FAQ en ${LOCALES.join(', ')}`,
+  `  ${String(SEED_STORIES.length)} historias, ${String(SEED_LESSONS.length)} enseñanzas, ${String(SEED_STYLES.length)} estilos, textos legales y FAQ en ${LOCALES.join(', ')}`,
 );

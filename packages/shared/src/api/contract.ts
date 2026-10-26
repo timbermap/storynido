@@ -4,6 +4,7 @@ import { countryCodeSchema } from '../countries';
 import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 import { BOOK_FORMATS } from '../models/common';
+import { LESSON_GROUPS } from '../models/catalog';
 import { CONTENT_KEYS, SITE_MODES } from '../models/config';
 import { roleSchema } from '../roles';
 
@@ -80,6 +81,18 @@ export const publicStorySchema = z.object({
 });
 
 export type PublicStory = z.infer<typeof publicStorySchema>;
+
+export const publicLessonSchema = z.object({
+  slug: z.string(),
+  group: z.enum(LESSON_GROUPS),
+  name: z.string(),
+  headline: z.string(),
+  description: z.string(),
+  ageMin: z.number().int(),
+  ageMax: z.number().int(),
+});
+
+export type PublicLesson = z.infer<typeof publicLessonSchema>;
 
 export const publicStyleSchema = z.object({
   slug: z.string(),
@@ -183,6 +196,14 @@ export const apiRoutes = {
     params: z.object({ slug: z.string().min(1).max(80) }),
     query: localeQuerySchema,
     response: publicStorySchema,
+  },
+  catalogLessons: {
+    method: 'GET',
+    path: '/v1/catalog/lessons',
+    access: 'public',
+    summary: 'Enseñanzas activas (combinables con cualquier historia)',
+    query: localeQuerySchema.extend({ age: z.coerce.number().int().min(0).max(12).optional() }),
+    response: z.object({ lessons: z.array(publicLessonSchema) }),
   },
   catalogStyles: {
     method: 'GET',

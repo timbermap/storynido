@@ -203,5 +203,21 @@
     "title": "Something went wrong",
     "text": "An unexpected error occurred. Please try again.",
     "retry": "Try again"
+  },
+  "Lessons": {
+    "title": "A story for every moment",
+    "subtitle": "Choose what you want them to learn: the adventure and the lesson combine into one unique story.",
+    "groups": {
+      "values": "Values",
+      "confidence": "Confidence",
+      "life": "Life moments",
+      "emotions": "Emotions"
+    },
+    "combineTitle": "Combine it with any adventure",
+    "combineText": "Pick the adventure they love most: the story is written with this message, adapted to their age.",
+    "custom": "Prefer a different message? When you create the story you can write your own, up to 150 characters.",
+    "back": "All lessons",
+    "storyCombine": "Combine it with a lesson",
+    "storyCombineText": "When you create the story you choose the message it carries. For example:"
   }
 }

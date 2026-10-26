@@ -6,6 +6,7 @@ export const COLLECTIONS = {
   consents: 'consents',
   stories: 'stories',
   illustrationStyles: 'illustrationStyles',
+  lessons: 'lessons',
   books: 'books',
   orders: 'orders',
   orderSteps: 'steps',

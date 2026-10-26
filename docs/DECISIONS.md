@@ -289,3 +289,20 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
   - El paso 2 es "Elige una aventura" en lugar de "La IA crea su historia".
   - Los tokens se integraron al tema de Tailwind en lugar de importar `storynido.css`, para no duplicar fuentes de verdad, no cargar las fuentes con `@import` y no pisar estilos globales.
 - **Resultado:** Lighthouse móvil 93-96 de rendimiento y 100 en accesibilidad, buenas prácticas y SEO después del rediseño.
+
+## 044 · Enseñanzas combinables con cualquier aventura
+
+- **Fecha:** 2026-10-26 · **Fase:** 05 · **Decidido por:** Sebastián
+- **Decisión:** se separan dos elecciones que se combinan:
+  - **Aventura** (`stories`): escenario e ilustraciones.
+  - **Enseñanza** (`lessons`): el mensaje que la IA integra en la trama sin sermonear, adaptado a la edad.
+- **Lanzamiento:** 16 enseñanzas en 4 grupos:
+  - Valores: compartir, amistad, respetar las diferencias, cuidar la naturaleza, decir la verdad.
+  - Confianza: "puedes lograr lo que te propongas", valentía, está bien equivocarse, ser uno mismo.
+  - Momentos de la vida: llega un hermanito, primer día de clases, dormir solo, dejar el pañal o el chupete, mudanza.
+  - Emociones: manejar el enojo, calma cuando estoy nervioso.
+- **Mensaje propio:** el adulto también puede escribir el suyo (`books.customLesson`, hasta 150 caracteres, moderado antes de usarse).
+- **Catálogo:** "Llega un hermanito" y "Primer día de clases" dejan de ser historias y pasan a ser enseñanzas. Se suman las aventuras "Amigos de la selva" y "El secreto del fondo del mar" (7 en total).
+- **Temas sensibles** (pérdida de una mascota o de un familiar, separaciones): campo `sensitive`, excluidos del catálogo hasta tener revisión humana del texto generado.
+- **SEO:** cada enseñanza tiene su página (`/es/ensenanzas/llega-un-hermanito`, `/en/lessons/…`, `/pt/licoes/…`) con las aventuras que se le combinan, y está en el sitemap.
+- **Motivo:** los padres buscan por situación ("cuento para cuando llega un hermanito"), no por escenario. Con 7 aventuras y 16 enseñanzas hay 112 combinaciones sin escribir una plantilla por cada una.
