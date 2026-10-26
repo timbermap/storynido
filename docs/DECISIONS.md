@@ -182,3 +182,48 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 
 - **Fecha:** 2026-10-26 · **Fase:** 03
 - **Decisión:** el workflow de deploy publica `firestore.rules` y `firestore.indexes.json` con `firebase deploy --only firestore`, autenticado por Workload Identity Federation. El deployer suma los roles `firebaserules.admin`, `datastore.indexAdmin`, `firebase.viewer` y `serviceusage.serviceUsageConsumer`. Las reglas de Storage no se despliegan: no se usa el bucket por defecto de Firebase, y los buckets reales son privados por IAM.
+
+## 030 · Contrato de API compartido en lugar de generar código desde OpenAPI
+
+- **Fecha:** 2026-10-26 · **Fase:** 04
+- **Decisión:** las rutas se definen una sola vez en `@storynido/shared` (`apiRoutes`: método, path, acceso y esquemas Zod). La API registra cada ruta desde ese contrato (validación, serialización, OpenAPI y control de acceso) y los clientes usan `createApiClient`, que tipa cada llamada y valida la respuesta con Zod. El OpenAPI (`/docs`) se genera desde los mismos esquemas con `fastify-type-provider-zod`.
+- **Alternativas:** generar un cliente desde OpenAPI (paso de build extra y tipos menos precisos).
+- **Motivo:** una sola fuente de verdad, sin generación de código, y cualquier diferencia entre servidor y cliente se detecta en compilación o al validar.
+
+## 031 · Proveedores: interfaces en shared, implementaciones en `@storynido/providers`
+
+- **Fecha:** 2026-10-26 · **Fase:** 04
+- **Decisión:**
+  - Las interfaces viven en `@storynido/shared`; las implementaciones, en el paquete Node `@storynido/providers`.
+  - La IA se divide en `AITextProvider` y `AIImageProvider`, porque el admin elige cada una por separado.
+  - Un `ProviderRegistry` elige la implementación según las variables de entorno. Para la IA, además, usa `aiConfig` en Firestore, escuchado en vivo, así que se cambia sin redeploy.
+  - El registro falla al arrancar si se pide un proveedor no disponible, rechaza una `aiConfig` inválida conservando la anterior, y en producción no permite proveedores simulados.
+- **Mocks:**
+  - Son deterministas y no cuestan nada.
+  - Los webhooks simulados se firman con HMAC, igual que los reales.
+  - La imprenta simulada emite la secuencia completa de estados.
+  - El marcador `[[unsafe]]` fuerza un rechazo de moderación, para probar el control de calidad.
+- **Contratos:** `@storynido/providers/testing` tiene una suite por tipo de proveedor. Los mocks ya la pasan; cada implementación real tendrá que pasar la misma.
+
+## 032 · Storage local con URLs firmadas imitando Cloud Storage
+
+- **Fecha:** 2026-10-26 · **Fase:** 04
+- **Decisión:** en desarrollo, `LocalStorageService` guarda archivos en disco y emite URLs firmadas (HMAC, con vencimiento, operación y Content-Type) que sirve la API en `/dev/storage`. Esa ruta solo existe fuera de producción y no aparece en OpenAPI. Así el flujo de subida desde el navegador de la fase 06 se prueba en local igual que en la nube.
+- **Nota:** en staging la API usa storage local (efímero) hasta que la fase 06 agregue Cloud Storage.
+
+## 033 · Rate limiting en memoria por instancia
+
+- **Fecha:** 2026-10-26 · **Fase:** 04
+- **Decisión:** `@fastify/rate-limit` con contador en memoria, por usuario si hay sesión y por IP si no (detrás del balanceador de Cloud Run, con `trustProxy`). 120 requests por minuto por defecto (`RATE_LIMIT_PER_MINUTE`).
+- **Límite conocido:** con varias instancias el límite efectivo se multiplica. Es suficiente como freno; si hace falta un límite global, se puede usar Memorystore (Redis) o Cloud Armor (fase 16).
+
+## 034 · App Check listo pero apagado fuera de producción
+
+- **Fecha:** 2026-10-26 · **Fase:** 04
+- **Decisión:** las rutas sensibles declaran `{ appCheck: true }` y la API verifica el header `X-Firebase-AppCheck` con el Admin SDK. Se exige por defecto solo con `APP_ENV=production` (`APP_CHECK_ENFORCED` lo puede forzar). En local y staging queda apagado hasta configurar reCAPTCHA Enterprise / App Check en la web (fase 05-06).
+
+## 035 · Emuladores de test separados de los de desarrollo
+
+- **Fecha:** 2026-10-26 · **Fase:** 04
+- **Decisión:** los tests que usan emuladores corren con `firebase.test.json` (otros puertos: Auth 19099, Firestore 18180, Storage 19199) y el proyecto `demo-storynido-test`, mediante `firebase/scripts/with-test-emulators.sh`. Turbo los corre en serie (`@storynido/api#test` depende de `@storynido/firebase#test`).
+- **Motivo:** reutilizar los emuladores de desarrollo mezclaba los datos: el emulador de Auth en modo de un solo proyecto emite tokens del proyecto de desarrollo. Ahora `pnpm test` funciona con o sin `pnpm emulators` corriendo y nunca toca los datos locales.

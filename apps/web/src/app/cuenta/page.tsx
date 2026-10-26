@@ -1,10 +1,13 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+import { ApiError } from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
 import { logOut } from '@/lib/firebase/auth-actions';
 
 const ROLE_LABELS = {
@@ -18,9 +21,32 @@ export default function AccountPage() {
   const { user, role, loading } = useAuth();
   const router = useRouter();
 
+  const [apiCheck, setApiCheck] = useState<string>('Verificando…');
+
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
+
+  // Confirma la sesión contra la API (verifica el token en el servidor).
+  useEffect(() => {
+    if (!user) return;
+    const controller = new AbortController();
+    api('me', { signal: controller.signal })
+      .then((me) => {
+        setApiCheck(`Sesión verificada por la API (${ROLE_LABELS[me.role]})`);
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        setApiCheck(
+          error instanceof ApiError
+            ? `La API respondió: ${error.message}`
+            : 'No se pudo contactar a la API',
+        );
+      });
+    return () => {
+      controller.abort();
+    };
+  }, [user]);
 
   if (loading || !user) {
     return (
@@ -42,6 +68,8 @@ export default function AccountPage() {
         <dd>{user.displayName ?? '—'}</dd>
         <dt className="text-muted-foreground">Rol</dt>
         <dd>{ROLE_LABELS[role]}</dd>
+        <dt className="text-muted-foreground">API</dt>
+        <dd role="status">{apiCheck}</dd>
       </dl>
       <Button variant="outline" onClick={() => void logOut()}>
         Cerrar sesión

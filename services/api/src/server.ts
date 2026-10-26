@@ -1,20 +1,68 @@
-import { cloudLoggingOptions, parseServiceEnv } from '@storynido/shared/server';
+import { createProviderRegistry, providerSettingsFromEnv } from '@storynido/providers';
+import { cloudLoggingOptions } from '@storynido/shared/server';
+import pino from 'pino';
 
 import { buildApp } from './app';
+import { loadApiConfig } from './config';
+import {
+  FirebaseAppCheckVerifier,
+  FirebaseTokenVerifier,
+  FirestoreLiveConfig,
+  initFirebaseAdmin,
+} from './firebase';
 
-const env = parseServiceEnv(process.env, 8080);
+const config = loadApiConfig(process.env);
+const loggerOptions = cloudLoggingOptions('api', config.env.LOG_LEVEL);
+const log = pino(loggerOptions);
 
-const app = buildApp({
-  logger: cloudLoggingOptions('api', env.LOG_LEVEL),
-  version: env.K_REVISION,
+const settings = providerSettingsFromEnv(process.env);
+if (
+  config.appEnv === 'production' &&
+  Object.values(settings).some((id) => id === 'mock' || id === 'local')
+) {
+  throw new Error(`Producción no puede usar proveedores simulados: ${JSON.stringify(settings)}`);
+}
+
+const providers = createProviderRegistry({
+  settings,
+  mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET,
+  localStorage: {
+    rootDir: config.env.LOCAL_STORAGE_DIR,
+    publicBaseUrl: config.env.PUBLIC_API_URL,
+    secret: config.env.LOCAL_STORAGE_SECRET,
+  },
+  onMockEmail: (message) => {
+    log.info({ to: message.to, template: message.template, locale: message.locale }, 'mock email');
+  },
+});
+
+const firebase = initFirebaseAdmin(config.projectId);
+const liveConfig = new FirestoreLiveConfig(firebase, providers, log);
+liveConfig.start();
+
+const app = await buildApp({
+  logger: loggerOptions,
+  deps: {
+    config,
+    version: config.env.K_REVISION,
+    tokens: new FirebaseTokenVerifier(firebase),
+    appCheck: new FirebaseAppCheckVerifier(firebase),
+    siteConfig: liveConfig,
+    providers,
+  },
 });
 
 // Cloud Run envía SIGTERM antes de apagar la instancia.
 for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   process.once(signal, () => {
     app.log.info({ signal }, 'shutting down');
+    liveConfig.stop();
     void app.close().then(() => process.exit(0));
   });
 }
 
-await app.listen({ port: env.PORT, host: '0.0.0.0' });
+await app.listen({ port: config.env.PORT, host: '0.0.0.0' });
+app.log.info(
+  { providers: providers.describe().active, projectId: config.projectId, appEnv: config.appEnv },
+  'api ready',
+);

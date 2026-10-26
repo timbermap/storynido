@@ -23,6 +23,7 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.3",
     "eslint-config-prettier": "10.1.8",
+    "firebase-tools": "15.34.1",
     "globals": "17.13.0",
     "prettier": "3.9.10",
     "prettier-plugin-tailwindcss": "0.8.1",

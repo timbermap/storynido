@@ -6,15 +6,16 @@ Contexto completo del proyecto: [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) �
 
 ## Estructura
 
-| Ruta              | Qué es                                                                                  | Puerto local |
-| ----------------- | --------------------------------------------------------------------------------------- | ------------ |
-| `apps/web`        | Sitio público (Next.js)                                                                 | 3000         |
-| `apps/admin`      | Panel super admin (Next.js)                                                             | 3001         |
-| `services/api`    | API HTTP (Fastify en Cloud Run)                                                         | 8080         |
-| `services/worker` | Worker del pipeline (Fastify en Cloud Run)                                              | 8081         |
-| `packages/shared` | Tipos, esquemas Zod (modelo de datos) y utilidades compartidas                          | —            |
-| `firebase/`       | Reglas, índices, emuladores, seed y roles: ver [firebase/README.md](firebase/README.md) | UI 4000      |
-| `infra/`          | Terraform (Google Cloud)                                                                | —            |
+| Ruta                 | Qué es                                                                                                    | Puerto local |
+| -------------------- | --------------------------------------------------------------------------------------------------------- | ------------ |
+| `apps/web`           | Sitio público (Next.js)                                                                                   | 3000         |
+| `apps/admin`         | Panel super admin (Next.js)                                                                               | 3001         |
+| `services/api`       | API HTTP (Fastify en Cloud Run): ver [services/api/README.md](services/api/README.md). Swagger en `/docs` | 8080         |
+| `services/worker`    | Worker del pipeline (Fastify en Cloud Run)                                                                | 8081         |
+| `packages/shared`    | Tipos, esquemas Zod (modelo de datos) y utilidades compartidas                                            | —            |
+| `packages/providers` | Proveedores (IA, pagos, imprenta, mails, storage): mocks, registro y tests de contrato                    | —            |
+| `firebase/`          | Reglas, índices, emuladores, seed y roles: ver [firebase/README.md](firebase/README.md)                   | UI 4000      |
+| `infra/`             | Terraform (Google Cloud)                                                                                  | —            |
 
 ## Requisitos
 

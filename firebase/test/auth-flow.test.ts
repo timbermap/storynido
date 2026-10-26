@@ -25,18 +25,20 @@ import { afterAll, describe, expect, it } from 'vitest';
 
 import { roleFromClaims } from '@storynido/shared';
 
-import { PROJECT_ID } from './setup';
+import { PROJECT_ID, emulatorHost } from './setup';
 
-process.env.FIREBASE_AUTH_EMULATOR_HOST ??= '127.0.0.1:9099';
+const authEmulator = emulatorHost('FIREBASE_AUTH_EMULATOR_HOST');
+const firestoreEmulator = emulatorHost('FIRESTORE_EMULATOR_HOST');
+const authUrl = `http://${authEmulator.host}:${String(authEmulator.port)}`;
 
 const app = initializeApp(
   { apiKey: 'demo-api-key', projectId: PROJECT_ID, authDomain: `${PROJECT_ID}.firebaseapp.com` },
   `auth-flow-${Date.now()}`,
 );
 const auth = getAuth(app);
-connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+connectAuthEmulator(auth, authUrl, { disableWarnings: true });
 const db = getFirestore(app);
-connectFirestoreEmulator(db, '127.0.0.1', 8180);
+connectFirestoreEmulator(db, firestoreEmulator.host, firestoreEmulator.port);
 
 const adminAuth = getAdminAuth(
   initializeAdminApp({ projectId: PROJECT_ID }, `admin-${Date.now()}`),
@@ -49,7 +51,7 @@ interface OobCode {
 }
 
 async function latestSignInLink(email: string): Promise<string> {
-  const res = await fetch(`http://127.0.0.1:9099/emulator/v1/projects/${PROJECT_ID}/oobCodes`);
+  const res = await fetch(`${authUrl}/emulator/v1/projects/${PROJECT_ID}/oobCodes`);
   const { oobCodes } = (await res.json()) as { oobCodes: OobCode[] };
   const link = oobCodes
     .filter((c) => c.email === email && c.requestType === 'EMAIL_SIGNIN')

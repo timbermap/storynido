@@ -11,11 +11,15 @@
     "lint": {},
     "typecheck": {},
     "test": {
-      "outputs": ["coverage/**"]
+      "outputs": []
     },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "@storynido/api#test": {
+      "dependsOn": ["@storynido/firebase#test"],
+      "outputs": []
     }
   }
 }
