@@ -81,7 +81,7 @@ describe('mocks: comportamiento específico', () => {
       orderId: 'o-1',
       customerEmail: null,
       currency: 'USD' as const,
-      locale: 'en-us' as const,
+      locale: 'en' as const,
       lineItems: [{ name: 'Book', amountMinor: 4999, quantity: 1 }],
       successUrl: 'http://localhost:3000/ok',
       cancelUrl: 'http://localhost:3000/cancel',

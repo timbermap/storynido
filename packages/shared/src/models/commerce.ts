@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { countryCodeSchema } from '../countries';
 import { currencySchema } from '../currency';
-import { languageSchema } from '../i18n';
+import { localeSchema } from '../i18n';
 import { orderStatusSchema } from '../order-status';
 import { CHILD_LIMITS } from './users';
 import { bookFormatSchema, timestampsSchema, uidSchema } from './common';
@@ -17,7 +17,7 @@ export const countrySchema = z.object({
     hardcover: z.boolean(),
   }),
   currency: currencySchema,
-  defaultLanguage: languageSchema,
+  defaultLocale: localeSchema,
   /** Impuesto en puntos básicos (1600 = 16 %). */
   taxBasisPoints: z.number().int().min(0).max(10000),
   taxIncludedInPrice: z.boolean(),
@@ -106,7 +106,7 @@ export const bookSchema = timestampsSchema.extend({
   childId: z.string().nullable(),
   storyId: z.string().nullable(),
   styleId: z.string().nullable(),
-  language: languageSchema,
+  language: localeSchema,
   dedication: z.string().max(CHILD_LIMITS.dedicationMaxLength).nullable(),
   wizardStep: z.number().int().min(0).max(10),
   photoIds: z.array(z.string()).max(3),

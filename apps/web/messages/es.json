@@ -1,0 +1,204 @@
+{
+  "Meta": {
+    "title": "{brand}: cuentos personalizados donde tu hijo es el protagonista",
+    "description": "Crea un cuento infantil único con el nombre, la cara y los gustos de tu hijo. Vista previa gratis, libro digital o impreso con envío a tu país.",
+    "skipToContent": "Saltar al contenido"
+  },
+  "Nav": {
+    "stories": "Historias",
+    "howItWorks": "Cómo funciona",
+    "faq": "Preguntas",
+    "blog": "Blog",
+    "signIn": "Iniciar sesión",
+    "account": "Mi cuenta",
+    "menu": "Menú",
+    "closeMenu": "Cerrar menú",
+    "mainNav": "Navegación principal"
+  },
+  "Switchers": {
+    "language": "Idioma",
+    "country": "País de envío",
+    "countryHint": "Precios y envíos para",
+    "countries": {
+      "MX": "México",
+      "US": "Estados Unidos",
+      "ES": "España",
+      "CO": "Colombia",
+      "CL": "Chile",
+      "PE": "Perú",
+      "BR": "Brasil"
+    }
+  },
+  "Footer": {
+    "tagline": "Cuentos únicos, con tu hijo como protagonista.",
+    "legal": "Legal",
+    "company": "StoryNido",
+    "cookiePreferences": "Preferencias de cookies",
+    "rights": "© {year} {brand}. Todos los derechos reservados.",
+    "contact": "Contacto"
+  },
+  "Legal": {
+    "terms": "Términos y condiciones",
+    "privacy": "Política de privacidad",
+    "cookies": "Política de cookies",
+    "refunds": "Reembolsos",
+    "shipping": "Envíos",
+    "updated": "Actualizado el {date}"
+  },
+  "Home": {
+    "hero": {
+      "eyebrow": "Cuentos personalizados con ilustraciones únicas",
+      "title": "Un cuento donde tu hijo es el héroe",
+      "subtitle": "Con su nombre, su cara y lo que más le gusta. Ves una vista previa gratis y recibes el libro en PDF o impreso en tu casa.",
+      "cta": "Crear su cuento",
+      "secondary": "Ver cómo funciona",
+      "fromPrice": "Desde {price}"
+    },
+    "trust": {
+      "preview": "Vista previa gratis",
+      "shipping": "Envío a {country}",
+      "privacy": "Fotos protegidas y borradas a los 30 días",
+      "languages": "En español, inglés y portugués"
+    },
+    "how": {
+      "title": "Así de fácil",
+      "subtitle": "En menos de 10 minutos tienes un libro único.",
+      "step1Title": "Cuéntanos de tu hijo",
+      "step1Text": "Su nombre, edad, gustos y de 1 a 3 fotos. Elige la historia y el estilo de ilustración.",
+      "step2Title": "Mira la vista previa gratis",
+      "step2Text": "Creamos la portada y dos páginas con tu hijo como protagonista. Puedes editar textos y cambiar la foto.",
+      "step3Title": "Recíbelo en casa",
+      "step3Text": "Descárgalo en PDF al instante o recíbelo impreso en tapa blanda o dura."
+    },
+    "gallery": {
+      "title": "Historias para cada sueño",
+      "subtitle": "Elige la aventura que más le va a gustar.",
+      "viewAll": "Ver todas las historias"
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "more": "Ver todas las preguntas"
+    },
+    "guarantee": {
+      "title": "Si no te encanta, no lo pagas",
+      "text": "Ves la vista previa antes de pagar. Y si tu libro llega con algún problema, lo reimprimimos o te devolvemos el dinero."
+    },
+    "cta": {
+      "title": "Regala un recuerdo para toda la vida",
+      "text": "Un cumpleaños, una Navidad o un martes cualquiera: cualquier día es bueno para ser protagonista.",
+      "button": "Empezar ahora"
+    }
+  },
+  "Stories": {
+    "title": "Historias",
+    "subtitle": "Cada historia se adapta a la edad y a los gustos de tu hijo.",
+    "filterLabel": "Edad",
+    "allAges": "Todas",
+    "ageRange": "{min} a {max} años",
+    "agesFor": "Para {min} a {max} años",
+    "pages": "{count} páginas",
+    "empty": "No hay historias para esa edad todavía.",
+    "from": "desde {price}",
+    "create": "Crear con esta historia",
+    "comingSoon": "Muy pronto podrás crear tu libro",
+    "sample": "Fragmento de muestra",
+    "sampleNote": "Así empieza la historia. En tu libro, el nombre y los detalles serán los de tu hijo.",
+    "formats": "Formatos y precios",
+    "shippingTo": "Envío a {country}: {price} · llega en {min} a {max} días hábiles",
+    "taxIncluded": "Impuestos incluidos",
+    "taxExtra": "Impuestos según tu dirección",
+    "notAvailable": "Todavía no vendemos en {country}. Puedes ver los precios de otro país desde el selector de arriba.",
+    "back": "Todas las historias",
+    "error": "No pudimos cargar las historias. Inténtalo de nuevo en unos minutos.",
+    "fallbackNotice": "Todavía no enviamos a {preferred}. Te mostramos los precios de {country}."
+  },
+  "Formats": {
+    "digital": "Libro digital (PDF)",
+    "softcover": "Tapa blanda",
+    "hardcover": "Tapa dura"
+  },
+  "Blog": {
+    "title": "Blog",
+    "subtitle": "Ideas para leer en familia, regalar y acompañar cada etapa.",
+    "readMore": "Leer artículo",
+    "back": "Volver al blog",
+    "published": "Publicado el {date}"
+  },
+  "Consent": {
+    "title": "Usamos cookies",
+    "text": "Usamos cookies necesarias para que el sitio funcione y, si aceptas, cookies de analítica y marketing para mejorarlo. Puedes cambiar tu elección cuando quieras.",
+    "acceptAll": "Aceptar todas",
+    "rejectAll": "Solo las necesarias",
+    "customize": "Configurar",
+    "save": "Guardar preferencias",
+    "necessary": "Necesarias",
+    "necessaryText": "Inicio de sesión, idioma, país y seguridad. Siempre activas.",
+    "analytics": "Analítica",
+    "analyticsText": "Nos ayudan a entender cómo se usa el sitio (Google Analytics).",
+    "marketing": "Marketing",
+    "marketingText": "Miden campañas y muestran anuncios relevantes (Meta).",
+    "policy": "Política de cookies"
+  },
+  "Auth": {
+    "title": "Entra a {brand}",
+    "subtitle": "Guarda tus cuentos y sigue tus pedidos.",
+    "google": "Continuar con Google",
+    "apple": "Continuar con Apple",
+    "or": "o",
+    "emailLabel": "Tu email",
+    "emailPlaceholder": "nombre@ejemplo.com",
+    "sendLink": "Enviarme un enlace para entrar",
+    "noPassword": "Sin contraseñas: te llega un enlace de acceso por correo.",
+    "checkEmailTitle": "Revisa tu correo",
+    "checkEmailText": "Te enviamos un enlace a {email}. Ábrelo desde este mismo dispositivo para entrar.",
+    "useAnotherEmail": "Usar otro email",
+    "signingIn": "Iniciando sesión…",
+    "invalidLink": "Este enlace no es válido.",
+    "requestNewLink": "Pide uno nuevo",
+    "confirmEmail": "Confirma tu email para terminar de entrar",
+    "enter": "Entrar",
+    "back": "Volver",
+    "errors": {
+      "popupClosed": "Cerraste la ventana antes de terminar. Inténtalo de nuevo.",
+      "popupBlocked": "El navegador bloqueó la ventana de inicio de sesión. Habilita las ventanas emergentes.",
+      "invalidEmail": "Ese email no parece válido.",
+      "expiredLink": "El enlace venció o ya se usó. Pide uno nuevo.",
+      "accountExists": "Ya existe una cuenta con ese email. Inicia sesión con el método que usaste antes.",
+      "network": "No hay conexión. Revisa tu internet e inténtalo de nuevo.",
+      "providerDisabled": "Ese método de inicio de sesión todavía no está disponible.",
+      "generic": "No pudimos iniciar sesión. Inténtalo de nuevo en unos minutos."
+    }
+  },
+  "Account": {
+    "title": "Mi cuenta",
+    "email": "Email",
+    "name": "Nombre",
+    "role": "Rol",
+    "api": "API",
+    "signOut": "Cerrar sesión",
+    "loading": "Cargando…",
+    "verifying": "Verificando…",
+    "verified": "Sesión verificada por la API ({role})",
+    "apiError": "La API respondió: {message}",
+    "apiUnreachable": "No se pudo contactar a la API",
+    "roles": {
+      "customer": "Cliente",
+      "admin": "Administrador",
+      "superadmin": "Superadministrador"
+    }
+  },
+  "Maintenance": {
+    "title": "Estamos haciendo mejoras",
+    "text": "{brand} vuelve en un rato. Gracias por tu paciencia."
+  },
+  "NotFound": {
+    "title": "No encontramos esta página",
+    "text": "Puede que el enlace esté mal escrito o que la página ya no exista.",
+    "home": "Ir al inicio"
+  },
+  "Error": {
+    "title": "Algo salió mal",
+    "text": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "retry": "Reintentar"
+  }
+}

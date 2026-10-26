@@ -1,4 +1,4 @@
-import type { Language } from '../i18n';
+import type { Locale } from '../i18n';
 
 /** Costo de una llamada, en millonésimas de dólar (precisión suficiente para tokens e imágenes). */
 export interface AiUsage {
@@ -8,7 +8,7 @@ export interface AiUsage {
 }
 
 export interface StoryRequest {
-  language: Language;
+  language: Locale;
   childName: string;
   age: number;
   pronouns: 'she' | 'he' | 'they' | null;

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { LANGUAGES } from '../i18n';
+import { LOCALES } from '../i18n';
 
 export const uidSchema = z.string().min(1).max(128);
 
@@ -12,8 +12,8 @@ export const timestampsSchema = z.object({
 /** Texto traducido: una entrada por idioma soportado. */
 export function localizedSchema<T extends z.ZodType>(value: T) {
   return z.object(
-    Object.fromEntries(LANGUAGES.map((language) => [language, value])) as Record<
-      (typeof LANGUAGES)[number],
+    Object.fromEntries(LOCALES.map((locale) => [locale, value])) as Record<
+      (typeof LOCALES)[number],
       T
     >,
   );

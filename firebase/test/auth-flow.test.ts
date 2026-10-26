@@ -80,7 +80,7 @@ describe('login sin contraseña', () => {
       email,
       displayName: null,
       photoURL: null,
-      locale: 'es-mx',
+      locale: 'es',
       country: 'MX',
       marketingOptIn: false,
       createdAt: serverTimestamp(),

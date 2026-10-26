@@ -5,6 +5,7 @@ import path from 'node:path';
 import { createProviderRegistry, providerSettingsFromEnv } from '@storynido/providers';
 
 import { buildApp } from './app';
+import { InMemoryCatalog } from './catalog';
 import { loadApiConfig } from './config';
 import {
   StaticSiteConfigSource,
@@ -56,6 +57,7 @@ export async function createTestApp(
     appCheck: fakeAppCheck,
     siteConfig,
     providers,
+    catalog: new InMemoryCatalog(),
     ...overrides,
   };
   const app = await buildApp({ deps, extend });

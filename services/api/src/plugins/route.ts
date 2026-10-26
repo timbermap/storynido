@@ -44,6 +44,7 @@ export function addRoute<R extends ApiRoute>(
       summary: route.summary,
       tags: [route.access === 'public' ? 'public' : route.access],
       security: route.access === 'public' ? [] : [{ bearerAuth: [] }],
+      ...(route.params ? { params: route.params } : {}),
       ...(route.body ? { body: route.body } : {}),
       ...(route.query ? { querystring: route.query } : {}),
       response: { 200: route.response, '4xx': apiErrorSchema, '5xx': apiErrorSchema },

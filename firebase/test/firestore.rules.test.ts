@@ -42,7 +42,7 @@ const userProfile = (uid: string) => ({
   email: `${uid}@storynido.test`,
   displayName: 'Alice',
   photoURL: null,
-  locale: 'es-mx',
+  locale: 'es',
   country: 'MX',
   marketingOptIn: false,
   createdAt: serverTimestamp(),
@@ -123,7 +123,7 @@ describe('users', () => {
       updatedAt: new Date(),
     });
     await assertSucceeds(
-      updateDoc(doc(alice(), 'users', ALICE), { locale: 'en-us', updatedAt: serverTimestamp() }),
+      updateDoc(doc(alice(), 'users', ALICE), { locale: 'en', updatedAt: serverTimestamp() }),
     );
     await assertFails(
       updateDoc(doc(alice(), 'users', ALICE), { role: 'superadmin', updatedAt: serverTimestamp() }),
@@ -307,8 +307,8 @@ describe('catálogo y configuración', () => {
     await seed('stories/activa', { active: true });
     await seed('stories/inactiva', { active: false });
     await seed('prices/MX_hardcover', { active: true, amountMinor: 79900 });
-    await seed('content/terms_es-mx', { published: true });
-    await seed('content/faq_es-mx', { published: false });
+    await seed('content/terms_es', { published: true });
+    await seed('content/faq_es', { published: false });
     await seed('siteConfig/global', { mode: 'live' });
     await seed('coupons/BIENVENIDA', { active: true });
     await seed('aiConfig/global', { textProvider: 'mock' });
@@ -319,8 +319,8 @@ describe('catálogo y configuración', () => {
     await assertSucceeds(getDoc(doc(anon(), 'stories', 'activa')));
     await assertFails(getDoc(doc(anon(), 'stories', 'inactiva')));
     await assertSucceeds(getDoc(doc(admin(), 'stories', 'inactiva')));
-    await assertSucceeds(getDoc(doc(anon(), 'content', 'terms_es-mx')));
-    await assertFails(getDoc(doc(anon(), 'content', 'faq_es-mx')));
+    await assertSucceeds(getDoc(doc(anon(), 'content', 'terms_es')));
+    await assertFails(getDoc(doc(anon(), 'content', 'faq_es')));
     await assertSucceeds(getDoc(doc(anon(), 'siteConfig', 'global')));
   });
 

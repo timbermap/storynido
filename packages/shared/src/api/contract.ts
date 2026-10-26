@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import { SITE_MODES } from '../models/config';
+import { countryCodeSchema } from '../countries';
+import { currencySchema } from '../currency';
+import { localeSchema } from '../i18n';
+import { BOOK_FORMATS } from '../models/common';
+import { CONTENT_KEYS, SITE_MODES } from '../models/config';
 import { roleSchema } from '../roles';
 
 export const API_ERROR_CODES = [
@@ -60,6 +64,72 @@ export const providersResponseSchema = z.object({
   available: z.record(z.string(), z.array(z.string())),
 });
 
+// --- Catálogo público -----------------------------------------------------------
+
+export const publicStorySchema = z.object({
+  slug: z.string(),
+  title: z.string(),
+  summary: z.string(),
+  excerpt: z.string(),
+  ageMin: z.number().int(),
+  ageMax: z.number().int(),
+  tags: z.array(z.string()),
+  pageCount: z.number().int(),
+  coverImage: z.string(),
+  samplePages: z.array(z.string()),
+});
+
+export type PublicStory = z.infer<typeof publicStorySchema>;
+
+export const publicStyleSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  sampleImage: z.string().nullable(),
+});
+
+export const publicCountrySchema = z.object({
+  code: countryCodeSchema,
+  currency: currencySchema,
+  defaultLocale: localeSchema,
+});
+
+export const offerFormatSchema = z.object({
+  format: z.enum(BOOK_FORMATS),
+  name: z.string(),
+  pageCount: z.number().int(),
+  amountMinor: z.number().int().nonnegative(),
+});
+
+/** Lo que se puede comprar en un país: formatos, precios, envío e impuestos. */
+export const offerSchema = z.object({
+  country: countryCodeSchema,
+  available: z.boolean(),
+  currency: currencySchema,
+  taxBasisPoints: z.number().int(),
+  taxIncludedInPrice: z.boolean(),
+  shipping: z.object({
+    costMinor: z.number().int().nonnegative(),
+    etaDaysMin: z.number().int().nonnegative(),
+    etaDaysMax: z.number().int().nonnegative(),
+  }),
+  formats: z.array(offerFormatSchema),
+});
+
+export type Offer = z.infer<typeof offerSchema>;
+
+export const publicContentSchema = z.object({
+  key: z.enum(CONTENT_KEYS),
+  locale: localeSchema,
+  title: z.string(),
+  /** Markdown. */
+  body: z.string(),
+  updatedAt: z.iso.datetime(),
+});
+
+export type PublicContent = z.infer<typeof publicContentSchema>;
+
+const localeQuerySchema = z.object({ locale: localeSchema });
+
 export type RouteAccess = 'public' | 'user' | 'admin' | 'superadmin';
 
 export interface ApiRoute {
@@ -68,6 +138,7 @@ export interface ApiRoute {
   path: string;
   access: RouteAccess;
   summary: string;
+  params?: z.ZodType;
   body?: z.ZodType;
   query?: z.ZodType;
   response: z.ZodType;
@@ -95,6 +166,55 @@ export const apiRoutes = {
     access: 'user',
     summary: 'Usuario autenticado y su rol',
     response: meResponseSchema,
+  },
+  catalogStories: {
+    method: 'GET',
+    path: '/v1/catalog/stories',
+    access: 'public',
+    summary: 'Historias activas, opcionalmente filtradas por edad',
+    query: localeQuerySchema.extend({ age: z.coerce.number().int().min(0).max(12).optional() }),
+    response: z.object({ stories: z.array(publicStorySchema) }),
+  },
+  catalogStory: {
+    method: 'GET',
+    path: '/v1/catalog/stories/:slug',
+    access: 'public',
+    summary: 'Detalle de una historia',
+    params: z.object({ slug: z.string().min(1).max(80) }),
+    query: localeQuerySchema,
+    response: publicStorySchema,
+  },
+  catalogStyles: {
+    method: 'GET',
+    path: '/v1/catalog/styles',
+    access: 'public',
+    summary: 'Estilos de ilustración activos',
+    query: localeQuerySchema,
+    response: z.object({ styles: z.array(publicStyleSchema) }),
+  },
+  catalogCountries: {
+    method: 'GET',
+    path: '/v1/catalog/countries',
+    access: 'public',
+    summary: 'Países donde se vende',
+    response: z.object({ countries: z.array(publicCountrySchema) }),
+  },
+  catalogOffer: {
+    method: 'GET',
+    path: '/v1/catalog/offer',
+    access: 'public',
+    summary: 'Formatos, precios, envío e impuestos de un país',
+    query: localeQuerySchema.extend({ country: countryCodeSchema }),
+    response: offerSchema,
+  },
+  content: {
+    method: 'GET',
+    path: '/v1/content/:key',
+    access: 'public',
+    summary: 'Texto publicado (legales, preguntas frecuentes, banners) en un idioma',
+    params: z.object({ key: z.enum(CONTENT_KEYS) }),
+    query: localeQuerySchema,
+    response: publicContentSchema,
   },
   adminProviders: {
     method: 'GET',

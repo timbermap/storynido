@@ -16,7 +16,11 @@ export const storySchema = timestampsSchema.extend({
   pageCount: z.number().int().positive(),
   title: localizedSchema(z.string().min(1)),
   summary: localizedSchema(z.string().min(1)),
-  /** Rutas de imágenes de muestra en el bucket de assets. */
+  /** Fragmento de muestra del texto, por idioma. */
+  excerpt: localizedSchema(z.string().min(1)),
+  /** Portada de muestra (ruta pública o del bucket de assets). */
+  coverImage: z.string().min(1),
+  /** Imágenes de páginas de muestra. */
   samplePages: z.array(z.string()),
   textPromptTemplate: z.string().min(1),
   imagePromptTemplate: z.string().min(1),

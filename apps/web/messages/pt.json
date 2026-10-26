@@ -1,0 +1,204 @@
+{
+  "Meta": {
+    "title": "{brand}: histórias personalizadas com seu filho como protagonista",
+    "description": "Crie um livro infantil único com o nome, o rosto e os gostos do seu filho. Prévia grátis, livro digital ou impresso com entrega no seu país.",
+    "skipToContent": "Pular para o conteúdo"
+  },
+  "Nav": {
+    "stories": "Histórias",
+    "howItWorks": "Como funciona",
+    "faq": "Perguntas",
+    "blog": "Blog",
+    "signIn": "Entrar",
+    "account": "Minha conta",
+    "menu": "Menu",
+    "closeMenu": "Fechar menu",
+    "mainNav": "Navegação principal"
+  },
+  "Switchers": {
+    "language": "Idioma",
+    "country": "País de entrega",
+    "countryHint": "Preços e frete para",
+    "countries": {
+      "MX": "México",
+      "US": "Estados Unidos",
+      "ES": "Espanha",
+      "CO": "Colômbia",
+      "CL": "Chile",
+      "PE": "Peru",
+      "BR": "Brasil"
+    }
+  },
+  "Footer": {
+    "tagline": "Histórias únicas, com seu filho como protagonista.",
+    "legal": "Legal",
+    "company": "StoryNido",
+    "cookiePreferences": "Preferências de cookies",
+    "rights": "© {year} {brand}. Todos os direitos reservados.",
+    "contact": "Contato"
+  },
+  "Legal": {
+    "terms": "Termos e condições",
+    "privacy": "Política de privacidade",
+    "cookies": "Política de cookies",
+    "refunds": "Reembolsos",
+    "shipping": "Envios",
+    "updated": "Atualizado em {date}"
+  },
+  "Home": {
+    "hero": {
+      "eyebrow": "Histórias personalizadas com ilustrações únicas",
+      "title": "Uma história em que seu filho é o herói",
+      "subtitle": "Com o nome, o rosto e o que ele mais gosta. Você vê uma prévia grátis e recebe o livro em PDF ou impresso em casa.",
+      "cta": "Criar a história",
+      "secondary": "Ver como funciona",
+      "fromPrice": "A partir de {price}"
+    },
+    "trust": {
+      "preview": "Prévia grátis",
+      "shipping": "Entrega para {country}",
+      "privacy": "Fotos protegidas e excluídas após 30 dias",
+      "languages": "Em espanhol, inglês e português"
+    },
+    "how": {
+      "title": "Simples assim",
+      "subtitle": "Em menos de 10 minutos você tem um livro único.",
+      "step1Title": "Conte sobre seu filho",
+      "step1Text": "Nome, idade, gostos e de 1 a 3 fotos. Escolha a história e o estilo de ilustração.",
+      "step2Title": "Veja a prévia grátis",
+      "step2Text": "Criamos a capa e duas páginas com seu filho como protagonista. Você pode editar os textos e trocar a foto.",
+      "step3Title": "Receba em casa",
+      "step3Text": "Baixe o PDF na hora ou receba impresso em capa mole ou capa dura."
+    },
+    "gallery": {
+      "title": "Histórias para cada sonho",
+      "subtitle": "Escolha a aventura que ele vai adorar.",
+      "viewAll": "Ver todas as histórias"
+    },
+    "faq": {
+      "title": "Perguntas frequentes",
+      "more": "Ver todas as perguntas"
+    },
+    "guarantee": {
+      "title": "Se você não amar, não paga",
+      "text": "Você vê a prévia antes de pagar. E se o livro chegar com algum problema, reimprimimos ou devolvemos o dinheiro."
+    },
+    "cta": {
+      "title": "Presenteie uma lembrança para a vida toda",
+      "text": "Um aniversário, o Natal ou uma terça-feira qualquer: todo dia é bom para ser protagonista.",
+      "button": "Começar agora"
+    }
+  },
+  "Stories": {
+    "title": "Histórias",
+    "subtitle": "Cada história se adapta à idade e aos gostos do seu filho.",
+    "filterLabel": "Idade",
+    "allAges": "Todas",
+    "ageRange": "{min} a {max} anos",
+    "agesFor": "Para {min} a {max} anos",
+    "pages": "{count} páginas",
+    "empty": "Ainda não há histórias para essa idade.",
+    "from": "a partir de {price}",
+    "create": "Criar com esta história",
+    "comingSoon": "Em breve você poderá criar o seu livro",
+    "sample": "Trecho de exemplo",
+    "sampleNote": "É assim que a história começa. No seu livro, o nome e os detalhes serão os do seu filho.",
+    "formats": "Formatos e preços",
+    "shippingTo": "Entrega para {country}: {price} · chega em {min} a {max} dias úteis",
+    "taxIncluded": "Impostos incluídos",
+    "taxExtra": "Impostos calculados no checkout",
+    "notAvailable": "Ainda não vendemos para {country}. Você pode ver os preços de outro país no seletor acima.",
+    "back": "Todas as histórias",
+    "error": "Não conseguimos carregar as histórias. Tente novamente em alguns minutos.",
+    "fallbackNotice": "Ainda não entregamos para {preferred}. Mostramos os preços de {country}."
+  },
+  "Formats": {
+    "digital": "Livro digital (PDF)",
+    "softcover": "Capa mole",
+    "hardcover": "Capa dura"
+  },
+  "Blog": {
+    "title": "Blog",
+    "subtitle": "Ideias para ler em família, presentear e acompanhar cada fase.",
+    "readMore": "Ler artigo",
+    "back": "Voltar ao blog",
+    "published": "Publicado em {date}"
+  },
+  "Consent": {
+    "title": "Usamos cookies",
+    "text": "Usamos cookies necessários para o site funcionar e, se você aceitar, cookies de análise e marketing para melhorá-lo. Você pode mudar sua escolha quando quiser.",
+    "acceptAll": "Aceitar todos",
+    "rejectAll": "Somente necessários",
+    "customize": "Configurar",
+    "save": "Salvar preferências",
+    "necessary": "Necessários",
+    "necessaryText": "Login, idioma, país e segurança. Sempre ativos.",
+    "analytics": "Análise",
+    "analyticsText": "Nos ajudam a entender como o site é usado (Google Analytics).",
+    "marketing": "Marketing",
+    "marketingText": "Medem campanhas e mostram anúncios relevantes (Meta).",
+    "policy": "Política de cookies"
+  },
+  "Auth": {
+    "title": "Entre no {brand}",
+    "subtitle": "Guarde suas histórias e acompanhe seus pedidos.",
+    "google": "Continuar com Google",
+    "apple": "Continuar com Apple",
+    "or": "ou",
+    "emailLabel": "Seu e-mail",
+    "emailPlaceholder": "nome@exemplo.com",
+    "sendLink": "Enviar um link para entrar",
+    "noPassword": "Sem senhas: você recebe um link de acesso por e-mail.",
+    "checkEmailTitle": "Confira seu e-mail",
+    "checkEmailText": "Enviamos um link para {email}. Abra-o neste mesmo dispositivo para entrar.",
+    "useAnotherEmail": "Usar outro e-mail",
+    "signingIn": "Entrando…",
+    "invalidLink": "Este link não é válido.",
+    "requestNewLink": "Peça um novo",
+    "confirmEmail": "Confirme seu e-mail para terminar de entrar",
+    "enter": "Entrar",
+    "back": "Voltar",
+    "errors": {
+      "popupClosed": "Você fechou a janela antes de terminar. Tente novamente.",
+      "popupBlocked": "O navegador bloqueou a janela de login. Permita janelas pop-up.",
+      "invalidEmail": "Esse e-mail não parece válido.",
+      "expiredLink": "O link expirou ou já foi usado. Peça um novo.",
+      "accountExists": "Já existe uma conta com esse e-mail. Entre com o método que você usou antes.",
+      "network": "Sem conexão. Verifique sua internet e tente novamente.",
+      "providerDisabled": "Esse método de login ainda não está disponível.",
+      "generic": "Não conseguimos fazer seu login. Tente novamente em alguns minutos."
+    }
+  },
+  "Account": {
+    "title": "Minha conta",
+    "email": "E-mail",
+    "name": "Nome",
+    "role": "Perfil",
+    "api": "API",
+    "signOut": "Sair",
+    "loading": "Carregando…",
+    "verifying": "Verificando…",
+    "verified": "Sessão verificada pela API ({role})",
+    "apiError": "A API respondeu: {message}",
+    "apiUnreachable": "Não foi possível contatar a API",
+    "roles": {
+      "customer": "Cliente",
+      "admin": "Administrador",
+      "superadmin": "Superadministrador"
+    }
+  },
+  "Maintenance": {
+    "title": "Estamos fazendo melhorias",
+    "text": "O {brand} volta em breve. Obrigado pela paciência."
+  },
+  "NotFound": {
+    "title": "Não encontramos esta página",
+    "text": "O link pode estar errado ou a página pode não existir mais.",
+    "home": "Ir para o início"
+  },
+  "Error": {
+    "title": "Algo deu errado",
+    "text": "Ocorreu um erro inesperado. Tente novamente.",
+    "retry": "Tentar novamente"
+  }
+}

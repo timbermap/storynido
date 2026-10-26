@@ -28,6 +28,8 @@
 - Fase 02: **staging aplicado** en el proyecto `storynido-staging` (organización timbermap.com, facturación Forestech Uruguay SRL). **Production** (`storynido-prod`) se crea más cerca del lanzamiento.
 - Staging: deploys automáticos activos (api y worker desplegados desde GitHub Actions el 2026-10-26). Pendiente: backends de App Hosting (web/admin) y dominios.
 
+- Fase 05: textos legales base para revisar con asesoría legal; portadas provisorias hasta la fase 07; testimonios ocultos hasta tener reseñas reales; el sitio público todavía no está publicado en App Hosting (staging).
+
 ## Riesgos
 
 - Consistencia del personaje en las ilustraciones (fase 07).

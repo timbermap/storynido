@@ -1,5 +1,6 @@
 # Firebase App Hosting: configuración base (production).
 # Los overrides de staging están en apphosting.staging.yaml.
+# La configuración web de Firebase la inyecta App Hosting (no hace falta NEXT_PUBLIC_FIREBASE_*).
 # Documentación: https://firebase.google.com/docs/app-hosting/configure
 runConfig:
   minInstances: 1
@@ -14,6 +15,18 @@ env:
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_BRAND_DOMAIN
     value: storynido.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://storynido.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SITE_ENV
+    value: production
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_API_URL
+    value: https://api.storynido.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_USE_FIREBASE_EMULATORS
+    value: 'false'
     availability: [BUILD, RUNTIME]
   - variable: NEXT_TELEMETRY_DISABLED
     value: '1'

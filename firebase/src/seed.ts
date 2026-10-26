@@ -3,27 +3,38 @@
  * configuración de países, productos, precios, sitio e IA.
  * Se niega a correr fuera de los emuladores.
  */
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
 import { getAuth, type UserRecord } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
 import {
   BOOK_FORMATS,
   COLLECTIONS,
+  CONTENT_KEYS,
+  LOCALES,
   COUNTRY_CODES,
   COUNTRY_DEFAULTS,
   GLOBAL_DOC_ID,
   aiConfigSchema,
+  contentDocId,
+  contentSchema,
   countrySchema,
+  illustrationStyleSchema,
   priceDocId,
   priceSchema,
   productSchema,
   siteConfigSchema,
+  storySchema,
   userSchema,
   type BookFormat,
   type CountryCode,
+  type Locale,
   type Role,
 } from '@storynido/shared';
 
+import { SEED_STORIES, SEED_STYLES } from '../seed-data/catalog';
 import { initAdmin, isUsingEmulators } from './admin';
 
 if (!isUsingEmulators()) {
@@ -63,7 +74,7 @@ for (const { email, displayName, role } of USERS) {
         email,
         displayName,
         photoURL: null,
-        locale: 'es-mx',
+        locale: 'es',
         country: 'MX',
         marketingOptIn: false,
         role,
@@ -98,7 +109,7 @@ for (const code of COUNTRY_CODES) {
       active: launched,
       formats: { digital: launched, softcover: launched, hardcover: launched },
       currency: defaults.currency,
-      defaultLanguage: defaults.defaultLanguage,
+      defaultLocale: defaults.defaultLocale,
       taxBasisPoints: code === 'MX' ? 1600 : 0,
       taxIncludedInPrice: code === 'MX',
       shipping: SAMPLE_SHIPPING[code] ?? { costMinor: 0, etaDaysMin: 0, etaDaysMax: 0 },
@@ -123,10 +134,10 @@ for (const code of COUNTRY_CODES) {
   }
 }
 
-const PRODUCT_NAMES: Record<BookFormat, { es: string; en: string; 'pt-BR': string }> = {
-  digital: { es: 'Libro digital (PDF)', en: 'Digital book (PDF)', 'pt-BR': 'Livro digital (PDF)' },
-  softcover: { es: 'Tapa blanda', en: 'Softcover', 'pt-BR': 'Capa mole' },
-  hardcover: { es: 'Tapa dura', en: 'Hardcover', 'pt-BR': 'Capa dura' },
+const PRODUCT_NAMES: Record<BookFormat, Record<Locale, string>> = {
+  digital: { es: 'Libro digital (PDF)', en: 'Digital book (PDF)', pt: 'Livro digital (PDF)' },
+  softcover: { es: 'Tapa blanda', en: 'Softcover', pt: 'Capa mole' },
+  hardcover: { es: 'Tapa dura', en: 'Hardcover', pt: 'Capa dura' },
 };
 
 for (const format of BOOK_FORMATS) {
@@ -163,8 +174,47 @@ batch.set(
   }),
 );
 
+for (const story of SEED_STORIES) {
+  batch.set(
+    db.collection(COLLECTIONS.stories).doc(story.slug),
+    storySchema.parse({ ...story, createdAt: now, updatedAt: now }),
+  );
+}
+
+for (const style of SEED_STYLES) {
+  batch.set(
+    db.collection(COLLECTIONS.illustrationStyles).doc(style.slug),
+    illustrationStyleSchema.parse({ ...style, createdAt: now, updatedAt: now }),
+  );
+}
+
+/** Textos base: firebase/seed-data/content/<idioma>/<clave>.md; la primera línea "# " es el título. */
+const contentDir = fileURLToPath(new URL('../seed-data/content/', import.meta.url));
+const SEEDED_CONTENT = CONTENT_KEYS.filter((key) => key !== 'banner');
+for (const locale of LOCALES) {
+  for (const key of SEEDED_CONTENT) {
+    const raw = readFileSync(`${contentDir}${locale}/${key}.md`, 'utf8');
+    const [heading = '', ...rest] = raw.split('\n');
+    batch.set(
+      db.collection(COLLECTIONS.content).doc(contentDocId(key, locale)),
+      contentSchema.parse({
+        key,
+        locale,
+        title: heading.replace(/^#\s+/, '').trim(),
+        body: rest.join('\n').trim(),
+        published: true,
+        updatedAt: now,
+        updatedBy: 'seed',
+      }),
+    );
+  }
+}
+
 await batch.commit();
 
 console.info('Seed listo:');
 for (const { email, role } of USERS) console.info(`  ${email} (${role})`);
 console.info('  países MX y US activos, precios de ejemplo, sitio en vivo, IA en mock');
+console.info(
+  `  ${String(SEED_STORIES.length)} historias, ${String(SEED_STYLES.length)} estilos, textos legales y FAQ en ${LOCALES.join(', ')}`,
+);

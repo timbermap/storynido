@@ -35,7 +35,15 @@ gcloud auth application-default login
 pnpm --filter @storynido/firebase set-role --project storynido-staging --email tu@email.com --role superadmin
 ```
 
-## 4. Secretos por plataforma
+## 4. Sitio público (fase 05)
+
+- **App Hosting:** las variables están en `apps/web/apphosting.yaml` (producción) y `apphosting.staging.yaml`. La configuración de Firebase la inyecta App Hosting.
+- **País por IP:** si se pone un balanceador o CDN delante del sitio, configurá el header personalizado `X-Client-Country: {client_region}`. Sin él, el país se detecta por el idioma del navegador y el visitante lo puede cambiar.
+- **Textos legales:** `firebase/seed-data/content/<idioma>/*.md` son textos base. Antes de lanzar, completá los datos entre corchetes y hacelos revisar con asesoría legal. Después se editan desde el panel admin (fase 14).
+- **Catálogo en staging o producción:** las historias, precios y textos se cargan con el panel admin (fase 14) o con una importación del seed preparada para ese ambiente.
+- **Analítica:** `NEXT_PUBLIC_GA4_MEASUREMENT_ID` y `NEXT_PUBLIC_META_PIXEL_ID` en `apphosting.yaml` cuando existan (solo se cargan con consentimiento).
+
+## 5. Secretos por plataforma
 
 Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cuando su fase lo necesita. En local, el mismo valor va en `.env.local`.
 
@@ -47,6 +55,6 @@ Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cua
 | `meta-capi-access-token`                     | Meta                                        | 11   |
 | `anthropic-api-key`, `flux-api-key`          | Opcionales (proveedores alternativos de IA) | 07   |
 
-## 5. Producción
+## 6. Producción
 
 Se completa en la fase 18 (checklist de salida).

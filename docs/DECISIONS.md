@@ -227,3 +227,54 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 - **Fecha:** 2026-10-26 · **Fase:** 04
 - **Decisión:** los tests que usan emuladores corren con `firebase.test.json` (otros puertos: Auth 19099, Firestore 18180, Storage 19199) y el proyecto `demo-storynido-test`, mediante `firebase/scripts/with-test-emulators.sh`. Turbo los corre en serie (`@storynido/api#test` depende de `@storynido/firebase#test`).
 - **Motivo:** reutilizar los emuladores de desarrollo mezclaba los datos: el emulador de Auth en modo de un solo proyecto emite tokens del proyecto de desarrollo. Ahora `pnpm test` funciona con o sin `pnpm emulators` corriendo y nunca toca los datos locales.
+
+## 036 · Rutas solo por idioma; el país es un ajuste aparte
+
+- **Fecha:** 2026-10-26 · **Fase:** 05 · **Decidido por:** Sebastián
+- **Decisión:** las URLs llevan solo el idioma (`/es`, `/en`, `/pt`) con slugs traducidos (`/es/historias`, `/en/stories`). El país de envío (moneda, precio, formatos, envío) se guarda aparte en la cookie `sn_country`. Al primer acceso se detecta por header de geolocalización de la CDN o balanceador (`X-Client-Country`), si no por la región de `Accept-Language`, y si no por el país principal del idioma. El visitante lo cambia con un selector. `es` es español neutro (con "tú"); `es-es` se agrega al lanzar España.
+- **Alternativas:** idioma + país (`/es-mx`, propuesta del prompt original), con muchas URLs casi duplicadas; solo país (`/mx`), que no resuelve EE. UU. con dos idiomas.
+- **Motivo:** el contenido es el mismo para todos los países de un idioma. Así se concentra el SEO en una URL por idioma y hay menos páginas que mantener.
+- **Si el país no está disponible:** se muestran los precios del país principal del idioma, o del primero activo, con un aviso visible.
+- **Modelo:** `Locale` = `es | en | pt` reemplaza al anterior `es-mx…` en Firestore, reglas, mails e IA.
+
+## 037 · El sitio lee el catálogo y el contenido desde la API
+
+- **Fecha:** 2026-10-26 · **Fase:** 05
+- **Decisión:** la web obtiene historias, estilos, países, ofertas por país y textos (legales, FAQ) de endpoints públicos de la API (`/v1/catalog/*`, `/v1/content/:key`). La API cachea Firestore 60 s y Next cachea las respuestas 5 minutos; el modo del sitio, 15 s. Si la API no responde, las páginas muestran lo que pueden (sin precios) en lugar de fallar.
+- **Motivo:** una sola puerta de entrada a los datos (la misma que usará el admin), sin credenciales de servidor en la web y con cache en dos niveles.
+
+## 038 · Rendimiento: Firebase diferido, hero sin JavaScript y fuentes livianas
+
+- **Fecha:** 2026-10-26 · **Fase:** 05
+- **Decisión:**
+  - Firebase Auth se inicializa cuando el navegador está libre (`requestIdleCallback`) y sin el manejador de ventanas emergentes. Ese manejador, que descarga ~70 KB de Google, se pasa recién en `signInWithPopup`.
+  - Firestore solo se carga después de iniciar sesión.
+  - El modo del sitio se lee en el servidor.
+  - El libro del hero se renderiza en el servidor con animación CSS.
+  - Solo viajan al navegador los textos que usan los componentes de cliente.
+  - Fraunces sin los ejes opcionales.
+- **Resultado (Lighthouse móvil, 4G simulado, build de producción):** 94-95 de rendimiento y 100 de accesibilidad, buenas prácticas y SEO en home, catálogo, detalle, blog y legales, en los tres idiomas.
+- **Motion:** se quitó del sitio público. El efecto del hero se logra con CSS sin costo de carga. Se vuelve a evaluar para las interacciones del creador (fase 06).
+
+## 039 · Configuración web de Firebase inyectada por App Hosting
+
+- **Fecha:** 2026-10-26 · **Fase:** 05
+- **Decisión:** en App Hosting la web usa `initializeApp()` sin opciones: App Hosting inyecta la configuración del proyecto. En local se usan los valores demo de los emuladores; `NEXT_PUBLIC_FIREBASE_*` queda como alternativa explícita. Así no hay claves de Firebase en el repo (aunque sean públicas, gitleaks las marcaría).
+
+## 040 · Contenido de lanzamiento: textos base y portadas provisorias
+
+- **Fecha:** 2026-10-26 · **Fase:** 05
+- **Decisión:**
+  - Los textos legales (términos, privacidad, cookies, reembolsos y envíos) y la FAQ son **textos base** en los tres idiomas, con datos de la empresa entre corchetes (`[Razón social]`, `[domicilio]`). **Tienen que revisarse con asesoría legal antes del lanzamiento** (ver checklist de la fase 18).
+  - Las portadas de las 6 historias son ilustraciones SVG propias y provisorias, que se reemplazan por ilustraciones generadas con IA (fase 07).
+  - La sección de testimonios no se muestra hasta tener reseñas reales (la fase 13 las pide automáticamente). No se publican testimonios inventados.
+
+## 041 · Consentimiento de cookies propio con Google Consent Mode v2
+
+- **Fecha:** 2026-10-26 · **Fase:** 05
+- **Decisión:** banner y diálogo propios (sin servicios de terceros). Las cookies necesarias están siempre activas; analítica y marketing arrancan apagadas. La elección se guarda en `sn_consent` por 6 meses y se puede cambiar desde el pie de página. GA4 y Meta Pixel solo se cargan con consentimiento y si sus IDs están configurados, con Consent Mode v2 (todo denegado por defecto).
+
+## 042 · robots.txt cerrado fuera de producción
+
+- **Fecha:** 2026-10-26 · **Fase:** 05
+- **Decisión:** `robots.txt` permite indexar solo con `NEXT_PUBLIC_SITE_ENV=production`. En staging y en local bloquea todo, para que Google no indexe sitios de prueba. El sitemap incluye cada página en los tres idiomas con sus alternativas `hreflang`. Los artículos del blog existen en un solo idioma y no tienen alternativas.

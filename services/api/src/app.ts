@@ -8,6 +8,7 @@ import { registerDocs } from './plugins/docs';
 import { registerErrorHandling } from './plugins/error-handler';
 import { registerSecurity } from './plugins/security';
 import { registerSiteMode } from './plugins/site-mode';
+import { registerCatalogRoutes } from './routes/catalog';
 import { registerDevStorageRoutes } from './routes/dev-storage';
 import { registerV1Routes } from './routes/v1';
 import './types';
@@ -39,6 +40,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   await registerDocs(app);
 
   registerV1Routes(app);
+  registerCatalogRoutes(app, deps.catalog);
   extend?.(app);
 
   const storage = deps.providers.storage();

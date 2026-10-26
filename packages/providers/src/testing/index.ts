@@ -106,7 +106,7 @@ export function describePaymentContract(
       orderId: `order-${name}`,
       customerEmail: 'ana@example.com',
       currency: 'MXN' as const,
-      locale: 'es-mx' as const,
+      locale: 'es' as const,
       lineItems: [{ name: 'Libro tapa dura', amountMinor: 99900, quantity: 1 }],
       successUrl: 'https://storynido.test/checkout/success',
       cancelUrl: 'https://storynido.test/checkout/cancel',
@@ -225,7 +225,7 @@ export function describeEmailContract(name: string, create: () => EmailProvider)
     const message = {
       to: 'ana@example.com',
       template: 'payment_confirmed' as const,
-      locale: 'es-mx' as const,
+      locale: 'es' as const,
       data: { orderId: 'o1' },
       idempotencyKey: `o1:payment_confirmed:${name}`,
     };

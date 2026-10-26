@@ -8,7 +8,7 @@ Contexto completo del proyecto: [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) �
 
 | Ruta                 | Qué es                                                                                                    | Puerto local |
 | -------------------- | --------------------------------------------------------------------------------------------------------- | ------------ |
-| `apps/web`           | Sitio público (Next.js)                                                                                   | 3000         |
+| `apps/web`           | Sitio público (Next.js): `/es`, `/en`, `/pt`, catálogo, legales, blog                                     | 3000         |
 | `apps/admin`         | Panel super admin (Next.js)                                                                               | 3001         |
 | `services/api`       | API HTTP (Fastify en Cloud Run): ver [services/api/README.md](services/api/README.md). Swagger en `/docs` | 8080         |
 | `services/worker`    | Worker del pipeline (Fastify en Cloud Run)                                                                | 8081         |

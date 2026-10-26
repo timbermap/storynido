@@ -2,7 +2,10 @@ import { createProviderRegistry, providerSettingsFromEnv } from '@storynido/prov
 import { cloudLoggingOptions } from '@storynido/shared/server';
 import pino from 'pino';
 
+import { getFirestore } from 'firebase-admin/firestore';
+
 import { buildApp } from './app';
+import { FirestoreCatalog } from './catalog';
 import { loadApiConfig } from './config';
 import {
   FirebaseAppCheckVerifier,
@@ -49,6 +52,7 @@ const app = await buildApp({
     appCheck: new FirebaseAppCheckVerifier(firebase),
     siteConfig: liveConfig,
     providers,
+    catalog: new FirestoreCatalog(getFirestore(firebase)),
   },
 });
 

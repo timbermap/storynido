@@ -1,0 +1,204 @@
+{
+  "Meta": {
+    "title": "{brand}: personalized stories starring your child",
+    "description": "Create a one-of-a-kind children's book with your child's name, face and favorite things. Free preview, digital or printed book shipped to your country.",
+    "skipToContent": "Skip to content"
+  },
+  "Nav": {
+    "stories": "Stories",
+    "howItWorks": "How it works",
+    "faq": "FAQ",
+    "blog": "Blog",
+    "signIn": "Sign in",
+    "account": "My account",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "mainNav": "Main navigation"
+  },
+  "Switchers": {
+    "language": "Language",
+    "country": "Shipping country",
+    "countryHint": "Prices and shipping for",
+    "countries": {
+      "MX": "Mexico",
+      "US": "United States",
+      "ES": "Spain",
+      "CO": "Colombia",
+      "CL": "Chile",
+      "PE": "Peru",
+      "BR": "Brazil"
+    }
+  },
+  "Footer": {
+    "tagline": "One-of-a-kind stories starring your child.",
+    "legal": "Legal",
+    "company": "StoryNido",
+    "cookiePreferences": "Cookie preferences",
+    "rights": "© {year} {brand}. All rights reserved.",
+    "contact": "Contact"
+  },
+  "Legal": {
+    "terms": "Terms and conditions",
+    "privacy": "Privacy policy",
+    "cookies": "Cookie policy",
+    "refunds": "Refunds",
+    "shipping": "Shipping",
+    "updated": "Updated on {date}"
+  },
+  "Home": {
+    "hero": {
+      "eyebrow": "Personalized stories with unique illustrations",
+      "title": "A story where your child is the hero",
+      "subtitle": "With their name, their face and the things they love. See a free preview and get the book as a PDF or printed and delivered to your door.",
+      "cta": "Create their story",
+      "secondary": "See how it works",
+      "fromPrice": "From {price}"
+    },
+    "trust": {
+      "preview": "Free preview",
+      "shipping": "Shipping to {country}",
+      "privacy": "Photos protected and deleted after 30 days",
+      "languages": "In Spanish, English and Portuguese"
+    },
+    "how": {
+      "title": "It's that easy",
+      "subtitle": "A one-of-a-kind book in less than 10 minutes.",
+      "step1Title": "Tell us about your child",
+      "step1Text": "Their name, age, favorite things and 1 to 3 photos. Pick the story and the illustration style.",
+      "step2Title": "See the free preview",
+      "step2Text": "We create the cover and two pages starring your child. You can edit the text and change the photo.",
+      "step3Title": "Get it at home",
+      "step3Text": "Download the PDF instantly or get it printed in softcover or hardcover."
+    },
+    "gallery": {
+      "title": "Stories for every dream",
+      "subtitle": "Pick the adventure they'll love the most.",
+      "viewAll": "See all stories"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "more": "See all questions"
+    },
+    "guarantee": {
+      "title": "If you don't love it, you don't pay",
+      "text": "You see the preview before paying. And if your book arrives with a problem, we'll reprint it or refund you."
+    },
+    "cta": {
+      "title": "Give a memory that lasts a lifetime",
+      "text": "A birthday, Christmas or just any Tuesday: every day is a good day to be the hero.",
+      "button": "Start now"
+    }
+  },
+  "Stories": {
+    "title": "Stories",
+    "subtitle": "Every story adapts to your child's age and interests.",
+    "filterLabel": "Age",
+    "allAges": "All",
+    "ageRange": "{min} to {max} years",
+    "agesFor": "Ages {min} to {max}",
+    "pages": "{count} pages",
+    "empty": "No stories for that age yet.",
+    "from": "from {price}",
+    "create": "Create with this story",
+    "comingSoon": "You'll be able to create your book very soon",
+    "sample": "Sample excerpt",
+    "sampleNote": "This is how the story begins. In your book, the name and details will be your child's.",
+    "formats": "Formats and prices",
+    "shippingTo": "Shipping to {country}: {price} · arrives in {min} to {max} business days",
+    "taxIncluded": "Taxes included",
+    "taxExtra": "Taxes calculated at checkout",
+    "notAvailable": "We don't sell in {country} yet. You can see prices for another country using the selector above.",
+    "back": "All stories",
+    "error": "We couldn't load the stories. Please try again in a few minutes.",
+    "fallbackNotice": "We don't ship to {preferred} yet. Showing prices for {country}."
+  },
+  "Formats": {
+    "digital": "Digital book (PDF)",
+    "softcover": "Softcover",
+    "hardcover": "Hardcover"
+  },
+  "Blog": {
+    "title": "Blog",
+    "subtitle": "Ideas for reading together, gifting and every stage of childhood.",
+    "readMore": "Read article",
+    "back": "Back to the blog",
+    "published": "Published on {date}"
+  },
+  "Consent": {
+    "title": "We use cookies",
+    "text": "We use necessary cookies to make the site work and, if you accept, analytics and marketing cookies to improve it. You can change your choice at any time.",
+    "acceptAll": "Accept all",
+    "rejectAll": "Necessary only",
+    "customize": "Customize",
+    "save": "Save preferences",
+    "necessary": "Necessary",
+    "necessaryText": "Sign-in, language, country and security. Always on.",
+    "analytics": "Analytics",
+    "analyticsText": "Help us understand how the site is used (Google Analytics).",
+    "marketing": "Marketing",
+    "marketingText": "Measure campaigns and show relevant ads (Meta).",
+    "policy": "Cookie policy"
+  },
+  "Auth": {
+    "title": "Sign in to {brand}",
+    "subtitle": "Save your stories and track your orders.",
+    "google": "Continue with Google",
+    "apple": "Continue with Apple",
+    "or": "or",
+    "emailLabel": "Your email",
+    "emailPlaceholder": "name@example.com",
+    "sendLink": "Email me a sign-in link",
+    "noPassword": "No passwords: we'll email you a sign-in link.",
+    "checkEmailTitle": "Check your email",
+    "checkEmailText": "We sent a link to {email}. Open it on this same device to sign in.",
+    "useAnotherEmail": "Use another email",
+    "signingIn": "Signing in…",
+    "invalidLink": "This link isn't valid.",
+    "requestNewLink": "Request a new one",
+    "confirmEmail": "Confirm your email to finish signing in",
+    "enter": "Sign in",
+    "back": "Back",
+    "errors": {
+      "popupClosed": "You closed the window before finishing. Please try again.",
+      "popupBlocked": "Your browser blocked the sign-in window. Please allow pop-ups.",
+      "invalidEmail": "That email doesn't look valid.",
+      "expiredLink": "The link expired or was already used. Request a new one.",
+      "accountExists": "An account with that email already exists. Sign in with the method you used before.",
+      "network": "No connection. Check your internet and try again.",
+      "providerDisabled": "That sign-in method isn't available yet.",
+      "generic": "We couldn't sign you in. Please try again in a few minutes."
+    }
+  },
+  "Account": {
+    "title": "My account",
+    "email": "Email",
+    "name": "Name",
+    "role": "Role",
+    "api": "API",
+    "signOut": "Sign out",
+    "loading": "Loading…",
+    "verifying": "Verifying…",
+    "verified": "Session verified by the API ({role})",
+    "apiError": "The API responded: {message}",
+    "apiUnreachable": "Couldn't reach the API",
+    "roles": {
+      "customer": "Customer",
+      "admin": "Administrator",
+      "superadmin": "Super administrator"
+    }
+  },
+  "Maintenance": {
+    "title": "We're making improvements",
+    "text": "{brand} will be back shortly. Thanks for your patience."
+  },
+  "NotFound": {
+    "title": "We couldn't find this page",
+    "text": "The link may be mistyped or the page may no longer exist.",
+    "home": "Go to the home page"
+  },
+  "Error": {
+    "title": "Something went wrong",
+    "text": "An unexpected error occurred. Please try again.",
+    "retry": "Try again"
+  }
+}

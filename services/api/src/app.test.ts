@@ -141,7 +141,10 @@ describe('api', () => {
       const spec = (await ctx.app.inject({ method: 'GET', url: '/docs/json' })).json<{
         paths: Record<string, unknown>;
       }>();
-      for (const route of Object.values(apiRoutes)) expect(spec.paths).toHaveProperty(route.path);
+      // OpenAPI escribe los parámetros como {slug}; el contrato, como :slug.
+      for (const route of Object.values(apiRoutes)) {
+        expect(Object.keys(spec.paths)).toContain(route.path.replace(/:(\w+)/g, '{$1}'));
+      }
       expect(spec.paths).not.toHaveProperty('/dev/storage/{bucket}/*');
     });
   });

@@ -1,6 +1,7 @@
 import type { ProviderRegistry } from '@storynido/providers';
 import type { SiteConfig } from '@storynido/shared';
 
+import type { CatalogRepository } from './catalog';
 import type { ApiConfig } from './config';
 
 export interface VerifiedUser {
@@ -31,6 +32,7 @@ export interface ApiDeps {
   appCheck: AppCheckVerifier;
   siteConfig: SiteConfigSource;
   providers: ProviderRegistry;
+  catalog: CatalogRepository;
 }
 
 /** Fuente fija (tests y arranque antes del primer snapshot). */

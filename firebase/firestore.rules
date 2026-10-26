@@ -56,7 +56,7 @@ service cloud.firestore {
     }
 
     function validLocale(value) {
-      return value in ['es-mx', 'en-us', 'es-us', 'es-es', 'es-co', 'es-cl', 'es-pe', 'pt-br'];
+      return value in ['es', 'en', 'pt'];
     }
 
     function validCountry(value) {
@@ -151,7 +151,7 @@ service cloud.firestore {
       let d = incoming();
       return (d.storyId == null || d.storyId is string)
         && (d.styleId == null || d.styleId is string)
-        && d.language in ['es', 'en', 'pt-BR']
+        && validLocale(d.language)
         && optString(d.dedication, 500)
         && d.wizardStep is int && d.wizardStep >= 0 && d.wizardStep <= 10
         && d.photoIds is list && d.photoIds.size() <= 3

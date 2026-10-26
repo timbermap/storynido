@@ -1,4 +1,5 @@
 # Overrides de App Hosting para el backend de staging (environment name = "staging").
+# NEXT_PUBLIC_SITE_ENV=staging hace que robots.txt bloquee la indexación.
 runConfig:
   minInstances: 0
   maxInstances: 3
@@ -6,4 +7,13 @@ runConfig:
 env:
   - variable: NEXT_PUBLIC_BRAND_DOMAIN
     value: staging.storynido.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://staging.storynido.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SITE_ENV
+    value: staging
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_API_URL
+    value: https://api-kxfsarqx2q-uc.a.run.app
     availability: [BUILD, RUNTIME]

@@ -6,7 +6,7 @@ import type {
   GeneratedStory,
   IllustrationRequest,
   ImageData,
-  Language,
+  Locale,
   ModerationResult,
   StoryRequest,
   StoryReview,
@@ -17,13 +17,13 @@ import { sha256Hex } from '../crypto';
 /** Texto que fuerza a la moderación simulada a rechazar (para probar el control de calidad). */
 export const MOCK_UNSAFE_MARKER = '[[unsafe]]';
 
-const PHRASES: Record<Language, (name: string, like: string, page: number) => string> = {
+const PHRASES: Record<Locale, (name: string, like: string, page: number) => string> = {
   es: (name, like, page) => `Página ${page}: ${name} vive una aventura llena de ${like}.`,
   en: (name, like, page) => `Page ${page}: ${name} goes on an adventure full of ${like}.`,
-  'pt-BR': (name, like, page) => `Página ${page}: ${name} vive uma aventura cheia de ${like}.`,
+  pt: (name, like, page) => `Página ${page}: ${name} vive uma aventura cheia de ${like}.`,
 };
 
-const DEFAULT_LIKE: Record<Language, string> = { es: 'magia', en: 'magic', 'pt-BR': 'magia' };
+const DEFAULT_LIKE: Record<Locale, string> = { es: 'magia', en: 'magic', pt: 'magia' };
 
 const usage = (model: string): AiUsage => ({ provider: 'mock', model, costUsdMicros: 0 });
 
