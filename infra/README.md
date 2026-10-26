@@ -54,16 +54,21 @@ infra/
 
 ## Bootstrap (una vez por ambiente)
 
+> **No mezclar con Timbermap.** Usá la configuración de gcloud `storynido` sin activarla globalmente, anteponiendo `CLOUDSDK_ACTIVE_CONFIG_NAME=storynido` a cada comando (o exportándola solo en la terminal donde trabajás con StoryNido). Nunca uses `timbermap-prod`.
+
 ```bash
+gcloud config configurations create storynido --no-activate
+gcloud config set account sebastian@timbermap.com --configuration storynido
+export CLOUDSDK_ACTIVE_CONFIG_NAME=storynido   # solo en esta terminal
 gcloud auth login
 gcloud billing accounts list                 # anotá el ID de la cuenta de facturación
 
 # 1. Proyecto, facturación, APIs mínimas y bucket del state (genera envs/<env>/backend.hcl)
 infra/scripts/bootstrap.sh staging storynido-staging XXXXXX-XXXXXX-XXXXXX
 
-# 2. Credenciales locales para Terraform (sin claves JSON)
+# 2. Credenciales locales para Terraform (sin claves JSON). Si ya tenés ADC de otro
+#    proyecto no hace falta cambiarlas: el provider usa billing_project = proyecto de StoryNido.
 gcloud auth application-default login
-gcloud auth application-default set-quota-project storynido-staging
 
 # 3. Variables del ambiente
 cd infra/envs/staging
@@ -76,6 +81,18 @@ terraform apply
 ```
 
 Los IDs de proyecto son globales: si `storynido-staging` ya existe, elegí otro (por ejemplo `storynido-stg-1234`) y usalo en todos los pasos.
+
+## Si se corta un `apply`
+
+Si se pierde la conexión, Terraform guarda el state en `errored.tfstate`. Para recuperarlo:
+
+```bash
+# El ID del lock en el backend GCS es la generación del objeto .tflock
+gcloud storage objects describe gs://<proyecto>-tfstate/terraform/state/default.tflock --format="value(generation)"
+terraform force-unlock -force <generación>
+terraform state push errored.tfstate
+terraform plan   # si un recurso quedó "tainted" pero está sano en GCP: terraform untaint <dirección>
+```
 
 ## Después del primer `apply`
 

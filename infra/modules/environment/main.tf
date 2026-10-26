@@ -343,9 +343,19 @@ module "messaging" {
   }
 }
 
+# Cloud Workflows necesita su agente de servicio antes de crear el primer workflow.
+resource "google_project_service_identity" "workflows" {
+  provider = google-beta
+
+  project = var.project_id
+  service = "workflows.googleapis.com"
+
+  depends_on = [module.apis]
+}
+
 module "order_pipeline" {
   source     = "../workflow"
-  depends_on = [module.apis]
+  depends_on = [google_project_service_identity.workflows]
 
   project_id          = var.project_id
   region              = var.region

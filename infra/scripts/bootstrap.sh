@@ -51,8 +51,7 @@ echo "==> Escrito $ENV_DIR/backend.hcl"
 cat <<MSG
 
 Listo. Próximos pasos:
-  gcloud auth application-default login
-  gcloud auth application-default set-quota-project $PROJECT_ID
+  gcloud auth application-default login   # si todavía no tenés ADC
   cd infra/envs/$ENVIRONMENT
   cp terraform.tfvars.example terraform.tfvars   # completar billing_account y alert_email
   terraform init -backend-config=backend.hcl

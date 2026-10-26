@@ -146,3 +146,9 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 
 - **Fecha:** 2026-10-26 · **Fase:** 02
 - **Decisión:** Terraform crea el proyecto Firebase y las apps web (`web`, `admin`) y habilita las APIs de App Hosting y Developer Connect. Los backends de App Hosting se crean con `firebase apphosting:backends:create`, porque conectar GitHub requiere autorizar la app de Firebase en el navegador. La configuración de runtime está versionada en `apps/*/apphosting.yaml` (production) y `apphosting.staging.yaml`.
+
+## 024 · Proyectos separados de Timbermap y configuración aislada de gcloud
+
+- **Fecha:** 2026-10-26 · **Fase:** 02
+- **Decisión:** StoryNido vive en proyectos propios (`storynido-staging`, después `storynido-prod`) dentro de la organización timbermap.com, nunca en `timbermap-prod` (producción en vivo de Timbermap). Se usa una configuración de gcloud `storynido` que **no** se activa globalmente: los comandos se corren con `CLOUDSDK_ACTIVE_CONFIG_NAME=storynido` para no cambiar la configuración por defecto que usa Timbermap. Las credenciales ADC no se modifican: los providers de Terraform fijan `billing_project` en el proyecto de StoryNido.
+- **Facturación:** cuenta Forestech Uruguay SRL (01F57C-…). Si StoryNido pasa a ser otra empresa, mover los proyectos a una cuenta propia (no requiere cambios de Terraform salvo `billing_account`).

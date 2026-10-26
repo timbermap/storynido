@@ -25,7 +25,8 @@
 
 - Repo en GitHub: [timbermap/storynido](https://github.com/timbermap/storynido) (privado). CI y build de imágenes Docker en verde desde el 2026-10-26.
 
-- Fase 02: la infraestructura está escrita y validada, pero no se aplicó: falta crear los proyectos de Google Cloud (ver `infra/README.md`). `terraform plan` necesita el proyecto creado.
+- Fase 02: **staging aplicado** en el proyecto `storynido-staging` (organización timbermap.com, facturación Forestech Uruguay SRL). **Production** (`storynido-prod`) se crea más cerca del lanzamiento.
+- Pendiente staging: variables de GitHub + `DEPLOY_ENABLED`, primer deploy de api/worker, backends de App Hosting y dominios.
 
 ## Riesgos
 
