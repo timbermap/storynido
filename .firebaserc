@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "demo-storynido",
+    "staging": "storynido-staging"
+  }
+}

@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Ningún cliente accede directo a Storage. Las fotos se suben y los PDFs se descargan
+// con URLs firmadas de corta duración que emite la API (fases 06 y 10); los buckets
+// reales son privados y se controlan con IAM (infra/).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

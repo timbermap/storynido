@@ -1,0 +1,352 @@
+import {
+  assertFails,
+  assertSucceeds,
+  type RulesTestEnvironment,
+} from '@firebase/rules-unit-testing';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+  type Firestore,
+} from 'firebase/firestore';
+import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
+
+import { createTestEnv } from './setup';
+
+let env: RulesTestEnvironment;
+
+const ALICE = 'alice';
+const BOB = 'bob';
+
+function db(uid: string | null, claims: Record<string, unknown> = {}): Firestore {
+  const context =
+    uid === null
+      ? env.unauthenticatedContext()
+      : env.authenticatedContext(uid, { email: `${uid}@storynido.test`, ...claims });
+  return context.firestore() as unknown as Firestore;
+}
+
+const alice = () => db(ALICE);
+const bob = () => db(BOB);
+const admin = () => db('admin-1', { role: 'admin' });
+const anon = () => db(null);
+
+const userProfile = (uid: string) => ({
+  email: `${uid}@storynido.test`,
+  displayName: 'Alice',
+  photoURL: null,
+  locale: 'es-mx',
+  country: 'MX',
+  marketingOptIn: false,
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+});
+
+const child = (ownerUid: string) => ({
+  ownerUid,
+  name: 'Martina',
+  age: 5,
+  pronouns: 'she',
+  likes: ['dinosaurios', 'espacio'],
+  petName: null,
+  bestFriendName: 'Tomi',
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+});
+
+const draftBook = (ownerUid: string, childId: string | null = null) => ({
+  ownerUid,
+  status: 'draft',
+  childId,
+  storyId: null,
+  styleId: null,
+  language: 'es',
+  dedication: null,
+  wizardStep: 0,
+  photoIds: [],
+  preview: null,
+  regenerationsUsed: 0,
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+});
+
+async function seed(path: string, data: Record<string, unknown>) {
+  await env.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore() as unknown as Firestore, path), data);
+  });
+}
+
+beforeAll(async () => {
+  env = await createTestEnv();
+});
+
+afterAll(async () => {
+  await env.cleanup();
+});
+
+beforeEach(async () => {
+  await env.clearFirestore();
+});
+
+describe('users', () => {
+  it('un usuario crea su propio perfil', async () => {
+    await assertSucceeds(setDoc(doc(alice(), 'users', ALICE), userProfile(ALICE)));
+  });
+
+  it('no puede crear el perfil de otro', async () => {
+    await assertFails(setDoc(doc(alice(), 'users', BOB), userProfile(BOB)));
+  });
+
+  it('no puede asignarse un rol', async () => {
+    await assertFails(
+      setDoc(doc(alice(), 'users', ALICE), { ...userProfile(ALICE), role: 'admin' }),
+    );
+  });
+
+  it('no puede usar un email distinto al de su token', async () => {
+    await assertFails(
+      setDoc(doc(alice(), 'users', ALICE), { ...userProfile(ALICE), email: 'otro@x.com' }),
+    );
+  });
+
+  it('puede editar su idioma pero no su rol', async () => {
+    await seed(`users/${ALICE}`, {
+      ...userProfile(ALICE),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await assertSucceeds(
+      updateDoc(doc(alice(), 'users', ALICE), { locale: 'en-us', updatedAt: serverTimestamp() }),
+    );
+    await assertFails(
+      updateDoc(doc(alice(), 'users', ALICE), { role: 'superadmin', updatedAt: serverTimestamp() }),
+    );
+  });
+
+  it('otro cliente no lo lee; un admin sí', async () => {
+    await seed(`users/${ALICE}`, {
+      ...userProfile(ALICE),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await assertFails(getDoc(doc(bob(), 'users', ALICE)));
+    await assertSucceeds(getDoc(doc(admin(), 'users', ALICE)));
+  });
+
+  it('nadie borra perfiles desde el cliente', async () => {
+    await seed(`users/${ALICE}`, {
+      ...userProfile(ALICE),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await assertFails(deleteDoc(doc(alice(), 'users', ALICE)));
+  });
+});
+
+describe('children', () => {
+  it('crea un perfil válido propio', async () => {
+    await assertSucceeds(setDoc(doc(alice(), 'children', 'c1'), child(ALICE)));
+  });
+
+  it('rechaza edad fuera de rango y demasiados gustos', async () => {
+    await assertFails(setDoc(doc(alice(), 'children', 'c1'), { ...child(ALICE), age: 30 }));
+    await assertFails(
+      setDoc(doc(alice(), 'children', 'c2'), { ...child(ALICE), likes: Array(11).fill('x') }),
+    );
+  });
+
+  it('no crea perfiles a nombre de otro', async () => {
+    await assertFails(setDoc(doc(alice(), 'children', 'c1'), child(BOB)));
+  });
+
+  it('otro cliente no lo lee ni lo lista', async () => {
+    await seed('children/c1', { ...child(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    await assertFails(getDoc(doc(bob(), 'children', 'c1')));
+    await assertFails(getDocs(collection(bob(), 'children')));
+    await assertSucceeds(
+      getDocs(query(collection(alice(), 'children'), where('ownerUid', '==', ALICE))),
+    );
+  });
+
+  it('no puede transferir el perfil a otro dueño', async () => {
+    await seed('children/c1', { ...child(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    await assertFails(
+      updateDoc(doc(alice(), 'children', 'c1'), { ownerUid: BOB, updatedAt: serverTimestamp() }),
+    );
+  });
+
+  it('el dueño lo borra', async () => {
+    await seed('children/c1', { ...child(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    await assertSucceeds(deleteDoc(doc(alice(), 'children', 'c1')));
+  });
+});
+
+describe('books', () => {
+  it('crea un borrador propio', async () => {
+    await assertSucceeds(setDoc(doc(alice(), 'books', 'b1'), draftBook(ALICE)));
+  });
+
+  it('no crea libros que no sean borrador ni con preview o regeneraciones', async () => {
+    await assertFails(
+      setDoc(doc(alice(), 'books', 'b1'), { ...draftBook(ALICE), status: 'preview_ready' }),
+    );
+    await assertFails(
+      setDoc(doc(alice(), 'books', 'b2'), { ...draftBook(ALICE), preview: { pages: [] } }),
+    );
+    await assertFails(
+      setDoc(doc(alice(), 'books', 'b3'), { ...draftBook(ALICE), regenerationsUsed: 5 }),
+    );
+  });
+
+  it('solo usa perfiles de chicos propios', async () => {
+    await seed('children/bob-child', {
+      ...child(BOB),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await seed('children/alice-child', {
+      ...child(ALICE),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await assertFails(setDoc(doc(alice(), 'books', 'b1'), draftBook(ALICE, 'bob-child')));
+    await assertSucceeds(setDoc(doc(alice(), 'books', 'b2'), draftBook(ALICE, 'alice-child')));
+  });
+
+  it('edita el borrador pero no el estado ni las regeneraciones', async () => {
+    await seed('books/b1', { ...draftBook(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    const ref = doc(alice(), 'books', 'b1');
+    await assertSucceeds(
+      updateDoc(ref, { dedication: 'Para Martina', wizardStep: 2, updatedAt: serverTimestamp() }),
+    );
+    await assertFails(updateDoc(ref, { status: 'ordered', updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { regenerationsUsed: 3, updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { wizardStep: 99, updatedAt: serverTimestamp() }));
+  });
+
+  it('no edita libros ya pedidos', async () => {
+    await seed('books/b1', {
+      ...draftBook(ALICE),
+      status: 'ordered',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await assertFails(
+      updateDoc(doc(alice(), 'books', 'b1'), { dedication: 'x', updatedAt: serverTimestamp() }),
+    );
+    await assertFails(deleteDoc(doc(alice(), 'books', 'b1')));
+  });
+
+  it('otro cliente no lo lee', async () => {
+    await seed('books/b1', { ...draftBook(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    await assertFails(getDoc(doc(bob(), 'books', 'b1')));
+  });
+});
+
+describe('orders', () => {
+  const order = {
+    ownerUid: ALICE,
+    bookId: 'b1',
+    status: 'paid',
+    format: 'hardcover',
+    country: 'MX',
+    currency: 'MXN',
+    amounts: {
+      subtotalMinor: 79900,
+      discountMinor: 0,
+      shippingMinor: 9900,
+      taxMinor: 0,
+      totalMinor: 89800,
+    },
+  };
+
+  beforeEach(async () => {
+    await seed('orders/o1', order);
+    await seed('orders/o1/steps/s1', { name: 'generate_story', status: 'running' });
+  });
+
+  it('el dueño lee su pedido y sus pasos; otro cliente no', async () => {
+    await assertSucceeds(getDoc(doc(alice(), 'orders', 'o1')));
+    await assertSucceeds(getDoc(doc(alice(), 'orders/o1/steps/s1')));
+    await assertFails(getDoc(doc(bob(), 'orders', 'o1')));
+    await assertFails(getDoc(doc(bob(), 'orders/o1/steps/s1')));
+  });
+
+  it('un cliente no crea pedidos ni cambia estado o precio', async () => {
+    await assertFails(setDoc(doc(alice(), 'orders', 'o2'), order));
+    await assertFails(updateDoc(doc(alice(), 'orders', 'o1'), { status: 'delivered' }));
+    await assertFails(updateDoc(doc(alice(), 'orders', 'o1'), { 'amounts.totalMinor': 1 }));
+    await assertFails(deleteDoc(doc(alice(), 'orders', 'o1')));
+  });
+
+  it('ni un admin escribe pedidos desde el cliente (solo la API)', async () => {
+    await assertSucceeds(getDoc(doc(admin(), 'orders', 'o1')));
+    await assertFails(updateDoc(doc(admin(), 'orders', 'o1'), { status: 'refunded' }));
+  });
+});
+
+describe('photos y consents', () => {
+  it('solo el servidor los escribe; el dueño los lee', async () => {
+    await assertFails(setDoc(doc(alice(), 'photos', 'p1'), { ownerUid: ALICE }));
+    await assertFails(setDoc(doc(alice(), 'consents', 'k1'), { ownerUid: ALICE }));
+    await seed('photos/p1', { ownerUid: ALICE });
+    await assertSucceeds(getDoc(doc(alice(), 'photos', 'p1')));
+    await assertFails(getDoc(doc(bob(), 'photos', 'p1')));
+  });
+});
+
+describe('catálogo y configuración', () => {
+  beforeEach(async () => {
+    await seed('stories/activa', { active: true });
+    await seed('stories/inactiva', { active: false });
+    await seed('prices/MX_hardcover', { active: true, amountMinor: 79900 });
+    await seed('content/terms_es-mx', { published: true });
+    await seed('content/faq_es-mx', { published: false });
+    await seed('siteConfig/global', { mode: 'live' });
+    await seed('coupons/BIENVENIDA', { active: true });
+    await seed('aiConfig/global', { textProvider: 'mock' });
+    await seed('auditLog/a1', { action: 'test' });
+  });
+
+  it('cualquiera lee lo activo o publicado; lo inactivo solo un admin', async () => {
+    await assertSucceeds(getDoc(doc(anon(), 'stories', 'activa')));
+    await assertFails(getDoc(doc(anon(), 'stories', 'inactiva')));
+    await assertSucceeds(getDoc(doc(admin(), 'stories', 'inactiva')));
+    await assertSucceeds(getDoc(doc(anon(), 'content', 'terms_es-mx')));
+    await assertFails(getDoc(doc(anon(), 'content', 'faq_es-mx')));
+    await assertSucceeds(getDoc(doc(anon(), 'siteConfig', 'global')));
+  });
+
+  it('un cliente no cambia precios ni el modo del sitio', async () => {
+    await assertFails(updateDoc(doc(alice(), 'prices', 'MX_hardcover'), { amountMinor: 1 }));
+    await assertFails(updateDoc(doc(alice(), 'siteConfig', 'global'), { mode: 'maintenance' }));
+  });
+
+  it('las escrituras de configuración pasan por la API, también para admins', async () => {
+    await assertFails(updateDoc(doc(admin(), 'siteConfig', 'global'), { mode: 'maintenance' }));
+    await assertFails(setDoc(doc(admin(), 'stories', 'nueva'), { active: true }));
+  });
+
+  it('cupones, configuración de IA y auditoría solo para admins', async () => {
+    for (const path of ['coupons/BIENVENIDA', 'aiConfig/global', 'auditLog/a1']) {
+      await assertFails(getDoc(doc(alice(), path)));
+      await assertSucceeds(getDoc(doc(admin(), path)));
+    }
+    await assertFails(setDoc(doc(admin(), 'auditLog', 'a2'), { action: 'falso' }));
+  });
+
+  it('un superadmin tiene los mismos permisos de lectura que un admin', async () => {
+    await assertSucceeds(getDoc(doc(db('root-1', { role: 'superadmin' }), 'aiConfig', 'global')));
+  });
+
+  it('un rol inventado se trata como customer', async () => {
+    await assertFails(getDoc(doc(db('x', { role: 'root' }), 'aiConfig', 'global')));
+  });
+});

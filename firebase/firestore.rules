@@ -1,0 +1,253 @@
+rules_version = '2';
+
+// Reglas de Firestore de StoryNido.
+// Principio: todo lo que no está permitido explícitamente está denegado.
+// Precios, estados, costos, pedidos, fotos, consentimientos y auditoría los escribe
+// solo el servidor (Admin SDK, que no pasa por estas reglas).
+// Límites sincronizados con packages/shared/src/models (CHILD_LIMITS y otros).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------------- helpers
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return request.auth.token.get('role', 'customer');
+    }
+
+    function isAdmin() {
+      return signedIn() && role() in ['admin', 'superadmin'];
+    }
+
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function ownsExisting() {
+      return signedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    function ownsIncoming() {
+      return signedIn() && request.resource.data.ownerUid == request.auth.uid;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function hasExactly(fields) {
+      return incoming().keys().hasAll(fields) && incoming().keys().hasOnly(fields);
+    }
+
+    function changesOnly(fields) {
+      return incoming().diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    function isNow(field) {
+      return incoming()[field] == request.time;
+    }
+
+    function optString(value, max) {
+      return value == null || (value is string && value.size() <= max);
+    }
+
+    function validLocale(value) {
+      return value in ['es-mx', 'en-us', 'es-us', 'es-es', 'es-co', 'es-cl', 'es-pe', 'pt-br'];
+    }
+
+    function validCountry(value) {
+      return value in ['MX', 'US', 'ES', 'CO', 'CL', 'PE', 'BR'];
+    }
+
+    function activeOrAdmin() {
+      return resource.data.active == true || isAdmin();
+    }
+
+    // ------------------------------------------------------------------ users
+
+    function validUserProfile() {
+      let d = incoming();
+      return optString(d.displayName, 100)
+        && optString(d.photoURL, 2048)
+        && validLocale(d.locale)
+        && validCountry(d.country)
+        && d.marketingOptIn is bool;
+    }
+
+    match /users/{uid} {
+      allow read: if isUser(uid) || isAdmin();
+
+      // El perfil lo crea el propio usuario al primer inicio de sesión; `role` es solo servidor.
+      allow create: if isUser(uid)
+        && hasExactly(['email', 'displayName', 'photoURL', 'locale', 'country', 'marketingOptIn', 'createdAt', 'updatedAt'])
+        && incoming().email == request.auth.token.get('email', null)
+        && isNow('createdAt')
+        && isNow('updatedAt')
+        && validUserProfile();
+
+      allow update: if isUser(uid)
+        && changesOnly(['displayName', 'photoURL', 'locale', 'country', 'marketingOptIn', 'updatedAt'])
+        && isNow('updatedAt')
+        && validUserProfile();
+
+      // El borrado de cuenta y datos pasa por la API (flujo de privacidad).
+      allow delete: if false;
+    }
+
+    // --------------------------------------------------------------- children
+
+    function validChild() {
+      let d = incoming();
+      return d.name is string && d.name.size() >= 1 && d.name.size() <= 40
+        && d.age is int && d.age >= 0 && d.age <= 12
+        && (d.pronouns == null || d.pronouns in ['she', 'he', 'they'])
+        && d.likes is list && d.likes.size() <= 10
+        && optString(d.petName, 40)
+        && optString(d.bestFriendName, 40);
+    }
+
+    match /children/{childId} {
+      allow read: if ownsExisting() || isAdmin();
+
+      allow create: if ownsIncoming()
+        && hasExactly(['ownerUid', 'name', 'age', 'pronouns', 'likes', 'petName', 'bestFriendName', 'createdAt', 'updatedAt'])
+        && isNow('createdAt')
+        && isNow('updatedAt')
+        && validChild();
+
+      allow update: if ownsExisting()
+        && changesOnly(['name', 'age', 'pronouns', 'likes', 'petName', 'bestFriendName', 'updatedAt'])
+        && isNow('updatedAt')
+        && validChild();
+
+      allow delete: if ownsExisting();
+    }
+
+    // ------------------------------------------- photos y consents (servidor)
+
+    match /photos/{photoId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow write: if false;
+    }
+
+    match /consents/{consentId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow write: if false;
+    }
+
+    // ------------------------------------------------------------------ books
+
+    function ownsChild(childId) {
+      return childId == null
+        || (childId is string
+          && get(/databases/$(database)/documents/children/$(childId)).data.ownerUid == request.auth.uid);
+    }
+
+    function validBookEdits() {
+      let d = incoming();
+      return (d.storyId == null || d.storyId is string)
+        && (d.styleId == null || d.styleId is string)
+        && d.language in ['es', 'en', 'pt-BR']
+        && optString(d.dedication, 500)
+        && d.wizardStep is int && d.wizardStep >= 0 && d.wizardStep <= 10
+        && d.photoIds is list && d.photoIds.size() <= 3
+        && ownsChild(d.childId);
+    }
+
+    match /books/{bookId} {
+      allow read: if ownsExisting() || isAdmin();
+
+      // Solo se crean borradores; preview, estado y regeneraciones los maneja el servidor.
+      allow create: if ownsIncoming()
+        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'language', 'dedication', 'wizardStep', 'photoIds', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
+        && incoming().status == 'draft'
+        && incoming().preview == null
+        && incoming().regenerationsUsed == 0
+        && isNow('createdAt')
+        && isNow('updatedAt')
+        && validBookEdits();
+
+      allow update: if ownsExisting()
+        && resource.data.status in ['draft', 'preview_ready']
+        && changesOnly(['childId', 'storyId', 'styleId', 'language', 'dedication', 'wizardStep', 'photoIds', 'updatedAt'])
+        && isNow('updatedAt')
+        && validBookEdits();
+
+      allow delete: if ownsExisting() && resource.data.status == 'draft';
+    }
+
+    // ----------------------------------------------------------------- orders
+
+    match /orders/{orderId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow write: if false;
+
+      match /steps/{stepId} {
+        allow read: if isAdmin()
+          || (signedIn() && get(/databases/$(database)/documents/orders/$(orderId)).data.ownerUid == request.auth.uid);
+        allow write: if false;
+      }
+    }
+
+    // ------------------------------------------- catálogo y configuración
+
+    match /stories/{id} {
+      allow read: if activeOrAdmin();
+      allow write: if false;
+    }
+
+    match /illustrationStyles/{id} {
+      allow read: if activeOrAdmin();
+      allow write: if false;
+    }
+
+    match /products/{id} {
+      allow read: if activeOrAdmin();
+      allow write: if false;
+    }
+
+    match /countries/{code} {
+      allow read: if activeOrAdmin();
+      allow write: if false;
+    }
+
+    match /prices/{id} {
+      allow read: if activeOrAdmin();
+      allow write: if false;
+    }
+
+    match /promotions/{id} {
+      allow read: if activeOrAdmin();
+      allow write: if false;
+    }
+
+    match /content/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow write: if false;
+    }
+
+    match /siteConfig/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /coupons/{code} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /aiConfig/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /auditLog/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+  }
+}

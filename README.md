@@ -6,19 +6,21 @@ Contexto completo del proyecto: [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) �
 
 ## Estructura
 
-| Ruta              | Qué es                                       | Puerto local |
-| ----------------- | -------------------------------------------- | ------------ |
-| `apps/web`        | Sitio público (Next.js)                      | 3000         |
-| `apps/admin`      | Panel super admin (Next.js)                  | 3001         |
-| `services/api`    | API HTTP (Fastify en Cloud Run)              | 8080         |
-| `services/worker` | Worker del pipeline (Fastify en Cloud Run)   | 8081         |
-| `packages/shared` | Tipos, esquemas Zod y utilidades compartidas | —            |
-| `infra/`          | Terraform (Google Cloud)                     | —            |
+| Ruta              | Qué es                                                                                  | Puerto local |
+| ----------------- | --------------------------------------------------------------------------------------- | ------------ |
+| `apps/web`        | Sitio público (Next.js)                                                                 | 3000         |
+| `apps/admin`      | Panel super admin (Next.js)                                                             | 3001         |
+| `services/api`    | API HTTP (Fastify en Cloud Run)                                                         | 8080         |
+| `services/worker` | Worker del pipeline (Fastify en Cloud Run)                                              | 8081         |
+| `packages/shared` | Tipos, esquemas Zod (modelo de datos) y utilidades compartidas                          | —            |
+| `firebase/`       | Reglas, índices, emuladores, seed y roles: ver [firebase/README.md](firebase/README.md) | UI 4000      |
+| `infra/`          | Terraform (Google Cloud)                                                                | —            |
 
 ## Requisitos
 
 - Node.js 24 (ver `.nvmrc`)
 - pnpm 11 (`npm install -g pnpm@11.22.0`)
+- Java 21 para los emuladores de Firebase (`brew install openjdk@21`)
 - Docker (opcional, para construir las imágenes de los servicios)
 
 ## Instalación
@@ -26,14 +28,19 @@ Contexto completo del proyecto: [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) �
 ```bash
 pnpm install
 cp .env.example .env.local   # un solo archivo de claves para todo el monorepo
-pnpm dev
+pnpm emulators               # terminal 1: emuladores de Firebase (requiere Java 21: brew install openjdk@21)
+pnpm seed                    # terminal 2, una vez: usuarios y configuración de prueba
+pnpm dev                     # terminal 2: web, admin, api y worker
 ```
+
+Login local: http://localhost:3000/login con `cliente@storynido.test` (enlace mágico: el link aparece en la terminal de los emuladores y en http://127.0.0.1:4000/auth).
 
 ## Comandos
 
 | Comando                             | Qué hace                                            |
 | ----------------------------------- | --------------------------------------------------- |
 | `pnpm dev`                          | Levanta web, admin, api y worker en modo desarrollo |
+| `pnpm emulators` / `pnpm seed`      | Emuladores de Firebase y datos de prueba            |
 | `pnpm build`                        | Compila todo                                        |
 | `pnpm lint`                         | ESLint (falla con cualquier warning)                |
 | `pnpm typecheck`                    | Verificación de tipos                               |

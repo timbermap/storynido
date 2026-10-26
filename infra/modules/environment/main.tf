@@ -102,9 +102,15 @@ module "service_accounts" {
       project_roles = []
     }
     sn-deployer = {
-      display_name  = "StoryNido deployer (GitHub Actions)"
-      description   = "CI/CD vía Workload Identity Federation. Sin claves JSON."
-      project_roles = ["roles/run.developer"]
+      display_name = "StoryNido deployer (GitHub Actions)"
+      description  = "CI/CD vía Workload Identity Federation (Cloud Run, reglas e índices de Firestore). Sin claves JSON."
+      project_roles = [
+        "roles/datastore.indexAdmin",
+        "roles/firebase.viewer",
+        "roles/firebaserules.admin",
+        "roles/run.developer",
+        "roles/serviceusage.serviceUsageConsumer",
+      ]
     }
   }
 }

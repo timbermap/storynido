@@ -26,6 +26,8 @@ service-account*.json
 .firebase/
 firebase-debug.log*
 firestore-debug.log*
+pubsub-debug.log*
+database-debug.log*
 ui-debug.log*
 
 # SO / editores
@@ -38,3 +40,4 @@ pnpm-debug.log*
 *.tfplan
 tfplan
 errored.tfstate
+firebase/.emulator-data/

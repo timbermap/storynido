@@ -1,4 +1,4 @@
-name: Deploy Cloud Run (reutilizable)
+name: Deploy (reutilizable)
 
 on:
   workflow_call:
@@ -15,6 +15,30 @@ permissions:
   id-token: write
 
 jobs:
+  firestore:
+    name: Firestore (reglas e índices) → ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    concurrency:
+      group: deploy-${{ inputs.environment }}-firestore
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter @storynido/firebase...
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+      - name: Deploy
+        run: pnpm --filter @storynido/firebase exec firebase deploy --only firestore --project "${{ vars.GCP_PROJECT_ID }}" --config ../firebase.json --non-interactive
+
   deploy:
     name: ${{ matrix.service }} → ${{ inputs.environment }}
     runs-on: ubuntu-latest

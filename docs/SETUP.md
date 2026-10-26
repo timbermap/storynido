@@ -16,7 +16,26 @@ Paso a paso en [infra/README.md](../infra/README.md):
 4. Backends de Firebase App Hosting para `apps/web` y `apps/admin`.
 5. Dominios: `storynido.com`, `admin.storynido.com`, `api.storynido.com`; redirección de `.online` y `.store`.
 
-## 3. Secretos por plataforma
+## 3. Autenticación (fase 03)
+
+En local no hace falta nada: los emuladores aceptan Google, Apple y enlace mágico con cuentas de prueba.
+
+Para staging y producción, en la consola de Firebase del proyecto → **Authentication → Sign-in method**:
+
+1. **Correo electrónico/contraseña** → activar **Vínculo de correo electrónico (acceso sin contraseña)**. Dejá desactivada la opción de contraseña.
+2. **Google** → activar y elegir el email de soporte.
+3. **Apple** → requiere una cuenta del Apple Developer Program (USD 99/año), un Services ID y una clave de Sign in with Apple. Se puede dejar para después: el botón muestra un error amigable si el proveedor no está habilitado.
+4. **Authentication → Configuración → Dominios autorizados**: agregar `staging.storynido.com` (o `storynido.com` y `www.storynido.com` en producción).
+5. Configuración web: `terraform -chdir=infra/envs/staging output firebase_web_config`. Esos valores van en las variables `NEXT_PUBLIC_FIREBASE_*` del backend de App Hosting (no son secretos).
+
+**Primer superadmin**: iniciá sesión una vez en el sitio y después:
+
+```bash
+gcloud auth application-default login
+pnpm --filter @storynido/firebase set-role --project storynido-staging --email tu@email.com --role superadmin
+```
+
+## 4. Secretos por plataforma
 
 Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cuando su fase lo necesita. En local, el mismo valor va en `.env.local`.
 
@@ -28,6 +47,6 @@ Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cua
 | `meta-capi-access-token`                     | Meta                                        | 11   |
 | `anthropic-api-key`, `flux-api-key`          | Opcionales (proveedores alternativos de IA) | 07   |
 
-## 4. Producción
+## 5. Producción
 
 Se completa en la fase 18 (checklist de salida).

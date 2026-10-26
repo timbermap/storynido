@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
 import { brand } from '@/lib/brand';
 
@@ -11,6 +13,9 @@ export default function HomePage() {
       <Button size="lg" disabled>
         Muy pronto
       </Button>
+      <Link href="/login" className="text-sm underline underline-offset-4">
+        Iniciar sesión
+      </Link>
     </main>
   );
 }

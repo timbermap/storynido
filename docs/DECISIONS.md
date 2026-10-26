@@ -152,3 +152,33 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 - **Fecha:** 2026-10-26 · **Fase:** 02
 - **Decisión:** StoryNido vive en proyectos propios (`storynido-staging`, después `storynido-prod`) dentro de la organización timbermap.com, nunca en `timbermap-prod` (producción en vivo de Timbermap). Se usa una configuración de gcloud `storynido` que **no** se activa globalmente: los comandos se corren con `CLOUDSDK_ACTIVE_CONFIG_NAME=storynido` para no cambiar la configuración por defecto que usa Timbermap. Las credenciales ADC no se modifican: los providers de Terraform fijan `billing_project` en el proyecto de StoryNido.
 - **Facturación:** cuenta Forestech Uruguay SRL (01F57C-…). Si StoryNido pasa a ser otra empresa, mover los proyectos a una cuenta propia (no requiere cambios de Terraform salvo `billing_account`).
+
+## 025 · Roles: sin claim = customer; admin y superadmin solo por script de servidor
+
+- **Fecha:** 2026-10-26 · **Fase:** 03
+- **Decisión:** el rol es el custom claim `role`. Un usuario sin claim es `customer` (`roleFromClaims` en `@storynido/shared` y `request.auth.token.get('role', 'customer')` en las reglas), así que todo usuario nuevo es customer sin pasos extra. `admin` y `superadmin` se asignan con `firebase/src/set-role.ts` (Admin SDK), que además deja el cambio en `auditLog` y se niega a operar sobre proyectos `timbermap*`. Un rol desconocido se trata como customer.
+- **Alternativas:** Cloud Function `beforeCreate` (requiere Identity Platform y Functions, más infraestructura) o un endpoint que asigne `customer` en el primer login (una llamada extra sin beneficio de seguridad).
+- **Motivo:** más simple y sin ventanas en las que un usuario no tenga rol. El panel admin (fase 15) usará la misma lógica vía API.
+
+## 026 · Escrituras sensibles solo desde el servidor, incluso para admins
+
+- **Fecha:** 2026-10-26 · **Fase:** 03
+- **Decisión:** el cliente solo escribe su perfil (`users`), los perfiles de sus chicos (`children`) y los campos editables de sus borradores (`books`). Pedidos, fotos, consentimientos, precios, catálogo, configuración y auditoría tienen `allow write: if false`: los escribe el servidor con el Admin SDK. Los admins leen todo, pero escriben a través de la API.
+- **Motivo:** así ningún cliente modificado puede cambiar precios, estados o costos, y toda acción de un admin queda auditada en un solo lugar (fase 14). Las reglas validan tipos, tamaños y campos permitidos, y que un libro solo use perfiles de chicos propios.
+
+## 027 · Emuladores con proyecto `demo-storynido` y paquete `firebase/`
+
+- **Fecha:** 2026-10-26 · **Fase:** 03
+- **Decisión:** reglas, índices, tests de reglas, seed y scripts viven en el paquete `@storynido/firebase` (carpeta `firebase/`); `firebase.json` en la raíz. Los emuladores usan el proyecto `demo-storynido`: los proyectos `demo-*` no pueden conectarse a Google Cloud. Firestore usa el puerto 8180 porque la API usa el 8080. `firebase-tools` es dependencia fijada del repo (no se usa la global).
+- **Tests:** 32 tests de reglas (Firestore y Storage) + test de integración del login por enlace mágico con Auth y Firestore reales del emulador. Se verificó que debilitar una regla hace fallar los tests.
+
+## 028 · Login en el cliente con el SDK web y perfil creado por el usuario
+
+- **Fecha:** 2026-10-26 · **Fase:** 03
+- **Decisión:** `apps/web` usa el SDK web de Firebase (popup para Google y Apple, enlace mágico por mail) con persistencia local del navegador. Al primer login el propio usuario crea `users/{uid}` con los campos que permiten las reglas. Por ahora la UI de login está solo en español; la internacionalización llega en la fase 05.
+- **Pendiente para staging/producción:** habilitar los proveedores en Firebase (ver `docs/SETUP.md`). Apple requiere una cuenta del Apple Developer Program (USD 99/año).
+
+## 029 · Reglas e índices de Firestore desplegados por CI
+
+- **Fecha:** 2026-10-26 · **Fase:** 03
+- **Decisión:** el workflow de deploy publica `firestore.rules` y `firestore.indexes.json` con `firebase deploy --only firestore`, autenticado por Workload Identity Federation. El deployer suma los roles `firebaserules.admin`, `datastore.indexAdmin`, `firebase.viewer` y `serviceusage.serviceUsageConsumer`. Las reglas de Storage no se despliegan: no se usa el bucket por defecto de Firebase, y los buckets reales son privados por IAM.

@@ -51,6 +51,11 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.browser } },
   },
   {
+    // Scripts de terminal: imprimir es su salida.
+    files: ['firebase/src/**/*.ts'],
+    rules: { 'no-console': 'off' },
+  },
+  {
     files: ['**/*.{js,mjs,cjs}'],
     ...tseslint.configs.disableTypeChecked,
   },

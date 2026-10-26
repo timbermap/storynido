@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 
 import { brand } from '@/lib/brand';
 
+import { Providers } from './providers';
+
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -13,7 +15,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
