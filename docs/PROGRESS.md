@@ -26,7 +26,7 @@
 - Repo en GitHub: [timbermap/storynido](https://github.com/timbermap/storynido) (privado). CI y build de imágenes Docker en verde desde el 2026-10-26.
 
 - Fase 02: **staging aplicado** en el proyecto `storynido-staging` (organización timbermap.com, facturación Forestech Uruguay SRL). **Production** (`storynido-prod`) se crea más cerca del lanzamiento.
-- Pendiente staging: variables de GitHub + `DEPLOY_ENABLED`, primer deploy de api/worker, backends de App Hosting y dominios.
+- Staging: deploys automáticos activos (api y worker desplegados desde GitHub Actions el 2026-10-26). Pendiente: backends de App Hosting (web/admin) y dominios.
 
 ## Riesgos
 
