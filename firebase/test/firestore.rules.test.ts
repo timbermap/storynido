@@ -67,7 +67,7 @@ const draftBook = (ownerUid: string, childId: string | null = null) => ({
   childId,
   storyId: null,
   styleId: null,
-  lessonId: null,
+  lessonIds: [],
   customLesson: null,
   language: 'es',
   dedication: null,
@@ -233,10 +233,28 @@ describe('books', () => {
     await assertFails(updateDoc(ref, { wizardStep: 99, updatedAt: serverTimestamp() }));
   });
 
-  it('elige una enseñanza o escribe un mensaje propio de hasta 150 caracteres', async () => {
+  it('elige hasta 2 enseñanzas (el mensaje propio cuenta como una) y mensajes de hasta 150 caracteres', async () => {
     await seed('books/b1', { ...draftBook(ALICE), createdAt: new Date(), updatedAt: new Date() });
     const ref = doc(alice(), 'books', 'b1');
-    await assertSucceeds(updateDoc(ref, { lessonId: 'compartir', updatedAt: serverTimestamp() }));
+    await assertSucceeds(
+      updateDoc(ref, { lessonIds: ['compartir', 'amistad'], updatedAt: serverTimestamp() }),
+    );
+    await assertFails(
+      updateDoc(ref, {
+        lessonIds: ['compartir', 'amistad', 'valentia'],
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(ref, {
+        lessonIds: ['compartir', 'amistad'],
+        customLesson: 'Y un mensaje más',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertSucceeds(
+      updateDoc(ref, { lessonIds: ['compartir'], updatedAt: serverTimestamp() }),
+    );
     await assertSucceeds(
       updateDoc(ref, {
         customLesson: 'Que sepa que el abuelo lo quiere mucho',

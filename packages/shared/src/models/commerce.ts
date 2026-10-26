@@ -86,7 +86,7 @@ export const BOOK_CLIENT_EDITABLE_FIELDS = [
   'childId',
   'storyId',
   'styleId',
-  'lessonId',
+  'lessonIds',
   'customLesson',
   'language',
   'dedication',
@@ -102,25 +102,32 @@ export const bookPageSchema = z.object({
 });
 
 /** books/{bookId}: borrador del wizard y libro generado. */
-export const bookSchema = timestampsSchema.extend({
-  ownerUid: uidSchema,
-  status: bookStatusSchema,
-  childId: z.string().nullable(),
-  storyId: z.string().nullable(),
-  styleId: z.string().nullable(),
-  /** Enseñanza elegida (lessons) o null. */
-  lessonId: z.string().nullable(),
-  /** Mensaje propio del adulto (alternativa a lessonId), moderado antes de usarse. */
-  customLesson: z.string().trim().max(CHILD_LIMITS.customLessonMaxLength).nullable(),
-  language: localeSchema,
-  dedication: z.string().max(CHILD_LIMITS.dedicationMaxLength).nullable(),
-  wizardStep: z.number().int().min(0).max(10),
-  photoIds: z.array(z.string()).max(3),
-  /** Solo servidor. */
-  preview: z.object({ pages: z.array(bookPageSchema) }).nullable(),
-  /** Solo servidor. */
-  regenerationsUsed: z.number().int().nonnegative(),
-});
+export const bookSchema = timestampsSchema
+  .extend({
+    ownerUid: uidSchema,
+    status: bookStatusSchema,
+    childId: z.string().nullable(),
+    storyId: z.string().nullable(),
+    styleId: z.string().nullable(),
+    /** Enseñanzas elegidas (lessons), en orden de importancia. Junto con el mensaje propio, hasta CHILD_LIMITS.maxLessons. */
+    lessonIds: z.array(z.string()).max(CHILD_LIMITS.maxLessons),
+    /** Mensaje propio del adulto, moderado antes de usarse. */
+    customLesson: z.string().trim().max(CHILD_LIMITS.customLessonMaxLength).nullable(),
+    language: localeSchema,
+    dedication: z.string().max(CHILD_LIMITS.dedicationMaxLength).nullable(),
+    wizardStep: z.number().int().min(0).max(10),
+    photoIds: z.array(z.string()).max(3),
+    /** Solo servidor. */
+    preview: z.object({ pages: z.array(bookPageSchema) }).nullable(),
+    /** Solo servidor. */
+    regenerationsUsed: z.number().int().nonnegative(),
+  })
+  .refine(
+    (book) => book.lessonIds.length + (book.customLesson ? 1 : 0) <= CHILD_LIMITS.maxLessons,
+    {
+      message: `Hasta ${String(CHILD_LIMITS.maxLessons)} enseñanzas (el mensaje propio cuenta como una)`,
+    },
+  );
 
 export type Book = z.infer<typeof bookSchema>;
 

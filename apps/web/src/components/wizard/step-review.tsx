@@ -12,7 +12,10 @@ export function StepReview({ nav, data }: { nav: StepNav; data: WizardData }) {
   const t = useTranslations('Wizard.review');
   const { book, child } = data;
   const story = data.stories.find((s) => s.slug === book.storyId);
-  const lesson = data.lessons.find((l) => l.slug === book.lessonId);
+  const chosen = book.lessonIds
+    .map((slug) => data.lessons.find((l) => l.slug === slug)?.name)
+    .filter((name): name is string => Boolean(name));
+  if (book.customLesson) chosen.push(`${t('customLesson')}: “${book.customLesson}”`);
   const style = data.styles.find((s) => s.slug === book.styleId);
 
   const rows: { label: string; value: string; step: number }[] = [
@@ -21,9 +24,7 @@ export function StepReview({ nav, data }: { nav: StepNav; data: WizardData }) {
     { label: t('adventure'), value: story?.title ?? '—', step: 2 },
     {
       label: t('lesson'),
-      value: book.customLesson
-        ? `${t('customLesson')}: “${book.customLesson}”`
-        : (lesson?.name ?? t('noLesson')),
+      value: chosen.length > 0 ? chosen.join(' · ') : t('noLesson'),
       step: 3,
     },
     { label: t('style'), value: style?.name ?? '—', step: 4 },

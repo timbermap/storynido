@@ -343,11 +343,12 @@
     "lesson": {
       "title": "What do you want them to learn?",
       "subtitle": "The story carries this message through the adventure, never with a lecture.",
-      "none": "No particular lesson",
       "custom": "Write my own message",
       "customLabel": "Your message",
       "customPlaceholder": "That Grandpa loves them very much even though he lives far away.",
-      "customHint": "{count}/150 characters. We'll review it before using it."
+      "customHint": "{count}/150 characters. We'll review it before using it.",
+      "pickUpTo": "Choose up to {max} ({count}/{max}). If you don't choose any, the story will still carry a positive message.",
+      "clear": "Clear selection"
     },
     "style": {
       "title": "Choose the illustration style",

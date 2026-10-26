@@ -343,11 +343,12 @@
     "lesson": {
       "title": "¿Qué quieres que aprenda?",
       "subtitle": "La historia transmite este mensaje a través de la aventura, sin sermones.",
-      "none": "Sin una enseñanza en particular",
       "custom": "Escribir mi propio mensaje",
       "customLabel": "Tu mensaje",
       "customPlaceholder": "Que sepa que el abuelo lo quiere mucho aunque viva lejos.",
-      "customHint": "{count}/150 caracteres. Lo revisamos antes de usarlo."
+      "customHint": "{count}/150 caracteres. Lo revisamos antes de usarlo.",
+      "pickUpTo": "Elige hasta {max} ({count}/{max}). Si no eliges ninguna, la historia igual tendrá un mensaje positivo.",
+      "clear": "Quitar selección"
     },
     "style": {
       "title": "Elige el estilo de ilustración",

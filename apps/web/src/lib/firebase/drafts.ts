@@ -22,7 +22,7 @@ export type BookEdits = Partial<
     | 'childId'
     | 'storyId'
     | 'styleId'
-    | 'lessonId'
+    | 'lessonIds'
     | 'customLesson'
     | 'language'
     | 'dedication'
@@ -58,7 +58,7 @@ export async function createDraft(
     childId: null,
     storyId: preset.storyId,
     styleId: null,
-    lessonId: preset.lessonId,
+    lessonIds: preset.lessonId ? [preset.lessonId] : [],
     customLesson: null,
     language: preset.language,
     dedication: null,
@@ -112,6 +112,8 @@ export function subscribeBook(
       const data = snapshot.data({ serverTimestamps: 'estimate' });
       onChange({
         ...(data as Book),
+        // Borradores creados antes de permitir varias enseñanzas no tienen lessonIds.
+        lessonIds: Array.isArray(data.lessonIds) ? (data.lessonIds as string[]) : [],
         id: snapshot.id,
         createdAt: asDate(data.createdAt as Timestampish) ?? new Date(),
         updatedAt: asDate(data.updatedAt as Timestampish) ?? new Date(),

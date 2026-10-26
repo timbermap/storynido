@@ -75,6 +75,8 @@
   }
   html {
     scroll-behavior: smooth;
+    /* El encabezado es fijo: lo enfocado o desplazado nunca queda tapado (WCAG 2.2, 2.4.11). */
+    scroll-padding-top: 6.5rem;
   }
   body {
     @apply bg-background font-sans text-foreground antialiased;

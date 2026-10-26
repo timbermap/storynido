@@ -7,48 +7,52 @@ import { CHILD_LIMITS, LESSON_GROUPS } from '@storynido/shared';
 
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
-import { cn } from '@/lib/utils';
 
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
-const NONE = '__none__';
-const CUSTOM = '__custom__';
-
 const chipClass =
-  'flex cursor-pointer items-center rounded-full border-2 px-4 py-2 text-sm font-bold transition has-[:checked]:border-primary has-[:checked]:bg-secondary has-[:checked]:text-primary has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50';
+  'flex cursor-pointer items-center rounded-full border-2 px-4 py-2 text-sm font-bold transition has-[:checked]:border-primary has-[:checked]:bg-secondary has-[:checked]:text-primary has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-45 has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50';
 
+/** Hasta 2 enseñanzas; el mensaje propio cuenta como una. */
 export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
   const t = useTranslations('Wizard.lesson');
   const tGroups = useTranslations('Lessons.groups');
   const { book } = data;
-  const [choice, setChoice] = useState(book.customLesson ? CUSTOM : (book.lessonId ?? NONE));
+  const [selected, setSelected] = useState<string[]>(book.lessonIds);
+  const [useCustom, setUseCustom] = useState(Boolean(book.customLesson));
   const [custom, setCustom] = useState(book.customLesson ?? '');
   const age = data.child?.age;
   const lessons = data.lessons.filter(
     (lesson) => age === undefined || (lesson.ageMin <= age && age <= lesson.ageMax),
   );
 
+  const count = selected.length + (useCustom ? 1 : 0);
+  const full = count >= CHILD_LIMITS.maxLessons;
+
+  function toggle(slug: string) {
+    setSelected((current) =>
+      current.includes(slug) ? current.filter((s) => s !== slug) : [...current, slug],
+    );
+  }
+
   async function next() {
     const ok = await nav.save(async () => {
       await updateBook(await getFirebaseDb(), book.id, {
-        lessonId: choice === NONE || choice === CUSTOM ? null : choice,
-        customLesson: choice === CUSTOM && custom.trim() ? custom.trim() : null,
+        lessonIds: selected,
+        customLesson: useCustom && custom.trim() ? custom.trim() : null,
       });
     });
     if (ok) await nav.goNext();
   }
 
-  const radio = (value: string, label: string) => (
-    <label key={value} className={chipClass}>
+  const checkbox = (key: string, label: string, checked: boolean, onChange: () => void) => (
+    <label key={key} className={chipClass}>
       <input
-        type="radio"
-        name="lesson"
-        value={value}
-        checked={choice === value}
-        onChange={() => {
-          setChoice(value);
-        }}
+        type="checkbox"
+        checked={checked}
+        disabled={!checked && full}
+        onChange={onChange}
         className="sr-only"
       />
       {label}
@@ -57,6 +61,9 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
 
   return (
     <WizardShell {...nav} title={t('title')} subtitle={t('subtitle')} onNext={() => void next()}>
+      <p className="-mt-4 mb-6 text-sm font-bold text-primary" aria-live="polite">
+        {t('pickUpTo', { max: CHILD_LIMITS.maxLessons, count })}
+      </p>
       <fieldset className="grid gap-6">
         <legend className="sr-only">{t('title')}</legend>
         {LESSON_GROUPS.map((group) => {
@@ -68,17 +75,34 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
                 {tGroups(group)}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {items.map((lesson) => radio(lesson.slug, lesson.name))}
+                {items.map((lesson) =>
+                  checkbox(lesson.slug, lesson.name, selected.includes(lesson.slug), () => {
+                    toggle(lesson.slug);
+                  }),
+                )}
               </div>
             </div>
           );
         })}
         <div className="flex flex-wrap gap-2 border-t pt-6">
-          {radio(NONE, t('none'))}
-          {radio(CUSTOM, t('custom'))}
+          {checkbox('custom', t('custom'), useCustom, () => {
+            setUseCustom(!useCustom);
+          })}
+          {count > 0 && (
+            <button
+              type="button"
+              className="rounded-full px-4 py-2 text-sm font-bold text-muted-foreground underline-offset-4 hover:underline"
+              onClick={() => {
+                setSelected([]);
+                setUseCustom(false);
+              }}
+            >
+              {t('clear')}
+            </button>
+          )}
         </div>
-        {choice === CUSTOM && (
-          <div className={cn('grid gap-2')}>
+        {useCustom && (
+          <div className="grid gap-2">
             <label htmlFor="custom-lesson" className="text-[0.91rem] font-extrabold">
               {t('customLabel')}
             </label>
