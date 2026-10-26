@@ -1,7 +1,7 @@
 {
   "Meta": {
-    "title": "{brand}: cuentos personalizados donde tu hijo es el protagonista",
-    "description": "Crea un cuento infantil único con el nombre, la cara y los gustos de tu hijo. Vista previa gratis, libro digital o impreso con envío a tu país.",
+    "title": "{brand}: tu hijo es el héroe de esta historia",
+    "description": "Un cuento ilustrado único con su nombre, su carita y las aventuras que siempre soñó. Mira una vista previa gratis y recíbelo en digital o impreso.",
     "skipToContent": "Saltar al contenido"
   },
   "Nav": {
@@ -13,7 +13,8 @@
     "account": "Mi cuenta",
     "menu": "Menú",
     "closeMenu": "Cerrar menú",
-    "mainNav": "Navegación principal"
+    "mainNav": "Navegación principal",
+    "create": "Crear mi cuento"
   },
   "Switchers": {
     "language": "Idioma",
@@ -30,7 +31,7 @@
     }
   },
   "Footer": {
-    "tagline": "Cuentos únicos, con tu hijo como protagonista.",
+    "tagline": "Historias que abrazan.",
     "legal": "Legal",
     "company": "StoryNido",
     "cookiePreferences": "Preferencias de cookies",
@@ -47,32 +48,33 @@
   },
   "Home": {
     "hero": {
-      "eyebrow": "Cuentos personalizados con ilustraciones únicas",
-      "title": "Un cuento donde tu hijo es el héroe",
-      "subtitle": "Con su nombre, su cara y lo que más le gusta. Ves una vista previa gratis y recibes el libro en PDF o impreso en tu casa.",
-      "cta": "Crear su cuento",
+      "eyebrow": "Historias que abrazan",
+      "title": "Tu hijo es el héroe de esta historia.",
+      "subtitle": "Un cuento único con su nombre, su carita y las aventuras que siempre soñó.",
+      "cta": "Crear una vista previa gratis",
       "secondary": "Ver cómo funciona",
-      "fromPrice": "Desde {price}"
+      "fromPrice": "Desde {price}",
+      "formats": "Disponible en digital y libro impreso"
     },
     "trust": {
-      "preview": "Vista previa gratis",
+      "preview": "Vista previa gratis antes de pagar",
       "shipping": "Envío a {country}",
       "privacy": "Fotos protegidas y borradas a los 30 días",
       "languages": "En español, inglés y portugués"
     },
     "how": {
-      "title": "Así de fácil",
-      "subtitle": "En menos de 10 minutos tienes un libro único.",
-      "step1Title": "Cuéntanos de tu hijo",
-      "step1Text": "Su nombre, edad, gustos y de 1 a 3 fotos. Elige la historia y el estilo de ilustración.",
-      "step2Title": "Mira la vista previa gratis",
-      "step2Text": "Creamos la portada y dos páginas con tu hijo como protagonista. Puedes editar textos y cambiar la foto.",
-      "step3Title": "Recíbelo en casa",
-      "step3Text": "Descárgalo en PDF al instante o recíbelo impreso en tapa blanda o dura."
+      "title": "Así de fácil es crear su cuento",
+      "subtitle": "Te acompañamos desde la idea hasta el libro terminado.",
+      "step1Title": "Cuéntanos sobre tu hijo",
+      "step1Text": "Su nombre, edad, gustos y una foto.",
+      "step2Title": "Elige una aventura",
+      "step2Text": "Viajes al espacio, dinosaurios, reinos mágicos, fútbol y más.",
+      "step3Title": "Descubre su cuento",
+      "step3Text": "Mira una vista previa gratis y elige tu formato favorito: digital, tapa blanda o tapa dura."
     },
     "gallery": {
-      "title": "Historias para cada sueño",
-      "subtitle": "Elige la aventura que más le va a gustar.",
+      "title": "Un universo de aventuras",
+      "subtitle": "Historias para soñar, donde cada niño puede reconocerse.",
       "viewAll": "Ver todas las historias"
     },
     "faq": {
@@ -84,9 +86,9 @@
       "text": "Ves la vista previa antes de pagar. Y si tu libro llega con algún problema, lo reimprimimos o te devolvemos el dinero."
     },
     "cta": {
-      "title": "Regala un recuerdo para toda la vida",
-      "text": "Un cumpleaños, una Navidad o un martes cualquiera: cualquier día es bueno para ser protagonista.",
-      "button": "Empezar ahora"
+      "title": "Una historia para recordar siempre.",
+      "text": "El mejor regalo es verse dentro de una aventura.",
+      "button": "Crear una vista previa gratis"
     }
   },
   "Stories": {

@@ -23,13 +23,13 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ loc
         color: '#2b2233',
       }}
     >
-      <div style={{ fontSize: 40, fontWeight: 700, color: '#b4532a' }}>{brand.name}</div>
+      <div style={{ fontSize: 40, fontWeight: 800, color: '#79518c' }}>✦ {brand.name}</div>
       <div
         style={{ fontSize: 76, fontWeight: 700, lineHeight: 1.05, marginTop: 24, maxWidth: 900 }}
       >
         {t('title')}
       </div>
-      <div style={{ fontSize: 32, marginTop: 28, maxWidth: 900, color: '#5b4e57' }}>
+      <div style={{ fontSize: 32, marginTop: 28, maxWidth: 900, color: '#69616c' }}>
         {t('eyebrow')}
       </div>
     </div>,

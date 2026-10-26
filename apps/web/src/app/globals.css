@@ -3,25 +3,35 @@
 @plugin '@tailwindcss/typography';
 
 /*
- * Paleta StoryNido: crema cálido, terracota y azul noche.
- * Contrastes verificados para WCAG 2.2 AA (texto normal >= 4.5:1).
+ * StoryNido · sistema visual v2 (dirección "magia editorial + confianza").
+ * 60 % crema/blanco, 30 % pasteles, 10 % violeta de acción.
+ * Los pasteles son fondos, nunca texto. Contrastes verificados (WCAG 2.2 AA):
+ * blanco/violeta 6.2:1 · tinta/crema 12:1 · secundario/crema 5.3:1 · violeta/lavanda 4.75:1.
  */
 :root {
-  --radius: 1rem;
-  --background: oklch(0.985 0.012 75);
-  --foreground: oklch(0.27 0.03 320);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.27 0.03 320);
-  --primary: oklch(0.53 0.15 38);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.34 0.09 272);
-  --secondary-foreground: oklch(0.98 0.01 85);
-  --accent: oklch(0.93 0.07 85);
-  --accent-foreground: oklch(0.27 0.03 320);
-  --muted: oklch(0.955 0.018 75);
-  --muted-foreground: oklch(0.46 0.03 320);
-  --border: oklch(0.89 0.025 70);
-  --ring: oklch(0.53 0.15 38);
+  --radius: 1.1rem;
+  --background: #faf0e5;
+  --foreground: #342a40;
+  --card: #ffffff;
+  --card-foreground: #342a40;
+  --primary: #79518c;
+  --primary-hover: #613b75;
+  --primary-foreground: #ffffff;
+  --secondary: #eadcf2;
+  --secondary-foreground: #342a40;
+  --accent: #eadcf2;
+  --accent-foreground: #342a40;
+  --muted: #f8f3fa;
+  --muted-foreground: #69616c;
+  --border: #e7dfe9;
+  --ring: #7a4db1;
+  --peach: #f5d9c9;
+  --mint: #ddf1e8;
+  --sky: #e1effa;
+  --butter: #fbedc6;
+  --rose: #f9e3ed;
+  --success: #245d4f;
+  --star: #d6ab68;
   color-scheme: light;
 }
 
@@ -32,6 +42,14 @@
   --color-card-foreground: var(--card-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-peach: var(--peach);
+  --color-mint: var(--mint);
+  --color-sky: var(--sky);
+  --color-butter: var(--butter);
+  --color-rose: var(--rose);
+  --color-success: var(--success);
+  --color-star: var(--star);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
@@ -43,7 +61,10 @@
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 6px);
+  --radius-xl: 1.6rem;
+  --radius-2xl: 2rem;
+  --shadow-card: 0 16px 48px rgb(57 36 75 / 0.07);
+  --shadow-book: 18px 25px 32px rgb(57 36 75 / 0.22);
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-heading), ui-serif, Georgia, serif;
 }
@@ -71,7 +92,16 @@
   h1,
   h2,
   h3 {
-    @apply font-display tracking-tight text-balance;
+    @apply font-display text-balance;
+    letter-spacing: -0.035em;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--foreground);
+  }
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 3px;
   }
   @media (prefers-reduced-motion: reduce) {
     html {

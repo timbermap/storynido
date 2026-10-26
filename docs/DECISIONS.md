@@ -278,3 +278,14 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 
 - **Fecha:** 2026-10-26 · **Fase:** 05
 - **Decisión:** `robots.txt` permite indexar solo con `NEXT_PUBLIC_SITE_ENV=production`. En staging y en local bloquea todo, para que Google no indexe sitios de prueba. El sitemap incluye cada página en los tres idiomas con sus alternativas `hreflang`. Los artículos del blog existen en un solo idioma y no tienen alternativas.
+
+## 043 · Branding v2: lavanda editorial
+
+- **Fecha:** 2026-10-26 · **Fase:** 05 · **Decidido por:** Sebastián
+- **Decisión:** se adopta la guía de marca v2 ("magia editorial + confianza"), resumida en `docs/BRAND.md`. Incluye paleta crema + violeta `#79518C` + pasteles, lema "Historias que abrazan", hero "Tu hijo es el héroe de esta historia." y CTA "Crear una vista previa gratis", más tarjetas y pasos al estilo de la guía, en los tres idiomas.
+- **Ajustes respecto de la guía y sus maquetas:**
+  - Español neutro con "tú" (las maquetas usaban voseo).
+  - Sin "envío a todo el mundo", sin "miles de familias" y sin testimonios de muestra.
+  - El paso 2 es "Elige una aventura" en lugar de "La IA crea su historia".
+  - Los tokens se integraron al tema de Tailwind en lugar de importar `storynido.css`, para no duplicar fuentes de verdad, no cargar las fuentes con `@import` y no pisar estilos globales.
+- **Resultado:** Lighthouse móvil 93-96 de rendimiento y 100 en accesibilidad, buenas prácticas y SEO después del rediseño.

@@ -1,7 +1,7 @@
 {
   "Meta": {
-    "title": "{brand}: personalized stories starring your child",
-    "description": "Create a one-of-a-kind children's book with your child's name, face and favorite things. Free preview, digital or printed book shipped to your country.",
+    "title": "{brand}: your child is the hero of this story",
+    "description": "A one-of-a-kind illustrated story with their name, their face and the adventures they've always dreamed of. See a free preview and get it digital or printed.",
     "skipToContent": "Skip to content"
   },
   "Nav": {
@@ -13,7 +13,8 @@
     "account": "My account",
     "menu": "Menu",
     "closeMenu": "Close menu",
-    "mainNav": "Main navigation"
+    "mainNav": "Main navigation",
+    "create": "Create my story"
   },
   "Switchers": {
     "language": "Language",
@@ -30,7 +31,7 @@
     }
   },
   "Footer": {
-    "tagline": "One-of-a-kind stories starring your child.",
+    "tagline": "Stories that hug.",
     "legal": "Legal",
     "company": "StoryNido",
     "cookiePreferences": "Cookie preferences",
@@ -47,32 +48,33 @@
   },
   "Home": {
     "hero": {
-      "eyebrow": "Personalized stories with unique illustrations",
-      "title": "A story where your child is the hero",
-      "subtitle": "With their name, their face and the things they love. See a free preview and get the book as a PDF or printed and delivered to your door.",
-      "cta": "Create their story",
+      "eyebrow": "Stories that hug",
+      "title": "Your child is the hero of this story.",
+      "subtitle": "A one-of-a-kind story with their name, their face and the adventures they've always dreamed of.",
+      "cta": "Create a free preview",
       "secondary": "See how it works",
-      "fromPrice": "From {price}"
+      "fromPrice": "From {price}",
+      "formats": "Available as a digital and printed book"
     },
     "trust": {
-      "preview": "Free preview",
+      "preview": "Free preview before you pay",
       "shipping": "Shipping to {country}",
       "privacy": "Photos protected and deleted after 30 days",
       "languages": "In Spanish, English and Portuguese"
     },
     "how": {
-      "title": "It's that easy",
-      "subtitle": "A one-of-a-kind book in less than 10 minutes.",
+      "title": "Creating their story is this easy",
+      "subtitle": "We're with you from the idea to the finished book.",
       "step1Title": "Tell us about your child",
-      "step1Text": "Their name, age, favorite things and 1 to 3 photos. Pick the story and the illustration style.",
-      "step2Title": "See the free preview",
-      "step2Text": "We create the cover and two pages starring your child. You can edit the text and change the photo.",
-      "step3Title": "Get it at home",
-      "step3Text": "Download the PDF instantly or get it printed in softcover or hardcover."
+      "step1Text": "Their name, age, favorite things and a photo.",
+      "step2Title": "Pick an adventure",
+      "step2Text": "Space trips, dinosaurs, magical kingdoms, soccer and more.",
+      "step3Title": "Discover their story",
+      "step3Text": "See a free preview and choose your favorite format: digital, softcover or hardcover."
     },
     "gallery": {
-      "title": "Stories for every dream",
-      "subtitle": "Pick the adventure they'll love the most.",
+      "title": "A universe of adventures",
+      "subtitle": "Stories to dream about, where every child can see themselves.",
       "viewAll": "See all stories"
     },
     "faq": {
@@ -84,9 +86,9 @@
       "text": "You see the preview before paying. And if your book arrives with a problem, we'll reprint it or refund you."
     },
     "cta": {
-      "title": "Give a memory that lasts a lifetime",
-      "text": "A birthday, Christmas or just any Tuesday: every day is a good day to be the hero.",
-      "button": "Start now"
+      "title": "A story to remember forever.",
+      "text": "The best gift is seeing yourself inside an adventure.",
+      "button": "Create a free preview"
     }
   },
   "Stories": {

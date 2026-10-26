@@ -20,7 +20,7 @@ export function parseFaq(markdown: string): FaqItem[] {
 /** Acordeón nativo (details/summary): accesible y sin JavaScript. */
 export function FaqList({ items }: { items: FaqItem[] }) {
   return (
-    <div className="divide-y rounded-xl border bg-card">
+    <div className="divide-y rounded-xl border bg-card shadow-[var(--shadow-card)]">
       {items.map((item) => (
         <details
           key={item.question}

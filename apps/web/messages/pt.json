@@ -1,7 +1,7 @@
 {
   "Meta": {
-    "title": "{brand}: histórias personalizadas com seu filho como protagonista",
-    "description": "Crie um livro infantil único com o nome, o rosto e os gostos do seu filho. Prévia grátis, livro digital ou impresso com entrega no seu país.",
+    "title": "{brand}: seu filho é o herói desta história",
+    "description": "Uma história ilustrada única com o nome, o rostinho e as aventuras que ele sempre sonhou. Veja uma prévia grátis e receba em digital ou impresso.",
     "skipToContent": "Pular para o conteúdo"
   },
   "Nav": {
@@ -13,7 +13,8 @@
     "account": "Minha conta",
     "menu": "Menu",
     "closeMenu": "Fechar menu",
-    "mainNav": "Navegação principal"
+    "mainNav": "Navegação principal",
+    "create": "Criar minha história"
   },
   "Switchers": {
     "language": "Idioma",
@@ -30,7 +31,7 @@
     }
   },
   "Footer": {
-    "tagline": "Histórias únicas, com seu filho como protagonista.",
+    "tagline": "Histórias que abraçam.",
     "legal": "Legal",
     "company": "StoryNido",
     "cookiePreferences": "Preferências de cookies",
@@ -47,32 +48,33 @@
   },
   "Home": {
     "hero": {
-      "eyebrow": "Histórias personalizadas com ilustrações únicas",
-      "title": "Uma história em que seu filho é o herói",
-      "subtitle": "Com o nome, o rosto e o que ele mais gosta. Você vê uma prévia grátis e recebe o livro em PDF ou impresso em casa.",
-      "cta": "Criar a história",
+      "eyebrow": "Histórias que abraçam",
+      "title": "Seu filho é o herói desta história.",
+      "subtitle": "Uma história única com o nome, o rostinho e as aventuras que ele sempre sonhou.",
+      "cta": "Criar uma prévia grátis",
       "secondary": "Ver como funciona",
-      "fromPrice": "A partir de {price}"
+      "fromPrice": "A partir de {price}",
+      "formats": "Disponível em livro digital e impresso"
     },
     "trust": {
-      "preview": "Prévia grátis",
+      "preview": "Prévia grátis antes de pagar",
       "shipping": "Entrega para {country}",
       "privacy": "Fotos protegidas e excluídas após 30 dias",
       "languages": "Em espanhol, inglês e português"
     },
     "how": {
-      "title": "Simples assim",
-      "subtitle": "Em menos de 10 minutos você tem um livro único.",
+      "title": "Criar a história dele é simples assim",
+      "subtitle": "Acompanhamos você da ideia até o livro pronto.",
       "step1Title": "Conte sobre seu filho",
-      "step1Text": "Nome, idade, gostos e de 1 a 3 fotos. Escolha a história e o estilo de ilustração.",
-      "step2Title": "Veja a prévia grátis",
-      "step2Text": "Criamos a capa e duas páginas com seu filho como protagonista. Você pode editar os textos e trocar a foto.",
-      "step3Title": "Receba em casa",
-      "step3Text": "Baixe o PDF na hora ou receba impresso em capa mole ou capa dura."
+      "step1Text": "Nome, idade, gostos e uma foto.",
+      "step2Title": "Escolha uma aventura",
+      "step2Text": "Viagens ao espaço, dinossauros, reinos mágicos, futebol e muito mais.",
+      "step3Title": "Descubra a história dele",
+      "step3Text": "Veja uma prévia grátis e escolha seu formato favorito: digital, capa mole ou capa dura."
     },
     "gallery": {
-      "title": "Histórias para cada sonho",
-      "subtitle": "Escolha a aventura que ele vai adorar.",
+      "title": "Um universo de aventuras",
+      "subtitle": "Histórias para sonhar, em que cada criança pode se reconhecer.",
       "viewAll": "Ver todas as histórias"
     },
     "faq": {
@@ -84,9 +86,9 @@
       "text": "Você vê a prévia antes de pagar. E se o livro chegar com algum problema, reimprimimos ou devolvemos o dinheiro."
     },
     "cta": {
-      "title": "Presenteie uma lembrança para a vida toda",
-      "text": "Um aniversário, o Natal ou uma terça-feira qualquer: todo dia é bom para ser protagonista.",
-      "button": "Começar agora"
+      "title": "Uma história para lembrar para sempre.",
+      "text": "O melhor presente é se ver dentro de uma aventura.",
+      "button": "Criar uma prévia grátis"
     }
   },
   "Stories": {

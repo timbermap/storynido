@@ -31,7 +31,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
   }, [open]);
 
   return (
-    <div className="md:hidden">
+    <div className="xl:hidden">
       <Button
         variant="ghost"
         size="icon"

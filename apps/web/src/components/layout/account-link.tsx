@@ -12,7 +12,7 @@ export function AccountLink() {
   return (
     <Link
       href={user ? '/account' : '/login'}
-      className={buttonVariants({ variant: 'outline', size: 'sm' })}
+      className={buttonVariants({ variant: 'ghost', size: 'sm' })}
     >
       {user ? t('account') : t('signIn')}
     </Link>

@@ -23,7 +23,7 @@ export async function StoryCard({
   return (
     <Link
       href={{ pathname: '/stories/[slug]', params: { slug: story.slug } }}
-      className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)] transition duration-200 hover:-translate-y-1 motion-reduce:hover:translate-y-0"
     >
       <div className="aspect-[3/4] overflow-hidden bg-muted">
         {/* SVG propio y liviano: se sirve tal cual (sin optimizador de imágenes). */}
@@ -39,7 +39,7 @@ export async function StoryCard({
         />
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <Heading className="text-lg leading-snug font-semibold">{story.title}</Heading>
+        <Heading className="text-xl leading-snug font-semibold">{story.title}</Heading>
         <p className="text-sm text-muted-foreground">
           {t('agesFor', { min: story.ageMin, max: story.ageMax })}
         </p>

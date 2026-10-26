@@ -16,7 +16,7 @@ export async function SiteFooter() {
   const tNav = await getTranslations('Nav');
 
   return (
-    <footer className="mt-24 border-t bg-muted/60">
+    <footer className="mt-24 border-t bg-[#f5eff4]">
       <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-3">
           <Logo className="flex items-center gap-2" />
