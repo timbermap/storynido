@@ -23,8 +23,7 @@
 
 ## Fuera de alcance / pendientes detectados
 
-- Las imágenes Docker no se probaron en local (Docker no instalado); se validan en el job `docker` de CI.
-- El repo todavía no tiene remoto en GitHub: CI se ejecuta cuando se suba.
+- Repo en GitHub: [timbermap/storynido](https://github.com/timbermap/storynido) (privado). CI y build de imágenes Docker en verde desde el 2026-10-26.
 
 ## Riesgos
 
