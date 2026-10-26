@@ -47,7 +47,7 @@ importers:
 
   apps/admin:
     dependencies:
-      '@micuento/shared':
+      '@storynido/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       class-variance-authority:
@@ -93,7 +93,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@micuento/shared':
+      '@storynido/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       class-variance-authority:
@@ -152,7 +152,7 @@ importers:
         specifier: 4.3.3
         version: 4.3.3
     devDependencies:
-      '@micuento/shared':
+      '@storynido/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       tsdown:
@@ -171,7 +171,7 @@ importers:
         specifier: 4.3.3
         version: 4.3.3
     devDependencies:
-      '@micuento/shared':
+      '@storynido/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       tsdown:

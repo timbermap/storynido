@@ -8,8 +8,8 @@ WORKDIR /repo
 FROM base AS build
 COPY . .
 RUN pnpm install --frozen-lockfile
-RUN pnpm turbo run build --filter=@micuento/api
-RUN pnpm --filter=@micuento/api deploy --prod --legacy /out
+RUN pnpm turbo run build --filter=@storynido/api
+RUN pnpm --filter=@storynido/api deploy --prod --legacy /out
 
 FROM node:24-slim AS runtime
 ENV NODE_ENV=production

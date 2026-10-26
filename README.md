@@ -1,6 +1,6 @@
-# MiCuento
+# StoryNido
 
-Plataforma de cuentos infantiles personalizados con IA, en formato digital (PDF) e impreso bajo demanda. El nombre de la marca es configurable (`BRAND_NAME` / `NEXT_PUBLIC_BRAND_NAME`).
+Plataforma de cuentos infantiles personalizados con IA, en formato digital (PDF) e impreso bajo demanda. Dominio: [storynido.com](https://storynido.com). El nombre y el dominio son configurables (`BRAND_NAME`, `BRAND_DOMAIN` y sus variantes `NEXT_PUBLIC_*`).
 
 Contexto completo del proyecto: [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) · Decisiones: [docs/DECISIONS.md](docs/DECISIONS.md) · Progreso: [docs/PROGRESS.md](docs/PROGRESS.md)
 
@@ -40,13 +40,13 @@ for d in apps/web apps/admin services/api services/worker; do cp -n $d/.env.exam
 | `pnpm test`                         | Tests con Vitest                                    |
 | `pnpm format` / `pnpm format:check` | Prettier                                            |
 
-Para trabajar sobre un solo paquete: `pnpm --filter @micuento/web dev`.
+Para trabajar sobre un solo paquete: `pnpm --filter @storynido/web dev`.
 
 ## Variables de entorno
 
 | Variable                 | Dónde       | Descripción        | Default     |
 | ------------------------ | ----------- | ------------------ | ----------- |
-| `NEXT_PUBLIC_BRAND_NAME` | web, admin  | Nombre de la marca | `MiCuento`  |
+| `NEXT_PUBLIC_BRAND_NAME` | web, admin  | Nombre de la marca | `StoryNido` |
 | `PORT`                   | api, worker | Puerto HTTP        | 8080 / 8081 |
 | `LOG_LEVEL`              | api, worker | `trace`…`fatal`    | `info`      |
 
@@ -57,8 +57,8 @@ Nunca subas archivos `.env.local` ni claves: en producción los secretos van en 
 Desde la raíz del repo:
 
 ```bash
-docker build -f services/api/Dockerfile -t micuento-api .
-docker build -f services/worker/Dockerfile -t micuento-worker .
+docker build -f services/api/Dockerfile -t storynido-api .
+docker build -f services/worker/Dockerfile -t storynido-worker .
 ```
 
 ## CI

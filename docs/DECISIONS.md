@@ -7,16 +7,16 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 ## 001 · Estructura del monorepo y nombres de paquetes
 
 - **Fecha:** 2026-10-26 · **Fase:** 01
-- **Decisión:** pnpm workspaces + Turborepo. Paquetes con el scope `@micuento/*`: `apps/web`, `apps/admin`, `services/api`, `services/worker`, `packages/shared`. La configuración común (tsconfig, ESLint, Prettier) vive en la raíz y no en paquetes `config-*` separados.
+- **Decisión:** pnpm workspaces + Turborepo. Paquetes con el scope `@storynido/*`: `apps/web`, `apps/admin`, `services/api`, `services/worker`, `packages/shared`. La configuración común (tsconfig, ESLint, Prettier) vive en la raíz y no en paquetes `config-*` separados.
 - **Motivo:** con solo cinco paquetes, la configuración en la raíz es más simple de mantener. Se puede extraer a paquetes si crece.
 
-## 002 · `@micuento/shared` como paquete "just-in-time"
+## 002 · `@storynido/shared` como paquete "just-in-time"
 
 - **Fecha:** 2026-10-26 · **Fase:** 01
 - **Decisión:** el paquete compartido expone su código TypeScript directamente (`exports` → `src/*.ts`), sin build propio. Next.js lo transpila con `transpilePackages` y los servicios lo empaquetan con tsdown (`deps.alwaysBundle`).
 - **Alternativas:** compilarlo a `dist/` con tsc (requiere watch en dev y orden de build).
 - **Motivo:** cambios instantáneos en desarrollo y sin pasos de build intermedios.
-- **Subpaths:** `@micuento/shared` (seguro para navegador) y `@micuento/shared/server` (solo Node: logging, entorno).
+- **Subpaths:** `@storynido/shared` (seguro para navegador) y `@storynido/shared/server` (solo Node: logging, entorno).
 
 ## 003 · TypeScript 6.0 (no 7.0)
 
@@ -59,7 +59,7 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 
 - **Fecha:** 2026-10-26 · **Fase:** 01
 - **Decisión:** build multi-stage: se instala el monorepo, se compila el servicio con tsdown, y `pnpm deploy --prod --legacy` arma un `node_modules` solo con dependencias de producción. La imagen final corre como usuario `node`.
-- **Motivo:** pnpm 10+ exige `inject-workspace-packages` para el deploy normal, lo que rompería la recarga en caliente de `@micuento/shared` en desarrollo. `@micuento/shared` es devDependency de los servicios porque se empaqueta dentro del bundle.
+- **Motivo:** pnpm 10+ exige `inject-workspace-packages` para el deploy normal, lo que rompería la recarga en caliente de `@storynido/shared` en desarrollo. `@storynido/shared` es devDependency de los servicios porque se empaqueta dentro del bundle.
 - **Nota:** Docker no estaba instalado en la máquina de desarrollo; las imágenes se validan en CI (job `docker`).
 
 ## 010 · Monedas: se agrega PEN
@@ -84,3 +84,9 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 
 - **Fecha:** 2026-10-26 · **Fase:** 01
 - **Decisión:** todas las dependencias con versión exacta (sin `^`). Versiones verificadas en npm el 2026-10-26. Actualizaciones controladas con Renovate/Dependabot (a configurar en la fase 16).
+
+## 014 · Nombre definitivo: StoryNido
+
+- **Fecha:** 2026-10-26 · **Fase:** 01
+- **Decisión:** la marca pasa de "MiCuento" (provisorio) a **StoryNido**. Se registraron `storynido.com`, `storynido.online` y `storynido.store`. El repo, el scope de paquetes (`@storynido/*`) y los valores por defecto se renombraron. Se agregó el dominio a la configuración de marca (`BRAND_DOMAIN`).
+- **Dominios:** `.com` es el principal; `.online` y `.store` redirigen con 301 al `.com` (se configura en la fase 02 / fase 05).

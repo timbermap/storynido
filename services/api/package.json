@@ -1,5 +1,5 @@
 {
-  "name": "@micuento/api",
+  "name": "@storynido/api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "zod": "4.3.3"
   },
   "devDependencies": {
-    "@micuento/shared": "workspace:*",
+    "@storynido/shared": "workspace:*",
     "tsdown": "0.23.2",
     "tsx": "4.23.15"
   }

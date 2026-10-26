@@ -1,4 +1,4 @@
-# @micuento/shared
+# @storynido/shared
 
 Tipos, esquemas Zod y utilidades compartidas por las apps y los servicios.
 

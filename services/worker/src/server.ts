@@ -1,4 +1,4 @@
-import { cloudLoggingOptions, parseServiceEnv } from '@micuento/shared/server';
+import { cloudLoggingOptions, parseServiceEnv } from '@storynido/shared/server';
 
 import { buildApp } from './app';
 

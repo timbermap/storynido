@@ -1,12 +1,24 @@
-# MiCuento — Contexto general del proyecto (PROJECT_BRIEF)
+# StoryNido — Contexto general del proyecto (PROJECT_BRIEF)
 
 > Este documento es el contexto común de todas las fases. Cada prompt de fase asume que lo leíste primero.
 
 ## Rol y objetivo
 
-Sos un equipo senior de ingeniería full stack, arquitectura cloud, seguridad y producto. Construís de punta a punta, listo para producción, una plataforma web profesional y escalable llamada provisoriamente **"MiCuento"** (el nombre debe ser configurable), que vende cuentos infantiles personalizados generados con IA, en formato digital (PDF) e impreso bajo demanda.
+Sos un equipo senior de ingeniería full stack, arquitectura cloud, seguridad y producto. Construís de punta a punta, listo para producción, una plataforma web profesional y escalable llamada **"StoryNido"** (el nombre debe ser configurable), que vende cuentos infantiles personalizados generados con IA, en formato digital (PDF) e impreso bajo demanda.
 
 El padre o la madre crea una cuenta, carga los datos del chico (nombre, edad, gustos, foto), elige una historia o temática, ve una vista previa gratis, paga, y el sistema genera automáticamente la historia, las ilustraciones con el chico como protagonista y el libro final. Si es impreso, el pedido se envía automáticamente a la API de impresión, que imprime en el país del cliente y despacha. Todo sin intervención humana.
+
+## Marca y dominios
+
+- Marca: **StoryNido** (configurable con `BRAND_NAME` / `NEXT_PUBLIC_BRAND_NAME`).
+- Dominios registrados (vencen el 26/10/2027 los `.online`/`.store` y el 26/10/2028 el `.com`):
+  - `storynido.com`: dominio principal del sitio público.
+  - `admin.storynido.com`: panel super admin.
+  - `api.storynido.com`: API pública (Cloud Run con dominio propio o detrás del balanceador).
+  - `staging.storynido.com` y `admin.staging.storynido.com`: ambiente de staging.
+  - `storynido.online` y `storynido.store`: redirección 301 a `storynido.com` (protección de marca, sin contenido propio).
+- Emails transaccionales desde un subdominio de envío (por ejemplo `mail.storynido.com`) con SPF, DKIM y DMARC; remitente visible `hola@storynido.com`.
+- El dominio también es configurable (`BRAND_DOMAIN` / `NEXT_PUBLIC_BRAND_DOMAIN`); nunca se hardcodea en el código.
 
 ## Reglas de trabajo (aplican a todas las fases)
 
@@ -26,7 +38,7 @@ El padre o la madre crea una cuenta, carga los datos del chico (nombre, edad, gu
 
 - **Monorepo** con pnpm workspaces y Turborepo: `apps/web`, `apps/admin`, `services/api`, `services/worker`, `packages/shared` (tipos, esquemas Zod, utilidades), `infra/`.
 - **Frontend público:** Next.js (App Router, última estable), React Server Components, Tailwind CSS, shadcn/ui, Framer Motion para animaciones sutiles. Hospedado en Firebase App Hosting con dominio propio y SSL automático.
-- **Panel super admin:** app Next.js separada en `apps/admin`, subdominio `admin.dominio.com`, mismo stack de UI.
+- **Panel super admin:** app Next.js separada en `apps/admin`, subdominio `admin.storynido.com`, mismo stack de UI.
 - **Autenticación:** Firebase Authentication con Google, Apple y enlace mágico por mail (sin contraseñas). Login persistente. Roles por custom claims: `customer`, `admin`, `superadmin`.
 - **Base de datos:** Firestore (modo nativo), reglas estrictas, índices definidos en código.
 - **Archivos:** Cloud Storage con buckets separados: fotos originales (privado, borrado automático a los 30 días por ciclo de vida), assets generados, PDFs finales (solo URLs firmadas).

@@ -3,7 +3,7 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  transpilePackages: ['@micuento/shared'],
+  transpilePackages: ['@storynido/shared'],
 };
 
 export default nextConfig;
