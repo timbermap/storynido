@@ -199,9 +199,18 @@ importers:
 
   packages/providers:
     dependencies:
+      '@google-cloud/storage':
+        specifier: 8.4.0
+        version: 8.4.0(supports-color@7.2.0)
+      '@google-cloud/vision':
+        specifier: 6.2.0
+        version: 6.2.0(supports-color@7.2.0)
       '@storynido/shared':
         specifier: workspace:*
         version: link:../shared
+      sharp:
+        specifier: 0.35.5
+        version: 0.35.5(@types/node@24.19.2)
       zod:
         specifier: 4.3.3
         version: 4.3.3
@@ -229,6 +238,12 @@ importers:
       '@fastify/swagger-ui':
         specifier: 6.1.2
         version: 6.1.2
+      '@google-cloud/storage':
+        specifier: 8.4.0
+        version: 8.4.0(supports-color@7.2.0)
+      '@google-cloud/vision':
+        specifier: 6.2.0
+        version: 6.2.0(supports-color@7.2.0)
       fastify:
         specifier: 5.12.7
         version: 5.12.7
@@ -244,6 +259,9 @@ importers:
       pino:
         specifier: 10.4.0
         version: 10.4.0
+      sharp:
+        specifier: 0.35.5
+        version: 0.35.5(@types/node@24.19.2)
       zod:
         specifier: 4.3.3
         version: 4.3.3
@@ -968,6 +986,10 @@ packages:
 
   '@google-cloud/storage@8.4.0':
     resolution: {integrity: sha512-M3kA6UA2Tjp5aznCrgKcm9CzOjiQyRMnquqalqXAeS5wvkqqZxN8wpNjjHafOSYs6lQ82U7f2i8we4eTfIrpkA==}
+    engines: {node: '>=22'}
+
+  '@google-cloud/vision@6.2.0':
+    resolution: {integrity: sha512-ihc5F+3YzUzay0H3sVuQiki2gjOr5/rLPPC7uzoAOgl/fli4UnO3wbJnGG2mx36T8LBl6jhf9EhfUQl6bjuL3g==}
     engines: {node: '>=22'}
 
   '@googleapis/sqladmin@38.1.1':
@@ -7857,19 +7879,16 @@ snapshots:
   '@google-cloud/paginator@7.2.0':
     dependencies:
       extend: 3.0.2
-    optional: true
 
   '@google-cloud/precise-date@5.2.0': {}
 
   '@google-cloud/projectify@5.2.0': {}
 
-  '@google-cloud/projectify@6.2.1':
-    optional: true
+  '@google-cloud/projectify@6.2.1': {}
 
   '@google-cloud/promisify@5.1.0': {}
 
-  '@google-cloud/promisify@6.2.1':
-    optional: true
+  '@google-cloud/promisify@6.2.1': {}
 
   '@google-cloud/pubsub@5.3.1(supports-color@7.2.0)':
     dependencies:
@@ -7917,7 +7936,13 @@ snapshots:
       teeny-request: 11.1.1(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
-    optional: true
+
+  '@google-cloud/vision@6.2.0(supports-color@7.2.0)':
+    dependencies:
+      '@google-cloud/promisify': 6.2.1
+      google-gax: 6.13.0(supports-color@7.2.0)
+    transitivePeerDependencies:
+      - supports-color
 
   '@googleapis/sqladmin@38.1.1(supports-color@7.2.0)':
     dependencies:
@@ -7969,8 +7994,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@img/colour@1.1.0':
-    optional: true
+  '@img/colour@1.1.0': {}
 
   '@img/sharp-darwin-arm64@0.35.5':
     optionalDependencies:
@@ -8351,8 +8375,7 @@ snapshots:
   '@next/swc-win32-x64-msvc@16.4.3':
     optional: true
 
-  '@nodable/entities@3.1.0':
-    optional: true
+  '@nodable/entities@3.1.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -8368,8 +8391,7 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@opentelemetry/api@1.10.0':
-    optional: true
+  '@opentelemetry/api@1.10.0': {}
 
   '@opentelemetry/api@1.9.1': {}
 
@@ -9795,8 +9817,7 @@ snapshots:
       normalize-path: 3.0.0
       picomatch: 2.3.2
 
-  anynum@1.0.1:
-    optional: true
+  anynum@1.0.1: {}
 
   archiver-utils@5.0.2:
     dependencies:
@@ -9916,7 +9937,6 @@ snapshots:
   async-retry@1.3.3:
     dependencies:
       retry: 0.13.1
-    optional: true
 
   async@3.2.6: {}
 
@@ -11068,7 +11088,6 @@ snapshots:
     dependencies:
       path-expression-matcher: 1.6.2
       xml-naming: 0.3.0
-    optional: true
 
   fast-xml-parser@5.11.2:
     dependencies:
@@ -11078,7 +11097,6 @@ snapshots:
       path-expression-matcher: 1.6.2
       strnum: 2.5.1
       xml-naming: 0.3.0
-    optional: true
 
   fastify-plugin@6.0.1: {}
 
@@ -11610,7 +11628,6 @@ snapshots:
       retry-request: 9.1.0
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   google-logging-utils@0.0.2: {}
 
@@ -11737,8 +11754,7 @@ snapshots:
 
   hookable@6.1.2: {}
 
-  html-entities@2.6.0:
-    optional: true
+  html-entities@2.6.0: {}
 
   html-url-attributes@3.0.1: {}
 
@@ -11978,8 +11994,7 @@ snapshots:
 
   is-unicode-supported@0.1.0: {}
 
-  is-unsafe@2.0.2:
-    optional: true
+  is-unsafe@2.0.2: {}
 
   is-url@1.2.4: {}
 
@@ -13181,8 +13196,7 @@ snapshots:
 
   path-exists@4.0.0: {}
 
-  path-expression-matcher@1.6.2:
-    optional: true
+  path-expression-matcher@1.6.2: {}
 
   path-key@3.1.1: {}
 
@@ -13347,7 +13361,6 @@ snapshots:
   proto3-json-serializer@4.1.0:
     dependencies:
       protobufjs: 7.6.6
-    optional: true
 
   protobufjs@7.6.6:
     dependencies:
@@ -13719,7 +13732,6 @@ snapshots:
   retry-request@9.1.0:
     dependencies:
       extend: 3.0.2
-    optional: true
 
   retry@0.13.1: {}
 
@@ -13935,7 +13947,6 @@ snapshots:
       '@img/sharp-win32-ia32': 0.35.5
       '@img/sharp-win32-x64': 0.35.5
       '@types/node': 24.19.2
-    optional: true
 
   shebang-command@2.0.0:
     dependencies:
@@ -14125,7 +14136,6 @@ snapshots:
   strnum@2.5.1:
     dependencies:
       anynum: 1.0.1
-    optional: true
 
   stubs@3.0.0: {}
 
@@ -14229,7 +14239,6 @@ snapshots:
       stream-events: 1.0.5
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   teex@1.0.1:
     dependencies:
@@ -14760,8 +14769,7 @@ snapshots:
 
   xdg-basedir@4.0.0: {}
 
-  xml-naming@0.3.0:
-    optional: true
+  xml-naming@0.3.0: {}
 
   xtend@4.0.2: {}
 

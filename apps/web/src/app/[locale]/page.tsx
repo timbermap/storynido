@@ -101,7 +101,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {t('hero.subtitle')}
             </p>
             <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start">
-              <Link href="/stories" className={buttonVariants({ size: 'lg' })}>
+              <Link href="/create" className={buttonVariants({ size: 'lg' })}>
                 {t('hero.cta')}
                 <ArrowRight aria-hidden="true" />
               </Link>
@@ -244,7 +244,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             {t('cta.text')}
           </p>
           <Link
-            href="/stories"
+            href="/create"
             className={buttonVariants({ size: 'lg', className: 'relative mt-8' })}
           >
             {t('cta.button')}

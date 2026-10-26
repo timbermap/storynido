@@ -14,7 +14,7 @@ export function LanguageSwitcher({ id }: { id: string }) {
   const t = useTranslations('Switchers');
   const locale = useLocale() as Locale;
   const pathname = usePathname();
-  const params = useParams<{ slug?: string; document?: string }>();
+  const params = useParams<{ slug?: string; document?: string; bookId?: string }>();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -28,6 +28,8 @@ export function LanguageSwitcher({ id }: { id: string }) {
       } else if (pathname === '/blog/[slug]') {
         // Los artículos no tienen el mismo slug en cada idioma: se va al índice del blog.
         router.replace('/blog', { locale: next });
+      } else if (pathname === '/create/[bookId]') {
+        router.replace({ pathname, params: { bookId: params.bookId ?? '' } }, { locale: next });
       } else if (pathname === '/stories/[slug]' || pathname === '/lessons/[slug]') {
         router.replace({ pathname, params: { slug: params.slug ?? '' } }, { locale: next });
       } else {

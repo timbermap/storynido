@@ -13,7 +13,10 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@google-cloud/storage": "8.4.0",
+    "@google-cloud/vision": "6.2.0",
     "@storynido/shared": "workspace:*",
+    "sharp": "0.35.5",
     "zod": "4.3.3"
   }
 }

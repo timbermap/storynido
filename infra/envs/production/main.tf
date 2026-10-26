@@ -31,5 +31,6 @@ module "environment" {
   api_scaling                = { min = 1, max = 20 }
   worker_scaling             = { min = 0, max = 50 }
   deletion_protection        = true
+  photo_analyzer             = var.photo_analyzer
   log_level                  = "info"
 }

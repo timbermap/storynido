@@ -6,6 +6,8 @@ import { localeSchema } from '../i18n';
 import { BOOK_FORMATS } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
 import { CONTENT_KEYS, SITE_MODES } from '../models/config';
+import { PHOTO_STATUSES } from '../models/users';
+import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
 import { roleSchema } from '../roles';
 
 export const API_ERROR_CODES = [
@@ -143,6 +145,26 @@ export type PublicContent = z.infer<typeof publicContentSchema>;
 
 const localeQuerySchema = z.object({ locale: localeSchema });
 
+// --- Fotos del protagonista ------------------------------------------------------
+
+export const publicPhotoSchema = z.object({
+  id: z.string(),
+  bookId: z.string(),
+  status: z.enum(PHOTO_STATUSES),
+  rejectionReasons: z.array(photoRejectionReasonSchema),
+  /** URL firmada de corta duración de la versión procesada (solo fotos válidas). */
+  previewUrl: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+});
+
+export type PublicPhoto = z.infer<typeof publicPhotoSchema>;
+
+export const signedUploadSchema = z.object({
+  url: z.string(),
+  headers: z.record(z.string(), z.string()),
+  expiresAt: z.iso.datetime(),
+});
+
 export type RouteAccess = 'public' | 'user' | 'admin' | 'superadmin';
 
 export interface ApiRoute {
@@ -236,6 +258,56 @@ export const apiRoutes = {
     params: z.object({ key: z.enum(CONTENT_KEYS) }),
     query: localeQuerySchema,
     response: publicContentSchema,
+  },
+  createConsent: {
+    method: 'POST',
+    path: '/v1/consents',
+    access: 'user',
+    summary:
+      'Registra el consentimiento del adulto responsable (con fecha, versión, IP y navegador)',
+    body: z.object({
+      type: z.literal('photo_upload'),
+      textVersion: z.string().min(1).max(40),
+      locale: localeSchema,
+    }),
+    response: z.object({ consentId: z.string() }),
+  },
+  createPhoto: {
+    method: 'POST',
+    path: '/v1/photos',
+    access: 'user',
+    summary: 'Prepara la subida de una foto y devuelve una URL firmada de corta duración',
+    body: z.object({
+      bookId: z.string().min(1),
+      consentId: z.string().min(1),
+      contentType: z.enum(PHOTO_RULES.allowedTypes),
+      sizeBytes: z.number().int().positive().max(PHOTO_RULES.maxBytes),
+    }),
+    response: z.object({ photoId: z.string(), upload: signedUploadSchema }),
+  },
+  processPhoto: {
+    method: 'POST',
+    path: '/v1/photos/:photoId/process',
+    access: 'user',
+    summary: 'Valida (cara, luz, nitidez, contenido) y procesa la foto ya subida',
+    params: z.object({ photoId: z.string().min(1) }),
+    response: publicPhotoSchema,
+  },
+  bookPhotos: {
+    method: 'GET',
+    path: '/v1/books/:bookId/photos',
+    access: 'user',
+    summary: 'Fotos de un borrador con URLs de vista previa de corta duración',
+    params: z.object({ bookId: z.string().min(1) }),
+    response: z.object({ photos: z.array(publicPhotoSchema) }),
+  },
+  deletePhoto: {
+    method: 'DELETE',
+    path: '/v1/photos/:photoId',
+    access: 'user',
+    summary: 'Borra la foto de inmediato (archivo original, procesado y metadatos)',
+    params: z.object({ photoId: z.string().min(1) }),
+    response: z.object({ deleted: z.literal(true) }),
   },
   adminProviders: {
     method: 'GET',

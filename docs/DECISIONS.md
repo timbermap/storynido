@@ -306,3 +306,48 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 - **Temas sensibles** (pérdida de una mascota o de un familiar, separaciones): campo `sensitive`, excluidos del catálogo hasta tener revisión humana del texto generado.
 - **SEO:** cada enseñanza tiene su página (`/es/ensenanzas/llega-un-hermanito`, `/en/lessons/…`, `/pt/licoes/…`) con las aventuras que se le combinan, y está en el sitemap.
 - **Motivo:** los padres buscan por situación ("cuento para cuando llega un hermanito"), no por escenario. Con 7 aventuras y 16 enseñanzas hay 112 combinaciones sin escribir una plantilla por cada una.
+
+## 045 · El creador pide iniciar sesión desde el primer paso
+
+- **Fecha:** 2026-10-26 · **Fase:** 06
+- **Decisión:** para crear un cuento hay que iniciar sesión (Google, Apple o enlace mágico) antes del primer paso. El enlace mágico devuelve a la página donde estaba el usuario.
+- **Motivo:**
+  - El consentimiento para subir fotos de un menor tiene que quedar asociado a un adulto identificado.
+  - El borrador se retoma desde cualquier dispositivo y desde Mi cuenta.
+  - La vista previa con IA (fase 07) tiene costo y necesita límites por usuario.
+- **Alternativa para el futuro:** sesión anónima de Firebase vinculada después, si las métricas muestran que el login frena conversiones.
+
+## 046 · Flujo de fotos: URL firmada, validación en el servidor y borrado inmediato de las rechazadas
+
+- **Fecha:** 2026-10-26 · **Fase:** 06
+- **Flujo:**
+  1. Consentimiento (`POST /v1/consents`, con versión del texto, IP y navegador).
+  2. `POST /v1/photos` verifica borrador propio editable, protagonista cargado, consentimiento propio y vigente, y máximo 3 fotos. Crea `photos/{id}` (`pending_upload`) y devuelve una URL firmada de 10 minutos.
+  3. El navegador sube directo al bucket.
+  4. `POST /v1/photos/:id/process` normaliza con Sharp: orientación EXIF, máximo 2048 px y JPEG **sin metadatos** (se descarta el GPS).
+  5. Se analiza la foto: caras, brillo, nitidez y contenido inapropiado.
+  6. Se evalúa con `evaluatePhoto`: una sola cara clara, cara de al menos 3 % de la imagen, lado mínimo de 512 px, luz y nitidez.
+  7. Si sirve, se genera un retrato cuadrado de 1024 px centrado en la cara.
+- **Privacidad:**
+  - Las fotos **rechazadas se borran en el momento**.
+  - El borrado a pedido elimina original, retrato y metadatos sin papelera (DECISIÓN 019).
+  - Las vistas previas usan URLs firmadas de 15 minutos.
+- **Motivos de rechazo** con mensajes concretos en los tres idiomas: sin cara, varias personas, cara chica, oscura, quemada, movida, baja resolución, formato no soportado, contenido inapropiado.
+
+## 047 · Cloud Storage real y Cloud Vision opcional
+
+- **Fecha:** 2026-10-26 · **Fase:** 06
+- **Decisión:** en la nube, `STORAGE_PROVIDER=gcs` (URLs firmadas v4 con la propia cuenta de servicio). El análisis de fotos es configurable con `PHOTO_ANALYZER`:
+  - `mock`: mide tamaño, luz y nitidez de verdad y supone una cara centrada.
+  - `vision`: Cloud Vision detecta caras y contenido inapropiado.
+- **Por ambiente:** staging arranca en `mock` (sin costo) y production en `vision`.
+- **Costo de Vision:** las primeras 1.000 imágenes por mes son gratis por función; después, alrededor de USD 1,50 cada 1.000 por función (detección de caras + SafeSearch).
+
+## 048 · Prueba de punta a punta del creador en Chrome real
+
+- **Fecha:** 2026-10-26 · **Fase:** 06
+- **Decisión:** antes de cerrar la fase se recorrió el creador completo con Chrome (puppeteer-core) contra los emuladores y la API local: enlace mágico, protagonista, consentimiento, subida y validación de foto, aventura, enseñanza, estilo, revisión, reanudación al recargar y lista de borradores, sin errores en la consola.
+- **Errores encontrados y corregidos:**
+  - A los componentes de cliente del creador les faltaban sus textos traducidos.
+  - El enlace mágico se procesaba dos veces en desarrollo.
+- **Pendiente:** la suite E2E permanente se arma con Playwright en la fase 17.

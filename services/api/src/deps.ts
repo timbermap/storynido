@@ -3,6 +3,7 @@ import type { SiteConfig } from '@storynido/shared';
 
 import type { CatalogRepository } from './catalog';
 import type { ApiConfig } from './config';
+import type { PhotoService } from './photos/service';
 
 export interface VerifiedUser {
   uid: string;
@@ -33,6 +34,7 @@ export interface ApiDeps {
   siteConfig: SiteConfigSource;
   providers: ProviderRegistry;
   catalog: CatalogRepository;
+  photos: PhotoService;
 }
 
 /** Fuente fija (tests y arranque antes del primer snapshot). */

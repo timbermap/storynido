@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useEffectEvent, useState, type SubmitEvent } from 'react';
+import { useEffect, useEffectEvent, useRef, useState, type SubmitEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -10,6 +10,7 @@ import {
   completeMagicLink,
   isMagicLink,
   rememberedEmail,
+  takeReturnPath,
   type AuthErrorKey,
 } from '@/lib/firebase/auth-actions';
 
@@ -25,7 +26,18 @@ export default function FinishSignInPage() {
     setStatus('signing-in');
     try {
       await completeMagicLink(withEmail, window.location.href);
-      router.replace('/account');
+      const back = takeReturnPath();
+      // La ruta guardada ya incluye el idioma: se navega sin volver a prefijarlo.
+      if (
+        back &&
+        !back.includes('/login') &&
+        !back.includes('/ingresar') &&
+        !back.includes('/entrar')
+      ) {
+        window.location.replace(back);
+      } else {
+        router.replace('/account');
+      }
     } catch (error) {
       setStatus({ error: authErrorKey(error) });
     }
@@ -42,9 +54,12 @@ export default function FinishSignInPage() {
     else setStatus('need-email');
   });
 
+  // El código del enlace es de un solo uso: no se procesa dos veces (React lo monta dos veces en desarrollo).
+  const started = useRef(false);
   useEffect(() => {
+    if (started.current) return;
+    started.current = true;
     // Leer la URL y localStorage solo es posible después de montar; es una única sincronización.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void processLink();
   }, []);
 

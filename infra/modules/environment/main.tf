@@ -244,6 +244,9 @@ locals {
     BUCKET_ASSETS  = module.bucket_assets.name
     BUCKET_PDFS    = module.bucket_pdfs.name
     INVOKER_SA     = local.sa["sn-invoker"]
+    # En la nube las fotos van a Cloud Storage (URLs firmadas v4).
+    STORAGE_PROVIDER = "gcs"
+    PHOTO_ANALYZER   = var.photo_analyzer
   }
 }
 

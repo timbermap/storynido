@@ -32,6 +32,8 @@ const CLIENT_NAMESPACES = [
   'Auth',
   'Account',
   'Stories',
+  'Lessons',
+  'Wizard',
   'Error',
 ];
 

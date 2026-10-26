@@ -37,6 +37,12 @@ variable "budget_amount" {
   description = "Presupuesto mensual."
 }
 
+variable "photo_analyzer" {
+  type        = string
+  default     = "mock"
+  description = "Análisis de fotos: mock o vision (Cloud Vision, costo por imagen)."
+}
+
 variable "budget_currency" {
   type        = string
   default     = "USD"

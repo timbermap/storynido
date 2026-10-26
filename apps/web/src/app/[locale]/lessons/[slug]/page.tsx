@@ -7,6 +7,7 @@ import type { Locale } from '@storynido/shared';
 
 import { HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { StoryCard } from '@/components/stories/story-card';
+import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { lowestPrice } from '@/lib/offer';
 import { localizedAlternates } from '@/lib/seo';
@@ -71,6 +72,12 @@ export default async function LessonPage({ params }: Props) {
           {lesson.headline}
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">{lesson.description}</p>
+        <Link
+          href={{ pathname: '/create', query: { lesson: lesson.slug } }}
+          className={buttonVariants({ size: 'lg', className: 'mt-6' })}
+        >
+          {t('cta')}
+        </Link>
       </header>
 
       <section className="mt-12" aria-labelledby="combine">

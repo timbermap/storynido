@@ -1,0 +1,161 @@
+import { COLLECTIONS, type Book, type Child, type Locale } from '@storynido/shared';
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+  type Firestore,
+} from 'firebase/firestore';
+
+/** Campos de un borrador que edita el cliente (las reglas rechazan cualquier otro). */
+export type BookEdits = Partial<
+  Pick<
+    Book,
+    | 'childId'
+    | 'storyId'
+    | 'styleId'
+    | 'lessonId'
+    | 'customLesson'
+    | 'language'
+    | 'dedication'
+    | 'wizardStep'
+    | 'photoIds'
+  >
+>;
+
+export type ChildFields = Pick<
+  Child,
+  'name' | 'age' | 'pronouns' | 'likes' | 'petName' | 'bestFriendName'
+>;
+
+export interface DraftSummary {
+  id: string;
+  childName: string | null;
+  updatedAt: Date | null;
+  wizardStep: number;
+}
+
+type Timestampish = { toDate(): Date } | null | undefined;
+
+const asDate = (value: Timestampish) => value?.toDate() ?? null;
+
+export async function createDraft(
+  db: Firestore,
+  uid: string,
+  preset: { language: Locale; storyId: string | null; lessonId: string | null },
+): Promise<string> {
+  const ref = await addDoc(collection(db, COLLECTIONS.books), {
+    ownerUid: uid,
+    status: 'draft',
+    childId: null,
+    storyId: preset.storyId,
+    styleId: null,
+    lessonId: preset.lessonId,
+    customLesson: null,
+    language: preset.language,
+    dedication: null,
+    wizardStep: 0,
+    photoIds: [],
+    preview: null,
+    regenerationsUsed: 0,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+export async function listDrafts(db: Firestore, uid: string): Promise<DraftSummary[]> {
+  const snapshot = await getDocs(
+    query(
+      collection(db, COLLECTIONS.books),
+      where('ownerUid', '==', uid),
+      where('status', '==', 'draft'),
+      orderBy('updatedAt', 'desc'),
+      limit(10),
+    ),
+  );
+  return Promise.all(
+    snapshot.docs.map(async (book) => {
+      const childId = book.get('childId') as string | null;
+      const child = childId ? await getDoc(doc(db, COLLECTIONS.children, childId)) : null;
+      return {
+        id: book.id,
+        childName: (child?.get('name') as string | undefined) ?? null,
+        updatedAt: asDate(book.get('updatedAt') as Timestampish),
+        wizardStep: book.get('wizardStep') as number,
+      };
+    }),
+  );
+}
+
+export function subscribeBook(
+  db: Firestore,
+  bookId: string,
+  onChange: (book: (Book & { id: string }) | null) => void,
+  onError: (error: Error) => void,
+): () => void {
+  return onSnapshot(
+    doc(db, COLLECTIONS.books, bookId),
+    (snapshot) => {
+      if (!snapshot.exists()) {
+        onChange(null);
+        return;
+      }
+      const data = snapshot.data({ serverTimestamps: 'estimate' });
+      onChange({
+        ...(data as Book),
+        id: snapshot.id,
+        createdAt: asDate(data.createdAt as Timestampish) ?? new Date(),
+        updatedAt: asDate(data.updatedAt as Timestampish) ?? new Date(),
+      });
+    },
+    onError,
+  );
+}
+
+export function subscribeChild(
+  db: Firestore,
+  childId: string,
+  onChange: (child: ChildFields | null) => void,
+): () => void {
+  return onSnapshot(doc(db, COLLECTIONS.children, childId), (snapshot) => {
+    onChange(snapshot.exists() ? (snapshot.data() as ChildFields) : null);
+  });
+}
+
+export async function updateBook(db: Firestore, bookId: string, edits: BookEdits): Promise<void> {
+  await updateDoc(doc(db, COLLECTIONS.books, bookId), { ...edits, updatedAt: serverTimestamp() });
+}
+
+/** Crea o actualiza el perfil del protagonista y lo vincula al borrador. */
+export async function saveChild(
+  db: Firestore,
+  uid: string,
+  bookId: string,
+  childId: string | null,
+  fields: ChildFields,
+): Promise<string> {
+  if (childId) {
+    await updateDoc(doc(db, COLLECTIONS.children, childId), {
+      ...fields,
+      updatedAt: serverTimestamp(),
+    });
+    return childId;
+  }
+  const ref = await addDoc(collection(db, COLLECTIONS.children), {
+    ownerUid: uid,
+    ...fields,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  await updateBook(db, bookId, { childId: ref.id });
+  return ref.id;
+}

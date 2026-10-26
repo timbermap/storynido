@@ -10,6 +10,7 @@ import { registerSecurity } from './plugins/security';
 import { registerSiteMode } from './plugins/site-mode';
 import { registerCatalogRoutes } from './routes/catalog';
 import { registerDevStorageRoutes } from './routes/dev-storage';
+import { registerPhotoRoutes } from './routes/photos';
 import { registerV1Routes } from './routes/v1';
 import './types';
 
@@ -41,6 +42,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
 
   registerV1Routes(app);
   registerCatalogRoutes(app, deps.catalog);
+  registerPhotoRoutes(app, deps.photos);
   extend?.(app);
 
   const storage = deps.providers.storage();

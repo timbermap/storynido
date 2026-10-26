@@ -12,6 +12,7 @@ import {
 import { getFirebaseAuth } from './client';
 
 const EMAIL_FOR_SIGN_IN_KEY = 'storynido:emailForSignIn';
+const RETURN_TO_KEY = 'storynido:returnTo';
 
 export async function signInWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider();
@@ -34,6 +35,7 @@ export async function sendMagicLink(email: string, finishPath: string): Promise<
   });
   try {
     window.localStorage.setItem(EMAIL_FOR_SIGN_IN_KEY, email);
+    window.localStorage.setItem(RETURN_TO_KEY, window.location.pathname + window.location.search);
   } catch {
     // Sin storage (modo privado): se le pide el email al volver.
   }
@@ -57,6 +59,17 @@ export async function completeMagicLink(email: string, url: string): Promise<voi
     window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY);
   } catch {
     // Nada que limpiar.
+  }
+}
+
+/** Ruta interna donde estaba el usuario al pedir el enlace (null si no hay o no es segura). */
+export function takeReturnPath(): string | null {
+  try {
+    const path = window.localStorage.getItem(RETURN_TO_KEY);
+    window.localStorage.removeItem(RETURN_TO_KEY);
+    return path?.startsWith('/') && !path.startsWith('//') ? path : null;
+  } catch {
+    return null;
   }
 }
 

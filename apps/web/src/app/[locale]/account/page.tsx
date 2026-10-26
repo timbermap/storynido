@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react';
 
 import { ApiError } from '@storynido/shared';
 
+import { DraftsList } from '@/components/wizard/drafts-list';
+import { getFirebaseDb } from '@/lib/firebase/client';
+import { listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
+
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/navigation';
@@ -17,10 +21,19 @@ export default function AccountPage() {
   const { user, role, loading } = useAuth();
   const router = useRouter();
   const [apiCheck, setApiCheck] = useState<string>(t('verifying'));
+  const [drafts, setDrafts] = useState<DraftSummary[]>([]);
+  const tWizard = useTranslations('Wizard.drafts');
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
+
+  useEffect(() => {
+    if (!user) return;
+    void getFirebaseDb()
+      .then((db) => listDrafts(db, user.uid))
+      .then(setDrafts);
+  }, [user]);
 
   // Confirma la sesión contra la API (verifica el token en el servidor).
   useEffect(() => {
@@ -54,7 +67,7 @@ export default function AccountPage() {
   }
 
   return (
-    <section className="container-page flex min-h-[60vh] max-w-md flex-col justify-center gap-6 py-12">
+    <section className="container-page flex min-h-[60vh] max-w-2xl flex-col justify-center gap-8 py-12">
       <h1 className="text-3xl font-semibold">{t('title')}</h1>
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
         <dt className="text-muted-foreground">{t('email')}</dt>
@@ -66,6 +79,12 @@ export default function AccountPage() {
         <dt className="text-muted-foreground">{t('api')}</dt>
         <dd role="status">{apiCheck}</dd>
       </dl>
+      {drafts.length > 0 && (
+        <section className="grid gap-4">
+          <h2 className="text-2xl font-semibold">{tWizard('title')}</h2>
+          <DraftsList drafts={drafts} />
+        </section>
+      )}
       <Button variant="outline" onClick={() => void logOut()}>
         {t('signOut')}
       </Button>

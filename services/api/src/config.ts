@@ -22,6 +22,10 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   /** Firmas de URLs locales y webhooks simulados: no son claves reales, solo sirven fuera de producción. */
   LOCAL_STORAGE_SECRET: z.string().min(8).default('local-dev-storage-secret'),
   MOCK_WEBHOOK_SECRET: z.string().min(8).default('local-dev-webhook-secret'),
+  /** Buckets reales (los define Terraform en Cloud Run). */
+  BUCKET_PHOTOS: z.string().optional(),
+  BUCKET_ASSETS: z.string().optional(),
+  BUCKET_PDFS: z.string().optional(),
 });
 
 export type ApiEnv = z.infer<typeof apiConfigSchema>;

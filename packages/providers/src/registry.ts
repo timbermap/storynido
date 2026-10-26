@@ -5,6 +5,7 @@ import {
   type AITextProvider,
   type EmailProvider,
   type PaymentProvider,
+  type PhotoAnalyzer,
   type PrintProvider,
   type StorageService,
 } from '@storynido/shared';
@@ -18,6 +19,7 @@ export const PROVIDER_IDS = {
   print: ['mock', 'gelato'],
   email: ['mock', 'resend'],
   storage: ['local', 'gcs'],
+  photoAnalyzer: ['mock', 'vision'],
 } as const;
 
 export type ProviderKind = keyof typeof PROVIDER_IDS;
@@ -29,6 +31,7 @@ export const providerSettingsSchema = z.object({
   print: z.enum(PROVIDER_IDS.print).default('mock'),
   email: z.enum(PROVIDER_IDS.email).default('mock'),
   storage: z.enum(PROVIDER_IDS.storage).default('local'),
+  photoAnalyzer: z.enum(PROVIDER_IDS.photoAnalyzer).default('mock'),
 });
 
 export type ProviderSettings = z.infer<typeof providerSettingsSchema>;
@@ -45,6 +48,7 @@ export function providerSettingsFromEnv(
     print: value('PRINT_PROVIDER'),
     email: value('EMAIL_PROVIDER'),
     storage: value('STORAGE_PROVIDER'),
+    photoAnalyzer: value('PHOTO_ANALYZER'),
   });
 }
 
@@ -55,6 +59,7 @@ interface ProviderTypes {
   print: PrintProvider;
   email: EmailProvider;
   storage: StorageService;
+  photoAnalyzer: PhotoAnalyzer;
 }
 
 export type ProviderFactories = {
@@ -140,6 +145,10 @@ export class ProviderRegistry {
 
   storage(): StorageService {
     return this.resolve('storage', this.settings.storage);
+  }
+
+  photoAnalyzer(): PhotoAnalyzer {
+    return this.resolve('photoAnalyzer', this.settings.photoAnalyzer);
   }
 
   describe(): { active: Record<ProviderKind, string>; available: Record<ProviderKind, string[]> } {

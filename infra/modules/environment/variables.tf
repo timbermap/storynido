@@ -91,6 +91,17 @@ variable "deletion_protection" {
   description = "Protege contra borrado los recursos con datos (Firestore, Cloud Run, Workflows)."
 }
 
+variable "photo_analyzer" {
+  type        = string
+  default     = "mock"
+  description = "Análisis de fotos: mock (sin costo) o vision (Cloud Vision, con costo por imagen)."
+
+  validation {
+    condition     = contains(["mock", "vision"], var.photo_analyzer)
+    error_message = "photo_analyzer debe ser mock o vision."
+  }
+}
+
 variable "log_level" {
   type        = string
   default     = "info"

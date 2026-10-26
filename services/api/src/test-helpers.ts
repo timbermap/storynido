@@ -3,9 +3,12 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { createProviderRegistry, providerSettingsFromEnv } from '@storynido/providers';
+import { getFirestore } from 'firebase-admin/firestore';
 
 import { buildApp } from './app';
 import { InMemoryCatalog } from './catalog';
+import { initFirebaseAdmin } from './firebase';
+import { PhotoService } from './photos/service';
 import { loadApiConfig } from './config';
 import {
   StaticSiteConfigSource,
@@ -58,6 +61,8 @@ export async function createTestApp(
     siteConfig,
     providers,
     catalog: new InMemoryCatalog(),
+    // Los tests corren con los emuladores de test (with-test-emulators.sh).
+    photos: new PhotoService(getFirestore(initFirebaseAdmin('demo-storynido-test')), providers),
     ...overrides,
   };
   const app = await buildApp({ deps, extend });

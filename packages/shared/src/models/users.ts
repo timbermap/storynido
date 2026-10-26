@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { countryCodeSchema } from '../countries';
 import { localeSchema } from '../i18n';
+import { photoRejectionReasonSchema } from '../providers/photo';
 import { roleSchema } from '../roles';
 import { timestampsSchema, uidSchema } from './common';
 
@@ -48,16 +49,19 @@ export const childSchema = timestampsSchema.extend({
 
 export type Child = z.infer<typeof childSchema>;
 
-export const PHOTO_STATUSES = ['uploaded', 'validating', 'valid', 'rejected', 'deleted'] as const;
+/** pending_upload → (subida) → valid | rejected. Al borrarse, el documento se elimina. */
+export const PHOTO_STATUSES = ['pending_upload', 'valid', 'rejected'] as const;
 
 /** photos/{photoId}: metadatos; el archivo vive en el bucket de fotos. Solo servidor. */
 export const photoSchema = timestampsSchema.extend({
   ownerUid: uidSchema,
+  bookId: z.string().min(1),
   childId: z.string().min(1),
+  contentType: z.string(),
   storagePath: z.string().min(1),
   processedPath: z.string().min(1).nullable(),
   status: z.enum(PHOTO_STATUSES),
-  rejectionReason: z.string().nullable(),
+  rejectionReasons: z.array(photoRejectionReasonSchema),
   consentId: z.string().min(1),
   /** Borrado automático a los 30 días (regla de ciclo de vida del bucket). */
   expiresAt: z.date(),

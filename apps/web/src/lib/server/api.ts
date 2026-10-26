@@ -56,6 +56,10 @@ export async function getLesson(locale: Locale, slug: string) {
   return (await getLessons(locale)).find((lesson) => lesson.slug === slug) ?? null;
 }
 
+export async function getStyles(locale: Locale) {
+  return (await catalogApi('catalogStyles', { query: { locale } })).styles;
+}
+
 export async function getActiveCountries() {
   try {
     return (await catalogApi('catalogCountries')).countries;

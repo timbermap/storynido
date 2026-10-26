@@ -60,7 +60,7 @@ export async function SiteHeader({
           <LanguageSwitcher id="language-desktop" />
           <CountrySwitcher id="country-desktop" current={country} countries={countries} />
           <AccountLink />
-          <Link href="/stories" className={buttonVariants({ size: 'sm' })}>
+          <Link href="/create" className={buttonVariants({ size: 'sm' })}>
             {t('create')}
           </Link>
         </div>
@@ -77,7 +77,7 @@ export async function SiteHeader({
             <CountrySwitcher id="country-mobile" current={country} countries={countries} />
             <AccountLink />
           </div>
-          <Link href="/stories" className={buttonVariants({ className: 'mt-4 w-full' })}>
+          <Link href="/create" className={buttonVariants({ className: 'mt-4 w-full' })}>
             {t('create')}
           </Link>
         </MobileMenu>

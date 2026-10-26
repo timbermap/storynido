@@ -6,6 +6,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 import { buildApp } from './app';
 import { FirestoreCatalog } from './catalog';
+import { PhotoService } from './photos/service';
 import { loadApiConfig } from './config';
 import {
   FirebaseAppCheckVerifier,
@@ -29,6 +30,14 @@ if (
 const providers = createProviderRegistry({
   settings,
   mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET,
+  gcsBuckets:
+    config.env.BUCKET_PHOTOS && config.env.BUCKET_ASSETS && config.env.BUCKET_PDFS
+      ? {
+          photos: config.env.BUCKET_PHOTOS,
+          assets: config.env.BUCKET_ASSETS,
+          pdfs: config.env.BUCKET_PDFS,
+        }
+      : undefined,
   localStorage: {
     rootDir: config.env.LOCAL_STORAGE_DIR,
     publicBaseUrl: config.env.PUBLIC_API_URL,
@@ -53,6 +62,7 @@ const app = await buildApp({
     siteConfig: liveConfig,
     providers,
     catalog: new FirestoreCatalog(getFirestore(firebase)),
+    photos: new PhotoService(getFirestore(firebase), providers),
   },
 });
 

@@ -8,7 +8,7 @@ import type { Locale } from '@storynido/shared';
 
 import { JsonLd } from '@/components/json-ld';
 import { CountryNotice } from '@/components/stories/country-notice';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { formatPrice } from '@/lib/format';
@@ -191,14 +191,12 @@ export default async function StoryPage({ params }: Props) {
             )}
           </section>
 
-          <div className="space-y-2">
-            <Button size="lg" disabled aria-describedby="coming-soon">
-              {t('create')}
-            </Button>
-            <p id="coming-soon" className="text-sm text-muted-foreground">
-              {t('comingSoon')}
-            </p>
-          </div>
+          <Link
+            href={{ pathname: '/create', query: { story: story.slug } }}
+            className={buttonVariants({ size: 'lg' })}
+          >
+            {t('create')}
+          </Link>
         </div>
       </div>
     </article>

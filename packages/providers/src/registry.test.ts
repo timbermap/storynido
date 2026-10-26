@@ -22,6 +22,7 @@ describe('ProviderRegistry', () => {
       print: 'mock',
       email: 'mock',
       storage: 'local',
+      photoAnalyzer: 'mock',
     });
     expect(registry.payment().id).toBe('mock');
     expect(registry.payment()).toBe(registry.payment());

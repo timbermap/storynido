@@ -43,7 +43,13 @@ pnpm --filter @storynido/firebase set-role --project storynido-staging --email t
 - **Catálogo en staging o producción:** las historias, precios y textos se cargan con el panel admin (fase 14) o con una importación del seed preparada para ese ambiente.
 - **Analítica:** `NEXT_PUBLIC_GA4_MEASUREMENT_ID` y `NEXT_PUBLIC_META_PIXEL_ID` en `apphosting.yaml` cuando existan (solo se cargan con consentimiento).
 
-## 5. Secretos por plataforma
+## 5. Fotos (fase 06)
+
+- En la nube las fotos van a Cloud Storage (`STORAGE_PROVIDER=gcs`, lo define Terraform). El bucket ya tiene CORS para el sitio y borrado a los 30 días.
+- Análisis: `photo_analyzer` en `infra/envs/<ambiente>/variables.tf` (`mock` o `vision`). Cloud Vision tiene costo por imagen después de las 1.000 gratis por mes.
+- En local se usa el almacenamiento en disco (`LOCAL_STORAGE_DIR`) y el análisis simulado.
+
+## 6. Secretos por plataforma
 
 Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cuando su fase lo necesita. En local, el mismo valor va en `.env.local`.
 
@@ -55,6 +61,6 @@ Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cua
 | `meta-capi-access-token`                     | Meta                                        | 11   |
 | `anthropic-api-key`, `flux-api-key`          | Opcionales (proveedores alternativos de IA) | 07   |
 
-## 6. Producción
+## 7. Producción
 
 Se completa en la fase 18 (checklist de salida).

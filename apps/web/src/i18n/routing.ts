@@ -21,6 +21,8 @@ export const routing = defineRouting({
     '/login': { es: '/ingresar', en: '/login', pt: '/entrar' },
     '/login/finish': { es: '/ingresar/confirmar', en: '/login/finish', pt: '/entrar/confirmar' },
     '/account': { es: '/cuenta', en: '/account', pt: '/conta' },
+    '/create': { es: '/crear', en: '/create', pt: '/criar' },
+    '/create/[bookId]': { es: '/crear/[bookId]', en: '/create/[bookId]', pt: '/criar/[bookId]' },
   },
 });
 
