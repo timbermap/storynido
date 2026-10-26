@@ -25,8 +25,8 @@ Contexto completo del proyecto: [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) �
 
 ```bash
 pnpm install
-# Variables de entorno locales (opcionales por ahora):
-for d in apps/web apps/admin services/api services/worker; do cp -n $d/.env.example $d/.env.local; done
+cp .env.example .env.local   # un solo archivo de claves para todo el monorepo
+pnpm dev
 ```
 
 ## Comandos
@@ -42,15 +42,16 @@ for d in apps/web apps/admin services/api services/worker; do cp -n $d/.env.exam
 
 Para trabajar sobre un solo paquete: `pnpm --filter @storynido/web dev`.
 
-## Variables de entorno
+## Claves y variables de entorno
 
-| Variable                 | Dónde       | Descripción        | Default     |
-| ------------------------ | ----------- | ------------------ | ----------- |
-| `NEXT_PUBLIC_BRAND_NAME` | web, admin  | Nombre de la marca | `StoryNido` |
-| `PORT`                   | api, worker | Puerto HTTP        | 8080 / 8081 |
-| `LOG_LEVEL`              | api, worker | `trace`…`fatal`    | `info`      |
+- **Local:** un único archivo `.env.local` en la raíz del repo, que leen todas las apps (vía `@next/env`) y servicios (vía `--env-file`). Está en `.gitignore` y nunca se sube.
+- **Plantilla:** [`.env.example`](.env.example) lista todas las variables, por plataforma y fase, y marca con `[SECRETO]` las que son claves.
+- **Staging / producción:** no hay archivos `.env`. Los secretos viven en Google Secret Manager y se inyectan como variables de entorno en Cloud Run y Firebase App Hosting (fase 02).
+- **`NEXT_PUBLIC_*`** llega al navegador: nunca pongas un secreto en una variable con ese prefijo.
+- **Proveedores en `mock`** (valor por defecto): todo funciona en local sin ninguna clave.
+- **CI:** gitleaks revisa todo el historial de git en cada push y falla si encuentra una clave.
 
-Nunca subas archivos `.env.local` ni claves: en producción los secretos van en Secret Manager.
+Si una clave se sube por error: rotala de inmediato en la plataforma (Stripe, Gelato, etc.); borrarla del repo no alcanza.
 
 ## Imágenes Docker
 
