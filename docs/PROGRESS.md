@@ -25,6 +25,8 @@
 
 - Repo en GitHub: [timbermap/storynido](https://github.com/timbermap/storynido) (privado). CI y build de imágenes Docker en verde desde el 2026-10-26.
 
+- Fase 02: la infraestructura está escrita y validada, pero no se aplicó: falta crear los proyectos de Google Cloud (ver `infra/README.md`). `terraform plan` necesita el proyecto creado.
+
 ## Riesgos
 
 - Consistencia del personaje en las ilustraciones (fase 07).

@@ -1,0 +1,9 @@
+# Overrides de App Hosting para el backend de staging (environment name = "staging").
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+
+env:
+  - variable: NEXT_PUBLIC_BRAND_DOMAIN
+    value: staging.storynido.com
+    availability: [BUILD, RUNTIME]

@@ -1,0 +1,5 @@
+# Copiar a terraform.tfvars (ignorado por git) y completar.
+project_id      = "storynido-prod"
+alert_email     = "sebastian@timbermap.com"
+billing_account = "XXXXXX-XXXXXX-XXXXXX"
+# budget_amount = 500

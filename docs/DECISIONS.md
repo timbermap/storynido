@@ -97,3 +97,52 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 - **Decisión:** en desarrollo, todas las claves de todas las plataformas viven en un único `.env.local` en la raíz (permisos 600, ignorado por git). Las apps Next.js lo cargan con `loadEnvConfig` de `@next/env` y los servicios con `tsx --env-file-if-exists`. `.env.example` documenta cada variable y marca los secretos. En staging y producción no hay archivos: Secret Manager → variables de entorno. gitleaks corre en CI sobre todo el historial.
 - **Alternativas:** un `.env.local` por app (claves duplicadas en varios archivos, fácil que queden desincronizadas); gestores externos como Doppler o 1Password CLI (otra cuenta y otra dependencia).
 - **Motivo:** un solo lugar para las claves en local, y en la nube el estándar de Google Cloud que ya usa el proyecto.
+
+## 016 · Un proyecto de Google Cloud por ambiente
+
+- **Fecha:** 2026-10-26 · **Fase:** 02
+- **Decisión:** `staging` y `production` en proyectos separados (sugeridos: `storynido-staging`, `storynido-prod`), cada uno con su state de Terraform en un bucket propio (`<proyecto>-tfstate`, versionado). Un módulo `environment` compone todos los módulos; `envs/<ambiente>` solo define provider, backend y valores.
+- **Alternativas:** un solo proyecto con recursos sufijados; workspaces de Terraform.
+- **Motivo:** aislamiento real de datos (fotos de menores), IAM y cuotas; un error en staging no puede tocar producción. Presupuestos separados.
+
+## 017 · Región us-central1 y Firestore nam5
+
+- **Fecha:** 2026-10-26 · **Fase:** 02
+- **Decisión:** Cloud Run, Tasks, Workflows, Artifact Registry y buckets en `us-central1`; Firestore en `nam5` (multirregión de EE. UU.).
+- **Motivo:** el lanzamiento es México y EE. UU.; `us-central1` tiene la mayor disponibilidad de modelos de Vertex AI, soporta mapeo de dominios en Cloud Run y es de las regiones más baratas. La ubicación de Firestore no se puede cambiar después.
+
+## 018 · Cuentas de servicio y permisos
+
+- **Fecha:** 2026-10-26 · **Fase:** 02
+- **Decisión:** cinco cuentas: `sn-api`, `sn-worker`, `sn-workflows`, `sn-invoker` y `sn-deployer`. Los permisos sobre buckets, secretos, servicios y el registro se dan a nivel de recurso, no de proyecto. `sn-invoker` es la identidad OIDC de Cloud Tasks, Pub/Sub y Scheduler para llamar al worker, que es privado. Cada secreto declara qué cuentas lo pueden leer.
+- **Motivo:** mínimo privilegio. Por ejemplo, el worker no puede leer la clave de Stripe y la API no puede escribir PDFs.
+
+## 019 · Privacidad de las fotos en Storage
+
+- **Fecha:** 2026-10-26 · **Fase:** 02
+- **Decisión:** el bucket de fotos originales tiene borrado automático a 30 días, versionado apagado y **soft delete desactivado** (`retention_duration_seconds = 0`). Cifrado en reposo con claves administradas por Google; CMEK se evalúa en la fase 16.
+- **Motivo:** el soft delete de Cloud Storage (7 días por defecto) conservaría las fotos después de un borrado a pedido del cliente.
+
+## 020 · Deploys sin claves JSON y con environments de GitHub
+
+- **Fecha:** 2026-10-26 · **Fase:** 02
+- **Decisión:** Workload Identity Federation con condición sobre el repo `timbermap/storynido` y su `repository_owner_id` (157223336). El deployer de cada proyecto solo acepta tokens de jobs que corren en el environment de GitHub del mismo nombre (`attribute.environment`). Staging se despliega cuando el CI de `main` termina en verde (`workflow_run`); production, al publicar un tag `v*` o manualmente.
+- **Motivo:** las reglas de aprobación obligatoria de los environments no están disponibles en repos privados de cuentas gratuitas de GitHub; publicar el tag es el paso manual de aprobación. Si se pasa a GitHub Pro/Team, agregar _required reviewers_ al environment `production`.
+- **Nota:** los deploys están apagados (`DEPLOY_ENABLED`) hasta que exista la infraestructura, para no fallar en cada push.
+
+## 021 · Terraform no maneja la imagen de Cloud Run
+
+- **Fecha:** 2026-10-26 · **Fase:** 02
+- **Decisión:** Terraform crea los servicios con una imagen pública de ejemplo e ignora `image` (`lifecycle.ignore_changes`); GitHub Actions despliega las imágenes con `gcloud run deploy --image`. Toda otra configuración (escalado, variables, cuentas de servicio) sigue en Terraform.
+- **Motivo:** separar infraestructura de releases sin que `terraform apply` revierta el último deploy.
+
+## 022 · Secretos no montados todavía en Cloud Run
+
+- **Fecha:** 2026-10-26 · **Fase:** 02
+- **Decisión:** los secretos se declaran sin valor y no se montan aún como variables de entorno en los servicios.
+- **Motivo:** Cloud Run falla al desplegar si referencia un secreto sin versiones. Cada fase que use un secreto lo monta en Terraform cuando su valor ya esté cargado.
+
+## 023 · Firebase App Hosting conectado fuera de Terraform
+
+- **Fecha:** 2026-10-26 · **Fase:** 02
+- **Decisión:** Terraform crea el proyecto Firebase y las apps web (`web`, `admin`) y habilita las APIs de App Hosting y Developer Connect. Los backends de App Hosting se crean con `firebase apphosting:backends:create`, porque conectar GitHub requiere autorizar la app de Firebase en el navegador. La configuración de runtime está versionada en `apps/*/apphosting.yaml` (production) y `apphosting.staging.yaml`.

@@ -1,0 +1,20 @@
+# Firebase App Hosting: configuración base (production).
+# Los overrides de staging están en apphosting.staging.yaml.
+# Documentación: https://firebase.google.com/docs/app-hosting/configure
+runConfig:
+  minInstances: 0
+  maxInstances: 3
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 1024
+
+env:
+  - variable: NEXT_PUBLIC_BRAND_NAME
+    value: StoryNido
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_BRAND_DOMAIN
+    value: storynido.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_TELEMETRY_DISABLED
+    value: '1'
+    availability: [BUILD]

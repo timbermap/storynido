@@ -1,0 +1,48 @@
+name: Deploy
+
+# - staging: automático cuando el CI de main termina en verde.
+# - production: al publicar un tag v* (por ejemplo v0.1.0) o manualmente.
+# Los deploys están apagados hasta que exista la infraestructura:
+#   gh variable set DEPLOY_ENABLED --body true
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Ambiente
+        type: choice
+        options: [staging, production]
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  staging:
+    if: >-
+      vars.DEPLOY_ENABLED == 'true' && (
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+        (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
+      )
+    uses: ./.github/workflows/_deploy-cloud-run.yml
+    with:
+      environment: staging
+      ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+  production:
+    if: >-
+      vars.DEPLOY_ENABLED == 'true' && (
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+        (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
+      )
+    uses: ./.github/workflows/_deploy-cloud-run.yml
+    with:
+      environment: production
+      ref: ${{ github.sha }}

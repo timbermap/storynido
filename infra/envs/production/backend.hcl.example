@@ -1,0 +1,2 @@
+# Lo genera infra/scripts/bootstrap.sh. Uso: terraform init -backend-config=backend.hcl
+bucket = "storynido-prod-tfstate"

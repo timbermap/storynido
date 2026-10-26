@@ -64,4 +64,8 @@ docker build -f services/worker/Dockerfile -t storynido-worker .
 
 ## CI
 
-GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) corre formato, lint, tipos, tests y build en cada PR y push a `main`, y construye las imágenes Docker. El deploy se agrega en la fase 02.
+GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) corre formato, lint, tipos, tests y build en cada PR y push a `main`, y construye las imágenes Docker. También valida Terraform (`fmt`, `validate`, `tflint`) y busca claves filtradas con gitleaks.
+
+## Infraestructura y deploy
+
+Terraform para Google Cloud en [infra/](infra/README.md). Staging se despliega solo cuando el CI de `main` pasa; production, al publicar un tag `v*`. Guía completa: [docs/SETUP.md](docs/SETUP.md).

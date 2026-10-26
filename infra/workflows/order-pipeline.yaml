@@ -1,0 +1,22 @@
+# Pipeline de generación de un pedido pagado.
+# PLACEHOLDER: los pasos reales (foto, historia, ilustraciones, QA, PDF, entrega)
+# se implementan en la fase 08. Por ahora solo registra la ejecución.
+main:
+  params: [event]
+  steps:
+    - init:
+        assign:
+          - order_id: ${map.get(event, "orderId")}
+          - worker_url: ${sys.get_env("WORKER_URL")}
+    - log_start:
+        call: sys.log
+        args:
+          severity: INFO
+          json:
+            message: order-pipeline placeholder
+            orderId: ${order_id}
+            workerUrl: ${worker_url}
+    - done:
+        return:
+          orderId: ${order_id}
+          status: placeholder

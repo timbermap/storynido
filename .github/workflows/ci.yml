@@ -43,6 +43,32 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
+  terraform:
+    name: Terraform (fmt, validate, tflint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.17.0
+      - uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.65.0
+      - run: terraform fmt -check -recursive infra
+      - name: terraform validate
+        run: |
+          for env in staging production; do
+            terraform -chdir=infra/envs/$env init -backend=false -input=false
+            terraform -chdir=infra/envs/$env validate
+          done
+      - name: tflint
+        working-directory: infra
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          tflint --init --config "$PWD/.tflint.hcl"
+          tflint --recursive --config "$PWD/.tflint.hcl"
+
   docker:
     name: Imagen Docker (${{ matrix.service }})
     runs-on: ubuntu-latest
