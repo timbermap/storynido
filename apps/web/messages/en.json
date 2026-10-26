@@ -54,7 +54,8 @@
       "cta": "Create a free preview",
       "secondary": "See how it works",
       "fromPrice": "From {price}",
-      "formats": "Available as a digital and printed book"
+      "formats": "Available as a digital and printed book",
+      "imageAlt": "Watercolor illustration of a young astronaut and his dog looking at the moon among the stars"
     },
     "trust": {
       "preview": "Free preview before you pay",

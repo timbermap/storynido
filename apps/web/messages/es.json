@@ -54,7 +54,8 @@
       "cta": "Crear una vista previa gratis",
       "secondary": "Ver cómo funciona",
       "fromPrice": "Desde {price}",
-      "formats": "Disponible en digital y libro impreso"
+      "formats": "Disponible en digital y libro impreso",
+      "imageAlt": "Ilustración en acuarela de un niño astronauta y su perro mirando la luna entre estrellas"
     },
     "trust": {
       "preview": "Vista previa gratis antes de pagar",

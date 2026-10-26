@@ -64,7 +64,7 @@ Flotación suave del libro del hero (CSS), transiciones de 150 a 250 ms. Siempre
 
 ## Pendiente de la guía
 
-- Ilustración de acuarela del hero (`hero-acuarela-muestra.webp`): reemplaza el libro con portadas SVG cuando esté el archivo original.
+- Ilustración del hero: en uso `apps/web/public/brand/hero-acuarela.webp` (608×404, recortada de la maqueta). Pedir el original en alta resolución para pantallas retina.
 - Portadas reales en acuarela generadas por el pipeline (fase 07).
 - Wizard (fase 06) y checkout (fase 11) con este sistema: un objetivo por pantalla, progreso visible, checkout sereno.
 - Experimentos de copy y CTA (A/B) cuando haya tráfico.

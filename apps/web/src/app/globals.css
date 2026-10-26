@@ -69,16 +69,6 @@
   --font-display: var(--font-heading), ui-serif, Georgia, serif;
 }
 
-@keyframes book-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -14,7 +14,7 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
-import { BookShowcase } from '@/components/home/book-showcase';
+import { HeroArt } from '@/components/home/hero-art';
 import { FaqList, parseFaq } from '@/components/home/faq-list';
 import { JsonLd } from '@/components/json-ld';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
@@ -117,9 +117,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {fromPrice && <span>{t('hero.fromPrice', { price: fromPrice })}</span>}
             </p>
           </div>
-          <BookShowcase
-            covers={stories.map((story) => ({ src: story.coverImage, title: story.title }))}
-          />
+          <HeroArt alt={t('hero.imageAlt')} />
         </div>
       </section>
 

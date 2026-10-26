@@ -54,7 +54,8 @@
       "cta": "Criar uma prévia grátis",
       "secondary": "Ver como funciona",
       "fromPrice": "A partir de {price}",
-      "formats": "Disponível em livro digital e impresso"
+      "formats": "Disponível em livro digital e impresso",
+      "imageAlt": "Ilustração em aquarela de um menino astronauta e seu cachorro olhando a lua entre as estrelas"
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",
