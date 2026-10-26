@@ -1,0 +1,23 @@
+{
+  "name": "@micuento/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env.local src/server.ts",
+    "build": "tsdown",
+    "start": "node dist/server.mjs",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "fastify": "5.12.7",
+    "zod": "4.3.3"
+  },
+  "devDependencies": {
+    "@micuento/shared": "workspace:*",
+    "tsdown": "0.23.2",
+    "tsx": "4.23.15"
+  }
+}
