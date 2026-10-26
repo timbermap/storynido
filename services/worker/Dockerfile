@@ -7,7 +7,7 @@ WORKDIR /repo
 
 FROM base AS build
 COPY . .
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --filter "@storynido/worker..."
 RUN pnpm turbo run build --filter=@storynido/worker
 RUN pnpm --filter=@storynido/worker deploy --prod --legacy /out
 
