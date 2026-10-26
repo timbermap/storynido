@@ -90,6 +90,31 @@
       "title": "Uma história para lembrar para sempre.",
       "text": "O melhor presente é se ver dentro de uma aventura.",
       "button": "Criar uma prévia grátis"
+    },
+    "photo": {
+      "title": "Da foto ao personagem",
+      "subtitle": "Com 1 a 3 fotos desenhamos um personagem parecido com seu filho, no estilo que você escolher.",
+      "photoLabel": "A foto dele",
+      "characterLabel": "O personagem ilustrado",
+      "point1": "A foto é só uma referência: nunca aparece no livro.",
+      "point2": "O personagem fica igual em todas as páginas.",
+      "point3": "As fotos são guardadas criptografadas e excluídas automaticamente após 30 dias.",
+      "sample": "Ilustração de exemplo"
+    },
+    "cover": {
+      "title": "O nome dele na capa",
+      "subtitle": "Escreva o nome e veja como ficaria o livro.",
+      "label": "Nome do protagonista",
+      "defaultName": "Sofia",
+      "line1": "A grande aventura de",
+      "line3": "nas estrelas",
+      "sample": "Capa de exemplo",
+      "cta": "Criar a história"
+    },
+    "trustInline": {
+      "formats": "Disponível em livro digital e impresso",
+      "shipping": "Entrega para {country}",
+      "preview": "Prévia grátis"
     }
   },
   "Stories": {

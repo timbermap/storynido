@@ -90,6 +90,31 @@
       "title": "A story to remember forever.",
       "text": "The best gift is seeing yourself inside an adventure.",
       "button": "Create a free preview"
+    },
+    "photo": {
+      "title": "From their photo to their character",
+      "subtitle": "From 1 to 3 photos we draw a character that looks like your child, in the style you choose.",
+      "photoLabel": "Their photo",
+      "characterLabel": "Their illustrated character",
+      "point1": "The photo is only a reference: it never appears in the book.",
+      "point2": "Their character looks the same on every page.",
+      "point3": "Photos are stored encrypted and deleted automatically after 30 days.",
+      "sample": "Sample illustration"
+    },
+    "cover": {
+      "title": "Their name on the cover",
+      "subtitle": "Type their name and see how their book would look.",
+      "label": "Hero's name",
+      "defaultName": "Emma",
+      "line1": "The great adventure of",
+      "line3": "among the stars",
+      "sample": "Sample cover",
+      "cta": "Create their story"
+    },
+    "trustInline": {
+      "formats": "Available as a digital and printed book",
+      "shipping": "Shipping to {country}",
+      "preview": "Free preview"
     }
   },
   "Stories": {

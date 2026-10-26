@@ -62,13 +62,21 @@ Contrastes verificados (WCAG 2.2 AA): blanco sobre violeta 6,2:1 · tinta sobre 
 - Íconos de contorno redondeado (lucide), confianza sobre menta.
 - Logo provisorio: estrella de 4 puntas sobre lavanda + "StoryNido" en Nunito Sans Black violeta. **Pendiente: logo definitivo de diseñador y búsqueda de marca registrada.**
 
+## Home (estructura)
+
+1. Hero: título, bajada, CTA "Crear una vista previa gratis", precio "desde" y 3 puntos de confianza con íconos de línea (formatos, envío al país del visitante, vista previa gratis).
+2. Cómo funciona: 3 pasos con ícono en círculo blanco, número en círculo pastel (lavanda, durazno, menta) y flechas.
+3. **De su foto a su personaje:** marco tipo polaroid ilustrado ("Su foto") → personaje en acuarela. **Nunca fotos reales de chicos** sin un consentimiento específico para publicidad.
+4. **Su nombre en la portada:** el visitante escribe el nombre y la portada de muestra se actualiza en vivo.
+5. Galería de aventuras, enseñanzas, preguntas frecuentes, garantía y bloque final.
+
 ## Movimiento
 
 Flotación suave del libro del hero (CSS), transiciones de 150 a 250 ms. Siempre respetar `prefers-reduced-motion`. **Sin animaciones continuas en el checkout.**
 
 ## Pendiente de la guía
 
-- Ilustración del hero: en uso `apps/web/public/brand/hero-acuarela.webp` (608×404, recortada de la maqueta). Pedir el original en alta resolución para pantallas retina.
+- Ilustración del hero: en uso `apps/web/public/brand/hero-acuarela.webp` (608×404, recortada de la maqueta). Se reutiliza en la sección foto→personaje (primer plano) y en la portada de muestra. Pedir el original en alta resolución y sumar 2 o 3 acuarelas más (sin texto) para variar.
 - Portadas reales en acuarela generadas por el pipeline (fase 07).
 - Wizard (fase 06) y checkout (fase 11) con este sistema: un objetivo por pantalla, progreso visible, checkout sereno.
 - Experimentos de copy y CTA (A/B) cuando haya tráfico.

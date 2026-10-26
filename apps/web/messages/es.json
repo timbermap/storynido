@@ -90,6 +90,31 @@
       "title": "Una historia para recordar siempre.",
       "text": "El mejor regalo es verse dentro de una aventura.",
       "button": "Crear una vista previa gratis"
+    },
+    "photo": {
+      "title": "De su foto a su personaje",
+      "subtitle": "Con 1 a 3 fotos dibujamos un personaje que se parece a tu hijo, en el estilo que elijas.",
+      "photoLabel": "Su foto",
+      "characterLabel": "Su personaje ilustrado",
+      "point1": "La foto es solo una referencia: nunca aparece en el libro.",
+      "point2": "Su personaje se ve igual en todas las páginas.",
+      "point3": "Las fotos se guardan cifradas y se borran solas a los 30 días.",
+      "sample": "Ilustración de muestra"
+    },
+    "cover": {
+      "title": "Su nombre, en la portada",
+      "subtitle": "Escribe su nombre y mira cómo quedaría su libro.",
+      "label": "Nombre del protagonista",
+      "defaultName": "Martina",
+      "line1": "La gran aventura de",
+      "line3": "en las estrellas",
+      "sample": "Portada de muestra",
+      "cta": "Crear su cuento"
+    },
+    "trustInline": {
+      "formats": "Disponible en digital y libro impreso",
+      "shipping": "Envío a {country}",
+      "preview": "Vista previa gratis"
     }
   },
   "Stories": {

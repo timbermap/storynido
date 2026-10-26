@@ -2,19 +2,19 @@ import {
   ArrowRight,
   BookOpen,
   Gift,
-  Globe,
-  Lock,
   Map,
+  ShieldCheck,
   Sparkles,
   Truck,
   UserRound,
-  ShieldCheck,
 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
 import { HeroArt } from '@/components/home/hero-art';
+import { NameCoverDemo } from '@/components/home/name-cover-demo';
+import { PhotoToStory } from '@/components/home/photo-to-story';
 import { FaqList, parseFaq } from '@/components/home/faq-list';
 import { JsonLd } from '@/components/json-ld';
 import { LessonGroups } from '@/components/lessons/lesson-groups';
@@ -44,20 +44,35 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const fromPrice = lowestPrice(offer, locale, display.country);
   const faqItems = faq ? parseFaq(faq.body) : [];
 
+  // Cada paso con su color pastel (número e ícono).
   const steps = [
-    { icon: UserRound, title: t('how.step1Title'), text: t('how.step1Text') },
-    { icon: Map, title: t('how.step2Title'), text: t('how.step2Text') },
-    { icon: BookOpen, title: t('how.step3Title'), text: t('how.step3Text') },
+    {
+      icon: UserRound,
+      title: t('how.step1Title'),
+      text: t('how.step1Text'),
+      tone: 'bg-secondary text-primary',
+    },
+    {
+      icon: Map,
+      title: t('how.step2Title'),
+      text: t('how.step2Text'),
+      tone: 'bg-peach text-[#8a4a2a]',
+    },
+    {
+      icon: BookOpen,
+      title: t('how.step3Title'),
+      text: t('how.step3Text'),
+      tone: 'bg-mint text-success',
+    },
   ];
 
   const trust = [
-    { icon: Sparkles, text: t('trust.preview') },
+    { icon: BookOpen, text: t('trustInline.formats') },
     {
       icon: Truck,
-      text: t('trust.shipping', { country: tSwitch(`countries.${display.country}`) }),
+      text: t('trustInline.shipping', { country: tSwitch(`countries.${display.country}`) }),
     },
-    { icon: Lock, text: t('trust.privacy') },
-    { icon: Globe, text: t('trust.languages') },
+    { icon: Sparkles, text: t('trustInline.preview') },
   ];
 
   return (
@@ -112,55 +127,73 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {t('hero.secondary')}
               </Link>
             </div>
-            <p className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm font-bold text-muted-foreground lg:justify-start">
-              <span className="inline-flex items-center gap-1.5">
-                <BookOpen className="size-4 text-primary" aria-hidden="true" />
-                {t('hero.formats')}
-              </span>
-              {fromPrice && <span>{t('hero.fromPrice', { price: fromPrice })}</span>}
-            </p>
+            {fromPrice && (
+              <p className="mt-4 text-sm font-bold text-muted-foreground">
+                {t('hero.fromPrice', { price: fromPrice })}
+              </p>
+            )}
+            <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-semibold text-muted-foreground lg:justify-start">
+              {trust.map(({ icon: Icon, text }) => (
+                <li key={text} className="inline-flex items-center gap-2">
+                  <Icon className="size-5 text-primary" strokeWidth={1.75} aria-hidden="true" />
+                  {text}
+                </li>
+              ))}
+            </ul>
           </div>
           <HeroArt alt={t('hero.imageAlt')} />
         </div>
       </section>
 
-      {/* Confianza */}
-      <section aria-label={t('trust.preview')} className="border-y bg-card">
-        <ul className="container-page grid gap-4 py-5 text-sm font-extrabold sm:grid-cols-2 lg:grid-cols-4">
-          {trust.map(({ icon: Icon, text }) => (
-            <li key={text} className="flex items-center gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-mint text-success">
-                <Icon className="size-5" aria-hidden="true" />
-              </span>
-              {text}
-            </li>
-          ))}
-        </ul>
-      </section>
-
       {/* Cómo funciona */}
       <section id={HOW_IT_WORKS_ID} className="container-page scroll-mt-28 py-20 lg:py-24">
-        <div className="max-w-2xl">
+        <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
             {t('how.title')}
           </h2>
           <p className="mt-3 text-lg text-muted-foreground">{t('how.subtitle')}</p>
         </div>
-        <ol className="mt-10 grid gap-5 md:grid-cols-3">
-          {steps.map(({ icon: Icon, title, text }, index) => (
-            <li key={title} className="rounded-xl border bg-card p-7 shadow-[var(--shadow-card)]">
-              <div className="flex items-center justify-between">
-                <span className="grid size-12 place-items-center rounded-[0.95rem] bg-secondary text-lg font-black text-primary">
+        <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-6">
+          {steps.map(({ icon: Icon, title, text, tone }, index) => (
+            <li key={title} className="relative flex flex-col items-center text-center">
+              <div className="relative">
+                <span className="grid size-28 place-items-center rounded-full bg-card shadow-[var(--shadow-card)]">
+                  <Icon className="size-11 text-primary/80" strokeWidth={1.5} aria-hidden="true" />
+                </span>
+                <span
+                  className={`absolute -top-1 -left-1 grid size-10 place-items-center rounded-full font-display text-lg font-bold ${tone}`}
+                >
                   {index + 1}
                 </span>
-                <Icon className="size-7 text-primary/70" aria-hidden="true" />
               </div>
-              <h3 className="mt-5 text-2xl leading-tight font-semibold">{title}</h3>
-              <p className="mt-2 text-muted-foreground">{text}</p>
+              {index < steps.length - 1 && (
+                <ArrowRight
+                  aria-hidden="true"
+                  className="absolute top-12 -right-5 hidden size-7 text-[#d8b9a8] md:block"
+                  strokeWidth={1.5}
+                />
+              )}
+              <h3 className="mt-6 text-2xl leading-tight font-semibold">{title}</h3>
+              <p className="mt-2 max-w-xs text-muted-foreground">{text}</p>
             </li>
           ))}
         </ol>
       </section>
+
+      <PhotoToStory />
+
+      <NameCoverDemo
+        labels={{
+          title: t('cover.title'),
+          subtitle: t('cover.subtitle'),
+          label: t('cover.label'),
+          defaultName: t('cover.defaultName'),
+          line1: t('cover.line1'),
+          line3: t('cover.line3'),
+          sample: t('cover.sample'),
+          cta: t('cover.cta'),
+        }}
+      />
 
       {/* Galería de historias */}
       {stories.length > 0 && (
