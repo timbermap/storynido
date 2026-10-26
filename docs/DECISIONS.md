@@ -437,3 +437,20 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 - **Decisión:** `gemini-3.1-flash-image` como modelo por defecto. El prompt ahora aclara que las referencias son solo para el aspecto del personaje y del estilo, y que la escena es nueva (sin copiar composición, fondo ni objetos).
 - **Pendiente:** verificar la corrección con una corrida corta solo de flash (~USD 0,41). Requiere aprobación.
 - **Estimación del script:** ahora incluye los tokens de entrada (foto y portada de referencia), que la primera estimación no contaba.
+
+## 056 · Crear sin cuenta: sesión anónima que se convierte en cuenta
+
+- **Fecha:** 2026-10-26 · **Estrategia comercial:** Fase 1 ("sin login obligatorio antes de comprobar valor")
+- **Decisión:** `/crear` abre una sesión anónima de Firebase y crea el borrador sin pedir cuenta. Las reglas de Firestore no cambian: el dueño es el `uid` anónimo.
+- **Cuándo se pide cuenta:** en la muestra, la tarjeta "Guarda tu cuento" invita a crearla. "Mi cuenta" y el inicio de sesión tratan la sesión anónima como sin cuenta.
+- **Al iniciar sesión:**
+  - **Google y Apple:** se vincula la sesión (mismo `uid`). Si esa cuenta ya existía, se entra con ella y la API traspasa los datos.
+  - **Enlace por mail:** se entra con el enlace y la API traspasa los datos. No se intenta vincular, porque si el mail ya tenía cuenta el intento fallido consume el código del enlace.
+- **Traspaso (`POST /v1/me/merge-anonymous`):**
+  - Exige el ID token de la sesión anónima: un token que no sea anónimo se rechaza, para que nadie pueda llevarse datos de otra cuenta.
+  - Mueve `books`, `children`, `photos` y `consents`; los consentimientos guardan `transferredFromUid`.
+  - Deja el registro en `auditLog` y borra el usuario anónimo.
+- **Abuso:** las cuotas de vista previa por IP (3 veces la cuota por usuario) y App Check en producción frenan la creación masiva de sesiones anónimas.
+- **Pendiente:**
+  - Habilitar el proveedor anónimo en Firebase Auth de staging y producción. Sin él, `/crear` vuelve a pedir inicio de sesión.
+  - La vinculación por Google y Apple no tiene E2E: el emulador no permite popups en modo headless.

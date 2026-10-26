@@ -2,6 +2,7 @@ import type { ProviderRegistry } from '@storynido/providers';
 import type { SiteConfig } from '@storynido/shared';
 import type { Firestore } from 'firebase-admin/firestore';
 
+import type { AccountService } from './accounts/service';
 import type { CatalogRepository } from './catalog';
 import type { ApiConfig } from './config';
 import type { PhotoService } from './photos/service';
@@ -38,6 +39,7 @@ export interface ApiDeps {
   catalog: CatalogRepository;
   photos: PhotoService;
   previews: PreviewService;
+  accounts: AccountService;
   db: Firestore;
 }
 

@@ -403,7 +403,9 @@
         "validation_failed": "That text isn't suitable for a children's story. Please change it and try again.",
         "bad_request": "Make sure the main character, photo, story and style are complete.",
         "generic": "Something went wrong. Please try again in a few minutes."
-      }
+      },
+      "saveStoryTitle": "Save your story",
+      "saveStoryText": "Create a free account so you don’t lose this sample and can pick it up on any device."
     }
   }
 }

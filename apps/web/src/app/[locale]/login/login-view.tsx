@@ -10,12 +10,12 @@ import { brand } from '@/lib/brand';
 
 export function LoginView() {
   const t = useTranslations('Auth');
-  const { user, loading } = useAuth();
+  const { signedIn, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && user) router.replace('/account');
-  }, [loading, user, router]);
+    if (!loading && signedIn) router.replace('/account');
+  }, [loading, signedIn, router]);
 
   return (
     <section className="container-page flex min-h-[70vh] max-w-sm flex-col justify-center gap-8 py-12">

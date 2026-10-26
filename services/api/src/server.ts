@@ -10,11 +10,13 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 import { buildApp } from './app';
 import { FirestoreCatalog } from './catalog';
+import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
 import {
   FirebaseAppCheckVerifier,
+  FirebaseAuthAccounts,
   FirebaseTokenVerifier,
   FirestoreLiveConfig,
   initFirebaseAdmin,
@@ -62,19 +64,21 @@ const liveConfig = new FirestoreLiveConfig(firebase, providers, log);
 liveConfig.start();
 
 const catalog = new FirestoreCatalog(db);
+const tokens = new FirebaseTokenVerifier(firebase);
 
 const app = await buildApp({
   logger: loggerOptions,
   deps: {
     config,
     version: config.env.K_REVISION,
-    tokens: new FirebaseTokenVerifier(firebase),
+    tokens,
     appCheck: new FirebaseAppCheckVerifier(firebase),
     siteConfig: liveConfig,
     providers,
     catalog,
     photos: new PhotoService(db, providers),
     previews: new PreviewService(db, providers, catalog, log),
+    accounts: new AccountService(db, tokens, new FirebaseAuthAccounts(firebase)),
     db,
   },
 });

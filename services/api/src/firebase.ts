@@ -25,6 +25,15 @@ export class FirebaseTokenVerifier implements TokenVerifier {
   }
 }
 
+/** Borrado de usuarios de Firebase Auth (sesiones anónimas ya traspasadas). */
+export class FirebaseAuthAccounts {
+  constructor(private readonly app: App) {}
+
+  async deleteUser(uid: string): Promise<void> {
+    await getAuth(this.app).deleteUser(uid);
+  }
+}
+
 export class FirebaseAppCheckVerifier implements AppCheckVerifier {
   constructor(private readonly app: App) {}
 

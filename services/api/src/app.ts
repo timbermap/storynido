@@ -8,6 +8,7 @@ import { registerDocs } from './plugins/docs';
 import { registerErrorHandling } from './plugins/error-handler';
 import { registerSecurity } from './plugins/security';
 import { registerSiteMode } from './plugins/site-mode';
+import { registerAccountRoutes } from './routes/accounts';
 import { registerAiConfigRoutes } from './routes/ai-config';
 import { registerCatalogRoutes } from './routes/catalog';
 import { registerDevStorageRoutes } from './routes/dev-storage';
@@ -47,6 +48,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   registerPhotoRoutes(app, deps.photos);
   registerPreviewRoutes(app, deps.previews);
   registerAiConfigRoutes(app, deps.db);
+  registerAccountRoutes(app, deps.accounts);
   extend?.(app);
 
   const storage = deps.providers.storage();

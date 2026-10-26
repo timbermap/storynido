@@ -9,6 +9,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { buildApp } from './app';
 import { InMemoryCatalog } from './catalog';
 import { initFirebaseAdmin } from './firebase';
+import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
@@ -20,11 +21,21 @@ import {
 } from './deps';
 import type { AppOptions } from './app';
 
-/** Tokens de prueba: "token-<uid>" con un rol opcional ("token-ana:admin"). */
+/**
+ * Tokens de prueba: "token-<uid>" con un rol opcional ("token-ana:admin").
+ * "token-<uid>:anonymous" es una sesión anónima (sin email).
+ */
 export const fakeTokens: TokenVerifier = {
   verify(idToken) {
     const match = /^token-([a-z0-9]+)(?::(\w+))?$/.exec(idToken);
     if (!match?.[1]) return Promise.reject(new Error('token inválido'));
+    if (match[2] === 'anonymous') {
+      return Promise.resolve({
+        uid: match[1],
+        email: null,
+        claims: { firebase: { sign_in_provider: 'anonymous' } },
+      });
+    }
     return Promise.resolve({
       uid: match[1],
       email: `${match[1]}@storynido.test`,
@@ -32,6 +43,9 @@ export const fakeTokens: TokenVerifier = {
     });
   },
 };
+
+/** Usuarios borrados por los servicios durante un test. */
+export const deletedUsers: string[] = [];
 
 export const fakeAppCheck: AppCheckVerifier = {
   verify: (token) => Promise.resolve(token === 'valid-app-check'),
@@ -71,6 +85,12 @@ export async function createTestApp(
     // Los tests corren con los emuladores de test (with-test-emulators.sh).
     photos: new PhotoService(db, providers),
     previews: new PreviewService(db, overrides.providers ?? providers, catalog, silentLogger),
+    accounts: new AccountService(db, fakeTokens, {
+      deleteUser: (uid) => {
+        deletedUsers.push(uid);
+        return Promise.resolve();
+      },
+    }),
     db,
     ...overrides,
   };

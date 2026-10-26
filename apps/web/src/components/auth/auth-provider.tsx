@@ -6,12 +6,17 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { roleFromClaims, type CountryCode, type Locale, type Role } from '@storynido/shared';
 
 interface AuthState {
+  /** Usuario de Firebase, incluida la sesión anónima del creador. */
   user: User | null;
+  /** Con cuenta real (no anónima): la que ve "Mi cuenta" y puede comprar. */
+  signedIn: boolean;
   role: Role;
   loading: boolean;
 }
 
-const AuthContext = createContext<AuthState>({ user: null, role: 'customer', loading: true });
+const LOGGED_OUT: AuthState = { user: null, signedIn: false, role: 'customer', loading: false };
+
+const AuthContext = createContext<AuthState>({ ...LOGGED_OUT, loading: true });
 
 /**
  * Sesión persistente: Firebase la guarda en el navegador y la restaura sola.
@@ -26,7 +31,7 @@ export function AuthProvider({
   locale: Locale;
   country: CountryCode;
 }) {
-  const [state, setState] = useState<AuthState>({ user: null, role: 'customer', loading: true });
+  const [state, setState] = useState<AuthState>({ ...LOGGED_OUT, loading: true });
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -40,12 +45,19 @@ export function AuthProvider({
       if (effect.cancelled) return;
       unsubscribe = onIdTokenChanged(getFirebaseAuth(), (user) => {
         if (!user) {
-          setState({ user: null, role: 'customer', loading: false });
+          setState(LOGGED_OUT);
           return;
         }
         void (async () => {
           const token = await user.getIdTokenResult();
-          setState({ user, role: roleFromClaims(token.claims), loading: false });
+          setState({
+            user,
+            signedIn: !user.isAnonymous,
+            role: roleFromClaims(token.claims),
+            loading: false,
+          });
+          // La sesión anónima no es una cuenta: el perfil se crea al vincularla.
+          if (user.isAnonymous) return;
           const [{ getFirebaseDb }, { ensureUserProfile }] = await Promise.all([
             import('@/lib/firebase/client'),
             import('@/lib/firebase/profile'),

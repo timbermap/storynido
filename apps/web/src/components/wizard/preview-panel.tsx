@@ -5,6 +5,8 @@ import { AlertTriangle, Loader2, Pencil, RefreshCw, Sparkles } from 'lucide-reac
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
+import { useAuth } from '@/components/auth/auth-provider';
+import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 
@@ -37,6 +39,7 @@ export function PreviewPanel({
   onEditChoices: () => void;
 }) {
   const t = useTranslations('Wizard.preview');
+  const { user } = useAuth();
   const [preview, setPreview] = useState<PublicPreview | null>(null);
   const [busy, setBusy] = useState<Target | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -206,6 +209,21 @@ export function PreviewPanel({
             ))}
           </ol>
         </>
+      )}
+
+      {data && user?.isAnonymous && (
+        <section
+          aria-labelledby="save-story"
+          className="mt-12 grid gap-6 rounded-xl bg-secondary p-6 sm:p-8 md:grid-cols-2 md:items-center"
+        >
+          <div>
+            <h2 id="save-story" className="text-2xl font-semibold">
+              {t('saveStoryTitle')}
+            </h2>
+            <p className="mt-2 text-muted-foreground">{t('saveStoryText')}</p>
+          </div>
+          <SignInPanel />
+        </section>
       )}
 
       <div className="mt-12 flex flex-col gap-3 border-t pt-8 sm:flex-row sm:items-center">

@@ -364,6 +364,22 @@ export const apiRoutes = {
     params: z.object({ photoId: z.string().min(1) }),
     response: z.object({ deleted: z.literal(true) }),
   },
+  mergeAnonymous: {
+    method: 'POST',
+    path: '/v1/me/merge-anonymous',
+    access: 'user',
+    summary:
+      'Pasa a la cuenta actual los borradores creados sin cuenta (sesión anónima) y borra esa sesión',
+    body: z.object({ anonymousIdToken: z.string().min(10).max(4096) }),
+    response: z.object({
+      moved: z.object({
+        books: z.number().int(),
+        children: z.number().int(),
+        photos: z.number().int(),
+        consents: z.number().int(),
+      }),
+    }),
+  },
   generatePreview: {
     method: 'POST',
     path: '/v1/books/:bookId/preview',

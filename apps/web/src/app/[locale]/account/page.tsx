@@ -18,15 +18,16 @@ import { logOut } from '@/lib/firebase/auth-actions';
 /** Mi cuenta (versión inicial): se completa en la fase 12. */
 export default function AccountPage() {
   const t = useTranslations('Account');
-  const { user, role, loading } = useAuth();
+  const { user, signedIn, role, loading } = useAuth();
   const router = useRouter();
   const [apiCheck, setApiCheck] = useState<string>(t('verifying'));
   const [drafts, setDrafts] = useState<DraftSummary[]>([]);
   const tWizard = useTranslations('Wizard.drafts');
 
   useEffect(() => {
-    if (!loading && !user) router.replace('/login');
-  }, [loading, user, router]);
+    // La sesión anónima del creador no es una cuenta: primero hay que iniciar sesión.
+    if (!loading && !signedIn) router.replace('/login');
+  }, [loading, signedIn, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -56,7 +57,7 @@ export default function AccountPage() {
     };
   }, [user, t]);
 
-  if (loading || !user) {
+  if (loading || !user || !signedIn) {
     return (
       <section className="flex min-h-[60vh] items-center justify-center">
         <p role="status" className="text-muted-foreground">

@@ -9,14 +9,16 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
+import { startAnonymousSession } from '@/lib/firebase/auth-actions';
 import { createDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 
 import { DraftsList } from './drafts-list';
 import { SignInGate } from './sign-in-gate';
 
 /**
- * Punto de entrada del creador. Con una historia o enseñanza preseleccionada crea el borrador
- * y entra directo; si no, ofrece retomar un borrador o empezar uno nuevo.
+ * Punto de entrada del creador. Sin sesión abre una anónima (se crea sin cuenta y se vincula
+ * al iniciar sesión). Con una historia o enseñanza preseleccionada crea el borrador y entra
+ * directo; si no, ofrece retomar un borrador o empezar uno nuevo.
  */
 export function CreateStart({
   storyId,
@@ -31,6 +33,8 @@ export function CreateStart({
   const router = useRouter();
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [busy, setBusy] = useState(false);
+  // Si la sesión anónima no está disponible (proveedor deshabilitado), se pide iniciar sesión.
+  const [anonymousFailed, setAnonymousFailed] = useState(false);
 
   async function startNew() {
     if (!user) return;
@@ -60,7 +64,14 @@ export function CreateStart({
     if (user) void onUser();
   }, [user]);
 
-  if (!loading && !user) return <SignInGate />;
+  useEffect(() => {
+    if (loading || user) return;
+    startAnonymousSession().catch(() => {
+      setAnonymousFailed(true);
+    });
+  }, [loading, user]);
+
+  if (anonymousFailed && !user) return <SignInGate />;
   if (!drafts) {
     return (
       <p role="status" className="container-page py-20 text-center text-muted-foreground">

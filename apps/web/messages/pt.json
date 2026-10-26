@@ -403,7 +403,9 @@
         "validation_failed": "Esse texto não é adequado para uma história infantil. Mude e tente de novo.",
         "bad_request": "Confira se o protagonista, a foto, a história e o estilo estão completos.",
         "generic": "Algo deu errado. Tente de novo em alguns minutos."
-      }
+      },
+      "saveStoryTitle": "Salve sua história",
+      "saveStoryText": "Crie sua conta grátis para não perder esta amostra e continuar em qualquer dispositivo."
     }
   }
 }

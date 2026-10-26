@@ -8,13 +8,13 @@ import { Link } from '@/i18n/navigation';
 
 export function AccountLink() {
   const t = useTranslations('Nav');
-  const { user } = useAuth();
+  const { signedIn } = useAuth();
   return (
     <Link
-      href={user ? '/account' : '/login'}
+      href={signedIn ? '/account' : '/login'}
       className={buttonVariants({ variant: 'ghost', size: 'sm' })}
     >
-      {user ? t('account') : t('signIn')}
+      {signedIn ? t('account') : t('signIn')}
     </Link>
   );
 }
