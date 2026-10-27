@@ -314,5 +314,5 @@ console.info(
     : '  países MX y US activos, precios de ejemplo, sitio en vivo, IA en mock',
 );
 console.info(
-  `  ${String(SEED_STORIES.length)} historias, ${String(SEED_LESSONS.length)} enseñanzas, ${String(SEED_STYLES.length)} estilos, ${String(SEED_ACTIVITY_TEMPLATES.length)} actividades, configuración editorial, textos legales y FAQ en ${LOCALES.join(', ')}`,
+  `  ${String(SEED_STORIES.length + SEED_NEW_STORIES.length)} historias, ${String(SEED_COLLECTIONS.length)} colecciones, ${String(SEED_LESSONS.length)} enseñanzas, ${String(SEED_STYLES.length)} estilos, ${String(SEED_ACTIVITY_TEMPLATES.length)} actividades, configuración editorial, textos legales y FAQ en ${LOCALES.join(', ')}`,
 );

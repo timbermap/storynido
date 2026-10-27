@@ -239,12 +239,9 @@ export const SEED_STORIES: SeedStory[] = [
   },
 ];
 
-/**
- * Historias de las colecciones nuevas (fase 07c). Quedan inactivas hasta tener su portada
- * ilustrada (`/samples/<slug>.webp`), que se genera con aprobación de costo.
- */
+/** Historias de las colecciones nuevas (fase 07c), con portada en `/samples/<slug>.webp`. */
 const NEW_STORY_BASE = {
-  active: false,
+  active: true,
   tags: [],
   pageCount: 12,
   samplePages: [],
