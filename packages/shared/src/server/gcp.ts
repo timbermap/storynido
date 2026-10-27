@@ -4,7 +4,7 @@
  */
 export async function gcpAccessToken(fetchImpl: typeof fetch = fetch): Promise<string> {
   const res = await fetchImpl(
-    'http://metadata.google.internal/computeMetadata/v1/instance/service-account/default/token',
+    'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token',
     { headers: { 'Metadata-Flavor': 'Google' } },
   );
   if (!res.ok) throw new Error(`Metadata token: HTTP ${String(res.status)}`);
