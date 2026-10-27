@@ -558,3 +558,34 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Pendiente:**
   - Un error intermitente de React (#441, `useEffectEvent` llamado durante el render) apareció 1 vez en 7 corridas del E2E y no se pudo reproducir.
   - Las historias que ya existen en staging no se actualizan con el seed (solo crea lo que falta), así que allá ofrecen los tipos por defecto: cuento y cuento con actividades.
+
+## 062 · Tres líneas comerciales: landings, acceso por público y colecciones
+
+- **Fecha:** 2026-10-27 · **Fase:** 07c (Fase B de las líneas comerciales)
+- **Rutas** (traducidas, misma app y misma marca):
+  - **Familias:** la home (`/es`); `/familias` redirige a ella con 308, para tener una sola URL en buscadores.
+  - **Eventos:** `/es/eventos` · `/en/events` · `/pt/eventos`.
+  - **Profesionales:** `/es/profesionales` · `/en/professionals` · `/pt/profissionais`.
+- **Acceso por público:**
+  - **Familias y Eventos** crean sin cuenta (sesión anónima, DECISIONS 056).
+  - **Profesionales** pide cuenta antes de crear: `/crear?line=professionals` muestra "Crea tu cuenta profesional" y no abre una sesión anónima.
+  - La línea llega por `?line=` o queda recordada en `sessionStorage`, sin cookies ni datos personales.
+- **Navegación:**
+  - El encabezado muestra Familias, Eventos, Profesionales, Historias y Blog ("Cómo funciona" y "Preguntas" siguen como secciones de la home).
+  - El pie tiene las 3 líneas.
+  - La home suma "¿Para quién es?" después del hero.
+- **Landings:**
+  - Hero con ilustración propia en acuarela (`public/brand/landing-*.webp`, generadas con Gemini por USD 0,14), cómo funciona, kit o beneficios, colecciones, preguntas frecuentes y llamado final.
+  - Sin cifras ni testimonios inventados. Lo que todavía no existe se dice: las piezas del kit y la compra por cantidad llegan "muy pronto", y los descuentos Pro "se activan con los pagos".
+  - Profesionales aclara que no es un sistema clínico.
+- **Modelo:**
+  - `books.channel` (`families` / `events` / `professionals`) se fija al crear y las reglas no permiten cambiarlo. Lo anterior es `families`.
+  - Las historias tienen `channels[]`, `collectionIds[]` y `personalization`: una historia puede estar en varias líneas sin duplicarse.
+  - Colección nueva `collections`, editable desde el admin en la fase 14. Tiene 8 colecciones: Familias (Aventuras, Nuestros recuerdos, Grandes momentos), Eventos (Cumpleaños) y Profesionales (las 4 de la estrategia, con sus temas).
+- **Creador según la línea:**
+  - Eventos arranca como Mini con texto muy visual y no tiene paso de enseñanzas. Los pasos ocultos se saltean sin cambiar los índices guardados.
+  - El paso de la aventura muestra solo las historias de la línea.
+- **Catálogo:** `/historias` es la tienda de Familias y filtra por colección cuando hay más de una con historias.
+- **Analítica:** el page view lleva `content_group` con la línea, sin datos personales.
+- **Historias nuevas:** 7, una por colección nueva, en los 3 idiomas. Están **inactivas** hasta generar su portada, porque requieren aprobación de costo (~USD 0,50).
+- **Calidad:** E2E en 1440 px y 390 px con las 3 líneas, el acceso de cada público y las rutas anteriores. Lighthouse móvil: rendimiento 92–93, accesibilidad 100, buenas prácticas 100. El SEO local baja a 69 solo porque `robots.txt` bloquea la indexación fuera de producción.

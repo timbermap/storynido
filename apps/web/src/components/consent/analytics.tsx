@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 import { useEffect } from 'react';
 
-import { isPrivatePath } from '@/lib/tracking';
+import { channelForPath, isPrivatePath } from '@/lib/tracking';
 
 import { useConsent } from './consent-provider';
 
@@ -39,7 +39,10 @@ export function Analytics() {
     const location = `${window.location.origin}${pathname}`;
     if (analytics && win.gtag && win.__snGaPage !== pathname) {
       win.__snGaPage = pathname;
-      win.gtag('event', 'page_view', { page_location: location });
+      win.gtag('event', 'page_view', {
+        page_location: location,
+        content_group: channelForPath(pathname),
+      });
     }
     if (marketing && win.fbq && win.__snFbPage !== pathname) {
       win.__snFbPage = pathname;

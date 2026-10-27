@@ -33,6 +33,15 @@ const EDITORIAL_OPTIONS = {
   contentTypes: [...CONTENT_TYPES],
 } satisfies Pick<Story, 'lengths' | 'textDensities' | 'readingLevels' | 'contentTypes'>;
 
+const ALL_PERSONALIZATION = { photo: true, avatar: true, memories: true, lessons: true };
+
+/** Las 7 aventuras originales: colección "Aventuras" de Familias. */
+const ADVENTURE = {
+  channels: ['families'],
+  collectionIds: ['aventuras'],
+  personalization: ALL_PERSONALIZATION,
+} satisfies Pick<Story, 'channels' | 'collectionIds' | 'personalization'>;
+
 export const SEED_STORIES: SeedStory[] = [
   {
     slug: 'aventura-espacial',
@@ -62,6 +71,7 @@ export const SEED_STORIES: SeedStory[] = [
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
     ...EDITORIAL_OPTIONS,
+    ...ADVENTURE,
   },
   {
     slug: 'valle-de-los-dinosaurios',
@@ -91,6 +101,7 @@ export const SEED_STORIES: SeedStory[] = [
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
     ...EDITORIAL_OPTIONS,
+    ...ADVENTURE,
   },
   {
     slug: 'reino-encantado',
@@ -116,6 +127,7 @@ export const SEED_STORIES: SeedStory[] = [
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
     ...EDITORIAL_OPTIONS,
+    ...ADVENTURE,
   },
   {
     slug: 'gol-de-campeon',
@@ -141,6 +153,7 @@ export const SEED_STORIES: SeedStory[] = [
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
     ...EDITORIAL_OPTIONS,
+    ...ADVENTURE,
   },
   {
     slug: 'superheroe-por-un-dia',
@@ -166,6 +179,7 @@ export const SEED_STORIES: SeedStory[] = [
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
     ...EDITORIAL_OPTIONS,
+    ...ADVENTURE,
   },
   {
     slug: 'amigos-de-la-selva',
@@ -191,6 +205,7 @@ export const SEED_STORIES: SeedStory[] = [
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
     ...EDITORIAL_OPTIONS,
+    ...ADVENTURE,
   },
   {
     slug: 'secreto-del-fondo-del-mar',
@@ -220,6 +235,196 @@ export const SEED_STORIES: SeedStory[] = [
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
     ...EDITORIAL_OPTIONS,
+    ...ADVENTURE,
+  },
+];
+
+/**
+ * Historias de las colecciones nuevas (fase 07c). Quedan inactivas hasta tener su portada
+ * ilustrada (`/samples/<slug>.webp`), que se genera con aprobación de costo.
+ */
+const NEW_STORY_BASE = {
+  active: false,
+  tags: [],
+  pageCount: 12,
+  samplePages: [],
+  textPromptTemplate: TEXT_PROMPT,
+  imagePromptTemplate: IMAGE_PROMPT,
+  ...EDITORIAL_OPTIONS,
+  personalization: ALL_PERSONALIZATION,
+};
+
+export const SEED_NEW_STORIES: SeedStory[] = [
+  {
+    ...NEW_STORY_BASE,
+    slug: 'las-tardes-con-los-abuelos',
+    order: 20,
+    ageMin: 2,
+    ageMax: 9,
+    channels: ['families'],
+    collectionIds: ['nuestros-recuerdos'],
+    title: {
+      es: 'Las tardes con los abuelos',
+      en: 'Afternoons with Grandma and Grandpa',
+      pt: 'As tardes com os avós',
+    },
+    summary: {
+      es: 'Una historia hecha con sus recuerdos favoritos con los abuelos: las recetas, los juegos y los secretos que solo ellos comparten.',
+      en: 'A story made from their favorite memories with their grandparents: the recipes, the games and the secrets only they share.',
+      pt: 'Uma história feita com as lembranças favoritas com os avós: as receitas, as brincadeiras e os segredos que só eles compartilham.',
+    },
+    excerpt: {
+      es: '—¿Te acuerdas de la primera vez que hicimos galletas? —preguntó el abuelo. Martina se rió: aquel día terminó con harina hasta en la nariz.',
+      en: '"Do you remember the first time we baked cookies?" Grandpa asked. Martina laughed: that day ended with flour all the way up her nose.',
+      pt: '— Lembra da primeira vez que fizemos biscoitos? — perguntou o avô. Martina riu: aquele dia terminou com farinha até no nariz.',
+    },
+    coverImage: '/samples/las-tardes-con-los-abuelos.webp',
+  },
+  {
+    ...NEW_STORY_BASE,
+    slug: 'mi-primer-dia-de-clases',
+    order: 21,
+    ageMin: 3,
+    ageMax: 7,
+    channels: ['families', 'professionals'],
+    collectionIds: ['grandes-momentos', 'mi-primera-experiencia'],
+    title: {
+      es: 'Mi primer día de clases',
+      en: 'My First Day of School',
+      pt: 'Meu primeiro dia de aula',
+    },
+    summary: {
+      es: 'La mochila nueva, el aula llena de colores y un compañero que también está nervioso. Un cuento para llegar al primer día con confianza.',
+      en: 'A new backpack, a classroom full of colors and a classmate who is nervous too. A story to start the first day with confidence.',
+      pt: 'A mochila nova, a sala cheia de cores e um colega que também está nervoso. Uma história para chegar ao primeiro dia com confiança.',
+    },
+    excerpt: {
+      es: 'En la puerta del aula, Leo apretó la mano de mamá. Entonces vio a un niño que también miraba sus zapatos. —Hola —le dijo—. ¿Te gustan los dinosaurios?',
+      en: 'At the classroom door, Leo squeezed Mom’s hand. Then he saw a boy who was also staring at his shoes. "Hi," he said. "Do you like dinosaurs?"',
+      pt: 'Na porta da sala, Leo apertou a mão da mamãe. Então viu um menino que também olhava para os sapatos. — Oi — disse. — Você gosta de dinossauros?',
+    },
+    coverImage: '/samples/mi-primer-dia-de-clases.webp',
+  },
+  {
+    ...NEW_STORY_BASE,
+    slug: 'el-cumpleanos-mas-magico',
+    order: 22,
+    ageMin: 2,
+    ageMax: 10,
+    channels: ['events', 'families'],
+    collectionIds: ['cumpleanos'],
+    title: {
+      es: 'El cumpleaños más mágico',
+      en: 'The Most Magical Birthday',
+      pt: 'O aniversário mais mágico',
+    },
+    summary: {
+      es: 'Las velas se encienden solas y la fiesta se convierte en una aventura. Un mini cuento con el cumpleañero como protagonista, para regalar a cada invitado.',
+      en: 'The candles light up by themselves and the party becomes an adventure. A mini story starring the birthday child, to give to every guest.',
+      pt: 'As velas se acendem sozinhas e a festa vira uma aventura. Uma mini história com o aniversariante como protagonista, para presentear cada convidado.',
+    },
+    excerpt: {
+      es: 'Cuando Mateo sopló las velas, el pastel empezó a brillar. —¡Pide un deseo! —gritaron sus amigos. Y el deseo… ¡se hizo realidad!',
+      en: 'When Mateo blew out the candles, the cake began to glow. "Make a wish!" his friends shouted. And the wish… came true!',
+      pt: 'Quando Mateo soprou as velas, o bolo começou a brilhar. — Faça um pedido! — gritaram os amigos. E o pedido… virou realidade!',
+    },
+    coverImage: '/samples/el-cumpleanos-mas-magico.webp',
+  },
+  {
+    ...NEW_STORY_BASE,
+    slug: 'las-letras-que-bailan',
+    order: 23,
+    ageMin: 4,
+    ageMax: 7,
+    channels: ['professionals', 'families'],
+    collectionIds: ['que-lindo-es-aprender'],
+    title: {
+      es: 'Las letras que bailan',
+      en: 'The Dancing Letters',
+      pt: 'As letras que dançam',
+    },
+    summary: {
+      es: 'Las letras se escaparon del libro y solo quien las reconoce puede devolverlas a su lugar. Una aventura para jugar con la lectura.',
+      en: 'The letters escaped from the book, and only someone who recognizes them can bring them back. An adventure to play with reading.',
+      pt: 'As letras fugiram do livro e só quem as reconhece consegue devolvê-las ao lugar. Uma aventura para brincar com a leitura.',
+    },
+    excerpt: {
+      es: 'La M se había escondido detrás de la montaña y la S se deslizaba como una serpiente. Sofía sonrió: ya sabía cómo atraparlas.',
+      en: 'The M was hiding behind the mountain and the S slid along like a snake. Sofia smiled: she already knew how to catch them.',
+      pt: 'O M tinha se escondido atrás da montanha e o S deslizava como uma serpente. Sofia sorriu: já sabia como pegá-las.',
+    },
+    coverImage: '/samples/las-letras-que-bailan.webp',
+  },
+  {
+    ...NEW_STORY_BASE,
+    slug: 'el-jardin-de-las-emociones',
+    order: 24,
+    ageMin: 3,
+    ageMax: 9,
+    channels: ['professionals', 'families'],
+    collectionIds: ['conozco-mis-emociones'],
+    title: {
+      es: 'El jardín de las emociones',
+      en: 'The Garden of Feelings',
+      pt: 'O jardim das emoções',
+    },
+    summary: {
+      es: 'En este jardín cada flor guarda una emoción. Recorriéndolo, el protagonista aprende a reconocer lo que siente y a ponerlo en palabras.',
+      en: 'In this garden every flower holds a feeling. Walking through it, the main character learns to recognize what they feel and put it into words.',
+      pt: 'Neste jardim cada flor guarda uma emoção. Ao percorrê-lo, o protagonista aprende a reconhecer o que sente e a colocar em palavras.',
+    },
+    excerpt: {
+      es: 'La flor roja temblaba como cuando uno se enoja. Lucas se agachó y le dijo bajito: —Yo también me siento así a veces. ¿Respiramos juntos?',
+      en: 'The red flower trembled the way you do when you get angry. Lucas crouched down and whispered: "I feel like that sometimes too. Shall we breathe together?"',
+      pt: 'A flor vermelha tremia como quando a gente fica bravo. Lucas se abaixou e disse baixinho: — Eu também me sinto assim às vezes. Vamos respirar juntos?',
+    },
+    coverImage: '/samples/el-jardin-de-las-emociones.webp',
+  },
+  {
+    ...NEW_STORY_BASE,
+    slug: 'un-pasito-mas',
+    order: 25,
+    ageMin: 3,
+    ageMax: 9,
+    channels: ['professionals', 'families'],
+    collectionIds: ['mis-pequenos-logros'],
+    title: { es: 'Un pasito más', en: 'One More Little Step', pt: 'Mais um passinho' },
+    summary: {
+      es: 'Subir la montaña parece imposible, hasta que el protagonista descubre que cada pasito cuenta y que pedir ayuda también es valiente.',
+      en: 'Climbing the mountain seems impossible, until the main character discovers that every little step counts and that asking for help is brave too.',
+      pt: 'Subir a montanha parece impossível, até que o protagonista descobre que cada passinho conta e que pedir ajuda também é coragem.',
+    },
+    excerpt: {
+      es: 'Ayer no llegaba ni a la primera piedra. Hoy Martina llegó al árbol grande. —¡Mira cuánto avanzaste! —le dijo el zorro.',
+      en: 'Yesterday she couldn’t even reach the first rock. Today Martina reached the big tree. "Look how far you’ve come!" said the fox.',
+      pt: 'Ontem ela não chegava nem à primeira pedra. Hoje Martina chegou à árvore grande. — Veja quanto você avançou! — disse a raposa.',
+    },
+    coverImage: '/samples/un-pasito-mas.webp',
+  },
+  {
+    ...NEW_STORY_BASE,
+    slug: 'mi-visita-al-dentista',
+    order: 26,
+    ageMin: 3,
+    ageMax: 8,
+    channels: ['professionals', 'families'],
+    collectionIds: ['mi-primera-experiencia'],
+    title: {
+      es: 'Mi visita al dentista',
+      en: 'My Visit to the Dentist',
+      pt: 'Minha visita ao dentista',
+    },
+    summary: {
+      es: 'La silla que sube y baja, la luz que parece un sol y una dentista muy amable. Un cuento para conocer la consulta antes de ir.',
+      en: 'The chair that goes up and down, the light that looks like a sun and a very kind dentist. A story to get to know the visit before going.',
+      pt: 'A cadeira que sobe e desce, a luz que parece um sol e uma dentista muito simpática. Uma história para conhecer a consulta antes de ir.',
+    },
+    excerpt: {
+      es: '—¿Puedo contar tus dientes? —preguntó la dentista. Mateo abrió grande la boca, como un león. —¡Veinte dientes brillantes! —anunció ella.',
+      en: '"May I count your teeth?" the dentist asked. Mateo opened wide, like a lion. "Twenty shiny teeth!" she announced.',
+      pt: '— Posso contar seus dentes? — perguntou a dentista. Mateo abriu bem a boca, como um leão. — Vinte dentes brilhantes! — anunciou ela.',
+    },
+    coverImage: '/samples/mi-visita-al-dentista.webp',
   },
 ];
 

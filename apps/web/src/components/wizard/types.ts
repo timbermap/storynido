@@ -8,10 +8,12 @@ import type {
 
 import type { ChildFields } from '@/lib/firebase/drafts';
 
-import type { SaveState } from './steps';
+import type { SaveState, WizardStep } from './steps';
 
 export interface StepNav {
   stepIndex: number;
+  /** Pasos ocultos para la línea comercial del libro. */
+  hidden: readonly WizardStep[];
   maxReached: number;
   saveState: SaveState;
   onBack?: () => void;

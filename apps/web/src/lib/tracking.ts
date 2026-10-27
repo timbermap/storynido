@@ -31,3 +31,17 @@ export function isPrivatePath(pathname: string): boolean {
   const path = pathname.toLowerCase().replace(/\/+$/, '');
   return PRIVATE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
+
+/** Línea comercial de una página pública, para agrupar la analítica (sin datos personales). */
+export function channelForPath(pathname: string): 'families' | 'events' | 'professionals' {
+  const path = pathname.toLowerCase();
+  const prefixes = (key: '/events' | '/professionals') => {
+    const localized = routing.pathnames[key];
+    return LOCALES.map(
+      (locale) => `/${locale}${typeof localized === 'string' ? localized : localized[locale]}`,
+    );
+  };
+  if (prefixes('/events').some((prefix) => path.startsWith(prefix))) return 'events';
+  if (prefixes('/professionals').some((prefix) => path.startsWith(prefix))) return 'professionals';
+  return 'families';
+}

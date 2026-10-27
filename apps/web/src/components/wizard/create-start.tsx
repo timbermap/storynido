@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useEffectEvent, useState } from 'react';
 
-import type { Locale } from '@storynido/shared';
+import type { Channel, Locale } from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,19 @@ import { getFirebaseDb } from '@/lib/firebase/client';
 import { startAnonymousSession } from '@/lib/firebase/auth-actions';
 import { createDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 
+import { CHANNEL_STORAGE_KEY } from '@/components/landing/remember-channel';
+
 import { DraftsList } from './drafts-list';
 import { SignInGate } from './sign-in-gate';
+
+function rememberedChannel(): Channel | null {
+  try {
+    const value = window.sessionStorage.getItem(CHANNEL_STORAGE_KEY);
+    return value === 'events' || value === 'professionals' || value === 'families' ? value : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Punto de entrada del creador. Sin sesión abre una anónima (se crea sin cuenta y se vincula
@@ -23,13 +34,28 @@ import { SignInGate } from './sign-in-gate';
 export function CreateStart({
   storyId,
   lessonId,
+  channel: channelParam,
+  proGate,
 }: {
   storyId: string | null;
   lessonId: string | null;
+  /** Línea pedida en la URL (?line=); si no, la recordada de la landing, o Familias. */
+  channel: Channel | null;
+  /** Textos de la puerta de cuenta de Profesionales. */
+  proGate: { title: string; text: string };
 }) {
   const t = useTranslations('Wizard');
   const locale = useLocale() as Locale;
-  const { user, loading } = useAuth();
+  const { user, signedIn, loading } = useAuth();
+  const [channel, setChannel] = useState<Channel>(channelParam ?? 'families');
+  useEffect(() => {
+    // La línea recordada de la landing se lee después de montar (sessionStorage).
+    const remembered = channelParam ? null : rememberedChannel();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (remembered) setChannel(remembered);
+  }, [channelParam]);
+  // Profesionales necesita cuenta desde el inicio: sus compras se acumulan para el descuento.
+  const needsAccount = channel === 'professionals';
   const router = useRouter();
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -43,12 +69,13 @@ export function CreateStart({
       language: locale,
       storyId,
       lessonId,
+      channel,
     });
     router.replace({ pathname: '/create/[bookId]', params: { bookId: id } });
   }
 
   const onUser = useEffectEvent(async () => {
-    if (!user) return;
+    if (!user || (needsAccount && !signedIn)) return;
     if (storyId || lessonId) {
       await startNew();
       return;
@@ -62,15 +89,18 @@ export function CreateStart({
     // Al tener sesión: crear o listar borradores (lectura de Firestore después de montar).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (user) void onUser();
-  }, [user]);
+  }, [user, signedIn]);
 
   useEffect(() => {
-    if (loading || user) return;
+    if (loading || user || needsAccount) return;
     startAnonymousSession().catch(() => {
       setAnonymousFailed(true);
     });
-  }, [loading, user]);
+  }, [loading, user, needsAccount]);
 
+  if (!loading && needsAccount && !signedIn) {
+    return <SignInGate title={proGate.title} text={proGate.text} />;
+  }
   if (anonymousFailed && !user) return <SignInGate />;
   if (!drafts) {
     return (

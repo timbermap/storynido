@@ -33,7 +33,9 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const story = data.stories.find((item) => item.slug === selected);
 
   const fits = (min: number, max: number) => age !== undefined && min <= age && age <= max;
-  const ordered = data.stories.toSorted(
+  // Solo las historias de la línea del libro (si no hubiera ninguna, todas).
+  const forChannel = data.stories.filter((item) => item.channels.includes(data.book.channel));
+  const ordered = (forChannel.length > 0 ? forChannel : data.stories).toSorted(
     (a, b) => Number(fits(b.ageMin, b.ageMax)) - Number(fits(a.ageMin, a.ageMax)),
   );
 

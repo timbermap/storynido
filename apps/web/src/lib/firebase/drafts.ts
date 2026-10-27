@@ -2,6 +2,7 @@ import {
   COLLECTIONS,
   DEFAULT_EDITORIAL_CONFIG,
   type Book,
+  type Channel,
   type Child,
   type Locale,
 } from '@storynido/shared';
@@ -63,7 +64,12 @@ const asDate = (value: Timestampish) => value?.toDate() ?? null;
 export async function createDraft(
   db: Firestore,
   uid: string,
-  preset: { language: Locale; storyId: string | null; lessonId: string | null },
+  preset: {
+    language: Locale;
+    storyId: string | null;
+    lessonId: string | null;
+    channel: Channel;
+  },
 ): Promise<string> {
   const ref = await addDoc(collection(db, COLLECTIONS.books), {
     ownerUid: uid,
@@ -81,7 +87,10 @@ export async function createDraft(
     avatar: null,
     memories: null,
     // Opciones editoriales: se ajustan en el paso de la aventura (sugeridas según la edad).
+    // Eventos arranca como mini cuento muy visual (el librito para cada invitado).
     ...DEFAULT_EDITORIAL_CONFIG.defaults,
+    ...(preset.channel === 'events' ? { length: 'mini', textDensity: 'visual' } : {}),
+    channel: preset.channel,
     preview: null,
     regenerationsUsed: 0,
     createdAt: serverTimestamp(),
@@ -142,6 +151,7 @@ export function subscribeBook(
         textDensity: (data.textDensity as Book['textDensity'] | undefined) ?? 'balanced',
         readingLevel: (data.readingLevel as Book['readingLevel'] | undefined) ?? 'developing',
         contentType: (data.contentType as Book['contentType'] | undefined) ?? 'story',
+        channel: (data.channel as Book['channel'] | undefined) ?? 'families',
         id: snapshot.id,
         createdAt: asDate(data.createdAt as Timestampish) ?? new Date(),
         updatedAt: asDate(data.updatedAt as Timestampish) ?? new Date(),

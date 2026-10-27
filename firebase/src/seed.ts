@@ -20,6 +20,7 @@ import {
   DEFAULT_EDITORIAL_CONFIG,
   activityTemplateSchema,
   aiConfigSchema,
+  collectionSchema,
   editorialConfigSchema,
   contentDocId,
   contentSchema,
@@ -38,7 +39,13 @@ import {
   type Role,
 } from '@storynido/shared';
 
-import { SEED_ACTIVITY_TEMPLATES, SEED_STORIES, SEED_STYLES } from '../seed-data/catalog';
+import {
+  SEED_ACTIVITY_TEMPLATES,
+  SEED_NEW_STORIES,
+  SEED_STORIES,
+  SEED_STYLES,
+} from '../seed-data/catalog';
+import { SEED_COLLECTIONS } from '../seed-data/collections';
 import { SEED_LESSONS } from '../seed-data/lessons';
 import { initAdmin, isUsingEmulators } from './admin';
 
@@ -55,6 +62,7 @@ const cloud = !isUsingEmulators();
 const refreshCatalog = process.argv.includes('--refresh-catalog');
 const CATALOG_COLLECTIONS = new Set<string>([
   COLLECTIONS.stories,
+  COLLECTIONS.collections,
   COLLECTIONS.illustrationStyles,
   COLLECTIONS.lessons,
   COLLECTIONS.activityTemplates,
@@ -209,7 +217,14 @@ batch.set(
   }),
 );
 
-for (const story of SEED_STORIES) {
+for (const collection of SEED_COLLECTIONS) {
+  batch.set(
+    db.collection(COLLECTIONS.collections).doc(collection.slug),
+    collectionSchema.parse({ ...collection, createdAt: now, updatedAt: now }),
+  );
+}
+
+for (const story of [...SEED_STORIES, ...SEED_NEW_STORIES]) {
   batch.set(
     db.collection(COLLECTIONS.stories).doc(story.slug),
     storySchema.parse({ ...story, createdAt: now, updatedAt: now }),
@@ -230,7 +245,7 @@ for (const lesson of SEED_LESSONS) {
 }
 
 // Historias que ya no están en el catálogo de ejemplo (p. ej. las que pasaron a ser enseñanzas).
-const seededSlugs = new Set(SEED_STORIES.map((story) => story.slug));
+const seededSlugs = new Set([...SEED_STORIES, ...SEED_NEW_STORIES].map((story) => story.slug));
 for (const doc of await db.collection(COLLECTIONS.stories).listDocuments()) {
   if (!seededSlugs.has(doc.id)) batch.delete(doc);
 }

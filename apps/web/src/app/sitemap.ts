@@ -42,6 +42,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...entry(() => '/', 1),
+    ...entry(() => '/events', 0.9),
+    ...entry(() => '/professionals', 0.9),
     ...entry(() => '/stories', 0.9),
     ...stories.flatMap((story) =>
       entry(() => ({ pathname: '/stories/[slug]', params: { slug: story.slug } }), 0.8),

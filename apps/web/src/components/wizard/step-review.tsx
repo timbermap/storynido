@@ -74,10 +74,15 @@ export function StepReview({
     { label: t('style'), value: style?.name ?? '—', step: step('style') },
   ];
 
+  const visibleRows = rows.filter((row) => {
+    const name = WIZARD_STEPS[row.step];
+    return name === undefined || !nav.hidden.includes(name);
+  });
+
   return (
     <WizardShell {...nav} title={t('title')} subtitle={t('subtitle')}>
       <dl className="divide-y rounded-xl border">
-        {rows.map((row) => (
+        {visibleRows.map((row) => (
           <div key={row.label} className="flex items-center justify-between gap-4 px-5 py-4">
             <div>
               <dt className="text-sm font-bold text-muted-foreground">{row.label}</dt>

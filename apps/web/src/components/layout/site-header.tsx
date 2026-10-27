@@ -27,14 +27,17 @@ export async function SiteHeader({
     'rounded-full px-2.5 py-2 whitespace-nowrap transition-colors hover:text-primary';
   const links = (
     <>
+      <Link href="/" className={linkClass}>
+        {t('families')}
+      </Link>
+      <Link href="/events" className={linkClass}>
+        {t('events')}
+      </Link>
+      <Link href="/professionals" className={linkClass}>
+        {t('professionals')}
+      </Link>
       <Link href="/stories" className={linkClass}>
         {t('stories')}
-      </Link>
-      <Link href={{ pathname: '/', hash: HOW_IT_WORKS_ID }} className={linkClass}>
-        {t('howItWorks')}
-      </Link>
-      <Link href={{ pathname: '/', hash: FAQ_ID }} className={linkClass}>
-        {t('faq')}
       </Link>
       <Link href="/blog" className={linkClass}>
         {t('blog')}

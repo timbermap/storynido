@@ -8,7 +8,7 @@ import { StoryCard } from '@/components/stories/story-card';
 import { Link } from '@/i18n/navigation';
 import { lowestPrice } from '@/lib/offer';
 import { localizedAlternates } from '@/lib/seo';
-import { getOffer, getStories } from '@/lib/server/api';
+import { getCollections, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +21,7 @@ const AGE_FILTERS = [
 
 interface Props {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ edad?: string }>;
+  searchParams: Promise<{ edad?: string; coleccion?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -38,18 +38,38 @@ export default async function StoriesPage({ params, searchParams }: Props) {
   const locale = (await params).locale as Locale;
   const t = await getTranslations('Stories');
 
-  const requested = Number((await searchParams).edad);
+  const query = await searchParams;
+  const requested = Number(query.edad);
   const filter = AGE_FILTERS.find((f) => f.min === requested);
   const display = await getDisplayCountry(locale);
 
   // Se filtra por el rango completo: una historia aplica si se superpone con el rango elegido.
-  const [stories, offer] = await Promise.all([
-    getStories(locale),
+  // El catálogo es la tienda de Familias, con sus colecciones.
+  const [stories, offer, allCollections] = await Promise.all([
+    getStories(locale, undefined, { channel: 'families' }),
     getOffer(display.country, locale),
+    getCollections(locale, 'families').catch(() => []),
   ]);
-  const visible = filter
-    ? stories.filter((story) => story.ageMin <= filter.max && story.ageMax >= filter.min)
-    : stories;
+  // Solo las colecciones con alguna historia disponible.
+  const collections = allCollections.filter((item) =>
+    stories.some((story) => story.collectionIds.includes(item.slug)),
+  );
+  const collection = collections.find((item) => item.slug === query.coleccion);
+  const visible = stories
+    .filter((story) => !filter || (story.ageMin <= filter.max && story.ageMax >= filter.min))
+    .filter((story) => !collection || story.collectionIds.includes(collection.slug));
+  const withQuery = (extra: Record<string, string | undefined>) => {
+    const merged = Object.fromEntries(
+      Object.entries({
+        edad: filter ? String(filter.min) : undefined,
+        coleccion: collection?.slug,
+        ...extra,
+      }).filter((entry): entry is [string, string] => entry[1] !== undefined),
+    );
+    return Object.keys(merged).length > 0
+      ? { pathname: '/stories' as const, query: merged }
+      : ('/stories' as const);
+  };
   const fromPrice = lowestPrice(offer, locale, display.country);
 
   return (
@@ -64,16 +84,35 @@ export default async function StoriesPage({ params, searchParams }: Props) {
 
       <nav aria-label={t('filterLabel')} className="mt-8 flex flex-wrap items-center gap-2">
         <span className="mr-1 text-sm font-semibold">{t('filterLabel')}:</span>
-        <FilterLink href="/stories" active={!filter} label={t('allAges')} />
+        <FilterLink href={withQuery({ edad: undefined })} active={!filter} label={t('allAges')} />
         {AGE_FILTERS.map((f) => (
           <FilterLink
             key={f.min}
-            href={{ pathname: '/stories', query: { edad: String(f.min) } }}
+            href={withQuery({ edad: String(f.min) })}
             active={filter?.min === f.min}
             label={t('ageRange', { min: f.min, max: f.max })}
           />
         ))}
       </nav>
+
+      {collections.length > 1 && (
+        <nav aria-label={t('collectionLabel')} className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-sm font-semibold">{t('collectionLabel')}:</span>
+          <FilterLink
+            href={withQuery({ coleccion: undefined })}
+            active={!collection}
+            label={t('allCollections')}
+          />
+          {collections.map((item) => (
+            <FilterLink
+              key={item.slug}
+              href={withQuery({ coleccion: item.slug })}
+              active={collection?.slug === item.slug}
+              label={item.name}
+            />
+          ))}
+        </nav>
+      )}
 
       {visible.length === 0 ? (
         <p className="mt-12 text-muted-foreground">{t('empty')}</p>

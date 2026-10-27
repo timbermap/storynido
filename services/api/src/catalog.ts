@@ -1,5 +1,7 @@
 import {
   COLLECTIONS,
+  collectionSchema,
+  type Collection,
   DEFAULT_EDITORIAL_CONFIG,
   GLOBAL_DOC_ID,
   editorialConfigSchema,
@@ -30,6 +32,7 @@ export interface CatalogRepository {
   stories(): Promise<Story[]>;
   styles(): Promise<IllustrationStyle[]>;
   lessons(): Promise<Lesson[]>;
+  collections(): Promise<Collection[]>;
   countries(): Promise<CountryConfig[]>;
   prices(country: CountryCode): Promise<Price[]>;
   products(): Promise<Product[]>;
@@ -64,6 +67,7 @@ const converters = {
   stories: createConverter(storySchema),
   styles: createConverter(illustrationStyleSchema),
   lessons: createConverter(lessonSchema),
+  collections: createConverter(collectionSchema),
   countries: createConverter(countrySchema),
   prices: createConverter(priceSchema),
   products: createConverter(productSchema),
@@ -114,6 +118,18 @@ export class FirestoreCatalog implements CatalogRepository {
         .get();
       // Los temas sensibles requieren revisión humana: no se ofrecen todavía.
       return snapshot.docs.map((doc) => doc.data()).filter((lesson) => !lesson.sensitive);
+    });
+  }
+
+  collections(): Promise<Collection[]> {
+    return this.cache.get('collections', async () => {
+      const snapshot = await this.db
+        .collection(COLLECTIONS.collections)
+        .withConverter(converters.collections)
+        .where('active', '==', true)
+        .orderBy('order')
+        .get();
+      return snapshot.docs.map((doc) => doc.data());
     });
   }
 
@@ -179,6 +195,7 @@ export class InMemoryCatalog implements CatalogRepository {
       stories?: Story[];
       styles?: IllustrationStyle[];
       lessons?: Lesson[];
+      collections?: Collection[];
       countries?: CountryConfig[];
       prices?: Price[];
       products?: Product[];
@@ -230,5 +247,11 @@ export class InMemoryCatalog implements CatalogRepository {
 
   editorial() {
     return Promise.resolve(this.data.editorial ?? DEFAULT_EDITORIAL_CONFIG);
+  }
+
+  collections() {
+    return Promise.resolve(
+      (this.data.collections ?? []).filter((c) => c.active).sort((a, b) => a.order - b.order),
+    );
   }
 }

@@ -7,11 +7,12 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-import { WIZARD_STEPS, type SaveState } from './steps';
+import { WIZARD_STEPS, type SaveState, type WizardStep } from './steps';
 
 /** Armazón del creador: progreso, título del paso (recibe el foco), navegación y guardado. */
 export function WizardShell({
   stepIndex,
+  hidden,
   maxReached,
   saveState,
   title,
@@ -25,6 +26,7 @@ export function WizardShell({
   nextDisabled,
 }: {
   stepIndex: number;
+  hidden: readonly WizardStep[];
   maxReached: number;
   saveState: SaveState;
   title: string;
@@ -39,7 +41,10 @@ export function WizardShell({
 }) {
   const t = useTranslations('Wizard');
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const total = WIZARD_STEPS.length;
+  // Numeración y progreso sobre los pasos visibles para la línea del libro.
+  const visible = WIZARD_STEPS.filter((step) => !hidden.includes(step));
+  const total = visible.length;
+  const position = visible.indexOf(WIZARD_STEPS[stepIndex] ?? 'child');
 
   // Al cambiar de paso, el foco va al título (lectores de pantalla y teclado).
   useEffect(() => {
@@ -49,7 +54,7 @@ export function WizardShell({
   return (
     <div className="container-page max-w-3xl py-10">
       <div className="flex items-center justify-between gap-4 text-sm font-bold text-muted-foreground">
-        <span>{t('progress', { current: stepIndex + 1, total })}</span>
+        <span>{t('progress', { current: position + 1, total })}</span>
         <span role="status" aria-live="polite" className="inline-flex items-center gap-1.5">
           {saveState === 'saving' && (
             <>
@@ -77,18 +82,19 @@ export function WizardShell({
         role="progressbar"
         aria-valuemin={1}
         aria-valuemax={total}
-        aria-valuenow={stepIndex + 1}
-        aria-label={t('progress', { current: stepIndex + 1, total })}
+        aria-valuenow={position + 1}
+        aria-label={t('progress', { current: position + 1, total })}
       >
         <span
           className="block h-full rounded-full bg-primary transition-all"
-          style={{ width: `${String(((stepIndex + 1) / total) * 100)}%` }}
+          style={{ width: `${String(((position + 1) / total) * 100)}%` }}
         />
       </div>
 
       <nav aria-label={t('title')} className="mt-4 hidden sm:block">
         <ol className="flex flex-wrap gap-2 text-xs font-extrabold">
-          {WIZARD_STEPS.map((step, index) => {
+          {visible.map((step, visibleIndex) => {
+            const index = WIZARD_STEPS.indexOf(step);
             const reachable = index <= maxReached;
             return (
               <li key={step}>
@@ -108,7 +114,7 @@ export function WizardShell({
                         : 'bg-muted text-muted-foreground',
                   )}
                 >
-                  {index + 1}. {t(`steps.${step}`)}
+                  {visibleIndex + 1}. {t(`steps.${step}`)}
                 </button>
               </li>
             );

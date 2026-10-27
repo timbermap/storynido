@@ -5,6 +5,9 @@
     "skipToContent": "Saltar al contenido"
   },
   "Nav": {
+    "families": "Familias",
+    "events": "Eventos",
+    "professionals": "Profesionales",
     "stories": "Historias",
     "howItWorks": "Cómo funciona",
     "faq": "Preguntas",
@@ -115,6 +118,25 @@
       "formats": "Disponible en digital y libro impreso",
       "shipping": "Envío a {country}",
       "preview": "Vista previa gratis"
+    },
+    "audience": {
+      "title": "¿Para quién es?",
+      "subtitle": "Una misma magia, tres formas de usarla.",
+      "families": {
+        "title": "Familias",
+        "text": "Un cuento donde su hijo es el protagonista, para regalar o leer juntos.",
+        "cta": "Crear su cuento"
+      },
+      "events": {
+        "title": "Eventos",
+        "text": "Mini cuentos y recuerdos de cumpleaños: un diseño, muchas copias.",
+        "cta": "Ver kits de cumpleaños"
+      },
+      "professionals": {
+        "title": "Profesionales",
+        "text": "Cuentos para cada niño que acompañas, con colecciones educativas.",
+        "cta": "Conocer más"
+      }
     }
   },
   "Stories": {
@@ -139,7 +161,9 @@
     "back": "Todas las historias",
     "error": "No pudimos cargar las historias. Inténtalo de nuevo en unos minutos.",
     "fallbackNotice": "Todavía no enviamos a {preferred}. Te mostramos los precios de {country}.",
-    "pagesRange": "De {min} a {max} páginas"
+    "pagesRange": "De {min} a {max} páginas",
+    "collectionLabel": "Colección",
+    "allCollections": "Todas"
   },
   "Formats": {
     "digital": "Libro digital (PDF)",
@@ -557,6 +581,135 @@
           "text": "Vocabulario más rico y una trama con giros."
         }
       }
+    }
+  },
+  "Landing": {
+    "events": {
+      "metaTitle": "Souvenirs y kits de cumpleaños personalizados",
+      "metaDescription": "Un cuento de cumpleaños con el protagonista de la fiesta, para regalar a cada invitado. Un diseño, muchas copias.",
+      "eyebrow": "StoryNido Eventos",
+      "title": "Recuerdos mágicos para compartir en cada celebración.",
+      "subtitle": "Creamos un mini cuento con el cumpleañero como protagonista. Un solo diseño que ustedes aprueban, con copias idénticas para todos los invitados.",
+      "cta": "Diseñar el kit de cumpleaños",
+      "note": "Puedes crear el diseño y ver la muestra gratis sin crear una cuenta.",
+      "imageAlt": "Ilustración en acuarela de un cumpleaños: el cumpleañero sopla las velas y sus amigos sostienen el mismo librito de regalo.",
+      "howTitle": "Cómo funciona",
+      "steps": {
+        "1": {
+          "title": "Elige la temática",
+          "text": "Aventura, magia o lo que más le guste al cumpleañero."
+        },
+        "2": {
+          "title": "Diseñamos su cuento",
+          "text": "Con su nombre, su edad y su ilustración, con foto o sin foto. Ves una muestra gratis."
+        },
+        "3": {
+          "title": "Un diseño, muchas copias",
+          "text": "El mismo librito para cada invitado: no generamos una historia distinta por copia."
+        }
+      },
+      "kitTitle": "Qué puede incluir el kit",
+      "kitSubtitle": "Todo con la misma ilustración del protagonista.",
+      "kit": {
+        "1": "Mini cuento",
+        "2": "Mini libro para colorear",
+        "3": "Actividades",
+        "4": "Invitaciones",
+        "5": "Tarjetas de agradecimiento",
+        "6": "Etiquetas y stickers",
+        "7": "Souvenirs para las bolsitas"
+      },
+      "kitNote": "Hoy puedes crear el cuento de cumpleaños y su muestra gratis. Las demás piezas del kit y la compra por cantidad se suman muy pronto.",
+      "collectionsTitle": "Temáticas de cumpleaños",
+      "faqTitle": "Preguntas frecuentes",
+      "faq": {
+        "1": {
+          "q": "¿Cada invitado recibe una historia diferente?",
+          "a": "No. Es un único diseño aprobado por ustedes, con copias idénticas para todos. Así es más rápido y más económico."
+        },
+        "2": {
+          "q": "¿Puedo imprimirlo en casa?",
+          "a": "Sí: la versión digital viene lista para imprimir. La impresión a cargo nuestro depende de que la imprenta tenga ese producto en tu país; si no, te ofrecemos la versión digital."
+        },
+        "3": {
+          "q": "¿Necesito una foto?",
+          "a": "No. Puedes elegir los rasgos del protagonista sin subir ninguna foto."
+        },
+        "4": {
+          "q": "¿Con cuánta anticipación conviene pedirlo?",
+          "a": "Los plazos de impresión dependen del país; los mostraremos antes de que confirmes el pedido."
+        }
+      },
+      "finalTitle": "Que cada invitado se lleve un recuerdo de la fiesta"
+    },
+    "professionals": {
+      "metaTitle": "Cuentos personalizados para psicopedagogos, docentes y terapeutas",
+      "metaDescription": "Crea cuentos personalizados para cada niño que acompañas, con colecciones educativas y lectura a medida, desde una sola cuenta.",
+      "eyebrow": "StoryNido Profesionales",
+      "title": "Historias únicas para acompañar cada aprendizaje y cada etapa.",
+      "subtitle": "Para psicopedagogos, docentes, fonoaudiólogos, psicólogos infantiles y odontopediatras: crea cuentos personalizados para cada niño con el que trabajas, desde una sola cuenta.",
+      "cta": "Crear mi cuenta profesional",
+      "ctaSignedIn": "Crear un cuento nuevo",
+      "note": "Necesitas una cuenta para guardar tus proyectos y acumular tus compras.",
+      "imageAlt": "Ilustración en acuarela de una educadora leyendo un cuento ilustrado con un niño en una mesa baja.",
+      "howTitle": "Cómo funciona",
+      "steps": {
+        "1": {
+          "title": "Crea tu cuenta profesional",
+          "text": "Una sola cuenta para todos tus proyectos y compras."
+        },
+        "2": {
+          "title": "Elige una colección",
+          "text": "Lectura, emociones, logros o primeras experiencias, con objetivos generales."
+        },
+        "3": {
+          "title": "Personaliza para cada niño",
+          "text": "Usa un alias y ajusta la extensión, la cantidad de texto y el nivel de lectura."
+        }
+      },
+      "benefitsTitle": "Pensado para tu trabajo",
+      "benefits": {
+        "1": {
+          "title": "Colecciones educativas",
+          "text": "Historias para aprender, reconocer emociones, celebrar logros y anticipar experiencias nuevas."
+        },
+        "2": {
+          "title": "Lectura a medida",
+          "text": "Extensión, cantidad de texto y nivel de lectura, cada uno por separado."
+        },
+        "3": {
+          "title": "Mínimos datos del niño",
+          "text": "Un alias en lugar del nombre completo, modo sin foto y ningún dato clínico."
+        },
+        "4": {
+          "title": "Precios para profesionales",
+          "text": "Precios profesionales y descuentos por compras recurrentes, que se activan junto con los pagos."
+        }
+      },
+      "collectionsTitle": "Colecciones",
+      "disclaimer": "StoryNido ofrece cuentos de acompañamiento. No es un sistema clínico ni reemplaza el criterio profesional, y no pide diagnósticos ni historias clínicas.",
+      "faqTitle": "Preguntas frecuentes",
+      "faq": {
+        "1": {
+          "q": "¿Puedo crear cuentos para distintos niños?",
+          "a": "Sí. Cada cuento es un proyecto independiente dentro de tu cuenta, identificado con un alias."
+        },
+        "2": {
+          "q": "¿Necesito fotos de los niños?",
+          "a": "No. Recomendamos el modo sin foto. Si usas una foto, necesitas la autorización de la madre, el padre o el tutor."
+        },
+        "3": {
+          "q": "¿Puedo ajustar el texto al nivel del niño?",
+          "a": "Sí: eliges la cantidad de texto y el nivel de lectura, independientes de la extensión del libro."
+        },
+        "4": {
+          "q": "¿Hay descuentos?",
+          "a": "Sí, por compras recurrentes de tu cuenta. Publicaremos los detalles cuando se habiliten los pagos."
+        }
+      },
+      "finalTitle": "Un cuento para cada niño que acompañas",
+      "signInTitle": "Crea tu cuenta profesional",
+      "signInText": "Así guardamos tus proyectos y tus compras en un solo lugar. Es rápido y sin contraseñas."
     }
   }
 }

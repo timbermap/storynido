@@ -5,6 +5,9 @@
     "skipToContent": "Skip to content"
   },
   "Nav": {
+    "families": "Families",
+    "events": "Events",
+    "professionals": "Professionals",
     "stories": "Stories",
     "howItWorks": "How it works",
     "faq": "FAQ",
@@ -115,6 +118,25 @@
       "formats": "Available as a digital and printed book",
       "shipping": "Shipping to {country}",
       "preview": "Free preview"
+    },
+    "audience": {
+      "title": "Who is it for?",
+      "subtitle": "The same magic, three ways to use it.",
+      "families": {
+        "title": "Families",
+        "text": "A story where your child is the hero, to give or to read together.",
+        "cta": "Create their story"
+      },
+      "events": {
+        "title": "Events",
+        "text": "Birthday mini books and keepsakes: one design, many copies.",
+        "cta": "See birthday kits"
+      },
+      "professionals": {
+        "title": "Professionals",
+        "text": "Stories for every child you support, with educational collections.",
+        "cta": "Learn more"
+      }
     }
   },
   "Stories": {
@@ -139,7 +161,9 @@
     "back": "All stories",
     "error": "We couldn't load the stories. Please try again in a few minutes.",
     "fallbackNotice": "We don't ship to {preferred} yet. Showing prices for {country}.",
-    "pagesRange": "{min} to {max} pages"
+    "pagesRange": "{min} to {max} pages",
+    "collectionLabel": "Collection",
+    "allCollections": "All"
   },
   "Formats": {
     "digital": "Digital book (PDF)",
@@ -557,6 +581,135 @@
           "text": "Richer vocabulary and a plot with twists."
         }
       }
+    }
+  },
+  "Landing": {
+    "events": {
+      "metaTitle": "Personalized birthday favors and kits",
+      "metaDescription": "A birthday story starring the guest of honor, to give to every guest. One design, many copies.",
+      "eyebrow": "StoryNido Events",
+      "title": "Magical keepsakes to share at every celebration.",
+      "subtitle": "We create a mini story starring the birthday child. One design you approve, with identical copies for every guest.",
+      "cta": "Design the birthday kit",
+      "note": "You can create the design and see the free sample without an account.",
+      "imageAlt": "Watercolor illustration of a birthday party: the birthday child blows out the candles while friends hold the same little gift book.",
+      "howTitle": "How it works",
+      "steps": {
+        "1": {
+          "title": "Choose the theme",
+          "text": "Adventure, magic or whatever the birthday child loves most."
+        },
+        "2": {
+          "title": "We design their story",
+          "text": "With their name, age and illustration, with or without a photo. You see a free sample."
+        },
+        "3": {
+          "title": "One design, many copies",
+          "text": "The same little book for every guest: we don’t generate a different story per copy."
+        }
+      },
+      "kitTitle": "What the kit can include",
+      "kitSubtitle": "All with the same illustration of the birthday child.",
+      "kit": {
+        "1": "Mini story book",
+        "2": "Mini coloring book",
+        "3": "Activities",
+        "4": "Invitations",
+        "5": "Thank-you cards",
+        "6": "Labels and stickers",
+        "7": "Party bag favors"
+      },
+      "kitNote": "Today you can create the birthday story and its free sample. The other kit pieces and ordering in quantity are coming very soon.",
+      "collectionsTitle": "Birthday themes",
+      "faqTitle": "Frequently asked questions",
+      "faq": {
+        "1": {
+          "q": "Does each guest get a different story?",
+          "a": "No. It’s one design you approve, with identical copies for everyone. That makes it faster and more affordable."
+        },
+        "2": {
+          "q": "Can I print it at home?",
+          "a": "Yes: the digital version comes ready to print. Printing by us depends on the print partner offering that product in your country; if not, we offer the digital version."
+        },
+        "3": {
+          "q": "Do I need a photo?",
+          "a": "No. You can choose the main character’s features without uploading any photo."
+        },
+        "4": {
+          "q": "How far in advance should I order?",
+          "a": "Printing times depend on the country; we’ll show them before you confirm the order."
+        }
+      },
+      "finalTitle": "Let every guest take home a memory of the party"
+    },
+    "professionals": {
+      "metaTitle": "Personalized stories for educators, therapists and specialists",
+      "metaDescription": "Create personalized stories for every child you support, with educational collections and tailored reading, from one account.",
+      "eyebrow": "StoryNido Professionals",
+      "title": "Unique stories to support every learning step and every stage.",
+      "subtitle": "For learning specialists, teachers, speech therapists, child psychologists and pediatric dentists: create personalized stories for every child you work with, from one account.",
+      "cta": "Create my professional account",
+      "ctaSignedIn": "Create a new story",
+      "note": "You need an account to save your projects and add up your purchases.",
+      "imageAlt": "Watercolor illustration of an educator reading an illustrated story with a child at a low table.",
+      "howTitle": "How it works",
+      "steps": {
+        "1": {
+          "title": "Create your professional account",
+          "text": "One account for all your projects and purchases."
+        },
+        "2": {
+          "title": "Choose a collection",
+          "text": "Reading, feelings, achievements or first experiences, with general goals."
+        },
+        "3": {
+          "title": "Personalize for each child",
+          "text": "Use an alias and adjust the length, amount of text and reading level."
+        }
+      },
+      "benefitsTitle": "Made for your work",
+      "benefits": {
+        "1": {
+          "title": "Educational collections",
+          "text": "Stories to learn, recognize feelings, celebrate achievements and prepare for new experiences."
+        },
+        "2": {
+          "title": "Tailored reading",
+          "text": "Length, amount of text and reading level, each set separately."
+        },
+        "3": {
+          "title": "Minimal child data",
+          "text": "An alias instead of a full name, no-photo mode and no clinical data."
+        },
+        "4": {
+          "title": "Professional pricing",
+          "text": "Professional prices and discounts for repeat purchases, enabled together with payments."
+        }
+      },
+      "collectionsTitle": "Collections",
+      "disclaimer": "StoryNido offers supportive stories. It is not a clinical system, does not replace professional judgment, and never asks for diagnoses or clinical records.",
+      "faqTitle": "Frequently asked questions",
+      "faq": {
+        "1": {
+          "q": "Can I create stories for different children?",
+          "a": "Yes. Each story is an independent project in your account, identified by an alias."
+        },
+        "2": {
+          "q": "Do I need photos of the children?",
+          "a": "No. We recommend no-photo mode. If you use a photo, you need permission from the parent or guardian."
+        },
+        "3": {
+          "q": "Can I match the text to the child’s level?",
+          "a": "Yes: you choose the amount of text and the reading level, independently of the book’s length."
+        },
+        "4": {
+          "q": "Are there discounts?",
+          "a": "Yes, for repeat purchases from your account. We’ll publish the details when payments are enabled."
+        }
+      },
+      "finalTitle": "A story for every child you support",
+      "signInTitle": "Create your professional account",
+      "signInText": "That’s how we keep your projects and purchases in one place. It’s quick and password-free."
     }
   }
 }

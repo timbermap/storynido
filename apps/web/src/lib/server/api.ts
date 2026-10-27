@@ -4,6 +4,7 @@ import {
   ApiError,
   DEFAULT_EDITORIAL_CONFIG,
   createApiClient,
+  type Channel,
   type CountryCode,
   type Locale,
   type Offer,
@@ -36,8 +37,16 @@ export async function getSiteMode() {
   }
 }
 
-export async function getStories(locale: Locale, age?: number) {
-  return (await catalogApi('catalogStories', { query: { locale, age } })).stories;
+export async function getStories(
+  locale: Locale,
+  age?: number,
+  filters: { channel?: Channel; collection?: string } = {},
+) {
+  return (await catalogApi('catalogStories', { query: { locale, age, ...filters } })).stories;
+}
+
+export async function getCollections(locale: Locale, channel?: Channel) {
+  return (await catalogApi('catalogCollections', { query: { locale, channel } })).collections;
 }
 
 export async function getStory(locale: Locale, slug: string) {

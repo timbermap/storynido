@@ -5,6 +5,7 @@ import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 import { orderStatusSchema } from '../order-status';
 import { avatarSchema, characterModeSchema, memoriesSchema } from './character';
+import { channelSchema } from './channels';
 import {
   bookLengthSchema,
   contentTypeSchema,
@@ -176,6 +177,8 @@ export const bookSchema = timestampsSchema
     textDensity: textDensitySchema.default('balanced'),
     readingLevel: readingLevelSchema.default('developing'),
     contentType: contentTypeSchema.default('story'),
+    /** Línea comercial por la que se creó (lo anterior es de Familias). */
+    channel: channelSchema.default('families'),
     /** Solo servidor. */
     preview: bookPreviewSchema.nullable(),
     /** Solo servidor. */

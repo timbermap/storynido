@@ -16,6 +16,7 @@ import { HeroArt } from '@/components/home/hero-art';
 import { NameCoverDemo } from '@/components/home/name-cover-demo';
 import { PhotoToStory } from '@/components/home/photo-to-story';
 import { FaqList, parseFaq } from '@/components/home/faq-list';
+import { AudienceSelector } from '@/components/landing/audience-selector';
 import { JsonLd } from '@/components/json-ld';
 import { LessonGroups } from '@/components/lessons/lesson-groups';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
@@ -144,6 +145,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <HeroArt alt={t('hero.imageAlt')} />
         </div>
       </section>
+
+      <AudienceSelector />
 
       {/* Cómo funciona */}
       <section id={HOW_IT_WORKS_ID} className="container-page scroll-mt-28 py-20 lg:py-24">

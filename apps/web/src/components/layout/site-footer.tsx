@@ -24,6 +24,15 @@ export async function SiteFooter() {
         </div>
         <nav aria-label={t('company')} className="flex flex-col gap-2 text-sm">
           <p className="font-semibold">{t('company')}</p>
+          <Link href="/" className="hover:underline">
+            {tNav('families')}
+          </Link>
+          <Link href="/events" className="hover:underline">
+            {tNav('events')}
+          </Link>
+          <Link href="/professionals" className="hover:underline">
+            {tNav('professionals')}
+          </Link>
           <Link href="/stories" className="hover:underline">
             {tNav('stories')}
           </Link>

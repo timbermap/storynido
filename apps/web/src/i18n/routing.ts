@@ -12,6 +12,10 @@ export const routing = defineRouting({
   localeCookie: { name: 'sn_locale', maxAge: 60 * 60 * 24 * 365 },
   pathnames: {
     '/': '/',
+    // Líneas comerciales (Familias es la home; /familias redirige a ella).
+    '/families': { es: '/familias', en: '/families', pt: '/familias' },
+    '/events': { es: '/eventos', en: '/events', pt: '/eventos' },
+    '/professionals': { es: '/profesionales', en: '/professionals', pt: '/profissionais' },
     '/stories': { es: '/historias', en: '/stories', pt: '/historias' },
     '/stories/[slug]': { es: '/historias/[slug]', en: '/stories/[slug]', pt: '/historias/[slug]' },
     '/lessons/[slug]': { es: '/ensenanzas/[slug]', en: '/lessons/[slug]', pt: '/licoes/[slug]' },

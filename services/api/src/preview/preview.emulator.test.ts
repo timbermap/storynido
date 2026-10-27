@@ -42,6 +42,9 @@ const story: Story = {
   textDensities: ['visual', 'balanced', 'rich'],
   readingLevels: ['beginner', 'developing', 'advanced'],
   contentTypes: ['story', 'coloring', 'story_activities'],
+  channels: ['families'],
+  collectionIds: [],
+  personalization: { photo: true, avatar: true, memories: true, lessons: true },
   createdAt: now,
   updatedAt: now,
 };

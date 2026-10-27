@@ -9,6 +9,7 @@ import {
   readingLevelSchema,
   textDensitySchema,
 } from './editorial';
+import { channelSchema, personalizationSchema } from './channels';
 import { CHILD_LIMITS } from './users';
 import { bookFormatSchema, localizedSchema, timestampsSchema } from './common';
 
@@ -47,6 +48,16 @@ export const storySchema = timestampsSchema.extend({
     .min(1)
     .default([...READING_LEVELS]),
   contentTypes: z.array(contentTypeSchema).min(1).default(['story', 'story_activities']),
+  /** Líneas en las que se ofrece (una misma historia puede estar en varias, sin duplicarla). */
+  channels: z.array(channelSchema).min(1).default(['families']),
+  /** Colecciones a las que pertenece (collections/{slug}). */
+  collectionIds: z.array(z.string()).default([]),
+  personalization: personalizationSchema.default({
+    photo: true,
+    avatar: true,
+    memories: true,
+    lessons: true,
+  }),
 });
 
 export type Story = z.infer<typeof storySchema>;

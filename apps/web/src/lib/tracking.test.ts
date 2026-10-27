@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isPrivatePath } from './tracking';
+import { channelForPath, isPrivatePath } from './tracking';
 
 describe('isPrivatePath', () => {
   it('excluye el creador, la cuenta y el acceso en todos los idiomas', () => {
@@ -31,5 +31,16 @@ describe('isPrivatePath', () => {
     ]) {
       expect(isPrivatePath(path), path).toBe(false);
     }
+  });
+});
+
+describe('channelForPath', () => {
+  it('agrupa las landings por línea comercial en los 3 idiomas', () => {
+    expect(channelForPath('/es/eventos')).toBe('events');
+    expect(channelForPath('/en/events')).toBe('events');
+    expect(channelForPath('/pt/profissionais')).toBe('professionals');
+    expect(channelForPath('/es/profesionales')).toBe('professionals');
+    expect(channelForPath('/es')).toBe('families');
+    expect(channelForPath('/es/historias/aventura-espacial')).toBe('families');
   });
 });

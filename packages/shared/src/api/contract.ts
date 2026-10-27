@@ -5,6 +5,7 @@ import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 import { BOOK_FORMATS } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
+import { channelSchema, personalizationSchema } from '../models/channels';
 import { CONTENT_KEYS, SITE_MODES, aiConfigSchema } from '../models/config';
 import {
   bookLengthSchema,
@@ -146,9 +147,22 @@ export const publicStorySchema = z.object({
   textDensities: z.array(textDensitySchema),
   readingLevels: z.array(readingLevelSchema),
   contentTypes: z.array(contentTypeSchema),
+  channels: z.array(channelSchema),
+  collectionIds: z.array(z.string()),
+  personalization: personalizationSchema,
 });
 
 export type PublicStory = z.infer<typeof publicStorySchema>;
+
+export const publicCollectionSchema = z.object({
+  slug: z.string(),
+  channel: channelSchema,
+  name: z.string(),
+  description: z.string(),
+  topics: z.array(z.string()),
+});
+
+export type PublicCollection = z.infer<typeof publicCollectionSchema>;
 
 export const publicLessonSchema = z.object({
   slug: z.string(),
@@ -273,8 +287,12 @@ export const apiRoutes = {
     method: 'GET',
     path: '/v1/catalog/stories',
     access: 'public',
-    summary: 'Historias activas, opcionalmente filtradas por edad',
-    query: localeQuerySchema.extend({ age: z.coerce.number().int().min(0).max(12).optional() }),
+    summary: 'Historias activas, opcionalmente filtradas por edad, línea comercial y colección',
+    query: localeQuerySchema.extend({
+      age: z.coerce.number().int().min(0).max(12).optional(),
+      channel: channelSchema.optional(),
+      collection: z.string().max(80).optional(),
+    }),
     response: z.object({ stories: z.array(publicStorySchema) }),
   },
   catalogStory: {
@@ -301,6 +319,14 @@ export const apiRoutes = {
     summary: 'Estilos de ilustración activos',
     query: localeQuerySchema,
     response: z.object({ styles: z.array(publicStyleSchema) }),
+  },
+  catalogCollections: {
+    method: 'GET',
+    path: '/v1/catalog/collections',
+    access: 'public',
+    summary: 'Colecciones activas, opcionalmente de una línea comercial',
+    query: localeQuerySchema.extend({ channel: channelSchema.optional() }),
+    response: z.object({ collections: z.array(publicCollectionSchema) }),
   },
   catalogEditorial: {
     method: 'GET',

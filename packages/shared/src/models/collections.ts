@@ -7,6 +7,8 @@ export const COLLECTIONS = {
   stories: 'stories',
   illustrationStyles: 'illustrationStyles',
   lessons: 'lessons',
+  /** Colecciones editoriales por línea comercial. */
+  collections: 'collections',
   books: 'books',
   orders: 'orders',
   orderSteps: 'steps',

@@ -5,6 +5,9 @@
     "skipToContent": "Pular para o conteúdo"
   },
   "Nav": {
+    "families": "Famílias",
+    "events": "Eventos",
+    "professionals": "Profissionais",
     "stories": "Histórias",
     "howItWorks": "Como funciona",
     "faq": "Perguntas",
@@ -115,6 +118,25 @@
       "formats": "Disponível em livro digital e impresso",
       "shipping": "Entrega para {country}",
       "preview": "Prévia grátis"
+    },
+    "audience": {
+      "title": "Para quem é?",
+      "subtitle": "A mesma magia, três formas de usar.",
+      "families": {
+        "title": "Famílias",
+        "text": "Uma história em que seu filho é o protagonista, para presentear ou ler juntos.",
+        "cta": "Criar a história"
+      },
+      "events": {
+        "title": "Eventos",
+        "text": "Mini livros e lembrancinhas de aniversário: um design, muitas cópias.",
+        "cta": "Ver kits de aniversário"
+      },
+      "professionals": {
+        "title": "Profissionais",
+        "text": "Histórias para cada criança que você acompanha, com coleções educativas.",
+        "cta": "Saiba mais"
+      }
     }
   },
   "Stories": {
@@ -139,7 +161,9 @@
     "back": "Todas as histórias",
     "error": "Não conseguimos carregar as histórias. Tente novamente em alguns minutos.",
     "fallbackNotice": "Ainda não entregamos para {preferred}. Mostramos os preços de {country}.",
-    "pagesRange": "De {min} a {max} páginas"
+    "pagesRange": "De {min} a {max} páginas",
+    "collectionLabel": "Coleção",
+    "allCollections": "Todas"
   },
   "Formats": {
     "digital": "Livro digital (PDF)",
@@ -557,6 +581,135 @@
           "text": "Vocabulário mais rico e uma trama com reviravoltas."
         }
       }
+    }
+  },
+  "Landing": {
+    "events": {
+      "metaTitle": "Lembrancinhas e kits de aniversário personalizados",
+      "metaDescription": "Uma história de aniversário com o protagonista da festa, para presentear cada convidado. Um design, muitas cópias.",
+      "eyebrow": "StoryNido Eventos",
+      "title": "Lembranças mágicas para compartilhar em cada celebração.",
+      "subtitle": "Criamos uma mini história com o aniversariante como protagonista. Um único design aprovado por vocês, com cópias idênticas para todos os convidados.",
+      "cta": "Criar o kit de aniversário",
+      "note": "Você pode criar o design e ver a amostra grátis sem criar uma conta.",
+      "imageAlt": "Ilustração em aquarela de um aniversário: o aniversariante sopra as velas e os amigos seguram o mesmo livrinho de presente.",
+      "howTitle": "Como funciona",
+      "steps": {
+        "1": {
+          "title": "Escolha o tema",
+          "text": "Aventura, magia ou o que o aniversariante mais gosta."
+        },
+        "2": {
+          "title": "Criamos a história",
+          "text": "Com o nome, a idade e a ilustração, com ou sem foto. Você vê uma amostra grátis."
+        },
+        "3": {
+          "title": "Um design, muitas cópias",
+          "text": "O mesmo livrinho para cada convidado: não geramos uma história diferente por cópia."
+        }
+      },
+      "kitTitle": "O que o kit pode incluir",
+      "kitSubtitle": "Tudo com a mesma ilustração do protagonista.",
+      "kit": {
+        "1": "Mini história",
+        "2": "Mini livro para colorir",
+        "3": "Atividades",
+        "4": "Convites",
+        "5": "Cartões de agradecimento",
+        "6": "Etiquetas e adesivos",
+        "7": "Lembrancinhas para as sacolinhas"
+      },
+      "kitNote": "Hoje você pode criar a história de aniversário e a amostra grátis. As outras peças do kit e a compra em quantidade chegam muito em breve.",
+      "collectionsTitle": "Temas de aniversário",
+      "faqTitle": "Perguntas frequentes",
+      "faq": {
+        "1": {
+          "q": "Cada convidado recebe uma história diferente?",
+          "a": "Não. É um único design aprovado por vocês, com cópias idênticas para todos. Assim é mais rápido e mais econômico."
+        },
+        "2": {
+          "q": "Posso imprimir em casa?",
+          "a": "Sim: a versão digital vem pronta para imprimir. A impressão por nossa conta depende de a gráfica oferecer esse produto no seu país; se não, oferecemos a versão digital."
+        },
+        "3": {
+          "q": "Preciso de uma foto?",
+          "a": "Não. Você pode escolher as características do protagonista sem enviar nenhuma foto."
+        },
+        "4": {
+          "q": "Com quanta antecedência devo pedir?",
+          "a": "Os prazos de impressão dependem do país; vamos mostrá-los antes de você confirmar o pedido."
+        }
+      },
+      "finalTitle": "Que cada convidado leve uma lembrança da festa"
+    },
+    "professionals": {
+      "metaTitle": "Histórias personalizadas para psicopedagogos, professores e terapeutas",
+      "metaDescription": "Crie histórias personalizadas para cada criança que você acompanha, com coleções educativas e leitura sob medida, a partir de uma única conta.",
+      "eyebrow": "StoryNido Profissionais",
+      "title": "Histórias únicas para acompanhar cada aprendizado e cada etapa.",
+      "subtitle": "Para psicopedagogos, professores, fonoaudiólogos, psicólogos infantis e odontopediatras: crie histórias personalizadas para cada criança com quem você trabalha, a partir de uma única conta.",
+      "cta": "Criar minha conta profissional",
+      "ctaSignedIn": "Criar uma nova história",
+      "note": "Você precisa de uma conta para guardar seus projetos e acumular suas compras.",
+      "imageAlt": "Ilustração em aquarela de uma educadora lendo uma história ilustrada com uma criança em uma mesa baixa.",
+      "howTitle": "Como funciona",
+      "steps": {
+        "1": {
+          "title": "Crie sua conta profissional",
+          "text": "Uma única conta para todos os seus projetos e compras."
+        },
+        "2": {
+          "title": "Escolha uma coleção",
+          "text": "Leitura, emoções, conquistas ou primeiras experiências, com objetivos gerais."
+        },
+        "3": {
+          "title": "Personalize para cada criança",
+          "text": "Use um apelido e ajuste a extensão, a quantidade de texto e o nível de leitura."
+        }
+      },
+      "benefitsTitle": "Pensado para o seu trabalho",
+      "benefits": {
+        "1": {
+          "title": "Coleções educativas",
+          "text": "Histórias para aprender, reconhecer emoções, celebrar conquistas e antecipar experiências novas."
+        },
+        "2": {
+          "title": "Leitura sob medida",
+          "text": "Extensão, quantidade de texto e nível de leitura, cada um separado."
+        },
+        "3": {
+          "title": "Mínimo de dados da criança",
+          "text": "Um apelido em vez do nome completo, modo sem foto e nenhum dado clínico."
+        },
+        "4": {
+          "title": "Preços para profissionais",
+          "text": "Preços profissionais e descontos por compras recorrentes, ativados junto com os pagamentos."
+        }
+      },
+      "collectionsTitle": "Coleções",
+      "disclaimer": "A StoryNido oferece histórias de acompanhamento. Não é um sistema clínico, não substitui o critério profissional e não pede diagnósticos nem prontuários.",
+      "faqTitle": "Perguntas frequentes",
+      "faq": {
+        "1": {
+          "q": "Posso criar histórias para crianças diferentes?",
+          "a": "Sim. Cada história é um projeto independente na sua conta, identificado por um apelido."
+        },
+        "2": {
+          "q": "Preciso de fotos das crianças?",
+          "a": "Não. Recomendamos o modo sem foto. Se usar uma foto, você precisa da autorização da mãe, do pai ou do responsável."
+        },
+        "3": {
+          "q": "Posso ajustar o texto ao nível da criança?",
+          "a": "Sim: você escolhe a quantidade de texto e o nível de leitura, independentes da extensão do livro."
+        },
+        "4": {
+          "q": "Há descontos?",
+          "a": "Sim, por compras recorrentes da sua conta. Publicaremos os detalhes quando os pagamentos forem habilitados."
+        }
+      },
+      "finalTitle": "Uma história para cada criança que você acompanha",
+      "signInTitle": "Crie sua conta profissional",
+      "signInText": "Assim guardamos seus projetos e compras em um só lugar. É rápido e sem senhas."
     }
   }
 }

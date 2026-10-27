@@ -49,6 +49,9 @@ export function toPublicStory(story: Story, locale: Locale): PublicStory {
     textDensities: story.textDensities,
     readingLevels: story.readingLevels,
     contentTypes: story.contentTypes,
+    channels: story.channels,
+    collectionIds: story.collectionIds,
+    personalization: story.personalization,
   };
 }
 
@@ -97,11 +100,13 @@ export function buildOffer(
 
 export function registerCatalogRoutes(app: FastifyInstance, catalog: CatalogRepository): void {
   addRoute(app, apiRoutes.catalogStories, {}, async (request) => {
-    const { locale, age } = query<'catalogStories'>(request);
+    const { locale, age, channel, collection } = query<'catalogStories'>(request);
     const stories = await catalog.stories();
     return {
       stories: stories
         .filter((story) => age === undefined || (story.ageMin <= age && age <= story.ageMax))
+        .filter((story) => !channel || story.channels.includes(channel))
+        .filter((story) => !collection || story.collectionIds.includes(collection))
         .map((story) => toPublicStory(story, locale)),
     };
   });
@@ -145,6 +150,21 @@ export function registerCatalogRoutes(app: FastifyInstance, catalog: CatalogRepo
   });
 
   addRoute(app, apiRoutes.catalogEditorial, {}, async () => catalog.editorial());
+
+  addRoute(app, apiRoutes.catalogCollections, {}, async (request) => {
+    const { locale, channel } = query<'catalogCollections'>(request);
+    return {
+      collections: (await catalog.collections())
+        .filter((item) => !channel || item.channel === channel)
+        .map((item) => ({
+          slug: item.slug,
+          channel: item.channel,
+          name: item.name[locale],
+          description: item.description[locale],
+          topics: item.topics.map((topic) => topic[locale]),
+        })),
+    };
+  });
 
   addRoute(app, apiRoutes.catalogCountries, {}, async () => ({
     countries: (await catalog.countries()).map((country) => ({

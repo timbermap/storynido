@@ -32,6 +32,9 @@ const story = (
   textDensities: ['visual', 'balanced'],
   readingLevels: ['beginner', 'developing'],
   contentTypes: ['story'],
+  channels: ['families'],
+  collectionIds: [],
+  personalization: { photo: true, avatar: true, memories: true, lessons: true },
   createdAt: now,
   updatedAt: now,
 });
@@ -99,7 +102,52 @@ describe('catálogo', () => {
   beforeAll(async () => {
     ctx = await createTestApp({
       catalog: new InMemoryCatalog({
-        stories: [story('b', 2, 4, 10), story('a', 1, 3, 6), story('oculta', 3, 3, 8, false)],
+        stories: [
+          story('b', 2, 4, 10),
+          story('a', 1, 3, 6),
+          story('oculta', 3, 3, 8, false),
+          {
+            ...story('dentista', 4, 3, 8),
+            channels: ['professionals', 'families'],
+            collectionIds: ['mi-primera-experiencia'],
+          },
+          { ...story('cumple', 5, 2, 10), channels: ['events'], collectionIds: ['cumpleanos'] },
+        ],
+        collections: [
+          {
+            slug: 'mi-primera-experiencia',
+            active: true,
+            order: 2,
+            channel: 'professionals',
+            name: t('Mi primera experiencia'),
+            description: t('Para anticipar situaciones nuevas.'),
+            topics: [t('Visita al dentista')],
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            slug: 'cumpleanos',
+            active: true,
+            order: 1,
+            channel: 'events',
+            name: t('Cumpleaños'),
+            description: t('Un cuento para cada invitado.'),
+            topics: [],
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            slug: 'borrador',
+            active: false,
+            order: 3,
+            channel: 'events',
+            name: t('Borrador'),
+            description: t('x'),
+            topics: [],
+            createdAt: now,
+            updatedAt: now,
+          },
+        ],
         lessons: [
           lesson('compartir', 2),
           lesson('llega-un-hermanito', 1, { group: 'life', ageMax: 5 }),
@@ -123,7 +171,7 @@ describe('catálogo', () => {
   it('lista solo historias activas, en orden y traducidas', async () => {
     const res = await get('/v1/catalog/stories?locale=en');
     const { stories } = res.json<{ stories: { slug: string; title: string }[] }>();
-    expect(stories.map((s) => s.slug)).toEqual(['a', 'b']);
+    expect(stories.map((s) => s.slug)).toEqual(['a', 'b', 'dentista', 'cumple']);
     expect(stories[0]?.title).toBe('Título a (en)');
   });
 
@@ -131,7 +179,7 @@ describe('catálogo', () => {
     const { stories } = (await get('/v1/catalog/stories?locale=es&age=8')).json<{
       stories: { slug: string }[];
     }>();
-    expect(stories.map((s) => s.slug)).toEqual(['b']);
+    expect(stories.map((s) => s.slug)).toEqual(['b', 'dentista', 'cumple']);
   });
 
   it('valida idioma y edad', async () => {
@@ -206,5 +254,31 @@ describe('catálogo', () => {
     expect(config.lengths.classic?.interiorPages).toBe(24);
     expect(config.lengths.mini?.interiorPages).toBe(12);
     expect(config.defaults.textDensity).toBe('balanced');
+  });
+
+  it('filtra historias por línea comercial y colección (una historia puede estar en varias)', async () => {
+    const slugs = async (url: string) =>
+      (await get(url)).json<{ stories: { slug: string }[] }>().stories.map((item) => item.slug);
+    expect(await slugs('/v1/catalog/stories?locale=es&channel=events')).toEqual(['cumple']);
+    expect(await slugs('/v1/catalog/stories?locale=es&channel=professionals')).toEqual([
+      'dentista',
+    ]);
+    expect(await slugs('/v1/catalog/stories?locale=es&channel=families')).toContain('dentista');
+    expect(await slugs('/v1/catalog/stories?locale=es&collection=mi-primera-experiencia')).toEqual([
+      'dentista',
+    ]);
+  });
+
+  it('lista colecciones activas por línea, con sus temas traducidos', async () => {
+    const res = await get('/v1/catalog/collections?locale=es&channel=professionals');
+    const { collections } = res.json<{ collections: { slug: string; topics: string[] }[] }>();
+    expect(collections).toEqual([
+      expect.objectContaining({ slug: 'mi-primera-experiencia', topics: ['Visita al dentista'] }),
+    ]);
+    const all = (await get('/v1/catalog/collections?locale=en')).json<{
+      collections: { slug: string; name: string }[];
+    }>().collections;
+    expect(all.map((item) => item.slug)).toEqual(['cumpleanos', 'mi-primera-experiencia']);
+    expect(all[0]?.name).toBe('Cumpleaños (en)');
   });
 });

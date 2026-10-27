@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
 
 import heroWatercolor from '../../../public/brand/hero-acuarela.webp';
 
@@ -12,7 +12,7 @@ function Sparkle({ className }: { className: string }) {
 }
 
 /** Ilustración de acuarela del hero (imagen LCP: carga prioritaria, optimizada por Next). */
-export function HeroArt({ alt }: { alt: string }) {
+export function HeroArt({ alt, src = heroWatercolor }: { alt: string; src?: StaticImageData }) {
   return (
     <div className="relative isolate mx-auto w-full max-w-2xl">
       <div
@@ -23,7 +23,7 @@ export function HeroArt({ alt }: { alt: string }) {
       <Sparkle className="absolute -right-2 -bottom-4 z-10 size-7 text-star" />
       <div className="overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,#fff9f3,#efe4f6)] shadow-[0_17px_45px_rgb(80_52_84/0.08)]">
         <Image
-          src={heroWatercolor}
+          src={src}
           alt={alt}
           priority
           placeholder="blur"

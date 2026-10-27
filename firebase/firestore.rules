@@ -189,6 +189,7 @@ service cloud.firestore {
         && d.get('textDensity', 'balanced') in ['visual', 'balanced', 'rich']
         && d.get('readingLevel', 'developing') in ['beginner', 'developing', 'advanced']
         && d.get('contentType', 'story') in ['story', 'coloring', 'activities', 'story_activities']
+        && d.get('channel', 'families') in ['families', 'events', 'professionals']
         && ownsChild(d.childId);
     }
 
@@ -197,7 +198,7 @@ service cloud.firestore {
 
       // Solo se crean borradores; preview, estado y regeneraciones los maneja el servidor.
       allow create: if ownsIncoming()
-        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'length', 'textDensity', 'readingLevel', 'contentType', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
+        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'length', 'textDensity', 'readingLevel', 'contentType', 'channel', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
         && incoming().status == 'draft'
         && incoming().preview == null
         && incoming().regenerationsUsed == 0
@@ -276,6 +277,11 @@ service cloud.firestore {
 
     match /coupons/{code} {
       allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /collections/{id} {
+      allow read: if activeOrAdmin();
       allow write: if false;
     }
 

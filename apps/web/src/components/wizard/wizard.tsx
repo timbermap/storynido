@@ -18,7 +18,7 @@ import { StepPhotos } from './step-photos';
 import { StepReview } from './step-review';
 import { StepStory } from './step-story';
 import { StepStyle } from './step-style';
-import { WIZARD_STEPS, type SaveState } from './steps';
+import { WIZARD_STEPS, hiddenSteps, type SaveState } from './steps';
 import type { StepNav, WizardData } from './types';
 
 type Catalog = Pick<WizardData, 'stories' | 'lessons' | 'styles' | 'editorial'>;
@@ -99,23 +99,39 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
   const current = stepIndex ?? 0;
   const maxReached = Math.max(book?.wizardStep ?? 0, current);
 
-  const nav = useMemo<StepNav>(
-    () => ({
+  const channel = book?.channel ?? 'families';
+
+  const nav = useMemo<StepNav>(() => {
+    const hidden = hiddenSteps(channel);
+    /** Siguiente (o anterior) paso visible para la línea del libro. */
+    const neighbor = (from: number, direction: 1 | -1) => {
+      let index = from + direction;
+      while (
+        index > 0 &&
+        index < WIZARD_STEPS.length - 1 &&
+        hidden.includes(WIZARD_STEPS[index] ?? 'child')
+      ) {
+        index += direction;
+      }
+      return Math.min(Math.max(index, 0), WIZARD_STEPS.length - 1);
+    };
+    return {
       stepIndex: current,
+      hidden,
       maxReached,
       saveState,
       save,
       onBack:
         current > 0
           ? () => {
-              setStepIndex(current - 1);
+              setStepIndex(neighbor(current, -1));
             }
           : undefined,
       onJump: (index) => {
         if (index <= maxReached) setStepIndex(index);
       },
       goNext: async () => {
-        const nextIndex = Math.min(current + 1, WIZARD_STEPS.length - 1);
+        const nextIndex = neighbor(current, 1);
         if (nextIndex > (book?.wizardStep ?? 0)) {
           await save(async () => {
             await updateBook(await getFirebaseDb(), bookId, { wizardStep: nextIndex });
@@ -124,9 +140,8 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
         setStepIndex(nextIndex);
         window.scrollTo({ top: 0 });
       },
-    }),
-    [current, maxReached, saveState, save, book?.wizardStep, bookId],
-  );
+    };
+  }, [current, maxReached, saveState, save, book?.wizardStep, bookId, channel]);
 
   if (!loading && !user) return <SignInGate />;
   if (book === null) {

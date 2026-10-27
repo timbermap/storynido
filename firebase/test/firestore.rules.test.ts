@@ -80,6 +80,7 @@ const draftBook = (ownerUid: string, childId: string | null = null) => ({
   textDensity: 'balanced',
   readingLevel: 'developing',
   contentType: 'story',
+  channel: 'families',
   preview: null,
   regenerationsUsed: 0,
   createdAt: serverTimestamp(),
@@ -282,6 +283,22 @@ describe('books', () => {
     );
   });
 
+  it('la línea comercial se fija al crear y no se cambia después', async () => {
+    await assertSucceeds(
+      setDoc(doc(alice(), 'books', 'ev'), { ...draftBook(ALICE), channel: 'events' }),
+    );
+    await assertFails(
+      setDoc(doc(alice(), 'books', 'bad'), { ...draftBook(ALICE), channel: 'empresas' }),
+    );
+    await seed('books/b2', { ...draftBook(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    await assertFails(
+      updateDoc(doc(alice(), 'books', 'b2'), {
+        channel: 'professionals',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
   it('opciones editoriales: solo valores conocidos', async () => {
     await seed('books/b1', { ...draftBook(ALICE), createdAt: new Date(), updatedAt: new Date() });
     const ref = doc(alice(), 'books', 'b1');
@@ -310,6 +327,7 @@ describe('books', () => {
       textDensity: _density,
       readingLevel: _level,
       contentType: _type,
+      channel: _channel,
       ...legacy
     } = draftBook(ALICE);
     await seed('books/old', { ...legacy, createdAt: new Date(), updatedAt: new Date() });

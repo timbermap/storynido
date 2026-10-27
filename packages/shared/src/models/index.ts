@@ -1,4 +1,5 @@
 export * from './catalog';
+export * from './channels';
 export * from './character';
 export * from './collections';
 export * from './commerce';
