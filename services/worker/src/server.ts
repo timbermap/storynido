@@ -64,7 +64,12 @@ const pipeline = new Pipeline(
   getFirestore(firebase),
   env.PIPELINE_HANDLERS === 'simulated'
     ? simulatedHandlers()
-    : generationHandlers({ db: getFirestore(firebase), providers, log: app.log }),
+    : generationHandlers({
+        db: getFirestore(firebase),
+        providers,
+        log: app.log,
+        allowSimulated: env.APP_ENV === 'local' || env.APP_ENV === 'test',
+      }),
   cloud
     ? new CloudWorkflowsOrchestrator({ ...gcp, workflow: env.WORKFLOW_NAME })
     : new LocalOrchestrator(current, app.log, env.LOCAL_RETRY_BASE_MS),

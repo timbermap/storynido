@@ -85,6 +85,8 @@ interface Deps {
   providers: ProviderRegistry;
   log: FastifyBaseLogger;
   qa?: Partial<QaLimits>;
+  /** Solo en local y en tests: permite los proveedores simulados. */
+  allowSimulated?: boolean;
 }
 
 /** Rasgos esenciales en frases, para la revisión de cada página. */
@@ -139,29 +141,42 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
   const { db, providers, log } = deps;
   const limits = { ...DEFAULT_QA_LIMITS, ...deps.qa };
   const storage = () => providers.storage();
-  let aiConfigCheckedAt = 0;
+  let aiConfig: { loadedAt: number; ready: Promise<void> } | null = null;
 
-  /** El admin elige proveedor y modelo en aiConfig: se aplica como en la API. */
-  async function ai(): Promise<AIProvider> {
-    if (Date.now() - aiConfigCheckedAt > 60_000) {
-      aiConfigCheckedAt = Date.now();
-      const config = (await db.collection(COLLECTIONS.aiConfig).doc(GLOBAL_DOC_ID).get()).data();
-      const field = (name: string) => {
-        const value: unknown = config?.[name];
-        return typeof value === 'string' && value !== '' ? value : undefined;
-      };
-      try {
-        providers.setAiOverride({
-          text: field('textProvider'),
-          image: field('imageProvider'),
-          textModel: field('textModel'),
-          imageModel: field('imageModel'),
-        });
-      } catch (error) {
-        log.error({ err: error }, 'ai config rejected; keeping previous providers');
-      }
+  /** Lee aiConfig y aplica el proveedor y los modelos que eligió el admin (como la API). */
+  async function loadAiConfig(): Promise<void> {
+    const config = (await db.collection(COLLECTIONS.aiConfig).doc(GLOBAL_DOC_ID).get()).data();
+    const field = (name: string) => {
+      const value: unknown = config?.[name];
+      return typeof value === 'string' && value !== '' ? value : undefined;
+    };
+    try {
+      providers.setAiOverride({
+        text: field('textProvider'),
+        image: field('imageProvider'),
+        textModel: field('textModel'),
+        imageModel: field('imageModel'),
+      });
+    } catch (error) {
+      log.error({ err: error }, 'ai config rejected; keeping previous providers');
     }
-    return providers.ai();
+  }
+
+  /**
+   * Proveedor de IA vigente. Todas las páginas que arrancan juntas esperan la misma lectura de
+   * aiConfig (antes, las que llegaban mientras se leía usaban el proveedor por defecto).
+   */
+  async function ai(): Promise<AIProvider> {
+    if (!aiConfig || Date.now() - aiConfig.loadedAt > 60_000) {
+      aiConfig = { loadedAt: Date.now(), ready: loadAiConfig() };
+    }
+    await aiConfig.ready;
+    const provider = providers.ai();
+    // En un ambiente real nunca se pinta ni se revisa un libro con la IA simulada.
+    if (!deps.allowSimulated && (provider.text.id === 'mock' || provider.image.id === 'mock')) {
+      throw new Error('La IA simulada no está permitida en este ambiente (revisar aiConfig).');
+    }
+    return provider;
   }
 
   /** Cada llamada queda en aiUsage (con el pedido) y en el gasto del día. Devuelve el costo. */
@@ -507,7 +522,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       for (;;) {
         let review: PageReview | null = null;
         if (path) {
-          review = await provider.text.reviewPage({
+          const request = {
             pageIndex: index,
             text: index === 0 ? null : (snapshot.pages[index - 1]?.text ?? null),
             image: await load(path),
@@ -515,7 +530,27 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             character: snapshot.character.description,
             mustKeep: snapshot.character.mustKeep,
             scene: index === 0 ? null : (snapshot.scenes?.[index - 1] ?? null),
-          });
+          };
+          // Una revisión que se cuelga no tumba el control de todo el libro: 1 reintento y,
+          // si sigue sin responder, esa página va a una persona.
+          for (let tries = 0; tries < 2 && !review; tries += 1) {
+            try {
+              review = await provider.text.reviewPage(request);
+            } catch (error) {
+              log.warn({ orderId: ctx.order.id, index, err: error }, 'page review failed');
+            }
+          }
+          if (!review) {
+            await qaEvent(ctx, 'page_human_review', {
+              pageIndex: index,
+              attemptCount: attempts,
+              repairCostUsdMicros: pageRepairCost,
+              finalStatus: 'human_review',
+              reason: 'review_unavailable',
+            });
+            blocked.push({ index, reason: 'revisión automática no disponible' });
+            return;
+          }
           cost += await record(ctx, 'review', review.usage);
         } else {
           await qaEvent(ctx, 'page_missing', { pageIndex: index });

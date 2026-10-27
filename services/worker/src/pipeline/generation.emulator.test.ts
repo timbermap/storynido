@@ -143,7 +143,7 @@ function setup(providers: ProviderRegistry) {
   const dispatcher = new InlineDispatcher(current, log, 1);
   const pipeline = new Pipeline(
     db,
-    generationHandlers({ db, providers, log }),
+    generationHandlers({ db, providers, log, allowSimulated: true }),
     orchestrator,
     dispatcher,
     log,
@@ -345,6 +345,60 @@ describe('generación del libro (fase 09)', () => {
 
     expect((await order()).status).toBe('ready');
     expect((await qaCodes()).map((event) => event.code)).toContain('moderation_image');
+  });
+
+  it('en un ambiente real nunca usa la IA simulada (el libro no se pinta con placeholders)', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const current = (): Pipeline => pipeline;
+    const orchestrator = new LocalOrchestrator(current, log, 1);
+    const dispatcher = new InlineDispatcher(current, log, 1);
+    const pipeline = new Pipeline(
+      db,
+      generationHandlers({ db, providers, log, allowSimulated: false }),
+      orchestrator,
+      dispatcher,
+      log,
+    );
+    const generate = vi.spyOn(providers.ai().image, 'generateIllustration');
+    await pipeline.handleEvent({ type: 'order.paid', orderId: 'o1', requestId: 'r1' });
+    await orchestrator.idle();
+    await dispatcher.idle();
+
+    const failed = await order();
+    expect(failed.status).toBe('qa_failed');
+    expect((failed.pipeline as { error: string }).error).toContain('IA simulada');
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it('una revisión que se cuelga una vez se reintenta; si sigue, solo esa página va a una persona', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const text = providers.ai().text;
+    const original = text.reviewPage.bind(text);
+    const failures = new Map<number, number>([
+      [1, 1],
+      [3, 99],
+    ]);
+    const reviews = vi.spyOn(text, 'reviewPage').mockImplementation(async (request) => {
+      const left = failures.get(request.pageIndex) ?? 0;
+      if (left > 0) {
+        failures.set(request.pageIndex, left - 1);
+        throw new Error('The operation was aborted due to timeout');
+      }
+      return original(request);
+    });
+    await setup(providers).run();
+
+    const failed = await order();
+    expect(failed.status).toBe('qa_failed');
+    expect((failed.pipeline as { error: string }).error).toContain('página 3');
+    // Sin reintentar el paso entero: las demás páginas se revisaron una sola vez.
+    expect((await step('quality_check')).attempts).toBe(1);
+    expect(reviews.mock.calls.filter(([request]) => request.pageIndex === 0)).toHaveLength(1);
+    expect(reviews.mock.calls.filter(([request]) => request.pageIndex === 1)).toHaveLength(2);
+    const human = (await qaCodes()).find((event) => event.code === 'page_human_review');
+    expect(human?.detail).toMatchObject({ pageIndex: 3, reason: 'review_unavailable' });
   });
 
   it('regenerar no cambia lo aprobado pero vuelve a pintar todas las páginas', async () => {

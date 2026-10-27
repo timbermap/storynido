@@ -97,6 +97,8 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   });
 }
 
+// Cloud Run no manda tráfico hasta que escucha: primero, los proveedores que eligió el admin.
+await liveConfig.waitForAiConfig();
 await app.listen({ port: config.env.PORT, host: '0.0.0.0' });
 app.log.info(
   { providers: providers.describe().active, projectId: config.projectId, appEnv: config.appEnv },

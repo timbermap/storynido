@@ -54,6 +54,11 @@ export class FirebaseAppCheckVerifier implements AppCheckVerifier {
 export class FirestoreLiveConfig implements SiteConfigSource {
   private currentMode: SiteConfig['mode'] = 'live';
   private readonly unsubscribers: (() => void)[] = [];
+  private markAiReady: () => void = () => undefined;
+  /** Se resuelve con la primera lectura de aiConfig (o su error). */
+  private readonly aiReady = new Promise<void>((resolve) => {
+    this.markAiReady = resolve;
+  });
 
   constructor(
     private readonly app: App,
@@ -103,12 +108,32 @@ export class FirestoreLiveConfig implements SiteConfigSource {
             } catch (error) {
               this.log.error({ err: error }, 'ai config rejected; keeping previous providers');
             }
+            this.markAiReady();
           },
           (error) => {
             this.log.error({ err: error }, 'aiConfig listener failed');
+            this.markAiReady();
           },
         ),
     );
+  }
+
+  /**
+   * Espera la primera lectura de aiConfig: sin esto, lo que llega apenas arranca la instancia
+   * usaría el proveedor por defecto (el simulado) en vez del que eligió el admin.
+   */
+  async waitForAiConfig(timeoutMs = 10_000): Promise<void> {
+    let timer: NodeJS.Timeout | undefined;
+    await Promise.race([
+      this.aiReady,
+      new Promise<void>((resolve) => {
+        timer = setTimeout(() => {
+          this.log.error('aiConfig not loaded in time; starting with default providers');
+          resolve();
+        }, timeoutMs);
+      }),
+    ]);
+    clearTimeout(timer);
   }
 
   stop(): void {
