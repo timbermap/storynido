@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { blend, contrastRatio } from './contrast';
 import { mazeSvg } from './maze';
+import { textPlacements } from './placement';
 import { chromePath, launchBrowser, renderPdf } from './render';
 import { FORMAT_SPECS, pageSizeMm, printablePages } from './spec';
 import {
@@ -42,6 +43,40 @@ describe('reglas de maquetación', () => {
     const width = pageSizeMm(FORMAT_SPECS.hardcover).width;
     expect(effectiveDpi(1792, width)).toBeGreaterThan(200);
     expect(effectiveDpi(896, width)).toBeLessThan(FORMAT_SPECS.hardcover.minDpi);
+  });
+
+  it('el texto va en la región más calma de la ilustración', async () => {
+    // Arriba liso (cielo), abajo con mucho detalle (personajes): el texto va arriba.
+    const busyBottom = await sharp({
+      create: { width: 300, height: 400, channels: 3, background: { r: 180, g: 200, b: 240 } },
+    })
+      .composite([
+        {
+          input: Buffer.from(
+            `<svg width="300" height="200"><pattern id="p" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#222"/></pattern><rect width="300" height="200" fill="url(#p)"/></svg>`,
+          ),
+          top: 200,
+          left: 0,
+        },
+      ])
+      .png()
+      .toBuffer();
+    const [placement] = await textPlacements([{ image: busyBottom, words: 80 }], {
+      allowCorners: false,
+    });
+    expect(placement).toBe('top');
+    // Textos cortos pueden ir en una esquina; nunca se repite igual si hay otra parecida.
+    const flat = await sharp({
+      create: { width: 300, height: 400, channels: 3, background: { r: 200, g: 200, b: 200 } },
+    })
+      .png()
+      .toBuffer();
+    const many = await textPlacements(
+      [flat, flat, flat].map((image) => ({ image, words: 20 })),
+      { allowCorners: true },
+    );
+    expect(many[0]).toBe('bottom');
+    expect(many[1]).not.toBe('bottom');
   });
 
   it('el laberinto es determinístico y tiene entrada y salida', () => {

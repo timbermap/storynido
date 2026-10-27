@@ -30,6 +30,8 @@ export const workerEnvSchema = serviceEnvSchema.extend({
   BUCKET_PHOTOS: z.string().optional(),
   BUCKET_ASSETS: z.string().optional(),
   BUCKET_PDFS: z.string().optional(),
+  /** Dominio de la marca (QR de la contratapa). */
+  BRAND_DOMAIN: z.string().default('storynido.com'),
   /** Base de la espera exponencial del orquestador local, en milisegundos. */
   LOCAL_RETRY_BASE_MS: z.coerce.number().int().nonnegative().default(2000),
 });

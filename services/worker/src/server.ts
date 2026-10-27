@@ -69,6 +69,7 @@ const pipeline = new Pipeline(
         providers,
         log: app.log,
         allowSimulated: env.APP_ENV === 'local' || env.APP_ENV === 'test',
+        brandDomain: env.BRAND_DOMAIN,
       }),
   cloud
     ? new CloudWorkflowsOrchestrator({ ...gcp, workflow: env.WORKFLOW_NAME })

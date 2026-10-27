@@ -8,7 +8,11 @@
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
+import { countWords } from '@storynido/shared';
+import QRCode from 'qrcode';
 import sharp from 'sharp';
+
+import { textPlacements } from '../src/pdf/placement';
 
 import { launchBrowser, renderPdf } from '../src/pdf/render';
 import { FORMAT_SPECS, pageSizeMm, type FormatSpec } from '../src/pdf/spec';
@@ -48,6 +52,23 @@ async function dataUri(file: string, spec: FormatSpec) {
   return { uri: `data:image/jpeg;base64,${jpeg.toString('base64')}`, width };
 }
 
+const sources = book.pages.map((_, index) =>
+  readFileSync(path.join(imageDir, imageFor(index + 1) ?? '')),
+);
+const placements = await textPlacements(
+  sources.map((image, index) => ({ image, words: countWords(book.pages[index]?.text ?? '') })),
+  { allowCorners: book.density !== 'rich' },
+);
+console.log(`ubicación del texto: ${placements.join(', ')}`);
+const qr = {
+  svg: await QRCode.toString('https://storynido.com', {
+    type: 'svg',
+    margin: 0,
+    color: { dark: '#342a40', light: '#0000' },
+  }),
+  label: 'storynido.com',
+};
+
 const browser = await launchBrowser();
 try {
   for (const spec of Object.values(FORMAT_SPECS)) {
@@ -61,7 +82,12 @@ try {
     const layout: LayoutBook = {
       ...book,
       cover: cover.uri,
-      pages: pages.map((page) => ({ text: page.text, image: page.uri })),
+      pages: pages.map((page, index) => ({
+        text: page.text,
+        image: page.uri,
+        placement: placements[index],
+      })),
+      qr,
     };
     const size = pageSizeMm(spec);
     const lowDpi = [cover, ...pages]

@@ -796,3 +796,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - su `PaymentProvider` (checkout, firma del webhook, reembolso);
   - Apple Pay y Google Pay;
   - multimoneda real y el procedimiento de pruebas con su CLI.
+
+## 073 · Libro más vendible: tapa con el nombre, texto que se mueve y contratapa completa
+
+- **Fecha:** 2026-10-27 · **Feedback de Sebastián sobre el PDF.**
+- **Tapa:** el título lleva el nombre del protagonista; el redactor ahora lo incluye ("La aventura espacial de Martina"). Si un libro anterior no lo tiene, la tapa muestra el nombre grande en lavanda debajo del título.
+- **Texto interior:**
+  - Ya no va siempre abajo. Cada página mide el detalle visual (bordes y contraste) de 6 regiones de su ilustración y pone el texto en la más calma: banda arriba o abajo, o esquina para textos cortos.
+  - Penaliza repetir la ubicación de la página anterior.
+  - Las ilustraciones nuevas dejan un tercio calmo, alternando arriba y abajo, y sin caras ahí.
+- **Contratapa:** título, sinopsis (la descripción de la historia), "Un cuento para {nombre}", QR a la web y la marca. En imprenta queda una zona blanca de 50×30 mm abajo a la derecha para el código de barras; el tamaño exacto se confirma con Gelato.

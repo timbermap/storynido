@@ -2,6 +2,7 @@ import type { ActivitySpec } from '@storynido/shared';
 
 import { fontFaces } from './fonts';
 import { mazeSvg } from './maze';
+import type { TextPlacement } from './placement';
 import { TRIM_MM, pageSizeMm, spineMm, type FormatSpec } from './spec';
 
 export type Density = 'visual' | 'balanced' | 'rich';
@@ -18,8 +19,12 @@ export interface LayoutBook {
   readingLevel: 'beginner' | 'developing' | 'advanced';
   /** Portada: data URI de la ilustración. */
   cover: string;
-  pages: { text: string; image: string }[];
+  /** `placement`: dónde va el texto (la región más calma de la ilustración). */
+  pages: { text: string; image: string; placement?: TextPlacement }[];
   activities: ActivitySpec[];
+  /** Contratapa: sinopsis breve y un QR (SVG) a StoryNido. */
+  synopsis?: string | null;
+  qr?: { svg: string; label: string } | null;
 }
 
 /** Colores de texto y panel: el contraste se verifica en los tests (≥ 4,5:1 en el peor caso). */
@@ -43,6 +48,7 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     dedicationFor: 'Este cuento es para {name}.',
     end: 'Fin',
     madeFor: 'Un cuento de StoryNido creado para {name}',
+    storyFor: 'Un cuento para {name}',
     activity: 'Actividad',
     back: 'Historias que abrazan.',
     words: 'Palabras',
@@ -51,6 +57,7 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     dedicationFor: 'This story is for {name}.',
     end: 'The End',
     madeFor: 'A StoryNido story made for {name}',
+    storyFor: 'A story for {name}',
     activity: 'Activity',
     back: 'Stories that hug.',
     words: 'Words',
@@ -59,6 +66,7 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     dedicationFor: 'Esta história é para {name}.',
     end: 'Fim',
     madeFor: 'Uma história StoryNido criada para {name}',
+    storyFor: 'Uma história para {name}',
     activity: 'Atividade',
     back: 'Histórias que abraçam.',
     words: 'Palavras',
@@ -89,12 +97,24 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .page { width: ${String(size.width)}mm; height: ${String(size.height)}mm; position: relative; overflow: hidden; break-after: page; background: ${PAPER}; }
 .page:last-child { break-after: auto; }
 .art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.panel { position: absolute; left: ${String(inset)}mm; right: ${String(inset)}mm; bottom: ${String(inset)}mm; background: rgba(255,250,243,${String(PANEL_ALPHA)}); border-radius: 6mm; padding: 6mm 8mm; }
+.panel { position: absolute; background: rgba(255,250,243,${String(PANEL_ALPHA)}); border-radius: 6mm; padding: 6mm 8mm; }
+.panel.bottom { left: ${String(inset)}mm; right: ${String(inset)}mm; bottom: ${String(inset)}mm; }
+.panel.top { left: ${String(inset)}mm; right: ${String(inset)}mm; top: ${String(inset)}mm; }
+.panel.top-left { left: ${String(inset)}mm; top: ${String(inset)}mm; width: 60%; }
+.panel.top-right { right: ${String(inset)}mm; top: ${String(inset)}mm; width: 60%; }
+.panel.bottom-left { left: ${String(inset)}mm; bottom: ${String(inset)}mm; width: 60%; }
+.panel.bottom-right { right: ${String(inset)}mm; bottom: ${String(inset)}mm; width: 60%; }
+.cover-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 50pt; line-height: 1; color: #79518c; margin-top: 3mm; letter-spacing: -0.02em; }
+.back { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; gap: 6mm; }
+.back .synopsis { font-family: 'Fraunces', serif; font-size: 15pt; line-height: 1.5; max-width: 140mm; }
+.back .qr { display: flex; align-items: center; gap: 4mm; font-size: 9.5pt; color: #69616c; }
+.back .qr svg { width: 22mm; height: 22mm; }
+.barcode-zone { position: absolute; right: ${String(inset)}mm; bottom: ${String(inset)}mm; width: 50mm; height: 30mm; background: #fff; }
 .story { font-family: 'Fraunces', serif; font-weight: 500; line-height: 1.42; color: ${INK}; }
 .story p + p { margin-top: 0.6em; }
 .center { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .title-band { position: absolute; left: 0; right: 0; top: 0; padding: ${String(inset)}mm ${String(inset)}mm 22mm; background: linear-gradient(to bottom, rgba(255,250,243,0.96) 55%, rgba(255,250,243,0)); text-align: center; }
-.title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 34pt; line-height: 1.08; letter-spacing: -0.02em; }
+.title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 40pt; line-height: 1.05; letter-spacing: -0.025em; }
 .coloring .art { object-fit: contain; background: #fff; }
 .activity { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; gap: 6mm; }
 .activity .kicker { font-size: 10pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #79518c; }
@@ -146,10 +166,13 @@ function storyPage(
   const layout = DENSITY_LAYOUT[coloring ? 'visual' : book.density];
   const scale = LEVEL_SCALE[book.readingLevel];
   const height = pageSizeMm(spec).height;
-  const maxMm = ((TRIM_MM.height * layout.panelPct) / 100).toFixed(1);
+  const placement = coloring ? 'top' : (page.placement ?? 'bottom');
+  // En una esquina el panel es más angosto: puede crecer más en alto.
+  const pct = placement.includes('-') ? Math.min(layout.panelPct * 1.6, 55) : layout.panelPct;
+  const maxMm = ((TRIM_MM.height * pct) / 100).toFixed(1);
   return `<section class="page${coloring ? ' coloring' : ''}" data-label="página ${String(number)}" style="height:${String(height)}mm">
   <img class="art" src="${page.image}" alt="">
-  <div class="panel" data-max-mm="${maxMm}" data-font-pt="${(layout.fontPt * scale).toFixed(2)}" data-min-pt="${(layout.minPt * scale).toFixed(2)}">
+  <div class="panel ${placement}" data-max-mm="${maxMm}" data-font-pt="${(layout.fontPt * scale).toFixed(2)}" data-min-pt="${(layout.minPt * scale).toFixed(2)}">
     <div class="story">${paragraphs(page.text)}</div>
   </div>
 </section>`;
@@ -193,17 +216,32 @@ function activityPage(book: LayoutBook, activity: ActivitySpec, index: number): 
 </section>`;
 }
 
+/** Tapa: el título siempre con el nombre del protagonista, bien grande (una tapa vendible). */
 function coverFront(book: LayoutBook, spec: FormatSpec): string {
+  const hasName = book.title.toLocaleLowerCase().includes(book.childName.toLocaleLowerCase());
+  const name = hasName ? '' : `<p class="cover-name">${escapeHtml(book.childName)}</p>`;
   return `<img class="art" src="${book.cover}" alt="">
-  <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title">${escapeHtml(book.title)}</h1></div>`;
+  <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title">${escapeHtml(book.title)}</h1>${name}</div>`;
 }
 
-function backCover(book: LayoutBook): string {
-  return `<div class="center" style="gap:5mm">
-    <p style="font-family:'Fraunces',serif;font-weight:600;font-size:22pt">StoryNido</p>
-    <p style="font-size:12pt;color:#69616c">${escapeHtml(text(book, 'back'))}</p>
-    <p style="font-size:10pt;color:#69616c">${escapeHtml(text(book, 'madeFor'))}</p>
-  </div>`;
+/**
+ * Contratapa: sinopsis, para quién es, QR a StoryNido y, en imprenta, la zona libre (blanca)
+ * donde la imprenta pone el código de barras.
+ */
+function backCover(book: LayoutBook, print: boolean): string {
+  const synopsis = book.synopsis ? `<p class="synopsis">${escapeHtml(book.synopsis)}</p>` : '';
+  const qr = book.qr
+    ? `<div class="qr">${book.qr.svg}<span>${escapeHtml(book.qr.label)}</span></div>`
+    : '';
+  return `<div class="back">
+    <p style="font-family:'Fraunces',serif;font-weight:600;font-size:22pt">${escapeHtml(book.title)}</p>
+    ${synopsis}
+    <p style="font-family:'Fraunces',serif;font-style:italic;font-size:14pt;color:#79518c">${escapeHtml(text(book, 'storyFor'))}</p>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:5mm">
+      ${qr}
+      <p style="font-family:'Fraunces',serif;font-weight:600;font-size:16pt">StoryNido <span style="font-family:'Nunito Sans',sans-serif;font-weight:400;font-size:10pt;color:#69616c">· ${escapeHtml(text(book, 'back'))}</span></p>
+    </div>
+  </div>${print ? '<div class="barcode-zone" data-zone="barcode"></div>' : ''}`;
 }
 
 /** Interior del libro: dedicatoria, páginas, actividades y fin (sin tapas). */
@@ -230,7 +268,7 @@ export function digitalHtml(book: LayoutBook, spec: FormatSpec): string {
   return document(spec, pageSizeMm(spec), [
     `<section class="page" data-label="portada">${coverFront(book, spec)}</section>`,
     ...interiorPages(book, spec),
-    `<section class="page" data-label="contratapa">${backCover(book)}</section>`,
+    `<section class="page" data-label="contratapa">${backCover(book, false)}</section>`,
   ]);
 }
 
@@ -246,7 +284,7 @@ export function printCoverHtml(book: LayoutBook, spec: FormatSpec, interiorCount
   const half = TRIM_MM.width + spec.bleedMm;
   return document(spec, { width, height }, [
     `<section class="page" data-label="tapas" style="width:${String(width)}mm;height:${String(height)}mm">
-  <div style="position:absolute;left:0;top:0;bottom:0;width:${String(half)}mm">${backCover(book)}</div>
+  <div style="position:absolute;left:0;top:0;bottom:0;width:${String(half)}mm">${backCover(book, true)}</div>
   <div style="position:absolute;left:${String(half)}mm;top:0;bottom:0;width:${String(spine)}mm;background:#79518c;display:flex;align-items:center;justify-content:center">
     <p style="transform:rotate(90deg);white-space:nowrap;color:#fff;font-family:'Fraunces',serif;font-size:${String(Math.min(10, spine * 1.6))}pt">${escapeHtml(book.title)}</p>
   </div>

@@ -1,12 +1,14 @@
 import { createHash } from 'node:crypto';
 
 import { encodeIllustration, type ProviderRegistry } from '@storynido/providers';
+import QRCode from 'qrcode';
 import sharp from 'sharp';
 import {
   COLLECTIONS,
   GLOBAL_DOC_ID,
   avatarToSheet,
   buildIllustrationPrompt,
+  countWords,
   coverScene,
   describeCharacter,
   nameIssues,
@@ -30,6 +32,7 @@ import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 
 import { launchBrowser, renderPdf } from '../pdf/render';
+import { textPlacements } from '../pdf/placement';
 import { FORMAT_SPECS, pageSizeMm, printablePages } from '../pdf/spec';
 import {
   DENSITY_LAYOUT,
@@ -76,6 +79,8 @@ export interface BookSnapshot {
   contentType: string;
   readingLevel: string;
   textDensity: string;
+  /** Sinopsis para la contratapa (descripción de la historia en el idioma del libro). */
+  synopsis?: string | null;
   words: { min: number; max: number } | null;
   activityPages: number;
   pages: { index: number; text: string; illustrationPrompt: string }[];
@@ -117,6 +122,8 @@ interface Deps {
   qa?: Partial<QaLimits>;
   /** Solo en local y en tests: permite los proveedores simulados. */
   allowSimulated?: boolean;
+  /** Dominio de la marca para el QR de la contratapa. */
+  brandDomain?: string;
 }
 
 /** El pedido tiene al menos un libro impreso. */
@@ -153,7 +160,12 @@ function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: s
   const fix = hint
     ? ` Make sure that: ${hint}. Draw exactly this scene, with the protagonist clearly visible.`
     : '';
-  return `${prompt}${visible}${hidden}${fix} No text, letters or words anywhere in the image.`;
+  // Espacio calmo para el texto: se alterna arriba y abajo para que las páginas no sean iguales.
+  const calm =
+    scene && scene.pageIndex % 2 === 1
+      ? ' Keep the top third of the image calm and simple (sky, wall or soft background) for the text, with no faces there.'
+      : ' Keep the bottom third of the image calm and simple (floor, grass or soft background) for the text, with no faces there.';
+  return `${prompt}${visible}${hidden}${fix}${scene ? calm : ''} No text, letters or words anywhere in the image.`;
 }
 
 function hashSnapshot(snapshot: Omit<BookSnapshot, 'hash'>): string {
@@ -437,6 +449,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       contentType: String(book.contentType ?? 'story'),
       readingLevel: String(book.readingLevel ?? 'developing'),
       textDensity: String(book.textDensity ?? 'balanced'),
+      synopsis:
+        (story.description as Record<string, string> | undefined)?.[String(book.language)] ?? null,
       words: preview.words ?? null,
       activityPages: preview.activityPages ?? 0,
       pages: preview.pages.map(({ index, text, illustrationPrompt }) => ({
@@ -756,6 +770,23 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       ),
     );
 
+    // Dónde va el texto de cada página: la región más calma de su ilustración.
+    const placements = await textPlacements(
+      sources.slice(1).map((image, index) => ({
+        image,
+        words: countWords(snapshot.pages[index]?.text ?? ''),
+      })),
+      { allowCorners: snapshot.textDensity !== 'rich' },
+    );
+    const qr = {
+      svg: await QRCode.toString(`https://${deps.brandDomain ?? 'storynido.com'}`, {
+        type: 'svg',
+        margin: 0,
+        color: { dark: '#342a40', light: '#0000' },
+      }),
+      label: deps.brandDomain ?? 'storynido.com',
+    };
+
     const formats: BookFormat[] = [
       'digital',
       ...new Set(
@@ -816,8 +847,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           pages: snapshot.pages.map((page, index) => ({
             text: page.text,
             image: prepared[index + 1]?.uri ?? '',
+            placement: placements[index],
           })),
           activities,
+          synopsis: snapshot.synopsis ?? null,
+          qr,
         };
         const interiorCount = interiorPages(layout, spec).length;
         if (format !== 'digital') {
