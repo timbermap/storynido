@@ -405,7 +405,13 @@ Children's picture book illustration. No text, letters, numbers, logos or waterm
   async moderateImage(image: ImageData): Promise<ModerationResult> {
     return moderate(this.client, [
       imagePart(image),
-      { text: `${MODERATION_RULES}\n\nThe image above is an illustration for the book.` },
+      {
+        text: `${MODERATION_RULES}
+
+The image above is an illustration for the book. Also reject it (category "text") if it shows any
+readable words, letters or numbers (signs, labels, captions): the book's text is added separately.
+Reject it (category "deformed") if faces or hands are clearly malformed.`,
+      },
     ]);
   }
 }

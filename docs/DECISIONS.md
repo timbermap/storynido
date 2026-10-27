@@ -461,4 +461,10 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 - **Problema:** con la portada completa como referencia, el modelo copia partes de su fondo en las páginas, aun con instrucciones explícitas de no hacerlo (verificación de la decisión 055).
 - **Decisión:** cada muestra genera primero una **lámina del personaje** (el chico solo, de cuerpo entero, sobre fondo crema liso y en el estilo elegido; `CHARACTER_REFERENCE_SCENE`). Esa lámina es la referencia de la portada, de las páginas y de las regeneraciones. Se guarda en `preview.characterImagePath`, solo para uso interno; el cliente no la ve.
 - **Costo:** 1 imagen más por muestra, unos USD 0,07, para un total de ~USD 0,28 en imágenes por muestra con flash.
-- **Evaluación:** `pnpm eval:character --reference sheet` (por defecto) reproduce el mismo método; `--reference cover` compara con el anterior. Falta la corrida de verificación (~USD 0,55).
+- **Evaluación:** `pnpm eval:character --reference sheet` (por defecto) reproduce el mismo método; `--reference cover` compara con el anterior.
+- **Verificación (USD 0,55, 8 imágenes con flash):**
+  - Ya no se copia el fondo entre escenas, en los 2 estilos.
+  - La consistencia mejora: la lámina fija también la ropa.
+  - 1 imagen de 8 tuvo texto colado (un cartel en el cohete).
+- **Control de calidad:** la moderación de imágenes ahora también rechaza texto legible y caras o manos deformes. Si una imagen no pasa, se regenera sola 1 vez.
+- **Gasto total de la evaluación:** ~USD 2,46 (retrato, 2 corridas de comparación y 1 de verificación).
