@@ -186,6 +186,11 @@ export const publicOrderSchema = z.object({
   createdAt: z.string(),
   /** El pago se puede simular (solo fuera de producción, con el proveedor simulado). */
   canSimulatePayment: z.boolean(),
+  /** La imprenta simulada puede avanzar un paso (solo fuera de producción). */
+  canSimulatePrint: z.boolean(),
+  /** El PDF digital ya se puede descargar. */
+  canDownload: z.boolean(),
+  tracking: z.object({ number: z.string().nullable(), url: z.string().nullable() }).nullable(),
 });
 
 export type PublicOrder = z.infer<typeof publicOrderSchema>;
@@ -638,6 +643,31 @@ export const apiRoutes = {
       'Solo desarrollo y staging con pagos simulados: confirma el pago como lo haría el webhook',
     params: z.object({ orderId: z.string().min(1) }),
     response: publicOrderSchema,
+  },
+  orderDownload: {
+    method: 'GET',
+    path: '/v1/orders/:orderId/download',
+    access: 'user',
+    summary: 'URL firmada (15 minutos) para descargar el PDF digital de un pedido propio',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: z.object({ url: z.string(), expiresAt: z.string() }),
+  },
+  devSimulatePrint: {
+    method: 'POST',
+    path: '/v1/dev/orders/:orderId/simulate-print',
+    access: 'user',
+    summary:
+      'Solo desarrollo y staging: la imprenta simulada avanza un paso (producción, envío, entrega)',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: z.object({ status: orderStatusSchema }),
+  },
+  adminCancelPrint: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/cancel-print',
+    access: 'admin',
+    summary: 'Cancela el pedido en la imprenta si todavía se puede; queda en auditoría',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: z.object({ status: orderStatusSchema }),
   },
   adminRefundOrder: {
     method: 'POST',

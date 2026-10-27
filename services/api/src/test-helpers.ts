@@ -15,6 +15,7 @@ import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
 import { RecordingConversions, type ConversionReporter } from './checkout/conversions';
 import { CheckoutService } from './checkout/service';
+import { FulfillmentService } from './orders/fulfillment';
 import { RecordingPublisher } from './orders/events';
 import {
   StaticSiteConfigSource,
@@ -109,6 +110,10 @@ export async function createTestApp(
       silentLogger,
       { devToolsEnabled: true, mockWebhookSecret: 'test-webhook-secret' },
     ),
+    fulfillment: new FulfillmentService(db, overrides.providers ?? providers, silentLogger, {
+      devToolsEnabled: true,
+      mockWebhookSecret: 'test-webhook-secret',
+    }),
     db,
     ...overrides,
   };

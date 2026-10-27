@@ -14,6 +14,7 @@ import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
 import { CheckoutService } from './checkout/service';
+import { FulfillmentService } from './orders/fulfillment';
 import { ServerConversions } from './checkout/conversions';
 import { loadApiConfig } from './config';
 import { PubSubPublisher, WorkerHttpPublisher } from './orders/events';
@@ -108,6 +109,10 @@ const app = await buildApp({
     accounts: new AccountService(db, tokens, new FirebaseAuthAccounts(firebase)),
     pipelineEvents,
     checkout,
+    fulfillment: new FulfillmentService(db, providers, log, {
+      devToolsEnabled: config.devToolsEnabled,
+      mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET,
+    }),
     db,
   },
 });

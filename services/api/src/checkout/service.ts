@@ -49,6 +49,11 @@ interface OrderDoc {
   couponCode: string | null;
   analyticsConsent?: boolean;
   payment: { provider: string; checkoutSessionId: string | null; paymentId: string | null };
+  print?: {
+    externalOrderId: string | null;
+    trackingNumber: string | null;
+    trackingUrl: string | null;
+  } | null;
   createdAt: unknown;
 }
 
@@ -268,6 +273,17 @@ export class CheckoutService {
         this.options.devToolsEnabled &&
         order.status === 'pending_payment' &&
         this.providers.payment().id === 'mock',
+      canSimulatePrint:
+        this.options.devToolsEnabled &&
+        this.providers.print().id === 'mock' &&
+        Boolean(order.print?.externalOrderId) &&
+        ['sent_to_print', 'in_production', 'shipped'].includes(order.status),
+      canDownload: ['ready', 'sent_to_print', 'in_production', 'shipped', 'delivered'].includes(
+        order.status,
+      ),
+      tracking: order.print?.trackingNumber
+        ? { number: order.print.trackingNumber, url: order.print.trackingUrl }
+        : null,
     };
   }
 

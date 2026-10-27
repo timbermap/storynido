@@ -6,6 +6,7 @@ import type { AccountService } from './accounts/service';
 import type { CatalogRepository } from './catalog';
 import type { CheckoutService } from './checkout/service';
 import type { PipelineEventPublisher } from './orders/events';
+import type { FulfillmentService } from './orders/fulfillment';
 import type { ApiConfig } from './config';
 import type { PhotoService } from './photos/service';
 import type { PreviewService } from './preview/service';
@@ -43,6 +44,7 @@ export interface ApiDeps {
   previews: PreviewService;
   accounts: AccountService;
   checkout: CheckoutService;
+  fulfillment: FulfillmentService;
   /** Eventos del pipeline del pedido (worker directo en local, Pub/Sub en la nube). */
   pipelineEvents: PipelineEventPublisher;
   db: Firestore;
