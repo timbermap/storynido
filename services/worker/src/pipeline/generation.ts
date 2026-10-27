@@ -9,6 +9,10 @@ import {
   avatarToSheet,
   buildIllustrationPrompt,
   countWords,
+  normalizeFirestoreData,
+  printAvailability,
+  printOptionId,
+  printOptionSchema,
   coverScene,
   describeCharacter,
   nameIssues,
@@ -17,6 +21,8 @@ import {
   type AIProvider,
   type ActivitySpec,
   type BookFormat,
+  type Currency,
+  type PrintAddress,
   type AiUsage,
   type Avatar,
   type CharacterSheet,
@@ -124,6 +130,16 @@ interface Deps {
   allowSimulated?: boolean;
   /** Dominio de la marca para el QR de la contratapa. */
   brandDomain?: string;
+}
+
+/** Un PDF maquetado y validado (lo usa la entrega). */
+export interface LayoutFile {
+  format: BookFormat;
+  kind: string;
+  path: string;
+  pages: number;
+  bytes: number;
+  sha256: string;
 }
 
 /** El pedido tiene al menos un libro impreso. */
@@ -795,13 +811,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           .filter((format) => format !== 'digital'),
       ),
     ];
-    const files: {
-      format: BookFormat;
-      kind: string;
-      path: string;
-      pages: number;
-      bytes: number;
-    }[] = [];
+    const files: LayoutFile[] = [];
     const printEligible: Record<string, boolean> = {};
     const problems: string[] = [];
     const base = `orders/${ctx.order.id}/g${String(ctx.generation)}`;
@@ -905,6 +915,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             path,
             pages: check.pageCount,
             bytes: result.pdf.length,
+            // Huella del PDF: la entrega verifica que se imprime exactamente este archivo.
+            sha256: createHash('sha256').update(result.pdf).digest('hex'),
           });
         }
       }
@@ -922,6 +934,109 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     return { output: { files, printEligible, preflight: 'passed', snapshotHash: hash } };
   }
 
+  /**
+   * Entrega: el digital queda listo (la descarga se firma al momento). Los impresos van a la
+   * imprenta solo si el PDF es exactamente el maquetado del libro aprobado y la matriz lo
+   * permite. El pedido de imprenta se crea una sola vez aunque el paso se reintente.
+   */
+  async function deliver(ctx: StepContext): Promise<StepResult> {
+    const files = (ctx.outputs.layout_pdf?.files ?? []) as LayoutFile[];
+    const digital = files.find((file) => file.format === 'digital');
+    if (!digital) throw new Error('Falta el PDF digital maquetado.');
+    const printItems = ctx.order.items.filter((item) => item.format !== 'digital');
+    if (printItems.length === 0) {
+      return { output: { digitalPath: digital.path, sentToPrint: false } };
+    }
+
+    const orderRef = db.collection(COLLECTIONS.orders).doc(ctx.order.id);
+    const order = (await orderRef.get()).data() ?? {};
+    const existing = order.print as { externalOrderId?: string | null } | null | undefined;
+    if (existing?.externalOrderId) {
+      return {
+        output: {
+          digitalPath: digital.path,
+          sentToPrint: true,
+          externalOrderId: existing.externalOrderId,
+        },
+      };
+    }
+    const address = order.shippingAddress as PrintAddress | null | undefined;
+    if (!address)
+      throw new HumanReviewError('print_address', 'El pedido impreso no tiene dirección.');
+
+    const items = [];
+    for (const item of printItems) {
+      const interior = files.find(
+        (file) => file.format === item.format && file.kind === 'interior',
+      );
+      const cover = files.find((file) => file.format === item.format && file.kind === 'cover');
+      if (!interior || !cover) throw new Error(`Faltan los PDF de ${item.format}.`);
+      // Nunca se imprime una versión distinta de la maquetada desde lo aprobado.
+      for (const file of [interior, cover]) {
+        const bytes = await storage().download({ bucket: 'pdfs', path: file.path });
+        if (createHash('sha256').update(bytes).digest('hex') !== file.sha256) {
+          await qaEvent(ctx, 'snapshot_mismatch', { step: 'deliver' });
+          throw new HumanReviewError('pdf_mismatch', 'El PDF de imprenta no es el maquetado.');
+        }
+      }
+      const option = (
+        await db
+          .collection(COLLECTIONS.printOptions)
+          .doc(printOptionId(address.country, item.format))
+          .get()
+      ).data();
+      const parsed = option ? printOptionSchema.safeParse(normalizeFirestoreData(option)) : null;
+      const available = printAvailability(
+        parsed?.success ? parsed.data : null,
+        interior.pages,
+        item.quantity,
+      );
+      if (!available.ok) {
+        throw new HumanReviewError(
+          'print_unavailable',
+          `No se puede imprimir: ${available.reason}.`,
+        );
+      }
+      const sevenDays = 7 * 24 * 3600;
+      items.push({
+        format: item.format as 'softcover' | 'hardcover',
+        pageCount: interior.pages,
+        quantity: item.quantity,
+        interiorPdfUrl: (
+          await storage().signedDownloadUrl({ bucket: 'pdfs', path: interior.path }, sevenDays)
+        ).url,
+        coverPdfUrl: (
+          await storage().signedDownloadUrl({ bucket: 'pdfs', path: cover.path }, sevenDays)
+        ).url,
+      });
+    }
+    const owner = (await db.collection(COLLECTIONS.users).doc(ctx.order.ownerUid).get()).data();
+    const printer = providers.print();
+    const created = await printer.createOrder({
+      orderId: ctx.order.id,
+      items,
+      address,
+      email: typeof owner?.email === 'string' ? owner.email : '',
+      currency: (order.currency as Currency | undefined) ?? 'USD',
+    });
+    await orderRef.update({
+      print: {
+        provider: printer.id,
+        externalOrderId: created.externalOrderId,
+        trackingNumber: null,
+        trackingUrl: null,
+      },
+      updatedAt: new Date(),
+    });
+    return {
+      output: {
+        digitalPath: digital.path,
+        sentToPrint: true,
+        externalOrderId: created.externalOrderId,
+      },
+    };
+  }
+
   return {
     steps: {
       prepare_photo: preparePhoto,
@@ -929,13 +1044,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       quality_check: qualityCheck,
       layout_pdf: (ctx) => layoutPdf(ctx),
       // Fase 12: entrega digital o impresa.
-      deliver: (ctx) =>
-        Promise.resolve({
-          output: {
-            simulated: true,
-            copies: ctx.order.items.reduce((sum, item) => sum + item.quantity, 0),
-          },
-        }),
+      deliver: (ctx) => deliver(ctx),
     },
     planIllustrations: async (ctx) => (await snapshotOf(ctx)).pages.length + 1,
     illustratePage: async (ctx: PageContext) => {

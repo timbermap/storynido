@@ -498,7 +498,11 @@ export class Pipeline {
 
   /** Fin feliz: el libro queda listo. Una ejecución vieja no cambia nada. */
   async finish(orderId: string, runId: string): Promise<boolean> {
-    return this.close(orderId, runId, 'ready', {});
+    // Si la entrega mandó el libro a la imprenta, el pedido queda "en imprenta".
+    const deliver = (
+      await this.order(orderId).collection(COLLECTIONS.orderSteps).doc('deliver').get()
+    ).data() as { output?: { sentToPrint?: boolean } } | undefined;
+    return this.close(orderId, runId, deliver?.output?.sentToPrint ? 'sent_to_print' : 'ready', {});
   }
 
   /** Se agotaron los reintentos: revisión manual y aviso al admin. */
@@ -525,14 +529,20 @@ export class Pipeline {
   private async close(
     orderId: string,
     runId: string,
-    to: 'ready' | 'qa_failed',
+    to: 'ready' | 'qa_failed' | 'sent_to_print',
     extra: Record<string, unknown>,
   ): Promise<boolean> {
     const orderRef = this.order(orderId);
     return this.db.runTransaction(async (tx) => {
       const order = (await tx.get(orderRef)).data() as OrderDoc | undefined;
       if (order?.status !== 'generating' || order.pipeline?.runId !== runId) return false;
-      assertOrderTransition(order.status, to);
+      // A imprenta se llega pasando por "listo".
+      if (to === 'sent_to_print') {
+        assertOrderTransition(order.status, 'ready');
+        assertOrderTransition('ready', to);
+      } else {
+        assertOrderTransition(order.status, to);
+      }
       tx.update(orderRef, {
         status: to,
         'pipeline.finishedAt': new Date(),

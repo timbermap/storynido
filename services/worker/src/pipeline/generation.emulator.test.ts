@@ -143,12 +143,42 @@ async function seedBook(
     },
     ...overrides,
   });
+  await db.doc('users/u1').set({ email: 'ana@storynido.test' });
+  await db.doc('printOptions/MX_softcover').set({
+    country: 'MX',
+    format: 'softcover',
+    provider: 'mock',
+    sku: 'photobook-softcover-210x280',
+    enabled: true,
+    qaSamplePassed: true,
+    pages: { min: 12, max: 120, multipleOf: 2 },
+    maxQuantity: 100,
+    etaDaysMin: 6,
+    etaDaysMax: 11,
+    productionCostUsdMinor: 900,
+    updatedAt: new Date(),
+  });
   await db.doc('orders/o1').set({
     ownerUid: 'u1',
     bookId: 'b1',
     status: 'paid',
     channel: 'families',
     items: [{ piece: 'book', format: options.format ?? 'digital', quantity: 1 }],
+    country: 'MX',
+    currency: 'MXN',
+    shippingAddress:
+      (options.format ?? 'digital') === 'digital'
+        ? null
+        : {
+            name: 'Ana Pérez',
+            line1: 'Av. Reforma 123',
+            line2: null,
+            city: 'Ciudad de México',
+            state: 'CDMX',
+            postalCode: '06600',
+            country: 'MX',
+            phone: '+52 55 1234 5678',
+          },
     costsUsdMicros: { ai: 0, print: 0, shipping: 0 },
     pipeline: { generation: 0, runId: null, failedStep: null },
   });
@@ -226,6 +256,8 @@ describe('generación del libro (fase 09)', () => {
       'aiUsage',
       'aiBudget',
       'adminAlerts',
+      'printOptions',
+      'users',
     ]) {
       await db.recursiveDelete(db.collection(name));
     }
@@ -279,6 +311,7 @@ describe('generación del libro (fase 09)', () => {
         path: 'orders/o1/g0/digital-book.pdf',
         pages: 8,
         bytes: expect.any(Number) as number,
+        sha256: expect.stringMatching(/^[0-9a-f]{64}$/) as string,
       },
     ]);
     expect(
@@ -300,12 +333,19 @@ describe('generación del libro (fase 09)', () => {
     expect(generate.mock.calls.every(([request]) => request.resolution === '2K')).toBe(true);
   });
 
-  it('impreso en 2K: tripa y tapas validadas, con sangrado', async () => {
+  it('impreso en 2K: tripa y tapas validadas, con sangrado, y el pedido va a la imprenta', async () => {
     const providers = registry();
     await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    const create = vi.spyOn(providers.print(), 'createOrder');
     await setup(providers).run();
 
-    expect((await order()).status).toBe('ready');
+    const sent = await order();
+    expect(sent.status).toBe('sent_to_print');
+    expect((sent.print as { externalOrderId: string }).externalOrderId).toBeTruthy();
+    expect(create).toHaveBeenCalledTimes(1);
+    const request = create.mock.calls[0]?.[0];
+    expect(request?.items).toMatchObject([{ format: 'softcover', pageCount: 12, quantity: 1 }]);
+    expect(request?.address.postalCode).toBe('06600');
     const layout = (await step('layout_pdf')).output as unknown as {
       files: { format: string; kind: string; pages: number }[];
       printEligible: Record<string, boolean>;
@@ -316,6 +356,38 @@ describe('generación del libro (fase 09)', () => {
       ['softcover', 'interior', 12],
       ['softcover', 'cover', 1],
     ]);
+  });
+
+  it('no se imprime si la imprenta no está habilitada para ese destino', async () => {
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    await db.doc('printOptions/MX_softcover').update({ qaSamplePassed: false });
+    const create = vi.spyOn(providers.print(), 'createOrder');
+    await setup(providers).run();
+    const failed = await order();
+    expect(failed.status).toBe('qa_failed');
+    expect((failed.pipeline as { failedStep: string }).failedStep).toBe('deliver');
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('nunca se imprime un PDF distinto del maquetado', async () => {
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    const storage = providers.storage();
+    // Simula que alguien cambió la tripa después de maquetarla.
+    vi.spyOn(storage, 'download').mockImplementation(async (ref) => {
+      const original = await (Object.getPrototypeOf(storage) as typeof storage).download.call(
+        storage,
+        ref,
+      );
+      return ref.bucket === 'pdfs' && ref.path.endsWith('softcover-interior.pdf')
+        ? new Uint8Array([...original, 0])
+        : original;
+    });
+    const create = vi.spyOn(providers.print(), 'createOrder');
+    await setup(providers).run();
+    expect((await order()).status).toBe('qa_failed');
+    expect(create).not.toHaveBeenCalled();
   });
 
   it('si la muestra cambió después de pagar, no se fabrica (lo aprobado es lo que se recibe)', async () => {
