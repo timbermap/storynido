@@ -231,7 +231,7 @@ describe('catálogo', () => {
       price(format, 1000),
     );
     const products = [product('digital'), product('softcover'), product('hardcover')];
-    const offer = buildOffer('MX', country, prices, products, 'es', []);
+    const offer = buildOffer('MX', country, prices, products, 'es', [], ['mock']);
     expect(offer.formats.map((f) => f.format)).toEqual(['digital']);
     expect(offer.printUnavailable).toBe(true);
   });

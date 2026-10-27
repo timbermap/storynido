@@ -197,22 +197,29 @@ for (const [code, eta] of Object.entries(SAMPLE_PRINT) as [
   { etaDaysMin: number; etaDaysMax: number },
 ][]) {
   for (const format of PRINT_FORMATS) {
-    batch.set(
-      db.collection(COLLECTIONS.printOptions).doc(printOptionId(code, format)),
-      printOptionSchema.parse({
-        country: code,
-        format,
-        provider: 'mock',
-        sku: `photobook-${format}-210x280`,
-        enabled: true,
-        qaSamplePassed: true,
-        pages: { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 },
-        maxQuantity: 100,
-        ...eta,
-        productionCostUsdMinor: format === 'hardcover' ? 1400 : 900,
-        updatedAt: now,
-      }),
-    );
+    // Matriz anterior a varias imprentas ({país}_{formato}): la reemplaza la de abajo.
+    await db.collection(COLLECTIONS.printOptions).doc(`${code}_${format}`).delete();
+    // En EE. UU. compiten dos imprentas simuladas (mock_alt solo se usa si está activa).
+    const printers = code === 'US' ? ['mock', 'mock_alt'] : ['mock'];
+    for (const provider of printers) {
+      batch.set(
+        db.collection(COLLECTIONS.printOptions).doc(printOptionId(code, format, provider)),
+        printOptionSchema.parse({
+          country: code,
+          format,
+          provider,
+          sku: `photobook-${format}-210x280`,
+          enabled: true,
+          qaSamplePassed: true,
+          pages: { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 },
+          maxQuantity: 100,
+          ...eta,
+          productionCostUsdMinor:
+            (format === 'hardcover' ? 1400 : 900) + (provider === 'mock_alt' ? 150 : 0),
+          updatedAt: now,
+        }),
+      );
+    }
   }
 }
 

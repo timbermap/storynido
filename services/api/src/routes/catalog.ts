@@ -64,6 +64,7 @@ export function buildOffer(
   products: Product[],
   locale: Locale,
   printOptions: PrintOption[] = [],
+  activePrinters: readonly string[] = [],
 ): Offer {
   if (!country) {
     return {
@@ -77,10 +78,15 @@ export function buildOffer(
       printUnavailable: false,
     };
   }
-  // Un impreso se ofrece solo si la imprenta está habilitada con la muestra aprobada.
+  // Un impreso se ofrece si al menos una imprenta activa lo tiene habilitado con la muestra
+  // aprobada (cuál gana se decide al pagar, con la dirección).
   const printable = (format: string) =>
     printOptions.some(
-      (option) => option.format === format && option.enabled && option.qaSamplePassed,
+      (option) =>
+        option.format === format &&
+        option.enabled &&
+        option.qaSamplePassed &&
+        activePrinters.includes(option.provider),
     );
   const formats = BOOK_FORMATS.flatMap((format) => {
     const price = prices.find((p) => p.format === format && p.currency === country.currency);
@@ -111,7 +117,11 @@ export function buildOffer(
   };
 }
 
-export function registerCatalogRoutes(app: FastifyInstance, catalog: CatalogRepository): void {
+export function registerCatalogRoutes(
+  app: FastifyInstance,
+  catalog: CatalogRepository,
+  activePrinters: readonly string[],
+): void {
   addRoute(app, apiRoutes.catalogStories, {}, async (request) => {
     const { locale, age, channel, collection } = query<'catalogStories'>(request);
     const stories = await catalog.stories();
@@ -202,6 +212,7 @@ export function registerCatalogRoutes(app: FastifyInstance, catalog: CatalogRepo
       products,
       locale,
       printOptions,
+      activePrinters,
     );
   });
 

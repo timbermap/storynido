@@ -57,7 +57,16 @@ export function createProviderFactories(
       ...(projectId ? { vertex: () => new VertexImageProvider(vertexClient(projectId)) } : {}),
     },
     payment: { mock: () => new MockPaymentProvider(options.mockWebhookSecret) },
-    print: { mock: () => new MockPrintProvider(options.mockWebhookSecret) },
+    print: {
+      mock: () => new MockPrintProvider(options.mockWebhookSecret),
+      // Más cara en impresión y más barata en envío a EE. UU.: gana según el destino.
+      mock_alt: () =>
+        new MockPrintProvider(options.mockWebhookSecret, {
+          id: 'mock_alt',
+          productionUsdMinor: { softcover: 1050, hardcover: 1550 },
+          shippingUsdMinor: { US: 299 },
+        }),
+    },
     email: { mock: () => new MockEmailProvider(options.onMockEmail) },
     storage: {
       local: () => new LocalStorageService(options.localStorage),

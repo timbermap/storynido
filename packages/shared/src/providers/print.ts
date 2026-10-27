@@ -23,6 +23,8 @@ export interface PrintQuote {
   currency: Currency;
   shippingMinor: number;
   productionCostUsdMinor: number;
+  /** Impresión + envío en centavos de USD: con esto se elige la imprenta más barata. */
+  totalCostUsdMinor: number;
   etaDaysMin: number;
   etaDaysMax: number;
 }
@@ -70,6 +72,10 @@ export interface PrintProvider {
     address: PrintAddress,
     currency: Currency,
   ): Promise<PrintQuote>;
+  /**
+   * Crea el pedido en la imprenta. Un ProviderError no reintentable (`retryable: false`) significa
+   * que esta imprenta no lo acepta: se prueba con la siguiente.
+   */
   createOrder(request: PrintOrderRequest): Promise<PrintOrder>;
   cancelOrder(externalOrderId: string): Promise<{ cancelled: boolean; reason: string | null }>;
   /** Verifica la firma y traduce el evento. Lanza WebhookSignatureError si es inválida. */

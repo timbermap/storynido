@@ -37,7 +37,8 @@
 
 - **Maquetación del libro (feedback de Sebastián sobre el PDF, 2026-10-27):** hecho (DECISIONS 073).
 - **Navbar con sesión iniciada:** hecho (menú con iniciales). Falta la marca de cuenta Pro en Profesionales.
-- **Gelato real (fase 12):** falta cargar la clave (`GELATO_API_KEY` en `.env.local` y `gelato-api-key` en Secret Manager) e implementar su `PrintProvider` en sandbox (DECISIONS 074).
+- **Gelato real (fase 12):** clave cargada (local y Secret Manager) y verificada contra su catálogo. Falta su `PrintProvider` (cotización, pedido, webhooks) y confirmar que la cuenta no tiene medio de pago (sandbox).
+- **Varias imprentas:** hecho con las simuladas (DECISIONS 075). Pendiente: PDF por imprenta, margen mínimo y ver la elección en el admin.
 - **Mi cuenta:** las filas "Rol" y "API" son de diagnóstico; ocultarlas a los clientes en la pasada de diseño.
 - **Pedidos trabados (detectado en la fase 08):** si Workflows no arranca y Pub/Sub manda el evento a `dead-letter`, el pedido queda en `generating`. Hace falta un barrido periódico que reintente los eventos con `started: false` y avise por los pedidos sin avance (fase 15 o 16).
 - **Hero y navbar (pedido de Sebastián, 2026-10-27):** rediseño con la referencia que mandó: titular grande con una palabra en lavanda, el libro abierto ilustrado con la "foto" del chico (ilustrada o sintética, nunca una foto real), CTA principal "Crear la vista previa gratis", enlace "Ver historias", línea "Digital en todo el mundo · Impreso en países seleccionados" y las 3 líneas como tarjetas debajo del hero. Navbar con menús por línea, búsqueda, "Iniciar sesión" y "Crear un cuento".

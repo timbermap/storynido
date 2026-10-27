@@ -1,6 +1,7 @@
 import {
   PRINT_STATUSES,
   WebhookSignatureError,
+  type CountryCode,
   type Currency,
   type PrintAddress,
   type PrintEvent,
@@ -16,6 +17,9 @@ import { z } from 'zod';
 import { hmacHex, safeEqualHex, stableId } from '../crypto';
 
 export const MOCK_PRINT_SIGNATURE_HEADER = 'x-mock-print-signature';
+
+/** Imprentas simuladas (sin pedidos reales): habilitan "Avanzar la imprenta" fuera de producción. */
+export const isSimulatedPrinter = (id: string) => id === 'mock' || id === 'mock_alt';
 
 const webhookSchema = z.object({
   id: z.string(),
@@ -74,13 +78,37 @@ const SHIPPING_MINOR: Partial<Record<Currency, number>> = {
   EUR: 599,
   BRL: 2990,
 };
-const PRODUCTION_USD_MINOR = { softcover: 900, hardcover: 1400 } as const;
+/** Envío de ejemplo por país, en centavos de USD (para comparar imprentas). */
+const SHIPPING_USD_MINOR: Partial<Record<CountryCode, number>> = { MX: 550, US: 699 };
+
+export interface MockPrintCosts {
+  id: string;
+  productionUsdMinor: Record<PrintItem['format'], number>;
+  shippingUsdMinor: Partial<Record<CountryCode, number>>;
+}
+
+const DEFAULT_COSTS: MockPrintCosts = {
+  id: 'mock',
+  productionUsdMinor: { softcover: 900, hardcover: 1400 },
+  shippingUsdMinor: SHIPPING_USD_MINOR,
+};
 
 export class MockPrintProvider implements PrintProvider {
-  readonly id = 'mock';
+  readonly id: string;
   private readonly shipped = new Set<string>();
+  private readonly costs: MockPrintCosts;
 
-  constructor(private readonly webhookSecret: string) {}
+  constructor(
+    private readonly webhookSecret: string,
+    costs: Partial<MockPrintCosts> = {},
+  ) {
+    this.costs = {
+      ...DEFAULT_COSTS,
+      ...costs,
+      shippingUsdMinor: { ...SHIPPING_USD_MINOR, ...costs.shippingUsdMinor },
+    };
+    this.id = this.costs.id;
+  }
 
   quote(
     items: readonly PrintItem[],
@@ -89,13 +117,15 @@ export class MockPrintProvider implements PrintProvider {
   ): Promise<PrintQuote> {
     if (items.length === 0) return Promise.reject(new RangeError('Sin ítems para cotizar'));
     const production = items.reduce(
-      (sum, item) => sum + PRODUCTION_USD_MINOR[item.format] * item.quantity,
+      (sum, item) => sum + this.costs.productionUsdMinor[item.format] * item.quantity,
       0,
     );
+    const shippingUsd = this.costs.shippingUsdMinor[address.country] ?? 1200;
     return Promise.resolve({
       currency,
       shippingMinor: SHIPPING_MINOR[currency] ?? 1000,
       productionCostUsdMinor: production,
+      totalCostUsdMinor: production + shippingUsd,
       etaDaysMin: address.country === 'US' ? 4 : 5,
       etaDaysMax: address.country === 'US' ? 8 : 10,
     });
@@ -105,7 +135,7 @@ export class MockPrintProvider implements PrintProvider {
     if (request.items.length === 0)
       return Promise.reject(new RangeError('Sin ítems para imprimir'));
     return Promise.resolve({
-      externalOrderId: stableId('mock_po', request.orderId),
+      externalOrderId: stableId(`${this.id}_po`, request.orderId),
       status: 'received',
     });
   }

@@ -10,8 +10,9 @@ import {
   buildIllustrationPrompt,
   countWords,
   normalizeFirestoreData,
-  printAvailability,
-  printOptionId,
+  ProviderError,
+  printCandidates,
+  printRoutingSchema,
   printOptionSchema,
   coverScene,
   describeCharacter,
@@ -1014,24 +1015,6 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           throw new HumanReviewError('pdf_mismatch', 'El PDF de imprenta no es el maquetado.');
         }
       }
-      const option = (
-        await db
-          .collection(COLLECTIONS.printOptions)
-          .doc(printOptionId(address.country, item.format))
-          .get()
-      ).data();
-      const parsed = option ? printOptionSchema.safeParse(normalizeFirestoreData(option)) : null;
-      const available = printAvailability(
-        parsed?.success ? parsed.data : null,
-        interior.pages,
-        item.quantity,
-      );
-      if (!available.ok) {
-        throw new HumanReviewError(
-          'print_unavailable',
-          `No se puede imprimir: ${available.reason}.`,
-        );
-      }
       const sevenDays = 7 * 24 * 3600;
       items.push({
         format: item.format as 'softcover' | 'hardcover',
@@ -1046,17 +1029,68 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       });
     }
     const owner = (await db.collection(COLLECTIONS.users).doc(ctx.order.ownerUid).get()).data();
-    const printer = providers.print();
-    const created = await printer.createOrder({
-      orderId: ctx.order.id,
-      items,
-      address,
-      email: typeof owner?.email === 'string' ? owner.email : '',
-      currency: (order.currency as Currency | undefined) ?? 'USD',
+    // La imprenta elegida al pagar (la más barata); si no acepta el pedido, la siguiente.
+    const routing = printRoutingSchema.safeParse(normalizeFirestoreData(order.printRouting));
+    const ranked = routing.success
+      ? [
+          routing.data.provider,
+          ...routing.data.quotes
+            .filter((quoted) => quoted.error === null)
+            .map((quoted) => quoted.provider),
+        ]
+      : providers.printers().map((printer) => printer.id);
+    const options = (
+      await db.collection(COLLECTIONS.printOptions).where('country', '==', address.country).get()
+    ).docs.flatMap((doc) => {
+      const parsed = printOptionSchema.safeParse(normalizeFirestoreData(doc.data()));
+      return parsed.success ? [parsed.data] : [];
     });
+    const able = printCandidates(
+      options,
+      items.map((item) => ({
+        format: item.format,
+        pages: item.pageCount,
+        quantity: item.quantity,
+      })),
+      providers.printers().map((printer) => printer.id),
+    );
+    const rejected: string[] = [];
+    let created: { externalOrderId: string } | null = null;
+    let printerId: string | null = null;
+    for (const id of [...new Set(ranked)]) {
+      const printer = providers.printer(id);
+      if (!printer || !able.includes(id)) {
+        rejected.push(`${id}: ya no imprime este libro`);
+        continue;
+      }
+      try {
+        created = await printer.createOrder({
+          orderId: ctx.order.id,
+          items,
+          address,
+          email: typeof owner?.email === 'string' ? owner.email : '',
+          currency: (order.currency as Currency | undefined) ?? 'USD',
+        });
+        printerId = id;
+        break;
+      } catch (error) {
+        // Un error reintentable (red, 5xx) reintenta el paso con la misma imprenta.
+        if (!(error instanceof ProviderError) || error.retryable) throw error;
+        rejected.push(`${id}: ${error.message}`);
+      }
+    }
+    if (!created || !printerId) {
+      throw new HumanReviewError(
+        'print_unavailable',
+        `Ninguna imprenta aceptó el pedido (${rejected.join('; ') || 'sin imprentas'}).`,
+      );
+    }
+    if (rejected.length > 0) {
+      ctx.log.warn({ orderId: ctx.order.id, printer: printerId, rejected }, 'print fallback');
+    }
     await orderRef.update({
       print: {
-        provider: printer.id,
+        provider: printerId,
         externalOrderId: created.externalOrderId,
         trackingNumber: null,
         trackingUrl: null,

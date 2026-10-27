@@ -65,7 +65,8 @@ pnpm --filter @storynido/firebase set-role --project storynido-staging --email t
 
 ## 5d. Imprenta y "Mi cuenta" (fase 12)
 
-- **Local y staging (`PRINT_PROVIDER=mock`):** un pedido impreso queda en "Tu libro está en la imprenta". En la página del pedido, "Avanzar la imprenta" manda el siguiente webhook firmado: imprimiendo → en camino (con seguimiento) → entregado.
+- **Varias imprentas:** `PRINT_PROVIDERS=mock,mock_alt` activa las dos simuladas (en EE. UU. compiten; gana la más barata).
+- **Local y staging (`PRINT_PROVIDERS=mock`):** un pedido impreso queda en "Tu libro está en la imprenta". En la página del pedido, "Avanzar la imprenta" manda el siguiente webhook firmado: imprimiendo → en camino (con seguimiento) → entregado.
 - **Matriz de impresión:** `pnpm seed` carga `printOptions` (MX y US). En staging se recarga con `pnpm --filter @storynido/firebase seed:cloud --project storynido-staging` (solo crea lo que falta).
 - **Webhook de la imprenta:** `POST /v1/webhooks/print/<proveedor>` con el cuerpo crudo; se verifica la firma.
 - **Mi cuenta (`/es/cuenta`):** pedidos en vivo, descarga, "Pedir de nuevo" (sin IA), perfiles con "Borrar datos" y "Borrar mi cuenta".

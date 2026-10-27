@@ -7,7 +7,7 @@ import {
   providerSettingsFromEnv,
   type ProviderRegistry,
 } from '@storynido/providers';
-import { STEP_POLICIES, type PageReview } from '@storynido/shared';
+import { ProviderError, STEP_POLICIES, type PageReview } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import Fastify from 'fastify';
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
@@ -23,9 +23,9 @@ import { Pipeline } from './pipeline';
 const db = getFirestore(getApps()[0] ?? initializeApp({ projectId: 'demo-storynido-test' }));
 const log = Fastify({ logger: false }).log;
 
-function registry(): ProviderRegistry {
+function registry(env: Record<string, string> = {}): ProviderRegistry {
   return createProviderRegistry({
-    settings: providerSettingsFromEnv({}),
+    settings: providerSettingsFromEnv(env),
     mockWebhookSecret: 'test-webhook-secret',
     localStorage: {
       rootDir: mkdtempSync(path.join(tmpdir(), 'storynido-worker-test-')),
@@ -33,6 +33,12 @@ function registry(): ProviderRegistry {
       secret: 'test-storage-secret',
     },
   });
+}
+
+function printer(providers: ProviderRegistry, id: string) {
+  const found = providers.printer(id);
+  if (!found) throw new Error(`Imprenta ${id} inactiva`);
+  return found;
 }
 
 /** Ilustraciones de prueba del tamaño real: 1K (768×1024) o 2K (1800×2400). */
@@ -144,7 +150,7 @@ async function seedBook(
     ...overrides,
   });
   await db.doc('users/u1').set({ email: 'ana@storynido.test' });
-  await db.doc('printOptions/MX_softcover').set({
+  await db.doc('printOptions/MX_softcover_mock').set({
     country: 'MX',
     format: 'softcover',
     provider: 'mock',
@@ -336,7 +342,7 @@ describe('generación del libro (fase 09)', () => {
   it('impreso en 2K: tripa y tapas validadas, con sangrado, y el pedido va a la imprenta', async () => {
     const providers = registry();
     await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
-    const create = vi.spyOn(providers.print(), 'createOrder');
+    const create = vi.spyOn(printer(providers, 'mock'), 'createOrder');
     await setup(providers).run();
 
     const sent = await order();
@@ -358,11 +364,43 @@ describe('generación del libro (fase 09)', () => {
     ]);
   });
 
+  it('la imprenta elegida al pagar rechaza el pedido: pasa a la siguiente', async () => {
+    const providers = registry({ PRINT_PROVIDERS: 'mock,mock_alt' });
+    await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    const alt = (await db.doc('printOptions/MX_softcover_mock').get()).data() ?? {};
+    await db.doc('printOptions/MX_softcover_mock_alt').set({ ...alt, provider: 'mock_alt' });
+    // Al pagar ganó mock_alt (la más barata); mock quedó segunda.
+    await db.doc('orders/o1').update({
+      printRouting: {
+        provider: 'mock_alt',
+        totalCostUsdMinor: 1300,
+        etaDaysMin: 5,
+        etaDaysMax: 9,
+        quotes: [
+          { provider: 'mock_alt', totalCostUsdMinor: 1300, etaDaysMax: 9, error: null },
+          { provider: 'mock', totalCostUsdMinor: 1450, etaDaysMax: 10, error: null },
+        ],
+        quotedAt: new Date(),
+      },
+    });
+    const rejected = vi
+      .spyOn(printer(providers, 'mock_alt'), 'createOrder')
+      .mockRejectedValue(new ProviderError('mock_alt', 'Producto discontinuado'));
+    const fallback = vi.spyOn(printer(providers, 'mock'), 'createOrder');
+    await setup(providers).run();
+
+    const sent = await order();
+    expect(sent.status).toBe('sent_to_print');
+    expect((sent.print as { provider: string }).provider).toBe('mock');
+    expect(rejected).toHaveBeenCalledTimes(1);
+    expect(fallback).toHaveBeenCalledTimes(1);
+  });
+
   it('no se imprime si la imprenta no está habilitada para ese destino', async () => {
     const providers = registry();
     await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
-    await db.doc('printOptions/MX_softcover').update({ qaSamplePassed: false });
-    const create = vi.spyOn(providers.print(), 'createOrder');
+    await db.doc('printOptions/MX_softcover_mock').update({ qaSamplePassed: false });
+    const create = vi.spyOn(printer(providers, 'mock'), 'createOrder');
     await setup(providers).run();
     const failed = await order();
     expect(failed.status).toBe('qa_failed');
@@ -384,7 +422,7 @@ describe('generación del libro (fase 09)', () => {
         ? new Uint8Array([...original, 0])
         : original;
     });
-    const create = vi.spyOn(providers.print(), 'createOrder');
+    const create = vi.spyOn(printer(providers, 'mock'), 'createOrder');
     await setup(providers).run();
     expect((await order()).status).toBe('qa_failed');
     expect(create).not.toHaveBeenCalled();

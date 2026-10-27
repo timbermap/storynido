@@ -68,7 +68,8 @@ export async function createTestApp(
   const config = loadApiConfig({ APP_ENV: 'test', RATE_LIMIT_PER_MINUTE: '1000', ...env });
   const siteConfig = new StaticSiteConfigSource();
   const providers = createProviderRegistry({
-    settings: providerSettingsFromEnv({}),
+    // Solo la configuración de proveedores (p. ej. PRINT_PROVIDERS) sale de env.
+    settings: providerSettingsFromEnv(env),
     mockWebhookSecret: 'test-webhook-secret',
     localStorage: {
       rootDir: mkdtempSync(path.join(tmpdir(), 'storynido-api-test-')),

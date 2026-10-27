@@ -47,7 +47,11 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   await registerDocs(app);
 
   registerV1Routes(app);
-  registerCatalogRoutes(app, deps.catalog);
+  registerCatalogRoutes(
+    app,
+    deps.catalog,
+    deps.providers.printers().map((printer) => printer.id),
+  );
   registerPhotoRoutes(app, deps.photos);
   registerPreviewRoutes(app, deps.previews);
   registerAiConfigRoutes(app, deps.db);

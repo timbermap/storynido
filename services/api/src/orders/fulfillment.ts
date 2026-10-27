@@ -1,4 +1,5 @@
 import {
+  isSimulatedPrinter,
   mockPrintWebhookSequence,
   signMockPrintWebhook,
   type ProviderRegistry,
@@ -64,8 +65,8 @@ export class FulfillmentService {
     rawBody: string,
     headers: Record<string, string | undefined>,
   ): Promise<'processed' | 'duplicate' | 'ignored'> {
-    const printer = this.providers.print();
-    if (printer.id !== providerId) throw new AppError(404, 'not_found', 'Imprenta desconocida.');
+    const printer = this.providers.printer(providerId);
+    if (!printer) throw new AppError(404, 'not_found', 'Imprenta desconocida.');
     let event: PrintEvent;
     try {
       event = printer.parseWebhook({ rawBody, headers });
@@ -77,17 +78,23 @@ export class FulfillmentService {
     }
     const eventRef = this.db.collection('printEvents').doc(`${providerId}_${event.eventId}`);
     if ((await eventRef.get()).exists) return 'duplicate';
-    const outcome = event.type === 'status' ? await this.applyStatus(event) : 'ignored';
+    const outcome = event.type === 'status' ? await this.applyStatus(providerId, event) : 'ignored';
     await eventRef.set({ type: event.type, outcome, at: new Date() });
     return outcome;
   }
 
-  private async applyStatus(event: Extract<PrintEvent, { type: 'status' }>) {
+  private async applyStatus(providerId: string, event: Extract<PrintEvent, { type: 'status' }>) {
     const ref = this.db.collection(COLLECTIONS.orders).doc(event.orderId);
     const to = STATUS_FROM_PRINT[event.status];
     const outcome = await this.db.runTransaction(async (tx) => {
       const order = (await tx.get(ref)).data() as OrderDoc | undefined;
-      if (order?.print?.externalOrderId !== event.externalOrderId) return 'ignored' as const;
+      // El evento tiene que venir de la imprenta que tiene el pedido.
+      if (
+        order?.print?.externalOrderId !== event.externalOrderId ||
+        order.print.provider !== providerId
+      ) {
+        return 'ignored' as const;
+      }
       if (!canTransitionOrder(order.status, to)) return 'ignored' as const;
       tx.update(ref, {
         status: to,
@@ -121,7 +128,15 @@ export class FulfillmentService {
     if (!canTransitionOrder(order.status, 'cancelled')) {
       throw new AppError(409, 'bad_request', `Ya no se puede cancelar ("${order.status}").`);
     }
-    const result = await this.providers.print().cancelOrder(order.print.externalOrderId);
+    const printer = this.providers.printer(order.print.provider);
+    if (!printer) {
+      throw new AppError(
+        409,
+        'bad_request',
+        `La imprenta "${order.print.provider}" no está activa.`,
+      );
+    }
+    const result = await printer.cancelOrder(order.print.externalOrderId);
     const audit: AuditLogEntry = {
       actorUid: actor.uid,
       actorEmail: actor.email,
@@ -163,18 +178,18 @@ export class FulfillmentService {
     const ref = this.db.collection(COLLECTIONS.orders).doc(orderId);
     const order = (await ref.get()).data() as OrderDoc | undefined;
     if (order?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
-    if (!this.options.devToolsEnabled || this.providers.print().id !== 'mock') {
-      throw new AppError(409, 'bad_request', 'La imprenta no es simulada.');
-    }
     if (!order.print?.externalOrderId) {
       throw new AppError(409, 'bad_request', 'El pedido no está en la imprenta.');
+    }
+    if (!this.options.devToolsEnabled || !isSimulatedPrinter(order.print.provider)) {
+      throw new AppError(409, 'bad_request', 'La imprenta no es simulada.');
     }
     const next = mockPrintWebhookSequence(orderId, order.print.externalOrderId).find((event) =>
       canTransitionOrder(order.status, STATUS_FROM_PRINT[event.data.status]),
     );
     if (!next) throw new AppError(409, 'bad_request', 'No hay más pasos de imprenta.');
     const webhook = signMockPrintWebhook(this.options.mockWebhookSecret, next);
-    await this.handlePrintWebhook('mock', webhook.rawBody, webhook.headers);
+    await this.handlePrintWebhook(order.print.provider, webhook.rawBody, webhook.headers);
     return { status: ((await ref.get()).data() as OrderDoc).status };
   }
 }

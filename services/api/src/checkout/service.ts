@@ -1,12 +1,13 @@
 import type { ProviderRegistry } from '@storynido/providers';
-import { signMockPaymentWebhook } from '@storynido/providers';
+import { isSimulatedPrinter, signMockPaymentWebhook } from '@storynido/providers';
 import {
   COLLECTIONS,
   WebhookSignatureError,
   addressProblems,
   assertOrderTransition,
   canTransitionOrder,
-  printAvailability,
+  printCandidates,
+  rankPrintQuotes,
   type checkoutQuoteBodySchema,
   type createCheckoutBodySchema,
   quote,
@@ -18,6 +19,7 @@ import {
   type OrderStatus,
   type PaymentEvent,
   type PriceSnapshot,
+  type PrintRouting,
   type Promotion,
   type PublicOrder,
 } from '@storynido/shared';
@@ -37,6 +39,30 @@ type QuoteBody = z.output<typeof checkoutQuoteBodySchema>;
 type PriceBody = Omit<QuoteBody, 'sourceOrderId'>;
 type CheckoutBody = z.output<typeof createCheckoutBodySchema>;
 
+/** Una imprenta que tarda más que esto en cotizar queda afuera (las otras siguen). */
+const PRINT_QUOTE_TIMEOUT_MS = 8000;
+
+const printUnavailable = () =>
+  new AppError(
+    409,
+    'print_unavailable',
+    'Disponible en digital; la impresión todavía no está disponible para este libro o destino.',
+  );
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(`Sin respuesta en ${String(ms)} ms`));
+      }, ms);
+    }),
+  ]).finally(() => {
+    clearTimeout(timer);
+  });
+}
+
 /** Rutas de la web por idioma a las que vuelve el pago. */
 const ORDER_PATH: Record<Locale, string> = { es: 'pedido', en: 'order', pt: 'pedido' };
 const CREATE_PATH: Record<Locale, string> = { es: 'crear', en: 'create', pt: 'criar' };
@@ -51,6 +77,7 @@ interface OrderDoc {
   analyticsConsent?: boolean;
   payment: { provider: string; checkoutSessionId: string | null; paymentId: string | null };
   print?: {
+    provider: string;
     externalOrderId: string | null;
     trackingNumber: string | null;
     trackingUrl: string | null;
@@ -115,25 +142,15 @@ export class CheckoutService {
       book,
       preview: book.preview as Parameters<typeof previewFingerprint>[0],
       result,
+      pages,
     };
   }
 
   /** Precio e imprenta (formato habilitado, páginas y cantidad) para un libro ya validado. */
   private async price(book: Record<string, unknown>, body: PriceBody, pages: number) {
-    if (body.format !== 'digital') {
-      // Nunca se manda a imprenta algo incompatible: formato habilitado, páginas y cantidad.
-      const option =
-        (await this.catalog.printOptions(body.country)).find(
-          (item) => item.format === body.format,
-        ) ?? null;
-      const available = printAvailability(option, pages, body.quantity);
-      if (!available.ok) {
-        throw new AppError(
-          409,
-          'print_unavailable',
-          'Disponible en digital; la impresión todavía no está disponible para este libro o destino.',
-        );
-      }
+    // Nunca se manda a imprenta algo incompatible: alguna imprenta activa tiene que poder.
+    if (body.format !== 'digital' && (await this.printCandidates(body, pages)).length === 0) {
+      throw printUnavailable();
     }
     const [countries, prices, coupon, promotions] = await Promise.all([
       this.catalog.countries(),
@@ -154,6 +171,85 @@ export class CheckoutService {
     });
     if (!result.ok) throw new AppError(409, 'bad_request', `No disponible: ${result.error}`);
     return result;
+  }
+
+  private async printCandidates(body: PriceBody, pages: number) {
+    return printCandidates(
+      await this.catalog.printOptions(body.country),
+      [{ format: body.format, pages, quantity: body.quantity }],
+      this.providers.printers().map((printer) => printer.id),
+    );
+  }
+
+  /**
+   * Elige la imprenta: cotiza con todas las que pueden (ya con la dirección) y gana la más
+   * barata en impresión + envío; si empatan, la que llega antes. El precio al cliente no cambia:
+   * sale siempre del catálogo. La elección queda congelada en el pedido.
+   */
+  private async routePrint(body: CheckoutBody, pages: number): Promise<PrintRouting | null> {
+    if (body.format === 'digital' || !body.shippingAddress) return null;
+    const address = body.shippingAddress;
+    const candidates = await this.printCandidates(body, pages);
+    const results = await Promise.all(
+      candidates.map(async (provider) => {
+        try {
+          const printer = this.providers.printer(provider);
+          if (!printer) throw new Error('Imprenta inactiva');
+          const quoted = await withTimeout(
+            printer.quote(
+              [
+                {
+                  format: body.format as 'softcover' | 'hardcover',
+                  pageCount: pages,
+                  quantity: body.quantity,
+                },
+              ],
+              address,
+              'USD',
+            ),
+            PRINT_QUOTE_TIMEOUT_MS,
+          );
+          return { provider, ok: true as const, ...quoted };
+        } catch (error) {
+          this.log.warn({ provider, err: error }, 'print quote failed');
+          return {
+            provider,
+            ok: false as const,
+            error: error instanceof Error ? error.message.slice(0, 200) : 'error',
+          };
+        }
+      }),
+    );
+    const ranked = rankPrintQuotes(results.flatMap((result) => (result.ok ? [result] : [])));
+    const best = ranked[0];
+    if (!best) throw printUnavailable();
+    return {
+      provider: best.provider,
+      totalCostUsdMinor: best.totalCostUsdMinor,
+      etaDaysMin: best.etaDaysMin,
+      etaDaysMax: best.etaDaysMax,
+      quotes: [
+        ...ranked.map((quoted) => ({
+          provider: quoted.provider,
+          totalCostUsdMinor: quoted.totalCostUsdMinor,
+          etaDaysMax: quoted.etaDaysMax,
+          error: null,
+        })),
+        ...results.flatMap((result) =>
+          result.ok
+            ? []
+            : [
+                {
+                  provider: result.provider,
+                  totalCostUsdMinor: null,
+                  etaDaysMax: null,
+                  error: result.error,
+                },
+              ],
+        ),
+      ],
+      quotedAt: new Date(),
+    };
   }
 
   private async coupon(code: string): Promise<Coupon | null> {
@@ -187,15 +283,19 @@ export class CheckoutService {
     if (user.anonymous) {
       throw new AppError(403, 'account_required', 'Crea tu cuenta para comprar.');
     }
-    const { book, preview, result } = await this.prepare(user.uid, body);
+    const { book, preview, result, pages } = await this.prepare(user.uid, body);
     this.checkAddress(body);
+    const printRouting = await this.routePrint(body, pages);
     return this.open(user, origin, {
       bookId: body.bookId,
       book,
       body,
       price: result.snapshot,
       title: preview.title,
-      fields: { approval: { fingerprint: previewFingerprint(preview), approvedAt: new Date() } },
+      fields: {
+        approval: { fingerprint: previewFingerprint(preview), approvedAt: new Date() },
+        printRouting,
+      },
     });
   }
 
@@ -220,6 +320,7 @@ export class CheckoutService {
     const full = { ...body, bookId };
     const price = await this.price(book, full, pages);
     this.checkAddress(full);
+    const printRouting = await this.routePrint(full, pages);
     const snapshot = source.snapshot as { title?: string };
     return this.open(user, origin, {
       bookId,
@@ -229,6 +330,7 @@ export class CheckoutService {
       title: snapshot.title ?? 'StoryNido',
       fields: {
         sourceOrderId,
+        printRouting,
         snapshot: source.snapshot,
         snapshotHash: source.snapshotHash ?? null,
         approval: source.approval ?? null,
@@ -361,7 +463,7 @@ export class CheckoutService {
         this.providers.payment().id === 'mock',
       canSimulatePrint:
         this.options.devToolsEnabled &&
-        this.providers.print().id === 'mock' &&
+        isSimulatedPrinter(order.print?.provider ?? '') &&
         Boolean(order.print?.externalOrderId) &&
         ['sent_to_print', 'in_production', 'shipped'].includes(order.status),
       canDownload: ['ready', 'sent_to_print', 'in_production', 'shipped', 'delivered'].includes(

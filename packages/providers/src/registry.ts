@@ -16,7 +16,8 @@ export const PROVIDER_IDS = {
   aiText: ['mock', 'vertex', 'anthropic'],
   aiImage: ['mock', 'vertex', 'flux'],
   payment: ['mock', 'stripe'],
-  print: ['mock', 'gelato'],
+  // mock_alt: segunda imprenta simulada (otros precios) para probar la elección entre varias.
+  print: ['mock', 'mock_alt', 'gelato'],
   email: ['mock', 'resend'],
   storage: ['local', 'gcs'],
   photoAnalyzer: ['mock', 'vision'],
@@ -28,7 +29,12 @@ export const providerSettingsSchema = z.object({
   aiText: z.enum(PROVIDER_IDS.aiText).default('mock'),
   aiImage: z.enum(PROVIDER_IDS.aiImage).default('mock'),
   payment: z.enum(PROVIDER_IDS.payment).default('mock'),
-  print: z.enum(PROVIDER_IDS.print).default('mock'),
+  /** Varias imprentas a la vez: se cotiza con todas y gana la más barata. */
+  print: z
+    .array(z.enum(PROVIDER_IDS.print))
+    .min(1)
+    .refine((ids) => new Set(ids).size === ids.length, 'Imprenta repetida')
+    .default(['mock']),
   email: z.enum(PROVIDER_IDS.email).default('mock'),
   storage: z.enum(PROVIDER_IDS.storage).default('local'),
   photoAnalyzer: z.enum(PROVIDER_IDS.photoAnalyzer).default('mock'),
@@ -63,7 +69,11 @@ export function providerSettingsFromEnv(
     aiText: value('AI_TEXT_PROVIDER'),
     aiImage: value('AI_IMAGE_PROVIDER'),
     payment: value('PAYMENT_PROVIDER'),
-    print: value('PRINT_PROVIDER'),
+    // PRINT_PROVIDERS=mock,gelato (lista); PRINT_PROVIDER se acepta por compatibilidad.
+    print: (value('PRINT_PROVIDERS') ?? value('PRINT_PROVIDER'))
+      ?.split(',')
+      .map((id) => id.trim())
+      .filter(Boolean),
     email: value('EMAIL_PROVIDER'),
     storage: value('STORAGE_PROVIDER'),
     photoAnalyzer: value('PHOTO_ANALYZER'),
@@ -108,7 +118,8 @@ export class ProviderRegistry {
   ) {
     // Falla al arrancar si la configuración pide algo que no existe.
     for (const kind of Object.keys(PROVIDER_IDS) as ProviderKind[]) {
-      this.factory(kind, settings[kind]);
+      const ids = settings[kind];
+      for (const id of Array.isArray(ids) ? ids : [ids]) this.factory(kind, id);
     }
   }
 
@@ -148,6 +159,7 @@ export class ProviderRegistry {
   active(): Record<ProviderKind, string> {
     return {
       ...this.settings,
+      print: this.settings.print.join(','),
       aiText: this.aiOverride.text ?? this.settings.aiText,
       aiImage: this.aiOverride.image ?? this.settings.aiImage,
     };
@@ -165,8 +177,16 @@ export class ProviderRegistry {
     return this.resolve('payment', this.settings.payment);
   }
 
-  print(): PrintProvider {
-    return this.resolve('print', this.settings.print);
+  /** Imprentas activas en este ambiente (en el orden configurado). */
+  printers(): PrintProvider[] {
+    return this.settings.print.map((id) => this.resolve('print', id));
+  }
+
+  /** Una imprenta activa por su ID (webhooks, pedidos ya ruteados). */
+  printer(id: string): PrintProvider | null {
+    return (this.settings.print as readonly string[]).includes(id)
+      ? this.resolve('print', id)
+      : null;
   }
 
   email(): EmailProvider {

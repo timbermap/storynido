@@ -839,3 +839,25 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Imprenta simulada:** fuera de producción, "Avanzar la imprenta" en el pedido manda el siguiente webhook firmado.
 - **Color `destructive`:** se agregó el token (antes `text-destructive` no tenía color) y la variante de botón.
 - **Pendiente con Gelato:** su `PrintProvider` (productos y SKU por formato, cotización, pedido, webhooks) en sandbox, y sus especificaciones de sangrado, lomo y código de barras.
+
+## 075 · Varias imprentas: se cotiza con todas y gana la más barata
+
+- **Fecha:** 2026-10-27 · **Pedido de Sebastián:** "se consultan varios precios, el mejor gana; si hay uno solo va ahí; si no hay ninguno con envío al país, solo digital". Criterio confirmado: **precio**.
+- **Matriz:** `printOptions/{país}_{formato}_{imprenta}`. Las imprentas activas en cada ambiente se configuran con `PRINT_PROVIDERS` (lista separada por comas; `PRINT_PROVIDER` sigue valiendo).
+- **Oferta:** el impreso se ofrece si al menos una imprenta activa lo tiene habilitado con la muestra física aprobada.
+- **Al pagar (con la dirección):**
+  - se cotiza en paralelo con todas las que pueden con el pedido entero (formato, páginas y cantidad), con 8 s de tope cada una;
+  - gana el **menor costo total en USD (impresión + envío)**; si empatan, la que llega antes;
+  - si ninguna responde o puede, `print_unavailable` y queda el digital;
+  - la elección queda congelada en el pedido (`printRouting`: ganadora, todas las cotizaciones y sus errores).
+- **El precio al cliente no cambia según la imprenta:** sale del catálogo del país. Varía nuestro margen.
+- **Al mandar a imprimir (`deliver`):** va a la ganadora. Si rechaza el pedido (error no reintentable) o ya no imprime ese producto, pasa a la siguiente de la lista. Un error de red reintenta el paso con la misma.
+- **Webhooks, cancelación e imprenta simulada:** por la imprenta que tiene el pedido. Un evento de otra imprenta se ignora.
+- **Simuladas:** `mock` y `mock_alt` (imprime más caro y envía más barato a EE. UU.). En EE. UU. compiten las dos.
+- **Pendiente:**
+  - especificaciones de PDF por imprenta (sangrado, lomo, código de barras); hoy todas reciben el mismo PDF de 21×28 cm con 3 mm de sangrado;
+  - margen mínimo (no ofrecer impreso si ninguna imprenta deja margen), si se decide;
+  - ver en el admin qué imprenta ganó y por qué.
+- **Gelato (verificado con la clave de staging):**
+  - tiene fotolibros de 210×280 mm vertical en tapa blanda y tapa dura: coincide con nuestro formato;
+  - no hay claves de prueba: una cuenta sin medio de pago funciona como sandbox (los pedidos se cancelan solos).

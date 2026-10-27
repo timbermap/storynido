@@ -643,33 +643,51 @@ describe('checkout y pagos (fase 11)', () => {
   beforeAll(async () => {
     events = new RecordingPublisher();
     conversions = new RecordingConversions();
-    const created = await createTestApp({
-      catalog: new InMemoryCatalog({
-        stories: [story],
-        styles: [style, lineArt],
-        lessons: [lesson],
-        countries: [mexico],
-        prices: [price('digital', 34900), price('hardcover', 89900)],
-        printOptions: [
-          {
-            country: 'MX',
-            format: 'hardcover',
-            provider: 'mock',
-            sku: 'photobook-hardcover-210x280',
-            enabled: true,
-            qaSamplePassed: true,
-            pages: { min: 4, max: 120, multipleOf: 2 },
-            maxQuantity: 50,
-            etaDaysMin: 6,
-            etaDaysMax: 10,
-            productionCostUsdMinor: 1400,
-            updatedAt: now,
-          },
-        ],
-      }),
-      pipelineEvents: events,
-      conversions,
-    });
+    const created = await createTestApp(
+      {
+        catalog: new InMemoryCatalog({
+          stories: [story],
+          styles: [style, lineArt],
+          lessons: [lesson],
+          countries: [mexico],
+          prices: [price('digital', 34900), price('hardcover', 89900)],
+          printOptions: [
+            {
+              country: 'MX',
+              format: 'hardcover',
+              provider: 'mock',
+              sku: 'photobook-hardcover-210x280',
+              enabled: true,
+              qaSamplePassed: true,
+              pages: { min: 4, max: 120, multipleOf: 2 },
+              maxQuantity: 50,
+              etaDaysMin: 6,
+              etaDaysMax: 10,
+              productionCostUsdMinor: 1400,
+              updatedAt: now,
+            },
+            {
+              country: 'MX',
+              format: 'hardcover',
+              provider: 'mock_alt',
+              sku: 'photobook-hardcover-210x280',
+              enabled: true,
+              qaSamplePassed: true,
+              pages: { min: 4, max: 120, multipleOf: 2 },
+              maxQuantity: 50,
+              etaDaysMin: 5,
+              etaDaysMax: 9,
+              productionCostUsdMinor: 1550,
+              updatedAt: now,
+            },
+          ],
+        }),
+        pipelineEvents: events,
+        conversions,
+      },
+      // Dos imprentas simuladas: se cotiza con las dos y gana la más barata.
+      { PRINT_PROVIDERS: 'mock,mock_alt' },
+    );
     app = created.app;
     providers = created.providers;
   });
@@ -799,6 +817,30 @@ describe('checkout y pagos (fase 11)', () => {
     expect(anonymous.json<{ error: { code: string } }>().error.code).toBe('account_required');
   });
 
+  it('si la imprenta más barata no responde, gana la siguiente; si ninguna, solo digital', async () => {
+    await approvedBook();
+    const quote = (id: string) => {
+      const printer = providers.printer(id);
+      if (!printer) throw new Error(`Imprenta ${id} inactiva`);
+      return vi.spyOn(printer, 'quote');
+    };
+    quote('mock').mockRejectedValue(new Error('503'));
+    const res = await checkout({ format: 'hardcover', shippingAddress: ADDRESS });
+    expect(res.statusCode).toBe(200);
+    const { orderId } = res.json<{ orderId: string }>();
+    const routing = (await db.doc(`orders/${orderId}`).get()).get('printRouting') as {
+      provider: string;
+      quotes: { provider: string; error: string | null }[];
+    };
+    expect(routing.provider).toBe('mock_alt');
+    expect(routing.quotes.find((quoted) => quoted.provider === 'mock')?.error).toBe('503');
+
+    quote('mock_alt').mockRejectedValue(new Error('timeout'));
+    const none = await checkout({ format: 'hardcover', shippingAddress: ADDRESS });
+    expect(none.json<{ error: { code: string } }>().error.code).toBe('print_unavailable');
+    vi.restoreAllMocks();
+  });
+
   it('pago confirmado por el webhook: pedido pagado, pipeline en marcha y libro cerrado', async () => {
     await approvedBook();
     const res = await checkout({ format: 'hardcover', shippingAddress: ADDRESS });
@@ -811,6 +853,16 @@ describe('checkout y pagos (fase 11)', () => {
     expect(stored?.status).toBe('pending_payment');
     expect(stored?.approval.fingerprint).toMatch(/^[0-9a-f]{64}$/);
     expect(stored?.priceSnapshot.totalMinor).toBe(104800);
+    // A México la imprenta simulada principal sale más barata (mismo envío, menos impresión).
+    const routing = (await db.doc(`orders/${orderId}`).get()).get('printRouting') as {
+      provider: string;
+      quotes: { provider: string; totalCostUsdMinor: number; error: null }[];
+    };
+    expect(routing.provider).toBe('mock');
+    expect(routing.quotes.map((quoted) => [quoted.provider, quoted.totalCostUsdMinor])).toEqual([
+      ['mock', 1950],
+      ['mock_alt', 2100],
+    ]);
 
     // Firma inválida: se rechaza y no cambia nada.
     expect((await webhook(completed(orderId, 104800), 'otro-secreto')).statusCode).toBe(400);

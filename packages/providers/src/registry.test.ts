@@ -28,6 +28,18 @@ describe('ProviderRegistry', () => {
     expect(registry.payment()).toBe(registry.payment());
   });
 
+  it('varias imprentas activas a la vez', () => {
+    const registry = createProviderRegistry({
+      ...options,
+      settings: providerSettingsFromEnv({ PRINT_PROVIDERS: 'mock, mock_alt' }),
+    });
+    expect(registry.printers().map((printer) => printer.id)).toEqual(['mock', 'mock_alt']);
+    expect(registry.printer('mock_alt')?.id).toBe('mock_alt');
+    expect(registry.printer('gelato')).toBeNull();
+    expect(registry.describe().active.print).toBe('mock,mock_alt');
+    expect(() => providerSettingsFromEnv({ PRINT_PROVIDERS: 'mock,mock' })).toThrow();
+  });
+
   it('falla al arrancar si se pide un proveedor no disponible', () => {
     expect(() =>
       createProviderRegistry({
