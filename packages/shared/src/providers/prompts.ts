@@ -1,6 +1,11 @@
 import type { Locale } from '../i18n';
-import type { Memories } from '../models/character';
-import type { LessonPrompt } from './ai';
+import {
+  describeTraits,
+  type CharacterTraits,
+  type Memories,
+  type MustKeepTrait,
+} from '../models/character';
+import type { CharacterSheet, LessonPrompt, StoryPlan } from './ai';
 
 /** Variables que admiten las plantillas de stories (textPromptTemplate / imagePromptTemplate). */
 export type TemplateVariables = Readonly<Record<string, string | number | null | undefined>>;
@@ -54,6 +59,8 @@ export interface StoryPromptInput {
   levelGuidance?: string;
   /** Libro para colorear: escenas simples con frases muy breves. */
   coloring?: boolean;
+  /** Plan del planificador editorial (guía A): el redactor lo sigue. */
+  plan?: Omit<StoryPlan, 'usage'> | null;
 }
 
 const MEMORY_LABELS: Record<keyof Memories, string> = {
@@ -94,7 +101,22 @@ Detalles reales de la familia (intégralos con naturalidad en escenas concretas;
 los diálogos; si alguno no encaja, omítelo; nunca agregues datos personales que no estén acá):
 ${memories}`
     : '';
-  return `${body}${memoriesSection}
+  const planSection = input.plan
+    ? `
+
+Plan aprobado por el editor (seguilo página por página; no agregues personajes ni hechos fuera de él):
+Tema: ${input.plan.theme}
+Arco: ${input.plan.arc}
+${input.plan.scenes
+  .map(
+    (scene) =>
+      `- Página ${String(scene.pageIndex + 1)}: ${scene.sceneGoal} (${scene.emotionalBeat})${
+        scene.personalDetail ? ` · detalle personal: ${scene.personalDetail}` : ''
+      }`,
+  )
+  .join('\n')}`
+    : '';
+  return `${body}${memoriesSection}${planSection}
 
 Reglas obligatorias:
 - Escribe en ${LANGUAGE_NAMES[input.language]}.
@@ -142,3 +164,21 @@ export function buildIllustrationPrompt(input: IllustrationPromptInput): string 
  */
 export const CHARACTER_REFERENCE_SCENE =
   'Character reference sheet: the main character alone, full body, standing in a front three-quarter view with a friendly neutral pose, on a plain flat warm cream background. No scenery, no props, no other characters.';
+
+/** Protagonista en una frase para los prompts de imagen, con los rasgos que no pueden cambiar. */
+export function describeCharacter(
+  name: string,
+  sheet: CharacterSheet,
+  traits: CharacterTraits,
+  mustKeep: readonly MustKeepTrait[],
+): string {
+  const extras = sheet.distinctiveFeatures.length
+    ? `; also: ${sheet.distinctiveFeatures.join(', ')}`
+    : '';
+  return `${name}: child (${sheet.apparentAge}); ${describeTraits(traits, mustKeep)}; usually wears ${sheet.clothing}${extras}`;
+}
+
+/** Escena de la portada: el título va en la capa tipográfica, nunca dentro de la imagen. */
+export function coverScene(title: string, firstScene: string | undefined): string {
+  return `Book cover illustration for "${title}": the main character as the hero of the story, joyful and centered, leaving clear space at the top for the title. ${firstScene ?? ''}`;
+}

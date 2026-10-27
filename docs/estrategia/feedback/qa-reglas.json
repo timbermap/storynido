@@ -1,0 +1,19 @@
+{
+  "version": "2026-10-27",
+  "purpose": "Reglas propuestas de control de calidad para adaptar el pipeline actual (no esquema operativo final)",
+  "no_architecture_rewrite": true,
+  "channels": ["families", "events", "professionals"],
+  "gates": [
+    {"id":"G0","name":"consent_and_input","severity":"blocker","checks":["adult_permission_for_child_photo","valid_input","language_supported","cost_ceiling"]},
+    {"id":"G1","name":"character_approval","severity":"blocker","checks":["adult_approved_character_sheet","appearance_anchor_attributes","two_or_three_pose_previews"]},
+    {"id":"G2","name":"editorial_outline","severity":"blocker","checks":["page_plan_count","age_and_reading_level","relevant_personal_facts","conflict_resolution_arc"]},
+    {"id":"G3","name":"text_quality","severity":"blocker","checks":["exact_names_and_dedication","locale_review","no_humiliation","no_unauthorized_clinical_claims","density_range_if_narrative_page"]},
+    {"id":"G4","name":"visual_quality","severity":"blocker","checks":["character_continuity","anatomy_review","narrative_image_alignment","style_consistency","no_cross_user_face_mix"]},
+    {"id":"G5","name":"layout_and_pdf","severity":"blocker","checks":["no_clipped_text_or_head","text_selectable","contrast","correct_page_count","fonts_embedded","bleed_if_print"]},
+    {"id":"G6","name":"snapshot_approval","severity":"blocker","checks":["preview_final_version_match","immutable_approved_snapshot","client_approval_record","no_hidden_regeneration_after_approval"]},
+    {"id":"G7","name":"delivery","severity":"blocker","checks":["private_download","digital_format_readable","print_sku_verified_if_print","shipping_quoted_if_print","payment_confirmed"]}
+  ],
+  "non_negotiable": ["no_cross_child_data_access", "no_unapproved_content_mutation", "no_impersonation_of_clinical_expertise", "no_unsupported_print_countries"],
+  "suggested_metrics": ["preview_character_approval_rate", "character_regenerations_per_book", "story_edit_rate", "critical_visual_issue_rate", "critical_narrative_issue_rate", "preview_final_mismatch_rate", "support_case_rate", "refund_rate", "repeat_purchase_rate"],
+  "note": "No utilizar auto-métricas de similitud facial como garantía biométrica; siempre posibilitar revisión adulta y consentimiento"
+}

@@ -20,12 +20,13 @@ import {
   type Transaction,
 } from 'firebase-admin/firestore';
 
-import type {
-  PipelineHandlers,
-  PipelineOrder,
-  SimpleStep,
-  StepContext,
-  StepOutputs,
+import {
+  HumanReviewError,
+  type PipelineHandlers,
+  type PipelineOrder,
+  type SimpleStep,
+  type StepContext,
+  type StepOutputs,
 } from './handlers';
 
 /** Una ejecución del pipeline: la arranca un evento y la sigue Workflows o el orquestador local. */
@@ -63,7 +64,9 @@ export type StepOutcome =
   /** Otro intento tiene el paso tomado; volver a llamar más tarde (no cuenta como intento). */
   | { state: 'busy' }
   /** La ejecución ya no corresponde (el libro se regeneró o el pedido cambió de estado). */
-  | { state: 'stale' };
+  | { state: 'stale' }
+  /** Reintentar no lo arregla: revisión manual sin más intentos. */
+  | { state: 'human_review'; reason: string };
 
 export type IllustrationStatus =
   | { state: 'succeeded' }
@@ -329,6 +332,8 @@ export class Pipeline {
         leaseUntil: null,
       });
       this.log.warn({ orderId, step, generation, err: message(error) }, 'pipeline step failed');
+      if (error instanceof HumanReviewError)
+        return { state: 'human_review', reason: message(error) };
       throw new StepFailedError(step, message(error));
     }
   }
@@ -435,7 +440,8 @@ export class Pipeline {
       });
       return 'succeeded';
     } catch (error) {
-      const last = claim.attempts >= ILLUSTRATION_PAGE_POLICY.maxAttempts;
+      const last =
+        error instanceof HumanReviewError || claim.attempts >= ILLUSTRATION_PAGE_POLICY.maxAttempts;
       await pageRef.update({ status: last ? 'failed' : 'pending', error: message(error) });
       this.log.warn(
         { orderId, index, attempt: claim.attempts, err: message(error) },

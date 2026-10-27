@@ -4,14 +4,19 @@ import {
   type Avatar,
   type AIImageProvider,
   type AITextProvider,
+  type ActivityRequest,
   type AiUsage,
   type CharacterSheetResult,
+  type GeneratedActivities,
   type GeneratedImage,
   type GeneratedStory,
   type IllustrationRequest,
   type ImageData,
   type ModerationResult,
+  type PageReview,
+  type PageReviewRequest,
   type StoryPage,
+  type StoryPlan,
   type StoryRequest,
   type StoryReview,
 } from '@storynido/shared';
@@ -214,6 +219,87 @@ const REVIEW_SCHEMA = {
   required: ['approved', 'issues', 'pages'],
 };
 
+const PLAN_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    theme: { type: 'STRING' },
+    arc: { type: 'STRING' },
+    scenes: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          sceneGoal: { type: 'STRING' },
+          emotionalBeat: { type: 'STRING' },
+          mustBeVisible: { type: 'ARRAY', items: { type: 'STRING' } },
+          notVisible: { type: 'ARRAY', items: { type: 'STRING' } },
+          continuityFacts: { type: 'ARRAY', items: { type: 'STRING' } },
+          wordBudget: { type: 'INTEGER' },
+          personalDetail: { type: 'STRING', nullable: true },
+        },
+        required: [
+          'sceneGoal',
+          'emotionalBeat',
+          'mustBeVisible',
+          'notVisible',
+          'continuityFacts',
+          'wordBudget',
+        ],
+      },
+    },
+  },
+  required: ['theme', 'arc', 'scenes'],
+};
+
+const PAGE_REVIEW_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    status: { type: 'STRING', enum: ['pass', 'repair', 'human_review', 'needs_reference'] },
+    criticalIssues: { type: 'ARRAY', items: { type: 'STRING' } },
+    nonCriticalIssues: { type: 'ARRAY', items: { type: 'STRING' } },
+    continuityChecks: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          trait: { type: 'STRING' },
+          expected: { type: 'STRING' },
+          observed: { type: 'STRING' },
+          confidence: { type: 'STRING', enum: ['low', 'medium', 'high'] },
+        },
+        required: ['trait', 'expected', 'observed', 'confidence'],
+      },
+    },
+    imageTextMatches: { type: 'BOOLEAN' },
+    textInImage: { type: 'BOOLEAN' },
+    repairTarget: { type: 'STRING', enum: ['illustration_only', 'text_only', 'none'] },
+  },
+  required: [
+    'status',
+    'criticalIssues',
+    'nonCriticalIssues',
+    'continuityChecks',
+    'imageTextMatches',
+    'textInImage',
+    'repairTarget',
+  ],
+};
+
+const ACTIVITIES_SCHEMA = {
+  type: 'ARRAY',
+  items: {
+    type: 'OBJECT',
+    properties: {
+      kind: { type: 'STRING' },
+      title: { type: 'STRING' },
+      instructions: { type: 'STRING' },
+      items: { type: 'ARRAY', items: { type: 'STRING' } },
+      illustrationPrompt: { type: 'STRING', nullable: true },
+    },
+    required: ['kind', 'title', 'instructions', 'items'],
+  },
+};
+
 const MODERATION_SCHEMA = {
   type: 'OBJECT',
   properties: {
@@ -390,6 +476,128 @@ ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrat
 
   async moderateText(text: string): Promise<ModerationResult> {
     return moderate(this.client, [{ text: `${MODERATION_RULES}\n\nText:\n"""${text}"""` }]);
+  }
+
+  /** Planificador editorial (guía A de docs/estrategia/feedback/PROMPTS-LLM-Y-QA.md). */
+  async planStory(request: StoryRequest): Promise<StoryPlan> {
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [
+        {
+          text: `You are a children's literature editor. Plan a warm, coherent personalized picture book that is fun to re-read.
+Respect the child: never ridicule appearance, abilities, origin or emotions. Do not invent biographical facts, diagnoses or relatives
+that were not provided. Before narrating, define beginning, motivation, an age-appropriate difficulty, the protagonist's own decisions,
+consequence and resolution. At least two personal details from the brief must change the action naturally (not just be mentioned).
+No two consecutive scenes may be nearly identical. Exactly ${String(request.pageCount)} scenes, one per narrative page.
+wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min)}-${String(request.wordsPerPage.max)} words` : 'as the brief says'}.
+mustBeVisible / notVisible / continuityFacts in short English phrases for the illustrator. Write theme, arc, sceneGoal and emotionalBeat
+in the language of the brief.
+
+Brief:
+${request.prompt}`,
+        },
+      ],
+      { temperature: 0.7, responseMimeType: 'application/json', responseSchema: PLAN_SCHEMA },
+    );
+    const plan = parseJson(response, 'plan') as Omit<StoryPlan, 'usage' | 'scenes'> & {
+      scenes: (Omit<StoryPlan['scenes'][number], 'pageIndex' | 'personalDetail'> & {
+        personalDetail?: string | null;
+      })[];
+    };
+    if (plan.scenes.length !== request.pageCount) {
+      throw new ProviderError(
+        'vertex',
+        `El plan vino con ${String(plan.scenes.length)} escenas en vez de ${String(request.pageCount)}`,
+        true,
+      );
+    }
+    return {
+      theme: plan.theme,
+      arc: plan.arc,
+      scenes: plan.scenes.map((scene, pageIndex) => ({
+        ...scene,
+        pageIndex,
+        personalDetail: scene.personalDetail ?? null,
+      })),
+      usage,
+    };
+  }
+
+  /** Revisor cruzado texto-imagen (guía D): preliminar, nunca biométrico. */
+  async reviewPage(request: PageReviewRequest): Promise<PageReview> {
+    const scene = request.scene
+      ? `Scene plan: ${request.scene.sceneGoal}. Must be visible: ${request.scene.mustBeVisible.join(', ') || '-'}. Must NOT appear: ${request.scene.notVisible.join(', ') || '-'}.`
+      : 'Scene plan: not available.';
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [
+        { text: 'Approved character reference sheet (the protagonist):' },
+        imagePart(request.reference),
+        {
+          text: `Illustration to review (${request.text === null ? 'book cover' : `page ${String(request.pageIndex + 1)}`}):`,
+        },
+        imagePart(request.image),
+        {
+          text: `You are a quality reviewer for a children's picture book, not a salesperson. Evaluate this ONE illustration against the
+page text, the scene plan and the approved character sheet. Look for: internal inconsistencies, improbable anatomy (hands, limbs, faces),
+incoherent clothing or accessories, missing or mixed-up characters, objects that contradict the text, cropped heads, and any letters or
+words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks).
+Never claim to verify biometric identity or exact likeness to a real person; your evaluation is preliminary and may mark uncertainty.
+Do not invent evidence: anything you cannot evaluate without another reference must be status needs_reference.
+
+Status:
+- pass: no critical issue.
+- repair: a critical issue that a new illustration of the same scene would fix (missing essential trait, wrong anatomy, text in image,
+  image contradicts the text). repairTarget illustration_only.
+- human_review: wrong or mixed-up protagonist, inappropriate content, sensitive data visible, or a problem in the text itself
+  (repairTarget text_only — the approved text is never changed automatically).
+
+Protagonist: ${request.character}
+Essential traits (must match in every illustration): ${request.mustKeep.join('; ') || 'none'}
+${scene}
+Page text: ${request.text ?? '(cover: no text)'}`,
+        },
+      ],
+      { temperature: 0, responseMimeType: 'application/json', responseSchema: PAGE_REVIEW_SCHEMA },
+    );
+    const review = parseJson(response, 'revisión de página') as Omit<
+      PageReview,
+      'pageIndex' | 'usage'
+    >;
+    return { ...review, pageIndex: request.pageIndex, usage };
+  }
+
+  /** Actividades a partir de plantillas aprobadas (fase 09; se dibujan en la fase 10). */
+  async generateActivities(request: ActivityRequest): Promise<GeneratedActivities> {
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [
+        {
+          text: `Create exactly ${String(request.count)} activities for a personalized children's activity book about ${request.childName}
+(${String(request.age)} years old, reading level ${request.readingLevel}), based on the story "${request.storyTitle}".
+Use only these approved activity templates (kind and guidance), cycling through them; do not invent other kinds:
+${request.templates.map((template) => `- ${template.kind}: ${template.guidance}`).join('\n')}
+${request.goal ? `General goal chosen by the professional (educational, never clinical): ${request.goal}\n` : ''}Write title, instructions and items in ${request.language === 'es' ? 'Spanish' : request.language === 'pt' ? 'Portuguese' : 'English'};
+items are characters, objects or words from the story. illustrationPrompt (English, simple outline scene, no text in the image) only if the
+activity needs a picture, else null. No diagnoses, therapy language or cure promises.
+
+Story pages:
+${request.storyPages.map((page, index) => `${String(index + 1)}. ${page}`).join('\n')}`,
+        },
+      ],
+      { temperature: 0.6, responseMimeType: 'application/json', responseSchema: ACTIVITIES_SCHEMA },
+    );
+    const activities = parseJson(response, 'actividades') as (Omit<
+      GeneratedActivities['activities'][number],
+      'illustrationPrompt'
+    > & { illustrationPrompt?: string | null })[];
+    return {
+      activities: activities.slice(0, request.count).map((activity) => ({
+        ...activity,
+        illustrationPrompt: activity.illustrationPrompt ?? null,
+      })),
+      usage,
+    };
   }
 }
 

@@ -1,0 +1,11 @@
+StoryNido - Voz del cliente (27 octubre 2026)
+
+Archivos:
+1) INFORME-COMPLETO.md: investigación cualitativa internacional, matriz por país, 26 categorías de falla, 24 pruebas y estrategia digital+impresión.
+2) evidencia-casos.csv: reseñas/comentarios seleccionados con país, fecha, enlace, resumen y nivel de confianza.
+3) PROMPT-PARA-CLAUDE.md: cómo pedir cambios incrementales sobre el repositorio avanzado.
+4) qa-reglas.json: propuesta de gates y pruebas; adaptar a esquema existente.
+
+IMPORTANTE: las reseñas y comentarios no son muestra aleatoria ni representan proporciones del mercado. Faltan evidencias independientes suficientes para México, Argentina y varios países. Los textos resumidos son paráfrasis y los enlaces permiten verificar fuente original.
+
+USO: descomprimir en el repositorio y pegar PROMPT-PARA-CLAUDE.md en Claude Code, pidiendo primero auditoría de brechas sobre código real, no reconstrucción de arquitectura.

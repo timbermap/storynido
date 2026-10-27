@@ -4,7 +4,6 @@ import { encodeIllustration, watermarkPreview, type ProviderRegistry } from '@st
 import {
   COLLECTIONS,
   CHARACTER_REFERENCE_SCENE,
-  describeTraits,
   editorialPlan,
   nameIssues,
   traitsKey,
@@ -24,6 +23,8 @@ import {
   PREVIEW_ILLUSTRATED_PAGES,
   ProviderError,
   buildIllustrationPrompt,
+  coverScene,
+  describeCharacter,
   buildStoryPrompt,
   utcDay,
   type AIProvider,
@@ -405,13 +406,21 @@ export class PreviewService {
       wordsPerPage: plan.words,
       mustInclude: requiredNames.slice(1),
     };
-    const prompt = buildStoryPrompt({
+    const promptInput = {
       ...request,
       template: story.textPromptTemplate,
       memories,
       levelGuidance: plan.levelGuidance,
       coloring: plan.contentType === 'coloring',
+    };
+    // Planificador editorial (guía A): arco, escenas y qué se ve en cada página. El redactor lo
+    // sigue y el pipeline lo usa para ilustrar y revisar cada página.
+    const { usage: planUsage, ...storyPlan } = await ai.text.planStory({
+      ...request,
+      prompt: buildStoryPrompt(promptInput),
     });
+    await track('story', { usage: planUsage });
+    const prompt = buildStoryPrompt({ ...promptInput, plan: storyPlan });
 
     // Texto: cuento, revisión editorial y moderación (un reintento si no pasa).
     const pages = await withModeratedRetry(
@@ -503,6 +512,9 @@ export class PreviewService {
       photoId: characterKey(book),
       editorialKey: editorialKey(book),
       interiorPages: plan.interiorPages,
+      activityPages: plan.activityPages,
+      words: plan.words,
+      plan: storyPlan,
       generatedAt: new Date(),
     };
   }
@@ -1070,22 +1082,6 @@ function defaultMustKeep(traits: CharacterTraits): MustKeepTrait[] {
 }
 
 /** Descripción del protagonista para los prompts: rasgos confirmados primero. */
-function describeCharacter(
-  name: string,
-  sheet: CharacterSheet,
-  traits: CharacterTraits,
-  mustKeep: readonly MustKeepTrait[],
-): string {
-  const extras = sheet.distinctiveFeatures.length
-    ? `; also: ${sheet.distinctiveFeatures.join(', ')}`
-    : '';
-  return `${name}: child (${sheet.apparentAge}); ${describeTraits(traits, mustKeep)}; usually wears ${sheet.clothing}${extras}`;
-}
-
-function coverScene(title: string, firstScene: string | undefined): string {
-  return `Book cover illustration for "${title}": the main character as the hero of the story, joyful and centered, leaving clear space at the top for the title. ${firstScene ?? ''}`;
-}
-
 /** Hash corto de la IP con el día: limita sin guardar ni registrar la dirección. */
 function hashIp(ip: string): string {
   return createHash('sha256').update(`${utcDay()}|${ip}`).digest('hex').slice(0, 16);

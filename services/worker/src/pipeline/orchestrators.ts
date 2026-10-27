@@ -55,6 +55,10 @@ export class LocalOrchestrator implements Orchestrator {
         try {
           const outcome = await pipeline.runStep(run.orderId, step.name, run.generation);
           if (outcome.state === 'stale') return;
+          if (outcome.state === 'human_review') {
+            await pipeline.fail(run.orderId, run.runId, step.name, outcome.reason);
+            return;
+          }
           if (outcome.state === 'busy') {
             await sleep(this.pollMs);
             continue;

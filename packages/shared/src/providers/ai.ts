@@ -120,8 +120,108 @@ export interface GeneratedImage extends ImageData {
   usage: AiUsage;
 }
 
+/** Plan de una página (planificador editorial, guía A). */
+export interface ScenePlan {
+  pageIndex: number;
+  sceneGoal: string;
+  emotionalBeat: string;
+  /** Lo que tiene que verse en la ilustración (en inglés). */
+  mustBeVisible: string[];
+  /** Lo que no tiene que aparecer (en inglés). */
+  notVisible: string[];
+  /** Hechos que no cambian de una página a otra (mascota, ropa, lugar...). */
+  continuityFacts: string[];
+  wordBudget: number;
+  /** Qué detalle personal mueve la escena, si alguno. */
+  personalDetail: string | null;
+}
+
+export interface StoryPlan {
+  theme: string;
+  /** Principio, motivación, dificultad, decisión del protagonista y resolución. */
+  arc: string;
+  scenes: ScenePlan[];
+  usage: AiUsage;
+}
+
+export const PAGE_REVIEW_STATUSES = ['pass', 'repair', 'human_review', 'needs_reference'] as const;
+
+export type PageReviewStatus = (typeof PAGE_REVIEW_STATUSES)[number];
+
+/** Revisión cruzada texto-imagen de una página (guía D). Nunca es una verificación biométrica. */
+export interface PageReviewRequest {
+  pageIndex: number;
+  /** Texto aprobado de la página (null en la portada). */
+  text: string | null;
+  image: ImageData;
+  /** Lámina aprobada del personaje: la referencia de continuidad. */
+  reference: ImageData;
+  /** Descripción del personaje con los rasgos que no pueden cambiar. */
+  character: string;
+  /** Rasgos esenciales, en inglés ("glasses: present", "hair: short curly black"). */
+  mustKeep: readonly string[];
+  scene: ScenePlan | null;
+}
+
+export interface ContinuityCheck {
+  trait: string;
+  expected: string;
+  observed: string;
+  confidence: 'low' | 'medium' | 'high';
+}
+
+export interface PageReview {
+  pageIndex: number;
+  status: PageReviewStatus;
+  criticalIssues: string[];
+  nonCriticalIssues: string[];
+  continuityChecks: ContinuityCheck[];
+  imageTextMatches: boolean;
+  /** Hay letras o palabras dentro de la ilustración. */
+  textInImage: boolean;
+  /** Qué arreglar: el texto aprobado nunca se cambia sin el adulto. */
+  repairTarget: 'illustration_only' | 'text_only' | 'none';
+  usage: AiUsage;
+}
+
+/** Actividad de un libro de actividades o mixto (se dibuja en la maquetación, fase 10). */
+export interface ActivitySpec {
+  kind: string;
+  title: string;
+  instructions: string;
+  /** Elementos de la historia que usa la actividad (personajes, objetos, palabras). */
+  items: string[];
+  /** Escena para una ilustración de contorno, si la actividad la necesita (en inglés). */
+  illustrationPrompt: string | null;
+}
+
+export interface ActivityRequest {
+  language: Locale;
+  childName: string;
+  age: number;
+  readingLevel: string;
+  storyTitle: string;
+  storyPages: readonly string[];
+  /** Plantillas aprobadas para el nivel: tipo e indicaciones. */
+  templates: readonly { kind: string; guidance: string }[];
+  count: number;
+  /** Profesionales: objetivo general elegido (nunca un protocolo clínico). */
+  goal: string | null;
+}
+
+export interface GeneratedActivities {
+  activities: ActivitySpec[];
+  usage: AiUsage;
+}
+
 export interface AITextProvider {
   readonly id: string;
+  /** Plan editorial por página antes de escribir (guía A). */
+  planStory(request: StoryRequest): Promise<StoryPlan>;
+  /** Revisión multimodal de una página ilustrada (guía D). */
+  reviewPage(request: PageReviewRequest): Promise<PageReview>;
+  /** Actividades a partir de plantillas aprobadas. */
+  generateActivities(request: ActivityRequest): Promise<GeneratedActivities>;
   /** Extrae la ficha del personaje a partir de la foto procesada. */
   describeCharacter(photo: ImageData): Promise<CharacterSheetResult>;
   generateStory(request: StoryRequest): Promise<GeneratedStory>;

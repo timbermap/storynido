@@ -1,30 +1,30 @@
 # Progreso
 
-| #   | Fase                                                 | Estado                            |
-| --- | ---------------------------------------------------- | --------------------------------- |
-| 01  | Monorepo base, paquete compartido, lint, tests y CI  | ✅ Hecha (2026-10-26)             |
-| 02  | Infraestructura con Terraform y ambientes            | ✅ Staging aplicado (2026-10-26)  |
-| 03  | Autenticación, roles y modelo de datos               | ✅ Hecha (2026-10-26)             |
-| 04  | API base y abstracciones de proveedores              | ✅ Hecha (2026-10-26)             |
-| 05  | Sitio público                                        | ✅ Hecha (2026-10-26)             |
-| 06  | Creador del libro y fotos                            | ✅ Hecha (2026-10-26)             |
-| 07  | Motor de IA y vista previa                           | ✅ Hecha (2026-10-27)             |
-| 07b | Opciones editoriales (extensión, texto, nivel, tipo) | ✅ Hecha (2026-10-27)             |
-| 07c | Líneas comerciales y landings                        | ✅ Hecha (2026-10-27)             |
-| 07d | Aprobación del personaje y P0 de calidad (feedback)  | ✅ 2026-10-27                     |
-| 08  | Pipeline: orquestación y worker                      | ✅ 2026-10-27 (infra sin aplicar) |
-| 09  | Generación del libro y QA                            | ⏳ Pendiente                      |
-| 10  | PDF                                                  | ⏳ Pendiente                      |
-| 11  | Pagos con Stripe                                     | ⏳ Pendiente                      |
-| 12  | Gelato y "Mi cuenta"                                 | ⏳ Pendiente                      |
-| 12b | Eventos (un diseño, muchas copias)                   | ⏳ Pendiente                      |
-| 12c | Profesionales (cuenta Pro, descuentos)               | ⏳ Pendiente                      |
-| 13  | Emails y postventa                                   | ⏳ Pendiente                      |
-| 14  | Admin: configuración                                 | ⏳ Pendiente                      |
-| 15  | Admin: operaciones                                   | ⏳ Pendiente                      |
-| 16  | Observabilidad y seguridad                           | ⏳ Pendiente                      |
-| 17  | E2E y rendimiento                                    | ⏳ Pendiente                      |
-| 18  | Documentación y salida                               | ⏳ Pendiente                      |
+| #   | Fase                                                 | Estado                               |
+| --- | ---------------------------------------------------- | ------------------------------------ |
+| 01  | Monorepo base, paquete compartido, lint, tests y CI  | ✅ Hecha (2026-10-26)                |
+| 02  | Infraestructura con Terraform y ambientes            | ✅ Staging aplicado (2026-10-26)     |
+| 03  | Autenticación, roles y modelo de datos               | ✅ Hecha (2026-10-26)                |
+| 04  | API base y abstracciones de proveedores              | ✅ Hecha (2026-10-26)                |
+| 05  | Sitio público                                        | ✅ Hecha (2026-10-26)                |
+| 06  | Creador del libro y fotos                            | ✅ Hecha (2026-10-26)                |
+| 07  | Motor de IA y vista previa                           | ✅ Hecha (2026-10-27)                |
+| 07b | Opciones editoriales (extensión, texto, nivel, tipo) | ✅ Hecha (2026-10-27)                |
+| 07c | Líneas comerciales y landings                        | ✅ Hecha (2026-10-27)                |
+| 07d | Aprobación del personaje y P0 de calidad (feedback)  | ✅ 2026-10-27                        |
+| 08  | Pipeline: orquestación y worker                      | ✅ 2026-10-27 (infra sin aplicar)    |
+| 09  | Generación del libro y QA                            | ✅ 2026-10-27 (falta la prueba real) |
+| 10  | PDF                                                  | ⏳ Pendiente                         |
+| 11  | Pagos con Stripe                                     | ⏳ Pendiente                         |
+| 12  | Gelato y "Mi cuenta"                                 | ⏳ Pendiente                         |
+| 12b | Eventos (un diseño, muchas copias)                   | ⏳ Pendiente                         |
+| 12c | Profesionales (cuenta Pro, descuentos)               | ⏳ Pendiente                         |
+| 13  | Emails y postventa                                   | ⏳ Pendiente                         |
+| 14  | Admin: configuración                                 | ⏳ Pendiente                         |
+| 15  | Admin: operaciones                                   | ⏳ Pendiente                         |
+| 16  | Observabilidad y seguridad                           | ⏳ Pendiente                         |
+| 17  | E2E y rendimiento                                    | ⏳ Pendiente                         |
+| 18  | Documentación y salida                               | ⏳ Pendiente                         |
 
 ## Estrategia comercial
 
@@ -35,6 +35,8 @@
 
 ## Fuera de alcance / pendientes detectados
 
+- **Pedidos trabados (detectado en la fase 08):** si Workflows no arranca y Pub/Sub manda el evento a `dead-letter`, el pedido queda en `generating`. Hace falta un barrido periódico que reintente los eventos con `started: false` y avise por los pedidos sin avance (fase 15 o 16).
+- **Hero y navbar (pedido de Sebastián, 2026-10-27):** rediseño con la referencia que mandó: titular grande con una palabra en lavanda, el libro abierto ilustrado con la "foto" del chico (ilustrada o sintética, nunca una foto real), CTA principal "Crear la vista previa gratis", enlace "Ver historias", línea "Digital en todo el mundo · Impreso en países seleccionados" y las 3 líneas como tarjetas debajo del hero. Navbar con menús por línea, búsqueda, "Iniciar sesión" y "Crear un cuento".
 - **UX a mejorar (pedido de Sebastián, 2026-10-27):** el diseño y la experiencia del encabezado (navbar), las preguntas frecuentes y el pie de página no convencen. Hace falta una pasada de diseño dedicada:
   - jerarquía y agrupación del menú (3 líneas + Historias + Blog + idioma + país + sesión);
   - menú móvil;

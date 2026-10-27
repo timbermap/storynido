@@ -1,3 +1,6 @@
+import os from 'node:os';
+import path from 'node:path';
+
 import { serviceEnvSchema } from '@storynido/shared/server';
 import { z } from 'zod';
 
@@ -16,6 +19,17 @@ export const workerEnvSchema = serviceEnvSchema.extend({
   WORKER_URL: z.url().default('http://localhost:8081'),
   /** Cuenta de servicio con la que Cloud Tasks firma (OIDC) las llamadas al worker. */
   INVOKER_SA: z.string().default(''),
+  /** "generation": pasos reales (fase 09); "simulated": recorre el pipeline sin IA. */
+  PIPELINE_HANDLERS: z.enum(['generation', 'simulated']).default('generation'),
+  /** Proveedores: los mismos que la API (storage local compartido en desarrollo). */
+  PUBLIC_API_URL: z.url().default('http://localhost:8080'),
+  LOCAL_STORAGE_DIR: z.string().default(path.join(os.tmpdir(), 'storynido-storage')),
+  LOCAL_STORAGE_SECRET: z.string().min(8).default('local-dev-storage-secret'),
+  MOCK_WEBHOOK_SECRET: z.string().min(8).default('local-dev-webhook-secret'),
+  VERTEX_LOCATION: z.string().default('global'),
+  BUCKET_PHOTOS: z.string().optional(),
+  BUCKET_ASSETS: z.string().optional(),
+  BUCKET_PDFS: z.string().optional(),
   /** Base de la espera exponencial del orquestador local, en milisegundos. */
   LOCAL_RETRY_BASE_MS: z.coerce.number().int().nonnegative().default(2000),
 });

@@ -39,6 +39,20 @@ export interface PageResult {
 
 export type SimpleStep = Exclude<PipelineStep, 'generate_illustrations'>;
 
+/**
+ * Un problema que reintentar no arregla (rasgo crítico distinto, texto aprobado con error,
+ * contenido bloqueado): el pedido va directo a revisión manual, sin gastar más intentos.
+ */
+export class HumanReviewError extends Error {
+  constructor(
+    readonly code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'HumanReviewError';
+  }
+}
+
 /** Lo que hace cada paso. La orquestación (reintentos, idempotencia, registro) es aparte. */
 export interface PipelineHandlers {
   steps: Record<SimpleStep, (ctx: StepContext) => Promise<StepResult>>;

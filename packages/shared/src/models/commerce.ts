@@ -160,6 +160,29 @@ export const bookPreviewSchema = z.object({
   editorialKey: z.string().optional(),
   /** Páginas interiores del libro terminado según esas opciones. */
   interiorPages: z.number().int().positive().optional(),
+  /** Páginas de actividades y rango de palabras con que se escribió (los usa el pipeline). */
+  activityPages: z.number().int().nonnegative().optional(),
+  words: z.object({ min: z.number().int(), max: z.number().int() }).optional(),
+  /** Plan del planificador editorial: qué se ve y qué no en cada página (fase 09). */
+  plan: z
+    .object({
+      theme: z.string(),
+      arc: z.string(),
+      scenes: z.array(
+        z.object({
+          pageIndex: z.number().int().nonnegative(),
+          sceneGoal: z.string(),
+          emotionalBeat: z.string(),
+          mustBeVisible: z.array(z.string()),
+          notVisible: z.array(z.string()),
+          continuityFacts: z.array(z.string()),
+          wordBudget: z.number().int(),
+          personalDetail: z.string().nullable(),
+        }),
+      ),
+    })
+    .nullable()
+    .optional(),
   generatedAt: z.date(),
 });
 

@@ -26,7 +26,8 @@ export const STEP_POLICIES: Record<PipelineStep, StepPolicy> = {
   prepare_photo: { maxAttempts: 3, timeoutSeconds: 120 },
   generate_story: { maxAttempts: 3, timeoutSeconds: 300 },
   generate_illustrations: { maxAttempts: 2, timeoutSeconds: 1800 },
-  quality_check: { maxAttempts: 3, timeoutSeconds: 600 },
+  // Revisa cada página y repara las que fallan: con modelos reales lleva varios minutos.
+  quality_check: { maxAttempts: 2, timeoutSeconds: 1500 },
   layout_pdf: { maxAttempts: 3, timeoutSeconds: 600 },
   deliver: { maxAttempts: 5, timeoutSeconds: 120 },
 };

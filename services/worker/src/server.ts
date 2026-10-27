@@ -1,9 +1,15 @@
+import {
+  aiModelSettingsFromEnv,
+  createProviderRegistry,
+  providerSettingsFromEnv,
+} from '@storynido/providers';
 import { cloudLoggingOptions } from '@storynido/shared/server';
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 import { buildApp } from './app';
 import { loadWorkerEnv } from './config';
+import { generationHandlers } from './pipeline/generation';
 import { simulatedHandlers } from './pipeline/handlers';
 import {
   CloudTasksDispatcher,
@@ -28,12 +34,37 @@ const app = buildApp({
   pipeline: current,
 });
 
+const settings = providerSettingsFromEnv(process.env);
+if (
+  env.APP_ENV === 'production' &&
+  Object.values(settings).some((id) => id === 'mock' || id === 'local')
+) {
+  throw new Error(`Producción no puede usar proveedores simulados: ${JSON.stringify(settings)}`);
+}
+const providers = createProviderRegistry({
+  settings,
+  mockWebhookSecret: env.MOCK_WEBHOOK_SECRET,
+  gcsBuckets:
+    env.BUCKET_PHOTOS && env.BUCKET_ASSETS && env.BUCKET_PDFS
+      ? { photos: env.BUCKET_PHOTOS, assets: env.BUCKET_ASSETS, pdfs: env.BUCKET_PDFS }
+      : undefined,
+  vertexProjectId: env.GCP_PROJECT_ID || undefined,
+  vertexLocation: env.VERTEX_LOCATION,
+  aiModels: aiModelSettingsFromEnv(process.env),
+  localStorage: {
+    rootDir: env.LOCAL_STORAGE_DIR,
+    publicBaseUrl: env.PUBLIC_API_URL,
+    secret: env.LOCAL_STORAGE_SECRET,
+  },
+});
+
 const gcp = { projectId: env.GCP_PROJECT_ID, region: env.GCP_REGION };
 const cloud = env.PIPELINE_RUNNER === 'cloud';
 const pipeline = new Pipeline(
   getFirestore(firebase),
-  // Fase 08: pasos simulados. La fase 09 conecta la generación real.
-  simulatedHandlers(),
+  env.PIPELINE_HANDLERS === 'simulated'
+    ? simulatedHandlers()
+    : generationHandlers({ db: getFirestore(firebase), providers, log: app.log }),
   cloud
     ? new CloudWorkflowsOrchestrator({ ...gcp, workflow: env.WORKFLOW_NAME })
     : new LocalOrchestrator(current, app.log, env.LOCAL_RETRY_BASE_MS),

@@ -8,7 +8,18 @@ export const QA_CODES = [
   'moderation_image',
   'character_approved',
   'character_corrected',
+  // Pipeline del libro (fase 09): cada uno con página, intento, costo de la reparación y estado final.
+  'page_missing',
+  'page_repair',
+  'page_human_review',
+  'page_needs_reference',
+  'snapshot_mismatch',
 ] as const;
+
+export type QaCode = (typeof QA_CODES)[number];
+
+/** Estado final de un problema de QA de una página. */
+export const QA_FINAL_STATUSES = ['repaired', 'human_review', 'accepted'] as const;
 
 export const qaEventSchema = z.object({
   code: z.enum(QA_CODES),

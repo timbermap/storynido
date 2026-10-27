@@ -11,6 +11,7 @@
 #   waiting             -> ilustraciones repartidas en Cloud Tasks: consultar hasta que terminen
 #   busy                -> otro intento tiene el paso: esperar y volver a llamar (no cuenta)
 #   stale               -> la ejecución ya no corresponde (regenerado o cambió el estado): fin
+#   human_review        -> reintentar no lo arregla: revisión manual sin más intentos
 #   HTTP 5xx / timeout  -> intento fallido: espera exponencial; al agotar, revisión manual
 main:
   params: [run]
@@ -93,6 +94,8 @@ runStep:
             next: waitBusy
           - condition: ${res.body.state == "waiting"}
             next: pollIllustrations
+          - condition: ${res.body.state == "human_review"}
+            next: humanReview
     - succeeded:
         return: succeeded
 
@@ -128,6 +131,12 @@ runStep:
     - pagesFailed:
         assign:
           - lastError: ${status.body.error}
+        next: attemptFailed
+
+    - humanReview:
+        assign:
+          - lastError: ${res.body.reason}
+        next: failOrder
 
     - attemptFailed:
         assign:

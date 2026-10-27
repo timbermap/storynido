@@ -659,3 +659,29 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Pasos simulados:** en esta fase los pasos son simulados (`simulatedHandlers`), sin IA ni costo. La fase 09 conecta la historia, las ilustraciones y el QA reales; la 10 el PDF; la 12 la entrega.
 - **Disparo de prueba:** `POST /v1/dev/books/:bookId/paid-order`, solo fuera de producción, hasta tener pagos (fase 11).
 - **Seguridad:** el worker no es público. Cloud Run solo acepta OIDC de `sn-invoker` (Pub/Sub, Cloud Tasks) y `sn-workflows`. Las colecciones nuevas solo las escribe el servidor y solo las leen los admins.
+
+## 066 · Generación del libro: se congela lo aprobado y se repara por página
+
+- **Fecha:** 2026-10-27 · **Fase:** 09 · **Guía:** `docs/estrategia/feedback/PROMPTS-LLM-Y-QA.md` (secciones A a G) y `qa-reglas.json`.
+- **El texto se escribe en la vista previa, no después del pago.**
+  - La etapa 1 corre planificador (A) → redactor (B) → revisión editorial (E) → moderación (F), con los chequeos de nombre exacto y densidad.
+  - El adulto lee, edita y aprueba ese texto. El pipeline nunca lo reescribe ("no_unapproved_content_mutation").
+  - Si algo del texto aprobado no pasa (nombre, seguridad), el pedido va a revisión humana.
+- **Planificador:** devuelve arco y escenas por página (qué se ve, qué no, hechos de continuidad, presupuesto de palabras, detalle personal). Se guarda en la vista previa y lo usan las ilustraciones y la revisión.
+- **Libro congelado (G1 + G6):** el primer paso exige el personaje aprobado y copia al pedido lo aprobado:
+  - texto, plan, lámina e imágenes de la muestra (salen de `previews/`, que se borra a los 30 días);
+  - descripción del personaje y rasgos esenciales.
+  - Un hash identifica la versión. Regenerar el libro no cambia lo congelado.
+- **Ilustraciones:**
+  - Portada y las 2 páginas ya aprobadas se reutilizan.
+  - El resto se pinta con la lámina como referencia, la escena del plan ("debe verse", "no mostrar") y "sin texto en la imagen".
+  - Cada imagen se modera (2 intentos por tarea, y la tarea se reintenta).
+  - Regenerar vuelve a pintar todas.
+- **Revisión por página (D):** cada imagen se compara con el texto, el plan y la lámina.
+  - `pass` sigue. `needs_reference` se acepta y queda registrado.
+  - `repair` vuelve a pintar solo esa página, con los problemas como corrección: hasta 2 veces por página, 30 % de las páginas por libro (mínimo 3) y USD 1,50 por libro.
+  - `human_review`, un problema del texto o las reparaciones agotadas bloquean el libro: revisión manual sin reintentos (`HumanReviewError`).
+- **Registro:** `books/{id}/qaEvents` con `page_repair`, `page_human_review`, `page_needs_reference`, `page_missing`, `moderation_image`, `name_mismatch` y `length_out_of_range`. Cada uno lleva pedido, página, intentos, costo de la reparación y estado final, sin datos del niño. Cada llamada de IA queda en `aiUsage` con el pedido.
+- **Sin biometría:** no se usan embeddings ni métricas de parecido facial (lo pide `qa-reglas.json`). La consistencia la controlan la lámina aprobada por el adulto y la revisión de rasgos esenciales.
+- **Actividades:** se generan con plantillas aprobadas por nivel y se moderan. Quedan en `orders/{id}/content/activities`; se dibujan en la maquetación (fase 10).
+- **Pendiente:** maquetación (10) y entrega (12) siguen simuladas. Variante regional del idioma (es-MX, es-AR…) cuando el libro guarde el país.

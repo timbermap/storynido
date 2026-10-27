@@ -1,14 +1,19 @@
 import type {
   AIImageProvider,
   AITextProvider,
+  ActivityRequest,
   AiUsage,
   CharacterSheetResult,
+  GeneratedActivities,
   GeneratedImage,
   GeneratedStory,
   IllustrationRequest,
   ImageData,
   Locale,
   ModerationResult,
+  PageReview,
+  PageReviewRequest,
+  StoryPlan,
   StoryRequest,
   StoryReview,
 } from '@storynido/shared';
@@ -97,6 +102,61 @@ export class MockAITextProvider implements AITextProvider {
     return Promise.resolve(moderate(text));
   }
 
+  planStory(request: StoryRequest): Promise<StoryPlan> {
+    const budget = request.wordsPerPage
+      ? Math.round((request.wordsPerPage.min + request.wordsPerPage.max) / 2)
+      : 30;
+    return Promise.resolve({
+      theme: request.storyTitle,
+      arc: `${request.childName} quiere algo, encuentra una dificultad, decide y lo logra.`,
+      scenes: Array.from({ length: request.pageCount }, (_, pageIndex) => ({
+        pageIndex,
+        sceneGoal: `Escena ${String(pageIndex + 1)}`,
+        emotionalBeat: pageIndex === request.pageCount - 1 ? 'alegría' : 'curiosidad',
+        mustBeVisible: [request.childName],
+        notVisible: ['text'],
+        continuityFacts: [],
+        wordBudget: budget,
+        personalDetail: pageIndex === 0 ? (request.likes[0] ?? null) : null,
+      })),
+      usage: usage('mock-text'),
+    });
+  }
+
+  /** Siempre aprueba: los tests que prueban reparaciones envuelven este método. */
+  reviewPage(request: PageReviewRequest): Promise<PageReview> {
+    return Promise.resolve({
+      pageIndex: request.pageIndex,
+      status: 'pass',
+      criticalIssues: [],
+      nonCriticalIssues: [],
+      continuityChecks: [],
+      imageTextMatches: true,
+      textInImage: false,
+      repairTarget: 'none',
+      usage: usage('mock-review'),
+    });
+  }
+
+  generateActivities(request: ActivityRequest): Promise<GeneratedActivities> {
+    const templates = request.templates.length
+      ? request.templates
+      : [{ kind: 'draw_ending', guidance: '' }];
+    return Promise.resolve({
+      activities: Array.from({ length: request.count }, (_, index) => {
+        const template = templates[index % templates.length] ?? { kind: 'draw_ending' };
+        return {
+          kind: template.kind,
+          title: `${request.childName}: actividad ${String(index + 1)}`,
+          instructions: `Actividad de ${request.storyTitle}.`,
+          items: [request.childName],
+          illustrationPrompt: `${request.childName} in a simple outline scene`,
+        };
+      }),
+      usage: usage('mock-text'),
+    });
+  }
+
   /** Ficha fija y verosímil: alcanza para probar el flujo sin enviar la foto a ningún lado. */
   describeCharacter(photo: ImageData): Promise<CharacterSheetResult> {
     const shade = parseInt(sha256Hex(photo.bytes).slice(0, 2), 16) % 3;
@@ -142,7 +202,8 @@ export class MockAIImageProvider implements AIImageProvider {
           ? [1024, 768]
           : [1024, 1024];
     const label = escapeXml(request.prompt.slice(0, 80));
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="100%" height="100%" fill="hsl(${hue} 60% 85%)"/><circle cx="${width / 2}" cy="${height / 2 - 80}" r="120" fill="hsl(${hue} 50% 60%)"/><text x="50%" y="${height - 120}" text-anchor="middle" font-family="sans-serif" font-size="28" fill="#333">${label}</text></svg>`;
+    // <desc> lleva el prompt completo: la moderación y la revisión simuladas leen sus marcas.
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><desc>${escapeXml(request.prompt)}</desc><rect width="100%" height="100%" fill="hsl(${hue} 60% 85%)"/><circle cx="${width / 2}" cy="${height / 2 - 80}" r="120" fill="hsl(${hue} 50% 60%)"/><text x="50%" y="${height - 120}" text-anchor="middle" font-family="sans-serif" font-size="28" fill="#333">${label}</text></svg>`;
     return Promise.resolve({
       bytes: new TextEncoder().encode(svg),
       mimeType: 'image/svg+xml',

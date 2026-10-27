@@ -6,3 +6,6 @@ coverage
 pnpm-lock.yaml
 *.tfstate*
 .terraform
+
+# Paquete de feedback de compradores: originales, sin reformatear.
+docs/estrategia/feedback/
