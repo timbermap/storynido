@@ -700,3 +700,23 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - Redes por variables `NEXT_PUBLIC_SOCIAL_INSTAGRAM`, `_TIKTOK` y `_YOUTUBE`; una red sin URL no se muestra.
   - Íconos dibujados en línea, sin logos de terceros en el bundle.
 - **Estilo 2.1:** ver `docs/BRAND.md` (pesos más livianos, menos cajas, color por público).
+
+## 068 · Lo que enseñó la primera prueba real del libro completo (staging)
+
+- **Fecha:** 2026-10-27 · Libro Mini de prueba (10 páginas), Vertex real. Costo total: USD 2,44 (vista previa, pedido y 2 reintentos del QA).
+- **Bugs encontrados y corregidos:**
+  1. **API con timeout de 60 s:** la vista previa real tarda ~110 s; pasó a 300 s.
+  2. **Carrera al leer `aiConfig`:** páginas en paralelo usaban el proveedor por defecto (simulado). Ahora esperan la misma lectura. Fuera de local y tests, el worker rechaza la IA simulada, y la API espera `aiConfig` antes de escuchar.
+  3. **Una revisión colgada tumbaba el QA de todo el libro.** Ahora 1 reintento y, si sigue, solo esa página va a una persona.
+  4. **Una reparación rechazada por la moderación también lo tumbaba.** Ahora es un intento fallido de esa página.
+  5. **La corrección copiaba la crítica del revisor al prompt** ("glifos", "placeholder") y el modelo dibujaba texto. Ahora solo dice qué tiene que verse (rasgos esperados y la escena).
+- **Lo que funcionó:**
+  - Libro congelado, ilustraciones en 44 s y reparaciones localizadas de las páginas 1 y 2.
+  - El QA detectó la página placeholder y la derivó a una persona con el motivo.
+- **Pendiente (fase 15):** que reintentar el QA reutilice las páginas ya aprobadas en vez de volver a reparar; hoy cada reintento repite reparaciones y gasta de más.
+
+## 069 · Formato del libro y resolución de impresión
+
+- **Fecha:** 2026-10-27 · **Decisión de Sebastián.**
+- **Tamaño:** 21×28 cm vertical, igual a la proporción 3:4 de las ilustraciones (no se recorta nada). El digital usa la misma proporción.
+- **Resolución:** los pedidos impresos generan las ilustraciones en 2K (~220 dpi a 21×28, suficiente para acuarela), con un costo de ≈ +USD 0,03 por imagen. El digital sigue en 1K.

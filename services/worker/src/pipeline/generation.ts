@@ -126,7 +126,9 @@ function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: s
     ? ` Must be visible: ${scene.mustBeVisible.join(', ')}.`
     : '';
   const hidden = scene?.notVisible.length ? ` Do not show: ${scene.notVisible.join(', ')}.` : '';
-  const fix = hint ? ` Fix from the previous attempt: ${hint}.` : '';
+  const fix = hint
+    ? ` Make sure that: ${hint}. Draw exactly this scene, with the protagonist clearly visible.`
+    : '';
   return `${prompt}${visible}${hidden}${fix} No text, letters or words anywhere in the image.`;
 }
 
@@ -617,8 +619,12 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         attempts += 1;
         repairsUsed += 1;
         const next = `orders/${ctx.order.id}/g${String(ctx.generation)}/illustration-${String(index)}-r${String(attempts)}.webp`;
-        const issues = review?.criticalIssues.join('; ') ?? '';
-        const hint = issues ? issues : undefined;
+        // La corrección dice qué tiene que verse (rasgos esperados), nunca describe la imagen
+        // fallida: copiar "glifos" o "texto" de la revisión hace que el modelo los dibuje.
+        const expected = (review?.continuityChecks ?? [])
+          .filter((check) => check.expected !== check.observed)
+          .map((check) => `${check.trait} ${check.expected}`);
+        const hint = expected.length > 0 ? expected.join(', ') : 'the scene matches the page';
         try {
           const spent = await illustrate(ctx, snapshot, index, next, 1000 * attempts + index, hint);
           cost += spent;

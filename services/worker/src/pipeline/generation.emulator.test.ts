@@ -181,6 +181,17 @@ function scriptReviews(
       ...base,
       status,
       criticalIssues: status === 'pass' ? [] : ['faltan los anteojos'],
+      continuityChecks:
+        status === 'pass'
+          ? []
+          : [
+              {
+                trait: 'glasses',
+                expected: 'present',
+                observed: 'missing',
+                confidence: 'high' as const,
+              },
+            ],
       repairTarget: status === 'repair' ? 'illustration_only' : 'none',
     };
   });
@@ -280,9 +291,9 @@ describe('generación del libro (fase 09)', () => {
     expect((await order()).status).toBe('ready');
     // 2 páginas nuevas + 1 reparación de la página 3.
     expect(generate).toHaveBeenCalledTimes(3);
-    expect(generate.mock.calls[2]?.[0].prompt).toContain(
-      'Fix from the previous attempt: faltan los anteojos',
-    );
+    expect(generate.mock.calls[2]?.[0].prompt).toContain('Make sure that: glasses present');
+    // Nunca repite la descripción de la imagen fallida.
+    expect(generate.mock.calls[2]?.[0].prompt).not.toContain('faltan los anteojos');
     const qa = (await step('quality_check')).output as {
       repaired: number;
       images: { index: number; imagePath: string }[];
