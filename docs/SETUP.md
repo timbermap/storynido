@@ -63,6 +63,13 @@ pnpm --filter @storynido/firebase set-role --project storynido-staging --email t
 - **Webhook del proveedor:** `POST /v1/webhooks/payments/<proveedor>` con el cuerpo crudo; se verifica la firma.
 - **Conversiones del servidor (opcional):** `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`, `META_PIXEL_ID` y `META_CAPI_ACCESS_TOKEN`. Sin claves no se envía nada.
 
+## 5d. Imprenta y "Mi cuenta" (fase 12)
+
+- **Local y staging (`PRINT_PROVIDER=mock`):** un pedido impreso queda en "Tu libro está en la imprenta". En la página del pedido, "Avanzar la imprenta" manda el siguiente webhook firmado: imprimiendo → en camino (con seguimiento) → entregado.
+- **Matriz de impresión:** `pnpm seed` carga `printOptions` (MX y US). En staging se recarga con `pnpm --filter @storynido/firebase seed:cloud`.
+- **Webhook de la imprenta:** `POST /v1/webhooks/print/<proveedor>` con el cuerpo crudo; se verifica la firma.
+- **Mi cuenta (`/es/cuenta`):** pedidos en vivo, descarga, "Pedir de nuevo" (sin IA), perfiles con "Borrar datos" y "Borrar mi cuenta".
+
 ## 6. Secretos por plataforma
 
 Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cuando su fase lo necesita. En local, el mismo valor va en `.env.local`.

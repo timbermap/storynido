@@ -278,7 +278,34 @@
     "preferencesTitle": "Preferences",
     "language": "Language",
     "languageNote": "We use your browser's language; if you prefer another one, choose it here and we'll remember it.",
-    "preferencesError": "We couldn't save your preference. Please try again."
+    "preferencesError": "We couldn't save your preference. Please try again.",
+    "orders": {
+      "title": "My orders",
+      "loading": "Loading your orders…",
+      "error": "We couldn’t load your orders.",
+      "empty": "You don’t have any orders yet.",
+      "untitled": "Your book",
+      "view": "View"
+    },
+    "children": {
+      "title": "Children’s profiles",
+      "note": "Deleting a profile removes its photos and drafts. Books already ordered are kept.",
+      "age": "{age} years old",
+      "delete": "Delete data",
+      "confirm": "Delete {name}’s data?",
+      "confirmDelete": "Yes, delete",
+      "cancel": "Cancel",
+      "deleted": "We deleted {name}’s data.",
+      "deletedKept": "We deleted {name}’s data. We kept {count, plural, one {# book already ordered} other {# books already ordered}}.",
+      "error": "We couldn’t delete the data. Please try again."
+    },
+    "deleteAccount": {
+      "title": "Delete my account",
+      "text": "We delete your account, profiles, photos and drafts. Paid orders are kept for billing only. This can’t be undone.",
+      "understood": "I understand this can’t be undone.",
+      "confirm": "Delete my account",
+      "error": "We couldn’t delete your account. Please try again."
+    }
   },
   "Maintenance": {
     "title": "We're making improvements",
@@ -882,11 +909,23 @@
         "pending_payment": "Payment",
         "paid": "Payment confirmed",
         "generating": "Creating the book",
-        "ready": "Book ready"
+        "ready": "Book ready",
+        "sent_to_print": "At the printer",
+        "in_production": "Printing",
+        "shipped": "On its way",
+        "delivered": "Delivered"
       },
       "simulateTitle": "Test mode",
       "simulateText": "Payments are simulated in this environment: nobody pays anything.",
-      "simulate": "Simulate the payment"
-    }
+      "simulate": "Simulate the payment",
+      "progress": "Step {current} of {total}",
+      "download": "Download the PDF",
+      "track": "Track shipment",
+      "reorder": "Order again",
+      "trackingNumber": "Tracking number: {number}",
+      "simulatePrintText": "The printer is simulated in this environment: each click moves the shipment one step.",
+      "simulatePrint": "Advance the printer"
+    },
+    "reorderSubtitle": "You are ordering the same book again, exactly as it turned out: no need to create it again."
   }
 }

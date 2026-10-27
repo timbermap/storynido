@@ -221,9 +221,9 @@ export function PreviewPanel({
       </h1>
 
       {failure && !data && (
-        <div role="alert" className="border-destructive/30 mt-8 rounded-xl border bg-card p-6">
+        <div role="alert" className="mt-8 rounded-xl border border-destructive/30 bg-card p-6">
           <p className="flex items-center gap-2 font-bold">
-            <AlertTriangle className="text-destructive size-5" aria-hidden="true" />
+            <AlertTriangle className="size-5 text-destructive" aria-hidden="true" />
             {t('failedTitle')}
           </p>
           <p className="mt-2 text-muted-foreground">{t(`errors.${failure}`)}</p>
@@ -248,7 +248,7 @@ export function PreviewPanel({
       )}
 
       {error && (
-        <p role="alert" className="text-destructive mt-6 font-semibold">
+        <p role="alert" className="mt-6 font-semibold text-destructive">
           {t(`errors.${error}`)}
         </p>
       )}

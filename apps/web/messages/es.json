@@ -278,7 +278,34 @@
     "preferencesTitle": "Preferencias",
     "language": "Idioma",
     "languageNote": "Detectamos el idioma de tu navegador; si prefieres otro, elígelo acá y lo recordamos.",
-    "preferencesError": "No pudimos guardar tu preferencia. Intenta de nuevo."
+    "preferencesError": "No pudimos guardar tu preferencia. Intenta de nuevo.",
+    "orders": {
+      "title": "Mis pedidos",
+      "loading": "Cargando tus pedidos…",
+      "error": "No pudimos cargar tus pedidos.",
+      "empty": "Todavía no tienes pedidos.",
+      "untitled": "Tu libro",
+      "view": "Ver"
+    },
+    "children": {
+      "title": "Perfiles de los chicos",
+      "note": "Borrar un perfil elimina sus fotos y borradores. Los libros ya pedidos se conservan.",
+      "age": "{age} años",
+      "delete": "Borrar datos",
+      "confirm": "¿Borrar los datos de {name}?",
+      "confirmDelete": "Sí, borrar",
+      "cancel": "Cancelar",
+      "deleted": "Borramos los datos de {name}.",
+      "deletedKept": "Borramos los datos de {name}. Conservamos {count, plural, one {# libro ya pedido} other {# libros ya pedidos}}.",
+      "error": "No pudimos borrar los datos. Intenta de nuevo."
+    },
+    "deleteAccount": {
+      "title": "Borrar mi cuenta",
+      "text": "Borramos tu cuenta, los perfiles, las fotos y los borradores. Los pedidos pagados se conservan solo para facturación. No se puede deshacer.",
+      "understood": "Entiendo que no se puede deshacer.",
+      "confirm": "Borrar mi cuenta",
+      "error": "No pudimos borrar tu cuenta. Intenta de nuevo."
+    }
   },
   "Maintenance": {
     "title": "Estamos haciendo mejoras",
@@ -882,11 +909,23 @@
         "pending_payment": "Pago",
         "paid": "Pago confirmado",
         "generating": "Creación del libro",
-        "ready": "Libro listo"
+        "ready": "Libro listo",
+        "sent_to_print": "En la imprenta",
+        "in_production": "Imprimiendo",
+        "shipped": "En camino",
+        "delivered": "Entregado"
       },
       "simulateTitle": "Modo de prueba",
       "simulateText": "Los pagos son simulados en este ambiente: nadie paga nada.",
-      "simulate": "Simular el pago"
-    }
+      "simulate": "Simular el pago",
+      "progress": "Paso {current} de {total}",
+      "download": "Descargar el PDF",
+      "track": "Seguir el envío",
+      "reorder": "Pedir de nuevo",
+      "trackingNumber": "Número de seguimiento: {number}",
+      "simulatePrintText": "La imprenta es simulada en este ambiente: cada clic avanza un paso del envío.",
+      "simulatePrint": "Avanzar la imprenta"
+    },
+    "reorderSubtitle": "Pides de nuevo el mismo libro, tal como quedó: no hace falta crearlo otra vez."
   }
 }

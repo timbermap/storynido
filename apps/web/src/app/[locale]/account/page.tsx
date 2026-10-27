@@ -1,11 +1,14 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ApiError } from '@storynido/shared';
 
+import { ChildrenList } from '@/components/account/children-list';
+import { DeleteAccount } from '@/components/account/delete-account';
 import { LanguagePreference } from '@/components/account/language-preference';
+import { OrdersList } from '@/components/account/orders-list';
 import { DraftsList } from '@/components/wizard/drafts-list';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
@@ -16,7 +19,7 @@ import { useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { logOut } from '@/lib/firebase/auth-actions';
 
-/** Mi cuenta (versión inicial): se completa en la fase 12. */
+/** Mi cuenta: pedidos en vivo, borradores, preferencias, perfiles de los chicos y borrado. */
 export default function AccountPage() {
   const t = useTranslations('Account');
   const { user, signedIn, role, loading } = useAuth();
@@ -24,10 +27,12 @@ export default function AccountPage() {
   const [apiCheck, setApiCheck] = useState<string>(t('verifying'));
   const [drafts, setDrafts] = useState<DraftSummary[]>([]);
   const tWizard = useTranslations('Wizard.drafts');
+  // Al borrar la cuenta se cierra la sesión a propósito: no hay que mandar a iniciar sesión.
+  const leaving = useRef(false);
 
   useEffect(() => {
     // La sesión anónima del creador no es una cuenta: primero hay que iniciar sesión.
-    if (!loading && !signedIn) router.replace('/login');
+    if (!loading && !signedIn && !leaving.current) router.replace('/login');
   }, [loading, signedIn, router]);
 
   useEffect(() => {
@@ -81,16 +86,23 @@ export default function AccountPage() {
         <dt className="text-muted-foreground">{t('api')}</dt>
         <dd role="status">{apiCheck}</dd>
       </dl>
-      <LanguagePreference uid={user.uid} />
+      <OrdersList uid={user.uid} />
       {drafts.length > 0 && (
         <section id="drafts" className="grid scroll-mt-28 gap-4">
           <h2 className="text-2xl font-medium">{tWizard('title')}</h2>
           <DraftsList drafts={drafts} />
         </section>
       )}
+      <LanguagePreference uid={user.uid} />
+      <ChildrenList uid={user.uid} />
       <Button variant="outline" onClick={() => void logOut()}>
         {t('signOut')}
       </Button>
+      <DeleteAccount
+        onDeleted={() => {
+          leaving.current = true;
+        }}
+      />
     </section>
   );
 }

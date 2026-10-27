@@ -60,7 +60,7 @@ export function LanguagePreference({ uid }: { uid: string }) {
       </label>
       <p className="text-sm text-muted-foreground">{t('languageNote')}</p>
       {error && (
-        <p role="alert" className="text-destructive text-sm font-semibold">
+        <p role="alert" className="text-sm font-semibold text-destructive">
           {t('preferencesError')}
         </p>
       )}

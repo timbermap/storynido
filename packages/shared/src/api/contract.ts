@@ -151,7 +151,7 @@ export const devPaidOrderResponseSchema = z.object({
 
 // --- Checkout y pedidos ---------------------------------------------------------
 
-export const checkoutQuoteBodySchema = z.object({
+const checkoutItemBodySchema = z.object({
   bookId: z.string().min(1),
   format: bookFormatSchema,
   country: countryCodeSchema,
@@ -159,12 +159,17 @@ export const checkoutQuoteBodySchema = z.object({
   couponCode: z.string().trim().toUpperCase().max(32).nullable().default(null),
 });
 
+export const checkoutQuoteBodySchema = checkoutItemBodySchema.extend({
+  /** Recompra: cotizar el libro ya generado de ese pedido (sin vista previa vigente). */
+  sourceOrderId: z.string().min(1).nullable().default(null),
+});
+
 export const checkoutQuoteResponseSchema = z.object({
   snapshot: priceSnapshotSchema,
   couponError: z.enum(QUOTE_ERRORS).nullable(),
 });
 
-export const createCheckoutBodySchema = checkoutQuoteBodySchema.extend({
+export const createCheckoutBodySchema = checkoutItemBodySchema.extend({
   shippingAddress: addressSchema.nullable().default(null),
   gift: z
     .object({ isGift: z.boolean(), message: z.string().trim().max(500).nullable() })

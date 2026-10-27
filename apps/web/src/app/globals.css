@@ -31,6 +31,7 @@
   --butter: #fbedc6;
   --rose: #f9e3ed;
   --success: #245d4f;
+  --destructive: #b3261e;
   --star: #d6ab68;
   color-scheme: light;
 }
@@ -49,6 +50,7 @@
   --color-butter: var(--butter);
   --color-rose: var(--rose);
   --color-success: var(--success);
+  --color-destructive: var(--destructive);
   --color-star: var(--star);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);

@@ -1,19 +1,25 @@
 'use client';
 
 import { ApiError, type CountryCode, type PublicOrder } from '@storynido/shared';
-import { Check, CircleDashed, FlaskConical, Loader2 } from 'lucide-react';
+import { Download, FlaskConical, Loader2, RotateCcw, Truck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
-import { Button } from '@/components/ui/button';
+import {
+  GENERATED_STATUSES,
+  OrderTimeline,
+  SETTLED_STATUSES,
+  isPrintOrder,
+} from '@/components/orders/timeline';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { cn } from '@/lib/utils';
 
 import { PriceSummary } from './price-summary';
 
-const STEPS = ['pending_payment', 'paid', 'generating', 'ready'] as const;
-const FINAL = new Set(['ready', 'delivered', 'qa_failed', 'cancelled', 'refunded', 'shipped']);
+/** Mientras el libro está en la imprenta los cambios llegan en días: se consulta más espaciado. */
+const AT_PRINTER = new Set(['sent_to_print', 'in_production', 'shipped']);
 
 /** Estado del pedido, en vivo: se consulta cada pocos segundos hasta que se resuelve. */
 export function OrderStatus({ orderId, country }: { orderId: string; country: CountryCode }) {
@@ -21,7 +27,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   const { signedIn, loading } = useAuth();
   const [order, setOrder] = useState<PublicOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [simulating, setSimulating] = useState(false);
+  const [busy, setBusy] = useState<'payment' | 'print' | 'download' | null>(null);
 
   useEffect(() => {
     if (!signedIn) return;
@@ -32,7 +38,11 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
         const current = await api('order', { params: { orderId } });
         if (cancelled) return;
         setOrder(current);
-        if (!FINAL.has(current.status)) timer = setTimeout(() => void load(), 4000);
+        const print = isPrintOrder(current.items);
+        const done = SETTLED_STATUSES.has(current.status) || (!print && current.status === 'ready');
+        if (!done) {
+          timer = setTimeout(() => void load(), AT_PRINTER.has(current.status) ? 30_000 : 4000);
+        }
       } catch (caught) {
         if (!cancelled) setError(caught instanceof ApiError ? caught.message : t('error'));
       }
@@ -44,14 +54,23 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
     };
   }, [orderId, signedIn, t]);
 
-  async function simulate() {
-    setSimulating(true);
+  async function run(kind: 'payment' | 'print' | 'download') {
+    setBusy(kind);
+    setError(null);
     try {
-      setOrder(await api('devSimulatePayment', { params: { orderId } }));
+      if (kind === 'payment') {
+        setOrder(await api('devSimulatePayment', { params: { orderId } }));
+      } else if (kind === 'print') {
+        await api('devSimulatePrint', { params: { orderId } });
+        setOrder(await api('order', { params: { orderId } }));
+      } else {
+        const { url } = await api('orderDownload', { params: { orderId } });
+        window.location.assign(url);
+      }
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : t('error'));
     } finally {
-      setSimulating(false);
+      setBusy(null);
     }
   }
 
@@ -65,66 +84,91 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   }
   if (!order) {
     return (
-      <p role="alert" className="text-destructive font-semibold">
+      <p role="alert" className="font-semibold text-destructive">
         {error}
       </p>
     );
   }
 
-  const current = STEPS.indexOf(order.status as (typeof STEPS)[number]);
+  const print = isPrintOrder(order.items);
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="grid content-start gap-6">
         <p role="status" aria-live="polite" className="text-xl font-medium">
           {t(`status.${order.status}`)}
         </p>
-        {current >= 0 && (
-          <ol className="grid gap-3">
-            {STEPS.map((step, index) => (
-              <li key={step} className="flex items-center gap-3">
-                <span
-                  className={cn(
-                    'grid size-7 place-items-center rounded-full border-2',
-                    index < current && 'border-primary bg-primary text-primary-foreground',
-                    index === current && 'border-primary text-primary',
-                    index > current && 'border-border text-muted-foreground',
-                  )}
-                >
-                  {index < current ? (
-                    <Check className="size-4" aria-hidden="true" />
-                  ) : index === current && step !== 'ready' ? (
-                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <CircleDashed className="size-4" aria-hidden="true" />
-                  )}
-                </span>
-                <span className={index > current ? 'text-muted-foreground' : 'font-semibold'}>
-                  {t(`steps.${step}`)}
-                </span>
-              </li>
-            ))}
-          </ol>
+        <OrderTimeline status={order.status} print={print} />
+
+        {(order.canDownload ||
+          Boolean(order.tracking?.url) ||
+          GENERATED_STATUSES.has(order.status)) && (
+          <div className="flex flex-wrap gap-3">
+            {order.canDownload && (
+              <Button disabled={busy !== null} onClick={() => void run('download')}>
+                {busy === 'download' ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Download aria-hidden="true" />
+                )}
+                {t('download')}
+              </Button>
+            )}
+            {order.tracking?.url && (
+              <a
+                href={order.tracking.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ variant: 'outline' })}
+              >
+                <Truck aria-hidden="true" />
+                {t('track')}
+              </a>
+            )}
+            {GENERATED_STATUSES.has(order.status) && (
+              <Link
+                href={{
+                  pathname: '/checkout/[bookId]',
+                  params: { bookId: order.bookId },
+                  query: { reorder: order.orderId },
+                }}
+                className={buttonVariants({ variant: 'outline' })}
+              >
+                <RotateCcw aria-hidden="true" />
+                {t('reorder')}
+              </Link>
+            )}
+          </div>
         )}
-        {order.canSimulatePayment && (
+        {order.tracking?.number && (
+          <p className="text-sm text-muted-foreground">
+            {t('trackingNumber', { number: order.tracking.number })}
+          </p>
+        )}
+
+        {(order.canSimulatePayment || order.canSimulatePrint) && (
           <div className="rounded-2xl border border-dashed bg-card p-4">
             <p className="flex items-center gap-2 text-sm font-semibold">
               <FlaskConical className="size-4" aria-hidden="true" />
               {t('simulateTitle')}
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">{t('simulateText')}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {order.canSimulatePayment ? t('simulateText') : t('simulatePrintText')}
+            </p>
             <Button
               className="mt-3"
               size="sm"
-              disabled={simulating}
-              onClick={() => void simulate()}
+              disabled={busy !== null}
+              onClick={() => void run(order.canSimulatePayment ? 'payment' : 'print')}
             >
-              {simulating && <Loader2 className="animate-spin" aria-hidden="true" />}
-              {t('simulate')}
+              {(busy === 'payment' || busy === 'print') && (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              )}
+              {order.canSimulatePayment ? t('simulate') : t('simulatePrint')}
             </Button>
           </div>
         )}
         {error && (
-          <p role="alert" className="text-destructive text-sm font-semibold">
+          <p role="alert" className="text-sm font-semibold text-destructive">
             {error}
           </p>
         )}

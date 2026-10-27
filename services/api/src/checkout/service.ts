@@ -34,6 +34,7 @@ import type { PreviewService } from '../preview/service';
 import type { ConversionReporter } from './conversions';
 
 type QuoteBody = z.output<typeof checkoutQuoteBodySchema>;
+type PriceBody = Omit<QuoteBody, 'sourceOrderId'>;
 type CheckoutBody = z.output<typeof createCheckoutBodySchema>;
 
 /** Rutas de la web por idioma a las que vuelve el pago. */
@@ -84,12 +85,16 @@ export class CheckoutService {
   // ------------------------------------------------------------------ precio
 
   async quote(uid: string, body: QuoteBody) {
-    const { result } = await this.prepare(uid, body);
+    const { result } = body.sourceOrderId
+      ? await this.reorderSource(uid, body.sourceOrderId, body.format).then(async (source) => ({
+          result: await this.price(source.book, body, source.pages),
+        }))
+      : await this.prepare(uid, body);
     return { snapshot: result.snapshot, couponError: result.couponError };
   }
 
   /** El libro tiene que estar aprobado y vigente; el precio sale del catálogo del país. */
-  private async prepare(uid: string, body: QuoteBody) {
+  private async prepare(uid: string, body: PriceBody) {
     const ref = this.db.collection(COLLECTIONS.books).doc(body.bookId);
     const book = (await ref.get()).data();
     if (book?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Libro inexistente.');
@@ -114,7 +119,7 @@ export class CheckoutService {
   }
 
   /** Precio e imprenta (formato habilitado, páginas y cantidad) para un libro ya validado. */
-  private async price(book: Record<string, unknown>, body: QuoteBody, pages: number) {
+  private async price(book: Record<string, unknown>, body: PriceBody, pages: number) {
     if (body.format !== 'digital') {
       // Nunca se manda a imprenta algo incompatible: formato habilitado, páginas y cantidad.
       const option =
@@ -207,32 +212,13 @@ export class CheckoutService {
     if (user.anonymous) {
       throw new AppError(403, 'account_required', 'Crea tu cuenta para comprar.');
     }
-    const sourceRef = this.db.collection(COLLECTIONS.orders).doc(sourceOrderId);
-    const source = (await sourceRef.get()).data();
-    if (source?.ownerUid !== user.uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
-    const generated = ['ready', 'sent_to_print', 'in_production', 'shipped', 'delivered'];
-    if (!generated.includes(String(source.status)) || !source.snapshot) {
-      throw new AppError(409, 'bad_request', 'Ese libro todavía no está terminado.');
-    }
-    const sourceItems = (source.items ?? []) as { format: BookFormat }[];
-    // Las ilustraciones de un libro digital son de pantalla (1K): no alcanzan para imprimir.
-    if (body.format !== 'digital' && sourceItems.every((item) => item.format === 'digital')) {
-      throw new AppError(
-        409,
-        'print_unavailable',
-        'Este libro se creó en digital: para imprimirlo hace falta crearlo en alta resolución.',
-      );
-    }
-    const layout = (
-      await sourceRef.collection(COLLECTIONS.orderSteps).doc('layout_pdf').get()
-    ).data() as
-      { output?: { files?: { format: string; kind: string; pages: number }[] } } | undefined;
-    const digital = layout?.output?.files?.find((file) => file.format === 'digital');
-    const interiorPages = digital ? digital.pages - 2 : 0;
-    const bookId = String(source.bookId);
-    const book = (await this.db.collection(COLLECTIONS.books).doc(bookId).get()).data() ?? {};
+    const { source, book, bookId, pages } = await this.reorderSource(
+      user.uid,
+      sourceOrderId,
+      body.format,
+    );
     const full = { ...body, bookId };
-    const price = await this.price(book, full, interiorPages);
+    const price = await this.price(book, full, pages);
     this.checkAddress(full);
     const snapshot = source.snapshot as { title?: string };
     return this.open(user, origin, {
@@ -248,6 +234,33 @@ export class CheckoutService {
         approval: source.approval ?? null,
       },
     });
+  }
+
+  /** Pedido original de una recompra: propio, terminado y con resolución para el formato. */
+  private async reorderSource(uid: string, sourceOrderId: string, format: BookFormat) {
+    const sourceRef = this.db.collection(COLLECTIONS.orders).doc(sourceOrderId);
+    const source = (await sourceRef.get()).data();
+    if (source?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
+    const generated = ['ready', 'sent_to_print', 'in_production', 'shipped', 'delivered'];
+    if (!generated.includes(String(source.status)) || !source.snapshot) {
+      throw new AppError(409, 'bad_request', 'Ese libro todavía no está terminado.');
+    }
+    const sourceItems = (source.items ?? []) as { format: BookFormat }[];
+    // Las ilustraciones de un libro digital son de pantalla (1K): no alcanzan para imprimir.
+    if (format !== 'digital' && sourceItems.every((item) => item.format === 'digital')) {
+      throw new AppError(
+        409,
+        'print_unavailable',
+        'Este libro se creó en digital: para imprimirlo hace falta crearlo en alta resolución.',
+      );
+    }
+    const layout = (
+      await sourceRef.collection(COLLECTIONS.orderSteps).doc('layout_pdf').get()
+    ).data() as { output?: { files?: { format: string; pages: number }[] } } | undefined;
+    const digital = layout?.output?.files?.find((file) => file.format === 'digital');
+    const bookId = String(source.bookId);
+    const book = (await this.db.collection(COLLECTIONS.books).doc(bookId).get()).data() ?? {};
+    return { source, book, bookId, pages: digital ? digital.pages - 2 : 0 };
   }
 
   private checkAddress(body: CheckoutBody) {

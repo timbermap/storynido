@@ -53,10 +53,13 @@ export function Checkout({
   bookId,
   offer,
   country,
+  reorderOf = null,
 }: {
   bookId: string;
   offer: Offer;
   country: CountryCode;
+  /** Recompra: el pedido cuyo libro ya generado se vuelve a pedir (sin IA). */
+  reorderOf?: string | null;
 }) {
   const t = useTranslations('Checkout');
   const locale = useLocale() as Locale;
@@ -80,9 +83,13 @@ export function Checkout({
   useEffect(() => {
     if (!signedIn) return;
     let cancelled = false;
-    api('checkoutQuote', { body: { bookId, format, country, quantity: 1, couponCode: coupon } })
+    api('checkoutQuote', {
+      body: { bookId, format, country, quantity: 1, couponCode: coupon, sourceOrderId: reorderOf },
+    })
       .then((result) => {
-        if (!cancelled) setQuote(result);
+        if (cancelled) return;
+        setQuote(result);
+        setError(null);
       })
       .catch((caught: unknown) => {
         if (!cancelled) setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
@@ -90,35 +97,35 @@ export function Checkout({
     return () => {
       cancelled = true;
     };
-  }, [bookId, format, country, coupon, signedIn, t]);
+  }, [bookId, format, country, coupon, reorderOf, signedIn, t]);
 
   async function pay() {
     setPaying(true);
     setError(null);
     try {
-      const { checkoutUrl } = await api('createCheckout', {
-        body: {
-          bookId,
-          format,
-          country,
-          quantity: 1,
-          couponCode: coupon,
-          shippingAddress: print
-            ? {
-                ...address,
-                line2: address.line2?.trim() ? address.line2 : null,
-                state: address.state?.trim() ? address.state.trim() : null,
-                phone: address.phone?.trim() ? address.phone.trim() : null,
-                country,
-              }
-            : null,
-          gift: {
-            isGift: gift.isGift,
-            message: gift.isGift && gift.message.trim() ? gift.message : null,
-          },
-          analyticsConsent: choice?.analytics ?? false,
+      const body = {
+        format,
+        country,
+        quantity: 1,
+        couponCode: coupon,
+        shippingAddress: print
+          ? {
+              ...address,
+              line2: address.line2?.trim() ? address.line2 : null,
+              state: address.state?.trim() ? address.state.trim() : null,
+              phone: address.phone?.trim() ? address.phone.trim() : null,
+              country,
+            }
+          : null,
+        gift: {
+          isGift: gift.isGift,
+          message: gift.isGift && gift.message.trim() ? gift.message : null,
         },
-      });
+        analyticsConsent: choice?.analytics ?? false,
+      };
+      const { checkoutUrl } = reorderOf
+        ? await api('reorder', { params: { orderId: reorderOf }, body })
+        : await api('createCheckout', { body: { ...body, bookId } });
       window.location.assign(checkoutUrl);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
@@ -270,7 +277,7 @@ export function Checkout({
           </Button>
         </form>
         {quote?.couponError && (
-          <p role="status" className="text-destructive text-sm">
+          <p role="status" className="text-sm text-destructive">
             {t(`couponErrors.${quote.couponError}`)}
           </p>
         )}
@@ -283,7 +290,7 @@ export function Checkout({
           </p>
         )}
         {error && (
-          <p role="alert" className="text-destructive text-sm font-semibold">
+          <p role="alert" className="text-sm font-semibold text-destructive">
             {error}
           </p>
         )}

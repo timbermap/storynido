@@ -883,6 +883,19 @@ describe('checkout y pagos (fase 11)', () => {
       output: { files: [{ format: 'digital', kind: 'book', pages: 20 }] },
     });
 
+    // La cotización de la recompra no pide una vista previa vigente.
+    await db.doc(`books/book-1`).update({ status: 'ordered' });
+    const quoted = await post('/v1/checkout/quote', {
+      bookId: 'book-1',
+      format: 'digital',
+      country: 'MX',
+      sourceOrderId: orderId,
+    });
+    expect(quoted.statusCode).toBe(200);
+    expect(quoted.json<{ snapshot: { totalMinor: number } }>().snapshot.totalMinor).toBeGreaterThan(
+      0,
+    );
+
     const toPrint = await post(`/v1/orders/${orderId}/reorder`, {
       format: 'hardcover',
       country: 'MX',

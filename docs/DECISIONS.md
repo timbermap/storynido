@@ -806,3 +806,36 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - Penaliza repetir la ubicación de la página anterior.
   - Las ilustraciones nuevas dejan un tercio calmo, alternando arriba y abajo, y sin caras ahí.
 - **Contratapa:** título, sinopsis (la descripción de la historia), "Un cuento para {nombre}", QR a la web y la marca. En imprenta queda una zona blanca de 50×30 mm abajo a la derecha para el código de barras; el tamaño exacto se confirma con Gelato.
+
+## 074 · Imprenta y "Mi cuenta" (fase 12) con la imprenta simulada, Gelato después
+
+- **Fecha:** 2026-10-27 · Gelato real cuando esté la clave (Sebastián ya la tiene; falta cargarla).
+- **Matriz de impresión (`printOptions/{país}_{formato}`):**
+  - Solo se ofrece impreso si el formato está habilitado para el país y el libro entra en páginas y cantidad (`printAvailability`).
+  - Si no, la oferta lo marca `printUnavailable` y el checkout responde `print_unavailable`: nunca se manda algo incompatible a la imprenta.
+- **Entrega impresa (paso `deliver`):**
+  - verifica el sha256 del PDF aprobado;
+  - crea el pedido en la imprenta una sola vez (clave idempotente);
+  - queda en `sent_to_print`. El digital queda en `ready` con URLs firmadas.
+- **Webhooks de la imprenta (`POST /v1/webhooks/print/:proveedor`):**
+  - firmados e idempotentes (`printEvents`);
+  - estados: `in_production` → `shipped` (con seguimiento) → `delivered`;
+  - una falla vuelve a `qa_failed` con aviso al admin (se reimprime con el mismo libro).
+- **Cancelación** (admin) solo si la imprenta lo permite, con auditoría.
+- **Descarga del digital:** URL firmada de 15 minutos generada al pedirla, solo para quien compró.
+- **Recompra con un clic, sin IA:**
+  - `?reorder=<pedido>` en el checkout cotiza y crea un pedido nuevo con la copia del libro congelado (`sourceOrderId`);
+  - el worker reutiliza las ilustraciones y el PDF: la recompra digital queda lista en segundos;
+  - un libro creado en digital (1K) no se puede pasar a impreso sin crearlo de nuevo en alta resolución.
+- **Borrado de datos a pedido:**
+  - perfil de un chico: fotos, borradores y su perfil;
+  - cuenta entera: además, el usuario de Firebase Auth;
+  - los pedidos pagados se conservan (facturación), con auditoría y un email de confirmación.
+- **"Mi cuenta":**
+  - pedidos en vivo (listener de Firestore) con una línea de tiempo amable (digital: 4 pasos; impreso: 7);
+  - ver el pedido, descargar el PDF, seguir el envío y "Pedir de nuevo";
+  - perfiles con "Borrar datos";
+  - "Borrar mi cuenta" con confirmación explícita.
+- **Imprenta simulada:** fuera de producción, "Avanzar la imprenta" en el pedido manda el siguiente webhook firmado.
+- **Color `destructive`:** se agregó el token (antes `text-destructive` no tenía color) y la variante de botón.
+- **Pendiente con Gelato:** su `PrintProvider` (productos y SKU por formato, cotización, pedido, webhooks) en sandbox, y sus especificaciones de sangrado, lomo y código de barras.
