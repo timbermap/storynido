@@ -303,12 +303,15 @@ module "worker" {
 module "api" {
   source = "../cloud_run_service"
 
-  project_id          = var.project_id
-  region              = var.region
-  name                = "api"
-  service_account     = local.sa["sn-api"]
-  min_instances       = var.api_scaling.min
-  max_instances       = var.api_scaling.max
+  project_id      = var.project_id
+  region          = var.region
+  name            = "api"
+  service_account = local.sa["sn-api"]
+  min_instances   = var.api_scaling.min
+  max_instances   = var.api_scaling.max
+  # La vista previa se genera dentro del request (historia + lámina, o portada y 2 páginas):
+  # con modelos reales tarda más de 60 s.
+  timeout_seconds     = 300
   deletion_protection = var.deletion_protection
   labels              = local.labels
   env = merge(local.common_env, {

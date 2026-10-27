@@ -17,7 +17,19 @@
     "menu": "Menú",
     "closeMenu": "Cerrar menú",
     "mainNav": "Navegación principal",
-    "create": "Crear mi cuento"
+    "create": "Crear mi cuento",
+    "allStories": "Todas las historias",
+    "allStoriesText": "Elige la aventura y la adaptamos a su edad.",
+    "eventsMenu": "Cumpleaños y eventos",
+    "eventsLanding": "Cumpleaños y eventos",
+    "eventsText": "Mini cuentos y recuerdos: un diseño, muchas copias.",
+    "eventsCreate": "Crear para un evento",
+    "eventsCreateText": "Empieza con el protagonista del festejo.",
+    "professionalsLanding": "StoryNido para profesionales",
+    "professionalsText": "Cuentos para cada niño que acompañas, con colecciones educativas.",
+    "professionalsCreate": "Crear para profesionales",
+    "professionalsCreateText": "Elige una colección y personaliza el cuento.",
+    "region": "Idioma y país"
   },
   "Switchers": {
     "language": "Idioma",
@@ -58,7 +70,14 @@
       "secondary": "Ver cómo funciona",
       "fromPrice": "Desde {price}",
       "formats": "Disponible en digital y libro impreso",
-      "imageAlt": "Ilustración en acuarela de un niño astronauta y su perro mirando la luna entre estrellas"
+      "imageAlt": "Ilustración en acuarela de un niño astronauta y su perro mirando la luna entre estrellas",
+      "kicker": "Cuentos personalizados, hechos con cariño",
+      "headline": "Su carita.<br></br>Su <hl>gran aventura</hl>.",
+      "lead": "Convierte su foto, sus cosas favoritas y sus momentos especiales en un cuento ilustrado que es solo suyo.",
+      "explore": "Ver historias",
+      "photoLabel": "Su foto",
+      "bookAlt": "Libro abierto con una ilustración en acuarela de un niño astronauta y su perro mirando la luna, junto a un retrato ilustrado del mismo niño",
+      "audienceTitle": "Elige para quién es"
     },
     "trust": {
       "preview": "Vista previa gratis antes de pagar",

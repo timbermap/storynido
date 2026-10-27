@@ -17,7 +17,19 @@
     "menu": "Menu",
     "closeMenu": "Close menu",
     "mainNav": "Main navigation",
-    "create": "Create my story"
+    "create": "Create my story",
+    "allStories": "All stories",
+    "allStoriesText": "Pick the adventure and we tailor it to their age.",
+    "eventsMenu": "Birthdays & events",
+    "eventsLanding": "Birthdays & events",
+    "eventsText": "Mini books and keepsakes: one design, many copies.",
+    "eventsCreate": "Create for an event",
+    "eventsCreateText": "Start with the birthday star.",
+    "professionalsLanding": "StoryNido for professionals",
+    "professionalsText": "Stories for every child you support, with educational collections.",
+    "professionalsCreate": "Create for professionals",
+    "professionalsCreateText": "Choose a collection and personalize the story.",
+    "region": "Language & country"
   },
   "Switchers": {
     "language": "Language",
@@ -58,7 +70,14 @@
       "secondary": "See how it works",
       "fromPrice": "From {price}",
       "formats": "Available as a digital and printed book",
-      "imageAlt": "Watercolor illustration of a young astronaut and his dog looking at the moon among the stars"
+      "imageAlt": "Watercolor illustration of a young astronaut and his dog looking at the moon among the stars",
+      "kicker": "Personalized stories, made with heart",
+      "headline": "Their little face.<br></br>Their <hl>big adventure</hl>.",
+      "lead": "Turn their photo, favorite things and special moments into a beautifully illustrated story that's truly theirs.",
+      "explore": "Explore stories",
+      "photoLabel": "Their photo",
+      "bookAlt": "Open book with a watercolor illustration of a young astronaut and his dog looking at the moon, next to an illustrated portrait of the same child",
+      "audienceTitle": "Choose who it is for"
     },
     "trust": {
       "preview": "Free preview before you pay",

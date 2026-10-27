@@ -2,6 +2,7 @@ import {
   ArrowRight,
   BookOpen,
   Gift,
+  Globe,
   Map,
   ShieldCheck,
   Sparkles,
@@ -12,7 +13,7 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
-import { HeroArt } from '@/components/home/hero-art';
+import { HeroBook } from '@/components/home/hero-book';
 import { NameCoverDemo } from '@/components/home/name-cover-demo';
 import { PhotoToStory } from '@/components/home/photo-to-story';
 import { FaqList, parseFaq } from '@/components/home/faq-list';
@@ -68,7 +69,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   ];
 
   const trust = [
-    { icon: BookOpen, text: t('trustInline.formats') },
+    { icon: Globe, text: t('trustInline.formats') },
     {
       icon: Truck,
       text: t('trustInline.shipping', { country: tSwitch(`countries.${display.country}`) }),
@@ -104,28 +105,36 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* Hero */}
       <section className="overflow-hidden">
-        <div className="container-page grid items-center gap-8 pt-10 pb-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14 lg:pt-16 lg:pb-24">
+        <div className="container-page grid items-center gap-6 pt-8 pb-10 lg:grid-cols-[1fr_1fr] lg:gap-8 lg:pt-14 lg:pb-16">
           <div className="text-center lg:text-left">
-            <p className="inline-flex items-center gap-2 text-xs font-black tracking-[0.11em] text-primary uppercase">
-              <span aria-hidden="true" className="size-2 rounded-full bg-star" />
-              {t('hero.eyebrow')}
+            <p className="text-xs font-extrabold tracking-[0.2em] text-muted-foreground uppercase">
+              {t('hero.kicker')}
             </p>
-            <h1 className="mt-4 text-[clamp(2.65rem,5.1vw,5rem)] leading-[1.08] font-semibold">
-              {t('hero.title')}
+            <h1 className="mt-5 text-[clamp(2.7rem,5.2vw,5.1rem)] leading-[1.02] font-semibold tracking-[-0.025em] lg:whitespace-nowrap">
+              {t.rich('hero.headline', {
+                br: () => <br />,
+                hl: (chunks) => <span className="text-primary">{chunks}</span>,
+              })}
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-[clamp(1.1rem,1.65vw,1.3rem)] leading-relaxed text-muted-foreground lg:mx-0">
-              {t('hero.subtitle')}
+            <p className="mx-auto mt-6 max-w-xl text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-muted-foreground lg:mx-0">
+              {t('hero.lead')}
             </p>
-            <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start">
-              <Link href="/create" className={buttonVariants({ size: 'lg' })}>
+            <div className="mt-9 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
+              <Link
+                href="/create"
+                className={buttonVariants({
+                  size: 'lg',
+                  className: 'h-14 w-full rounded-full px-8 text-lg sm:w-auto',
+                })}
+              >
                 {t('hero.cta')}
                 <ArrowRight aria-hidden="true" />
               </Link>
               <Link
-                href={{ pathname: '/', hash: HOW_IT_WORKS_ID }}
-                className={buttonVariants({ size: 'lg', variant: 'ghost' })}
+                href="/stories"
+                className="border-b-2 border-foreground/25 pb-0.5 text-lg font-extrabold transition-colors hover:border-primary hover:text-primary"
               >
-                {t('hero.secondary')}
+                {t('hero.explore')}
               </Link>
             </div>
             {fromPrice && (
@@ -133,16 +142,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {t('hero.fromPrice', { price: fromPrice })}
               </p>
             )}
-            <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-semibold text-muted-foreground lg:justify-start">
+            <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-muted-foreground lg:justify-start">
               {trust.map(({ icon: Icon, text }) => (
                 <li key={text} className="inline-flex items-center gap-2">
-                  <Icon className="size-5 text-primary" strokeWidth={1.75} aria-hidden="true" />
+                  <Icon
+                    className="size-[1.15rem] text-foreground/60"
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                  />
                   {text}
                 </li>
               ))}
             </ul>
           </div>
-          <HeroArt alt={t('hero.imageAlt')} />
+          <HeroBook alt={t('hero.bookAlt')} photoLabel={t('hero.photoLabel')} />
         </div>
       </section>
 

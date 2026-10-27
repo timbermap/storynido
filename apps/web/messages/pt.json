@@ -17,7 +17,19 @@
     "menu": "Menu",
     "closeMenu": "Fechar menu",
     "mainNav": "Navegação principal",
-    "create": "Criar minha história"
+    "create": "Criar minha história",
+    "allStories": "Todas as histórias",
+    "allStoriesText": "Escolha a aventura e adaptamos à idade.",
+    "eventsMenu": "Aniversários e eventos",
+    "eventsLanding": "Aniversários e eventos",
+    "eventsText": "Mini livros e lembranças: um design, muitas cópias.",
+    "eventsCreate": "Criar para um evento",
+    "eventsCreateText": "Comece pelo aniversariante.",
+    "professionalsLanding": "StoryNido para profissionais",
+    "professionalsText": "Histórias para cada criança que você acompanha, com coleções educativas.",
+    "professionalsCreate": "Criar para profissionais",
+    "professionalsCreateText": "Escolha uma coleção e personalize a história.",
+    "region": "Idioma e país"
   },
   "Switchers": {
     "language": "Idioma",
@@ -58,7 +70,14 @@
       "secondary": "Ver como funciona",
       "fromPrice": "A partir de {price}",
       "formats": "Disponível em livro digital e impresso",
-      "imageAlt": "Ilustração em aquarela de um menino astronauta e seu cachorro olhando a lua entre as estrelas"
+      "imageAlt": "Ilustração em aquarela de um menino astronauta e seu cachorro olhando a lua entre as estrelas",
+      "kicker": "Histórias personalizadas, feitas com carinho",
+      "headline": "Seu rostinho.<br></br>Sua <hl>grande aventura</hl>.",
+      "lead": "Transforme a foto, as coisas favoritas e os momentos especiais em uma história ilustrada que é só dela.",
+      "explore": "Ver histórias",
+      "photoLabel": "A foto",
+      "bookAlt": "Livro aberto com uma ilustração em aquarela de um menino astronauta e seu cachorro olhando a lua, ao lado de um retrato ilustrado da mesma criança",
+      "audienceTitle": "Escolha para quem é"
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",

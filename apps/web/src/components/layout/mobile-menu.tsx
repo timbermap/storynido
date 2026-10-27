@@ -31,7 +31,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
   }, [open]);
 
   return (
-    <div className="xl:hidden">
+    <div className="lg:hidden">
       <Button
         variant="ghost"
         size="icon"
@@ -47,7 +47,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
       <div
         id="mobile-menu"
         hidden={!open}
-        className="absolute inset-x-0 top-full border-b bg-background px-4 pt-2 pb-6 shadow-lg"
+        className="absolute inset-x-0 top-full max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b bg-background px-4 pt-4 pb-6 shadow-lg"
       >
         {children}
       </div>
