@@ -199,28 +199,63 @@ describe('vista previa', () => {
 
   const generate = (bookId: string, token = TOKEN) =>
     app.inject({ method: 'POST', url: `/v1/books/${bookId}/preview`, headers: auth(token) });
+  const approve = (bookId: string, token = TOKEN) =>
+    app.inject({
+      method: 'POST',
+      url: `/v1/books/${bookId}/preview/character/approve`,
+      headers: auth(token),
+    });
+  /** Muestra completa: etapa 1 (texto + personaje) y aprobación (portada + páginas). */
+  const generateAndApprove = async (bookId: string) => {
+    await generate(bookId);
+    return approve(bookId);
+  };
 
-  it('genera texto completo, portada y dos páginas con marca de agua, y registra el uso', async () => {
+  it('etapa 1: texto completo y lámina del personaje, sin portada ni páginas ilustradas', async () => {
     await seedBook(providers, 'book-1');
     const res = await generate('book-1');
     expect(res.statusCode).toBe(200);
     const body = res.json<PublicPreview>();
     expect(body.status).toBe('preview_ready');
-    expect(body.regenerationsLeft).toBe(1);
-    expect(body.preview?.totalPages).toBe(4);
-    expect(body.preview?.pages).toHaveLength(2);
-    expect(body.preview?.pages.every((page) => page.imageUrl)).toBe(true);
-    expect(body.preview?.coverUrl).toContain('-preview.webp');
+    expect(body.preview?.stage).toBe('character');
+    expect(body.preview?.coverUrl).toBeNull();
+    expect(body.preview?.character?.imageUrl).toContain('-preview.webp');
+    expect(body.preview?.character?.approved).toBe(false);
+    // Recién generada, la muestra no está desactualizada (los rasgos aún no están confirmados).
     expect(body.preview?.stale).toBe(false);
+    // El visor recibe todas las páginas del cuento, todavía sin ilustrar.
+    expect(body.preview?.pages).toHaveLength(4);
+    expect(body.preview?.pages.every((page) => page.imageUrl === null)).toBe(true);
+    // Rasgos estimados de la foto, con pelo y piel fijados por defecto.
+    expect(body.preview?.character?.mustKeep).toEqual(['hair', 'skinTone']);
 
     // La enseñanza llega a la historia (el mock la nombra en la página 2).
     expect(body.preview?.pages[1]?.text).toContain('Compartir');
 
-    // La ficha del personaje queda guardada en la foto.
+    // La ficha y los rasgos quedan guardados en la foto (se borran con ella).
     const photo = await db.doc('photos/book-1-photo').get();
     expect(photo.get('characterSheet.hair')).toBeTruthy();
+    expect(photo.get('characterTraits.hairType')).toBeTruthy();
 
-    // Cada llamada a la IA queda registrada contra el día.
+    // Solo 1 imagen en esta etapa.
+    const usage = await db.collection('aiUsage').where('bookId', '==', 'book-1').get();
+    expect(usage.docs.filter((doc) => doc.get('kind') === 'illustration')).toHaveLength(1);
+  });
+
+  it('aprobar al personaje ilustra la portada y 2 páginas con marca de agua, y registra el uso', async () => {
+    await seedBook(providers, 'book-1');
+    await generate('book-1');
+    const res = await approve('book-1');
+    expect(res.statusCode).toBe(200);
+    const body = res.json<PublicPreview>();
+    expect(body.preview?.stage).toBe('complete');
+    expect(body.preview?.coverUrl).toContain('-preview.webp');
+    expect(body.preview?.character?.approved).toBe(true);
+    expect(body.preview?.pages.filter((page) => page.imageUrl)).toHaveLength(2);
+    expect(body.preview?.stale).toBe(false);
+    // Volver a aprobar no ilustra de nuevo.
+    expect((await approve('book-1')).statusCode).toBe(409);
+
     const usage = await db.collection('aiUsage').where('bookId', '==', 'book-1').get();
     const kinds = new Set(usage.docs.map((doc) => doc.get('kind') as string));
     expect([...kinds].sort()).toEqual([
@@ -237,13 +272,67 @@ describe('vista previa', () => {
     const cleanPath = book.get('preview.cover.imagePath') as string;
     expect(await providers.storage().exists({ bucket: 'assets', path: cleanPath })).toBe(true);
     expect(JSON.stringify(body)).not.toContain(cleanPath);
+    // Los rasgos aprobados quedan en el libro y hay un registro de calidad sin datos del niño.
+    expect(book.get('characterTraits.hairType')).toBeTruthy();
+    const qa = await db.collection('books/book-1/qaEvents').get();
+    expect(qa.docs.map((doc) => doc.get('code') as string)).toContain('character_approved');
+  });
+
+  it('no aprueba una muestra desactualizada (los rasgos no se confirman para otra foto)', async () => {
+    await seedBook(providers, 'book-1');
+    await generate('book-1');
+    await db.doc('books/book-1').update({ styleId: 'otro-estilo' });
+    expect((await approve('book-1')).statusCode).toBe(409);
+    expect((await db.doc('books/book-1').get()).get('characterTraits')).toBeUndefined();
+  });
+
+  it('con una sesión anónima, ilustrar pide cuenta (si así está configurado)', async () => {
+    await seedBook(providers, 'book-1');
+    await generate('book-1', `${TOKEN}:anonymous`);
+    const blocked = await approve('book-1', `${TOKEN}:anonymous`);
+    expect(blocked.statusCode).toBe(403);
+    expect(blocked.json<{ error: { code: string } }>().error.code).toBe('account_required');
+    await setAiConfig({ illustrationsRequireAccount: false });
+    expect((await approve('book-1', `${TOKEN}:anonymous`)).statusCode).toBe(200);
+  });
+
+  it('corregir rasgos vuelve a dibujar la lámina, cuenta como regeneración y queda en el libro', async () => {
+    await seedBook(providers, 'book-1');
+    const first = (await generate('book-1')).json<PublicPreview>();
+    const traits = { ...first.preview?.character?.traits, glasses: true, distinctive: 'pecas' };
+    const res = await app.inject({
+      method: 'PUT',
+      url: '/v1/books/book-1/preview/character',
+      headers: auth(TOKEN),
+      payload: { traits, mustKeep: ['glasses', 'hair'] },
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json<PublicPreview>();
+    expect(body.preview?.stage).toBe('character');
+    expect(body.preview?.character?.imageUrl).not.toBe(first.preview?.character?.imageUrl);
+    expect(body.preview?.character?.traits.glasses).toBe(true);
+    expect(body.preview?.character?.mustKeep).toEqual(['glasses', 'hair']);
+    expect(body.regenerationsLeft).toBe(0);
+    expect(body.preview?.stale).toBe(false);
+    expect((await db.doc('books/book-1').get()).get('mustKeep')).toEqual(['glasses', 'hair']);
+
+    // Un rasgo distintivo no apto se rechaza.
+    const unsafe = await app.inject({
+      method: 'PUT',
+      url: '/v1/books/book-1/preview/character',
+      headers: auth(TOKEN),
+      payload: { traits: { ...traits, distinctive: MOCK_UNSAFE_MARKER }, mustKeep: [] },
+    });
+    expect(unsafe.statusCode).toBe(422);
+    // Aprobar después de corregir funciona.
+    expect((await approve('book-1')).statusCode).toBe(200);
   });
 
   it('la extensión y la cantidad de texto son independientes (24 páginas, visual o más lectura)', async () => {
     await seedBook(providers, 'book-visual', { length: 'classic', textDensity: 'visual' });
     await seedBook(providers, 'book-rich', { length: 'classic', textDensity: 'rich' });
-    const visual = (await generate('book-visual')).json<PublicPreview>();
-    const rich = (await generate('book-rich')).json<PublicPreview>();
+    const visual = (await generateAndApprove('book-visual')).json<PublicPreview>();
+    const rich = (await generateAndApprove('book-rich')).json<PublicPreview>();
     expect(visual.preview?.totalPages).toBe(24);
     expect(rich.preview?.totalPages).toBe(24);
     const words = (text: string) => countWords(text);
@@ -334,9 +423,14 @@ describe('vista previa', () => {
       glasses: true,
     };
     await seedBook(providers, 'book-1', { characterMode: 'avatar', avatar, photoIds: [] });
-    const res = await generate('book-1');
+    expect((await generate('book-1')).json<PublicPreview>().preview?.stale).toBe(false);
+    const res = await approve('book-1');
     expect(res.statusCode).toBe(200);
-    expect(res.json<PublicPreview>().preview?.pages).toHaveLength(2);
+    expect(res.json<PublicPreview>().preview?.pages.filter((page) => page.imageUrl)).toHaveLength(
+      2,
+    );
+    // Sin foto, los rasgos elegidos son los del personaje (y los anteojos quedan fijados).
+    expect(res.json<PublicPreview>().preview?.character?.mustKeep).toContain('glasses');
     const usage = await db.collection('aiUsage').where('bookId', '==', 'book-1').get();
     expect(usage.docs.some((doc) => doc.get('kind') === 'character')).toBe(false);
 
@@ -348,6 +442,12 @@ describe('vista previa', () => {
       headers: auth(TOKEN),
     });
     expect(after.json<PublicPreview>().preview?.stale).toBe(true);
+
+    // Los rasgos aprobados eran para los rasgos anteriores: la nueva muestra usa los nuevos.
+    const again = (await generate('book-1')).json<PublicPreview>();
+    expect(again.preview?.character?.traits.glasses).toBe(false);
+    expect(again.preview?.character?.mustKeep).not.toContain('glasses');
+    expect(again.preview?.stale).toBe(false);
   });
 
   it('modo sin foto sin rasgos elegidos: pide completarlos', async () => {
@@ -376,7 +476,7 @@ describe('vista previa', () => {
 
   it('regenera una ilustración hasta el límite y descuenta solo si sale bien', async () => {
     await seedBook(providers, 'book-1');
-    const first = (await generate('book-1')).json<PublicPreview>();
+    const first = (await generateAndApprove('book-1')).json<PublicPreview>();
     const regenerate = (target: string) =>
       app.inject({
         method: 'POST',

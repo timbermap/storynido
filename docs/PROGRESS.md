@@ -11,7 +11,7 @@
 | 07  | Motor de IA y vista previa                           | ✅ Hecha (2026-10-27)            |
 | 07b | Opciones editoriales (extensión, texto, nivel, tipo) | ✅ Hecha (2026-10-27)            |
 | 07c | Líneas comerciales y landings                        | ✅ Hecha (2026-10-27)            |
-| 07d | Aprobación del personaje y P0 de calidad (feedback)  | ⏳ Pendiente                     |
+| 07d | Aprobación del personaje y P0 de calidad (feedback)  | ✅ 2026-10-27                    |
 | 08  | Pipeline: orquestación y worker                      | ⏳ Pendiente                     |
 | 09  | Generación del libro y QA                            | ⏳ Pendiente                     |
 | 10  | PDF                                                  | ⏳ Pendiente                     |
@@ -34,6 +34,14 @@
 - Hecho: analítica aislada del creador, la cuenta y el acceso (P0); vista previa con los ajustes de la estrategia (1 regeneración gratis, "Muestra de la historia", qué cambia en el libro final).
 
 ## Fuera de alcance / pendientes detectados
+
+- **UX a mejorar (pedido de Sebastián, 2026-10-27):** el diseño y la experiencia del encabezado (navbar), las preguntas frecuentes y el pie de página no convencen. Hace falta una pasada de diseño dedicada:
+  - jerarquía y agrupación del menú (3 líneas + Historias + Blog + idioma + país + sesión);
+  - menú móvil;
+  - preguntas frecuentes más fáciles de recorrer;
+  - pie con más estructura.
+    Sin fase asignada todavía; propuesta: una fase corta de diseño antes de la 17 o junto con ella.
+- Fase 07d: ejemplos de libros completos generados con IA (~USD 7) quedan para cuando el producto esté terminado. Mientras tanto, la ficha de cada historia tiene "Hojear un ejemplo" con la portada y el fragmento, sin costo.
 
 - Repo en GitHub: [timbermap/storynido](https://github.com/timbermap/storynido) (privado). CI y build de imágenes Docker en verde desde el 2026-10-26.
 

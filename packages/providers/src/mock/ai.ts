@@ -59,11 +59,15 @@ export class MockAITextProvider implements AITextProvider {
       const like =
         request.likes[index % Math.max(request.likes.length, 1)] ?? DEFAULT_LIKE[request.language];
       const lesson = index === 1 ? request.lessons[0] : undefined;
+      // Los nombres obligatorios (apodo) aparecen en la primera página.
+      const extra =
+        index === 0 && request.mustInclude?.length ? ` ${request.mustInclude.join(' ')}` : '';
       return {
         index,
         text: fitWords(
           PHRASES[request.language](request.childName, like, index + 1) +
-            (lesson ? ` (${lesson.name})` : ''),
+            (lesson ? ` (${lesson.name})` : '') +
+            extra,
           FILLER[request.language],
           request.wordsPerPage,
         ),
@@ -97,6 +101,14 @@ export class MockAITextProvider implements AITextProvider {
   describeCharacter(photo: ImageData): Promise<CharacterSheetResult> {
     const shade = parseInt(sha256Hex(photo.bytes).slice(0, 2), 16) % 3;
     return Promise.resolve({
+      traits: {
+        skinTone: (['medium', 'light', 'brown'] as const)[shade] ?? 'medium',
+        hairColor: (['dark-brown', 'light-brown', 'black'] as const)[shade] ?? 'dark-brown',
+        hairLength: (['short', 'medium', 'medium'] as const)[shade] ?? 'short',
+        hairType: (['curly', 'straight', 'wavy'] as const)[shade] ?? 'curly',
+        eyeColor: 'brown',
+        glasses: false,
+      },
       sheet: {
         apparentAge: 'about 5 years old',
         hair:

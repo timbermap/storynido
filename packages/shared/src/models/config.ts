@@ -26,6 +26,11 @@ export const aiConfigSchema = z.object({
   maxRegenerationsPerBook: z.number().int().min(0).max(50),
   /** Vistas previas completas por usuario y por día (anti abuso). */
   maxPreviewsPerUserPerDay: z.number().int().min(1).max(100),
+  /**
+   * La etapa 2 de la muestra (portada y páginas, la parte cara) pide cuenta: filtra curiosos
+   * y deja el contacto. La etapa 1 (texto + personaje) sigue sin cuenta.
+   */
+  illustrationsRequireAccount: z.boolean(),
   dailyBudgetUsd: z.number().nonnegative(),
   budgetAlertPercent: z.number().int().min(1).max(100),
   updatedAt: z.date(),

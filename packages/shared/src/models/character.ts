@@ -85,3 +85,43 @@ export type Memories = z.infer<typeof memoriesSchema>;
 export function hasMemories(memories: Memories | null | undefined): memories is Memories {
   return Boolean(memories && MEMORY_KEYS.some((key) => memories[key]));
 }
+
+/** Rasgos del protagonista que el adulto confirma o corrige ("¿Es él / es ella?", fase 07d). */
+export const characterTraitsSchema = avatarSchema.extend({
+  /** Rasgo distintivo libre (pecas, un diente menos…), moderado antes de usarse. */
+  distinctive: z.string().trim().max(60).nullable(),
+});
+
+export type CharacterTraits = z.infer<typeof characterTraitsSchema>;
+
+/** Rasgos que el adulto marca como obligatorios en todas las ilustraciones. */
+export const MUST_KEEP_TRAITS = ['hair', 'skinTone', 'eyeColor', 'glasses', 'distinctive'] as const;
+
+export const mustKeepSchema = z.array(z.enum(MUST_KEEP_TRAITS)).max(MUST_KEEP_TRAITS.length);
+
+export type MustKeepTrait = (typeof MUST_KEEP_TRAITS)[number];
+
+/** Rasgos en una frase para los prompts de imagen, con los obligatorios destacados. */
+export function describeTraits(
+  traits: CharacterTraits,
+  mustKeep: readonly MustKeepTrait[],
+): string {
+  const sheet = avatarToSheet(traits, 0);
+  const parts: Record<MustKeepTrait, string | null> = {
+    hair: sheet.hair,
+    skinTone: sheet.skinTone,
+    eyeColor: sheet.eyes,
+    glasses: traits.glasses ? 'wears round glasses' : 'no glasses',
+    distinctive: traits.distinctive ? `distinctive feature: ${traits.distinctive}` : null,
+  };
+  const all = Object.values(parts).filter(Boolean).join('; ');
+  const keep = mustKeep.map((trait) => parts[trait]).filter(Boolean);
+  return keep.length > 0
+    ? `${all}. MUST KEEP IDENTICAL in every illustration: ${keep.join('; ')}`
+    : all;
+}
+
+/** Clave estable de los rasgos confirmados (desactualiza la muestra si cambian). */
+export function traitsKey(traits: CharacterTraits, mustKeep: readonly MustKeepTrait[]): string {
+  return `${avatarKey(traits)}|${traits.distinctive ?? ''}|${[...mustKeep].sort().join(',')}`;
+}

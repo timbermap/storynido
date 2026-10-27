@@ -162,6 +162,7 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
     return (
       <PreviewPanel
         book={book}
+        childName={child?.name ?? ''}
         generating={generating}
         generateError={generateError}
         onRegenerateAll={() => void generatePreview()}

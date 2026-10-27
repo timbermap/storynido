@@ -10,6 +10,7 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { saveChild, updateBook } from '@/lib/firebase/drafts';
+import { useStepDraft } from '@/lib/use-step-draft';
 
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
@@ -34,6 +35,21 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [friend, setFriend] = useState(child?.bestFriendName ?? '');
   const [dedication, setDedication] = useState(book.dedication ?? '');
   const [error, setError] = useState<string | null>(null);
+  const clearDraft = useStepDraft(
+    book.id,
+    'child',
+    { name, age, pronouns, likes, like, petName, friend, dedication },
+    (saved) => {
+      setName(saved.name);
+      setAge(saved.age);
+      setPronouns(saved.pronouns);
+      setLikes(saved.likes);
+      setLike(saved.like);
+      setPetName(saved.petName);
+      setFriend(saved.friend);
+      setDedication(saved.dedication);
+    },
+  );
 
   const pronounOptions: { value: Child['pronouns']; label: string }[] = [
     { value: 'she', label: t('she') },
@@ -75,7 +91,10 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       });
       await updateBook(db, book.id, { dedication: blankToNull(dedication) });
     });
-    if (ok) await nav.goNext();
+    if (ok) {
+      clearDraft();
+      await nav.goNext();
+    }
   }
 
   return (

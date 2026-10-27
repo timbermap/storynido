@@ -163,7 +163,12 @@
     "fallbackNotice": "Todavía no enviamos a {preferred}. Te mostramos los precios de {country}.",
     "pagesRange": "De {min} a {max} páginas",
     "collectionLabel": "Colección",
-    "allCollections": "Todas"
+    "allCollections": "Todas",
+    "browse": "Hojear un ejemplo",
+    "exampleNote": "Ejemplo con un niño inventado: en tu libro, el protagonista será tu hijo y el texto se escribe para él.",
+    "exampleTitle": "Así es un libro de StoryNido",
+    "exampleLocked": "En tu libro, esta página se ilustra con tu protagonista",
+    "exampleDedication": "Para Martina, que sueña con las estrellas."
   },
   "Formats": {
     "digital": "Libro digital (PDF)",
@@ -435,10 +440,34 @@
         "ai_unavailable": "No pudimos generar las ilustraciones en este momento. Intenta de nuevo en unos minutos; tu borrador queda guardado.",
         "validation_failed": "Ese texto no es apto para un cuento infantil. Cámbialo e intenta de nuevo.",
         "bad_request": "Revisa que estén completos el protagonista, la foto, la historia y el estilo.",
-        "generic": "Algo salió mal. Intenta de nuevo en unos minutos."
+        "generic": "Algo salió mal. Intenta de nuevo en unos minutos.",
+        "account_required": "Crea tu cuenta gratis para ver la portada y las páginas ilustradas."
       },
       "saveStoryTitle": "Guarda tu cuento",
-      "saveStoryText": "Crea tu cuenta gratis para no perder esta muestra y retomarla desde cualquier dispositivo."
+      "saveStoryText": "Crea tu cuenta gratis para no perder esta muestra y retomarla desde cualquier dispositivo.",
+      "characterTitle": "Así vamos a dibujar a {name}",
+      "characterText": "Revisa que se parezca. Si algo no está bien, corrígelo antes de ilustrar el libro.",
+      "characterAlt": "Lámina del personaje: {name} de cuerpo entero",
+      "approve": "Sí, es así",
+      "approveNote": "Después ilustramos la portada y las primeras páginas.",
+      "correct": "Corregir rasgos",
+      "saveTraits": "Guardar y volver a dibujar",
+      "correctNote": "Volver a dibujar usa tu regeneración gratis.",
+      "mustKeepLegend": "Tiene que mantenerse igual en todo el libro",
+      "mustKeep": {
+        "hair": "Pelo",
+        "skinTone": "Tono de piel",
+        "eyeColor": "Ojos",
+        "glasses": "Anteojos",
+        "distinctive": "Rasgo distintivo"
+      },
+      "distinctive": "Rasgo distintivo (opcional)",
+      "distinctivePlaceholder": "Pecas en la nariz",
+      "accountTitle": "Crea tu cuenta para ver la portada y las páginas",
+      "accountText": "Es gratis. Así guardamos tu cuento y lo que ya aprobaste.",
+      "illustrating": "Ilustrando la portada y las primeras páginas…",
+      "readWhile": "Lee el cuento completo",
+      "approvedBadge": "Personaje aprobado"
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
@@ -711,5 +740,20 @@
       "signInTitle": "Crea tu cuenta profesional",
       "signInText": "Así guardamos tus proyectos y tus compras en un solo lugar. Es rápido y sin contraseñas."
     }
+  },
+  "Viewer": {
+    "label": "Visor del libro",
+    "prev": "Página anterior",
+    "next": "Página siguiente",
+    "counter": "{current} de {total}",
+    "cover": "Portada",
+    "dedication": "Dedicatoria",
+    "page": "Página {number}",
+    "end": "Fin",
+    "theEnd": "Fin",
+    "locked": "Se ilustra cuando confirmes tu libro",
+    "thumbnails": "Páginas del libro",
+    "noDedication": "Aquí irá tu dedicatoria",
+    "example": "Ejemplo"
   }
 }

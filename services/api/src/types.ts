@@ -6,6 +6,8 @@ export interface RequestUser {
   uid: string;
   email: string | null;
   role: Role;
+  /** Sesión anónima del creador (todavía sin cuenta). */
+  anonymous: boolean;
 }
 
 /** Cuándo responde una ruta según el modo del sitio. */

@@ -28,6 +28,9 @@ export function registerAuthentication(app: FastifyInstance): void {
         uid: verified.uid,
         email: verified.email,
         role: roleFromClaims(verified.claims),
+        anonymous:
+          (verified.claims.firebase as { sign_in_provider?: unknown } | undefined)
+            ?.sign_in_provider === 'anonymous',
       };
     } catch {
       throw unauthorized('La sesión no es válida o venció. Iniciá sesión de nuevo.');

@@ -9,6 +9,7 @@ import { MEMORY_KEYS, MEMORY_MAX_LENGTH, type Memories } from '@storynido/shared
 import { Button } from '@/components/ui/button';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
+import { useStepDraft } from '@/lib/use-step-draft';
 
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
@@ -19,12 +20,16 @@ const EMPTY: Memories = { moment: null, companion: null, nickname: null, favorit
 export function StepMemories({ nav, data }: { nav: StepNav; data: WizardData }) {
   const t = useTranslations('Wizard.memories');
   const [values, setValues] = useState<Memories>(data.book.memories ?? EMPTY);
+  const clearDraft = useStepDraft(data.book.id, 'memories', values, setValues);
 
   async function save(memories: Memories) {
     const ok = await nav.save(async () => {
       await updateBook(await getFirebaseDb(), data.book.id, { memories });
     });
-    if (ok) await nav.goNext();
+    if (ok) {
+      clearDraft();
+      await nav.goNext();
+    }
   }
 
   function next() {

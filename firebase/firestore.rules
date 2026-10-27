@@ -213,6 +213,12 @@ service cloud.firestore {
         && validBookEdits();
 
       allow delete: if ownsExisting() && resource.data.status == 'draft';
+
+      // Controles de calidad del libro: solo el servidor escribe; el admin los consulta.
+      match /qaEvents/{eventId} {
+        allow read: if isAdmin();
+        allow write: if false;
+      }
     }
 
     // ----------------------------------------------------------------- orders

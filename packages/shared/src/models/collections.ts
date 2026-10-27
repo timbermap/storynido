@@ -12,6 +12,8 @@ export const COLLECTIONS = {
   books: 'books',
   orders: 'orders',
   orderSteps: 'steps',
+  /** books/{bookId}/qaEvents: controles de calidad del libro (solo servidor). */
+  qaEvents: 'qaEvents',
   countries: 'countries',
   products: 'products',
   prices: 'prices',

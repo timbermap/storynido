@@ -599,3 +599,36 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - **10–12:** versión aprobada congelada con hash; nada se imprime ni se entrega si no coincide. Lector web y PDF para lo digital. Impresión solo con muestra física aprobada por SKU y país.
 - **Español regional:** la interfaz sigue en español neutro, pero el cuento se escribe en la variante del país (es-MX, es-AR con voseo, es-ES).
 - **Límite:** no se usan métricas automáticas de parecido facial como garantía; el control es la aprobación del adulto.
+
+## 064 · Muestra en 2 etapas: el adulto aprueba al personaje antes de ilustrar
+
+- **Fecha:** 2026-10-27 · **Fase:** 07d · **Origen:** feedback de compradores (DECISIONS 063) y control de costos.
+- **Etapa 1 (≈ USD 0,08):**
+  - Cuento completo (con extensión y densidad de 07b) y la lámina del personaje: 1 sola imagen.
+  - El adulto ve la lámina con sus rasgos y responde "¿Es él / es ella?": "Sí, es así" o "Corregir rasgos".
+- **Corregir rasgos (≈ USD 0,07):**
+  - Pelo, piel, ojos, anteojos y un rasgo distintivo (moderado).
+  - El adulto marca qué rasgos deben quedar idénticos (`mustKeep`; por defecto pelo, piel y anteojos si los usa). Entran en cada prompt como "MUST KEEP IDENTICAL".
+  - Vuelve a dibujar la lámina y usa la regeneración gratis.
+- **Etapa 2 (≈ USD 0,20):**
+  - Portada + 2 páginas, con la lámina aprobada como referencia.
+  - **Pide cuenta** (`aiConfig.illustrationsRequireAccount`, por defecto activado; error `account_required`). Es la parte cara y así se limita el uso anónimo sin pedir datos antes de mostrar valor.
+- **Rasgos confirmados:**
+  - Se guardan en el libro (`characterTraits`, `mustKeep`) junto con `characterBase`, la foto o los rasgos sobre los que se confirmaron.
+  - Si el adulto cambia la foto o los rasgos, dejan de valer y la muestra figura desactualizada.
+  - No se puede aprobar una muestra desactualizada.
+- **Nombre exacto:**
+  - Chequeo determinístico (`nameIssues`): falta, tildes, una letra cambiada.
+  - Si falla, se reescribe 1 vez. Si sigue mal, error y no se muestra.
+- **Moderación ampliada:**
+  - Rechaza burlas sobre el cuerpo o las necesidades, castigos que avergüencen, diagnósticos y promesas de curación.
+  - En imágenes, también texto dentro de la ilustración y deformidades.
+- **QA:** `books/{id}/qaEvents` con códigos (`name_mismatch`, `length_out_of_range`, `moderation_*`, `character_approved`, `character_corrected`), sin datos del niño. Solo lo leen los admins.
+- **Visor del libro:**
+  - Carrusel con todas las páginas (portada, dedicatoria, cuento, fin), flechas, teclado, deslizamiento y miniaturas.
+  - Las páginas sin ilustrar muestran su texto real y "Se ilustra cuando confirmes tu libro".
+  - Editar el texto y probar otra ilustración actúan sobre la página visible.
+- **Ejemplo sin costo:**
+  - La ficha de cada historia tiene "Hojear un ejemplo" (portada, dedicatoria, fragmento) con el mismo visor.
+  - Los libros de ejemplo completos (~USD 7) se generan cuando el producto esté terminado.
+- **Formulario en curso:** lo escrito en "Protagonista" y "Recuerdos" se guarda en el navegador (`localStorage`, 7 días) y se borra al guardar el paso.

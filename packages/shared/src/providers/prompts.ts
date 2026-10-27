@@ -116,6 +116,8 @@ Reglas obligatorias:
   }
 - Las enseñanzas se muestran con lo que hacen los personajes, nunca como moraleja explícita ni sermón.
 - Nada de violencia, miedo intenso, marcas, personajes con derechos de autor ni datos personales reales.
+- Nunca te burles del cuerpo, la apariencia, la higiene, las capacidades o las necesidades del protagonista; nada de castigos que avergüencen, diagnósticos ni promesas de curación. El protagonista puede equivocarse, aprender y pedir ayuda sin quedar humillado.
+- Escribe el nombre del protagonista exactamente así: "${input.childName}" (con sus tildes y mayúsculas).
 - "illustrationPrompt" de cada página: la escena en inglés, en una o dos frases, sin texto dentro de la imagen.`;
 }
 

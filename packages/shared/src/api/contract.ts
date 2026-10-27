@@ -5,6 +5,7 @@ import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 import { BOOK_FORMATS } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
+import { characterTraitsSchema, mustKeepSchema } from '../models/character';
 import { channelSchema, personalizationSchema } from '../models/channels';
 import { CONTENT_KEYS, SITE_MODES, aiConfigSchema } from '../models/config';
 import {
@@ -32,6 +33,8 @@ export const API_ERROR_CODES = [
   'limit_reached',
   /** La IA está pausada (presupuesto diario agotado o moderación fallida dos veces). */
   'ai_unavailable',
+  /** Hace falta una cuenta (no alcanza la sesión anónima). */
+  'account_required',
   'internal',
 ] as const;
 
@@ -114,13 +117,26 @@ export const publicPreviewSchema = z.object({
   error: z.string().nullable(),
   preview: z
     .object({
+      /** "character": falta aprobar el personaje; "complete": portada y páginas ilustradas. */
+      stage: z.enum(['character', 'complete']),
       title: z.string(),
-      coverUrl: z.string(),
+      coverUrl: z.string().nullable(),
+      character: z
+        .object({
+          imageUrl: z.string(),
+          traits: characterTraitsSchema,
+          mustKeep: mustKeepSchema,
+          approved: z.boolean(),
+        })
+        .nullable(),
+      /** Dedicatoria tal cual irá en el libro (página fija). */
+      dedication: z.string().nullable(),
+      /** Todas las páginas del cuento; solo las primeras tienen ilustración en la muestra. */
       pages: z.array(
         z.object({ index: z.number().int(), text: z.string(), imageUrl: z.string().nullable() }),
       ),
       totalPages: z.number().int(),
-      /** El borrador cambió (historia, estilo o foto) después de generarla. */
+      /** El borrador cambió (historia, estilo, personaje u opciones) después de generarla. */
       stale: z.boolean(),
       generatedAt: z.string(),
     })
@@ -449,6 +465,25 @@ export const apiRoutes = {
     summary: 'Edita el texto de una página (se modera antes de guardarlo)',
     params: bookParamsSchema.extend({ index: z.coerce.number().int().min(0).max(40) }),
     body: z.object({ text: z.string().trim().min(1).max(PREVIEW_PAGE_TEXT_MAX) }),
+    response: publicPreviewSchema,
+  },
+  approveCharacter: {
+    method: 'POST',
+    path: '/v1/books/:bookId/preview/character/approve',
+    access: 'user',
+    summary:
+      'El adulto aprueba al personaje ("¿Es él / es ella?") y se ilustran la portada y las primeras páginas',
+    params: bookParamsSchema,
+    response: publicPreviewSchema,
+  },
+  updateCharacter: {
+    method: 'PUT',
+    path: '/v1/books/:bookId/preview/character',
+    access: 'user',
+    summary:
+      'Corrige los rasgos del personaje y los que no pueden cambiar; vuelve a dibujar la lámina (cuenta como regeneración)',
+    params: bookParamsSchema,
+    body: z.object({ traits: characterTraitsSchema, mustKeep: mustKeepSchema }),
     response: publicPreviewSchema,
   },
   regeneratePreviewIllustration: {

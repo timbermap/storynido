@@ -1,3 +1,4 @@
+import type { Avatar } from '../models/character';
 import type { Locale } from '../i18n';
 
 /** Costo de una llamada, en millonésimas de dólar (precisión suficiente para tokens e imágenes). */
@@ -24,6 +25,8 @@ export interface StoryRequest {
   pageCount: number;
   /** Rango de palabras por página (densidad de texto). */
   wordsPerPage?: { min: number; max: number };
+  /** Nombres que tienen que aparecer tal cual (protagonista y apodo). */
+  mustInclude?: readonly string[];
 }
 
 /** Enseñanza que la IA teje en la trama sin sermonear. */
@@ -81,6 +84,8 @@ export interface CharacterSheet {
 
 export interface CharacterSheetResult {
   sheet: CharacterSheet;
+  /** Rasgos estructurados estimados, para que el adulto los confirme o corrija. */
+  traits: Avatar;
   usage: AiUsage;
 }
 

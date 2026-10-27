@@ -163,7 +163,12 @@
     "fallbackNotice": "We don't ship to {preferred} yet. Showing prices for {country}.",
     "pagesRange": "{min} to {max} pages",
     "collectionLabel": "Collection",
-    "allCollections": "All"
+    "allCollections": "All",
+    "browse": "Flip through an example",
+    "exampleNote": "Example with a made-up child: in your book, the hero will be your child and the text is written for them.",
+    "exampleTitle": "This is a StoryNido book",
+    "exampleLocked": "In your book, this page is illustrated with your hero",
+    "exampleDedication": "For Martina, who dreams of the stars."
   },
   "Formats": {
     "digital": "Digital book (PDF)",
@@ -435,10 +440,34 @@
         "ai_unavailable": "We couldn't create the illustrations right now. Please try again in a few minutes; your draft is saved.",
         "validation_failed": "That text isn't suitable for a children's story. Please change it and try again.",
         "bad_request": "Make sure the main character, photo, story and style are complete.",
-        "generic": "Something went wrong. Please try again in a few minutes."
+        "generic": "Something went wrong. Please try again in a few minutes.",
+        "account_required": "Create a free account to see the cover and illustrated pages."
       },
       "saveStoryTitle": "Save your story",
-      "saveStoryText": "Create a free account so you don’t lose this sample and can pick it up on any device."
+      "saveStoryText": "Create a free account so you don’t lose this sample and can pick it up on any device.",
+      "characterTitle": "This is how we’ll draw {name}",
+      "characterText": "Check that it looks right. If something is off, fix it before we illustrate the book.",
+      "characterAlt": "Character sheet: {name}, full body",
+      "approve": "Yes, that’s them",
+      "approveNote": "Next we illustrate the cover and the first pages.",
+      "correct": "Fix features",
+      "saveTraits": "Save and redraw",
+      "correctNote": "Redrawing uses your free redo.",
+      "mustKeepLegend": "Must stay the same throughout the book",
+      "mustKeep": {
+        "hair": "Hair",
+        "skinTone": "Skin tone",
+        "eyeColor": "Eyes",
+        "glasses": "Glasses",
+        "distinctive": "Distinctive feature"
+      },
+      "distinctive": "Distinctive feature (optional)",
+      "distinctivePlaceholder": "Freckles on the nose",
+      "accountTitle": "Create your account to see the cover and pages",
+      "accountText": "It’s free. That’s how we save your story and what you’ve approved.",
+      "illustrating": "Illustrating the cover and the first pages…",
+      "readWhile": "Read the whole story",
+      "approvedBadge": "Character approved"
     },
     "character": {
       "modeLegend": "How should we create the main character?",
@@ -711,5 +740,20 @@
       "signInTitle": "Create your professional account",
       "signInText": "That’s how we keep your projects and purchases in one place. It’s quick and password-free."
     }
+  },
+  "Viewer": {
+    "label": "Book viewer",
+    "prev": "Previous page",
+    "next": "Next page",
+    "counter": "{current} of {total}",
+    "cover": "Cover",
+    "dedication": "Dedication",
+    "page": "Page {number}",
+    "end": "The end",
+    "theEnd": "The end",
+    "locked": "Illustrated once you confirm your book",
+    "thumbnails": "Book pages",
+    "noDedication": "Your dedication goes here",
+    "example": "Example"
   }
 }

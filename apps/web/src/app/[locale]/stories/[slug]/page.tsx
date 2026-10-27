@@ -8,6 +8,7 @@ import type { BookLength, EditorialConfig, Locale } from '@storynido/shared';
 
 import { JsonLd } from '@/components/json-ld';
 import { CountryNotice } from '@/components/stories/country-notice';
+import { StoryExample } from '@/components/stories/story-example';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
@@ -200,6 +201,21 @@ export default async function StoryPage({ params }: Props) {
           </Link>
         </div>
       </div>
+
+      <section aria-labelledby="browse" className="mt-16">
+        <h2 id="browse" className="text-[clamp(1.8rem,3.4vw,2.6rem)] font-semibold">
+          {t('browse')}
+        </h2>
+        <p className="mt-2 max-w-2xl text-muted-foreground">{t('exampleNote')}</p>
+        <div className="mt-6 max-w-4xl">
+          <StoryExample
+            title={story.title}
+            coverImage={story.coverImage}
+            excerpt={story.excerpt}
+            samplePages={story.samplePages}
+          />
+        </div>
+      </section>
     </article>
   );
 }

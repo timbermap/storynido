@@ -43,6 +43,24 @@ export function registerPreviewRoutes(app: FastifyInstance, previews: PreviewSer
     );
   });
 
+  addRoute(app, apiRoutes.approveCharacter, { appCheck: true }, async (request) =>
+    previews.approveCharacter(
+      uid(request),
+      (request.params as ParamsOf<'approveCharacter'>).bookId,
+      request.user?.anonymous ?? true,
+    ),
+  );
+
+  addRoute(app, apiRoutes.updateCharacter, { appCheck: true }, async (request) => {
+    const body = request.body as BodyOf<'updateCharacter'>;
+    return previews.updateCharacter(
+      uid(request),
+      (request.params as ParamsOf<'updateCharacter'>).bookId,
+      body.traits,
+      body.mustKeep,
+    );
+  });
+
   addRoute(app, apiRoutes.regeneratePreviewIllustration, { appCheck: true }, async (request) => {
     const params = request.params as ParamsOf<'regeneratePreviewIllustration'>;
     return previews.regenerate(uid(request), params.bookId, params.target, request.ip);

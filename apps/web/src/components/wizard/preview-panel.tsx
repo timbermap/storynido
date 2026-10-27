@@ -1,48 +1,80 @@
 'use client';
 
-import { ApiError, type PublicPreview } from '@storynido/shared';
-import { AlertTriangle, Loader2, Pencil, RefreshCw, Sparkles } from 'lucide-react';
+import { ApiError, PREVIEW_PAGE_TEXT_MAX, type PublicPreview } from '@storynido/shared';
+import { AlertTriangle, CheckCircle2, Loader2, Pencil, RefreshCw, Sparkles } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { SignInPanel } from '@/components/auth/sign-in-panel';
+import { BookViewer, type ViewerPage } from '@/components/book/book-viewer';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 
+import { CharacterReview } from './character-review';
 import type { WizardData } from './types';
 
 type Target = 'cover' | number;
+type PreviewData = NonNullable<PublicPreview['preview']>;
 
-const KNOWN_ERRORS = ['limit_reached', 'ai_unavailable', 'validation_failed', 'bad_request'];
+const KNOWN_ERRORS = [
+  'limit_reached',
+  'ai_unavailable',
+  'validation_failed',
+  'bad_request',
+  'account_required',
+];
 
 /** Código de error de la API traducible ("generic" si no lo conocemos). */
 export function previewErrorKey(error: unknown): string {
   return error instanceof ApiError && KNOWN_ERRORS.includes(error.code) ? error.code : 'generic';
 }
 
+/** Páginas del visor: portada, dedicatoria, el cuento completo y el cierre. */
+function viewerPages(preview: PreviewData): ViewerPage[] {
+  return [
+    { key: 'cover', kind: 'cover', imageUrl: preview.coverUrl, text: null },
+    { key: 'dedication', kind: 'dedication', imageUrl: null, text: preview.dedication },
+    ...preview.pages.map((page) => ({
+      key: `page-${String(page.index)}`,
+      kind: 'story' as const,
+      imageUrl: page.imageUrl,
+      text: page.text,
+      number: page.index + 1,
+    })),
+    { key: 'end', kind: 'end', imageUrl: null, text: null },
+  ];
+}
+
 /**
- * Muestra de la historia: portada y primeras páginas con marca de agua, texto editable
- * (moderado en el servidor) y regeneración de ilustraciones con límite.
+ * Muestra de la historia en 2 etapas: primero el adulto aprueba al personaje ("¿Es él / es
+ * ella?"); después ve el libro entero en el visor, con la portada y las primeras páginas
+ * ilustradas (marca de agua), el resto con su texto, y puede editar textos y pedir otra
+ * ilustración dentro del límite.
  */
 export function PreviewPanel({
   book,
+  childName,
   generating,
   generateError,
   onRegenerateAll,
   onEditChoices,
 }: {
   book: WizardData['book'];
+  childName: string;
   generating: boolean;
   generateError: string | null;
   onRegenerateAll: () => void;
   onEditChoices: () => void;
 }) {
   const t = useTranslations('Wizard.preview');
+  const tViewer = useTranslations('Viewer');
   const { user } = useAuth();
   const [preview, setPreview] = useState<PublicPreview | null>(null);
   const [busy, setBusy] = useState<Target | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ index: number; text: string } | null>(null);
+  const [saving, setSaving] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   const isGenerating = generating || book.status === 'preview_generating';
@@ -68,7 +100,11 @@ export function PreviewPanel({
     headingRef.current?.focus();
   }, [isGenerating]);
 
+  const data = preview?.preview ?? null;
+
   if (isGenerating) {
+    // Si ya había un personaje en revisión, lo que se está generando son las ilustraciones.
+    const illustrating = data?.stage === 'character';
     return (
       <div className="container-page max-w-3xl py-16 text-center" role="status" aria-live="polite">
         <Loader2 className="mx-auto size-10 animate-spin text-primary" aria-hidden="true" />
@@ -77,15 +113,19 @@ export function PreviewPanel({
           tabIndex={-1}
           className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-semibold outline-none"
         >
-          {t('generatingTitle')}
+          {illustrating ? t('illustrating') : t('generatingTitle')}
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">{t('generatingText')}</p>
+        {!illustrating && (
+          <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
+            {t('generatingText')}
+          </p>
+        )}
       </div>
     );
   }
 
-  const data = preview?.preview ?? null;
   const failure = generateError ?? (preview?.error ? 'ai_unavailable' : null);
+  const regenerationsLeft = preview?.regenerationsLeft ?? 0;
 
   async function run(target: Target, action: () => Promise<PublicPreview>) {
     setBusy(target);
@@ -99,17 +139,74 @@ export function PreviewPanel({
     }
   }
 
-  const regenerate = (target: Target) =>
-    run(target, () =>
-      api('regeneratePreviewIllustration', {
-        params: { bookId: book.id, target: String(target) },
-      }),
-    );
+  async function saveText() {
+    if (!editing) return;
+    setSaving(true);
+    setError(null);
+    try {
+      setPreview(
+        await api('updatePreviewPage', {
+          params: { bookId: book.id, index: String(editing.index) },
+          body: { text: editing.text },
+        }),
+      );
+      setEditing(null);
+    } catch (caught) {
+      setError(previewErrorKey(caught));
+    } finally {
+      setSaving(false);
+    }
+  }
 
-  const canRegenerate = (preview?.regenerationsLeft ?? 0) > 0 && busy === null && !data?.stale;
+  const canRegenerate =
+    data?.stage === 'complete' && regenerationsLeft > 0 && busy === null && !data.stale;
+
+  /** Acciones de la página visible del visor. */
+  const actions = (page: ViewerPage) => {
+    if (page.kind !== 'cover' && page.kind !== 'story') return null;
+    const target: Target = page.kind === 'cover' ? 'cover' : (page.number ?? 1) - 1;
+    const illustrated = page.imageUrl !== null;
+    return (
+      <div className="flex flex-wrap gap-2">
+        {page.kind === 'story' && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setEditing({ index: (page.number ?? 1) - 1, text: page.text ?? '' });
+            }}
+          >
+            <Pencil aria-hidden="true" />
+            {t('editText')}
+          </Button>
+        )}
+        {illustrated && (
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={!canRegenerate}
+            onClick={() =>
+              void run(target, () =>
+                api('regeneratePreviewIllustration', {
+                  params: { bookId: book.id, target: String(target) },
+                }),
+              )
+            }
+          >
+            {busy === target ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <RefreshCw aria-hidden="true" />
+            )}
+            {busy === target ? t('regenerating') : t('regenerate')}
+          </Button>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <div className="container-page max-w-4xl py-10">
+    <div className="container-page max-w-5xl py-10">
       <p className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-black tracking-[0.08em] text-primary uppercase">
         <Sparkles className="size-3.5" aria-hidden="true" />
         {t('badge')}
@@ -155,63 +252,113 @@ export function PreviewPanel({
         </p>
       )}
 
-      {data && (
-        <>
-          <div className="mt-8 grid gap-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-            <figure>
-              <IllustrationFrame
-                src={data.coverUrl}
-                alt={t('coverAlt', { title: data.title })}
-                busy={busy === 'cover'}
-                busyLabel={t('regenerating')}
-              />
-              <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                <span className="font-display text-lg font-semibold">{t('cover')}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={!canRegenerate}
-                  onClick={() => void regenerate('cover')}
-                >
-                  <RefreshCw aria-hidden="true" />
-                  {t('regenerate')}
-                </Button>
-              </figcaption>
-            </figure>
-
-            <aside className="self-start rounded-xl border bg-card p-6 shadow-[var(--shadow-card)]">
-              <h2 className="text-xl font-semibold">{t('differencesTitle')}</h2>
-              <ul className="mt-3 grid gap-2 text-muted-foreground">
-                <li>
-                  {t('differencesPages', { total: data.totalPages, shown: data.pages.length })}
-                </li>
-                <li>{t('differencesWatermark')}</li>
-                <li>{t('differencesEdit')}</li>
-              </ul>
-              <p className="mt-4 text-sm font-bold text-primary">
-                {t('regenerationsLeft', { count: preview?.regenerationsLeft ?? 0 })}
-              </p>
-            </aside>
-          </div>
-
-          <ol className="mt-12 grid gap-10">
-            {data.pages.map((page) => (
-              <PreviewPage
-                key={page.index}
-                bookId={book.id}
-                page={page}
-                busy={busy === page.index}
-                canRegenerate={canRegenerate}
-                onRegenerate={() => void regenerate(page.index)}
-                onSaved={setPreview}
-                onError={setError}
-              />
-            ))}
-          </ol>
-        </>
+      {data?.stage === 'character' && data.character && (
+        <div className="mt-8 grid gap-10 [&>*]:min-w-0">
+          <CharacterReview
+            bookId={book.id}
+            childName={childName}
+            character={data.character}
+            regenerationsLeft={regenerationsLeft}
+            onUpdated={setPreview}
+            onError={setError}
+          />
+          <section aria-labelledby="read-while" className="grid gap-4 [&>*]:min-w-0">
+            <h2 id="read-while" className="text-2xl font-semibold">
+              {t('readWhile')}
+            </h2>
+            <BookViewer
+              title={data.title}
+              pages={viewerPages(data)}
+              imageAlt={(page) =>
+                page.kind === 'cover'
+                  ? t('coverAlt', { title: data.title })
+                  : t('pageAlt', { number: page.number ?? 0 })
+              }
+              lockedLabel={tViewer('locked')}
+            />
+          </section>
+        </div>
       )}
 
-      {data && user?.isAnonymous && (
+      {data?.stage === 'complete' && (
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] [&>*]:min-w-0">
+          <div className="grid gap-4 [&>*]:min-w-0">
+            <BookViewer
+              title={data.title}
+              pages={viewerPages(data)}
+              imageAlt={(page) =>
+                page.kind === 'cover'
+                  ? t('coverAlt', { title: data.title })
+                  : t('pageAlt', { number: page.number ?? 0 })
+              }
+              lockedLabel={tViewer('locked')}
+              actions={actions}
+              onPageChange={() => {
+                setEditing(null);
+              }}
+            />
+            {editing && (
+              <div className="grid gap-3 rounded-xl border bg-card p-4">
+                <label htmlFor="page-text-editor" className="font-bold">
+                  {t('textLabel', { number: editing.index + 1 })}
+                </label>
+                <textarea
+                  id="page-text-editor"
+                  value={editing.text}
+                  maxLength={PREVIEW_PAGE_TEXT_MAX}
+                  rows={6}
+                  onChange={(event) => {
+                    setEditing({ ...editing, text: event.target.value });
+                  }}
+                  className="w-full rounded-lg border bg-card p-3 text-lg leading-relaxed"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    disabled={saving || editing.text.trim().length === 0}
+                    onClick={() => void saveText()}
+                  >
+                    {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
+                    {t('saveText')}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setEditing(null);
+                    }}
+                  >
+                    {t('cancel')}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <aside className="self-start rounded-xl border bg-card p-6 shadow-[var(--shadow-card)]">
+            {data.character?.approved && (
+              <p className="mb-3 inline-flex items-center gap-1.5 text-sm font-bold text-success">
+                <CheckCircle2 className="size-4" aria-hidden="true" />
+                {t('approvedBadge')}
+              </p>
+            )}
+            <h2 className="text-xl font-semibold">{t('differencesTitle')}</h2>
+            <ul className="mt-3 grid gap-2 text-muted-foreground">
+              <li>
+                {t('differencesPages', {
+                  total: data.totalPages,
+                  shown: data.pages.filter((page) => page.imageUrl).length,
+                })}
+              </li>
+              <li>{t('differencesWatermark')}</li>
+              <li>{t('differencesEdit')}</li>
+            </ul>
+            <p className="mt-4 text-sm font-bold text-primary">
+              {t('regenerationsLeft', { count: regenerationsLeft })}
+            </p>
+          </aside>
+        </div>
+      )}
+
+      {data?.stage === 'complete' && user?.isAnonymous && (
         <section
           aria-labelledby="save-story"
           className="mt-12 grid gap-6 rounded-xl bg-secondary p-6 sm:p-8 md:grid-cols-2 md:items-center"
@@ -240,154 +387,5 @@ export function PreviewPanel({
         </div>
       </div>
     </div>
-  );
-}
-
-function IllustrationFrame({
-  src,
-  alt,
-  busy,
-  busyLabel,
-}: {
-  src: string | null;
-  alt: string;
-  busy: boolean;
-  busyLabel: string;
-}) {
-  return (
-    <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-muted shadow-[var(--shadow-card)]">
-      {src && (
-        // URL firmada de corta duración: no pasa por el optimizador de imágenes.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={alt} className="size-full object-cover" />
-      )}
-      {busy && (
-        <div
-          role="status"
-          className="absolute inset-0 grid place-items-center bg-background/70 text-sm font-bold"
-        >
-          <span className="inline-flex items-center gap-2">
-            <Loader2 className="size-5 animate-spin" aria-hidden="true" />
-            {busyLabel}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function PreviewPage({
-  bookId,
-  page,
-  busy,
-  canRegenerate,
-  onRegenerate,
-  onSaved,
-  onError,
-}: {
-  bookId: string;
-  page: NonNullable<PublicPreview['preview']>['pages'][number];
-  busy: boolean;
-  canRegenerate: boolean;
-  onRegenerate: () => void;
-  onSaved: (preview: PublicPreview) => void;
-  onError: (key: string | null) => void;
-}) {
-  const t = useTranslations('Wizard.preview');
-  const [editing, setEditing] = useState(false);
-  const [text, setText] = useState(page.text);
-  const [saving, setSaving] = useState(false);
-  const number = page.index + 1;
-  const fieldId = `page-text-${String(page.index)}`;
-
-  async function save() {
-    setSaving(true);
-    onError(null);
-    try {
-      onSaved(
-        await api('updatePreviewPage', {
-          params: { bookId, index: String(page.index) },
-          body: { text },
-        }),
-      );
-      setEditing(false);
-    } catch (caught) {
-      onError(previewErrorKey(caught));
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <li className="grid items-start gap-6 md:grid-cols-2">
-      <div>
-        <IllustrationFrame
-          src={page.imageUrl}
-          alt={t('pageAlt', { number })}
-          busy={busy}
-          busyLabel={t('regenerating')}
-        />
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mt-3"
-          disabled={!canRegenerate}
-          onClick={onRegenerate}
-        >
-          <RefreshCw aria-hidden="true" />
-          {t('regenerate')}
-        </Button>
-      </div>
-      <div>
-        <h2 className="font-display text-lg font-semibold">{t('page', { number })}</h2>
-        {editing ? (
-          <div className="mt-3 grid gap-3">
-            <label htmlFor={fieldId} className="sr-only">
-              {t('textLabel', { number })}
-            </label>
-            <textarea
-              id={fieldId}
-              value={text}
-              maxLength={800}
-              rows={6}
-              onChange={(event) => {
-                setText(event.target.value);
-              }}
-              className="w-full rounded-lg border bg-card p-3 text-lg leading-relaxed"
-            />
-            <div className="flex gap-2">
-              <Button disabled={saving || text.trim().length === 0} onClick={() => void save()}>
-                {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
-                {t('saveText')}
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setText(page.text);
-                  setEditing(false);
-                }}
-              >
-                {t('cancel')}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <p className="mt-3 font-display text-xl leading-relaxed">{page.text}</p>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-3"
-              onClick={() => {
-                setEditing(true);
-              }}
-            >
-              <Pencil aria-hidden="true" />
-              {t('editText')}
-            </Button>
-          </>
-        )}
-      </div>
-    </li>
   );
 }

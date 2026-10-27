@@ -40,6 +40,12 @@ Prioridades: **P0** bloquea vender · **P1** calidad o servicio · **P2** optimi
 
 ## 3. Fase nueva 07d (antes del pipeline): P0 que se resuelven ya, sin costo de IA
 
+> **Estado:** hecha el 2026-10-27 (DECISIONS 064). Ajustes respecto del plan:
+>
+> - La muestra se divide en 2 etapas: primero el cuento completo y la lámina; recién con la aprobación se ilustran la portada y 2 páginas. Ilustrar pide cuenta gratis.
+> - Los códigos de QA son `character_approved` y `character_corrected` (en vez de `character_rejected`).
+> - Se sumó un visor del libro completo, tipo "echar un vistazo".
+
 1. **"¿Es él / es ella?"**
    - La muestra muestra la lámina del personaje (con marca de agua) junto con sus rasgos.
    - El adulto confirma o corrige pelo, piel, ojos y anteojos, y marca los rasgos que no pueden cambiar.

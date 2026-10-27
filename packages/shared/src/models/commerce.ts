@@ -5,6 +5,7 @@ import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 import { orderStatusSchema } from '../order-status';
 import { avatarSchema, characterModeSchema, memoriesSchema } from './character';
+import { characterTraitsSchema, mustKeepSchema } from './character';
 import { channelSchema } from './channels';
 import {
   bookLengthSchema,
@@ -129,7 +130,23 @@ export const PREVIEW_ILLUSTRATED_PAGES = 2;
 /** Vista previa: texto completo del cuento, portada y las primeras páginas ilustradas. */
 export const bookPreviewSchema = z.object({
   title: z.string(),
-  cover: z.object({ imagePath: z.string(), previewImagePath: z.string() }),
+  /**
+   * Etapa: primero se aprueba el personaje ("character"); recién después se ilustran la
+   * portada y las primeras páginas ("complete"). Las muestras anteriores son "complete".
+   */
+  stage: z.enum(['character', 'complete']).optional(),
+  /** null mientras el personaje no está aprobado. */
+  cover: z.object({ imagePath: z.string(), previewImagePath: z.string() }).nullable(),
+  /** Lámina del personaje con su versión de vista previa y los rasgos confirmados. */
+  character: z
+    .object({
+      imagePath: z.string(),
+      previewImagePath: z.string(),
+      traits: characterTraitsSchema,
+      mustKeep: mustKeepSchema,
+      approvedAt: z.date().nullable(),
+    })
+    .optional(),
   /** Lámina del personaje (referencia interna de cada ilustración; el cliente no la ve). */
   characterImagePath: z.string().nullable().optional(),
   pages: z.array(bookPageSchema),
@@ -187,6 +204,11 @@ export const bookSchema = timestampsSchema
     previewError: z.string().nullable().optional(),
     /** Solo servidor: inicio de la generación en curso (para destrabar intentos colgados). */
     previewStartedAt: z.date().nullable().optional(),
+    /** Solo servidor: rasgos confirmados por el adulto (sobreviven a una nueva muestra). */
+    characterTraits: characterTraitsSchema.nullable().optional(),
+    mustKeep: mustKeepSchema.optional(),
+    /** Foto o rasgos sobre los que se confirmaron los rasgos: si cambian, dejan de valer. */
+    characterBase: z.string().nullable().optional(),
     /** Solo servidor: costo de IA acumulado del libro, en millonésimas de dólar. */
     aiCostUsdMicros: z.number().int().nonnegative().optional(),
   })
