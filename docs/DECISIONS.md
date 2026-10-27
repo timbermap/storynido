@@ -752,7 +752,7 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - piezas de Eventos (invitación, tarjetas, stickers), en la fase 12b;
   - lector web de la entrega digital, en la fase 12;
   - especificaciones exactas por SKU (sangrado, páginas, lomo), en la fase 12 con Gelato.
-- **Bloqueo conocido:** la portada y las 2 páginas aprobadas en la vista previa son 1K (~105 dpi), así que hoy un pedido impreso se bloquea por resolución. Ver la pregunta abierta sobre la etapa 2 en 2K.
+- **Resolución de lo aprobado en la vista previa:** resuelto en DECISIONS 071 (etapa 2 en 2K).
 
 ## 071 · Etapa 2 de la vista previa en 2K
 
