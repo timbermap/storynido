@@ -12,6 +12,7 @@ import { registerAccountRoutes } from './routes/accounts';
 import { registerAiConfigRoutes } from './routes/ai-config';
 import { registerCatalogRoutes } from './routes/catalog';
 import { registerDevStorageRoutes } from './routes/dev-storage';
+import { registerOrderRoutes } from './routes/orders';
 import { registerPhotoRoutes } from './routes/photos';
 import { registerPreviewRoutes } from './routes/previews';
 import { registerV1Routes } from './routes/v1';
@@ -49,6 +50,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   registerPreviewRoutes(app, deps.previews);
   registerAiConfigRoutes(app, deps.db);
   registerAccountRoutes(app, deps.accounts);
+  registerOrderRoutes(app);
   extend?.(app);
 
   const storage = deps.providers.storage();

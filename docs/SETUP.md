@@ -49,6 +49,13 @@ pnpm --filter @storynido/firebase set-role --project storynido-staging --email t
 - Análisis: `photo_analyzer` en `infra/envs/<ambiente>/variables.tf` (`mock` o `vision`). Cloud Vision tiene costo por imagen después de las 1.000 gratis por mes.
 - En local se usa el almacenamiento en disco (`LOCAL_STORAGE_DIR`) y el análisis simulado.
 
+## 5b. Pipeline del pedido (fase 08)
+
+- **Local:** con los emuladores y la API corriendo, levantá el worker con `pnpm --filter @storynido/worker dev` (puerto 8081). La API le manda los eventos directo (`PIPELINE_EVENTS=worker`, por defecto en local) y el worker orquesta y reparte las páginas en el mismo proceso.
+- **Probarlo:** con un libro en vista previa lista, `POST /v1/dev/books/<bookId>/paid-order` (solo fuera de producción) crea un pedido pagado simulado y dispara el pipeline. El estado se ve en `GET /v1/admin/orders/<orderId>/pipeline`.
+- **Nube:** API → Pub/Sub (`order-events`) → worker → Cloud Workflows (`infra/workflows/order-pipeline.yaml`) → worker por paso; las páginas van por Cloud Tasks (`illustrations`). El worker no es público: solo lo llaman las cuentas invocadoras con OIDC.
+- **Pedido trabado:** queda en `qa_failed` con un aviso en `adminAlerts`. El admin reintenta un paso (`POST /v1/admin/orders/<id>/retry`) o regenera el libro (`POST /v1/admin/orders/<id>/regenerate`).
+
 ## 6. Secretos por plataforma
 
 Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cuando su fase lo necesita. En local, el mismo valor va en `.env.local`.

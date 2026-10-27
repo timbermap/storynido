@@ -291,6 +291,9 @@ importers:
       fastify:
         specifier: 5.12.7
         version: 5.12.7
+      firebase-admin:
+        specifier: 14.5.0
+        version: 14.5.0(@firebase/app-compat@0.5.20)(@firebase/app@0.16.4)(supports-color@7.2.0)
       zod:
         specifier: 4.3.3
         version: 4.3.3

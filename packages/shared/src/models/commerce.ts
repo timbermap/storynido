@@ -7,6 +7,7 @@ import { orderStatusSchema } from '../order-status';
 import { avatarSchema, characterModeSchema, memoriesSchema } from './character';
 import { characterTraitsSchema, mustKeepSchema } from './character';
 import { channelSchema } from './channels';
+import { orderPipelineSchema } from './pipeline';
 import {
   bookLengthSchema,
   contentTypeSchema,
@@ -240,12 +241,26 @@ export const addressSchema = z.object({
   phone: z.string().max(30).nullable(),
 });
 
+export const ORDER_PIECES = ['book'] as const;
+
+/** Una línea del pedido: pieza, formato y cantidad. */
+export const orderItemSchema = z.object({
+  piece: z.enum(ORDER_PIECES).default('book'),
+  format: bookFormatSchema,
+  quantity: z.number().int().min(1).max(500),
+});
+
+export type OrderItem = z.infer<typeof orderItemSchema>;
+
 /** orders/{orderId}: solo servidor (precios, estado y costos nunca los escribe el cliente). */
 export const orderSchema = timestampsSchema.extend({
   ownerUid: uidSchema,
   bookId: z.string().min(1),
   status: orderStatusSchema,
-  format: bookFormatSchema,
+  /** Línea comercial del pedido (los pedidos anteriores son de Familias). */
+  channel: channelSchema.default('families'),
+  /** Líneas del pedido: todas salen de un solo diseño (Eventos imprime N copias). */
+  items: z.array(orderItemSchema).min(1),
   country: countryCodeSchema,
   currency: currencySchema,
   amounts: moneyBreakdownSchema,
@@ -265,34 +280,20 @@ export const orderSchema = timestampsSchema.extend({
       trackingUrl: z.url().nullable(),
     })
     .nullable(),
-  /** Costos reales en USD (centavos) para el cálculo de margen. */
-  costsUsdMinor: z.object({
+  /** Costos reales en millonésimas de dólar para el cálculo de margen. */
+  costsUsdMicros: z.object({
     ai: z.number().int().nonnegative(),
     print: z.number().int().nonnegative(),
     shipping: z.number().int().nonnegative(),
   }),
+  pipeline: orderPipelineSchema.default({
+    generation: 0,
+    runId: null,
+    startedAt: null,
+    finishedAt: null,
+    failedStep: null,
+    error: null,
+  }),
 });
 
 export type Order = z.infer<typeof orderSchema>;
-
-export const PIPELINE_STEPS = [
-  'prepare_photo',
-  'generate_story',
-  'generate_illustrations',
-  'quality_check',
-  'layout_pdf',
-  'deliver',
-] as const;
-
-/** orders/{orderId}/steps/{stepId}: historial del pipeline. Solo servidor. */
-export const orderStepSchema = z.object({
-  name: z.enum(PIPELINE_STEPS),
-  status: z.enum(['pending', 'running', 'succeeded', 'failed', 'skipped']),
-  attempts: z.number().int().nonnegative(),
-  startedAt: z.date().nullable(),
-  finishedAt: z.date().nullable(),
-  error: z.string().nullable(),
-  costUsdMinor: z.number().int().nonnegative(),
-});
-
-export type OrderStep = z.infer<typeof orderStepSchema>;

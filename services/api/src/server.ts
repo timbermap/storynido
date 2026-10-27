@@ -14,6 +14,7 @@ import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
+import { PubSubPublisher, WorkerHttpPublisher } from './orders/events';
 import {
   FirebaseAppCheckVerifier,
   FirebaseAuthAccounts,
@@ -79,6 +80,10 @@ const app = await buildApp({
     photos: new PhotoService(db, providers),
     previews: new PreviewService(db, providers, catalog, log),
     accounts: new AccountService(db, tokens, new FirebaseAuthAccounts(firebase)),
+    pipelineEvents:
+      config.pipelineEvents === 'pubsub'
+        ? new PubSubPublisher(config.projectId, config.env.ORDER_EVENTS_TOPIC)
+        : new WorkerHttpPublisher(config.env.WORKER_URL),
     db,
   },
 });

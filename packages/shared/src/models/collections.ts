@@ -12,6 +12,12 @@ export const COLLECTIONS = {
   books: 'books',
   orders: 'orders',
   orderSteps: 'steps',
+  /** orders/{orderId}/events/{requestId}: eventos del pipeline ya procesados (deduplicación). */
+  orderEvents: 'events',
+  /** orders/{orderId}/steps/generate_illustrations/pages/{index}. */
+  illustrationTasks: 'pages',
+  /** adminAlerts/{id}: avisos para el admin (solo servidor). */
+  adminAlerts: 'adminAlerts',
   /** books/{bookId}/qaEvents: controles de calidad del libro (solo servidor). */
   qaEvents: 'qaEvents',
   countries: 'countries',

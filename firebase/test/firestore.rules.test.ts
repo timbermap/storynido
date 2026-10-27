@@ -424,6 +424,21 @@ describe('orders', () => {
     await assertFails(deleteDoc(doc(alice(), 'orders', 'o1')));
   });
 
+  it('eventos, tareas por página y avisos del pipeline: solo lectura para admins', async () => {
+    await seed('orders/o1/events/paid:o1', { type: 'order.paid' });
+    await seed('orders/o1/steps/generate_illustrations/pages/0', { status: 'succeeded' });
+    await seed('adminAlerts/a1', { kind: 'pipeline_failed', orderId: 'o1' });
+    for (const path of [
+      'orders/o1/events/paid:o1',
+      'orders/o1/steps/generate_illustrations/pages/0',
+      'adminAlerts/a1',
+    ]) {
+      await assertFails(getDoc(doc(alice(), path)));
+      await assertSucceeds(getDoc(doc(admin(), path)));
+      await assertFails(setDoc(doc(admin(), path), { status: 'x' }));
+    }
+  });
+
   it('ni un admin escribe pedidos desde el cliente (solo la API)', async () => {
     await assertSucceeds(getDoc(doc(admin(), 'orders', 'o1')));
     await assertFails(updateDoc(doc(admin(), 'orders', 'o1'), { status: 'refunded' }));

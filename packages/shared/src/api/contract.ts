@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { countryCodeSchema } from '../countries';
 import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
-import { BOOK_FORMATS } from '../models/common';
+import { BOOK_FORMATS, bookFormatSchema } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
 import { characterTraitsSchema, mustKeepSchema } from '../models/character';
 import { channelSchema, personalizationSchema } from '../models/channels';
@@ -15,7 +15,9 @@ import {
   readingLevelSchema,
   textDensitySchema,
 } from '../models/editorial';
+import { pipelineStepSchema } from '../models/pipeline';
 import { PHOTO_STATUSES } from '../models/users';
+import { orderStatusSchema } from '../order-status';
 import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
 import { roleSchema } from '../roles';
 
@@ -96,6 +98,51 @@ export const adminAiConfigResponseSchema = z.object({
   }),
   spentTodayUsd: z.number(),
   available: z.object({ text: z.array(z.string()), image: z.array(z.string()) }),
+});
+
+// --- Pipeline del pedido (admin) ------------------------------------------------
+
+export const adminOrderPipelineResponseSchema = z.object({
+  orderId: z.string(),
+  status: orderStatusSchema,
+  channel: channelSchema,
+  pipeline: z.object({
+    generation: z.number().int(),
+    runId: z.string().nullable(),
+    startedAt: z.string().nullable(),
+    finishedAt: z.string().nullable(),
+    failedStep: pipelineStepSchema.nullable(),
+    error: z.string().nullable(),
+  }),
+  steps: z.array(
+    z.object({
+      name: pipelineStepSchema,
+      status: z.string(),
+      generation: z.number().int(),
+      attempts: z.number().int(),
+      durationMs: z.number().int().nullable(),
+      error: z.string().nullable(),
+      costUsdMicros: z.number().int(),
+    }),
+  ),
+  costsUsdMicros: z.object({ ai: z.number(), print: z.number(), shipping: z.number() }),
+});
+
+export type AdminOrderPipeline = z.infer<typeof adminOrderPipelineResponseSchema>;
+
+export const pipelineRequestResponseSchema = z.object({
+  accepted: z.literal(true),
+  requestId: z.string(),
+});
+
+export const devPaidOrderBodySchema = z.object({
+  format: bookFormatSchema.default('digital'),
+  quantity: z.number().int().min(1).max(500).default(1),
+});
+
+export const devPaidOrderResponseSchema = z.object({
+  orderId: z.string(),
+  requestId: z.string(),
 });
 
 // --- Vista previa ---------------------------------------------------------------
@@ -509,6 +556,42 @@ export const apiRoutes = {
       'Cambia proveedor, modelos, límites o presupuesto de IA (efecto inmediato, queda en auditoría)',
     body: aiConfigUpdateSchema,
     response: adminAiConfigResponseSchema,
+  },
+  adminOrderPipeline: {
+    method: 'GET',
+    path: '/v1/admin/orders/:orderId/pipeline',
+    access: 'admin',
+    summary: 'Estado del pipeline del pedido: pasos, intentos, errores y costos',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: adminOrderPipelineResponseSchema,
+  },
+  adminRetryOrderStep: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/retry',
+    access: 'admin',
+    summary:
+      'Reintenta un pedido en revisión desde un paso (por defecto el que falló); queda en auditoría',
+    params: z.object({ orderId: z.string().min(1) }),
+    body: z.object({ fromStep: pipelineStepSchema.optional() }),
+    response: pipelineRequestResponseSchema,
+  },
+  adminRegenerateOrder: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/regenerate',
+    access: 'admin',
+    summary: 'Regenera el libro completo (nueva generación); queda en auditoría',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: pipelineRequestResponseSchema,
+  },
+  devPaidOrder: {
+    method: 'POST',
+    path: '/v1/dev/books/:bookId/paid-order',
+    access: 'user',
+    summary:
+      'Solo desarrollo y staging: crea un pedido pagado del libro y dispara el pipeline (pagos simulados)',
+    params: z.object({ bookId: z.string().min(1) }),
+    body: devPaidOrderBodySchema,
+    response: devPaidOrderResponseSchema,
   },
   adminProviders: {
     method: 'GET',

@@ -20,6 +20,10 @@
     "@storynido/api#test": {
       "dependsOn": ["@storynido/firebase#test"],
       "outputs": []
+    },
+    "@storynido/worker#test": {
+      "dependsOn": ["@storynido/api#test"],
+      "outputs": []
     }
   }
 }

@@ -283,7 +283,14 @@ module "worker" {
   timeout_seconds     = 900
   deletion_protection = var.deletion_protection
   labels              = local.labels
-  env                 = local.common_env
+  env = merge(local.common_env, {
+    # Cloud Workflows orquesta y Cloud Tasks reparte las páginas (en local, todo en el worker).
+    PIPELINE_RUNNER    = "cloud"
+    WORKFLOW_NAME      = "order-pipeline"
+    ILLUSTRATION_QUEUE = "illustrations"
+    # URL determinística del propio servicio: destino de las tareas de Cloud Tasks.
+    WORKER_URL = "https://worker-${data.google_project.this.number}.${var.region}.run.app"
+  })
 
   invokers = {
     invoker   = local.member["sn-invoker"]
@@ -344,22 +351,19 @@ module "messaging" {
   region         = var.region
   labels         = local.labels
 
-  topics = ["order-paid", "order-events"]
+  # order.paid, order.retry_step y order.regenerate (API -> worker).
+  topics = ["order-events"]
 
   push_subscriptions = {
-    order-paid-to-worker = {
-      topic                = "order-paid"
-      push_endpoint        = "${module.worker.uri}/pubsub/order-paid"
+    order-events-to-worker = {
+      topic                = "order-events"
+      push_endpoint        = "${module.worker.uri}/events/pubsub"
       oidc_service_account = local.sa["sn-invoker"]
     }
   }
 
   queues = {
-    pipeline-steps = {
-      max_dispatches_per_second = 10
-      max_concurrent_dispatches = 50
-      max_attempts              = 5
-    }
+    # Una tarea por página; el ritmo limita las llamadas al modelo de imágenes.
     illustrations = {
       max_dispatches_per_second = 5
       max_concurrent_dispatches = 20

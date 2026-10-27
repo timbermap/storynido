@@ -28,6 +28,11 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   BUCKET_PHOTOS: z.string().optional(),
   BUCKET_ASSETS: z.string().optional(),
   BUCKET_PDFS: z.string().optional(),
+  /** Worker del pipeline (en local, la API le manda los eventos directo). */
+  WORKER_URL: z.url().default('http://localhost:8081'),
+  /** "worker": eventos directo al worker (local); "pubsub": tema de Pub/Sub (nube). */
+  PIPELINE_EVENTS: z.enum(['worker', 'pubsub']).optional(),
+  ORDER_EVENTS_TOPIC: z.string().default('order-events'),
 });
 
 export type ApiEnv = z.infer<typeof apiConfigSchema>;
@@ -41,6 +46,7 @@ export interface ApiConfig {
   rateLimitPerMinute: number;
   /** Swagger UI y rutas /dev solo fuera de producción. */
   devToolsEnabled: boolean;
+  pipelineEvents: 'worker' | 'pubsub';
 }
 
 export function loadApiConfig(source: Readonly<Record<string, string | undefined>>): ApiConfig {
@@ -60,5 +66,6 @@ export function loadApiConfig(source: Readonly<Record<string, string | undefined
     appCheckEnforced: env.APP_CHECK_ENFORCED ?? env.APP_ENV === 'production',
     rateLimitPerMinute: env.RATE_LIMIT_PER_MINUTE,
     devToolsEnabled: env.APP_ENV !== 'production',
+    pipelineEvents: env.PIPELINE_EVENTS ?? (isLocal ? 'worker' : 'pubsub'),
   };
 }

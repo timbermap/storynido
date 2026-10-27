@@ -1,22 +1,161 @@
-# Pipeline de generación de un pedido pagado.
-# PLACEHOLDER: los pasos reales (foto, historia, ilustraciones, QA, PDF, entrega)
-# se implementan en la fase 08. Por ahora solo registra la ejecución.
+# Pipeline de un pedido pagado (fase 08).
+#
+# Lo arranca el worker al recibir el evento order.paid / order.retry_step / order.regenerate,
+# con el argumento:
+#   { orderId, runId, generation, steps: [{ name, maxAttempts, timeoutSeconds }] }
+# Las políticas de cada paso salen de STEP_POLICIES (packages/shared): una sola fuente.
+# El orquestador local (services/worker/src/pipeline/orchestrators.ts) hace exactamente lo mismo.
+#
+# Respuestas del worker al correr un paso:
+#   succeeded | skipped -> siguiente paso
+#   waiting             -> ilustraciones repartidas en Cloud Tasks: consultar hasta que terminen
+#   busy                -> otro intento tiene el paso: esperar y volver a llamar (no cuenta)
+#   stale               -> la ejecución ya no corresponde (regenerado o cambió el estado): fin
+#   HTTP 5xx / timeout  -> intento fallido: espera exponencial; al agotar, revisión manual
 main:
-  params: [event]
+  params: [run]
   steps:
     - init:
         assign:
-          - order_id: ${map.get(event, "orderId")}
-          - worker_url: ${sys.get_env("WORKER_URL")}
-    - log_start:
-        call: sys.log
-        args:
-          severity: INFO
-          json:
-            message: order-pipeline placeholder
-            orderId: ${order_id}
-            workerUrl: ${worker_url}
+          - worker: ${sys.get_env("WORKER_URL")}
+    - eachStep:
+        for:
+          value: step
+          in: ${run.steps}
+          steps:
+            - runOne:
+                call: runStep
+                args:
+                  worker: ${worker}
+                  run: ${run}
+                  step: ${step}
+                result: outcome
+            - stopEarly:
+                switch:
+                  - condition: ${outcome == "stale"}
+                    return:
+                      orderId: ${run.orderId}
+                      state: stale
+                  - condition: ${outcome == "failed"}
+                    return:
+                      orderId: ${run.orderId}
+                      state: qa_failed
+    - finish:
+        try:
+          call: http.post
+          args:
+            url: ${worker + "/pipeline/orders/" + run.orderId + "/finish"}
+            auth:
+              type: OIDC
+            body:
+              runId: ${run.runId}
+        retry: ${http.default_retry}
     - done:
         return:
-          orderId: ${order_id}
-          status: placeholder
+          orderId: ${run.orderId}
+          state: ready
+
+# Un paso con sus reintentos. Devuelve "succeeded", "stale" o "failed".
+runStep:
+  params: [worker, run, step]
+  steps:
+    - init:
+        assign:
+          - attempt: 0
+          - delay: 2
+          - lastError: ''
+          - target:
+              orderId: ${run.orderId}
+              generation: ${run.generation}
+    - callStep:
+        try:
+          call: http.post
+          args:
+            url: ${worker + "/pipeline/steps/" + step.name + "/run"}
+            auth:
+              type: OIDC
+            body: ${target}
+            timeout: ${step.timeoutSeconds}
+          result: res
+        except:
+          as: e
+          steps:
+            - keepError:
+                assign:
+                  - lastError: ${text.substring(json.encode_to_string(e), 0, 1500)}
+            - toFailure:
+                next: attemptFailed
+    - route:
+        switch:
+          - condition: ${res.body.state == "stale"}
+            return: stale
+          - condition: ${res.body.state == "busy"}
+            next: waitBusy
+          - condition: ${res.body.state == "waiting"}
+            next: pollIllustrations
+    - succeeded:
+        return: succeeded
+
+    - waitBusy:
+        call: sys.sleep
+        args:
+          seconds: 10
+        next: callStep
+
+    - pollIllustrations:
+        call: sys.sleep
+        args:
+          seconds: 10
+    - illustrationStatus:
+        try:
+          call: http.post
+          args:
+            url: ${worker + "/pipeline/illustrations/status"}
+            auth:
+              type: OIDC
+            body: ${target}
+          result: status
+        retry: ${http.default_retry}
+    - routeStatus:
+        switch:
+          - condition: ${status.body.state == "succeeded"}
+            return: succeeded
+          - condition: ${status.body.state == "stale"}
+            return: stale
+          - condition: ${status.body.state == "failed"}
+            next: pagesFailed
+        next: pollIllustrations
+    - pagesFailed:
+        assign:
+          - lastError: ${status.body.error}
+
+    - attemptFailed:
+        assign:
+          - attempt: ${attempt + 1}
+    - giveUp:
+        switch:
+          - condition: ${attempt >= step.maxAttempts}
+            next: failOrder
+    - backoff:
+        call: sys.sleep
+        args:
+          seconds: ${delay}
+    - growDelay:
+        assign:
+          - delay: ${math.min(delay * 2, 60)}
+        next: callStep
+
+    - failOrder:
+        try:
+          call: http.post
+          args:
+            url: ${worker + "/pipeline/orders/" + run.orderId + "/fail"}
+            auth:
+              type: OIDC
+            body:
+              runId: ${run.runId}
+              step: ${step.name}
+              error: ${lastError}
+        retry: ${http.default_retry}
+    - failed:
+        return: failed

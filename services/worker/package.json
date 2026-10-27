@@ -9,10 +9,11 @@
     "start": "node dist/server.mjs",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc",
-    "test": "vitest run"
+    "test": "../../firebase/scripts/with-test-emulators.sh vitest run"
   },
   "dependencies": {
     "fastify": "5.12.7",
+    "firebase-admin": "14.5.0",
     "zod": "4.3.3"
   },
   "devDependencies": {

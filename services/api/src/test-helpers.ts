@@ -13,6 +13,7 @@ import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
+import { RecordingPublisher } from './orders/events';
 import {
   StaticSiteConfigSource,
   type AppCheckVerifier,
@@ -91,6 +92,7 @@ export async function createTestApp(
         return Promise.resolve();
       },
     }),
+    pipelineEvents: new RecordingPublisher(),
     db,
     ...overrides,
   };

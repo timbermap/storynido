@@ -231,7 +231,25 @@ service cloud.firestore {
         allow read: if isAdmin()
           || (signedIn() && get(/databases/$(database)/documents/orders/$(orderId)).data.ownerUid == request.auth.uid);
         allow write: if false;
+
+        // Tareas por página de las ilustraciones: internas del pipeline.
+        match /pages/{index} {
+          allow read: if isAdmin();
+          allow write: if false;
+        }
       }
+
+      // Eventos del pipeline ya procesados (deduplicación): solo el worker.
+      match /events/{requestId} {
+        allow read: if isAdmin();
+        allow write: if false;
+      }
+    }
+
+    // Avisos para el admin (pipeline trabado, pasos agotados): los escribe el worker.
+    match /adminAlerts/{alertId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // ------------------------------------------- catálogo y configuración

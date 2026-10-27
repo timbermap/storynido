@@ -4,6 +4,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 
 import type { AccountService } from './accounts/service';
 import type { CatalogRepository } from './catalog';
+import type { PipelineEventPublisher } from './orders/events';
 import type { ApiConfig } from './config';
 import type { PhotoService } from './photos/service';
 import type { PreviewService } from './preview/service';
@@ -40,6 +41,8 @@ export interface ApiDeps {
   photos: PhotoService;
   previews: PreviewService;
   accounts: AccountService;
+  /** Eventos del pipeline del pedido (worker directo en local, Pub/Sub en la nube). */
+  pipelineEvents: PipelineEventPublisher;
   db: Firestore;
 }
 

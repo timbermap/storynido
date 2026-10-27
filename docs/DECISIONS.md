@@ -632,3 +632,30 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - La ficha de cada historia tiene "Hojear un ejemplo" (portada, dedicatoria, fragmento) con el mismo visor.
   - Los libros de ejemplo completos (~USD 7) se generan cuando el producto esté terminado.
 - **Formulario en curso:** lo escrito en "Protagonista" y "Recuerdos" se guarda en el navegador (`localStorage`, 7 días) y se borra al guardar el paso.
+
+## 065 · Pipeline del pedido: worker idempotente, Workflows y Cloud Tasks
+
+- **Fecha:** 2026-10-27 · **Fase:** 08.
+- **Estados del pedido:** las transiciones válidas están en `ORDER_TRANSITIONS` (`packages/shared`). Todo cambio de estado pasa por `assertOrderTransition`.
+  - `qa_failed` es la revisión manual: desde ahí se vuelve a generar o se reembolsa.
+  - Desde `ready` el admin también puede regenerar antes de enviar.
+- **Flujo en la nube:**
+  1. La API publica el evento (`order.paid`, `order.retry_step` u `order.regenerate`) en Pub/Sub, tema `order-events`.
+  2. Una suscripción push con OIDC lo entrega al worker, que deduplica por `requestId`, cambia el pedido a `generating` y arranca Cloud Workflows.
+  3. El workflow llama al worker paso por paso, con reintentos exponenciales.
+  4. Las ilustraciones se reparten en Cloud Tasks (una tarea por página, con el ritmo de la cola).
+- **En local**, el mismo algoritmo corre dentro del worker (`LocalOrchestrator`, `InlineDispatcher`). La API le manda los eventos por HTTP.
+- **Una sola fuente de políticas:** intentos y timeouts por paso están en `STEP_POLICIES`. El worker se los pasa al workflow como argumento.
+- **Idempotencia:**
+  - **Eventos:** duplicados ignorados (`orders/{id}/events/{requestId}`).
+  - **Pasos:** un paso terminado en la generación actual no se repite. Un paso en curso tiene dueño hasta que vence su lease.
+  - **Clave idempotente** por paso (`orderId:gN:paso`), la misma en todos los reintentos. Los proveedores (imprenta, pagos) la usan para no duplicar.
+  - **Páginas:** cada página es una tarea propia; reintentar las ilustraciones rehace solo las que fallaron.
+  - **Ejecuciones viejas:** cerrar o fallar una ejecución vieja no toca el pedido.
+- **Regenerar** sube la generación: cambian las claves y se rehace todo. **Reintentar** desde un paso rehace ese paso y los siguientes; si es antes de las ilustraciones, también todas las páginas.
+- **Registro:** `orders/{id}/steps/{paso}` guarda estado, intentos, duración, error, costo (millonésimas de dólar) y un resultado sin datos del niño. El costo se suma al pedido (`costsUsdMicros`).
+- **Fallas:** al agotar los reintentos, el pedido pasa a `qa_failed`, se crea `adminAlerts/{id}` y queda un log de severidad ERROR para la alerta de la fase 16.
+- **Pedido:** suma `channel` (Familias por defecto) e `items[]` (pieza, formato, cantidad). Eventos imprime N copias de un solo diseño.
+- **Pasos simulados:** en esta fase los pasos son simulados (`simulatedHandlers`), sin IA ni costo. La fase 09 conecta la historia, las ilustraciones y el QA reales; la 10 el PDF; la 12 la entrega.
+- **Disparo de prueba:** `POST /v1/dev/books/:bookId/paid-order`, solo fuera de producción, hasta tener pagos (fase 11).
+- **Seguridad:** el worker no es público. Cloud Run solo acepta OIDC de `sn-invoker` (Pub/Sub, Cloud Tasks) y `sn-workflows`. Las colecciones nuevas solo las escribe el servidor y solo las leen los admins.
