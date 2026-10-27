@@ -53,7 +53,7 @@ export function SignInPanel() {
   if (status.kind === 'sent') {
     return (
       <div className="space-y-3 text-center" role="status">
-        <h2 className="text-xl font-semibold">{t('checkEmailTitle')}</h2>
+        <h2 className="text-xl font-medium">{t('checkEmailTitle')}</h2>
         <p className="text-muted-foreground">{t('checkEmailText', { email: status.email })}</p>
         <Button
           variant="ghost"

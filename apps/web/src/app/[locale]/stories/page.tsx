@@ -75,7 +75,7 @@ export default async function StoriesPage({ params, searchParams }: Props) {
   return (
     <div className="container-page py-14">
       <header className="max-w-2xl">
-        <h1 className="text-4xl font-semibold sm:text-5xl">{t('title')}</h1>
+        <h1 className="text-4xl font-medium sm:text-5xl">{t('title')}</h1>
         <p className="mt-3 text-lg text-muted-foreground">{t('subtitle')}</p>
         <div className="mt-4">
           <CountryNotice display={display} />

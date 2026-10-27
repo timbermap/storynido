@@ -111,7 +111,7 @@ export function PreviewPanel({
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-semibold outline-none"
+          className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-medium outline-none"
         >
           {illustrating ? t('illustrating') : t('generatingTitle')}
         </h1>
@@ -207,14 +207,14 @@ export function PreviewPanel({
 
   return (
     <div className="container-page max-w-5xl py-10">
-      <p className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-black tracking-[0.08em] text-primary uppercase">
+      <p className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-bold tracking-[0.08em] text-primary uppercase">
         <Sparkles className="size-3.5" aria-hidden="true" />
         {t('badge')}
       </p>
       <h1
         ref={headingRef}
         tabIndex={-1}
-        className="mt-4 text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.1] font-semibold outline-none"
+        className="mt-4 text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.1] font-medium outline-none"
       >
         {data?.title ?? t('badge')}
       </h1>
@@ -263,7 +263,7 @@ export function PreviewPanel({
             onError={setError}
           />
           <section aria-labelledby="read-while" className="grid gap-4 [&>*]:min-w-0">
-            <h2 id="read-while" className="text-2xl font-semibold">
+            <h2 id="read-while" className="text-2xl font-medium">
               {t('readWhile')}
             </h2>
             <BookViewer
@@ -340,7 +340,7 @@ export function PreviewPanel({
                 {t('approvedBadge')}
               </p>
             )}
-            <h2 className="text-xl font-semibold">{t('differencesTitle')}</h2>
+            <h2 className="text-xl font-medium">{t('differencesTitle')}</h2>
             <ul className="mt-3 grid gap-2 text-muted-foreground">
               <li>
                 {t('differencesPages', {
@@ -364,7 +364,7 @@ export function PreviewPanel({
           className="mt-12 grid gap-6 rounded-xl bg-secondary p-6 sm:p-8 md:grid-cols-2 md:items-center"
         >
           <div>
-            <h2 id="save-story" className="text-2xl font-semibold">
+            <h2 id="save-story" className="text-2xl font-medium">
               {t('saveStoryTitle')}
             </h2>
             <p className="mt-2 text-muted-foreground">{t('saveStoryText')}</p>

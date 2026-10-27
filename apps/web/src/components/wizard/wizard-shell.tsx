@@ -92,7 +92,7 @@ export function WizardShell({
       </div>
 
       <nav aria-label={t('title')} className="mt-4 hidden sm:block">
-        <ol className="flex flex-wrap gap-2 text-xs font-extrabold">
+        <ol className="flex flex-wrap gap-2 text-xs font-semibold">
           {visible.map((step, visibleIndex) => {
             const index = WIZARD_STEPS.indexOf(step);
             const reachable = index <= maxReached;
@@ -126,7 +126,7 @@ export function WizardShell({
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className="text-3xl leading-tight font-semibold outline-none sm:text-4xl"
+          className="text-3xl leading-tight font-medium outline-none sm:text-4xl"
         >
           {title}
         </h1>

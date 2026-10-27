@@ -110,9 +110,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
               <Maintenance />
             ) : (
               <>
-                <SiteHeader country={display.country} countries={display.activeCountries} />
+                <SiteHeader />
                 <main id="main">{children}</main>
-                <SiteFooter />
+                <SiteFooter country={display.country} countries={display.activeCountries} />
               </>
             )}
             <ConsentBanner />

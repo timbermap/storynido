@@ -107,10 +107,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <section className="overflow-hidden">
         <div className="container-page grid items-center gap-6 pt-8 pb-10 lg:grid-cols-[1fr_1fr] lg:gap-8 lg:pt-14 lg:pb-16">
           <div className="text-center lg:text-left">
-            <p className="text-xs font-extrabold tracking-[0.2em] text-muted-foreground uppercase">
+            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
               {t('hero.kicker')}
             </p>
-            <h1 className="mt-5 text-[clamp(2.7rem,5.2vw,5.1rem)] leading-[1.02] font-semibold tracking-[-0.025em] lg:whitespace-nowrap">
+            <h1 className="mt-5 text-[clamp(2.7rem,5.2vw,5.1rem)] leading-[1.02] font-medium tracking-[-0.025em] lg:whitespace-nowrap">
               {t.rich('hero.headline', {
                 br: () => <br />,
                 hl: (chunks) => <span className="text-primary">{chunks}</span>,
@@ -132,7 +132,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </Link>
               <Link
                 href="/stories"
-                className="border-b-2 border-foreground/25 pb-0.5 text-lg font-extrabold transition-colors hover:border-primary hover:text-primary"
+                className="border-b-2 border-foreground/25 pb-0.5 text-lg font-semibold transition-colors hover:border-primary hover:text-primary"
               >
                 {t('hero.explore')}
               </Link>
@@ -164,7 +164,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* Cómo funciona */}
       <section id={HOW_IT_WORKS_ID} className="container-page scroll-mt-28 py-20 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
+          <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
             {t('how.title')}
           </h2>
           <p className="mt-3 text-lg text-muted-foreground">{t('how.subtitle')}</p>
@@ -189,7 +189,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   strokeWidth={1.5}
                 />
               )}
-              <h3 className="mt-6 text-2xl leading-tight font-semibold">{title}</h3>
+              <h3 className="mt-6 text-2xl leading-tight font-medium">{title}</h3>
               <p className="mt-2 max-w-xs text-muted-foreground">{text}</p>
             </li>
           ))}
@@ -217,7 +217,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <div className="container-page">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="max-w-2xl">
-                <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
+                <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
                   {t('gallery.title')}
                 </h2>
                 <p className="mt-3 text-lg text-muted-foreground">{t('gallery.subtitle')}</p>
@@ -240,7 +240,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {lessons.length > 0 && (
         <section className="container-page py-20 lg:py-24">
           <div className="max-w-2xl">
-            <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
+            <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
               {tLessons('title')}
             </h2>
             <p className="mt-3 text-lg text-muted-foreground">{tLessons('subtitle')}</p>
@@ -253,24 +253,39 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* Preguntas frecuentes */}
       {faqItems.length > 0 && (
-        <section id={FAQ_ID} className="container-page scroll-mt-28 py-20 lg:py-24">
-          <h2 className="text-center text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
-            {t('faq.title')}
-          </h2>
-          <div className="mx-auto mt-10 max-w-3xl">
-            <FaqList items={faqItems} />
+        <section
+          id={FAQ_ID}
+          className="container-page grid scroll-mt-28 gap-10 py-20 lg:grid-cols-[1fr_1.6fr] lg:gap-16 lg:py-24"
+        >
+          <div>
+            <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
+              {t('faq.title')}
+            </h2>
+            <p className="mt-4 max-w-sm text-muted-foreground">
+              {t.rich('faq.contact', {
+                mail: (chunks) => (
+                  <a
+                    href="mailto:hola@storynido.com"
+                    className="font-semibold text-primary underline-offset-4 hover:underline"
+                  >
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </p>
           </div>
+          <FaqList items={faqItems} />
         </section>
       )}
 
       {/* Garantía */}
       <section className="container-page">
-        <div className="flex flex-col items-start gap-5 rounded-xl border bg-card p-8 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:p-10">
+        <div className="flex flex-col items-start gap-5 rounded-2xl border bg-card p-8 sm:flex-row sm:items-center sm:p-10">
           <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-mint text-success">
             <ShieldCheck className="size-7" aria-hidden="true" />
           </span>
           <div>
-            <h2 className="text-2xl font-semibold">{t('guarantee.title')}</h2>
+            <h2 className="text-2xl font-medium">{t('guarantee.title')}</h2>
             <p className="mt-2 text-muted-foreground">{t('guarantee.text')}</p>
           </div>
         </div>
@@ -286,7 +301,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             ✦
           </span>
           <Gift className="relative mx-auto size-10 text-primary" aria-hidden="true" />
-          <h2 className="relative mt-4 text-[clamp(2rem,4vw,3.2rem)] leading-[1.1] font-semibold">
+          <h2 className="relative mt-4 text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
             {t('cta.title')}
           </h2>
           <p className="relative mx-auto mt-3 max-w-xl text-lg text-muted-foreground">

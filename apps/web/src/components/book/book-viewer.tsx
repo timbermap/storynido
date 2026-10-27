@@ -151,7 +151,7 @@ export function BookViewer({
                   go(position);
                 }}
                 className={cn(
-                  'grid h-16 w-12 place-items-center overflow-hidden rounded-md border-2 bg-card text-[0.65rem] font-black text-muted-foreground transition',
+                  'grid h-16 w-12 place-items-center overflow-hidden rounded-md border-2 bg-card text-[0.65rem] font-bold text-muted-foreground transition',
                   position === index
                     ? 'border-primary'
                     : 'border-transparent hover:border-primary/40',
@@ -222,7 +222,7 @@ function PageSpread({
       <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl shadow-[0_17px_45px_rgb(80_52_84/0.18)]">
         <Illustration src={page.imageUrl} alt={alt} lockedLabel={lockedLabel} />
         {/* El título va en la capa tipográfica, nunca dentro de la ilustración. */}
-        <h3 className="absolute inset-x-0 top-0 bg-gradient-to-b from-[#fffaf4]/95 to-transparent px-6 pt-6 pb-10 text-center font-display text-2xl leading-tight font-semibold sm:text-3xl">
+        <h3 className="absolute inset-x-0 top-0 bg-gradient-to-b from-[#fffaf4]/95 to-transparent px-6 pt-6 pb-10 text-center font-display text-2xl leading-tight font-medium sm:text-3xl">
           {title}
         </h3>
         {badge && <Badge>{badge}</Badge>}
@@ -257,7 +257,7 @@ function PageSpread({
 
 function Badge({ children }: { children: ReactNode }) {
   return (
-    <span className="absolute bottom-3 left-3 rounded-full bg-card/90 px-3 py-1 text-xs font-black tracking-wide text-primary uppercase">
+    <span className="absolute bottom-3 left-3 rounded-full bg-card/90 px-3 py-1 text-xs font-bold tracking-wide text-primary uppercase">
       {children}
     </span>
   );

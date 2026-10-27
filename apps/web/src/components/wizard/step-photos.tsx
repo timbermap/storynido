@@ -161,7 +161,7 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
       <div className="grid gap-6">
         <CharacterModeChooser nav={nav} data={data} />
         <div className="rounded-xl bg-mint p-5">
-          <p className="font-extrabold text-success">{t('tipsTitle')}</p>
+          <p className="font-semibold text-success">{t('tipsTitle')}</p>
           <ul className="mt-2 grid gap-1 text-sm sm:grid-cols-2">
             {(['tip1', 'tip2', 'tip3', 'tip4'] as const).map((tip) => (
               <li key={tip} className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
 
         {!consentId ? (
           <div className="rounded-xl border-2 border-primary/30 p-5">
-            <p className="flex items-center gap-2 font-extrabold">
+            <p className="flex items-center gap-2 font-semibold">
               <ShieldCheck className="size-5 text-primary" aria-hidden="true" />
               {t('consentTitle')}
             </p>

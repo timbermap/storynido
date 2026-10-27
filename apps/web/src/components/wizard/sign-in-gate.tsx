@@ -14,7 +14,7 @@ export function SignInGate({ title, text }: { title?: string; text?: string } = 
         <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-secondary text-primary">
           <ShieldCheck className="size-6" aria-hidden="true" />
         </span>
-        <h1 className="text-3xl font-semibold">{title ?? t('signInTitle')}</h1>
+        <h1 className="text-3xl font-medium">{title ?? t('signInTitle')}</h1>
         <p className="text-muted-foreground">{text ?? t('signInText')}</p>
       </header>
       <SignInPanel />

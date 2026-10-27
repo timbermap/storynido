@@ -20,7 +20,7 @@ export function LoginView() {
   return (
     <section className="container-page flex min-h-[70vh] max-w-sm flex-col justify-center gap-8 py-12">
       <header className="space-y-2 text-center">
-        <h1 className="text-3xl font-semibold">{t('title', { brand: brand.name })}</h1>
+        <h1 className="text-3xl font-medium">{t('title', { brand: brand.name })}</h1>
         <p className="text-muted-foreground">{t('subtitle')}</p>
       </header>
       <SignInPanel />

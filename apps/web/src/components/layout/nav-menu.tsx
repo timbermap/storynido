@@ -16,12 +16,15 @@ export function NavMenu({
   children,
   align = 'start',
   className,
+  panelClassName = 'w-[22rem]',
 }: {
   id: string;
   label: ReactNode;
   children: ReactNode;
   align?: 'start' | 'end';
   className?: string;
+  /** Ancho del panel. */
+  panelClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -83,7 +86,7 @@ export function NavMenu({
         onClick={() => {
           setOpen((value) => !value);
         }}
-        className="inline-flex items-center gap-1 rounded-full px-3 py-2 whitespace-nowrap transition-colors hover:text-primary aria-expanded:text-primary"
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 whitespace-nowrap transition-colors hover:text-primary aria-expanded:text-primary"
       >
         {label}
         <ChevronDown
@@ -95,11 +98,12 @@ export function NavMenu({
         id={id}
         hidden={!open}
         className={cn(
-          'absolute top-full z-40 w-[22rem] pt-2',
+          'absolute top-full z-40 pt-3',
+          panelClassName,
           align === 'end' ? 'right-0' : '-left-3',
         )}
       >
-        <div className="rounded-2xl border border-[rgb(55_37_75/0.08)] bg-card p-2 shadow-[0_18px_45px_rgb(80_52_84/0.14)]">
+        <div className="overflow-hidden rounded-2xl border border-[rgb(55_37_75/0.08)] bg-card shadow-[0_24px_60px_-12px_rgb(52_42_64/0.22)]">
           {children}
         </div>
       </div>
@@ -118,18 +122,18 @@ export function NavMenuItem({
   icon?: ReactNode;
 }) {
   return (
-    <span className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors group-hover:bg-secondary/60">
+    <span className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors group-hover:bg-[#f6f1f8]">
       {icon && (
         <span
           aria-hidden="true"
-          className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl bg-secondary text-primary"
+          className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-[#f6f1f8] text-primary"
         >
           {icon}
         </span>
       )}
       <span className="grid gap-0.5">
-        <span className="font-extrabold text-foreground">{title}</span>
-        {text && <span className="text-sm font-semibold text-muted-foreground">{text}</span>}
+        <span className="font-semibold text-foreground">{title}</span>
+        {text && <span className="text-sm leading-snug text-muted-foreground">{text}</span>}
       </span>
     </span>
   );

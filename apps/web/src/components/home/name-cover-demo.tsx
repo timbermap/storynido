@@ -66,11 +66,11 @@ export function NameCoverDemo({ labels }: { labels: NameCoverLabels }) {
         </div>
 
         <div className="order-1 lg:order-2">
-          <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
+          <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
             {t('title')}
           </h2>
           <p className="mt-3 text-lg text-muted-foreground">{t('subtitle')}</p>
-          <label htmlFor={id} className="mt-8 block text-[0.91rem] font-extrabold">
+          <label htmlFor={id} className="mt-8 block text-[0.91rem] font-semibold">
             {t('label')}
           </label>
           <input

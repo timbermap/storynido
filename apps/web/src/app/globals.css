@@ -10,7 +10,7 @@
  */
 :root {
   --radius: 1.1rem;
-  --background: #faf0e5;
+  --background: #fbf7f2;
   --foreground: #342a40;
   --card: #ffffff;
   --card-foreground: #342a40;
@@ -23,7 +23,7 @@
   --accent-foreground: #342a40;
   --muted: #f8f3fa;
   --muted-foreground: #69616c;
-  --border: #e7dfe9;
+  --border: #ece5ec;
   --ring: #7a4db1;
   --peach: #f5d9c9;
   --mint: #ddf1e8;
@@ -63,7 +63,7 @@
   --radius-lg: var(--radius);
   --radius-xl: 1.6rem;
   --radius-2xl: 2rem;
-  --shadow-card: 0 16px 48px rgb(57 36 75 / 0.07);
+  --shadow-card: 0 1px 2px rgb(52 42 64 / 0.04), 0 12px 32px -12px rgb(52 42 64 / 0.12);
   --shadow-book: 18px 25px 32px rgb(57 36 75 / 0.22);
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-heading), ui-serif, Georgia, serif;
@@ -85,7 +85,8 @@
   h2,
   h3 {
     @apply font-display text-balance;
-    letter-spacing: -0.035em;
+    font-weight: 500;
+    letter-spacing: -0.03em;
   }
   ::selection {
     background: var(--accent);

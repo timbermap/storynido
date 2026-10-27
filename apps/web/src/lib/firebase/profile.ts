@@ -1,5 +1,12 @@
 import type { User } from 'firebase/auth';
-import { doc, getDoc, serverTimestamp, setDoc, type Firestore } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  type Firestore,
+} from 'firebase/firestore';
 
 import { COLLECTIONS, type CountryCode, type Locale } from '@storynido/shared';
 
@@ -26,4 +33,9 @@ export async function ensureUserProfile(
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+}
+
+/** Idioma preferido de la cuenta (lo cambia el propio usuario desde "Mi cuenta"). */
+export async function updateUserLocale(db: Firestore, uid: string, locale: Locale): Promise<void> {
+  await updateDoc(doc(db, COLLECTIONS.users, uid), { locale, updatedAt: serverTimestamp() });
 }

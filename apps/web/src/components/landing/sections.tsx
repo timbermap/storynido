@@ -29,11 +29,11 @@ export function LandingHero({
     <section className="overflow-hidden">
       <div className="container-page grid items-center gap-8 pt-10 pb-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14 lg:pt-16 lg:pb-24">
         <div className="text-center lg:text-left">
-          <p className="inline-flex items-center gap-2 text-xs font-black tracking-[0.11em] text-primary uppercase">
+          <p className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.11em] text-primary uppercase">
             <span aria-hidden="true" className="size-2 rounded-full bg-star" />
             {eyebrow}
           </p>
-          <h1 className="mt-4 text-[clamp(2.4rem,4.6vw,4.4rem)] leading-[1.08] font-semibold">
+          <h1 className="mt-4 text-[clamp(2.4rem,4.6vw,4.4rem)] leading-[1.08] font-medium">
             {title}
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-[clamp(1.1rem,1.65vw,1.3rem)] leading-relaxed text-muted-foreground lg:mx-0">
@@ -60,7 +60,7 @@ export function LandingSteps({
   const tones = ['bg-secondary text-primary', 'bg-peach text-[#8a4a2a]', 'bg-mint text-success'];
   return (
     <section className="container-page py-20 lg:py-24">
-      <h2 className="text-center text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
+      <h2 className="text-center text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
         {title}
       </h2>
       <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-6">
@@ -78,7 +78,7 @@ export function LandingSteps({
                 strokeWidth={1.5}
               />
             )}
-            <h3 className="mt-5 text-2xl leading-tight font-semibold">{step.title}</h3>
+            <h3 className="mt-5 text-2xl leading-tight font-medium">{step.title}</h3>
             <p className="mt-2 max-w-xs text-muted-foreground">{step.text}</p>
           </li>
         ))}
@@ -102,7 +102,7 @@ export function LandingChecklist({
     <section className="bg-muted py-20 lg:py-24">
       <div className="container-page">
         <div className="max-w-2xl">
-          <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">{title}</h2>
+          <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">{title}</h2>
           {subtitle && <p className="mt-3 text-lg text-muted-foreground">{subtitle}</p>}
         </div>
         <ul
@@ -141,14 +141,14 @@ export function LandingCollections({
   if (collections.length === 0) return null;
   return (
     <section className="container-page py-20 lg:py-24">
-      <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">{title}</h2>
+      <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">{title}</h2>
       <ul className="mt-10 grid gap-6 sm:grid-cols-2">
         {collections.map((collection) => (
           <li
             key={collection.slug}
             className="rounded-xl border bg-card p-6 shadow-[var(--shadow-card)]"
           >
-            <h3 className="text-2xl font-semibold">{collection.name}</h3>
+            <h3 className="text-2xl font-medium">{collection.name}</h3>
             <p className="mt-2 text-muted-foreground">{collection.description}</p>
             {collection.topics.length > 0 && (
               <ul className="mt-4 flex flex-wrap gap-2">
@@ -172,7 +172,7 @@ export function LandingCollections({
 export function LandingFaq({ title, items }: { title: string; items: FaqItem[] }) {
   return (
     <section className="container-page py-20 lg:py-24">
-      <h2 className="text-center text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
+      <h2 className="text-center text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
         {title}
       </h2>
       <div className="mx-auto mt-10 max-w-3xl">
@@ -192,7 +192,7 @@ export function LandingFinalCta({ title, cta }: { title: string; cta: ReactNode 
         >
           ✦
         </span>
-        <h2 className="relative text-[clamp(2rem,4vw,3.2rem)] leading-[1.1] font-semibold">
+        <h2 className="relative text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
           {title}
         </h2>
         <div className="relative mt-8 flex justify-center">{cta}</div>

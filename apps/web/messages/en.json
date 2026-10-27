@@ -29,7 +29,8 @@
     "professionalsText": "Stories for every child you support, with educational collections.",
     "professionalsCreate": "Create for professionals",
     "professionalsCreateText": "Choose a collection and personalize the story.",
-    "region": "Language & country"
+    "region": "Language & country",
+    "familiesCreate": "Create their story"
   },
   "Switchers": {
     "language": "Language",
@@ -51,7 +52,12 @@
     "company": "StoryNido",
     "cookiePreferences": "Cookie preferences",
     "rights": "© {year} {brand}. All rights reserved.",
-    "contact": "Contact"
+    "contact": "Contact",
+    "help": "Help",
+    "pitch": "Illustrated stories where your child is the hero: with their name, their face and the things they love. Digital or printed.",
+    "follow": "Follow us",
+    "newTab": "opens in a new tab",
+    "preferences": "Language & country"
   },
   "Legal": {
     "terms": "Terms and conditions",
@@ -102,7 +108,8 @@
     },
     "faq": {
       "title": "Frequently asked questions",
-      "more": "See all questions"
+      "more": "See all questions",
+      "contact": "Another question? Write to <mail>hola@storynido.com</mail> and we will get back to you."
     },
     "guarantee": {
       "title": "If you don't love it, you don't pay",
@@ -262,7 +269,11 @@
       "customer": "Customer",
       "admin": "Administrator",
       "superadmin": "Super administrator"
-    }
+    },
+    "preferencesTitle": "Preferences",
+    "language": "Language",
+    "languageNote": "We use your browser's language; if you prefer another one, choose it here and we'll remember it.",
+    "preferencesError": "We couldn't save your preference. Please try again."
   },
   "Maintenance": {
     "title": "We're making improvements",

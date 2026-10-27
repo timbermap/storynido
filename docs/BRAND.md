@@ -70,6 +70,24 @@ Contrastes verificados (WCAG 2.2 AA): blanco sobre violeta 6,2:1 · tinta sobre 
 4. **Su nombre en la portada:** el visitante escribe el nombre y la portada de muestra se actualiza en vivo.
 5. Galería de aventuras, enseñanzas, preguntas frecuentes, garantía y bloque final.
 
+## Actualización 2.1 (2026-10-27): más liviana y actual
+
+- **Pesos:** los títulos (Fraunces) van en peso medio; el texto, sin `black` ni `extrabold`. Lo pesado se veía "web vieja".
+- **Fondos y bordes:** crema más clara (`#fbf7f2`), bordes finos, sombras suaves. Menos cajas: las enseñanzas son columnas con chips finos y las preguntas frecuentes una lista con divisores.
+- **Un color por público:**
+
+  | Público              | Punto y acento        | Fondo     |
+  | -------------------- | --------------------- | --------- |
+  | Familias             | lavanda (`--primary`) | `#f6eefa` |
+  | Cumpleaños y eventos | durazno `#d9895c`     | `#fbeee6` |
+  | Profesionales        | menta `#4f9e82`       | `#eaf5ef` |
+
+  Se usa en el menú, las tarjetas de la home y el pie.
+
+- **Logo provisorio:** corazón lavanda con un destello y el nombre en Fraunces (versión clara para fondos oscuros).
+- **Encabezado:** un menú por público. Sin selector de idioma: el idioma se detecta solo (navegador) y se cambia en el pie o en "Mi cuenta".
+- **Pie oscuro (`#2e2338`):** marca, redes (Instagram, TikTok y YouTube, configurables por ambiente), una columna por público y Ayuda, legales, idioma y país.
+
 ## Movimiento
 
 Flotación suave del libro del hero (CSS), transiciones de 150 a 250 ms. Siempre respetar `prefers-reduced-motion`. **Sin animaciones continuas en el checkout.**

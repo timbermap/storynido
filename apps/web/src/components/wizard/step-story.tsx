@@ -89,7 +89,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
                   {tStories('agesFor', { min: story.ageMin, max: story.ageMax })}
                 </span>
                 {fits(story.ageMin, story.ageMax) && (
-                  <span className="w-fit rounded-full bg-mint px-2 py-0.5 text-xs font-extrabold text-success">
+                  <span className="w-fit rounded-full bg-mint px-2 py-0.5 text-xs font-semibold text-success">
                     {t('recommended')}
                   </span>
                 )}

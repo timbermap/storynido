@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { ApiError } from '@storynido/shared';
 
+import { LanguagePreference } from '@/components/account/language-preference';
 import { DraftsList } from '@/components/wizard/drafts-list';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
@@ -69,7 +70,7 @@ export default function AccountPage() {
 
   return (
     <section className="container-page flex min-h-[60vh] max-w-2xl flex-col justify-center gap-8 py-12">
-      <h1 className="text-3xl font-semibold">{t('title')}</h1>
+      <h1 className="text-3xl font-medium">{t('title')}</h1>
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
         <dt className="text-muted-foreground">{t('email')}</dt>
         <dd>{user.email ?? '—'}</dd>
@@ -80,9 +81,10 @@ export default function AccountPage() {
         <dt className="text-muted-foreground">{t('api')}</dt>
         <dd role="status">{apiCheck}</dd>
       </dl>
+      <LanguagePreference uid={user.uid} />
       {drafts.length > 0 && (
         <section className="grid gap-4">
-          <h2 className="text-2xl font-semibold">{tWizard('title')}</h2>
+          <h2 className="text-2xl font-medium">{tWizard('title')}</h2>
           <DraftsList drafts={drafts} />
         </section>
       )}

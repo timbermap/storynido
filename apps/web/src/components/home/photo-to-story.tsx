@@ -11,7 +11,7 @@ export async function PhotoToStory() {
     <section className="container-page py-20 lg:py-24">
       <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
-          <h2 className="text-[clamp(2rem,4vw,3.5rem)] leading-[1.1] font-semibold">
+          <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
             {t('title')}
           </h2>
           <p className="mt-3 text-lg text-muted-foreground">{t('subtitle')}</p>
@@ -38,7 +38,7 @@ export async function PhotoToStory() {
               className="h-full w-full scale-[1.9] object-cover object-[46%_38%]"
             />
           </div>
-          <span className="absolute -top-3 right-4 rounded-full bg-card px-3 py-1 text-xs font-extrabold text-primary shadow-[var(--shadow-card)]">
+          <span className="absolute -top-3 right-4 rounded-full bg-card px-3 py-1 text-xs font-semibold text-primary shadow-[var(--shadow-card)]">
             {t('characterLabel')}
           </span>
 
@@ -47,7 +47,7 @@ export async function PhotoToStory() {
             <div className="grid aspect-square place-items-center rounded-sm border-2 border-dashed border-primary/40 bg-sky text-primary">
               <Camera className="size-9" aria-hidden="true" />
             </div>
-            <span className="mt-2 block text-center text-xs font-extrabold text-muted-foreground">
+            <span className="mt-2 block text-center text-xs font-semibold text-muted-foreground">
               {t('photoLabel')}
             </span>
           </div>

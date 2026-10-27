@@ -69,7 +69,7 @@ export default async function BlogPostPage({ params }: Props) {
         <ArrowLeft className="size-4" aria-hidden="true" />
         {t('back')}
       </Link>
-      <h1 className="mt-6 text-4xl font-semibold sm:text-5xl">{post.metadata.title}</h1>
+      <h1 className="mt-6 text-4xl font-medium sm:text-5xl">{post.metadata.title}</h1>
       <p className="mt-3 text-sm text-muted-foreground">
         {t('published', { date: formatDate(post.metadata.date, locale, display.country) })}
       </p>

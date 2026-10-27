@@ -118,7 +118,7 @@ export function BookOptions({
 
   return (
     <section aria-labelledby="book-options" className="mt-10 grid gap-8 border-t pt-8">
-      <h2 id="book-options" className="text-2xl font-semibold">
+      <h2 id="book-options" className="text-2xl font-medium">
         {t('title')}
       </h2>
 

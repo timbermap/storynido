@@ -71,7 +71,7 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
           if (items.length === 0) return null;
           return (
             <div key={group}>
-              <p className="text-sm font-black tracking-wide text-muted-foreground uppercase">
+              <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">
                 {tGroups(group)}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -103,7 +103,7 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
         </div>
         {useCustom && (
           <div className="grid gap-2">
-            <label htmlFor="custom-lesson" className="text-[0.91rem] font-extrabold">
+            <label htmlFor="custom-lesson" className="text-[0.91rem] font-semibold">
               {t('customLabel')}
             </label>
             <textarea

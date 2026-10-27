@@ -20,22 +20,22 @@ export function parseFaq(markdown: string): FaqItem[] {
 /** Acordeón nativo (details/summary): accesible y sin JavaScript. */
 export function FaqList({ items }: { items: FaqItem[] }) {
   return (
-    <div className="divide-y rounded-xl border bg-card shadow-[var(--shadow-card)]">
+    <div className="divide-y divide-border border-y border-border">
       {items.map((item) => (
         <details
           key={item.question}
-          className="group p-5 [&_summary::-webkit-details-marker]:hidden"
+          className="group py-5 [&_summary::-webkit-details-marker]:hidden"
         >
-          <summary className="flex cursor-pointer items-center justify-between gap-4 text-lg font-semibold">
+          <summary className="flex cursor-pointer items-start justify-between gap-6 text-[1.05rem] font-semibold">
             {item.question}
             <span
               aria-hidden="true"
-              className="text-2xl text-primary transition group-open:rotate-45"
+              className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full border border-border text-lg leading-none text-primary transition group-open:rotate-45 group-open:border-primary/40"
             >
               +
             </span>
           </summary>
-          <Markdown className="mt-3 text-muted-foreground">{item.answer}</Markdown>
+          <Markdown className="mt-3 max-w-2xl text-muted-foreground">{item.answer}</Markdown>
         </details>
       ))}
     </div>

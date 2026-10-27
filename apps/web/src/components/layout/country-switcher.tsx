@@ -13,10 +13,12 @@ export function CountrySwitcher({
   id,
   current,
   countries,
+  selectClassName,
 }: {
   id: string;
   current: CountryCode;
   countries: readonly CountryCode[];
+  selectClassName?: string;
 }) {
   const t = useTranslations('Switchers');
   const router = useRouter();
@@ -36,7 +38,10 @@ export function CountrySwitcher({
             router.refresh();
           });
         }}
-        className="h-10 rounded-full border border-border bg-card px-3 text-sm font-bold text-foreground"
+        className={
+          selectClassName ??
+          'h-10 rounded-full border border-border bg-card px-3 text-sm font-semibold text-foreground'
+        }
       >
         {options.map((code) => (
           <option key={code} value={code}>

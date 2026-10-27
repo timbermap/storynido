@@ -40,7 +40,7 @@ export function OptionCard({
       {checked && (
         <span
           aria-hidden="true"
-          className="absolute top-3 right-3 grid size-7 place-items-center rounded-full bg-primary text-sm font-black text-primary-foreground"
+          className="absolute top-3 right-3 grid size-7 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground"
         >
           ✓
         </span>

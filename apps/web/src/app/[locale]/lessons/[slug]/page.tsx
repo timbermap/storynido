@@ -63,12 +63,12 @@ export default async function LessonPage({ params }: Props) {
       </Link>
 
       <header className="mt-6 max-w-3xl">
-        <p className="inline-flex items-center gap-2 text-xs font-black tracking-[0.11em] text-primary uppercase">
+        <p className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.11em] text-primary uppercase">
           <Sparkles className="size-4" aria-hidden="true" />
           {t(`groups.${lesson.group}`)} ·{' '}
           {tStories('agesFor', { min: lesson.ageMin, max: lesson.ageMax })}
         </p>
-        <h1 className="mt-3 text-[clamp(2.3rem,4.5vw,3.8rem)] leading-[1.1] font-semibold">
+        <h1 className="mt-3 text-[clamp(2.3rem,4.5vw,3.8rem)] leading-[1.1] font-medium">
           {lesson.headline}
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">{lesson.description}</p>
@@ -81,7 +81,7 @@ export default async function LessonPage({ params }: Props) {
       </header>
 
       <section className="mt-12" aria-labelledby="combine">
-        <h2 id="combine" className="text-3xl font-semibold">
+        <h2 id="combine" className="text-3xl font-medium">
           {t('combineTitle')}
         </h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">{t('combineText')}</p>

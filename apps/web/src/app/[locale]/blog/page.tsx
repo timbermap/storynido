@@ -33,7 +33,7 @@ export default async function BlogPage({ params }: Props) {
 
   return (
     <div className="container-page max-w-3xl py-14">
-      <h1 className="text-4xl font-semibold sm:text-5xl">{t('title')}</h1>
+      <h1 className="text-4xl font-medium sm:text-5xl">{t('title')}</h1>
       <p className="mt-3 text-lg text-muted-foreground">{t('subtitle')}</p>
       <ul className="mt-10 space-y-6">
         {posts.map((post) => (
@@ -41,7 +41,7 @@ export default async function BlogPage({ params }: Props) {
             <p className="text-sm text-muted-foreground">
               <time dateTime={post.date}>{formatDate(post.date, locale, display.country)}</time>
             </p>
-            <h2 className="mt-1 text-2xl font-semibold">
+            <h2 className="mt-1 text-2xl font-medium">
               <Link
                 href={{ pathname: '/blog/[slug]', params: { slug: post.slug } }}
                 className="hover:underline"

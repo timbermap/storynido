@@ -112,7 +112,7 @@ export function CreateStart({
 
   return (
     <section className="container-page max-w-2xl py-14">
-      <h1 className="mb-8 text-3xl font-semibold sm:text-4xl">{t('drafts.title')}</h1>
+      <h1 className="mb-8 text-3xl font-medium sm:text-4xl">{t('drafts.title')}</h1>
       <DraftsList drafts={drafts} />
       <Button className="mt-8" size="lg" disabled={busy} onClick={() => void startNew()}>
         {t('drafts.startNew')}

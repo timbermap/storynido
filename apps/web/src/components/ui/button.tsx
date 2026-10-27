@@ -5,15 +5,16 @@ import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-full text-[0.96rem] font-extrabold whitespace-nowrap transition-all duration-200 outline-none hover:-translate-y-0.5 focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-60 motion-reduce:hover:translate-y-0 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-full text-[0.95rem] font-semibold whitespace-nowrap transition-colors duration-200 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          'bg-primary text-primary-foreground shadow-[0_7px_18px_rgb(121_81_140/0.18)] hover:bg-primary-hover',
+          'bg-primary text-primary-foreground shadow-[0_1px_2px_rgb(52_42_64/0.12),0_6px_16px_-6px_rgb(121_81_140/0.45)] hover:bg-primary-hover',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        outline: 'border-2 border-primary bg-card text-primary hover:bg-secondary',
-        ghost: 'text-primary hover:bg-secondary/60 hover:translate-y-0',
+        outline:
+          'border border-primary/40 bg-card text-primary hover:border-primary hover:bg-[#f6f1f8]',
+        ghost: 'text-primary hover:bg-[#f6f1f8]',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {

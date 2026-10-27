@@ -1,25 +1,23 @@
 import {
+  ArrowRight,
   BookHeart,
   BookOpen,
-  Globe,
   GraduationCap,
   Newspaper,
   PartyPopper,
   Sparkles,
-  WandSparkles,
 } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
-import type { CountryCode, Locale } from '@storynido/shared';
+import type { Locale } from '@storynido/shared';
 
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { getCollections } from '@/lib/server/api';
+import { cn } from '@/lib/utils';
 
 import { AccountLink } from './account-link';
-import { CountrySwitcher } from './country-switcher';
-import { LanguageSwitcher } from './language-switcher';
 import { Logo } from './logo';
 import { MobileMenu } from './mobile-menu';
 import { NavMenu, NavMenuItem } from './nav-menu';
@@ -33,30 +31,41 @@ interface MenuLink {
   href: Href;
   title: string;
   text?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 }
 
-const icon = 'size-[1.1rem]';
+/** Cada público con su color: lavanda (familias), durazno (eventos), menta (profesionales). */
+export const AUDIENCE_TONES = {
+  families: { dot: 'bg-primary', panel: 'bg-[#f6eefa]', text: 'text-primary' },
+  events: { dot: 'bg-[#d9895c]', panel: 'bg-[#fbeee6]', text: 'text-[#a8633b]' },
+  professionals: { dot: 'bg-[#4f9e82]', panel: 'bg-[#eaf5ef]', text: 'text-[#357a62]' },
+} as const;
 
-export async function SiteHeader({
-  country,
-  countries,
-}: {
-  country: CountryCode;
-  countries: CountryCode[];
-}) {
+type Audience = keyof typeof AUDIENCE_TONES;
+
+const icon = 'size-[1.05rem]';
+
+export async function SiteHeader() {
   const locale = (await getLocale()) as Locale;
-  const [t, tSwitch, collections] = await Promise.all([
+  const [t, tAudience, collections, eventCollections, proCollections] = await Promise.all([
     getTranslations('Nav'),
-    getTranslations('Switchers'),
+    getTranslations('Home.audience'),
     getCollections(locale, 'families').catch(() => []),
+    getCollections(locale, 'events').catch(() => []),
+    getCollections(locale, 'professionals').catch(() => []),
   ]);
 
-  // Cada línea comercial tiene su menú: qué es y cómo empezar.
-  const menus: { id: string; label: string; links: MenuLink[] }[] = [
+  // Un menú por público: qué es, adónde ir y cómo empezar.
+  const menus: {
+    audience: Audience;
+    label: string;
+    cta: { href: Href; label: string };
+    links: MenuLink[];
+  }[] = [
     {
-      id: 'menu-stories',
-      label: t('stories'),
+      audience: 'families',
+      label: t('families'),
+      cta: { href: '/create', label: t('familiesCreate') },
       links: [
         {
           href: '/stories',
@@ -67,7 +76,6 @@ export async function SiteHeader({
         ...collections.map((collection) => ({
           href: { pathname: '/stories' as const, query: { coleccion: collection.slug } },
           title: collection.name,
-          text: collection.description,
           icon: <BookHeart className={icon} />,
         })),
         {
@@ -79,8 +87,9 @@ export async function SiteHeader({
       ],
     },
     {
-      id: 'menu-events',
+      audience: 'events',
       label: t('eventsMenu'),
+      cta: { href: { pathname: '/create', query: { line: 'events' } }, label: t('eventsCreate') },
       links: [
         {
           href: '/events',
@@ -88,17 +97,20 @@ export async function SiteHeader({
           text: t('eventsText'),
           icon: <PartyPopper className={icon} />,
         },
-        {
-          href: { pathname: '/create', query: { line: 'events' } },
-          title: t('eventsCreate'),
-          text: t('eventsCreateText'),
-          icon: <WandSparkles className={icon} />,
-        },
+        ...eventCollections.map((collection) => ({
+          href: '/events' as const,
+          title: collection.name,
+          icon: <BookHeart className={icon} />,
+        })),
       ],
     },
     {
-      id: 'menu-professionals',
+      audience: 'professionals',
       label: t('professionals'),
+      cta: {
+        href: { pathname: '/create', query: { line: 'professionals' } },
+        label: t('professionalsCreate'),
+      },
       links: [
         {
           href: '/professionals',
@@ -106,106 +118,120 @@ export async function SiteHeader({
           text: t('professionalsText'),
           icon: <GraduationCap className={icon} />,
         },
-        {
-          href: { pathname: '/create', query: { line: 'professionals' } },
-          title: t('professionalsCreate'),
-          text: t('professionalsCreateText'),
-          icon: <WandSparkles className={icon} />,
-        },
+        ...proCollections.map((collection) => ({
+          href: '/professionals' as const,
+          title: collection.name,
+          icon: <BookHeart className={icon} />,
+        })),
       ],
     },
   ];
 
-  const region = (suffix: string) => (
-    <div className="grid gap-3 p-3">
-      <LanguageSwitcher id={`language-${suffix}`} />
-      <CountrySwitcher id={`country-${suffix}`} current={country} countries={countries} />
-    </div>
-  );
-
   return (
-    <header className="sticky top-0 z-30 border-b border-[rgb(55_37_75/0.06)] bg-[rgb(255_251_246/0.94)] backdrop-blur">
-      <div className="container-page relative flex h-[4.5rem] items-center justify-between gap-4 lg:h-[5.25rem]">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-xl">
-          <Logo className="flex items-center gap-2.5" />
+    <header className="sticky top-0 z-30 border-b border-[rgb(52_42_64/0.06)] bg-background/90 backdrop-blur-md">
+      <div className="container-page relative flex h-16 items-center justify-between gap-4 lg:h-[4.75rem]">
+        <Link href="/" className="flex shrink-0 items-center rounded-xl">
+          <Logo />
         </Link>
 
         <nav
           aria-label={t('mainNav')}
-          className="hidden items-center gap-1 text-[0.95rem] font-extrabold text-foreground/85 lg:flex"
+          className="hidden items-center gap-1 text-[0.95rem] font-semibold text-foreground/80 lg:flex"
         >
-          {menus.map((menu) => (
-            <NavMenu key={menu.id} id={menu.id} label={menu.label}>
-              <ul>
-                {menu.links.map((link) => (
-                  <li key={link.title}>
-                    <Link href={link.href} className="group block rounded-xl">
-                      <NavMenuItem title={link.title} text={link.text} icon={link.icon} />
+          {menus.map((menu) => {
+            const tone = AUDIENCE_TONES[menu.audience];
+            return (
+              <NavMenu
+                key={menu.audience}
+                id={`menu-${menu.audience}`}
+                panelClassName="w-[36rem]"
+                label={
+                  <>
+                    <span aria-hidden="true" className={cn('size-2 rounded-full', tone.dot)} />
+                    {menu.label}
+                  </>
+                }
+              >
+                <div className="grid grid-cols-[13rem_1fr]">
+                  <div className={cn('flex flex-col p-5', tone.panel)}>
+                    <p className={cn('text-xs font-bold tracking-[0.14em] uppercase', tone.text)}>
+                      {menu.label}
+                    </p>
+                    <p className="mt-2 text-[0.95rem] leading-snug text-foreground/80">
+                      {tAudience(`${menu.audience}.text`)}
+                    </p>
+                    <Link
+                      href={menu.cta.href}
+                      className={cn(
+                        'mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-semibold hover:underline',
+                        tone.text,
+                      )}
+                    >
+                      {menu.cta.label}
+                      <ArrowRight aria-hidden="true" className="size-4" />
                     </Link>
-                  </li>
-                ))}
-              </ul>
-            </NavMenu>
-          ))}
+                  </div>
+                  <ul className="p-2">
+                    {menu.links.map((link) => (
+                      <li key={link.title}>
+                        <Link href={link.href} className="group block rounded-xl">
+                          <NavMenuItem title={link.title} text={link.text} icon={link.icon} />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </NavMenu>
+            );
+          })}
         </nav>
 
-        <div className="hidden items-center gap-1.5 lg:flex">
-          <NavMenu
-            id="menu-region"
-            align="end"
-            label={
-              <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-muted-foreground">
-                <Globe aria-hidden="true" className="size-[1.15rem]" />
-                <span className="sr-only">{t('region')}: </span>
-                {locale.toUpperCase()} · {country}
-              </span>
-            }
-          >
-            <p className="px-3 pt-2 text-xs font-black tracking-[0.1em] text-muted-foreground uppercase">
-              {t('region')}
-            </p>
-            {region('desktop')}
-          </NavMenu>
+        <div className="hidden items-center gap-2 lg:flex">
           <AccountLink />
-          <Link
-            href="/create"
-            className={buttonVariants({ size: 'sm', className: 'h-11 rounded-full px-6' })}
-          >
+          <Link href="/create" className={buttonVariants({ size: 'sm', className: 'px-5' })}>
             {t('create')}
           </Link>
         </div>
 
         <MobileMenu>
-          <nav aria-label={t('mainNav')} className="grid gap-5">
-            {menus.map((menu) => (
-              <section key={menu.id} aria-labelledby={`${menu.id}-mobile`}>
-                <h2
-                  id={`${menu.id}-mobile`}
-                  className="px-3 font-sans text-xs font-black tracking-[0.1em] text-muted-foreground uppercase"
+          <nav aria-label={t('mainNav')} className="grid gap-4">
+            {menus.map((menu) => {
+              const tone = AUDIENCE_TONES[menu.audience];
+              return (
+                <section
+                  key={menu.audience}
+                  aria-labelledby={`menu-${menu.audience}-mobile`}
+                  className={cn('rounded-2xl p-3', tone.panel)}
                 >
-                  {menu.label}
-                </h2>
-                <ul className="mt-1">
-                  {menu.links.map((link) => (
-                    <li key={link.title}>
-                      <Link href={link.href} className="group block rounded-xl">
-                        <NavMenuItem title={link.title} icon={link.icon} />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
+                  <h2
+                    id={`menu-${menu.audience}-mobile`}
+                    className={cn(
+                      'flex items-center gap-2 px-2 font-sans text-xs font-bold tracking-[0.14em] uppercase',
+                      tone.text,
+                    )}
+                  >
+                    <span aria-hidden="true" className={cn('size-2 rounded-full', tone.dot)} />
+                    {menu.label}
+                  </h2>
+                  <ul className="mt-1">
+                    {[...menu.links, { href: menu.cta.href, title: menu.cta.label }].map((link) => (
+                      <li key={link.title}>
+                        <Link
+                          href={link.href}
+                          className="block rounded-lg px-2 py-2 font-semibold hover:bg-white/60"
+                        >
+                          {link.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })}
           </nav>
-          <div className="mt-5 rounded-2xl bg-secondary/50">
-            <p className="px-3 pt-3 text-xs font-black tracking-[0.1em] text-muted-foreground uppercase">
-              {t('region')} · {tSwitch(`countries.${country}`)}
-            </p>
-            {region('mobile')}
-          </div>
           <div className="mt-4 grid gap-2">
             <AccountLink />
-            <Link href="/create" className={buttonVariants({ className: 'w-full rounded-full' })}>
+            <Link href="/create" className={buttonVariants({ className: 'w-full' })}>
               {t('create')}
             </Link>
           </div>

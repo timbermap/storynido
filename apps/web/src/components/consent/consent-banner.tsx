@@ -43,7 +43,7 @@ export function ConsentBanner() {
           aria-label={t('title')}
           className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-3xl rounded-xl border bg-card p-5 shadow-lg sm:inset-x-6"
         >
-          <h2 className="text-lg font-semibold">{t('title')}</h2>
+          <h2 className="text-lg font-medium">{t('title')}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {t('text')} {policyLink}
           </p>
@@ -76,7 +76,7 @@ export function ConsentBanner() {
         aria-labelledby="consent-title"
         className="m-auto w-[min(100%-2rem,32rem)] rounded-xl border bg-card p-6 text-card-foreground shadow-xl backdrop:bg-black/40"
       >
-        <h2 id="consent-title" className="text-xl font-semibold">
+        <h2 id="consent-title" className="text-xl font-medium">
           {t('title')}
         </h2>
         <div className="mt-4 space-y-4">

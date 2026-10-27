@@ -28,7 +28,7 @@ export function DraftsList({ drafts }: { drafts: DraftSummary[] }) {
           </div>
           <Link
             href={{ pathname: '/create/[bookId]', params: { bookId: draft.id } }}
-            className="font-extrabold text-primary hover:underline"
+            className="font-semibold text-primary hover:underline"
           >
             {t('continue')}
           </Link>

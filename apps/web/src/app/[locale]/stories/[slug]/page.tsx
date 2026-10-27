@@ -112,14 +112,14 @@ export default async function StoryPage({ params }: Props) {
               {t('agesFor', { min: story.ageMin, max: story.ageMax })} ·{' '}
               {pagesLabel(t, story.lengths, editorial)}
             </p>
-            <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">{story.title}</h1>
+            <h1 className="mt-2 text-4xl font-medium sm:text-5xl">{story.title}</h1>
             <p className="mt-4 text-lg text-muted-foreground">{story.summary}</p>
           </div>
 
           <section aria-labelledby="sample" className="rounded-xl border bg-card p-6 shadow-sm">
             <h2
               id="sample"
-              className="flex items-center gap-2 text-sm font-semibold tracking-wide text-muted-foreground uppercase"
+              className="flex items-center gap-2 text-sm font-medium tracking-wide text-muted-foreground uppercase"
             >
               <BookOpen className="size-4" aria-hidden="true" />
               {t('sample')}
@@ -132,7 +132,7 @@ export default async function StoryPage({ params }: Props) {
 
           {lessons.length > 0 && (
             <section aria-labelledby="lessons">
-              <h2 id="lessons" className="text-xl font-semibold">
+              <h2 id="lessons" className="text-xl font-medium">
                 {tLessons('storyCombine')}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">{tLessons('storyCombineText')}</p>
@@ -157,7 +157,7 @@ export default async function StoryPage({ params }: Props) {
           )}
 
           <section aria-labelledby="formats">
-            <h2 id="formats" className="text-xl font-semibold">
+            <h2 id="formats" className="text-xl font-medium">
               {t('formats')}
             </h2>
             {offer?.available ? (
@@ -203,7 +203,7 @@ export default async function StoryPage({ params }: Props) {
       </div>
 
       <section aria-labelledby="browse" className="mt-16">
-        <h2 id="browse" className="text-[clamp(1.8rem,3.4vw,2.6rem)] font-semibold">
+        <h2 id="browse" className="text-[clamp(1.8rem,3.4vw,2.6rem)] font-medium">
           {t('browse')}
         </h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">{t('exampleNote')}</p>

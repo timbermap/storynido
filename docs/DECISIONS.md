@@ -685,3 +685,18 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Sin biometría:** no se usan embeddings ni métricas de parecido facial (lo pide `qa-reglas.json`). La consistencia la controlan la lámina aprobada por el adulto y la revisión de rasgos esenciales.
 - **Actividades:** se generan con plantillas aprobadas por nivel y se moderan. Quedan en `orders/{id}/content/activities`; se dibujan en la maquetación (fase 10).
 - **Pendiente:** maquetación (10) y entrega (12) siguen simuladas. Variante regional del idioma (es-MX, es-AR…) cuando el libro guarde el país.
+
+## 067 · Landing: navegación por público, idioma automático y pie profesional
+
+- **Fecha:** 2026-10-27 · **Pedido de Sebastián.**
+- **Encabezado:** 3 menús, uno por público (Familias, Cumpleaños y eventos, Profesionales), cada uno con su color.
+  - Cada panel tiene qué es, sus enlaces y colecciones, y el llamado propio.
+  - En el celular, los mismos 3 bloques.
+- **Idioma:**
+  - Se detecta solo: idioma del navegador al entrar, y la cookie `sn_locale` lo recuerda.
+  - El país se detecta por IP solo si la infraestructura manda el header (`X-Client-Country`, con balanceador o CDN). Hoy App Hosting no lo manda, así que se usa el idioma del navegador.
+  - Cambiarlo: en el pie (idioma y país) o en "Mi cuenta → Preferencias" (queda en el perfil).
+- **Pie:**
+  - Redes por variables `NEXT_PUBLIC_SOCIAL_INSTAGRAM`, `_TIKTOK` y `_YOUTUBE`; una red sin URL no se muestra.
+  - Íconos dibujados en línea, sin logos de terceros en el bundle.
+- **Estilo 2.1:** ver `docs/BRAND.md` (pesos más livianos, menos cajas, color por público).

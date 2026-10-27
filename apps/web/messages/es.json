@@ -29,7 +29,8 @@
     "professionalsText": "Cuentos para cada niño que acompañas, con colecciones educativas.",
     "professionalsCreate": "Crear para profesionales",
     "professionalsCreateText": "Elige una colección y personaliza el cuento.",
-    "region": "Idioma y país"
+    "region": "Idioma y país",
+    "familiesCreate": "Crear su cuento"
   },
   "Switchers": {
     "language": "Idioma",
@@ -51,7 +52,12 @@
     "company": "StoryNido",
     "cookiePreferences": "Preferencias de cookies",
     "rights": "© {year} {brand}. Todos los derechos reservados.",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "help": "Ayuda",
+    "pitch": "Cuentos ilustrados donde tu hijo es el protagonista: con su nombre, su carita y lo que más le gusta. En digital o impresos.",
+    "follow": "Síguenos",
+    "newTab": "se abre en otra pestaña",
+    "preferences": "Idioma y país"
   },
   "Legal": {
     "terms": "Términos y condiciones",
@@ -102,7 +108,8 @@
     },
     "faq": {
       "title": "Preguntas frecuentes",
-      "more": "Ver todas las preguntas"
+      "more": "Ver todas las preguntas",
+      "contact": "¿Otra duda? Escríbenos a <mail>hola@storynido.com</mail> y te respondemos."
     },
     "guarantee": {
       "title": "Si no te encanta, no lo pagas",
@@ -262,7 +269,11 @@
       "customer": "Cliente",
       "admin": "Administrador",
       "superadmin": "Superadministrador"
-    }
+    },
+    "preferencesTitle": "Preferencias",
+    "language": "Idioma",
+    "languageNote": "Detectamos el idioma de tu navegador; si prefieres otro, elígelo acá y lo recordamos.",
+    "preferencesError": "No pudimos guardar tu preferencia. Intenta de nuevo."
   },
   "Maintenance": {
     "title": "Estamos haciendo mejoras",

@@ -40,11 +40,11 @@ export async function StoryCard({
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <Heading className="text-xl leading-snug font-semibold">{story.title}</Heading>
-        <p className="w-fit rounded-full bg-secondary px-2.5 py-0.5 text-xs font-extrabold text-primary">
+        <p className="w-fit rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
           {t('agesFor', { min: story.ageMin, max: story.ageMax })}
         </p>
         {fromPrice && (
-          <p className="mt-auto text-sm font-black text-primary">
+          <p className="mt-auto text-sm font-bold text-primary">
             {t('from', { price: fromPrice })}
           </p>
         )}
