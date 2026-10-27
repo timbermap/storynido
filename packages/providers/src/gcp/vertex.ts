@@ -636,7 +636,7 @@ Children's picture book illustration. No text, letters, numbers, logos or waterm
     for (let attempt = 1; attempt <= 2; attempt += 1) {
       const { response, usage } = await this.client.generate(model, parts, {
         responseModalities: ['IMAGE'],
-        imageConfig: { aspectRatio: request.aspectRatio, imageSize: '1K' },
+        imageConfig: { aspectRatio: request.aspectRatio, imageSize: request.resolution ?? '1K' },
         ...(request.seed === null ? {} : { seed: request.seed }),
       });
       lastUsage = [...lastUsage, usage];

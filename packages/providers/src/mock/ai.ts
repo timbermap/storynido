@@ -195,12 +195,14 @@ export class MockAIImageProvider implements AIImageProvider {
   generateIllustration(request: IllustrationRequest): Promise<GeneratedImage> {
     const hash = sha256Hex(`${request.prompt}|${request.stylePrompt}|${String(request.seed)}`);
     const hue = parseInt(hash.slice(0, 2), 16);
-    const [width, height] =
+    const scale = request.resolution === '2K' ? 2 : 1;
+    const [width, height] = (
       request.aspectRatio === '3:4'
         ? [768, 1024]
         : request.aspectRatio === '4:3'
           ? [1024, 768]
-          : [1024, 1024];
+          : [1024, 1024]
+    ).map((side) => side * scale) as [number, number];
     const label = escapeXml(request.prompt.slice(0, 80));
     // <desc> lleva el prompt completo: la moderación y la revisión simuladas leen sus marcas.
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><desc>${escapeXml(request.prompt)}</desc><rect width="100%" height="100%" fill="hsl(${hue} 60% 85%)"/><circle cx="${width / 2}" cy="${height / 2 - 80}" r="120" fill="hsl(${hue} 50% 60%)"/><text x="50%" y="${height - 120}" text-anchor="middle" font-family="sans-serif" font-size="28" fill="#333">${label}</text></svg>`;

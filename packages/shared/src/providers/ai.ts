@@ -112,6 +112,8 @@ export interface IllustrationRequest {
   /** Ilustraciones ya generadas del mismo libro (p. ej. la portada) para mantener la consistencia. */
   references: readonly ImageData[];
   aspectRatio: '1:1' | '3:4' | '4:3';
+  /** 1K para pantalla; 2K para imprenta (~220 dpi a 21×28 cm). */
+  resolution?: '1K' | '2K';
   /** Semilla para reproducibilidad, si el proveedor la soporta. */
   seed: number | null;
 }
