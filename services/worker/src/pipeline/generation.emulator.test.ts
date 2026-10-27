@@ -617,6 +617,52 @@ describe('generación del libro (fase 09)', () => {
     });
   });
 
+  it('la recompra reutiliza el libro ya generado: ninguna llamada a la IA', async () => {
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    const { pipeline, run } = setup(providers);
+    await run();
+    expect((await order()).status).toBe('sent_to_print');
+
+    const source = await order();
+    await db.doc('orders/o2').set({
+      ownerUid: 'u1',
+      bookId: 'b1',
+      status: 'paid',
+      channel: 'families',
+      items: [{ piece: 'book', format: 'digital', quantity: 1 }],
+      country: 'MX',
+      currency: 'MXN',
+      shippingAddress: null,
+      costsUsdMicros: { ai: 0, print: 0, shipping: 0 },
+      pipeline: { generation: 0, runId: null, failedStep: null },
+      sourceOrderId: 'o1',
+      snapshot: source.snapshot as unknown,
+      snapshotHash: source.snapshotHash as unknown,
+    });
+    const ai = providers.ai();
+    const spies = [
+      vi.spyOn(ai.text, 'moderateText'),
+      vi.spyOn(ai.text, 'reviewPage'),
+      vi.spyOn(ai.text, 'generateStory'),
+      vi.spyOn(ai.image, 'generateIllustration'),
+      vi.spyOn(ai.image, 'moderateImage'),
+    ];
+    await pipeline.handleEvent({ type: 'order.paid', orderId: 'o2', requestId: 'r2' });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    for (let i = 0; i < 200; i += 1) {
+      const status = (await db.doc('orders/o2').get()).get('status') as string;
+      if (status === 'ready' || status === 'qa_failed') break;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    expect((await db.doc('orders/o2').get()).get('status')).toBe('ready');
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled();
+    const layout = (await db.doc('orders/o2/steps/layout_pdf').get()).get('output') as {
+      files: { format: string }[];
+    };
+    expect(layout.files.map((file) => file.format)).toEqual(['digital']);
+  });
+
   it('regenerar no cambia lo aprobado pero vuelve a pintar todas las páginas', async () => {
     const providers = registry();
     await seedBook(providers);

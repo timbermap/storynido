@@ -869,6 +869,51 @@ describe('checkout y pagos (fase 11)', () => {
     expect(twice.statusCode).toBe(409);
   });
 
+  it('recompra con un clic: mismo libro, sin muestra nueva; un digital no pasa a impreso', async () => {
+    await approvedBook();
+    const { orderId } = (await checkout()).json<{ orderId: string }>();
+    await webhook(completed(orderId, 34900, 'evt_src'));
+    // El libro ya se generó (lo haría el worker).
+    await db.doc(`orders/${orderId}`).update({
+      status: 'ready',
+      snapshot: { title: 'La aventura de Martina', hash: 'h' },
+      snapshotHash: 'h',
+    });
+    await db.doc(`orders/${orderId}/steps/layout_pdf`).set({
+      output: { files: [{ format: 'digital', kind: 'book', pages: 20 }] },
+    });
+
+    const toPrint = await post(`/v1/orders/${orderId}/reorder`, {
+      format: 'hardcover',
+      country: 'MX',
+      shippingAddress: ADDRESS,
+    });
+    expect(toPrint.json<{ error: { code: string } }>().error.code).toBe('print_unavailable');
+
+    const again = await post(`/v1/orders/${orderId}/reorder`, {
+      format: 'digital',
+      country: 'MX',
+      gift: { isGift: true, message: 'Para la prima' },
+    });
+    expect(again.statusCode).toBe(200);
+    const created = (
+      await db.doc(`orders/${again.json<{ orderId: string }>().orderId}`).get()
+    ).data() as
+      | { sourceOrderId: string; status: string; snapshot: { title: string }; bookTitle: string }
+      | undefined;
+    expect(created?.sourceOrderId).toBe(orderId);
+    expect(created?.status).toBe('pending_payment');
+    expect(created?.snapshot.title).toBe('La aventura de Martina');
+    expect(created?.bookTitle).toBe('La aventura de Martina');
+
+    const notMine = await post(
+      `/v1/orders/${orderId}/reorder`,
+      { format: 'digital', country: 'MX' },
+      'token-luis',
+    );
+    expect(notMine.statusCode).toBe(404);
+  });
+
   it('desarrollo: el pago simulado pasa por el mismo webhook firmado', async () => {
     await approvedBook();
     const { orderId } = (await checkout({ analyticsConsent: false })).json<{ orderId: string }>();

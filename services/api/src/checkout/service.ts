@@ -104,16 +104,23 @@ export class CheckoutService {
     if (preview.preview.stale) {
       throw new AppError(409, 'bad_request', 'Cambiaste tus elecciones: crea la muestra de nuevo.');
     }
-    if (body.format !== 'digital' && book.channel === 'events' && body.quantity < 1) {
-      throw new AppError(400, 'bad_request', 'Cantidad inválida.');
-    }
+    const pages = (book.preview as { interiorPages?: number } | null)?.interiorPages ?? 0;
+    const result = await this.price(book, body, pages);
+    return {
+      book,
+      preview: book.preview as Parameters<typeof previewFingerprint>[0],
+      result,
+    };
+  }
+
+  /** Precio e imprenta (formato habilitado, páginas y cantidad) para un libro ya validado. */
+  private async price(book: Record<string, unknown>, body: QuoteBody, pages: number) {
     if (body.format !== 'digital') {
       // Nunca se manda a imprenta algo incompatible: formato habilitado, páginas y cantidad.
       const option =
         (await this.catalog.printOptions(body.country)).find(
           (item) => item.format === body.format,
         ) ?? null;
-      const pages = (book.preview as { interiorPages?: number } | null)?.interiorPages ?? 0;
       const available = printAvailability(option, pages, body.quantity);
       if (!available.ok) {
         throw new AppError(
@@ -141,11 +148,7 @@ export class CheckoutService {
       now: new Date(),
     });
     if (!result.ok) throw new AppError(409, 'bad_request', `No disponible: ${result.error}`);
-    return {
-      book,
-      preview: book.preview as Parameters<typeof previewFingerprint>[0],
-      result,
-    };
+    return result;
   }
 
   private async coupon(code: string): Promise<Coupon | null> {
@@ -180,48 +183,123 @@ export class CheckoutService {
       throw new AppError(403, 'account_required', 'Crea tu cuenta para comprar.');
     }
     const { book, preview, result } = await this.prepare(user.uid, body);
-    if (body.format !== 'digital') {
-      if (!body.shippingAddress)
-        throw new AppError(400, 'bad_request', 'Falta la dirección de envío.');
-      if (body.shippingAddress.country !== body.country) {
-        throw new AppError(400, 'bad_request', 'La dirección tiene que ser del país elegido.');
-      }
-      const problems = addressProblems(body.shippingAddress);
-      if (problems.length > 0) {
-        throw new AppError(
-          400,
-          'validation_failed',
-          `Revisa la dirección: ${problems.join(', ')}.`,
-        );
-      }
+    this.checkAddress(body);
+    return this.open(user, origin, {
+      bookId: body.bookId,
+      book,
+      body,
+      price: result.snapshot,
+      title: preview.title,
+      fields: { approval: { fingerprint: previewFingerprint(preview), approvedAt: new Date() } },
+    });
+  }
+
+  /**
+   * Recompra con un clic: el mismo libro (ya generado) en otro formato o como regalo. Copia el
+   * libro congelado del pedido original: el pipeline no vuelve a llamar a la IA.
+   */
+  async reorder(
+    user: { uid: string; email: string | null; anonymous: boolean },
+    sourceOrderId: string,
+    body: Omit<CheckoutBody, 'bookId'>,
+    origin: string,
+  ): Promise<{ orderId: string; checkoutUrl: string }> {
+    if (user.anonymous) {
+      throw new AppError(403, 'account_required', 'Crea tu cuenta para comprar.');
     }
+    const sourceRef = this.db.collection(COLLECTIONS.orders).doc(sourceOrderId);
+    const source = (await sourceRef.get()).data();
+    if (source?.ownerUid !== user.uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
+    const generated = ['ready', 'sent_to_print', 'in_production', 'shipped', 'delivered'];
+    if (!generated.includes(String(source.status)) || !source.snapshot) {
+      throw new AppError(409, 'bad_request', 'Ese libro todavía no está terminado.');
+    }
+    const sourceItems = (source.items ?? []) as { format: BookFormat }[];
+    // Las ilustraciones de un libro digital son de pantalla (1K): no alcanzan para imprimir.
+    if (body.format !== 'digital' && sourceItems.every((item) => item.format === 'digital')) {
+      throw new AppError(
+        409,
+        'print_unavailable',
+        'Este libro se creó en digital: para imprimirlo hace falta crearlo en alta resolución.',
+      );
+    }
+    const layout = (
+      await sourceRef.collection(COLLECTIONS.orderSteps).doc('layout_pdf').get()
+    ).data() as
+      { output?: { files?: { format: string; kind: string; pages: number }[] } } | undefined;
+    const digital = layout?.output?.files?.find((file) => file.format === 'digital');
+    const interiorPages = digital ? digital.pages - 2 : 0;
+    const bookId = String(source.bookId);
+    const book = (await this.db.collection(COLLECTIONS.books).doc(bookId).get()).data() ?? {};
+    const full = { ...body, bookId };
+    const price = await this.price(book, full, interiorPages);
+    this.checkAddress(full);
+    const snapshot = source.snapshot as { title?: string };
+    return this.open(user, origin, {
+      bookId,
+      book,
+      body: full,
+      price: price.snapshot,
+      title: snapshot.title ?? 'StoryNido',
+      fields: {
+        sourceOrderId,
+        snapshot: source.snapshot,
+        snapshotHash: source.snapshotHash ?? null,
+        approval: source.approval ?? null,
+      },
+    });
+  }
+
+  private checkAddress(body: CheckoutBody) {
+    if (body.format === 'digital') return;
+    if (!body.shippingAddress)
+      throw new AppError(400, 'bad_request', 'Falta la dirección de envío.');
+    if (body.shippingAddress.country !== body.country) {
+      throw new AppError(400, 'bad_request', 'La dirección tiene que ser del país elegido.');
+    }
+    const problems = addressProblems(body.shippingAddress);
+    if (problems.length > 0) {
+      throw new AppError(400, 'validation_failed', `Revisa la dirección: ${problems.join(', ')}.`);
+    }
+  }
+
+  /** Abre el pedido (pendiente de pago, con el precio congelado) y la sesión de pago. */
+  private async open(
+    user: { uid: string; email: string | null },
+    origin: string,
+    input: {
+      bookId: string;
+      book: Record<string, unknown>;
+      body: CheckoutBody;
+      price: PriceSnapshot;
+      title: string;
+      fields: Record<string, unknown>;
+    },
+  ): Promise<{ orderId: string; checkoutUrl: string }> {
+    const { book, body, price } = input;
     const locale = (book.language as Locale | undefined) ?? 'es';
     const ref = this.db.collection(COLLECTIONS.orders).doc();
     const now = new Date();
-    const snapshot = result.snapshot;
     await ref.set({
       ownerUid: user.uid,
-      bookId: body.bookId,
+      bookId: input.bookId,
+      bookTitle: input.title,
       status: 'pending_payment',
       channel: typeof book.channel === 'string' ? book.channel : 'families',
       items: [{ piece: 'book', format: body.format, quantity: body.quantity }],
       country: body.country,
-      currency: snapshot.currency,
+      currency: price.currency,
       amounts: {
-        subtotalMinor: snapshot.subtotalMinor,
-        discountMinor: snapshot.discount.minor,
-        shippingMinor: snapshot.shipping.minor,
-        taxMinor: snapshot.tax.minor,
-        totalMinor: snapshot.totalMinor,
+        subtotalMinor: price.subtotalMinor,
+        discountMinor: price.discount.minor,
+        shippingMinor: price.shipping.minor,
+        taxMinor: price.tax.minor,
+        totalMinor: price.totalMinor,
       },
-      priceSnapshot: snapshot,
-      couponCode: snapshot.discount.reason === 'coupon' ? snapshot.discount.label : null,
+      priceSnapshot: price,
+      couponCode: price.discount.reason === 'coupon' ? price.discount.label : null,
       gift: body.gift,
       shippingAddress: body.format === 'digital' ? null : body.shippingAddress,
-      approval: {
-        fingerprint: previewFingerprint(preview),
-        approvedAt: now,
-      },
       analyticsConsent: body.analyticsConsent,
       payment: { provider: this.providers.payment().id, checkoutSessionId: null, paymentId: null },
       print: null,
@@ -234,6 +312,7 @@ export class CheckoutService {
         failedStep: null,
         error: null,
       },
+      ...input.fields,
       createdAt: now,
       updatedAt: now,
     });
@@ -241,18 +320,12 @@ export class CheckoutService {
     const session = await this.providers.payment().createCheckout({
       orderId: ref.id,
       customerEmail: user.email,
-      currency: snapshot.currency,
+      currency: price.currency,
       locale,
       // Un solo ítem con el total calculado acá: el proveedor nunca recalcula el precio.
-      lineItems: [
-        {
-          name: preview.title,
-          amountMinor: snapshot.totalMinor,
-          quantity: 1,
-        },
-      ],
+      lineItems: [{ name: input.title, amountMinor: price.totalMinor, quantity: 1 }],
       successUrl: `${origin}/${locale}/${ORDER_PATH[locale]}/${ref.id}`,
-      cancelUrl: `${origin}/${locale}/${CREATE_PATH[locale]}/${body.bookId}`,
+      cancelUrl: `${origin}/${locale}/${CREATE_PATH[locale]}/${input.bookId}`,
     });
     await ref.update({ 'payment.checkoutSessionId': session.id, updatedAt: new Date() });
     return { orderId: ref.id, checkoutUrl: session.url };

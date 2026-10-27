@@ -644,6 +644,37 @@ export const apiRoutes = {
     params: z.object({ orderId: z.string().min(1) }),
     response: publicOrderSchema,
   },
+  reorder: {
+    method: 'POST',
+    path: '/v1/orders/:orderId/reorder',
+    access: 'user',
+    summary:
+      'Recompra con un clic: el mismo libro ya generado en otro formato o como regalo (sin IA)',
+    params: z.object({ orderId: z.string().min(1) }),
+    body: createCheckoutBodySchema.omit({ bookId: true }),
+    response: createCheckoutResponseSchema,
+  },
+  deleteChild: {
+    method: 'DELETE',
+    path: '/v1/me/children/:childId',
+    access: 'user',
+    summary:
+      'Borra el perfil de un chico, sus fotos y sus borradores (los pedidos pagados se conservan)',
+    params: z.object({ childId: z.string().min(1) }),
+    response: z.object({
+      photos: z.number().int(),
+      books: z.number().int(),
+      keptOrderedBooks: z.number().int(),
+    }),
+  },
+  deleteAccount: {
+    method: 'DELETE',
+    path: '/v1/me',
+    access: 'user',
+    summary: 'Borra la cuenta y todos sus datos personales (los pedidos pagados se conservan)',
+    body: z.object({ confirm: z.literal(true) }),
+    response: z.object({ deleted: z.literal(true) }),
+  },
   orderDownload: {
     method: 'GET',
     path: '/v1/orders/:orderId/download',

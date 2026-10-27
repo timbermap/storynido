@@ -497,7 +497,34 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
   }
 
   /** G2 + G3 sobre el texto congelado (no se reescribe) y actividades si corresponden. */
+  /** Ilustraciones finales (revisadas) del pedido original de una recompra. */
+  async function sourceImages(ctx: StepContext): Promise<Map<number, string>> {
+    const source = ctx.order.sourceOrderId ?? '';
+    const qa = (
+      await db
+        .collection(COLLECTIONS.orders)
+        .doc(source)
+        .collection(COLLECTIONS.orderSteps)
+        .doc('quality_check')
+        .get()
+    ).data() as { output?: { images?: { index: number; imagePath: string }[] } } | undefined;
+    const images = new Map(
+      (qa?.output?.images ?? []).map((image) => [image.index, image.imagePath]),
+    );
+    if (images.size === 0)
+      throw new HumanReviewError(
+        'reorder_source',
+        'El pedido original no tiene el libro terminado.',
+      );
+    return images;
+  }
+
   async function generateStory(ctx: StepContext): Promise<StepResult> {
+    // Recompra: el texto es el mismo libro ya revisado; no se vuelve a llamar a la IA.
+    if (ctx.order.sourceOrderId) {
+      const snapshot = await snapshotOf(ctx);
+      return { output: { pages: snapshot.pages.length, reused: true } };
+    }
     const snapshot = await snapshotOf(ctx);
     const provider = await ai();
     let cost = 0;
@@ -590,6 +617,14 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
 
   /** G4 con reparaciones localizadas: una página con problemas no toca a las demás. */
   async function qualityCheck(ctx: StepContext): Promise<StepResult> {
+    // Recompra: las páginas ya pasaron la revisión en el pedido original.
+    if (ctx.order.sourceOrderId) {
+      const images = (ctx.outputs.generate_illustrations?.images ?? []) as {
+        index: number;
+        imagePath: string;
+      }[];
+      return { output: { images, reviewed: 0, repaired: 0, reused: true } };
+    }
     const snapshot = await snapshotOf(ctx);
     const provider = await ai();
     const reference = await load(snapshot.character.sheetPath);
@@ -1050,6 +1085,17 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     illustratePage: async (ctx: PageContext) => {
       const snapshot = await snapshotOf(ctx);
       const path = `orders/${ctx.order.id}/g${String(ctx.generation)}/illustration-${String(ctx.index)}.webp`;
+      // Recompra: se copia la ilustración final del pedido original (sin IA).
+      if (ctx.order.sourceOrderId) {
+        const source = (await sourceImages(ctx)).get(ctx.index);
+        if (!source)
+          throw new HumanReviewError(
+            'reorder_source',
+            'Falta una ilustración del pedido original.',
+          );
+        await copy(source, path);
+        return { imagePath: path, costUsdMicros: 0 };
+      }
       const approved = snapshot.approved[String(ctx.index)];
       // Lo que el adulto ya vio y aprobó en la vista previa se reutiliza tal cual.
       if (approved && ctx.generation === 0) {

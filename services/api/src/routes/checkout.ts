@@ -37,6 +37,16 @@ export function registerCheckoutRoutes(app: FastifyInstance, checkout: CheckoutS
     );
   });
 
+  addRoute(app, apiRoutes.reorder, { appCheck: true }, (request) => {
+    const current = user(request);
+    return checkout.reorder(
+      { uid: current.uid, email: current.email, anonymous: current.anonymous },
+      (request.params as { orderId: string }).orderId,
+      request.body as Omit<CheckoutBody, 'bookId'>,
+      origin(request),
+    );
+  });
+
   addRoute(app, apiRoutes.order, {}, (request) =>
     checkout.order(user(request).uid, (request.params as { orderId: string }).orderId),
   );

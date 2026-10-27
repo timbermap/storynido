@@ -93,12 +93,17 @@ export async function createTestApp(
     // Los tests corren con los emuladores de test (with-test-emulators.sh).
     photos: new PhotoService(db, providers),
     previews,
-    accounts: new AccountService(db, fakeTokens, {
-      deleteUser: (uid) => {
-        deletedUsers.push(uid);
-        return Promise.resolve();
+    accounts: new AccountService(
+      db,
+      fakeTokens,
+      {
+        deleteUser: (uid) => {
+          deletedUsers.push(uid);
+          return Promise.resolve();
+        },
       },
-    }),
+      overrides.providers ?? providers,
+    ),
     pipelineEvents,
     checkout: new CheckoutService(
       db,

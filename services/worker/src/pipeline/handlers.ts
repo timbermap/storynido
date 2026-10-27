@@ -9,6 +9,8 @@ export interface PipelineOrder {
   status: string;
   channel: string;
   items: { piece: string; format: string; quantity: number }[];
+  /** Recompra: el libro ya generado en otro pedido (se reutiliza, sin IA). */
+  sourceOrderId?: string | null;
 }
 
 export type StepOutputs = Partial<Record<PipelineStep, Record<string, unknown>>>;

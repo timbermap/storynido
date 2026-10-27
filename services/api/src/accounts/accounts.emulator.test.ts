@@ -2,8 +2,9 @@
  * Crear sin cuenta: los datos de la sesión anónima pasan a la cuenta real al iniciar sesión
  * con un mail que ya tenía cuenta (con emuladores).
  */
+import type { ProviderRegistry } from '@storynido/providers';
 import { getFirestore } from 'firebase-admin/firestore';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { initFirebaseAdmin } from '../firebase';
 import { auth, createTestApp, deletedUsers } from '../test-helpers';
@@ -84,5 +85,122 @@ describe('fusión de la sesión anónima', () => {
       payload: { anonymousIdToken: 'token-anon1:anonymous' },
     });
     expect(anonymous.statusCode).toBe(401);
+  });
+});
+
+describe('borrado de datos a pedido', () => {
+  let app: App;
+  let providers: ProviderRegistry;
+
+  beforeAll(async () => {
+    const created = await createTestApp();
+    app = created.app;
+    providers = created.providers;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  beforeEach(async () => {
+    for (const name of ['books', 'children', 'photos', 'users', 'auditLog']) {
+      await db.recursiveDelete(db.collection(name));
+    }
+    deletedUsers.length = 0;
+    const storage = providers.storage();
+    await storage.upload(
+      { bucket: 'photos', path: 'ana/b1/p1/original.jpg' },
+      new Uint8Array([1]),
+      'image/jpeg',
+    );
+    await storage.upload(
+      { bucket: 'assets', path: 'previews/ana/b1/cover.webp' },
+      new Uint8Array([1]),
+      'image/webp',
+    );
+    await db.doc('users/ana').set({ email: 'ana@storynido.test', locale: 'es' });
+    await db.doc('children/c1').set({ ownerUid: 'ana', name: 'Martina', age: 5 });
+    await db.doc('photos/p1').set({
+      ownerUid: 'ana',
+      childId: 'c1',
+      storagePath: 'ana/b1/p1/original.jpg',
+      processedPath: null,
+    });
+    await db.doc('books/b1').set({
+      ownerUid: 'ana',
+      childId: 'c1',
+      status: 'preview_ready',
+      preview: {
+        cover: { imagePath: 'previews/ana/b1/cover.webp', previewImagePath: null },
+        pages: [],
+      },
+    });
+    await db.doc('books/b2').set({ ownerUid: 'ana', childId: 'c1', status: 'ordered' });
+    await db.doc('children/otro').set({ ownerUid: 'luis', name: 'Lucas' });
+  });
+
+  it('borrar un chico: perfil, fotos y borradores; los pedidos pagados se conservan', async () => {
+    const send = vi.spyOn(providers.email(), 'send');
+    const res = await app.inject({
+      method: 'DELETE',
+      url: '/v1/me/children/c1',
+      headers: auth('token-ana'),
+    });
+    expect(res.json()).toEqual({ photos: 1, books: 1, keptOrderedBooks: 1 });
+    expect((await db.doc('children/c1').get()).exists).toBe(false);
+    expect((await db.doc('photos/p1').get()).exists).toBe(false);
+    expect((await db.doc('books/b1').get()).exists).toBe(false);
+    expect((await db.doc('books/b2').get()).exists).toBe(true);
+    expect(
+      await providers.storage().exists({ bucket: 'photos', path: 'ana/b1/p1/original.jpg' }),
+    ).toBe(false);
+    expect(
+      await providers.storage().exists({ bucket: 'assets', path: 'previews/ana/b1/cover.webp' }),
+    ).toBe(false);
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'ana@storynido.test', template: 'data_deleted' }),
+    );
+    // De otra persona, no.
+    const other = await app.inject({
+      method: 'DELETE',
+      url: '/v1/me/children/otro',
+      headers: auth('token-ana'),
+    });
+    expect(other.statusCode).toBe(404);
+    send.mockRestore();
+  });
+
+  it('borrar la cuenta: datos personales y acceso; necesita confirmación y una cuenta real', async () => {
+    const anonymous = await app.inject({
+      method: 'DELETE',
+      url: '/v1/me',
+      headers: auth('token-ana:anonymous'),
+      payload: { confirm: true },
+    });
+    expect(anonymous.statusCode).toBe(403);
+    const missing = await app.inject({
+      method: 'DELETE',
+      url: '/v1/me',
+      headers: auth('token-ana'),
+      payload: {},
+    });
+    expect(missing.statusCode).toBe(400);
+
+    const res = await app.inject({
+      method: 'DELETE',
+      url: '/v1/me',
+      headers: auth('token-ana'),
+      payload: { confirm: true },
+    });
+    expect(res.json()).toEqual({ deleted: true });
+    expect((await db.doc('users/ana').get()).exists).toBe(false);
+    expect((await db.doc('children/c1').get()).exists).toBe(false);
+    expect((await db.doc('books/b2').get()).exists).toBe(true);
+    expect(deletedUsers).toEqual(['ana']);
+    const audit = await db
+      .collection('auditLog')
+      .where('action', '==', 'privacy.delete_account')
+      .get();
+    expect(audit.size).toBe(1);
   });
 });

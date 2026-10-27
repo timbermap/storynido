@@ -106,7 +106,7 @@ const app = await buildApp({
     catalog,
     photos: new PhotoService(db, providers),
     previews,
-    accounts: new AccountService(db, tokens, new FirebaseAuthAccounts(firebase)),
+    accounts: new AccountService(db, tokens, new FirebaseAuthAccounts(firebase), providers),
     pipelineEvents,
     checkout,
     fulfillment: new FulfillmentService(db, providers, log, {

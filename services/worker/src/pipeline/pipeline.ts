@@ -80,6 +80,7 @@ interface OrderDoc {
   status: OrderStatus;
   channel?: string;
   items?: PipelineOrder['items'];
+  sourceOrderId?: string | null;
   pipeline?: {
     generation?: number;
     runId?: string | null;
@@ -584,6 +585,7 @@ export class Pipeline {
       status: order.status,
       channel: order.channel ?? 'families',
       items: order.items ?? [],
+      sourceOrderId: order.sourceOrderId ?? null,
     };
   }
 
