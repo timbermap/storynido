@@ -39,6 +39,8 @@ export const API_ERROR_CODES = [
   'ai_unavailable',
   /** Hace falta una cuenta (no alcanza la sesión anónima). */
   'account_required',
+  /** El libro no se puede imprimir en este destino (formato, páginas o cantidad). */
+  'print_unavailable',
   'internal',
 ] as const;
 
@@ -315,6 +317,8 @@ export const offerSchema = z.object({
     etaDaysMax: z.number().int().nonnegative(),
   }),
   formats: z.array(offerFormatSchema),
+  /** El país vende impresos pero la imprenta todavía no está habilitada: solo digital. */
+  printUnavailable: z.boolean().default(false),
 });
 
 export type Offer = z.infer<typeof offerSchema>;

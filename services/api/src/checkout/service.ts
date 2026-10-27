@@ -6,6 +6,7 @@ import {
   addressProblems,
   assertOrderTransition,
   canTransitionOrder,
+  printAvailability,
   type checkoutQuoteBodySchema,
   type createCheckoutBodySchema,
   quote,
@@ -100,6 +101,22 @@ export class CheckoutService {
     }
     if (body.format !== 'digital' && book.channel === 'events' && body.quantity < 1) {
       throw new AppError(400, 'bad_request', 'Cantidad inválida.');
+    }
+    if (body.format !== 'digital') {
+      // Nunca se manda a imprenta algo incompatible: formato habilitado, páginas y cantidad.
+      const option =
+        (await this.catalog.printOptions(body.country)).find(
+          (item) => item.format === body.format,
+        ) ?? null;
+      const pages = (book.preview as { interiorPages?: number } | null)?.interiorPages ?? 0;
+      const available = printAvailability(option, pages, body.quantity);
+      if (!available.ok) {
+        throw new AppError(
+          409,
+          'print_unavailable',
+          'Disponible en digital; la impresión todavía no está disponible para este libro o destino.',
+        );
+      }
     }
     const [countries, prices, coupon, promotions] = await Promise.all([
       this.catalog.countries(),

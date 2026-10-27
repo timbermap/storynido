@@ -18,6 +18,8 @@ export const COLLECTIONS = {
   illustrationTasks: 'pages',
   /** adminAlerts/{id}: avisos para el admin (solo servidor). */
   adminAlerts: 'adminAlerts',
+  /** printOptions/{país}_{formato}: matriz de impresión (admin). */
+  printOptions: 'printOptions',
   /** books/{bookId}/qaEvents: controles de calidad del libro (solo servidor). */
   qaEvents: 'qaEvents',
   countries: 'countries',

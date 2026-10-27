@@ -34,6 +34,9 @@ import {
   storySchema,
   userSchema,
   type BookFormat,
+  PRINT_FORMATS,
+  printOptionId,
+  printOptionSchema,
   type BookLength,
   type CountryCode,
   type Locale,
@@ -177,6 +180,36 @@ for (const code of COUNTRY_CODES) {
         amountMinor: prices[format],
         lengthAdjustmentsMinor: SAMPLE_LENGTH_ADJUSTMENTS[code] ?? {},
         active: true,
+        updatedAt: now,
+      }),
+    );
+  }
+}
+
+// Matriz de impresión de ejemplo con la imprenta simulada (la real se habilita desde el admin
+// recién con la muestra física aprobada).
+const SAMPLE_PRINT: Partial<Record<CountryCode, { etaDaysMin: number; etaDaysMax: number }>> = {
+  MX: { etaDaysMin: 6, etaDaysMax: 11 },
+  US: { etaDaysMin: 5, etaDaysMax: 9 },
+};
+for (const [code, eta] of Object.entries(SAMPLE_PRINT) as [
+  CountryCode,
+  { etaDaysMin: number; etaDaysMax: number },
+][]) {
+  for (const format of PRINT_FORMATS) {
+    batch.set(
+      db.collection(COLLECTIONS.printOptions).doc(printOptionId(code, format)),
+      printOptionSchema.parse({
+        country: code,
+        format,
+        provider: 'mock',
+        sku: `photobook-${format}-210x280`,
+        enabled: true,
+        qaSamplePassed: true,
+        pages: { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 },
+        maxQuantity: 100,
+        ...eta,
+        productionCostUsdMinor: format === 'hardcover' ? 1400 : 900,
         updatedAt: now,
       }),
     );

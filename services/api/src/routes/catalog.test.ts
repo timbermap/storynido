@@ -2,6 +2,7 @@ import type { Content, CountryConfig, Lesson, Price, Product, Story } from '@sto
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { InMemoryCatalog } from '../catalog';
+import { buildOffer } from './catalog';
 import { createTestApp } from '../test-helpers';
 
 const now = new Date('2026-10-26T00:00:00Z');
@@ -103,6 +104,22 @@ describe('catálogo', () => {
   beforeAll(async () => {
     ctx = await createTestApp({
       catalog: new InMemoryCatalog({
+        printOptions: [
+          {
+            country: 'MX',
+            format: 'hardcover',
+            provider: 'mock',
+            sku: 'photobook-hardcover-210x280',
+            enabled: true,
+            qaSamplePassed: true,
+            pages: { min: 12, max: 120, multipleOf: 2 },
+            maxQuantity: 50,
+            etaDaysMin: 6,
+            etaDaysMax: 10,
+            productionCostUsdMinor: 1400,
+            updatedAt: now,
+          },
+        ],
         stories: [
           story('b', 2, 4, 10),
           story('a', 1, 3, 6),
@@ -206,6 +223,17 @@ describe('catálogo', () => {
     expect(offer.available).toBe(true);
     expect(offer.currency).toBe('MXN');
     expect(offer.formats.map((f) => f.format)).toEqual(['digital', 'hardcover']);
+  });
+
+  it('sin imprenta habilitada (o sin muestra aprobada) el impreso no se ofrece', () => {
+    const country = { ...mx, formats: { digital: true, softcover: true, hardcover: true } };
+    const prices = (['digital', 'softcover', 'hardcover'] as const).map((format) =>
+      price(format, 1000),
+    );
+    const products = [product('digital'), product('softcover'), product('hardcover')];
+    const offer = buildOffer('MX', country, prices, products, 'es', []);
+    expect(offer.formats.map((f) => f.format)).toEqual(['digital']);
+    expect(offer.printUnavailable).toBe(true);
   });
 
   it('un país no activo no está disponible', async () => {

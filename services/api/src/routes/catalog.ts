@@ -6,6 +6,7 @@ import {
   type Locale,
   type Offer,
   type Price,
+  type PrintOption,
   type Product,
   type PublicStory,
   type Story,
@@ -62,6 +63,7 @@ export function buildOffer(
   prices: Price[],
   products: Product[],
   locale: Locale,
+  printOptions: PrintOption[] = [],
 ): Offer {
   if (!country) {
     return {
@@ -72,12 +74,19 @@ export function buildOffer(
       taxIncludedInPrice: false,
       shipping: { costMinor: 0, etaDaysMin: 0, etaDaysMax: 0 },
       formats: [],
+      printUnavailable: false,
     };
   }
+  // Un impreso se ofrece solo si la imprenta está habilitada con la muestra aprobada.
+  const printable = (format: string) =>
+    printOptions.some(
+      (option) => option.format === format && option.enabled && option.qaSamplePassed,
+    );
   const formats = BOOK_FORMATS.flatMap((format) => {
     const price = prices.find((p) => p.format === format && p.currency === country.currency);
     const product = products.find((p) => p.format === format);
     if (!country.formats[format] || !price || !product) return [];
+    if (format !== 'digital' && !printable(format)) return [];
     return [
       {
         format,
@@ -95,6 +104,10 @@ export function buildOffer(
     taxIncludedInPrice: country.taxIncludedInPrice,
     shipping: country.shipping,
     formats,
+    printUnavailable:
+      BOOK_FORMATS.some(
+        (format) => format !== 'digital' && country.formats[format] && !printable(format),
+      ) && !formats.some((format) => format.format !== 'digital'),
   };
 }
 
@@ -176,10 +189,11 @@ export function registerCatalogRoutes(app: FastifyInstance, catalog: CatalogRepo
 
   addRoute(app, apiRoutes.catalogOffer, {}, async (request) => {
     const { country: code, locale } = query<'catalogOffer'>(request);
-    const [countries, prices, products] = await Promise.all([
+    const [countries, prices, products, printOptions] = await Promise.all([
       catalog.countries(),
       catalog.prices(code),
       catalog.products(),
+      catalog.printOptions(code),
     ]);
     return buildOffer(
       code,
@@ -187,6 +201,7 @@ export function registerCatalogRoutes(app: FastifyInstance, catalog: CatalogRepo
       prices,
       products,
       locale,
+      printOptions,
     );
   });
 

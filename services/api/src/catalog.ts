@@ -1,4 +1,6 @@
 import {
+  normalizeFirestoreData,
+  printOptionSchema,
   COLLECTIONS,
   collectionSchema,
   type Collection,
@@ -22,6 +24,7 @@ import {
   type Lesson,
   type Locale,
   type Price,
+  type PrintOption,
   type Product,
   type Story,
 } from '@storynido/shared';
@@ -36,6 +39,8 @@ export interface CatalogRepository {
   countries(): Promise<CountryConfig[]>;
   prices(country: CountryCode): Promise<Price[]>;
   products(): Promise<Product[]>;
+  /** Matriz de impresión del país (qué formato se puede imprimir, con qué reglas). */
+  printOptions(country: CountryCode): Promise<PrintOption[]>;
   content(key: string, locale: Locale): Promise<Content | null>;
   /** Configuración editorial vigente (o la de fábrica si todavía no se cargó). */
   editorial(): Promise<EditorialConfig>;
@@ -167,6 +172,19 @@ export class FirestoreCatalog implements CatalogRepository {
     });
   }
 
+  printOptions(country: CountryCode): Promise<PrintOption[]> {
+    return this.cache.get(`print:${country}`, async () => {
+      const snapshot = await this.db
+        .collection(COLLECTIONS.printOptions)
+        .where('country', '==', country)
+        .get();
+      return snapshot.docs.flatMap((doc) => {
+        const parsed = printOptionSchema.safeParse(normalizeFirestoreData(doc.data()));
+        return parsed.success ? [parsed.data] : [];
+      });
+    });
+  }
+
   content(key: string, locale: Locale): Promise<Content | null> {
     return this.cache.get(`content:${key}:${locale}`, async () => {
       const snapshot = await this.db
@@ -199,6 +217,7 @@ export class InMemoryCatalog implements CatalogRepository {
       countries?: CountryConfig[];
       prices?: Price[];
       products?: Product[];
+      printOptions?: PrintOption[];
       content?: Content[];
       editorial?: EditorialConfig;
     } = {},
@@ -232,6 +251,10 @@ export class InMemoryCatalog implements CatalogRepository {
     return Promise.resolve(
       (this.data.prices ?? []).filter((p) => p.country === country && p.active),
     );
+  }
+
+  printOptions(country: CountryCode) {
+    return Promise.resolve((this.data.printOptions ?? []).filter((o) => o.country === country));
   }
 
   products() {
