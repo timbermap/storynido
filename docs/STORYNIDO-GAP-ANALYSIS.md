@@ -123,19 +123,19 @@ Cada paso se cierra con lint, typecheck, tests y capturas en desktop y móvil. N
 
 Fuente: `docs/estrategia/LINEAS-COMERCIALES.md`. Inventario de lo que ya existe y dónde entra cada parte del ajuste (sin rehacer nada):
 
-| Requisito                                                      | Estado hoy                                                                                                                      | Se resuelve en                                   |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Extensión (mini 8–12, corto 16, clásico 24, gran aventura 32)  | PARCIAL: `stories.pageCount` (12) define las páginas; `products.pageCount` las del formato impreso. Se extiende, no se duplica. | 07b                                              |
-| Cantidad de texto independiente de la extensión                | NO EXISTE: el prompt pide 2 a 4 oraciones fijas. Se parametriza en `buildStoryPrompt`.                                          | 07b                                              |
-| Nivel de lectura                                               | NO EXISTE: hoy solo influye la edad.                                                                                            | 07b                                              |
-| Tipo de contenido (cuento, colorear, actividades, mixto)       | NO EXISTE.                                                                                                                      | 07b (modelo), 09 y 10 (generación y maquetación) |
-| Familias, Eventos y Profesionales con landings y acceso propio | NO EXISTE: hay una sola home. Familias = la tienda actual, sin romper rutas.                                                    | 07c                                              |
-| Colecciones y metadatos de plantillas por canal                | PARCIAL: hay historias y enseñanzas, sin colecciones ni canales.                                                                | 07c                                              |
-| Un diseño, muchas copias (Eventos)                             | PARCIAL: `PrintProvider` ya acepta `quantity`; el creador y la lámina del personaje se reutilizan.                              | 08, 10, 11, 12, 12b                              |
-| Cuenta Pro, proyectos por alias, repetir configuración         | NO EXISTE: hay usuarios con roles y libros por dueño. Se agrega `accountType` (sin tocar los roles).                            | 12c                                              |
-| Descuentos por recurrencia                                     | NO EXISTE: hay `coupons` y `promotions`. Se extiende el cálculo de precios del servidor.                                        | 11, 12c                                          |
-| Precios por canal, producto, extensión y cantidad              | PARCIAL: `prices` por país y formato.                                                                                           | 11                                               |
-| Admin y métricas por canal                                     | NO EXISTE: el admin es un esqueleto.                                                                                            | 14, 15                                           |
+| Requisito                                                      | Estado hoy                                                                                                                    | Se resuelve en      |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| Extensión (mini 8–12, corto 16, clásico 24, gran aventura 32)  | EXISTE (07b, DECISIONS 061): configuración editorial; los libros anteriores conservan el `pageCount` de su historia.          | 07b                 |
+| Cantidad de texto independiente de la extensión                | EXISTE (07b): rango de palabras por página, con 1 reescritura si no se cumple.                                                | 07b                 |
+| Nivel de lectura                                               | EXISTE (07b): guía por nivel en el prompt, sugerida según la edad.                                                            | 07b                 |
+| Tipo de contenido (cuento, colorear, actividades, mixto)       | PARCIAL (07b): modelo, selección, estilo para colorear y plantillas de actividades. Falta generar y maquetar las actividades. | 09 y 10             |
+| Familias, Eventos y Profesionales con landings y acceso propio | NO EXISTE: hay una sola home. Familias = la tienda actual, sin romper rutas.                                                  | 07c                 |
+| Colecciones y metadatos de plantillas por canal                | PARCIAL: hay historias y enseñanzas, sin colecciones ni canales.                                                              | 07c                 |
+| Un diseño, muchas copias (Eventos)                             | PARCIAL: `PrintProvider` ya acepta `quantity`; el creador y la lámina del personaje se reutilizan.                            | 08, 10, 11, 12, 12b |
+| Cuenta Pro, proyectos por alias, repetir configuración         | NO EXISTE: hay usuarios con roles y libros por dueño. Se agrega `accountType` (sin tocar los roles).                          | 12c                 |
+| Descuentos por recurrencia                                     | NO EXISTE: hay `coupons` y `promotions`. Se extiende el cálculo de precios del servidor.                                      | 11, 12c             |
+| Precios por canal, producto, extensión y cantidad              | PARCIAL: `prices` por país y formato.                                                                                         | 11                  |
+| Admin y métricas por canal                                     | NO EXISTE: el admin es un esqueleto.                                                                                          | 14, 15              |
 
 **Restricciones a validar antes de vender:**
 
