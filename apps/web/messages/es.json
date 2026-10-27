@@ -30,7 +30,12 @@
     "professionalsCreate": "Crear para profesionales",
     "professionalsCreateText": "Elige una colección y personaliza el cuento.",
     "region": "Idioma y país",
-    "familiesCreate": "Crear su cuento"
+    "familiesCreate": "Crear su cuento",
+    "myStories": "Mis cuentos",
+    "preferences": "Preferencias",
+    "signOut": "Cerrar sesión",
+    "accountMenu": "Menú de tu cuenta",
+    "signedInAs": "Sesión de"
   },
   "Switchers": {
     "language": "Idioma",

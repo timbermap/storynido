@@ -30,7 +30,12 @@
     "professionalsCreate": "Criar para profissionais",
     "professionalsCreateText": "Escolha uma coleção e personalize a história.",
     "region": "Idioma e país",
-    "familiesCreate": "Criar a história"
+    "familiesCreate": "Criar a história",
+    "myStories": "Minhas histórias",
+    "preferences": "Preferências",
+    "signOut": "Sair",
+    "accountMenu": "Menu da sua conta",
+    "signedInAs": "Conectado como"
   },
   "Switchers": {
     "language": "Idioma",

@@ -35,6 +35,7 @@
 
 ## Fuera de alcance / pendientes detectados
 
+- **Navbar con sesión iniciada (pedido de Sebastián, 2026-10-27):** hoy solo cambia "Iniciar sesión" por "Mi cuenta". Falta un menú de usuario (iniciales o foto) con Mis cuentos (borradores y muestras), Mis pedidos, Preferencias y Cerrar sesión, y en Profesionales la marca de cuenta Pro. Encaja en la fase 12 ("Mi cuenta"), o antes si se prioriza.
 - **Pedidos trabados (detectado en la fase 08):** si Workflows no arranca y Pub/Sub manda el evento a `dead-letter`, el pedido queda en `generating`. Hace falta un barrido periódico que reintente los eventos con `started: false` y avise por los pedidos sin avance (fase 15 o 16).
 - **Hero y navbar (pedido de Sebastián, 2026-10-27):** rediseño con la referencia que mandó: titular grande con una palabra en lavanda, el libro abierto ilustrado con la "foto" del chico (ilustrada o sintética, nunca una foto real), CTA principal "Crear la vista previa gratis", enlace "Ver historias", línea "Digital en todo el mundo · Impreso en países seleccionados" y las 3 líneas como tarjetas debajo del hero. Navbar con menús por línea, búsqueda, "Iniciar sesión" y "Crear un cuento".
 - **UX a mejorar (pedido de Sebastián, 2026-10-27):** el diseño y la experiencia del encabezado (navbar), las preguntas frecuentes y el pie de página no convencen. Hace falta una pasada de diseño dedicada:

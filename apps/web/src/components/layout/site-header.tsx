@@ -230,7 +230,7 @@ export async function SiteHeader() {
             })}
           </nav>
           <div className="mt-4 grid gap-2">
-            <AccountLink />
+            <AccountLink variant="list" />
             <Link href="/create" className={buttonVariants({ className: 'w-full' })}>
               {t('create')}
             </Link>

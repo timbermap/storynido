@@ -29,6 +29,8 @@ export function NavMenu({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // Si lo abrió el mouse al pasar, el clic que sigue no lo cierra.
+  const openedByHover = useRef(false);
   const pathname = usePathname();
   const [lastPath, setLastPath] = useState(pathname);
 
@@ -70,11 +72,13 @@ export function NavMenu({
       onPointerEnter={(event) => {
         if (event.pointerType !== 'mouse') return;
         clearTimeout(closeTimer.current);
+        if (!open) openedByHover.current = true;
         setOpen(true);
       }}
       onPointerLeave={(event) => {
         if (event.pointerType !== 'mouse') return;
         closeTimer.current = setTimeout(() => {
+          openedByHover.current = false;
           setOpen(false);
         }, 150);
       }}
@@ -84,6 +88,10 @@ export function NavMenu({
         aria-expanded={open}
         aria-controls={id}
         onClick={() => {
+          if (openedByHover.current) {
+            openedByHover.current = false;
+            return;
+          }
           setOpen((value) => !value);
         }}
         className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 whitespace-nowrap transition-colors hover:text-primary aria-expanded:text-primary"

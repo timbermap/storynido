@@ -33,6 +33,17 @@ import {
   type StepResult,
 } from './handlers';
 
+/** Ninguno de los intentos de una ilustración pasó la moderación (con lo que se gastó). */
+export class IllustrationRejectedError extends Error {
+  constructor(
+    readonly index: number,
+    readonly costUsdMicros: number,
+  ) {
+    super(`La ilustración ${String(index)} no pasó la moderación.`);
+    this.name = 'IllustrationRejectedError';
+  }
+}
+
 /** Libro aprobado y congelado al empezar el pedido. El texto ya no cambia sin el adulto. */
 export interface BookSnapshot {
   hash: string;
@@ -278,9 +289,13 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         );
         return cost;
       }
-      await qaEvent(ctx, 'moderation_image', { pageIndex: index, attempt: attempt + 1 });
+      await qaEvent(ctx, 'moderation_image', {
+        pageIndex: index,
+        attempt: attempt + 1,
+        categories: verdict.categories.join(',').slice(0, 80),
+      });
     }
-    throw new Error(`La ilustración ${String(index)} no pasó la moderación.`);
+    throw new IllustrationRejectedError(index, cost);
   }
 
   // --------------------------------------------------------------- pasos
@@ -519,9 +534,12 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       let path = produced.get(index) ?? null;
       let attempts = 0;
       let pageRepairCost = 0;
+      // Si una reparación no pasó la moderación, se reintenta con la misma revisión.
+      let pending: PageReview | null = null;
       for (;;) {
-        let review: PageReview | null = null;
-        if (path) {
+        let review: PageReview | null = pending;
+        pending = null;
+        if (path && !review) {
           const request = {
             pageIndex: index,
             text: index === 0 ? null : (snapshot.pages[index - 1]?.text ?? null),
@@ -552,7 +570,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             return;
           }
           cost += await record(ctx, 'review', review.usage);
-        } else {
+        } else if (!path) {
           await qaEvent(ctx, 'page_missing', { pageIndex: index });
         }
 
@@ -601,11 +619,21 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         const next = `orders/${ctx.order.id}/g${String(ctx.generation)}/illustration-${String(index)}-r${String(attempts)}.webp`;
         const issues = review?.criticalIssues.join('; ') ?? '';
         const hint = issues ? issues : undefined;
-        const spent = await illustrate(ctx, snapshot, index, next, 1000 * attempts + index, hint);
-        cost += spent;
-        repairCost += spent;
-        pageRepairCost += spent;
-        path = next;
+        try {
+          const spent = await illustrate(ctx, snapshot, index, next, 1000 * attempts + index, hint);
+          cost += spent;
+          repairCost += spent;
+          pageRepairCost += spent;
+          path = next;
+        } catch (error) {
+          // Una reparación rechazada por la moderación es un intento fallido de esta página,
+          // no del control de todo el libro.
+          if (!(error instanceof IllustrationRejectedError)) throw error;
+          cost += error.costUsdMicros;
+          repairCost += error.costUsdMicros;
+          pageRepairCost += error.costUsdMicros;
+          pending = review;
+        }
       }
     });
 

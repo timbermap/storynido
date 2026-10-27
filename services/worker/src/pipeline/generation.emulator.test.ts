@@ -401,6 +401,32 @@ describe('generación del libro (fase 09)', () => {
     expect(human?.detail).toMatchObject({ pageIndex: 3, reason: 'review_unavailable' });
   });
 
+  it('una reparación que la moderación rechaza es un intento fallido de esa página, no del QA', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    scriptReviews(providers, { 2: ['repair'] });
+    const image = providers.ai().image;
+    const original = image.moderateImage.bind(image);
+    let calls = 0;
+    // Las 2 páginas nuevas pasan; todas las reparaciones se rechazan.
+    vi.spyOn(image, 'moderateImage').mockImplementation(async (data) => {
+      calls += 1;
+      return calls <= 2 ? original(data) : { allowed: false, categories: ['test'] };
+    });
+    await setup(providers).run();
+
+    const failed = await order();
+    expect(failed.status).toBe('qa_failed');
+    expect((failed.pipeline as { error: string }).error).toContain('página 2');
+    expect((await step('quality_check')).attempts).toBe(1);
+    const codes = await qaCodes();
+    expect(codes.filter((event) => event.code === 'moderation_image')).toHaveLength(4);
+    expect(codes.find((event) => event.code === 'page_human_review')?.detail).toMatchObject({
+      pageIndex: 2,
+      attemptCount: 2,
+    });
+  });
+
   it('regenerar no cambia lo aprobado pero vuelve a pintar todas las páginas', async () => {
     const providers = registry();
     await seedBook(providers);

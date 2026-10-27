@@ -34,8 +34,12 @@ export function LanguagePreference({ uid }: { uid: string }) {
   }
 
   return (
-    <section aria-labelledby="preferences" className="grid gap-3 rounded-2xl border bg-card p-5">
-      <h2 id="preferences" className="text-xl font-medium">
+    <section
+      id="preferences"
+      aria-labelledby="preferences-title"
+      className="grid scroll-mt-28 gap-3 rounded-2xl border bg-card p-5"
+    >
+      <h2 id="preferences-title" className="text-xl font-medium">
         {t('preferencesTitle')}
       </h2>
       <label htmlFor="account-language" className="grid gap-1.5 text-sm">

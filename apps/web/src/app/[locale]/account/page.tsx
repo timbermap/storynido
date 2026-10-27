@@ -83,7 +83,7 @@ export default function AccountPage() {
       </dl>
       <LanguagePreference uid={user.uid} />
       {drafts.length > 0 && (
-        <section className="grid gap-4">
+        <section id="drafts" className="grid scroll-mt-28 gap-4">
           <h2 className="text-2xl font-medium">{tWizard('title')}</h2>
           <DraftsList drafts={drafts} />
         </section>
