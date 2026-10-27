@@ -753,3 +753,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - lector web de la entrega digital, en la fase 12;
   - especificaciones exactas por SKU (sangrado, páginas, lomo), en la fase 12 con Gelato.
 - **Bloqueo conocido:** la portada y las 2 páginas aprobadas en la vista previa son 1K (~105 dpi), así que hoy un pedido impreso se bloquea por resolución. Ver la pregunta abierta sobre la etapa 2 en 2K.
+
+## 071 · Etapa 2 de la vista previa en 2K
+
+- **Fecha:** 2026-10-27 · **Decisión de Sebastián.**
+- La portada y las 2 páginas que el adulto aprueba en la vista previa (y su regeneración) se generan en 2K.
+  - Lo aprobado se usa tal cual en el libro, también impreso: no se puede volver a dibujar en más resolución sin cambiar lo que vio el adulto.
+  - La versión con marca de agua que ve el cliente sigue reducida a 1024 px.
+- **Costo:** ≈ +USD 0,10 por vista previa que llega a la etapa 2, que ya pide cuenta.
+- La lámina del personaje sigue en 1K: es referencia, no se imprime.
+- Las vistas previas anteriores a este cambio siguen en 1K. Un pedido impreso con ellas se frena por resolución y pide revisión humana.

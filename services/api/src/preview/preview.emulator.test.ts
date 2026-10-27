@@ -13,7 +13,7 @@ import {
 } from '@storynido/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 import sharp from 'sharp';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InMemoryCatalog } from '../catalog';
 import { initFirebaseAdmin } from '../firebase';
@@ -240,6 +240,20 @@ describe('vista previa', () => {
     // Solo 1 imagen en esta etapa.
     const usage = await db.collection('aiUsage').where('bookId', '==', 'book-1').get();
     expect(usage.docs.filter((doc) => doc.get('kind') === 'illustration')).toHaveLength(1);
+  });
+
+  it('la lámina va en 1K; la portada y las páginas aprobadas, en 2K (pueden ir a imprenta)', async () => {
+    await seedBook(providers, 'book-1');
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    await generate('book-1');
+    expect(paint.mock.calls.map(([request]) => request.resolution ?? '1K')).toEqual(['1K']);
+    await approve('book-1');
+    expect(paint.mock.calls.slice(1).map(([request]) => request.resolution)).toEqual([
+      '2K',
+      '2K',
+      '2K',
+    ]);
+    paint.mockRestore();
   });
 
   it('aprobar al personaje ilustra la portada y 2 páginas con marca de agua, y registra el uso', async () => {

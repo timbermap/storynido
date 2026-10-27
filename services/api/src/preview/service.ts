@@ -696,6 +696,8 @@ export class PreviewService {
           character: { description, photo },
           references: [lamina],
           aspectRatio: '3:4',
+          // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
+          resolution: '2K',
           seed,
         });
       // Todas usan la lámina aprobada como referencia, así que se generan en paralelo.
@@ -976,6 +978,8 @@ export class PreviewService {
         character: { description, photo },
         references: [reference],
         aspectRatio: '3:4',
+        // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
+        resolution: '2K',
         seed: Date.now() % 100_000,
       });
 
