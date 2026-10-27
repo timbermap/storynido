@@ -45,6 +45,10 @@ export function toPublicStory(story: Story, locale: Locale): PublicStory {
     pageCount: story.pageCount,
     coverImage: story.coverImage,
     samplePages: story.samplePages,
+    lengths: story.lengths,
+    textDensities: story.textDensities,
+    readingLevels: story.readingLevels,
+    contentTypes: story.contentTypes,
   };
 }
 
@@ -135,9 +139,12 @@ export function registerCatalogRoutes(app: FastifyInstance, catalog: CatalogRepo
         slug: style.slug,
         name: style.name[locale],
         sampleImage: style.sampleImage,
+        contentTypes: style.contentTypes,
       })),
     };
   });
+
+  addRoute(app, apiRoutes.catalogEditorial, {}, async () => catalog.editorial());
 
   addRoute(app, apiRoutes.catalogCountries, {}, async () => ({
     countries: (await catalog.countries()).map((country) => ({

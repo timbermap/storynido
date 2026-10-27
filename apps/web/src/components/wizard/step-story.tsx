@@ -4,10 +4,14 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
+import { suggestedReading, type PublicStory } from '@storynido/shared';
+
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
 
+import { BookOptions, type BookChoice } from './book-options';
 import { OptionCard } from './option-card';
+import { WIZARD_STEPS } from './steps';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
@@ -17,6 +21,16 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [selected, setSelected] = useState(data.book.storyId);
   const [error, setError] = useState<string | null>(null);
   const age = data.child?.age;
+  // La primera vez que se llega a este paso, la lectura se sugiere según la edad.
+  const firstVisit = data.book.wizardStep <= WIZARD_STEPS.indexOf('story');
+  const [choice, setChoice] = useState<BookChoice>(() => ({
+    length: data.book.length ?? data.editorial.defaults.length,
+    contentType: data.book.contentType,
+    ...(firstVisit && age !== undefined
+      ? suggestedReading(age)
+      : { textDensity: data.book.textDensity, readingLevel: data.book.readingLevel }),
+  }));
+  const story = data.stories.find((item) => item.slug === selected);
 
   const fits = (min: number, max: number) => age !== undefined && min <= age && age <= max;
   const ordered = data.stories.toSorted(
@@ -28,8 +42,9 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
       setError(t('required'));
       return;
     }
+    const options = fitToStory(choice, story);
     const ok = await nav.save(async () => {
-      await updateBook(await getFirebaseDb(), data.book.id, { storyId: selected });
+      await updateBook(await getFirebaseDb(), data.book.id, { storyId: selected, ...options });
     });
     if (ok) await nav.goNext();
   }
@@ -81,6 +96,27 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
           ))}
         </div>
       </fieldset>
+
+      <BookOptions
+        story={story}
+        editorial={data.editorial}
+        age={age ?? null}
+        value={fitToStory(choice, story)}
+        onChange={setChoice}
+      />
     </WizardShell>
   );
+}
+
+/** Si la historia no admite alguna opción elegida, se usa la primera que sí admite. */
+function fitToStory(choice: BookChoice, story: PublicStory | undefined): BookChoice {
+  if (!story) return choice;
+  const pick = <T,>(value: T, allowed: readonly T[]) =>
+    allowed.includes(value) ? value : (allowed[0] ?? value);
+  return {
+    length: pick(choice.length, story.lengths),
+    textDensity: pick(choice.textDensity, story.textDensities),
+    readingLevel: pick(choice.readingLevel, story.readingLevels),
+    contentType: pick(choice.contentType, story.contentTypes),
+  };
 }

@@ -21,7 +21,7 @@ import { StepStyle } from './step-style';
 import { WIZARD_STEPS, type SaveState } from './steps';
 import type { StepNav, WizardData } from './types';
 
-type Catalog = Pick<WizardData, 'stories' | 'lessons' | 'styles'>;
+type Catalog = Pick<WizardData, 'stories' | 'lessons' | 'styles' | 'editorial'>;
 
 /** Creador del libro: borrador en Firestore, guardado en cada paso, se retoma donde quedó. */
 export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }) {

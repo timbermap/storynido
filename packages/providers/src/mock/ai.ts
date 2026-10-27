@@ -26,6 +26,20 @@ const PHRASES: Record<Locale, (name: string, like: string, page: number) => stri
 
 const DEFAULT_LIKE: Record<Locale, string> = { es: 'magia', en: 'magic', pt: 'magia' };
 
+/** Relleno para llegar a la densidad pedida (el texto simulado respeta el rango de palabras). */
+const FILLER: Record<Locale, string> = {
+  es: 'Juntos descubren algo nuevo y sonríen.',
+  en: 'Together they discover something new and smile.',
+  pt: 'Juntos descobrem algo novo e sorriem.',
+};
+
+function fitWords(text: string, filler: string, range?: { min: number; max: number }): string {
+  if (!range) return text;
+  let words = text.split(/\s+/);
+  while (words.length < range.min) words = [...words, ...filler.split(/\s+/)];
+  return words.slice(0, range.max).join(' ');
+}
+
 const usage = (model: string): AiUsage => ({ provider: 'mock', model, costUsdMicros: 0 });
 
 function moderate(text: string): ModerationResult {
@@ -47,9 +61,12 @@ export class MockAITextProvider implements AITextProvider {
       const lesson = index === 1 ? request.lessons[0] : undefined;
       return {
         index,
-        text:
+        text: fitWords(
           PHRASES[request.language](request.childName, like, index + 1) +
-          (lesson ? ` (${lesson.name})` : ''),
+            (lesson ? ` (${lesson.name})` : ''),
+          FILLER[request.language],
+          request.wordsPerPage,
+        ),
         illustrationPrompt: `${request.childName}, ${request.age} años, escena ${index + 1} de "${request.storyTitle}" con ${like}`,
       };
     });

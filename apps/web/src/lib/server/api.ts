@@ -2,6 +2,7 @@ import 'server-only';
 
 import {
   ApiError,
+  DEFAULT_EDITORIAL_CONFIG,
   createApiClient,
   type CountryCode,
   type Locale,
@@ -54,6 +55,15 @@ export async function getLessons(locale: Locale, age?: number) {
 
 export async function getLesson(locale: Locale, slug: string) {
   return (await getLessons(locale)).find((lesson) => lesson.slug === slug) ?? null;
+}
+
+/** Opciones editoriales vigentes; si la API no responde, las de fábrica. */
+export async function getEditorial() {
+  try {
+    return await catalogApi('catalogEditorial');
+  } catch {
+    return DEFAULT_EDITORIAL_CONFIG;
+  }
 }
 
 export async function getStyles(locale: Locale) {

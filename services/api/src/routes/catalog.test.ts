@@ -28,6 +28,10 @@ const story = (
   samplePages: [],
   textPromptTemplate: 'x',
   imagePromptTemplate: 'y',
+  lengths: ['mini', 'classic'],
+  textDensities: ['visual', 'balanced'],
+  readingLevels: ['beginner', 'developing'],
+  contentTypes: ['story'],
   createdAt: now,
   updatedAt: now,
 });
@@ -190,5 +194,17 @@ describe('catálogo', () => {
     });
     expect((await get('/v1/content/faq?locale=es')).statusCode).toBe(404);
     expect((await get('/v1/content/inventado?locale=es')).statusCode).toBe(400);
+  });
+
+  it('publica la configuración editorial (con valores de fábrica si no hay)', async () => {
+    const res = await get('/v1/catalog/editorial');
+    expect(res.statusCode).toBe(200);
+    const config = res.json<{
+      lengths: Record<string, { interiorPages: number }>;
+      defaults: { textDensity: string };
+    }>();
+    expect(config.lengths.classic?.interiorPages).toBe(24);
+    expect(config.lengths.mini?.interiorPages).toBe(12);
+    expect(config.defaults.textDensity).toBe('balanced');
   });
 });

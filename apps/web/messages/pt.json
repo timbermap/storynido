@@ -138,7 +138,8 @@
     "notAvailable": "Ainda não vendemos para {country}. Você pode ver os preços de outro país no seletor acima.",
     "back": "Todas as histórias",
     "error": "Não conseguimos carregar as histórias. Tente novamente em alguns minutos.",
-    "fallbackNotice": "Ainda não entregamos para {preferred}. Mostramos os preços de {country}."
+    "fallbackNotice": "Ainda não entregamos para {preferred}. Mostramos os preços de {country}.",
+    "pagesRange": "De {min} a {max} páginas"
   },
   "Formats": {
     "digital": "Livro digital (PDF)",
@@ -354,7 +355,8 @@
     "style": {
       "title": "Escolha o estilo de ilustração",
       "subtitle": "É assim que o livro inteiro vai ficar.",
-      "required": "Escolha um estilo para continuar."
+      "required": "Escolha um estilo para continuar.",
+      "coloring": "Para colorir usamos ilustrações com contornos limpos."
     },
     "review": {
       "title": "Tudo pronto para a prévia!",
@@ -375,7 +377,8 @@
       "characterPhoto": "Com a foto",
       "characterAvatar": "Sem foto (características escolhidas)",
       "memories": "Lembranças",
-      "memoriesCount": "{count, plural, =0 {Sem lembranças} one {# lembrança} other {# lembranças}}"
+      "memoriesCount": "{count, plural, =0 {Sem lembranças} one {# lembrança} other {# lembranças}}",
+      "book": "Seu livro"
     },
     "preview": {
       "badge": "Amostra da história",
@@ -478,6 +481,82 @@
       "favoritePlaceholder": "Dançar na cozinha aos domingos",
       "privacy": "Não inclua sobrenomes, endereços, o nome da escola nem outros dados pessoais.",
       "skip": "Pular esta etapa"
+    },
+    "book": {
+      "title": "Seu livro",
+      "typeLegend": "Que tipo de livro?",
+      "lengthLegend": "Extensão",
+      "pages": "{count} páginas",
+      "digitalOnly": "Só digital",
+      "digitalOrPrint": "Digital ou impresso",
+      "adjust": "Ajustar a leitura",
+      "suggested": "Sugerido para {age, plural, one {# ano} other {# anos}}: {density} · {level}",
+      "densityLegend": "Quantidade de texto",
+      "levelLegend": "Nível de leitura",
+      "types": {
+        "story": {
+          "name": "História ilustrada",
+          "text": "Uma história com ilustrações em cada página."
+        },
+        "coloring": {
+          "name": "Para colorir",
+          "text": "As cenas da história, prontas para pintar."
+        },
+        "story_activities": {
+          "name": "História com atividades",
+          "text": "A história, com jogos e desafios entre as páginas."
+        },
+        "activities": {
+          "name": "Livro de atividades",
+          "text": "Labirintos, jogo dos erros e brincadeiras com o personagem."
+        }
+      },
+      "lengths": {
+        "mini": {
+          "name": "Mini",
+          "text": "Uma história curtinha, para ler rapidinho."
+        },
+        "short": {
+          "name": "Curto",
+          "text": "Ideal para ler antes de dormir."
+        },
+        "classic": {
+          "name": "Clássico",
+          "text": "Uma história completa, com mais aventuras."
+        },
+        "epic": {
+          "name": "Grande aventura",
+          "text": "A história mais longa, para leitores animados."
+        }
+      },
+      "densities": {
+        "visual": {
+          "name": "Bem visual",
+          "text": "Poucas palavras, muita ilustração."
+        },
+        "balanced": {
+          "name": "Equilibrado",
+          "text": "Para ler juntos."
+        },
+        "rich": {
+          "name": "Mais leitura",
+          "text": "Para quem já lê sozinho."
+        }
+      },
+      "levels": {
+        "beginner": {
+          "name": "Inicial",
+          "text": "Palavras simples e frases que se repetem."
+        },
+        "developing": {
+          "name": "Em desenvolvimento",
+          "text": "Algumas palavras novas e frases mais longas."
+        },
+        "advanced": {
+          "name": "Avançado",
+          "text": "Vocabulário mais rico e uma trama com reviravoltas."
+        }
+      }
     }
   }
 }

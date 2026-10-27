@@ -17,7 +17,10 @@ import {
   COUNTRY_CODES,
   COUNTRY_DEFAULTS,
   GLOBAL_DOC_ID,
+  DEFAULT_EDITORIAL_CONFIG,
+  activityTemplateSchema,
   aiConfigSchema,
+  editorialConfigSchema,
   contentDocId,
   contentSchema,
   countrySchema,
@@ -35,7 +38,7 @@ import {
   type Role,
 } from '@storynido/shared';
 
-import { SEED_STORIES, SEED_STYLES } from '../seed-data/catalog';
+import { SEED_ACTIVITY_TEMPLATES, SEED_STORIES, SEED_STYLES } from '../seed-data/catalog';
 import { SEED_LESSONS } from '../seed-data/lessons';
 import { initAdmin, isUsingEmulators } from './admin';
 
@@ -224,6 +227,18 @@ for (const doc of await db.collection(COLLECTIONS.stories).listDocuments()) {
   if (!seededSlugs.has(doc.id)) batch.delete(doc);
 }
 
+batch.set(
+  db.collection(COLLECTIONS.editorialConfig).doc(GLOBAL_DOC_ID),
+  editorialConfigSchema.parse(DEFAULT_EDITORIAL_CONFIG),
+);
+
+for (const { id, ...template } of SEED_ACTIVITY_TEMPLATES) {
+  batch.set(
+    db.collection(COLLECTIONS.activityTemplates).doc(id),
+    activityTemplateSchema.parse(template),
+  );
+}
+
 for (const style of SEED_STYLES) {
   batch.set(
     db.collection(COLLECTIONS.illustrationStyles).doc(style.slug),
@@ -275,5 +290,5 @@ console.info(
     : '  países MX y US activos, precios de ejemplo, sitio en vivo, IA en mock',
 );
 console.info(
-  `  ${String(SEED_STORIES.length)} historias, ${String(SEED_LESSONS.length)} enseñanzas, ${String(SEED_STYLES.length)} estilos, textos legales y FAQ en ${LOCALES.join(', ')}`,
+  `  ${String(SEED_STORIES.length)} historias, ${String(SEED_LESSONS.length)} enseñanzas, ${String(SEED_STYLES.length)} estilos, ${String(SEED_ACTIVITY_TEMPLATES.length)} actividades, configuración editorial, textos legales y FAQ en ${LOCALES.join(', ')}`,
 );

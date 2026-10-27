@@ -2,7 +2,15 @@
  * Catálogo de ejemplo: 7 aventuras y 4 estilos en los tres idiomas. Las enseñanzas están en lessons.ts.
  * Es el punto de partida; después se edita desde el panel admin (fase 14).
  */
-import type { IllustrationStyle, Story } from '@storynido/shared';
+import {
+  BOOK_LENGTHS,
+  CONTENT_TYPES,
+  READING_LEVELS,
+  TEXT_DENSITIES,
+  type ActivityTemplate,
+  type IllustrationStyle,
+  type Story,
+} from '@storynido/shared';
 
 type SeedStory = Omit<Story, 'createdAt' | 'updatedAt'>;
 type SeedStyle = Omit<IllustrationStyle, 'createdAt' | 'updatedAt'>;
@@ -12,10 +20,18 @@ Protagonista: {{childName}}, {{age}} años (pronombre: {{pronouns}}). Le gusta: 
 Mascota: {{petName}}. Mejor amigo o amiga: {{bestFriendName}}.
 Enseñanzas para tejer en la trama:
 {{lessons}}
-Tono cálido y luminoso, frases cortas adecuadas a la edad, un pequeño desafío y un final feliz.
-Cada página: de 2 a 4 oraciones y la escena para ilustrar.`;
+Tono cálido y luminoso, un pequeño desafío y un final feliz.
+Cada página: su texto y la escena para ilustrar.`;
 
 const IMAGE_PROMPT = `Children's picture book illustration: {{scene}}. Main character: {{character}}. Art style: {{style}}. Clear composition, warm light, no text in the image.`;
+
+/** Todas las historias de ejemplo admiten todas las opciones editoriales. */
+const EDITORIAL_OPTIONS = {
+  lengths: [...BOOK_LENGTHS],
+  textDensities: [...TEXT_DENSITIES],
+  readingLevels: [...READING_LEVELS],
+  contentTypes: [...CONTENT_TYPES],
+} satisfies Pick<Story, 'lengths' | 'textDensities' | 'readingLevels' | 'contentTypes'>;
 
 export const SEED_STORIES: SeedStory[] = [
   {
@@ -45,6 +61,7 @@ export const SEED_STORIES: SeedStory[] = [
     samplePages: [],
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
+    ...EDITORIAL_OPTIONS,
   },
   {
     slug: 'valle-de-los-dinosaurios',
@@ -73,6 +90,7 @@ export const SEED_STORIES: SeedStory[] = [
     samplePages: [],
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
+    ...EDITORIAL_OPTIONS,
   },
   {
     slug: 'reino-encantado',
@@ -97,6 +115,7 @@ export const SEED_STORIES: SeedStory[] = [
     samplePages: [],
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
+    ...EDITORIAL_OPTIONS,
   },
   {
     slug: 'gol-de-campeon',
@@ -121,6 +140,7 @@ export const SEED_STORIES: SeedStory[] = [
     samplePages: [],
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
+    ...EDITORIAL_OPTIONS,
   },
   {
     slug: 'superheroe-por-un-dia',
@@ -145,6 +165,7 @@ export const SEED_STORIES: SeedStory[] = [
     samplePages: [],
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
+    ...EDITORIAL_OPTIONS,
   },
   {
     slug: 'amigos-de-la-selva',
@@ -169,6 +190,7 @@ export const SEED_STORIES: SeedStory[] = [
     samplePages: [],
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
+    ...EDITORIAL_OPTIONS,
   },
   {
     slug: 'secreto-del-fondo-del-mar',
@@ -197,6 +219,7 @@ export const SEED_STORIES: SeedStory[] = [
     samplePages: [],
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
+    ...EDITORIAL_OPTIONS,
   },
 ];
 
@@ -208,6 +231,7 @@ export const SEED_STYLES: SeedStyle[] = [
     name: { es: 'Acuarela', en: 'Watercolor', pt: 'Aquarela' },
     promptModifier: 'soft watercolor children book illustration, gentle textures, pastel palette',
     sampleImage: '/styles/acuarela.webp',
+    contentTypes: ['story', 'activities', 'story_activities'],
   },
   {
     slug: 'cartoon-3d',
@@ -216,6 +240,7 @@ export const SEED_STYLES: SeedStyle[] = [
     name: { es: 'Cartoon 3D', en: '3D cartoon', pt: 'Cartoon 3D' },
     promptModifier: '3D animated movie style, soft lighting, rounded shapes, vibrant colors',
     sampleImage: '/styles/cartoon-3d.webp',
+    contentTypes: ['story', 'activities', 'story_activities'],
   },
   {
     slug: 'cuento-clasico',
@@ -224,6 +249,7 @@ export const SEED_STYLES: SeedStyle[] = [
     name: { es: 'Cuento clásico', en: 'Classic storybook', pt: 'Conto clássico' },
     promptModifier: 'classic storybook illustration, ink lines and gouache, warm vintage tones',
     sampleImage: '/styles/cuento-clasico.webp',
+    contentTypes: ['story', 'activities', 'story_activities'],
   },
   {
     slug: 'lapices-de-colores',
@@ -232,5 +258,61 @@ export const SEED_STYLES: SeedStyle[] = [
     name: { es: 'Lápices de colores', en: 'Colored pencils', pt: 'Lápis de cor' },
     promptModifier: 'colored pencil drawing, hand-drawn texture, cheerful and simple',
     sampleImage: '/styles/lapices-de-colores.webp',
+    contentTypes: ['story', 'activities', 'story_activities'],
+  },
+  {
+    // Solo para libros para colorear: contornos limpios, no una acuarela pasada a blanco y negro.
+    slug: 'para-colorear',
+    active: true,
+    order: 5,
+    name: { es: 'Para colorear', en: 'Coloring', pt: 'Para colorir' },
+    promptModifier:
+      'black and white coloring book line art for children, clean bold uniform outlines, no shading, no gray, no color fills, large simple shapes with wide areas to color, plain white background',
+    sampleImage: null,
+    contentTypes: ['coloring'],
+  },
+];
+
+/** Actividades aprobadas: se generan a partir de la historia y se maquetan en las fases 09 y 10. */
+export const SEED_ACTIVITY_TEMPLATES: (ActivityTemplate & { id: string })[] = [
+  {
+    id: 'maze',
+    kind: 'maze',
+    active: true,
+    readingLevels: ['beginner', 'developing', 'advanced'],
+    promptGuidance:
+      'Laberinto simple para ayudar al protagonista a llegar a un objeto o personaje de la historia. Más caminos y vueltas en niveles más altos.',
+  },
+  {
+    id: 'match',
+    kind: 'match',
+    active: true,
+    readingLevels: ['beginner', 'developing'],
+    promptGuidance:
+      'Unir con flechas personajes u objetos de la historia con su sombra, su nombre o el lugar donde aparecen.',
+  },
+  {
+    id: 'differences',
+    kind: 'differences',
+    active: true,
+    readingLevels: ['developing', 'advanced'],
+    promptGuidance:
+      'Encontrar entre 3 y 7 diferencias entre dos versiones de una escena de la historia, según el nivel.',
+  },
+  {
+    id: 'complete-sentence',
+    kind: 'complete_sentence',
+    active: true,
+    readingLevels: ['developing', 'advanced'],
+    promptGuidance:
+      'Completar frases de la historia con una palabra (con opciones para elegir en el nivel en desarrollo).',
+  },
+  {
+    id: 'draw-ending',
+    kind: 'draw_ending',
+    active: true,
+    readingLevels: ['beginner', 'developing', 'advanced'],
+    promptGuidance:
+      'Dibujar otro final o el momento favorito de la historia, con una consigna breve adecuada al nivel.',
   },
 ];

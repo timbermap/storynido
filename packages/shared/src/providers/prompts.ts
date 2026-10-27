@@ -49,6 +49,11 @@ export interface StoryPromptInput {
   lessons: readonly LessonPrompt[];
   /** Recuerdos guiados ya moderados (null si no hay). */
   memories?: Memories | null;
+  /** Densidad de texto y nivel de lectura (fase 07b). */
+  wordsPerPage?: { min: number; max: number };
+  levelGuidance?: string;
+  /** Libro para colorear: escenas simples con frases muy breves. */
+  coloring?: boolean;
 }
 
 const MEMORY_LABELS: Record<keyof Memories, string> = {
@@ -93,7 +98,22 @@ ${memories}`
 
 Reglas obligatorias:
 - Escribe en ${LANGUAGE_NAMES[input.language]}.
-- Exactamente ${String(input.pageCount)} páginas; ${input.childName} es el protagonista en todas.
+- Exactamente ${String(input.pageCount)} páginas; ${input.childName} es el protagonista en todas.${
+    input.wordsPerPage
+      ? `
+- Cada página tiene entre ${String(input.wordsPerPage.min)} y ${String(input.wordsPerPage.max)} palabras (esto reemplaza cualquier indicación anterior sobre la cantidad de oraciones).`
+      : ''
+  }${
+    input.levelGuidance
+      ? `
+- Nivel de lectura: ${input.levelGuidance}`
+      : ''
+  }${
+    input.coloring
+      ? `
+- Es un libro para colorear: cada escena tiene pocos elementos grandes y bien separados, fáciles de pintar.`
+      : ''
+  }
 - Las enseñanzas se muestran con lo que hacen los personajes, nunca como moraleja explícita ni sermón.
 - Nada de violencia, miedo intenso, marcas, personajes con derechos de autor ni datos personales reales.
 - "illustrationPrompt" de cada página: la escena en inglés, en una o dos frases, sin texto dentro de la imagen.`;

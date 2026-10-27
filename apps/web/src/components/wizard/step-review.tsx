@@ -24,6 +24,7 @@ export function StepReview({
   onViewPreview?: () => void;
 }) {
   const t = useTranslations('Wizard.review');
+  const tBook = useTranslations('Wizard.book');
   const { book, child } = data;
   const story = data.stories.find((s) => s.slug === book.storyId);
   const chosen = book.lessonIds
@@ -46,6 +47,20 @@ export function StepReview({
       step: step('photos'),
     },
     { label: t('adventure'), value: story?.title ?? '—', step: step('story') },
+    {
+      label: t('book'),
+      value: [
+        book.length
+          ? `${tBook(`lengths.${book.length}.name`)} · ${tBook('pages', { count: data.editorial.lengths[book.length].interiorPages })}`
+          : null,
+        tBook(`types.${book.contentType}.name`),
+        book.contentType === 'coloring' ? null : tBook(`densities.${book.textDensity}.name`),
+        book.contentType === 'coloring' ? null : tBook(`levels.${book.readingLevel}.name`),
+      ]
+        .filter(Boolean)
+        .join(' · '),
+      step: step('story'),
+    },
     {
       label: t('memories'),
       value: t('memoriesCount', { count: memories }),

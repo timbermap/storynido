@@ -1,4 +1,10 @@
-import { COLLECTIONS, type Book, type Child, type Locale } from '@storynido/shared';
+import {
+  COLLECTIONS,
+  DEFAULT_EDITORIAL_CONFIG,
+  type Book,
+  type Child,
+  type Locale,
+} from '@storynido/shared';
 import {
   addDoc,
   collection,
@@ -31,6 +37,10 @@ export type BookEdits = Partial<
     | 'characterMode'
     | 'avatar'
     | 'memories'
+    | 'length'
+    | 'textDensity'
+    | 'readingLevel'
+    | 'contentType'
   >
 >;
 
@@ -70,6 +80,8 @@ export async function createDraft(
     characterMode: 'photo',
     avatar: null,
     memories: null,
+    // Opciones editoriales: se ajustan en el paso de la aventura (sugeridas según la edad).
+    ...DEFAULT_EDITORIAL_CONFIG.defaults,
     preview: null,
     regenerationsUsed: 0,
     createdAt: serverTimestamp(),
@@ -125,6 +137,11 @@ export function subscribeBook(
         characterMode: data.characterMode === 'avatar' ? 'avatar' : 'photo',
         avatar: (data.avatar as Book['avatar'] | undefined) ?? null,
         memories: (data.memories as Book['memories'] | undefined) ?? null,
+        // Borradores anteriores a las opciones editoriales (extensión null = la de su historia).
+        length: (data.length as Book['length'] | undefined) ?? null,
+        textDensity: (data.textDensity as Book['textDensity'] | undefined) ?? 'balanced',
+        readingLevel: (data.readingLevel as Book['readingLevel'] | undefined) ?? 'developing',
+        contentType: (data.contentType as Book['contentType'] | undefined) ?? 'story',
         id: snapshot.id,
         createdAt: asDate(data.createdAt as Timestampish) ?? new Date(),
         updatedAt: asDate(data.updatedAt as Timestampish) ?? new Date(),

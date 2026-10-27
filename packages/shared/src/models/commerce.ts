@@ -5,6 +5,12 @@ import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 import { orderStatusSchema } from '../order-status';
 import { avatarSchema, characterModeSchema, memoriesSchema } from './character';
+import {
+  bookLengthSchema,
+  contentTypeSchema,
+  readingLevelSchema,
+  textDensitySchema,
+} from './editorial';
 import { CHILD_LIMITS } from './users';
 import { bookFormatSchema, timestampsSchema, uidSchema } from './common';
 
@@ -96,6 +102,10 @@ export const BOOK_CLIENT_EDITABLE_FIELDS = [
   'characterMode',
   'avatar',
   'memories',
+  'length',
+  'textDensity',
+  'readingLevel',
+  'contentType',
   'updatedAt',
 ] as const;
 
@@ -127,6 +137,10 @@ export const bookPreviewSchema = z.object({
   styleId: z.string(),
   /** ID de la foto usada, o la clave de los rasgos en el modo sin foto (avatarKey). */
   photoId: z.string(),
+  /** Opciones editoriales con las que se generó ("extensión|densidad|nivel|tipo"). */
+  editorialKey: z.string().optional(),
+  /** Páginas interiores del libro terminado según esas opciones. */
+  interiorPages: z.number().int().positive().optional(),
   generatedAt: z.date(),
 });
 
@@ -154,6 +168,14 @@ export const bookSchema = timestampsSchema
     avatar: avatarSchema.nullable().default(null),
     /** Recuerdos guiados (opcionales), moderados antes de usarse. */
     memories: memoriesSchema.nullable().default(null),
+    /**
+     * Opciones editoriales (fase 07b). `length` null = libro anterior: usa el pageCount de su
+     * historia. Densidad, nivel y tipo tienen valores por defecto para lo anterior.
+     */
+    length: bookLengthSchema.nullable().default(null),
+    textDensity: textDensitySchema.default('balanced'),
+    readingLevel: readingLevelSchema.default('developing'),
+    contentType: contentTypeSchema.default('story'),
     /** Solo servidor. */
     preview: bookPreviewSchema.nullable(),
     /** Solo servidor. */

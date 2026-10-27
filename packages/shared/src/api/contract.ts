@@ -6,6 +6,13 @@ import { localeSchema } from '../i18n';
 import { BOOK_FORMATS } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
 import { CONTENT_KEYS, SITE_MODES, aiConfigSchema } from '../models/config';
+import {
+  bookLengthSchema,
+  contentTypeSchema,
+  editorialConfigSchema,
+  readingLevelSchema,
+  textDensitySchema,
+} from '../models/editorial';
 import { PHOTO_STATUSES } from '../models/users';
 import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
 import { roleSchema } from '../roles';
@@ -135,6 +142,10 @@ export const publicStorySchema = z.object({
   pageCount: z.number().int(),
   coverImage: z.string(),
   samplePages: z.array(z.string()),
+  lengths: z.array(bookLengthSchema),
+  textDensities: z.array(textDensitySchema),
+  readingLevels: z.array(readingLevelSchema),
+  contentTypes: z.array(contentTypeSchema),
 });
 
 export type PublicStory = z.infer<typeof publicStorySchema>;
@@ -155,6 +166,7 @@ export const publicStyleSchema = z.object({
   slug: z.string(),
   name: z.string(),
   sampleImage: z.string().nullable(),
+  contentTypes: z.array(contentTypeSchema),
 });
 
 export const publicCountrySchema = z.object({
@@ -289,6 +301,13 @@ export const apiRoutes = {
     summary: 'Estilos de ilustración activos',
     query: localeQuerySchema,
     response: z.object({ styles: z.array(publicStyleSchema) }),
+  },
+  catalogEditorial: {
+    method: 'GET',
+    path: '/v1/catalog/editorial',
+    access: 'public',
+    summary: 'Extensiones, densidades de texto, niveles de lectura y tipos de contenido vigentes',
+    response: editorialConfigSchema,
   },
   catalogCountries: {
     method: 'GET',

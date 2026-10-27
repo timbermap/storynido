@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+import {
+  BOOK_LENGTHS,
+  READING_LEVELS,
+  TEXT_DENSITIES,
+  bookLengthSchema,
+  contentTypeSchema,
+  readingLevelSchema,
+  textDensitySchema,
+} from './editorial';
 import { CHILD_LIMITS } from './users';
 import { bookFormatSchema, localizedSchema, timestampsSchema } from './common';
 
@@ -24,6 +33,20 @@ export const storySchema = timestampsSchema.extend({
   samplePages: z.array(z.string()),
   textPromptTemplate: z.string().min(1),
   imagePromptTemplate: z.string().min(1),
+  /** Opciones editoriales admitidas (las historias anteriores admiten todas). */
+  lengths: z
+    .array(bookLengthSchema)
+    .min(1)
+    .default([...BOOK_LENGTHS]),
+  textDensities: z
+    .array(textDensitySchema)
+    .min(1)
+    .default([...TEXT_DENSITIES]),
+  readingLevels: z
+    .array(readingLevelSchema)
+    .min(1)
+    .default([...READING_LEVELS]),
+  contentTypes: z.array(contentTypeSchema).min(1).default(['story', 'story_activities']),
 });
 
 export type Story = z.infer<typeof storySchema>;
@@ -36,6 +59,11 @@ export const illustrationStyleSchema = timestampsSchema.extend({
   name: localizedSchema(z.string().min(1)),
   promptModifier: z.string().min(1),
   sampleImage: z.string().nullable(),
+  /** Tipos de contenido en los que se ofrece (el estilo de contornos es solo para colorear). */
+  contentTypes: z
+    .array(contentTypeSchema)
+    .min(1)
+    .default(['story', 'activities', 'story_activities']),
 });
 
 export type IllustrationStyle = z.infer<typeof illustrationStyleSchema>;

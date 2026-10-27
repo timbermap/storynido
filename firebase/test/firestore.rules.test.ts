@@ -76,6 +76,10 @@ const draftBook = (ownerUid: string, childId: string | null = null) => ({
   characterMode: 'photo',
   avatar: null,
   memories: null,
+  length: 'classic',
+  textDensity: 'balanced',
+  readingLevel: 'developing',
+  contentType: 'story',
   preview: null,
   regenerationsUsed: 0,
   createdAt: serverTimestamp(),
@@ -278,11 +282,36 @@ describe('books', () => {
     );
   });
 
+  it('opciones editoriales: solo valores conocidos', async () => {
+    await seed('books/b1', { ...draftBook(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    const ref = doc(alice(), 'books', 'b1');
+    await assertSucceeds(
+      updateDoc(ref, {
+        length: 'mini',
+        textDensity: 'visual',
+        readingLevel: 'beginner',
+        contentType: 'coloring',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(updateDoc(ref, { length: 'enorme', updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { textDensity: 'mucho', updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { readingLevel: 'experto', updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { contentType: 'video', updatedAt: serverTimestamp() }));
+  });
+
   it('los borradores anteriores (sin modo ni recuerdos) se siguen editando', async () => {
-    const legacy: Record<string, unknown> = { ...draftBook(ALICE) };
-    delete legacy.characterMode;
-    delete legacy.avatar;
-    delete legacy.memories;
+    // Un borrador de antes del modo sin foto, los recuerdos y las opciones editoriales.
+    const {
+      characterMode: _mode,
+      avatar: _avatar,
+      memories: _memories,
+      length: _length,
+      textDensity: _density,
+      readingLevel: _level,
+      contentType: _type,
+      ...legacy
+    } = draftBook(ALICE);
     await seed('books/old', { ...legacy, createdAt: new Date(), updatedAt: new Date() });
     await assertSucceeds(
       updateDoc(doc(alice(), 'books', 'old'), { wizardStep: 3, updatedAt: serverTimestamp() }),

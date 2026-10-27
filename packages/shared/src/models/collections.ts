@@ -17,6 +17,9 @@ export const COLLECTIONS = {
   promotions: 'promotions',
   siteConfig: 'siteConfig',
   aiConfig: 'aiConfig',
+  /** editorialConfig/global: extensiones, densidades, niveles y tipos de contenido. */
+  editorialConfig: 'editorialConfig',
+  activityTemplates: 'activityTemplates',
   aiUsage: 'aiUsage',
   aiBudget: 'aiBudget',
   /** previewQuota/{uid_AAAA-MM-DD} y previewQuota/ip_{ip}_{AAAA-MM-DD}: vistas previas del día. */

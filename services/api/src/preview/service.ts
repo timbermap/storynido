@@ -4,6 +4,12 @@ import { encodeIllustration, watermarkPreview, type ProviderRegistry } from '@st
 import {
   COLLECTIONS,
   CHARACTER_REFERENCE_SCENE,
+  editorialPlan,
+  pagesOutOfRange,
+  type BookLength,
+  type ContentType,
+  type ReadingLevel,
+  type TextDensity,
   avatarKey,
   avatarToSheet,
   hasMemories,
@@ -62,6 +68,11 @@ interface BookData {
   characterMode?: 'photo' | 'avatar';
   avatar?: Avatar | null;
   memories?: Memories | null;
+  /** Opciones editoriales (fase 07b); los libros anteriores no las tienen. */
+  length?: BookLength | null;
+  textDensity?: TextDensity;
+  readingLevel?: ReadingLevel;
+  contentType?: ContentType;
   preview: (Omit<BookPreview, 'generatedAt'> & { generatedAt: unknown }) | null;
   regenerationsUsed: number;
   previewError?: string | null;
@@ -154,11 +165,12 @@ export class PreviewService {
             imageUrl: page.previewImagePath ? await url(page.previewImagePath) : null,
           })),
         ),
-        totalPages: preview.pages.length,
+        totalPages: preview.interiorPages ?? preview.pages.length,
         stale:
           preview.storyId !== book.storyId ||
           preview.styleId !== book.styleId ||
-          preview.photoId !== characterKey(book),
+          preview.photoId !== characterKey(book) ||
+          (preview.editorialKey ?? editorialKey(book)) !== editorialKey(book),
         generatedAt: (toDate(preview.generatedAt) ?? new Date()).toISOString(),
       },
     };
@@ -297,7 +309,13 @@ export class PreviewService {
         .get(),
     ]);
     const story = stories.find((item) => item.slug === book.storyId);
-    const style = styles.find((item) => item.slug === book.styleId);
+    const choice = editorialChoice(book);
+    // Para colorear siempre se usan contornos limpios, aunque el borrador tenga otro estilo.
+    const style =
+      choice.contentType === 'coloring'
+        ? styles.find((item) => item.contentTypes.includes('coloring'))
+        : styles.find((item) => item.slug === book.styleId);
+    const plan = editorialPlan(choice, await this.catalog.editorial(), story?.pageCount ?? 12);
     const child = childSnap.data();
     if (!story || !style || child?.ownerUid !== uid) {
       throw new AppError(
@@ -357,23 +375,35 @@ export class PreviewService {
       dedication: null,
       storyTitle: story.title[book.language],
       lessons: lessonPrompts,
-      pageCount: story.pageCount,
+      // Libro de actividades: la historia breve que les da contexto.
+      pageCount: Math.max(plan.narrativePages, PREVIEW_ILLUSTRATED_PAGES),
+      wordsPerPage: plan.words,
     };
     const prompt = buildStoryPrompt({
       ...request,
       template: story.textPromptTemplate,
       memories,
+      levelGuidance: plan.levelGuidance,
+      coloring: plan.contentType === 'coloring',
     });
 
     // Texto: cuento, revisión editorial y moderación (un reintento si no pasa).
     const pages = await withModeratedRetry(
       async () => {
-        const draft = await track('story', await ai.text.generateStory({ ...request, prompt }));
-        const review = await track(
-          'review',
-          await ai.text.reviewStory(draft, { ...request, prompt }),
-        );
-        return { title: draft.title, pages: review.pages, approved: review.approved };
+        const write = async () => {
+          const draft = await track('story', await ai.text.generateStory({ ...request, prompt }));
+          const review = await track(
+            'review',
+            await ai.text.reviewStory(draft, { ...request, prompt }),
+          );
+          return { title: draft.title, pages: review.pages, approved: review.approved };
+        };
+        // La densidad elegida se respeta: si alguna página se pasa del rango, 1 corrección.
+        const first = await write();
+        const outOfRange = pagesOutOfRange(first.pages, plan.words);
+        if (outOfRange.length === 0) return first;
+        this.log.warn({ bookId, pages: outOfRange.length }, 'story length out of range, retrying');
+        return write();
       },
       async (result) => {
         if (!result.approved) return false;
@@ -451,6 +481,8 @@ export class PreviewService {
       storyId: story.slug,
       styleId: style.slug,
       photoId: characterKey(book),
+      editorialKey: editorialKey(book),
+      interiorPages: plan.interiorPages,
       generatedAt: new Date(),
     };
   }
@@ -706,6 +738,27 @@ export class PreviewService {
     }
     return this.get(uid, bookId);
   }
+}
+
+/** Opciones editoriales del libro, con los valores por defecto para los libros anteriores. */
+function editorialChoice(book: BookData) {
+  return {
+    length: book.length ?? null,
+    textDensity: book.textDensity ?? 'balanced',
+    readingLevel: book.readingLevel ?? 'developing',
+    contentType: book.contentType ?? 'story',
+  } as const;
+}
+
+/** Clave estable de las opciones editoriales (para saber si la muestra quedó desactualizada). */
+function editorialKey(book: BookData): string {
+  const choice = editorialChoice(book);
+  return [
+    choice.length ?? 'legacy',
+    choice.textDensity,
+    choice.readingLevel,
+    choice.contentType,
+  ].join('|');
 }
 
 /** Con qué personaje se generó: la foto usada o los rasgos elegidos. */

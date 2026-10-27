@@ -22,6 +22,8 @@ export interface StoryRequest {
   /** Prompt ya armado con la plantilla de la historia (stories.textPromptTemplate). */
   prompt: string;
   pageCount: number;
+  /** Rango de palabras por página (densidad de texto). */
+  wordsPerPage?: { min: number; max: number };
 }
 
 /** Enseñanza que la IA teje en la trama sin sermonear. */

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
-import type { Locale } from '@storynido/shared';
+import type { BookLength, EditorialConfig, Locale } from '@storynido/shared';
 
 import { JsonLd } from '@/components/json-ld';
 import { CountryNotice } from '@/components/stories/country-notice';
@@ -13,7 +13,7 @@ import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { formatPrice } from '@/lib/format';
 import { localizedAlternates } from '@/lib/seo';
-import { getLessons, getOffer, getStory } from '@/lib/server/api';
+import { getEditorial, getLessons, getOffer, getStory } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
 
@@ -45,13 +45,14 @@ export default async function StoryPage({ params }: Props) {
   const locale = rawLocale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [story, offer, lessons, t, tSwitch, tLessons] = await Promise.all([
+  const [story, offer, lessons, t, tSwitch, tLessons, editorial] = await Promise.all([
     getStory(locale, slug),
     getOffer(display.country, locale),
     getLessons(locale).catch(() => []),
     getTranslations('Stories'),
     getTranslations('Switchers'),
     getTranslations('Lessons'),
+    getEditorial(),
   ]);
   if (!story) notFound();
 
@@ -108,7 +109,7 @@ export default async function StoryPage({ params }: Props) {
           <div>
             <p className="text-sm font-semibold text-primary">
               {t('agesFor', { min: story.ageMin, max: story.ageMax })} ·{' '}
-              {t('pages', { count: story.pageCount })}
+              {pagesLabel(t, story.lengths, editorial)}
             </p>
             <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">{story.title}</h1>
             <p className="mt-4 text-lg text-muted-foreground">{story.summary}</p>
@@ -201,4 +202,19 @@ export default async function StoryPage({ params }: Props) {
       </div>
     </article>
   );
+}
+
+/** Páginas según las extensiones que admite la historia (la cantidad la elige el cliente). */
+function pagesLabel(
+  t: (key: 'pages' | 'pagesRange', values: Record<string, number>) => string,
+  lengths: readonly BookLength[],
+  editorial: EditorialConfig,
+): string {
+  const pages = lengths
+    .filter((length) => editorial.lengths[length].active)
+    .map((length) => editorial.lengths[length].interiorPages);
+  if (pages.length === 0) return '';
+  const min = Math.min(...pages);
+  const max = Math.max(...pages);
+  return min === max ? t('pages', { count: min }) : t('pagesRange', { min, max });
 }

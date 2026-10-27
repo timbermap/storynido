@@ -522,3 +522,39 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
 - **Auth:** dominios autorizados: `web--storynido-staging.us-central1.hosted.app` y `staging.storynido.com`.
 - **CORS:** la API no tenía `CORS_ORIGINS` en la nube, así que rechazaba al navegador. Se agrega desde `var.cors_origins` (los mismos orígenes que los buckets). Pendiente de `terraform apply`.
 - **Dominio `staging.storynido.com`:** pendiente. Requiere registrarlo en App Hosting y cargar registros DNS en el registrador (autorización del dueño).
+
+## 061 · Opciones editoriales: extensión, cantidad de texto, nivel de lectura y tipo de contenido
+
+- **Fecha:** 2026-10-27 · **Fase:** 07b (Fase A de las líneas comerciales)
+- **Modelo:** `packages/shared/src/models/editorial.ts`. Configuración en `editorialConfig/global`, editable desde el admin en la fase 14, con valores de fábrica si falta:
+
+| Extensión     | Páginas interiores | Narrativas | Formatos                                              |
+| ------------- | ------------------ | ---------- | ----------------------------------------------------- |
+| Mini          | 12                 | 10         | Solo digital, hasta validar con la imprenta (fase 12) |
+| Corto         | 16                 | 14         | Solo digital, hasta validar con la imprenta           |
+| Clásico       | 24                 | 22         | Digital, tapa blanda, tapa dura                       |
+| Gran aventura | 32                 | 30         | Digital, tapa blanda, tapa dura                       |
+
+Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % de las páginas son de actividades.
+
+- **Densidad de texto** (palabras por página narrativa): muy visual 5–20, equilibrado 25–60 (por defecto) y más lectura 70–120.
+- **Nivel de lectura:** inicial, en desarrollo y avanzado, cada uno con indicaciones para la IA.
+- **Independencia:** extensión, densidad y nivel no dependen entre sí. Un mismo cuento de 24 páginas se genera con 5–20 o con 70–120 palabras por página (probado).
+- **Una sola fuente de páginas:**
+  - Se extiende el `pageCount` existente: si el libro tiene extensión, manda la configuración editorial.
+  - Los libros anteriores (`length: null`) conservan el `pageCount` de su historia.
+  - Los demás campos tienen valores por defecto (equilibrado, en desarrollo, cuento).
+- **Generación:**
+  - `buildStoryPrompt` agrega el rango de palabras y la guía del nivel, por encima de lo que diga la plantilla.
+  - Si alguna página queda fuera del rango (con margen: −40 % / +30 %), se reescribe 1 vez.
+  - La muestra queda desactualizada si cambian las opciones (`preview.editorialKey`).
+- **Creador:** no hay pasos nuevos. "Tu libro" está en el paso de la aventura:
+  - tipo de contenido y extensión, como tarjetas que indican "Solo digital" o "Digital o impreso";
+  - densidad y nivel en "Ajustar la lectura" (plegado), sugeridos según la edad la primera vez (`suggestedReading`).
+  - Si la historia no admite una opción, se ajusta sola.
+- **Colorear:** estilo `para-colorear` (contornos limpios, sin sombras, generado así y no convertido desde una acuarela). Es el único que se ofrece para libros para colorear.
+- **Actividades:** 5 plantillas aprobadas en `activityTemplates` (laberinto, unir, diferencias, completar la frase y dibujar el final), con sus niveles. Se generan y maquetan en las fases 09 y 10; hoy la muestra de un libro de actividades muestra la historia que les da contexto.
+- **Página de historia:** muestra el rango de páginas según las extensiones que admite (por ejemplo, "De 12 a 32 páginas") en lugar de un número fijo.
+- **Pendiente:**
+  - Un error intermitente de React (#441, `useEffectEvent` llamado durante el render) apareció 1 vez en 7 corridas del E2E y no se pudo reproducir.
+  - Las historias que ya existen en staging no se actualizan con el seed (solo crea lo que falta), así que allá ofrecen los tipos por defecto: cuento y cuento con actividades.

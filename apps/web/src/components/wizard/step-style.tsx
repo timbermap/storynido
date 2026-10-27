@@ -22,7 +22,15 @@ const SWATCHES: Record<string, string> = {
 
 export function StepStyle({ nav, data }: { nav: StepNav; data: WizardData }) {
   const t = useTranslations('Wizard.style');
-  const [selected, setSelected] = useState(data.book.styleId);
+  // Para colorear solo se ofrece el estilo de contornos (y al revés).
+  const styles = data.styles.filter((style) => style.contentTypes.includes(data.book.contentType));
+  const [selected, setSelected] = useState(
+    styles.some((style) => style.slug === data.book.styleId)
+      ? data.book.styleId
+      : styles.length === 1
+        ? (styles[0]?.slug ?? null)
+        : null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   async function next() {
@@ -40,14 +48,14 @@ export function StepStyle({ nav, data }: { nav: StepNav; data: WizardData }) {
     <WizardShell
       {...nav}
       title={t('title')}
-      subtitle={t('subtitle')}
+      subtitle={data.book.contentType === 'coloring' ? t('coloring') : t('subtitle')}
       error={error}
       onNext={() => void next()}
     >
       <fieldset>
         <legend className="sr-only">{t('title')}</legend>
         <div className="grid grid-cols-2 gap-4">
-          {data.styles.map((style) => (
+          {styles.map((style) => (
             <OptionCard
               key={style.slug}
               name="style"

@@ -1,5 +1,9 @@
 import {
   COLLECTIONS,
+  DEFAULT_EDITORIAL_CONFIG,
+  GLOBAL_DOC_ID,
+  editorialConfigSchema,
+  type EditorialConfig,
   contentDocId,
   contentSchema,
   countrySchema,
@@ -30,6 +34,15 @@ export interface CatalogRepository {
   prices(country: CountryCode): Promise<Price[]>;
   products(): Promise<Product[]>;
   content(key: string, locale: Locale): Promise<Content | null>;
+  /** Configuración editorial vigente (o la de fábrica si todavía no se cargó). */
+  editorial(): Promise<EditorialConfig>;
+}
+
+/** La configuración de Firestore pisa la de fábrica clave por clave (un error no la invalida toda). */
+export function mergeEditorialConfig(data: unknown): EditorialConfig {
+  const merged = { ...DEFAULT_EDITORIAL_CONFIG, ...(data && typeof data === 'object' ? data : {}) };
+  const parsed = editorialConfigSchema.safeParse(merged);
+  return parsed.success ? parsed.data : DEFAULT_EDITORIAL_CONFIG;
 }
 
 /** Cache en memoria con vencimiento: el catálogo cambia poco y se lee en cada página. */
@@ -149,6 +162,14 @@ export class FirestoreCatalog implements CatalogRepository {
       return content?.published ? content : null;
     });
   }
+
+  editorial(): Promise<EditorialConfig> {
+    return this.cache.get('editorial', async () =>
+      mergeEditorialConfig(
+        (await this.db.collection(COLLECTIONS.editorialConfig).doc(GLOBAL_DOC_ID).get()).data(),
+      ),
+    );
+  }
 }
 
 /** Catálogo fijo para tests. */
@@ -162,6 +183,7 @@ export class InMemoryCatalog implements CatalogRepository {
       prices?: Price[];
       products?: Product[];
       content?: Content[];
+      editorial?: EditorialConfig;
     } = {},
   ) {}
 
@@ -204,5 +226,9 @@ export class InMemoryCatalog implements CatalogRepository {
       (this.data.content ?? []).find((c) => c.key === key && c.locale === locale && c.published) ??
         null,
     );
+  }
+
+  editorial() {
+    return Promise.resolve(this.data.editorial ?? DEFAULT_EDITORIAL_CONFIG);
   }
 }

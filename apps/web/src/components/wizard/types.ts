@@ -1,4 +1,10 @@
-import type { Book, PublicLesson, PublicStory } from '@storynido/shared';
+import type {
+  Book,
+  ContentType,
+  EditorialConfig,
+  PublicLesson,
+  PublicStory,
+} from '@storynido/shared';
 
 import type { ChildFields } from '@/lib/firebase/drafts';
 
@@ -20,6 +26,7 @@ export interface StyleOption {
   slug: string;
   name: string;
   sampleImage: string | null;
+  contentTypes: ContentType[];
 }
 
 export interface WizardData {
@@ -28,4 +35,5 @@ export interface WizardData {
   stories: PublicStory[];
   lessons: PublicLesson[];
   styles: StyleOption[];
+  editorial: EditorialConfig;
 }

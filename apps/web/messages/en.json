@@ -138,7 +138,8 @@
     "notAvailable": "We don't sell in {country} yet. You can see prices for another country using the selector above.",
     "back": "All stories",
     "error": "We couldn't load the stories. Please try again in a few minutes.",
-    "fallbackNotice": "We don't ship to {preferred} yet. Showing prices for {country}."
+    "fallbackNotice": "We don't ship to {preferred} yet. Showing prices for {country}.",
+    "pagesRange": "{min} to {max} pages"
   },
   "Formats": {
     "digital": "Digital book (PDF)",
@@ -354,7 +355,8 @@
     "style": {
       "title": "Choose the illustration style",
       "subtitle": "This is how the whole book will look.",
-      "required": "Choose a style to continue."
+      "required": "Choose a style to continue.",
+      "coloring": "For coloring books we use clean outline illustrations."
     },
     "review": {
       "title": "All set for the preview!",
@@ -375,7 +377,8 @@
       "characterPhoto": "With their photo",
       "characterAvatar": "Without a photo (chosen features)",
       "memories": "Memories",
-      "memoriesCount": "{count, plural, =0 {No memories} one {# memory} other {# memories}}"
+      "memoriesCount": "{count, plural, =0 {No memories} one {# memory} other {# memories}}",
+      "book": "Your book"
     },
     "preview": {
       "badge": "Story sample",
@@ -478,6 +481,82 @@
       "favoritePlaceholder": "Dancing in the kitchen on Sundays",
       "privacy": "Don't include last names, addresses, their school's name or other personal details.",
       "skip": "Skip this step"
+    },
+    "book": {
+      "title": "Your book",
+      "typeLegend": "What kind of book?",
+      "lengthLegend": "Length",
+      "pages": "{count} pages",
+      "digitalOnly": "Digital only",
+      "digitalOrPrint": "Digital or print",
+      "adjust": "Adjust the reading",
+      "suggested": "Suggested for {age, plural, one {# year} other {# years}}: {density} · {level}",
+      "densityLegend": "Amount of text",
+      "levelLegend": "Reading level",
+      "types": {
+        "story": {
+          "name": "Illustrated story",
+          "text": "A story with illustrations on every page."
+        },
+        "coloring": {
+          "name": "Coloring book",
+          "text": "The scenes of their story, ready to color."
+        },
+        "story_activities": {
+          "name": "Story with activities",
+          "text": "The story, with games and challenges between pages."
+        },
+        "activities": {
+          "name": "Activity book",
+          "text": "Mazes, spot-the-difference and games with their character."
+        }
+      },
+      "lengths": {
+        "mini": {
+          "name": "Mini",
+          "text": "A short story to read in a little while."
+        },
+        "short": {
+          "name": "Short",
+          "text": "Perfect for bedtime."
+        },
+        "classic": {
+          "name": "Classic",
+          "text": "A complete story with more adventures."
+        },
+        "epic": {
+          "name": "Big adventure",
+          "text": "The longest story, for eager readers."
+        }
+      },
+      "densities": {
+        "visual": {
+          "name": "Very visual",
+          "text": "Few words, lots of illustration."
+        },
+        "balanced": {
+          "name": "Balanced",
+          "text": "For reading together."
+        },
+        "rich": {
+          "name": "More reading",
+          "text": "For kids who already read on their own."
+        }
+      },
+      "levels": {
+        "beginner": {
+          "name": "Beginner",
+          "text": "Simple words and repeated phrases."
+        },
+        "developing": {
+          "name": "Developing",
+          "text": "Some new words and longer sentences."
+        },
+        "advanced": {
+          "name": "Advanced",
+          "text": "Richer vocabulary and a plot with twists."
+        }
+      }
     }
   }
 }
