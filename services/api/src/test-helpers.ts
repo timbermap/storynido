@@ -13,6 +13,8 @@ import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
+import { RecordingConversions, type ConversionReporter } from './checkout/conversions';
+import { CheckoutService } from './checkout/service';
 import { RecordingPublisher } from './orders/events';
 import {
   StaticSiteConfigSource,
@@ -58,7 +60,7 @@ export const auth = (token: string) => ({ authorization: `Bearer ${token}` });
 export const silentLogger = pino({ level: 'silent' });
 
 export async function createTestApp(
-  overrides: Partial<ApiDeps> = {},
+  overrides: Partial<ApiDeps> & { conversions?: ConversionReporter } = {},
   env: Record<string, string> = {},
   extend?: AppOptions['extend'],
 ) {
@@ -75,6 +77,10 @@ export async function createTestApp(
   });
   const db = getFirestore(initFirebaseAdmin('demo-storynido-test'));
   const catalog = overrides.catalog ?? new InMemoryCatalog();
+  const previews =
+    overrides.previews ??
+    new PreviewService(db, overrides.providers ?? providers, catalog, silentLogger);
+  const pipelineEvents = overrides.pipelineEvents ?? new RecordingPublisher();
   const deps: ApiDeps = {
     config,
     version: 'test',
@@ -85,14 +91,24 @@ export async function createTestApp(
     catalog,
     // Los tests corren con los emuladores de test (with-test-emulators.sh).
     photos: new PhotoService(db, providers),
-    previews: new PreviewService(db, overrides.providers ?? providers, catalog, silentLogger),
+    previews,
     accounts: new AccountService(db, fakeTokens, {
       deleteUser: (uid) => {
         deletedUsers.push(uid);
         return Promise.resolve();
       },
     }),
-    pipelineEvents: new RecordingPublisher(),
+    pipelineEvents,
+    checkout: new CheckoutService(
+      db,
+      overrides.providers ?? providers,
+      catalog,
+      previews,
+      pipelineEvents,
+      overrides.conversions ?? new RecordingConversions(),
+      silentLogger,
+      { devToolsEnabled: true, mockWebhookSecret: 'test-webhook-secret' },
+    ),
     db,
     ...overrides,
   };

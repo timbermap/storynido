@@ -502,7 +502,8 @@
       "accountText": "It’s free. That’s how we save your story and what you’ve approved.",
       "illustrating": "Illustrating the cover and the first pages…",
       "readWhile": "Read the whole story",
-      "approvedBadge": "Character approved"
+      "approvedBadge": "Character approved",
+      "continueAfterApproval": "Choose the format once you approve the character and the sample is up to date."
     },
     "character": {
       "modeLegend": "How should we create the main character?",
@@ -790,5 +791,102 @@
     "thumbnails": "Book pages",
     "noDedication": "Your dedication goes here",
     "example": "Example"
+  },
+  "Checkout": {
+    "title": "Your book",
+    "subtitle": "Choose the format. We calculate the price with your country’s taxes and shipping.",
+    "unavailable": "We don’t sell in your country yet. You can see prices for another country from the footer.",
+    "signInTitle": "Sign in to buy",
+    "signInText": "So we can save your order and let you know when your book is ready.",
+    "formatTitle": "Format",
+    "formats": {
+      "digital": {
+        "name": "Digital",
+        "text": "PDF to read on screen and print at home."
+      },
+      "softcover": {
+        "name": "Softcover",
+        "text": "Printed book, 21×28 cm."
+      },
+      "hardcover": {
+        "name": "Hardcover",
+        "text": "Printed book, 21×28 cm, to give and keep."
+      }
+    },
+    "addressTitle": "Shipping address",
+    "optional": "optional",
+    "address": {
+      "name": "Recipient name",
+      "line1": "Street address",
+      "line2": "Apartment, suite, etc.",
+      "city": "City",
+      "state": "State",
+      "postalCode": "ZIP code",
+      "phone": "Phone"
+    },
+    "giftTitle": "Gift",
+    "isGift": "It’s a gift",
+    "giftMessage": "Message for the card",
+    "summaryTitle": "Summary",
+    "coupon": "Coupon",
+    "apply": "Apply",
+    "calculating": "Calculating the price…",
+    "couponErrors": {
+      "coupon_invalid": "That coupon doesn’t exist.",
+      "coupon_expired": "That coupon has expired.",
+      "coupon_exhausted": "That coupon has been fully used.",
+      "coupon_not_applicable": "That coupon doesn’t apply to this country or currency.",
+      "country_unavailable": "Not available.",
+      "format_unavailable": "Not available.",
+      "price_missing": "Not available."
+    },
+    "component": {
+      "book": "Book",
+      "length": "Length adjustment"
+    },
+    "discount": {
+      "coupon": "Coupon {label}",
+      "promotion": "Promotion {label}"
+    },
+    "shippingEta": "Shipping (arrives in {min} to {max} business days)",
+    "shippingDigital": "Digital delivery",
+    "free": "Free",
+    "taxIncluded": "Tax included ({rate}%)",
+    "tax": "Tax ({rate}%)",
+    "total": "Total",
+    "pay": "Pay",
+    "payNote": "Secure payment with our payment processor. Your book is created as soon as the payment is confirmed.",
+    "errors": {
+      "generic": "Something went wrong. Please try again in a few minutes."
+    },
+    "order": {
+      "title": "Your order",
+      "loading": "Loading your order…",
+      "error": "We couldn’t load your order.",
+      "status": {
+        "pending_payment": "Waiting for payment confirmation.",
+        "paid": "Payment confirmed! We’re starting your book.",
+        "generating": "We’re creating your book: illustrating and reviewing every page.",
+        "ready": "Your book is ready!",
+        "qa_failed": "Someone on our team is reviewing your book to make it perfect. We’ll email you.",
+        "cancelled": "The payment wasn’t completed and the order was cancelled.",
+        "refunded": "The order was refunded.",
+        "delivered": "Your book was delivered.",
+        "sent_to_print": "Your book is at the printer.",
+        "in_production": "Your book is being printed.",
+        "shipped": "Your book is on its way.",
+        "draft": "Order being prepared.",
+        "preview_ready": "Order being prepared."
+      },
+      "steps": {
+        "pending_payment": "Payment",
+        "paid": "Payment confirmed",
+        "generating": "Creating the book",
+        "ready": "Book ready"
+      },
+      "simulateTitle": "Test mode",
+      "simulateText": "Payments are simulated in this environment: nobody pays anything.",
+      "simulate": "Simulate the payment"
+    }
   }
 }

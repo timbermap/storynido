@@ -2,12 +2,20 @@
  * Vista previa de punta a punta con emuladores (Firestore), storage local e IA simulada:
  * generación, cuotas, presupuesto, regeneraciones, edición moderada y configuración de IA.
  */
-import { MOCK_UNSAFE_MARKER, type ProviderRegistry } from '@storynido/providers';
+import {
+  MOCK_UNSAFE_MARKER,
+  signMockPaymentWebhook,
+  type ProviderRegistry,
+} from '@storynido/providers';
 import {
   countWords,
   utcDay,
+  type CountryConfig,
   type IllustrationStyle,
   type Lesson,
+  type Price,
+  type PriceSnapshot,
+  type PublicOrder,
   type PublicPreview,
   type Story,
 } from '@storynido/shared';
@@ -16,6 +24,8 @@ import sharp from 'sharp';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InMemoryCatalog } from '../catalog';
+import { RecordingConversions } from '../checkout/conversions';
+import { RecordingPublisher } from '../orders/events';
 import { initFirebaseAdmin } from '../firebase';
 import { auth, createTestApp } from '../test-helpers';
 
@@ -590,5 +600,277 @@ describe('configuración de IA', () => {
       textModel: 'gemini-3.5-flash',
     });
     expect(res.statusCode).toBe(400);
+  });
+});
+
+describe('checkout y pagos (fase 11)', () => {
+  let app: App;
+  let providers: ProviderRegistry;
+  let events: RecordingPublisher;
+  let conversions: RecordingConversions;
+
+  const mexico: CountryConfig = {
+    code: 'MX',
+    active: true,
+    formats: { digital: true, softcover: true, hardcover: true },
+    currency: 'MXN',
+    defaultLocale: 'es',
+    taxBasisPoints: 1600,
+    taxIncludedInPrice: true,
+    shipping: { costMinor: 14900, etaDaysMin: 5, etaDaysMax: 9 },
+    updatedAt: now,
+  };
+  const price = (format: Price['format'], amountMinor: number): Price => ({
+    country: 'MX',
+    format,
+    currency: 'MXN',
+    amountMinor,
+    lengthAdjustmentsMinor: {},
+    active: true,
+    updatedAt: now,
+  });
+  const ADDRESS = {
+    name: 'Ana Pérez',
+    line1: 'Av. Reforma 123',
+    line2: null,
+    city: 'Ciudad de México',
+    state: 'CDMX',
+    postalCode: '06600',
+    country: 'MX',
+    phone: '+52 55 1234 5678',
+  };
+
+  beforeAll(async () => {
+    events = new RecordingPublisher();
+    conversions = new RecordingConversions();
+    const created = await createTestApp({
+      catalog: new InMemoryCatalog({
+        stories: [story],
+        styles: [style, lineArt],
+        lessons: [lesson],
+        countries: [mexico],
+        prices: [price('digital', 34900), price('hardcover', 89900)],
+      }),
+      pipelineEvents: events,
+      conversions,
+    });
+    app = created.app;
+    providers = created.providers;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  beforeEach(async () => {
+    events.events.length = 0;
+    conversions.purchases.length = 0;
+    for (const name of [
+      'photos',
+      'books',
+      'children',
+      'orders',
+      'coupons',
+      'promotions',
+      'paymentEvents',
+      'adminAlerts',
+      'auditLog',
+      'aiUsage',
+      'aiBudget',
+      'previewQuota',
+    ]) {
+      await db.recursiveDelete(db.collection(name));
+    }
+    await setAiConfig({});
+  });
+
+  /** Libro con la muestra completa y el personaje aprobado. */
+  async function approvedBook(bookId = 'book-1') {
+    await seedBook(providers, bookId);
+    await app.inject({ method: 'POST', url: `/v1/books/${bookId}/preview`, headers: auth(TOKEN) });
+    await app.inject({
+      method: 'POST',
+      url: `/v1/books/${bookId}/preview/character/approve`,
+      headers: auth(TOKEN),
+    });
+  }
+
+  const post = (url: string, payload: unknown, token = TOKEN) =>
+    app.inject({ method: 'POST', url, headers: auth(token), payload: payload as object });
+  const webhook = (
+    payload: Parameters<typeof signMockPaymentWebhook>[1],
+    secret = 'test-webhook-secret',
+  ) => {
+    const signed = signMockPaymentWebhook(secret, payload);
+    return app.inject({
+      method: 'POST',
+      url: '/v1/webhooks/payments/mock',
+      headers: { 'content-type': 'application/json', ...signed.headers },
+      payload: signed.rawBody,
+    });
+  };
+  const checkout = async (body: Record<string, unknown> = {}) => {
+    const res = await post('/v1/checkout', {
+      bookId: 'book-1',
+      format: 'digital',
+      country: 'MX',
+      analyticsConsent: true,
+      ...body,
+    });
+    return res;
+  };
+  const completed = (orderId: string, amountMinor: number, id = 'evt_1') => ({
+    id,
+    type: 'checkout.completed',
+    data: { orderId, sessionId: 'cs_1', paymentId: 'pay_1', amountMinor, currency: 'MXN' },
+  });
+
+  it('cotiza en el servidor: envío, IVA incluido y cupón (o su error)', async () => {
+    await approvedBook();
+    await db.doc('coupons/BIENVENIDA').set({
+      code: 'BIENVENIDA',
+      type: 'percent',
+      value: 10,
+      currency: null,
+      countries: [],
+      validFrom: new Date('2026-01-01'),
+      validUntil: null,
+      maxRedemptions: null,
+      redemptions: 0,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+    const res = await post('/v1/checkout/quote', {
+      bookId: 'book-1',
+      format: 'hardcover',
+      country: 'MX',
+      couponCode: 'bienvenida',
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json<{ snapshot: PriceSnapshot; couponError: string | null }>();
+    expect(body.couponError).toBeNull();
+    expect(body.snapshot.discount).toEqual({ minor: 8990, reason: 'coupon', label: 'BIENVENIDA' });
+    expect(body.snapshot.totalMinor).toBe(89900 - 8990 + 14900);
+
+    const bad = await post('/v1/checkout/quote', {
+      bookId: 'book-1',
+      format: 'digital',
+      country: 'MX',
+      couponCode: 'NOEXISTE',
+    });
+    expect(bad.json<{ couponError: string }>().couponError).toBe('coupon_invalid');
+  });
+
+  it('sin muestra aprobada, sin cuenta o sin dirección válida no se puede pagar', async () => {
+    await seedBook(providers, 'book-1');
+    expect((await checkout()).statusCode).toBe(409);
+    await approvedBook('book-2');
+    expect((await checkout({ bookId: 'book-2', format: 'hardcover' })).statusCode).toBe(400);
+    const badZip = await checkout({
+      bookId: 'book-2',
+      format: 'hardcover',
+      shippingAddress: { ...ADDRESS, postalCode: '123' },
+    });
+    expect(badZip.statusCode).toBe(400);
+    expect(badZip.json<{ error: { code: string } }>().error.code).toBe('validation_failed');
+    expect(badZip.json<{ error: { message: string } }>().error.message).toContain('postalCode');
+    const anonymous = await post(
+      '/v1/checkout',
+      { bookId: 'book-2', format: 'digital', country: 'MX' },
+      `${TOKEN}:anonymous`,
+    );
+    expect(anonymous.json<{ error: { code: string } }>().error.code).toBe('account_required');
+  });
+
+  it('pago confirmado por el webhook: pedido pagado, pipeline en marcha y libro cerrado', async () => {
+    await approvedBook();
+    const res = await checkout({ format: 'hardcover', shippingAddress: ADDRESS });
+    expect(res.statusCode).toBe(200);
+    const { orderId, checkoutUrl } = res.json<{ orderId: string; checkoutUrl: string }>();
+    expect(checkoutUrl).toContain(`/es/pedido/${orderId}`);
+    const stored = (await db.doc(`orders/${orderId}`).get()).data() as
+      | { status: string; approval: { fingerprint: string }; priceSnapshot: PriceSnapshot }
+      | undefined;
+    expect(stored?.status).toBe('pending_payment');
+    expect(stored?.approval.fingerprint).toMatch(/^[0-9a-f]{64}$/);
+    expect(stored?.priceSnapshot.totalMinor).toBe(104800);
+
+    // Firma inválida: se rechaza y no cambia nada.
+    expect((await webhook(completed(orderId, 104800), 'otro-secreto')).statusCode).toBe(400);
+    expect((await db.doc(`orders/${orderId}`).get()).get('status')).toBe('pending_payment');
+
+    const ok = await webhook(completed(orderId, 104800));
+    expect(ok.json<{ outcome: string }>().outcome).toBe('processed');
+    // El mismo evento otra vez no duplica nada.
+    const again = await webhook(completed(orderId, 104800));
+    expect(again.json<{ outcome: string }>().outcome).toBe('duplicate');
+
+    expect((await db.doc(`orders/${orderId}`).get()).get('status')).toBe('paid');
+    expect((await db.doc('books/book-1').get()).get('status')).toBe('ordered');
+    expect(events.events).toEqual([
+      { type: 'order.paid', orderId, requestId: `paid:${orderId}:pay_1` },
+    ]);
+    expect(conversions.purchases).toEqual([{ orderId, valueMinor: 104800, currency: 'MXN' }]);
+  });
+
+  it('si lo cobrado no coincide con lo congelado, no se fabrica y se avisa al admin', async () => {
+    await approvedBook();
+    const { orderId } = (await checkout()).json<{ orderId: string }>();
+    await webhook(completed(orderId, 100));
+    expect((await db.doc(`orders/${orderId}`).get()).get('status')).toBe('pending_payment');
+    expect(events.events).toEqual([]);
+    const alerts = await db.collection('adminAlerts').get();
+    expect(alerts.docs.map((doc) => doc.get('kind') as unknown)).toEqual(['payment_mismatch']);
+  });
+
+  it('checkout vencido → cancelado; reembolso desde el admin → reembolsado y auditado', async () => {
+    await approvedBook();
+    const first = (await checkout()).json<{ orderId: string }>().orderId;
+    await webhook({
+      id: 'evt_exp',
+      type: 'checkout.expired',
+      data: { orderId: first, sessionId: 'cs_1' },
+    });
+    expect((await db.doc(`orders/${first}`).get()).get('status')).toBe('cancelled');
+
+    const second = (await checkout()).json<{ orderId: string }>().orderId;
+    await webhook(completed(second, 34900, 'evt_2'));
+    const refund = await post(
+      `/v1/admin/orders/${second}/refund`,
+      { reason: 'No le gustó' },
+      'token-admin:admin',
+    );
+    expect(refund.statusCode).toBe(200);
+    expect(refund.json<{ status: string }>().status).toBe('refunded');
+    const audit = await db.collection('auditLog').where('action', '==', 'order.refund').get();
+    expect(audit.size).toBe(1);
+    const twice = await post(
+      `/v1/admin/orders/${second}/refund`,
+      { reason: 'Otra vez' },
+      'token-admin:admin',
+    );
+    expect(twice.statusCode).toBe(409);
+  });
+
+  it('desarrollo: el pago simulado pasa por el mismo webhook firmado', async () => {
+    await approvedBook();
+    const { orderId } = (await checkout({ analyticsConsent: false })).json<{ orderId: string }>();
+    const view = await app.inject({
+      method: 'GET',
+      url: `/v1/orders/${orderId}`,
+      headers: auth(TOKEN),
+    });
+    expect(view.json<PublicOrder>().canSimulatePayment).toBe(true);
+    const paid = await post(`/v1/dev/orders/${orderId}/simulate-payment`, {});
+    expect(paid.json<PublicOrder>().status).toBe('paid');
+    expect(conversions.purchases).toEqual([]);
+    // Otra persona no ve el pedido.
+    const other = await app.inject({
+      method: 'GET',
+      url: `/v1/orders/${orderId}`,
+      headers: auth('token-luis'),
+    });
+    expect(other.statusCode).toBe(404);
   });
 });

@@ -25,6 +25,7 @@ import {
   type QaCode,
   type ScenePlan,
 } from '@storynido/shared';
+import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 
@@ -330,7 +331,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
   /** G1 + G6: el personaje está aprobado y se congela lo que el adulto vio. */
   async function preparePhoto(ctx: StepContext): Promise<StepResult> {
     const orderRef = db.collection(COLLECTIONS.orders).doc(ctx.order.id);
-    const existing = (await orderRef.get()).data()?.snapshot as BookSnapshot | undefined;
+    const orderData = (await orderRef.get()).data();
+    const existing = orderData?.snapshot as BookSnapshot | undefined;
     // Regenerar no cambia lo aprobado: el libro congelado se conserva.
     if (existing) return { output: { snapshotHash: existing.hash, frozen: false } };
 
@@ -363,6 +365,15 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       throw new HumanReviewError(
         'character_not_approved',
         'El libro no tiene el personaje aprobado por el adulto.',
+      );
+    }
+    // Lo que se pagó es lo que se fabrica: si la muestra cambió después de pagar, no se sigue.
+    const approval = orderData?.approval as { fingerprint?: string } | null | undefined;
+    if (approval?.fingerprint && approval.fingerprint !== previewFingerprint(preview)) {
+      await qaEvent(ctx, 'snapshot_mismatch', { step: 'prepare_photo' });
+      throw new HumanReviewError(
+        'approval_changed',
+        'La muestra cambió después del pago: hace falta una nueva aprobación.',
       );
     }
     const [childSnap, storySnap, styleSnap] = await Promise.all([
@@ -462,13 +473,22 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     let cost = 0;
 
     const texts = [snapshot.title, ...snapshot.pages.map((page) => page.text)];
+    // El texto es el que aprobó el adulto: si sacó el apodo, es su decisión (se registra). Un
+    // nombre mal escrito ("Martin" por "Martín") sí frena: es un error que se le pudo pasar.
     const names = nameIssues(texts, snapshot.requiredNames);
     if (names.length > 0) {
-      await qaEvent(ctx, 'name_mismatch', { names: names.length });
-      throw new HumanReviewError(
-        'name_mismatch',
-        'Un nombre aprobado no aparece tal cual en el texto.',
-      );
+      const misspelled = names.filter((issue) => issue.problem === 'misspelled');
+      await qaEvent(ctx, 'name_mismatch', {
+        names: names.length,
+        misspelled: misspelled.length,
+        blocking: misspelled.length > 0,
+      });
+      if (misspelled.length > 0) {
+        throw new HumanReviewError(
+          'name_mismatch',
+          'Un nombre aprobado aparece mal escrito en el texto.',
+        );
+      }
     }
     if (snapshot.scenes && snapshot.scenes.length !== snapshot.pages.length) {
       await qaEvent(ctx, 'snapshot_mismatch', {

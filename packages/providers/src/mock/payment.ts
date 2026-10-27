@@ -83,6 +83,12 @@ export class MockPaymentProvider implements PaymentProvider {
           .parse(event.data);
         return { type: 'refund.succeeded', eventId: event.id, ...data };
       }
+      case 'dispute.opened': {
+        const data = z
+          .object({ paymentId: z.string(), amountMinor: z.number().int() })
+          .parse(event.data);
+        return { type: 'dispute.opened', eventId: event.id, ...data };
+      }
       default:
         return { type: 'ignored', eventId: event.id, rawType: event.type };
     }

@@ -502,7 +502,8 @@
       "accountText": "Es gratis. Así guardamos tu cuento y lo que ya aprobaste.",
       "illustrating": "Ilustrando la portada y las primeras páginas…",
       "readWhile": "Lee el cuento completo",
-      "approvedBadge": "Personaje aprobado"
+      "approvedBadge": "Personaje aprobado",
+      "continueAfterApproval": "Elige el formato cuando apruebes al personaje y la muestra esté al día."
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
@@ -790,5 +791,102 @@
     "thumbnails": "Páginas del libro",
     "noDedication": "Aquí irá tu dedicatoria",
     "example": "Ejemplo"
+  },
+  "Checkout": {
+    "title": "Tu libro",
+    "subtitle": "Elige el formato. El precio lo calculamos con los impuestos y el envío de tu país.",
+    "unavailable": "Todavía no vendemos en tu país. Puedes ver los precios de otro país desde el pie de página.",
+    "signInTitle": "Inicia sesión para comprar",
+    "signInText": "Así guardamos tu pedido y te avisamos cuando tu libro esté listo.",
+    "formatTitle": "Formato",
+    "formats": {
+      "digital": {
+        "name": "Digital",
+        "text": "PDF para leer en pantalla e imprimir en casa."
+      },
+      "softcover": {
+        "name": "Tapa blanda",
+        "text": "Libro impreso de 21×28 cm."
+      },
+      "hardcover": {
+        "name": "Tapa dura",
+        "text": "Libro impreso de 21×28 cm, para regalar y guardar."
+      }
+    },
+    "addressTitle": "Dirección de envío",
+    "optional": "opcional",
+    "address": {
+      "name": "Nombre de quien recibe",
+      "line1": "Calle y número",
+      "line2": "Colonia, piso o depto.",
+      "city": "Ciudad",
+      "state": "Estado",
+      "postalCode": "Código postal",
+      "phone": "Teléfono"
+    },
+    "giftTitle": "Regalo",
+    "isGift": "Es un regalo",
+    "giftMessage": "Mensaje para la tarjeta",
+    "summaryTitle": "Resumen",
+    "coupon": "Cupón",
+    "apply": "Aplicar",
+    "calculating": "Calculando el precio…",
+    "couponErrors": {
+      "coupon_invalid": "Ese cupón no existe.",
+      "coupon_expired": "Ese cupón ya no está vigente.",
+      "coupon_exhausted": "Ese cupón ya se usó todas las veces posibles.",
+      "coupon_not_applicable": "Ese cupón no aplica a este país o moneda.",
+      "country_unavailable": "No disponible.",
+      "format_unavailable": "No disponible.",
+      "price_missing": "No disponible."
+    },
+    "component": {
+      "book": "Libro",
+      "length": "Ajuste por extensión"
+    },
+    "discount": {
+      "coupon": "Cupón {label}",
+      "promotion": "Promoción {label}"
+    },
+    "shippingEta": "Envío (llega en {min} a {max} días hábiles)",
+    "shippingDigital": "Entrega digital",
+    "free": "Gratis",
+    "taxIncluded": "IVA incluido ({rate} %)",
+    "tax": "Impuestos ({rate} %)",
+    "total": "Total",
+    "pay": "Pagar",
+    "payNote": "Pago seguro con nuestro procesador de pagos. Tu libro se crea apenas se confirma el pago.",
+    "errors": {
+      "generic": "Algo salió mal. Intenta de nuevo en unos minutos."
+    },
+    "order": {
+      "title": "Tu pedido",
+      "loading": "Cargando tu pedido…",
+      "error": "No pudimos cargar tu pedido.",
+      "status": {
+        "pending_payment": "Esperando la confirmación del pago.",
+        "paid": "¡Pago confirmado! Empezamos a crear tu libro.",
+        "generating": "Estamos creando tu libro: ilustramos cada página y la revisamos.",
+        "ready": "¡Tu libro está listo!",
+        "qa_failed": "Una persona de nuestro equipo está revisando tu libro para que quede perfecto. Te avisamos por correo.",
+        "cancelled": "El pago no se completó y el pedido se canceló.",
+        "refunded": "El pedido fue reembolsado.",
+        "delivered": "Tu libro fue entregado.",
+        "sent_to_print": "Tu libro está en la imprenta.",
+        "in_production": "Tu libro se está imprimiendo.",
+        "shipped": "Tu libro va en camino.",
+        "draft": "Pedido en preparación.",
+        "preview_ready": "Pedido en preparación."
+      },
+      "steps": {
+        "pending_payment": "Pago",
+        "paid": "Pago confirmado",
+        "generating": "Creación del libro",
+        "ready": "Libro listo"
+      },
+      "simulateTitle": "Modo de prueba",
+      "simulateText": "Los pagos son simulados en este ambiente: nadie paga nada.",
+      "simulate": "Simular el pago"
+    }
   }
 }

@@ -8,6 +8,7 @@ import { avatarSchema, characterModeSchema, memoriesSchema } from './character';
 import { characterTraitsSchema, mustKeepSchema } from './character';
 import { channelSchema } from './channels';
 import { orderPipelineSchema } from './pipeline';
+import { priceSnapshotSchema } from './pricing';
 import {
   bookLengthSchema,
   contentTypeSchema,
@@ -47,6 +48,8 @@ export const priceSchema = z.object({
   format: bookFormatSchema,
   currency: currencySchema,
   amountMinor: z.number().int().nonnegative(),
+  /** Ajuste por extensión del libro (Mini más barato, Gran aventura más caro). */
+  lengthAdjustmentsMinor: z.partialRecord(bookLengthSchema, z.number().int()).default({}),
   active: z.boolean(),
   updatedAt: z.date(),
 });
@@ -264,6 +267,29 @@ export const addressSchema = z.object({
   phone: z.string().max(30).nullable(),
 });
 
+export type Address = z.infer<typeof addressSchema>;
+
+/** Reglas de dirección por país (lo que piden las imprentas y los correos). */
+const ADDRESS_RULES: Partial<
+  Record<string, { postalCode: RegExp; state: RegExp; phone: boolean }>
+> = {
+  MX: { postalCode: /^\d{5}$/, state: /^.{2,}$/, phone: true },
+  US: { postalCode: /^\d{5}(-\d{4})?$/, state: /^[A-Z]{2}$/, phone: false },
+};
+
+/** Campos de la dirección que no cumplen las reglas de su país (vacío si está bien). */
+export function addressProblems(address: Address): (keyof Address)[] {
+  const rules = ADDRESS_RULES[address.country];
+  if (!rules) return [];
+  const problems: (keyof Address)[] = [];
+  if (!rules.postalCode.test(address.postalCode.trim())) problems.push('postalCode');
+  if (!rules.state.test((address.state ?? '').trim().toUpperCase())) problems.push('state');
+  if (rules.phone && !/^[+\d][\d\s()-]{6,}$/.test((address.phone ?? '').trim())) {
+    problems.push('phone');
+  }
+  return problems;
+}
+
 export const ORDER_PIECES = ['book'] as const;
 
 /** Una línea del pedido: pieza, formato y cantidad. */
@@ -309,6 +335,15 @@ export const orderSchema = timestampsSchema.extend({
     print: z.number().int().nonnegative(),
     shipping: z.number().int().nonnegative(),
   }),
+  /** Precio congelado: componentes, descuento y su motivo, envío e impuestos. */
+  priceSnapshot: priceSnapshotSchema.nullable().default(null),
+  /** Lo que el comprador aprobó y pagó (huella de la vista previa; sin datos del niño). */
+  approval: z
+    .object({ fingerprint: z.string(), approvedAt: z.date().nullable() })
+    .nullable()
+    .default(null),
+  /** Consentimiento de analítica al pagar (para las conversiones del lado del servidor). */
+  analyticsConsent: z.boolean().default(false),
   pipeline: orderPipelineSchema.default({
     generation: 0,
     runId: null,

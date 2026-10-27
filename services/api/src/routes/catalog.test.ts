@@ -71,6 +71,7 @@ const mx: CountryConfig = {
 const price = (format: Price['format'], amountMinor: number): Price => ({
   country: 'MX',
   format,
+  lengthAdjustmentsMinor: {},
   currency: 'MXN',
   amountMinor,
   active: true,

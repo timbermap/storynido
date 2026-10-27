@@ -27,6 +27,17 @@ export const routing = defineRouting({
     '/account': { es: '/cuenta', en: '/account', pt: '/conta' },
     '/create': { es: '/crear', en: '/create', pt: '/criar' },
     '/create/[bookId]': { es: '/crear/[bookId]', en: '/create/[bookId]', pt: '/criar/[bookId]' },
+    // Pago y pedido (la API arma la URL de vuelta del pago con estas mismas rutas).
+    '/checkout/[bookId]': {
+      es: '/pagar/[bookId]',
+      en: '/checkout/[bookId]',
+      pt: '/pagamento/[bookId]',
+    },
+    '/order/[orderId]': {
+      es: '/pedido/[orderId]',
+      en: '/order/[orderId]',
+      pt: '/pedido/[orderId]',
+    },
   },
 });
 

@@ -8,7 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { BookViewer, type ViewerPage } from '@/components/book/book-viewer';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 
 import { CharacterReview } from './character-review';
@@ -378,12 +379,23 @@ export function PreviewPanel({
           {t('editChoices')}
         </Button>
         <div className="sm:ml-auto sm:text-right">
-          <Button size="lg" disabled aria-describedby="continue-soon">
-            {t('continue')}
-          </Button>
-          <p id="continue-soon" className="mt-2 max-w-sm text-sm text-muted-foreground">
-            {t('continueSoon')}
-          </p>
+          {data?.stage === 'complete' && !data.stale ? (
+            <Link
+              href={{ pathname: '/checkout/[bookId]', params: { bookId: book.id } }}
+              className={buttonVariants({ size: 'lg' })}
+            >
+              {t('continue')}
+            </Link>
+          ) : (
+            <>
+              <Button size="lg" disabled aria-describedby="continue-soon">
+                {t('continue')}
+              </Button>
+              <p id="continue-soon" className="mt-2 max-w-sm text-sm text-muted-foreground">
+                {t('continueAfterApproval')}
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

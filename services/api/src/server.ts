@@ -13,6 +13,8 @@ import { FirestoreCatalog } from './catalog';
 import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
+import { CheckoutService } from './checkout/service';
+import { ServerConversions } from './checkout/conversions';
 import { loadApiConfig } from './config';
 import { PubSubPublisher, WorkerHttpPublisher } from './orders/events';
 import {
@@ -67,6 +69,30 @@ liveConfig.start();
 const catalog = new FirestoreCatalog(db);
 const tokens = new FirebaseTokenVerifier(firebase);
 
+const previews = new PreviewService(db, providers, catalog, log);
+const pipelineEvents =
+  config.pipelineEvents === 'pubsub'
+    ? new PubSubPublisher(config.projectId, config.env.ORDER_EVENTS_TOPIC)
+    : new WorkerHttpPublisher(config.env.WORKER_URL);
+const checkout = new CheckoutService(
+  db,
+  providers,
+  catalog,
+  previews,
+  pipelineEvents,
+  new ServerConversions(
+    {
+      ga4MeasurementId: config.env.GA4_MEASUREMENT_ID,
+      ga4ApiSecret: config.env.GA4_API_SECRET,
+      metaPixelId: config.env.META_PIXEL_ID,
+      metaAccessToken: config.env.META_CAPI_ACCESS_TOKEN,
+    },
+    log,
+  ),
+  log,
+  { devToolsEnabled: config.devToolsEnabled, mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET },
+);
+
 const app = await buildApp({
   logger: loggerOptions,
   deps: {
@@ -78,12 +104,10 @@ const app = await buildApp({
     providers,
     catalog,
     photos: new PhotoService(db, providers),
-    previews: new PreviewService(db, providers, catalog, log),
+    previews,
     accounts: new AccountService(db, tokens, new FirebaseAuthAccounts(firebase)),
-    pipelineEvents:
-      config.pipelineEvents === 'pubsub'
-        ? new PubSubPublisher(config.projectId, config.env.ORDER_EVENTS_TOPIC)
-        : new WorkerHttpPublisher(config.env.WORKER_URL),
+    pipelineEvents,
+    checkout,
     db,
   },
 });

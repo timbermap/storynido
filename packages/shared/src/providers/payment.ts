@@ -37,6 +37,8 @@ export type PaymentEvent =
     }
   | { type: 'checkout.expired'; eventId: string; orderId: string; sessionId: string }
   | { type: 'refund.succeeded'; eventId: string; paymentId: string; amountMinor: number }
+  /** Contracargo abierto: el admin tiene que responder con evidencia. */
+  | { type: 'dispute.opened'; eventId: string; paymentId: string; amountMinor: number }
   | { type: 'ignored'; eventId: string; rawType: string };
 
 export interface RefundRequest {

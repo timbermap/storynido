@@ -9,6 +9,8 @@ import { routing, type AppPathname } from '@/i18n/routing';
 const PRIVATE_PATHNAMES: AppPathname[] = [
   '/create',
   '/create/[bookId]',
+  '/checkout/[bookId]',
+  '/order/[orderId]',
   '/account',
   '/login',
   '/login/finish',

@@ -15,7 +15,9 @@ import {
   readingLevelSchema,
   textDensitySchema,
 } from '../models/editorial';
+import { addressSchema } from '../models/commerce';
 import { pipelineStepSchema } from '../models/pipeline';
+import { QUOTE_ERRORS, priceSnapshotSchema } from '../models/pricing';
 import { PHOTO_STATUSES } from '../models/users';
 import { orderStatusSchema } from '../order-status';
 import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
@@ -144,6 +146,47 @@ export const devPaidOrderResponseSchema = z.object({
   orderId: z.string(),
   requestId: z.string(),
 });
+
+// --- Checkout y pedidos ---------------------------------------------------------
+
+export const checkoutQuoteBodySchema = z.object({
+  bookId: z.string().min(1),
+  format: bookFormatSchema,
+  country: countryCodeSchema,
+  quantity: z.number().int().min(1).max(500).default(1),
+  couponCode: z.string().trim().toUpperCase().max(32).nullable().default(null),
+});
+
+export const checkoutQuoteResponseSchema = z.object({
+  snapshot: priceSnapshotSchema,
+  couponError: z.enum(QUOTE_ERRORS).nullable(),
+});
+
+export const createCheckoutBodySchema = checkoutQuoteBodySchema.extend({
+  shippingAddress: addressSchema.nullable().default(null),
+  gift: z
+    .object({ isGift: z.boolean(), message: z.string().trim().max(500).nullable() })
+    .default({ isGift: false, message: null }),
+  analyticsConsent: z.boolean().default(false),
+});
+
+export const createCheckoutResponseSchema = z.object({
+  orderId: z.string(),
+  checkoutUrl: z.string(),
+});
+
+export const publicOrderSchema = z.object({
+  orderId: z.string(),
+  bookId: z.string(),
+  status: orderStatusSchema,
+  items: z.array(z.object({ format: bookFormatSchema, quantity: z.number().int() })),
+  priceSnapshot: priceSnapshotSchema.nullable(),
+  createdAt: z.string(),
+  /** El pago se puede simular (solo fuera de producción, con el proveedor simulado). */
+  canSimulatePayment: z.boolean(),
+});
+
+export type PublicOrder = z.infer<typeof publicOrderSchema>;
 
 // --- Vista previa ---------------------------------------------------------------
 
@@ -556,6 +599,50 @@ export const apiRoutes = {
       'Cambia proveedor, modelos, límites o presupuesto de IA (efecto inmediato, queda en auditoría)',
     body: aiConfigUpdateSchema,
     response: adminAiConfigResponseSchema,
+  },
+  checkoutQuote: {
+    method: 'POST',
+    path: '/v1/checkout/quote',
+    access: 'user',
+    summary:
+      'Precio del pedido calculado en el servidor (formato, cantidad, cupón, envío, impuestos)',
+    body: checkoutQuoteBodySchema,
+    response: checkoutQuoteResponseSchema,
+  },
+  createCheckout: {
+    method: 'POST',
+    path: '/v1/checkout',
+    access: 'user',
+    summary:
+      'Crea el pedido (precio y aprobación congelados) y la sesión de pago; devuelve la URL de pago',
+    body: createCheckoutBodySchema,
+    response: createCheckoutResponseSchema,
+  },
+  order: {
+    method: 'GET',
+    path: '/v1/orders/:orderId',
+    access: 'user',
+    summary: 'Estado de un pedido propio',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: publicOrderSchema,
+  },
+  devSimulatePayment: {
+    method: 'POST',
+    path: '/v1/dev/orders/:orderId/simulate-payment',
+    access: 'user',
+    summary:
+      'Solo desarrollo y staging con pagos simulados: confirma el pago como lo haría el webhook',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: publicOrderSchema,
+  },
+  adminRefundOrder: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/refund',
+    access: 'admin',
+    summary: 'Reembolsa un pedido pagado (total); queda en auditoría',
+    params: z.object({ orderId: z.string().min(1) }),
+    body: z.object({ reason: z.string().trim().min(3).max(300) }),
+    response: z.object({ status: orderStatusSchema, refundId: z.string() }),
   },
   adminOrderPipeline: {
     method: 'GET',

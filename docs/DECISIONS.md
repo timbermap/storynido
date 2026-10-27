@@ -763,3 +763,36 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Costo:** ≈ +USD 0,10 por vista previa que llega a la etapa 2, que ya pide cuenta.
 - La lámina del personaje sigue en 1K: es referencia, no se imprime.
 - Las vistas previas anteriores a este cambio siguen en 1K. Un pedido impreso con ellas se frena por resolución y pide revisión humana.
+
+## 072 · Checkout y pagos (fase 11) sobre la interfaz, con el procesador por definir
+
+- **Fecha:** 2026-10-27 · **Decisión de Sebastián:** construir la fase con el proveedor simulado y conectar el procesador real cuando se elija la entidad cobradora. Stripe no abre cuentas en Uruguay ni en Argentina; las opciones están en la conversación del 2026-10-27: Stripe con una empresa en EE. UU., Mercado Pago, dLocal o PayPal.
+- **Precio siempre en el servidor (`quote`):**
+  - precio del país y formato, más un ajuste por extensión (`prices.lengthAdjustmentsMinor`), por la cantidad;
+  - un solo descuento, el mayor entre cupón y promoción vigente;
+  - envío del país si es impreso;
+  - impuesto incluido (se informa la parte) o sumado.
+  - Un cupón que no sirve no frena la compra: se informa y se cobra sin él.
+  - El pedido guarda el **snapshot** completo (cada componente, el descuento y su motivo). El cliente nunca manda montos, y al proveedor se le pasa un único ítem con el total.
+- **Checkout (`POST /v1/checkout`):**
+  - exige cuenta (no anónima), la muestra completa con el personaje aprobado y vigente, y una dirección válida para el país si es impreso (México: CP de 5 dígitos, estado y teléfono; EE. UU.: ZIP y estado de 2 letras);
+  - crea el pedido en `pending_payment` con el precio y la **huella de lo aprobado**.
+  - Al fabricar, el worker compara la huella. Si la muestra cambió después de pagar, revisión humana: "lo que aprobás es lo que recibís".
+- **Webhook (`POST /v1/webhooks/payments/:proveedor`):**
+  - cuerpo crudo, firma verificada (400 si es inválida), idempotente por ID de evento (`paymentEvents`);
+  - pagado: el monto y la moneda tienen que coincidir con lo congelado. Si coinciden, `paid`, libro `ordered`, se usa el cupón y se publica `order.paid`. Si no, aviso al admin sin fabricar;
+  - vencido: `cancelled`. Reembolso: `refunded`. Contracargo: aviso al admin.
+- **Reembolso:** `POST /v1/admin/orders/:id/reembolso`, total, con clave idempotente y auditoría.
+- **Conversiones del servidor (GA4 Measurement Protocol y Meta API de Conversiones):**
+  - solo si el comprador aceptó la analítica y hay claves;
+  - sin datos personales: pedido, valor y moneda.
+  - Meta pide algún identificador del usuario para atribuir; se suma con su consentimiento cuando se active la campaña.
+- **Web:**
+  - `/pagar/[libro]`: formato con precio, dirección, regalo, cupón y resumen calculado por la API;
+  - `/pedido/[pedido]`: estado en vivo;
+  - fuera de producción, con el proveedor simulado, "Simular el pago" pasa por el mismo webhook firmado.
+- **Libro con el texto editado por el adulto:** si sacó el apodo, no se frena (se registra). Un nombre mal escrito sí va a revisión.
+- **Pendiente con el procesador elegido:**
+  - su `PaymentProvider` (checkout, firma del webhook, reembolso);
+  - Apple Pay y Google Pay;
+  - multimoneda real y el procedimiento de pruebas con su CLI.

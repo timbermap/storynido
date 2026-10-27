@@ -34,6 +34,7 @@ import {
   storySchema,
   userSchema,
   type BookFormat,
+  type BookLength,
   type CountryCode,
   type Locale,
   type Role,
@@ -121,6 +122,13 @@ const SAMPLE_PRICES: Partial<Record<CountryCode, Record<BookFormat, number>>> = 
   US: { digital: 1999, softcover: 3999, hardcover: 4999 },
 };
 
+/** Ajuste por extensión: el Mini cuesta menos y la Gran aventura más. */
+const SAMPLE_LENGTH_ADJUSTMENTS: Partial<Record<CountryCode, Partial<Record<BookLength, number>>>> =
+  {
+    MX: { mini: -5000, epic: 10000 },
+    US: { mini: -300, epic: 600 },
+  };
+
 const SAMPLE_SHIPPING: Partial<
   Record<CountryCode, { costMinor: number; etaDaysMin: number; etaDaysMax: number }>
 > = {
@@ -167,11 +175,30 @@ for (const code of COUNTRY_CODES) {
         format,
         currency: defaults.currency,
         amountMinor: prices[format],
+        lengthAdjustmentsMinor: SAMPLE_LENGTH_ADJUSTMENTS[code] ?? {},
         active: true,
         updatedAt: now,
       }),
     );
   }
+}
+
+// Cupón de prueba (solo en los emuladores): 10 % para probar el checkout.
+if (!cloud) {
+  batch.set(db.collection(COLLECTIONS.coupons).doc('PRUEBA10'), {
+    code: 'PRUEBA10',
+    type: 'percent',
+    value: 10,
+    currency: null,
+    countries: [],
+    validFrom: new Date('2026-01-01'),
+    validUntil: null,
+    maxRedemptions: null,
+    redemptions: 0,
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+  });
 }
 
 const PRODUCT_NAMES: Record<BookFormat, Record<Locale, string>> = {

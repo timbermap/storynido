@@ -26,6 +26,7 @@ import '../globals.css';
 
 const CLIENT_NAMESPACES = [
   'Nav',
+  'Checkout',
   'Switchers',
   'Footer',
   'Consent',

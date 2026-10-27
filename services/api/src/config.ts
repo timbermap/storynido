@@ -33,6 +33,11 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   /** "worker": eventos directo al worker (local); "pubsub": tema de Pub/Sub (nube). */
   PIPELINE_EVENTS: z.enum(['worker', 'pubsub']).optional(),
   ORDER_EVENTS_TOPIC: z.string().default('order-events'),
+  /** Conversiones del lado del servidor (opcionales; sin claves no se envían). */
+  GA4_MEASUREMENT_ID: z.string().optional(),
+  GA4_API_SECRET: z.string().optional(),
+  META_PIXEL_ID: z.string().optional(),
+  META_CAPI_ACCESS_TOKEN: z.string().optional(),
 });
 
 export type ApiEnv = z.infer<typeof apiConfigSchema>;

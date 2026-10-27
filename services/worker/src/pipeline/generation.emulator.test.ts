@@ -8,6 +8,7 @@ import {
   type ProviderRegistry,
 } from '@storynido/providers';
 import { STEP_POLICIES, type PageReview } from '@storynido/shared';
+import { previewFingerprint } from '@storynido/shared/server';
 import Fastify from 'fastify';
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -317,6 +318,36 @@ describe('generación del libro (fase 09)', () => {
     ]);
   });
 
+  it('si la muestra cambió después de pagar, no se fabrica (lo aprobado es lo que se recibe)', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const book = (await db.doc('books/b1').get()).data() as {
+      preview: Parameters<typeof previewFingerprint>[0];
+    };
+    await db.doc('orders/o1').update({
+      approval: { fingerprint: previewFingerprint(book.preview), approvedAt: new Date() },
+    });
+    await db.doc('books/b1').update({ 'preview.title': 'Otro título' });
+    await setup(providers).run();
+
+    const failed = await order();
+    expect(failed.status).toBe('qa_failed');
+    expect((failed.pipeline as { error: string }).error).toContain('nueva aprobación');
+  });
+
+  it('con la huella de lo pagado intacta, el libro avanza', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const book = (await db.doc('books/b1').get()).data() as {
+      preview: Parameters<typeof previewFingerprint>[0];
+    };
+    await db.doc('orders/o1').update({
+      approval: { fingerprint: previewFingerprint(book.preview), approvedAt: new Date() },
+    });
+    await setup(providers).run();
+    expect((await order()).status).toBe('ready');
+  });
+
   it('sin personaje aprobado: revisión manual sin reintentos', async () => {
     const providers = registry();
     await seedBook(providers);
@@ -346,6 +377,15 @@ describe('generación del libro (fase 09)', () => {
     expect((await order()).status).toBe('qa_failed');
     expect((await step('generate_story')).attempts).toBe(1);
     expect((await qaCodes()).map((event) => event.code)).toContain('name_mismatch');
+  });
+
+  it('si el adulto sacó el apodo del texto, no se frena (lo aprobado manda)', async () => {
+    const providers = registry();
+    await seedBook(providers, { memories: { nickname: 'Tincho' } });
+    await setup(providers).run();
+    expect((await order()).status).toBe('ready');
+    const event = (await qaCodes()).find((item) => item.code === 'name_mismatch');
+    expect(event?.detail).toMatchObject({ blocking: false });
   });
 
   it('una página que falla la revisión se repara sola, sin tocar las demás', async () => {

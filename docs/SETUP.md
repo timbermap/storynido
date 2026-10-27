@@ -56,6 +56,13 @@ pnpm --filter @storynido/firebase set-role --project storynido-staging --email t
 - **Nube:** API → Pub/Sub (`order-events`) → worker → Cloud Workflows (`infra/workflows/order-pipeline.yaml`) → worker por paso; las páginas van por Cloud Tasks (`illustrations`). El worker no es público: solo lo llaman las cuentas invocadoras con OIDC.
 - **Pedido trabado:** queda en `qa_failed` con un aviso en `adminAlerts`. El admin reintenta un paso (`POST /v1/admin/orders/<id>/retry`) o regenera el libro (`POST /v1/admin/orders/<id>/regenerate`).
 
+## 5c. Checkout y pagos (fase 11)
+
+- **Local y staging (`PAYMENT_PROVIDER=mock`):** desde la muestra aprobada, "Elegir formato" lleva a `/es/pagar/<libro>`. "Pagar" crea el pedido y vuelve a `/es/pedido/<pedido>`, donde "Simular el pago" lo confirma con el mismo webhook firmado que usará el procesador real.
+- **Cupón de prueba (emuladores):** `PRUEBA10` (10 %).
+- **Webhook del proveedor:** `POST /v1/webhooks/payments/<proveedor>` con el cuerpo crudo; se verifica la firma.
+- **Conversiones del servidor (opcional):** `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`, `META_PIXEL_ID` y `META_CAPI_ACCESS_TOKEN`. Sin claves no se envía nada.
+
 ## 6. Secretos por plataforma
 
 Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cuando su fase lo necesita. En local, el mismo valor va en `.env.local`.

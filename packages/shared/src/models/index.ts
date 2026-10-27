@@ -6,6 +6,7 @@ export * from './commerce';
 export * from './common';
 export * from './editorial';
 export * from './pipeline';
+export * from './pricing';
 export * from './qa';
 export * from './config';
 export * from './firestore';
