@@ -51,6 +51,14 @@ import { initAdmin, isUsingEmulators } from './admin';
 const projectFlag = process.argv.indexOf('--project');
 const cloudProject = projectFlag >= 0 ? process.argv[projectFlag + 1] : undefined;
 const cloud = !isUsingEmulators();
+/** En la nube, `--refresh-catalog` reescribe historias, estilos y enseñanzas (no la configuración). */
+const refreshCatalog = process.argv.includes('--refresh-catalog');
+const CATALOG_COLLECTIONS = new Set<string>([
+  COLLECTIONS.stories,
+  COLLECTIONS.illustrationStyles,
+  COLLECTIONS.lessons,
+  COLLECTIONS.activityTemplates,
+]);
 
 if (cloud && !cloudProject?.startsWith('storynido-')) {
   console.error(
@@ -272,7 +280,8 @@ let created = 0;
 const existing = cloud ? await db.getAll(...writes.map((write) => write.ref)) : [];
 const commit = db.batch();
 writes.forEach((write, index) => {
-  if (cloud && existing[index]?.exists) return;
+  const refreshable = refreshCatalog && CATALOG_COLLECTIONS.has(write.ref.parent.id);
+  if (cloud && existing[index]?.exists && !refreshable) return;
   commit.set(write.ref, write.data);
   created += 1;
 });
@@ -280,7 +289,7 @@ await commit.commit();
 
 console.info(
   cloud
-    ? `Seed en ${String(cloudProject)}: ${String(created)} documentos nuevos (los existentes no se tocaron)`
+    ? `Seed en ${String(cloudProject)}: ${String(created)} documentos escritos (${refreshCatalog ? 'catálogo actualizado; ' : ''}la configuración existente no se tocó)`
     : 'Seed listo:',
 );
 for (const { email, role } of cloud ? [] : USERS) console.info(`  ${email} (${role})`);
