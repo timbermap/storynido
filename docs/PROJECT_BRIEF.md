@@ -63,6 +63,18 @@ El padre o la madre crea una cuenta, carga los datos del chico (nombre, edad, gu
 - Cada país se activa/desactiva desde el admin: formatos (digital, impreso o ambos), moneda, precio, impuestos, costo y tiempo de envío, idioma por defecto.
 - Detección de país por IP, con cambio manual.
 
+## Líneas comerciales (ajuste 2026-10-27)
+
+StoryNido vende 3 líneas con la misma app, los mismos servicios y la misma marca (detalle en `docs/estrategia/LINEAS-COMERCIALES.md`):
+
+- **Familias** ("Tu hijo es el protagonista de su propia historia."): la tienda actual. Cuentos mini, cortos, clásicos y grandes aventuras; para colorear y con actividades; digital o impreso. Se crea sin cuenta.
+- **Eventos** ("Recuerdos mágicos para compartir en cada celebración."): kits de cumpleaños. **Un diseño, muchas copias** (librito, colorear, actividades, invitaciones, tarjetas, stickers, souvenirs). Se crea sin cuenta.
+- **Profesionales** ("Historias únicas para acompañar cada aprendizaje y cada etapa."): una cuenta Pro crea cuentos para distintos niños (con alias), a partir de colecciones educativas, con descuentos por recurrencia. Necesita cuenta. No es un sistema clínico.
+
+Cada línea tiene su landing y su forma de acceso (fase 07c). La extensión, la cantidad de texto, el nivel de lectura y el tipo de contenido son independientes entre sí (fase 07b). Precios por canal, producto, extensión, formato, cantidad y país, siempre calculados en el servidor.
+
+Fuera de alcance: regalos corporativos con códigos, portales para empresas, white-label, plataformas escolares, CRM, suscripciones nuevas y app móvil.
+
 ## Estados del pedido
 
 `draft, preview_ready, pending_payment, paid, generating, qa_failed, ready, sent_to_print, in_production, shipped, delivered, refunded, cancelled`
@@ -77,4 +89,4 @@ El padre o la madre crea una cuenta, carga los datos del chico (nombre, edad, gu
 
 ## Fases
 
-01 Monorepo base · 02 Terraform · 03 Auth y datos · 04 API y proveedores · 05 Sitio público · 06 Creador y fotos · 07 Motor IA y vista previa · 08 Pipeline · 09 Generación y QA · 10 PDF · 11 Stripe · 12 Gelato · 13 Emails · 14 Admin configuración · 15 Admin operaciones · 16 Observabilidad y seguridad · 17 E2E y rendimiento · 18 Documentación y salida
+01 Monorepo base · 02 Terraform · 03 Auth y datos · 04 API y proveedores · 05 Sitio público · 06 Creador y fotos · 07 Motor IA y vista previa · 07b Opciones editoriales · 07c Líneas comerciales y landings · 08 Pipeline · 09 Generación y QA · 10 PDF · 11 Stripe · 12 Gelato · 12b Eventos · 12c Profesionales · 13 Emails · 14 Admin configuración · 15 Admin operaciones · 16 Observabilidad y seguridad · 17 E2E y rendimiento · 18 Documentación y salida

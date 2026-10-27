@@ -490,3 +490,19 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
   - En el prompt van en un bloque fijo que pide integrarlos con naturalidad, omitir los que no encajen y no agregar datos personales. Así funcionan con cualquier plantilla.
 - **Dónde se guardan:** en el libro (`characterMode`, `avatar`, `memories`), no en el perfil del chico: son de cada cuento y no exigen cambiar las reglas de `children`. Los borradores anteriores, que no tienen estos campos, se tratan como "con foto" y "sin recuerdos".
 - **Pasos del creador:** quedan 7 (protagonista, personaje, aventura, recuerdos, enseñanza, estilo, revisión). La estrategia sugiere 5; se compactan cuando se definan las 3 colecciones.
+
+## 059 · Tres líneas comerciales sobre la misma app
+
+- **Fecha:** 2026-10-27 · **Fuente:** `docs/estrategia/LINEAS-COMERCIALES.md`
+- **Decisión:** Familias, Eventos y Profesionales comparten la app, los servicios y la marca. Se implementan extendiendo lo existente, en fases nuevas (07b, 07c, 12b y 12c) y en ajustes a las fases 08–17.
+- **Landings y acceso por público (07c):**
+  - **Familias:** la home actual (`/`), sin cuenta.
+  - **Eventos:** `/eventos`, sin cuenta; el creador entra en modo evento.
+  - **Profesionales:** `/profesionales`, con cuenta desde el inicio, porque las compras se acumulan para el descuento.
+  - La home suma un selector "¿Para quién es?" y el encabezado muestra las 3 líneas.
+- **Relación con la estrategia anterior:**
+  - Las colecciones propuestas (Aventuras, Nuestros recuerdos, Grandes momentos) pasan a ser las colecciones de Familias.
+  - Eventos con copias idénticas reemplaza al punto "producción multilibro" que la estrategia anterior dejaba fuera.
+  - La entidad cobradora, la imprenta y el primer mercado siguen pendientes de decisión.
+- **Cuenta Pro:** es un atributo (`accountType`), no un rol, para no tocar los custom claims ni los permisos del admin.
+- **Valores por defecto para lo anterior:** canal `families`, extensión clásica (o el `pageCount` de la historia), densidad equilibrada y nivel "en desarrollo".

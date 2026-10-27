@@ -118,3 +118,26 @@ Estados: **EXISTE** · **PARCIAL** · **NO EXISTE** · **BLOQUEADO** (depende de
 | 4    | Eventos sin PII, experimentos, admin                                                                          | Sí: `EVENTOS-Y-KPIS.md`                                         |
 
 Cada paso se cierra con lint, typecheck, tests y capturas en desktop y móvil. Nada se despliega a producción ni cobra sin aprobación.
+
+## 10. Ajuste 2026-10-27: tres líneas comerciales
+
+Fuente: `docs/estrategia/LINEAS-COMERCIALES.md`. Inventario de lo que ya existe y dónde entra cada parte del ajuste (sin rehacer nada):
+
+| Requisito                                                      | Estado hoy                                                                                                                      | Se resuelve en                                   |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Extensión (mini 8–12, corto 16, clásico 24, gran aventura 32)  | PARCIAL: `stories.pageCount` (12) define las páginas; `products.pageCount` las del formato impreso. Se extiende, no se duplica. | 07b                                              |
+| Cantidad de texto independiente de la extensión                | NO EXISTE: el prompt pide 2 a 4 oraciones fijas. Se parametriza en `buildStoryPrompt`.                                          | 07b                                              |
+| Nivel de lectura                                               | NO EXISTE: hoy solo influye la edad.                                                                                            | 07b                                              |
+| Tipo de contenido (cuento, colorear, actividades, mixto)       | NO EXISTE.                                                                                                                      | 07b (modelo), 09 y 10 (generación y maquetación) |
+| Familias, Eventos y Profesionales con landings y acceso propio | NO EXISTE: hay una sola home. Familias = la tienda actual, sin romper rutas.                                                    | 07c                                              |
+| Colecciones y metadatos de plantillas por canal                | PARCIAL: hay historias y enseñanzas, sin colecciones ni canales.                                                                | 07c                                              |
+| Un diseño, muchas copias (Eventos)                             | PARCIAL: `PrintProvider` ya acepta `quantity`; el creador y la lámina del personaje se reutilizan.                              | 08, 10, 11, 12, 12b                              |
+| Cuenta Pro, proyectos por alias, repetir configuración         | NO EXISTE: hay usuarios con roles y libros por dueño. Se agrega `accountType` (sin tocar los roles).                            | 12c                                              |
+| Descuentos por recurrencia                                     | NO EXISTE: hay `coupons` y `promotions`. Se extiende el cálculo de precios del servidor.                                        | 11, 12c                                          |
+| Precios por canal, producto, extensión y cantidad              | PARCIAL: `prices` por país y formato.                                                                                           | 11                                               |
+| Admin y métricas por canal                                     | NO EXISTE: el admin es un esqueleto.                                                                                            | 14, 15                                           |
+
+**Restricciones a validar antes de vender:**
+
+- **Impresión de los formatos cortos:** el mini (8–12 páginas) y el corto (16) pueden quedar por debajo del mínimo de páginas de la imprenta para tapa dura. Cada producto declara sus límites y lo que no cumple se ofrece solo en digital.
+- **Fotos en Profesionales:** el niño no es hijo del profesional, así que hace falta una declaración de autorización del tutor, con texto revisado por un abogado. Se sugiere el modo sin foto.
