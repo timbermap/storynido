@@ -11,6 +11,7 @@
 | 07  | Motor de IA y vista previa                           | ✅ Hecha (2026-10-27)            |
 | 07b | Opciones editoriales (extensión, texto, nivel, tipo) | ✅ Hecha (2026-10-27)            |
 | 07c | Líneas comerciales y landings                        | ✅ Hecha (2026-10-27)            |
+| 07d | Aprobación del personaje y P0 de calidad (feedback)  | ⏳ Pendiente                     |
 | 08  | Pipeline: orquestación y worker                      | ⏳ Pendiente                     |
 | 09  | Generación del libro y QA                            | ⏳ Pendiente                     |
 | 10  | PDF                                                  | ⏳ Pendiente                     |

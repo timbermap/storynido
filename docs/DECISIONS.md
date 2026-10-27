@@ -589,3 +589,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Analítica:** el page view lleva `content_group` con la línea, sin datos personales.
 - **Historias nuevas:** 7, una por colección nueva, en los 3 idiomas. Están **inactivas** hasta generar su portada, porque requieren aprobación de costo (~USD 0,50).
 - **Calidad:** E2E en 1440 px y 390 px con las 3 líneas, el acceso de cada público y las rutas anteriores. Lighthouse móvil: rendimiento 92–93, accesibilidad 100, buenas prácticas 100. El SEO local baja a 69 solo porque `robots.txt` bloquea la indexación fuera de producción.
+
+## 063 · Feedback de compradores: misma arquitectura, más control del libro entero
+
+- **Fecha:** 2026-10-27 · **Fuente:** paquete "Voz del cliente" (reseñas públicas, muestra cualitativa; ver `docs/CUSTOMER-FEEDBACK-GAP-ANALYSIS.md`).
+- **Decisión:** no cambia la arquitectura. Se agregan controles en las fases existentes:
+  - **07d (nueva, antes del pipeline):** el adulto ve y aprueba la lámina del personaje y corrige o fija rasgos esenciales; nombre exacto verificado; moderación ampliada (burlas, diagnósticos, promesas terapéuticas); formulario en curso protegido.
+  - **09:** planificador → redactor → localización por país → revisión de seguridad → revisión multimodal por página, con reparaciones localizadas.
+  - **10–12:** versión aprobada congelada con hash; nada se imprime ni se entrega si no coincide. Lector web y PDF para lo digital. Impresión solo con muestra física aprobada por SKU y país.
+- **Español regional:** la interfaz sigue en español neutro, pero el cuento se escribe en la variante del país (es-MX, es-AR con voseo, es-ES).
+- **Límite:** no se usan métricas automáticas de parecido facial como garantía; el control es la aprobación del adulto.
