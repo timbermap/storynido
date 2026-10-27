@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { getAuth, type UserRecord } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, type DocumentReference } from 'firebase-admin/firestore';
 
 import {
   BOOK_FORMATS,
@@ -39,14 +39,24 @@ import { SEED_STORIES, SEED_STYLES } from '../seed-data/catalog';
 import { SEED_LESSONS } from '../seed-data/lessons';
 import { initAdmin, isUsingEmulators } from './admin';
 
-if (!isUsingEmulators()) {
+/**
+ * Dos modos:
+ * - Emuladores (por defecto): datos de ejemplo completos, con usuarios de prueba.
+ * - Nube (`--project storynido-…`): solo catálogo y configuración, sin usuarios, y solo crea lo
+ *   que falta (nunca pisa lo que se haya editado después, por ejemplo desde el admin).
+ */
+const projectFlag = process.argv.indexOf('--project');
+const cloudProject = projectFlag >= 0 ? process.argv[projectFlag + 1] : undefined;
+const cloud = !isUsingEmulators();
+
+if (cloud && !cloudProject?.startsWith('storynido-')) {
   console.error(
-    'El seed solo corre contra los emuladores (FIRESTORE_EMULATOR_HOST y FIREBASE_AUTH_EMULATOR_HOST).',
+    'Fuera de los emuladores el seed exige --project storynido-<ambiente> (nunca Timbermap).',
   );
   process.exit(1);
 }
 
-const app = initAdmin(undefined);
+const app = initAdmin(cloud ? cloudProject : undefined);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const now = new Date();
@@ -65,7 +75,7 @@ async function upsertUser(email: string, displayName: string): Promise<UserRecor
   }
 }
 
-for (const { email, displayName, role } of USERS) {
+for (const { email, displayName, role } of cloud ? [] : USERS) {
   const user = await upsertUser(email, displayName);
   await auth.setCustomUserClaims(user.uid, role === 'customer' ? {} : { role });
   await db
@@ -99,7 +109,16 @@ const SAMPLE_SHIPPING: Partial<
   US: { costMinor: 699, etaDaysMin: 4, etaDaysMax: 8 },
 };
 
-const batch = db.batch();
+const writes: { ref: DocumentReference; data: object }[] = [];
+/** En la nube solo se crean los documentos que faltan; en los emuladores se reescriben. */
+const batch = {
+  set(ref: DocumentReference, data: object) {
+    writes.push({ ref, data });
+  },
+  delete(ref: DocumentReference) {
+    if (!cloud) void ref.delete();
+  },
+};
 
 for (const code of COUNTRY_CODES) {
   const defaults = COUNTRY_DEFAULTS[code];
@@ -164,14 +183,15 @@ batch.set(
 batch.set(
   db.collection(COLLECTIONS.aiConfig).doc(GLOBAL_DOC_ID),
   aiConfigSchema.parse({
-    textProvider: 'mock',
-    textModel: 'mock-text',
-    imageProvider: 'mock',
-    imageModel: 'mock-image',
+    // En la nube, IA real con tope bajo (aprobado para staging: USD 2 por día).
+    textProvider: cloud ? 'vertex' : 'mock',
+    textModel: cloud ? 'gemini-3.5-flash' : 'mock-text',
+    imageProvider: cloud ? 'vertex' : 'mock',
+    imageModel: cloud ? 'gemini-3.1-flash-image' : 'mock-image',
     // Estrategia comercial: 1 regeneración gratis por vista previa (configurable).
     maxRegenerationsPerBook: 1,
-    maxPreviewsPerUserPerDay: 5,
-    dailyBudgetUsd: 20,
+    maxPreviewsPerUserPerDay: cloud ? 3 : 5,
+    dailyBudgetUsd: cloud ? 2 : 20,
     budgetAlertPercent: 80,
     updatedAt: now,
     updatedBy: 'seed',
@@ -233,11 +253,27 @@ for (const locale of LOCALES) {
   }
 }
 
-await batch.commit();
+let created = 0;
+const existing = cloud ? await db.getAll(...writes.map((write) => write.ref)) : [];
+const commit = db.batch();
+writes.forEach((write, index) => {
+  if (cloud && existing[index]?.exists) return;
+  commit.set(write.ref, write.data);
+  created += 1;
+});
+await commit.commit();
 
-console.info('Seed listo:');
-for (const { email, role } of USERS) console.info(`  ${email} (${role})`);
-console.info('  países MX y US activos, precios de ejemplo, sitio en vivo, IA en mock');
+console.info(
+  cloud
+    ? `Seed en ${String(cloudProject)}: ${String(created)} documentos nuevos (los existentes no se tocaron)`
+    : 'Seed listo:',
+);
+for (const { email, role } of cloud ? [] : USERS) console.info(`  ${email} (${role})`);
+console.info(
+  cloud
+    ? '  países, precios de ejemplo, sitio en vivo, IA en Vertex con tope diario de USD 2'
+    : '  países MX y US activos, precios de ejemplo, sitio en vivo, IA en mock',
+);
 console.info(
   `  ${String(SEED_STORIES.length)} historias, ${String(SEED_LESSONS.length)} enseñanzas, ${String(SEED_STYLES.length)} estilos, textos legales y FAQ en ${LOCALES.join(', ')}`,
 );

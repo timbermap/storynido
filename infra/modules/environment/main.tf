@@ -304,7 +304,11 @@ module "api" {
   max_instances       = var.api_scaling.max
   deletion_protection = var.deletion_protection
   labels              = local.labels
-  env                 = merge(local.common_env, { WORKER_URL = module.worker.uri })
+  env = merge(local.common_env, {
+    WORKER_URL = module.worker.uri
+    # Orígenes de la web que pueden llamar a la API desde el navegador (los mismos que el CORS de los buckets).
+    CORS_ORIGINS = join(",", var.cors_origins)
+  })
 
   # La API es pública: la autenticación la hacen Firebase Auth y App Check en la app.
   public = true

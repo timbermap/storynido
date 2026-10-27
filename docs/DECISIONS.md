@@ -506,3 +506,19 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
   - La entidad cobradora, la imprenta y el primer mercado siguen pendientes de decisión.
 - **Cuenta Pro:** es un atributo (`accountType`), no un rol, para no tocar los custom claims ni los permisos del admin.
 - **Valores por defecto para lo anterior:** canal `families`, extensión clásica (o el `pageCount` de la historia), densidad equilibrada y nivel "en desarrollo".
+
+## 060 · Web de staging en Firebase App Hosting (desde el código local)
+
+- **Fecha:** 2026-10-27
+- **Backend:** `web` en `storynido-staging` (us-central1), asociado a la web app de Firebase y con entorno `staging`, que aplica `apps/web/apphosting.staging.yaml` (sin indexación y apuntando a la API de staging). URL: https://web--storynido-staging.us-central1.hosted.app.
+- **Despliegue:** `firebase deploy --only apphosting --project storynido-staging`, sin conectar GitHub.
+  - El CLI sube el repo entero (respetando `.gitignore`: los `.env*` locales no se suben) y `firebase.json → apphosting.rootDir = apps/web` indica la app.
+  - App Hosting construye con pnpm y Turborepo.
+  - Conectar GitHub para desplegar en cada push queda como mejora: requiere instalar la app de Firebase en el repo.
+- **Datos:** `pnpm --filter @storynido/firebase seed:cloud --project storynido-staging` carga solo el catálogo y la configuración, sin usuarios, y solo crea lo que falta.
+  - Exige un proyecto `storynido-*`.
+  - Usa las credenciales locales con `GOOGLE_CLOUD_QUOTA_PROJECT=storynido-staging`, para no consumir cuota de otro proyecto.
+  - En staging deja la IA en Vertex con tope de USD 2 por día, 3 muestras por usuario por día y 1 regeneración.
+- **Auth:** dominios autorizados: `web--storynido-staging.us-central1.hosted.app` y `staging.storynido.com`.
+- **CORS:** la API no tenía `CORS_ORIGINS` en la nube, así que rechazaba al navegador. Se agrega desde `var.cors_origins` (los mismos orígenes que los buckets). Pendiente de `terraform apply`.
+- **Dominio `staging.storynido.com`:** pendiente. Requiere registrarlo en App Hosting y cargar registros DNS en el registrador (autorización del dueño).
