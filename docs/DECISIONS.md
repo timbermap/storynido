@@ -782,7 +782,7 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - cuerpo crudo, firma verificada (400 si es inválida), idempotente por ID de evento (`paymentEvents`);
   - pagado: el monto y la moneda tienen que coincidir con lo congelado. Si coinciden, `paid`, libro `ordered`, se usa el cupón y se publica `order.paid`. Si no, aviso al admin sin fabricar;
   - vencido: `cancelled`. Reembolso: `refunded`. Contracargo: aviso al admin.
-- **Reembolso:** `POST /v1/admin/orders/:id/reembolso`, total, con clave idempotente y auditoría.
+- **Reembolso:** `POST /v1/admin/orders/:id/refund`, total, con clave idempotente y auditoría.
 - **Conversiones del servidor (GA4 Measurement Protocol y Meta API de Conversiones):**
   - solo si el comprador aceptó la analítica y hay claves;
   - sin datos personales: pedido, valor y moneda.
