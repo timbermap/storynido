@@ -80,7 +80,8 @@ export const DEFAULT_EDITORIAL_CONFIG: EditorialConfig = {
       active: true,
     },
     classic: {
-      interiorPages: 24,
+      // 28: el mínimo de los fotolibros de Gelato (28 a 200 páginas, pares). DECISIONS 076.
+      interiorPages: 28,
       fixedPages: 2,
       activityShare: 0.25,
       formats: [...BOOK_FORMATS],

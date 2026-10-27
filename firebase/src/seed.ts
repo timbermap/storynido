@@ -252,7 +252,7 @@ for (const format of BOOK_FORMATS) {
     db.collection(COLLECTIONS.products).doc(format),
     productSchema.parse({
       format,
-      pageCount: 24,
+      pageCount: 28,
       active: true,
       name: PRODUCT_NAMES[format],
       createdAt: now,

@@ -228,7 +228,7 @@ Actualmente queremos ofrecer cuatro formatos comerciales.
 | ------------- | --------------------------- |
 | Mini          | 8–12                        |
 | Corto         | 16                          |
-| Clásico       | 24                          |
+| Clásico       | 28                          |
 | Gran aventura | 32                          |
 
 Estos valores deben poder configurarse desde el sistema administrativo existente cuando sea posible.

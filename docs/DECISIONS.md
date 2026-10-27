@@ -861,3 +861,16 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Gelato (verificado con la clave de staging):**
   - tiene fotolibros de 210×280 mm vertical en tapa blanda y tapa dura: coincide con nuestro formato;
   - no hay claves de prueba: una cuenta sin medio de pago funciona como sandbox (los pedidos se cancelan solos).
+
+## 076 · Gelato: Clásico pasa a 28 páginas y México queda en digital hasta tener imprenta local
+
+- **Fecha:** 2026-10-27 · **Decisiones de Sebastián** después de consultar la API de Gelato (catálogo y cotizaciones gratuitas, sin pedidos).
+- **Productos de Gelato:** fotolibros 210×280 mm vertical, tapa blanda y tapa dura (`photobooks-softcover_pf_210x280-mm-8x11-inch_…_ver`, `photobooks-hardcover_pf_210x280-mm-8x11-inch_…_ver`). Envían a México y EE. UU.
+- **Mínimo de 28 páginas interiores** (28 a 200, pares). Mini (12) y Corto (16) ya eran solo digitales. **Clásico pasa de 24 a 28 páginas** (+4 páginas ilustradas por libro); Épico (32) no cambia. Si más adelante se suma una imprenta de libros cortos, se revisa.
+- **Archivo para Gelato:** un solo PDF. Página 1: el pliego de tapa (contratapa + lomo + tapa); página 2 en blanco (guarda); las páginas interiores; la última en blanco. La tapa depende del formato y de las páginas (API `cover-dimensions`):
+  - tapa dura, 32 páginas: 478×326 mm con 17 mm de vuelta, lomo de 6 mm;
+  - tapa blanda, 32 páginas: 429×286 mm con 3 mm de sangrado, lomo de ~3 mm.
+- **Costos reales (USD, impreso en EE. UU., el envío más barato):**
+  - a EE. UU.: tapa blanda 16,85–17,50 (6–7 días), tapa dura 19,82–20,72 (7–8 días). Con nuestros precios, buen margen;
+  - a México: tapa blanda 44,40–45,32, tapa dura 48,61–49,89 (9–16 días, UPS DDU: el cliente paga la importación al recibir). **A pérdida.**
+- **México:** solo digital por ahora (Gelato solo en la matriz de EE. UU.). Se busca una imprenta con producción en México para sumarla al enrutador.

@@ -352,13 +352,13 @@ describe('vista previa', () => {
     expect((await approve('book-1')).statusCode).toBe(200);
   });
 
-  it('la extensión y la cantidad de texto son independientes (24 páginas, visual o más lectura)', async () => {
+  it('la extensión y la cantidad de texto son independientes (28 páginas, visual o más lectura)', async () => {
     await seedBook(providers, 'book-visual', { length: 'classic', textDensity: 'visual' });
     await seedBook(providers, 'book-rich', { length: 'classic', textDensity: 'rich' });
     const visual = (await generateAndApprove('book-visual')).json<PublicPreview>();
     const rich = (await generateAndApprove('book-rich')).json<PublicPreview>();
-    expect(visual.preview?.totalPages).toBe(24);
-    expect(rich.preview?.totalPages).toBe(24);
+    expect(visual.preview?.totalPages).toBe(28);
+    expect(rich.preview?.totalPages).toBe(28);
     const words = (text: string) => countWords(text);
     for (const page of visual.preview?.pages ?? []) {
       expect(words(page.text)).toBeGreaterThanOrEqual(5);
@@ -368,9 +368,9 @@ describe('vista previa', () => {
       expect(words(page.text)).toBeGreaterThanOrEqual(70);
       expect(words(page.text)).toBeLessThanOrEqual(120);
     }
-    // El cuento completo tiene las páginas narrativas de la extensión (24 - 2 fijas).
+    // El cuento completo tiene las páginas narrativas de la extensión (28 - 2 fijas).
     const book = await db.doc('books/book-rich').get();
-    expect((book.get('preview.pages') as unknown[]).length).toBe(22);
+    expect((book.get('preview.pages') as unknown[]).length).toBe(26);
   });
 
   it('un libro anterior (sin extensión) conserva las páginas de su historia', async () => {

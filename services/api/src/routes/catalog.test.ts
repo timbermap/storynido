@@ -280,7 +280,7 @@ describe('catálogo', () => {
       lengths: Record<string, { interiorPages: number }>;
       defaults: { textDensity: string };
     }>();
-    expect(config.lengths.classic?.interiorPages).toBe(24);
+    expect(config.lengths.classic?.interiorPages).toBe(28);
     expect(config.lengths.mini?.interiorPages).toBe(12);
     expect(config.defaults.textDensity).toBe('balanced');
   });
