@@ -4,6 +4,11 @@ import { encodeIllustration, watermarkPreview, type ProviderRegistry } from '@st
 import {
   COLLECTIONS,
   CHARACTER_REFERENCE_SCENE,
+  avatarKey,
+  avatarToSheet,
+  hasMemories,
+  type Avatar,
+  type Memories,
   PREVIEW_ILLUSTRATED_PAGES,
   ProviderError,
   buildIllustrationPrompt,
@@ -53,6 +58,10 @@ interface BookData {
   customLesson: string | null;
   language: Locale;
   photoIds: string[];
+  /** Los borradores anteriores al modo sin foto no tienen estos campos. */
+  characterMode?: 'photo' | 'avatar';
+  avatar?: Avatar | null;
+  memories?: Memories | null;
   preview: (Omit<BookPreview, 'generatedAt'> & { generatedAt: unknown }) | null;
   regenerationsUsed: number;
   previewError?: string | null;
@@ -149,7 +158,7 @@ export class PreviewService {
         stale:
           preview.storyId !== book.storyId ||
           preview.styleId !== book.styleId ||
-          preview.photoId !== book.photoIds[0],
+          preview.photoId !== characterKey(book),
         generatedAt: (toDate(preview.generatedAt) ?? new Date()).toISOString(),
       },
     };
@@ -191,8 +200,14 @@ export class PreviewService {
           'Completa el protagonista, la historia y el estilo.',
         );
       }
-      if (book.photoIds.length === 0) {
-        throw new AppError(409, 'bad_request', 'Sube una foto del protagonista.');
+      if (book.characterMode === 'avatar' ? !book.avatar : book.photoIds.length === 0) {
+        throw new AppError(
+          409,
+          'bad_request',
+          book.characterMode === 'avatar'
+            ? 'Elige los rasgos del protagonista.'
+            : 'Sube una foto del protagonista.',
+        );
       }
 
       const usedByUser = Number(userSnap.get('count') ?? 0);
@@ -312,8 +327,23 @@ export class PreviewService {
       });
     }
 
-    const photoId = book.photoIds[0] ?? '';
-    const { photo, sheet } = await this.characterFor(uid, photoId, ai, track);
+    // Recuerdos guiados: se moderan antes de entrar al prompt.
+    const memories = hasMemories(book.memories) ? book.memories : null;
+    if (memories) {
+      const verdict = await track(
+        'moderation',
+        await ai.text.moderateText(Object.values(memories).filter(Boolean).join('\n')),
+      );
+      if (!verdict.allowed) {
+        throw new AppError(
+          422,
+          'validation_failed',
+          'Alguno de los recuerdos no se puede usar en un cuento infantil. Edítalo e intenta de nuevo.',
+        );
+      }
+    }
+
+    const { photo, sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
     const characterDescription = `${String(child.name)}: ${describeCharacterSheet(sheet)}`;
 
     const request = {
@@ -329,7 +359,11 @@ export class PreviewService {
       lessons: lessonPrompts,
       pageCount: story.pageCount,
     };
-    const prompt = buildStoryPrompt({ ...request, template: story.textPromptTemplate });
+    const prompt = buildStoryPrompt({
+      ...request,
+      template: story.textPromptTemplate,
+      memories,
+    });
 
     // Texto: cuento, revisión editorial y moderación (un reintento si no pasa).
     const pages = await withModeratedRetry(
@@ -416,9 +450,28 @@ export class PreviewService {
       pages: bookPages,
       storyId: story.slug,
       styleId: style.slug,
-      photoId,
+      photoId: characterKey(book),
       generatedAt: new Date(),
     };
+  }
+
+  /** Ficha del personaje: de los rasgos elegidos (sin foto) o de la foto procesada. */
+  private async characterOf(
+    uid: string,
+    book: BookData,
+    age: number,
+    ai: AIProvider,
+    track: <T extends { usage?: GeneratedImage['usage'] }>(
+      kind: UsageContext['kind'],
+      result: T,
+    ) => Promise<T>,
+  ): Promise<{ photo: ImageData | null; sheet: CharacterSheet }> {
+    if (book.characterMode === 'avatar') {
+      if (!book.avatar)
+        throw new AppError(409, 'bad_request', 'Elige los rasgos del protagonista.');
+      return { photo: null, sheet: avatarToSheet(book.avatar, age) };
+    }
+    return this.characterFor(uid, book.photoIds[0] ?? '', ai, track);
   }
 
   /** Foto procesada del protagonista y su ficha (se calcula una vez y se guarda en la foto). */
@@ -578,7 +631,13 @@ export class PreviewService {
         }
         return result;
       };
-      const { photo, sheet } = await this.characterFor(uid, preview.photoId, ai, track);
+      const { photo, sheet } = await this.characterOf(
+        uid,
+        book,
+        Number(childSnap.get('age') ?? 5),
+        ai,
+        track,
+      );
       const description = `${String(childSnap.get('name'))}: ${describeCharacterSheet(sheet)}`;
       const storage = this.providers.storage();
       // Referencia: la lámina del personaje (las muestras anteriores a ella usan la portada).
@@ -647,6 +706,12 @@ export class PreviewService {
     }
     return this.get(uid, bookId);
   }
+}
+
+/** Con qué personaje se generó: la foto usada o los rasgos elegidos. */
+function characterKey(book: BookData): string {
+  if (book.characterMode === 'avatar') return book.avatar ? avatarKey(book.avatar) : 'avatar:none';
+  return book.photoIds[0] ?? '';
 }
 
 /** Hash corto de la IP con el día: limita sin guardar ni registrar la dirección. */

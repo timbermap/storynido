@@ -251,8 +251,9 @@
     "metaTitle": "Criar uma história",
     "steps": {
       "child": "Protagonista",
-      "photos": "Fotos",
+      "photos": "Personagem",
       "story": "Aventura",
+      "memories": "Lembranças",
       "lesson": "Lição",
       "style": "Estilo",
       "review": "Prévia"
@@ -369,7 +370,12 @@
       "edit": "Editar",
       "generate": "Criar a prévia grátis",
       "generateNote": "É grátis e sem compromisso de compra. Leva cerca de um minuto.",
-      "viewPreview": "Ver a amostra"
+      "viewPreview": "Ver a amostra",
+      "character": "Personagem",
+      "characterPhoto": "Com a foto",
+      "characterAvatar": "Sem foto (características escolhidas)",
+      "memories": "Lembranças",
+      "memoriesCount": "{count, plural, =0 {Sem lembranças} one {# lembrança} other {# lembranças}}"
     },
     "preview": {
       "badge": "Amostra da história",
@@ -406,6 +412,72 @@
       },
       "saveStoryTitle": "Salve sua história",
       "saveStoryText": "Crie sua conta grátis para não perder esta amostra e continuar em qualquer dispositivo."
+    },
+    "character": {
+      "modeLegend": "Como criamos o protagonista?",
+      "photo": "Com a foto",
+      "photoText": "Fica mais parecido com seu filho. A foto é privada e só é usada para criar a história.",
+      "avatar": "Sem foto",
+      "avatarText": "Você escolhe as características: pele, cabelo, olhos e óculos.",
+      "avatarTitle": "Escolha como ele é",
+      "avatarSubtitle": "Com essas características ilustramos o protagonista em toda a história.",
+      "skinTone": "Tom de pele",
+      "hairColor": "Cor do cabelo",
+      "hairLength": "Comprimento do cabelo",
+      "hairType": "Tipo de cabelo",
+      "eyeColor": "Cor dos olhos",
+      "glasses": "Usa óculos",
+      "required": "Escolha todas as características para continuar.",
+      "options": {
+        "skinTone": {
+          "very-light": "Muito clara",
+          "light": "Clara",
+          "medium": "Média",
+          "tan": "Morena clara",
+          "brown": "Morena",
+          "deep": "Escura"
+        },
+        "hairColor": {
+          "black": "Preto",
+          "dark-brown": "Castanho-escuro",
+          "light-brown": "Castanho-claro",
+          "blond": "Loiro",
+          "red": "Ruivo"
+        },
+        "hairLength": {
+          "very-short": "Muito curto",
+          "short": "Curto",
+          "medium": "Médio",
+          "long": "Longo"
+        },
+        "hairType": {
+          "straight": "Liso",
+          "wavy": "Ondulado",
+          "curly": "Cacheado",
+          "coily": "Crespo"
+        },
+        "eyeColor": {
+          "brown": "Castanhos",
+          "hazel": "Mel",
+          "green": "Verdes",
+          "blue": "Azuis",
+          "gray": "Cinza"
+        }
+      }
+    },
+    "memories": {
+      "title": "Deixe com a cara dele",
+      "subtitle": "Conte alguns detalhes reais e nós os transformamos em cenas da história. Tudo é opcional.",
+      "moment": "Qual lembrança ou momento especial deve aparecer?",
+      "momentPlaceholder": "O dia em que aprendeu a andar de bicicleta com o avô",
+      "companion": "Quem acompanha na aventura?",
+      "companionPlaceholder": "A avó Rosa e o cachorro Rocco",
+      "nickname": "Como chamam em casa?",
+      "nicknamePlaceholder": "Tini",
+      "favorite": "Do que mais gosta?",
+      "favoritePlaceholder": "Dançar na cozinha aos domingos",
+      "privacy": "Não inclua sobrenomes, endereços, o nome da escola nem outros dados pessoais.",
+      "skip": "Pular esta etapa"
     }
   }
 }

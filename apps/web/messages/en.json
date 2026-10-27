@@ -251,8 +251,9 @@
     "metaTitle": "Create a story",
     "steps": {
       "child": "Hero",
-      "photos": "Photos",
+      "photos": "Character",
       "story": "Adventure",
+      "memories": "Memories",
       "lesson": "Lesson",
       "style": "Style",
       "review": "Preview"
@@ -369,7 +370,12 @@
       "edit": "Edit",
       "generate": "Create the free preview",
       "generateNote": "It's free, with no obligation to buy. It takes about a minute.",
-      "viewPreview": "See the sample"
+      "viewPreview": "See the sample",
+      "character": "Character",
+      "characterPhoto": "With their photo",
+      "characterAvatar": "Without a photo (chosen features)",
+      "memories": "Memories",
+      "memoriesCount": "{count, plural, =0 {No memories} one {# memory} other {# memories}}"
     },
     "preview": {
       "badge": "Story sample",
@@ -406,6 +412,72 @@
       },
       "saveStoryTitle": "Save your story",
       "saveStoryText": "Create a free account so you don’t lose this sample and can pick it up on any device."
+    },
+    "character": {
+      "modeLegend": "How should we create the main character?",
+      "photo": "With their photo",
+      "photoText": "Looks more like your child. The photo is private and only used to create their story.",
+      "avatar": "Without a photo",
+      "avatarText": "You choose their features: skin, hair, eyes and glasses.",
+      "avatarTitle": "Choose how they look",
+      "avatarSubtitle": "We illustrate the main character with these features throughout the story.",
+      "skinTone": "Skin tone",
+      "hairColor": "Hair color",
+      "hairLength": "Hair length",
+      "hairType": "Hair type",
+      "eyeColor": "Eye color",
+      "glasses": "Wears glasses",
+      "required": "Choose every feature to continue.",
+      "options": {
+        "skinTone": {
+          "very-light": "Very fair",
+          "light": "Fair",
+          "medium": "Medium",
+          "tan": "Tan",
+          "brown": "Brown",
+          "deep": "Deep"
+        },
+        "hairColor": {
+          "black": "Black",
+          "dark-brown": "Dark brown",
+          "light-brown": "Light brown",
+          "blond": "Blond",
+          "red": "Red"
+        },
+        "hairLength": {
+          "very-short": "Very short",
+          "short": "Short",
+          "medium": "Medium",
+          "long": "Long"
+        },
+        "hairType": {
+          "straight": "Straight",
+          "wavy": "Wavy",
+          "curly": "Curly",
+          "coily": "Coily"
+        },
+        "eyeColor": {
+          "brown": "Brown",
+          "hazel": "Hazel",
+          "green": "Green",
+          "blue": "Blue",
+          "gray": "Gray"
+        }
+      }
+    },
+    "memories": {
+      "title": "Make it truly theirs",
+      "subtitle": "Tell us a few real details and we'll turn them into scenes in the story. Everything is optional.",
+      "moment": "Which memory or special moment should appear?",
+      "momentPlaceholder": "The day they learned to ride a bike with Grandpa",
+      "companion": "Who joins them on the adventure?",
+      "companionPlaceholder": "Grandma Rose and their dog Rocco",
+      "nickname": "What do you call them at home?",
+      "nicknamePlaceholder": "Tini",
+      "favorite": "What do they enjoy most?",
+      "favoritePlaceholder": "Dancing in the kitchen on Sundays",
+      "privacy": "Don't include last names, addresses, their school's name or other personal details.",
+      "skip": "Skip this step"
     }
   }
 }

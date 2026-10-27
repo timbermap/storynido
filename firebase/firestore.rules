@@ -147,6 +147,28 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/children/$(childId)).data.ownerUid == request.auth.uid);
     }
 
+    // Rasgos del modo sin foto (AVATAR_OPTIONS en packages/shared/src/models/character.ts).
+    function validAvatar(a) {
+      return a == null || (a is map
+        && a.keys().hasOnly(['skinTone', 'hairColor', 'hairLength', 'hairType', 'eyeColor', 'glasses'])
+        && a.skinTone in ['very-light', 'light', 'medium', 'tan', 'brown', 'deep']
+        && a.hairColor in ['black', 'dark-brown', 'light-brown', 'blond', 'red']
+        && a.hairLength in ['very-short', 'short', 'medium', 'long']
+        && a.hairType in ['straight', 'wavy', 'curly', 'coily']
+        && a.eyeColor in ['brown', 'hazel', 'green', 'blue', 'gray']
+        && a.glasses is bool);
+    }
+
+    // Recuerdos guiados: todos opcionales, 150 caracteres como máximo.
+    function validMemories(m) {
+      return m == null || (m is map
+        && m.keys().hasOnly(['moment', 'companion', 'nickname', 'favorite'])
+        && optString(m.get('moment', null), 150)
+        && optString(m.get('companion', null), 150)
+        && optString(m.get('nickname', null), 150)
+        && optString(m.get('favorite', null), 150));
+    }
+
     function validBookEdits() {
       let d = incoming();
       return (d.storyId == null || d.storyId is string)
@@ -158,6 +180,10 @@ service cloud.firestore {
         && optString(d.dedication, 500)
         && d.wizardStep is int && d.wizardStep >= 0 && d.wizardStep <= 10
         && d.photoIds is list && d.photoIds.size() <= 3
+        // Los borradores anteriores al modo sin foto no tienen estos campos.
+        && d.get('characterMode', 'photo') in ['photo', 'avatar']
+        && validAvatar(d.get('avatar', null))
+        && validMemories(d.get('memories', null))
         && ownsChild(d.childId);
     }
 
@@ -166,7 +192,7 @@ service cloud.firestore {
 
       // Solo se crean borradores; preview, estado y regeneraciones los maneja el servidor.
       allow create: if ownsIncoming()
-        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
+        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
         && incoming().status == 'draft'
         && incoming().preview == null
         && incoming().regenerationsUsed == 0
@@ -176,7 +202,7 @@ service cloud.firestore {
 
       allow update: if ownsExisting()
         && resource.data.status in ['draft', 'preview_ready']
-        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'updatedAt'])
+        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'updatedAt'])
         && isNow('updatedAt')
         && validBookEdits();
 

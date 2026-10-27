@@ -11,7 +11,9 @@ import { subscribeBook, subscribeChild, updateBook, type ChildFields } from '@/l
 import { PreviewPanel, previewErrorKey } from './preview-panel';
 import { SignInGate } from './sign-in-gate';
 import { StepChild } from './step-child';
+import { StepAvatar } from './step-avatar';
 import { StepLesson } from './step-lesson';
+import { StepMemories } from './step-memories';
 import { StepPhotos } from './step-photos';
 import { StepReview } from './step-review';
 import { StepStory } from './step-story';
@@ -161,7 +163,13 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
     case 'child':
       return <StepChild key="child" nav={nav} data={data} />;
     case 'photos':
-      return <StepPhotos key="photos" nav={nav} data={data} />;
+      return book.characterMode === 'avatar' ? (
+        <StepAvatar key="avatar" nav={nav} data={data} />
+      ) : (
+        <StepPhotos key="photos" nav={nav} data={data} />
+      );
+    case 'memories':
+      return <StepMemories key="memories" nav={nav} data={data} />;
     case 'story':
       return <StepStory key="story" nav={nav} data={data} />;
     case 'lesson':

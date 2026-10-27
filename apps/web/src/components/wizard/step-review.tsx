@@ -3,8 +3,11 @@
 import { Sparkles } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { MEMORY_KEYS } from '@storynido/shared';
+
 import { Button } from '@/components/ui/button';
 
+import { WIZARD_STEPS } from './steps';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
@@ -29,16 +32,31 @@ export function StepReview({
   if (book.customLesson) chosen.push(`${t('customLesson')}: “${book.customLesson}”`);
   const style = data.styles.find((s) => s.slug === book.styleId);
 
+  const memories = MEMORY_KEYS.filter((key) => book.memories?.[key]).length;
+  const step = (name: (typeof WIZARD_STEPS)[number]) => WIZARD_STEPS.indexOf(name);
+
   const rows: { label: string; value: string; step: number }[] = [
-    { label: t('protagonist'), value: child?.name ?? '—', step: 0 },
-    { label: t('photos'), value: t('photoCount', { count: book.photoIds.length }), step: 1 },
-    { label: t('adventure'), value: story?.title ?? '—', step: 2 },
+    { label: t('protagonist'), value: child?.name ?? '—', step: step('child') },
+    {
+      label: t('character'),
+      value:
+        book.characterMode === 'avatar'
+          ? t('characterAvatar')
+          : `${t('characterPhoto')} · ${t('photoCount', { count: book.photoIds.length })}`,
+      step: step('photos'),
+    },
+    { label: t('adventure'), value: story?.title ?? '—', step: step('story') },
+    {
+      label: t('memories'),
+      value: t('memoriesCount', { count: memories }),
+      step: step('memories'),
+    },
     {
       label: t('lesson'),
       value: chosen.length > 0 ? chosen.join(' · ') : t('noLesson'),
-      step: 3,
+      step: step('lesson'),
     },
-    { label: t('style'), value: style?.name ?? '—', step: 4 },
+    { label: t('style'), value: style?.name ?? '—', step: step('style') },
   ];
 
   return (

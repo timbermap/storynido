@@ -28,6 +28,9 @@ export type BookEdits = Partial<
     | 'dedication'
     | 'wizardStep'
     | 'photoIds'
+    | 'characterMode'
+    | 'avatar'
+    | 'memories'
   >
 >;
 
@@ -64,6 +67,9 @@ export async function createDraft(
     dedication: null,
     wizardStep: 0,
     photoIds: [],
+    characterMode: 'photo',
+    avatar: null,
+    memories: null,
     preview: null,
     regenerationsUsed: 0,
     createdAt: serverTimestamp(),
@@ -115,6 +121,10 @@ export function subscribeBook(
         ...(data as Book),
         // Borradores creados antes de permitir varias enseñanzas no tienen lessonIds.
         lessonIds: Array.isArray(data.lessonIds) ? (data.lessonIds as string[]) : [],
+        // Borradores anteriores al modo sin foto y a los recuerdos.
+        characterMode: data.characterMode === 'avatar' ? 'avatar' : 'photo',
+        avatar: (data.avatar as Book['avatar'] | undefined) ?? null,
+        memories: (data.memories as Book['memories'] | undefined) ?? null,
         id: snapshot.id,
         createdAt: asDate(data.createdAt as Timestampish) ?? new Date(),
         updatedAt: asDate(data.updatedAt as Timestampish) ?? new Date(),

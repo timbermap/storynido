@@ -17,6 +17,7 @@ import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { LEGAL_SLUGS } from '@/lib/legal';
 
+import { CharacterModeChooser } from './character-mode';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
@@ -158,6 +159,7 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
       nextDisabled={uploads.length > 0}
     >
       <div className="grid gap-6">
+        <CharacterModeChooser nav={nav} data={data} />
         <div className="rounded-xl bg-mint p-5">
           <p className="font-extrabold text-success">{t('tipsTitle')}</p>
           <ul className="mt-2 grid gap-1 text-sm sm:grid-cols-2">

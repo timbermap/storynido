@@ -1,4 +1,5 @@
 import type { Locale } from '../i18n';
+import type { Memories } from '../models/character';
 import type { LessonPrompt } from './ai';
 
 /** Variables que admiten las plantillas de stories (textPromptTemplate / imagePromptTemplate). */
@@ -46,6 +47,24 @@ export interface StoryPromptInput {
   petName: string | null;
   bestFriendName: string | null;
   lessons: readonly LessonPrompt[];
+  /** Recuerdos guiados ya moderados (null si no hay). */
+  memories?: Memories | null;
+}
+
+const MEMORY_LABELS: Record<keyof Memories, string> = {
+  moment: 'Un momento especial para incluir',
+  companion: 'Quién lo acompaña en la aventura',
+  nickname: 'Cómo le dicen en casa',
+  favorite: 'Lo que más disfruta',
+};
+
+/** Detalles reales de la familia: se integran con naturalidad y, si no encajan, se omiten. */
+export function memoriesBlock(memories: Memories | null | undefined): string | null {
+  if (!memories) return null;
+  const lines = (Object.keys(MEMORY_LABELS) as (keyof Memories)[])
+    .filter((key) => memories[key])
+    .map((key) => `- ${MEMORY_LABELS[key]}: ${String(memories[key])}`);
+  return lines.length ? lines.join('\n') : null;
 }
 
 /** Prompt de texto con la plantilla de la historia y reglas fijas que el admin no puede quitar. */
@@ -62,7 +81,15 @@ export function buildStoryPrompt(input: StoryPromptInput): string {
     bestFriendName: input.bestFriendName,
     lessons: lessonsBlock(input.lessons),
   });
-  return `${body}
+  const memories = memoriesBlock(input.memories);
+  const memoriesSection = memories
+    ? `
+
+Detalles reales de la familia (intégralos con naturalidad en escenas concretas; usa el apodo en
+los diálogos; si alguno no encaja, omítelo; nunca agregues datos personales que no estén acá):
+${memories}`
+    : '';
+  return `${body}${memoriesSection}
 
 Reglas obligatorias:
 - Escribe en ${LANGUAGE_NAMES[input.language]}.

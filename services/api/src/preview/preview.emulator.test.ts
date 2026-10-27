@@ -257,6 +257,51 @@ describe('vista previa', () => {
     expect(book?.previewError).toMatch(/mensaje propio/);
   });
 
+  it('modo sin foto: genera con los rasgos elegidos, sin foto ni ficha por IA', async () => {
+    const avatar = {
+      skinTone: 'brown',
+      hairColor: 'dark-brown',
+      hairLength: 'medium',
+      hairType: 'curly',
+      eyeColor: 'hazel',
+      glasses: true,
+    };
+    await seedBook(providers, 'book-1', { characterMode: 'avatar', avatar, photoIds: [] });
+    const res = await generate('book-1');
+    expect(res.statusCode).toBe(200);
+    expect(res.json<PublicPreview>().preview?.pages).toHaveLength(2);
+    const usage = await db.collection('aiUsage').where('bookId', '==', 'book-1').get();
+    expect(usage.docs.some((doc) => doc.get('kind') === 'character')).toBe(false);
+
+    // Cambiar un rasgo deja la muestra desactualizada.
+    await db.doc('books/book-1').update({ avatar: { ...avatar, glasses: false } });
+    const after = await app.inject({
+      method: 'GET',
+      url: '/v1/books/book-1/preview',
+      headers: auth(TOKEN),
+    });
+    expect(after.json<PublicPreview>().preview?.stale).toBe(true);
+  });
+
+  it('modo sin foto sin rasgos elegidos: pide completarlos', async () => {
+    await seedBook(providers, 'book-1', { characterMode: 'avatar', avatar: null, photoIds: [] });
+    expect((await generate('book-1')).statusCode).toBe(409);
+  });
+
+  it('modera los recuerdos antes de usarlos', async () => {
+    await seedBook(providers, 'book-1', {
+      memories: {
+        moment: null,
+        companion: 'Su abuela Rosa',
+        nickname: `Tini ${MOCK_UNSAFE_MARKER}`,
+        favorite: null,
+      },
+    });
+    const res = await generate('book-1');
+    expect(res.statusCode).toBe(422);
+    expect((await db.doc('books/book-1').get()).get('previewError')).toMatch(/recuerdos/);
+  });
+
   it('pide completar el borrador antes de generar', async () => {
     await seedBook(providers, 'book-1', { styleId: null });
     expect((await generate('book-1')).statusCode).toBe(409);

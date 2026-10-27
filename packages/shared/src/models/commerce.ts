@@ -4,6 +4,7 @@ import { countryCodeSchema } from '../countries';
 import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 import { orderStatusSchema } from '../order-status';
+import { avatarSchema, characterModeSchema, memoriesSchema } from './character';
 import { CHILD_LIMITS } from './users';
 import { bookFormatSchema, timestampsSchema, uidSchema } from './common';
 
@@ -92,6 +93,9 @@ export const BOOK_CLIENT_EDITABLE_FIELDS = [
   'dedication',
   'wizardStep',
   'photoIds',
+  'characterMode',
+  'avatar',
+  'memories',
   'updatedAt',
 ] as const;
 
@@ -121,6 +125,7 @@ export const bookPreviewSchema = z.object({
   /** Con qué se generó, para saber si quedó desactualizada tras editar el borrador. */
   storyId: z.string(),
   styleId: z.string(),
+  /** ID de la foto usada, o la clave de los rasgos en el modo sin foto (avatarKey). */
   photoId: z.string(),
   generatedAt: z.date(),
 });
@@ -143,6 +148,12 @@ export const bookSchema = timestampsSchema
     dedication: z.string().max(CHILD_LIMITS.dedicationMaxLength).nullable(),
     wizardStep: z.number().int().min(0).max(10),
     photoIds: z.array(z.string()).max(3),
+    /** Con su foto o sin foto (rasgos elegidos). Los borradores anteriores no lo tienen: foto. */
+    characterMode: characterModeSchema.default('photo'),
+    /** Rasgos del modo sin foto. */
+    avatar: avatarSchema.nullable().default(null),
+    /** Recuerdos guiados (opcionales), moderados antes de usarse. */
+    memories: memoriesSchema.nullable().default(null),
     /** Solo servidor. */
     preview: bookPreviewSchema.nullable(),
     /** Solo servidor. */

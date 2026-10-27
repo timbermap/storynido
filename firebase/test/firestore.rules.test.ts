@@ -73,6 +73,9 @@ const draftBook = (ownerUid: string, childId: string | null = null) => ({
   dedication: null,
   wizardStep: 0,
   photoIds: [],
+  characterMode: 'photo',
+  avatar: null,
+  memories: null,
   preview: null,
   regenerationsUsed: 0,
   createdAt: serverTimestamp(),
@@ -231,6 +234,59 @@ describe('books', () => {
     await assertFails(updateDoc(ref, { status: 'ordered', updatedAt: serverTimestamp() }));
     await assertFails(updateDoc(ref, { regenerationsUsed: 3, updatedAt: serverTimestamp() }));
     await assertFails(updateDoc(ref, { wizardStep: 99, updatedAt: serverTimestamp() }));
+  });
+
+  it('modo sin foto con rasgos válidos y recuerdos de hasta 150 caracteres', async () => {
+    await seed('books/b1', { ...draftBook(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    const ref = doc(alice(), 'books', 'b1');
+    const avatar = {
+      skinTone: 'brown',
+      hairColor: 'dark-brown',
+      hairLength: 'medium',
+      hairType: 'curly',
+      eyeColor: 'hazel',
+      glasses: false,
+    };
+    await assertSucceeds(
+      updateDoc(ref, { characterMode: 'avatar', avatar, updatedAt: serverTimestamp() }),
+    );
+    await assertFails(updateDoc(ref, { characterMode: 'robot', updatedAt: serverTimestamp() }));
+    await assertFails(
+      updateDoc(ref, { avatar: { ...avatar, skinTone: 'verde' }, updatedAt: serverTimestamp() }),
+    );
+    await assertFails(
+      updateDoc(ref, { avatar: { ...avatar, extra: 'x' }, updatedAt: serverTimestamp() }),
+    );
+    const memories = {
+      moment: null,
+      companion: 'Su abuela Rosa',
+      nickname: 'Tini',
+      favorite: null,
+    };
+    await assertSucceeds(updateDoc(ref, { memories, updatedAt: serverTimestamp() }));
+    await assertFails(
+      updateDoc(ref, {
+        memories: { ...memories, moment: 'x'.repeat(151) },
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(ref, {
+        memories: { ...memories, address: 'Calle 1' },
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it('los borradores anteriores (sin modo ni recuerdos) se siguen editando', async () => {
+    const legacy: Record<string, unknown> = { ...draftBook(ALICE) };
+    delete legacy.characterMode;
+    delete legacy.avatar;
+    delete legacy.memories;
+    await seed('books/old', { ...legacy, createdAt: new Date(), updatedAt: new Date() });
+    await assertSucceeds(
+      updateDoc(doc(alice(), 'books', 'old'), { wizardStep: 3, updatedAt: serverTimestamp() }),
+    );
   });
 
   it('elige hasta 2 enseñanzas (el mensaje propio cuenta como una) y mensajes de hasta 150 caracteres', async () => {

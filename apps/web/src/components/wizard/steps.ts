@@ -1,4 +1,12 @@
-export const WIZARD_STEPS = ['child', 'photos', 'story', 'lesson', 'style', 'review'] as const;
+export const WIZARD_STEPS = [
+  'child',
+  'photos',
+  'story',
+  'memories',
+  'lesson',
+  'style',
+  'review',
+] as const;
 
 export type WizardStep = (typeof WIZARD_STEPS)[number];
 

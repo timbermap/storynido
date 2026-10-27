@@ -468,3 +468,25 @@ Formato: cada decisión tiene fecha, contexto, decisión, alternativas considera
   - 1 imagen de 8 tuvo texto colado (un cartel en el cohete).
 - **Control de calidad:** la moderación de imágenes ahora también rechaza texto legible y caras o manos deformes. Si una imagen no pasa, se regenera sola 1 vez.
 - **Gasto total de la evaluación:** ~USD 2,46 (retrato, 2 corridas de comparación y 1 de verificación).
+
+## 058 · Modo sin foto y recuerdos guiados
+
+- **Fecha:** 2026-10-27 · **Estrategia comercial:** Fase 1 (D1 "Recuerdos auténticos" y D6 "Privacidad y control")
+- **Modo sin foto:**
+  - En el paso del personaje se elige "Con su foto" o "Sin foto".
+  - Sin foto se eligen piel (6 tonos), color de pelo (5), largo (4), tipo (4), color de ojos (5) y anteojos. Cada opción lleva el nombre escrito, además de la muestra de color.
+  - La ficha del personaje se arma con esos rasgos (`avatarToSheet`): no se sube ninguna foto ni se llama a la IA para describirla.
+  - La lámina del personaje y la muestra funcionan igual que con foto.
+  - Si cambian los rasgos, la muestra queda desactualizada (`avatarKey`).
+- **Recuerdos guiados:** paso nuevo después de la aventura, con 4 preguntas opcionales:
+  - un momento especial;
+  - quién lo acompaña;
+  - cómo le dicen en casa;
+  - lo que más disfruta.
+- **Reglas de los recuerdos:**
+  - 150 caracteres como máximo, validados en las reglas de Firestore.
+  - Aviso de no incluir apellidos, direcciones ni escuela.
+  - Se moderan antes de generar.
+  - En el prompt van en un bloque fijo que pide integrarlos con naturalidad, omitir los que no encajen y no agregar datos personales. Así funcionan con cualquier plantilla.
+- **Dónde se guardan:** en el libro (`characterMode`, `avatar`, `memories`), no en el perfil del chico: son de cada cuento y no exigen cambiar las reglas de `children`. Los borradores anteriores, que no tienen estos campos, se tratan como "con foto" y "sin recuerdos".
+- **Pasos del creador:** quedan 7 (protagonista, personaje, aventura, recuerdos, enseñanza, estilo, revisión). La estrategia sugiere 5; se compactan cuando se definan las 3 colecciones.
