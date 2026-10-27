@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { encodeIllustration, type ProviderRegistry } from '@storynido/providers';
+import sharp from 'sharp';
 import {
   COLLECTIONS,
   GLOBAL_DOC_ID,
@@ -12,6 +13,8 @@ import {
   pagesOutOfRange,
   utcDay,
   type AIProvider,
+  type ActivitySpec,
+  type BookFormat,
   type AiUsage,
   type Avatar,
   type CharacterSheet,
@@ -25,6 +28,20 @@ import {
 import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 
+import { launchBrowser, renderPdf } from '../pdf/render';
+import { FORMAT_SPECS, pageSizeMm, printablePages } from '../pdf/spec';
+import {
+  DENSITY_LAYOUT,
+  coverSizeMm,
+  digitalHtml,
+  interiorPages,
+  printCoverHtml,
+  printInteriorHtml,
+  type Density,
+  type Lang,
+  type LayoutBook,
+} from '../pdf/templates';
+import { effectiveDpi, validatePdf } from '../pdf/validate';
 import {
   HumanReviewError,
   type PageContext,
@@ -57,6 +74,7 @@ export interface BookSnapshot {
   dedication: string | null;
   contentType: string;
   readingLevel: string;
+  textDensity: string;
   words: { min: number; max: number } | null;
   activityPages: number;
   pages: { index: number; text: string; illustrationPrompt: string }[];
@@ -98,6 +116,11 @@ interface Deps {
   qa?: Partial<QaLimits>;
   /** Solo en local y en tests: permite los proveedores simulados. */
   allowSimulated?: boolean;
+}
+
+/** El pedido tiene al menos un libro impreso. */
+export function isPrint(order: { items: { format: string }[] }): boolean {
+  return order.items.some((item) => item.format !== 'digital');
 }
 
 /** Rasgos esenciales en frases, para la revisión de cada página. */
@@ -278,6 +301,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         character: { description: snapshot.character.description, photo: null },
         references: [reference],
         aspectRatio: '3:4',
+        // Los pedidos impresos se ilustran en 2K (~220 dpi a 21×28 cm; DECISIONS 069).
+        resolution: isPrint(ctx.order) ? '2K' : '1K',
         seed: seed + attempt,
       });
       cost += await record(ctx, 'illustration', image.usage);
@@ -400,6 +425,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       dedication: typeof book.dedication === 'string' ? book.dedication : null,
       contentType: String(book.contentType ?? 'story'),
       readingLevel: String(book.readingLevel ?? 'developing'),
+      textDensity: String(book.textDensity ?? 'balanced'),
       words: preview.words ?? null,
       activityPages: preview.activityPages ?? 0,
       pages: preview.pages.map(({ index, text, illustrationPrompt }) => ({
@@ -670,16 +696,185 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     };
   }
 
+  /**
+   * G5 + preflight (guía G): digital siempre; tripa y tapas por cada formato impreso. Todo se
+   * valida (páginas, tamaño con sangrado, tipografías, texto sin desborde, resolución) y el
+   * libro congelado tiene que seguir siendo el aprobado (hash).
+   */
+  async function layoutPdf(ctx: StepContext): Promise<StepResult> {
+    const snapshot = await snapshotOf(ctx);
+    const { hash, ...content } = snapshot;
+    if (hashSnapshot(content) !== hash) {
+      await qaEvent(ctx, 'snapshot_mismatch', { step: 'layout_pdf' });
+      throw new HumanReviewError(
+        'snapshot_mismatch',
+        'El libro congelado no coincide con el aprobado.',
+      );
+    }
+    const images = new Map(
+      ((ctx.outputs.quality_check?.images ?? []) as { index: number; imagePath: string }[]).map(
+        (image) => [image.index, image.imagePath],
+      ),
+    );
+    const total = snapshot.pages.length + 1;
+    if (images.size < total) throw new Error('Faltan ilustraciones revisadas para maquetar.');
+    const activitiesDoc = (
+      await db
+        .collection(COLLECTIONS.orders)
+        .doc(ctx.order.id)
+        .collection('content')
+        .doc('activities')
+        .get()
+    ).data();
+    const activities =
+      activitiesDoc?.generation === ctx.generation
+        ? (activitiesDoc.activities as ActivitySpec[])
+        : [];
+    const sources = await Promise.all(
+      Array.from({ length: total }, (_, index) =>
+        storage().download({ bucket: ASSETS, path: images.get(index) ?? '' }),
+      ),
+    );
+
+    const formats: BookFormat[] = [
+      'digital',
+      ...new Set(
+        ctx.order.items
+          .map((item) => item.format as BookFormat)
+          .filter((format) => format !== 'digital'),
+      ),
+    ];
+    const files: {
+      format: BookFormat;
+      kind: string;
+      path: string;
+      pages: number;
+      bytes: number;
+    }[] = [];
+    const printEligible: Record<string, boolean> = {};
+    const problems: string[] = [];
+    const base = `orders/${ctx.order.id}/g${String(ctx.generation)}`;
+    const browser = await launchBrowser();
+    try {
+      for (const format of formats) {
+        const spec = FORMAT_SPECS[format];
+        const size = pageSizeMm(spec);
+        const prepared = await Promise.all(
+          sources.map(async (bytes) => {
+            const image = sharp(bytes);
+            const { width } = await image.metadata();
+            const jpeg = await image
+              .resize({ width: Math.min(width, spec.maxImagePx), withoutEnlargement: true })
+              .jpeg({ quality: spec.jpegQuality })
+              .toBuffer();
+            return {
+              uri: `data:image/jpeg;base64,${jpeg.toString('base64')}`,
+              dpi: effectiveDpi(width, size.width),
+            };
+          }),
+        );
+        const lowDpi = prepared.flatMap((image, index) => (image.dpi < spec.minDpi ? [index] : []));
+        if (lowDpi.length > 0) {
+          problems.push(
+            `${format}: resolución baja en ${lowDpi
+              .map((index) => (index === 0 ? 'portada' : `página ${String(index)}`))
+              .join(', ')}`,
+          );
+          continue;
+        }
+        const layout: LayoutBook = {
+          language: snapshot.language as Lang,
+          title: snapshot.title,
+          childName: snapshot.childName,
+          dedication: snapshot.dedication,
+          contentType: snapshot.contentType,
+          density: (snapshot.textDensity in DENSITY_LAYOUT
+            ? snapshot.textDensity
+            : 'balanced') as Density,
+          readingLevel: snapshot.readingLevel as LayoutBook['readingLevel'],
+          cover: prepared[0]?.uri ?? '',
+          pages: snapshot.pages.map((page, index) => ({
+            text: page.text,
+            image: prepared[index + 1]?.uri ?? '',
+          })),
+          activities,
+        };
+        const interiorCount = interiorPages(layout, spec).length;
+        if (format !== 'digital') {
+          printEligible[format] = printablePages(spec, interiorCount);
+          if (!printEligible[format]) {
+            problems.push(`${format}: ${String(interiorCount)} páginas no cumplen con la imprenta`);
+            continue;
+          }
+        }
+        const jobs =
+          format === 'digital'
+            ? [{ kind: 'book', html: digitalHtml(layout, spec), size, pages: interiorCount + 2 }]
+            : [
+                {
+                  kind: 'interior',
+                  html: printInteriorHtml(layout, spec),
+                  size,
+                  pages: interiorCount,
+                },
+                {
+                  kind: 'cover',
+                  html: printCoverHtml(layout, spec, interiorCount),
+                  size: coverSizeMm(spec, interiorCount),
+                  pages: 1,
+                },
+              ];
+        for (const job of jobs) {
+          const result = await renderPdf(browser, job.html, job.size, {
+            bleedMm: spec.bleedMm,
+            title: snapshot.title,
+          });
+          if (result.overflow.length > 0) {
+            problems.push(`${format}: el texto no entra en ${result.overflow.join(', ')}`);
+            continue;
+          }
+          const check = await validatePdf(result.pdf, {
+            pages: job.pages,
+            widthMm: job.size.width,
+            heightMm: job.size.height,
+            bleedMm: spec.bleedMm,
+          });
+          if (!check.ok) {
+            problems.push(`${format} ${job.kind}: ${check.errors.join('; ')}`);
+            continue;
+          }
+          const path = `${base}/${format}-${job.kind}.pdf`;
+          await storage().upload({ bucket: 'pdfs', path }, result.pdf, 'application/pdf');
+          files.push({
+            format,
+            kind: job.kind,
+            path,
+            pages: check.pageCount,
+            bytes: result.pdf.length,
+          });
+        }
+      }
+    } finally {
+      await browser.close();
+    }
+
+    if (problems.length > 0) {
+      await qaEvent(ctx, 'layout_blocked', { problems: problems.length });
+      throw new HumanReviewError(
+        'layout_blocked',
+        `Maquetación: ${problems.join(' · ')}`.slice(0, 500),
+      );
+    }
+    return { output: { files, printEligible, preflight: 'passed', snapshotHash: hash } };
+  }
+
   return {
     steps: {
       prepare_photo: preparePhoto,
       generate_story: generateStory,
       quality_check: qualityCheck,
-      // Fase 10: maquetación del PDF. Fase 12: entrega digital o impresa.
-      layout_pdf: (ctx) =>
-        Promise.resolve({
-          output: { simulated: true, pdfPath: `orders/${ctx.order.id}/book.pdf` },
-        }),
+      layout_pdf: (ctx) => layoutPdf(ctx),
+      // Fase 12: entrega digital o impresa.
       deliver: (ctx) =>
         Promise.resolve({
           output: {

@@ -720,3 +720,36 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-27 · **Decisión de Sebastián.**
 - **Tamaño:** 21×28 cm vertical, igual a la proporción 3:4 de las ilustraciones (no se recorta nada). El digital usa la misma proporción.
 - **Resolución:** los pedidos impresos generan las ilustraciones en 2K (~220 dpi a 21×28, suficiente para acuarela), con un costo de ≈ +USD 0,03 por imagen. El digital sigue en 1K.
+
+## 070 · Maquetación del libro (fase 10)
+
+- **Fecha:** 2026-10-27.
+- **Motor:** plantillas HTML/CSS → Chromium (Playwright) → PDF.
+  - Las tipografías de la marca (Fraunces y Nunito Sans, subconjunto latino) van embebidas en el HTML: nunca se depende de las del sistema.
+  - Chromium está en la imagen del worker (`CHROME_PATH`).
+- **Formato:** 21×28 cm vertical. Digital RGB, imágenes JPEG a 1600 px.
+  - Imprenta: 3 mm de sangrado, TrimBox, BleedBox y ArtBox marcados, imágenes JPEG 92 a resolución completa.
+  - Tripa y tapas por separado (contratapa + lomo + portada). El lomo es aproximado hasta tener el cálculo de Gelato.
+- **Texto:** siempre en capa tipográfica, en un panel crema sobre la ilustración (contraste ≥ 4,5:1 aun sobre negro).
+  - El alto máximo del panel y la letra salen de la densidad (visual 24 %, equilibrado 34 %, más lectura 46 %); el nivel de lectura escala la letra.
+  - Un script achica la letra hasta el mínimo. Si igual no entra, la página se marca y la maquetación se bloquea: el texto aprobado no se recorta ni se cambia.
+- **Ilustraciones:** a página completa sin recortes (la página es 3:4 como la imagen; solo se pierde el sangrado). Nada de texto dentro de la imagen.
+- **Actividades:**
+  - Laberinto (SVG determinístico por nivel), unir, completar con banco de palabras, y dibujar el final.
+  - "Encontrar diferencias" se maqueta por ahora como dibujar (necesita dos versiones de una escena).
+  - Todo imprimible en blanco y negro.
+- **Validaciones bloqueantes (G5 + preflight G):**
+  - cantidad de páginas;
+  - tamaño con sangrado y área de corte;
+  - tipografías embebidas;
+  - texto sin desborde;
+  - resolución efectiva (digital ≥ 72 dpi, imprenta ≥ 200 dpi);
+  - reglas de páginas de la imprenta (si no cumple: solo digital);
+  - hash del libro congelado igual al aprobado.
+- **Guardado:** `pdfs/orders/{id}/g{n}/{formato}-{book|interior|cover}.pdf`, con acceso solo por URL firmada (fase 12).
+- **Color:** se entrega en RGB. Gelato acepta RGB y convierte a CMYK en su flujo; si un SKU exige CMYK, se convierte en el worker (pendiente de confirmar en la fase 12).
+- **Pendientes:**
+  - piezas de Eventos (invitación, tarjetas, stickers), en la fase 12b;
+  - lector web de la entrega digital, en la fase 12;
+  - especificaciones exactas por SKU (sangrado, páginas, lomo), en la fase 12 con Gelato.
+- **Bloqueo conocido:** la portada y las 2 páginas aprobadas en la vista previa son 1K (~105 dpi), así que hoy un pedido impreso se bloquea por resolución. Ver la pregunta abierta sobre la etapa 2 en 2K.

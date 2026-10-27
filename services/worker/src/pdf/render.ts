@@ -19,7 +19,10 @@ export function chromePath(): string | null {
 export async function launchBrowser(): Promise<Browser> {
   const executablePath = chromePath();
   if (!executablePath) throw new Error('No hay Chromium para generar el PDF (CHROME_PATH).');
-  return chromium.launch({ executablePath, args: ['--no-sandbox', '--font-render-hinting=none'] });
+  return chromium.launch({
+    executablePath,
+    args: ['--no-sandbox', '--disable-dev-shm-usage', '--font-render-hinting=none'],
+  });
 }
 
 export interface RenderResult {

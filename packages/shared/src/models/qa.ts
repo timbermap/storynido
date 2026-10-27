@@ -14,6 +14,7 @@ export const QA_CODES = [
   'page_human_review',
   'page_needs_reference',
   'snapshot_mismatch',
+  'layout_blocked',
 ] as const;
 
 export type QaCode = (typeof QA_CODES)[number];

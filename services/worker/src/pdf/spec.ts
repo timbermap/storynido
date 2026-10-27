@@ -28,7 +28,8 @@ export const FORMAT_SPECS: Record<BookFormat, FormatSpec> = {
     format: 'digital',
     bleedMm: 0,
     safeMm: 12,
-    minDpi: 96,
+    // En pantalla alcanza con menos: una ilustración de 768 px se ve bien en un celular o tablet.
+    minDpi: 72,
     jpegQuality: 82,
     maxImagePx: 1600,
     pages: null,

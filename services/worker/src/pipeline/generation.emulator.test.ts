@@ -34,8 +34,16 @@ function registry(): ProviderRegistry {
   });
 }
 
-const webp = (hue: number) =>
-  sharp({ create: { width: 48, height: 64, channels: 3, background: { r: hue, g: 120, b: 200 } } })
+/** Ilustraciones de prueba del tamaño real: 1K (768×1024) o 2K (1800×2400). */
+const webp = (hue: number, width = 768) =>
+  sharp({
+    create: {
+      width,
+      height: Math.round((width * 4) / 3),
+      channels: 3,
+      background: { r: hue, g: 120, b: 200 },
+    },
+  })
     .webp()
     .toBuffer()
     .then((buffer) => new Uint8Array(buffer));
@@ -47,13 +55,21 @@ const PAGES = [
   'Martín vuelve a casa feliz.',
 ];
 
-async function seedBook(providers: ProviderRegistry, overrides: Record<string, unknown> = {}) {
+async function seedBook(
+  providers: ProviderRegistry,
+  overrides: Record<string, unknown> = {},
+  options: { format?: string; previewWidth?: number; pages?: number } = {},
+) {
+  const texts = Array.from(
+    { length: options.pages ?? PAGES.length },
+    (_, index) => PAGES[index % PAGES.length] ?? '',
+  );
   const storage = providers.storage();
   const preview = 'previews/u1/b1';
   for (const [index, name] of ['character', 'cover', 'page-0', 'page-1'].entries()) {
     await storage.upload(
       { bucket: 'assets', path: `${preview}/${name}.webp` },
-      await webp(40 * index),
+      await webp(40 * index, options.previewWidth),
       'image/webp',
     );
   }
@@ -101,7 +117,7 @@ async function seedBook(providers: ProviderRegistry, overrides: Record<string, u
         mustKeep: ['hair', 'glasses'],
         approvedAt: new Date(),
       },
-      pages: PAGES.map((text, index) => ({
+      pages: texts.map((text, index) => ({
         index,
         text,
         illustrationPrompt: `scene ${String(index + 1)}`,
@@ -110,7 +126,7 @@ async function seedBook(providers: ProviderRegistry, overrides: Record<string, u
       plan: {
         theme: 'espacio',
         arc: 'arco',
-        scenes: PAGES.map((_, pageIndex) => ({
+        scenes: texts.map((_, pageIndex) => ({
           pageIndex,
           sceneGoal: 'meta',
           emotionalBeat: 'alegría',
@@ -131,7 +147,7 @@ async function seedBook(providers: ProviderRegistry, overrides: Record<string, u
     bookId: 'b1',
     status: 'paid',
     channel: 'families',
-    items: [{ piece: 'book', format: 'hardcover', quantity: 1 }],
+    items: [{ piece: 'book', format: options.format ?? 'digital', quantity: 1 }],
     costsUsdMicros: { ai: 0, print: 0, shipping: 0 },
     pipeline: { generation: 0, runId: null, failedStep: null },
   });
@@ -248,6 +264,57 @@ describe('generación del libro (fase 09)', () => {
     expect(new Set(usage.docs.map((doc) => doc.get('kind') as string))).toEqual(
       new Set(['moderation', 'illustration', 'review']),
     );
+
+    // PDF digital: portada, dedicatoria, 4 páginas, fin y contratapa; validado y guardado.
+    const layout = (await step('layout_pdf')).output as unknown as {
+      files: { format: string; kind: string; path: string; pages: number }[];
+      preflight: string;
+    };
+    expect(layout.preflight).toBe('passed');
+    expect(layout.files).toEqual([
+      {
+        format: 'digital',
+        kind: 'book',
+        path: 'orders/o1/g0/digital-book.pdf',
+        pages: 8,
+        bytes: expect.any(Number) as number,
+      },
+    ]);
+    expect(
+      await providers.storage().exists({ bucket: 'pdfs', path: 'orders/o1/g0/digital-book.pdf' }),
+    ).toBe(true);
+  });
+
+  it('impreso con las imágenes aprobadas en 1K: la maquetación lo frena por resolución', async () => {
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10 });
+    const generate = vi.spyOn(providers.ai().image, 'generateIllustration');
+    await setup(providers).run();
+
+    const failed = await order();
+    expect(failed.status).toBe('qa_failed');
+    expect((failed.pipeline as { failedStep: string }).failedStep).toBe('layout_pdf');
+    expect((failed.pipeline as { error: string }).error).toContain('resolución baja en portada');
+    // Las páginas nuevas sí se pidieron en 2K.
+    expect(generate.mock.calls.every(([request]) => request.resolution === '2K')).toBe(true);
+  });
+
+  it('impreso en 2K: tripa y tapas validadas, con sangrado', async () => {
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    await setup(providers).run();
+
+    expect((await order()).status).toBe('ready');
+    const layout = (await step('layout_pdf')).output as unknown as {
+      files: { format: string; kind: string; pages: number }[];
+      printEligible: Record<string, boolean>;
+    };
+    expect(layout.printEligible).toEqual({ softcover: true });
+    expect(layout.files.map((file) => [file.format, file.kind, file.pages])).toEqual([
+      ['digital', 'book', 14],
+      ['softcover', 'interior', 12],
+      ['softcover', 'cover', 1],
+    ]);
   });
 
   it('sin personaje aprobado: revisión manual sin reintentos', async () => {

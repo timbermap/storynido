@@ -13,6 +13,11 @@ RUN pnpm --filter=@storynido/worker deploy --prod --legacy /out
 
 FROM node:24-slim AS runtime
 ENV NODE_ENV=production
+# Chromium para maquetar los PDF del libro (las tipografías van embebidas en el HTML).
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends chromium \
+  && rm -rf /var/lib/apt/lists/*
+ENV CHROME_PATH=/usr/bin/chromium
 WORKDIR /app
 COPY --from=build --chown=node:node /out/node_modules ./node_modules
 COPY --from=build --chown=node:node /out/package.json ./package.json
