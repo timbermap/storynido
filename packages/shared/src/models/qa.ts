@@ -15,6 +15,10 @@ export const QA_CODES = [
   'page_needs_reference',
   'snapshot_mismatch',
   'layout_blocked',
+  // Revisión manual (fase 15): un admin aprobó las ilustraciones tal como estaban.
+  'human_approved',
+  // El adulto editó el texto de una página de la muestra (métrica story_edit_rate).
+  'text_edited',
 ] as const;
 
 export type QaCode = (typeof QA_CODES)[number];

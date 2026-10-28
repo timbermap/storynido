@@ -212,8 +212,17 @@ function setup(providers: ProviderRegistry) {
       adminUrl: 'https://admin.storynido.test',
     }),
   );
-  const run = async (type: 'order.paid' | 'order.regenerate' = 'order.paid', requestId = 'r1') => {
-    await pipeline.handleEvent({ type, orderId: 'o1', requestId });
+  const run = async (
+    type: 'order.paid' | 'order.regenerate' | 'order.retry_step' = 'order.paid',
+    requestId = 'r1',
+    fromStep?: 'quality_check',
+  ) => {
+    await pipeline.handleEvent({
+      type,
+      orderId: 'o1',
+      requestId,
+      ...(fromStep ? { fromStep } : {}),
+    });
     await orchestrator.idle();
     await dispatcher.idle();
   };
@@ -731,6 +740,33 @@ describe('generación del libro (fase 09)', () => {
     // No reintenta el paso entero: una falla de QA no se arregla repitiendo.
     expect((await step('quality_check')).attempts).toBe(1);
     expect(STEP_POLICIES.quality_check.maxAttempts).toBeGreaterThan(1);
+  });
+
+  it('revisión manual: el admin aprueba las páginas y el libro termina entregado sin más IA', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    scriptReviews(providers, { 2: ['repair', 'repair', 'repair'] });
+    const { run } = setup(providers);
+    await run();
+    const failed = await order();
+    expect(failed.status).toBe('qa_failed');
+    expect((failed.pipeline as { failedStep: string }).failedStep).toBe('quality_check');
+
+    // Lo que hace la API al aprobar: guarda la aprobación de esta generación y pide el reintento.
+    const generation = (failed.pipeline as { generation: number }).generation;
+    await db.doc('orders/o1').update({
+      'pipeline.humanApproval': { generation, by: 'admin@storynido.test' },
+    });
+    // reviewPage ya está espiado por scriptReviews: se cuentan las llamadas nuevas.
+    const review = vi.spyOn(providers.ai().text, 'reviewPage');
+    const generate = vi.spyOn(providers.ai().image, 'generateIllustration');
+    const [reviewsBefore, imagesBefore] = [review.mock.calls.length, generate.mock.calls.length];
+    await run('order.retry_step', 'approve-1', 'quality_check');
+
+    expect((await order()).status).toBe('ready');
+    expect(review.mock.calls.length).toBe(reviewsBefore);
+    expect(generate.mock.calls.length).toBe(imagesBefore);
+    expect((await qaCodes()).some((event) => event.code === 'human_approved')).toBe(true);
   });
 
   it('personaje equivocado: a revisión humana sin gastar reparaciones', async () => {

@@ -45,6 +45,8 @@ export const COLLECTIONS = {
   metricsDaily: 'metricsDaily',
   /** Tipo de cambio diario a USD (fuente: open.er-api.com). */
   fxRates: 'fxRates',
+  /** Constancias de los pedidos de borrado gestionados por el admin. */
+  privacyRequests: 'privacyRequests',
   /** editorialConfig/global: extensiones, densidades, niveles y tipos de contenido. */
   editorialConfig: 'editorialConfig',
   activityTemplates: 'activityTemplates',

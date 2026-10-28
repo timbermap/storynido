@@ -196,7 +196,15 @@ export class EmailNotifier {
    * Avisa al cliente del estado del pedido. Una vez por estado (la clave lo garantiza), en su
    * idioma, con los datos del pedido.
    */
-  async orderStatus(orderId: string, status: OrderStatus): Promise<NotifyOutcome | null> {
+  /**
+   * Mail del estado del pedido. `resend` (desde el admin) usa otra clave: se vuelve a mandar
+   * aunque ya se haya enviado, y queda registrado aparte.
+   */
+  async orderStatus(
+    orderId: string,
+    status: OrderStatus,
+    options: { resend?: string } = {},
+  ): Promise<NotifyOutcome | null> {
     const order = (await this.db.collection(COLLECTIONS.orders).doc(orderId).get()).data();
     if (!order) return null;
     const uid = String(order.ownerUid);
@@ -210,7 +218,12 @@ export class EmailNotifier {
     const total = snapshot ? formatMoney(snapshot.totalMinor, snapshot.currency, locale) : null;
     const base = { uid, orderId };
     const send = (template: EmailTemplate, data: Record<string, unknown>) =>
-      this.notify({ ...base, key: `order:${orderId}:${template}`, template, data });
+      this.notify({
+        ...base,
+        key: `order:${orderId}:${template}${options.resend ? `:resend:${options.resend}` : ''}`,
+        template,
+        data,
+      });
 
     switch (status) {
       case 'paid':

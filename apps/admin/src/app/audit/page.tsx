@@ -42,11 +42,20 @@ const show = (value: unknown) => (value === undefined ? '—' : JSON.stringify(v
 /** Registro de auditoría: quién, qué, cuándo, antes y después. Solo lectura. */
 export default function AuditPage() {
   const [entity, setEntity] = useState('');
+  const [actor, setActor] = useState('');
+  const [from, setFrom] = useState('');
   const [more, setMore] = useState<AdminAuditEntry[]>([]);
   const [moreError, setMoreError] = useState<string | null>(null);
   const load = useCallback(
-    () => api('adminAuditLog', { query: { limit: 50, ...(entity ? { entity } : {}) } }),
-    [entity],
+    () =>
+      api('adminAuditLog', {
+        query: {
+          limit: 50,
+          ...(entity ? { entity } : actor ? { actor } : {}),
+          ...(from ? { from: `${from}T00:00:00.000Z` } : {}),
+        },
+      }),
+    [entity, actor, from],
   );
   const { data, error } = useApi(load);
   const entries = [...(data?.entries ?? []), ...more];
@@ -56,7 +65,12 @@ export default function AuditPage() {
     if (!last) return;
     try {
       const next = await api('adminAuditLog', {
-        query: { limit: 50, before: last.at, ...(entity ? { entity } : {}) },
+        query: {
+          limit: 50,
+          before: last.at,
+          ...(entity ? { entity } : actor ? { actor } : {}),
+          ...(from ? { from: `${from}T00:00:00.000Z` } : {}),
+        },
       });
       setMore((current) => [...current, ...next.entries]);
     } catch (caught) {
@@ -70,21 +84,43 @@ export default function AuditPage() {
         title="Auditoría"
         text="Cada escritura del admin queda acá con su antes y después."
         actions={
-          <select
-            aria-label="Filtrar por entidad"
-            className="h-9 rounded-md border bg-background px-2 text-sm"
-            value={entity}
-            onChange={(event) => {
-              setEntity(event.target.value);
-              setMore([]);
-            }}
-          >
-            {ENTITIES.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-wrap gap-2">
+            <input
+              aria-label="Filtrar por usuario (email)"
+              placeholder="Email de quien cambió"
+              className="h-9 w-56 rounded-md border bg-background px-2 text-sm"
+              defaultValue={actor}
+              onBlur={(event) => {
+                setActor(event.target.value.trim());
+                setMore([]);
+              }}
+            />
+            <input
+              type="date"
+              aria-label="Desde"
+              className="h-9 rounded-md border bg-background px-2 text-sm"
+              value={from}
+              onChange={(event) => {
+                setFrom(event.target.value);
+                setMore([]);
+              }}
+            />
+            <select
+              aria-label="Filtrar por entidad"
+              className="h-9 rounded-md border bg-background px-2 text-sm"
+              value={entity}
+              onChange={(event) => {
+                setEntity(event.target.value);
+                setMore([]);
+              }}
+            >
+              {ENTITIES.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
         }
       />
       {(error ?? moreError) && <Notice tone="error">{error ?? moreError}</Notice>}

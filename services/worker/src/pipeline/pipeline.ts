@@ -86,6 +86,7 @@ interface OrderDoc {
     generation?: number;
     runId?: string | null;
     failedStep?: PipelineStep | null;
+    humanApproval?: { generation: number; by: string | null } | null;
   };
 }
 
@@ -597,6 +598,7 @@ export class Pipeline {
       channel: order.channel ?? 'families',
       items: order.items ?? [],
       sourceOrderId: order.sourceOrderId ?? null,
+      humanApproval: order.pipeline?.humanApproval ?? null,
     };
   }
 

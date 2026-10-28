@@ -5,6 +5,7 @@ import {
   SITE_MODES,
   catalogPrices,
   type SiteConfig,
+  type Role,
 } from '@storynido/shared';
 import { getApps, initializeApp, type App } from 'firebase-admin/app';
 import { getAppCheck } from 'firebase-admin/app-check';
@@ -37,6 +38,23 @@ export class FirebaseAuthAccounts {
 
   async deleteUser(uid: string): Promise<void> {
     await getAuth(this.app).deleteUser(uid);
+  }
+
+  async findByEmail(email: string) {
+    try {
+      const user = await getAuth(this.app).getUserByEmail(email);
+      return { uid: user.uid, email: user.email ?? null };
+    } catch {
+      return null;
+    }
+  }
+
+  async setRole(uid: string, role: Role): Promise<void> {
+    const auth = getAuth(this.app);
+    const user = await auth.getUser(uid);
+    await auth.setCustomUserClaims(uid, { ...user.customClaims, role });
+    // Las sesiones abiertas vuelven a iniciar sesión y toman el rol nuevo (o pierden el acceso).
+    await auth.revokeRefreshTokens(uid);
   }
 }
 

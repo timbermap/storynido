@@ -997,6 +997,8 @@ export class PreviewService {
     }
     const pages = preview.pages.map((page) => (page.index === index ? { ...page, text } : page));
     await ref.update({ 'preview.pages': pages, updatedAt: new Date() });
+    // Métrica de calidad (story_edit_rate): sin el texto, solo que se editó una página.
+    await this.qaEvent(bookId, 'text_edited', { pageIndex: index });
     return this.get(uid, bookId);
   }
 

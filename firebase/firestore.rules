@@ -399,6 +399,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /privacyRequests/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     match /aiUsage/{id} {
       allow read: if isAdmin();
       allow write: if false;

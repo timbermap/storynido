@@ -58,6 +58,9 @@ export const fakeTokens: TokenVerifier = {
 /** Usuarios borrados por los servicios durante un test. */
 export const deletedUsers: string[] = [];
 
+/** Cambios de rol pedidos a Firebase Auth durante un test. */
+export const roleChanges: { uid: string; role: string }[] = [];
+
 export const fakeAppCheck: AppCheckVerifier = {
   verify: (token) => Promise.resolve(token === 'valid-app-check'),
 };
@@ -117,6 +120,15 @@ export async function createTestApp(
       {
         deleteUser: (uid) => {
           deletedUsers.push(uid);
+          return Promise.resolve();
+        },
+        // Cuentas de prueba: "<uid>@storynido.test".
+        findByEmail: (email) => {
+          const match = /^([a-z0-9]+)@storynido\.test$/.exec(email);
+          return Promise.resolve(match?.[1] ? { uid: match[1], email } : null);
+        },
+        setRole: (uid, role) => {
+          roleChanges.push({ uid, role });
           return Promise.resolve();
         },
       },

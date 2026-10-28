@@ -23,6 +23,25 @@ export class ResendEmailProvider implements EmailProvider {
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
+  /** Prueba de conexión: la clave funciona y el dominio del remitente está verificado. */
+  async check(): Promise<string> {
+    let response: Response;
+    try {
+      response = await this.fetchImpl('https://api.resend.com/domains', {
+        headers: { authorization: `Bearer ${this.options.apiKey}` },
+        signal: AbortSignal.timeout(10_000),
+      });
+    } catch (error) {
+      throw new ProviderError(this.id, 'Sin respuesta de Resend', true, { cause: error });
+    }
+    if (!response.ok) {
+      throw new ProviderError(this.id, `Resend rechazó la clave (HTTP ${String(response.status)})`);
+    }
+    const body = (await response.json()) as { data?: { name: string; status: string }[] };
+    const domains = (body.data ?? []).map((domain) => `${domain.name} (${domain.status})`);
+    return domains.length ? `Dominios: ${domains.join(', ')}` : 'Clave válida, sin dominios';
+  }
+
   async send(message: EmailMessage): Promise<{ messageId: string }> {
     const mail = await renderEmail(message, this.options.brand);
     let response: Response;

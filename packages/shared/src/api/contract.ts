@@ -119,6 +119,91 @@ export const adminAuditEntrySchema = z.object({
 
 export type AdminAuditEntry = z.infer<typeof adminAuditEntrySchema>;
 
+// --- Operaciones (fase 15) ---------------------------------------------------------
+
+export const adminOrderSummarySchema = z.object({
+  id: z.string(),
+  status: orderStatusSchema,
+  channel: z.string(),
+  country: z.string(),
+  currency: z.string(),
+  totalMinor: z.number(),
+  formats: z.array(z.string()),
+  customerEmail: z.string().nullable(),
+  createdAt: z.string().nullable(),
+  failedStep: z.string().nullable(),
+  error: z.string().nullable(),
+  printProvider: z.string().nullable(),
+});
+
+export type AdminOrderSummary = z.infer<typeof adminOrderSummarySchema>;
+
+export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
+  bookId: z.string(),
+  bookTitle: z.string().nullable(),
+  ownerUid: z.string(),
+  items: z.array(z.object({ piece: z.string(), format: z.string(), quantity: z.number() })),
+  amounts: z.object({
+    subtotalMinor: z.number(),
+    discountMinor: z.number(),
+    shippingMinor: z.number(),
+    taxMinor: z.number(),
+    totalMinor: z.number(),
+  }),
+  discount: z.object({ reason: z.string().nullable(), label: z.string().nullable() }),
+  shipping: z
+    .object({
+      name: z.string(),
+      city: z.string(),
+      state: z.string().nullable(),
+      postalCode: z.string(),
+      country: z.string(),
+    })
+    .nullable(),
+  payment: z.object({ provider: z.string(), paymentId: z.string().nullable() }),
+  print: z
+    .object({
+      provider: z.string(),
+      externalOrderId: z.string().nullable(),
+      trackingNumber: z.string().nullable(),
+      trackingUrl: z.string().nullable(),
+    })
+    .nullable(),
+  printQuotes: z.array(
+    z.object({
+      provider: z.string(),
+      totalCostUsdMinor: z.number().nullable(),
+      error: z.string().nullable(),
+    }),
+  ),
+  costs: z.object({
+    revenueUsd: z.number(),
+    taxUsd: z.number(),
+    aiUsd: z.number(),
+    printUsd: z.number(),
+    marginUsd: z.number(),
+    fxDate: z.string(),
+  }),
+  qa: z.array(z.object({ code: z.string(), at: z.string().nullable() })),
+  /** Ilustraciones del libro (URLs de 15 minutos) para la revisión manual. */
+  pages: z.array(z.object({ index: z.number(), url: z.string() })),
+});
+
+export type AdminOrderDetail = z.infer<typeof adminOrderDetailSchema>;
+
+export const adminCustomerSchema = z.object({
+  uid: z.string(),
+  email: z.string().nullable(),
+  createdAt: z.string().nullable(),
+  accountType: z.string(),
+  role: z.string(),
+  orders: z.number(),
+  /** Gastado por moneda (unidad mínima), solo pedidos que cuentan como venta. */
+  spentByCurrency: z.record(z.string(), z.number()),
+  /** Cantidad de perfiles de chicos (nunca sus datos). */
+  children: z.number(),
+});
+
 const usdByKey = z.record(z.string(), z.number());
 
 export const dayMetricsSchema = z.object({
@@ -740,6 +825,217 @@ export const apiRoutes = {
     query: z.object({ days: z.coerce.number().int().min(1).max(366).default(30) }),
     response: aiCostReportSchema,
   },
+  adminOrders: {
+    method: 'GET',
+    path: '/v1/admin/orders',
+    access: 'admin',
+    summary: 'Pedidos con filtros (estado, país, canal, formato, fechas, cliente o número)',
+    query: z.object({
+      status: orderStatusSchema.optional(),
+      country: z.string().max(2).optional(),
+      channel: z.string().max(20).optional(),
+      format: z.string().max(20).optional(),
+      from: z.iso.datetime().optional(),
+      to: z.iso.datetime().optional(),
+      /** Número de pedido o email del cliente. */
+      q: z.string().max(120).optional(),
+      before: z.iso.datetime().optional(),
+      limit: z.coerce.number().int().min(1).max(100).default(50),
+    }),
+    response: z.object({ orders: z.array(adminOrderSummarySchema) }),
+  },
+  adminOrderDetail: {
+    method: 'GET',
+    path: '/v1/admin/orders/:orderId',
+    access: 'admin',
+    summary: 'Detalle del pedido: montos, costos y margen, imprenta, QA e ilustraciones',
+    params: z.object({ orderId: z.string() }),
+    response: adminOrderDetailSchema,
+  },
+  adminApproveOrder: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/approve',
+    access: 'admin',
+    summary: 'Revisión manual: aprueba las ilustraciones y el pedido sigue a maqueta y entrega',
+    params: z.object({ orderId: z.string() }),
+    response: z.object({ accepted: z.literal(true), requestId: z.string() }),
+  },
+  adminResendEmail: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/resend-email',
+    access: 'admin',
+    summary: 'Vuelve a mandar el mail del estado actual del pedido (queda en auditoría)',
+    params: z.object({ orderId: z.string() }),
+    response: z.object({ sent: z.boolean(), detail: z.string() }),
+  },
+  adminReviewQueue: {
+    method: 'GET',
+    path: '/v1/admin/review-queue',
+    access: 'admin',
+    summary: 'Pedidos en revisión manual (fallaron el control de calidad o un paso)',
+    response: z.object({
+      orders: z.array(adminOrderSummarySchema.extend({ qaCodes: z.array(z.string()) })),
+    }),
+  },
+  adminCustomers: {
+    method: 'GET',
+    path: '/v1/admin/customers',
+    access: 'admin',
+    summary: 'Clientes (los más recientes o uno por email), con compras y cantidad de chicos',
+    query: z.object({ q: z.string().max(120).optional() }),
+    response: z.object({ customers: z.array(adminCustomerSchema) }),
+  },
+  adminCustomerDetail: {
+    method: 'GET',
+    path: '/v1/admin/customers/:uid',
+    access: 'admin',
+    summary: 'Cliente: pedidos, nivel Pro y pedidos de borrado (sin datos de los chicos)',
+    params: z.object({ uid: z.string() }),
+    response: adminCustomerSchema.extend({
+      ordersList: z.array(adminOrderSummarySchema),
+      pro: z
+        .object({
+          purchases: z.number(),
+          digitalPercent: z.number(),
+          printPercent: z.number(),
+          windowDays: z.number(),
+        })
+        .nullable(),
+      privacyRequests: z.array(
+        z.object({
+          requestedBy: z.string().nullable(),
+          completedAt: z.string().nullable(),
+          result: z.record(z.string(), z.number()),
+        }),
+      ),
+    }),
+  },
+  adminEraseCustomerData: {
+    method: 'POST',
+    path: '/v1/admin/customers/:uid/erase-child-data',
+    access: 'admin',
+    summary:
+      'Borra a pedido fotos, perfiles de chicos y borradores; conserva cuenta y pedidos (constancia)',
+    params: z.object({ uid: z.string() }),
+    response: z.object({
+      children: z.number(),
+      photos: z.number(),
+      books: z.number(),
+      keptOrderedBooks: z.number(),
+    }),
+  },
+  adminStaff: {
+    method: 'GET',
+    path: '/v1/admin/staff',
+    access: 'admin',
+    summary: 'Usuarios del panel (admin y superadmin)',
+    response: z.object({
+      staff: z.array(z.object({ uid: z.string(), email: z.string().nullable(), role: roleSchema })),
+    }),
+  },
+  adminSetStaffRole: {
+    method: 'PUT',
+    path: '/v1/admin/staff',
+    access: 'superadmin',
+    summary: 'Alta, baja o cambio de rol de un usuario del panel (queda en auditoría)',
+    body: z.object({ email: z.email(), role: roleSchema }),
+    response: z.object({
+      uid: z.string(),
+      email: z.string().nullable(),
+      role: roleSchema,
+      isStaff: z.boolean(),
+    }),
+  },
+  adminTestIntegration: {
+    method: 'POST',
+    path: '/v1/admin/integrations/test',
+    access: 'admin',
+    summary:
+      'Prueba de conexión de un proveedor (imprenta: cotiza; mails: verifica la clave; IA: una moderación mínima)',
+    body: z.object({
+      kind: z.enum(['print', 'email', 'ai', 'storage', 'payment']),
+      id: z.string().max(40).optional(),
+    }),
+    response: z.object({ ok: z.boolean(), detail: z.string(), ms: z.number() }),
+  },
+  adminQuoteRequests: {
+    method: 'GET',
+    path: '/v1/admin/quote-requests',
+    access: 'admin',
+    summary: 'Cola de "Pedir cotización" de Eventos (impresos)',
+    response: z.object({
+      requests: z.array(
+        z.object({
+          id: z.string(),
+          email: z.string().nullable(),
+          country: z.string(),
+          pieces: z.array(z.string()),
+          copies: z.number(),
+          message: z.string().nullable(),
+          status: z.enum(['new', 'contacted', 'closed']),
+          note: z.string().nullable(),
+          createdAt: z.string().nullable(),
+        }),
+      ),
+    }),
+  },
+  adminUpdateQuoteRequest: {
+    method: 'PUT',
+    path: '/v1/admin/quote-requests/:id',
+    access: 'admin',
+    summary: 'Cambia el estado de una cotización (queda en auditoría)',
+    params: z.object({ id: z.string() }),
+    body: z.object({
+      status: z.enum(['new', 'contacted', 'closed']),
+      note: z.string().max(500).nullable(),
+    }),
+    response: z.object({ id: z.string(), status: z.string() }),
+  },
+  adminInsights: {
+    method: 'GET',
+    path: '/v1/admin/insights',
+    access: 'admin',
+    summary:
+      'Calidad (tasas del informe §10), impresión por imprenta, formato y país, y ventas por canal',
+    query: z.object({ days: z.coerce.number().int().min(1).max(366).default(30) }),
+    response: z.object({
+      quality: z.array(
+        z.object({
+          metric: z.string(),
+          value: z.number().nullable(),
+          numerator: z.number(),
+          denominator: z.number(),
+          note: z.string(),
+        }),
+      ),
+      qaCodes: z.record(z.string(), z.number()),
+      print: z.array(
+        z.object({
+          provider: z.string(),
+          format: z.string(),
+          country: z.string(),
+          orders: z.number(),
+          failed: z.number(),
+          cancelled: z.number(),
+          failureRate: z.number(),
+        }),
+      ),
+      channels: z.array(
+        z.object({
+          channel: z.string(),
+          orders: z.number(),
+          revenueUsd: z.number(),
+          avgTicketUsd: z.number(),
+          repeatCustomers: z.number(),
+        }),
+      ),
+      choices: z.object({
+        formats: z.record(z.string(), z.number()),
+        lengths: z.record(z.string(), z.number()),
+        densities: z.record(z.string(), z.number()),
+      }),
+    }),
+  },
   adminAuditLog: {
     method: 'GET',
     path: '/v1/admin/audit-log',
@@ -747,6 +1043,10 @@ export const apiRoutes = {
     summary: 'Registro de auditoría, del más reciente al más antiguo',
     query: z.object({
       entity: z.string().max(60).optional(),
+      /** Email de quien hizo el cambio. */
+      actor: z.string().max(120).optional(),
+      /** Desde esta fecha (ISO). */
+      from: z.iso.datetime().optional(),
       /** Paginado: entradas anteriores a esta fecha (ISO). */
       before: z.iso.datetime().optional(),
       limit: z.coerce.number().int().min(1).max(100).default(50),

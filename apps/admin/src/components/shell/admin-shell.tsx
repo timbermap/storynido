@@ -25,7 +25,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <div className="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
       <aside
         className={cn(
-          'border-r bg-card md:sticky md:top-0 md:block md:h-dvh',
+          'border-r bg-card md:sticky md:top-0 md:block md:h-dvh md:overflow-y-auto',
           open ? 'block' : 'hidden',
         )}
       >

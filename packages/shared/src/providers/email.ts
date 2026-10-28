@@ -32,4 +32,6 @@ export interface EmailMessage {
 export interface EmailProvider {
   readonly id: string;
   send(message: EmailMessage): Promise<{ messageId: string }>;
+  /** Prueba de conexión del admin (sin mandar mails). */
+  check?(): Promise<string>;
 }

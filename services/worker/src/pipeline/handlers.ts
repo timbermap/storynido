@@ -11,6 +11,8 @@ export interface PipelineOrder {
   items: { piece: string; format: string; quantity: number }[];
   /** Recompra: el libro ya generado en otro pedido (se reutiliza, sin IA). */
   sourceOrderId?: string | null;
+  /** Revisión manual (fase 15): un admin aprobó las ilustraciones de esta generación. */
+  humanApproval?: { generation: number; by: string | null } | null;
 }
 
 export type StepOutputs = Partial<Record<PipelineStep, Record<string, unknown>>>;

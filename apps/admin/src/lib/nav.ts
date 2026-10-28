@@ -1,5 +1,12 @@
 import {
   BadgePercent,
+  ChartColumn,
+  ClipboardCheck,
+  MessageSquareQuote,
+  Plug,
+  ShieldUser,
+  ShoppingBag,
+  Users,
   BookOpen,
   BriefcaseBusiness,
   Cake,
@@ -22,6 +29,15 @@ import {
 export interface NavItem {
   href:
     | '/'
+    | '/orders'
+    | '/order'
+    | '/review'
+    | '/customers'
+    | '/customer'
+    | '/quotes'
+    | '/quality'
+    | '/staff'
+    | '/integrations'
     | '/site'
     | '/countries'
     | '/prices'
@@ -47,6 +63,36 @@ export interface NavItem {
 /** Secciones del panel. Las de las etapas siguientes se suman acá. */
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: '/', label: 'Resumen', keywords: 'dashboard inicio ventas', icon: Gauge },
+  {
+    href: '/orders',
+    label: 'Pedidos',
+    keywords: 'compras reembolso imprenta pipeline',
+    icon: ShoppingBag,
+  },
+  {
+    href: '/review',
+    label: 'Revisión manual',
+    keywords: 'qa calidad cola aprobar',
+    icon: ClipboardCheck,
+  },
+  {
+    href: '/customers',
+    label: 'Clientes',
+    keywords: 'usuarios privacidad borrado pro',
+    icon: Users,
+  },
+  {
+    href: '/quotes',
+    label: 'Cotizaciones',
+    keywords: 'eventos impresos pedidos',
+    icon: MessageSquareQuote,
+  },
+  {
+    href: '/quality',
+    label: 'Calidad y canales',
+    keywords: 'métricas qa imprenta canales',
+    icon: ChartColumn,
+  },
   {
     href: '/site',
     label: 'Sitio',
@@ -106,6 +152,18 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: 'Modelos de IA',
     keywords: 'catálogo precios política datos fotos',
     icon: Cpu,
+  },
+  {
+    href: '/staff',
+    label: 'Usuarios del panel',
+    keywords: 'roles admin superadmin',
+    icon: ShieldUser,
+  },
+  {
+    href: '/integrations',
+    label: 'Integraciones',
+    keywords: 'proveedores conexión prueba',
+    icon: Plug,
   },
   { href: '/audit', label: 'Auditoría', keywords: 'cambios historial registro', icon: History },
 ];

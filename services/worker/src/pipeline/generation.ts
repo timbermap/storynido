@@ -640,6 +640,20 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       return { output: { images, reviewed: 0, repaired: 0, reused: true } };
     }
     const snapshot = await snapshotOf(ctx);
+    // Revisión manual: un admin vio las páginas y las aprobó para esta generación. Se aceptan
+    // tal como están (sin revisión automática ni reparaciones) y el pedido sigue a la maqueta.
+    const approval = ctx.order.humanApproval;
+    if (approval?.generation === ctx.generation) {
+      const images = (ctx.outputs.generate_illustrations?.images ?? []) as {
+        index: number;
+        imagePath: string;
+      }[];
+      if (images.length < snapshot.pages.length + 1) {
+        throw new HumanReviewError('page_missing', 'Faltan ilustraciones: hay que regenerar.');
+      }
+      await qaEvent(ctx, 'human_approved', { pages: images.length });
+      return { output: { images, reviewed: 0, repaired: 0, approvedBy: approval.by ?? 'admin' } };
+    }
     const provider = await ai();
     const reference = await load(snapshot.character.sheetPath);
     const produced = new Map(

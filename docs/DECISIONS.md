@@ -1115,3 +1115,35 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Costo real:** por muestra y por libro (promedio, p50 y p95, según el modelo de imagen) y por modelo, desde `aiUsage`.
 - **Semilla:** los cuatro modelos de Vertex en uso, con su precio de lista. Pendiente: confirmar la exención del monitoreo de abuso de Vertex (revisión humana) antes de producción.
 - **Gráficos:** una serie con el color de la marca, validado contra la superficie clara (`#79518c`) y la oscura (`#a77bd0`).
+
+## 088 · Admin, operaciones (fase 15)
+
+- **Fecha:** 2026-10-28.
+- **Pedidos:**
+  - búsqueda por número o email y filtros (estado, país, canal, formato, fechas). En Firestore va un filtro de igualdad con su índice por fecha; el resto se filtra en memoria sobre 200 pedidos;
+  - detalle con montos, descuento, imprenta y cotizaciones, seguimiento, pipeline (duración, intentos, errores y costo por paso), códigos de QA, y costos y margen en USD;
+  - acciones con confirmación y auditoría: aprobar, reintentar desde un paso, regenerar, reenviar el mail del estado, cancelar en la imprenta y reembolsar con motivo.
+- **Revisión manual:**
+  - la cola son los pedidos `qa_failed`, con el paso y los códigos de QA;
+  - **aprobar** solo si falló el control de calidad. Guarda `pipeline.humanApproval` (generación y quién) y pide el reintento desde `quality_check`; el worker acepta las ilustraciones tal como están (código `human_approved`) y sigue a maqueta y entrega sin más IA. Probado de punta a punta con mocks;
+  - las ilustraciones muestran al chico: el panel las da solo para pedidos en revisión, detrás de un botón, con enlaces de 15 minutos.
+- **Clientes:**
+  - lista y detalle con compras, gasto por moneda, nivel Pro y cantidad de perfiles de chicos (nunca sus datos);
+  - borrado a pedido de fotos, perfiles y borradores. Se conservan la cuenta y los pedidos (facturación). La constancia queda en `privacyRequests` y en la auditoría, y el cliente recibe un mail.
+- **Usuarios del panel:** solo el superadmin da de alta, baja o cambia roles. Nadie se cambia a sí mismo, siempre queda un superadmin, y el cambio cierra las sesiones de esa persona (`revokeRefreshTokens`).
+- **Auditoría:** filtros por entidad, por quién hizo el cambio y desde una fecha.
+- **Integraciones:** estado y "Probar conexión", sin pedidos ni mails reales:
+  - imprenta: cotiza a EE. UU.;
+  - mails: verifica la clave y los dominios;
+  - IA: una moderación mínima;
+  - archivos: una lectura;
+  - pagos: muestra el proveedor configurado (no hay un pago de prueba real hasta elegir proveedor).
+- **Cotizaciones de Eventos:** cola con estado (nueva, contactada, cerrada) y nota interna, auditados.
+- **Calidad y canales:**
+  - las tasas del informe §10, cada una con numerador y denominador;
+  - códigos de QA del período;
+  - imprenta por proveedor, formato y país (pedidos, fallas en la entrega y cancelados);
+  - ventas, ticket y clientes que repiten por canal;
+  - formatos, extensiones y densidades más elegidos.
+  - `story_edit_rate` usa el nuevo código `text_edited`; `support_case_rate` queda sin dato hasta tener soporte.
+- **Índices nuevos:** `auditLog (actorEmail, at)`, `aiUsage (kind, at)` y `qaEvents.at` en grupo de colecciones.

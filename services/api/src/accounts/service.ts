@@ -1,6 +1,9 @@
 import type { EmailNotifier } from '@storynido/emails';
 import type { ProviderRegistry } from '@storynido/providers';
-import { COLLECTIONS, type AuditLogEntry } from '@storynido/shared';
+import { COLLECTIONS, isAdminRole, type AuditLogEntry, type Role } from '@storynido/shared';
+
+import { auditEntry } from '../admin/audit';
+import type { RequestUser } from '../types';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import type { TokenVerifier } from '../deps';
@@ -13,6 +16,10 @@ type Owned = (typeof OWNED)[number];
 /** Borra usuarios de Firebase Auth (en los tests, un doble). */
 export interface AuthAccounts {
   deleteUser(uid: string): Promise<void>;
+  /** Cuenta por email (null si no existe). */
+  findByEmail(email: string): Promise<{ uid: string; email: string | null } | null>;
+  /** Cambia el rol (custom claim) y cierra sus sesiones para que tome el nuevo. */
+  setRole(uid: string, role: Role): Promise<void>;
 }
 
 /**
@@ -85,6 +92,110 @@ export class AccountService {
     if (options.notify !== false)
       await this.notifyDeleted(user, `delete-child:${childId}`, 'child');
     return { photos: photos.size, books: deletedBooks, keptOrderedBooks: kept };
+  }
+
+  /**
+   * Pedido de borrado gestionado por el admin (fase 15): cada chico con sus fotos y libros no
+   * pedidos, más fotos y borradores sueltos. Conserva la cuenta y los pedidos (facturación) y
+   * deja la constancia en `privacyRequests` y en la auditoría.
+   */
+  async adminEraseChildData(admin: RequestUser, uid: string) {
+    const profile = (await this.db.collection(COLLECTIONS.users).doc(uid).get()).data();
+    if (!profile) throw new AppError(404, 'not_found', 'Cliente inexistente.');
+    const owner = { uid, email: (profile.email as string | null | undefined) ?? null };
+    const children = await this.db
+      .collection(COLLECTIONS.children)
+      .where('ownerUid', '==', uid)
+      .get();
+    let photos = 0;
+    let books = 0;
+    let keptOrderedBooks = 0;
+    for (const doc of children.docs) {
+      const result = await this.deleteChild(owner, doc.id, { notify: false });
+      photos += result.photos;
+      books += result.books;
+      keptOrderedBooks += result.keptOrderedBooks;
+    }
+    // Fotos y borradores que no estaban vinculados a un chico.
+    const storage = this.providers.storage();
+    const loose = await this.db.collection(COLLECTIONS.photos).where('ownerUid', '==', uid).get();
+    for (const doc of loose.docs) {
+      for (const path of [doc.get('storagePath'), doc.get('processedPath')]) {
+        if (typeof path === 'string') await storage.delete({ bucket: 'photos', path });
+      }
+      await doc.ref.delete();
+      photos += 1;
+    }
+    const drafts = await this.db.collection(COLLECTIONS.books).where('ownerUid', '==', uid).get();
+    for (const doc of drafts.docs) {
+      if (doc.get('status') === 'ordered') continue;
+      for (const path of previewPaths(doc.get('preview'))) {
+        await storage.delete({ bucket: 'assets', path });
+      }
+      await this.db.recursiveDelete(doc.ref);
+      books += 1;
+    }
+    const result = { children: children.size, photos, books, keptOrderedBooks };
+    const now = new Date();
+    const batch = this.db.batch();
+    batch.create(this.db.collection(COLLECTIONS.privacyRequests).doc(), {
+      uid,
+      scope: 'child_data',
+      requestedBy: admin.email ?? admin.uid,
+      result,
+      completedAt: now,
+    });
+    batch.create(
+      this.db.collection(COLLECTIONS.auditLog).doc(),
+      auditEntry(admin, {
+        action: 'privacy.admin_erase',
+        entity: COLLECTIONS.users,
+        entityId: uid,
+        before: null,
+        after: result,
+      }),
+    );
+    await batch.commit();
+    await this.notifyDeleted(owner, `admin-erase:${uid}:${now.toISOString()}`, 'account');
+    return result;
+  }
+
+  /**
+   * Alta, baja o cambio de rol de un usuario del panel (solo superadmin). El último superadmin
+   * no se puede bajar, y nadie se cambia el rol a sí mismo.
+   */
+  async setStaffRole(admin: RequestUser, email: string, role: Role) {
+    const account = await this.auth.findByEmail(email.trim().toLowerCase());
+    if (!account) throw new AppError(404, 'not_found', 'No hay una cuenta con ese email.');
+    if (account.uid === admin.uid) {
+      throw new AppError(409, 'bad_request', 'No puedes cambiar tu propio rol.');
+    }
+    const ref = this.db.collection(COLLECTIONS.users).doc(account.uid);
+    const previous = ((await ref.get()).get('role') as Role | undefined) ?? 'customer';
+    if (previous === 'superadmin' && role !== 'superadmin') {
+      const supers = await this.db
+        .collection(COLLECTIONS.users)
+        .where('role', '==', 'superadmin')
+        .get();
+      if (supers.size <= 1) {
+        throw new AppError(409, 'bad_request', 'Tiene que quedar al menos un superadmin.');
+      }
+    }
+    await this.auth.setRole(account.uid, role);
+    const batch = this.db.batch();
+    batch.set(ref, { role, email: account.email, updatedAt: new Date() }, { merge: true });
+    batch.create(
+      this.db.collection(COLLECTIONS.auditLog).doc(),
+      auditEntry(admin, {
+        action: 'user.set_role',
+        entity: COLLECTIONS.users,
+        entityId: account.uid,
+        before: { role: previous },
+        after: { role },
+      }),
+    );
+    await batch.commit();
+    return { uid: account.uid, email: account.email, role, isStaff: isAdminRole(role) };
   }
 
   /** Borra la cuenta: cada chico, las fotos y borradores sueltos, el perfil y el acceso. */

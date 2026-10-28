@@ -148,9 +148,17 @@ export function registerAdminRoutes(app: FastifyInstance, db: Firestore): void {
   });
 
   addRoute(app, apiRoutes.adminAuditLog, {}, async (request) => {
-    const query = request.query as { entity?: string; before?: string; limit: number };
+    const query = request.query as {
+      entity?: string;
+      actor?: string;
+      from?: string;
+      before?: string;
+      limit: number;
+    };
     let ref = db.collection(COLLECTIONS.auditLog).orderBy('at', 'desc');
     if (query.entity) ref = ref.where('entity', '==', query.entity);
+    else if (query.actor) ref = ref.where('actorEmail', '==', query.actor.trim().toLowerCase());
+    if (query.from) ref = ref.where('at', '>=', new Date(query.from));
     if (query.before) ref = ref.where('at', '<', new Date(query.before));
     const snapshot = await ref.limit(query.limit).get();
     const entries: AdminAuditEntry[] = snapshot.docs.map((doc) => {
