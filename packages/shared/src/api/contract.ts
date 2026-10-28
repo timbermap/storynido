@@ -15,6 +15,7 @@ import {
   readingLevelSchema,
   textDensitySchema,
 } from '../models/editorial';
+import { adminConfigKindSchema, adminDocIdSchema } from '../models/admin-config';
 import { addressSchema } from '../models/commerce';
 import { KIT_PIECES, eventPricingSchema, kitSelectionSchema } from '../models/kit';
 import { accountTypeSchema, proProfileSchema } from '../models/users';
@@ -651,6 +652,25 @@ export const apiRoutes = {
     summary: 'Cambia el modo del sitio en vivo, sin redeploy (queda en auditoría)',
     body: z.object({ mode: z.enum(SITE_MODES) }),
     response: adminSiteConfigResponseSchema,
+  },
+  adminConfigList: {
+    method: 'GET',
+    path: '/v1/admin/config/:kind',
+    access: 'admin',
+    summary: 'Documentos de configuración del negocio (países, precios, cupones, promociones…)',
+    params: z.object({ kind: adminConfigKindSchema }),
+    response: z.object({
+      items: z.array(z.object({ id: z.string(), data: z.record(z.string(), z.unknown()) })),
+    }),
+  },
+  adminConfigSave: {
+    method: 'PUT',
+    path: '/v1/admin/config/:kind/:id',
+    access: 'admin',
+    summary: 'Crea o reemplaza un documento de configuración (validado y auditado)',
+    params: z.object({ kind: adminConfigKindSchema, id: adminDocIdSchema }),
+    body: z.record(z.string(), z.unknown()),
+    response: z.object({ id: z.string(), data: z.record(z.string(), z.unknown()) }),
   },
   adminAuditLog: {
     method: 'GET',

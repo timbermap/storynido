@@ -1,15 +1,33 @@
 import {
+  ADMIN_CONFIG,
   COLLECTIONS,
   GLOBAL_DOC_ID,
   apiRoutes,
+  expectedDocId,
+  normalizeFirestoreData,
   type AdminAuditEntry,
+  type AdminConfigKind,
   type SiteConfig,
 } from '@storynido/shared';
 import type { FastifyInstance } from 'fastify';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import { actorLabel, auditedWrite } from '../admin/audit';
+import { AppError } from '../errors';
 import { addRoute } from '../plugins/route';
+
+/** Firestore no guarda `undefined`: se quitan los campos opcionales vacíos (las fechas quedan). */
+function withoutUndefined(value: unknown): unknown {
+  if (value === null || typeof value !== 'object' || value instanceof Date) return value;
+  if (Array.isArray(value)) return value.map(withoutUndefined);
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([, inner]) => inner !== undefined)
+      .map(([key, inner]) => [key, withoutUndefined(inner)]),
+  );
+}
+
+const asRecord = (value: unknown) => normalizeFirestoreData(value) as Record<string, unknown>;
 
 function toDate(value: unknown): Date | null {
   if (value instanceof Date) return value;
@@ -56,6 +74,57 @@ export function registerAdminRoutes(app: FastifyInstance, db: Firestore): void {
     return site();
   });
 
+  // Configuración del negocio (etapa 2): un mismo par de rutas para cada tipo, validado con
+  // su esquema y auditado. El catálogo de la API la toma en menos de un minuto (cache).
+  addRoute(app, apiRoutes.adminConfigList, {}, async (request) => {
+    const { kind } = request.params as { kind: AdminConfigKind };
+    const snapshot = await db.collection(ADMIN_CONFIG[kind].collection).get();
+    return { items: snapshot.docs.map((doc) => ({ id: doc.id, data: asRecord(doc.data()) })) };
+  });
+
+  addRoute(app, apiRoutes.adminConfigSave, {}, async (request) => {
+    const { kind, id } = request.params as { kind: AdminConfigKind; id: string };
+    const parsed = ADMIN_CONFIG[kind].input.safeParse(request.body);
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      throw new AppError(
+        400,
+        'validation_failed',
+        `${issue?.path.length ? issue.path.join('.') : 'Datos'}: ${issue?.message ?? 'inválidos'}`,
+      );
+    }
+    const expected = expectedDocId(kind, parsed.data);
+    if (expected !== null && expected !== id) {
+      throw new AppError(400, 'validation_failed', `El id tiene que ser "${expected}".`);
+    }
+    const ref = db.collection(ADMIN_CONFIG[kind].collection).doc(id);
+    const existing = (await ref.get()).data();
+    const before = existing ? asRecord(existing) : null;
+    const now = new Date();
+    const data = withoutUndefined({
+      ...parsed.data,
+      // Lo que no edita el admin: cuándo se creó y cuántas veces se usó un cupón.
+      ...(kind === 'coupons' || kind === 'promotions'
+        ? { createdAt: before?.createdAt ?? now }
+        : {}),
+      ...(kind === 'coupons' ? { redemptions: before?.redemptions ?? 0 } : {}),
+      updatedAt: now,
+    }) as Record<string, unknown>;
+    await auditedWrite(
+      db,
+      request.user,
+      {
+        action: `${kind}.${before ? 'update' : 'create'}`,
+        entity: ADMIN_CONFIG[kind].collection,
+        entityId: id,
+        before,
+        after: data,
+      },
+      (batch) => batch.set(ref, data),
+    );
+    return { id, data };
+  });
+
   addRoute(app, apiRoutes.adminAuditLog, {}, async (request) => {
     const query = request.query as { entity?: string; before?: string; limit: number };
     let ref = db.collection(COLLECTIONS.auditLog).orderBy('at', 'desc');
@@ -70,8 +139,9 @@ export function registerAdminRoutes(app: FastifyInstance, db: Firestore): void {
         action: data.action as string,
         entity: data.entity as string,
         entityId: data.entityId as string,
-        before: (data.before as Record<string, unknown> | null | undefined) ?? null,
-        after: (data.after as Record<string, unknown> | null | undefined) ?? null,
+        // Las fechas guardadas en el antes y el después vuelven como fechas (ISO), no Timestamps.
+        before: data.before ? asRecord(data.before) : null,
+        after: data.after ? asRecord(data.after) : null,
         at: toDate(data.at)?.toISOString() ?? new Date(0).toISOString(),
       };
     });

@@ -12,6 +12,12 @@ const ENTITIES = [
   ['', 'Todo'],
   ['siteConfig', 'Sitio'],
   ['aiConfig', 'IA'],
+  ['countries', 'Países'],
+  ['prices', 'Precios'],
+  ['coupons', 'Cupones'],
+  ['promotions', 'Promociones'],
+  ['eventPricing', 'Eventos'],
+  ['proDiscounts', 'Profesionales'],
   ['orders', 'Pedidos'],
   ['users', 'Usuarios'],
 ] as const;

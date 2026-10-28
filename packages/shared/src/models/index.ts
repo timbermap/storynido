@@ -14,3 +14,4 @@ export * from './firestore';
 export * from './users';
 export * from './events';
 export * from './kit';
+export * from './admin-config';

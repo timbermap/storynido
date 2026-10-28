@@ -1,7 +1,29 @@
-import { Gauge, History, Power, Sparkles, type LucideIcon } from 'lucide-react';
+import {
+  BadgePercent,
+  BriefcaseBusiness,
+  Cake,
+  Gauge,
+  Globe,
+  History,
+  Power,
+  Sparkles,
+  Tag,
+  Ticket,
+  type LucideIcon,
+} from 'lucide-react';
 
 export interface NavItem {
-  href: '/' | '/site' | '/ai' | '/audit';
+  href:
+    | '/'
+    | '/site'
+    | '/countries'
+    | '/prices'
+    | '/coupons'
+    | '/promotions'
+    | '/event-pricing'
+    | '/pro-discounts'
+    | '/ai'
+    | '/audit';
   label: string;
   /** Palabras extra para la búsqueda. */
   keywords: string;
@@ -16,6 +38,27 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: 'Sitio',
     keywords: 'modo mantenimiento vista previa en vivo',
     icon: Power,
+  },
+  { href: '/countries', label: 'Países', keywords: 'impuestos envío moneda idioma', icon: Globe },
+  { href: '/prices', label: 'Precios', keywords: 'productos formatos extensión pro', icon: Tag },
+  { href: '/coupons', label: 'Cupones', keywords: 'códigos descuento', icon: Ticket },
+  {
+    href: '/promotions',
+    label: 'Promociones',
+    keywords: 'descuento fechas campaña',
+    icon: BadgePercent,
+  },
+  {
+    href: '/event-pricing',
+    label: 'Eventos',
+    keywords: 'kit cumpleaños piezas precio',
+    icon: Cake,
+  },
+  {
+    href: '/pro-discounts',
+    label: 'Profesionales',
+    keywords: 'descuento recurrencia escalones pro',
+    icon: BriefcaseBusiness,
   },
   {
     href: '/ai',

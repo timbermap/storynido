@@ -1040,3 +1040,18 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - 2: países, precios (Familias, Pro y Eventos), cupones, promociones y descuentos Pro;
   - 3: historias, colecciones, estilos, enseñanzas, opciones editoriales, contenido y prueba de prompts;
   - 4: dashboard con agregados y catálogo de modelos de IA (`aiModels`) con sus reglas.
+
+## 083 · Admin, etapa 2: configuración del negocio (países, precios, cupones, promociones, Eventos y Pro)
+
+- **Fecha:** 2026-10-28 · Fase 14 (etapa 2 de 4).
+- **Un solo mecanismo:** `ADMIN_CONFIG` (shared) dice, por tipo, la colección, el esquema de entrada y el id del documento.
+  - Rutas: `GET /v1/admin/config/:tipo` y `PUT /v1/admin/config/:tipo/:id`.
+  - El servidor valida con el esquema, exige el id natural (`MX_digital`, `MX`, el código del cupón) y pone `updatedAt` y `createdAt`.
+  - Nunca pisa los usos de un cupón.
+  - Todo queda en la auditoría con antes y después.
+- **Tipos:** países (activación, formatos, moneda, impuesto, envío e idioma), precios (Familias, Pro base y ajuste por extensión), cupones, promociones (con inicio y fin; el fin tiene que ser posterior), precios de Eventos por país y descuento Pro (ventana, escalones y tope en impresos).
+- **Panel:** un editor genérico (tabla + formulario armado con la descripción de los campos).
+  - Los montos se editan en la unidad de la moneda y se guardan en centavos.
+  - "Nuevo" no pisa un documento existente: se edita desde la tabla.
+- **Propagación:** la API toma los cambios en menos de un minuto (cache del catálogo); las páginas públicas, en hasta 5 minutos (revalidación de Next).
+- **Probado en local con los emuladores:** ingreso, alta de precio, descuento Pro, cambio de modo del sitio, auditoría, búsqueda y modo oscuro.

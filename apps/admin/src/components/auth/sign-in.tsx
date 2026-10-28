@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   TotpMultiFactorGenerator,
   getMultiFactorResolver,
+  signInWithEmailAndPassword,
   signInWithPopup,
   type MultiFactorError,
   type MultiFactorResolver,
@@ -13,7 +14,7 @@ import { useState, type SubmitEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { brand } from '@/lib/brand';
-import { getFirebaseAuth } from '@/lib/firebase';
+import { getFirebaseAuth, useFirebaseEmulators } from '@/lib/firebase';
 
 import { CodeInput } from './code-input';
 
@@ -90,11 +91,49 @@ export function SignIn() {
           Continuar con Google
         </Button>
       )}
+      {useFirebaseEmulators && !resolver && <EmulatorSignIn />}
       {error && (
         <p role="alert" className="text-center text-sm font-medium text-destructive">
           {error}
         </p>
       )}
     </main>
+  );
+}
+
+/** Solo con los emuladores (desarrollo local y pruebas): email y contraseña de prueba. */
+function EmulatorSignIn() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  return (
+    <form
+      className="grid gap-2 border-t pt-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void signInWithEmailAndPassword(getFirebaseAuth(), email, password);
+      }}
+    >
+      <p className="text-xs text-muted-foreground">Emuladores: cuenta de prueba</p>
+      <input
+        aria-label="Email"
+        className="h-9 rounded-md border bg-background px-2 text-sm"
+        value={email}
+        onChange={(event) => {
+          setEmail(event.target.value);
+        }}
+      />
+      <input
+        aria-label="Contraseña"
+        type="password"
+        className="h-9 rounded-md border bg-background px-2 text-sm"
+        value={password}
+        onChange={(event) => {
+          setPassword(event.target.value);
+        }}
+      />
+      <Button type="submit" variant="outline">
+        Entrar
+      </Button>
+    </form>
   );
 }
