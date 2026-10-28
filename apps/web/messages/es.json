@@ -311,7 +311,8 @@
   },
   "Maintenance": {
     "title": "Estamos haciendo mejoras",
-    "text": "{brand} vuelve en un rato. Gracias por tu paciencia."
+    "text": "{brand} vuelve en un rato. Gracias por tu paciencia.",
+    "previewOnly": "Puedes crear tu muestra gratis. Las compras están pausadas por el momento: vuelve pronto."
   },
   "NotFound": {
     "title": "No encontramos esta página",

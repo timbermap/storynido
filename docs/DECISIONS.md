@@ -1022,3 +1022,21 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - modo "texto propio ilustrado por StoryNido";
   - tabla de descuentos y precio Pro editables en el admin (fase 14);
   - revisión legal del texto de autorización.
+
+## 082 · Admin, etapa 1: acceso con 2FA, auditoría transversal e interruptor del sitio
+
+- **Fecha:** 2026-10-28 · Fase 14 (etapa 1 de 4).
+- **Acceso:** solo `admin` y `superadmin`, con **verificación en dos pasos obligatoria** (TOTP de Identity Platform: Google Authenticator, 1Password, Authy).
+  - Ingreso con Google. El enlace mágico no admite segundo factor en Firebase, así que el admin no lo usa.
+  - Un admin sin factor registrado ve el alta (QR o clave); al confirmarlo vuelve a entrar con el código.
+  - La API lo hace cumplir en todas las rutas `admin`/`superadmin`: el token tiene que traer `firebase.sign_in_second_factor` (error `mfa_required`). Por defecto se exige fuera de local (`ADMIN_MFA_REQUIRED`).
+  - **Requisito:** pasar el proyecto a Identity Platform y activar TOTP. Es un cambio que no se puede deshacer; sin costo hasta 50.000 usuarios activos por mes (TOTP no cobra por uso).
+- **Auditoría:** toda escritura del admin pasa por `auditedWrite`, que guarda el cambio y su entrada de `auditLog` (quién, qué, cuándo, antes y después) en el mismo lote. Pantalla de auditoría con filtro por entidad y paginado.
+- **Interruptor del sitio:** `PUT /v1/admin/site-config` (admin) escribe `siteConfig/global`.
+  - La API lo escucha en vivo; la web lo revalida cada 15 s, sin redeploy.
+  - "Solo vista previa" muestra un aviso arriba de la web y bloquea las compras.
+- **Panel:** navegación lateral con búsqueda, modo claro/oscuro (guardado en el navegador), Resumen (modo del sitio y gasto de IA de hoy), Sitio, IA (solo el superadmin edita) y Auditoría.
+- **Siguientes etapas:**
+  - 2: países, precios (Familias, Pro y Eventos), cupones, promociones y descuentos Pro;
+  - 3: historias, colecciones, estilos, enseñanzas, opciones editoriales, contenido y prueba de prompts;
+  - 4: dashboard con agregados y catálogo de modelos de IA (`aiModels`) con sus reglas.

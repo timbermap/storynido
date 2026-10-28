@@ -43,6 +43,8 @@ export const API_ERROR_CODES = [
   'account_required',
   /** El libro no se puede imprimir en este destino (formato, páginas o cantidad). */
   'print_unavailable',
+  /** El admin exige sesión con verificación en dos pasos. */
+  'mfa_required',
   'internal',
 ] as const;
 
@@ -96,6 +98,25 @@ export const aiConfigUpdateSchema = aiConfigSchema
   .omit({ updatedAt: true, updatedBy: true })
   .partial()
   .refine((value) => Object.keys(value).length > 0, { message: 'Nada para cambiar' });
+
+export const adminSiteConfigResponseSchema = z.object({
+  mode: z.enum(SITE_MODES),
+  updatedAt: z.string().nullable(),
+  updatedBy: z.string().nullable(),
+});
+
+export const adminAuditEntrySchema = z.object({
+  id: z.string(),
+  actorEmail: z.string().nullable(),
+  action: z.string(),
+  entity: z.string(),
+  entityId: z.string(),
+  before: z.record(z.string(), z.unknown()).nullable(),
+  after: z.record(z.string(), z.unknown()).nullable(),
+  at: z.string(),
+});
+
+export type AdminAuditEntry = z.infer<typeof adminAuditEntrySchema>;
 
 export const adminAiConfigResponseSchema = z.object({
   config: aiConfigSchema.omit({ updatedAt: true, updatedBy: true }).extend({
@@ -615,6 +636,34 @@ export const apiRoutes = {
     summary: 'Regenera la portada o una página ilustrada (con límite por libro)',
     params: bookParamsSchema.extend({ target: previewTargetSchema }),
     response: publicPreviewSchema,
+  },
+  adminSiteConfig: {
+    method: 'GET',
+    path: '/v1/admin/site-config',
+    access: 'admin',
+    summary: 'Modo del sitio con quién y cuándo lo cambió',
+    response: adminSiteConfigResponseSchema,
+  },
+  updateSiteConfig: {
+    method: 'PUT',
+    path: '/v1/admin/site-config',
+    access: 'admin',
+    summary: 'Cambia el modo del sitio en vivo, sin redeploy (queda en auditoría)',
+    body: z.object({ mode: z.enum(SITE_MODES) }),
+    response: adminSiteConfigResponseSchema,
+  },
+  adminAuditLog: {
+    method: 'GET',
+    path: '/v1/admin/audit-log',
+    access: 'admin',
+    summary: 'Registro de auditoría, del más reciente al más antiguo',
+    query: z.object({
+      entity: z.string().max(60).optional(),
+      /** Paginado: entradas anteriores a esta fecha (ISO). */
+      before: z.iso.datetime().optional(),
+      limit: z.coerce.number().int().min(1).max(100).default(50),
+    }),
+    response: z.object({ entries: z.array(adminAuditEntrySchema) }),
   },
   adminAiConfig: {
     method: 'GET',

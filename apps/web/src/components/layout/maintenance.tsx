@@ -17,3 +17,16 @@ export async function Maintenance() {
     </main>
   );
 }
+
+/** Modo "solo vista previa": se puede crear la muestra, pero las compras están pausadas. */
+export async function PreviewOnlyBanner() {
+  const t = await getTranslations('Maintenance');
+  return (
+    <p
+      role="status"
+      className="bg-secondary px-4 py-2 text-center text-sm font-semibold text-secondary-foreground"
+    >
+      {t('previewOnly')}
+    </p>
+  );
+}

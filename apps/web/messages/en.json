@@ -311,7 +311,8 @@
   },
   "Maintenance": {
     "title": "We're making improvements",
-    "text": "{brand} will be back shortly. Thanks for your patience."
+    "text": "{brand} will be back shortly. Thanks for your patience.",
+    "previewOnly": "You can create your free preview. Purchases are paused for now: please come back soon."
   },
   "NotFound": {
     "title": "We couldn't find this page",

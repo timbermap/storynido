@@ -1,6 +1,7 @@
 import { apiErrorSchema, apiRoutes } from '@storynido/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { loadApiConfig } from './config';
 import { addRoute } from './plugins/route';
 import { auth, createTestApp } from './test-helpers';
 
@@ -75,6 +76,40 @@ describe('api', () => {
         expect(res.statusCode).toBe(200);
         expect(res.json()).toMatchObject({ active: { payment: 'mock', storage: 'local' } });
       }
+    });
+  });
+
+  describe('verificación en dos pasos del admin', () => {
+    let strict: TestApp;
+
+    beforeAll(async () => {
+      strict = await createTestApp({}, { ADMIN_MFA_REQUIRED: 'true' });
+    });
+
+    afterAll(async () => {
+      await strict.app.close();
+    });
+
+    const providers = (token: string) =>
+      strict.app.inject({ method: 'GET', url: '/v1/admin/providers', headers: auth(token) });
+
+    it('un admin sin segundo factor no entra; con segundo factor sí', async () => {
+      const without = await providers('token-root:admin');
+      expect(without.statusCode).toBe(403);
+      expect(without.json()).toMatchObject({ error: { code: 'mfa_required' } });
+      expect((await providers('token-root:admin:mfa')).statusCode).toBe(200);
+      expect((await providers('token-root:superadmin:mfa')).statusCode).toBe(200);
+    });
+
+    it('un customer no entra aunque tenga segundo factor', async () => {
+      const res = await providers('token-ana:customer:mfa');
+      expect(res.json()).toMatchObject({ error: { code: 'forbidden' } });
+    });
+
+    it('fuera de local se exige por defecto', () => {
+      expect(loadApiConfig({ APP_ENV: 'staging' }).adminMfaRequired).toBe(true);
+      expect(loadApiConfig({ APP_ENV: 'production' }).adminMfaRequired).toBe(true);
+      expect(loadApiConfig({ APP_ENV: 'test' }).adminMfaRequired).toBe(false);
     });
   });
 

@@ -1,14 +1,9 @@
-import {
-  COLLECTIONS,
-  GLOBAL_DOC_ID,
-  apiRoutes,
-  type AiConfig,
-  type AuditLogEntry,
-} from '@storynido/shared';
+import { COLLECTIONS, GLOBAL_DOC_ID, apiRoutes, type AiConfig } from '@storynido/shared';
 import type { FastifyInstance } from 'fastify';
 import type { Firestore } from 'firebase-admin/firestore';
 import type { z } from 'zod';
 
+import { actorLabel, auditedWrite } from '../admin/audit';
 import { AiBudget } from '../ai/budget';
 import { AppError } from '../errors';
 import { addRoute } from '../plugins/route';
@@ -73,27 +68,23 @@ export function registerAiConfigRoutes(app: FastifyInstance, db: Firestore): voi
       throw new AppError(400, 'validation_failed', 'Elige un modelo real para ese proveedor.');
     }
 
-    const actor = request.user;
-    const now = new Date();
     const config: AiConfig = {
       ...after,
-      updatedAt: now,
-      updatedBy: actor?.email ?? actor?.uid ?? null,
+      updatedAt: new Date(),
+      updatedBy: actorLabel(request.user),
     };
-    const audit: AuditLogEntry = {
-      actorUid: actor?.uid ?? null,
-      actorEmail: actor?.email ?? null,
-      action: 'ai_config.update',
-      entity: COLLECTIONS.aiConfig,
-      entityId: GLOBAL_DOC_ID,
-      before: { ...before },
-      after: { ...after },
-      at: now,
-    };
-    const batch = db.batch();
-    batch.set(ref, config);
-    batch.create(db.collection(COLLECTIONS.auditLog).doc(), audit);
-    await batch.commit();
+    await auditedWrite(
+      db,
+      request.user,
+      {
+        action: 'ai_config.update',
+        entity: COLLECTIONS.aiConfig,
+        entityId: GLOBAL_DOC_ID,
+        before: { ...before },
+        after: { ...after },
+      },
+      (batch) => batch.set(ref, config),
+    );
     // Se aplica ya en esta instancia; las demás lo toman del listener.
     providers.setAiOverride({
       text: after.textProvider,

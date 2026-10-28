@@ -28,12 +28,13 @@ import {
 import type { AppOptions } from './app';
 
 /**
- * Tokens de prueba: "token-<uid>" con un rol opcional ("token-ana:admin").
+ * Tokens de prueba: "token-<uid>" con un rol opcional ("token-ana:admin") y ":mfa" si la
+ * sesión tiene segundo factor ("token-ana:admin:mfa").
  * "token-<uid>:anonymous" es una sesión anónima (sin email).
  */
 export const fakeTokens: TokenVerifier = {
   verify(idToken) {
-    const match = /^token-([a-z0-9]+)(?::(\w+))?$/.exec(idToken);
+    const match = /^token-([a-z0-9]+)(?::(\w+))?(:mfa)?$/.exec(idToken);
     if (!match?.[1]) return Promise.reject(new Error('token inválido'));
     if (match[2] === 'anonymous') {
       return Promise.resolve({
@@ -45,7 +46,10 @@ export const fakeTokens: TokenVerifier = {
     return Promise.resolve({
       uid: match[1],
       email: `${match[1]}@storynido.test`,
-      claims: match[2] ? { role: match[2] } : {},
+      claims: {
+        ...(match[2] ? { role: match[2] } : {}),
+        ...(match[3] ? { firebase: { sign_in_second_factor: 'totp' } } : {}),
+      },
     });
   },
 };

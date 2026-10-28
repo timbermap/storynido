@@ -7,3 +7,6 @@ env:
   - variable: NEXT_PUBLIC_BRAND_DOMAIN
     value: staging.storynido.com
     availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_API_URL
+    value: https://api-kxfsarqx2q-uc.a.run.app
+    availability: [BUILD, RUNTIME]

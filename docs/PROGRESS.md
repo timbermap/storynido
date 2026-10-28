@@ -20,7 +20,7 @@
 | 12b | Eventos (un diseño, muchas copias)                   | ✅ 2026-10-28 (kit digital; impreso por cotización) |
 | 12c | Profesionales (cuenta Pro, descuentos)               | ✅ 2026-10-28 (texto propio pendiente)              |
 | 13  | Emails y postventa                                   | ✅ 2026-10-28 (mails simulados hasta Resend)        |
-| 14  | Admin: configuración                                 | ⏳ Pendiente                                        |
+| 14  | Admin: configuración                                 | 🚧 Etapa 1 de 4 (acceso con 2FA, auditoría, sitio)  |
 | 15  | Admin: operaciones                                   | ⏳ Pendiente                                        |
 | 16  | Observabilidad y seguridad                           | ⏳ Pendiente                                        |
 | 17  | E2E y rendimiento                                    | ⏳ Pendiente                                        |

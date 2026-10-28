@@ -8,6 +8,8 @@ export interface RequestUser {
   role: Role;
   /** Sesión anónima del creador (todavía sin cuenta). */
   anonymous: boolean;
+  /** Inició sesión con segundo factor (Identity Platform). El admin lo exige. */
+  mfa: boolean;
 }
 
 /** Cuándo responde una ruta según el modo del sitio. */

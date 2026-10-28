@@ -18,3 +18,6 @@ env:
   - variable: NEXT_TELEMETRY_DISABLED
     value: '1'
     availability: [BUILD]
+  - variable: NEXT_PUBLIC_API_URL
+    value: https://api.storynido.com
+    availability: [BUILD, RUNTIME]

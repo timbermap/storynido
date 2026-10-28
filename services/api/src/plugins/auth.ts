@@ -24,13 +24,14 @@ export function registerAuthentication(app: FastifyInstance): void {
     if (!match?.[1]) throw unauthorized('Header Authorization inválido.');
     try {
       const verified = await app.deps.tokens.verify(match[1]);
+      const firebase = verified.claims.firebase as
+        { sign_in_provider?: unknown; sign_in_second_factor?: unknown } | undefined;
       request.user = {
         uid: verified.uid,
         email: verified.email,
         role: roleFromClaims(verified.claims),
-        anonymous:
-          (verified.claims.firebase as { sign_in_provider?: unknown } | undefined)
-            ?.sign_in_provider === 'anonymous',
+        anonymous: firebase?.sign_in_provider === 'anonymous',
+        mfa: typeof firebase?.sign_in_second_factor === 'string',
       };
     } catch {
       throw unauthorized('La sesión no es válida o venció. Iniciá sesión de nuevo.');
@@ -50,7 +51,7 @@ function hasAccess(role: Role, access: RouteAccess): boolean {
   }
 }
 
-/** preHandler que exige sesión y el rol que pide la ruta. */
+/** preHandler que exige sesión y el rol que pide la ruta (y 2FA en las rutas de admin). */
 export function requireAccess(access: RouteAccess): preHandlerHookHandler {
   return (request: FastifyRequest, _reply, done) => {
     if (access === 'public') {
@@ -61,7 +62,22 @@ export function requireAccess(access: RouteAccess): preHandlerHookHandler {
       done(unauthorized());
       return;
     }
-    done(hasAccess(request.user.role, access) ? undefined : forbidden());
+    if (!hasAccess(request.user.role, access)) {
+      done(forbidden());
+      return;
+    }
+    const adminRoute = access === 'admin' || access === 'superadmin';
+    if (adminRoute && request.server.deps.config.adminMfaRequired && !request.user.mfa) {
+      done(
+        new AppError(
+          403,
+          'mfa_required',
+          'El panel de administración exige verificación en dos pasos.',
+        ),
+      );
+      return;
+    }
+    done();
   };
 }
 

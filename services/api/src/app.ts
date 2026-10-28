@@ -9,6 +9,7 @@ import { registerErrorHandling } from './plugins/error-handler';
 import { registerSecurity } from './plugins/security';
 import { registerSiteMode } from './plugins/site-mode';
 import { registerAccountRoutes } from './routes/accounts';
+import { registerAdminRoutes } from './routes/admin';
 import { registerAiConfigRoutes } from './routes/ai-config';
 import { registerCatalogRoutes } from './routes/catalog';
 import { registerCheckoutRoutes } from './routes/checkout';
@@ -59,6 +60,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   registerPhotoRoutes(app, deps.photos);
   registerPreviewRoutes(app, deps.previews);
   registerAiConfigRoutes(app, deps.db);
+  registerAdminRoutes(app, deps.db);
   registerAccountRoutes(app, deps.accounts);
   registerOrderRoutes(app);
   registerCheckoutRoutes(app, deps.checkout);

@@ -16,6 +16,8 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   CORS_ORIGINS: z.string().optional(),
   /** Si es true, los endpoints sensibles exigen un token válido de App Check. */
   APP_CHECK_ENFORCED: booleanString.optional(),
+  /** Si es true, las rutas de admin exigen sesión con segundo factor (por defecto, fuera de local). */
+  ADMIN_MFA_REQUIRED: booleanString.optional(),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(120),
   PUBLIC_API_URL: z.url().default('http://localhost:8080'),
   LOCAL_STORAGE_DIR: z.string().default(path.join(os.tmpdir(), 'storynido-storage')),
@@ -71,6 +73,7 @@ export interface ApiConfig {
   projectId: string;
   corsOrigins: string[];
   appCheckEnforced: boolean;
+  adminMfaRequired: boolean;
   rateLimitPerMinute: number;
   /** Swagger UI y rutas /dev solo fuera de producción. */
   devToolsEnabled: boolean;
@@ -92,6 +95,7 @@ export function loadApiConfig(source: Readonly<Record<string, string | undefined
       .map((origin) => origin.trim())
       .filter(Boolean),
     appCheckEnforced: env.APP_CHECK_ENFORCED ?? env.APP_ENV === 'production',
+    adminMfaRequired: env.ADMIN_MFA_REQUIRED ?? !isLocal,
     rateLimitPerMinute: env.RATE_LIMIT_PER_MINUTE,
     devToolsEnabled: env.APP_ENV !== 'production',
     pipelineEvents: env.PIPELINE_EVENTS ?? (isLocal ? 'worker' : 'pubsub'),

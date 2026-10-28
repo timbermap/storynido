@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 
 import { Analytics } from '@/components/consent/analytics';
 import { ConsentBanner } from '@/components/consent/consent-banner';
-import { Maintenance } from '@/components/layout/maintenance';
+import { Maintenance, PreviewOnlyBanner } from '@/components/layout/maintenance';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
 import { routing } from '@/i18n/routing';
@@ -111,6 +111,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
               <Maintenance />
             ) : (
               <>
+                {mode === 'preview_only' && <PreviewOnlyBanner />}
                 <SiteHeader />
                 <main id="main">{children}</main>
                 <SiteFooter country={display.country} countries={display.activeCountries} />
