@@ -1,3 +1,4 @@
+import type { BookEvent } from '../models/events';
 import type { Locale } from '../i18n';
 import {
   describeTraits,
@@ -54,6 +55,8 @@ export interface StoryPromptInput {
   lessons: readonly LessonPrompt[];
   /** Recuerdos guiados ya moderados (null si no hay). */
   memories?: Memories | null;
+  /** Eventos: cumpleaños (con la temática ya moderada). */
+  event?: BookEvent | null;
   /** Densidad de texto y nivel de lectura (fase 07b). */
   wordsPerPage?: { min: number; max: number };
   levelGuidance?: string;
@@ -101,6 +104,17 @@ Detalles reales de la familia (intégralos con naturalidad en escenas concretas;
 los diálogos; si alguno no encaja, omítelo; nunca agregues datos personales que no estén acá):
 ${memories}`
     : '';
+  const event = input.event;
+  const eventSection =
+    event?.type === 'birthday'
+      ? `
+
+Es un cuento de cumpleaños para regalar a los invitados de la fiesta: ${input.childName}${
+          event.turningAge ? ` cumple ${String(event.turningAge)} años` : ' festeja su cumpleaños'
+        }.${event.theme ? ` La temática de la fiesta es «${event.theme}»: úsala en la aventura.` : ''}
+La historia termina con la celebración (torta, velas y amigos). Que sea alegre, corta y fácil de leer
+en voz alta; no nombres a los invitados.`
+      : '';
   const planSection = input.plan
     ? `
 
@@ -116,7 +130,7 @@ ${input.plan.scenes
   )
   .join('\n')}`
     : '';
-  return `${body}${memoriesSection}${planSection}
+  return `${body}${memoriesSection}${eventSection}${planSection}
 
 Reglas obligatorias:
 - Escribe en ${LANGUAGE_NAMES[input.language]}.

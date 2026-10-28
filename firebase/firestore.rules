@@ -169,6 +169,18 @@ service cloud.firestore {
         && optString(m.get('favorite', null), 150));
     }
 
+    // Eventos (fase 12b): cumpleaños con fecha, edad que cumple y temática (todo opcional).
+    function validEvent(e) {
+      return e == null || (e is map
+        && e.keys().hasOnly(['type', 'date', 'turningAge', 'theme'])
+        && e.type == 'birthday'
+        && (e.get('date', null) == null
+          || (e.date is string && e.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
+        && (e.get('turningAge', null) == null
+          || (e.turningAge is int && e.turningAge >= 1 && e.turningAge <= 15))
+        && optString(e.get('theme', null), 60));
+    }
+
     function validBookEdits() {
       let d = incoming();
       return (d.storyId == null || d.storyId is string)
@@ -184,6 +196,7 @@ service cloud.firestore {
         && d.get('characterMode', 'photo') in ['photo', 'avatar']
         && validAvatar(d.get('avatar', null))
         && validMemories(d.get('memories', null))
+        && validEvent(d.get('event', null))
         // Opciones editoriales (BOOK_LENGTHS, TEXT_DENSITIES, READING_LEVELS, CONTENT_TYPES).
         && d.get('length', null) in [null, 'mini', 'short', 'classic', 'epic']
         && d.get('textDensity', 'balanced') in ['visual', 'balanced', 'rich']
@@ -198,7 +211,7 @@ service cloud.firestore {
 
       // Solo se crean borradores; preview, estado y regeneraciones los maneja el servidor.
       allow create: if ownsIncoming()
-        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'length', 'textDensity', 'readingLevel', 'contentType', 'channel', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
+        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'event', 'length', 'textDensity', 'readingLevel', 'contentType', 'channel', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
         && incoming().status == 'draft'
         && incoming().preview == null
         && incoming().regenerationsUsed == 0
@@ -208,7 +221,7 @@ service cloud.firestore {
 
       allow update: if ownsExisting()
         && resource.data.status in ['draft', 'preview_ready']
-        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'length', 'textDensity', 'readingLevel', 'contentType', 'updatedAt'])
+        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'event', 'length', 'textDensity', 'readingLevel', 'contentType', 'updatedAt'])
         && isNow('updatedAt')
         && validBookEdits();
 

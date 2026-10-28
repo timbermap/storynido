@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { bookEventSchema } from './events';
+
 import { countryCodeSchema } from '../countries';
 import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
@@ -223,6 +225,8 @@ export const bookSchema = timestampsSchema
     contentType: contentTypeSchema.default('story'),
     /** Línea comercial por la que se creó (lo anterior es de Familias). */
     channel: channelSchema.default('families'),
+    /** Eventos (fase 12b): cumpleaños con fecha, edad que cumple y temática. */
+    event: bookEventSchema.nullable().default(null),
     /** Solo servidor. */
     preview: bookPreviewSchema.nullable(),
     /** Solo servidor. */

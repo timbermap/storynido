@@ -390,7 +390,17 @@
       "friend": "Melhor amigo ou amiga (opcional)",
       "dedication": "Dedicatória (opcional)",
       "dedicationPlaceholder": "Para Sofia, que toda noite sonha com as estrelas. Com amor, mamãe e papai.",
-      "required": "Escreva o nome para continuar."
+      "required": "Escreva o nome para continuar.",
+      "event": {
+        "title": "Dados do aniversário",
+        "note": "Usamos na história. A data nos ajuda a informar os prazos reais de impressão.",
+        "date": "Data da festa",
+        "turningAge": "Idade que vai fazer",
+        "turningAgeEmpty": "Escolher",
+        "years": "{count, plural, one {# ano} other {# anos}}",
+        "theme": "Tema da festa (opcional)",
+        "themePlaceholder": "Por exemplo: dinossauros, espaço, princesas"
+      }
     },
     "photos": {
       "title": "Envie de 1 a 3 fotos",
@@ -471,7 +481,10 @@
       "characterAvatar": "Sem foto (características escolhidas)",
       "memories": "Lembranças",
       "memoriesCount": "{count, plural, =0 {Sem lembranças} one {# lembrança} other {# lembranças}}",
-      "book": "Seu livro"
+      "book": "Seu livro",
+      "event": "Aniversário",
+      "eventTurning": "Faz {count}",
+      "eventEmpty": "Não preenchido"
     },
     "preview": {
       "badge": "Amostra da história",

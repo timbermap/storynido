@@ -1,6 +1,7 @@
 import {
   COLLECTIONS,
   DEFAULT_EDITORIAL_CONFIG,
+  EMPTY_BIRTHDAY,
   type Book,
   type Channel,
   type Child,
@@ -38,6 +39,7 @@ export type BookEdits = Partial<
     | 'characterMode'
     | 'avatar'
     | 'memories'
+    | 'event'
     | 'length'
     | 'textDensity'
     | 'readingLevel'
@@ -86,6 +88,8 @@ export async function createDraft(
     characterMode: 'photo',
     avatar: null,
     memories: null,
+    // Eventos: el cumpleaños se completa en el paso del protagonista.
+    event: preset.channel === 'events' ? EMPTY_BIRTHDAY : null,
     // Opciones editoriales: se ajustan en el paso de la aventura (sugeridas según la edad).
     // Eventos arranca como mini cuento muy visual (el librito para cada invitado).
     ...DEFAULT_EDITORIAL_CONFIG.defaults,
@@ -146,6 +150,7 @@ export function subscribeBook(
         characterMode: data.characterMode === 'avatar' ? 'avatar' : 'photo',
         avatar: (data.avatar as Book['avatar'] | undefined) ?? null,
         memories: (data.memories as Book['memories'] | undefined) ?? null,
+        event: (data.event as Book['event'] | undefined) ?? null,
         // Borradores anteriores a las opciones editoriales (extensión null = la de su historia).
         length: (data.length as Book['length'] | undefined) ?? null,
         textDensity: (data.textDensity as Book['textDensity'] | undefined) ?? 'balanced',

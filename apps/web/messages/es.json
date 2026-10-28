@@ -390,7 +390,17 @@
       "friend": "Su mejor amigo o amiga (opcional)",
       "dedication": "Dedicatoria (opcional)",
       "dedicationPlaceholder": "Para Martina, que cada noche sueña con las estrellas. Con amor, mamá y papá.",
-      "required": "Escribe su nombre para continuar."
+      "required": "Escribe su nombre para continuar.",
+      "event": {
+        "title": "Datos del cumpleaños",
+        "note": "Los usamos en el cuento. La fecha nos sirve para avisarte los plazos reales de impresión.",
+        "date": "Fecha de la fiesta",
+        "turningAge": "Edad que cumple",
+        "turningAgeEmpty": "Elegir",
+        "years": "{count, plural, one {# año} other {# años}}",
+        "theme": "Temática de la fiesta (opcional)",
+        "themePlaceholder": "Por ejemplo: dinosaurios, espacio, princesas"
+      }
     },
     "photos": {
       "title": "Sube de 1 a 3 fotos",
@@ -471,7 +481,10 @@
       "characterAvatar": "Sin foto (rasgos elegidos)",
       "memories": "Recuerdos",
       "memoriesCount": "{count, plural, =0 {Sin recuerdos} one {# recuerdo} other {# recuerdos}}",
-      "book": "Tu libro"
+      "book": "Tu libro",
+      "event": "Cumpleaños",
+      "eventTurning": "Cumple {count}",
+      "eventEmpty": "Sin completar"
     },
     "preview": {
       "badge": "Muestra de la historia",

@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, type KeyboardEvent } from 'react';
 
-import { CHILD_LIMITS, type Child } from '@storynido/shared';
+import { CHILD_LIMITS, EMPTY_BIRTHDAY, EVENT_LIMITS, type Child } from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -34,11 +34,16 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [petName, setPetName] = useState(child?.petName ?? '');
   const [friend, setFriend] = useState(child?.bestFriendName ?? '');
   const [dedication, setDedication] = useState(book.dedication ?? '');
+  // Eventos: datos del cumpleaños (fecha, edad que cumple y temática).
+  const isEvent = book.channel === 'events';
+  const [eventDate, setEventDate] = useState(book.event?.date ?? '');
+  const [turningAge, setTurningAge] = useState(book.event?.turningAge ?? null);
+  const [theme, setTheme] = useState(book.event?.theme ?? '');
   const [error, setError] = useState<string | null>(null);
   const clearDraft = useStepDraft(
     book.id,
     'child',
-    { name, age, pronouns, likes, like, petName, friend, dedication },
+    { name, age, pronouns, likes, like, petName, friend, dedication, eventDate, turningAge, theme },
     (saved) => {
       setName(saved.name);
       setAge(saved.age);
@@ -48,6 +53,9 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       setPetName(saved.petName);
       setFriend(saved.friend);
       setDedication(saved.dedication);
+      setEventDate(saved.eventDate);
+      setTurningAge(saved.turningAge);
+      setTheme(saved.theme);
     },
   );
 
@@ -89,7 +97,19 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
         petName: blankToNull(petName),
         bestFriendName: blankToNull(friend),
       });
-      await updateBook(db, book.id, { dedication: blankToNull(dedication) });
+      await updateBook(db, book.id, {
+        dedication: blankToNull(dedication),
+        ...(isEvent
+          ? {
+              event: {
+                ...EMPTY_BIRTHDAY,
+                date: eventDate || null,
+                turningAge,
+                theme: blankToNull(theme.slice(0, EVENT_LIMITS.themeMaxLength)),
+              },
+            }
+          : {}),
+      });
     });
     if (ok) {
       clearDraft();
@@ -247,6 +267,66 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
             />
           </div>
         </div>
+
+        {isEvent && (
+          <fieldset className="grid gap-4 rounded-2xl border bg-card p-4">
+            <legend className="px-1 text-base font-semibold">{t('event.title')}</legend>
+            <p className="text-sm text-muted-foreground">{t('event.note')}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <label htmlFor="event-date" className={labelClass}>
+                  {t('event.date')}
+                </label>
+                <input
+                  id="event-date"
+                  type="date"
+                  className={inputClass}
+                  value={eventDate}
+                  onChange={(event) => {
+                    setEventDate(event.target.value);
+                  }}
+                />
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="event-age" className={labelClass}>
+                  {t('event.turningAge')}
+                </label>
+                <select
+                  id="event-age"
+                  className={inputClass}
+                  value={turningAge ?? ''}
+                  onChange={(event) => {
+                    setTurningAge(event.target.value ? Number(event.target.value) : null);
+                  }}
+                >
+                  <option value="">{t('event.turningAgeEmpty')}</option>
+                  {Array.from({ length: EVENT_LIMITS.maxTurningAge }, (_, index) => index + 1).map(
+                    (value) => (
+                      <option key={value} value={value}>
+                        {t('event.years', { count: value })}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="event-theme" className={labelClass}>
+                {t('event.theme')}
+              </label>
+              <input
+                id="event-theme"
+                className={inputClass}
+                value={theme}
+                maxLength={EVENT_LIMITS.themeMaxLength}
+                placeholder={t('event.themePlaceholder')}
+                onChange={(event) => {
+                  setTheme(event.target.value);
+                }}
+              />
+            </div>
+          </fieldset>
+        )}
 
         <div className="grid gap-2">
           <label htmlFor="child-dedication" className={labelClass}>

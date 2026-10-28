@@ -76,6 +76,7 @@ const draftBook = (ownerUid: string, childId: string | null = null) => ({
   characterMode: 'photo',
   avatar: null,
   memories: null,
+  event: null,
   length: 'classic',
   textDensity: 'balanced',
   readingLevel: 'developing',
@@ -281,6 +282,18 @@ describe('books', () => {
         updatedAt: serverTimestamp(),
       }),
     );
+    // Eventos: cumpleaños con fecha, edad y temática; nada más.
+    const event = { type: 'birthday', date: '2026-12-05', turningAge: 6, theme: 'dinosaurios' };
+    await assertSucceeds(updateDoc(ref, { event, updatedAt: serverTimestamp() }));
+    for (const bad of [
+      { ...event, type: 'wedding' },
+      { ...event, date: '5/12/2026' },
+      { ...event, turningAge: 40 },
+      { ...event, theme: 'x'.repeat(61) },
+      { ...event, guests: ['Luis'] },
+    ]) {
+      await assertFails(updateDoc(ref, { event: bad, updatedAt: serverTimestamp() }));
+    }
   });
 
   it('la línea comercial se fija al crear y no se cambia después', async () => {

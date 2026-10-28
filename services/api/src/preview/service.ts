@@ -11,6 +11,7 @@ import {
   type MustKeepTrait,
   type QaEvent,
   pagesOutOfRange,
+  type BookEvent,
   type BookLength,
   type ContentType,
   type ReadingLevel,
@@ -74,6 +75,8 @@ interface BookData {
   characterMode?: 'photo' | 'avatar';
   avatar?: Avatar | null;
   memories?: Memories | null;
+  /** Eventos (fase 12b). */
+  event?: BookEvent | null;
   dedication?: string | null;
   /** Rasgos confirmados por el adulto (fase 07d). */
   characterTraits?: CharacterTraits | null;
@@ -381,6 +384,19 @@ export class PreviewService {
       }
     }
 
+    // Eventos: la temática de la fiesta también se modera antes de entrar al prompt.
+    const event = book.event ?? null;
+    if (event?.theme) {
+      const verdict = await track('moderation', await ai.text.moderateText(event.theme));
+      if (!verdict.allowed) {
+        throw new AppError(
+          422,
+          'validation_failed',
+          'La temática no se puede usar en un cuento infantil. Edítala e intenta de nuevo.',
+        );
+      }
+    }
+
     const { photo, sheet, traits, mustKeep } = await this.characterOf(
       uid,
       book,
@@ -412,6 +428,7 @@ export class PreviewService {
       ...request,
       template: story.textPromptTemplate,
       memories,
+      event,
       levelGuidance: plan.levelGuidance,
       coloring: plan.contentType === 'coloring',
     };

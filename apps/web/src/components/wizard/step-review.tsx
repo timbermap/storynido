@@ -1,7 +1,7 @@
 'use client';
 
 import { Sparkles } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { MEMORY_KEYS } from '@storynido/shared';
 
@@ -24,6 +24,7 @@ export function StepReview({
   onViewPreview?: () => void;
 }) {
   const t = useTranslations('Wizard.review');
+  const locale = useLocale();
   const tBook = useTranslations('Wizard.book');
   const { book, child } = data;
   const story = data.stories.find((s) => s.slug === book.storyId);
@@ -36,8 +37,24 @@ export function StepReview({
   const memories = MEMORY_KEYS.filter((key) => book.memories?.[key]).length;
   const step = (name: (typeof WIZARD_STEPS)[number]) => WIZARD_STEPS.indexOf(name);
 
+  const event = book.channel === 'events' ? book.event : null;
+  const eventValue = event
+    ? [
+        event.turningAge ? t('eventTurning', { count: event.turningAge }) : null,
+        event.date
+          ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(
+              new Date(`${event.date}T00:00:00Z`),
+            )
+          : null,
+        event.theme,
+      ]
+        .filter(Boolean)
+        .join(' · ') || t('eventEmpty')
+    : null;
+
   const rows: { label: string; value: string; step: number }[] = [
     { label: t('protagonist'), value: child?.name ?? '—', step: step('child') },
+    ...(eventValue ? [{ label: t('event'), value: eventValue, step: step('child') }] : []),
     {
       label: t('character'),
       value:

@@ -12,3 +12,4 @@ export * from './qa';
 export * from './config';
 export * from './firestore';
 export * from './users';
+export * from './events';

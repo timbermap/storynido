@@ -390,7 +390,17 @@
       "friend": "Their best friend (optional)",
       "dedication": "Dedication (optional)",
       "dedicationPlaceholder": "For Emma, who dreams of the stars every night. With love, Mom and Dad.",
-      "required": "Enter their name to continue."
+      "required": "Enter their name to continue.",
+      "event": {
+        "title": "Birthday details",
+        "note": "We use them in the story. The date helps us tell you real printing times.",
+        "date": "Party date",
+        "turningAge": "Turning",
+        "turningAgeEmpty": "Choose",
+        "years": "{count, plural, one {# year old} other {# years old}}",
+        "theme": "Party theme (optional)",
+        "themePlaceholder": "For example: dinosaurs, space, princesses"
+      }
     },
     "photos": {
       "title": "Upload 1 to 3 photos",
@@ -471,7 +481,10 @@
       "characterAvatar": "Without a photo (chosen features)",
       "memories": "Memories",
       "memoriesCount": "{count, plural, =0 {No memories} one {# memory} other {# memories}}",
-      "book": "Your book"
+      "book": "Your book",
+      "event": "Birthday",
+      "eventTurning": "Turning {count}",
+      "eventEmpty": "Not filled in"
     },
     "preview": {
       "badge": "Story sample",

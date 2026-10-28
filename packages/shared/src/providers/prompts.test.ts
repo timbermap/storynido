@@ -45,6 +45,18 @@ describe('plantillas de prompts', () => {
     expect(prompt).toContain('Exactamente 12 páginas');
   });
 
+  it('cumpleaños (Eventos): edad que cumple, temática y cierre con la celebración', () => {
+    expect(buildStoryPrompt(base)).not.toContain('cuento de cumpleaños');
+    const prompt = buildStoryPrompt({
+      ...base,
+      event: { type: 'birthday', date: '2026-12-05', turningAge: 6, theme: 'dinosaurios' },
+    });
+    expect(prompt).toContain('cumple 6 años');
+    expect(prompt).toContain('«dinosaurios»');
+    expect(prompt).toContain('termina con la celebración');
+    expect(prompt).toContain('no nombres a los invitados');
+  });
+
   it('detecta si hay recuerdos cargados', () => {
     expect(hasMemories(null)).toBe(false);
     expect(hasMemories({ moment: null, companion: null, nickname: null, favorite: null })).toBe(
