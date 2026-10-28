@@ -12,6 +12,7 @@ import {
   type PipelineEvent,
   type PipelineStep,
 } from '@storynido/shared';
+import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
 import {
   FieldValue,
@@ -159,6 +160,7 @@ export class Pipeline {
     private readonly orchestrator: Orchestrator,
     private readonly dispatcher: IllustrationDispatcher,
     private readonly log: FastifyBaseLogger,
+    private readonly notifier: EmailNotifier | null = null,
   ) {}
 
   // ------------------------------------------------------------------ eventos
@@ -503,7 +505,10 @@ export class Pipeline {
     const deliver = (
       await this.order(orderId).collection(COLLECTIONS.orderSteps).doc('deliver').get()
     ).data() as { output?: { sentToPrint?: boolean } } | undefined;
-    return this.close(orderId, runId, deliver?.output?.sentToPrint ? 'sent_to_print' : 'ready', {});
+    const to = deliver?.output?.sentToPrint ? 'sent_to_print' : 'ready';
+    const closed = await this.close(orderId, runId, to, {});
+    if (closed) await this.notifier?.orderStatus(orderId, to);
+    return closed;
   }
 
   /** Se agotaron los reintentos: revisión manual y aviso al admin. */
@@ -523,6 +528,12 @@ export class Pipeline {
       });
       // severity ERROR: la alerta de Cloud Monitoring (fase 16) se dispara con este log.
       this.log.error({ orderId, step, runId, err: error }, 'pipeline failed: manual review');
+      await this.notifier?.adminAlert({
+        key: `alert:${orderId}:pipeline_failed:${runId}`,
+        kind: 'pipeline_failed',
+        orderId,
+        message: `Revisión manual (${step}): ${error.slice(0, 300)}`,
+      });
     }
     return closed;
   }

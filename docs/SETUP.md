@@ -71,6 +71,17 @@ pnpm --filter @storynido/firebase set-role --project storynido-staging --email t
 - **Webhook de la imprenta:** `POST /v1/webhooks/print/<proveedor>` con el cuerpo crudo; se verifica la firma.
 - **Mi cuenta (`/es/cuenta`):** pedidos en vivo, descarga, "Pedir de nuevo" (sin IA), perfiles con "Borrar datos" y "Borrar mi cuenta".
 
+## 5e. Mails y postventa (fase 13)
+
+- **Local:** los mails los guarda el proveedor simulado y salen en el log de la API (`mock email`). Cada envío queda en `emailLog` del emulador.
+- **Vista previa de las plantillas:** `pnpm --filter @storynido/emails preview /tmp/mails` y abrir `/tmp/mails/index.html`.
+- **Postventa a mano:** `curl -X POST localhost:8081/jobs/daily` (reseñas, recordatorios, sugerencias, reintentos).
+- **Resend (real):**
+  1. Crear la cuenta y verificar el dominio (registros DNS que indica Resend, con autorización).
+  2. Cargar `RESEND_API_KEY` en `.env.local` y en Secret Manager (`resend-api-key`).
+  3. `EMAIL_PROVIDER=resend` y `EMAIL_FROM`.
+- **Variables:** `WEB_URL`, `ADMIN_URL`, `ADMIN_ALERT_EMAILS`, `EMAIL_LINK_SECRET` (bajas firmadas) y `EMAIL_POSTAL_ADDRESS` (pie de marketing).
+
 ## 6. Secretos por plataforma
 
 Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cuando su fase lo necesita. En local, el mismo valor va en `.env.local`.

@@ -4,6 +4,7 @@ import { GcsStorageService } from './gcp/storage';
 import { VertexClient, VertexImageProvider, VertexTextProvider } from './gcp/vertex';
 import { VisionPhotoAnalyzer } from './gcp/vision';
 import { GelatoPrintProvider, type GelatoOptions } from './gelato/print';
+import { ResendEmailProvider, type ResendOptions } from './resend/email';
 
 import { LocalStorageService } from './local/storage';
 import { MockAIImageProvider, MockAITextProvider } from './mock/ai';
@@ -33,6 +34,8 @@ export interface DefaultProviderOptions {
   aiModels?: AiModelSettings;
   /** Gelato (solo si hay clave): sin clave, la imprenta no se registra. */
   gelato?: Pick<GelatoOptions, 'apiKey' | 'orderType'>;
+  /** Resend (solo si hay clave): sin clave, los mails quedan en el proveedor simulado. */
+  resend?: Omit<ResendOptions, 'fetchImpl'>;
   onMockEmail?: (message: EmailMessage) => void;
 }
 
@@ -43,6 +46,7 @@ export function createProviderFactories(
 ): ProviderFactories {
   const buckets = options.gcsBuckets;
   const gelato = options.gelato;
+  const resend = options.resend;
   const projectId = options.vertexProjectId;
   let vertex: VertexClient | undefined;
   const vertexClient = (id: string) =>
@@ -72,7 +76,10 @@ export function createProviderFactories(
         }),
       ...(gelato ? { gelato: () => new GelatoPrintProvider(gelato) } : {}),
     },
-    email: { mock: () => new MockEmailProvider(options.onMockEmail) },
+    email: {
+      mock: () => new MockEmailProvider(options.onMockEmail),
+      ...(resend ? { resend: () => new ResendEmailProvider(resend) } : {}),
+    },
     storage: {
       local: () => new LocalStorageService(options.localStorage),
       ...(buckets ? { gcs: () => new GcsStorageService(buckets) } : {}),

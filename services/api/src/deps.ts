@@ -1,3 +1,4 @@
+import type { EmailNotifier } from '@storynido/emails';
 import type { ProviderRegistry } from '@storynido/providers';
 import type { SiteConfig } from '@storynido/shared';
 import type { Firestore } from 'firebase-admin/firestore';
@@ -45,6 +46,8 @@ export interface ApiDeps {
   accounts: AccountService;
   checkout: CheckoutService;
   fulfillment: FulfillmentService;
+  /** Mails al cliente y alertas al equipo (idempotentes). */
+  notifier: EmailNotifier;
   /** Eventos del pipeline del pedido (worker directo en local, Pub/Sub en la nube). */
   pipelineEvents: PipelineEventPublisher;
   db: Firestore;

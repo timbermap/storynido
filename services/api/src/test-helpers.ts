@@ -3,6 +3,7 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+import { EmailNotifier } from '@storynido/emails';
 import { createProviderRegistry, providerSettingsFromEnv } from '@storynido/providers';
 import { getFirestore } from 'firebase-admin/firestore';
 
@@ -79,9 +80,18 @@ export async function createTestApp(
   });
   const db = getFirestore(initFirebaseAdmin('demo-storynido-test'));
   const catalog = overrides.catalog ?? new InMemoryCatalog();
+  const notifier =
+    overrides.notifier ??
+    new EmailNotifier(db, () => (overrides.providers ?? providers).email(), {
+      webUrl: 'https://storynido.test',
+      apiUrl: 'https://api.storynido.test',
+      linkSecret: 'test-email-link-secret',
+      adminEmails: ['equipo@storynido.test'],
+      adminUrl: 'https://admin.storynido.test',
+    });
   const previews =
     overrides.previews ??
-    new PreviewService(db, overrides.providers ?? providers, catalog, silentLogger);
+    new PreviewService(db, overrides.providers ?? providers, catalog, silentLogger, notifier);
   const pipelineEvents = overrides.pipelineEvents ?? new RecordingPublisher();
   const deps: ApiDeps = {
     config,
@@ -104,6 +114,7 @@ export async function createTestApp(
         },
       },
       overrides.providers ?? providers,
+      notifier,
     ),
     pipelineEvents,
     checkout: new CheckoutService(
@@ -115,11 +126,16 @@ export async function createTestApp(
       overrides.conversions ?? new RecordingConversions(),
       silentLogger,
       { devToolsEnabled: true, mockWebhookSecret: 'test-webhook-secret' },
+      notifier,
     ),
-    fulfillment: new FulfillmentService(db, overrides.providers ?? providers, silentLogger, {
-      devToolsEnabled: true,
-      mockWebhookSecret: 'test-webhook-secret',
-    }),
+    fulfillment: new FulfillmentService(
+      db,
+      overrides.providers ?? providers,
+      silentLogger,
+      { devToolsEnabled: true, mockWebhookSecret: 'test-webhook-secret' },
+      notifier,
+    ),
+    notifier,
     db,
     ...overrides,
   };

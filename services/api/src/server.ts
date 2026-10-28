@@ -1,3 +1,4 @@
+import { EmailNotifier } from '@storynido/emails';
 import {
   aiModelSettingsFromEnv,
   createProviderRegistry,
@@ -52,6 +53,17 @@ const providers = createProviderRegistry({
   gelato: config.env.GELATO_API_KEY
     ? { apiKey: config.env.GELATO_API_KEY, orderType: config.env.GELATO_ORDER_TYPE }
     : undefined,
+  resend: config.env.RESEND_API_KEY
+    ? {
+        apiKey: config.env.RESEND_API_KEY,
+        from: config.env.EMAIL_FROM,
+        brand: {
+          name: 'StoryNido',
+          siteUrl: config.env.WEB_URL,
+          postalAddress: config.env.EMAIL_POSTAL_ADDRESS ?? null,
+        },
+      }
+    : undefined,
   aiModels: aiModelSettingsFromEnv(process.env),
   localStorage: {
     rootDir: config.env.LOCAL_STORAGE_DIR,
@@ -71,7 +83,18 @@ liveConfig.start();
 const catalog = new FirestoreCatalog(db);
 const tokens = new FirebaseTokenVerifier(firebase);
 
-const previews = new PreviewService(db, providers, catalog, log);
+const notifier = new EmailNotifier(db, () => providers.email(), {
+  webUrl: config.env.WEB_URL,
+  apiUrl: config.env.PUBLIC_API_URL,
+  // En local alcanza una firma fija; en la nube, sin secreto no se mandan mails de marketing.
+  linkSecret:
+    config.env.EMAIL_LINK_SECRET ??
+    (config.appEnv === 'local' ? 'local-dev-email-link-secret' : null),
+  adminEmails: config.env.ADMIN_ALERT_EMAILS,
+  adminUrl: config.env.ADMIN_URL,
+  log,
+});
+const previews = new PreviewService(db, providers, catalog, log, notifier);
 const pipelineEvents =
   config.pipelineEvents === 'pubsub'
     ? new PubSubPublisher(config.projectId, config.env.ORDER_EVENTS_TOPIC)
@@ -93,6 +116,7 @@ const checkout = new CheckoutService(
   ),
   log,
   { devToolsEnabled: config.devToolsEnabled, mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET },
+  notifier,
 );
 
 const app = await buildApp({
@@ -107,13 +131,26 @@ const app = await buildApp({
     catalog,
     photos: new PhotoService(db, providers),
     previews,
-    accounts: new AccountService(db, tokens, new FirebaseAuthAccounts(firebase), providers),
+    accounts: new AccountService(
+      db,
+      tokens,
+      new FirebaseAuthAccounts(firebase),
+      providers,
+      notifier,
+    ),
     pipelineEvents,
     checkout,
-    fulfillment: new FulfillmentService(db, providers, log, {
-      devToolsEnabled: config.devToolsEnabled,
-      mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET,
-    }),
+    fulfillment: new FulfillmentService(
+      db,
+      providers,
+      log,
+      {
+        devToolsEnabled: config.devToolsEnabled,
+        mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET,
+      },
+      notifier,
+    ),
+    notifier,
     db,
   },
 });

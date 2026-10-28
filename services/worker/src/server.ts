@@ -1,3 +1,4 @@
+import { EmailNotifier } from '@storynido/emails';
 import {
   aiModelSettingsFromEnv,
   createProviderRegistry,
@@ -9,6 +10,7 @@ import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 import { buildApp } from './app';
+import { PostSaleJobs } from './jobs/post-sale';
 import { loadWorkerEnv } from './config';
 import { generationHandlers } from './pipeline/generation';
 import { simulatedHandlers } from './pipeline/handlers';
@@ -33,6 +35,7 @@ const app = buildApp({
   logger: cloudLoggingOptions('worker', env.LOG_LEVEL),
   version: env.K_REVISION,
   pipeline: current,
+  jobs: () => jobs,
 });
 
 const settings = providerSettingsFromEnv(process.env);
@@ -51,6 +54,17 @@ const providers = createProviderRegistry({
   gelato: env.GELATO_API_KEY
     ? { apiKey: env.GELATO_API_KEY, orderType: env.GELATO_ORDER_TYPE }
     : undefined,
+  resend: env.RESEND_API_KEY
+    ? {
+        apiKey: env.RESEND_API_KEY,
+        from: env.EMAIL_FROM,
+        brand: {
+          name: 'StoryNido',
+          siteUrl: env.WEB_URL,
+          postalAddress: env.EMAIL_POSTAL_ADDRESS ?? null,
+        },
+      }
+    : undefined,
   aiModels: aiModelSettingsFromEnv(process.env),
   localStorage: {
     rootDir: env.LOCAL_STORAGE_DIR,
@@ -58,6 +72,19 @@ const providers = createProviderRegistry({
     secret: env.LOCAL_STORAGE_SECRET,
   },
 });
+
+const db = getFirestore(firebase);
+const notifier = new EmailNotifier(db, () => providers.email(), {
+  webUrl: env.WEB_URL,
+  apiUrl: env.PUBLIC_API_URL,
+  // En local alcanza una firma fija; en la nube, sin secreto no se mandan mails de marketing.
+  linkSecret:
+    env.EMAIL_LINK_SECRET ?? (env.APP_ENV === 'local' ? 'local-dev-email-link-secret' : null),
+  adminEmails: env.ADMIN_ALERT_EMAILS,
+  adminUrl: env.ADMIN_URL,
+  log: app.log,
+});
+const jobs = new PostSaleJobs(db, notifier);
 
 const gcp = { projectId: env.GCP_PROJECT_ID, region: env.GCP_REGION };
 const cloud = env.PIPELINE_RUNNER === 'cloud';
@@ -84,6 +111,7 @@ const pipeline = new Pipeline(
       })
     : new InlineDispatcher(current, app.log, env.LOCAL_RETRY_BASE_MS),
   app.log,
+  notifier,
 );
 
 // Cloud Run envía SIGTERM antes de apagar la instancia.

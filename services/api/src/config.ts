@@ -24,6 +24,23 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   MOCK_WEBHOOK_SECRET: z.string().min(8).default('local-dev-webhook-secret'),
   /** Gelato: sin clave no se registra. Fuera de producción los pedidos quedan en borrador. */
   GELATO_API_KEY: z.string().trim().optional(),
+  /** Mails: web y admin públicos (enlaces), destinatarios de alertas y firma de las bajas. */
+  WEB_URL: z.url().default('http://localhost:3000'),
+  ADMIN_URL: z.url().default('http://localhost:3001'),
+  ADMIN_ALERT_EMAILS: z
+    .string()
+    .default('')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((email) => email.trim())
+        .filter(Boolean),
+    ),
+  EMAIL_LINK_SECRET: z.string().trim().min(16).optional(),
+  /** Resend: sin clave, los mails quedan en el proveedor simulado (EMAIL_PROVIDER=mock). */
+  RESEND_API_KEY: z.string().trim().optional(),
+  EMAIL_FROM: z.string().default('StoryNido <hola@storynido.com>'),
+  EMAIL_POSTAL_ADDRESS: z.string().optional(),
   GELATO_ORDER_TYPE: z.enum(['draft', 'order']).default('draft'),
   /** Región de Vertex AI ("global" tiene los modelos de Gemini más nuevos). */
   VERTEX_LOCATION: z.string().default('global'),

@@ -2,9 +2,11 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+import { EmailNotifier } from '@storynido/emails';
 import {
   createProviderRegistry,
   providerSettingsFromEnv,
+  type MockEmailProvider,
   type ProviderRegistry,
 } from '@storynido/providers';
 import { ProviderError, STEP_POLICIES, type PageReview, type PrintItem } from '@storynido/shared';
@@ -201,6 +203,13 @@ function setup(providers: ProviderRegistry) {
     orchestrator,
     dispatcher,
     log,
+    new EmailNotifier(db, () => providers.email(), {
+      webUrl: 'https://storynido.test',
+      apiUrl: 'https://api.storynido.test',
+      linkSecret: 'test-email-link-secret',
+      adminEmails: ['equipo@storynido.test'],
+      adminUrl: 'https://admin.storynido.test',
+    }),
   );
   const run = async (type: 'order.paid' | 'order.regenerate' = 'order.paid', requestId = 'r1') => {
     await pipeline.handleEvent({ type, orderId: 'o1', requestId });
@@ -265,6 +274,7 @@ describe('generación del libro (fase 09)', () => {
       'adminAlerts',
       'printOptions',
       'users',
+      'emailLog',
     ]) {
       await db.recursiveDelete(db.collection(name));
     }
@@ -324,6 +334,30 @@ describe('generación del libro (fase 09)', () => {
     expect(
       await providers.storage().exists({ bucket: 'pdfs', path: 'orders/o1/g0/digital-book.pdf' }),
     ).toBe(true);
+  });
+
+  it('mails: "tu libro está listo" al cliente, en su idioma', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    await setup(providers).run();
+    const sent = () => (providers.email() as MockEmailProvider).sent;
+    expect(sent().map((message) => [message.template, message.to])).toEqual([
+      ['digital_ready', 'ana@storynido.test'],
+    ]);
+    expect(sent()[0]?.data.url).toBe('https://storynido.test/es/pedido/o1');
+  });
+
+  it('mails: si queda en revisión manual, alerta al equipo y nada al cliente', async () => {
+    // Un impreso con imágenes de 1K: la maquetación lo frena.
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10 });
+    await setup(providers).run();
+    expect(
+      (providers.email() as MockEmailProvider).sent.map((message) => [
+        message.template,
+        message.to,
+      ]),
+    ).toEqual([['admin_alert', 'equipo@storynido.test']]);
   });
 
   it('impreso con las imágenes aprobadas en 1K: la maquetación lo frena por resolución', async () => {

@@ -2,9 +2,11 @@
  * Vista previa de punta a punta con emuladores (Firestore), storage local e IA simulada:
  * generación, cuotas, presupuesto, regeneraciones, edición moderada y configuración de IA.
  */
+import type { EmailNotifier } from '@storynido/emails';
 import {
   MOCK_UNSAFE_MARKER,
   signMockPaymentWebhook,
+  type MockEmailProvider,
   type ProviderRegistry,
 } from '@storynido/providers';
 import {
@@ -608,6 +610,7 @@ describe('checkout y pagos (fase 11)', () => {
   let providers: ProviderRegistry;
   let events: RecordingPublisher;
   let conversions: RecordingConversions;
+  let notifier: EmailNotifier;
 
   const mexico: CountryConfig = {
     code: 'MX',
@@ -690,6 +693,7 @@ describe('checkout y pagos (fase 11)', () => {
     );
     app = created.app;
     providers = created.providers;
+    notifier = created.deps.notifier;
   });
 
   afterAll(async () => {
@@ -712,6 +716,9 @@ describe('checkout y pagos (fase 11)', () => {
       'aiUsage',
       'aiBudget',
       'previewQuota',
+      'emailLog',
+      'reviews',
+      'users',
     ]) {
       await db.recursiveDelete(db.collection(name));
     }
@@ -977,6 +984,134 @@ describe('checkout y pagos (fase 11)', () => {
       'token-luis',
     );
     expect(notMine.statusCode).toBe(404);
+  });
+
+  /** Mails que mandó el proveedor simulado (filtrados por su clave). */
+  const mails = (filter: (message: { idempotencyKey: string }) => boolean) =>
+    (providers.email() as MockEmailProvider).sent.filter(filter);
+
+  it('mails del pedido: en el idioma del cliente y una sola vez por estado', async () => {
+    await db
+      .doc(`users/${UID}`)
+      .set({ email: `${UID}@storynido.test`, locale: 'en', marketingOptIn: false });
+    await approvedBook();
+    const { orderId } = (await checkout({ format: 'hardcover', shippingAddress: ADDRESS })).json<{
+      orderId: string;
+    }>();
+    // El webhook duplicado no repite el mail.
+    await webhook(completed(orderId, 104800, 'evt_mail'));
+    await webhook(completed(orderId, 104800, 'evt_mail_2'));
+    const ofOrder = () =>
+      mails((message) => message.idempotencyKey.startsWith(`order:${orderId}:`));
+    expect(ofOrder().map((message) => message.template)).toEqual(['payment_confirmed']);
+    expect(ofOrder()[0]).toMatchObject({
+      to: `${UID}@storynido.test`,
+      locale: 'en',
+      data: { format: 'hardcover', total: expect.stringContaining('MXN') as string },
+    });
+    expect((await db.collection('emailLog').where('orderId', '==', orderId).get()).size).toBe(1);
+
+    // La imprenta (simulada): en producción → despachado (con seguimiento) → entregado.
+    await db.doc(`orders/${orderId}`).update({
+      status: 'sent_to_print',
+      print: {
+        provider: 'mock',
+        externalOrderId: 'mock_po_mail',
+        trackingNumber: null,
+        trackingUrl: null,
+      },
+    });
+    for (let step = 0; step < 3; step += 1) {
+      await post(`/v1/dev/orders/${orderId}/simulate-print`, {});
+    }
+    expect(ofOrder().map((message) => message.template)).toEqual([
+      'payment_confirmed',
+      'print_in_production',
+      'shipped',
+      'delivered',
+    ]);
+    const shipped = ofOrder().find((message) => message.template === 'shipped');
+    expect(String(shipped?.data.trackingNumber)).toMatch(/^MOCK/);
+    expect((await db.doc(`orders/${orderId}`).get()).get('deliveredAt')).toBeTruthy();
+  });
+
+  it('marketing: solo con consentimiento y con baja firmada que se respeta', async () => {
+    const send = (key: string) =>
+      notifier.notify({
+        key,
+        template: 'review_request',
+        uid: UID,
+        data: { bookTitle: 'La aventura', url: 'https://storynido.test/es/pedido/o1#opinion' },
+      });
+    await db
+      .doc(`users/${UID}`)
+      .set({ email: `${UID}@storynido.test`, locale: 'es', marketingOptIn: false });
+    expect(await send('m1')).toBe('skipped');
+    await db.doc(`users/${UID}`).update({ marketingOptIn: true });
+    expect(await send('m2')).toBe('sent');
+    expect(await send('m2')).toBe('duplicate');
+    const sent = mails((message) => message.idempotencyKey === 'm2')[0];
+    const link = new URL(String(sent?.data.unsubscribeUrl));
+    expect(link.pathname).toBe('/v1/email/unsubscribe');
+
+    const forged = await app.inject({
+      method: 'GET',
+      url: `/v1/email/unsubscribe?u=${UID}&t=nope`,
+    });
+    expect(forged.statusCode).toBe(400);
+    const done = await app.inject({ method: 'GET', url: `/v1/email/unsubscribe${link.search}` });
+    expect(done.statusCode).toBe(200);
+    expect(done.body).toContain('No vas a recibir más correos de novedades');
+    expect((await db.doc(`users/${UID}`).get()).get('marketingOptIn')).toBe(false);
+    expect(await send('m3')).toBe('skipped');
+    // Los avisos del pedido siguen llegando: no son marketing.
+    expect(
+      await notifier.notify({
+        key: 'm4',
+        template: 'delivered',
+        uid: UID,
+        data: { bookTitle: 'La aventura', url: 'https://storynido.test/es/pedido/o1' },
+      }),
+    ).toBe('sent');
+  });
+
+  it('bienvenida al iniciar sesión, una sola vez por cuenta', async () => {
+    await db.doc(`users/${UID}`).set({
+      email: `${UID}@storynido.test`,
+      locale: 'pt',
+      displayName: 'Ana',
+      marketingOptIn: false,
+    });
+    for (let call = 0; call < 2; call += 1) {
+      await app.inject({ method: 'GET', url: '/v1/me', headers: auth(TOKEN) });
+    }
+    await app.inject({ method: 'GET', url: '/v1/me', headers: auth('token-anon:anonymous') });
+    const welcome = mails((message) => message.idempotencyKey.startsWith('welcome:'));
+    expect(welcome).toHaveLength(1);
+    expect(welcome[0]).toMatchObject({ locale: 'pt', data: { name: 'Ana' } });
+  });
+
+  it('opinión del cliente: recién con el libro recibido, privada y editable', async () => {
+    await approvedBook();
+    const { orderId } = (await checkout()).json<{ orderId: string }>();
+    const review = (rating: number, comment: string | null) =>
+      post(`/v1/orders/${orderId}/review`, { rating, comment });
+    expect((await review(5, 'Hermoso')).statusCode).toBe(409);
+    await db.doc(`orders/${orderId}`).update({ status: 'ready' });
+    expect((await review(4, 'Muy lindo')).statusCode).toBe(200);
+    expect((await review(5, '  Hermoso  ')).statusCode).toBe(200);
+    const view = await app.inject({
+      method: 'GET',
+      url: `/v1/orders/${orderId}`,
+      headers: auth(TOKEN),
+    });
+    expect(view.json<PublicOrder>()).toMatchObject({
+      canReview: true,
+      review: { rating: 5, comment: 'Hermoso' },
+    });
+    expect((await db.doc(`reviews/${orderId}`).get()).get('published')).toBe(false);
+    const other = await post(`/v1/orders/${orderId}/review`, { rating: 1 }, 'token-luis');
+    expect(other.statusCode).toBe(404);
   });
 
   it('desarrollo: el pago simulado pasa por el mismo webhook firmado', async () => {

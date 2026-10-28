@@ -58,11 +58,14 @@ export function AuthProvider({
           });
           // La sesión anónima no es una cuenta: el perfil se crea al vincularla.
           if (user.isAnonymous) return;
-          const [{ getFirebaseDb }, { ensureUserProfile }] = await Promise.all([
+          const [{ getFirebaseDb }, { ensureUserProfile }, { api }] = await Promise.all([
             import('@/lib/firebase/client'),
             import('@/lib/firebase/profile'),
+            import('@/lib/api'),
           ]);
-          await ensureUserProfile(await getFirebaseDb(), user, { locale, country });
+          const created = await ensureUserProfile(await getFirebaseDb(), user, { locale, country });
+          // Cuenta nueva: la API manda la bienvenida (una sola vez, en el idioma del perfil).
+          if (created) await api('me').catch(() => undefined);
         })();
       });
     };

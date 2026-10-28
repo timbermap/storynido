@@ -305,7 +305,9 @@
       "understood": "I understand this can’t be undone.",
       "confirm": "Delete my account",
       "error": "We couldn’t delete your account. Please try again."
-    }
+    },
+    "news": "Get news by email",
+    "newsNote": "Ideas for a new story on special dates, draft reminders and review requests. Updates about your orders always arrive."
   },
   "Maintenance": {
     "title": "We're making improvements",
@@ -924,7 +926,17 @@
       "reorder": "Order again",
       "trackingNumber": "Tracking number: {number}",
       "simulatePrintText": "The printer is simulated in this environment: each click moves the shipment one step.",
-      "simulatePrint": "Advance the printer"
+      "simulatePrint": "Advance the printer",
+      "review": {
+        "title": "How did you like the book?",
+        "rating": "Your rating",
+        "stars": "{count, plural, one {# star} other {# stars}}",
+        "comment": "Comment (optional)",
+        "privacy": "Your review is private: only our team sees it. If we ever want to show it on the site, we’ll ask you first.",
+        "save": "Send my review",
+        "thanks": "Thanks for telling us!",
+        "error": "We couldn’t save your review. Please try again."
+      }
     },
     "reorderSubtitle": "You are ordering the same book again, exactly as it turned out: no need to create it again."
   }

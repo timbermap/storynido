@@ -17,6 +17,14 @@ export function registerFulfillmentRoutes(app: FastifyInstance, fulfillment: Ful
     fulfillment.download(user(request).uid, orderId(request)),
   );
 
+  addRoute(app, apiRoutes.orderReview, {}, (request) =>
+    fulfillment.review(
+      user(request).uid,
+      orderId(request),
+      request.body as { rating: number; comment: string | null },
+    ),
+  );
+
   addRoute(app, apiRoutes.adminCancelPrint, {}, (request) => {
     const current = user(request);
     return fulfillment.cancelPrint({ uid: current.uid, email: current.email }, orderId(request));

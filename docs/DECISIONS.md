@@ -897,3 +897,44 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - El PDF único sale con 31 páginas (tapa + guarda + 28 + guarda).
   - **Gelato no descarga ni valida el archivo de un borrador.** El archivo recién se valida con el primer pedido confirmado (la muestra física).
 - **Webhook de Gelato (staging):** `https://api-kxfsarqx2q-uc.a.run.app/v1/webhooks/print/gelato`, configurado en su panel (Developer → Webhooks).
+
+## 078 · Mails transaccionales y postventa (fase 13)
+
+- **Fecha:** 2026-10-28.
+- **Plantillas:** paquete `@storynido/emails`, con React Email (`@react-email/components` 1.0.12) en es, en y pt.
+  - Datos validados por plantilla: un mail con datos faltantes no sale.
+  - Vista previa local: `pnpm --filter @storynido/emails preview <carpeta>`.
+- **Proveedor:** Resend (registra solo si hay `RESEND_API_KEY`; si no, el simulado).
+  - Clave idempotente en cada envío.
+  - En marketing, `List-Unsubscribe` con baja en un clic (RFC 8058).
+  - Elegido sobre SendGrid por la API simple, la idempotencia nativa y el plan gratis (3.000 mails por mes).
+- **Registro y no duplicar (`emailLog/{huella de la clave}`):** cada mail tiene una clave (`order:<id>:shipped`, `welcome:<uid>`…).
+  - Lo ya enviado u omitido no se repite: webhooks duplicados, reintentos del pipeline o el job corrido dos veces.
+  - Un mail que falla no frena el pedido: queda `failed` y el job diario lo reintenta, hasta 3 intentos.
+  - Guarda los datos, para reenviar desde el admin (fase 15).
+- **Cuándo sale cada uno:**
+  - pago confirmado: webhook del pago;
+  - libro listo (solo el digital): fin del pipeline;
+  - en la imprenta: fin del pipeline, con el plazo de la imprenta elegida;
+  - en producción, despachado (con seguimiento) y entregado: webhooks de la imprenta;
+  - reembolso y cancelación: solo si había un pago;
+  - datos borrados;
+  - bienvenida: al crear la cuenta;
+  - muestra lista: etapa 2 de la vista previa, solo con cuenta;
+  - alertas al equipo: revisión manual, falla de imprenta, monto distinto. Destinatarios en `ADMIN_ALERT_EMAILS`.
+- **"Libro listo" lleva al pedido, no a un link de descarga.** El link firmado se genera al tocar "Descargar", solo para la cuenta dueña, así no circulan links a libros de chicos por mail.
+- **Postventa (job diario `POST /jobs/daily` del worker, con Cloud Scheduler):**
+  - pedido de opinión a los 7 días de entregado (el digital, desde que quedó listo);
+  - recordatorio de muestra sin comprar entre 1 y 3 días después;
+  - sugerencia de un libro nuevo el 1/12 (Navidad, todos los países) y el 16/4 (Día del Niño, México);
+  - reintento de los mails fallidos.
+  - El cumpleaños del chico queda pendiente: hoy no guardamos fecha de nacimiento, solo la edad.
+- **Marketing (opinión, recordatorio, sugerencias):**
+  - solo con `marketingOptIn` y con enlace de baja firmado (HMAC con `EMAIL_LINK_SECRET`; sin secreto no se mandan);
+  - la baja (`/v1/email/unsubscribe`, GET o POST) apaga `marketingOptIn`;
+  - en Mi cuenta → Preferencias está el interruptor "Recibir novedades";
+  - los avisos del pedido llegan siempre;
+  - antes de mandar marketing a EE. UU. hace falta una dirección postal en el pie (CAN-SPAM): `EMAIL_POSTAL_ADDRESS`.
+- **Opiniones (`reviews/{pedido}`):** formulario en la página del pedido (1–5 estrellas y comentario), recién con el libro recibido.
+  - Son privadas: mostrarlas en la web requiere el permiso del cliente (regla de no publicar testimonios inventados).
+- **Inicio de sesión:** el mail del enlace mágico lo sigue mandando Firebase; personalizarlo queda pendiente.

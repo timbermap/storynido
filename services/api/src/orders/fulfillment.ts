@@ -1,3 +1,4 @@
+import type { EmailNotifier } from '@storynido/emails';
 import {
   isSimulatedPrinter,
   mockPrintWebhookSequence,
@@ -9,6 +10,7 @@ import {
   WebhookSignatureError,
   canTransitionOrder,
   type AuditLogEntry,
+  type BookFormat,
   type OrderStatus,
   type PrintEvent,
   type PrintStatus,
@@ -16,6 +18,7 @@ import {
 import type { FastifyBaseLogger } from 'fastify';
 import type { Firestore } from 'firebase-admin/firestore';
 
+import { reviewable } from '../checkout/service';
 import { AppError } from '../errors';
 
 interface OrderDoc {
@@ -58,6 +61,7 @@ export class FulfillmentService {
     private readonly providers: ProviderRegistry,
     private readonly log: FastifyBaseLogger,
     private readonly options: { devToolsEnabled: boolean; mockWebhookSecret: string },
+    private readonly notifier: EmailNotifier | null = null,
   ) {}
 
   async handlePrintWebhook(
@@ -100,6 +104,8 @@ export class FulfillmentService {
         status: to,
         ...(event.trackingNumber ? { 'print.trackingNumber': event.trackingNumber } : {}),
         ...(event.trackingUrl ? { 'print.trackingUrl': event.trackingUrl } : {}),
+        // Desde acá se cuentan los días para pedir la reseña.
+        ...(to === 'delivered' ? { deliveredAt: new Date() } : {}),
         updatedAt: new Date(),
       });
       return 'processed' as const;
@@ -114,6 +120,14 @@ export class FulfillmentService {
         resolvedAt: null,
       });
       this.log.error({ orderId: event.orderId }, 'print failed');
+      await this.notifier?.adminAlert({
+        key: `alert:${event.orderId}:print_failed:${event.eventId}`,
+        kind: 'print_failed',
+        orderId: event.orderId,
+        message: 'La imprenta informó una falla: hay que reimprimir con el mismo libro.',
+      });
+    } else if (outcome === 'processed') {
+      await this.notifier?.orderStatus(event.orderId, to);
     }
     return outcome;
   }
@@ -152,7 +166,31 @@ export class FulfillmentService {
       throw new AppError(409, 'bad_request', result.reason ?? 'La imprenta no pudo cancelar.');
     }
     await ref.update({ status: 'cancelled', updatedAt: new Date() });
+    await this.notifier?.orderStatus(orderId, 'cancelled');
     return { status: 'cancelled' as const };
+  }
+
+  /** Opinión del cliente (una por pedido; la puede corregir). Privada hasta publicarla a mano. */
+  async review(uid: string, orderId: string, body: { rating: number; comment: string | null }) {
+    const order = (await this.db.collection(COLLECTIONS.orders).doc(orderId).get()).data() as
+      (OrderDoc & { bookId: string; items: { format: BookFormat }[] }) | undefined;
+    if (order?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
+    if (!reviewable(order)) {
+      throw new AppError(409, 'bad_request', 'Podrás opinar cuando recibas tu libro.');
+    }
+    const ref = this.db.collection(COLLECTIONS.reviews).doc(orderId);
+    const existing = (await ref.get()).data();
+    await ref.set({
+      ownerUid: uid,
+      orderId,
+      bookId: order.bookId,
+      rating: body.rating,
+      comment: body.comment?.trim() ? body.comment.trim() : null,
+      published: false,
+      createdAt: (existing?.createdAt as unknown) ?? new Date(),
+      updatedAt: new Date(),
+    });
+    return { saved: true as const };
   }
 
   /** URL firmada de 15 minutos al PDF digital, generada al momento. */

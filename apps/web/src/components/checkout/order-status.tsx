@@ -13,6 +13,7 @@ import {
   isPrintOrder,
 } from '@/components/orders/timeline';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { OrderReview } from '@/components/orders/order-review';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 
@@ -139,6 +140,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
             )}
           </div>
         )}
+        {order.canReview && <OrderReview orderId={order.orderId} initial={order.review} />}
         {order.tracking?.number && (
           <p className="text-sm text-muted-foreground">
             {t('trackingNumber', { number: order.tracking.number })}

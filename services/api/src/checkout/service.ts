@@ -1,4 +1,5 @@
 import type { ProviderRegistry } from '@storynido/providers';
+import type { EmailNotifier } from '@storynido/emails';
 import { isSimulatedPrinter, signMockPaymentWebhook } from '@storynido/providers';
 import {
   COLLECTIONS,
@@ -85,6 +86,12 @@ interface OrderDoc {
   createdAt: unknown;
 }
 
+/** Se opina sobre lo recibido: el digital listo o el impreso entregado. */
+export function reviewable(order: { status: OrderStatus; items: { format: BookFormat }[] }) {
+  const digitalOnly = order.items.every((item) => item.format === 'digital');
+  return order.status === 'delivered' || (order.status === 'ready' && digitalOnly);
+}
+
 function toIso(value: unknown): string {
   if (value instanceof Date) return value.toISOString();
   if (value && typeof value === 'object' && 'toDate' in value) {
@@ -107,6 +114,7 @@ export class CheckoutService {
     private readonly conversions: ConversionReporter,
     private readonly log: FastifyBaseLogger,
     private readonly options: { devToolsEnabled: boolean; mockWebhookSecret: string },
+    private readonly notifier: EmailNotifier | null = null,
   ) {}
 
   // ------------------------------------------------------------------ precio
@@ -447,9 +455,13 @@ export class CheckoutService {
   }
 
   async order(uid: string, orderId: string): Promise<PublicOrder> {
-    const snap = await this.db.collection(COLLECTIONS.orders).doc(orderId).get();
+    const [snap, reviewSnap] = await Promise.all([
+      this.db.collection(COLLECTIONS.orders).doc(orderId).get(),
+      this.db.collection(COLLECTIONS.reviews).doc(orderId).get(),
+    ]);
     const order = snap.data() as OrderDoc | undefined;
     if (order?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
+    const review = reviewSnap.data();
     return {
       orderId,
       bookId: order.bookId,
@@ -469,6 +481,10 @@ export class CheckoutService {
       canDownload: ['ready', 'sent_to_print', 'in_production', 'shipped', 'delivered'].includes(
         order.status,
       ),
+      canReview: reviewable(order),
+      review: review
+        ? { rating: Number(review.rating), comment: (review.comment as string | null) ?? null }
+        : null,
       tracking: order.print?.trackingNumber
         ? { number: order.print.trackingNumber, url: order.print.trackingUrl }
         : null,
@@ -576,8 +592,15 @@ export class CheckoutService {
         resolvedAt: null,
       });
       this.log.error({ orderId: event.orderId }, 'payment amount mismatch');
+      await this.notifier?.adminAlert({
+        key: `alert:${event.orderId}:payment_mismatch`,
+        kind: 'payment_mismatch',
+        orderId: event.orderId,
+        message: 'Lo cobrado no coincide con el precio del pedido: no se fabrica hasta revisarlo.',
+      });
       return 'processed';
     }
+    await this.notifier?.orderStatus(event.orderId, 'paid');
     await this.events.publish({
       type: 'order.paid',
       orderId: event.orderId,
@@ -609,7 +632,7 @@ export class CheckoutService {
   /** Cambia el estado si la transición vale (y, si se indica, solo desde `from`). */
   private async close(orderId: string, from: OrderStatus | null, to: OrderStatus) {
     const ref = this.db.collection(COLLECTIONS.orders).doc(orderId);
-    return this.db.runTransaction(async (tx) => {
+    const outcome = await this.db.runTransaction(async (tx) => {
       const order = (await tx.get(ref)).data() as OrderDoc | undefined;
       if (!order || (from && order.status !== from) || !canTransitionOrder(order.status, to)) {
         return 'ignored' as const;
@@ -617,6 +640,8 @@ export class CheckoutService {
       tx.update(ref, { status: to, updatedAt: new Date() });
       return 'processed' as const;
     });
+    if (outcome === 'processed') await this.notifier?.orderStatus(orderId, to);
+    return outcome;
   }
 
   // ------------------------------------------------------------------ reembolsos

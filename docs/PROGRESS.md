@@ -1,30 +1,30 @@
 # Progreso
 
-| #   | Fase                                                 | Estado                                |
-| --- | ---------------------------------------------------- | ------------------------------------- |
-| 01  | Monorepo base, paquete compartido, lint, tests y CI  | ✅ Hecha (2026-10-26)                 |
-| 02  | Infraestructura con Terraform y ambientes            | ✅ Staging aplicado (2026-10-26)      |
-| 03  | Autenticación, roles y modelo de datos               | ✅ Hecha (2026-10-26)                 |
-| 04  | API base y abstracciones de proveedores              | ✅ Hecha (2026-10-26)                 |
-| 05  | Sitio público                                        | ✅ Hecha (2026-10-26)                 |
-| 06  | Creador del libro y fotos                            | ✅ Hecha (2026-10-26)                 |
-| 07  | Motor de IA y vista previa                           | ✅ Hecha (2026-10-27)                 |
-| 07b | Opciones editoriales (extensión, texto, nivel, tipo) | ✅ Hecha (2026-10-27)                 |
-| 07c | Líneas comerciales y landings                        | ✅ Hecha (2026-10-27)                 |
-| 07d | Aprobación del personaje y P0 de calidad (feedback)  | ✅ 2026-10-27                         |
-| 08  | Pipeline: orquestación y worker                      | ✅ 2026-10-27 (infra sin aplicar)     |
-| 09  | Generación del libro y QA                            | ✅ 2026-10-27 (falta la prueba real)  |
-| 10  | PDF                                                  | ✅ 2026-10-27                         |
-| 11  | Pagos (procesador por definir)                       | ✅ 2026-10-27 (con pagos simulados)   |
-| 12  | Gelato y "Mi cuenta"                                 | ✅ 2026-10-27 (con imprenta simulada) |
-| 12b | Eventos (un diseño, muchas copias)                   | ⏳ Pendiente                          |
-| 12c | Profesionales (cuenta Pro, descuentos)               | ⏳ Pendiente                          |
-| 13  | Emails y postventa                                   | ⏳ Pendiente                          |
-| 14  | Admin: configuración                                 | ⏳ Pendiente                          |
-| 15  | Admin: operaciones                                   | ⏳ Pendiente                          |
-| 16  | Observabilidad y seguridad                           | ⏳ Pendiente                          |
-| 17  | E2E y rendimiento                                    | ⏳ Pendiente                          |
-| 18  | Documentación y salida                               | ⏳ Pendiente                          |
+| #   | Fase                                                 | Estado                                       |
+| --- | ---------------------------------------------------- | -------------------------------------------- |
+| 01  | Monorepo base, paquete compartido, lint, tests y CI  | ✅ Hecha (2026-10-26)                        |
+| 02  | Infraestructura con Terraform y ambientes            | ✅ Staging aplicado (2026-10-26)             |
+| 03  | Autenticación, roles y modelo de datos               | ✅ Hecha (2026-10-26)                        |
+| 04  | API base y abstracciones de proveedores              | ✅ Hecha (2026-10-26)                        |
+| 05  | Sitio público                                        | ✅ Hecha (2026-10-26)                        |
+| 06  | Creador del libro y fotos                            | ✅ Hecha (2026-10-26)                        |
+| 07  | Motor de IA y vista previa                           | ✅ Hecha (2026-10-27)                        |
+| 07b | Opciones editoriales (extensión, texto, nivel, tipo) | ✅ Hecha (2026-10-27)                        |
+| 07c | Líneas comerciales y landings                        | ✅ Hecha (2026-10-27)                        |
+| 07d | Aprobación del personaje y P0 de calidad (feedback)  | ✅ 2026-10-27                                |
+| 08  | Pipeline: orquestación y worker                      | ✅ 2026-10-27 (infra sin aplicar)            |
+| 09  | Generación del libro y QA                            | ✅ 2026-10-27 (falta la prueba real)         |
+| 10  | PDF                                                  | ✅ 2026-10-27                                |
+| 11  | Pagos (procesador por definir)                       | ✅ 2026-10-27 (con pagos simulados)          |
+| 12  | Gelato y "Mi cuenta"                                 | ✅ 2026-10-27 (con imprenta simulada)        |
+| 12b | Eventos (un diseño, muchas copias)                   | ⏳ Pendiente                                 |
+| 12c | Profesionales (cuenta Pro, descuentos)               | ⏳ Pendiente                                 |
+| 13  | Emails y postventa                                   | ✅ 2026-10-28 (mails simulados hasta Resend) |
+| 14  | Admin: configuración                                 | ⏳ Pendiente                                 |
+| 15  | Admin: operaciones                                   | ⏳ Pendiente                                 |
+| 16  | Observabilidad y seguridad                           | ⏳ Pendiente                                 |
+| 17  | E2E y rendimiento                                    | ⏳ Pendiente                                 |
+| 18  | Documentación y salida                               | ⏳ Pendiente                                 |
 
 ## Estrategia comercial
 

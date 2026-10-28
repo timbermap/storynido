@@ -1,3 +1,4 @@
+import type { EmailNotifier } from '@storynido/emails';
 import type { ProviderRegistry } from '@storynido/providers';
 import { COLLECTIONS, type AuditLogEntry } from '@storynido/shared';
 import type { Firestore } from 'firebase-admin/firestore';
@@ -24,6 +25,7 @@ export class AccountService {
     private readonly tokens: TokenVerifier,
     private readonly auth: AuthAccounts,
     private readonly providers: ProviderRegistry,
+    private readonly notifier: EmailNotifier,
   ) {}
 
   // ------------------------------------------------------------ privacidad
@@ -151,12 +153,13 @@ export class AccountService {
     const profile = (await this.db.collection(COLLECTIONS.users).doc(user.uid).get()).data();
     const saved: unknown = profile?.locale;
     const locale = saved === 'en' || saved === 'pt' ? saved : 'es';
-    await this.providers.email().send({
-      to: user.email,
+    // Con la dirección y el idioma explícitos: el perfil puede estar por borrarse.
+    await this.notifier.notify({
+      key: idempotencyKey,
       template: 'data_deleted',
+      to: user.email,
       locale,
       data: { scope },
-      idempotencyKey,
     });
   }
 

@@ -2,6 +2,7 @@ import { pipelineEventSchema, pipelineStepSchema } from '@storynido/shared';
 import Fastify, { type FastifyServerOptions } from 'fastify';
 import { z } from 'zod';
 
+import type { PostSaleJobs } from './jobs/post-sale';
 import { StepFailedError, type Pipeline } from './pipeline/pipeline';
 
 export interface AppOptions {
@@ -9,6 +10,8 @@ export interface AppOptions {
   version: string;
   /** Sin pipeline solo responde el health check. Es una función: se crea con el logger de la app. */
   pipeline?: () => Pipeline;
+  /** Postventa diaria (Cloud Scheduler). */
+  jobs?: () => PostSaleJobs;
 }
 
 const runBody = z.object({
@@ -26,11 +29,14 @@ const pubsubEnvelope = z.object({
  * Worker del pipeline. No es público: Cloud Run solo acepta llamadas con OIDC de las cuentas
  * invocadoras (Pub/Sub, Cloud Tasks y Cloud Workflows). En local escucha en localhost.
  */
-export function buildApp({ logger = false, version, pipeline }: AppOptions) {
+export function buildApp({ logger = false, version, pipeline, jobs }: AppOptions) {
   const app = Fastify({ logger });
 
   // Cloud Run reserva las rutas que terminan en "z" (p. ej. /healthz), por eso se usa /health.
   app.get('/health', () => ({ status: 'ok', service: 'worker', version }));
+
+  /** Postventa: reseñas, recordatorios, sugerencias y reintentos de mails (una vez por día). */
+  if (jobs) app.post('/jobs/daily', () => jobs().run());
 
   if (!pipeline) return app;
 

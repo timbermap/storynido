@@ -305,7 +305,9 @@
       "understood": "Entiendo que no se puede deshacer.",
       "confirm": "Borrar mi cuenta",
       "error": "No pudimos borrar tu cuenta. Intenta de nuevo."
-    }
+    },
+    "news": "Recibir novedades por correo",
+    "newsNote": "Ideas para un cuento nuevo en fechas especiales, recordatorios de borradores y pedidos de opinión. Los avisos de tus pedidos llegan siempre."
   },
   "Maintenance": {
     "title": "Estamos haciendo mejoras",
@@ -924,7 +926,17 @@
       "reorder": "Pedir de nuevo",
       "trackingNumber": "Número de seguimiento: {number}",
       "simulatePrintText": "La imprenta es simulada en este ambiente: cada clic avanza un paso del envío.",
-      "simulatePrint": "Avanzar la imprenta"
+      "simulatePrint": "Avanzar la imprenta",
+      "review": {
+        "title": "¿Qué les pareció el libro?",
+        "rating": "Tu calificación",
+        "stars": "{count, plural, one {# estrella} other {# estrellas}}",
+        "comment": "Comentario (opcional)",
+        "privacy": "Tu opinión es privada: solo la ve nuestro equipo. Si algún día la mostramos en la web, te pedimos permiso antes.",
+        "save": "Enviar mi opinión",
+        "thanks": "¡Gracias por contarnos!",
+        "error": "No pudimos guardar tu opinión. Intenta de nuevo."
+      }
     },
     "reorderSubtitle": "Pides de nuevo el mismo libro, tal como quedó: no hace falta crearlo otra vez."
   }

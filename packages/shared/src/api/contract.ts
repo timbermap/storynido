@@ -195,6 +195,9 @@ export const publicOrderSchema = z.object({
   canSimulatePrint: z.boolean(),
   /** El PDF digital ya se puede descargar. */
   canDownload: z.boolean(),
+  /** Ya se puede opinar (digital listo o impreso entregado). */
+  canReview: z.boolean(),
+  review: z.object({ rating: z.number().int(), comment: z.string().nullable() }).nullable(),
   tracking: z.object({ number: z.string().nullable(), url: z.string().nullable() }).nullable(),
 });
 
@@ -679,6 +682,18 @@ export const apiRoutes = {
     summary: 'Borra la cuenta y todos sus datos personales (los pedidos pagados se conservan)',
     body: z.object({ confirm: z.literal(true) }),
     response: z.object({ deleted: z.literal(true) }),
+  },
+  orderReview: {
+    method: 'POST',
+    path: '/v1/orders/:orderId/review',
+    access: 'user',
+    summary: 'Opinión sobre un pedido propio (privada: publicarla es una decisión manual)',
+    params: z.object({ orderId: z.string().min(1) }),
+    body: z.object({
+      rating: z.number().int().min(1).max(5),
+      comment: z.string().trim().max(1000).nullable().default(null),
+    }),
+    response: z.object({ saved: z.literal(true) }),
   },
   orderDownload: {
     method: 'GET',

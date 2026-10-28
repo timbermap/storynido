@@ -36,6 +36,7 @@ import {
   type Locale,
   type PublicPreview,
 } from '@storynido/shared';
+import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type DocumentReference, type Firestore } from 'firebase-admin/firestore';
 
@@ -127,6 +128,7 @@ export class PreviewService {
     private readonly providers: ProviderRegistry,
     private readonly catalog: CatalogRepository,
     private readonly log: FastifyBaseLogger,
+    private readonly notifier: EmailNotifier | null = null,
   ) {
     this.budget = new AiBudget(db, log);
   }
@@ -636,6 +638,30 @@ export class PreviewService {
   }
 
   /** Registro de control de calidad del libro (sin datos del niño). */
+  /** "Tu muestra está lista" (una vez por libro), por si se fue de la página mientras tanto. */
+  private async notifyPreviewReady(uid: string, bookId: string) {
+    if (!this.notifier) return;
+    const book = (await this.bookRef(bookId).get()).data() ?? {};
+    const childId = typeof book.childId === 'string' ? book.childId : null;
+    const child = childId
+      ? (await this.db.collection(COLLECTIONS.children).doc(childId).get()).data()
+      : undefined;
+    const title = (book.preview as { title?: string } | null)?.title;
+    const saved: unknown = book.language;
+    const language = saved === 'en' || saved === 'pt' ? saved : 'es';
+    if (!title || typeof child?.name !== 'string') return;
+    await this.notifier.notify({
+      key: `book:${bookId}:preview_ready`,
+      template: 'preview_ready',
+      uid,
+      data: {
+        childName: child.name,
+        bookTitle: title,
+        url: this.notifier.createUrl(language, bookId),
+      },
+    });
+  }
+
   private async qaEvent(bookId: string, code: QaEvent['code'], detail: QaEvent['detail'] = null) {
     const event: QaEvent = { code, at: new Date(), detail };
     await this.bookRef(bookId).collection(COLLECTIONS.qaEvents).add(event);
@@ -739,6 +765,7 @@ export class PreviewService {
         updatedAt: new Date(),
       });
       await this.qaEvent(bookId, 'character_approved', { mustKeep: mustKeep.length });
+      if (!anonymous) await this.notifyPreviewReady(uid, bookId);
     } catch (error) {
       await ref.update({ status: 'preview_ready', previewStartedAt: null });
       throw error instanceof AppError ? error : generationFailed();

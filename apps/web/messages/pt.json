@@ -305,7 +305,9 @@
       "understood": "Entendo que não dá para desfazer.",
       "confirm": "Apagar minha conta",
       "error": "Não conseguimos apagar sua conta. Tente de novo."
-    }
+    },
+    "news": "Receber novidades por e-mail",
+    "newsNote": "Ideias para uma história nova em datas especiais, lembretes de rascunhos e pedidos de opinião. Os avisos dos seus pedidos chegam sempre."
   },
   "Maintenance": {
     "title": "Estamos fazendo melhorias",
@@ -924,7 +926,17 @@
       "reorder": "Pedir de novo",
       "trackingNumber": "Código de rastreio: {number}",
       "simulatePrintText": "A gráfica é simulada neste ambiente: cada clique avança uma etapa do envio.",
-      "simulatePrint": "Avançar a gráfica"
+      "simulatePrint": "Avançar a gráfica",
+      "review": {
+        "title": "O que vocês acharam do livro?",
+        "rating": "Sua avaliação",
+        "stars": "{count, plural, one {# estrela} other {# estrelas}}",
+        "comment": "Comentário (opcional)",
+        "privacy": "Sua opinião é privada: só nossa equipe vê. Se um dia quisermos mostrá-la no site, pedimos sua permissão antes.",
+        "save": "Enviar minha opinião",
+        "thanks": "Obrigado por contar!",
+        "error": "Não conseguimos salvar sua opinião. Tente de novo."
+      }
     },
     "reorderSubtitle": "Você pede de novo o mesmo livro, do jeito que ficou: não precisa criá-lo outra vez."
   }
