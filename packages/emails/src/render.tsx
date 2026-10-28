@@ -1,3 +1,4 @@
+/** @jsxRuntime automatic @jsxImportSource react */
 import { render } from '@react-email/components';
 import type { EmailMessage } from '@storynido/shared';
 
