@@ -12,7 +12,7 @@ import {
   createProviderFactories,
   providerSettingsFromEnv,
 } from '@storynido/providers';
-import { PHOTO_CONSENT_VERSION } from '@storynido/shared';
+import { GUARDIAN_CONSENT_VERSION, PHOTO_CONSENT_VERSION } from '@storynido/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 import sharp from 'sharp';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -114,7 +114,7 @@ describe('fotos del protagonista', () => {
   });
 
   beforeEach(async () => {
-    for (const name of ['photos', 'books', 'children', 'consents']) {
+    for (const name of ['photos', 'books', 'children', 'consents', 'users']) {
       const docs = await db.collection(name).listDocuments();
       await Promise.all(docs.map((doc) => doc.delete()));
     }
@@ -148,6 +148,46 @@ describe('fotos del protagonista', () => {
       payload: { bookId: 'b1', consentId: bobConsent, contentType: 'image/jpeg', sizeBytes: 1000 },
     });
     expect(res.statusCode).toBe(403);
+  });
+
+  it('un profesional necesita declarar la autorización del tutor antes de subir fotos', async () => {
+    await seedDraft('ana', 'b1');
+    await db.doc('users/ana').set({ accountType: 'professional' });
+    const photoConsent = await consent(app, 'token-ana');
+    const ask = () =>
+      app.inject({
+        method: 'POST',
+        url: '/v1/photos',
+        headers: auth('token-ana'),
+        payload: {
+          bookId: 'b1',
+          consentId: photoConsent,
+          contentType: 'image/jpeg',
+          sizeBytes: 1000,
+        },
+      });
+    const blocked = await ask();
+    expect(blocked.statusCode).toBe(403);
+    expect(blocked.json<{ error: { message: string } }>().error.message).toContain('tutor');
+    const guardian = await app.inject({
+      method: 'POST',
+      url: '/v1/consents',
+      headers: auth('token-ana'),
+      payload: {
+        type: 'guardian_authorization',
+        textVersion: GUARDIAN_CONSENT_VERSION,
+        locale: 'es',
+      },
+    });
+    expect(guardian.statusCode).toBe(200);
+    const stored = (
+      await db.doc(`consents/${guardian.json<{ consentId: string }>().consentId}`).get()
+    ).data();
+    expect(stored).toMatchObject({
+      type: 'guardian_authorization',
+      textVersion: GUARDIAN_CONSENT_VERSION,
+    });
+    expect((await ask()).statusCode).toBe(200);
   });
 
   it('una foto buena se valida, se procesa y queda en el borrador', async () => {

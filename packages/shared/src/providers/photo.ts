@@ -62,6 +62,11 @@ export const PHOTO_RULES = {
 
 /** Consentimiento vigente para subir fotos (cambia si cambia el texto). */
 export const PHOTO_CONSENT_VERSION = 'photo-upload-v1';
+/**
+ * Profesionales: declaración de que tienen la autorización de la madre, el padre o el tutor
+ * del chico para usar su foto. El texto lo revisa un abogado antes del lanzamiento.
+ */
+export const GUARDIAN_CONSENT_VERSION = 'guardian-authorization-v1';
 
 /** Decide si una foto sirve. Devuelve los motivos de rechazo (vacío = válida). */
 export function evaluatePhoto(analysis: PhotoAnalysis): PhotoRejectionReason[] {

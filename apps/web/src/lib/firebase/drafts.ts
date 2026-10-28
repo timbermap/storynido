@@ -40,6 +40,7 @@ export type BookEdits = Partial<
     | 'avatar'
     | 'memories'
     | 'event'
+    | 'goal'
     | 'length'
     | 'textDensity'
     | 'readingLevel'
@@ -50,7 +51,10 @@ export type BookEdits = Partial<
 export type ChildFields = Pick<
   Child,
   'name' | 'age' | 'pronouns' | 'likes' | 'petName' | 'bestFriendName'
->;
+> & {
+  /** Profesionales: identifica el proyecto sin usar el nombre real (el cuento usa `name`). */
+  alias?: string | null;
+};
 
 export interface DraftSummary {
   id: string;
@@ -85,11 +89,14 @@ export async function createDraft(
     dedication: null,
     wizardStep: 0,
     photoIds: [],
-    characterMode: 'photo',
+    // Profesionales: arranca sin foto (el avatar evita subir fotos de chicos ajenos).
+    characterMode: preset.channel === 'professionals' ? 'avatar' : 'photo',
     avatar: null,
     memories: null,
     // Eventos: el cumpleaños se completa en el paso del protagonista.
     event: preset.channel === 'events' ? EMPTY_BIRTHDAY : null,
+    // Profesionales: objetivo general (uno de los temas de la colección), opcional.
+    goal: null,
     // Opciones editoriales: se ajustan en el paso de la aventura (sugeridas según la edad).
     // Eventos arranca como mini cuento muy visual (el librito para cada invitado).
     ...DEFAULT_EDITORIAL_CONFIG.defaults,
@@ -151,6 +158,7 @@ export function subscribeBook(
         avatar: (data.avatar as Book['avatar'] | undefined) ?? null,
         memories: (data.memories as Book['memories'] | undefined) ?? null,
         event: (data.event as Book['event'] | undefined) ?? null,
+        goal: (data.goal as string | null | undefined) ?? null,
         // Borradores anteriores a las opciones editoriales (extensión null = la de su historia).
         length: (data.length as Book['length'] | undefined) ?? null,
         textDensity: (data.textDensity as Book['textDensity'] | undefined) ?? 'balanced',

@@ -400,6 +400,12 @@
         "years": "{count, plural, one {# year old} other {# years old}}",
         "theme": "Party theme (optional)",
         "themePlaceholder": "For example: dinosaurs, space, princesses"
+      },
+      "pro": {
+        "alias": "Project alias",
+        "aliasHint": "To find it in your account. Use an alias (for example, “Sofi, 2nd grade”), never a last name.",
+        "aliasPlaceholder": "E.g. Sofi, 2nd grade",
+        "storyName": "Name in the story"
       }
     },
     "photos": {
@@ -437,7 +443,8 @@
       "badType": "That format is not supported. Use JPG, PNG or WebP.",
       "limit": "You already have 3 photos. Delete one to upload another.",
       "needOne": "Upload at least one valid photo to continue.",
-      "uploadError": "We couldn't upload the photo. Please try again."
+      "uploadError": "We couldn't upload the photo. Please try again.",
+      "guardianText": "As a professional, I confirm I have permission from this child's parent or legal guardian to use their photo in educational material."
     },
     "story": {
       "title": "Choose the adventure",
@@ -453,7 +460,12 @@
       "customPlaceholder": "That Grandpa loves them very much even though he lives far away.",
       "customHint": "{count}/150 characters. We'll review it before using it.",
       "pickUpTo": "Choose up to {max} ({count}/{max}). If you don't choose any, the story will still carry a positive message.",
-      "clear": "Clear selection"
+      "clear": "Clear selection",
+      "goal": {
+        "title": "General goal (optional)",
+        "hint": "It guides the story. This is educational material: it does not replace a professional or clinical intervention.",
+        "none": "No goal"
+      }
     },
     "style": {
       "title": "Choose the illustration style",

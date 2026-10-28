@@ -77,6 +77,8 @@ export const childSchema = timestampsSchema.extend({
     .max(CHILD_LIMITS.maxLikes),
   petName: z.string().trim().max(CHILD_LIMITS.nameMaxLength).nullable(),
   bestFriendName: z.string().trim().max(CHILD_LIMITS.nameMaxLength).nullable(),
+  /** Profesionales: alias del proyecto (por ejemplo "Sofi, 2.º grado"); nunca el apellido. */
+  alias: z.string().trim().max(CHILD_LIMITS.nameMaxLength).nullable().default(null),
 });
 
 export type Child = z.infer<typeof childSchema>;

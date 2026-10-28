@@ -229,6 +229,11 @@ export const bookSchema = timestampsSchema
     channel: channelSchema.default('families'),
     /** Eventos (fase 12b): cumpleaños con fecha, edad que cumple y temática. */
     event: bookEventSchema.nullable().default(null),
+    /**
+     * Profesionales (fase 12c): objetivo general elegido de la colección (por ejemplo
+     * "reconocer emociones"). Guía la historia; nunca es una intervención clínica.
+     */
+    goal: z.string().trim().max(80).nullable().default(null),
     /** Solo servidor. */
     preview: bookPreviewSchema.nullable(),
     /** Solo servidor. */

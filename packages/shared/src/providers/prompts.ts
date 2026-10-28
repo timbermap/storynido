@@ -57,6 +57,8 @@ export interface StoryPromptInput {
   memories?: Memories | null;
   /** Eventos: cumpleaños (con la temática ya moderada). */
   event?: BookEvent | null;
+  /** Profesionales: objetivo general (guía narrativa, nunca clínica). */
+  goal?: string | null;
   /** Densidad de texto y nivel de lectura (fase 07b). */
   wordsPerPage?: { min: number; max: number };
   levelGuidance?: string;
@@ -115,6 +117,13 @@ Es un cuento de cumpleaños para regalar a los invitados de la fiesta: ${input.c
 La historia termina con la celebración (torta, velas y amigos). Que sea alegre, corta y fácil de leer
 en voz alta; no nombres a los invitados.`
       : '';
+  const goalSection = input.goal
+    ? `
+
+Objetivo general elegido por el profesional: «${input.goal}». Úsalo como guía de la historia
+(situaciones, emociones y un cierre que invite a conversar). Es un cuento educativo: no des
+indicaciones terapéuticas ni diagnósticos, y no menciones el objetivo de forma explícita.`
+    : '';
   const planSection = input.plan
     ? `
 
@@ -130,7 +139,7 @@ ${input.plan.scenes
   )
   .join('\n')}`
     : '';
-  return `${body}${memoriesSection}${eventSection}${planSection}
+  return `${body}${memoriesSection}${eventSection}${goalSection}${planSection}
 
 Reglas obligatorias:
 - Escribe en ${LANGUAGE_NAMES[input.language]}.

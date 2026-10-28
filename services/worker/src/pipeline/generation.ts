@@ -947,6 +947,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           })),
           activities,
           synopsis: snapshot.synopsis ?? null,
+          // Profesionales: el aviso de material educativo (no clínico) en la página final.
+          educationalNotice: ctx.order.channel === 'professionals',
           qr,
         };
         if (format === 'digital') kitCover = layout.cover;

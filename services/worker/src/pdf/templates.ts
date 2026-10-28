@@ -24,6 +24,8 @@ export interface LayoutBook {
   activities: ActivitySpec[];
   /** Contratapa: sinopsis breve y un QR (SVG) a StoryNido. */
   synopsis?: string | null;
+  /** Profesionales: aviso de que es material educativo (no una intervención clínica). */
+  educationalNotice?: boolean;
   qr?: { svg: string; label: string } | null;
 }
 
@@ -48,6 +50,8 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     dedicationFor: 'Este cuento es para {name}.',
     end: 'Fin',
     madeFor: 'Un cuento de StoryNido creado para {name}',
+    notice:
+      'Material educativo creado con StoryNido. No reemplaza ni constituye una intervención profesional o clínica.',
     storyFor: 'Un cuento para {name}',
     activity: 'Actividad',
     back: 'Historias que abrazan.',
@@ -57,6 +61,8 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     dedicationFor: 'This story is for {name}.',
     end: 'The End',
     madeFor: 'A StoryNido story made for {name}',
+    notice:
+      'Educational material made with StoryNido. It does not replace or constitute a professional or clinical intervention.',
     storyFor: 'A story for {name}',
     activity: 'Activity',
     back: 'Stories that hug.',
@@ -66,6 +72,8 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     dedicationFor: 'Esta história é para {name}.',
     end: 'Fim',
     madeFor: 'Uma história StoryNido criada para {name}',
+    notice:
+      'Material educativo criado com o StoryNido. Não substitui nem constitui uma intervenção profissional ou clínica.',
     storyFor: 'Uma história para {name}',
     activity: 'Atividade',
     back: 'Histórias que abraçam.',
@@ -251,7 +259,7 @@ export function interiorPages(book: LayoutBook, spec: FormatSpec): string[] {
     `<section class="page" data-label="dedicatoria"><div class="center"><p style="font-family:'Fraunces',serif;font-style:italic;font-size:20pt;line-height:1.5;max-width:130mm">${escapeHtml(dedication)}</p></div></section>`,
     ...book.pages.map((page, index) => storyPage(book, spec, page, index + 1)),
     ...book.activities.map((activity, index) => activityPage(book, activity, index)),
-    `<section class="page" data-label="fin"><div class="center" style="gap:6mm"><p style="font-family:'Fraunces',serif;font-weight:600;font-size:40pt">${escapeHtml(text(book, 'end'))}</p><p style="font-size:11pt;color:#69616c">${escapeHtml(text(book, 'madeFor'))}</p></div></section>`,
+    `<section class="page" data-label="fin"><div class="center" style="gap:6mm"><p style="font-family:'Fraunces',serif;font-weight:600;font-size:40pt">${escapeHtml(text(book, 'end'))}</p><p style="font-size:11pt;color:#69616c">${escapeHtml(text(book, 'madeFor'))}</p>${book.educationalNotice ? `<p class="notice" style="margin-top:10mm;max-width:130mm;font-size:9pt;line-height:1.4;color:#69616c">${escapeHtml(text(book, 'notice'))}</p>` : ''}</div></section>`,
   ];
 }
 

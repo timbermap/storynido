@@ -107,20 +107,23 @@ service cloud.firestore {
         && (d.pronouns == null || d.pronouns in ['she', 'he', 'they'])
         && d.likes is list && d.likes.size() <= 10
         && optString(d.petName, 40)
-        && optString(d.bestFriendName, 40);
+        && optString(d.bestFriendName, 40)
+        && optString(d.get('alias', null), 40);
     }
 
     match /children/{childId} {
       allow read: if ownsExisting() || isAdmin();
 
       allow create: if ownsIncoming()
-        && hasExactly(['ownerUid', 'name', 'age', 'pronouns', 'likes', 'petName', 'bestFriendName', 'createdAt', 'updatedAt'])
+        // El alias es de Profesionales (los perfiles de Familias no lo tienen).
+        && (hasExactly(['ownerUid', 'name', 'age', 'pronouns', 'likes', 'petName', 'bestFriendName', 'createdAt', 'updatedAt'])
+          || hasExactly(['ownerUid', 'name', 'age', 'pronouns', 'likes', 'petName', 'bestFriendName', 'alias', 'createdAt', 'updatedAt']))
         && isNow('createdAt')
         && isNow('updatedAt')
         && validChild();
 
       allow update: if ownsExisting()
-        && changesOnly(['name', 'age', 'pronouns', 'likes', 'petName', 'bestFriendName', 'updatedAt'])
+        && changesOnly(['name', 'age', 'pronouns', 'likes', 'petName', 'bestFriendName', 'alias', 'updatedAt'])
         && isNow('updatedAt')
         && validChild();
 
@@ -197,6 +200,7 @@ service cloud.firestore {
         && validAvatar(d.get('avatar', null))
         && validMemories(d.get('memories', null))
         && validEvent(d.get('event', null))
+        && optString(d.get('goal', null), 80)
         // Opciones editoriales (BOOK_LENGTHS, TEXT_DENSITIES, READING_LEVELS, CONTENT_TYPES).
         && d.get('length', null) in [null, 'mini', 'short', 'classic', 'epic']
         && d.get('textDensity', 'balanced') in ['visual', 'balanced', 'rich']
@@ -211,7 +215,7 @@ service cloud.firestore {
 
       // Solo se crean borradores; preview, estado y regeneraciones los maneja el servidor.
       allow create: if ownsIncoming()
-        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'event', 'length', 'textDensity', 'readingLevel', 'contentType', 'channel', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
+        && hasExactly(['ownerUid', 'status', 'childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'event', 'goal', 'length', 'textDensity', 'readingLevel', 'contentType', 'channel', 'preview', 'regenerationsUsed', 'createdAt', 'updatedAt'])
         && incoming().status == 'draft'
         && incoming().preview == null
         && incoming().regenerationsUsed == 0
@@ -221,7 +225,7 @@ service cloud.firestore {
 
       allow update: if ownsExisting()
         && resource.data.status in ['draft', 'preview_ready']
-        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'event', 'length', 'textDensity', 'readingLevel', 'contentType', 'updatedAt'])
+        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'event', 'goal', 'length', 'textDensity', 'readingLevel', 'contentType', 'updatedAt'])
         && isNow('updatedAt')
         && validBookEdits();
 

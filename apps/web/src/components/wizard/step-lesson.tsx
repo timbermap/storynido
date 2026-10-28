@@ -22,6 +22,19 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [selected, setSelected] = useState<string[]>(book.lessonIds);
   const [useCustom, setUseCustom] = useState(Boolean(book.customLesson));
   const [custom, setCustom] = useState(book.customLesson ?? '');
+  // Profesionales: objetivo general, uno de los temas de las colecciones de la historia.
+  const [goal, setGoal] = useState<string | null>(book.goal ?? null);
+  const story = data.stories.find((item) => item.slug === book.storyId);
+  const goals =
+    book.channel === 'professionals' && story
+      ? [
+          ...new Set(
+            data.collections
+              .filter((collection) => story.collectionIds.includes(collection.slug))
+              .flatMap((collection) => collection.topics),
+          ),
+        ]
+      : [];
   const age = data.child?.age;
   const lessons = data.lessons.filter(
     (lesson) => age === undefined || (lesson.ageMin <= age && age <= lesson.ageMax),
@@ -41,6 +54,7 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
       await updateBook(await getFirebaseDb(), book.id, {
         lessonIds: selected,
         customLesson: useCustom && custom.trim() ? custom.trim() : null,
+        ...(goals.length > 0 ? { goal: goal && goals.includes(goal) ? goal : null } : {}),
       });
     });
     if (ok) await nav.goNext();
@@ -64,6 +78,28 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
       <p className="-mt-4 mb-6 text-sm font-bold text-primary" aria-live="polite">
         {t('pickUpTo', { max: CHILD_LIMITS.maxLessons, count })}
       </p>
+      {goals.length > 0 && (
+        <fieldset className="mb-8 grid gap-3 rounded-2xl border bg-card p-4">
+          <legend className="px-1 text-base font-semibold">{t('goal.title')}</legend>
+          <p className="text-sm text-muted-foreground">{t('goal.hint')}</p>
+          <div className="flex flex-wrap gap-2">
+            {[null, ...goals].map((option) => (
+              <label key={option ?? 'none'} className={chipClass}>
+                <input
+                  type="radio"
+                  name="goal"
+                  className="sr-only"
+                  checked={goal === option}
+                  onChange={() => {
+                    setGoal(option);
+                  }}
+                />
+                {option ?? t('goal.none')}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
       <fieldset className="grid gap-6">
         <legend className="sr-only">{t('title')}</legend>
         {LESSON_GROUPS.map((group) => {

@@ -400,6 +400,12 @@
         "years": "{count, plural, one {# ano} other {# anos}}",
         "theme": "Tema da festa (opcional)",
         "themePlaceholder": "Por exemplo: dinossauros, espaço, princesas"
+      },
+      "pro": {
+        "alias": "Apelido do projeto",
+        "aliasHint": "Para encontrá-lo na sua conta. Use um apelido (por exemplo, “Sofi, 2º ano”), nunca o sobrenome.",
+        "aliasPlaceholder": "Ex.: Sofi, 2º ano",
+        "storyName": "Nome na história"
       }
     },
     "photos": {
@@ -437,7 +443,8 @@
       "badType": "Esse formato não é suportado. Use JPG, PNG ou WebP.",
       "limit": "Você já tem 3 fotos. Exclua uma para enviar outra.",
       "needOne": "Envie pelo menos uma foto válida para continuar.",
-      "uploadError": "Não conseguimos enviar a foto. Tente novamente."
+      "uploadError": "Não conseguimos enviar a foto. Tente novamente.",
+      "guardianText": "Como profissional, confirmo que tenho a autorização da mãe, do pai ou do responsável legal para usar a foto desta criança em um material educativo."
     },
     "story": {
       "title": "Escolha a aventura",
@@ -453,7 +460,12 @@
       "customPlaceholder": "Que ele saiba que o vovô o ama muito, mesmo morando longe.",
       "customHint": "{count}/150 caracteres. Revisamos antes de usar.",
       "pickUpTo": "Escolha até {max} ({count}/{max}). Se não escolher nenhuma, a história terá mesmo assim uma mensagem positiva.",
-      "clear": "Limpar seleção"
+      "clear": "Limpar seleção",
+      "goal": {
+        "title": "Objetivo geral (opcional)",
+        "hint": "Orienta a história. É um material educativo: não substitui uma intervenção profissional ou clínica.",
+        "none": "Sem objetivo"
+      }
     },
     "style": {
       "title": "Escolha o estilo de ilustração",

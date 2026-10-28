@@ -1,6 +1,7 @@
 import { cropPortrait, normalizeImage, type ProviderRegistry } from '@storynido/providers';
 import {
   COLLECTIONS,
+  GUARDIAN_CONSENT_VERSION,
   PHOTO_CONSENT_VERSION,
   PHOTO_RULES,
   evaluatePhoto,
@@ -32,12 +33,15 @@ export class PhotoService {
 
   async recordConsent(input: {
     uid: string;
+    type?: 'photo_upload' | 'guardian_authorization';
     textVersion: string;
     locale: Locale;
     ip: string;
     userAgent: string | null;
   }): Promise<string> {
-    if (input.textVersion !== PHOTO_CONSENT_VERSION) {
+    const type = input.type ?? 'photo_upload';
+    const version = type === 'photo_upload' ? PHOTO_CONSENT_VERSION : GUARDIAN_CONSENT_VERSION;
+    if (input.textVersion !== version) {
       throw new AppError(
         409,
         'bad_request',
@@ -46,7 +50,7 @@ export class PhotoService {
     }
     const ref = await this.db.collection(COLLECTIONS.consents).add({
       ownerUid: input.uid,
-      type: 'photo_upload',
+      type,
       textVersion: input.textVersion,
       locale: input.locale,
       acceptedAt: new Date(),
@@ -83,6 +87,25 @@ export class PhotoService {
       consent.textVersion !== PHOTO_CONSENT_VERSION
     ) {
       throw new AppError(403, 'forbidden', 'Necesitamos tu consentimiento antes de subir fotos.');
+    }
+    // Profesionales: la foto es de un chico que no es propio; hace falta la declaración de
+    // que tienen la autorización de su madre, padre o tutor.
+    const owner = (await this.db.collection(COLLECTIONS.users).doc(input.uid).get()).data();
+    if (owner?.accountType === 'professional') {
+      const guardian = await this.db
+        .collection(COLLECTIONS.consents)
+        .where('ownerUid', '==', input.uid)
+        .where('type', '==', 'guardian_authorization')
+        .where('textVersion', '==', GUARDIAN_CONSENT_VERSION)
+        .limit(1)
+        .get();
+      if (guardian.empty) {
+        throw new AppError(
+          403,
+          'forbidden',
+          'Antes de subir la foto, confirma que tienes la autorización de su madre, padre o tutor.',
+        );
+      }
     }
 
     const existing = await this.db

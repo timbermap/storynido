@@ -24,6 +24,7 @@ export function registerPhotoRoutes(app: FastifyInstance, photos: PhotoService):
     const body = request.body as BodyOf<'createConsent'>;
     const consentId = await photos.recordConsent({
       uid: uid(request),
+      type: body.type,
       textVersion: body.textVersion,
       locale: body.locale,
       ip: request.ip,

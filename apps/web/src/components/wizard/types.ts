@@ -2,6 +2,7 @@ import type {
   Book,
   ContentType,
   EditorialConfig,
+  PublicCollection,
   PublicLesson,
   PublicStory,
 } from '@storynido/shared';
@@ -38,4 +39,6 @@ export interface WizardData {
   lessons: PublicLesson[];
   styles: StyleOption[];
   editorial: EditorialConfig;
+  /** Colecciones de Profesionales: sus temas son los objetivos que se pueden elegir. */
+  collections: PublicCollection[];
 }

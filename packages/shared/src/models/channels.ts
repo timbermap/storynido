@@ -45,3 +45,19 @@ export const personalizationSchema = z.object({
 });
 
 export type Personalization = z.infer<typeof personalizationSchema>;
+
+/**
+ * Objetivos que se pueden elegir para una historia (Profesionales): los temas de sus
+ * colecciones, en cualquier idioma. El objetivo entra al prompt solo si es uno de estos.
+ */
+export function storyGoals(
+  collections: readonly Pick<Collection, 'slug' | 'topics'>[],
+  collectionIds: readonly string[],
+): string[] {
+  return collections
+    .filter((collection) => collectionIds.includes(collection.slug))
+    .flatMap((collection) => collection.topics.flatMap((topic) => Object.values(topic)));
+}
+
+export const validGoal = (goal: string | null | undefined, goals: readonly string[]) =>
+  goal && goals.includes(goal) ? goal : null;

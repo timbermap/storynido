@@ -36,6 +36,8 @@ import {
   type LessonPrompt,
   type Locale,
   type PublicPreview,
+  storyGoals,
+  validGoal,
 } from '@storynido/shared';
 import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
@@ -77,6 +79,8 @@ interface BookData {
   memories?: Memories | null;
   /** Eventos (fase 12b). */
   event?: BookEvent | null;
+  /** Profesionales (fase 12c): objetivo general de la colección. */
+  goal?: string | null;
   dedication?: string | null;
   /** Rasgos confirmados por el adulto (fase 07d). */
   characterTraits?: CharacterTraits | null;
@@ -384,6 +388,12 @@ export class PreviewService {
       }
     }
 
+    // Profesionales: el objetivo tiene que ser uno de los temas de las colecciones de la
+    // historia (así no entra texto libre al prompt).
+    const goal = book.goal
+      ? validGoal(book.goal, storyGoals(await this.catalog.collections(), story.collectionIds))
+      : null;
+
     // Eventos: la temática de la fiesta también se modera antes de entrar al prompt.
     const event = book.event ?? null;
     if (event?.theme) {
@@ -429,6 +439,7 @@ export class PreviewService {
       template: story.textPromptTemplate,
       memories,
       event,
+      goal,
       levelGuidance: plan.levelGuidance,
       coloring: plan.contentType === 'coloring',
     };

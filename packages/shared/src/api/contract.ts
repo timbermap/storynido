@@ -504,7 +504,7 @@ export const apiRoutes = {
     summary:
       'Registra el consentimiento del adulto responsable (con fecha, versión, IP y navegador)',
     body: z.object({
-      type: z.literal('photo_upload'),
+      type: z.enum(['photo_upload', 'guardian_authorization']).default('photo_upload'),
       textVersion: z.string().min(1).max(40),
       locale: localeSchema,
     }),

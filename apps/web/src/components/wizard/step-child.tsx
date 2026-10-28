@@ -34,6 +34,9 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [petName, setPetName] = useState(child?.petName ?? '');
   const [friend, setFriend] = useState(child?.bestFriendName ?? '');
   const [dedication, setDedication] = useState(book.dedication ?? '');
+  // Profesionales: el alias identifica el proyecto en la cuenta; el nombre es el del cuento.
+  const isPro = book.channel === 'professionals';
+  const [alias, setAlias] = useState(child?.alias ?? '');
   // Eventos: datos del cumpleaños (fecha, edad que cumple y temática).
   const isEvent = book.channel === 'events';
   const [eventDate, setEventDate] = useState(book.event?.date ?? '');
@@ -43,9 +46,23 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   const clearDraft = useStepDraft(
     book.id,
     'child',
-    { name, age, pronouns, likes, like, petName, friend, dedication, eventDate, turningAge, theme },
+    {
+      name,
+      alias,
+      age,
+      pronouns,
+      likes,
+      like,
+      petName,
+      friend,
+      dedication,
+      eventDate,
+      turningAge,
+      theme,
+    },
     (saved) => {
       setName(saved.name);
+      setAlias(saved.alias);
       setAge(saved.age);
       setPronouns(saved.pronouns);
       setLikes(saved.likes);
@@ -96,6 +113,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
         likes: pending,
         petName: blankToNull(petName),
         bestFriendName: blankToNull(friend),
+        ...(isPro ? { alias: blankToNull(alias.slice(0, CHILD_LIMITS.nameMaxLength)) } : {}),
       });
       await updateBook(db, book.id, {
         dedication: blankToNull(dedication),
@@ -126,10 +144,32 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       onNext={() => void next()}
     >
       <div className="grid gap-6">
+        {isPro && (
+          <div className="grid gap-2">
+            <label htmlFor="child-alias" className={labelClass}>
+              {t('pro.alias')}
+            </label>
+            <p id="alias-hint" className="text-sm text-muted-foreground">
+              {t('pro.aliasHint')}
+            </p>
+            <input
+              id="child-alias"
+              className={inputClass}
+              value={alias}
+              maxLength={CHILD_LIMITS.nameMaxLength}
+              autoComplete="off"
+              aria-describedby="alias-hint"
+              placeholder={t('pro.aliasPlaceholder')}
+              onChange={(event) => {
+                setAlias(event.target.value);
+              }}
+            />
+          </div>
+        )}
         <div className="grid gap-6 sm:grid-cols-[2fr_1fr]">
           <div className="grid gap-2">
             <label htmlFor="child-name" className={labelClass}>
-              {t('name')}
+              {isPro ? t('pro.storyName') : t('name')}
             </label>
             <input
               id="child-name"

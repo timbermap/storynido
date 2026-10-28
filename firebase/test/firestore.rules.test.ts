@@ -77,6 +77,7 @@ const draftBook = (ownerUid: string, childId: string | null = null) => ({
   avatar: null,
   memories: null,
   event: null,
+  goal: null,
   length: 'classic',
   textDensity: 'balanced',
   readingLevel: 'developing',
@@ -180,6 +181,15 @@ describe('children', () => {
     );
   });
 
+  it('Profesionales: alias opcional y corto', async () => {
+    await assertSucceeds(
+      setDoc(doc(alice(), 'children', 'c1'), { ...child(ALICE), alias: 'Sofi, 2.º grado' }),
+    );
+    await assertFails(
+      setDoc(doc(alice(), 'children', 'c2'), { ...child(ALICE), alias: 'x'.repeat(41) }),
+    );
+  });
+
   it('no crea perfiles a nombre de otro', async () => {
     await assertFails(setDoc(doc(alice(), 'children', 'c1'), child(BOB)));
   });
@@ -209,6 +219,25 @@ describe('children', () => {
 describe('books', () => {
   it('crea un borrador propio', async () => {
     await assertSucceeds(setDoc(doc(alice(), 'books', 'b1'), draftBook(ALICE)));
+  });
+
+  it('el objetivo (Profesionales) es texto corto o null', async () => {
+    await seed('books/b1', { ...draftBook(ALICE), createdAt: new Date(), updatedAt: new Date() });
+    await assertSucceeds(
+      updateDoc(doc(alice(), 'books', 'b1'), {
+        goal: 'Manejar la frustración',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(alice(), 'books', 'b1'), {
+        goal: 'x'.repeat(81),
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      setDoc(doc(alice(), 'books', 'b2'), { ...draftBook(ALICE), goal: 'x'.repeat(81) }),
+    );
   });
 
   it('no crea libros que no sean borrador ni con preview o regeneraciones', async () => {

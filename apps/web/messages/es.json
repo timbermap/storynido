@@ -400,6 +400,12 @@
         "years": "{count, plural, one {# año} other {# años}}",
         "theme": "Temática de la fiesta (opcional)",
         "themePlaceholder": "Por ejemplo: dinosaurios, espacio, princesas"
+      },
+      "pro": {
+        "alias": "Alias del proyecto",
+        "aliasHint": "Para encontrarlo en tu cuenta. Usa un alias (por ejemplo, «Sofi, 2.º grado»), nunca el apellido.",
+        "aliasPlaceholder": "Ej.: Sofi, 2.º grado",
+        "storyName": "Nombre en el cuento"
       }
     },
     "photos": {
@@ -437,7 +443,8 @@
       "badType": "Ese formato no está soportado. Usa JPG, PNG o WebP.",
       "limit": "Ya tienes 3 fotos. Elimina una para subir otra.",
       "needOne": "Sube al menos una foto válida para continuar.",
-      "uploadError": "No pudimos subir la foto. Inténtalo de nuevo."
+      "uploadError": "No pudimos subir la foto. Inténtalo de nuevo.",
+      "guardianText": "Como profesional, confirmo que tengo la autorización de la madre, el padre o el tutor legal para usar la foto de este niño o niña en un material educativo."
     },
     "story": {
       "title": "Elige la aventura",
@@ -453,7 +460,12 @@
       "customPlaceholder": "Que sepa que el abuelo lo quiere mucho aunque viva lejos.",
       "customHint": "{count}/150 caracteres. Lo revisamos antes de usarlo.",
       "pickUpTo": "Elige hasta {max} ({count}/{max}). Si no eliges ninguna, la historia igual tendrá un mensaje positivo.",
-      "clear": "Quitar selección"
+      "clear": "Quitar selección",
+      "goal": {
+        "title": "Objetivo general (opcional)",
+        "hint": "Orienta la historia. Es un material educativo: no reemplaza una intervención profesional ni clínica.",
+        "none": "Sin objetivo"
+      }
     },
     "style": {
       "title": "Elige el estilo de ilustración",

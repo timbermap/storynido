@@ -137,6 +137,18 @@ describe.skipIf(!chromePath())('PDF', () => {
     ...overrides,
   });
 
+  it('Profesionales: el cierre lleva el aviso de material educativo no clínico', () => {
+    const spec = FORMAT_SPECS.digital;
+    const last = (overrides: Partial<LayoutBook>) => interiorPages(book(overrides), spec).join('');
+    expect(last({})).not.toContain('class="notice"');
+    const pro = last({ educationalNotice: true });
+    expect(pro).toContain('Material educativo creado con StoryNido');
+    expect(pro).toContain('intervención profesional o clínica');
+    expect(last({ educationalNotice: true, language: 'en' })).toContain(
+      'professional or clinical intervention',
+    );
+  });
+
   it('digital: páginas, tamaño 21×28 y tipografías embebidas', async () => {
     const spec = FORMAT_SPECS.digital;
     const layout = book();
