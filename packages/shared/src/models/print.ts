@@ -8,6 +8,14 @@ export const printFormatSchema = z.enum(PRINT_FORMATS);
 
 export type PrintFormat = z.infer<typeof printFormatSchema>;
 
+/** Fotolibros 210×280 mm vertical (nuestro 21×28 cm), papel de 170 g y laminado mate. */
+export const GELATO_PRODUCTS: Record<PrintFormat, string> = {
+  softcover:
+    'photobooks-softcover_pf_210x280-mm-8x11-inch_pt_170-gsm-65lb-coated-silk_cl_4-4_ccl_4-4_bt_glued-left_ct_matt-lamination_prt_1-0_cpt_250-gsm-100-lb-cover-coated-silk_ver',
+  hardcover:
+    'photobooks-hardcover_pf_210x280-mm-8x11-inch_pt_170-gsm-65lb-coated-silk_cl_4-4_ccl_4-4_bt_glued-left_ct_matt-lamination_prt_1-0_cpt_130-gsm-65-lb-cover-coated-silk_ver',
+};
+
 /**
  * printOptions/{país}_{formato}_{imprenta}: matriz de impresión. Puede haber varias imprentas por
  * país y formato; cada una imprime solo si está habilitada Y pasó la muestra física

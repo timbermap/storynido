@@ -1,5 +1,6 @@
 export * from './defaults';
 export * from './gcp/storage';
+export * from './gelato/print';
 export * from './gcp/vertex';
 export * from './gcp/vision';
 export * from './images';

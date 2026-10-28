@@ -1,6 +1,7 @@
 import {
   aiModelSettingsFromEnv,
   createProviderRegistry,
+  simulatedProviders,
   providerSettingsFromEnv,
 } from '@storynido/providers';
 import { cloudLoggingOptions } from '@storynido/shared/server';
@@ -35,10 +36,7 @@ const app = buildApp({
 });
 
 const settings = providerSettingsFromEnv(process.env);
-if (
-  env.APP_ENV === 'production' &&
-  Object.values(settings).some((id) => id === 'mock' || id === 'local')
-) {
+if (env.APP_ENV === 'production' && simulatedProviders(settings).length > 0) {
   throw new Error(`Producción no puede usar proveedores simulados: ${JSON.stringify(settings)}`);
 }
 const providers = createProviderRegistry({
@@ -50,6 +48,9 @@ const providers = createProviderRegistry({
       : undefined,
   vertexProjectId: env.GCP_PROJECT_ID || undefined,
   vertexLocation: env.VERTEX_LOCATION,
+  gelato: env.GELATO_API_KEY
+    ? { apiKey: env.GELATO_API_KEY, orderType: env.GELATO_ORDER_TYPE }
+    : undefined,
   aiModels: aiModelSettingsFromEnv(process.env),
   localStorage: {
     rootDir: env.LOCAL_STORAGE_DIR,

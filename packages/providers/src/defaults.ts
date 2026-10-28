@@ -3,6 +3,7 @@ import type { EmailMessage, StorageBucket } from '@storynido/shared';
 import { GcsStorageService } from './gcp/storage';
 import { VertexClient, VertexImageProvider, VertexTextProvider } from './gcp/vertex';
 import { VisionPhotoAnalyzer } from './gcp/vision';
+import { GelatoPrintProvider, type GelatoOptions } from './gelato/print';
 
 import { LocalStorageService } from './local/storage';
 import { MockAIImageProvider, MockAITextProvider } from './mock/ai';
@@ -30,6 +31,8 @@ export interface DefaultProviderOptions {
   /** Región de Vertex AI; "global" tiene los modelos más nuevos. */
   vertexLocation?: string;
   aiModels?: AiModelSettings;
+  /** Gelato (solo si hay clave): sin clave, la imprenta no se registra. */
+  gelato?: Pick<GelatoOptions, 'apiKey' | 'orderType'>;
   onMockEmail?: (message: EmailMessage) => void;
 }
 
@@ -39,6 +42,7 @@ export function createProviderFactories(
   currentModels: () => AiModelSettings = () => aiModelSettingsSchema.parse({}),
 ): ProviderFactories {
   const buckets = options.gcsBuckets;
+  const gelato = options.gelato;
   const projectId = options.vertexProjectId;
   let vertex: VertexClient | undefined;
   const vertexClient = (id: string) =>
@@ -66,6 +70,7 @@ export function createProviderFactories(
           productionUsdMinor: { softcover: 1050, hardcover: 1550 },
           shippingUsdMinor: { US: 299 },
         }),
+      ...(gelato ? { gelato: () => new GelatoPrintProvider(gelato) } : {}),
     },
     email: { mock: () => new MockEmailProvider(options.onMockEmail) },
     storage: {

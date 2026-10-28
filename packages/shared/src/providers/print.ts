@@ -29,10 +29,34 @@ export interface PrintQuote {
   etaDaysMax: number;
 }
 
+/**
+ * Cómo pide los archivos una imprenta. "separate": tripa y tapa en dos PDF. "single": un solo
+ * PDF con el pliego de tapa, una guarda en blanco, la tripa y otra guarda (Gelato).
+ */
+export interface PrintFileSpec {
+  packaging: 'separate' | 'single';
+  /** Pliego de tapa (contratapa + lomo + tapa), en mm, con sangrado o vuelta incluidos. */
+  cover: {
+    widthMm: number;
+    heightMm: number;
+    spineLeftMm: number;
+    spineWidthMm: number;
+    /** Distancia del borde del pliego al corte (sangrado, o vuelta en tapa dura). */
+    edgeMm: number;
+  };
+}
+
+export interface PrintOrderFiles {
+  /** "separate": tripa y tapa; "single": el libro entero en un PDF. */
+  interiorPdfUrl: string | null;
+  coverPdfUrl: string | null;
+  bookPdfUrl: string | null;
+}
+
 export interface PrintOrderRequest {
   /** Nuestro ID de pedido: también es la clave de idempotencia. */
   orderId: string;
-  items: readonly (PrintItem & { interiorPdfUrl: string; coverPdfUrl: string })[];
+  items: readonly (PrintItem & PrintOrderFiles)[];
   address: PrintAddress;
   email: string;
   currency: Currency;
@@ -78,6 +102,11 @@ export interface PrintProvider {
    */
   createOrder(request: PrintOrderRequest): Promise<PrintOrder>;
   cancelOrder(externalOrderId: string): Promise<{ cancelled: boolean; reason: string | null }>;
-  /** Verifica la firma y traduce el evento. Lanza WebhookSignatureError si es inválida. */
-  parseWebhook(input: WebhookInput): PrintEvent;
+  /**
+   * Verifica el webhook (firma, o consultando el pedido a la imprenta) y lo traduce. Lanza
+   * WebhookSignatureError si no se puede verificar.
+   */
+  parseWebhook(input: WebhookInput): PrintEvent | Promise<PrintEvent>;
+  /** Archivos que pide para este libro. Sin esto, tripa y tapa genéricas por separado. */
+  fileSpec?(item: PrintItem): Promise<PrintFileSpec>;
 }

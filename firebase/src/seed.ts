@@ -35,6 +35,7 @@ import {
   userSchema,
   type BookFormat,
   PRINT_FORMATS,
+  GELATO_PRODUCTS,
   printOptionId,
   printOptionSchema,
   type BookLength,
@@ -221,6 +222,29 @@ for (const [code, eta] of Object.entries(SAMPLE_PRINT) as [
       );
     }
   }
+}
+
+// Gelato (DECISIONS 076): solo EE. UU. (a México sale a pérdida). Fotolibros de 28 a 200
+// páginas pares. Costo y plazo de referencia de su cotización; el real se pide al pagar.
+for (const format of PRINT_FORMATS) {
+  batch.set(
+    db.collection(COLLECTIONS.printOptions).doc(printOptionId('US', format, 'gelato')),
+    printOptionSchema.parse({
+      country: 'US',
+      format,
+      provider: 'gelato',
+      sku: GELATO_PRODUCTS[format],
+      enabled: true,
+      // En producción se habilita recién con la muestra física aprobada.
+      qaSamplePassed: cloudProject !== 'storynido-prod',
+      pages: { min: 28, max: 200, multipleOf: 2 },
+      maxQuantity: 100,
+      etaDaysMin: 6,
+      etaDaysMax: 8,
+      productionCostUsdMinor: format === 'hardcover' ? 1283 : 986,
+      updatedAt: now,
+    }),
+  );
 }
 
 // Cupón de prueba (solo en los emuladores): 10 % para probar el checkout.

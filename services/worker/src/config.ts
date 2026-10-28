@@ -26,6 +26,9 @@ export const workerEnvSchema = serviceEnvSchema.extend({
   LOCAL_STORAGE_DIR: z.string().default(path.join(os.tmpdir(), 'storynido-storage')),
   LOCAL_STORAGE_SECRET: z.string().min(8).default('local-dev-storage-secret'),
   MOCK_WEBHOOK_SECRET: z.string().min(8).default('local-dev-webhook-secret'),
+  /** Gelato: sin clave no se registra. Fuera de producción los pedidos quedan en borrador. */
+  GELATO_API_KEY: z.string().optional(),
+  GELATO_ORDER_TYPE: z.enum(['draft', 'order']).default('draft'),
   VERTEX_LOCATION: z.string().default('global'),
   BUCKET_PHOTOS: z.string().optional(),
   BUCKET_ASSETS: z.string().optional(),

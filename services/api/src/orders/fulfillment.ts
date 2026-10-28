@@ -69,7 +69,7 @@ export class FulfillmentService {
     if (!printer) throw new AppError(404, 'not_found', 'Imprenta desconocida.');
     let event: PrintEvent;
     try {
-      event = printer.parseWebhook({ rawBody, headers });
+      event = await printer.parseWebhook({ rawBody, headers });
     } catch (error) {
       if (error instanceof WebhookSignatureError) {
         throw new AppError(400, 'bad_request', 'Firma inválida.');

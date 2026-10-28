@@ -211,6 +211,7 @@ export function describePrintContract(
           ...item,
           interiorPdfUrl: 'https://storynido.test/interior.pdf',
           coverPdfUrl: 'https://storynido.test/cover.pdf',
+          bookPdfUrl: null,
         })),
         address: sampleAddress,
         email: 'ana@example.com',
@@ -220,7 +221,7 @@ export function describePrintContract(
       expect((await provider.cancelOrder(order.externalOrderId)).cancelled).toBe(true);
     });
 
-    it('rechaza webhooks con firma inválida y traduce estados', () => {
+    it('rechaza webhooks con firma inválida y traduce estados', async () => {
       const input = signWebhook({
         id: 'evt_p1',
         type: 'order.status',
@@ -232,10 +233,12 @@ export function describePrintContract(
           trackingUrl: null,
         },
       });
-      expect(() => provider.parseWebhook({ ...input, rawBody: `${input.rawBody} ` })).toThrow(
+      // Puede verificar en forma sincrónica (firma) o asincrónica (consultando a la imprenta).
+      const parse = async (webhook: WebhookInput) => provider.parseWebhook(webhook);
+      await expect(parse({ ...input, rawBody: `${input.rawBody} ` })).rejects.toThrow(
         ProviderError,
       );
-      expect(provider.parseWebhook(input)).toMatchObject({
+      expect(await parse(input)).toMatchObject({
         type: 'status',
         status: 'shipped',
         trackingNumber: 'T1',

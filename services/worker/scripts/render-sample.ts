@@ -4,20 +4,23 @@
  * ilustraciones (0 = portada, 1..n = páginas). Genera el PDF digital y los de imprenta y los
  * valida. Uso:
  *   pnpm --filter @storynido/worker exec tsx scripts/render-sample.ts <libro.json> <imagenes/> <salida/>
+ * Con --gelato (y GELATO_API_KEY) usa la tapa real de Gelato y arma su PDF único (gratis).
  */
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
+import { GelatoPrintProvider } from '@storynido/providers';
 import { countWords } from '@storynido/shared';
 import QRCode from 'qrcode';
 import sharp from 'sharp';
 
 import { textPlacements } from '../src/pdf/placement';
 
+import { assembleSinglePdf } from '../src/pdf/assemble';
 import { launchBrowser, renderPdf } from '../src/pdf/render';
 import { FORMAT_SPECS, pageSizeMm, type FormatSpec } from '../src/pdf/spec';
 import {
-  coverSizeMm,
+  defaultCoverGeometry,
   digitalHtml,
   interiorPages,
   printCoverHtml,
@@ -26,7 +29,11 @@ import {
 } from '../src/pdf/templates';
 import { effectiveDpi, validatePdf } from '../src/pdf/validate';
 
-const [bookFile, imageDir, outDir] = process.argv.slice(2);
+const [bookFile, imageDir, outDir] = process.argv.slice(2).filter((arg) => !arg.startsWith('--'));
+const gelato =
+  process.argv.includes('--gelato') && process.env.GELATO_API_KEY
+    ? new GelatoPrintProvider({ apiKey: process.env.GELATO_API_KEY, orderType: 'draft' })
+    : null;
 if (!bookFile || !imageDir || !outDir)
   throw new Error('Uso: render-sample.ts <libro.json> <imagenes/> <salida/>');
 mkdirSync(outDir, { recursive: true });
@@ -139,11 +146,32 @@ try {
         }),
         interior.overflow,
       );
-      const coverSize = coverSizeMm(spec, count);
-      const tapas = await renderPdf(browser, printCoverHtml(layout, spec, count), coverSize, {
-        bleedMm: spec.bleedMm,
-        title: book.title,
-      });
+      // Gelato pide 28 páginas como mínimo: con menos, la tapa se mide para 28.
+      const gelatoSpec = gelato
+        ? await gelato.fileSpec({
+            format: spec.format,
+            pageCount: Math.max(count, 28),
+            quantity: 1,
+          })
+        : null;
+      const geometry = gelatoSpec?.cover ?? defaultCoverGeometry(spec, count);
+      const coverSize = { width: geometry.widthMm, height: geometry.heightMm };
+      const tapas = await renderPdf(
+        browser,
+        printCoverHtml(layout, spec, geometry, !gelatoSpec),
+        coverSize,
+        {
+          bleedMm: geometry.edgeMm,
+          title: book.title,
+        },
+      );
+      if (gelatoSpec) {
+        const single = await assembleSinglePdf(tapas.pdf, interior.pdf);
+        writeFileSync(path.join(outDir, `${spec.format}-gelato-libro.pdf`), single);
+        console.log(
+          `  gelato ${spec.format}: tapa ${String(geometry.widthMm)}×${String(geometry.heightMm)} mm, lomo ${String(geometry.spineWidthMm)} mm, ${String(count + 3)} páginas`,
+        );
+      }
       writeFileSync(path.join(outDir, `${spec.format}-tapas.pdf`), tapas.pdf);
       report(
         `${spec.format} tapas`,
@@ -151,7 +179,7 @@ try {
           pages: 1,
           widthMm: coverSize.width,
           heightMm: coverSize.height,
-          bleedMm: spec.bleedMm,
+          bleedMm: geometry.edgeMm,
         }),
         tapas.overflow,
       );

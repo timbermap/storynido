@@ -1,4 +1,4 @@
-import type { ActivitySpec } from '@storynido/shared';
+import type { ActivitySpec, PrintFileSpec } from '@storynido/shared';
 
 import { fontFaces } from './fonts';
 import { mazeSvg } from './maze';
@@ -277,25 +277,38 @@ export function printInteriorHtml(book: LayoutBook, spec: FormatSpec): string {
   return document(spec, pageSizeMm(spec), interiorPages(book, spec));
 }
 
-export function printCoverHtml(book: LayoutBook, spec: FormatSpec, interiorCount: number): string {
+/** Pliego de tapa: la geometría la da la imprenta (lomo y vuelta según páginas y papel). */
+export type CoverGeometry = PrintFileSpec['cover'];
+
+/** Pliego genérico (imprentas sin especificación propia): sangrado común y lomo aproximado. */
+export function defaultCoverGeometry(spec: FormatSpec, interiorCount: number): CoverGeometry {
   const spine = spineMm(interiorCount, spec.format);
-  const width = 2 * TRIM_MM.width + spine + 2 * spec.bleedMm;
-  const height = TRIM_MM.height + 2 * spec.bleedMm;
-  const half = TRIM_MM.width + spec.bleedMm;
-  return document(spec, { width, height }, [
-    `<section class="page" data-label="tapas" style="width:${String(width)}mm;height:${String(height)}mm">
-  <div style="position:absolute;left:0;top:0;bottom:0;width:${String(half)}mm">${backCover(book, true)}</div>
-  <div style="position:absolute;left:${String(half)}mm;top:0;bottom:0;width:${String(spine)}mm;background:#79518c;display:flex;align-items:center;justify-content:center">
-    <p style="transform:rotate(90deg);white-space:nowrap;color:#fff;font-family:'Fraunces',serif;font-size:${String(Math.min(10, spine * 1.6))}pt">${escapeHtml(book.title)}</p>
-  </div>
-  <div style="position:absolute;left:${String(half + spine)}mm;top:0;bottom:0;right:0;overflow:hidden">${coverFront(book, spec)}</div>
-</section>`,
-  ]);
+  return {
+    widthMm: 2 * TRIM_MM.width + spine + 2 * spec.bleedMm,
+    heightMm: TRIM_MM.height + 2 * spec.bleedMm,
+    spineLeftMm: TRIM_MM.width + spec.bleedMm,
+    spineWidthMm: spine,
+    edgeMm: spec.bleedMm,
+  };
 }
 
-export function coverSizeMm(spec: FormatSpec, interiorCount: number) {
-  return {
-    width: 2 * TRIM_MM.width + spineMm(interiorCount, spec.format) + 2 * spec.bleedMm,
-    height: TRIM_MM.height + 2 * spec.bleedMm,
-  };
+export function printCoverHtml(
+  book: LayoutBook,
+  spec: FormatSpec,
+  cover: CoverGeometry,
+  // Zona blanca para el código de barras (Gelato no la usa: lo imprime en la última página).
+  barcodeZone = true,
+): string {
+  const { widthMm: width, heightMm: height, spineLeftMm: left, spineWidthMm: spine } = cover;
+  // Los márgenes del texto se miden desde el corte: en tapa dura, la vuelta es más ancha.
+  const coverSpec: FormatSpec = { ...spec, bleedMm: cover.edgeMm };
+  return document(coverSpec, { width, height }, [
+    `<section class="page" data-label="tapas" style="width:${String(width)}mm;height:${String(height)}mm">
+  <div style="position:absolute;left:0;top:0;bottom:0;width:${String(left)}mm">${backCover(book, barcodeZone)}</div>
+  <div style="position:absolute;left:${String(left)}mm;top:0;bottom:0;width:${String(spine)}mm;background:#79518c;display:flex;align-items:center;justify-content:center">
+    <p style="transform:rotate(90deg);white-space:nowrap;color:#fff;font-family:'Fraunces',serif;font-size:${String(Math.min(10, spine * 1.6))}pt">${escapeHtml(book.title)}</p>
+  </div>
+  <div style="position:absolute;left:${String(left + spine)}mm;top:0;bottom:0;right:0;overflow:hidden">${coverFront(book, coverSpec)}</div>
+</section>`,
+  ]);
 }

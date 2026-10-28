@@ -22,6 +22,9 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   /** Firmas de URLs locales y webhooks simulados: no son claves reales, solo sirven fuera de producción. */
   LOCAL_STORAGE_SECRET: z.string().min(8).default('local-dev-storage-secret'),
   MOCK_WEBHOOK_SECRET: z.string().min(8).default('local-dev-webhook-secret'),
+  /** Gelato: sin clave no se registra. Fuera de producción los pedidos quedan en borrador. */
+  GELATO_API_KEY: z.string().optional(),
+  GELATO_ORDER_TYPE: z.enum(['draft', 'order']).default('draft'),
   /** Región de Vertex AI ("global" tiene los modelos de Gemini más nuevos). */
   VERTEX_LOCATION: z.string().default('global'),
   /** Buckets reales (los define Terraform en Cloud Run). */

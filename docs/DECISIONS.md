@@ -874,3 +874,20 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - a EE. UU.: tapa blanda 16,85–17,50 (6–7 días), tapa dura 19,82–20,72 (7–8 días). Con nuestros precios, buen margen;
   - a México: tapa blanda 44,40–45,32, tapa dura 48,61–49,89 (9–16 días, UPS DDU: el cliente paga la importación al recibir). **A pérdida.**
 - **México:** solo digital por ahora (Gelato solo en la matriz de EE. UU.). Se busca una imprenta con producción en México para sumarla al enrutador.
+
+## 077 · Gelato conectado: cotización, pedido (borrador fuera de producción), webhooks y su PDF
+
+- **Fecha:** 2026-10-28.
+- **Cotización:** `POST /v4/orders:quote` (gratis, sin archivos). Se toma el envío normal más barato; costo total en USD para competir en el enrutador.
+- **Pedido:** `POST /v4/orders` con `orderReferenceId` = nuestro pedido.
+  - Antes busca si ya existe (reintentos sin duplicar).
+  - Fuera de producción va como **borrador** (`GELATO_ORDER_TYPE=draft`): no se fabrica ni se cobra. En producción: `order`.
+- **Archivos (`fileSpec`):** Gelato pide un solo PDF: pliego de tapa, guarda, tripa y guarda. La tapa usa su `cover-dimensions` para las páginas reales:
+  - tapa dura: 20 mm de vuelta;
+  - tapa blanda: 3 mm de sangrado y lomo según las páginas.
+  - Sin zona de código de barras (Gelato lo imprime en la última página).
+- **Maquetación por imprenta:** la maqueta usa la tapa de la imprenta elegida al pagar. Si al mandar a imprimir hay que pasar a otra imprenta con otras especificaciones, se salta ("necesita otra maquetación"). Volver a maquetar para la siguiente queda pendiente.
+- **Webhooks:** Gelato no los firma. Cada aviso se verifica consultando el pedido con nuestra clave: vale lo que dice su API, no el cuerpo del webhook.
+- **Producción:** el chequeo de proveedores simulados ahora también revisa la lista de imprentas (antes `mock_alt` pasaba).
+- **Matriz:** Gelato solo en EE. UU., de 28 a 200 páginas pares. En producción, `qaSamplePassed` queda en falso hasta aprobar la muestra física.
+- **Muestras:** `scripts/render-sample.ts --gelato` arma el PDF con la tapa real de Gelato.

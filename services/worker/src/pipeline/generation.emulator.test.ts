@@ -7,9 +7,10 @@ import {
   providerSettingsFromEnv,
   type ProviderRegistry,
 } from '@storynido/providers';
-import { ProviderError, STEP_POLICIES, type PageReview } from '@storynido/shared';
+import { ProviderError, STEP_POLICIES, type PageReview, type PrintItem } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import Fastify from 'fastify';
+import { PDFDocument } from 'pdf-lib';
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import sharp from 'sharp';
@@ -362,6 +363,56 @@ describe('generación del libro (fase 09)', () => {
       ['softcover', 'interior', 12],
       ['softcover', 'cover', 1],
     ]);
+  });
+
+  it('imprenta con especificación propia (como Gelato): un solo PDF con su tapa y guardas', async () => {
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    await db.doc('orders/o1').update({
+      printRouting: {
+        provider: 'mock',
+        totalCostUsdMinor: 1450,
+        etaDaysMin: 5,
+        etaDaysMax: 10,
+        quotes: [{ provider: 'mock', totalCostUsdMinor: 1450, etaDaysMax: 10, error: null }],
+        quotedAt: new Date(),
+      },
+    });
+    const mock = printer(providers, 'mock');
+    // Pliego como el de una tapa dura de Gelato: 20 mm de vuelta y lomo de 6 mm.
+    const cover = { widthMm: 478, heightMm: 326, spineLeftMm: 236, spineWidthMm: 6, edgeMm: 20 };
+    const fileSpec = vi.fn((_item: PrintItem) =>
+      Promise.resolve({ packaging: 'single' as const, cover }),
+    );
+    Object.assign(mock, { fileSpec });
+    const create = vi.spyOn(mock, 'createOrder');
+    await setup(providers).run();
+
+    expect((await order()).status).toBe('sent_to_print');
+    expect(fileSpec).toHaveBeenCalledWith({ format: 'softcover', pageCount: 12, quantity: 1 });
+    const layout = (await step('layout_pdf')).output as unknown as {
+      files: { format: string; kind: string; pages: number; printer?: string | null }[];
+    };
+    expect(layout.files.map((file) => [file.format, file.kind, file.pages, file.printer])).toEqual([
+      ['digital', 'book', 14, undefined],
+      // Tapa + guarda + 12 páginas + guarda.
+      ['softcover', 'book', 15, 'mock'],
+    ]);
+    const request = create.mock.calls[0]?.[0];
+    expect(request?.items[0]).toMatchObject({
+      pageCount: 12,
+      interiorPdfUrl: null,
+      coverPdfUrl: null,
+      bookPdfUrl: expect.stringContaining('softcover-book.pdf') as string,
+    });
+    const bytes = await providers
+      .storage()
+      .download({ bucket: 'pdfs', path: 'orders/o1/g0/softcover-book.pdf' });
+    const pdf = await PDFDocument.load(bytes);
+    const mm = (points: number) => Math.round(points / (72 / 25.4));
+    const [first, second] = pdf.getPages();
+    expect([mm(first?.getWidth() ?? 0), mm(first?.getHeight() ?? 0)]).toEqual([478, 326]);
+    expect([mm(second?.getWidth() ?? 0), mm(second?.getHeight() ?? 0)]).toEqual([216, 286]);
   });
 
   it('la imprenta elegida al pagar rechaza el pedido: pasa a la siguiente', async () => {

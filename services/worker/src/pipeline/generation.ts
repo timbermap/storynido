@@ -38,12 +38,13 @@ import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 
+import { assembleSinglePdf } from '../pdf/assemble';
 import { launchBrowser, renderPdf } from '../pdf/render';
 import { textPlacements } from '../pdf/placement';
 import { FORMAT_SPECS, pageSizeMm, printablePages } from '../pdf/spec';
 import {
   DENSITY_LAYOUT,
-  coverSizeMm,
+  defaultCoverGeometry,
   digitalHtml,
   interiorPages,
   printCoverHtml,
@@ -141,6 +142,8 @@ export interface LayoutFile {
   pages: number;
   bytes: number;
   sha256: string;
+  /** Imprenta para la que se maquetó; null o ausente: archivos genéricos. */
+  printer?: string | null;
 }
 
 /** El pedido tiene al menos un libro impreso. */
@@ -849,6 +852,15 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     ];
     const files: LayoutFile[] = [];
     const printEligible: Record<string, boolean> = {};
+    // Imprenta elegida al pagar (la más barata): define la tapa y cómo se entregan los archivos.
+    const routing = isPrint(ctx.order)
+      ? printRoutingSchema.safeParse(
+          normalizeFirestoreData(
+            (await db.collection(COLLECTIONS.orders).doc(ctx.order.id).get()).get('printRouting'),
+          ),
+        )
+      : null;
+    const printer = routing?.success ? providers.printer(routing.data.provider) : null;
     const problems: string[] = [];
     const base = `orders/${ctx.order.id}/g${String(ctx.generation)}`;
     const browser = await launchBrowser();
@@ -907,26 +919,47 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             continue;
           }
         }
+        // La tapa y el empaquetado los define la imprenta elegida al pagar (si tiene los suyos).
+        const fileSpec =
+          format !== 'digital' && printer?.fileSpec
+            ? await printer.fileSpec({
+                format,
+                pageCount: interiorCount,
+                quantity: ctx.order.items.find((item) => item.format === format)?.quantity ?? 1,
+              })
+            : null;
+        const cover = fileSpec?.cover ?? defaultCoverGeometry(spec, interiorCount);
         const jobs =
           format === 'digital'
-            ? [{ kind: 'book', html: digitalHtml(layout, spec), size, pages: interiorCount + 2 }]
+            ? [
+                {
+                  kind: 'book',
+                  html: digitalHtml(layout, spec),
+                  size,
+                  bleedMm: spec.bleedMm,
+                  pages: interiorCount + 2,
+                },
+              ]
             : [
                 {
                   kind: 'interior',
                   html: printInteriorHtml(layout, spec),
                   size,
+                  bleedMm: spec.bleedMm,
                   pages: interiorCount,
                 },
                 {
                   kind: 'cover',
-                  html: printCoverHtml(layout, spec, interiorCount),
-                  size: coverSizeMm(spec, interiorCount),
+                  html: printCoverHtml(layout, spec, cover, fileSpec?.packaging !== 'single'),
+                  size: { width: cover.widthMm, height: cover.heightMm },
+                  bleedMm: cover.edgeMm,
                   pages: 1,
                 },
               ];
+        const rendered: { kind: string; pdf: Uint8Array; pages: number }[] = [];
         for (const job of jobs) {
           const result = await renderPdf(browser, job.html, job.size, {
-            bleedMm: spec.bleedMm,
+            bleedMm: job.bleedMm,
             title: snapshot.title,
           });
           if (result.overflow.length > 0) {
@@ -937,22 +970,41 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             pages: job.pages,
             widthMm: job.size.width,
             heightMm: job.size.height,
-            bleedMm: spec.bleedMm,
+            bleedMm: job.bleedMm,
           });
           if (!check.ok) {
             problems.push(`${format} ${job.kind}: ${check.errors.join('; ')}`);
             continue;
           }
-          const path = `${base}/${format}-${job.kind}.pdf`;
-          await storage().upload({ bucket: 'pdfs', path }, result.pdf, 'application/pdf');
+          rendered.push({ kind: job.kind, pdf: result.pdf, pages: check.pageCount });
+        }
+        if (rendered.length !== jobs.length) continue;
+        const interiorPdf = rendered.find((item) => item.kind === 'interior');
+        const coverPdf = rendered.find((item) => item.kind === 'cover');
+        const outputs =
+          fileSpec?.packaging === 'single' && interiorPdf && coverPdf
+            ? [
+                {
+                  kind: 'book',
+                  pdf: await assembleSinglePdf(coverPdf.pdf, interiorPdf.pdf),
+                  // Tapa + guarda + tripa + guarda.
+                  pages: interiorPdf.pages + 3,
+                },
+              ]
+            : rendered;
+        for (const output of outputs) {
+          const path = `${base}/${format}-${output.kind}.pdf`;
+          await storage().upload({ bucket: 'pdfs', path }, output.pdf, 'application/pdf');
           files.push({
             format,
-            kind: job.kind,
+            kind: output.kind,
             path,
-            pages: check.pageCount,
-            bytes: result.pdf.length,
+            pages: output.pages,
+            bytes: output.pdf.length,
             // Huella del PDF: la entrega verifica que se imprime exactamente este archivo.
-            sha256: createHash('sha256').update(result.pdf).digest('hex'),
+            sha256: createHash('sha256').update(output.pdf).digest('hex'),
+            // Para qué imprenta se maquetó (null: archivos genéricos que sirven a cualquiera).
+            ...(format === 'digital' ? {} : { printer: fileSpec ? (printer?.id ?? null) : null }),
           });
         }
       }
@@ -1001,31 +1053,36 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       throw new HumanReviewError('print_address', 'El pedido impreso no tiene dirección.');
 
     const items = [];
+    // Imprenta para la que se maquetó (null: archivos genéricos, sirven a cualquiera sin specs).
+    let laidOutFor: string | null = null;
+    const sevenDays = 7 * 24 * 3600;
+    const signed = async (file: LayoutFile | undefined) =>
+      file
+        ? (await storage().signedDownloadUrl({ bucket: 'pdfs', path: file.path }, sevenDays)).url
+        : null;
     for (const item of printItems) {
-      const interior = files.find(
-        (file) => file.format === item.format && file.kind === 'interior',
-      );
-      const cover = files.find((file) => file.format === item.format && file.kind === 'cover');
-      if (!interior || !cover) throw new Error(`Faltan los PDF de ${item.format}.`);
+      const mine = files.filter((file) => file.format === item.format);
+      const book = mine.find((file) => file.kind === 'book');
+      const interior = mine.find((file) => file.kind === 'interior');
+      const cover = mine.find((file) => file.kind === 'cover');
+      if (!book && (!interior || !cover)) throw new Error(`Faltan los PDF de ${item.format}.`);
+      laidOutFor = mine[0]?.printer ?? null;
       // Nunca se imprime una versión distinta de la maquetada desde lo aprobado.
-      for (const file of [interior, cover]) {
+      for (const file of [book, interior, cover].filter((value) => value !== undefined)) {
         const bytes = await storage().download({ bucket: 'pdfs', path: file.path });
         if (createHash('sha256').update(bytes).digest('hex') !== file.sha256) {
           await qaEvent(ctx, 'snapshot_mismatch', { step: 'deliver' });
           throw new HumanReviewError('pdf_mismatch', 'El PDF de imprenta no es el maquetado.');
         }
       }
-      const sevenDays = 7 * 24 * 3600;
       items.push({
         format: item.format as 'softcover' | 'hardcover',
-        pageCount: interior.pages,
+        // En un solo PDF van también la tapa y las dos guardas.
+        pageCount: interior?.pages ?? (book ? book.pages - 3 : 0),
         quantity: item.quantity,
-        interiorPdfUrl: (
-          await storage().signedDownloadUrl({ bucket: 'pdfs', path: interior.path }, sevenDays)
-        ).url,
-        coverPdfUrl: (
-          await storage().signedDownloadUrl({ bucket: 'pdfs', path: cover.path }, sevenDays)
-        ).url,
+        interiorPdfUrl: await signed(interior),
+        coverPdfUrl: await signed(cover),
+        bookPdfUrl: await signed(book),
       });
     }
     const owner = (await db.collection(COLLECTIONS.users).doc(ctx.order.ownerUid).get()).data();
@@ -1061,6 +1118,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       const printer = providers.printer(id);
       if (!printer || !able.includes(id)) {
         rejected.push(`${id}: ya no imprime este libro`);
+        continue;
+      }
+      // Una imprenta con especificaciones propias solo recibe los archivos maquetados para ella.
+      if (printer.fileSpec ? laidOutFor !== id : laidOutFor !== null) {
+        rejected.push(`${id}: necesita otra maquetación`);
         continue;
       }
       try {

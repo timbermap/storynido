@@ -60,6 +60,15 @@ export function aiModelSettingsFromEnv(
 
 export type ProviderSettings = z.infer<typeof providerSettingsSchema>;
 
+const SIMULATED = new Set(['mock', 'mock_alt', 'local']);
+
+/** Proveedores simulados configurados (producción no puede usar ninguno). */
+export function simulatedProviders(settings: ProviderSettings): string[] {
+  return Object.values(settings)
+    .flat()
+    .filter((id) => SIMULATED.has(id));
+}
+
 /** Configuración inicial desde variables de entorno (ver .env.example). */
 export function providerSettingsFromEnv(
   env: Readonly<Record<string, string | undefined>>,
