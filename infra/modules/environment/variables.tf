@@ -91,6 +91,29 @@ variable "deletion_protection" {
   description = "Protege contra borrado los recursos con datos (Firestore, Cloud Run, Workflows)."
 }
 
+variable "email_provider" {
+  type        = string
+  default     = "mock"
+  description = "Mails: mock (no se mandan) o resend (requiere el secreto resend-api-key con valor)."
+
+  validation {
+    condition     = contains(["mock", "resend"], var.email_provider)
+    error_message = "email_provider debe ser mock o resend."
+  }
+}
+
+variable "email_link_secret_loaded" {
+  type        = bool
+  default     = false
+  description = "El secreto email-link-secret ya tiene valor: recién entonces los servicios lo leen (firma de las bajas)."
+}
+
+variable "admin_url" {
+  type        = string
+  default     = ""
+  description = "URL del panel de administración (enlace de las alertas por mail). Vacío: la web."
+}
+
 variable "print_providers" {
   type        = list(string)
   default     = ["mock"]

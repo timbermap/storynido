@@ -267,9 +267,20 @@ locals {
     PHOTO_ANALYZER    = var.photo_analyzer
     PRINT_PROVIDERS   = join(",", var.print_providers)
     GELATO_ORDER_TYPE = var.gelato_order_type
+    # Mails: enlaces a la web, a la API (bajas) y al admin; las alertas van al mail de monitoreo.
+    EMAIL_PROVIDER     = var.email_provider
+    WEB_URL            = "https://${var.public_domain}"
+    PUBLIC_API_URL     = var.api_domain != "" ? "https://${var.api_domain}" : "https://api-${data.google_project.this.number}.${var.region}.run.app"
+    ADMIN_URL          = var.admin_url != "" ? var.admin_url : "https://${var.public_domain}"
+    ADMIN_ALERT_EMAILS = var.alert_email
   }
   # Claves de las imprentas activas (los valores se cargan con infra/scripts/set-secret.sh).
   print_secret_env = contains(var.print_providers, "gelato") ? { GELATO_API_KEY = "gelato-api-key" } : {}
+  email_secret_env = merge(
+    var.email_link_secret_loaded ? { EMAIL_LINK_SECRET = "email-link-secret" } : {},
+    var.email_provider == "resend" ? { RESEND_API_KEY = "resend-api-key" } : {},
+  )
+  service_secret_env = merge(local.print_secret_env, local.email_secret_env)
 }
 
 module "worker" {
@@ -295,7 +306,7 @@ module "worker" {
     # URL determinística del propio servicio: destino de las tareas de Cloud Tasks.
     WORKER_URL = "https://worker-${data.google_project.this.number}.${var.region}.run.app"
   })
-  secret_env = local.print_secret_env
+  secret_env = local.service_secret_env
 
   invokers = {
     invoker   = local.member["sn-invoker"]
@@ -324,7 +335,7 @@ module "api" {
     # Orígenes de la web que pueden llamar a la API desde el navegador (los mismos que el CORS de los buckets).
     CORS_ORIGINS = join(",", var.cors_origins)
   })
-  secret_env = local.print_secret_env
+  secret_env = local.service_secret_env
 
   # La API es pública: la autenticación la hacen Firebase Auth y App Check en la app.
   public = true
@@ -414,6 +425,32 @@ module "order_pipeline" {
   }
 }
 
+# --- Postventa: el worker manda reseñas, recordatorios y sugerencias una vez por día ------
+
+resource "google_cloud_scheduler_job" "post_sale" {
+  project     = var.project_id
+  region      = var.region
+  name        = "post-sale-daily"
+  description = "Postventa diaria (DECISIONS 078): idempotente, se puede correr de nuevo sin duplicar mails."
+  schedule    = "0 15 * * *"
+  time_zone   = "Etc/UTC"
+
+  http_target {
+    http_method = "POST"
+    uri         = "${module.worker.uri}/jobs/daily"
+    oidc_token {
+      service_account_email = local.sa["sn-invoker"]
+      audience              = module.worker.uri
+    }
+  }
+
+  retry_config {
+    retry_count = 2
+  }
+
+  depends_on = [module.apis]
+}
+
 # --- Secretos (sin valores: se cargan con gcloud, ver infra/README.md) --------
 
 module "secrets" {
@@ -439,6 +476,10 @@ module "secrets" {
     gelato-webhook-secret = {
       description = "Gelato: secreto de verificación de webhooks"
       accessors   = { api = local.member["sn-api"] }
+    }
+    email-link-secret = {
+      description = "Firma de los enlaces de baja de los mails (valor aleatorio interno)"
+      accessors   = { api = local.member["sn-api"], worker = local.member["sn-worker"] }
     }
     resend-api-key = {
       description = "Resend: API key de emails"
