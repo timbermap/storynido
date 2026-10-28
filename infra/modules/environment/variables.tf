@@ -126,8 +126,8 @@ variable "print_providers" {
   description = "Imprentas activas (se cotiza con todas y gana la más barata): mock, mock_alt, gelato."
 
   validation {
-    condition     = length(var.print_providers) > 0 && alltrue([for id in var.print_providers : contains(["mock", "mock_alt", "gelato", "cloudprinter"], id)])
-    error_message = "print_providers: una o más de mock, mock_alt, gelato, cloudprinter."
+    condition     = length(var.print_providers) > 0 && alltrue([for id in var.print_providers : contains(["mock", "mock_alt", "gelato", "cloudprinter", "lulu"], id)])
+    error_message = "print_providers: una o más de mock, mock_alt, gelato, cloudprinter, lulu."
   }
 }
 

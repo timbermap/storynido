@@ -2,6 +2,7 @@ import { EmailNotifier } from '@storynido/emails';
 import {
   aiModelSettingsFromEnv,
   createProviderRegistry,
+  luluOptionsFromEnv,
   simulatedProviders,
   providerSettingsFromEnv,
 } from '@storynido/providers';
@@ -60,6 +61,7 @@ const providers = createProviderRegistry({
         webhookKey: env.CLOUDPRINTER_WEBHOOK_KEY ?? null,
       }
     : undefined,
+  lulu: luluOptionsFromEnv(env),
   resend: env.RESEND_API_KEY
     ? {
         apiKey: env.RESEND_API_KEY,

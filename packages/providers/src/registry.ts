@@ -17,7 +17,7 @@ export const PROVIDER_IDS = {
   aiImage: ['mock', 'vertex', 'flux'],
   payment: ['mock', 'stripe'],
   // mock_alt: segunda imprenta simulada (otros precios) para probar la elección entre varias.
-  print: ['mock', 'mock_alt', 'gelato', 'cloudprinter'],
+  print: ['mock', 'mock_alt', 'gelato', 'cloudprinter', 'lulu'],
   email: ['mock', 'resend'],
   storage: ['local', 'gcs'],
   photoAnalyzer: ['mock', 'vision'],

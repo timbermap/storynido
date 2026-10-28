@@ -149,6 +149,16 @@ describe.skipIf(!chromePath())('PDF', () => {
     );
   });
 
+  it('mínimo de la imprenta: páginas para dibujar antes del cierre', () => {
+    const spec = FORMAT_SPECS.softcover;
+    const plain = interiorPages(book(), spec);
+    const padded = interiorPages(book({ fillerPages: 4 }), spec);
+    expect(padded).toHaveLength(plain.length + 4);
+    expect(padded.at(-1)).toContain('data-label="fin"');
+    expect(padded.filter((page) => page.includes('data-label="dibujos"'))).toHaveLength(4);
+    expect(padded[padded.length - 2]).toContain('Mis dibujos');
+  });
+
   it('digital: páginas, tamaño 21×28 y tipografías embebidas', async () => {
     const spec = FORMAT_SPECS.digital;
     const layout = book();

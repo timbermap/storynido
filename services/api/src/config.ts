@@ -47,6 +47,12 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   /** Cloudprinter: sin clave no se registra. La clave del webhook verifica sus señales. */
   CLOUDPRINTER_API_KEY: z.string().trim().optional(),
   CLOUDPRINTER_WEBHOOK_KEY: z.string().trim().optional(),
+  /** Lulu: fuera de producción va al sandbox (LULU_SANDBOX lo fuerza). */
+  LULU_CLIENT_KEY: z.string().trim().optional(),
+  LULU_CLIENT_SECRET: z.string().trim().optional(),
+  LULU_SANDBOX_CLIENT_KEY: z.string().trim().optional(),
+  LULU_SANDBOX_CLIENT_SECRET: z.string().trim().optional(),
+  LULU_SANDBOX: z.enum(['true', 'false']).optional(),
   /** Región de Vertex AI ("global" tiene los modelos de Gemini más nuevos). */
   VERTEX_LOCATION: z.string().default('global'),
   /** Buckets reales (los define Terraform en Cloud Run). */

@@ -26,6 +26,8 @@ export interface LayoutBook {
   synopsis?: string | null;
   /** Profesionales: aviso de que es material educativo (no una intervención clínica). */
   educationalNotice?: boolean;
+  /** Páginas para dibujar antes del cierre (completan el mínimo de la imprenta). */
+  fillerPages?: number;
   qr?: { svg: string; label: string } | null;
 }
 
@@ -54,6 +56,8 @@ const STRINGS: Record<Lang, Record<string, string>> = {
       'Material educativo creado con StoryNido. No reemplaza ni constituye una intervención profesional o clínica.',
     storyFor: 'Un cuento para {name}',
     activity: 'Actividad',
+    drawings: 'Mis dibujos',
+    drawingsHint: 'Dibuja aquí tu parte favorita del cuento.',
     back: 'Historias que abrazan.',
     words: 'Palabras',
   },
@@ -65,6 +69,8 @@ const STRINGS: Record<Lang, Record<string, string>> = {
       'Educational material made with StoryNido. It does not replace or constitute a professional or clinical intervention.',
     storyFor: 'A story for {name}',
     activity: 'Activity',
+    drawings: 'My drawings',
+    drawingsHint: 'Draw your favorite part of the story here.',
     back: 'Stories that hug.',
     words: 'Words',
   },
@@ -76,6 +82,8 @@ const STRINGS: Record<Lang, Record<string, string>> = {
       'Material educativo criado com o StoryNido. Não substitui nem constitui uma intervenção profissional ou clínica.',
     storyFor: 'Uma história para {name}',
     activity: 'Atividade',
+    drawings: 'Meus desenhos',
+    drawingsHint: 'Desenhe aqui a sua parte favorita da história.',
     back: 'Histórias que abraçam.',
     words: 'Palavras',
   },
@@ -252,13 +260,19 @@ function backCover(book: LayoutBook, print: boolean): string {
   </div>${print ? '<div class="barcode-zone" data-zone="barcode"></div>' : ''}`;
 }
 
-/** Interior del libro: dedicatoria, páginas, actividades y fin (sin tapas). */
+/** Página para dibujar: completa el mínimo de páginas de la imprenta (también es actividad). */
+function drawingPage(book: LayoutBook): string {
+  return `<section class="page" data-label="dibujos"><div style="position:absolute;inset:0;display:flex;flex-direction:column;gap:5mm;padding:22mm 18mm"><p style="font-family:'Fraunces',serif;font-weight:600;font-size:22pt;color:#79518c">${escapeHtml(text(book, 'drawings'))}</p><p style="font-size:11pt;color:#69616c">${escapeHtml(text(book, 'drawingsHint'))}</p><div style="flex:1;border:1.5mm dashed #d8c1f2;border-radius:6mm"></div></div></section>`;
+}
+
+/** Interior del libro: dedicatoria, páginas, actividades, páginas para dibujar y fin. */
 export function interiorPages(book: LayoutBook, spec: FormatSpec): string[] {
   const dedication = book.dedication ?? text(book, 'dedicationFor');
   return [
     `<section class="page" data-label="dedicatoria"><div class="center"><p style="font-family:'Fraunces',serif;font-style:italic;font-size:20pt;line-height:1.5;max-width:130mm">${escapeHtml(dedication)}</p></div></section>`,
     ...book.pages.map((page, index) => storyPage(book, spec, page, index + 1)),
     ...book.activities.map((activity, index) => activityPage(book, activity, index)),
+    ...Array.from({ length: book.fillerPages ?? 0 }, () => drawingPage(book)),
     `<section class="page" data-label="fin"><div class="center" style="gap:6mm"><p style="font-family:'Fraunces',serif;font-weight:600;font-size:40pt">${escapeHtml(text(book, 'end'))}</p><p style="font-size:11pt;color:#69616c">${escapeHtml(text(book, 'madeFor'))}</p>${book.educationalNotice ? `<p class="notice" style="margin-top:10mm;max-width:130mm;font-size:9pt;line-height:1.4;color:#69616c">${escapeHtml(text(book, 'notice'))}</p>` : ''}</div></section>`,
   ];
 }

@@ -1078,3 +1078,22 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Probar prompt:** arma el prompt de texto y el de una ilustración con datos de ejemplo (Martina, 5 años), tal como le llegarían a la IA, incluso antes de guardar. No llama a la IA: no tiene costo.
 - **Editor:** campos por idioma (es, en, pt), texto largo, listas y JSON validado para las estructuras anidadas (extensiones, niveles, temas).
 - **Pendiente (etapa 4):** dashboard con agregados precalculados y catálogo de modelos de IA (`aiModels`) con sus reglas de política de datos.
+
+## 086 · Lulu: tercera imprenta para EE. UU., con páginas para dibujar hasta el mínimo
+
+- **Fecha:** 2026-10-28 · Pedido de Sebastián (opciones A y B).
+- **Producto:** US Letter a color estándar, papel estucado de 80 lb:
+  - tapa blanda: `0850X1100FCSTDPB080CW444GXX`;
+  - tapa dura: `0850X1100FCSTDCW080CW444GXX`.
+- **Cotización real (sandbox, 28 páginas, Austin, TX, con impuesto):** tapa blanda USD 11,52 (5,83 + envío 5,69); tapa dura USD 20,81. Le gana a Gelato (16,85 y 19,82) y a Cloudprinter (17,54 y 36,62) en tapa blanda.
+- **Mínimo de páginas:** tapa blanda de 32 a 800; tapa dura desde 24. La imprenta declara `minInteriorPages` en su especificación de archivos y el maquetador agrega páginas **"Mis dibujos"** antes del cierre (siempre pares). Así cualquier libro de 28 o más páginas puede ir a Lulu.
+- **Archivos:** tapa y tripa por separado (las descarga de una URL), con sangrado de 1/8" (3,175 mm, nuevo campo `bleedMm`). La tapa usa las medidas de su API `cover-dimensions` (lomo y vuelta incluidos).
+- **Envío:** el más barato entre MAIL y PRIORITY_MAIL (no hay GROUND a EE. UU. para estos libros).
+- **Solo EE. UU.:** México y Latinoamérica piden el documento fiscal del destinatario; si no hay envío posible, el error no es reintentable y el enrutador elige otra imprenta.
+- **Pedido:** idempotente por nuestro pedido (`external_id`). Exige teléfono del destinatario.
+- **Avisos:** `PRINT_JOB_STATUS_CHANGED`. No se cree lo que llega: se consulta el trabajo con nuestras credenciales (producción → `in_production`, despacho con seguimiento → `shipped`, rechazo → `failed`, cancelación → `cancelled`).
+- **Ambientes:** fuera de producción va siempre al sandbox (no imprime ni cobra; `LULU_SANDBOX`). Las claves de producción solo crean pedidos en producción.
+- **Staging, en dos pasos:**
+  1. Terraform crea los secretos `lulu-client-key` y `lulu-client-secret` (vacíos).
+  2. Sebastián carga los valores del sandbox; recién entonces se suma `lulu` a `print_providers` (Cloud Run no arranca con un secreto sin versión).
+- **Pendiente:** registrar el webhook en Lulu y hacer una prueba de punta a punta en el sandbox (confirmar si pide un medio de pago de prueba).

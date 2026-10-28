@@ -97,3 +97,14 @@ Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cua
 ## 7. Producción
 
 Se completa en la fase 18 (checklist de salida).
+
+## Lulu (imprenta de EE. UU.)
+
+- **Claves:** en `.env.local`, `LULU_CLIENT_KEY`/`LULU_CLIENT_SECRET` (producción) y `LULU_SANDBOX_CLIENT_KEY`/`LULU_SANDBOX_CLIENT_SECRET` (sandbox). Fuera de producción se usa siempre el sandbox.
+- **Staging:** después del `terraform apply` que crea los secretos, cargar las del **sandbox**:
+  ```bash
+  cd /Users/snojekba/Documents/13_AI_book/storynido
+  infra/scripts/set-secret.sh storynido-staging lulu-client-key
+  infra/scripts/set-secret.sh storynido-staging lulu-client-secret
+  ```
+  Después se agrega `lulu` a `print_providers` en `infra/envs/staging/main.tf` (otro plan y apply).

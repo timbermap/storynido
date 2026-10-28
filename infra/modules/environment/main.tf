@@ -267,6 +267,8 @@ locals {
     PHOTO_ANALYZER    = var.photo_analyzer
     PRINT_PROVIDERS   = join(",", var.print_providers)
     GELATO_ORDER_TYPE = var.gelato_order_type
+    # Lulu: solo producción usa la API real; el resto, el sandbox (DECISIONS 086).
+    LULU_SANDBOX = var.environment == "production" ? "false" : "true"
     # Mails: enlaces a la web, a la API (bajas) y al admin; las alertas van al mail de monitoreo.
     EMAIL_PROVIDER     = var.email_provider
     WEB_URL            = "https://${var.public_domain}"
@@ -278,6 +280,10 @@ locals {
   print_secret_env = merge(
     contains(var.print_providers, "gelato") ? { GELATO_API_KEY = "gelato-api-key" } : {},
     contains(var.print_providers, "cloudprinter") ? { CLOUDPRINTER_API_KEY = "cloudprinter-api-key" } : {},
+    contains(var.print_providers, "lulu") ? {
+      LULU_CLIENT_KEY    = "lulu-client-key"
+      LULU_CLIENT_SECRET = "lulu-client-secret"
+    } : {},
   )
   # Las señales de las imprentas las recibe solo la API.
   api_print_secret_env = contains(var.print_providers, "cloudprinter") ? {
@@ -490,6 +496,15 @@ module "secrets" {
     cloudprinter-webhook-key = {
       description = "Cloudprinter: clave de las señales (CloudSignal)"
       accessors   = { api = local.member["sn-api"] }
+    }
+    # Fuera de producción, las claves del sandbox de Lulu (no imprime ni cobra).
+    lulu-client-key = {
+      description = "Lulu: client key (sandbox fuera de producción)"
+      accessors   = { api = local.member["sn-api"], worker = local.member["sn-worker"] }
+    }
+    lulu-client-secret = {
+      description = "Lulu: client secret (sandbox fuera de producción)"
+      accessors   = { api = local.member["sn-api"], worker = local.member["sn-worker"] }
     }
     gelato-webhook-secret = {
       description = "Gelato: secreto de verificación de webhooks"

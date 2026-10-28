@@ -49,6 +49,12 @@ export const workerEnvSchema = serviceEnvSchema.extend({
   /** Cloudprinter: sin clave no se registra. La clave del webhook verifica sus señales. */
   CLOUDPRINTER_API_KEY: z.string().trim().optional(),
   CLOUDPRINTER_WEBHOOK_KEY: z.string().trim().optional(),
+  /** Lulu: fuera de producción va al sandbox (LULU_SANDBOX lo fuerza). */
+  LULU_CLIENT_KEY: z.string().trim().optional(),
+  LULU_CLIENT_SECRET: z.string().trim().optional(),
+  LULU_SANDBOX_CLIENT_KEY: z.string().trim().optional(),
+  LULU_SANDBOX_CLIENT_SECRET: z.string().trim().optional(),
+  LULU_SANDBOX: z.enum(['true', 'false']).optional(),
   VERTEX_LOCATION: z.string().default('global'),
   BUCKET_PHOTOS: z.string().optional(),
   BUCKET_ASSETS: z.string().optional(),

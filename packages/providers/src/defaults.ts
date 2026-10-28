@@ -5,6 +5,7 @@ import { VertexClient, VertexImageProvider, VertexTextProvider } from './gcp/ver
 import { VisionPhotoAnalyzer } from './gcp/vision';
 import { CloudprinterPrintProvider, type CloudprinterOptions } from './cloudprinter/print';
 import { GelatoPrintProvider, type GelatoOptions } from './gelato/print';
+import { LuluPrintProvider, type LuluOptions } from './lulu/print';
 import { ResendEmailProvider, type ResendOptions } from './resend/email';
 
 import { LocalStorageService } from './local/storage';
@@ -37,6 +38,8 @@ export interface DefaultProviderOptions {
   gelato?: Pick<GelatoOptions, 'apiKey' | 'orderType'>;
   /** Cloudprinter (solo si hay clave). */
   cloudprinter?: Omit<CloudprinterOptions, 'fetchImpl'>;
+  /** Lulu (solo si hay clave; fuera de producción, el sandbox). */
+  lulu?: Omit<LuluOptions, 'fetchImpl'>;
   /** Resend (solo si hay clave): sin clave, los mails quedan en el proveedor simulado. */
   resend?: Omit<ResendOptions, 'fetchImpl'>;
   onMockEmail?: (message: EmailMessage) => void;
@@ -50,6 +53,7 @@ export function createProviderFactories(
   const buckets = options.gcsBuckets;
   const gelato = options.gelato;
   const cloudprinter = options.cloudprinter;
+  const lulu = options.lulu;
   const resend = options.resend;
   const projectId = options.vertexProjectId;
   let vertex: VertexClient | undefined;
@@ -80,6 +84,7 @@ export function createProviderFactories(
         }),
       ...(gelato ? { gelato: () => new GelatoPrintProvider(gelato) } : {}),
       ...(cloudprinter ? { cloudprinter: () => new CloudprinterPrintProvider(cloudprinter) } : {}),
+      ...(lulu ? { lulu: () => new LuluPrintProvider(lulu) } : {}),
     },
     email: {
       mock: () => new MockEmailProvider(options.onMockEmail),

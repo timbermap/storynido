@@ -22,6 +22,12 @@ export const CLOUDPRINTER_PRODUCTS: Record<PrintFormat, string> = {
   hardcover: 'photobook_cw_us_letter_p_fc',
 };
 
+/** Lulu: US Letter a color estándar, papel estucado de 80 lb (tapa blanda y tapa dura). */
+export const LULU_PRODUCTS: Record<PrintFormat, string> = {
+  softcover: '0850X1100FCSTDPB080CW444GXX',
+  hardcover: '0850X1100FCSTDCW080CW444GXX',
+};
+
 /**
  * printOptions/{país}_{formato}_{imprenta}: matriz de impresión. Puede haber varias imprentas por
  * país y formato; cada una imprime solo si está habilitada Y pasó la muestra física

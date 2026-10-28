@@ -899,12 +899,15 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
               })
             : null;
         // Tamaño al corte y sangrado: los de la imprenta elegida (si los define).
-        const spec: FormatSpec = fileSpec?.trim
-          ? {
-              ...FORMAT_SPECS[format],
-              trimMm: { width: fileSpec.trim.widthMm, height: fileSpec.trim.heightMm },
-            }
-          : FORMAT_SPECS[format];
+        const spec: FormatSpec = {
+          ...FORMAT_SPECS[format],
+          ...(fileSpec?.trim
+            ? { trimMm: { width: fileSpec.trim.widthMm, height: fileSpec.trim.heightMm } }
+            : {}),
+          ...(fileSpec?.bleedMm !== undefined ? { bleedMm: fileSpec.bleedMm } : {}),
+        };
+        // Mínimo de páginas de la imprenta (Lulu: 32 en tapa blanda): páginas para dibujar.
+        const fillerPages = Math.max(0, (fileSpec?.minInteriorPages ?? 0) - expectedInterior);
         const size = pageSizeMm(spec);
         const prepared = await Promise.all(
           sources.map(async (bytes) => {
@@ -949,6 +952,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           synopsis: snapshot.synopsis ?? null,
           // Profesionales: el aviso de material educativo (no clínico) en la página final.
           educationalNotice: ctx.order.channel === 'professionals',
+          fillerPages,
           qr,
         };
         if (format === 'digital') kitCover = layout.cover;

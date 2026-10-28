@@ -38,6 +38,7 @@ import {
   CLOUDPRINTER_PRODUCTS,
   DEFAULT_PRO_DISCOUNTS,
   GELATO_PRODUCTS,
+  LULU_PRODUCTS,
   proDiscountConfigSchema,
   eventPricingSchema,
   printOptionId,
@@ -286,6 +287,29 @@ for (const [code, cloud] of Object.entries(CLOUDPRINTER) as [
       }),
     );
   }
+}
+
+// Lulu (EE. UU.; DECISIONS 086): la más barata en tapa blanda. Pide 32 páginas en tapa blanda: el
+// libro clásico (28) se completa con páginas para dibujar. Fuera de producción usa el sandbox.
+const LULU_COST: Record<'softcover' | 'hardcover', number> = { softcover: 494, hardcover: 1351 };
+for (const format of PRINT_FORMATS) {
+  batch.set(
+    db.collection(COLLECTIONS.printOptions).doc(printOptionId('US', format, 'lulu')),
+    printOptionSchema.parse({
+      country: 'US',
+      format,
+      provider: 'lulu',
+      sku: LULU_PRODUCTS[format],
+      enabled: true,
+      qaSamplePassed: cloudProject !== 'storynido-prod',
+      pages: { min: 24, max: 200, multipleOf: 2 },
+      maxQuantity: 100,
+      etaDaysMin: 8,
+      etaDaysMax: 16,
+      productionCostUsdMinor: LULU_COST[format],
+      updatedAt: now,
+    }),
+  );
 }
 
 // Kit de Eventos (DECISIONS 079): precios de ejemplo, editables en el admin (fase 14). El

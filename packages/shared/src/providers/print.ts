@@ -37,6 +37,13 @@ export interface PrintFileSpec {
   packaging: 'separate' | 'single';
   /** Tamaño de página al corte de esta imprenta (si no, nuestro 210×280 mm). */
   trim?: { widthMm: number; heightMm: number };
+  /** Sangrado del interior que pide la imprenta (si no, el nuestro de 3 mm). */
+  bleedMm?: number;
+  /**
+   * Páginas interiores mínimas: si el libro tiene menos, se completa con páginas para dibujar
+   * antes del cierre (Lulu pide 32 en tapa blanda).
+   */
+  minInteriorPages?: number;
   /** Pliego de tapa (contratapa + lomo + tapa), en mm, con sangrado o vuelta incluidos. */
   cover: {
     widthMm: number;
