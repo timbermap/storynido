@@ -684,6 +684,16 @@ describe('checkout y pagos (fase 11)', () => {
               updatedAt: now,
             },
           ],
+          eventPricing: [
+            {
+              country: 'MX',
+              currency: 'MXN',
+              active: true,
+              designMinor: 24900,
+              pieces: { invitation: 6900, stickers: 5900 },
+              updatedAt: now,
+            },
+          ],
         }),
         pipelineEvents: events,
         conversions,
@@ -1112,6 +1122,49 @@ describe('checkout y pagos (fase 11)', () => {
     expect((await db.doc(`reviews/${orderId}`).get()).get('published')).toBe(false);
     const other = await post(`/v1/orders/${orderId}/review`, { rating: 1 }, 'token-luis');
     expect(other.statusCode).toBe(404);
+  });
+
+  it('kit de Eventos: diseño + licencia por pieza, una línea por pieza y solo para Eventos', async () => {
+    await approvedBook();
+    const kit = {
+      pieces: [
+        { piece: 'mini_book', copies: 30 },
+        { piece: 'stickers', copies: 30 },
+      ],
+      invitation: { time: '16:00', place: 'Salón Arcoíris' },
+    };
+    const body = { bookId: 'book-1', format: 'digital', country: 'MX', kit };
+    // Un libro de Familias no lleva kit.
+    expect((await post('/v1/checkout/quote', body)).statusCode).toBe(400);
+    await db.doc('books/book-1').update({ channel: 'events' });
+    const quoted = await post('/v1/checkout/quote', body);
+    expect(quoted.statusCode).toBe(200);
+    const snapshot = quoted.json<{ snapshot: PriceSnapshot }>().snapshot;
+    expect(
+      snapshot.components.map((item) => [item.code, item.piece ?? null, item.totalMinor]),
+    ).toEqual([
+      ['design', null, 24900],
+      ['piece', 'stickers', 5900],
+    ]);
+    expect(snapshot.totalMinor).toBe(30800);
+    // Una pieza sin precio en el país no se vende; impreso, tampoco (se pide cotización).
+    const tags = await post('/v1/checkout/quote', {
+      ...body,
+      kit: { ...kit, pieces: [...kit.pieces, { piece: 'favor_tags', copies: 30 }] },
+    });
+    expect(tags.statusCode).toBe(409);
+    const printed = await post('/v1/checkout/quote', { ...body, format: 'hardcover' });
+    expect(printed.json<{ error: { code: string } }>().error.code).toBe('print_unavailable');
+
+    const res = await checkout({ kit });
+    expect(res.statusCode).toBe(200);
+    const order = (await db.doc(`orders/${res.json<{ orderId: string }>().orderId}`).get()).data();
+    expect(order?.items).toEqual([
+      { piece: 'mini_book', format: 'digital', quantity: 30 },
+      { piece: 'stickers', format: 'digital', quantity: 30 },
+    ]);
+    expect(order?.kit).toMatchObject({ paper: 'a4', invitation: { place: 'Salón Arcoíris' } });
+    expect((order?.priceSnapshot as PriceSnapshot).totalMinor).toBe(30800);
   });
 
   it('desarrollo: el pago simulado pasa por el mismo webhook firmado', async () => {

@@ -36,6 +36,7 @@ import {
   type BookFormat,
   PRINT_FORMATS,
   GELATO_PRODUCTS,
+  eventPricingSchema,
   printOptionId,
   printOptionSchema,
   type BookLength,
@@ -242,6 +243,44 @@ for (const format of PRINT_FORMATS) {
       etaDaysMin: 6,
       etaDaysMax: 8,
       productionCostUsdMinor: format === 'hardcover' ? 1283 : 986,
+      updatedAt: now,
+    }),
+  );
+}
+
+// Kit de Eventos (DECISIONS 079): precios de ejemplo, editables en el admin (fase 14). El
+// diseño incluye el librito; cada pieza extra es una licencia digital (las copias no cambian el
+// precio: la licencia dice cuántas se pueden imprimir).
+const EVENT_PRICES: Partial<
+  Record<CountryCode, { design: number; pieces: Record<string, number> }>
+> = {
+  MX: {
+    design: 24900,
+    pieces: {
+      activities: 4900,
+      invitation: 6900,
+      thank_you: 4900,
+      stickers: 5900,
+      favor_tags: 4900,
+    },
+  },
+  US: {
+    design: 1499,
+    pieces: { activities: 299, invitation: 399, thank_you: 299, stickers: 349, favor_tags: 299 },
+  },
+};
+for (const [code, prices] of Object.entries(EVENT_PRICES) as [
+  CountryCode,
+  { design: number; pieces: Record<string, number> },
+][]) {
+  batch.set(
+    db.collection(COLLECTIONS.eventPricing).doc(code),
+    eventPricingSchema.parse({
+      country: code,
+      currency: COUNTRY_DEFAULTS[code].currency,
+      active: true,
+      designMinor: prices.design,
+      pieces: prices.pieces,
       updatedAt: now,
     }),
   );

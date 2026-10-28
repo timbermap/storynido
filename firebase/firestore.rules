@@ -315,6 +315,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /eventPricing/{country} {
+      allow read: if activeOrAdmin();
+      allow write: if false;
+    }
+
     match /promotions/{id} {
       allow read: if activeOrAdmin();
       allow write: if false;

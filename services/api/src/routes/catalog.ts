@@ -197,6 +197,14 @@ export function registerCatalogRoutes(
     })),
   }));
 
+  addRoute(app, apiRoutes.catalogEventPricing, {}, async (request) => {
+    const { country } = query<'catalogEventPricing'>(request);
+    const pricing = await catalog.eventPricing(country);
+    if (!pricing) return { pricing: null };
+    const { updatedAt: _updatedAt, ...rest } = pricing;
+    return { pricing: rest };
+  });
+
   addRoute(app, apiRoutes.catalogOffer, {}, async (request) => {
     const { country: code, locale } = query<'catalogOffer'>(request);
     const [countries, prices, products, printOptions] = await Promise.all([

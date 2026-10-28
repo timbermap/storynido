@@ -8,6 +8,8 @@ import {
   GLOBAL_DOC_ID,
   editorialConfigSchema,
   type EditorialConfig,
+  type EventPricing,
+  eventPricingSchema,
   contentDocId,
   contentSchema,
   countrySchema,
@@ -41,6 +43,8 @@ export interface CatalogRepository {
   products(): Promise<Product[]>;
   /** Matriz de impresión del país (qué formato se puede imprimir, con qué reglas). */
   printOptions(country: CountryCode): Promise<PrintOption[]>;
+  /** Precio del kit de Eventos del país (null: no se vende). */
+  eventPricing(country: CountryCode): Promise<EventPricing | null>;
   content(key: string, locale: Locale): Promise<Content | null>;
   /** Configuración editorial vigente (o la de fábrica si todavía no se cargó). */
   editorial(): Promise<EditorialConfig>;
@@ -185,6 +189,14 @@ export class FirestoreCatalog implements CatalogRepository {
     });
   }
 
+  eventPricing(country: CountryCode): Promise<EventPricing | null> {
+    return this.cache.get(`events:${country}`, async () => {
+      const data = (await this.db.collection(COLLECTIONS.eventPricing).doc(country).get()).data();
+      const parsed = data ? eventPricingSchema.safeParse(normalizeFirestoreData(data)) : null;
+      return parsed?.success && parsed.data.active ? parsed.data : null;
+    });
+  }
+
   content(key: string, locale: Locale): Promise<Content | null> {
     return this.cache.get(`content:${key}:${locale}`, async () => {
       const snapshot = await this.db
@@ -218,6 +230,7 @@ export class InMemoryCatalog implements CatalogRepository {
       prices?: Price[];
       products?: Product[];
       printOptions?: PrintOption[];
+      eventPricing?: EventPricing[];
       content?: Content[];
       editorial?: EditorialConfig;
     } = {},
@@ -255,6 +268,13 @@ export class InMemoryCatalog implements CatalogRepository {
 
   printOptions(country: CountryCode) {
     return Promise.resolve((this.data.printOptions ?? []).filter((o) => o.country === country));
+  }
+
+  eventPricing(country: CountryCode) {
+    return Promise.resolve(
+      (this.data.eventPricing ?? []).find((item) => item.country === country && item.active) ??
+        null,
+    );
   }
 
   products() {

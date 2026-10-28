@@ -29,6 +29,8 @@ export const COLLECTIONS = {
   countries: 'countries',
   products: 'products',
   prices: 'prices',
+  /** eventPricing/{país}: precio del kit de Eventos (diseño + licencia por pieza). */
+  eventPricing: 'eventPricing',
   coupons: 'coupons',
   promotions: 'promotions',
   siteConfig: 'siteConfig',

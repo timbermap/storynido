@@ -4,10 +4,13 @@ import { currencySchema } from '../currency';
 import type { CountryConfig, Coupon, Price, Promotion } from './commerce';
 import type { BookFormat } from './common';
 import type { BookLength } from './editorial';
+import { kitPieceSchema, type EventPricing, type KitSelection } from './kit';
 
 /** Un componente del precio (lo que el comprador ve en el resumen y queda en el pedido). */
 export const priceComponentSchema = z.object({
-  code: z.enum(['book', 'length']),
+  /** book/length: libro; design/piece: kit de Eventos (diseño una vez + licencia por pieza). */
+  code: z.enum(['book', 'length', 'design', 'piece']),
+  piece: kitPieceSchema.optional(),
   unitMinor: z.number().int(),
   quantity: z.number().int().positive(),
   totalMinor: z.number().int(),
@@ -68,7 +71,10 @@ export type QuoteResult =
   | { ok: true; snapshot: PriceSnapshot; couponError: QuoteError | null }
   | { ok: false; error: QuoteError };
 
-function couponProblem(coupon: Coupon | null, input: QuoteInput): QuoteError | null {
+function couponProblem(
+  coupon: Coupon | null,
+  input: Pick<QuoteInput, 'country' | 'now'>,
+): QuoteError | null {
   if (!coupon?.active) return 'coupon_invalid';
   if (coupon.validFrom > input.now || (coupon.validUntil && coupon.validUntil < input.now)) {
     return 'coupon_expired';
@@ -119,6 +125,47 @@ export function quote(input: QuoteInput): QuoteResult {
       totalMinor: lengthAdjustment * quantity,
     });
   }
+  return finalize(components, country, format, input);
+}
+
+/**
+ * Kit de Eventos: el diseño (una vez, incluye el librito) más la licencia digital de cada
+ * pieza extra. Es digital: sin envío. Descuentos e impuestos, igual que un libro.
+ */
+export function quoteKit(
+  input: Omit<QuoteInput, 'price' | 'format' | 'length' | 'quantity'> & {
+    pricing: EventPricing | null;
+    kit: KitSelection;
+  },
+): QuoteResult {
+  const { country, pricing } = input;
+  if (!country?.active) return { ok: false, error: 'country_unavailable' };
+  if (!pricing?.active || pricing.currency !== country.currency) {
+    return { ok: false, error: 'price_missing' };
+  }
+  const components: PriceSnapshot['components'] = [
+    {
+      code: 'design',
+      unitMinor: pricing.designMinor,
+      quantity: 1,
+      totalMinor: pricing.designMinor,
+    },
+  ];
+  for (const { piece } of input.kit.pieces) {
+    if (piece === 'mini_book') continue;
+    const unit = pricing.pieces[piece];
+    if (unit === undefined) return { ok: false, error: 'format_unavailable' };
+    components.push({ code: 'piece', piece, unitMinor: unit, quantity: 1, totalMinor: unit });
+  }
+  return finalize(components, country, 'digital', input);
+}
+
+function finalize(
+  components: PriceSnapshot['components'],
+  country: CountryConfig,
+  format: BookFormat,
+  input: Pick<QuoteInput, 'coupon' | 'couponCode' | 'promotions' | 'now' | 'country'>,
+): QuoteResult {
   const subtotal = Math.max(
     0,
     components.reduce((sum, component) => sum + component.totalMinor, 0),

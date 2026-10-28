@@ -16,6 +16,7 @@ import {
   textDensitySchema,
 } from '../models/editorial';
 import { addressSchema } from '../models/commerce';
+import { eventPricingSchema, kitSelectionSchema } from '../models/kit';
 import { pipelineStepSchema } from '../models/pipeline';
 import { QUOTE_ERRORS, priceSnapshotSchema } from '../models/pricing';
 import { PHOTO_STATUSES } from '../models/users';
@@ -157,6 +158,8 @@ const checkoutItemBodySchema = z.object({
   country: countryCodeSchema,
   quantity: z.number().int().min(1).max(500).default(1),
   couponCode: z.string().trim().toUpperCase().max(32).nullable().default(null),
+  /** Eventos: piezas del kit y copias (digital). Sin kit, es un libro. */
+  kit: kitSelectionSchema.nullable().default(null),
 });
 
 export const checkoutQuoteBodySchema = checkoutItemBodySchema.extend({
@@ -472,6 +475,15 @@ export const apiRoutes = {
     summary: 'Formatos, precios, envío e impuestos de un país',
     query: localeQuerySchema.extend({ country: countryCodeSchema }),
     response: offerSchema,
+  },
+  catalogEventPricing: {
+    method: 'GET',
+    path: '/v1/catalog/event-pricing',
+    access: 'public',
+    summary:
+      'Precio del kit de Eventos de un país (diseño y licencia por pieza); null si no se vende',
+    query: z.object({ country: countryCodeSchema }),
+    response: z.object({ pricing: eventPricingSchema.omit({ updatedAt: true }).nullable() }),
   },
   content: {
     method: 'GET',

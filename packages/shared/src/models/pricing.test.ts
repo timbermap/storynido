@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import type { CountryConfig, Coupon, Price, Promotion } from './commerce';
-import { quote, type QuoteInput } from './pricing';
+import type { EventPricing } from './kit';
+import { quote, quoteKit, type QuoteInput } from './pricing';
 
 const NOW = new Date('2026-11-01T12:00:00Z');
 
@@ -174,6 +175,77 @@ describe('precio del pedido (servidor)', () => {
     ).toEqual({ ok: false, error: 'format_unavailable' });
     expect(quote(input({ price: null }))).toEqual({ ok: false, error: 'price_missing' });
     expect(quote(input({ price: price({ currency: 'USD' }) }))).toEqual({
+      ok: false,
+      error: 'price_missing',
+    });
+  });
+});
+
+describe('kit de Eventos', () => {
+  const pricing: EventPricing = {
+    country: 'MX',
+    currency: 'MXN',
+    active: true,
+    designMinor: 24900,
+    pieces: { activities: 4900, invitation: 6900, thank_you: 4900, stickers: 5900 },
+    updatedAt: NOW,
+  };
+  const kit = (pieces: { piece: string; copies: number }[]) =>
+    ({ pieces, invitation: null }) as Parameters<typeof quoteKit>[0]['kit'];
+  const base = { country: MX, pricing, coupon: null, couponCode: null, promotions: [], now: NOW };
+
+  it('diseño una vez + licencia por pieza; las copias no cambian el precio digital', () => {
+    const thirty = quoteKit({
+      ...base,
+      kit: kit([
+        { piece: 'mini_book', copies: 30 },
+        { piece: 'stickers', copies: 30 },
+      ]),
+    });
+    const five = quoteKit({
+      ...base,
+      kit: kit([
+        { piece: 'mini_book', copies: 5 },
+        { piece: 'stickers', copies: 5 },
+      ]),
+    });
+    if (!thirty.ok || !five.ok) throw new Error('debería cotizar');
+    expect(thirty.snapshot.components).toEqual([
+      { code: 'design', unitMinor: 24900, quantity: 1, totalMinor: 24900 },
+      { code: 'piece', piece: 'stickers', unitMinor: 5900, quantity: 1, totalMinor: 5900 },
+    ]);
+    expect(thirty.snapshot.totalMinor).toBe(24900 + 5900);
+    expect(five.snapshot.totalMinor).toBe(thirty.snapshot.totalMinor);
+    // Digital: sin envío; el IVA va incluido en México.
+    expect(thirty.snapshot.shipping.minor).toBe(0);
+    expect(thirty.snapshot.tax.included).toBe(true);
+  });
+
+  it('una pieza sin precio no se vende; el cupón aplica igual que en un libro', () => {
+    expect(
+      quoteKit({
+        ...base,
+        kit: kit([
+          { piece: 'mini_book', copies: 1 },
+          { piece: 'favor_tags', copies: 1 },
+        ]),
+      }),
+    ).toEqual({ ok: false, error: 'format_unavailable' });
+    const discounted = quoteKit({
+      ...base,
+      coupon: coupon(),
+      couponCode: 'BIENVENIDA',
+      kit: kit([{ piece: 'mini_book', copies: 10 }]),
+    });
+    if (!discounted.ok) throw new Error('debería cotizar');
+    expect(discounted.snapshot.discount).toEqual({
+      minor: 2490,
+      reason: 'coupon',
+      label: 'BIENVENIDA',
+    });
+    expect(
+      quoteKit({ ...base, pricing: null, kit: kit([{ piece: 'mini_book', copies: 1 }]) }),
+    ).toEqual({
       ok: false,
       error: 'price_missing',
     });

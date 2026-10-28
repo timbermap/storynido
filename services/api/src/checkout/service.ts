@@ -11,10 +11,13 @@ import {
   rankPrintQuotes,
   type checkoutQuoteBodySchema,
   type createCheckoutBodySchema,
+  paperFor,
   quote,
+  quoteKit,
   type AuditLogEntry,
   type BookFormat,
   type BookLength,
+  type KitSelection,
   type Coupon,
   type Locale,
   type OrderStatus,
@@ -156,6 +159,7 @@ export class CheckoutService {
 
   /** Precio e imprenta (formato habilitado, páginas y cantidad) para un libro ya validado. */
   private async price(book: Record<string, unknown>, body: PriceBody, pages: number) {
+    if (body.kit) return this.priceKit(book, body, body.kit);
     // Nunca se manda a imprenta algo incompatible: alguna imprenta activa tiene que poder.
     if (body.format !== 'digital' && (await this.printCandidates(body, pages)).length === 0) {
       throw printUnavailable();
@@ -172,6 +176,40 @@ export class CheckoutService {
       format: body.format,
       length: (book.length as BookLength | null | undefined) ?? null,
       quantity: body.quantity,
+      coupon,
+      couponCode: body.couponCode,
+      promotions,
+      now: new Date(),
+    });
+    if (!result.ok) throw new AppError(409, 'bad_request', `No disponible: ${result.error}`);
+    return result;
+  }
+
+  /**
+   * Kit de Eventos: un diseño y varias piezas en digital (la licencia dice cuántas copias). El
+   * impreso de las piezas se pide por cotización: nunca se inventa disponibilidad.
+   */
+  private async priceKit(book: Record<string, unknown>, body: PriceBody, kit: KitSelection) {
+    if (book.channel !== 'events') {
+      throw new AppError(400, 'bad_request', 'El kit es solo para libros de Eventos.');
+    }
+    if (body.format !== 'digital') {
+      throw new AppError(
+        409,
+        'print_unavailable',
+        'Las piezas del kit son digitales para imprimir.',
+      );
+    }
+    const [countries, pricing, coupon, promotions] = await Promise.all([
+      this.catalog.countries(),
+      this.catalog.eventPricing(body.country),
+      body.couponCode ? this.coupon(body.couponCode) : Promise.resolve(null),
+      this.promotions(),
+    ]);
+    const result = quoteKit({
+      country: countries.find((country) => country.code === body.country) ?? null,
+      pricing,
+      kit,
       coupon,
       couponCode: body.couponCode,
       promotions,
@@ -409,7 +447,15 @@ export class CheckoutService {
       bookTitle: input.title,
       status: 'pending_payment',
       channel: typeof book.channel === 'string' ? book.channel : 'families',
-      items: [{ piece: 'book', format: body.format, quantity: body.quantity }],
+      // Eventos: una línea por pieza del kit, con las copias que autoriza la licencia.
+      items: body.kit
+        ? body.kit.pieces.map((item) => ({
+            piece: item.piece,
+            format: 'digital',
+            quantity: item.copies,
+          }))
+        : [{ piece: 'book', format: body.format, quantity: body.quantity }],
+      kit: body.kit ? { ...body.kit, paper: paperFor(body.country) } : null,
       country: body.country,
       currency: price.currency,
       amounts: {
