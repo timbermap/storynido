@@ -1,5 +1,6 @@
 import {
   ADMIN_CONFIG,
+  adminConfigStamps,
   COLLECTIONS,
   GLOBAL_DOC_ID,
   apiRoutes,
@@ -101,12 +102,12 @@ export function registerAdminRoutes(app: FastifyInstance, db: Firestore): void {
     const existing = (await ref.get()).data();
     const before = existing ? asRecord(existing) : null;
     const now = new Date();
+    const stamps = adminConfigStamps(kind);
     const data = withoutUndefined({
       ...parsed.data,
-      // Lo que no edita el admin: cuándo se creó y cuántas veces se usó un cupón.
-      ...(kind === 'coupons' || kind === 'promotions'
-        ? { createdAt: before?.createdAt ?? now }
-        : {}),
+      // Lo que no edita el admin: cuándo se creó, quién lo cambió y cuántas veces se usó un cupón.
+      ...(stamps.createdAt ? { createdAt: before?.createdAt ?? now } : {}),
+      ...(stamps.updatedBy ? { updatedBy: actorLabel(request.user) } : {}),
       ...(kind === 'coupons' ? { redemptions: before?.redemptions ?? 0 } : {}),
       updatedAt: now,
     }) as Record<string, unknown>;

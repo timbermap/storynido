@@ -14,6 +14,16 @@ import { FieldInput, type FieldSpec } from './fields';
 
 type Data = Record<string, unknown>;
 
+/** Campos que ocupan todo el ancho del formulario. */
+const WIDE_FIELDS = new Set<FieldSpec['kind']>([
+  'moneyRecord',
+  'tiers',
+  'multi',
+  'textarea',
+  'localized',
+  'json',
+]);
+
 export interface ConfigEditorProps {
   kind: AdminConfigKind;
   title: string;
@@ -26,6 +36,8 @@ export interface ConfigEditorProps {
   idFrom?: (data: Data) => string;
   /** Un solo documento (por ejemplo `proDiscounts/global`): se edita directo. */
   single?: { id: string; defaults: Data };
+  /** Algo más debajo del formulario (por ejemplo, probar el prompt con datos de ejemplo). */
+  extra?: (data: Data) => ReactNode;
 }
 
 /** Tabla + formulario para un tipo de configuración. La API valida y audita cada cambio. */
@@ -38,6 +50,7 @@ export function ConfigEditor({
   blank,
   idFrom,
   single,
+  extra,
 }: ConfigEditorProps) {
   const load = useCallback(() => api('adminConfigList', { params: { kind } }), [kind]);
   const { data, error, reload } = useApi(load);
@@ -95,14 +108,13 @@ export function ConfigEditor({
             </label>
           )}
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        {/* Cada documento con su propio estado de campos (p. ej. el texto de un JSON). */}
+        <div key={form.id ?? 'nuevo'} className="grid gap-4 sm:grid-cols-2">
           {fields.map((field) => (
             <label
               key={field.path}
               className={`grid content-start gap-1 text-sm ${
-                field.kind === 'moneyRecord' || field.kind === 'tiers' || field.kind === 'multi'
-                  ? 'sm:col-span-2'
-                  : ''
+                WIDE_FIELDS.has(field.kind) ? 'sm:col-span-2' : ''
               }`}
             >
               <span className="font-medium">{field.label}</span>
@@ -118,6 +130,7 @@ export function ConfigEditor({
             </label>
           ))}
         </div>
+        {extra?.(form.data)}
         <div className="flex gap-2">
           <Button type="submit" disabled={saving}>
             Guardar

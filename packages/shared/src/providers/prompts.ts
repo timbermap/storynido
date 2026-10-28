@@ -206,3 +206,48 @@ export function describeCharacter(
 export function coverScene(title: string, firstScene: string | undefined): string {
   return `Book cover illustration for "${title}": the main character as the hero of the story, joyful and centered, leaving clear space at the top for the title. ${firstScene ?? ''}`;
 }
+
+/** Datos de ejemplo para probar una plantilla desde el admin (sin datos reales ni IA). */
+export const PROMPT_SAMPLE = {
+  childName: 'Martina',
+  age: 5,
+  pronouns: 'she',
+  likes: ['dinosaurios', 'pintar'],
+  petName: 'Rocco',
+  bestFriendName: 'Tomás',
+  scene: 'The main character waves at the moon from a small rocket window.',
+} as const;
+
+/** Lo que recibiría la IA con esta plantilla: el prompt de texto y el de una ilustración. */
+export function samplePrompts(input: {
+  textPromptTemplate: string;
+  imagePromptTemplate: string;
+  title: string;
+  language: Locale;
+  pageCount: number;
+  styleModifier: string;
+  lessons?: readonly LessonPrompt[];
+}): { text: string; image: string } {
+  const sample = PROMPT_SAMPLE;
+  return {
+    text: buildStoryPrompt({
+      template: input.textPromptTemplate,
+      language: input.language,
+      pageCount: input.pageCount,
+      storyTitle: input.title,
+      childName: sample.childName,
+      age: sample.age,
+      pronouns: sample.pronouns,
+      likes: sample.likes,
+      petName: sample.petName,
+      bestFriendName: sample.bestFriendName,
+      lessons: input.lessons ?? [],
+    }),
+    image: buildIllustrationPrompt({
+      template: input.imagePromptTemplate,
+      scene: sample.scene,
+      character: `${sample.childName}, a ${String(sample.age)}-year-old girl with curly brown hair`,
+      style: input.styleModifier,
+    }),
+  };
+}

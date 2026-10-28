@@ -1064,3 +1064,17 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Backend `admin`** en App Hosting (entorno `staging`), en https://admin--storynido-staging.us-central1.hosted.app.
   - Dominio autorizado en Auth y agregado al CORS de la API.
   - `admin_url` apunta al panel (enlace de las alertas por mail).
+
+## 085 · Admin, etapa 3: catálogo editorial, contenido y prueba de prompts
+
+- **Fecha:** 2026-10-28 · Fase 14 (etapa 3 de 4).
+- **Mismo mecanismo que la etapa 2** (`ADMIN_CONFIG`), con seis tipos más:
+  - historias: edades, textos por idioma, prompts de texto e imagen, páginas de muestra, líneas, colecciones y opciones editoriales admitidas, sin duplicar plantillas;
+  - colecciones, con su línea y sus temas u objetivos;
+  - estilos de ilustración y enseñanzas (con su guía para la IA y la marca de tema sensible);
+  - opciones editoriales (`editorialConfig/global`);
+  - contenido (legales, preguntas frecuentes y banner por idioma, en Markdown, con vista previa y quién lo cambió).
+- **Validación en el servidor:** edades al revés, slugs, ids naturales (`faq_es`) y la configuración editorial completa. Nada inválido llega a Firestore.
+- **Probar prompt:** arma el prompt de texto y el de una ilustración con datos de ejemplo (Martina, 5 años), tal como le llegarían a la IA, incluso antes de guardar. No llama a la IA: no tiene costo.
+- **Editor:** campos por idioma (es, en, pt), texto largo, listas y JSON validado para las estructuras anidadas (extensiones, niveles, temas).
+- **Pendiente (etapa 4):** dashboard con agregados precalculados y catálogo de modelos de IA (`aiModels`) con sus reglas de política de datos.

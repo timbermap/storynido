@@ -1,7 +1,13 @@
 import {
   BadgePercent,
+  BookOpen,
   BriefcaseBusiness,
   Cake,
+  FileText,
+  Library,
+  Lightbulb,
+  Palette,
+  SlidersHorizontal,
   Gauge,
   Globe,
   History,
@@ -22,6 +28,12 @@ export interface NavItem {
     | '/promotions'
     | '/event-pricing'
     | '/pro-discounts'
+    | '/stories'
+    | '/collections'
+    | '/styles'
+    | '/lessons'
+    | '/editorial'
+    | '/content'
     | '/ai'
     | '/audit';
   label: string;
@@ -60,6 +72,27 @@ export const NAV_ITEMS: readonly NavItem[] = [
     keywords: 'descuento recurrencia escalones pro',
     icon: BriefcaseBusiness,
   },
+  {
+    href: '/stories',
+    label: 'Historias',
+    keywords: 'plantillas prompts temáticas',
+    icon: BookOpen,
+  },
+  {
+    href: '/collections',
+    label: 'Colecciones',
+    keywords: 'categorías temas líneas',
+    icon: Library,
+  },
+  { href: '/styles', label: 'Estilos', keywords: 'ilustración imagen', icon: Palette },
+  { href: '/lessons', label: 'Enseñanzas', keywords: 'mensajes valores', icon: Lightbulb },
+  {
+    href: '/editorial',
+    label: 'Opciones editoriales',
+    keywords: 'extensiones densidad niveles tipos páginas',
+    icon: SlidersHorizontal,
+  },
+  { href: '/content', label: 'Contenido', keywords: 'legales faq banner textos', icon: FileText },
   {
     href: '/ai',
     label: 'IA',

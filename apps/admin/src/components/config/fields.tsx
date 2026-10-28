@@ -2,11 +2,13 @@
 
 import {
   CURRENCY_MINOR_UNITS,
+  LOCALES,
   fromMinorUnits,
   toMinorUnits,
   type Currency,
 } from '@storynido/shared';
 import { Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { getPath } from '@/lib/paths';
@@ -31,6 +33,14 @@ export type FieldSpec = { path: string; label: string; hint?: string } & (
   | { kind: 'moneyRecord'; keys: readonly string[]; currencyPath: string; signed?: boolean }
   /** Escalones del descuento Pro. */
   | { kind: 'tiers' }
+  /** Texto largo (prompts, guías para la IA). */
+  | { kind: 'textarea'; rows?: number }
+  /** Un texto por idioma (es, en, pt). */
+  | { kind: 'localized'; multiline?: boolean }
+  /** Lista de textos separados por coma. */
+  | { kind: 'tags' }
+  /** Estructuras anidadas sin formulario propio: JSON validado por la API. */
+  | { kind: 'json'; rows?: number }
 );
 
 const inputClass = 'h-9 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-60';
@@ -70,6 +80,44 @@ function MoneyInput({
         }}
       />
       <span className="text-xs text-muted-foreground">{currency}</span>
+    </span>
+  );
+}
+
+const areaClass =
+  'w-full rounded-md border bg-background px-2 py-1.5 font-mono text-xs leading-relaxed';
+
+/** JSON editable: se aplica solo cuando es válido (si no, avisa y no cambia el valor). */
+function JsonInput({
+  value,
+  rows,
+  onChange,
+}: {
+  value: unknown;
+  rows: number;
+  onChange: (value: unknown) => void;
+}) {
+  const [text, setText] = useState(() => JSON.stringify(value ?? null, null, 2));
+  const [invalid, setInvalid] = useState(false);
+  return (
+    <span className="grid gap-1">
+      <textarea
+        className={areaClass}
+        rows={rows}
+        spellCheck={false}
+        aria-invalid={invalid}
+        value={text}
+        onChange={(event) => {
+          setText(event.target.value);
+          try {
+            onChange(JSON.parse(event.target.value));
+            setInvalid(false);
+          } catch {
+            setInvalid(true);
+          }
+        }}
+      />
+      {invalid && <span className="text-xs text-destructive">JSON inválido: no se aplica.</span>}
     </span>
   );
 }
@@ -215,6 +263,63 @@ export function FieldInput({
         </span>
       );
     }
+    case 'textarea':
+      return (
+        <textarea
+          className={areaClass}
+          rows={field.rows ?? 6}
+          value={typeof value === 'string' ? value : ''}
+          onChange={(event) => {
+            onChange(event.target.value);
+          }}
+        />
+      );
+    case 'localized': {
+      const texts = (value && typeof value === 'object' ? value : {}) as Record<string, string>;
+      return (
+        <span className="grid gap-1">
+          {LOCALES.map((locale) => {
+            const props = {
+              'aria-label': `${field.label} (${locale})`,
+              value: texts[locale] ?? '',
+              onChange: (event: { target: { value: string } }) => {
+                onChange({ ...texts, [locale]: event.target.value });
+              },
+            };
+            return (
+              <span key={locale} className="grid grid-cols-[2rem_1fr] items-start gap-2">
+                <span className="pt-2 font-mono text-xs text-muted-foreground uppercase">
+                  {locale}
+                </span>
+                {field.multiline ? (
+                  <textarea className={areaClass} rows={3} {...props} />
+                ) : (
+                  <input className={inputClass} {...props} />
+                )}
+              </span>
+            );
+          })}
+        </span>
+      );
+    }
+    case 'tags':
+      return (
+        <input
+          className={inputClass}
+          placeholder="uno, dos, tres"
+          value={Array.isArray(value) ? (value as string[]).join(', ') : ''}
+          onChange={(event) => {
+            onChange(
+              event.target.value
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean),
+            );
+          }}
+        />
+      );
+    case 'json':
+      return <JsonInput value={value} rows={field.rows ?? 10} onChange={onChange} />;
     case 'tiers': {
       const tiers = Array.isArray(value)
         ? (value as { minPurchases: number; percent: number }[])

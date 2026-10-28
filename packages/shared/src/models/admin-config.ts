@@ -1,15 +1,19 @@
 import { z } from 'zod';
 
+import { illustrationStyleSchema, lessonSchema, storySchema } from './catalog';
+import { collectionSchema } from './channels';
 import { COLLECTIONS } from './collections';
 import { countrySchema, couponSchema, priceDocId, priceSchema, promotionSchema } from './commerce';
+import { contentDocId, contentSchema } from './config';
+import { editorialConfigSchema } from './editorial';
 import { eventPricingSchema } from './kit';
 import { proDiscountConfigSchema } from './pricing';
 
 /**
- * Configuración del negocio editable desde el admin (fase 14, etapa 2). Cada tipo dice en qué
- * colección vive, con qué esquema entra (las fechas llegan como texto ISO) y cuál es el id del
- * documento. Las fechas de auditoría (`createdAt`, `updatedAt`) y los contadores los pone el
- * servidor.
+ * Configuración del negocio editable desde el admin (fase 14, etapas 2 y 3). Cada tipo dice en
+ * qué colección vive, con qué esquema entra (las fechas llegan como texto ISO) y cuál es el id
+ * del documento. `updatedAt` lo pone siempre el servidor; `createdAt` y `updatedBy`, en los
+ * tipos que los tienen; los contadores (usos de un cupón) nunca los pisa el admin.
  */
 export const ADMIN_CONFIG = {
   countries: {
@@ -24,6 +28,7 @@ export const ADMIN_CONFIG = {
   },
   coupons: {
     collection: COLLECTIONS.coupons,
+    createdAt: true,
     input: couponSchema
       .omit({ createdAt: true, updatedAt: true, redemptions: true })
       .extend({ validFrom: z.coerce.date(), validUntil: z.coerce.date().nullable() }),
@@ -31,6 +36,7 @@ export const ADMIN_CONFIG = {
   },
   promotions: {
     collection: COLLECTIONS.promotions,
+    createdAt: true,
     input: promotionSchema
       .omit({ createdAt: true, updatedAt: true })
       .extend({ startsAt: z.coerce.date(), endsAt: z.coerce.date() })
@@ -54,7 +60,59 @@ export const ADMIN_CONFIG = {
     ),
     docId: () => 'global',
   },
+  // Etapa 3: catálogo editorial y contenido.
+  stories: {
+    collection: COLLECTIONS.stories,
+    createdAt: true,
+    input: storySchema
+      .omit({ createdAt: true, updatedAt: true })
+      .refine((data) => data.ageMax >= data.ageMin, {
+        message: 'La edad máxima es menor que la mínima',
+        path: ['ageMax'],
+      }),
+    docId: (data: { slug: string }) => data.slug,
+  },
+  styles: {
+    collection: COLLECTIONS.illustrationStyles,
+    createdAt: true,
+    input: illustrationStyleSchema.omit({ createdAt: true, updatedAt: true }),
+    docId: (data: { slug: string }) => data.slug,
+  },
+  lessons: {
+    collection: COLLECTIONS.lessons,
+    createdAt: true,
+    input: lessonSchema
+      .omit({ createdAt: true, updatedAt: true })
+      .refine((data) => data.ageMax >= data.ageMin, {
+        message: 'La edad máxima es menor que la mínima',
+        path: ['ageMax'],
+      }),
+    docId: (data: { slug: string }) => data.slug,
+  },
+  collections: {
+    collection: COLLECTIONS.collections,
+    createdAt: true,
+    input: collectionSchema.omit({ createdAt: true, updatedAt: true }),
+    docId: (data: { slug: string }) => data.slug,
+  },
+  content: {
+    collection: COLLECTIONS.content,
+    updatedBy: true,
+    input: contentSchema.omit({ updatedAt: true, updatedBy: true }),
+    docId: (data: { key: string; locale: string }) => contentDocId(data.key, data.locale),
+  },
+  editorial: {
+    collection: COLLECTIONS.editorialConfig,
+    input: editorialConfigSchema,
+    docId: () => 'global',
+  },
 } as const;
+
+/** Si el tipo guarda cuándo se creó o quién lo cambió por última vez. */
+export const adminConfigStamps = (kind: AdminConfigKind) => {
+  const entry = ADMIN_CONFIG[kind];
+  return { createdAt: 'createdAt' in entry, updatedBy: 'updatedBy' in entry };
+};
 
 export const ADMIN_CONFIG_KINDS = Object.keys(ADMIN_CONFIG) as (keyof typeof ADMIN_CONFIG)[];
 export const adminConfigKindSchema = z.enum(

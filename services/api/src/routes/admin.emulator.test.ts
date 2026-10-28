@@ -28,6 +28,8 @@ describe('admin: interruptor del sitio y auditoría', () => {
       COLLECTIONS.prices,
       COLLECTIONS.coupons,
       COLLECTIONS.promotions,
+      COLLECTIONS.content,
+      COLLECTIONS.lessons,
     ]) {
       await db.recursiveDelete(db.collection(name));
     }
@@ -183,6 +185,44 @@ describe('admin: interruptor del sitio y auditoría', () => {
       (await save('promotions', 'dia-del-nino', { ...promo, endsAt: '2027-05-01T00:00:00.000Z' }))
         .statusCode,
     ).toBe(200);
+  });
+
+  it('contenido: el id es clave_idioma y guarda quién lo cambió', async () => {
+    const faq = {
+      key: 'faq',
+      locale: 'es',
+      title: 'Preguntas',
+      body: '## ¿Cuánto tarda?',
+      published: true,
+    };
+    expect((await save('content', 'faq_en', faq)).statusCode).toBe(400);
+    expect((await save('content', 'faq_es', faq)).statusCode).toBe(200);
+    expect((await db.doc('content/faq_es').get()).data()).toMatchObject({
+      body: '## ¿Cuánto tarda?',
+      updatedBy: 'admin@storynido.test',
+    });
+  });
+
+  it('enseñanzas: rechaza edades al revés y guarda createdAt al crear', async () => {
+    const lesson = {
+      slug: 'compartir',
+      active: true,
+      order: 1,
+      group: 'values',
+      ageMin: 6,
+      ageMax: 3,
+      name: { es: 'Compartir', en: 'Sharing', pt: 'Compartilhar' },
+      headline: { es: 'Un cuento para compartir', en: 'A story about sharing', pt: 'Uma história' },
+      description: { es: 'Descripción', en: 'Description', pt: 'Descrição' },
+      promptGuidance: 'Mostrar que compartir suma, sin sermón.',
+      sensitive: false,
+    };
+    const backwards = await save('lessons', 'compartir', lesson);
+    expect(backwards.json()).toMatchObject({ error: { message: /edad máxima/ } });
+    expect(
+      (await save('lessons', 'compartir', { ...lesson, ageMin: 3, ageMax: 8 })).statusCode,
+    ).toBe(200);
+    expect((await db.doc('lessons/compartir').get()).get('createdAt')).toBeDefined();
   });
 
   it('un customer no lee ni escribe la configuración', async () => {

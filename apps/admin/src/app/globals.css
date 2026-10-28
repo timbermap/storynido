@@ -60,3 +60,33 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+/* Vista previa del Markdown del contenido (sin plugin de tipografía). */
+.prose-admin h1 {
+  @apply mt-4 mb-2 text-xl font-semibold;
+}
+.prose-admin h2 {
+  @apply mt-4 mb-2 text-lg font-semibold;
+}
+.prose-admin h3 {
+  @apply mt-3 mb-1 font-semibold;
+}
+.prose-admin p {
+  @apply my-2 leading-relaxed;
+}
+.prose-admin ul {
+  @apply my-2 list-disc pl-5;
+}
+.prose-admin ol {
+  @apply my-2 list-decimal pl-5;
+}
+.prose-admin a {
+  @apply text-primary underline;
+}
+.prose-admin table {
+  @apply my-2 w-full border-collapse text-xs;
+}
+.prose-admin th,
+.prose-admin td {
+  @apply border px-2 py-1 text-left;
+}

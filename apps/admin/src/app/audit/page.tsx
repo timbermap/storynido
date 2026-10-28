@@ -18,6 +18,12 @@ const ENTITIES = [
   ['promotions', 'Promociones'],
   ['eventPricing', 'Eventos'],
   ['proDiscounts', 'Profesionales'],
+  ['stories', 'Historias'],
+  ['collections', 'Colecciones'],
+  ['illustrationStyles', 'Estilos'],
+  ['lessons', 'Enseñanzas'],
+  ['editorialConfig', 'Opciones editoriales'],
+  ['content', 'Contenido'],
   ['orders', 'Pedidos'],
   ['users', 'Usuarios'],
 ] as const;
