@@ -91,6 +91,28 @@ variable "deletion_protection" {
   description = "Protege contra borrado los recursos con datos (Firestore, Cloud Run, Workflows)."
 }
 
+variable "print_providers" {
+  type        = list(string)
+  default     = ["mock"]
+  description = "Imprentas activas (se cotiza con todas y gana la más barata): mock, mock_alt, gelato."
+
+  validation {
+    condition     = length(var.print_providers) > 0 && alltrue([for id in var.print_providers : contains(["mock", "mock_alt", "gelato"], id)])
+    error_message = "print_providers: una o más de mock, mock_alt, gelato."
+  }
+}
+
+variable "gelato_order_type" {
+  type        = string
+  default     = "draft"
+  description = "Gelato: draft (queda en borrador, no se fabrica ni se cobra) u order (producción)."
+
+  validation {
+    condition     = contains(["draft", "order"], var.gelato_order_type)
+    error_message = "gelato_order_type debe ser draft u order."
+  }
+}
+
 variable "photo_analyzer" {
   type        = string
   default     = "mock"

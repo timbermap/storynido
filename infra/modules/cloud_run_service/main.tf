@@ -64,6 +64,12 @@ variable "env" {
   description = "Variables de entorno no secretas."
 }
 
+variable "secret_env" {
+  type        = map(string)
+  default     = {}
+  description = "Variables de entorno secretas: nombre => ID del secreto en Secret Manager (última versión)."
+}
+
 variable "public" {
   type        = bool
   default     = false
@@ -127,6 +133,19 @@ resource "google_cloud_run_v2_service" "this" {
         content {
           name  = env.key
           value = env.value
+        }
+      }
+
+      dynamic "env" {
+        for_each = var.secret_env
+        content {
+          name = env.key
+          value_source {
+            secret_key_ref {
+              secret  = env.value
+              version = "latest"
+            }
+          }
         }
       }
 

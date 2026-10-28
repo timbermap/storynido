@@ -32,5 +32,8 @@ module "environment" {
   worker_scaling             = { min = 0, max = 3 }
   deletion_protection        = false
   photo_analyzer             = var.photo_analyzer
-  log_level                  = "debug"
+  # Gelato (DECISIONS 077) en borrador: no se fabrica ni se cobra.
+  print_providers   = ["gelato"]
+  gelato_order_type = "draft"
+  log_level         = "debug"
 }

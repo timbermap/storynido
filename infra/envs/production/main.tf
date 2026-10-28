@@ -32,5 +32,8 @@ module "environment" {
   worker_scaling             = { min = 0, max = 50 }
   deletion_protection        = true
   photo_analyzer             = var.photo_analyzer
-  log_level                  = "info"
+  # Gelato (DECISIONS 077).
+  print_providers   = ["gelato"]
+  gelato_order_type = "order"
+  log_level         = "info"
 }

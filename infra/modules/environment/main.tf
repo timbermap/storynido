@@ -263,9 +263,13 @@ locals {
     BUCKET_PDFS    = module.bucket_pdfs.name
     INVOKER_SA     = local.sa["sn-invoker"]
     # En la nube las fotos van a Cloud Storage (URLs firmadas v4).
-    STORAGE_PROVIDER = "gcs"
-    PHOTO_ANALYZER   = var.photo_analyzer
+    STORAGE_PROVIDER  = "gcs"
+    PHOTO_ANALYZER    = var.photo_analyzer
+    PRINT_PROVIDERS   = join(",", var.print_providers)
+    GELATO_ORDER_TYPE = var.gelato_order_type
   }
+  # Claves de las imprentas activas (los valores se cargan con infra/scripts/set-secret.sh).
+  print_secret_env = contains(var.print_providers, "gelato") ? { GELATO_API_KEY = "gelato-api-key" } : {}
 }
 
 module "worker" {
@@ -291,6 +295,7 @@ module "worker" {
     # URL determinística del propio servicio: destino de las tareas de Cloud Tasks.
     WORKER_URL = "https://worker-${data.google_project.this.number}.${var.region}.run.app"
   })
+  secret_env = local.print_secret_env
 
   invokers = {
     invoker   = local.member["sn-invoker"]
@@ -319,6 +324,7 @@ module "api" {
     # Orígenes de la web que pueden llamar a la API desde el navegador (los mismos que el CORS de los buckets).
     CORS_ORIGINS = join(",", var.cors_origins)
   })
+  secret_env = local.print_secret_env
 
   # La API es pública: la autenticación la hacen Firebase Auth y App Check en la app.
   public = true
