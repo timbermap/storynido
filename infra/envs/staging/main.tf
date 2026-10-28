@@ -33,7 +33,11 @@ module "environment" {
   deletion_protection        = false
   photo_analyzer             = var.photo_analyzer
   # Gelato (DECISIONS 077) en borrador: no se fabrica ni se cobra.
-  print_providers   = ["gelato"]
+  # Gelato (EE. UU.) y Cloudprinter (México): el enrutador elige la más barata (DECISIONS 080).
+  print_providers   = ["gelato", "cloudprinter"]
   gelato_order_type = "draft"
-  log_level         = "debug"
+  # Mails reales con Resend; el secreto de las bajas ya tiene valor (DECISIONS 078).
+  email_provider           = "resend"
+  email_link_secret_loaded = true
+  log_level                = "debug"
 }

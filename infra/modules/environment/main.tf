@@ -275,12 +275,20 @@ locals {
     ADMIN_ALERT_EMAILS = var.alert_email
   }
   # Claves de las imprentas activas (los valores se cargan con infra/scripts/set-secret.sh).
-  print_secret_env = contains(var.print_providers, "gelato") ? { GELATO_API_KEY = "gelato-api-key" } : {}
+  print_secret_env = merge(
+    contains(var.print_providers, "gelato") ? { GELATO_API_KEY = "gelato-api-key" } : {},
+    contains(var.print_providers, "cloudprinter") ? { CLOUDPRINTER_API_KEY = "cloudprinter-api-key" } : {},
+  )
+  # Las señales de las imprentas las recibe solo la API.
+  api_print_secret_env = contains(var.print_providers, "cloudprinter") ? {
+    CLOUDPRINTER_WEBHOOK_KEY = "cloudprinter-webhook-key"
+  } : {}
   email_secret_env = merge(
     var.email_link_secret_loaded ? { EMAIL_LINK_SECRET = "email-link-secret" } : {},
     var.email_provider == "resend" ? { RESEND_API_KEY = "resend-api-key" } : {},
   )
   service_secret_env = merge(local.print_secret_env, local.email_secret_env)
+  api_secret_env     = merge(local.service_secret_env, local.api_print_secret_env)
 }
 
 module "worker" {
@@ -335,7 +343,7 @@ module "api" {
     # Orígenes de la web que pueden llamar a la API desde el navegador (los mismos que el CORS de los buckets).
     CORS_ORIGINS = join(",", var.cors_origins)
   })
-  secret_env = local.service_secret_env
+  secret_env = local.api_secret_env
 
   # La API es pública: la autenticación la hacen Firebase Auth y App Check en la app.
   public = true
@@ -472,6 +480,14 @@ module "secrets" {
     gelato-api-key = {
       description = "Gelato: API key"
       accessors   = { api = local.member["sn-api"], worker = local.member["sn-worker"] }
+    }
+    cloudprinter-api-key = {
+      description = "Cloudprinter: API key de CloudCore"
+      accessors   = { api = local.member["sn-api"], worker = local.member["sn-worker"] }
+    }
+    cloudprinter-webhook-key = {
+      description = "Cloudprinter: clave de las señales (CloudSignal)"
+      accessors   = { api = local.member["sn-api"] }
     }
     gelato-webhook-secret = {
       description = "Gelato: secreto de verificación de webhooks"
