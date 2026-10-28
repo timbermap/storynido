@@ -996,3 +996,29 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Pendiente:**
   - revistas abrochadas (`magazine_sas_us_letter_p_fc`, desde 8 páginas en múltiplos de 4) para los libritos impresos de Eventos: el formato exacto de la tapa se confirma con un pedido de sandbox;
   - la muestra física.
+
+## 081 · Profesionales: cuenta Pro, proyectos por alias y descuento por recurrencia
+
+- **Fecha:** 2026-10-28 · Fase 12c.
+- **Cuenta Pro:** `users.accountType` (`family` por defecto) y un perfil mínimo (profesión de una lista con "otra", espacio opcional y país).
+  - La escribe solo la API (`POST /v1/me/professional`); las reglas no dejan que el cliente la cambie.
+  - No cambia el rol (`customer`): ni custom claims ni admin.
+  - Se activa al entrar al creador por la línea Profesionales, después de iniciar sesión. Sin cuenta Pro no se crea el primer borrador de esa línea.
+- **Precio:** `price.proAmountMinor` (precio Pro base, separado del de Familias) y el descuento por compras elegibles en 90 días (`proDiscounts/global`: 5 → 10 %, 10 → 15 %, 20 → 20 %; tope en impreso 15 %).
+  - **Compras elegibles:** pedidos pagados en adelante (incluye `qa_failed`), sin reembolsados, cancelados ni pendientes; cada pedido cuenta una vez y se cuentan en el servidor.
+  - Un solo descuento: el mayor entre cupón, promoción y Pro. Queda en el snapshot del pedido; los anteriores no cambian.
+  - Un reembolso posterior baja el escalón para las compras siguientes.
+  - Una cuenta Familia no accede al precio Pro aunque lo pida en la petición (test).
+- **Proyectos por niño:** cada libro es un proyecto; el niño se identifica con un **alias** (`children.alias`, opcional) y el nombre es el que va en el cuento. No se pide el apellido.
+  - "Mi cuenta" Pro: descuento vigente y próximo escalón, proyectos agrupados por niño, "Continuar" y **"Repetir configuración"** (historia, extensión, densidad, nivel y estilo a un borrador nuevo, sin datos ni fotos del niño).
+  - El alias no va a analítica ni a logs.
+- **Fotos de niños que no son propios:** antes de subir, el profesional declara la autorización de la madre, el padre o el tutor (`consents` tipo `guardian_authorization`, versión `guardian-authorization-v1`, con fecha, IP y navegador).
+  - La API rechaza la subida de una cuenta Pro sin esa declaración.
+  - El borrador de Profesionales arranca en modo sin foto (avatar).
+  - El texto lo revisa un abogado antes del lanzamiento.
+- **Objetivo educativo:** se elige entre los temas de las colecciones de la historia (`book.goal`). En el servidor solo entra al prompt si es uno de esos temas (nunca texto libre). Guía la historia sin indicaciones terapéuticas ni diagnósticos.
+- **Aviso:** "material educativo, no reemplaza una intervención profesional o clínica" en el creador (paso del objetivo) y al cierre del PDF de los libros de Profesionales.
+- **Pendiente:**
+  - modo "texto propio ilustrado por StoryNido";
+  - tabla de descuentos y precio Pro editables en el admin (fase 14);
+  - revisión legal del texto de autorización.

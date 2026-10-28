@@ -1016,5 +1016,50 @@
       "moreCopies": "Order more copies",
       "ready": "Your kit is ready!"
     }
+  },
+  "Pro": {
+    "activation": {
+      "title": "Activate your Pro account",
+      "text": "Tell us your profession to create projects per child and get Pro pricing and repeat-purchase discounts.",
+      "profession": "Profession",
+      "professionEmpty": "Choose an option",
+      "professionOther": "Which one?",
+      "practice": "Practice, school or space (optional)",
+      "practicePlaceholder": "E.g. Learning Space",
+      "country": "Country",
+      "note": "Same account and same sign-in. We never ask for diagnoses or clinical data.",
+      "submit": "Activate Pro account",
+      "required": "Choose your profession.",
+      "error": "We couldn't activate the account. Please try again.",
+      "professions": {
+        "psychologist": "Child psychology",
+        "psychopedagogue": "Educational psychology",
+        "speech_therapist": "Speech therapy",
+        "teacher": "Teaching",
+        "tutor": "Private tutor",
+        "pediatric_dentist": "Pediatric dentistry",
+        "other": "Other"
+      }
+    },
+    "account": {
+      "title": "Pro account",
+      "newProject": "New project",
+      "purchases": "{count, plural, =0 {No purchases} one {# purchase} other {# purchases}} in the last {days} days",
+      "discount": "Your current discount: {digital}% on digital and {print}% on print.",
+      "basePrice": "You have the base Pro price.",
+      "next": "{missing, plural, one {# more purchase} other {# more purchases}} to reach {percent}%.",
+      "loading": "Loading projects…",
+      "empty": "No projects yet. Each child you work with is a project.",
+      "untitled": "Story not chosen",
+      "continue": "Continue",
+      "repeat": "Repeat settings",
+      "repeatNote": "“Repeat settings” copies the story, length, density, level and style to a new draft, without the child's data or photos.",
+      "status": {
+        "draft": "Draft",
+        "preview_generating": "Creating preview",
+        "preview_ready": "Preview ready",
+        "ordered": "Purchased"
+      }
+    }
   }
 }

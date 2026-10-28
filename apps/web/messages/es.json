@@ -1016,5 +1016,50 @@
       "moreCopies": "Pedir más copias",
       "ready": "¡Tu kit está listo!"
     }
+  },
+  "Pro": {
+    "activation": {
+      "title": "Activa tu cuenta Pro",
+      "text": "Cuéntanos tu profesión para crear proyectos por niño y acceder al precio Pro y a los descuentos por recurrencia.",
+      "profession": "Profesión",
+      "professionEmpty": "Elige una opción",
+      "professionOther": "¿Cuál?",
+      "practice": "Consultorio, escuela o espacio (opcional)",
+      "practicePlaceholder": "Ej.: Espacio Aprender",
+      "country": "País",
+      "note": "Es la misma cuenta y el mismo inicio de sesión. No pedimos diagnósticos ni datos clínicos.",
+      "submit": "Activar cuenta Pro",
+      "required": "Elige tu profesión.",
+      "error": "No pudimos activar la cuenta. Intenta de nuevo.",
+      "professions": {
+        "psychologist": "Psicología infantil",
+        "psychopedagogue": "Psicopedagogía",
+        "speech_therapist": "Fonoaudiología / logopedia",
+        "teacher": "Docencia",
+        "tutor": "Maestra o maestro particular",
+        "pediatric_dentist": "Odontopediatría",
+        "other": "Otra"
+      }
+    },
+    "account": {
+      "title": "Cuenta Pro",
+      "newProject": "Nuevo proyecto",
+      "purchases": "{count, plural, =0 {Sin compras} one {# compra} other {# compras}} en los últimos {days} días",
+      "discount": "Tu descuento actual: {digital} % en digital y {print} % en impreso.",
+      "basePrice": "Tienes el precio Pro base.",
+      "next": "Con {missing, plural, one {# compra más} other {# compras más}} llegas al {percent} %.",
+      "loading": "Cargando proyectos…",
+      "empty": "Todavía no tienes proyectos. Cada niño con el que trabajas es un proyecto.",
+      "untitled": "Historia sin elegir",
+      "continue": "Continuar",
+      "repeat": "Repetir configuración",
+      "repeatNote": "«Repetir configuración» copia la historia, la extensión, la densidad, el nivel y el estilo a un borrador nuevo, sin los datos ni las fotos del niño.",
+      "status": {
+        "draft": "Borrador",
+        "preview_generating": "Creando la muestra",
+        "preview_ready": "Muestra lista",
+        "ordered": "Comprado"
+      }
+    }
   }
 }

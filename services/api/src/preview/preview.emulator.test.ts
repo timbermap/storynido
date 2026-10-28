@@ -817,6 +817,78 @@ describe('checkout y pagos (fase 11)', () => {
     expect(bad.json<{ couponError: string }>().couponError).toBe('coupon_invalid');
   });
 
+  it('Profesionales: solo la API activa la cuenta; precio Pro y escalón por compras elegibles', async () => {
+    await approvedBook();
+    const quoteDigital = async (extra: Record<string, unknown> = {}) => {
+      const res = await post('/v1/checkout/quote', {
+        bookId: 'book-1',
+        format: 'digital',
+        country: 'MX',
+        ...extra,
+      });
+      return res.json<{ snapshot: PriceSnapshot }>().snapshot;
+    };
+    const status = async () =>
+      (await app.inject({ method: 'GET', url: '/v1/me/professional', headers: auth(TOKEN) })).json<{
+        accountType: string;
+        discount: { purchases: number; next: unknown } | null;
+      }>();
+
+    // Familia: aunque la petición diga que es Pro, paga el precio de Familias.
+    const family = await quoteDigital({ pro: { purchases: 50 }, accountType: 'professional' });
+    expect(family.subtotalMinor).toBe(34900);
+    expect(family.discount.reason).toBeNull();
+    expect((await status()).accountType).toBe('family');
+
+    const activated = await post('/v1/me/professional', {
+      profession: 'teacher',
+      professionOther: 'no se guarda',
+      practiceName: 'Escuela Arcoíris',
+      country: 'MX',
+    });
+    expect(activated.statusCode).toBe(200);
+    expect((await db.doc(`users/${UID}`).get()).get('proProfile')).toMatchObject({
+      profession: 'teacher',
+      professionOther: null,
+    });
+    expect(await status()).toMatchObject({
+      accountType: 'professional',
+      discount: { purchases: 0, next: { purchases: 5, percent: 10 } },
+    });
+    // Precio Pro base (10 % menos), sin descuento por recurrencia todavía.
+    expect((await quoteDigital()).subtotalMinor).toBe(31410);
+
+    // 5 compras elegibles en 90 días → 10 %. No cuentan: reembolsadas, canceladas, pendientes,
+    // las de otra cuenta ni las anteriores a la ventana.
+    const day = 24 * 3600 * 1000;
+    const orders: [string, string, number, string][] = [
+      ['o1', 'paid', 1, UID],
+      ['o2', 'delivered', 10, UID],
+      ['o3', 'shipped', 20, UID],
+      ['o4', 'ready', 30, UID],
+      ['o5', 'qa_failed', 40, UID],
+      ['o6', 'refunded', 5, UID],
+      ['o7', 'cancelled', 5, UID],
+      ['o8', 'pending_payment', 5, UID],
+      ['o9', 'paid', 100, UID],
+      ['o10', 'paid', 5, 'otra-cuenta'],
+    ];
+    for (const [id, orderStatus, daysAgo, ownerUid] of orders) {
+      await db
+        .doc(`orders/${id}`)
+        .set({ ownerUid, status: orderStatus, createdAt: new Date(Date.now() - daysAgo * day) });
+    }
+    expect((await status()).discount?.purchases).toBe(5);
+    const tier = await quoteDigital();
+    expect(tier.discount).toEqual({ minor: 3141, reason: 'pro', label: 'Pro 10 %' });
+    expect(tier.totalMinor).toBe(31410 - 3141);
+
+    // Un reembolso posterior baja el escalón para las compras siguientes.
+    await db.doc('orders/o2').update({ status: 'refunded' });
+    expect((await status()).discount?.purchases).toBe(4);
+    expect((await quoteDigital()).discount.reason).toBeNull();
+  });
+
   it('sin muestra aprobada, sin cuenta o sin dirección válida no se puede pagar', async () => {
     await seedBook(providers, 'book-1');
     expect((await checkout()).statusCode).toBe(409);

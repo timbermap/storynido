@@ -13,6 +13,8 @@ import { startAnonymousSession } from '@/lib/firebase/auth-actions';
 import { createDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 
 import { CHANNEL_STORAGE_KEY } from '@/components/landing/remember-channel';
+import { ProActivationCard } from '@/components/pro/pro-activation';
+import { useProStatus } from '@/components/pro/use-pro-status';
 
 import { DraftsList } from './drafts-list';
 import { SignInGate } from './sign-in-gate';
@@ -56,6 +58,9 @@ export function CreateStart({
   }, [channelParam]);
   // Profesionales necesita cuenta desde el inicio: sus compras se acumulan para el descuento.
   const needsAccount = channel === 'professionals';
+  // ...y cuenta Pro activa (perfil mínimo) antes del primer borrador.
+  const { status: pro, refresh: refreshPro } = useProStatus();
+  const proReady = !needsAccount || pro?.accountType === 'professional';
   const router = useRouter();
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -75,7 +80,7 @@ export function CreateStart({
   }
 
   const onUser = useEffectEvent(async () => {
-    if (!user || (needsAccount && !signedIn)) return;
+    if (!user || (needsAccount && !signedIn) || !proReady) return;
     if (storyId || lessonId) {
       await startNew();
       return;
@@ -89,7 +94,7 @@ export function CreateStart({
     // Al tener sesión: crear o listar borradores (lectura de Firestore después de montar).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (user) void onUser();
-  }, [user, signedIn]);
+  }, [user, signedIn, proReady]);
 
   useEffect(() => {
     if (loading || user || needsAccount) return;
@@ -100,6 +105,9 @@ export function CreateStart({
 
   if (!loading && needsAccount && !signedIn) {
     return <SignInGate title={proGate.title} text={proGate.text} />;
+  }
+  if (needsAccount && pro?.accountType === 'family') {
+    return <ProActivationCard onActivated={() => void refreshPro()} />;
   }
   if (anonymousFailed && !user) return <SignInGate />;
   if (!drafts) {

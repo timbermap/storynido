@@ -1016,5 +1016,50 @@
       "moreCopies": "Pedir mais cópias",
       "ready": "Seu kit está pronto!"
     }
+  },
+  "Pro": {
+    "activation": {
+      "title": "Ative sua conta Pro",
+      "text": "Conte sua profissão para criar projetos por criança e ter acesso ao preço Pro e aos descontos por recorrência.",
+      "profession": "Profissão",
+      "professionEmpty": "Escolha uma opção",
+      "professionOther": "Qual?",
+      "practice": "Consultório, escola ou espaço (opcional)",
+      "practicePlaceholder": "Ex.: Espaço Aprender",
+      "country": "País",
+      "note": "É a mesma conta e o mesmo login. Não pedimos diagnósticos nem dados clínicos.",
+      "submit": "Ativar conta Pro",
+      "required": "Escolha sua profissão.",
+      "error": "Não conseguimos ativar a conta. Tente novamente.",
+      "professions": {
+        "psychologist": "Psicologia infantil",
+        "psychopedagogue": "Psicopedagogia",
+        "speech_therapist": "Fonoaudiologia",
+        "teacher": "Docência",
+        "tutor": "Professor(a) particular",
+        "pediatric_dentist": "Odontopediatria",
+        "other": "Outra"
+      }
+    },
+    "account": {
+      "title": "Conta Pro",
+      "newProject": "Novo projeto",
+      "purchases": "{count, plural, =0 {Nenhuma compra} one {# compra} other {# compras}} nos últimos {days} dias",
+      "discount": "Seu desconto atual: {digital}% no digital e {print}% no impresso.",
+      "basePrice": "Você tem o preço Pro base.",
+      "next": "Com mais {missing, plural, one {# compra} other {# compras}} você chega a {percent}%.",
+      "loading": "Carregando projetos…",
+      "empty": "Você ainda não tem projetos. Cada criança com quem você trabalha é um projeto.",
+      "untitled": "História não escolhida",
+      "continue": "Continuar",
+      "repeat": "Repetir configuração",
+      "repeatNote": "“Repetir configuração” copia a história, a extensão, a densidade, o nível e o estilo para um novo rascunho, sem os dados nem as fotos da criança.",
+      "status": {
+        "draft": "Rascunho",
+        "preview_generating": "Criando a amostra",
+        "preview_ready": "Amostra pronta",
+        "ordered": "Comprado"
+      }
+    }
   }
 }

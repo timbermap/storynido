@@ -75,6 +75,8 @@ export async function createDraft(
     storyId: string | null;
     lessonId: string | null;
     channel: Channel;
+    /** "Repetir configuración" (Profesionales): estilo y opciones editoriales, sin datos del niño. */
+    settings?: ProjectSettings;
   },
 ): Promise<string> {
   const ref = await addDoc(collection(db, COLLECTIONS.books), {
@@ -101,6 +103,7 @@ export async function createDraft(
     // Eventos arranca como mini cuento muy visual (el librito para cada invitado).
     ...DEFAULT_EDITORIAL_CONFIG.defaults,
     ...(preset.channel === 'events' ? { length: 'mini', textDensity: 'visual' } : {}),
+    ...preset.settings,
     channel: preset.channel,
     preview: null,
     regenerationsUsed: 0,
@@ -108,6 +111,74 @@ export async function createDraft(
     updatedAt: serverTimestamp(),
   });
   return ref.id;
+}
+
+/** Lo que copia "Repetir configuración": historia aparte, nada del niño ni de sus fotos. */
+export type ProjectSettings = Pick<
+  Book,
+  'styleId' | 'length' | 'textDensity' | 'readingLevel' | 'contentType'
+>;
+
+export interface ProjectBook {
+  id: string;
+  status: Book['status'];
+  storyId: string | null;
+  goal: string | null;
+  settings: ProjectSettings;
+  updatedAt: Date | null;
+}
+
+export interface Project {
+  childId: string;
+  /** Alias del proyecto; si no tiene, el nombre del cuento. */
+  label: string;
+  books: ProjectBook[];
+}
+
+/** Profesionales: libros de la línea agrupados por niño (cada niño es un proyecto). */
+export async function listProjects(db: Firestore, uid: string): Promise<Project[]> {
+  const snapshot = await getDocs(
+    query(
+      collection(db, COLLECTIONS.books),
+      where('ownerUid', '==', uid),
+      orderBy('updatedAt', 'desc'),
+      limit(100),
+    ),
+  );
+  const byChild = new Map<string, ProjectBook[]>();
+  for (const book of snapshot.docs) {
+    const childId = book.get('childId') as string | null;
+    if (book.get('channel') !== 'professionals' || !childId) continue;
+    const data = book.data();
+    byChild.set(childId, [
+      ...(byChild.get(childId) ?? []),
+      {
+        id: book.id,
+        status: data.status as Book['status'],
+        storyId: (data.storyId as string | null | undefined) ?? null,
+        goal: (data.goal as string | null | undefined) ?? null,
+        settings: {
+          styleId: (data.styleId as string | null | undefined) ?? null,
+          length: (data.length as Book['length'] | undefined) ?? null,
+          textDensity: (data.textDensity as Book['textDensity'] | undefined) ?? 'balanced',
+          readingLevel: (data.readingLevel as Book['readingLevel'] | undefined) ?? 'developing',
+          contentType: (data.contentType as Book['contentType'] | undefined) ?? 'story',
+        },
+        updatedAt: asDate(data.updatedAt as Timestampish),
+      },
+    ]);
+  }
+  return Promise.all(
+    [...byChild].map(async ([childId, books]) => {
+      const child = await getDoc(doc(db, COLLECTIONS.children, childId));
+      const alias = child.get('alias') as string | null | undefined;
+      return {
+        childId,
+        label: alias?.trim() ? alias : ((child.get('name') as string | undefined) ?? '—'),
+        books,
+      };
+    }),
+  );
 }
 
 export async function listDrafts(db: Firestore, uid: string): Promise<DraftSummary[]> {

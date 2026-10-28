@@ -9,6 +9,8 @@ import { ChildrenList } from '@/components/account/children-list';
 import { DeleteAccount } from '@/components/account/delete-account';
 import { LanguagePreference } from '@/components/account/language-preference';
 import { OrdersList } from '@/components/account/orders-list';
+import { ProPanel } from '@/components/pro/pro-panel';
+import { useProStatus } from '@/components/pro/use-pro-status';
 import { DraftsList } from '@/components/wizard/drafts-list';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
@@ -27,6 +29,7 @@ export default function AccountPage() {
   const [apiCheck, setApiCheck] = useState<string>(t('verifying'));
   const [drafts, setDrafts] = useState<DraftSummary[]>([]);
   const tWizard = useTranslations('Wizard.drafts');
+  const { status: pro } = useProStatus();
   // Al borrar la cuenta se cierra la sesión a propósito: no hay que mandar a iniciar sesión.
   const leaving = useRef(false);
 
@@ -86,6 +89,7 @@ export default function AccountPage() {
         <dt className="text-muted-foreground">{t('api')}</dt>
         <dd role="status">{apiCheck}</dd>
       </dl>
+      {pro?.accountType === 'professional' && <ProPanel uid={user.uid} status={pro} />}
       <OrdersList uid={user.uid} />
       {drafts.length > 0 && (
         <section id="drafts" className="grid scroll-mt-28 gap-4">

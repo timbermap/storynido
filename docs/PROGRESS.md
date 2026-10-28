@@ -18,7 +18,7 @@
 | 11  | Pagos (procesador por definir)                       | ✅ 2026-10-27 (con pagos simulados)                 |
 | 12  | Gelato y "Mi cuenta"                                 | ✅ 2026-10-27 (con imprenta simulada)               |
 | 12b | Eventos (un diseño, muchas copias)                   | ✅ 2026-10-28 (kit digital; impreso por cotización) |
-| 12c | Profesionales (cuenta Pro, descuentos)               | ⏳ Pendiente                                        |
+| 12c | Profesionales (cuenta Pro, descuentos)               | ✅ 2026-10-28 (texto propio pendiente)              |
 | 13  | Emails y postventa                                   | ✅ 2026-10-28 (mails simulados hasta Resend)        |
 | 14  | Admin: configuración                                 | ⏳ Pendiente                                        |
 | 15  | Admin: operaciones                                   | ⏳ Pendiente                                        |
