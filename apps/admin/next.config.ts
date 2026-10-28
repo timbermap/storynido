@@ -25,7 +25,10 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: securityHeaders({
           apiUrl: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080',
-          dev: process.env.NODE_ENV !== 'production',
+          // Emuladores locales (también en `next start` para los E2E): sus orígenes en la CSP.
+          dev:
+            process.env.NODE_ENV !== 'production' ||
+            process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === 'true',
           analytics: false,
         }),
       },

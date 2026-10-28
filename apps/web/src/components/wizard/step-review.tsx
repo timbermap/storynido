@@ -100,21 +100,23 @@ export function StepReview({
     <WizardShell {...nav} title={t('title')} subtitle={t('subtitle')}>
       <dl className="divide-y rounded-xl border">
         {visibleRows.map((row) => (
-          <div key={row.label} className="flex items-center justify-between gap-4 px-5 py-4">
-            <div>
-              <dt className="text-sm font-bold text-muted-foreground">{row.label}</dt>
-              <dd className="mt-0.5 font-semibold">{row.value}</dd>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={`${t('edit')}: ${row.label}`}
-              onClick={() => {
-                nav.onJump(row.step);
-              }}
-            >
-              {t('edit')}
-            </Button>
+          // dt y dd como hijos directos del grupo (lista de definición válida para lectores de
+          // pantalla); el botón va en su propio dd, a la derecha.
+          <div key={row.label} className="grid grid-cols-[1fr_auto] items-center gap-x-4 px-5 py-4">
+            <dt className="text-sm font-bold text-muted-foreground">{row.label}</dt>
+            <dd className="col-start-1 mt-0.5 font-semibold">{row.value}</dd>
+            <dd className="col-start-2 row-span-2 row-start-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label={`${t('edit')}: ${row.label}`}
+                onClick={() => {
+                  nav.onJump(row.step);
+                }}
+              >
+                {t('edit')}
+              </Button>
+            </dd>
           </div>
         ))}
       </dl>

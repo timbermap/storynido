@@ -40,7 +40,8 @@ export function DailyBars({ points, label }: { points: DailyPoint[]; label: stri
       <svg
         viewBox={`0 0 ${String(width)} ${String(HEIGHT + 24)}`}
         className="h-auto w-full"
-        role="img"
+        // Grupo (no imagen): cada barra es enfocable y anuncia su día y su valor.
+        role="group"
         aria-label={label}
       >
         {[0, 1, 2, 3].map((index) => {

@@ -199,7 +199,7 @@ export async function SiteFooter({
             />
           </div>
         </div>
-        <p className="container-page pb-8 text-xs text-white/45">
+        <p className="container-page pb-8 text-xs text-white/60">
           {t('rights', { year: new Date().getFullYear(), brand: brand.name })}
         </p>
       </div>

@@ -3,6 +3,7 @@ packages:
   - services/*
   - packages/*
   - firebase
+  - e2e
 allowBuilds:
   '@firebase/util': true
   '@parcel/watcher': false

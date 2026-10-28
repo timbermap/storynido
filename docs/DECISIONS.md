@@ -1170,3 +1170,35 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - **Dependencias:** `pnpm audit --prod --audit-level=high` en CI. Se actualizó zod a 4.6.7 y se fuerza `@grpc/grpc-js` ≥ 1.13.6 (dos vulnerabilidades altas).
   - **Reglas:** tests nuevos para las colecciones del panel (solo lectura de admin).
 - **Privacidad:** `docs/PRIVACY.md` (qué datos, dónde, cuánto tiempo, encargados, bases legales y derechos). CMEK evaluado y no adoptado por ahora.
+
+## 090 · E2E, rendimiento y accesibilidad (fase 17)
+
+- **Fecha:** 2026-10-28.
+- **E2E con Playwright** (`e2e/`), contra los emuladores, la API, el worker, la web y el admin locales, con IA, pagos, imprenta y mails simulados (sin costo):
+  - **Páginas públicas:** home, landings de Familias, Eventos y Profesionales, catálogo y detalle de una historia, en es, en y pt, a 390 y 1440 px. Cada una sin scroll horizontal, con cero violaciones de axe (WCAG 2.2 AA) y con el botón que lleva a cada público a su creador.
+  - **Compra completa (escritorio, México):** foto con consentimiento, muestra, cuenta con enlace mágico, edición y regeneración, checkout de tapa blanda con cupón, pago simulado, pipeline hasta la imprenta, entrega con seguimiento, opinión, recompra en digital sin IA, y borrado de datos y de la cuenta.
+  - **Móvil sin foto (390 px):** rasgos elegidos (anteojos), libro para colorear Mini, "Mía" con tilde y la lámina con los rasgos.
+  - **Admin:**
+    - un cliente no entra;
+    - el modo del sitio llega a la web en segundos;
+    - reembolso con motivo y auditoría;
+    - aprobar desde la cola de revisión.
+    - El segundo factor se prueba en la API: con emuladores no hay TOTP.
+- **CI:** `.github/workflows/e2e.yml` corre la suite completa en cada PR y en main (emuladores con `emulators:exec` y seed), y las páginas públicas contra staging después de cada deploy.
+- **Lo que encontraron los E2E (corregido):**
+  - el formulario de opinión había quedado dentro del botón de descarga del kit de Eventos: solo aparecía en kits, y dentro de un botón;
+  - el pie tenía contraste 4,2:1 (ahora más de 4,5:1);
+  - la lista del resumen del creador tenía una estructura inválida para lectores de pantalla;
+  - el creador saltaba al cargar (CLS 0,58): ahora reserva la altura.
+- **Lighthouse** (`e2e/perf/lighthouse.mjs`, páginas clave en móvil y escritorio, umbral 90):
+  - staging, antes de estos arreglos: rendimiento 93–100, accesibilidad 96–97, buenas prácticas 96 y SEO 89. El SEO baja solo por el canonical, que apunta al dominio real cuando se mide en `hosted.app`;
+  - el creador en móvil daba 77 por el salto de diseño ya corregido;
+  - `is-crawlable` no se mide: local y staging son `noindex` a propósito.
+- **Carga** (`e2e/perf/load.mjs`, autocannon, 50 conexiones, una instancia local):
+  - catálogo de historias: unos 15.000 pedidos por segundo (p99 de 6 ms);
+  - modo del sitio y colecciones: más de 44.000 pedidos por segundo;
+  - el límite por IP (120 por minuto) frena a un mismo cliente, como corresponde;
+  - miles de pedidos por día son menos de un pedido por segundo; lo que escala es el pipeline (Cloud Run hasta 3 instancias en staging, con Cloud Tasks por página).
+- **Escenarios del informe (§7.4):** `docs/QA-SCENARIOS.md` relaciona cada uno con su prueba.
+  - Los visuales (parecido, estabilidad, ropa), los regionales y los de tono los cubre el panel humano.
+  - Falta el escenario 22 (fecha de regalo).

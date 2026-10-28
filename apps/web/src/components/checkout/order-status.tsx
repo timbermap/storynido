@@ -172,15 +172,14 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                   ) : (
                     <Download className="size-4 text-primary" aria-hidden="true" />
                   )}
-                  {order.canReview && (
-                    <OrderReview orderId={order.orderId} initial={order.review} />
-                  )}
                   {tKit(`pieces.${file === 'book' ? 'mini_book' : file}.name`)}
                 </button>
               </li>
             ))}
           </ul>
         )}
+        {/* Opinión del cliente (libro recibido o digital listo), una sola vez por pedido. */}
+        {order.canReview && <OrderReview orderId={order.orderId} initial={order.review} />}
         {order.tracking?.number && (
           <p className="text-sm text-muted-foreground">
             {t('trackingNumber', { number: order.tracking.number })}

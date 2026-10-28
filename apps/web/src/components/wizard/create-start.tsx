@@ -112,7 +112,10 @@ export function CreateStart({
   if (anonymousFailed && !user) return <SignInGate />;
   if (!drafts) {
     return (
-      <p role="status" className="container-page py-20 text-center text-muted-foreground">
+      <p
+        role="status"
+        className="container-page min-h-[80vh] py-20 text-center text-muted-foreground"
+      >
         {t('loading')}
       </p>
     );

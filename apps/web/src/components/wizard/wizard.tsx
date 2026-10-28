@@ -151,7 +151,10 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
   }
   if (loading || !book || (book.childId && !child)) {
     return (
-      <p role="status" className="container-page py-20 text-center text-muted-foreground">
+      <p
+        role="status"
+        className="container-page min-h-[80vh] py-20 text-center text-muted-foreground"
+      >
         {t('loading')}
       </p>
     );
