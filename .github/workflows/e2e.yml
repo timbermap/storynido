@@ -55,8 +55,8 @@ jobs:
       # Los emuladores con los puertos de desarrollo (firebase.json); el seed carga el catálogo y
       # Playwright levanta la API, el worker, la web y el admin.
       - run: >-
-          ./firebase/scripts/firebase.sh emulators:exec --only auth,firestore,storage
-          --project demo-storynido
+          pnpm --filter @storynido/firebase exec ./scripts/firebase.sh emulators:exec
+          --only auth,firestore,storage --project demo-storynido
           "pnpm --filter @storynido/firebase exec tsx src/seed.ts && E2E_START=1 pnpm --filter @storynido/e2e e2e"
       - uses: actions/upload-artifact@v5
         if: failure()
