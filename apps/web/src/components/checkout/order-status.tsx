@@ -28,7 +28,8 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   const { signedIn, loading } = useAuth();
   const [order, setOrder] = useState<PublicOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<'payment' | 'print' | 'download' | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const tKit = useTranslations('Checkout.kit');
 
   useEffect(() => {
     if (!signedIn) return;
@@ -55,8 +56,8 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
     };
   }, [orderId, signedIn, t]);
 
-  async function run(kind: 'payment' | 'print' | 'download') {
-    setBusy(kind);
+  async function run(kind: 'payment' | 'print' | 'download', file = 'book') {
+    setBusy(kind === 'download' ? `download:${file}` : kind);
     setError(null);
     try {
       if (kind === 'payment') {
@@ -65,7 +66,10 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
         await api('devSimulatePrint', { params: { orderId } });
         setOrder(await api('order', { params: { orderId } }));
       } else {
-        const { url } = await api('orderDownload', { params: { orderId } });
+        const { url } = await api('orderDownload', {
+          params: { orderId },
+          query: { file: file as 'book' },
+        });
         window.location.assign(url);
       }
     } catch (caught) {
@@ -92,11 +96,14 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   }
 
   const print = isPrintOrder(order.items);
+  // Eventos: el kit con sus piezas, para descargar de a una o todo junto.
+  const kitFiles = order.files.filter((file) => file !== 'book' && file !== 'kit_zip');
+  const isKit = order.files.includes('kit_zip');
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="grid content-start gap-6">
         <p role="status" aria-live="polite" className="text-xl font-medium">
-          {t(`status.${order.status}`)}
+          {isKit && order.status === 'ready' ? tKit('ready') : t(`status.${order.status}`)}
         </p>
         <OrderTimeline status={order.status} print={print} />
 
@@ -104,9 +111,19 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
           Boolean(order.tracking?.url) ||
           GENERATED_STATUSES.has(order.status)) && (
           <div className="flex flex-wrap gap-3">
-            {order.canDownload && (
+            {order.canDownload && isKit && (
+              <Button disabled={busy !== null} onClick={() => void run('download', 'kit_zip')}>
+                {busy === 'download:kit_zip' ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Download aria-hidden="true" />
+                )}
+                {tKit('downloadAll')}
+              </Button>
+            )}
+            {order.canDownload && !isKit && (
               <Button disabled={busy !== null} onClick={() => void run('download')}>
-                {busy === 'download' ? (
+                {busy === 'download:book' ? (
                   <Loader2 className="animate-spin" aria-hidden="true" />
                 ) : (
                   <Download aria-hidden="true" />
@@ -130,17 +147,40 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 href={{
                   pathname: '/checkout/[bookId]',
                   params: { bookId: order.bookId },
-                  query: { reorder: order.orderId },
+                  query: isKit ? { reorder: order.orderId, kit: '1' } : { reorder: order.orderId },
                 }}
                 className={buttonVariants({ variant: 'outline' })}
               >
                 <RotateCcw aria-hidden="true" />
-                {t('reorder')}
+                {isKit ? tKit('moreCopies') : t('reorder')}
               </Link>
             )}
           </div>
         )}
-        {order.canReview && <OrderReview orderId={order.orderId} initial={order.review} />}
+        {order.canDownload && isKit && (
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {['book', ...kitFiles].map((file) => (
+              <li key={file}>
+                <button
+                  type="button"
+                  disabled={busy !== null}
+                  onClick={() => void run('download', file)}
+                  className="flex w-full items-center gap-2 rounded-xl border bg-card px-4 py-3 text-left text-sm font-semibold hover:border-primary/40 disabled:opacity-60"
+                >
+                  {busy === `download:${file}` ? (
+                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Download className="size-4 text-primary" aria-hidden="true" />
+                  )}
+                  {order.canReview && (
+                    <OrderReview orderId={order.orderId} initial={order.review} />
+                  )}
+                  {tKit(`pieces.${file === 'book' ? 'mini_book' : file}.name`)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         {order.tracking?.number && (
           <p className="text-sm text-muted-foreground">
             {t('trackingNumber', { number: order.tracking.number })}

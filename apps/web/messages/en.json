@@ -884,7 +884,9 @@
     },
     "component": {
       "book": "Book",
-      "length": "Length adjustment"
+      "length": "Length adjustment",
+      "design": "Kit design (includes the mini story)",
+      "piece": "Piece"
     },
     "discount": {
       "coupon": "Coupon {label}",
@@ -951,6 +953,56 @@
         "error": "We couldn’t save your review. Please try again."
       }
     },
-    "reorderSubtitle": "You are ordering the same book again, exactly as it turned out: no need to create it again."
+    "reorderSubtitle": "You are ordering the same book again, exactly as it turned out: no need to create it again.",
+    "kit": {
+      "title": "Your birthday kit",
+      "subtitle": "One design, many copies: choose the pieces and how many guests. We hand them to you ready to print at home or at a print shop.",
+      "unavailable": "The birthday kit isn’t available in your country yet.",
+      "piecesTitle": "Kit pieces",
+      "piecesNote": "All with the same hero and the same design.",
+      "design": "Design:",
+      "includedAgain": "Same design (not charged again)",
+      "pieces": {
+        "mini_book": {
+          "name": "Mini story",
+          "text": "The birthday booklet, one for each guest."
+        },
+        "activities": {
+          "name": "Activity kit",
+          "text": "Maze, draw the cake and match the words."
+        },
+        "invitation": {
+          "name": "Invitation",
+          "text": "5×7 in card with date, time and place."
+        },
+        "thank_you": {
+          "name": "Thank-you card",
+          "text": "To say goodbye to each guest."
+        },
+        "stickers": {
+          "name": "Stickers",
+          "text": "Sheet of 12 round 2 in stickers."
+        },
+        "favor_tags": {
+          "name": "Favor bag tags",
+          "text": "9 tags per sheet, with the hole marked."
+        }
+      },
+      "copies": "How many guests?",
+      "copiesNote": "It’s the number of copies the license allows. It doesn’t change the price.",
+      "invitationTitle": "Invitation details",
+      "time": "Time",
+      "place": "Place",
+      "invitationNote": "The date comes from the birthday details. Anything left blank becomes a line to fill in by hand.",
+      "printTitle": "Want them printed?",
+      "printText": "For now the pieces are to print at home or at a nearby print shop. If you’d like us to send them printed, ask for a quote and we’ll reply by email.",
+      "printPlaceholder": "Party date, city, any useful detail",
+      "printRequest": "Ask for a quote",
+      "printSent": "Done! We’ll email you the quote.",
+      "license": "The license allows {copies} copies of each piece for the birthday.",
+      "downloadAll": "Download everything (ZIP)",
+      "moreCopies": "Order more copies",
+      "ready": "Your kit is ready!"
+    }
   }
 }

@@ -13,6 +13,7 @@ import {
   countWords,
   utcDay,
   type CountryConfig,
+  type EmailMessage,
   type IllustrationStyle,
   type Lesson,
   type Price,
@@ -729,6 +730,7 @@ describe('checkout y pagos (fase 11)', () => {
       'emailLog',
       'reviews',
       'users',
+      'printQuoteRequests',
     ]) {
       await db.recursiveDelete(db.collection(name));
     }
@@ -997,7 +999,7 @@ describe('checkout y pagos (fase 11)', () => {
   });
 
   /** Mails que mandó el proveedor simulado (filtrados por su clave). */
-  const mails = (filter: (message: { idempotencyKey: string }) => boolean) =>
+  const mails = (filter: (message: EmailMessage) => boolean) =>
     (providers.email() as MockEmailProvider).sent.filter(filter);
 
   it('mails del pedido: en el idioma del cliente y una sola vez por estado', async () => {
@@ -1165,6 +1167,58 @@ describe('checkout y pagos (fase 11)', () => {
     ]);
     expect(order?.kit).toMatchObject({ paper: 'a4', invitation: { place: 'Salón Arcoíris' } });
     expect((order?.priceSnapshot as PriceSnapshot).totalMinor).toBe(30800);
+  });
+
+  it('kit: "pedir más copias" cobra solo las licencias; los impresos se piden por cotización', async () => {
+    await approvedBook();
+    await db.doc('books/book-1').update({ channel: 'events' });
+    const kit = {
+      pieces: [
+        { piece: 'mini_book', copies: 20 },
+        { piece: 'invitation', copies: 20 },
+      ],
+      invitation: null,
+    };
+    const { orderId } = (await checkout({ kit })).json<{ orderId: string }>();
+    await db.doc(`orders/${orderId}`).update({
+      status: 'ready',
+      snapshot: { title: 'El cumple de Martina', hash: 'h' },
+    });
+    const more = { ...kit, pieces: kit.pieces.map((item) => ({ ...item, copies: 40 })) };
+    const quoted = await post('/v1/checkout/quote', {
+      bookId: 'book-1',
+      format: 'digital',
+      country: 'MX',
+      kit: more,
+      sourceOrderId: orderId,
+    });
+    const snapshot = quoted.json<{ snapshot: PriceSnapshot }>().snapshot;
+    expect(snapshot.components.map((item) => item.code)).toEqual(['piece']);
+    expect(snapshot.totalMinor).toBe(6900);
+    const again = await post(`/v1/orders/${orderId}/reorder`, {
+      format: 'digital',
+      country: 'MX',
+      kit: more,
+    });
+    expect(again.statusCode).toBe(200);
+    const copy = (await db.doc(`orders/${again.json<{ orderId: string }>().orderId}`).get()).data();
+    expect(copy?.sourceOrderId).toBe(orderId);
+    expect(copy?.items).toEqual([
+      { piece: 'mini_book', format: 'digital', quantity: 40 },
+      { piece: 'invitation', format: 'digital', quantity: 40 },
+    ]);
+
+    const request = await post('/v1/events/print-quote', {
+      bookId: 'book-1',
+      country: 'MX',
+      pieces: ['mini_book', 'stickers'],
+      copies: 30,
+      message: 'Para el 5 de diciembre',
+    });
+    expect(request.statusCode).toBe(200);
+    expect((await db.collection('printQuoteRequests').get()).size).toBe(1);
+    const alerts = mails((message) => message.template === 'admin_alert');
+    expect(alerts.at(-1)?.data.message).toContain('mini_book, stickers × 30 copias');
   });
 
   it('desarrollo: el pago simulado pasa por el mismo webhook firmado', async () => {

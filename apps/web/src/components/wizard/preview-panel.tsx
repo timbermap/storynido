@@ -381,7 +381,12 @@ export function PreviewPanel({
         <div className="sm:ml-auto sm:text-right">
           {data?.stage === 'complete' && !data.stale ? (
             <Link
-              href={{ pathname: '/checkout/[bookId]', params: { bookId: book.id } }}
+              href={{
+                pathname: '/checkout/[bookId]',
+                params: { bookId: book.id },
+                // Eventos: el kit de cumpleaños (un diseño, muchas copias).
+                query: book.channel === 'events' ? { kit: '1' } : {},
+              }}
               className={buttonVariants({ size: 'lg' })}
             >
               {t('continue')}

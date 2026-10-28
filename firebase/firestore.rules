@@ -265,6 +265,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Cotizaciones de impresos (Eventos): las escribe la API; las atiende el equipo.
+    match /printQuoteRequests/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Opiniones: las escribe la API (dueño del pedido); publicarlas es una decisión manual.
     match /reviews/{orderId} {
       allow read: if isAdmin();

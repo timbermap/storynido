@@ -20,9 +20,11 @@ export function PriceSummary({
   const rows: { label: string; value: string; muted?: boolean }[] = snapshot.components.map(
     (component) => ({
       label:
-        component.quantity > 1
-          ? `${t(`component.${component.code}`)} × ${String(component.quantity)}`
-          : t(`component.${component.code}`),
+        component.code === 'piece' && component.piece
+          ? t(`kit.pieces.${component.piece}.name`)
+          : component.quantity > 1
+            ? `${t(`component.${component.code}`)} × ${String(component.quantity)}`
+            : t(`component.${component.code}`),
       value: money(component.totalMinor),
     }),
   );

@@ -697,6 +697,20 @@ export const apiRoutes = {
     body: z.object({ confirm: z.literal(true) }),
     response: z.object({ deleted: z.literal(true) }),
   },
+  eventPrintQuote: {
+    method: 'POST',
+    path: '/v1/events/print-quote',
+    access: 'user',
+    summary: 'Pedido de cotización de piezas del kit impresas (llega al equipo; no promete nada)',
+    body: z.object({
+      bookId: z.string().min(1),
+      country: countryCodeSchema,
+      pieces: z.array(z.enum(KIT_PIECES)).min(1),
+      copies: z.number().int().min(1).max(1000),
+      message: z.string().trim().max(1000).nullable().default(null),
+    }),
+    response: z.object({ received: z.literal(true) }),
+  },
   orderReview: {
     method: 'POST',
     path: '/v1/orders/:orderId/review',

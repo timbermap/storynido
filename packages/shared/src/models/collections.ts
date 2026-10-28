@@ -18,6 +18,8 @@ export const COLLECTIONS = {
   illustrationTasks: 'pages',
   /** adminAlerts/{id}: avisos para el admin (solo servidor). */
   adminAlerts: 'adminAlerts',
+  /** printQuoteRequests/{id}: pedidos de cotización de piezas impresas (Eventos). */
+  printQuoteRequests: 'printQuoteRequests',
   /** reviews/{pedido}: opiniones de los clientes (privadas; solo el admin las lee). */
   reviews: 'reviews',
   /** emailLog/{huella de la clave}: mails enviados u omitidos (solo servidor; el admin los ve). */

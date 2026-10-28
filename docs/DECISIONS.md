@@ -938,3 +938,31 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Opiniones (`reviews/{pedido}`):** formulario en la página del pedido (1–5 estrellas y comentario), recién con el libro recibido.
   - Son privadas: mostrarlas en la web requiere el permiso del cliente (regla de no publicar testimonios inventados).
 - **Inicio de sesión:** el mail del enlace mágico lo sigue mandando Firebase; personalizarlo queda pendiente.
+
+## 079 · Eventos (fase 12b): un diseño, muchas copias, en digital para imprimir
+
+- **Fecha:** 2026-10-28.
+- **Datos del cumpleaños (`book.event`):** fecha, edad que cumple y temática.
+  - Se cargan en el paso del protagonista (solo en Eventos) y los validan las reglas.
+  - La temática se modera antes de entrar al prompt.
+  - El cuento termina con la celebración y no nombra a los invitados.
+- **Un solo diseño:** el librito Mini (con su lámina y sus ilustraciones) es el diseño.
+  - Las piezas se arman con plantillas a partir de la portada aprobada: **ninguna pieza usa IA**. Verificado: un kit hace las mismas llamadas de imagen que el libro solo.
+  - Lo que queda afuera: el libro para colorear con dibujos de contorno, que necesitaría IA.
+- **Piezas (PDF para imprimir en casa o en una imprenta local; Carta en EE. UU., A4 en el resto):**
+  - invitación y tarjeta de agradecimiento: 5×7", frente y dorso, con 3 mm de sangrado y marcas de corte;
+  - hoja de 12 stickers redondos de 2";
+  - 9 etiquetas para la bolsita, con el agujero marcado;
+  - kit de actividades: laberinto, dibujar la torta y unir palabras.
+  - Cada hoja lleva la licencia: "N copias para el cumpleaños de …".
+  - Todo junto en un ZIP. Se descarga por pieza o el ZIP, con URL firmada de 15 minutos.
+- **Precio (`eventPricing/{país}`):** diseño una vez (incluye el librito) + licencia digital por pieza.
+  - Las copias no cambian el precio del digital: las dice la licencia.
+  - "Pedir más copias" cobra solo las licencias, sin el diseño y sin IA.
+  - Precios de ejemplo: México 249 MXN el diseño y 49–69 por pieza; EE. UU. USD 14.99 y 2.99–3.99. Se editan en el admin (fase 14).
+- **Impreso:** hoy ninguna imprenta del enrutador imprime estas piezas (Gelato pide 28 páginas para libros). Solo digital y **"Pedir cotización"**, que le llega al equipo (`printQuoteRequests` y alerta por mail). Nunca se inventa disponibilidad.
+- **Pedido:** una línea por pieza (`items`, con las copias como cantidad) y el kit en `order.kit` (piezas, invitación y hoja).
+- **Pendiente:**
+  - libro de colorear del kit (con IA de contorno, con costo);
+  - piezas impresas, cuando haya una imprenta que las haga en el país;
+  - el aviso "tu libro está listo" todavía dice "libro" también para el kit.

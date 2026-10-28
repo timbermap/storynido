@@ -884,7 +884,9 @@
     },
     "component": {
       "book": "Libro",
-      "length": "Ajuste por extensión"
+      "length": "Ajuste por extensión",
+      "design": "Diseño del kit (incluye el mini cuento)",
+      "piece": "Pieza"
     },
     "discount": {
       "coupon": "Cupón {label}",
@@ -951,6 +953,56 @@
         "error": "No pudimos guardar tu opinión. Intenta de nuevo."
       }
     },
-    "reorderSubtitle": "Pides de nuevo el mismo libro, tal como quedó: no hace falta crearlo otra vez."
+    "reorderSubtitle": "Pides de nuevo el mismo libro, tal como quedó: no hace falta crearlo otra vez.",
+    "kit": {
+      "title": "Tu kit de cumpleaños",
+      "subtitle": "Un diseño, muchas copias: elige las piezas y cuántos invitados. Te las damos listas para imprimir en casa o en una imprenta.",
+      "unavailable": "Todavía no vendemos el kit de cumpleaños en tu país.",
+      "piecesTitle": "Piezas del kit",
+      "piecesNote": "Todas con el mismo protagonista y el mismo diseño.",
+      "design": "Diseño:",
+      "includedAgain": "Mismo diseño (no se cobra otra vez)",
+      "pieces": {
+        "mini_book": {
+          "name": "Mini cuento",
+          "text": "El librito del cumpleaños, para cada invitado."
+        },
+        "activities": {
+          "name": "Kit de actividades",
+          "text": "Laberinto, dibujar la torta y unir palabras."
+        },
+        "invitation": {
+          "name": "Invitación",
+          "text": "Tarjeta 13×18 cm con fecha, hora y lugar."
+        },
+        "thank_you": {
+          "name": "Tarjeta de agradecimiento",
+          "text": "Para despedir a cada invitado."
+        },
+        "stickers": {
+          "name": "Stickers",
+          "text": "Hoja de 12 stickers redondos de 5 cm."
+        },
+        "favor_tags": {
+          "name": "Etiquetas para la bolsita",
+          "text": "9 etiquetas por hoja, con el agujero marcado."
+        }
+      },
+      "copies": "¿Cuántos invitados?",
+      "copiesNote": "Es la cantidad de copias que autoriza la licencia. No cambia el precio.",
+      "invitationTitle": "Datos de la invitación",
+      "time": "Hora",
+      "place": "Lugar",
+      "invitationNote": "La fecha sale de los datos del cumpleaños. Si dejas algo vacío, queda una línea para completarlo a mano.",
+      "printTitle": "¿Las quieres impresas?",
+      "printText": "Por ahora las piezas son para imprimir en casa o en una imprenta cercana. Si prefieres que te las mandemos impresas, pídenos una cotización y te respondemos por correo.",
+      "printPlaceholder": "Fecha de la fiesta, ciudad, cualquier detalle útil",
+      "printRequest": "Pedir cotización",
+      "printSent": "¡Listo! Te escribimos por correo con la cotización.",
+      "license": "La licencia autoriza {copies} copias de cada pieza para el cumpleaños.",
+      "downloadAll": "Descargar todo (ZIP)",
+      "moreCopies": "Pedir más copias",
+      "ready": "¡Tu kit está listo!"
+    }
   }
 }

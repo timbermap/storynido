@@ -136,6 +136,8 @@ export function quoteKit(
   input: Omit<QuoteInput, 'price' | 'format' | 'length' | 'quantity'> & {
     pricing: EventPricing | null;
     kit: KitSelection;
+    /** "Pedir más copias" del mismo diseño: no se vuelve a cobrar el diseño. */
+    reuseDesign?: boolean;
   },
 ): QuoteResult {
   const { country, pricing } = input;
@@ -143,14 +145,16 @@ export function quoteKit(
   if (!pricing?.active || pricing.currency !== country.currency) {
     return { ok: false, error: 'price_missing' };
   }
-  const components: PriceSnapshot['components'] = [
-    {
-      code: 'design',
-      unitMinor: pricing.designMinor,
-      quantity: 1,
-      totalMinor: pricing.designMinor,
-    },
-  ];
+  const components: PriceSnapshot['components'] = input.reuseDesign
+    ? []
+    : [
+        {
+          code: 'design',
+          unitMinor: pricing.designMinor,
+          quantity: 1,
+          totalMinor: pricing.designMinor,
+        },
+      ];
   for (const { piece } of input.kit.pieces) {
     if (piece === 'mini_book') continue;
     const unit = pricing.pieces[piece];

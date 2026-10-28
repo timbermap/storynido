@@ -28,6 +28,14 @@ export function registerCheckoutRoutes(app: FastifyInstance, checkout: CheckoutS
     checkout.quote(user(request).uid, request.body as QuoteBody),
   );
 
+  addRoute(app, apiRoutes.eventPrintQuote, {}, (request) => {
+    const current = user(request);
+    return checkout.requestPrintQuote(
+      { uid: current.uid, email: current.email },
+      request.body as z.output<(typeof apiRoutes)['eventPrintQuote']['body']>,
+    );
+  });
+
   addRoute(app, apiRoutes.createCheckout, { appCheck: true }, (request) => {
     const current = user(request);
     return checkout.create(

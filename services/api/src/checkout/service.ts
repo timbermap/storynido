@@ -133,7 +133,7 @@ export class CheckoutService {
   async quote(uid: string, body: QuoteBody) {
     const { result } = body.sourceOrderId
       ? await this.reorderSource(uid, body.sourceOrderId, body.format).then(async (source) => ({
-          result: await this.price(source.book, body, source.pages),
+          result: await this.price(source.book, body, source.pages, true),
         }))
       : await this.prepare(uid, body);
     return { snapshot: result.snapshot, couponError: result.couponError };
@@ -166,8 +166,13 @@ export class CheckoutService {
   }
 
   /** Precio e imprenta (formato habilitado, páginas y cantidad) para un libro ya validado. */
-  private async price(book: Record<string, unknown>, body: PriceBody, pages: number) {
-    if (body.kit) return this.priceKit(book, body, body.kit);
+  private async price(
+    book: Record<string, unknown>,
+    body: PriceBody,
+    pages: number,
+    reorder = false,
+  ) {
+    if (body.kit) return this.priceKit(book, body, body.kit, reorder);
     // Nunca se manda a imprenta algo incompatible: alguna imprenta activa tiene que poder.
     if (body.format !== 'digital' && (await this.printCandidates(body, pages)).length === 0) {
       throw printUnavailable();
@@ -197,7 +202,12 @@ export class CheckoutService {
    * Kit de Eventos: un diseño y varias piezas en digital (la licencia dice cuántas copias). El
    * impreso de las piezas se pide por cotización: nunca se inventa disponibilidad.
    */
-  private async priceKit(book: Record<string, unknown>, body: PriceBody, kit: KitSelection) {
+  private async priceKit(
+    book: Record<string, unknown>,
+    body: PriceBody,
+    kit: KitSelection,
+    reuseDesign: boolean,
+  ) {
     if (book.channel !== 'events') {
       throw new AppError(400, 'bad_request', 'El kit es solo para libros de Eventos.');
     }
@@ -218,6 +228,7 @@ export class CheckoutService {
       country: countries.find((country) => country.code === body.country) ?? null,
       pricing,
       kit,
+      reuseDesign,
       coupon,
       couponCode: body.couponCode,
       promotions,
@@ -372,7 +383,7 @@ export class CheckoutService {
       body.format,
     );
     const full = { ...body, bookId };
-    const price = await this.price(book, full, pages);
+    const price = await this.price(book, full, pages, true);
     this.checkAddress(full);
     const printRouting = await this.routePrint(full, pages);
     const snapshot = source.snapshot as { title?: string };
@@ -552,6 +563,39 @@ export class CheckoutService {
         ? { number: order.print.trackingNumber, url: order.print.trackingUrl }
         : null,
     };
+  }
+
+  /** Eventos: cotización de piezas impresas. Le llega al equipo; no se promete disponibilidad. */
+  async requestPrintQuote(
+    user: { uid: string; email: string | null },
+    body: {
+      bookId: string;
+      country: string;
+      pieces: string[];
+      copies: number;
+      message: string | null;
+    },
+  ) {
+    const book = (await this.db.collection(COLLECTIONS.books).doc(body.bookId).get()).data();
+    if (book?.ownerUid !== user.uid) throw new AppError(404, 'not_found', 'Libro inexistente.');
+    const ref = await this.db.collection(COLLECTIONS.printQuoteRequests).add({
+      ownerUid: user.uid,
+      email: user.email,
+      bookId: body.bookId,
+      country: body.country,
+      pieces: body.pieces,
+      copies: body.copies,
+      message: body.message,
+      status: 'new',
+      createdAt: new Date(),
+    });
+    await this.notifier?.adminAlert({
+      key: `alert:print_quote:${ref.id}`,
+      kind: 'print_quote',
+      orderId: null,
+      message: `Cotización de impresos (Eventos): ${body.pieces.join(', ')} × ${String(body.copies)} copias, ${body.country}. Contacto: ${user.email ?? 'sin mail'}.${body.message ? ` Mensaje: ${body.message}` : ''}`,
+    });
+    return { received: true as const };
   }
 
   // ------------------------------------------------------------------ webhook
