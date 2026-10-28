@@ -42,6 +42,9 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   EMAIL_FROM: z.string().default('StoryNido <hola@storynido.com>'),
   EMAIL_POSTAL_ADDRESS: z.string().optional(),
   GELATO_ORDER_TYPE: z.enum(['draft', 'order']).default('draft'),
+  /** Cloudprinter: sin clave no se registra. La clave del webhook verifica sus señales. */
+  CLOUDPRINTER_API_KEY: z.string().trim().optional(),
+  CLOUDPRINTER_WEBHOOK_KEY: z.string().trim().optional(),
   /** Región de Vertex AI ("global" tiene los modelos de Gemini más nuevos). */
   VERTEX_LOCATION: z.string().default('global'),
   /** Buckets reales (los define Terraform en Cloud Run). */

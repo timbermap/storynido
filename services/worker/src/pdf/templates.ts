@@ -3,7 +3,7 @@ import type { ActivitySpec, PrintFileSpec } from '@storynido/shared';
 import { fontFaces } from './fonts';
 import { mazeSvg } from './maze';
 import type { TextPlacement } from './placement';
-import { TRIM_MM, pageSizeMm, spineMm, type FormatSpec } from './spec';
+import { pageSizeMm, spineMm, trimOf, type FormatSpec } from './spec';
 
 export type Density = 'visual' | 'balanced' | 'rich';
 export type Lang = 'es' | 'en' | 'pt';
@@ -169,7 +169,7 @@ function storyPage(
   const placement = coloring ? 'top' : (page.placement ?? 'bottom');
   // En una esquina el panel es más angosto: puede crecer más en alto.
   const pct = placement.includes('-') ? Math.min(layout.panelPct * 1.6, 55) : layout.panelPct;
-  const maxMm = ((TRIM_MM.height * pct) / 100).toFixed(1);
+  const maxMm = ((trimOf(spec).height * pct) / 100).toFixed(1);
   return `<section class="page${coloring ? ' coloring' : ''}" data-label="página ${String(number)}" style="height:${String(height)}mm">
   <img class="art" src="${page.image}" alt="">
   <div class="panel ${placement}" data-max-mm="${maxMm}" data-font-pt="${(layout.fontPt * scale).toFixed(2)}" data-min-pt="${(layout.minPt * scale).toFixed(2)}">
@@ -284,9 +284,9 @@ export type CoverGeometry = PrintFileSpec['cover'];
 export function defaultCoverGeometry(spec: FormatSpec, interiorCount: number): CoverGeometry {
   const spine = spineMm(interiorCount, spec.format);
   return {
-    widthMm: 2 * TRIM_MM.width + spine + 2 * spec.bleedMm,
-    heightMm: TRIM_MM.height + 2 * spec.bleedMm,
-    spineLeftMm: TRIM_MM.width + spec.bleedMm,
+    widthMm: 2 * trimOf(spec).width + spine + 2 * spec.bleedMm,
+    heightMm: trimOf(spec).height + 2 * spec.bleedMm,
+    spineLeftMm: trimOf(spec).width + spec.bleedMm,
     spineWidthMm: spine,
     edgeMm: spec.bleedMm,
   };

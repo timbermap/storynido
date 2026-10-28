@@ -35,6 +35,7 @@ import {
   userSchema,
   type BookFormat,
   PRINT_FORMATS,
+  CLOUDPRINTER_PRODUCTS,
   GELATO_PRODUCTS,
   eventPricingSchema,
   printOptionId,
@@ -246,6 +247,41 @@ for (const format of PRINT_FORMATS) {
       updatedAt: now,
     }),
   );
+}
+
+// Cloudprinter (DECISIONS 080): fotolibros US Letter producidos cerca del cliente. En México
+// sale mucho más barato que Gelato (que imprime en EE. UU.). Costos de referencia de su
+// cotización (USD); el real se pide al pagar y el enrutador elige el más barato.
+const CLOUDPRINTER: Partial<
+  Record<CountryCode, { eta: [number, number]; cost: Record<'softcover' | 'hardcover', number> }>
+> = {
+  MX: { eta: [5, 9], cost: { softcover: 523, hardcover: 1079 } },
+  US: { eta: [5, 10], cost: { softcover: 1296, hardcover: 3169 } },
+};
+for (const [code, cloud] of Object.entries(CLOUDPRINTER) as [
+  CountryCode,
+  { eta: [number, number]; cost: Record<'softcover' | 'hardcover', number> },
+][]) {
+  for (const format of PRINT_FORMATS) {
+    batch.set(
+      db.collection(COLLECTIONS.printOptions).doc(printOptionId(code, format, 'cloudprinter')),
+      printOptionSchema.parse({
+        country: code,
+        format,
+        provider: 'cloudprinter',
+        sku: CLOUDPRINTER_PRODUCTS[format],
+        enabled: true,
+        // En producción se habilita recién con la muestra física aprobada.
+        qaSamplePassed: cloudProject !== 'storynido-prod',
+        pages: { min: 28, max: 200, multipleOf: 2 },
+        maxQuantity: 100,
+        etaDaysMin: cloud.eta[0],
+        etaDaysMax: cloud.eta[1],
+        productionCostUsdMinor: cloud.cost[format],
+        updatedAt: now,
+      }),
+    );
+  }
 }
 
 // Kit de Eventos (DECISIONS 079): precios de ejemplo, editables en el admin (fase 14). El

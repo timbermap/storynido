@@ -54,6 +54,12 @@ const providers = createProviderRegistry({
   gelato: env.GELATO_API_KEY
     ? { apiKey: env.GELATO_API_KEY, orderType: env.GELATO_ORDER_TYPE }
     : undefined,
+  cloudprinter: env.CLOUDPRINTER_API_KEY
+    ? {
+        apiKey: env.CLOUDPRINTER_API_KEY,
+        webhookKey: env.CLOUDPRINTER_WEBHOOK_KEY ?? null,
+      }
+    : undefined,
   resend: env.RESEND_API_KEY
     ? {
         apiKey: env.RESEND_API_KEY,

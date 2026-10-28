@@ -966,3 +966,33 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - libro de colorear del kit (con IA de contorno, con costo);
   - piezas impresas, cuando haya una imprenta que las haga en el país;
   - el aviso "tu libro está listo" todavía dice "libro" también para el kit.
+
+## 080 · Cloudprinter: libro impreso en México con margen, y tamaño de página por imprenta
+
+- **Fecha:** 2026-10-28 · Clave de sandbox de Sebastián: el sandbox no imprime ni cobra y simula las señales.
+- **Producto:** fotolibros US Letter vertical (21,59 × 27,94 cm), lo más cercano a nuestro 21×28:
+  - tapa blanda: `photobook_pb_us_letter_p_fc`, 3 mm de sangrado;
+  - tapa dura: `photobook_cw_us_letter_p_fc`, 18 mm de vuelta.
+- **Cotización real (USD, 28 páginas, envío más barato):**
+
+| Destino | Tapa   | Cloudprinter | Gelato    |
+| ------- | ------ | ------------ | --------- |
+| México  | blanda | 13,49        | 44,40     |
+| México  | dura   | 19,05        | 48,61     |
+| EE. UU. | blanda | 17,54        | **16,85** |
+| EE. UU. | dura   | 36,62        | **19,82** |
+
+- En México produce cerca, con envío de unos USD 8. Con los precios actuales queda un margen de USD 22–27.
+- En EE. UU. gana Gelato; el enrutador elige solo, pedido por pedido.
+- **Tamaño por imprenta:** la especificación de archivos (`fileSpec`) incluye el tamaño al corte. La tripa y la tapa se maquetan al tamaño de la imprenta elegida al pagar. Las ilustraciones 3:4 se recortan apenas a los costados.
+- **Archivos:** tapa y tripa en dos PDF, con el MD5 de cada uno (Cloudprinter verifica la descarga). Lomo con su fórmula: gramaje × volumen × páginas/2 ÷ 1000 + 2 × grosor de tapa (papel de 200 g mate).
+- **Pedido:**
+  - `orders/add` con la cotización elegida y la referencia = nuestro pedido;
+  - idempotente: antes consulta `orders/info`.
+- **Señales (CloudSignal):** cada una trae la clave del webhook (`CLOUDPRINTER_WEBHOOK_KEY`, configurada en su panel), que se compara.
+  - Producción → `in_production`; despacho → `shipped` (con seguimiento); entrega → `delivered`; cancelación → `cancelled`.
+  - Error sin demora → falla (revisión manual); error con demora → atraso, se ignora.
+- **Matriz:** Cloudprinter en México y EE. UU., tapa blanda y dura, de 28 a 200 páginas.
+- **Pendiente:**
+  - revistas abrochadas (`magazine_sas_us_letter_p_fc`, desde 8 páginas en múltiplos de 4) para los libritos impresos de Eventos: el formato exacto de la tapa se confirma con un pedido de sandbox;
+  - la muestra física.

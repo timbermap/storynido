@@ -16,6 +16,12 @@ export const GELATO_PRODUCTS: Record<PrintFormat, string> = {
     'photobooks-hardcover_pf_210x280-mm-8x11-inch_pt_170-gsm-65lb-coated-silk_cl_4-4_ccl_4-4_bt_glued-left_ct_matt-lamination_prt_1-0_cpt_130-gsm-65-lb-cover-coated-silk_ver',
 };
 
+/** Fotolibros US Letter vertical (21,6 × 27,9 cm): lo más cercano a nuestro 21×28. */
+export const CLOUDPRINTER_PRODUCTS: Record<PrintFormat, string> = {
+  softcover: 'photobook_pb_us_letter_p_fc',
+  hardcover: 'photobook_cw_us_letter_p_fc',
+};
+
 /**
  * printOptions/{país}_{formato}_{imprenta}: matriz de impresión. Puede haber varias imprentas por
  * país y formato; cada una imprime solo si está habilitada Y pasó la muestra física

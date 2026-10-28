@@ -500,6 +500,58 @@ describe('generación del libro (fase 09)', () => {
     expect([mm(second?.getWidth() ?? 0), mm(second?.getHeight() ?? 0)]).toEqual([216, 286]);
   });
 
+  it('imprenta con otro tamaño (como Cloudprinter): tripa y tapa al tamaño US Letter, con MD5', async () => {
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    await db.doc('orders/o1').update({
+      printRouting: {
+        provider: 'mock',
+        totalCostUsdMinor: 1349,
+        etaDaysMin: 4,
+        etaDaysMax: 8,
+        quotes: [{ provider: 'mock', totalCostUsdMinor: 1349, etaDaysMax: 8, error: null }],
+        quotedAt: new Date(),
+      },
+    });
+    const mock = printer(providers, 'mock');
+    const fileSpec = vi.fn(() =>
+      Promise.resolve({
+        packaging: 'separate' as const,
+        trim: { widthMm: 215.9, heightMm: 279.4 },
+        cover: {
+          widthMm: 439.76,
+          heightMm: 285.4,
+          spineLeftMm: 218.9,
+          spineWidthMm: 1.96,
+          edgeMm: 3,
+        },
+      }),
+    );
+    Object.assign(mock, { fileSpec });
+    const create = vi.spyOn(mock, 'createOrder');
+    await setup(providers).run();
+
+    expect((await order()).status).toBe('sent_to_print');
+    const storage = providers.storage();
+    const mm = (points: number) => Math.round((points / 72) * 25.4 * 10) / 10;
+    const interior = await PDFDocument.load(
+      await storage.download({ bucket: 'pdfs', path: 'orders/o1/g0/softcover-interior.pdf' }),
+    );
+    expect([mm(interior.getPage(0).getWidth()), mm(interior.getPage(0).getHeight())]).toEqual([
+      221.9, 285.4,
+    ]);
+    const cover = await PDFDocument.load(
+      await storage.download({ bucket: 'pdfs', path: 'orders/o1/g0/softcover-cover.pdf' }),
+    );
+    // El PDF redondea al punto: la misma tolerancia que la validación (±0,5 mm).
+    expect(Math.abs(mm(cover.getPage(0).getWidth()) - 439.76)).toBeLessThan(0.5);
+    expect(Math.abs(mm(cover.getPage(0).getHeight()) - 285.4)).toBeLessThan(0.5);
+    const item = create.mock.calls[0]?.[0].items[0];
+    expect(item?.interiorMd5).toMatch(/^[0-9a-f]{32}$/);
+    expect(item?.coverMd5).toMatch(/^[0-9a-f]{32}$/);
+    expect(item?.bookPdfUrl).toBeNull();
+  });
+
   it('la imprenta elegida al pagar rechaza el pedido: pasa a la siguiente', async () => {
     const providers = registry({ PRINT_PROVIDERS: 'mock,mock_alt' });
     await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });

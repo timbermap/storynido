@@ -3,6 +3,7 @@ import type { EmailMessage, StorageBucket } from '@storynido/shared';
 import { GcsStorageService } from './gcp/storage';
 import { VertexClient, VertexImageProvider, VertexTextProvider } from './gcp/vertex';
 import { VisionPhotoAnalyzer } from './gcp/vision';
+import { CloudprinterPrintProvider, type CloudprinterOptions } from './cloudprinter/print';
 import { GelatoPrintProvider, type GelatoOptions } from './gelato/print';
 import { ResendEmailProvider, type ResendOptions } from './resend/email';
 
@@ -34,6 +35,8 @@ export interface DefaultProviderOptions {
   aiModels?: AiModelSettings;
   /** Gelato (solo si hay clave): sin clave, la imprenta no se registra. */
   gelato?: Pick<GelatoOptions, 'apiKey' | 'orderType'>;
+  /** Cloudprinter (solo si hay clave). */
+  cloudprinter?: Omit<CloudprinterOptions, 'fetchImpl'>;
   /** Resend (solo si hay clave): sin clave, los mails quedan en el proveedor simulado. */
   resend?: Omit<ResendOptions, 'fetchImpl'>;
   onMockEmail?: (message: EmailMessage) => void;
@@ -46,6 +49,7 @@ export function createProviderFactories(
 ): ProviderFactories {
   const buckets = options.gcsBuckets;
   const gelato = options.gelato;
+  const cloudprinter = options.cloudprinter;
   const resend = options.resend;
   const projectId = options.vertexProjectId;
   let vertex: VertexClient | undefined;
@@ -75,6 +79,7 @@ export function createProviderFactories(
           shippingUsdMinor: { US: 299 },
         }),
       ...(gelato ? { gelato: () => new GelatoPrintProvider(gelato) } : {}),
+      ...(cloudprinter ? { cloudprinter: () => new CloudprinterPrintProvider(cloudprinter) } : {}),
     },
     email: {
       mock: () => new MockEmailProvider(options.onMockEmail),

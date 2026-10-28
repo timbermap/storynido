@@ -5,6 +5,8 @@ export const TRIM_MM = { width: 210, height: 280 } as const;
 
 export interface FormatSpec {
   format: BookFormat;
+  /** Tamaño al corte de la imprenta elegida (si no, TRIM_MM). */
+  trimMm?: { width: number; height: number };
   /** Sangrado por lado (0 en digital). */
   bleedMm: number;
   /** Margen interno donde nunca va texto. */
@@ -54,11 +56,17 @@ export const FORMAT_SPECS: Record<BookFormat, FormatSpec> = {
   },
 };
 
+/** Tamaño al corte: el de la imprenta, o nuestro 21×28 cm. */
+export function trimOf(spec: FormatSpec) {
+  return spec.trimMm ?? TRIM_MM;
+}
+
 /** Tamaño de página con sangrado. */
 export function pageSizeMm(spec: FormatSpec) {
+  const trim = trimOf(spec);
   return {
-    width: TRIM_MM.width + 2 * spec.bleedMm,
-    height: TRIM_MM.height + 2 * spec.bleedMm,
+    width: trim.width + 2 * spec.bleedMm,
+    height: trim.height + 2 * spec.bleedMm,
   };
 }
 

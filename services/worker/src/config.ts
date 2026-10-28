@@ -46,6 +46,9 @@ export const workerEnvSchema = serviceEnvSchema.extend({
   EMAIL_FROM: z.string().default('StoryNido <hola@storynido.com>'),
   EMAIL_POSTAL_ADDRESS: z.string().optional(),
   GELATO_ORDER_TYPE: z.enum(['draft', 'order']).default('draft'),
+  /** Cloudprinter: sin clave no se registra. La clave del webhook verifica sus señales. */
+  CLOUDPRINTER_API_KEY: z.string().trim().optional(),
+  CLOUDPRINTER_WEBHOOK_KEY: z.string().trim().optional(),
   VERTEX_LOCATION: z.string().default('global'),
   BUCKET_PHOTOS: z.string().optional(),
   BUCKET_ASSETS: z.string().optional(),

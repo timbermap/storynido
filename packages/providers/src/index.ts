@@ -1,5 +1,6 @@
 export * from './defaults';
 export * from './gcp/storage';
+export * from './cloudprinter/print';
 export * from './gelato/print';
 export * from './resend/email';
 export * from './gcp/vertex';

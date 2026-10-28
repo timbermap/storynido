@@ -47,7 +47,7 @@ import { assembleSinglePdf } from '../pdf/assemble';
 import { kitPieceDocument, type KitBook } from '../pdf/kit';
 import { launchBrowser, renderPdf } from '../pdf/render';
 import { textPlacements } from '../pdf/placement';
-import { FORMAT_SPECS, pageSizeMm, printablePages } from '../pdf/spec';
+import { FORMAT_SPECS, pageSizeMm, printablePages, type FormatSpec } from '../pdf/spec';
 import {
   DENSITY_LAYOUT,
   defaultCoverGeometry,
@@ -887,7 +887,24 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const browser = await launchBrowser();
     try {
       for (const format of formats) {
-        const spec = FORMAT_SPECS[format];
+        // Dedicatoria + páginas + actividades + fin (las tapas van aparte).
+        const expectedInterior = snapshot.pages.length + activities.length + 2;
+        // La tapa y el empaquetado los define la imprenta elegida al pagar (si tiene los suyos).
+        const fileSpec =
+          format !== 'digital' && printer?.fileSpec
+            ? await printer.fileSpec({
+                format,
+                pageCount: expectedInterior,
+                quantity: ctx.order.items.find((item) => item.format === format)?.quantity ?? 1,
+              })
+            : null;
+        // Tamaño al corte y sangrado: los de la imprenta elegida (si los define).
+        const spec: FormatSpec = fileSpec?.trim
+          ? {
+              ...FORMAT_SPECS[format],
+              trimMm: { width: fileSpec.trim.widthMm, height: fileSpec.trim.heightMm },
+            }
+          : FORMAT_SPECS[format];
         const size = pageSizeMm(spec);
         const prepared = await Promise.all(
           sources.map(async (bytes) => {
@@ -941,15 +958,6 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             continue;
           }
         }
-        // La tapa y el empaquetado los define la imprenta elegida al pagar (si tiene los suyos).
-        const fileSpec =
-          format !== 'digital' && printer?.fileSpec
-            ? await printer.fileSpec({
-                format,
-                pageCount: interiorCount,
-                quantity: ctx.order.items.find((item) => item.format === format)?.quantity ?? 1,
-              })
-            : null;
         const cover = fileSpec?.cover ?? defaultCoverGeometry(spec, interiorCount);
         const jobs =
           format === 'digital'
@@ -1147,12 +1155,15 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       if (!book && (!interior || !cover)) throw new Error(`Faltan los PDF de ${item.format}.`);
       laidOutFor = mine[0]?.printer ?? null;
       // Nunca se imprime una versión distinta de la maquetada desde lo aprobado.
+      const md5 = new Map<string, string>();
       for (const file of [book, interior, cover].filter((value) => value !== undefined)) {
         const bytes = await storage().download({ bucket: 'pdfs', path: file.path });
         if (createHash('sha256').update(bytes).digest('hex') !== file.sha256) {
           await qaEvent(ctx, 'snapshot_mismatch', { step: 'deliver' });
           throw new HumanReviewError('pdf_mismatch', 'El PDF de imprenta no es el maquetado.');
         }
+        // Algunas imprentas verifican la descarga con el MD5 del archivo.
+        md5.set(file.path, createHash('md5').update(bytes).digest('hex'));
       }
       items.push({
         format: item.format as 'softcover' | 'hardcover',
@@ -1162,6 +1173,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         interiorPdfUrl: await signed(interior),
         coverPdfUrl: await signed(cover),
         bookPdfUrl: await signed(book),
+        interiorMd5: interior ? (md5.get(interior.path) ?? null) : null,
+        coverMd5: cover ? (md5.get(cover.path) ?? null) : null,
+        bookMd5: book ? (md5.get(book.path) ?? null) : null,
       });
     }
     const owner = (await db.collection(COLLECTIONS.users).doc(ctx.order.ownerUid).get()).data();

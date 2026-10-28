@@ -35,6 +35,8 @@ export interface PrintQuote {
  */
 export interface PrintFileSpec {
   packaging: 'separate' | 'single';
+  /** Tamaño de página al corte de esta imprenta (si no, nuestro 210×280 mm). */
+  trim?: { widthMm: number; heightMm: number };
   /** Pliego de tapa (contratapa + lomo + tapa), en mm, con sangrado o vuelta incluidos. */
   cover: {
     widthMm: number;
@@ -51,6 +53,10 @@ export interface PrintOrderFiles {
   interiorPdfUrl: string | null;
   coverPdfUrl: string | null;
   bookPdfUrl: string | null;
+  /** MD5 de cada archivo (algunas imprentas lo piden para verificar la descarga). */
+  interiorMd5?: string | null;
+  coverMd5?: string | null;
+  bookMd5?: string | null;
 }
 
 export interface PrintOrderRequest {
