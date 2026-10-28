@@ -16,7 +16,7 @@ import {
   textDensitySchema,
 } from '../models/editorial';
 import { addressSchema } from '../models/commerce';
-import { eventPricingSchema, kitSelectionSchema } from '../models/kit';
+import { KIT_PIECES, eventPricingSchema, kitSelectionSchema } from '../models/kit';
 import { pipelineStepSchema } from '../models/pipeline';
 import { QUOTE_ERRORS, priceSnapshotSchema } from '../models/pricing';
 import { PHOTO_STATUSES } from '../models/users';
@@ -198,6 +198,8 @@ export const publicOrderSchema = z.object({
   canSimulatePrint: z.boolean(),
   /** El PDF digital ya se puede descargar. */
   canDownload: z.boolean(),
+  /** Archivos digitales que se pueden descargar (el libro, cada pieza del kit y el ZIP). */
+  files: z.array(z.string()),
   /** Ya se puede opinar (digital listo o impreso entregado). */
   canReview: z.boolean(),
   review: z.object({ rating: z.number().int(), comment: z.string().nullable() }).nullable(),
@@ -711,8 +713,10 @@ export const apiRoutes = {
     method: 'GET',
     path: '/v1/orders/:orderId/download',
     access: 'user',
-    summary: 'URL firmada (15 minutos) para descargar el PDF digital de un pedido propio',
+    summary:
+      'URL firmada (15 minutos) para descargar el PDF digital de un pedido propio (o una pieza del kit, o el ZIP)',
     params: z.object({ orderId: z.string().min(1) }),
+    query: z.object({ file: z.enum(['book', 'kit_zip', ...KIT_PIECES]).default('book') }),
     response: z.object({ url: z.string(), expiresAt: z.string() }),
   },
   devSimulatePrint: {

@@ -89,6 +89,14 @@ interface OrderDoc {
   createdAt: unknown;
 }
 
+const DOWNLOADABLE_STATUSES: readonly OrderStatus[] = [
+  'ready',
+  'sent_to_print',
+  'in_production',
+  'shipped',
+  'delivered',
+];
+
 /** Se opina sobre lo recibido: el digital listo o el impreso entregado. */
 export function reviewable(order: { status: OrderStatus; items: { format: BookFormat }[] }) {
   const digitalOnly = order.items.every((item) => item.format === 'digital');
@@ -501,9 +509,11 @@ export class CheckoutService {
   }
 
   async order(uid: string, orderId: string): Promise<PublicOrder> {
-    const [snap, reviewSnap] = await Promise.all([
-      this.db.collection(COLLECTIONS.orders).doc(orderId).get(),
+    const ref = this.db.collection(COLLECTIONS.orders).doc(orderId);
+    const [snap, reviewSnap, layoutSnap] = await Promise.all([
+      ref.get(),
       this.db.collection(COLLECTIONS.reviews).doc(orderId).get(),
+      ref.collection(COLLECTIONS.orderSteps).doc('layout_pdf').get(),
     ]);
     const order = snap.data() as OrderDoc | undefined;
     if (order?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
@@ -524,10 +534,17 @@ export class CheckoutService {
         isSimulatedPrinter(order.print?.provider ?? '') &&
         Boolean(order.print?.externalOrderId) &&
         ['sent_to_print', 'in_production', 'shipped'].includes(order.status),
-      canDownload: ['ready', 'sent_to_print', 'in_production', 'shipped', 'delivered'].includes(
-        order.status,
-      ),
+      canDownload: DOWNLOADABLE_STATUSES.includes(order.status),
       canReview: reviewable(order),
+      files: DOWNLOADABLE_STATUSES.includes(order.status)
+        ? (
+            ((
+              layoutSnap.get('output') as { files?: { format: string; kind: string }[] } | undefined
+            )?.files ?? []) as { format: string; kind: string }[]
+          )
+            .filter((file) => file.format === 'digital')
+            .map((file) => file.kind)
+        : [],
       review: review
         ? { rating: Number(review.rating), comment: (review.comment as string | null) ?? null }
         : null,

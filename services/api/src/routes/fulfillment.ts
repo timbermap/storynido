@@ -14,7 +14,11 @@ const orderId = (request: FastifyRequest) => (request.params as { orderId: strin
 
 export function registerFulfillmentRoutes(app: FastifyInstance, fulfillment: FulfillmentService) {
   addRoute(app, apiRoutes.orderDownload, {}, (request) =>
-    fulfillment.download(user(request).uid, orderId(request)),
+    fulfillment.download(
+      user(request).uid,
+      orderId(request),
+      (request.query as { file?: string }).file ?? 'book',
+    ),
   );
 
   addRoute(app, apiRoutes.orderReview, {}, (request) =>

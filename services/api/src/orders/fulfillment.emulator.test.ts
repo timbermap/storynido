@@ -58,6 +58,14 @@ describe('imprenta, descarga y cancelación (fase 12)', () => {
         new Uint8Array([37, 80, 68, 70]),
         'application/pdf',
       );
+    await db.doc('orders/o1/steps/layout_pdf').set({
+      output: {
+        files: [
+          { format: 'digital', kind: 'book', path: 'orders/o1/g0/digital-book.pdf' },
+          { format: 'digital', kind: 'kit_zip', path: 'orders/o1/g0/kit.zip' },
+        ],
+      },
+    });
     await db.doc('orders/o1/steps/deliver').set({
       status: 'succeeded',
       output: { digitalPath: 'orders/o1/g0/digital-book.pdf', sentToPrint: print },
@@ -157,6 +165,19 @@ describe('imprenta, descarga y cancelación (fase 12)', () => {
       headers: auth('token-luis'),
     });
     expect(other.statusCode).toBe(404);
+    // Kit de Eventos: el ZIP con todas las piezas; una pieza que no se compró no está.
+    const zip = await app.inject({
+      method: 'GET',
+      url: '/v1/orders/o1/download?file=kit_zip',
+      headers: auth('token-ana'),
+    });
+    expect(zip.json<{ url: string }>().url).toContain('kit.zip');
+    const missing = await app.inject({
+      method: 'GET',
+      url: '/v1/orders/o1/download?file=stickers',
+      headers: auth('token-ana'),
+    });
+    expect(missing.statusCode).toBe(409);
     await db.doc('orders/o1').update({ status: 'generating' });
     const early = await app.inject({
       method: 'GET',

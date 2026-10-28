@@ -193,21 +193,29 @@ export class FulfillmentService {
     return { saved: true as const };
   }
 
-  /** URL firmada de 15 minutos al PDF digital, generada al momento. */
-  async download(uid: string, orderId: string) {
+  /** URL firmada de 15 minutos al PDF digital (o a una pieza del kit, o al ZIP), generada al momento. */
+  async download(uid: string, orderId: string, file = 'book') {
     const ref = this.db.collection(COLLECTIONS.orders).doc(orderId);
     const order = (await ref.get()).data() as OrderDoc | undefined;
     if (order?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
     if (!DOWNLOADABLE.has(order.status)) {
       throw new AppError(409, 'bad_request', 'El libro todavía no está listo.');
     }
-    const deliver = (await ref.collection(COLLECTIONS.orderSteps).doc('deliver').get()).data() as
-      { output?: { digitalPath?: string } } | undefined;
-    const path = deliver?.output?.digitalPath;
-    if (!path) throw new AppError(409, 'bad_request', 'El libro todavía no está listo.');
+    const layout = (await ref.collection(COLLECTIONS.orderSteps).doc('layout_pdf').get()).data() as
+      { output?: { files?: { format: string; kind: string; path: string }[] } } | undefined;
+    const found = layout?.output?.files?.find(
+      (item) => item.format === 'digital' && item.kind === file,
+    );
+    if (!found) throw new AppError(409, 'bad_request', 'El libro todavía no está listo.');
+    const filename =
+      file === 'kit_zip'
+        ? 'storynido-kit.zip'
+        : file === 'book'
+          ? 'storynido.pdf'
+          : `storynido-${file}.pdf`;
     const signed = await this.providers
       .storage()
-      .signedDownloadUrl({ bucket: 'pdfs', path }, 15 * 60, 'storynido.pdf');
+      .signedDownloadUrl({ bucket: 'pdfs', path: found.path }, 15 * 60, filename);
     return { url: signed.url, expiresAt: signed.expiresAt.toISOString() };
   }
 

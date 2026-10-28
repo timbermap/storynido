@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 
+import { zipSync } from 'fflate';
+
 import { encodeIllustration, type ProviderRegistry } from '@storynido/providers';
 import QRCode from 'qrcode';
 import sharp from 'sharp';
@@ -11,6 +13,8 @@ import {
   countWords,
   normalizeFirestoreData,
   ProviderError,
+  bookEventSchema,
+  kitSelectionSchema,
   printCandidates,
   printRoutingSchema,
   printOptionSchema,
@@ -37,8 +41,10 @@ import {
 import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
+import { z } from 'zod';
 
 import { assembleSinglePdf } from '../pdf/assemble';
+import { kitPieceDocument, type KitBook } from '../pdf/kit';
 import { launchBrowser, renderPdf } from '../pdf/render';
 import { textPlacements } from '../pdf/placement';
 import { FORMAT_SPECS, pageSizeMm, printablePages } from '../pdf/spec';
@@ -790,6 +796,18 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
    * valida (páginas, tamaño con sangrado, tipografías, texto sin desborde, resolución) y el
    * libro congelado tiene que seguir siendo el aprobado (hash).
    */
+  /** Kit de Eventos del pedido (piezas, copias, invitación, hoja) y los datos del cumpleaños. */
+  async function kitOf(orderId: string) {
+    const order = (await db.collection(COLLECTIONS.orders).doc(orderId).get()).data();
+    const parsed = kitSelectionSchema
+      .extend({ paper: z.enum(['letter', 'a4']) })
+      .safeParse(order?.kit);
+    if (!parsed.success) return null;
+    const book = (await db.collection(COLLECTIONS.books).doc(String(order?.bookId)).get()).data();
+    const event = bookEventSchema.safeParse(book?.event);
+    return { ...parsed.data, event: event.success ? event.data : null };
+  }
+
   async function layoutPdf(ctx: StepContext): Promise<StepResult> {
     const snapshot = await snapshotOf(ctx);
     const { hash, ...content } = snapshot;
@@ -863,6 +881,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const printer = routing?.success ? providers.printer(routing.data.provider) : null;
     const problems: string[] = [];
     const base = `orders/${ctx.order.id}/g${String(ctx.generation)}`;
+    // Eventos: las piezas del kit salen de la portada aprobada del librito (sin IA).
+    const kit = await kitOf(ctx.order.id);
+    let kitCover: string | null = null;
     const browser = await launchBrowser();
     try {
       for (const format of formats) {
@@ -911,6 +932,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           synopsis: snapshot.synopsis ?? null,
           qr,
         };
+        if (format === 'digital') kitCover = layout.cover;
         const interiorCount = interiorPages(layout, spec).length;
         if (format !== 'digital') {
           printEligible[format] = printablePages(spec, interiorCount);
@@ -1007,6 +1029,63 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             ...(format === 'digital' ? {} : { printer: fileSpec ? (printer?.id ?? null) : null }),
           });
         }
+      }
+      if (kit && kitCover) {
+        const kitBook: KitBook = {
+          language: snapshot.language as Lang,
+          childName: snapshot.childName,
+          title: snapshot.title,
+          turningAge: kit.event?.turningAge ?? null,
+          eventDate: kit.event?.date ?? null,
+          invitation: kit.invitation,
+          cover: kitCover,
+          paper: kit.paper,
+        };
+        for (const { piece, copies } of kit.pieces) {
+          if (piece === 'mini_book') continue;
+          const doc = kitPieceDocument(kitBook, piece, copies);
+          const result = await renderPdf(browser, doc.html, doc.size, {
+            bleedMm: 0,
+            title: `${snapshot.title} · ${piece}`,
+          });
+          const check = await validatePdf(result.pdf, {
+            pages: doc.pages,
+            widthMm: doc.size.width,
+            heightMm: doc.size.height,
+            bleedMm: 0,
+          });
+          if (!check.ok) {
+            problems.push(`kit ${piece}: ${check.errors.join('; ')}`);
+            continue;
+          }
+          const path = `${base}/kit-${piece}.pdf`;
+          await storage().upload({ bucket: 'pdfs', path }, result.pdf, 'application/pdf');
+          files.push({
+            format: 'digital',
+            kind: piece,
+            path,
+            pages: check.pageCount,
+            bytes: result.pdf.length,
+            sha256: createHash('sha256').update(result.pdf).digest('hex'),
+          });
+        }
+        // Todo junto en un ZIP (el librito y cada pieza), para descargar de una vez.
+        const entries: Record<string, Uint8Array> = {};
+        for (const file of files.filter((item) => item.format === 'digital')) {
+          const name = file.kind === 'book' ? 'mini-cuento.pdf' : `${file.kind}.pdf`;
+          entries[name] = await storage().download({ bucket: 'pdfs', path: file.path });
+        }
+        const zip = zipSync(entries, { level: 0 });
+        const zipPath = `${base}/kit.zip`;
+        await storage().upload({ bucket: 'pdfs', path: zipPath }, zip, 'application/zip');
+        files.push({
+          format: 'digital',
+          kind: 'kit_zip',
+          path: zipPath,
+          pages: 0,
+          bytes: zip.length,
+          sha256: createHash('sha256').update(zip).digest('hex'),
+        });
       }
     } finally {
       await browser.close();

@@ -11,6 +11,7 @@ import {
 } from '@storynido/providers';
 import { ProviderError, STEP_POLICIES, type PageReview, type PrintItem } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
+import { unzipSync } from 'fflate';
 import Fastify from 'fastify';
 import { PDFDocument } from 'pdf-lib';
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
@@ -334,6 +335,56 @@ describe('generación del libro (fase 09)', () => {
     expect(
       await providers.storage().exists({ bucket: 'pdfs', path: 'orders/o1/g0/digital-book.pdf' }),
     ).toBe(true);
+  });
+
+  it('kit de Eventos: cada pieza en PDF y un ZIP, con el mismo diseño (ninguna llamada extra a la IA)', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    await db.doc('books/b1').update({
+      channel: 'events',
+      event: { type: 'birthday', date: '2026-12-05', turningAge: 6, theme: 'espacio' },
+    });
+    await db.doc('orders/o1').update({
+      items: [
+        { piece: 'mini_book', format: 'digital', quantity: 30 },
+        { piece: 'invitation', format: 'digital', quantity: 30 },
+        { piece: 'stickers', format: 'digital', quantity: 30 },
+      ],
+      kit: {
+        pieces: [
+          { piece: 'mini_book', copies: 30 },
+          { piece: 'invitation', copies: 30 },
+          { piece: 'stickers', copies: 30 },
+        ],
+        invitation: { time: '16:00', place: 'Salón Arcoíris' },
+        paper: 'letter',
+      },
+    });
+    const generate = vi.spyOn(providers.ai().image, 'generateIllustration');
+    await setup(providers).run();
+
+    expect((await order()).status).toBe('ready');
+    // Lo mismo que un libro sin kit (las ilustraciones del librito): las piezas no usan IA.
+    expect(generate).toHaveBeenCalledTimes(2);
+    const layout = (await step('layout_pdf')).output as unknown as {
+      files: { kind: string; path: string; pages: number }[];
+    };
+    expect(layout.files.map((file) => [file.kind, file.pages])).toEqual([
+      ['book', 8],
+      ['invitation', 2],
+      ['stickers', 1],
+      ['kit_zip', 0],
+    ]);
+    const zip = unzipSync(
+      await providers.storage().download({ bucket: 'pdfs', path: 'orders/o1/g0/kit.zip' }),
+    );
+    expect(Object.keys(zip).sort()).toEqual(['invitation.pdf', 'mini-cuento.pdf', 'stickers.pdf']);
+    // Hoja Carta (EE. UU.) con la licencia de copias.
+    const invitation = await PDFDocument.load(zip['invitation.pdf'] ?? new Uint8Array());
+    const mm = (points: number) => Math.round((points / 72) * 25.4);
+    expect([mm(invitation.getPage(0).getWidth()), mm(invitation.getPage(0).getHeight())]).toEqual([
+      216, 279,
+    ]);
   });
 
   it('mails: "tu libro está listo" al cliente, en su idioma', async () => {
