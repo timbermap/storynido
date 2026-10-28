@@ -37,7 +37,7 @@
 
 - **Maquetación del libro (feedback de Sebastián sobre el PDF, 2026-10-27):** hecho (DECISIONS 073).
 - **Navbar con sesión iniciada:** hecho (menú con iniciales). Falta la marca de cuenta Pro en Profesionales.
-- **Gelato real (fase 12):** clave cargada (local y Secret Manager) y verificada contra su catálogo. Falta su `PrintProvider` (cotización, pedido, webhooks) y confirmar que la cuenta no tiene medio de pago (sandbox).
+- **Gelato real (fase 12):** conectado (DECISIONS 077). En staging corre en borrador, solo para EE. UU. Falta: configurar el webhook en su panel; la muestra física (valida el archivo y habilita `qaSamplePassed` en producción); y volver a maquetar cuando la imprenta de respaldo pide otras especificaciones.
 - **Varias imprentas:** hecho con las simuladas (DECISIONS 075). Pendiente: PDF por imprenta, margen mínimo y ver la elección en el admin.
 - **Mi cuenta:** las filas "Rol" y "API" son de diagnóstico; ocultarlas a los clientes en la pasada de diseño.
 - **Pedidos trabados (detectado en la fase 08):** si Workflows no arranca y Pub/Sub manda el evento a `dead-letter`, el pedido queda en `generating`. Hace falta un barrido periódico que reintente los eventos con `started: false` y avise por los pedidos sin avance (fase 15 o 16).

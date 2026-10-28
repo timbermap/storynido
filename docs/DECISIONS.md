@@ -891,3 +891,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Producción:** el chequeo de proveedores simulados ahora también revisa la lista de imprentas (antes `mock_alt` pasaba).
 - **Matriz:** Gelato solo en EE. UU., de 28 a 200 páginas pares. En producción, `qaSamplePassed` queda en falso hasta aprobar la muestra física.
 - **Muestras:** `scripts/render-sample.ts --gelato` arma el PDF con la tapa real de Gelato.
+- **Prueba (2026-10-28, local con IA simulada y Gelato real, sin costo):** libro Clásico de 28 páginas, tapa blanda, a Nueva York.
+  - Cotización: USD 16,85 (USPS Ground Advantage, 6–7 días).
+  - Borrador creado en Gelato con el producto, las 28 páginas, el envío y la dirección correctos, y nuestra referencia de pedido.
+  - El PDF único sale con 31 páginas (tapa + guarda + 28 + guarda).
+  - **Gelato no descarga ni valida el archivo de un borrador.** El archivo recién se valida con el primer pedido confirmado (la muestra física).
+- **Webhook de Gelato (staging):** `https://api-kxfsarqx2q-uc.a.run.app/v1/webhooks/print/gelato`, configurado en su panel (Developer → Webhooks).
