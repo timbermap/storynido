@@ -12,6 +12,7 @@ import { InMemoryCatalog } from './catalog';
 import { initFirebaseAdmin } from './firebase';
 import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
+import { ProService } from './pro/service';
 import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
 import { RecordingConversions, type ConversionReporter } from './checkout/conversions';
@@ -93,6 +94,7 @@ export async function createTestApp(
     overrides.previews ??
     new PreviewService(db, overrides.providers ?? providers, catalog, silentLogger, notifier);
   const pipelineEvents = overrides.pipelineEvents ?? new RecordingPublisher();
+  const pro = overrides.pro ?? new ProService(db, catalog);
   const deps: ApiDeps = {
     config,
     version: 'test',
@@ -127,6 +129,7 @@ export async function createTestApp(
       silentLogger,
       { devToolsEnabled: true, mockWebhookSecret: 'test-webhook-secret' },
       notifier,
+      pro,
     ),
     fulfillment: new FulfillmentService(
       db,
@@ -136,6 +139,7 @@ export async function createTestApp(
       notifier,
     ),
     notifier,
+    pro,
     db,
     ...overrides,
   };

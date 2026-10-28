@@ -37,6 +37,7 @@ import type { CatalogRepository } from '../catalog';
 import { AppError } from '../errors';
 import type { PipelineEventPublisher } from '../orders/events';
 import type { PreviewService } from '../preview/service';
+import type { ProService } from '../pro/service';
 import type { ConversionReporter } from './conversions';
 
 type QuoteBody = z.output<typeof checkoutQuoteBodySchema>;
@@ -126,6 +127,7 @@ export class CheckoutService {
     private readonly log: FastifyBaseLogger,
     private readonly options: { devToolsEnabled: boolean; mockWebhookSecret: string },
     private readonly notifier: EmailNotifier | null = null,
+    private readonly pro: ProService | null = null,
   ) {}
 
   // ------------------------------------------------------------------ precio
@@ -177,13 +179,18 @@ export class CheckoutService {
     if (body.format !== 'digital' && (await this.printCandidates(body, pages)).length === 0) {
       throw printUnavailable();
     }
-    const [countries, prices, coupon, promotions] = await Promise.all([
+    const [countries, prices, coupon, promotions, pro] = await Promise.all([
       this.catalog.countries(),
       this.catalog.prices(body.country),
       body.couponCode ? this.coupon(body.couponCode) : Promise.resolve(null),
       this.promotions(),
+      // Profesionales: lo decide la cuenta (servidor), nunca la petición.
+      this.pro && typeof book.ownerUid === 'string'
+        ? this.pro.context(book.ownerUid)
+        : Promise.resolve(null),
     ]);
     const result = quote({
+      pro,
       country: countries.find((country) => country.code === body.country) ?? null,
       price: prices.find((price) => price.format === body.format) ?? null,
       format: body.format,

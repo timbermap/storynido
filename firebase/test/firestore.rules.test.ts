@@ -139,6 +139,13 @@ describe('users', () => {
     await assertFails(
       updateDoc(doc(alice(), 'users', ALICE), { role: 'superadmin', updatedAt: serverTimestamp() }),
     );
+    // Tampoco se hace Pro sola (precios y descuentos Pro): lo escribe la API.
+    await assertFails(
+      updateDoc(doc(alice(), 'users', ALICE), {
+        accountType: 'professional',
+        updatedAt: serverTimestamp(),
+      }),
+    );
   });
 
   it('otro cliente no lo lee; un admin sí', async () => {

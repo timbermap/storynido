@@ -629,6 +629,8 @@ describe('checkout y pagos (fase 11)', () => {
     format,
     currency: 'MXN',
     amountMinor,
+    // Precio Pro base: 10 % menos (cuentas profesionales).
+    proAmountMinor: Math.round(amountMinor * 0.9),
     lengthAdjustmentsMinor: {},
     active: true,
     updatedAt: now,
@@ -1219,6 +1221,71 @@ describe('checkout y pagos (fase 11)', () => {
     expect((await db.collection('printQuoteRequests').get()).size).toBe(1);
     const alerts = mails((message) => message.template === 'admin_alert');
     expect(alerts.at(-1)?.data.message).toContain('mini_book, stickers × 30 copias');
+  });
+
+  it('Profesionales: precio Pro y descuento por compras elegibles; Familia no los obtiene', async () => {
+    await approvedBook();
+    const quoted = async () =>
+      (
+        await post('/v1/checkout/quote', {
+          bookId: 'book-1',
+          format: 'hardcover',
+          country: 'MX',
+        })
+      ).json<{ snapshot: PriceSnapshot }>().snapshot;
+    // Familia: precio de siempre, aunque la petición traiga cosas raras.
+    const family = await quoted();
+    expect(family.components[0]?.unitMinor).toBe(89900);
+    const status = () =>
+      app.inject({ method: 'GET', url: '/v1/me/professional', headers: auth(TOKEN) });
+    expect((await status()).json<{ accountType: string }>().accountType).toBe('family');
+
+    const activated = await post('/v1/me/professional', {
+      profession: 'psychopedagogue',
+      professionOther: null,
+      practiceName: 'Espacio Aprender',
+      country: 'MX',
+    });
+    expect(activated.statusCode).toBe(200);
+    expect((await quoted()).components[0]?.unitMinor).toBe(80910);
+
+    // 5 compras elegibles en 90 días → 10 %. No cuentan: reembolsado, cancelado,
+    // pendiente de pago ni una de hace 100 días.
+    const day = 24 * 3600 * 1000;
+    const seed = (id: string, status: string, daysAgo: number) =>
+      db.doc(`orders/${id}`).set({
+        ownerUid: UID,
+        status,
+        items: [{ format: 'digital', quantity: 1 }],
+        createdAt: new Date(Date.now() - daysAgo * day),
+      });
+    for (const [index, status] of [
+      'paid',
+      'ready',
+      'delivered',
+      'shipped',
+      'generating',
+    ].entries()) {
+      await seed(`pro-${String(index)}`, status, 10 + index);
+    }
+    await seed('pro-refunded', 'refunded', 5);
+    await seed('pro-cancelled', 'cancelled', 5);
+    await seed('pro-pending', 'pending_payment', 1);
+    await seed('pro-old', 'delivered', 100);
+    const discount = (await status()).json<{
+      discount: { purchases: number; digitalPercent: number; next: { purchases: number } };
+    }>().discount;
+    expect(discount).toMatchObject({ purchases: 5, digitalPercent: 10, next: { purchases: 10 } });
+    const pro = await quoted();
+    expect(pro.discount).toEqual({ minor: 8091, reason: 'pro', label: 'Pro 10 %' });
+
+    // Otra cuenta (Familia) no ve el precio Pro.
+    const other = await post(
+      '/v1/checkout/quote',
+      { bookId: 'book-1', format: 'hardcover', country: 'MX' },
+      'token-luis',
+    );
+    expect(other.statusCode).toBe(404);
   });
 
   it('desarrollo: el pago simulado pasa por el mismo webhook firmado', async () => {

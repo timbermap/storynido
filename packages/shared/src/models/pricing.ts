@@ -23,7 +23,7 @@ export const priceSnapshotSchema = z.object({
   subtotalMinor: z.number().int().nonnegative(),
   discount: z.object({
     minor: z.number().int().nonnegative(),
-    reason: z.enum(['coupon', 'promotion']).nullable(),
+    reason: z.enum(['coupon', 'promotion', 'pro']).nullable(),
     /** Código del cupón o nombre de la promoción. */
     label: z.string().nullable(),
   }),
@@ -54,6 +54,48 @@ export const QUOTE_ERRORS = [
 
 export type QuoteError = (typeof QUOTE_ERRORS)[number];
 
+/**
+ * proDiscounts/global: descuento Pro por recurrencia (editable en el admin). Las compras
+ * elegibles (pagadas, sin reembolso ni cancelación) se cuentan en el servidor, en la ventana.
+ */
+export const proDiscountConfigSchema = z.object({
+  windowDays: z.number().int().min(1).max(365),
+  /** Escalones: desde N compras elegibles, X % (el mayor que corresponda). */
+  tiers: z.array(
+    z.object({
+      minPurchases: z.number().int().min(1),
+      percent: z.number().int().min(0).max(80),
+    }),
+  ),
+  /** Tope del descuento en impresos (cuida el margen; en digital rige la tabla). */
+  physicalMaxPercent: z.number().int().min(0).max(80),
+});
+
+export type ProDiscountConfig = z.infer<typeof proDiscountConfigSchema>;
+
+export const DEFAULT_PRO_DISCOUNTS: ProDiscountConfig = {
+  windowDays: 90,
+  tiers: [
+    { minPurchases: 5, percent: 10 },
+    { minPurchases: 10, percent: 15 },
+    { minPurchases: 20, percent: 20 },
+  ],
+  physicalMaxPercent: 15,
+};
+
+/** Porcentaje Pro que corresponde a la próxima compra (las previas + esta no cuenta todavía). */
+export function proPercent(
+  purchases: number,
+  config: ProDiscountConfig,
+  format: BookFormat,
+): number {
+  const tier = [...config.tiers]
+    .filter((item) => purchases >= item.minPurchases)
+    .sort((a, b) => b.percent - a.percent)[0];
+  const percent = tier?.percent ?? 0;
+  return format === 'digital' ? percent : Math.min(percent, config.physicalMaxPercent);
+}
+
 export interface QuoteInput {
   country: CountryConfig | null;
   price: Price | null;
@@ -65,6 +107,8 @@ export interface QuoteInput {
   couponCode: string | null;
   promotions: readonly Promotion[];
   now: Date;
+  /** Cuenta profesional: precio Pro base y descuento por compras elegibles previas. */
+  pro?: { purchases: number; config: ProDiscountConfig } | null;
 }
 
 export type QuoteResult =
@@ -109,12 +153,14 @@ export function quote(input: QuoteInput): QuoteResult {
   }
   const quantity = Math.max(1, Math.floor(input.quantity));
   const lengthAdjustment = input.length ? (price.lengthAdjustmentsMinor[input.length] ?? 0) : 0;
+  // Profesionales: su precio base (si el país lo tiene); el resto, el de Familias.
+  const unit = input.pro ? (price.proAmountMinor ?? price.amountMinor) : price.amountMinor;
   const components: PriceSnapshot['components'] = [
     {
       code: 'book',
-      unitMinor: price.amountMinor,
+      unitMinor: unit,
       quantity,
-      totalMinor: price.amountMinor * quantity,
+      totalMinor: unit * quantity,
     },
   ];
   if (lengthAdjustment !== 0) {
@@ -168,7 +214,7 @@ function finalize(
   components: PriceSnapshot['components'],
   country: CountryConfig,
   format: BookFormat,
-  input: Pick<QuoteInput, 'coupon' | 'couponCode' | 'promotions' | 'now' | 'country'>,
+  input: Pick<QuoteInput, 'coupon' | 'couponCode' | 'promotions' | 'now' | 'country' | 'pro'>,
 ): QuoteResult {
   const subtotal = Math.max(
     0,
@@ -195,12 +241,18 @@ function finalize(
         coupon.type === 'percent' ? Math.round((subtotal * coupon.value) / 100) : coupon.value,
       )
     : 0;
+  // Profesionales: descuento por recurrencia (un solo descuento: el mayor de todos).
+  const percentPro = input.pro ? proPercent(input.pro.purchases, input.pro.config, format) : 0;
+  const proMinor = Math.round((subtotal * percentPro) / 100);
+  const best = Math.max(couponMinor, promotionMinor, proMinor);
   const discount =
-    couponMinor >= promotionMinor && couponMinor > 0
-      ? { minor: couponMinor, reason: 'coupon' as const, label: coupon?.code ?? null }
-      : promotionMinor > 0
-        ? { minor: promotionMinor, reason: 'promotion' as const, label: promotion?.name ?? null }
-        : { minor: 0, reason: null, label: null };
+    best === 0
+      ? { minor: 0, reason: null, label: null }
+      : couponMinor === best
+        ? { minor: couponMinor, reason: 'coupon' as const, label: coupon?.code ?? null }
+        : proMinor === best
+          ? { minor: proMinor, reason: 'pro' as const, label: `Pro ${String(percentPro)} %` }
+          : { minor: promotionMinor, reason: 'promotion' as const, label: promotion?.name ?? null };
 
   const shippingMinor = format === 'digital' ? 0 : country.shipping.costMinor;
   const taxable = subtotal - discount.minor + shippingMinor;

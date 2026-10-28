@@ -20,6 +20,33 @@ export const CHILD_LIMITS = {
   maxLessons: 2,
 } as const;
 
+/** Tipo de cuenta (fase 12c): no cambia el rol; lo escribe solo la API. */
+export const ACCOUNT_TYPES = ['family', 'professional'] as const;
+export const accountTypeSchema = z.enum(ACCOUNT_TYPES);
+export type AccountType = z.infer<typeof accountTypeSchema>;
+
+/** Profesiones de StoryNido Profesionales (con "otra"). No es un sistema clínico. */
+export const PROFESSIONS = [
+  'psychologist',
+  'psychopedagogue',
+  'speech_therapist',
+  'teacher',
+  'tutor',
+  'pediatric_dentist',
+  'other',
+] as const;
+
+export const proProfileSchema = z.object({
+  profession: z.enum(PROFESSIONS),
+  /** Solo si eligió "otra". */
+  professionOther: z.string().trim().max(60).nullable(),
+  /** Consultorio, escuela o espacio (opcional). */
+  practiceName: z.string().trim().max(80).nullable(),
+  country: countryCodeSchema,
+});
+
+export type ProProfile = z.infer<typeof proProfileSchema>;
+
 /** users/{uid} */
 export const userSchema = timestampsSchema.extend({
   email: z.email().nullable(),
@@ -30,6 +57,9 @@ export const userSchema = timestampsSchema.extend({
   marketingOptIn: z.boolean(),
   /** Espejo del custom claim; solo lo escribe el servidor. */
   role: roleSchema.optional(),
+  /** Familia o profesional (fase 12c): solo servidor. Las cuentas anteriores son familia. */
+  accountType: accountTypeSchema.default('family'),
+  proProfile: proProfileSchema.nullable().default(null),
 });
 
 export type User = z.infer<typeof userSchema>;
@@ -83,7 +113,14 @@ export const photoSchema = timestampsSchema.extend({
 
 export type Photo = z.infer<typeof photoSchema>;
 
-export const CONSENT_TYPES = ['photo_upload', 'terms', 'privacy', 'marketing'] as const;
+export const CONSENT_TYPES = [
+  'photo_upload',
+  'terms',
+  'privacy',
+  'marketing',
+  /** Profesionales: declaran tener la autorización de la madre, el padre o el tutor del chico. */
+  'guardian_authorization',
+] as const;
 
 /** consents/{consentId}: registro inmutable de consentimientos. Solo servidor. */
 export const consentSchema = z.object({

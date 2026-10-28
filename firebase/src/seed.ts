@@ -36,7 +36,9 @@ import {
   type BookFormat,
   PRINT_FORMATS,
   CLOUDPRINTER_PRODUCTS,
+  DEFAULT_PRO_DISCOUNTS,
   GELATO_PRODUCTS,
+  proDiscountConfigSchema,
   eventPricingSchema,
   printOptionId,
   printOptionSchema,
@@ -181,6 +183,8 @@ for (const code of COUNTRY_CODES) {
         format,
         currency: defaults.currency,
         amountMinor: prices[format],
+        // Precio Pro base de ejemplo: 10 % menos (editable en el admin).
+        proAmountMinor: Math.round((prices[format] * 0.9) / 100) * 100 - (code === 'US' ? 1 : 0),
         lengthAdjustmentsMinor: SAMPLE_LENGTH_ADJUSTMENTS[code] ?? {},
         active: true,
         updatedAt: now,
@@ -321,6 +325,12 @@ for (const [code, prices] of Object.entries(EVENT_PRICES) as [
     }),
   );
 }
+
+// Descuento Pro por recurrencia (DECISIONS 081): escalones de fábrica, editables en el admin.
+batch.set(
+  db.collection(COLLECTIONS.proDiscounts).doc(GLOBAL_DOC_ID),
+  proDiscountConfigSchema.parse(DEFAULT_PRO_DISCOUNTS),
+);
 
 // Cupón de prueba (solo en los emuladores): 10 % para probar el checkout.
 if (!cloud) {

@@ -52,6 +52,8 @@ export const priceSchema = z.object({
   amountMinor: z.number().int().nonnegative(),
   /** Ajuste por extensión del libro (Mini más barato, Gran aventura más caro). */
   lengthAdjustmentsMinor: z.partialRecord(bookLengthSchema, z.number().int()).default({}),
+  /** Precio Pro base (cuentas profesionales); sin él, el de Familias. */
+  proAmountMinor: z.number().int().nonnegative().optional(),
   active: z.boolean(),
   updatedAt: z.date(),
 });

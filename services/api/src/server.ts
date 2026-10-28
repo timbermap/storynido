@@ -15,6 +15,7 @@ import { FirestoreCatalog } from './catalog';
 import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
+import { ProService } from './pro/service';
 import { CheckoutService } from './checkout/service';
 import { FulfillmentService } from './orders/fulfillment';
 import { ServerConversions } from './checkout/conversions';
@@ -101,6 +102,7 @@ const notifier = new EmailNotifier(db, () => providers.email(), {
   log,
 });
 const previews = new PreviewService(db, providers, catalog, log, notifier);
+const pro = new ProService(db, catalog);
 const pipelineEvents =
   config.pipelineEvents === 'pubsub'
     ? new PubSubPublisher(config.projectId, config.env.ORDER_EVENTS_TOPIC)
@@ -123,6 +125,7 @@ const checkout = new CheckoutService(
   log,
   { devToolsEnabled: config.devToolsEnabled, mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET },
   notifier,
+  pro,
 );
 
 const app = await buildApp({
@@ -157,6 +160,7 @@ const app = await buildApp({
       notifier,
     ),
     notifier,
+    pro,
     db,
   },
 });

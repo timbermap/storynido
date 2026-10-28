@@ -18,6 +18,7 @@ import { registerOrderRoutes } from './routes/orders';
 import { registerPhotoRoutes } from './routes/photos';
 import { registerPreviewRoutes } from './routes/previews';
 import { registerEmailRoutes } from './routes/email';
+import { registerProRoutes } from './routes/pro';
 import { registerV1Routes } from './routes/v1';
 import './types';
 
@@ -49,6 +50,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
 
   registerV1Routes(app);
   registerEmailRoutes(app);
+  registerProRoutes(app, deps.pro);
   registerCatalogRoutes(
     app,
     deps.catalog,

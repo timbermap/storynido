@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { CountryConfig, Coupon, Price, Promotion } from './commerce';
 import type { EventPricing } from './kit';
-import { quote, quoteKit, type QuoteInput } from './pricing';
+import { DEFAULT_PRO_DISCOUNTS, proPercent, quote, quoteKit, type QuoteInput } from './pricing';
 
 const NOW = new Date('2026-11-01T12:00:00Z');
 
@@ -249,5 +249,46 @@ describe('kit de Eventos', () => {
       ok: false,
       error: 'price_missing',
     });
+  });
+});
+
+describe('Profesionales: precio Pro y descuento por recurrencia', () => {
+  const pro = (purchases: number) => ({ purchases, config: DEFAULT_PRO_DISCOUNTS });
+
+  it('escalones: 1–4 base, 5–9 10 %, 10–19 15 %, 20+ 20 % (impresos con tope de 15 %)', () => {
+    expect(
+      [0, 4, 5, 9, 10, 19, 20, 50].map((n) => proPercent(n, DEFAULT_PRO_DISCOUNTS, 'digital')),
+    ).toEqual([0, 0, 10, 10, 15, 15, 20, 20]);
+    expect(proPercent(25, DEFAULT_PRO_DISCOUNTS, 'hardcover')).toBe(15);
+  });
+
+  it('usa el precio Pro base y el descuento del escalón; nunca suma con un cupón', () => {
+    const base = quote(input({ price: price({ proAmountMinor: 79900 }), pro: pro(0) }));
+    if (!base.ok) throw new Error('debería cotizar');
+    expect(base.snapshot.components[0]).toMatchObject({ code: 'book', unitMinor: 79900 });
+    expect(base.snapshot.discount.reason).toBeNull();
+
+    const tenth = quote(input({ price: price({ proAmountMinor: 79900 }), pro: pro(12) }));
+    if (!tenth.ok) throw new Error('debería cotizar');
+    // Tapa dura con 12 compras: 15 % (el tope de impresos también es 15).
+    expect(tenth.snapshot.discount).toEqual({ minor: 11985, reason: 'pro', label: 'Pro 15 %' });
+
+    // Un cupón del 10 % no se suma: gana el mayor (15 % Pro).
+    const both = quote(
+      input({
+        price: price({ proAmountMinor: 79900 }),
+        pro: pro(12),
+        coupon: coupon(),
+        couponCode: 'BIENVENIDA',
+      }),
+    );
+    if (!both.ok) throw new Error('debería cotizar');
+    expect(both.snapshot.discount.reason).toBe('pro');
+  });
+
+  it('una cuenta Familia paga el precio de Familias', () => {
+    const family = quote(input({ price: price({ proAmountMinor: 79900 }), pro: null }));
+    if (!family.ok) throw new Error('debería cotizar');
+    expect(family.snapshot.components[0]).toMatchObject({ unitMinor: 89900 });
   });
 });

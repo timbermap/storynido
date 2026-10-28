@@ -9,6 +9,9 @@ import {
   editorialConfigSchema,
   type EditorialConfig,
   type EventPricing,
+  type ProDiscountConfig,
+  DEFAULT_PRO_DISCOUNTS,
+  proDiscountConfigSchema,
   eventPricingSchema,
   contentDocId,
   contentSchema,
@@ -48,6 +51,8 @@ export interface CatalogRepository {
   content(key: string, locale: Locale): Promise<Content | null>;
   /** Configuración editorial vigente (o la de fábrica si todavía no se cargó). */
   editorial(): Promise<EditorialConfig>;
+  /** Descuento Pro por recurrencia (o el de fábrica si todavía no se cargó). */
+  proDiscounts(): Promise<ProDiscountConfig>;
 }
 
 /** La configuración de Firestore pisa la de fábrica clave por clave (un error no la invalida toda). */
@@ -216,6 +221,16 @@ export class FirestoreCatalog implements CatalogRepository {
       ),
     );
   }
+
+  proDiscounts(): Promise<ProDiscountConfig> {
+    return this.cache.get('pro-discounts', async () => {
+      const data = (
+        await this.db.collection(COLLECTIONS.proDiscounts).doc(GLOBAL_DOC_ID).get()
+      ).data();
+      const parsed = data ? proDiscountConfigSchema.safeParse(data) : null;
+      return parsed?.success ? parsed.data : DEFAULT_PRO_DISCOUNTS;
+    });
+  }
 }
 
 /** Catálogo fijo para tests. */
@@ -231,6 +246,7 @@ export class InMemoryCatalog implements CatalogRepository {
       products?: Product[];
       printOptions?: PrintOption[];
       eventPricing?: EventPricing[];
+      proDiscounts?: ProDiscountConfig;
       content?: Content[];
       editorial?: EditorialConfig;
     } = {},
@@ -290,6 +306,10 @@ export class InMemoryCatalog implements CatalogRepository {
 
   editorial() {
     return Promise.resolve(this.data.editorial ?? DEFAULT_EDITORIAL_CONFIG);
+  }
+
+  proDiscounts() {
+    return Promise.resolve(this.data.proDiscounts ?? DEFAULT_PRO_DISCOUNTS);
   }
 
   collections() {

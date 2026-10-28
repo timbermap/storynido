@@ -17,6 +17,7 @@ import {
 } from '../models/editorial';
 import { addressSchema } from '../models/commerce';
 import { KIT_PIECES, eventPricingSchema, kitSelectionSchema } from '../models/kit';
+import { accountTypeSchema, proProfileSchema } from '../models/users';
 import { pipelineStepSchema } from '../models/pipeline';
 import { QUOTE_ERRORS, priceSnapshotSchema } from '../models/pricing';
 import { PHOTO_STATUSES } from '../models/users';
@@ -687,6 +688,33 @@ export const apiRoutes = {
       photos: z.number().int(),
       books: z.number().int(),
       keptOrderedBooks: z.number().int(),
+    }),
+  },
+  proActivate: {
+    method: 'POST',
+    path: '/v1/me/professional',
+    access: 'user',
+    summary: 'Activa la cuenta Profesional (perfil mínimo; no cambia el rol)',
+    body: proProfileSchema,
+    response: z.object({ accountType: z.literal('professional') }),
+  },
+  proStatus: {
+    method: 'GET',
+    path: '/v1/me/professional',
+    access: 'user',
+    summary: 'Tipo de cuenta y descuento Pro vigente (compras elegibles y próximo escalón)',
+    response: z.object({
+      accountType: accountTypeSchema,
+      proProfile: proProfileSchema.nullable(),
+      discount: z
+        .object({
+          windowDays: z.number().int(),
+          purchases: z.number().int(),
+          digitalPercent: z.number().int(),
+          printPercent: z.number().int(),
+          next: z.object({ purchases: z.number().int(), percent: z.number().int() }).nullable(),
+        })
+        .nullable(),
     }),
   },
   deleteAccount: {
