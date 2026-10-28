@@ -33,8 +33,9 @@ module "environment" {
   deletion_protection        = false
   photo_analyzer             = var.photo_analyzer
   # Gelato (DECISIONS 077) en borrador: no se fabrica ni se cobra.
-  # Gelato (EE. UU.) y Cloudprinter (México): el enrutador elige la más barata (DECISIONS 080).
-  print_providers   = ["gelato", "cloudprinter"]
+  # Gelato y Lulu (EE. UU.) y Cloudprinter (México): el enrutador elige la más barata (DECISIONS 080).
+  # Lulu (DECISIONS 086) en sandbox: no imprime ni cobra.
+  print_providers   = ["gelato", "cloudprinter", "lulu"]
   gelato_order_type = "draft"
   # Mails reales con Resend; el secreto de las bajas ya tiene valor (DECISIONS 078).
   email_provider           = "resend"
