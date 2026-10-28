@@ -1055,3 +1055,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - "Nuevo" no pisa un documento existente: se edita desde la tabla.
 - **Propagación:** la API toma los cambios en menos de un minuto (cache del catálogo); las páginas públicas, en hasta 5 minutos (revalidación de Next).
 - **Probado en local con los emuladores:** ingreso, alta de precio, descuento Pro, cambio de modo del sitio, auditoría, búsqueda y modo oscuro.
+
+## 084 · Admin en staging sin 2FA hasta pasar a Identity Platform
+
+- **Fecha:** 2026-10-28 · Decisión de Sebastián: el paso a Identity Platform (sin vuelta atrás) queda para cuando preparemos producción.
+- **Staging:** `ADMIN_MFA_REQUIRED=false` en la API (Terraform: `admin_mfa_required`) y `NEXT_PUBLIC_ADMIN_MFA_REQUIRED=false` en el admin. El acceso queda protegido por el rol y la cuenta de Google.
+- **Producción:** sigue exigiendo 2FA por defecto. Antes de lanzar hay que pasar a Identity Platform y activar TOTP (criterio de aceptación de la fase 14).
+- **Backend `admin`** en App Hosting (entorno `staging`), en https://admin--storynido-staging.us-central1.hosted.app.
+  - Dominio autorizado en Auth y agregado al CORS de la API.
+  - `admin_url` apunta al panel (enlace de las alertas por mail).

@@ -17,9 +17,10 @@ export const useFirebaseEmulators = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATO
 
 /**
  * El admin exige verificación en dos pasos (TOTP). Con los emuladores no hay segundo factor,
- * igual que la API en local.
+ * igual que la API en local; en staging se apaga hasta pasar a Identity Platform.
  */
-export const mfaRequired = !useFirebaseEmulators;
+export const mfaRequired =
+  !useFirebaseEmulators && process.env.NEXT_PUBLIC_ADMIN_MFA_REQUIRED !== 'false';
 
 const blankToUndefined = (value: string | undefined) => (value === '' ? undefined : value);
 

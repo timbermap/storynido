@@ -108,6 +108,12 @@ variable "email_link_secret_loaded" {
   description = "El secreto email-link-secret ya tiene valor: recién entonces los servicios lo leen (firma de las bajas)."
 }
 
+variable "admin_mfa_required" {
+  type        = bool
+  default     = true
+  description = "Las rutas de admin de la API exigen verificación en dos pasos (requiere Identity Platform con TOTP)."
+}
+
 variable "admin_url" {
   type        = string
   default     = ""

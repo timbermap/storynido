@@ -61,7 +61,9 @@ export const adminConfigKindSchema = z.enum(
   ADMIN_CONFIG_KINDS as [keyof typeof ADMIN_CONFIG, ...(keyof typeof ADMIN_CONFIG)[]],
 );
 export type AdminConfigKind = z.infer<typeof adminConfigKindSchema>;
-export type AdminConfigInput<K extends AdminConfigKind> = z.input<(typeof ADMIN_CONFIG)[K]['input']>;
+export type AdminConfigInput<K extends AdminConfigKind> = z.input<
+  (typeof ADMIN_CONFIG)[K]['input']
+>;
 
 /** Id de documento válido para los tipos sin clave natural (slug). */
 export const adminDocIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);

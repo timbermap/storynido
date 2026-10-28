@@ -21,7 +21,7 @@ module "environment" {
   firestore_location         = var.firestore_location
   public_domain              = "staging.storynido.com"
   api_domain                 = var.api_domain
-  cors_origins               = ["https://staging.storynido.com", "https://web--storynido-staging.us-central1.hosted.app", "http://localhost:3000"]
+  cors_origins               = ["https://staging.storynido.com", "https://web--storynido-staging.us-central1.hosted.app", "https://admin--storynido-staging.us-central1.hosted.app", "http://localhost:3000"]
   github_repository          = "timbermap/storynido"
   github_repository_owner_id = "157223336"
   alert_email                = var.alert_email
@@ -40,4 +40,7 @@ module "environment" {
   email_provider           = "resend"
   email_link_secret_loaded = true
   log_level                = "debug"
+  # Panel de admin (DECISIONS 084): sin 2FA en staging hasta pasar a Identity Platform.
+  admin_url          = "https://admin--storynido-staging.us-central1.hosted.app"
+  admin_mfa_required = false
 }

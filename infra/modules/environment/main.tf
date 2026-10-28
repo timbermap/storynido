@@ -342,6 +342,8 @@ module "api" {
     WORKER_URL = module.worker.uri
     # Orígenes de la web que pueden llamar a la API desde el navegador (los mismos que el CORS de los buckets).
     CORS_ORIGINS = join(",", var.cors_origins)
+    # 2FA del admin (DECISIONS 082); se apaga solo mientras no haya Identity Platform.
+    ADMIN_MFA_REQUIRED = tostring(var.admin_mfa_required)
   })
   secret_env = local.api_secret_env
 

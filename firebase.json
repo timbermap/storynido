@@ -60,6 +60,28 @@
         "**/*.tfstate*",
         "**/tfplan"
       ]
+    },
+    {
+      "backendId": "admin",
+      "rootDir": "apps/admin",
+      "ignore": [
+        ".git",
+        "**/node_modules",
+        "**/.next",
+        "**/.turbo",
+        "**/dist",
+        ".env",
+        ".env.*",
+        "**/.env",
+        "**/.env.*",
+        "firebase-debug.log",
+        "**/*.log",
+        "eval-reports",
+        "infra",
+        "coverage",
+        "**/*.tfstate*",
+        "**/tfplan"
+      ]
     }
   ]
 }
