@@ -440,6 +440,34 @@ describe('vista previa', () => {
     expect(book?.previewError).toMatch(/mensaje propio/);
   });
 
+  it('si el modelo de imagen no puede recibir fotos de chicos, solo se crea sin foto', async () => {
+    const model = providers.aiModels().image;
+    await db.doc(`aiModels/${model}`).set({
+      provider: 'mock',
+      model,
+      kind: 'image',
+      price: null,
+      dataPolicy: {
+        trainsOnData: true,
+        humanReview: false,
+        regions: [],
+        enterpriseAgreement: false,
+      },
+      allowedEnvironments: ['local', 'staging'],
+      childPhotosAllowed: false,
+      lastEval: null,
+      notes: null,
+    });
+    try {
+      await seedBook(providers, 'book-1');
+      const res = await generate('book-1');
+      expect(res.statusCode).toBe(409);
+      expect(res.json()).toMatchObject({ error: { message: /sin foto/ } });
+    } finally {
+      await db.doc(`aiModels/${model}`).delete();
+    }
+  });
+
   it('modo sin foto: genera con los rasgos elegidos, sin foto ni ficha por IA', async () => {
     const avatar = {
       skinTone: 'brown',

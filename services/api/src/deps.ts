@@ -1,4 +1,5 @@
 import type { EmailNotifier } from '@storynido/emails';
+import type { MetricsService } from './metrics/service';
 import type { ProService } from './pro/service';
 import type { ProviderRegistry } from '@storynido/providers';
 import type { SiteConfig } from '@storynido/shared';
@@ -49,6 +50,8 @@ export interface ApiDeps {
   fulfillment: FulfillmentService;
   /** StoryNido Profesionales: cuenta Pro y descuento por recurrencia. */
   pro: ProService;
+  /** Dashboard del admin: métricas diarias y costo real de IA. */
+  metrics: MetricsService;
   /** Mails al cliente y alertas al equipo (idempotentes). */
   notifier: EmailNotifier;
   /** Eventos del pipeline del pedido (worker directo en local, Pub/Sub en la nube). */

@@ -151,6 +151,17 @@ export class ProviderRegistry {
   }
 
   /** Aplica la configuración de IA del admin. Rechaza proveedores no disponibles. */
+  private modelPrices = new Map<string, { inputPerMTok: number; outputPerMTok: number }>();
+
+  /** Precios del catálogo de modelos (aiModels); un modelo sin precio se cobra con el peor caso. */
+  setModelPrices(prices: Record<string, { inputPerMTok: number; outputPerMTok: number }>): void {
+    this.modelPrices = new Map(Object.entries(prices));
+  }
+
+  modelPrice(model: string) {
+    return this.modelPrices.get(model) ?? null;
+  }
+
   setAiOverride(override: AiOverride): void {
     if (override.text) this.factory('aiText', override.text);
     if (override.image) this.factory('aiImage', override.image);

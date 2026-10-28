@@ -1,4 +1,11 @@
-import { COLLECTIONS, GLOBAL_DOC_ID, apiRoutes, type AiConfig } from '@storynido/shared';
+import {
+  COLLECTIONS,
+  GLOBAL_DOC_ID,
+  aiModelProblems,
+  aiModelSchema,
+  apiRoutes,
+  type AiConfig,
+} from '@storynido/shared';
 import type { FastifyInstance } from 'fastify';
 import type { Firestore } from 'firebase-admin/firestore';
 import type { z } from 'zod';
@@ -60,6 +67,31 @@ export function registerAiConfigRoutes(app: FastifyInstance, db: Firestore): voi
         );
       }
     }
+    // Catálogo de modelos (aiModels): si hay modelos cargados, el elegido tiene que estar y cumplir
+    // las reglas del ambiente (nunca uno que entrena con los datos en producción).
+    const catalog = await db.collection(COLLECTIONS.aiModels).get();
+    if (!catalog.empty) {
+      const environment = app.deps.config.appEnv === 'test' ? 'local' : app.deps.config.appEnv;
+      for (const [provider, model] of [
+        [after.textProvider, after.textModel],
+        [after.imageProvider, after.imageModel],
+      ] as const) {
+        if (provider === 'mock') continue;
+        const entry = catalog.docs
+          .map((doc) => aiModelSchema.safeParse(doc.data()))
+          .find((parsed) => parsed.success && parsed.data.model === model);
+        if (!entry?.success) {
+          throw new AppError(
+            400,
+            'validation_failed',
+            `El modelo "${model}" no está en el catálogo de modelos: cárgalo (con su precio y su política de datos) antes de elegirlo.`,
+          );
+        }
+        const problems = aiModelProblems(entry.data, environment);
+        if (problems.length > 0) throw new AppError(400, 'validation_failed', problems.join(' '));
+      }
+    }
+
     // Un proveedor real con un modelo simulado fallaría en la primera llamada.
     if (
       (after.textProvider !== 'mock' && after.textModel.startsWith('mock')) ||

@@ -3,6 +3,7 @@ import {
   BookOpen,
   BriefcaseBusiness,
   Cake,
+  Cpu,
   FileText,
   Library,
   Lightbulb,
@@ -35,6 +36,7 @@ export interface NavItem {
     | '/editorial'
     | '/content'
     | '/ai'
+    | '/ai-models'
     | '/audit';
   label: string;
   /** Palabras extra para la búsqueda. */
@@ -98,6 +100,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: 'IA',
     keywords: 'modelos proveedor presupuesto regeneraciones',
     icon: Sparkles,
+  },
+  {
+    href: '/ai-models',
+    label: 'Modelos de IA',
+    keywords: 'catálogo precios política datos fotos',
+    icon: Cpu,
   },
   { href: '/audit', label: 'Auditoría', keywords: 'cambios historial registro', icon: History },
 ];

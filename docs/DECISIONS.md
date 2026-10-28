@@ -1097,3 +1097,21 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   1. Terraform crea los secretos `lulu-client-key` y `lulu-client-secret` (vacíos).
   2. Sebastián carga los valores del sandbox; recién entonces se suma `lulu` a `print_providers` (Cloud Run no arranca con un secreto sin versión).
 - **Pendiente:** registrar el webhook en Lulu y hacer una prueba de punta a punta en el sandbox (confirmar si pide un medio de pago de prueba).
+
+## 087 · Admin, etapa 4: dashboard con agregados y catálogo de modelos de IA
+
+- **Fecha:** 2026-10-28 · Cierra la fase 14 (falta la verificación en dos pasos de staging; ver 084).
+- **Dashboard:** ventas de hoy, de 7 días y del período; ticket promedio; conversión de muestra a compra; costo de IA (muestras no compradas incluidas); impresión y envío; margen neto estimado; ingresos por país y por moneda; barras por día con tooltip y vista de tabla.
+  - **Agregados:** `metricsDaily/{día}`. Un día cerrado se calcula una vez y se guarda; no se recalcula. Hoy se calcula en vivo. Cada cálculo lee solo los pedidos de un día, así que escala.
+  - **Ventas:** pedidos pagados y no reembolsados ni cancelados (la misma lista que el descuento Pro, `REVENUE_ORDER_STATUSES`).
+  - **Margen estimado:** ingresos sin impuestos − IA − impresión y envío. No incluye comisiones de pago (proveedor por definir).
+  - **Tipo de cambio:** `fxRates/{día}` desde open.er-api.com (ExchangeRate-API, acceso abierto con atribución), una consulta por día. Si falla, se usa la última cotización guardada y el panel muestra de qué fecha es.
+- **Catálogo de modelos (`aiModels`):** precio por millón de tokens, política de datos (entrena con los datos, revisión humana, regiones, contrato empresarial), ambientes permitidos, si puede recibir fotos de chicos y la última evaluación. Lo edita solo el superadmin.
+- **Reglas que hace cumplir el sistema:**
+  - al elegir un modelo en IA, tiene que estar en el catálogo (si el catálogo tiene modelos) y permitido en el ambiente;
+  - en producción, nunca un modelo que entrena con los datos o tiene revisión humana;
+  - si el modelo de imagen activo no puede recibir fotos de chicos, las muestras se crean solo sin foto;
+  - el costo de cada llamada usa el precio del catálogo; si no tiene, el de lista; si no, el peor caso (USD 2 / 120 por millón).
+- **Costo real:** por muestra y por libro (promedio, p50 y p95, según el modelo de imagen) y por modelo, desde `aiUsage`.
+- **Semilla:** los cuatro modelos de Vertex en uso, con su precio de lista. Pendiente: confirmar la exención del monitoreo de abuso de Vertex (revisión humana) antes de producción.
+- **Gráficos:** una serie con el color de la marca, validado contra la superficie clara (`#79518c`) y la oscura (`#a77bd0`).

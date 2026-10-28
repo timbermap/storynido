@@ -119,6 +119,43 @@ export const adminAuditEntrySchema = z.object({
 
 export type AdminAuditEntry = z.infer<typeof adminAuditEntrySchema>;
 
+const usdByKey = z.record(z.string(), z.number());
+
+export const dayMetricsSchema = z.object({
+  day: z.string(),
+  final: z.boolean(),
+  orders: z.number(),
+  refunds: z.number(),
+  revenueUsd: z.number(),
+  netRevenueUsd: z.number(),
+  revenueByCurrency: usdByKey,
+  revenueUsdByCountry: usdByKey,
+  ordersByChannel: usdByKey,
+  avgTicketUsd: z.number(),
+  previews: z.number(),
+  conversionPct: z.number(),
+  aiCostUsd: z.number(),
+  printCostUsd: z.number(),
+  marginUsd: z.number(),
+  fxSource: z.string(),
+  fxDate: z.string(),
+});
+
+const costStatsSchema = z.object({
+  count: z.number(),
+  avgUsd: z.number(),
+  p50Usd: z.number(),
+  p95Usd: z.number(),
+});
+
+export const aiCostReportSchema = z.object({
+  byModel: z.array(
+    z.object({ provider: z.string(), model: z.string(), calls: z.number(), totalUsd: z.number() }),
+  ),
+  perPreview: z.array(costStatsSchema.extend({ imageModel: z.string() })),
+  perBook: z.array(costStatsSchema.extend({ imageModel: z.string() })),
+});
+
 export const adminAiConfigResponseSchema = z.object({
   config: aiConfigSchema.omit({ updatedAt: true, updatedBy: true }).extend({
     updatedAt: z.string().nullable(),
@@ -671,6 +708,37 @@ export const apiRoutes = {
     params: z.object({ kind: adminConfigKindSchema, id: adminDocIdSchema }),
     body: z.record(z.string(), z.unknown()),
     response: z.object({ id: z.string(), data: z.record(z.string(), z.unknown()) }),
+  },
+  adminMetrics: {
+    method: 'GET',
+    path: '/v1/admin/metrics',
+    access: 'admin',
+    summary: 'Métricas por día (los cerrados precalculados, hoy en vivo) y totales del rango',
+    query: z.object({ days: z.coerce.number().int().min(1).max(366).default(30) }),
+    response: z.object({
+      days: z.array(dayMetricsSchema),
+      totals: dayMetricsSchema.pick({
+        orders: true,
+        refunds: true,
+        previews: true,
+        revenueUsd: true,
+        netRevenueUsd: true,
+        aiCostUsd: true,
+        printCostUsd: true,
+        marginUsd: true,
+        avgTicketUsd: true,
+        conversionPct: true,
+        revenueUsdByCountry: true,
+      }),
+    }),
+  },
+  adminAiCosts: {
+    method: 'GET',
+    path: '/v1/admin/ai-costs',
+    access: 'admin',
+    summary: 'Costo real de IA por muestra y por libro (promedio, p50 y p95) y por modelo',
+    query: z.object({ days: z.coerce.number().int().min(1).max(366).default(30) }),
+    response: aiCostReportSchema,
   },
   adminAuditLog: {
     method: 'GET',

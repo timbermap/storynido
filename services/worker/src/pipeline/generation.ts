@@ -37,6 +37,7 @@ import {
   type PageReview,
   type QaCode,
   type ScenePlan,
+  catalogPrices,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
@@ -235,6 +236,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     } catch (error) {
       log.error({ err: error }, 'ai config rejected; keeping previous providers');
     }
+    // Precios del catálogo del admin: el costo de cada llamada (y el presupuesto) los usa.
+    const models = await db.collection(COLLECTIONS.aiModels).get();
+    providers.setModelPrices(catalogPrices(models.docs.map((doc) => doc.data())));
   }
 
   /**

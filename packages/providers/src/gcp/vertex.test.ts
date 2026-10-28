@@ -51,6 +51,13 @@ describe('Vertex AI', () => {
       }),
     ).toBe(2000);
     expect(vertexCostUsdMicros('modelo-nuevo', { candidatesTokenCount: 1000 })).toBe(120_000);
+    // El catálogo del admin manda; si no tiene precio, la tabla de lista o el peor caso.
+    const catalog = (model: string) =>
+      model === 'modelo-nuevo' ? { inputPerMTok: 1, outputPerMTok: 10 } : null;
+    expect(vertexCostUsdMicros('modelo-nuevo', { candidatesTokenCount: 1000 }, catalog)).toBe(
+      10_000,
+    );
+    expect(vertexCostUsdMicros('otro', { candidatesTokenCount: 1000 }, catalog)).toBe(120_000);
   });
 
   it('genera el cuento con la cantidad de páginas pedida y su costo', async () => {

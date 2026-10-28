@@ -16,6 +16,7 @@ import { FirestoreCatalog } from './catalog';
 import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
+import { MetricsService } from './metrics/service';
 import { ProService } from './pro/service';
 import { CheckoutService } from './checkout/service';
 import { FulfillmentService } from './orders/fulfillment';
@@ -163,6 +164,7 @@ const app = await buildApp({
     ),
     notifier,
     pro,
+    metrics: new MetricsService(db),
     db,
   },
 });

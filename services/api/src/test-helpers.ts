@@ -12,6 +12,7 @@ import { InMemoryCatalog } from './catalog';
 import { initFirebaseAdmin } from './firebase';
 import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
+import { MetricsService } from './metrics/service';
 import { ProService } from './pro/service';
 import { PreviewService } from './preview/service';
 import { loadApiConfig } from './config';
@@ -144,6 +145,8 @@ export async function createTestApp(
     ),
     notifier,
     pro,
+    // Tipo de cambio fijo en los tests (sin red).
+    metrics: new MetricsService(db, () => Promise.resolve({ USD: 1, MXN: 20 })),
     db,
     ...overrides,
   };

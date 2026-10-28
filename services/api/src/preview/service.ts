@@ -38,6 +38,8 @@ import {
   type PublicPreview,
   storyGoals,
   validGoal,
+  acceptsChildPhotos,
+  aiModelSchema,
 } from '@storynido/shared';
 import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
@@ -212,6 +214,13 @@ export class PreviewService {
     const userQuota = quotas.doc(`${uid}_${day}`);
     // La IP se guarda con un hash corto: alcanza para limitar sin conservar la dirección.
     const ipQuota = quotas.doc(`ip_${hashIp(ip)}_${day}`);
+    // Catálogo de modelos: si el modelo de imagen activo no puede recibir fotos de chicos
+    // (entrena con los datos, tiene revisión humana o no está permitido), solo modo sin foto.
+    const imageModel = (
+      await this.db.collection(COLLECTIONS.aiModels).doc(this.providers.aiModels().image).get()
+    ).data();
+    const entry = imageModel ? aiModelSchema.safeParse(imageModel) : null;
+    const photosAllowed = !entry?.success || acceptsChildPhotos(entry.data);
 
     await this.db.runTransaction(async (tx) => {
       const [bookSnap, userSnap, ipSnap] = await Promise.all([
@@ -237,6 +246,13 @@ export class PreviewService {
           409,
           'bad_request',
           'Completa el protagonista, la historia y el estilo.',
+        );
+      }
+      if (book.characterMode !== 'avatar' && !photosAllowed) {
+        throw new AppError(
+          409,
+          'bad_request',
+          'Por ahora las muestras se crean sin foto: elige los rasgos del protagonista.',
         );
       }
       if (book.characterMode === 'avatar' ? !book.avatar : book.photoIds.length === 0) {

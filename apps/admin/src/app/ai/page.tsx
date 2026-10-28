@@ -4,6 +4,7 @@ import type { AiConfig } from '@storynido/shared';
 import { useCallback, useState, type ReactNode, type SubmitEvent } from 'react';
 
 import { useAdminAuth } from '@/components/auth/admin-auth';
+import { AiCosts } from '@/components/dashboard/ai-costs';
 import { Button } from '@/components/ui/button';
 import { Card, Notice, PageHeader } from '@/components/ui/page-header';
 import { api } from '@/lib/api';
@@ -176,6 +177,7 @@ export default function AiPage() {
         )}
         {message && <Notice tone={message.error ? 'error' : 'info'}>{message.text}</Notice>}
       </form>
+      <AiCosts />
     </>
   );
 }

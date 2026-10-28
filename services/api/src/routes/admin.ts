@@ -6,6 +6,7 @@ import {
   apiRoutes,
   expectedDocId,
   normalizeFirestoreData,
+  sumMetrics,
   type AdminAuditEntry,
   type AdminConfigKind,
   type SiteConfig,
@@ -85,6 +86,14 @@ export function registerAdminRoutes(app: FastifyInstance, db: Firestore): void {
 
   addRoute(app, apiRoutes.adminConfigSave, {}, async (request) => {
     const { kind, id } = request.params as { kind: AdminConfigKind; id: string };
+    // El catálogo de modelos de IA decide qué recibe los datos de los chicos: solo el superadmin.
+    if (kind === 'aiModels' && request.user?.role !== 'superadmin') {
+      throw new AppError(
+        403,
+        'forbidden',
+        'Solo el superadmin cambia el catálogo de modelos de IA.',
+      );
+    }
     const parsed = ADMIN_CONFIG[kind].input.safeParse(request.body);
     if (!parsed.success) {
       const issue = parsed.error.issues[0];
@@ -124,6 +133,18 @@ export function registerAdminRoutes(app: FastifyInstance, db: Firestore): void {
       (batch) => batch.set(ref, data),
     );
     return { id, data };
+  });
+
+  // Dashboard: días cerrados precalculados (metricsDaily) y hoy en vivo.
+  addRoute(app, apiRoutes.adminMetrics, {}, async (request) => {
+    const { days } = request.query as { days: number };
+    const list = await app.deps.metrics.range(days);
+    return { days: list, totals: sumMetrics(list) };
+  });
+
+  addRoute(app, apiRoutes.adminAiCosts, {}, async (request) => {
+    const { days } = request.query as { days: number };
+    return app.deps.metrics.aiCosts(days);
   });
 
   addRoute(app, apiRoutes.adminAuditLog, {}, async (request) => {

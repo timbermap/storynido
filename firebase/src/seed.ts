@@ -37,6 +37,7 @@ import {
   PRINT_FORMATS,
   CLOUDPRINTER_PRODUCTS,
   DEFAULT_PRO_DISCOUNTS,
+  aiModelSchema,
   GELATO_PRODUCTS,
   LULU_PRODUCTS,
   proDiscountConfigSchema,
@@ -355,6 +356,37 @@ batch.set(
   db.collection(COLLECTIONS.proDiscounts).doc(GLOBAL_DOC_ID),
   proDiscountConfigSchema.parse(DEFAULT_PRO_DISCOUNTS),
 );
+
+// Catálogo de modelos de IA (DECISIONS 087): los de Vertex que ya se usan, con su precio de lista.
+// Vertex no entrena con los datos de los clientes (términos de Google Cloud). Pendiente: confirmar
+// la exención del monitoreo de abuso (revisión humana) antes de producción.
+const VERTEX_MODELS = [
+  { model: 'gemini-3.5-flash', kind: 'text', input: 0.5, output: 3 },
+  { model: 'gemini-3.1-flash-lite', kind: 'text', input: 0.1, output: 0.4 },
+  { model: 'gemini-3.1-flash-image', kind: 'image', input: 0.5, output: 60 },
+  { model: 'gemini-3-pro-image', kind: 'image', input: 2, output: 120 },
+] as const;
+for (const entry of VERTEX_MODELS) {
+  batch.set(
+    db.collection(COLLECTIONS.aiModels).doc(entry.model),
+    aiModelSchema.parse({
+      provider: 'vertex',
+      model: entry.model,
+      kind: entry.kind,
+      price: { inputPerMTok: entry.input, outputPerMTok: entry.output },
+      dataPolicy: {
+        trainsOnData: false,
+        humanReview: false,
+        regions: ['global'],
+        enterpriseAgreement: true,
+      },
+      allowedEnvironments: ['local', 'staging', 'production'],
+      childPhotosAllowed: entry.kind === 'image',
+      lastEval: null,
+      notes: 'Precio de lista de Vertex AI (revisar en la consola).',
+    }),
+  );
+}
 
 // Cupón de prueba (solo en los emuladores): 10 % para probar el checkout.
 if (!cloud) {

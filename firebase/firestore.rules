@@ -383,6 +383,22 @@ service cloud.firestore {
     // ------------------------------------------------ costos y cuotas de IA
 
     // Uso y gasto de IA: solo el servidor escribe; el admin lo consulta.
+    // Catálogo de modelos, métricas y tipos de cambio: los escribe el servidor; el admin los lee.
+    match /aiModels/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /metricsDaily/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /fxRates/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     match /aiUsage/{id} {
       allow read: if isAdmin();
       allow write: if false;

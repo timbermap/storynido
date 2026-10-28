@@ -1,4 +1,4 @@
-import { COLLECTIONS } from '@storynido/shared';
+import { COLLECTIONS, utcDay } from '@storynido/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
@@ -30,6 +30,11 @@ describe('admin: interruptor del sitio y auditoría', () => {
       COLLECTIONS.promotions,
       COLLECTIONS.content,
       COLLECTIONS.lessons,
+      COLLECTIONS.orders,
+      COLLECTIONS.metricsDaily,
+      COLLECTIONS.fxRates,
+      COLLECTIONS.aiUsage,
+      COLLECTIONS.aiBudget,
     ]) {
       await db.recursiveDelete(db.collection(name));
     }
@@ -223,6 +228,92 @@ describe('admin: interruptor del sitio y auditoría', () => {
       (await save('lessons', 'compartir', { ...lesson, ageMin: 3, ageMax: 8 })).statusCode,
     ).toBe(200);
     expect((await db.doc('lessons/compartir').get()).get('createdAt')).toBeDefined();
+  });
+
+  it('catálogo de modelos de IA: solo el superadmin lo cambia', async () => {
+    const entry = {
+      provider: 'vertex',
+      model: 'gemini-3.5-flash',
+      kind: 'text',
+      price: { inputPerMTok: 0.5, outputPerMTok: 3 },
+      dataPolicy: {
+        trainsOnData: false,
+        humanReview: false,
+        regions: ['global'],
+        enterpriseAgreement: true,
+      },
+      allowedEnvironments: ['staging', 'production'],
+      childPhotosAllowed: false,
+      lastEval: null,
+      notes: null,
+    };
+    expect((await save('aiModels', 'gemini-3.5-flash', entry)).statusCode).toBe(403);
+    expect(
+      (await save('aiModels', 'gemini-3.5-flash', entry, 'token-root:superadmin:mfa')).statusCode,
+    ).toBe(200);
+    await db.recursiveDelete(db.collection(COLLECTIONS.aiModels));
+  });
+
+  it('dashboard: el día cerrado se guarda y no se recalcula; hoy va en vivo', async () => {
+    const today = utcDay();
+    const yesterday = utcDay(new Date(Date.now() - 24 * 3600 * 1000));
+    const at = (day: string) => new Date(`${day}T12:00:00.000Z`);
+    const order = (id: string, day: string, status: string, totalMinor: number) =>
+      db.doc(`orders/${id}`).set({
+        status,
+        channel: 'families',
+        country: 'MX',
+        currency: 'MXN',
+        amounts: { totalMinor, taxMinor: 0 },
+        printRouting: { totalCostUsdMinor: 500 },
+        createdAt: at(day),
+      });
+    await order('o1', yesterday, 'paid', 40000);
+    await order('o2', yesterday, 'refunded', 40000);
+    await order('o3', today, 'delivered', 20000);
+    await db.doc(`aiBudget/${yesterday}`).set({ spentUsdMicros: 2_000_000 });
+    for (const [book, orderId, cost] of [
+      ['b1', null, 300_000],
+      ['b2', null, 500_000],
+      ['b1', 'o1', 1_500_000],
+    ] as const) {
+      await db.collection('aiUsage').add({
+        day: yesterday,
+        kind: 'illustration',
+        provider: 'vertex',
+        model: 'gemini-3.1-flash-image',
+        costUsdMicros: cost,
+        ownerUid: 'u1',
+        bookId: book,
+        orderId,
+        at: at(yesterday),
+      });
+    }
+    const metrics = () =>
+      app.inject({ method: 'GET', url: '/v1/admin/metrics?days=2', headers: auth(ADMIN) });
+    const first = (await metrics()).json<{
+      days: { day: string; final: boolean; orders: number; revenueUsd: number; previews: number }[];
+      totals: { orders: number; revenueUsd: number; marginUsd: number };
+    }>();
+    expect(first.days.map((day) => [day.day, day.final, day.orders])).toEqual([
+      [yesterday, true, 1],
+      [today, false, 1],
+    ]);
+    expect(first.days[0]).toMatchObject({ revenueUsd: 20, previews: 2 });
+    // 20 + 10 de ingresos; 2 de IA y 5 + 5 de impresión.
+    expect(first.totals).toMatchObject({ orders: 2, revenueUsd: 30, marginUsd: 18 });
+    expect((await db.doc(`metricsDaily/${yesterday}`).get()).exists).toBe(true);
+
+    // Un cambio posterior en un día cerrado no altera lo guardado (no se recalcula).
+    await db.doc('orders/o2').update({ status: 'paid' });
+    const second = (await metrics()).json<{ days: { orders: number }[] }>();
+    expect(second.days[0]?.orders).toBe(1);
+
+    const costs = (
+      await app.inject({ method: 'GET', url: '/v1/admin/ai-costs?days=3', headers: auth(ADMIN) })
+    ).json<{ perPreview: { count: number; p50Usd: number }[]; perBook: { avgUsd: number }[] }>();
+    expect(costs.perPreview[0]).toMatchObject({ count: 2, p50Usd: 0.3 });
+    expect(costs.perBook[0]).toMatchObject({ avgUsd: 1.5 });
   });
 
   it('un customer no lee ni escribe la configuración', async () => {

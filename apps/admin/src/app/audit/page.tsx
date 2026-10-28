@@ -24,6 +24,7 @@ const ENTITIES = [
   ['lessons', 'Enseñanzas'],
   ['editorialConfig', 'Opciones editoriales'],
   ['content', 'Contenido'],
+  ['aiModels', 'Modelos de IA'],
   ['orders', 'Pedidos'],
   ['users', 'Usuarios'],
 ] as const;

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { aiModelSchema } from './ai-models';
 import { illustrationStyleSchema, lessonSchema, storySchema } from './catalog';
 import { collectionSchema } from './channels';
 import { COLLECTIONS } from './collections';
@@ -106,6 +107,13 @@ export const ADMIN_CONFIG = {
     input: editorialConfigSchema,
     docId: () => 'global',
   },
+  // Etapa 4: catálogo de modelos de IA (solo el superadmin lo cambia; ver la ruta).
+  aiModels: {
+    collection: COLLECTIONS.aiModels,
+    updatedBy: true,
+    input: aiModelSchema,
+    docId: (data: { model: string }) => data.model,
+  },
 } as const;
 
 /** Si el tipo guarda cuándo se creó o quién lo cambió por última vez. */
@@ -123,8 +131,8 @@ export type AdminConfigInput<K extends AdminConfigKind> = z.input<
   (typeof ADMIN_CONFIG)[K]['input']
 >;
 
-/** Id de documento válido para los tipos sin clave natural (slug). */
-export const adminDocIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);
+/** Id de documento válido (slug; con puntos para los nombres de modelos como gemini-3.5-flash). */
+export const adminDocIdSchema = z.string().regex(/^[A-Za-z0-9._-]{1,80}$/);
 
 /** El id del documento tiene que coincidir con su clave natural (o ser un slug válido). */
 export function expectedDocId(kind: AdminConfigKind, data: unknown): string | null {

@@ -1,5 +1,11 @@
 import type { ProviderRegistry } from '@storynido/providers';
-import { COLLECTIONS, GLOBAL_DOC_ID, SITE_MODES, type SiteConfig } from '@storynido/shared';
+import {
+  COLLECTIONS,
+  GLOBAL_DOC_ID,
+  SITE_MODES,
+  catalogPrices,
+  type SiteConfig,
+} from '@storynido/shared';
 import { getApps, initializeApp, type App } from 'firebase-admin/app';
 import { getAppCheck } from 'firebase-admin/app-check';
 import { getAuth } from 'firebase-admin/auth';
@@ -68,6 +74,7 @@ export class FirestoreLiveConfig implements SiteConfigSource {
 
   start(): void {
     const db = getFirestore(this.app);
+    this.watchModelPrices();
 
     this.unsubscribers.push(
       db
@@ -115,6 +122,21 @@ export class FirestoreLiveConfig implements SiteConfigSource {
             this.markAiReady();
           },
         ),
+    );
+  }
+
+  /** Catálogo de modelos: sus precios definen el costo de cada llamada (y el presupuesto). */
+  private watchModelPrices(): void {
+    const db = getFirestore(this.app);
+    this.unsubscribers.push(
+      db.collection(COLLECTIONS.aiModels).onSnapshot(
+        (snapshot) => {
+          this.providers.setModelPrices(catalogPrices(snapshot.docs.map((doc) => doc.data())));
+        },
+        (error) => {
+          this.log.error({ err: error }, 'aiModels listener failed');
+        },
+      ),
     );
   }
 

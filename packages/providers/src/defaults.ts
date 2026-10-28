@@ -1,7 +1,12 @@
 import type { EmailMessage, StorageBucket } from '@storynido/shared';
 
 import { GcsStorageService } from './gcp/storage';
-import { VertexClient, VertexImageProvider, VertexTextProvider } from './gcp/vertex';
+import {
+  VertexClient,
+  VertexImageProvider,
+  VertexTextProvider,
+  type ModelPriceLookup,
+} from './gcp/vertex';
 import { VisionPhotoAnalyzer } from './gcp/vision';
 import { CloudprinterPrintProvider, type CloudprinterOptions } from './cloudprinter/print';
 import { GelatoPrintProvider, type GelatoOptions } from './gelato/print';
@@ -49,6 +54,7 @@ export interface DefaultProviderOptions {
 export function createProviderFactories(
   options: Omit<DefaultProviderOptions, 'settings' | 'aiModels'>,
   currentModels: () => AiModelSettings = () => aiModelSettingsSchema.parse({}),
+  currentPrices?: ModelPriceLookup,
 ): ProviderFactories {
   const buckets = options.gcsBuckets;
   const gelato = options.gelato;
@@ -62,6 +68,7 @@ export function createProviderFactories(
       projectId: id,
       location: options.vertexLocation,
       models: currentModels,
+      prices: currentPrices,
     }));
   return {
     aiText: {
@@ -105,7 +112,11 @@ export function createProviderRegistry(options: DefaultProviderOptions): Provide
   // Los proveedores leen los modelos vigentes del registro (aiConfig los cambia en vivo).
   const defaults = options.aiModels ?? aiModelSettingsSchema.parse({});
   const registry: ProviderRegistry = new ProviderRegistry(
-    createProviderFactories(options, () => registry.aiModels()),
+    createProviderFactories(
+      options,
+      () => registry.aiModels(),
+      (model) => registry.modelPrice(model),
+    ),
     options.settings,
     defaults,
   );

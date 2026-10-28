@@ -1,5 +1,6 @@
 import {
   COLLECTIONS,
+  REVENUE_ORDER_STATUSES,
   type OrderStatus,
   type ProDiscountConfig,
   type ProProfile,
@@ -9,18 +10,6 @@ import type { Firestore } from 'firebase-admin/firestore';
 
 import type { CatalogRepository } from '../catalog';
 import { AppError } from '../errors';
-
-/** Pedidos que cuentan para el descuento: pagados y no reembolsados ni cancelados. */
-const ELIGIBLE: readonly OrderStatus[] = [
-  'paid',
-  'generating',
-  'ready',
-  'qa_failed',
-  'sent_to_print',
-  'in_production',
-  'shipped',
-  'delivered',
-];
 
 /**
  * StoryNido Profesionales (fase 12c): la cuenta Pro la activa la API (el cliente no puede
@@ -59,7 +48,9 @@ export class ProService {
       .where('ownerUid', '==', uid)
       .where('createdAt', '>=', since)
       .get();
-    return orders.docs.filter((doc) => ELIGIBLE.includes(doc.get('status') as OrderStatus)).length;
+    return orders.docs.filter((doc) =>
+      REVENUE_ORDER_STATUSES.includes(doc.get('status') as OrderStatus),
+    ).length;
   }
 
   /** Para el checkout: null si la cuenta es de Familia (el precio de Familias de siempre). */

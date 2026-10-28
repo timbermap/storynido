@@ -100,7 +100,7 @@ export function ConfigEditor({
                 className="h-9 rounded-md border bg-background px-2 text-sm"
                 value={slug}
                 required
-                pattern="[A-Za-z0-9_-]{1,64}"
+                pattern="[A-Za-z0-9._-]{1,80}"
                 onChange={(event) => {
                   setSlug(event.target.value);
                 }}

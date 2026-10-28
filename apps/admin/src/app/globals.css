@@ -11,6 +11,9 @@
   --primary-foreground: #ffffff;
   --card: #ffffff;
   --destructive: #b3261e;
+  /* Serie de los gráficos (validada contra la superficie clara). */
+  --chart-1: #79518c;
+  --chart-grid: oklch(0.92 0.01 85);
   --muted: oklch(0.96 0.01 85);
   --muted-foreground: oklch(0.5 0.02 60);
   --accent: oklch(0.95 0.03 85);
@@ -26,6 +29,9 @@
   --primary-foreground: #241a2b;
   --card: oklch(0.22 0.01 60);
   --destructive: #f2b8b5;
+  /* Validada contra la superficie oscura (no es la misma que la clara). */
+  --chart-1: #a77bd0;
+  --chart-grid: oklch(0.3 0.01 60);
   --muted: oklch(0.25 0.01 60);
   --muted-foreground: oklch(0.72 0.02 85);
   --accent: oklch(0.28 0.02 60);
@@ -41,6 +47,8 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-card: var(--card);
   --color-destructive: var(--destructive);
+  --color-chart-1: var(--chart-1);
+  --color-chart-grid: var(--chart-grid);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);

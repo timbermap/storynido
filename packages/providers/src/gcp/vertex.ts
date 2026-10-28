@@ -58,8 +58,21 @@ interface GenerateContentResponse {
 
 type Part = { text: string } | { inlineData: { mimeType: string; data: string } };
 
-export function vertexCostUsdMicros(model: string, usage: UsageMetadata | undefined): number {
-  const price = VERTEX_PRICES[model] ?? WORST_PRICE;
+/** Precio por millón de tokens según el catálogo del admin (aiModels), si lo tiene. */
+export type ModelPriceLookup = (
+  model: string,
+) => { inputPerMTok: number; outputPerMTok: number } | null | undefined;
+
+/** Costo de una llamada: el precio del catálogo, si no el de lista, y si no el peor caso. */
+export function vertexCostUsdMicros(
+  model: string,
+  usage: UsageMetadata | undefined,
+  catalog?: ModelPriceLookup,
+): number {
+  const listed = catalog?.(model);
+  const price = listed
+    ? { input: listed.inputPerMTok, output: listed.outputPerMTok }
+    : (VERTEX_PRICES[model] ?? WORST_PRICE);
   const input = usage?.promptTokenCount ?? 0;
   const output = (usage?.candidatesTokenCount ?? 0) + (usage?.thoughtsTokenCount ?? 0);
   return Math.ceil(input * price.input + output * price.output);
@@ -78,6 +91,8 @@ export interface VertexOptions {
   location?: string;
   /** Modelos vigentes (aiConfig puede cambiarlos sin redeploy). */
   models: () => { text: string; image: string };
+  /** Precios del catálogo del admin (aiModels), leídos en vivo. */
+  prices?: ModelPriceLookup;
   /** Token alternativo (p. ej. el script de evaluación con gcloud). Si no, credenciales del entorno. */
   getAccessToken?: () => Promise<string>;
   fetch?: typeof fetch;
@@ -136,7 +151,7 @@ export class VertexClient {
           usage: {
             provider: 'vertex',
             model,
-            costUsdMicros: vertexCostUsdMicros(model, response.usageMetadata),
+            costUsdMicros: vertexCostUsdMicros(model, response.usageMetadata, this.options.prices),
           },
         };
       }

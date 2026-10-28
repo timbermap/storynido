@@ -39,6 +39,12 @@ export const COLLECTIONS = {
   promotions: 'promotions',
   siteConfig: 'siteConfig',
   aiConfig: 'aiConfig',
+  /** Catálogo de modelos de IA: precios y política de datos (admin, fase 14). */
+  aiModels: 'aiModels',
+  /** Métricas diarias precalculadas del dashboard. */
+  metricsDaily: 'metricsDaily',
+  /** Tipo de cambio diario a USD (fuente: open.er-api.com). */
+  fxRates: 'fxRates',
   /** editorialConfig/global: extensiones, densidades, niveles y tipos de contenido. */
   editorialConfig: 'editorialConfig',
   activityTemplates: 'activityTemplates',
