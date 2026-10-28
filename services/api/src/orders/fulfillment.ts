@@ -76,6 +76,10 @@ export class FulfillmentService {
       event = await printer.parseWebhook({ rawBody, headers });
     } catch (error) {
       if (error instanceof WebhookSignatureError) {
+        this.log.warn(
+          { event: 'webhook_rejected', provider: providerId },
+          'print webhook rejected',
+        );
         throw new AppError(400, 'bad_request', 'Firma inválida.');
       }
       throw error;
@@ -110,6 +114,12 @@ export class FulfillmentService {
       });
       return 'processed' as const;
     });
+    if (outcome === 'processed') {
+      this.log.info(
+        { event: 'order_status', orderId: event.orderId, status: to, provider: providerId },
+        'order status changed',
+      );
+    }
     if (outcome === 'processed' && event.status === 'failed') {
       await this.db.collection(COLLECTIONS.adminAlerts).add({
         kind: 'print_failed',
@@ -166,6 +176,7 @@ export class FulfillmentService {
       throw new AppError(409, 'bad_request', result.reason ?? 'La imprenta no pudo cancelar.');
     }
     await ref.update({ status: 'cancelled', updatedAt: new Date() });
+    this.log.info({ event: 'order_status', orderId, status: 'cancelled' }, 'order status changed');
     await this.notifier?.orderStatus(orderId, 'cancelled');
     return { status: 'cancelled' as const };
   }

@@ -112,6 +112,17 @@ export class AiBudget {
       });
     }
     await batch.commit();
+    // Métrica de costo de IA (y alerta de picos) en Cloud Monitoring.
+    this.log.info(
+      {
+        event: 'ai_usage',
+        kind: context.kind,
+        provider: usage.provider,
+        model: usage.model,
+        costUsdMicros: usage.costUsdMicros,
+      },
+      'ai usage',
+    );
     if (usage.costUsdMicros > 0) await this.maybeAlert(day, limits);
   }
 
@@ -130,6 +141,7 @@ export class AiBudget {
       this.log.error(
         {
           alert: 'ai_budget_threshold',
+          event: 'ai_budget_alert',
           spentUsd: crossed / 1_000_000,
           dailyBudgetUsd: limits.dailyBudgetUsd,
         },

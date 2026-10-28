@@ -11,3 +11,6 @@ allowBuilds:
   protobufjs: false
   re2: false
   unrs-resolver: true
+# Seguridad (fase 16): versiones transitivas con vulnerabilidades altas (pnpm audit en CI).
+overrides:
+  '@grpc/grpc-js@<1.13.6': 1.13.7

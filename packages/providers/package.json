@@ -20,7 +20,7 @@
     "@storynido/shared": "workspace:*",
     "google-auth-library": "11.3.1",
     "sharp": "0.35.5",
-    "zod": "4.3.3"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "tsx": "4.23.15"

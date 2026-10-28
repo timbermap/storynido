@@ -48,6 +48,8 @@ main:
             url: ${worker + "/pipeline/orders/" + run.orderId + "/finish"}
             auth:
               type: OIDC
+            headers:
+              X-Cloud-Trace-Context: ${run.trace + "/1;o=1"}
             body:
               runId: ${run.runId}
         retry: ${http.default_retry}
@@ -75,6 +77,8 @@ runStep:
             url: ${worker + "/pipeline/steps/" + step.name + "/run"}
             auth:
               type: OIDC
+            headers:
+              X-Cloud-Trace-Context: ${run.trace + "/1;o=1"}
             body: ${target}
             timeout: ${step.timeoutSeconds}
           result: res
@@ -116,6 +120,8 @@ runStep:
             url: ${worker + "/pipeline/illustrations/status"}
             auth:
               type: OIDC
+            headers:
+              X-Cloud-Trace-Context: ${run.trace + "/1;o=1"}
             body: ${target}
           result: status
         retry: ${http.default_retry}
@@ -161,6 +167,8 @@ runStep:
             url: ${worker + "/pipeline/orders/" + run.orderId + "/fail"}
             auth:
               type: OIDC
+            headers:
+              X-Cloud-Trace-Context: ${run.trace + "/1;o=1"}
             body:
               runId: ${run.runId}
               step: ${step.name}

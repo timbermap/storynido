@@ -1,4 +1,5 @@
 import { isAdminRole, roleFromClaims, type Role, type RouteAccess } from '@storynido/shared';
+import { traceLogFields } from '@storynido/shared/server';
 import type {
   FastifyInstance,
   FastifyRequest,
@@ -16,6 +17,17 @@ const BEARER = /^Bearer\s+(.+)$/i;
  */
 export function registerAuthentication(app: FastifyInstance): void {
   app.decorateRequest('user', null);
+
+  // Cada línea de log del request lleva su traza (Cloud Run manda la cabecera).
+  app.addHook('onRequest', (request, _reply, done) => {
+    const header = request.headers['x-cloud-trace-context'] ?? request.headers.traceparent;
+    const fields = traceLogFields(
+      Array.isArray(header) ? header[0] : header,
+      app.deps.config.projectId,
+    );
+    if (Object.keys(fields).length > 0) request.log = request.log.child(fields);
+    done();
+  });
 
   app.addHook('onRequest', async (request) => {
     const header = request.headers.authorization;

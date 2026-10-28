@@ -284,6 +284,18 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       { merge: true },
     );
     await batch.commit();
+    // Métrica de costo de IA (y alerta de picos) en Cloud Monitoring.
+    ctx.log.info(
+      {
+        event: 'ai_usage',
+        orderId: ctx.order.id,
+        kind,
+        provider: usage.provider,
+        model: usage.model,
+        costUsdMicros: usage.costUsdMicros,
+      },
+      'ai usage',
+    );
     return usage.costUsdMicros;
   }
 

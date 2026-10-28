@@ -12,6 +12,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 import { buildApp } from './app';
 import { PostSaleJobs } from './jobs/post-sale';
+import { PipelineWatchdog } from './jobs/watchdog';
 import { loadWorkerEnv } from './config';
 import { generationHandlers } from './pipeline/generation';
 import { simulatedHandlers } from './pipeline/handlers';
@@ -33,10 +34,12 @@ const firebase =
 const current = (): Pipeline => pipeline;
 
 const app = buildApp({
-  logger: cloudLoggingOptions('worker', env.LOG_LEVEL),
+  logger: cloudLoggingOptions('worker', env.LOG_LEVEL, env.K_REVISION),
   version: env.K_REVISION,
+  projectId: env.GCP_PROJECT_ID || 'demo-storynido',
   pipeline: current,
   jobs: () => jobs,
+  watchdog: () => watchdog,
 });
 
 const settings = providerSettingsFromEnv(process.env);
@@ -93,6 +96,12 @@ const notifier = new EmailNotifier(db, () => providers.email(), {
   log: app.log,
 });
 const jobs = new PostSaleJobs(db, notifier);
+const watchdog = new PipelineWatchdog(
+  db,
+  notifier,
+  app.log,
+  env.GCP_PROJECT_ID || 'demo-storynido',
+);
 
 const gcp = { projectId: env.GCP_PROJECT_ID, region: env.GCP_REGION };
 const cloud = env.PIPELINE_RUNNER === 'cloud';

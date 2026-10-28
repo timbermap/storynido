@@ -467,6 +467,30 @@ resource "google_cloud_scheduler_job" "post_sale" {
   depends_on = [module.apis]
 }
 
+resource "google_cloud_scheduler_job" "watchdog" {
+  project     = var.project_id
+  region      = var.region
+  name        = "pipeline-watchdog"
+  description = "Vigía del pipeline (DECISIONS 089): avisa los pedidos que llevan más de 2 horas generando."
+  schedule    = "*/30 * * * *"
+  time_zone   = "Etc/UTC"
+
+  http_target {
+    http_method = "POST"
+    uri         = "${module.worker.uri}/jobs/watchdog"
+    oidc_token {
+      service_account_email = local.sa["sn-invoker"]
+      audience              = module.worker.uri
+    }
+  }
+
+  retry_config {
+    retry_count = 1
+  }
+
+  depends_on = [module.apis]
+}
+
 # --- Secretos (sin valores: se cargan con gcloud, ver infra/README.md) --------
 
 module "secrets" {

@@ -1,12 +1,56 @@
 import { describe, expect, it } from 'vitest';
 
-import { cloudLoggingOptions, parseServiceEnv } from './index';
+import {
+  cloudLoggingOptions,
+  cloudTraceHeader,
+  orderLogFields,
+  orderTraceId,
+  parseServiceEnv,
+  traceLogFields,
+} from './index';
 
 describe('server utils', () => {
   it('mapea niveles de pino a severidades de Cloud Logging', () => {
     const { formatters } = cloudLoggingOptions('api', 'info');
     expect(formatters.level('warn')).toEqual({ severity: 'WARNING' });
     expect(formatters.level('desconocido')).toEqual({ severity: 'DEFAULT' });
+  });
+
+  it('los errores salen con lo que necesita Error Reporting (tipo, servicio, versión y pila)', () => {
+    const options = cloudLoggingOptions('worker', 'info', 'worker-00042');
+    expect(options.mixin({}, 30)).toEqual({});
+    const reported = options.mixin({}, 50) as { '@type'?: string; serviceContext?: object };
+    expect(reported['@type']).toContain('ReportedErrorEvent');
+    expect(reported.serviceContext).toEqual({ service: 'worker', version: 'worker-00042' });
+    const error = new Error('boom');
+    const line = options.formatters.log({ err: { stack: error.stack } }) as {
+      stack_trace?: string;
+    };
+    expect(line.stack_trace).toContain('Error: boom');
+  });
+
+  it('traza: lee la cabecera de Cloud Trace o la W3C; la del pedido es estable', () => {
+    const trace = '105445aa7843bc8bf206b12000100000';
+    expect(traceLogFields(`${trace}/1;o=1`, 'p')).toEqual({
+      'logging.googleapis.com/trace': `projects/p/traces/${trace}`,
+      'logging.googleapis.com/spanId': '0000000000000001',
+      'logging.googleapis.com/trace_sampled': true,
+    });
+    expect(traceLogFields(`00-${trace}-00f067aa0ba902b7-01`, 'p')).toMatchObject({
+      'logging.googleapis.com/spanId': '00f067aa0ba902b7',
+      'logging.googleapis.com/trace_sampled': true,
+    });
+    expect(traceLogFields(undefined, 'p')).toEqual({});
+    expect(traceLogFields('basura', 'p')).toEqual({});
+
+    const id = orderTraceId('o1');
+    expect(id).toMatch(/^[\da-f]{32}$/);
+    expect(orderTraceId('o1')).toBe(id);
+    expect(cloudTraceHeader(id)).toMatch(new RegExp(`^${id}/\\d+;o=1$`));
+    expect(orderLogFields('o1', 'p')).toEqual({
+      orderId: 'o1',
+      'logging.googleapis.com/trace': `projects/p/traces/${id}`,
+    });
   });
 
   it('usa el puerto por defecto y respeta PORT', () => {

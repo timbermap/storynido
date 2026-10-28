@@ -623,6 +623,10 @@ export class CheckoutService {
       event = provider.parseWebhook({ rawBody, headers });
     } catch (error) {
       if (error instanceof WebhookSignatureError) {
+        this.log.warn(
+          { event: 'webhook_rejected', provider: providerId },
+          'payment webhook rejected',
+        );
         throw new AppError(400, 'bad_request', 'Firma inválida.');
       }
       throw error;
@@ -714,6 +718,10 @@ export class CheckoutService {
       });
       return 'processed';
     }
+    this.log.info(
+      { event: 'order_status', orderId: event.orderId, status: 'paid' },
+      'order status changed',
+    );
     await this.notifier?.orderStatus(event.orderId, 'paid');
     await this.events.publish({
       type: 'order.paid',
@@ -754,7 +762,10 @@ export class CheckoutService {
       tx.update(ref, { status: to, updatedAt: new Date() });
       return 'processed' as const;
     });
-    if (outcome === 'processed') await this.notifier?.orderStatus(orderId, to);
+    if (outcome === 'processed') {
+      this.log.info({ event: 'order_status', orderId, status: to }, 'order status changed');
+      await this.notifier?.orderStatus(orderId, to);
+    }
     return outcome;
   }
 

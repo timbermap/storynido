@@ -6,6 +6,7 @@ import {
   initializeAuth,
   type Auth,
 } from 'firebase/auth';
+import type { AppCheck } from 'firebase/app-check';
 import type { Firestore } from 'firebase/firestore';
 
 import { EMULATOR_HOSTS, firebaseConfig, useFirebaseEmulators } from './config';
@@ -47,4 +48,34 @@ export function getFirebaseDb(): Promise<Firestore> {
     return instance;
   });
   return db;
+}
+
+/** reCAPTCHA Enterprise para App Check (sin clave, App Check queda apagado). */
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
+let appCheck: Promise<AppCheck | null> | undefined;
+
+/**
+ * Token de App Check para las rutas sensibles de la API (subir fotos, generar la muestra,
+ * pagar). Se carga en diferido y solo si hay clave de reCAPTCHA Enterprise.
+ */
+export async function getAppCheckToken(): Promise<string | null> {
+  if (!RECAPTCHA_SITE_KEY || useFirebaseEmulators || typeof window === 'undefined') return null;
+  appCheck ??= import('firebase/app-check')
+    .then(({ initializeAppCheck, ReCaptchaEnterpriseProvider }) =>
+      initializeAppCheck(firebaseApp(), {
+        provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),
+        isTokenAutoRefreshEnabled: true,
+      }),
+    )
+    .catch(() => null);
+  const instance = await appCheck;
+  if (!instance) return null;
+  try {
+    const { getToken } = await import('firebase/app-check');
+    return (await getToken(instance)).token;
+  } catch {
+    // Sin token, la API responde app_check_failed solo donde lo exige.
+    return null;
+  }
 }

@@ -1147,3 +1147,26 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - formatos, extensiones y densidades más elegidos.
   - `story_edit_rate` usa el nuevo código `text_edited`; `support_case_rate` queda sin dato hasta tener soporte.
 - **Índices nuevos:** `auditLog (actorEmail, at)`, `aiUsage (kind, at)` y `qaEvents.at` en grupo de colecciones.
+
+## 089 · Observabilidad, seguridad y privacidad (fase 16)
+
+- **Fecha:** 2026-10-28.
+- **Trazas:** cada pedido tiene un ID de Cloud Trace derivado de su número (`orderTraceId`). El worker lo manda en `X-Cloud-Trace-Context` a Cloud Tasks (cada página) y a Workflows (cada paso), así Cloud Run agrupa el recorrido completo del pedido en una sola traza.
+  - Se usa el rastreo nativo de Cloud Run en lugar del SDK de OpenTelemetry: da la misma traza de punta a punta sin sumar dependencias pesadas. OpenTelemetry queda como mejora si hace falta medir dentro de un request (spans internos).
+- **Logs:** cada request lleva su traza (`logging.googleapis.com/trace`), y los del pipeline, el `orderId` y la traza del pedido. Los eventos tienen nombre (`event`):
+  - `pipeline_step`, con su duración y costo;
+  - `pipeline_failed` y `pipeline_stuck`;
+  - `order_status`;
+  - `ai_usage` y `ai_budget_alert`;
+  - `webhook_rejected`.
+- **Error Reporting:** los logs de error salen con `@type` ReportedErrorEvent, servicio, versión (`K_REVISION`) y la pila en `stack_trace`.
+- **Cloud Monitoring (Terraform):**
+  - **Métricas desde los logs:** pedidos por estado, duración de cada paso, llamadas y costo de IA, revisión manual, atascos, webhooks rechazados y errores por servicio.
+  - **Tablero "operación".**
+  - **Alertas por mail:** pedido en revisión manual, pipeline atascado (vigía cada 30 minutos: más de 2 horas generando), webhooks rechazados, presupuesto de IA cerca del límite, pico de uso de IA, errores en los servicios, además de las que ya había (API caída, 5xx y presupuesto de facturación al 50, 90 y 100 %).
+- **Seguridad:**
+  - **CSP y cabeceras** (HSTS, X-Frame-Options, nosniff, Referrer-Policy, COOP y Permissions-Policy) en la web y el admin. La CSP es de lista cerrada; `script-src` conserva `'unsafe-inline'` por las páginas estáticas de Next.
+  - **App Check:** la web manda el token de App Check (reCAPTCHA Enterprise) si existe la clave del sitio. Pendiente: crear la clave y registrar la app en App Check (Terraform, con OK); después se exige también en staging.
+  - **Dependencias:** `pnpm audit --prod --audit-level=high` en CI. Se actualizó zod a 4.6.7 y se fuerza `@grpc/grpc-js` ≥ 1.13.6 (dos vulnerabilidades altas).
+  - **Reglas:** tests nuevos para las colecciones del panel (solo lectura de admin).
+- **Privacidad:** `docs/PRIVACY.md` (qué datos, dónde, cuánto tiempo, encargados, bases legales y derechos). CMEK evaluado y no adoptado por ahora.

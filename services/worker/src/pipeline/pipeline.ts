@@ -1,3 +1,4 @@
+import { orderLogFields } from '@storynido/shared/server';
 import { randomUUID } from 'node:crypto';
 
 import {
@@ -31,6 +32,10 @@ import {
 } from './handlers';
 
 /** Una ejecución del pipeline: la arranca un evento y la sigue Workflows o el orquestador local. */
+
+/** Proyecto de Google Cloud: une los logs del pedido con su traza. */
+const PROJECT_ID = process.env.GCP_PROJECT_ID ?? 'local';
+
 export interface PipelineRun {
   orderId: string;
   runId: string;
@@ -326,6 +331,18 @@ export class Pipeline {
         result.output,
         result.costUsdMicros ?? 0,
       );
+      // Métrica de latencia del pipeline (Cloud Monitoring la arma desde este log).
+      this.log.info(
+        {
+          ...orderLogFields(orderId, PROJECT_ID),
+          event: 'pipeline_step',
+          step,
+          outcome: 'succeeded',
+          durationMs: Date.now() - claim.startedAt.getTime(),
+          costUsdMicros: result.costUsdMicros ?? 0,
+        },
+        'pipeline step succeeded',
+      );
       return { state: 'succeeded', output: result.output };
     } catch (error) {
       await stepRef.update({
@@ -335,7 +352,18 @@ export class Pipeline {
         durationMs: Date.now() - claim.startedAt.getTime(),
         leaseUntil: null,
       });
-      this.log.warn({ orderId, step, generation, err: message(error) }, 'pipeline step failed');
+      this.log.warn(
+        {
+          ...orderLogFields(orderId, PROJECT_ID),
+          event: 'pipeline_step',
+          outcome: 'failed',
+          step,
+          generation,
+          durationMs: Date.now() - claim.startedAt.getTime(),
+          err: message(error),
+        },
+        'pipeline step failed',
+      );
       if (error instanceof HumanReviewError)
         return { state: 'human_review', reason: message(error) };
       throw new StepFailedError(step, message(error));
@@ -528,7 +556,16 @@ export class Pipeline {
         resolvedAt: null,
       });
       // severity ERROR: la alerta de Cloud Monitoring (fase 16) se dispara con este log.
-      this.log.error({ orderId, step, runId, err: error }, 'pipeline failed: manual review');
+      this.log.error(
+        {
+          ...orderLogFields(orderId, PROJECT_ID),
+          event: 'pipeline_failed',
+          step,
+          runId,
+          err: error,
+        },
+        'pipeline failed: manual review',
+      );
       await this.notifier?.adminAlert({
         key: `alert:${orderId}:pipeline_failed:${runId}`,
         kind: 'pipeline_failed',
@@ -546,7 +583,7 @@ export class Pipeline {
     extra: Record<string, unknown>,
   ): Promise<boolean> {
     const orderRef = this.order(orderId);
-    return this.db.runTransaction(async (tx) => {
+    const closed = await this.db.runTransaction(async (tx) => {
       const order = (await tx.get(orderRef)).data() as OrderDoc | undefined;
       if (order?.status !== 'generating' || order.pipeline?.runId !== runId) return false;
       // A imprenta se llega pasando por "listo".
@@ -564,6 +601,14 @@ export class Pipeline {
       });
       return true;
     });
+    // Métrica de pedidos por estado.
+    if (closed) {
+      this.log.info(
+        { ...orderLogFields(orderId, PROJECT_ID), event: 'order_status', status: to },
+        'order status changed',
+      );
+    }
+    return closed;
   }
 
   // ------------------------------------------------------------ utilidades

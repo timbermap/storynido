@@ -494,6 +494,23 @@ describe('orders', () => {
   });
 });
 
+describe('datos del panel (fases 14 a 16)', () => {
+  it('modelos, métricas, cotizaciones de cambio y constancias: solo los lee un admin; nadie escribe', async () => {
+    const paths = [
+      'aiModels/gemini-3.5-flash',
+      'metricsDaily/2026-10-27',
+      'fxRates/2026-10-27',
+      'privacyRequests/r1',
+    ];
+    for (const path of paths) await seed(path, { x: 1 });
+    for (const path of paths) {
+      await assertFails(getDoc(doc(alice(), path)));
+      await assertSucceeds(getDoc(doc(admin(), path)));
+      await assertFails(setDoc(doc(admin(), path), { x: 2 }));
+    }
+  });
+});
+
 describe('photos y consents', () => {
   it('solo el servidor los escribe; el dueño los lee', async () => {
     await assertFails(setDoc(doc(alice(), 'photos', 'p1'), { ownerUid: ALICE }));

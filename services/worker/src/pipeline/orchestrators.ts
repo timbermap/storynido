@@ -1,3 +1,4 @@
+import { cloudTraceHeader, orderTraceId } from '@storynido/shared/server';
 import { ILLUSTRATION_PAGE_POLICY, retryDelayMs } from '@storynido/shared';
 import { gcpPost } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
@@ -141,7 +142,9 @@ export class CloudWorkflowsOrchestrator implements Orchestrator {
   async start(run: PipelineRun): Promise<void> {
     const { projectId, region, workflow } = this.target;
     const url = `https://workflowexecutions.googleapis.com/v1/projects/${projectId}/locations/${region}/workflows/${workflow}/executions`;
-    const res = await gcpPost(url, { argument: JSON.stringify(run) }, this.target.fetch);
+    // `trace`: Workflows la manda en cada llamada al worker (una sola traza por pedido).
+    const argument = JSON.stringify({ ...run, trace: orderTraceId(run.orderId) });
+    const res = await gcpPost(url, { argument }, this.target.fetch);
     if (res.status >= 300) {
       throw new Error(`Workflows: HTTP ${String(res.status)} ${JSON.stringify(res.json)}`);
     }
@@ -174,7 +177,11 @@ export class CloudTasksDispatcher implements IllustrationDispatcher {
           httpRequest: {
             httpMethod: 'POST',
             url: `${workerUrl}/pipeline/illustrations/run`,
-            headers: { 'Content-Type': 'application/json' },
+            // La traza del pedido: Cloud Run agrupa cada página con el resto del pedido.
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Cloud-Trace-Context': cloudTraceHeader(orderTraceId(task.orderId)),
+            },
             body: Buffer.from(JSON.stringify(task)).toString('base64'),
             oidcToken: { serviceAccountEmail: invokerEmail, audience: workerUrl },
           },

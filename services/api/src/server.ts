@@ -32,7 +32,7 @@ import {
 } from './firebase';
 
 const config = loadApiConfig(process.env);
-const loggerOptions = cloudLoggingOptions('api', config.env.LOG_LEVEL);
+const loggerOptions = cloudLoggingOptions('api', config.env.LOG_LEVEL, config.env.K_REVISION);
 const log = pino(loggerOptions);
 
 const settings = providerSettingsFromEnv(process.env);
