@@ -38,9 +38,13 @@ export function StepReview({
   const step = (name: (typeof WIZARD_STEPS)[number]) => WIZARD_STEPS.indexOf(name);
 
   const event = book.channel === 'events' ? book.event : null;
+  const tOccasions = useTranslations('Wizard.child.event.occasions');
   const eventValue = event
     ? [
-        event.turningAge ? t('eventTurning', { count: event.turningAge }) : null,
+        tOccasions(event.type),
+        event.type === 'birthday' && event.turningAge
+          ? t('eventTurning', { count: event.turningAge })
+          : null,
         event.date
           ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(
               new Date(`${event.date}T00:00:00Z`),

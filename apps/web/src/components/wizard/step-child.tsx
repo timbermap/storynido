@@ -4,7 +4,14 @@ import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, type KeyboardEvent } from 'react';
 
-import { CHILD_LIMITS, EMPTY_BIRTHDAY, EVENT_LIMITS, type Child } from '@storynido/shared';
+import {
+  CHILD_LIMITS,
+  EMPTY_BIRTHDAY,
+  EVENT_LIMITS,
+  EVENT_TYPES,
+  type Child,
+  type EventType,
+} from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -40,6 +47,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   // Eventos: datos del cumpleaños (fecha, edad que cumple y temática).
   const isEvent = book.channel === 'events';
   const [eventDate, setEventDate] = useState(book.event?.date ?? '');
+  const [occasion, setOccasion] = useState<EventType>(book.event?.type ?? 'birthday');
   const [turningAge, setTurningAge] = useState(book.event?.turningAge ?? null);
   const [theme, setTheme] = useState(book.event?.theme ?? '');
   const [error, setError] = useState<string | null>(null);
@@ -121,8 +129,9 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
           ? {
               event: {
                 ...EMPTY_BIRTHDAY,
+                type: occasion,
                 date: eventDate || null,
-                turningAge,
+                turningAge: occasion === 'birthday' ? turningAge : null,
                 theme: blankToNull(theme.slice(0, EVENT_LIMITS.themeMaxLength)),
               },
             }
@@ -312,6 +321,25 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
           <fieldset className="grid gap-4 rounded-2xl border bg-card p-4">
             <legend className="px-1 text-base font-semibold">{t('event.title')}</legend>
             <p className="text-sm text-muted-foreground">{t('event.note')}</p>
+            <div className="grid gap-2">
+              <label htmlFor="event-occasion" className={labelClass}>
+                {t('event.occasion')}
+              </label>
+              <select
+                id="event-occasion"
+                className={inputClass}
+                value={occasion}
+                onChange={(event) => {
+                  setOccasion(event.target.value as EventType);
+                }}
+              >
+                {EVENT_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {t(`event.occasions.${type}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <label htmlFor="event-date" className={labelClass}>
@@ -327,28 +355,31 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
                   }}
                 />
               </div>
-              <div className="grid gap-2">
-                <label htmlFor="event-age" className={labelClass}>
-                  {t('event.turningAge')}
-                </label>
-                <select
-                  id="event-age"
-                  className={inputClass}
-                  value={turningAge ?? ''}
-                  onChange={(event) => {
-                    setTurningAge(event.target.value ? Number(event.target.value) : null);
-                  }}
-                >
-                  <option value="">{t('event.turningAgeEmpty')}</option>
-                  {Array.from({ length: EVENT_LIMITS.maxTurningAge }, (_, index) => index + 1).map(
-                    (value) => (
+              {occasion === 'birthday' && (
+                <div className="grid gap-2">
+                  <label htmlFor="event-age" className={labelClass}>
+                    {t('event.turningAge')}
+                  </label>
+                  <select
+                    id="event-age"
+                    className={inputClass}
+                    value={turningAge ?? ''}
+                    onChange={(event) => {
+                      setTurningAge(event.target.value ? Number(event.target.value) : null);
+                    }}
+                  >
+                    <option value="">{t('event.turningAgeEmpty')}</option>
+                    {Array.from(
+                      { length: EVENT_LIMITS.maxTurningAge },
+                      (_, index) => index + 1,
+                    ).map((value) => (
                       <option key={value} value={value}>
                         {t('event.years', { count: value })}
                       </option>
-                    ),
-                  )}
-                </select>
-              </div>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
             <div className="grid gap-2">
               <label htmlFor="event-theme" className={labelClass}>

@@ -1,7 +1,12 @@
 import { z } from 'zod';
 
-/** Tipos de evento (fase 12b): por ahora, cumpleaños. */
-export const EVENT_TYPES = ['birthday'] as const;
+/**
+ * Ocasiones del kit (fase 12b; DECISIONS 109): cumpleaños, bautismo, primera comunión y egreso
+ * o fin de año escolar. La edad que cumple solo aplica al cumpleaños.
+ */
+export const EVENT_TYPES = ['birthday', 'baptism', 'communion', 'graduation'] as const;
+
+export type EventType = (typeof EVENT_TYPES)[number];
 
 export const EVENT_LIMITS = { themeMaxLength: 60, maxTurningAge: 15 } as const;
 
@@ -16,7 +21,7 @@ export const bookEventSchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .nullable(),
-  /** Edad que cumple. */
+  /** Edad que cumple (solo cumpleaños). */
   turningAge: z.number().int().min(1).max(EVENT_LIMITS.maxTurningAge).nullable(),
   /** Temática de la fiesta (dinosaurios, espacio…), moderada antes de usarse. */
   theme: z.string().trim().max(EVENT_LIMITS.themeMaxLength).nullable(),

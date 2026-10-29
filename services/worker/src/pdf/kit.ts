@@ -1,10 +1,10 @@
-import type { KitPiece, PaperSize } from '@storynido/shared';
+import type { EventType, KitPiece, PaperSize } from '@storynido/shared';
 
 import { fontFaces } from './fonts';
 import { mazeSvg } from './maze';
 
 /**
- * Piezas del kit de cumpleaños (fase 12b). Se arman con la portada y las ilustraciones del
+ * Piezas del kit de Eventos (fase 12b): cumpleaños y otras ocasiones. Se arman con la portada y las ilustraciones del
  * librito ya aprobado: ninguna pieza vuelve a usar IA. Se imprimen en casa o en una imprenta
  * local: tamaño real, marcas de corte y la licencia de copias en cada hoja.
  */
@@ -15,6 +15,8 @@ export interface KitBook {
   language: KitLang;
   childName: string;
   title: string;
+  /** Ocasión: cambia los textos de las piezas (el cumpleaños es la base). */
+  occasion: EventType;
   turningAge: number | null;
   /** Fecha del evento (AAAA-MM-DD). */
   eventDate: string | null;
@@ -102,11 +104,133 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
   },
 };
 
+/** Textos que cambian según la ocasión; lo que no está acá sale de STRINGS (cumpleaños). */
+const OCCASION_STRINGS: Record<
+  Exclude<EventType, 'birthday'>,
+  Record<KitLang, Record<string, string>>
+> = {
+  baptism: {
+    es: {
+      invite: '¡Te invito a mi bautismo!',
+      birthday: '¡El bautismo de {name}!',
+      thanks: '¡Gracias por acompañarme en mi bautismo!',
+      tag: '¡Gracias por acompañarnos!',
+      activities: 'Actividades del bautismo de {name}',
+      maze: 'Ayuda a {name} a llegar a la fiesta',
+      draw: 'Dibuja un recuerdo de este día',
+      drawHint: '¿Quiénes estaban? ¿Qué te gustó más?',
+      words: 'globo · regalo · flor · torta',
+      license: 'Licencia StoryNido: {copies} copias para el bautismo de {name}.',
+    },
+    en: {
+      invite: 'You’re invited to my baptism!',
+      birthday: '{name}’s baptism!',
+      thanks: 'Thank you for joining me on my baptism day!',
+      tag: 'Thanks for joining us!',
+      activities: '{name}’s baptism activities',
+      maze: 'Help {name} get to the party',
+      draw: 'Draw a memory of this day',
+      drawHint: 'Who was there? What did you like best?',
+      words: 'balloon · gift · flower · cake',
+      license: 'StoryNido license: {copies} copies for {name}’s baptism.',
+    },
+    pt: {
+      invite: 'Venha para o meu batizado!',
+      birthday: 'O batizado de {name}!',
+      thanks: 'Obrigado por me acompanhar no meu batizado!',
+      tag: 'Obrigado por nos acompanhar!',
+      activities: 'Atividades do batizado de {name}',
+      maze: 'Ajude {name} a chegar à festa',
+      draw: 'Desenhe uma lembrança deste dia',
+      drawHint: 'Quem estava lá? Do que você mais gostou?',
+      words: 'balão · presente · flor · bolo',
+      license: 'Licença StoryNido: {copies} cópias para o batizado de {name}.',
+    },
+  },
+  communion: {
+    es: {
+      invite: '¡Te invito a mi primera comunión!',
+      birthday: '¡La primera comunión de {name}!',
+      thanks: '¡Gracias por acompañarme en mi primera comunión!',
+      tag: '¡Gracias por acompañarnos!',
+      activities: 'Actividades de la comunión de {name}',
+      maze: 'Ayuda a {name} a llegar a la fiesta',
+      draw: 'Dibuja un recuerdo de este día',
+      drawHint: '¿Quiénes estaban? ¿Qué te gustó más?',
+      words: 'globo · regalo · flor · torta',
+      license: 'Licencia StoryNido: {copies} copias para la primera comunión de {name}.',
+    },
+    en: {
+      invite: 'You’re invited to my First Communion!',
+      birthday: '{name}’s First Communion!',
+      thanks: 'Thank you for joining me on my First Communion!',
+      tag: 'Thanks for joining us!',
+      activities: '{name}’s First Communion activities',
+      maze: 'Help {name} get to the party',
+      draw: 'Draw a memory of this day',
+      drawHint: 'Who was there? What did you like best?',
+      words: 'balloon · gift · flower · cake',
+      license: 'StoryNido license: {copies} copies for {name}’s First Communion.',
+    },
+    pt: {
+      invite: 'Venha para a minha primeira comunhão!',
+      birthday: 'A primeira comunhão de {name}!',
+      thanks: 'Obrigado por me acompanhar na minha primeira comunhão!',
+      tag: 'Obrigado por nos acompanhar!',
+      activities: 'Atividades da comunhão de {name}',
+      maze: 'Ajude {name} a chegar à festa',
+      draw: 'Desenhe uma lembrança deste dia',
+      drawHint: 'Quem estava lá? Do que você mais gostou?',
+      words: 'balão · presente · flor · bolo',
+      license: 'Licença StoryNido: {copies} cópias para a primeira comunhão de {name}.',
+    },
+  },
+  graduation: {
+    es: {
+      invite: '¡Te invito a festejar mi egreso!',
+      birthday: '¡Felicitaciones, {name}!',
+      thanks: '¡Gracias por festejar conmigo!',
+      tag: '¡Gracias por este año!',
+      activities: 'Actividades del egreso de {name}',
+      maze: 'Ayuda a {name} a llegar a su diploma',
+      draw: 'Dibuja tu mejor recuerdo del año',
+      drawHint: '¿Con quién jugabas? ¿Qué aprendiste?',
+      words: 'diploma · mochila · lápiz · globo',
+      license: 'Licencia StoryNido: {copies} copias para el egreso de {name}.',
+    },
+    en: {
+      invite: 'Come celebrate my graduation!',
+      birthday: 'Congratulations, {name}!',
+      thanks: 'Thank you for celebrating with me!',
+      tag: 'Thanks for a great year!',
+      activities: '{name}’s graduation activities',
+      maze: 'Help {name} get to the diploma',
+      draw: 'Draw your best memory of the year',
+      drawHint: 'Who did you play with? What did you learn?',
+      words: 'diploma · backpack · pencil · balloon',
+      license: 'StoryNido license: {copies} copies for {name}’s graduation.',
+    },
+    pt: {
+      invite: 'Venha comemorar a minha formatura!',
+      birthday: 'Parabéns, {name}!',
+      thanks: 'Obrigado por comemorar comigo!',
+      tag: 'Obrigado por este ano!',
+      activities: 'Atividades da formatura de {name}',
+      maze: 'Ajude {name} a chegar ao diploma',
+      draw: 'Desenhe sua melhor lembrança do ano',
+      drawHint: 'Com quem você brincava? O que aprendeu?',
+      words: 'diploma · mochila · lápis · balão',
+      license: 'Licença StoryNido: {copies} cópias para a formatura de {name}.',
+    },
+  },
+};
+
 const escapeHtml = (value: string) =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 function t(book: KitBook, key: string, extra: Record<string, string | number> = {}) {
-  let value = STRINGS[book.language][key] ?? key;
+  const occasion = book.occasion === 'birthday' ? undefined : OCCASION_STRINGS[book.occasion];
+  let value = occasion?.[book.language][key] ?? STRINGS[book.language][key] ?? key;
   for (const [name, replacement] of Object.entries({
     name: book.childName,
     age: book.turningAge ?? '',
@@ -189,7 +313,7 @@ function invitation(book: KitBook, copies: number) {
   return cardSheet(
     book,
     copies,
-    `<img class="art" src="${book.cover}" alt=""><div class="band"><h1 class="display">${book.turningAge ? t(book, 'turning') : t(book, 'birthday')}</h1><p>${t(book, 'invite')}</p></div>`,
+    `<img class="art" src="${book.cover}" alt=""><div class="band"><h1 class="display">${book.occasion === 'birthday' && book.turningAge ? t(book, 'turning') : t(book, 'birthday')}</h1><p>${t(book, 'invite')}</p></div>`,
     `<div class="back"><h2 class="display">${t(book, 'invite')}</h2>${field('when', date)}${field('time', book.invitation?.time)}${field('where', book.invitation?.place)}<p class="row">${t(book, 'waiting')}</p></div>`,
   );
 }

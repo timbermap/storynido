@@ -193,7 +193,7 @@ export default async function StoryPage({ params, searchParams }: Props) {
                   {tLessons('storyCombine')}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">{tLessons('storyCombineText')}</p>
-                <ul className="mt-3 flex flex-wrap gap-2">
+                <ul className="mt-3 flex flex-wrap gap-3">
                   {(story.suggestedLessons?.length
                     ? story.suggestedLessons.flatMap((slug) =>
                         lessons.filter((lesson) => lesson.slug === slug),
@@ -207,7 +207,7 @@ export default async function StoryPage({ params, searchParams }: Props) {
                       <li key={lesson.slug}>
                         <Link
                           href={{ pathname: '/lessons/[slug]', params: { slug: lesson.slug } }}
-                          className="inline-block rounded-full bg-secondary px-3.5 py-1.5 text-sm font-bold text-primary hover:underline"
+                          className="inline-flex min-h-9 items-center rounded-full bg-secondary px-4 py-1.5 text-sm font-bold text-primary hover:underline"
                         >
                           {lesson.name}
                         </Link>

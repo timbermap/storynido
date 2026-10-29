@@ -168,8 +168,8 @@
       },
       "events": {
         "title": "Celebraciones",
-        "text": "Mini cuentos y recuerdos de cumpleaños: un diseño, muchas copias.",
-        "cta": "Ver kits de cumpleaños"
+        "text": "Mini cuentos y recuerdos para cumpleaños, bautismos, comuniones y egresos: un diseño, muchas copias.",
+        "cta": "Ver kits para celebraciones"
       },
       "professionals": {
         "title": "Profesionales",
@@ -234,8 +234,8 @@
     "lengthsTitle": "Elige la extensión",
     "lengthsText": "Al crear el libro eliges cuántas páginas tiene; abajo de cada una, los formatos en que sale.",
     "browseJump": "Hojear páginas de ejemplo",
-    "kitTitle": "Tu kit de cumpleaños",
-    "kitText": "Todas las piezas salen del mismo diseño, con el cumpleañero como protagonista. El precio no cambia con la cantidad de invitados.",
+    "kitTitle": "Tu kit para la celebración",
+    "kitText": "Todas las piezas salen del mismo diseño, con el homenajeado como protagonista. El precio no cambia con la cantidad de invitados.",
     "createKit": "Diseñar el kit con esta historia"
   },
   "Formats": {
@@ -414,7 +414,7 @@
       "startNew": "Empezar uno nuevo",
       "untitled": {
         "families": "Cuento sin terminar",
-        "events": "Cuento de cumpleaños sin terminar",
+        "events": "Cuento de celebración sin terminar",
         "professionals": "Cuento profesional sin terminar"
       },
       "of": "El cuento de {name}",
@@ -447,14 +447,21 @@
       "dedicationPlaceholder": "Para Martina, que cada noche sueña con las estrellas. Con amor, mamá y papá.",
       "required": "Escribe su nombre para continuar.",
       "event": {
-        "title": "Datos del cumpleaños",
+        "title": "Datos de la celebración",
         "note": "Los usamos en el cuento. La fecha nos sirve para avisarte los plazos reales de impresión.",
         "date": "Fecha de la fiesta",
         "turningAge": "Edad que cumple",
         "turningAgeEmpty": "Elegir",
         "years": "{count, plural, one {# año} other {# años}}",
         "theme": "Temática de la fiesta (opcional)",
-        "themePlaceholder": "Por ejemplo: dinosaurios, espacio, princesas"
+        "themePlaceholder": "Por ejemplo: dinosaurios, espacio, princesas",
+        "occasion": "¿Qué celebran?",
+        "occasions": {
+          "birthday": "Cumpleaños",
+          "baptism": "Bautismo",
+          "communion": "Primera comunión",
+          "graduation": "Egreso o fin de año escolar"
+        }
       },
       "pro": {
         "alias": "Alias del proyecto",
@@ -549,7 +556,7 @@
       "memories": "Recuerdos",
       "memoriesCount": "{count, plural, =0 {Sin recuerdos} one {# recuerdo} other {# recuerdos}}",
       "book": "Tu libro",
-      "event": "Cumpleaños",
+      "event": "Celebración",
       "eventTurning": "Cumple {count}",
       "eventEmpty": "Sin completar"
     },
@@ -788,19 +795,19 @@
   },
   "Landing": {
     "events": {
-      "metaTitle": "Souvenirs y kits de cumpleaños personalizados",
-      "metaDescription": "Un cuento de cumpleaños con el protagonista de la fiesta, para regalar a cada invitado. Un diseño, muchas copias.",
+      "metaTitle": "Souvenirs y kits personalizados para cumpleaños y celebraciones",
+      "metaDescription": "Un mini cuento con el protagonista de la fiesta, para regalar a cada invitado: cumpleaños, bautismos, comuniones y egresos. Un diseño, muchas copias.",
       "eyebrow": "StoryNido Celebraciones",
       "title": "Recuerdos mágicos para compartir en cada celebración.",
-      "subtitle": "Con una foto del cumpleañero (o eligiendo sus rasgos) lo convertimos en el protagonista de un mini cuento ilustrado. Un solo diseño que ustedes aprueban, con copias idénticas para todos los invitados.",
-      "cta": "Diseñar el kit de cumpleaños",
+      "subtitle": "Para cumpleaños, bautismos, comuniones y egresos. Con una foto del homenajeado (o eligiendo sus rasgos) lo convertimos en el protagonista de un mini cuento ilustrado. Un solo diseño que ustedes aprueban, con copias idénticas para todos los invitados.",
+      "cta": "Diseñar el kit",
       "note": "Ves los ejemplos sin cuenta. Para crear el diseño y ver la muestra gratis, inicias sesión con tu correo: así guardamos tu proyecto.",
       "imageAlt": "Ilustración en acuarela de un cumpleaños: el cumpleañero sopla las velas y sus amigos sostienen el mismo librito de regalo.",
       "howTitle": "Cómo funciona",
       "steps": {
         "1": {
           "title": "Elige la temática",
-          "text": "Aventura, magia o lo que más le guste al cumpleañero."
+          "text": "Aventura, magia o lo que más le guste al homenajeado."
         },
         "2": {
           "title": "Diseñamos su cuento",
@@ -817,7 +824,7 @@
         "7": "Impresión profesional de las piezas, en cantidad"
       },
       "kitNote": "Hoy puedes crear el diseño, ver la muestra gratis y comprar el kit digital: lo imprimes en casa o en la imprenta que prefieras. Si quieres que lo imprimamos nosotros en cantidad, lo cotizamos aparte según tu país.",
-      "collectionsTitle": "Temas de cumpleaños",
+      "collectionsTitle": "Temas para la fiesta",
       "faqTitle": "Preguntas frecuentes",
       "faq": {
         "1": {
@@ -1064,9 +1071,9 @@
     },
     "reorderSubtitle": "Pides de nuevo el mismo libro, tal como quedó: no hace falta crearlo otra vez.",
     "kit": {
-      "title": "Tu kit de cumpleaños",
+      "title": "Tu kit para la celebración",
       "subtitle": "Un diseño, muchas copias: elige las piezas y cuántos invitados. Te las damos listas para imprimir en casa o en una imprenta.",
-      "unavailable": "Todavía no vendemos el kit de cumpleaños en tu país.",
+      "unavailable": "Todavía no vendemos el kit en tu país.",
       "piecesTitle": "Piezas del kit",
       "piecesNote": "Todas con el mismo protagonista y el mismo diseño.",
       "design": "Diseño:",
@@ -1074,7 +1081,7 @@
       "pieces": {
         "mini_book": {
           "name": "Mini cuento",
-          "text": "El librito del cumpleaños, para cada invitado."
+          "text": "El librito de la fiesta, para cada invitado."
         },
         "activities": {
           "name": "Kit de actividades",
@@ -1102,13 +1109,13 @@
       "invitationTitle": "Datos de la invitación",
       "time": "Hora",
       "place": "Lugar",
-      "invitationNote": "La fecha sale de los datos del cumpleaños. Si dejas algo vacío, queda una línea para completarlo a mano.",
+      "invitationNote": "La fecha sale de los datos de la celebración. Si dejas algo vacío, queda una línea para completarlo a mano.",
       "printTitle": "¿Las quieres impresas?",
       "printText": "Por ahora las piezas son para imprimir en casa o en una imprenta cercana. Si prefieres que te las mandemos impresas, pídenos una cotización y te respondemos por correo.",
       "printPlaceholder": "Fecha de la fiesta, ciudad, cualquier detalle útil",
       "printRequest": "Pedir cotización",
       "printSent": "¡Listo! Te escribimos por correo con la cotización.",
-      "license": "La licencia autoriza {copies} copias de cada pieza para el cumpleaños.",
+      "license": "La licencia autoriza {copies} copias de cada pieza para la celebración.",
       "downloadAll": "Descargar todo (ZIP)",
       "moreCopies": "Pedir más copias",
       "ready": "¡Tu kit está listo!"

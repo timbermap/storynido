@@ -107,16 +107,14 @@ los diálogos; si alguno no encaja, omítelo; nunca agregues datos personales qu
 ${memories}`
     : '';
   const event = input.event;
-  const eventSection =
-    event?.type === 'birthday'
-      ? `
+  const eventSection = event
+    ? `
 
-Es un cuento de cumpleaños para regalar a los invitados de la fiesta: ${input.childName}${
-          event.turningAge ? ` cumple ${String(event.turningAge)} años` : ' festeja su cumpleaños'
-        }.${event.theme ? ` La temática de la fiesta es «${event.theme}»: úsala en la aventura.` : ''}
-La historia termina con la celebración (torta, velas y amigos). Que sea alegre, corta y fácil de leer
-en voz alta; no nombres a los invitados.`
-      : '';
+${EVENT_STORY[event.type](input.childName, event.turningAge)}${
+        event.theme ? ` La temática de la fiesta es «${event.theme}»: úsala en la aventura.` : ''
+      }
+Que sea alegre, corta y fácil de leer en voz alta; no nombres a los invitados.`
+    : '';
   const goalSection = input.goal
     ? `
 
@@ -167,6 +165,20 @@ ${narrativeRules(input)}
 - El título incluye el nombre del protagonista (por ejemplo, "La aventura espacial de ${input.childName}"): es la tapa del libro.
 - "illustrationPrompt" de cada página: la escena en inglés, en una o dos frases, sin texto dentro de la imagen.`;
 }
+
+/** Qué celebra el cuento de Eventos y cómo termina, según la ocasión. */
+const EVENT_STORY: Record<BookEvent['type'], (name: string, age: number | null) => string> = {
+  birthday: (name, age) =>
+    `Es un cuento de cumpleaños para regalar a los invitados de la fiesta: ${name}${
+      age ? ` cumple ${String(age)} años` : ' festeja su cumpleaños'
+    }.\nLa historia termina con la celebración (torta, velas y amigos).`,
+  baptism: (name) =>
+    `Es un cuento para regalar a los invitados del bautismo de ${name}.\nLa historia habla de bienvenida, familia y cariño, y termina con la celebración junto a sus seres queridos. Trata lo religioso con respeto y sin detalles de rituales.`,
+  communion: (name) =>
+    `Es un cuento para regalar a los invitados de la primera comunión de ${name}.\nLa historia habla de crecer, compartir y la familia, y termina con la celebración. Trata lo religioso con respeto y sin detalles de rituales ni enseñanzas doctrinales.`,
+  graduation: (name) =>
+    `Es un cuento para regalar a los compañeros en el egreso o el fin de año escolar de ${name}.\nLa historia recorre lo vivido en el año (amigos, juegos, lo aprendido) y termina con el festejo y las ganas de lo que viene.`,
+};
 
 /**
  * Reglas narrativas (AUDITORIA-PRODUCTO §4): lo que separa un cuento memorable de uno genérico.

@@ -1443,3 +1443,15 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Home:** el botón principal es "Crear una vista previa gratis" (baja a "¿Para quién es?") y se suma "Explorar cuentos" (catálogo).
 - **Creador y muestra:** cada extensión muestra el precio digital y, si se imprime, "impreso desde". La muestra terminada repite los precios antes de ir al pago. Es el mismo dato de la ficha; el monto final lo da el checkout. Eventos no los muestra, porque el kit tiene su precio.
 - **Envíos:** "¿Llega a tu país?" con el selector de país: digital, impreso con su plazo, o que todavía no se vende.
+
+## 109 · Historias 9–12, portadas nuevas, ejemplos por estilo y más ocasiones
+
+- **Fecha:** 2026-10-29.
+- **Para grandes lectores (9 a 12):** colección nueva con cuatro historias (misterio, ciencia, exploración y humor). Sin Mini ni libro para colorear, densidad media o alta y paleta `explorer` (azules de noche con luz de linterna). Portadas con la dirección de arte nueva (USD 0,27).
+- **Portadas del catálogo:** las 14 anteriores, regeneradas con la dirección de arte nueva (paleta por historia, gouache digital, sin texto). Costo: USD 0,95.
+- **Muestra:** cada estilo tiene un librito de ejemplo de 4 páginas, con el mismo chico y el mismo zorro (`public/styles/<estilo>/1-4.webp`). Las páginas sin ilustrar muestran una distinta cada una, en lugar de repetir la misma imagen. Costo: USD 1,36. El estilo Cartoon 3D no se ve 3D, ni en su muestra original ni en estas: hay que revisar su prompt.
+- **Celebraciones:** el kit admite cumpleaños, bautismo, primera comunión y egreso o fin de año escolar (`event.type`).
+  - Cada ocasión tiene su texto en el prompt del cuento y sus propias piezas: invitación, agradecimiento, etiquetas, actividades y licencia.
+  - La edad que cumple solo se pide en el cumpleaños.
+  - Lo religioso se trata con respeto y sin rituales ni doctrina.
+- **CI:** estuvo fallando por formato (Prettier) desde el commit 9a1d8f8, y la API de staging no se deployaba. Ya está corregido.
