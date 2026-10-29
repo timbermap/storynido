@@ -7,7 +7,7 @@ import { MEMORY_KEYS } from '@storynido/shared';
 
 import { Button } from '@/components/ui/button';
 
-import { WIZARD_STEPS } from './steps';
+import type { WizardStep } from './steps';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
@@ -35,7 +35,7 @@ export function StepReview({
   const style = data.styles.find((s) => s.slug === book.styleId);
 
   const memories = MEMORY_KEYS.filter((key) => book.memories?.[key]).length;
-  const step = (name: (typeof WIZARD_STEPS)[number]) => WIZARD_STEPS.indexOf(name);
+  const step = (name: WizardStep) => name;
 
   const event = book.channel === 'events' ? book.event : null;
   const tOccasions = useTranslations('Wizard.child.event.occasions');
@@ -56,7 +56,7 @@ export function StepReview({
         .join(' · ') || t('eventEmpty')
     : null;
 
-  const rows: { label: string; value: string; step: number }[] = [
+  const rows: { label: string; value: string; step: WizardStep }[] = [
     { label: t('protagonist'), value: child?.name ?? '—', step: step('child') },
     ...(eventValue ? [{ label: t('event'), value: eventValue, step: step('child') }] : []),
     {
@@ -95,10 +95,8 @@ export function StepReview({
     { label: t('style'), value: style?.name ?? '—', step: step('style') },
   ];
 
-  const visibleRows = rows.filter((row) => {
-    const name = WIZARD_STEPS[row.step];
-    return name === undefined || !nav.hidden.includes(name);
-  });
+  // Solo lo que tiene la línea del libro (Eventos no tiene enseñanza).
+  const visibleRows = rows.filter((row) => nav.flow.includes(row.step));
 
   return (
     <WizardShell {...nav} title={t('title')} subtitle={t('subtitle')}>

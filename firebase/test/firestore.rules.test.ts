@@ -276,6 +276,11 @@ describe('books', () => {
     await assertFails(updateDoc(ref, { status: 'ordered', updatedAt: serverTimestamp() }));
     await assertFails(updateDoc(ref, { regenerationsUsed: 3, updatedAt: serverTimestamp() }));
     await assertFails(updateDoc(ref, { wizardStep: 99, updatedAt: serverTimestamp() }));
+    // El paso por nombre (DECISIONS 113): solo pasos que existen.
+    await assertSucceeds(
+      updateDoc(ref, { wizardStepKey: 'style', wizardStep: 5, updatedAt: serverTimestamp() }),
+    );
+    await assertFails(updateDoc(ref, { wizardStepKey: 'checkout', updatedAt: serverTimestamp() }));
   });
 
   it('modo sin foto con rasgos válidos y recuerdos de hasta 150 caracteres', async () => {

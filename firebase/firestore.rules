@@ -194,6 +194,8 @@ service cloud.firestore {
         && validLocale(d.language)
         && optString(d.dedication, 500)
         && d.wizardStep is int && d.wizardStep >= 0 && d.wizardStep <= 10
+        // Paso por nombre (DECISIONS 113); los borradores anteriores no lo tienen.
+        && d.get('wizardStepKey', null) in [null, 'child', 'photos', 'story', 'memories', 'lesson', 'style', 'review']
         && d.photoIds is list && d.photoIds.size() <= 3
         // Los borradores anteriores al modo sin foto no tienen estos campos.
         && d.get('characterMode', 'photo') in ['photo', 'avatar']
@@ -225,7 +227,7 @@ service cloud.firestore {
 
       allow update: if ownsExisting()
         && resource.data.status in ['draft', 'preview_ready']
-        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'photoIds', 'characterMode', 'avatar', 'memories', 'event', 'goal', 'length', 'textDensity', 'readingLevel', 'contentType', 'updatedAt'])
+        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'wizardStepKey', 'photoIds', 'characterMode', 'avatar', 'memories', 'event', 'goal', 'length', 'textDensity', 'readingLevel', 'contentType', 'updatedAt'])
         && isNow('updatedAt')
         && validBookEdits();
 

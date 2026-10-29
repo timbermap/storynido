@@ -35,6 +35,7 @@ export type BookEdits = Partial<
     | 'language'
     | 'dedication'
     | 'wizardStep'
+    | 'wizardStepKey'
     | 'photoIds'
     | 'characterMode'
     | 'avatar'

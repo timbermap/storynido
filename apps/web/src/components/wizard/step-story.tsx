@@ -11,7 +11,6 @@ import { updateBook } from '@/lib/firebase/drafts';
 
 import { BookOptions, type BookChoice } from './book-options';
 import { OptionCard } from './option-card';
-import { WIZARD_STEPS } from './steps';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
@@ -22,7 +21,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [error, setError] = useState<string | null>(null);
   const age = data.child?.age;
   // La primera vez que se llega a este paso, la lectura se sugiere según la edad.
-  const firstVisit = data.book.wizardStep <= WIZARD_STEPS.indexOf('story');
+  const firstVisit = nav.reached <= nav.flow.indexOf('story');
   const [choice, setChoice] = useState<BookChoice>(() => ({
     length: data.book.length ?? data.editorial.defaults.length,
     contentType: data.book.contentType,

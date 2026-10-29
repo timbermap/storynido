@@ -127,6 +127,7 @@ export const BOOK_CLIENT_EDITABLE_FIELDS = [
   'language',
   'dedication',
   'wizardStep',
+  'wizardStepKey',
   'photoIds',
   'characterMode',
   'avatar',
@@ -231,6 +232,8 @@ export const bookSchema = timestampsSchema
     language: localeSchema,
     dedication: z.string().max(CHILD_LIMITS.dedicationMaxLength).nullable(),
     wizardStep: z.number().int().min(0).max(10),
+    /** Paso alcanzado, por nombre (DECISIONS 113). Sin él, se traduce `wizardStep`. */
+    wizardStepKey: z.string().max(20).nullable().optional(),
     photoIds: z.array(z.string()).max(3),
     /** Con su foto o sin foto (rasgos elegidos). Los borradores anteriores no lo tienen: foto. */
     characterMode: characterModeSchema.default('photo'),

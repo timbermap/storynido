@@ -11,14 +11,14 @@ import { cn } from '@/lib/utils';
 
 import { LINE_TONE } from './drafts-list';
 
-import { WIZARD_STAGES, WIZARD_STEPS, stageOf, type SaveState, type WizardStep } from './steps';
+import { WIZARD_STAGES, stageOf, type SaveState, type WizardStep } from './steps';
 
 /** Armazón del creador: progreso, título del paso (recibe el foco), navegación y guardado. */
 export function WizardShell({
-  stepIndex,
+  step: current,
+  flow,
+  reached,
   line,
-  hidden,
-  maxReached,
   saveState,
   title,
   subtitle,
@@ -30,10 +30,10 @@ export function WizardShell({
   nextLabel,
   nextDisabled,
 }: {
-  stepIndex: number;
+  step: WizardStep;
+  flow: readonly WizardStep[];
+  reached: number;
   line?: Channel;
-  hidden: readonly WizardStep[];
-  maxReached: number;
   saveState: SaveState;
   title: string;
   subtitle?: string;
@@ -41,7 +41,7 @@ export function WizardShell({
   error?: string | null;
   onBack?: () => void;
   onNext?: () => void;
-  onJump: (index: number) => void;
+  onJump: (step: WizardStep) => void;
   nextLabel?: string;
   nextDisabled?: boolean;
 }) {
@@ -49,9 +49,8 @@ export function WizardShell({
   const tLines = useTranslations('Wizard.lines');
   const headingRef = useRef<HTMLHeadingElement>(null);
   // Numeración y progreso sobre los pasos visibles para la línea del libro.
-  const visible = WIZARD_STEPS.filter((step) => !hidden.includes(step));
+  const visible = flow;
   const total = visible.length;
-  const current = WIZARD_STEPS[stepIndex] ?? 'child';
   const position = visible.indexOf(current);
   // Etapas: lo que se ve arriba. Dentro de "La aventura", el sub-paso visible (2 de 4).
   const { index: stageIndex, stage } = stageOf(current);
@@ -73,7 +72,7 @@ export function WizardShell({
   // Al cambiar de paso, el foco va al título (lectores de pantalla y teclado).
   useEffect(() => {
     headingRef.current?.focus();
-  }, [stepIndex]);
+  }, [current]);
 
   return (
     <div className="container-page max-w-3xl py-10">
@@ -135,8 +134,7 @@ export function WizardShell({
             // Cada etapa abre en su primer paso visible; se puede volver a lo ya recorrido.
             const first = item.steps.find((step) => visible.includes(step));
             if (!first) return null;
-            const target = WIZARD_STEPS.indexOf(first);
-            const reachable = target <= maxReached;
+            const reachable = flow.indexOf(first) <= reached;
             const active = index === stageIndex;
             return (
               <li key={item.key}>
@@ -145,7 +143,7 @@ export function WizardShell({
                   disabled={!reachable}
                   aria-current={active ? 'step' : undefined}
                   onClick={() => {
-                    onJump(target);
+                    onJump(first);
                   }}
                   className={cn(
                     'rounded-full px-3 py-1 transition disabled:cursor-not-allowed',

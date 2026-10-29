@@ -15,15 +15,18 @@ import type { ChildFields } from '@/lib/firebase/drafts';
 import type { SaveState, WizardStep } from './steps';
 
 export interface StepNav {
-  stepIndex: number;
+  /** Paso actual. */
+  step: WizardStep;
+  /** Pasos de la línea del libro, en orden (FLOWS). */
+  flow: readonly WizardStep[];
+  /** Posición más lejana alcanzada en `flow`. */
+  reached: number;
   /** Línea del libro: el creador la muestra arriba (Familia, Celebración, Profesional). */
   line: Channel;
-  /** Pasos ocultos para la línea comercial del libro. */
-  hidden: readonly WizardStep[];
-  maxReached: number;
   saveState: SaveState;
   onBack?: () => void;
-  onJump: (index: number) => void;
+  /** Ir a un paso ya alcanzado. */
+  onJump: (step: WizardStep) => void;
   /** Avanza al paso siguiente (y lo registra como alcanzado). */
   goNext: () => Promise<void>;
   /** Envuelve un guardado mostrando "Guardando…" / "Guardado" / error. */

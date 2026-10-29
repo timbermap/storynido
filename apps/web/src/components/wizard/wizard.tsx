@@ -18,7 +18,7 @@ import { StepPhotos } from './step-photos';
 import { StepReview } from './step-review';
 import { StepStory } from './step-story';
 import { StepStyle } from './step-style';
-import { WIZARD_STEPS, hiddenSteps, type SaveState } from './steps';
+import { WIZARD_STEPS, flowFor, reachedIndex, type SaveState, type WizardStep } from './steps';
 import type { StepNav, WizardData } from './types';
 
 type Catalog = Pick<
@@ -32,7 +32,7 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
   const { user, loading } = useAuth();
   const [book, setBook] = useState<WizardData['book'] | null | undefined>(undefined);
   const [child, setChild] = useState<ChildFields | null>(null);
-  const [stepIndex, setStepIndex] = useState<number | null>(null);
+  const [current, setCurrent] = useState<WizardStep | null>(null);
   const [saveState, setSaveState] = useState<SaveState>('idle');
   // La muestra se abre sola si el libro ya tiene una (o se está generando).
   const [view, setView] = useState<'steps' | 'preview' | null>(null);
@@ -69,8 +69,10 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
     };
   }, [childId]);
 
-  // Al abrir el borrador se retoma en el último paso alcanzado.
-  if (book && stepIndex === null) setStepIndex(Math.min(book.wizardStep, WIZARD_STEPS.length - 1));
+  const channel = book?.channel ?? 'families';
+  const flow = flowFor(channel);
+  // Al abrir el borrador se retoma en el último paso alcanzado (con migración del índice viejo).
+  if (book && current === null) setCurrent(flow[reachedIndex(flow, book)] ?? 'child');
   if (book && view === null) setView(book.status === 'draft' ? 'steps' : 'preview');
 
   const generatePreview = useCallback(async () => {
@@ -99,53 +101,44 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
     }
   }, []);
 
-  const current = stepIndex ?? 0;
-  const maxReached = Math.max(book?.wizardStep ?? 0, current);
+  const step = current ?? 'child';
+  const index = Math.max(flow.indexOf(step), 0);
+  const reached = book ? Math.max(reachedIndex(flow, book), index) : index;
 
-  const channel = book?.channel ?? 'families';
-
-  const nav = useMemo<StepNav>(() => {
-    const hidden = hiddenSteps(channel);
-    /** Siguiente (o anterior) paso visible para la línea del libro. */
-    const neighbor = (from: number, direction: 1 | -1) => {
-      let index = from + direction;
-      while (
-        index > 0 &&
-        index < WIZARD_STEPS.length - 1 &&
-        hidden.includes(WIZARD_STEPS[index] ?? 'child')
-      ) {
-        index += direction;
-      }
-      return Math.min(Math.max(index, 0), WIZARD_STEPS.length - 1);
-    };
-    return {
-      stepIndex: current,
+  const nav = useMemo<StepNav>(
+    () => ({
+      step,
+      flow,
+      reached,
       line: channel,
-      hidden,
-      maxReached,
       saveState,
       save,
       onBack:
-        current > 0
+        index > 0
           ? () => {
-              setStepIndex(neighbor(current, -1));
+              setCurrent(flow[index - 1] ?? 'child');
             }
           : undefined,
-      onJump: (index) => {
-        if (index <= maxReached) setStepIndex(index);
+      onJump: (target) => {
+        if (flow.indexOf(target) <= reached) setCurrent(target);
       },
       goNext: async () => {
-        const nextIndex = neighbor(current, 1);
-        if (nextIndex > (book?.wizardStep ?? 0)) {
+        const next = flow[Math.min(index + 1, flow.length - 1)] ?? 'review';
+        if (flow.indexOf(next) > (book ? reachedIndex(flow, book) : 0)) {
           await save(async () => {
-            await updateBook(await getFirebaseDb(), bookId, { wizardStep: nextIndex });
+            // El paso se guarda por nombre; el índice viejo queda para los borradores anteriores.
+            await updateBook(await getFirebaseDb(), bookId, {
+              wizardStepKey: next,
+              wizardStep: WIZARD_STEPS.indexOf(next),
+            });
           });
         }
-        setStepIndex(nextIndex);
+        setCurrent(next);
         window.scrollTo({ top: 0 });
       },
-    };
-  }, [current, maxReached, saveState, save, book?.wizardStep, bookId, channel]);
+    }),
+    [step, flow, index, reached, channel, saveState, save, book, bookId],
+  );
 
   if (!loading && !user) return <SignInGate />;
   if (book === null) {
@@ -176,14 +169,14 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
         onRegenerateAll={() => void generatePreview()}
         onEditChoices={() => {
           setView('steps');
-          setStepIndex(WIZARD_STEPS.length - 1);
+          setCurrent('review');
           window.scrollTo({ top: 0 });
         }}
       />
     );
   }
   // Cada paso se monta de nuevo al cambiar (estado del formulario fresco).
-  switch (WIZARD_STEPS[current]) {
+  switch (step) {
     case 'child':
       return <StepChild key="child" nav={nav} data={data} />;
     case 'photos':

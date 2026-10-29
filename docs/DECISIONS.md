@@ -1509,3 +1509,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Privacidad:** con el responsable en Uruguay, la política nombra la Ley 18.331 de Protección de Datos Personales entre las leyes que se respetan (es, en y pt). Publicado en staging.
 - **Historial de git:** se sacaron de todos los commits los tres scripts temporales que se habían subido por error (`firebase/src/zz-*`, con el email y el uid de staging del dueño). Los ignora `.gitignore`.
 - **Nuevo flujo de creación (plan aprobado):** Profesionales no tiene suscripción ni packs. El cierre muestra el precio con el descuento por volumen que ya existe y cuánto falta para el próximo nivel. Después del pago se sigue en la página del pedido (generación en vivo y descargas), con un acceso a Mis cuentos, que también muestra el pedido en vivo.
+
+## 113 · Nuevo flujo de creación, PR 1: pasos por línea y paso guardado por nombre
+
+- **Fecha:** 2026-10-29 · Plan del nuevo flujo aprobado (selector de línea, arranque propio, núcleo compartido, cierre propio).
+- **`FLOWS`** (`apps/web/src/components/wizard/steps.ts`): los pasos de cada línea, en orden. Es una config declarativa con un solo asistente, y reemplaza a `hiddenSteps`.
+- **`books.wizardStepKey`:** el paso alcanzado se guarda por nombre. Reordenar o quitar pasos no rompe borradores.
+  - Los anteriores se migran solos al abrirse: el índice viejo (`wizardStep`) se traduce a su paso, y un paso que la línea ya no tiene cuenta como el anterior que sí está.
+  - `wizardStep` se sigue escribiendo por compatibilidad.
+  - El borrador nuevo no lo escribe al crearse (la regla de alta no cambia, así la web anterior sigue funcionando). Lo guarda al avanzar.
+- **Reglas de Firestore:** `wizardStepKey` es editable y solo acepta pasos que existen.
