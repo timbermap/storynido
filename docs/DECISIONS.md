@@ -1340,3 +1340,11 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - la API arranca con mínimo 0 instancias, más un Cloud Scheduler que llama a `/health` cada 10 minutos (`api_keep_warm`): unos USD 0,10 por mes, contra USD 8 a 10 de una instancia siempre encendida;
   - con tráfico real se pasa a `min = 1`;
   - costo fijo estimado sin ventas: unos USD 3 a 5 por mes.
+
+## 100 · Producción en etapas
+
+- **Fecha:** 2026-10-29 · Proyecto `storynido-prod` creado con `infra/scripts/bootstrap.sh` (misma cuenta de facturación que staging; presupuesto de USD 100 por mes con avisos).
+- **Etapa 1:** toda la infraestructura (165 recursos) con la imagen de ejemplo en Cloud Run y `print_providers = ["mock"]`, para que ningún servicio lea un secreto todavía sin valor.
+- **Etapa 2:** con los secretos cargados (Gelato, Cloudprinter, Lulu, Resend, enlace de bajas), imprentas reales y `email_provider = "resend"`.
+- **Etapa 3:** el código real (tag `v*`). Necesita el procesador de pagos o un modo "pagos desactivados", porque la API se niega a arrancar en producción con proveedores simulados.
+- **Dominios:** `api_domain` queda vacío hasta verificar `storynido.com` en Google. Después: `api.storynido.com` en Cloud Run, y `storynido.com`, `www` y `admin.` en App Hosting.

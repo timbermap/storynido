@@ -35,8 +35,11 @@ module "environment" {
   worker_scaling      = { min = 0, max = 50 }
   deletion_protection = true
   photo_analyzer      = var.photo_analyzer
-  # Gelato (DECISIONS 077).
-  print_providers   = ["gelato"]
+  # Etapa 1 (DECISIONS 100): infraestructura sin claves, con la imagen de ejemplo en Cloud Run.
+  # Cloud Run no arranca si lee un secreto sin valor: con "mock" no lee ninguno. Etapa 2, con
+  # los secretos cargados: ["gelato", "cloudprinter", "lulu"] y email_provider = "resend".
+  # Nunca se despliega el código real con "mock": la API se niega a arrancar en producción.
+  print_providers   = ["mock"]
   gelato_order_type = "order"
   log_level         = "info"
   # Se suma el dominio del admin cuando exista.
