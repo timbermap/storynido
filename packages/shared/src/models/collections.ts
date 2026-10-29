@@ -31,6 +31,8 @@ export const COLLECTIONS = {
   countries: 'countries',
   products: 'products',
   prices: 'prices',
+  /** productPricing/{formato}: margen por producto (precio = costo + margen; DECISIONS 096). */
+  productPricing: 'productPricing',
   /** proDiscounts/global: descuento Pro por recurrencia (escalones editables en el admin). */
   proDiscounts: 'proDiscounts',
   /** eventPricing/{país}: precio del kit de Eventos (diseño + licencia por pieza). */

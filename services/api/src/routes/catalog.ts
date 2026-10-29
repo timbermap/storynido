@@ -1,11 +1,16 @@
 import {
   BOOK_FORMATS,
   apiRoutes,
+  charmPrice,
+  fromUsdMinor,
+  unitPriceUsdMinor,
+  type BookFormat,
+  type FxRates,
+  type ProductPricing,
   type CountryCode,
   type CountryConfig,
   type Locale,
   type Offer,
-  type Price,
   type PrintOption,
   type Product,
   type PublicStory,
@@ -57,63 +62,78 @@ export function toPublicStory(story: Story, locale: Locale): PublicStory {
 }
 
 /** Oferta de un país: solo formatos habilitados en el país, con producto activo y precio. */
-export function buildOffer(
-  code: CountryCode,
-  country: CountryConfig | undefined,
-  prices: Price[],
-  products: Product[],
-  locale: Locale,
-  printOptions: PrintOption[] = [],
-  activePrinters: readonly string[] = [],
-): Offer {
-  if (!country) {
-    return {
-      country: code,
-      available: false,
-      currency: 'USD',
-      taxBasisPoints: 0,
-      taxIncludedInPrice: false,
-      shipping: { costMinor: 0, etaDaysMin: 0, etaDaysMax: 0 },
-      formats: [],
-      printUnavailable: false,
-    };
-  }
+/**
+ * Lo que se puede comprar en un país (DECISIONS 096): precio = costo + margen, en su moneda.
+ * El impreso se muestra estimado con la imprenta más barata habilitada; la impresión exacta y
+ * el envío se cotizan en el checkout, con la dirección.
+ */
+export function buildOffer(input: {
+  code: CountryCode;
+  country: CountryConfig;
+  pricing: Record<BookFormat, ProductPricing>;
+  fx: FxRates;
+  products: Product[];
+  locale: Locale;
+  printOptions?: PrintOption[];
+  activePrinters?: readonly string[];
+}): Offer {
+  const { code, country, pricing, fx, products, locale } = input;
   // Un impreso se ofrece si al menos una imprenta activa lo tiene habilitado con la muestra
   // aprobada (cuál gana se decide al pagar, con la dirección).
   const printable = (format: string) =>
-    printOptions.some(
+    (input.printOptions ?? []).filter(
       (option) =>
         option.format === format &&
         option.enabled &&
         option.qaSamplePassed &&
-        activePrinters.includes(option.provider),
+        (input.activePrinters ?? []).includes(option.provider),
     );
   const formats = BOOK_FORMATS.flatMap((format) => {
-    const price = prices.find((p) => p.format === format && p.currency === country.currency);
     const product = products.find((p) => p.format === format);
-    if (!country.formats[format] || !price || !product) return [];
-    if (format !== 'digital' && !printable(format)) return [];
+    const productPricing = pricing[format];
+    if (!country.active || !country.formats[format] || !product || !productPricing.active) {
+      return [];
+    }
+    const options = format === 'digital' ? [] : printable(format);
+    if (format !== 'digital' && options.length === 0) return [];
+    const production =
+      options.length > 0 ? Math.min(...options.map((option) => option.productionCostUsdMinor)) : 0;
+    const local = fromUsdMinor(
+      unitPriceUsdMinor(productPricing, production, null),
+      country.currency,
+      fx,
+    );
+    if (local === null) return [];
     return [
       {
         format,
         name: product.name[locale],
         pageCount: product.pageCount,
-        amountMinor: price.amountMinor,
+        amountMinor: charmPrice(local, country.currency),
+        estimated: format !== 'digital',
       },
     ];
   });
+  const printOptions = BOOK_FORMATS.flatMap((format) =>
+    format === 'digital' ? [] : printable(format),
+  );
   return {
     country: code,
     available: formats.length > 0,
     currency: country.currency,
     taxBasisPoints: country.taxBasisPoints,
     taxIncludedInPrice: country.taxIncludedInPrice,
-    shipping: country.shipping,
+    shipping: {
+      costMinor: 0,
+      etaDaysMin: printOptions.length ? Math.min(...printOptions.map((o) => o.etaDaysMin)) : 0,
+      etaDaysMax: printOptions.length ? Math.max(...printOptions.map((o) => o.etaDaysMax)) : 0,
+      quoted: true,
+    },
     formats,
     printUnavailable:
-      BOOK_FORMATS.some(
-        (format) => format !== 'digital' && country.formats[format] && !printable(format),
-      ) && !formats.some((format) => format.format !== 'digital'),
+      country.active &&
+      BOOK_FORMATS.some((format) => format !== 'digital' && country.formats[format]) &&
+      !formats.some((format) => format.format !== 'digital'),
   };
 }
 
@@ -121,6 +141,8 @@ export function registerCatalogRoutes(
   app: FastifyInstance,
   catalog: CatalogRepository,
   activePrinters: readonly string[],
+  /** Tipo de cambio del día (para mostrar precios en la moneda de cada país). */
+  fxRates: () => Promise<FxRates>,
 ): void {
   addRoute(app, apiRoutes.catalogStories, {}, async (request) => {
     const { locale, age, channel, collection } = query<'catalogStories'>(request);
@@ -207,21 +229,23 @@ export function registerCatalogRoutes(
 
   addRoute(app, apiRoutes.catalogOffer, {}, async (request) => {
     const { country: code, locale } = query<'catalogOffer'>(request);
-    const [countries, prices, products, printOptions] = await Promise.all([
-      catalog.countries(),
-      catalog.prices(code),
+    const [country, pricing, fx, products, printOptions] = await Promise.all([
+      catalog.country(code),
+      catalog.productPricing(),
+      fxRates(),
       catalog.products(),
       catalog.printOptions(code),
     ]);
-    return buildOffer(
+    return buildOffer({
       code,
-      countries.find((c) => c.code === code),
-      prices,
+      country,
+      pricing,
+      fx,
       products,
       locale,
       printOptions,
       activePrinters,
-    );
+    });
   });
 
   addRoute(app, apiRoutes.content, {}, async (request) => {

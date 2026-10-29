@@ -310,6 +310,8 @@ const checkoutItemBodySchema = z.object({
 export const checkoutQuoteBodySchema = checkoutItemBodySchema.extend({
   /** Recompra: cotizar el libro ya generado de ese pedido (sin vista previa vigente). */
   sourceOrderId: z.string().min(1).nullable().default(null),
+  /** Impreso: con la dirección completa se cotiza con las imprentas (envío real). */
+  shippingAddress: addressSchema.nullable().default(null),
 });
 
 export const checkoutQuoteResponseSchema = z.object({
@@ -465,6 +467,8 @@ export const offerFormatSchema = z.object({
   name: z.string(),
   pageCount: z.number().int(),
   amountMinor: z.number().int().nonnegative(),
+  /** Impreso: precio estimado (la impresión exacta y el envío se cotizan con la dirección). */
+  estimated: z.boolean().default(false),
 });
 
 /** Lo que se puede comprar en un país: formatos, precios, envío e impuestos. */
@@ -478,6 +482,8 @@ export const offerSchema = z.object({
     costMinor: z.number().int().nonnegative(),
     etaDaysMin: z.number().int().nonnegative(),
     etaDaysMax: z.number().int().nonnegative(),
+    /** El envío se cotiza con la dirección de cada pedido (no hay costo fijo). */
+    quoted: z.boolean().default(false),
   }),
   formats: z.array(offerFormatSchema),
   /** El país vende impresos pero la imprenta todavía no está habilitada: solo digital. */

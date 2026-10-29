@@ -33,8 +33,12 @@ export const LULU_PRODUCTS: Record<PrintFormat, string> = {
  * país y formato; cada una imprime solo si está habilitada Y pasó la muestra física
  * (`qaSamplePassed`). Si ninguna puede, el libro queda solo digital.
  */
+/** País de una opción de imprenta que sirve para cualquier destino (la imprenta envía al mundo). */
+export const ANY_COUNTRY = '*';
+
 export const printOptionSchema = z.object({
-  country: countryCodeSchema,
+  /** País de destino, o `*`: cualquiera (si la imprenta no llega, su cotización falla y queda afuera). */
+  country: countryCodeSchema.or(z.literal(ANY_COUNTRY)),
   format: printFormatSchema,
   /** Proveedor (gelato, mock…) y su producto. */
   provider: z.string().min(1),
@@ -125,6 +129,9 @@ export function rankPrintQuotes<T extends RoutedQuote>(quotes: readonly T[]): T[
 export const printRoutingSchema = z.object({
   provider: z.string(),
   totalCostUsdMinor: z.number().int().nonnegative(),
+  /** Impresión y envío por separado (el envío se cobra al costo; DECISIONS 096). */
+  productionCostUsdMinor: z.number().int().nonnegative().optional(),
+  shippingCostUsdMinor: z.number().int().nonnegative().optional(),
   etaDaysMin: z.number().int().nonnegative(),
   etaDaysMax: z.number().int().nonnegative(),
   /** Todas las cotizaciones, ordenadas; las que fallaron quedan con el error. */

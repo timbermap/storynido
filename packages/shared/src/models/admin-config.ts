@@ -4,11 +4,12 @@ import { aiModelSchema } from './ai-models';
 import { illustrationStyleSchema, lessonSchema, storySchema } from './catalog';
 import { collectionSchema } from './channels';
 import { COLLECTIONS } from './collections';
-import { countrySchema, couponSchema, priceDocId, priceSchema, promotionSchema } from './commerce';
+import { countrySchema, couponSchema, promotionSchema } from './commerce';
 import { contentDocId, contentSchema } from './config';
 import { editorialConfigSchema } from './editorial';
 import { eventPricingSchema } from './kit';
 import { proDiscountConfigSchema } from './pricing';
+import { productPricingSchema } from './product-pricing';
 
 /**
  * Configuración del negocio editable desde el admin (fase 14, etapas 2 y 3). Cada tipo dice en
@@ -22,10 +23,10 @@ export const ADMIN_CONFIG = {
     input: countrySchema.omit({ updatedAt: true }),
     docId: (data: { code: string }) => data.code,
   },
-  prices: {
-    collection: COLLECTIONS.prices,
-    input: priceSchema.omit({ updatedAt: true }),
-    docId: (data: { country: string; format: string }) => priceDocId(data.country, data.format),
+  productPricing: {
+    collection: COLLECTIONS.productPricing,
+    input: productPricingSchema.omit({ updatedAt: true }),
+    docId: (data: { product: string }) => data.product,
   },
   coupons: {
     collection: COLLECTIONS.coupons,

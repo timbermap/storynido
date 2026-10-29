@@ -1,4 +1,5 @@
 import { LocalStorageService } from '@storynido/providers';
+import { utcDay } from '@storynido/shared';
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 
@@ -59,6 +60,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
     app,
     deps.catalog,
     deps.providers.printers().map((printer) => printer.id),
+    () => deps.metrics.fx(utcDay()),
   );
   registerPhotoRoutes(app, deps.photos);
   registerPreviewRoutes(app, deps.previews);

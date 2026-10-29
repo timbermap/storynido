@@ -7,6 +7,7 @@ import {
   simulatedProviders,
   providerSettingsFromEnv,
 } from '@storynido/providers';
+import { utcDay } from '@storynido/shared';
 import { cloudLoggingOptions } from '@storynido/shared/server';
 import pino from 'pino';
 
@@ -107,6 +108,7 @@ const notifier = new EmailNotifier(db, () => providers.email(), {
 });
 const previews = new PreviewService(db, providers, catalog, log, notifier);
 const pro = new ProService(db, catalog);
+const metrics = new MetricsService(db);
 const pipelineEvents =
   config.pipelineEvents === 'pubsub'
     ? new PubSubPublisher(config.projectId, config.env.ORDER_EVENTS_TOPIC)
@@ -127,7 +129,11 @@ const checkout = new CheckoutService(
     log,
   ),
   log,
-  { devToolsEnabled: config.devToolsEnabled, mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET },
+  {
+    devToolsEnabled: config.devToolsEnabled,
+    mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET,
+    fx: () => metrics.fx(utcDay()),
+  },
   notifier,
   pro,
 );
@@ -176,7 +182,7 @@ const app = await buildApp({
     ),
     notifier,
     pro,
-    metrics: new MetricsService(db),
+    metrics,
     spans,
     db,
   },

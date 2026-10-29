@@ -325,6 +325,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Márgenes por producto (DECISIONS 096): los lee la API; el público ve solo el precio final.
+    match /productPricing/{product} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     match /proDiscounts/{id} {
       allow read: if isAdmin();
       allow write: if false;

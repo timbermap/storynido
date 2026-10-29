@@ -92,49 +92,54 @@ describe('admin: interruptor del sitio y auditoría', () => {
       payload,
     });
 
-  const price = {
-    country: 'MX',
-    format: 'digital',
-    currency: 'MXN',
-    amountMinor: 34900,
-    proAmountMinor: 31400,
-    lengthAdjustmentsMinor: {},
+  const pricing = {
+    product: 'digital',
+    baseCostUsdMinor: 100,
+    marginMode: 'fixed',
+    marginFixedUsdMinor: 1899,
+    marginPercent: 0,
+    lengthAdjustmentsUsdMinor: {},
+    proPercentOff: 10,
     active: true,
   };
 
-  it('precios: el id es país_formato; crear y actualizar quedan auditados con el antes', async () => {
-    const wrong = await save('prices', 'MX_hardcover', price);
+  it('márgenes: el id es el producto; crear y actualizar quedan auditados con el antes', async () => {
+    const wrong = await save('productPricing', 'hardcover', pricing);
     expect(wrong.statusCode).toBe(400);
-    expect(wrong.json()).toMatchObject({ error: { message: 'El id tiene que ser "MX_digital".' } });
+    expect(wrong.json()).toMatchObject({ error: { message: 'El id tiene que ser "digital".' } });
+    const bad = await save('productPricing', 'digital', { ...pricing, marginMode: 'lo que sea' });
+    expect(bad.statusCode).toBe(400);
 
-    expect((await save('prices', 'MX_digital', price)).statusCode).toBe(200);
-    expect((await save('prices', 'MX_digital', { ...price, amountMinor: 39900 })).statusCode).toBe(
-      200,
-    );
-    expect((await db.doc('prices/MX_digital').get()).get('amountMinor')).toBe(39900);
+    expect((await save('productPricing', 'digital', pricing)).statusCode).toBe(200);
+    const percent = { ...pricing, marginMode: 'percent_min', marginPercent: 60 };
+    expect((await save('productPricing', 'digital', percent)).statusCode).toBe(200);
+    expect((await db.doc('productPricing/digital').get()).get('marginMode')).toBe('percent_min');
 
     const { entries } = (
       await app.inject({
         method: 'GET',
-        url: '/v1/admin/audit-log?entity=prices',
+        url: '/v1/admin/audit-log?entity=productPricing',
         headers: auth(ADMIN),
       })
     ).json<{
-      entries: { action: string; before: { amountMinor?: number; updatedAt?: string } | null }[];
+      entries: { action: string; before: { marginMode?: string; updatedAt?: string } | null }[];
     }>();
-    expect(entries.map((entry) => entry.action)).toEqual(['prices.update', 'prices.create']);
-    expect(entries[0]?.before?.amountMinor).toBe(34900);
+    expect(entries.map((entry) => entry.action)).toEqual([
+      'productPricing.update',
+      'productPricing.create',
+    ]);
+    expect(entries[0]?.before?.marginMode).toBe('fixed');
     // Las fechas del antes y el después vuelven como texto ISO.
     expect(entries[0]?.before?.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     expect(entries[1]?.before).toBeNull();
 
     const list = await app.inject({
       method: 'GET',
-      url: '/v1/admin/config/prices',
+      url: '/v1/admin/config/productPricing',
       headers: auth(ADMIN),
     });
     expect(list.json()).toMatchObject({
-      items: [{ id: 'MX_digital', data: { amountMinor: 39900 } }],
+      items: [{ id: 'digital', data: { marginPercent: 60 } }],
     });
   });
 
@@ -317,7 +322,7 @@ describe('admin: interruptor del sitio y auditoría', () => {
   });
 
   it('un customer no lee ni escribe la configuración', async () => {
-    expect((await save('prices', 'MX_digital', price, 'token-ana')).statusCode).toBe(403);
+    expect((await save('productPricing', 'digital', pricing, 'token-ana')).statusCode).toBe(403);
     const list = await app.inject({
       method: 'GET',
       url: '/v1/admin/config/coupons',

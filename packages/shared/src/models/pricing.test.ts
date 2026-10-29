@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { CountryConfig, Coupon, Price, Promotion } from './commerce';
+import type { CountryConfig, Coupon, Promotion } from './commerce';
+import { DEFAULT_PRODUCT_PRICING } from './product-pricing';
 import type { EventPricing } from './kit';
 import { DEFAULT_PRO_DISCOUNTS, proPercent, quote, quoteKit, type QuoteInput } from './pricing';
 
@@ -28,16 +29,13 @@ const US: CountryConfig = {
   shipping: { costMinor: 699, etaDaysMin: 4, etaDaysMax: 8 },
 };
 
-const price = (overrides: Partial<Price> = {}): Price => ({
-  country: 'MX',
-  format: 'hardcover',
-  currency: 'MXN',
-  amountMinor: 89900,
-  lengthAdjustmentsMinor: { mini: -20000, epic: 15000 },
-  active: true,
+const FX = { rates: { MXN: 18.5 }, source: 'test', date: '2026-11-01' };
+const pricing = (format: 'digital' | 'softcover' | 'hardcover' = 'hardcover') => ({
+  ...DEFAULT_PRODUCT_PRICING[format],
   updatedAt: NOW,
-  ...overrides,
 });
+// Tapa dura: USD 13,51 de impresión y 9,49 de envío a esa dirección.
+const PRINT = { productionUsdMinor: 1351, shippingUsdMinor: 949, etaDaysMin: 6, etaDaysMax: 10 };
 
 const coupon = (overrides: Partial<Coupon> = {}): Coupon => ({
   code: 'BIENVENIDA',
@@ -57,10 +55,12 @@ const coupon = (overrides: Partial<Coupon> = {}): Coupon => ({
 
 const input = (overrides: Partial<QuoteInput> = {}): QuoteInput => ({
   country: MX,
-  price: price(),
+  pricing: pricing(),
+  fx: FX,
   format: 'hardcover',
   length: 'classic',
   quantity: 1,
+  print: PRINT,
   coupon: null,
   couponCode: null,
   promotions: [],
@@ -68,40 +68,68 @@ const input = (overrides: Partial<QuoteInput> = {}): QuoteInput => ({
   ...overrides,
 });
 
-describe('precio del pedido (servidor)', () => {
-  it('tapa dura en México: precio + envío, IVA incluido e informado', () => {
+describe('precio del pedido (servidor): costo + margen', () => {
+  it('tapa dura en México: (propio + impresión + margen) en pesos, envío al costo, IVA incluido', () => {
     const result = quote(input());
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.snapshot.subtotalMinor).toBe(89900);
-    expect(result.snapshot.shipping.minor).toBe(14900);
-    // Total 104 800 con IVA incluido: 16/116 del total es impuesto.
-    expect(result.snapshot.totalMinor).toBe(104800);
-    expect(result.snapshot.tax).toEqual({ minor: 14455, basisPoints: 1600, included: true });
+    if (!result.ok) throw new Error(result.error);
+    // USD 1 + 13,51 + 28 = 42,51 → 786,44 MXN → precio lindo 786,99.
+    expect(result.snapshot.components).toEqual([
+      { code: 'book', unitMinor: 78699, quantity: 1, totalMinor: 78699 },
+    ]);
+    // Envío USD 9,49 → 175,57 MXN → hacia arriba, 176.
+    expect(result.snapshot.shipping).toEqual({
+      minor: 17600,
+      etaDaysMin: 6,
+      etaDaysMax: 10,
+      pending: false,
+    });
+    expect(result.snapshot.totalMinor).toBe(96299);
+    expect(result.snapshot.tax).toEqual({ minor: 13283, basisPoints: 1600, included: true });
   });
 
-  it('digital: sin envío; en EE. UU. el impuesto se suma', () => {
-    const result = quote(
+  it('impreso sin dirección: el envío queda pendiente y fuera del total', () => {
+    const result = quote(input({ print: { ...PRINT, shippingUsdMinor: null } }));
+    if (!result.ok) throw new Error(result.error);
+    expect(result.snapshot.shipping).toMatchObject({ minor: 0, pending: true });
+    expect(result.snapshot.totalMinor).toBe(78699);
+  });
+
+  it('digital en EE. UU.: sin envío, el impuesto se suma; la extensión ajusta el precio', () => {
+    const digital = quote(
+      input({ country: US, format: 'digital', pricing: pricing('digital'), print: null }),
+    );
+    if (!digital.ok) throw new Error(digital.error);
+    expect(digital.snapshot.components[0]).toMatchObject({ unitMinor: 1999 });
+    expect(digital.snapshot.shipping.minor).toBe(0);
+    expect(digital.snapshot.tax).toEqual({ minor: 160, basisPoints: 800, included: false });
+    expect(digital.snapshot.totalMinor).toBe(2159);
+
+    const mini = quote(
       input({
         country: US,
         format: 'digital',
-        price: price({ country: 'US', format: 'digital', currency: 'USD', amountMinor: 1999 }),
+        pricing: pricing('digital'),
+        print: null,
+        length: 'mini',
+        quantity: 2,
       }),
     );
-    if (!result.ok) throw new Error(result.error);
-    expect(result.snapshot.shipping.minor).toBe(0);
-    expect(result.snapshot.tax).toEqual({ minor: 160, basisPoints: 800, included: false });
-    expect(result.snapshot.totalMinor).toBe(2159);
+    if (!mini.ok) throw new Error(mini.error);
+    expect(mini.snapshot.components).toEqual([
+      { code: 'book', unitMinor: 1699, quantity: 2, totalMinor: 3398 },
+    ]);
   });
 
-  it('la extensión ajusta el precio y queda como componente', () => {
-    const result = quote(input({ length: 'mini', quantity: 2 }));
-    if (!result.ok) throw new Error(result.error);
-    expect(result.snapshot.components).toEqual([
-      { code: 'book', unitMinor: 89900, quantity: 2, totalMinor: 179800 },
-      { code: 'length', unitMinor: -20000, quantity: 2, totalMinor: -40000 },
-    ]);
-    expect(result.snapshot.subtotalMinor).toBe(139800);
+  it('margen en porcentaje o con mínimo, según lo que elija el admin', () => {
+    const percent = quote(
+      input({
+        country: US,
+        pricing: { ...pricing(), marginMode: 'percent', marginPercent: 100 },
+      }),
+    );
+    if (!percent.ok) throw new Error(percent.error);
+    // (1 + 13,51) × 2 = 29,02 → 29,99.
+    expect(percent.snapshot.components[0]).toMatchObject({ unitMinor: 2999 });
   });
 
   it('se aplica un solo descuento: el mayor entre cupón y promoción', () => {
@@ -121,7 +149,7 @@ describe('precio del pedido (servidor)', () => {
     );
     if (!withBoth.ok) throw new Error(withBoth.error);
     expect(withBoth.snapshot.discount).toEqual({
-      minor: 13485,
+      minor: 11805,
       reason: 'promotion',
       label: 'Buen Fin',
     });
@@ -131,13 +159,13 @@ describe('precio del pedido (servidor)', () => {
     );
     if (!bigCoupon.ok) throw new Error(bigCoupon.error);
     expect(bigCoupon.snapshot.discount).toEqual({
-      minor: 17980,
+      minor: 15740,
       reason: 'coupon',
       label: 'BIENVENIDA',
     });
   });
 
-  it('un cupón fijo no deja el subtotal negativo', () => {
+  it('un cupón fijo no deja el subtotal negativo (el envío se paga igual)', () => {
     const result = quote(
       input({
         coupon: coupon({ type: 'fixed', value: 999999, currency: 'MXN' }),
@@ -145,8 +173,8 @@ describe('precio del pedido (servidor)', () => {
       }),
     );
     if (!result.ok) throw new Error(result.error);
-    expect(result.snapshot.discount.minor).toBe(89900);
-    expect(result.snapshot.totalMinor).toBe(14900);
+    expect(result.snapshot.discount.minor).toBe(78699);
+    expect(result.snapshot.totalMinor).toBe(17600);
   });
 
   it('un cupón que no sirve se informa y se cobra sin él', () => {
@@ -165,7 +193,7 @@ describe('precio del pedido (servidor)', () => {
     }
   });
 
-  it('país o formato no disponible, o precio sin cargar: no se puede comprar', () => {
+  it('no se puede comprar: país apagado, formato apagado, sin imprenta, sin precio o sin cambio', () => {
     expect(quote(input({ country: { ...MX, active: false } }))).toEqual({
       ok: false,
       error: 'country_unavailable',
@@ -173,8 +201,13 @@ describe('precio del pedido (servidor)', () => {
     expect(
       quote(input({ country: { ...MX, formats: { ...MX.formats, hardcover: false } } })),
     ).toEqual({ ok: false, error: 'format_unavailable' });
-    expect(quote(input({ price: null }))).toEqual({ ok: false, error: 'price_missing' });
-    expect(quote(input({ price: price({ currency: 'USD' }) }))).toEqual({
+    expect(quote(input({ pricing: { ...pricing(), active: false } }))).toEqual({
+      ok: false,
+      error: 'format_unavailable',
+    });
+    expect(quote(input({ print: null }))).toEqual({ ok: false, error: 'format_unavailable' });
+    expect(quote(input({ pricing: null }))).toEqual({ ok: false, error: 'price_missing' });
+    expect(quote(input({ fx: { ...FX, rates: {} } }))).toEqual({
       ok: false,
       error: 'price_missing',
     });
@@ -262,33 +295,23 @@ describe('Profesionales: precio Pro y descuento por recurrencia', () => {
     expect(proPercent(25, DEFAULT_PRO_DISCOUNTS, 'hardcover')).toBe(15);
   });
 
-  it('usa el precio Pro base y el descuento del escalón; nunca suma con un cupón', () => {
-    const base = quote(input({ price: price({ proAmountMinor: 79900 }), pro: pro(0) }));
-    if (!base.ok) throw new Error('debería cotizar');
-    expect(base.snapshot.components[0]).toMatchObject({ code: 'book', unitMinor: 79900 });
+  it('descuento base Pro del producto y el del escalón; nunca suma con un cupón', () => {
+    const family = quote(input({ pro: null }));
+    const base = quote(input({ pro: pro(0) }));
+    if (!family.ok || !base.ok) throw new Error('debería cotizar');
+    // 10 % menos antes del precio lindo: 42,51 → 38,26 USD → 707,81 → 707,99 MXN.
+    expect(base.snapshot.components[0]).toMatchObject({ code: 'book', unitMinor: 70799 });
+    expect(family.snapshot.components[0]).toMatchObject({ unitMinor: 78699 });
     expect(base.snapshot.discount.reason).toBeNull();
 
-    const tenth = quote(input({ price: price({ proAmountMinor: 79900 }), pro: pro(12) }));
-    if (!tenth.ok) throw new Error('debería cotizar');
+    const twelve = quote(input({ pro: pro(12) }));
+    if (!twelve.ok) throw new Error('debería cotizar');
     // Tapa dura con 12 compras: 15 % (el tope de impresos también es 15).
-    expect(tenth.snapshot.discount).toEqual({ minor: 11985, reason: 'pro', label: 'Pro 15 %' });
+    expect(twelve.snapshot.discount).toEqual({ minor: 10620, reason: 'pro', label: 'Pro 15 %' });
 
     // Un cupón del 10 % no se suma: gana el mayor (15 % Pro).
-    const both = quote(
-      input({
-        price: price({ proAmountMinor: 79900 }),
-        pro: pro(12),
-        coupon: coupon(),
-        couponCode: 'BIENVENIDA',
-      }),
-    );
+    const both = quote(input({ pro: pro(12), coupon: coupon(), couponCode: 'BIENVENIDA' }));
     if (!both.ok) throw new Error('debería cotizar');
     expect(both.snapshot.discount.reason).toBe('pro');
-  });
-
-  it('una cuenta Familia paga el precio de Familias', () => {
-    const family = quote(input({ price: price({ proAmountMinor: 79900 }), pro: null }));
-    if (!family.ok) throw new Error('debería cotizar');
-    expect(family.snapshot.components[0]).toMatchObject({ unitMinor: 89900 });
   });
 });

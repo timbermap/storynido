@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { bookEventSchema } from './events';
 
-import { countryCodeSchema } from '../countries';
+import { countryCodeSchema, countryDefaults, type CountryCode } from '../countries';
 import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 import { orderStatusSchema } from '../order-status';
@@ -43,6 +43,25 @@ export const countrySchema = z.object({
 });
 
 export type CountryConfig = z.infer<typeof countrySchema>;
+
+/**
+ * Un país sin configuración propia: se vende todo, en su moneda o en dólares, sin impuesto
+ * propio (el envío se cotiza con cada pedido). El admin lo puede pisar en Países.
+ */
+export function defaultCountryConfig(code: CountryCode, now = new Date()): CountryConfig {
+  const defaults = countryDefaults(code);
+  return {
+    code,
+    active: true,
+    formats: { digital: true, softcover: true, hardcover: true },
+    currency: defaults.currency,
+    defaultLocale: defaults.defaultLocale,
+    taxBasisPoints: 0,
+    taxIncludedInPrice: false,
+    shipping: { costMinor: 0, etaDaysMin: 0, etaDaysMax: 0 },
+    updatedAt: now,
+  };
+}
 
 /** prices/{country}_{format} */
 export const priceSchema = z.object({

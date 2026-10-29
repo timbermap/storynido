@@ -1,10 +1,17 @@
 import { z } from 'zod';
 
-import { currencySchema } from '../currency';
-import type { CountryConfig, Coupon, Price, Promotion } from './commerce';
+import { CURRENCY_MINOR_UNITS, currencySchema, type Currency } from '../currency';
+import type { CountryConfig, Coupon, Promotion } from './commerce';
 import type { BookFormat } from './common';
 import type { BookLength } from './editorial';
 import { kitPieceSchema, type EventPricing, type KitSelection } from './kit';
+import type { FxRates } from './metrics';
+import {
+  charmPrice,
+  fromUsdMinor,
+  unitPriceUsdMinor,
+  type ProductPricing,
+} from './product-pricing';
 
 /** Un componente del precio (lo que el comprador ve en el resumen y queda en el pedido). */
 export const priceComponentSchema = z.object({
@@ -31,6 +38,8 @@ export const priceSnapshotSchema = z.object({
     minor: z.number().int().nonnegative(),
     etaDaysMin: z.number().int().nonnegative(),
     etaDaysMax: z.number().int().nonnegative(),
+    /** Impreso sin dirección todavía: el envío se cotiza al completarla (no está en el total). */
+    pending: z.boolean().default(false),
   }),
   tax: z.object({
     minor: z.number().int().nonnegative(),
@@ -96,18 +105,33 @@ export function proPercent(
   return format === 'digital' ? percent : Math.min(percent, config.physicalMaxPercent);
 }
 
+/** Lo que cuesta imprimir y enviar el pedido con la imprenta elegida, en centavos de USD. */
+export interface PrintCost {
+  /** Impresión de todas las unidades del pedido. */
+  productionUsdMinor: number;
+  /** Envío a la dirección; null: todavía sin dirección (se informa como pendiente). */
+  shippingUsdMinor: number | null;
+  etaDaysMin: number;
+  etaDaysMax: number;
+}
+
 export interface QuoteInput {
   country: CountryConfig | null;
-  price: Price | null;
+  /** Margen y costos del producto (productPricing/{formato}). */
+  pricing: ProductPricing | Omit<ProductPricing, 'updatedAt'> | null;
+  /** Tipo de cambio del día (unidades por dólar). */
+  fx: FxRates;
   format: BookFormat;
   length: BookLength | null;
   quantity: number;
+  /** Impreso: costo de la imprenta para esta dirección (o la estimación, sin dirección). */
+  print?: PrintCost | null;
   coupon: Coupon | null;
   /** Código que escribió el comprador (aunque no exista). */
   couponCode: string | null;
   promotions: readonly Promotion[];
   now: Date;
-  /** Cuenta profesional: precio Pro base y descuento por compras elegibles previas. */
+  /** Cuenta profesional: descuento base del producto y por compras elegibles previas. */
   pro?: { purchases: number; config: ProDiscountConfig } | null;
 }
 
@@ -139,39 +163,57 @@ function couponProblem(
   return null;
 }
 
+/** Centavos de USD → moneda del comprador, redondeado hacia arriba a la unidad entera. */
+function shippingIn(usdMinor: number, currency: Currency, fx: FxRates): number | null {
+  const minor = fromUsdMinor(usdMinor, currency, fx);
+  if (minor === null) return null;
+  const unit = 10 ** CURRENCY_MINOR_UNITS[currency];
+  return Math.ceil(minor / unit) * unit;
+}
+
 /**
- * Precio de un pedido, calculado siempre en el servidor. Se aplica un solo descuento: el
- * mayor entre el cupón y la promoción vigente. Un cupón que no sirve no frena la compra: se
- * informa (`couponError`) y se cobra sin él.
+ * Precio de un pedido, calculado siempre en el servidor (DECISIONS 096): costo + margen del
+ * producto, en dólares y convertido a la moneda del país. El impreso suma la impresión de la
+ * imprenta elegida y el envío al costo. Se aplica un solo descuento: el mayor entre cupón,
+ * promoción y Pro. Un cupón que no sirve no frena la compra: se informa (`couponError`).
  */
 export function quote(input: QuoteInput): QuoteResult {
-  const { country, price, format } = input;
+  const { country, pricing, format } = input;
   if (!country?.active) return { ok: false, error: 'country_unavailable' };
-  if (!country.formats[format]) return { ok: false, error: 'format_unavailable' };
-  if (!price?.active || price.currency !== country.currency || price.format !== format) {
-    return { ok: false, error: 'price_missing' };
+  if (!country.formats[format] || (pricing && !pricing.active)) {
+    return { ok: false, error: 'format_unavailable' };
   }
+  if (pricing?.product !== format) return { ok: false, error: 'price_missing' };
+  const print = format === 'digital' ? null : (input.print ?? null);
+  if (format !== 'digital' && !print) return { ok: false, error: 'format_unavailable' };
+
   const quantity = Math.max(1, Math.floor(input.quantity));
-  const lengthAdjustment = input.length ? (price.lengthAdjustmentsMinor[input.length] ?? 0) : 0;
-  // Profesionales: su precio base (si el país lo tiene); el resto, el de Familias.
-  const unit = input.pro ? (price.proAmountMinor ?? price.amountMinor) : price.amountMinor;
-  const components: PriceSnapshot['components'] = [
+  const productionUnit = print ? Math.round(print.productionUsdMinor / quantity) : 0;
+  const usd = unitPriceUsdMinor(pricing, productionUnit, input.length);
+  // Profesionales: descuento base del producto (además del de recurrencia).
+  const unitUsd = input.pro ? Math.round((usd * (100 - pricing.proPercentOff)) / 100) : usd;
+  const local = fromUsdMinor(unitUsd, country.currency, input.fx);
+  if (local === null) return { ok: false, error: 'price_missing' };
+  const unit = charmPrice(local, country.currency);
+
+  const shippingMinor =
+    print?.shippingUsdMinor == null
+      ? 0
+      : shippingIn(print.shippingUsdMinor, country.currency, input.fx);
+  if (shippingMinor === null) return { ok: false, error: 'price_missing' };
+
+  return finalize(
+    [{ code: 'book', unitMinor: unit, quantity, totalMinor: unit * quantity }],
+    country,
+    format,
+    input,
     {
-      code: 'book',
-      unitMinor: unit,
-      quantity,
-      totalMinor: unit * quantity,
+      minor: shippingMinor,
+      etaDaysMin: print?.etaDaysMin ?? 0,
+      etaDaysMax: print?.etaDaysMax ?? 0,
+      pending: print !== null && print.shippingUsdMinor === null,
     },
-  ];
-  if (lengthAdjustment !== 0) {
-    components.push({
-      code: 'length',
-      unitMinor: lengthAdjustment,
-      quantity,
-      totalMinor: lengthAdjustment * quantity,
-    });
-  }
-  return finalize(components, country, format, input);
+  );
 }
 
 /**
@@ -179,7 +221,7 @@ export function quote(input: QuoteInput): QuoteResult {
  * pieza extra. Es digital: sin envío. Descuentos e impuestos, igual que un libro.
  */
 export function quoteKit(
-  input: Omit<QuoteInput, 'price' | 'format' | 'length' | 'quantity'> & {
+  input: Omit<QuoteInput, 'pricing' | 'fx' | 'print' | 'format' | 'length' | 'quantity'> & {
     pricing: EventPricing | null;
     kit: KitSelection;
     /** "Pedir más copias" del mismo diseño: no se vuelve a cobrar el diseño. */
@@ -207,7 +249,12 @@ export function quoteKit(
     if (unit === undefined) return { ok: false, error: 'format_unavailable' };
     components.push({ code: 'piece', piece, unitMinor: unit, quantity: 1, totalMinor: unit });
   }
-  return finalize(components, country, 'digital', input);
+  return finalize(components, country, 'digital', input, {
+    minor: 0,
+    etaDaysMin: 0,
+    etaDaysMax: 0,
+    pending: false,
+  });
 }
 
 function finalize(
@@ -215,6 +262,7 @@ function finalize(
   country: CountryConfig,
   format: BookFormat,
   input: Pick<QuoteInput, 'coupon' | 'couponCode' | 'promotions' | 'now' | 'country' | 'pro'>,
+  shipping: PriceSnapshot['shipping'],
 ): QuoteResult {
   const subtotal = Math.max(
     0,
@@ -254,8 +302,7 @@ function finalize(
           ? { minor: proMinor, reason: 'pro' as const, label: `Pro ${String(percentPro)} %` }
           : { minor: promotionMinor, reason: 'promotion' as const, label: promotion?.name ?? null };
 
-  const shippingMinor = format === 'digital' ? 0 : country.shipping.costMinor;
-  const taxable = subtotal - discount.minor + shippingMinor;
+  const taxable = subtotal - discount.minor + shipping.minor;
   const basisPoints = country.taxBasisPoints;
   // Incluido: el precio ya lo tiene y se informa la parte que corresponde; si no, se suma.
   const taxMinor = country.taxIncludedInPrice
@@ -271,11 +318,7 @@ function finalize(
       components,
       subtotalMinor: subtotal,
       discount,
-      shipping: {
-        minor: shippingMinor,
-        etaDaysMin: format === 'digital' ? 0 : country.shipping.etaDaysMin,
-        etaDaysMax: format === 'digital' ? 0 : country.shipping.etaDaysMax,
-      },
+      shipping,
       tax: { minor: taxMinor, basisPoints, included: country.taxIncludedInPrice },
       totalMinor: total,
     },

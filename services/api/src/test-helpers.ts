@@ -33,6 +33,9 @@ import type { AppOptions } from './app';
  * sesión tiene segundo factor ("token-ana:admin:mfa").
  * "token-<uid>:anonymous" es una sesión anónima (sin email).
  */
+/** Tipo de cambio fijo de los tests (unidades por dólar). */
+export const TEST_FX = { rates: { USD: 1, MXN: 20 }, source: 'test', date: '2026-10-29' };
+
 export const fakeTokens: TokenVerifier = {
   verify(idToken) {
     const match = /^token-([a-z0-9]+)(?::(\w+))?(:mfa)?$/.exec(idToken);
@@ -144,7 +147,11 @@ export async function createTestApp(
       pipelineEvents,
       overrides.conversions ?? new RecordingConversions(),
       silentLogger,
-      { devToolsEnabled: true, mockWebhookSecret: 'test-webhook-secret' },
+      {
+        devToolsEnabled: true,
+        mockWebhookSecret: 'test-webhook-secret',
+        fx: () => Promise.resolve(TEST_FX),
+      },
       notifier,
       pro,
     ),
@@ -158,7 +165,7 @@ export async function createTestApp(
     notifier,
     pro,
     // Tipo de cambio fijo en los tests (sin red).
-    metrics: new MetricsService(db, () => Promise.resolve({ USD: 1, MXN: 20 })),
+    metrics: new MetricsService(db, () => Promise.resolve(TEST_FX.rates)),
     db,
     ...overrides,
   };

@@ -1,4 +1,11 @@
 import {
+  ANY_COUNTRY,
+  BOOK_FORMATS,
+  DEFAULT_PRODUCT_PRICING,
+  defaultCountryConfig,
+  productPricingSchema,
+  type BookFormat,
+  type ProductPricing,
   normalizeFirestoreData,
   printOptionSchema,
   COLLECTIONS,
@@ -42,9 +49,16 @@ export interface CatalogRepository {
   lessons(): Promise<Lesson[]>;
   collections(): Promise<Collection[]>;
   countries(): Promise<CountryConfig[]>;
+  /** Configuración de un país: la propia (aunque esté apagado) o la de fábrica para el resto. */
+  country(code: CountryCode): Promise<CountryConfig>;
+  /** Margen y costos de cada producto (o los de fábrica si no se cargaron). */
+  productPricing(): Promise<Record<BookFormat, ProductPricing>>;
   prices(country: CountryCode): Promise<Price[]>;
   products(): Promise<Product[]>;
-  /** Matriz de impresión del país (qué formato se puede imprimir, con qué reglas). */
+  /**
+   * Matriz de impresión de un destino: las opciones del país y las globales (`*`); si una
+   * imprenta tiene las dos para el mismo formato, gana la del país.
+   */
   printOptions(country: CountryCode): Promise<PrintOption[]>;
   /** Precio del kit de Eventos del país (null: no se vende). */
   eventPricing(country: CountryCode): Promise<EventPricing | null>;
@@ -60,6 +74,34 @@ export function mergeEditorialConfig(data: unknown): EditorialConfig {
   const merged = { ...DEFAULT_EDITORIAL_CONFIG, ...(data && typeof data === 'object' ? data : {}) };
   const parsed = editorialConfigSchema.safeParse(merged);
   return parsed.success ? parsed.data : DEFAULT_EDITORIAL_CONFIG;
+}
+
+/** Márgenes cargados, y los de fábrica para los productos que falten. */
+function withDefaultPricing(stored: ProductPricing[]): Record<BookFormat, ProductPricing> {
+  const epoch = new Date(0);
+  return Object.fromEntries(
+    BOOK_FORMATS.map((format) => [
+      format,
+      stored.find((item) => item.product === format) ?? {
+        ...DEFAULT_PRODUCT_PRICING[format],
+        updatedAt: epoch,
+      },
+    ]),
+  ) as Record<BookFormat, ProductPricing>;
+}
+
+/** Opciones de un destino: la del país pisa a la global de la misma imprenta y formato. */
+function forDestination(options: PrintOption[]): PrintOption[] {
+  return options.filter(
+    (option) =>
+      option.country !== ANY_COUNTRY ||
+      !options.some(
+        (other) =>
+          other.country !== ANY_COUNTRY &&
+          other.provider === option.provider &&
+          other.format === option.format,
+      ),
+  );
 }
 
 /** Cache en memoria con vencimiento: el catálogo cambia poco y se lee en cada página. */
@@ -158,6 +200,28 @@ export class FirestoreCatalog implements CatalogRepository {
     });
   }
 
+  country(code: CountryCode): Promise<CountryConfig> {
+    return this.cache.get(`country:${code}`, async () => {
+      const snapshot = await this.db
+        .collection(COLLECTIONS.countries)
+        .withConverter(converters.countries)
+        .doc(code)
+        .get();
+      return snapshot.data() ?? defaultCountryConfig(code);
+    });
+  }
+
+  productPricing(): Promise<Record<BookFormat, ProductPricing>> {
+    return this.cache.get('product-pricing', async () => {
+      const snapshot = await this.db.collection(COLLECTIONS.productPricing).get();
+      const stored = snapshot.docs.flatMap((doc) => {
+        const parsed = productPricingSchema.safeParse(normalizeFirestoreData(doc.data()));
+        return parsed.success ? [parsed.data] : [];
+      });
+      return withDefaultPricing(stored);
+    });
+  }
+
   prices(country: CountryCode): Promise<Price[]> {
     return this.cache.get(`prices:${country}`, async () => {
       const snapshot = await this.db
@@ -185,12 +249,14 @@ export class FirestoreCatalog implements CatalogRepository {
     return this.cache.get(`print:${country}`, async () => {
       const snapshot = await this.db
         .collection(COLLECTIONS.printOptions)
-        .where('country', '==', country)
+        .where('country', 'in', [country, ANY_COUNTRY])
         .get();
-      return snapshot.docs.flatMap((doc) => {
-        const parsed = printOptionSchema.safeParse(normalizeFirestoreData(doc.data()));
-        return parsed.success ? [parsed.data] : [];
-      });
+      return forDestination(
+        snapshot.docs.flatMap((doc) => {
+          const parsed = printOptionSchema.safeParse(normalizeFirestoreData(doc.data()));
+          return parsed.success ? [parsed.data] : [];
+        }),
+      );
     });
   }
 
@@ -243,6 +309,7 @@ export class InMemoryCatalog implements CatalogRepository {
       collections?: Collection[];
       countries?: CountryConfig[];
       prices?: Price[];
+      productPricing?: ProductPricing[];
       products?: Product[];
       printOptions?: PrintOption[];
       eventPricing?: EventPricing[];
@@ -276,6 +343,16 @@ export class InMemoryCatalog implements CatalogRepository {
     return Promise.resolve((this.data.countries ?? []).filter((c) => c.active));
   }
 
+  country(code: CountryCode) {
+    return Promise.resolve(
+      (this.data.countries ?? []).find((c) => c.code === code) ?? defaultCountryConfig(code),
+    );
+  }
+
+  productPricing() {
+    return Promise.resolve(withDefaultPricing(this.data.productPricing ?? []));
+  }
+
   prices(country: CountryCode) {
     return Promise.resolve(
       (this.data.prices ?? []).filter((p) => p.country === country && p.active),
@@ -283,7 +360,13 @@ export class InMemoryCatalog implements CatalogRepository {
   }
 
   printOptions(country: CountryCode) {
-    return Promise.resolve((this.data.printOptions ?? []).filter((o) => o.country === country));
+    return Promise.resolve(
+      forDestination(
+        (this.data.printOptions ?? []).filter(
+          (o) => o.country === country || o.country === ANY_COUNTRY,
+        ),
+      ),
+    );
   }
 
   eventPricing(country: CountryCode) {

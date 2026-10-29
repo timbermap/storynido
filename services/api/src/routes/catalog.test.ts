@@ -1,9 +1,19 @@
-import type { Content, CountryConfig, Lesson, Price, Product, Story } from '@storynido/shared';
+import {
+  DEFAULT_PRODUCT_PRICING,
+  type BookFormat,
+  type Content,
+  type CountryConfig,
+  type Lesson,
+  type Price,
+  type Product,
+  type ProductPricing,
+  type Story,
+} from '@storynido/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { InMemoryCatalog } from '../catalog';
 import { buildOffer } from './catalog';
-import { createTestApp } from '../test-helpers';
+import { TEST_FX, createTestApp } from '../test-helpers';
 
 const now = new Date('2026-10-26T00:00:00Z');
 const t = (es: string) => ({ es, en: `${es} (en)`, pt: `${es} (pt)` });
@@ -172,7 +182,7 @@ describe('catálogo', () => {
           lesson('perdida', 3, { sensitive: true }),
           lesson('inactiva', 4, { active: false }),
         ],
-        countries: [mx],
+        countries: [mx, { ...mx, code: 'BR', currency: 'BRL', active: false }],
         prices: [price('digital', 34900), price('softcover', 79900), price('hardcover', 99900)],
         products: [product('digital'), product('softcover'), product('hardcover')],
         content: [content('privacy', true), content('faq', false)],
@@ -214,24 +224,52 @@ describe('catálogo', () => {
     expect((await get('/v1/catalog/stories/nada?locale=es')).statusCode).toBe(404);
   });
 
-  it('la oferta incluye solo formatos habilitados en el país, con precio', async () => {
+  it('la oferta: formatos habilitados, costo + margen en pesos y envío a cotizar', async () => {
     const offer = (await get('/v1/catalog/offer?country=MX&locale=es')).json<{
+      available: boolean;
+      currency: string;
+      shipping: { costMinor: number; quoted: boolean; etaDaysMin: number; etaDaysMax: number };
+      formats: { format: string; amountMinor: number; estimated: boolean }[];
+    }>();
+    expect(offer.available).toBe(true);
+    expect(offer.currency).toBe('MXN');
+    // Digital: USD 1 + 18,99 = 19,99 × 20 = 399,80 → 399,99. Tapa dura: 1 + 14 + 28 = 43 USD.
+    expect(offer.formats).toEqual([
+      expect.objectContaining({ format: 'digital', amountMinor: 39999, estimated: false }),
+      expect.objectContaining({ format: 'hardcover', amountMinor: 86099, estimated: true }),
+    ]);
+    expect(offer.shipping).toEqual({ costMinor: 0, quoted: true, etaDaysMin: 6, etaDaysMax: 10 });
+  });
+
+  it('un país sin configuración propia se vende en dólares (somos globales)', async () => {
+    const offer = (await get('/v1/catalog/offer?country=AR&locale=es')).json<{
       available: boolean;
       currency: string;
       formats: { format: string; amountMinor: number }[];
     }>();
-    expect(offer.available).toBe(true);
-    expect(offer.currency).toBe('MXN');
-    expect(offer.formats.map((f) => f.format)).toEqual(['digital', 'hardcover']);
+    expect(offer).toMatchObject({ available: true, currency: 'USD' });
+    expect(offer.formats[0]).toMatchObject({ format: 'digital', amountMinor: 1999 });
   });
 
   it('sin imprenta habilitada (o sin muestra aprobada) el impreso no se ofrece', () => {
     const country = { ...mx, formats: { digital: true, softcover: true, hardcover: true } };
-    const prices = (['digital', 'softcover', 'hardcover'] as const).map((format) =>
-      price(format, 1000),
-    );
     const products = [product('digital'), product('softcover'), product('hardcover')];
-    const offer = buildOffer('MX', country, prices, products, 'es', [], ['mock']);
+    const pricing = Object.fromEntries(
+      (['digital', 'softcover', 'hardcover'] as const).map((format) => [
+        format,
+        { ...DEFAULT_PRODUCT_PRICING[format], updatedAt: now },
+      ]),
+    ) as Record<BookFormat, ProductPricing>;
+    const offer = buildOffer({
+      code: 'MX',
+      country,
+      pricing,
+      fx: TEST_FX,
+      products,
+      locale: 'es',
+      printOptions: [],
+      activePrinters: ['mock'],
+    });
     expect(offer.formats.map((f) => f.format)).toEqual(['digital']);
     expect(offer.printUnavailable).toBe(true);
   });
