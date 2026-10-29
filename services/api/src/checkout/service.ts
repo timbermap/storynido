@@ -256,14 +256,14 @@ export class CheckoutService {
         'Las piezas del kit son digitales para imprimir.',
       );
     }
-    const [countries, pricing, coupon, promotions] = await Promise.all([
-      this.catalog.countries(),
+    const [country, pricing, coupon, promotions] = await Promise.all([
+      this.catalog.country(body.country),
       this.catalog.eventPricing(body.country),
       body.couponCode ? this.coupon(body.couponCode) : Promise.resolve(null),
       this.promotions(),
     ]);
     const result = quoteKit({
-      country: countries.find((country) => country.code === body.country) ?? null,
+      country,
       pricing,
       kit,
       reuseDesign,

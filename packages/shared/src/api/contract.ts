@@ -486,6 +486,11 @@ export const offerSchema = z.object({
     quoted: z.boolean().default(false),
   }),
   formats: z.array(offerFormatSchema),
+  /**
+   * Moneda local del país, solo como referencia (todo se cobra en dólares; DECISIONS 097):
+   * unidades por dólar del día. Null si el país usa dólares o no hay cotización.
+   */
+  local: z.object({ currency: currencySchema, rate: z.number().positive() }).nullable().default(null),
   /** El país vende impresos pero la imprenta todavía no está habilitada: solo digital. */
   printUnavailable: z.boolean().default(false),
 });

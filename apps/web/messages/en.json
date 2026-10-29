@@ -189,7 +189,8 @@
     "exampleNote": "Example with a made-up child: in your book, the hero will be your child and the text is written for them.",
     "exampleTitle": "This is a StoryNido book",
     "exampleLocked": "In your book, this page is illustrated with your hero",
-    "exampleDedication": "For Martina, who dreams of the stars."
+    "exampleDedication": "For Martina, who dreams of the stars.",
+    "usdNote": "Prices in US dollars (USD); your bank converts them. Reference: 1 USD ≈ {rate} {currency}."
   },
   "Formats": {
     "digital": "Digital book (PDF)",
@@ -1024,7 +1025,8 @@
     "fromPrice": "from {price}",
     "shippingPending": "Shipping: calculated from your address",
     "addressToQuote": "Complete the address to see shipping and the total.",
-    "importDuties": "International shipping: the recipient may have to pay import duties."
+    "importDuties": "International shipping: the recipient may have to pay import duties.",
+    "localReference": "Reference in your currency (charged in US dollars)"
   },
   "Pro": {
     "activation": {

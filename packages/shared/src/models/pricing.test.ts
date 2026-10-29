@@ -69,29 +69,30 @@ const input = (overrides: Partial<QuoteInput> = {}): QuoteInput => ({
 });
 
 describe('precio del pedido (servidor): costo + margen', () => {
-  it('tapa dura en México: (propio + impresión + margen) en pesos, envío al costo, IVA incluido', () => {
+  it('tapa dura en México: todo en dólares, envío al costo, IVA incluido', () => {
     const result = quote(input());
     if (!result.ok) throw new Error(result.error);
-    // USD 1 + 13,51 + 28 = 42,51 → 786,44 MXN → precio lindo 786,99.
+    // USD 1 + 13,51 + 28 = 42,51 → precio lindo 42,99.
+    expect(result.snapshot.currency).toBe('USD');
     expect(result.snapshot.components).toEqual([
-      { code: 'book', unitMinor: 78699, quantity: 1, totalMinor: 78699 },
+      { code: 'book', unitMinor: 4299, quantity: 1, totalMinor: 4299 },
     ]);
-    // Envío USD 9,49 → 175,57 MXN → hacia arriba, 176.
+    // Envío al costo, exacto: USD 9,49.
     expect(result.snapshot.shipping).toEqual({
-      minor: 17600,
+      minor: 949,
       etaDaysMin: 6,
       etaDaysMax: 10,
       pending: false,
     });
-    expect(result.snapshot.totalMinor).toBe(96299);
-    expect(result.snapshot.tax).toEqual({ minor: 13283, basisPoints: 1600, included: true });
+    expect(result.snapshot.totalMinor).toBe(5248);
+    expect(result.snapshot.tax).toEqual({ minor: 724, basisPoints: 1600, included: true });
   });
 
   it('impreso sin dirección: el envío queda pendiente y fuera del total', () => {
     const result = quote(input({ print: { ...PRINT, shippingUsdMinor: null } }));
     if (!result.ok) throw new Error(result.error);
     expect(result.snapshot.shipping).toMatchObject({ minor: 0, pending: true });
-    expect(result.snapshot.totalMinor).toBe(78699);
+    expect(result.snapshot.totalMinor).toBe(4299);
   });
 
   it('digital en EE. UU.: sin envío, el impuesto se suma; la extensión ajusta el precio', () => {
@@ -149,7 +150,7 @@ describe('precio del pedido (servidor): costo + margen', () => {
     );
     if (!withBoth.ok) throw new Error(withBoth.error);
     expect(withBoth.snapshot.discount).toEqual({
-      minor: 11805,
+      minor: 645,
       reason: 'promotion',
       label: 'Buen Fin',
     });
@@ -159,7 +160,7 @@ describe('precio del pedido (servidor): costo + margen', () => {
     );
     if (!bigCoupon.ok) throw new Error(bigCoupon.error);
     expect(bigCoupon.snapshot.discount).toEqual({
-      minor: 15740,
+      minor: 860,
       reason: 'coupon',
       label: 'BIENVENIDA',
     });
@@ -168,13 +169,13 @@ describe('precio del pedido (servidor): costo + margen', () => {
   it('un cupón fijo no deja el subtotal negativo (el envío se paga igual)', () => {
     const result = quote(
       input({
-        coupon: coupon({ type: 'fixed', value: 999999, currency: 'MXN' }),
+        coupon: coupon({ type: 'fixed', value: 999999, currency: 'USD' }),
         couponCode: 'BIENVENIDA',
       }),
     );
     if (!result.ok) throw new Error(result.error);
-    expect(result.snapshot.discount.minor).toBe(78699);
-    expect(result.snapshot.totalMinor).toBe(17600);
+    expect(result.snapshot.discount.minor).toBe(4299);
+    expect(result.snapshot.totalMinor).toBe(949);
   });
 
   it('un cupón que no sirve se informa y se cobra sin él', () => {
@@ -183,7 +184,8 @@ describe('precio del pedido (servidor): costo + margen', () => {
       [coupon({ validUntil: new Date('2026-10-01') }), 'coupon_expired'],
       [coupon({ maxRedemptions: 5, redemptions: 5 }), 'coupon_exhausted'],
       [coupon({ countries: ['US'] }), 'coupon_not_applicable'],
-      [coupon({ type: 'fixed', value: 500, currency: 'USD' }), 'coupon_not_applicable'],
+      // Los cupones fijos son en dólares (todo se cobra en USD).
+      [coupon({ type: 'fixed', value: 500, currency: 'MXN' }), 'coupon_not_applicable'],
     ] as const;
     for (const [candidate, error] of cases) {
       const result = quote(input({ coupon: candidate, couponCode: 'X' }));
@@ -193,7 +195,7 @@ describe('precio del pedido (servidor): costo + margen', () => {
     }
   });
 
-  it('no se puede comprar: país apagado, formato apagado, sin imprenta, sin precio o sin cambio', () => {
+  it('no se puede comprar: país apagado, formato apagado, sin imprenta o sin precio', () => {
     expect(quote(input({ country: { ...MX, active: false } }))).toEqual({
       ok: false,
       error: 'country_unavailable',
@@ -207,17 +209,13 @@ describe('precio del pedido (servidor): costo + margen', () => {
     });
     expect(quote(input({ print: null }))).toEqual({ ok: false, error: 'format_unavailable' });
     expect(quote(input({ pricing: null }))).toEqual({ ok: false, error: 'price_missing' });
-    expect(quote(input({ fx: { ...FX, rates: {} } }))).toEqual({
-      ok: false,
-      error: 'price_missing',
-    });
   });
 });
 
 describe('kit de Eventos', () => {
   const pricing: EventPricing = {
     country: 'MX',
-    currency: 'MXN',
+    currency: 'USD',
     active: true,
     designMinor: 24900,
     pieces: { activities: 4900, invitation: 6900, thank_you: 4900, stickers: 5900 },
@@ -299,15 +297,15 @@ describe('Profesionales: precio Pro y descuento por recurrencia', () => {
     const family = quote(input({ pro: null }));
     const base = quote(input({ pro: pro(0) }));
     if (!family.ok || !base.ok) throw new Error('debería cotizar');
-    // 10 % menos antes del precio lindo: 42,51 → 38,26 USD → 707,81 → 707,99 MXN.
-    expect(base.snapshot.components[0]).toMatchObject({ code: 'book', unitMinor: 70799 });
-    expect(family.snapshot.components[0]).toMatchObject({ unitMinor: 78699 });
+    // 10 % menos antes del precio lindo: 42,51 → 38,26 → 38,99 USD.
+    expect(base.snapshot.components[0]).toMatchObject({ code: 'book', unitMinor: 3899 });
+    expect(family.snapshot.components[0]).toMatchObject({ unitMinor: 4299 });
     expect(base.snapshot.discount.reason).toBeNull();
 
     const twelve = quote(input({ pro: pro(12) }));
     if (!twelve.ok) throw new Error('debería cotizar');
     // Tapa dura con 12 compras: 15 % (el tope de impresos también es 15).
-    expect(twelve.snapshot.discount).toEqual({ minor: 10620, reason: 'pro', label: 'Pro 15 %' });
+    expect(twelve.snapshot.discount).toEqual({ minor: 585, reason: 'pro', label: 'Pro 15 %' });
 
     // Un cupón del 10 % no se suma: gana el mayor (15 % Pro).
     const both = quote(input({ pro: pro(12), coupon: coupon(), couponCode: 'BIENVENIDA' }));

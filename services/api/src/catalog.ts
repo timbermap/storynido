@@ -1,5 +1,6 @@
 import {
   ANY_COUNTRY,
+  CHARGE_CURRENCY,
   BOOK_FORMATS,
   DEFAULT_PRODUCT_PRICING,
   defaultCountryConfig,
@@ -60,7 +61,10 @@ export interface CatalogRepository {
    * imprenta tiene las dos para el mismo formato, gana la del país.
    */
   printOptions(country: CountryCode): Promise<PrintOption[]>;
-  /** Precio del kit de Eventos del país (null: no se vende). */
+  /**
+   * Precio del kit de Eventos, en dólares: el del país si tiene uno en USD; si no, el de EE. UU.
+   * (el mismo para todo el mundo). Null: no se vende.
+   */
   eventPricing(country: CountryCode): Promise<EventPricing | null>;
   content(key: string, locale: Locale): Promise<Content | null>;
   /** Configuración editorial vigente (o la de fábrica si todavía no se cargó). */
@@ -74,6 +78,16 @@ export function mergeEditorialConfig(data: unknown): EditorialConfig {
   const merged = { ...DEFAULT_EDITORIAL_CONFIG, ...(data && typeof data === 'object' ? data : {}) };
   const parsed = editorialConfigSchema.safeParse(merged);
   return parsed.success ? parsed.data : DEFAULT_EDITORIAL_CONFIG;
+}
+
+/** Kit de Eventos en dólares: el del país (activo y en USD) o el de EE. UU. para el resto. */
+function usdEventPricing(
+  own: EventPricing | null,
+  global: EventPricing | null,
+): EventPricing | null {
+  const usable = (pricing: EventPricing | null) =>
+    pricing?.active && pricing.currency === CHARGE_CURRENCY ? pricing : null;
+  return usable(own) ?? usable(global);
 }
 
 /** Márgenes cargados, y los de fábrica para los productos que falten. */
@@ -262,9 +276,12 @@ export class FirestoreCatalog implements CatalogRepository {
 
   eventPricing(country: CountryCode): Promise<EventPricing | null> {
     return this.cache.get(`events:${country}`, async () => {
-      const data = (await this.db.collection(COLLECTIONS.eventPricing).doc(country).get()).data();
-      const parsed = data ? eventPricingSchema.safeParse(normalizeFirestoreData(data)) : null;
-      return parsed?.success && parsed.data.active ? parsed.data : null;
+      const read = async (code: CountryCode) => {
+        const data = (await this.db.collection(COLLECTIONS.eventPricing).doc(code).get()).data();
+        const parsed = data ? eventPricingSchema.safeParse(normalizeFirestoreData(data)) : null;
+        return parsed?.success ? parsed.data : null;
+      };
+      return usdEventPricing(await read(country), country === 'US' ? null : await read('US'));
     });
   }
 
@@ -370,10 +387,9 @@ export class InMemoryCatalog implements CatalogRepository {
   }
 
   eventPricing(country: CountryCode) {
-    return Promise.resolve(
-      (this.data.eventPricing ?? []).find((item) => item.country === country && item.active) ??
-        null,
-    );
+    const find = (code: CountryCode) =>
+      (this.data.eventPricing ?? []).find((item) => item.country === code) ?? null;
+    return Promise.resolve(usdEventPricing(find(country), find('US')));
   }
 
   products() {

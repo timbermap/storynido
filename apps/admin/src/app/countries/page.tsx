@@ -31,7 +31,12 @@ export default function CountriesPage() {
           readOnlyOnEdit: true,
         },
         { kind: 'boolean', path: 'active', label: 'Activo' },
-        { kind: 'select', path: 'currency', label: 'Moneda', options: CURRENCIES },
+        {
+          kind: 'select',
+          path: 'currency',
+          label: 'Moneda local (solo referencia: todo se cobra en USD)',
+          options: CURRENCIES,
+        },
         { kind: 'select', path: 'defaultLocale', label: 'Idioma por defecto', options: LOCALES },
         { kind: 'boolean', path: 'formats.digital', label: 'Digital' },
         { kind: 'boolean', path: 'formats.softcover', label: 'Tapa blanda' },

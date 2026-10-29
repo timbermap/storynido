@@ -1,8 +1,8 @@
 import {
   BOOK_FORMATS,
   apiRoutes,
+  CHARGE_CURRENCY,
   charmPrice,
-  fromUsdMinor,
   unitPriceUsdMinor,
   type BookFormat,
   type FxRates,
@@ -63,7 +63,8 @@ export function toPublicStory(story: Story, locale: Locale): PublicStory {
 
 /** Oferta de un país: solo formatos habilitados en el país, con producto activo y precio. */
 /**
- * Lo que se puede comprar en un país (DECISIONS 096): precio = costo + margen, en su moneda.
+ * Lo que se puede comprar en un país (DECISIONS 096 y 097): precio = costo + margen, en dólares
+ * (la moneda local va solo como referencia).
  * El impreso se muestra estimado con la imprenta más barata habilitada; la impresión exacta y
  * el envío se cotizan en el checkout, con la dirección.
  */
@@ -98,18 +99,15 @@ export function buildOffer(input: {
     if (format !== 'digital' && options.length === 0) return [];
     const production =
       options.length > 0 ? Math.min(...options.map((option) => option.productionCostUsdMinor)) : 0;
-    const local = fromUsdMinor(
-      unitPriceUsdMinor(productPricing, production, null),
-      country.currency,
-      fx,
-    );
-    if (local === null) return [];
     return [
       {
         format,
         name: product.name[locale],
         pageCount: product.pageCount,
-        amountMinor: charmPrice(local, country.currency),
+        amountMinor: charmPrice(
+          unitPriceUsdMinor(productPricing, production, null),
+          CHARGE_CURRENCY,
+        ),
         estimated: format !== 'digital',
       },
     ];
@@ -117,10 +115,13 @@ export function buildOffer(input: {
   const printOptions = BOOK_FORMATS.flatMap((format) =>
     format === 'digital' ? [] : printable(format),
   );
+  const rate = fx.rates[country.currency];
   return {
     country: code,
     available: formats.length > 0,
-    currency: country.currency,
+    currency: CHARGE_CURRENCY,
+    local:
+      country.currency !== CHARGE_CURRENCY && rate ? { currency: country.currency, rate } : null,
     taxBasisPoints: country.taxBasisPoints,
     taxIncludedInPrice: country.taxIncludedInPrice,
     shipping: {

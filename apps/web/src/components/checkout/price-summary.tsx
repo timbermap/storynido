@@ -2,17 +2,20 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 
-import type { CountryCode, Locale, PriceSnapshot } from '@storynido/shared';
+import type { CountryCode, Locale, Offer, PriceSnapshot } from '@storynido/shared';
 
-import { formatPrice } from '@/lib/format';
+import { formatPrice, localReference } from '@/lib/format';
 
 /** Resumen del precio tal como lo calculó el servidor (cada componente y el total). */
 export function PriceSummary({
   snapshot,
   country,
+  local = null,
 }: {
   snapshot: PriceSnapshot;
   country: CountryCode;
+  /** Moneda local de referencia (todo se cobra en dólares). */
+  local?: Offer['local'];
 }) {
   const t = useTranslations('Checkout');
   const locale = useLocale() as Locale;
@@ -61,6 +64,11 @@ export function PriceSummary({
       muted: snapshot.tax.included,
     });
 
+  const reference =
+    snapshot.currency === 'USD'
+      ? localReference(snapshot.totalMinor, local, locale, country)
+      : null;
+
   return (
     <dl className="grid gap-2.5 text-sm">
       {rows.map((row) => (
@@ -76,6 +84,12 @@ export function PriceSummary({
         <dt>{t('total')}</dt>
         <dd className="tabular-nums">{money(snapshot.totalMinor)}</dd>
       </div>
+      {reference && (
+        <div className="flex justify-between gap-4 text-xs text-muted-foreground">
+          <dt>{t('localReference')}</dt>
+          <dd className="tabular-nums">{reference}</dd>
+        </div>
+      )}
     </dl>
   );
 }

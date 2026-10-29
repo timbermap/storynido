@@ -377,40 +377,18 @@ for (const printer of WORLDWIDE) {
 // Kit de Eventos (DECISIONS 079): precios de ejemplo, editables en el admin (fase 14). El
 // diseño incluye el librito; cada pieza extra es una licencia digital (las copias no cambian el
 // precio: la licencia dice cuántas se pueden imprimir).
-const EVENT_PRICES: Partial<
-  Record<CountryCode, { design: number; pieces: Record<string, number> }>
-> = {
-  MX: {
-    design: 24900,
-    pieces: {
-      activities: 4900,
-      invitation: 6900,
-      thank_you: 4900,
-      stickers: 5900,
-      favor_tags: 4900,
-    },
-  },
-  US: {
-    design: 1499,
+// En dólares, el mismo para todo el mundo (DECISIONS 097): se guarda en el documento de EE. UU.
+batch.set(
+  db.collection(COLLECTIONS.eventPricing).doc('US'),
+  eventPricingSchema.parse({
+    country: 'US',
+    currency: 'USD',
+    active: true,
+    designMinor: 1499,
     pieces: { activities: 299, invitation: 399, thank_you: 299, stickers: 349, favor_tags: 299 },
-  },
-};
-for (const [code, prices] of Object.entries(EVENT_PRICES) as [
-  CountryCode,
-  { design: number; pieces: Record<string, number> },
-][]) {
-  batch.set(
-    db.collection(COLLECTIONS.eventPricing).doc(code),
-    eventPricingSchema.parse({
-      country: code,
-      currency: countryDefaults(code).currency,
-      active: true,
-      designMinor: prices.design,
-      pieces: prices.pieces,
-      updatedAt: now,
-    }),
-  );
-}
+    updatedAt: now,
+  }),
+);
 
 // Descuento Pro por recurrencia (DECISIONS 081): escalones de fábrica, editables en el admin.
 batch.set(

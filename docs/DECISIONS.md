@@ -1294,3 +1294,17 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - el kit de Eventos sigue con precio por país (`eventPricing`) y en países sin configurar no se ofrece;
   - impuestos de bienes digitales en la UE y otros (IVA OSS), a revisar con el procesador de pagos y el contador;
   - países con sanciones o sin cobertura de pagos, a definir con el procesador.
+
+## 097 · Todo en dólares; la moneda local, solo de referencia
+
+- **Fecha:** 2026-10-29 · Decisión de Sebastián: "quiero todo en US$; la conversión a moneda local, al final".
+- **Se cobra en USD en todos los países:**
+  - precios;
+  - pedidos (`priceSnapshot.currency`);
+  - cupones fijos;
+  - kit de Eventos: un precio en dólares para todo el mundo, guardado en `eventPricing/US`; un país solo usa el suyo si está en USD.
+- **El "precio lindo"** (,99) es en dólares. El envío se cobra al costo, al centavo.
+- **La moneda del país** (`countries.currency`) es solo informativa:
+  - la oferta trae `local` (moneda y tipo de cambio del día);
+  - la web muestra "Precios en dólares; tu banco hace la conversión. Referencia: 1 USD ≈ 18,5 MXN" y, en el resumen del checkout, "≈ MXN 1.234".
+- **Impuestos:** siguen la configuración del país (por ejemplo, el IVA incluido en México), calculados sobre el monto en dólares.

@@ -189,7 +189,8 @@
     "exampleNote": "Exemplo com uma criança inventada: no seu livro, o protagonista será seu filho e o texto é escrito para ele.",
     "exampleTitle": "Assim é um livro StoryNido",
     "exampleLocked": "No seu livro, esta página é ilustrada com o seu protagonista",
-    "exampleDedication": "Para Martina, que sonha com as estrelas."
+    "exampleDedication": "Para Martina, que sonha com as estrelas.",
+    "usdNote": "Preços em dólares (USD); seu banco faz a conversão. Referência: 1 USD ≈ {rate} {currency}."
   },
   "Formats": {
     "digital": "Livro digital (PDF)",
@@ -1024,7 +1025,8 @@
     "fromPrice": "a partir de {price}",
     "shippingPending": "Frete: calculado com o seu endereço",
     "addressToQuote": "Complete o endereço para ver o frete e o total.",
-    "importDuties": "Envio internacional: pode haver impostos de importação pagos por quem recebe o livro."
+    "importDuties": "Envio internacional: pode haver impostos de importação pagos por quem recebe o livro.",
+    "localReference": "Referência na sua moeda (cobrado em dólares)"
   },
   "Pro": {
     "activation": {

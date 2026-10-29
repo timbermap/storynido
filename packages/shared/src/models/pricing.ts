@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { CURRENCY_MINOR_UNITS, currencySchema, type Currency } from '../currency';
+import { currencySchema, type Currency } from '../currency';
 import type { CountryConfig, Coupon, Promotion } from './commerce';
 import type { BookFormat } from './common';
 import type { BookLength } from './editorial';
@@ -12,6 +12,12 @@ import {
   unitPriceUsdMinor,
   type ProductPricing,
 } from './product-pricing';
+
+/**
+ * Todo se cobra en dólares (decisión de Sebastián, DECISIONS 097): precios, pedidos, cupones
+ * fijos y el kit de Eventos. La moneda local de cada país es solo una referencia ("≈ MXN 373").
+ */
+export const CHARGE_CURRENCY: Currency = 'USD';
 
 /** Un componente del precio (lo que el comprador ve en el resumen y queda en el pedido). */
 export const priceComponentSchema = z.object({
@@ -157,23 +163,15 @@ function couponProblem(
   ) {
     return 'coupon_not_applicable';
   }
-  if (coupon.type === 'fixed' && coupon.currency !== input.country?.currency) {
+  if (coupon.type === 'fixed' && coupon.currency !== CHARGE_CURRENCY) {
     return 'coupon_not_applicable';
   }
   return null;
 }
 
-/** Centavos de USD → moneda del comprador, redondeado hacia arriba a la unidad entera. */
-function shippingIn(usdMinor: number, currency: Currency, fx: FxRates): number | null {
-  const minor = fromUsdMinor(usdMinor, currency, fx);
-  if (minor === null) return null;
-  const unit = 10 ** CURRENCY_MINOR_UNITS[currency];
-  return Math.ceil(minor / unit) * unit;
-}
-
 /**
- * Precio de un pedido, calculado siempre en el servidor (DECISIONS 096): costo + margen del
- * producto, en dólares y convertido a la moneda del país. El impreso suma la impresión de la
+ * Precio de un pedido, calculado siempre en el servidor (DECISIONS 096 y 097): costo + margen
+ * del producto, todo en dólares. El impreso suma la impresión de la
  * imprenta elegida y el envío al costo. Se aplica un solo descuento: el mayor entre cupón,
  * promoción y Pro. Un cupón que no sirve no frena la compra: se informa (`couponError`).
  */
@@ -192,15 +190,12 @@ export function quote(input: QuoteInput): QuoteResult {
   const usd = unitPriceUsdMinor(pricing, productionUnit, input.length);
   // Profesionales: descuento base del producto (además del de recurrencia).
   const unitUsd = input.pro ? Math.round((usd * (100 - pricing.proPercentOff)) / 100) : usd;
-  const local = fromUsdMinor(unitUsd, country.currency, input.fx);
+  const local = fromUsdMinor(unitUsd, CHARGE_CURRENCY, input.fx);
   if (local === null) return { ok: false, error: 'price_missing' };
-  const unit = charmPrice(local, country.currency);
+  const unit = charmPrice(local, CHARGE_CURRENCY);
 
-  const shippingMinor =
-    print?.shippingUsdMinor == null
-      ? 0
-      : shippingIn(print.shippingUsdMinor, country.currency, input.fx);
-  if (shippingMinor === null) return { ok: false, error: 'price_missing' };
+  // El envío se cobra al costo, exacto (en dólares, sin redondear).
+  const shippingMinor = print?.shippingUsdMinor ?? 0;
 
   return finalize(
     [{ code: 'book', unitMinor: unit, quantity, totalMinor: unit * quantity }],
@@ -230,7 +225,7 @@ export function quoteKit(
 ): QuoteResult {
   const { country, pricing } = input;
   if (!country?.active) return { ok: false, error: 'country_unavailable' };
-  if (!pricing?.active || pricing.currency !== country.currency) {
+  if (!pricing?.active || pricing.currency !== CHARGE_CURRENCY) {
     return { ok: false, error: 'price_missing' };
   }
   const components: PriceSnapshot['components'] = input.reuseDesign
@@ -314,7 +309,7 @@ function finalize(
     ok: true,
     couponError,
     snapshot: {
-      currency: country.currency,
+      currency: CHARGE_CURRENCY,
       components,
       subtotalMinor: subtotal,
       discount,

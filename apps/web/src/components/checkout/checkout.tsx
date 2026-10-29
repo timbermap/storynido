@@ -347,7 +347,7 @@ export function Checkout({
           </p>
         )}
         {quote ? (
-          <PriceSummary snapshot={quote.snapshot} country={country} />
+          <PriceSummary snapshot={quote.snapshot} country={country} local={offer.local} />
         ) : (
           <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />

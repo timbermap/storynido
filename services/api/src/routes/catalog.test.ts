@@ -228,15 +228,18 @@ describe('catálogo', () => {
     const offer = (await get('/v1/catalog/offer?country=MX&locale=es')).json<{
       available: boolean;
       currency: string;
+      local: unknown;
       shipping: { costMinor: number; quoted: boolean; etaDaysMin: number; etaDaysMax: number };
       formats: { format: string; amountMinor: number; estimated: boolean }[];
     }>();
     expect(offer.available).toBe(true);
-    expect(offer.currency).toBe('MXN');
-    // Digital: USD 1 + 18,99 = 19,99 × 20 = 399,80 → 399,99. Tapa dura: 1 + 14 + 28 = 43 USD.
+    // Todo en dólares (DECISIONS 097); el peso va solo como referencia.
+    expect(offer.currency).toBe('USD');
+    expect(offer.local).toEqual({ currency: 'MXN', rate: 20 });
+    // Digital: USD 1 + 18,99 = 19,99. Tapa dura: 1 + 14 + 28 = 43 → 43,99.
     expect(offer.formats).toEqual([
-      expect.objectContaining({ format: 'digital', amountMinor: 39999, estimated: false }),
-      expect.objectContaining({ format: 'hardcover', amountMinor: 86099, estimated: true }),
+      expect.objectContaining({ format: 'digital', amountMinor: 1999, estimated: false }),
+      expect.objectContaining({ format: 'hardcover', amountMinor: 4399, estimated: true }),
     ]);
     expect(offer.shipping).toEqual({ costMinor: 0, quoted: true, etaDaysMin: 6, etaDaysMax: 10 });
   });

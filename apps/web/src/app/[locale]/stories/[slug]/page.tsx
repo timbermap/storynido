@@ -198,6 +198,16 @@ export default async function StoryPage({ params }: Props) {
                     } · `}
                   {offer.taxIncludedInPrice ? t('taxIncluded') : t('taxExtra')}
                 </p>
+                {offer.local && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t('usdNote', {
+                      rate: new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(
+                        offer.local.rate,
+                      ),
+                      currency: offer.local.currency,
+                    })}
+                  </p>
+                )}
               </>
             ) : (
               <p className="mt-3 text-muted-foreground">
