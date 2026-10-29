@@ -114,7 +114,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 {mode === 'preview_only' && <PreviewOnlyBanner />}
                 <SiteHeader />
                 <main id="main">{children}</main>
-                <SiteFooter country={display.country} countries={display.activeCountries} />
+                <SiteFooter />
               </>
             )}
             <ConsentBanner />

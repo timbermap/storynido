@@ -277,7 +277,9 @@
     },
     "preferencesTitle": "Preferences",
     "language": "Language",
-    "languageNote": "We use your browser's language; if you prefer another one, choose it here and we'll remember it.",
+    "languageNote": "We detect it from your location; if you prefer another one, choose it here and we'll remember it. You can also change it in the footer.",
+    "country": "Country",
+    "countryNote": "We detect it from your location. It sets the currency and prices you see; shipping is calculated from each order's address.",
     "preferencesError": "We couldn't save your preference. Please try again.",
     "orders": {
       "title": "My orders",
@@ -367,7 +369,11 @@
       "title": "Your stories in progress",
       "continue": "Continue",
       "startNew": "Start a new one",
-      "untitled": "Untitled story",
+      "untitled": {
+        "families": "Unfinished story",
+        "events": "Unfinished birthday story",
+        "professionals": "Unfinished professional story"
+      },
       "of": "{name}'s story",
       "updated": "Edited on {date}"
     },

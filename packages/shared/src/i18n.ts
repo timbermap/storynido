@@ -81,3 +81,39 @@ export function countryFromAcceptLanguage(header: string | null | undefined): Co
   }
   return null;
 }
+
+/** Países donde se habla español (ISO 3166-1 alfa-2). */
+const SPANISH_COUNTRIES = new Set([
+  'AR',
+  'BO',
+  'CL',
+  'CO',
+  'CR',
+  'CU',
+  'DO',
+  'EC',
+  'ES',
+  'GQ',
+  'GT',
+  'HN',
+  'MX',
+  'NI',
+  'PA',
+  'PE',
+  'PR',
+  'PY',
+  'SV',
+  'UY',
+  'VE',
+]);
+/** Países donde se habla portugués. */
+const PORTUGUESE_COUNTRIES = new Set(['AO', 'BR', 'CV', 'GW', 'MZ', 'PT', 'ST', 'TL']);
+
+/** Idioma del sitio para un país (por la IP del visitante): español, portugués o, si no, inglés. */
+export function localeForCountry(country: string | null | undefined): Locale | null {
+  if (!country) return null;
+  const code = country.toUpperCase();
+  if (SPANISH_COUNTRIES.has(code)) return 'es';
+  if (PORTUGUESE_COUNTRIES.has(code)) return 'pt';
+  return /^[A-Z]{2}$/.test(code) ? 'en' : null;
+}

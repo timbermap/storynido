@@ -15,6 +15,11 @@ describe('país', () => {
     expect(detectCountry(headers({ 'accept-language': 'es-CL,es;q=0.9' }), 'es')).toBe('CL');
   });
 
+  it('el país de la IP le gana al navegador; uno que no vendemos no cuenta', () => {
+    expect(detectCountry(headers({ 'accept-language': 'en-US' }), 'es', 'PE')).toBe('PE');
+    expect(detectCountry(headers({ 'accept-language': 'es-CL' }), 'es', 'AR')).toBe('CL');
+  });
+
   it('si no sabe nada, usa el país principal del idioma', () => {
     expect(detectCountry(headers({}), 'en')).toBe('US');
     expect(detectCountry(headers({ 'x-client-country': 'ZZ' }), 'pt')).toBe('BR');

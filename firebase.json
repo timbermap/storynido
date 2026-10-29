@@ -58,7 +58,8 @@
         "infra",
         "coverage",
         "**/*.tfstate*",
-        "**/tfplan"
+        "**/tfplan",
+        "**/geo"
       ]
     },
     {
@@ -80,7 +81,8 @@
         "infra",
         "coverage",
         "**/*.tfstate*",
-        "**/tfplan"
+        "**/tfplan",
+        "**/geo"
       ]
     }
   ]

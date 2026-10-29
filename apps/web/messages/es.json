@@ -277,7 +277,9 @@
     },
     "preferencesTitle": "Preferencias",
     "language": "Idioma",
-    "languageNote": "Detectamos el idioma de tu navegador; si prefieres otro, elígelo acá y lo recordamos.",
+    "languageNote": "Lo detectamos por tu ubicación; si prefieres otro, elígelo aquí y lo recordamos. También puedes cambiarlo en el pie de página.",
+    "country": "País",
+    "countryNote": "Lo detectamos por tu ubicación. Define la moneda y los precios que ves; el envío se calcula con la dirección de cada pedido.",
     "preferencesError": "No pudimos guardar tu preferencia. Intenta de nuevo.",
     "orders": {
       "title": "Mis pedidos",
@@ -367,7 +369,11 @@
       "title": "Tus cuentos en proceso",
       "continue": "Continuar",
       "startNew": "Empezar uno nuevo",
-      "untitled": "Cuento sin nombre",
+      "untitled": {
+        "families": "Cuento sin terminar",
+        "events": "Cuento de cumpleaños sin terminar",
+        "professionals": "Cuento profesional sin terminar"
+      },
       "of": "El cuento de {name}",
       "updated": "Editado el {date}"
     },

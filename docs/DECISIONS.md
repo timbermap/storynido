@@ -1239,3 +1239,26 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - Solo "el usuario no existe" cuenta como borrado: cualquier otro error de Auth corta el job.
 - **Identity Platform:** `autodelete_anonymous_users = true` borra las sesiones anónimas a los 30 días. Así no cuentan como usuarios activos en el precio. Lo que quede en Firestore lo borra el job.
 - **Constancias:** los consentimientos se conservan (prueba legal); `PRIVACY.md` actualizado.
+
+## 094 · Idioma y país por IP; el país sale del footer
+
+- **Fecha:** 2026-10-29 · Pedido de Sebastián: "seremos globales".
+- **Detección:**
+  - App Hosting no manda el país, solo la IP (`x-fah-client-ip`); se probó con una ruta temporal.
+  - El país se saca de la IP con la base gratuita de DB-IP ("IP to Country Lite", CC BY 4.0, unos 8 MB), que `scripts/fetch-geoip.mjs` baja al compilar la web.
+  - La consulta corre en nuestro servidor: la IP no sale a terceros ni se guarda. Si la base falta, se usa el idioma del navegador.
+- **Idioma:** sin idioma elegido, sale del país de la IP: español en los países hispanohablantes, portugués en los lusófonos e inglés en el resto (`localeForCountry`). Elegirlo en el footer o en la cuenta tiene prioridad (cookie `sn_locale`).
+- **País:**
+  - sale del footer;
+  - se elige en "Mi cuenta → Preferencias", junto al idioma; queda en el perfil y en el dispositivo;
+  - al iniciar sesión, el país y el idioma de la cuenta se aplican al dispositivo.
+  - Mientras los países conocidos sean 7, uno fuera de la lista (por ejemplo, Argentina) muestra precios del país principal del idioma. Esto cambia con el envío cotizado por pedido.
+- **Privacidad:** la política pública informa el uso de la IP y atribuye a DB-IP.
+
+## 095 · El creador desde una línea arranca el cuento de esa línea
+
+- **Problema:** desde "Crear para un evento", con una sesión anónima que tenía un borrador vacío de otra línea, se veía "Tus cuentos en proceso · Cuento sin nombre" en vez de arrancar.
+- **Decisión:**
+  - con `?line=`, solo se ofrecen los borradores de esa línea; si no hay, se crea uno y se entra directo;
+  - un borrador vacío (sin nombre y en el primer paso) se reutiliza en vez de listarse;
+  - en la lista, los borradores sin nombre dicen de qué línea son.

@@ -6,11 +6,14 @@ import { cache } from 'react';
 
 import { COUNTRY_COOKIE, detectCountry, parseCountry, resolveDisplayCountry } from '../country';
 import { getActiveCountries } from './api';
+import { clientIp, countryFromIp } from './geoip';
 
 /** País preferido del visitante (cookie que fija el proxy o el selector). */
 export async function preferredCountry(locale: Locale): Promise<CountryCode> {
   const fromCookie = parseCountry((await cookies()).get(COUNTRY_COOKIE)?.value);
-  return fromCookie ?? detectCountry(await headers(), locale);
+  if (fromCookie) return fromCookie;
+  const requestHeaders = await headers();
+  return detectCountry(requestHeaders, locale, countryFromIp(clientIp(requestHeaders)));
 }
 
 export interface DisplayCountry {

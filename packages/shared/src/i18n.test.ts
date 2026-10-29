@@ -7,6 +7,7 @@ import {
   countryFromAcceptLanguage,
   intlLocale,
   isLocale,
+  localeForCountry,
   localeFromAcceptLanguage,
 } from './i18n';
 
@@ -37,5 +38,18 @@ describe('i18n', () => {
     expect(countryFromAcceptLanguage('es-CO,es;q=0.9')).toBe('CO');
     expect(countryFromAcceptLanguage('en-GB,en;q=0.9')).toBeNull();
     expect(countryFromAcceptLanguage(null)).toBeNull();
+  });
+});
+
+describe('idioma por país (IP)', () => {
+  it('español, portugués o inglés', () => {
+    expect(localeForCountry('AR')).toBe('es');
+    expect(localeForCountry('uy')).toBe('es');
+    expect(localeForCountry('BR')).toBe('pt');
+    expect(localeForCountry('PT')).toBe('pt');
+    expect(localeForCountry('US')).toBe('en');
+    expect(localeForCountry('DE')).toBe('en');
+    expect(localeForCountry(null)).toBeNull();
+    expect(localeForCountry('XYZ')).toBeNull();
   });
 });

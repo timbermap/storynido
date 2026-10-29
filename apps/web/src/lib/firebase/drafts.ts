@@ -61,7 +61,11 @@ export interface DraftSummary {
   childName: string | null;
   updatedAt: Date | null;
   wizardStep: number;
+  channel: Channel;
 }
+
+/** Borrador recién creado al que nunca se le cargó nada (se reutiliza en vez de listarlo). */
+export const isEmptyDraft = (draft: DraftSummary) => !draft.childName && draft.wizardStep === 0;
 
 type Timestampish = { toDate(): Date } | null | undefined;
 
@@ -201,6 +205,7 @@ export async function listDrafts(db: Firestore, uid: string): Promise<DraftSumma
         childName: (child?.get('name') as string | undefined) ?? null,
         updatedAt: asDate(book.get('updatedAt') as Timestampish),
         wizardStep: book.get('wizardStep') as number,
+        channel: (book.get('channel') as Channel | undefined) ?? 'families',
       };
     }),
   );

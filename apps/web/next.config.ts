@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   transpilePackages: ['@storynido/shared'],
   pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
+  // Base de país por IP: la lee el proxy y el servidor con fs (no la detecta el trazado solo).
+  outputFileTracingIncludes: { '/*': ['./geo/*.mmdb'] },
   // Cabeceras de seguridad en todas las páginas (DECISIONS 089).
   headers: () =>
     Promise.resolve([

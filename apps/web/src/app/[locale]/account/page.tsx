@@ -13,7 +13,7 @@ import { ProPanel } from '@/components/pro/pro-panel';
 import { useProStatus } from '@/components/pro/use-pro-status';
 import { DraftsList } from '@/components/wizard/drafts-list';
 import { getFirebaseDb } from '@/lib/firebase/client';
-import { listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
+import { isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,9 @@ export default function AccountPage() {
     if (!user) return;
     void getFirebaseDb()
       .then((db) => listDrafts(db, user.uid))
-      .then(setDrafts);
+      .then((found) => {
+        setDrafts(found.filter((draft) => !isEmptyDraft(draft)));
+      });
   }, [user]);
 
   // Confirma la sesión contra la API (verifica el token en el servidor).

@@ -18,7 +18,9 @@ export function DraftsList({ drafts }: { drafts: DraftSummary[] }) {
         >
           <div>
             <p className="font-display text-lg font-semibold">
-              {draft.childName ? t('of', { name: draft.childName }) : t('untitled')}
+              {draft.childName
+                ? t('of', { name: draft.childName })
+                : t(`untitled.${draft.channel}`)}
             </p>
             {draft.updatedAt && (
               <p className="text-sm text-muted-foreground">

@@ -3,33 +3,47 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState, useTransition } from 'react';
 
-import { LOCALES, LOCALE_DEFINITIONS, type Locale } from '@storynido/shared';
+import {
+  COUNTRY_CODES,
+  LOCALES,
+  LOCALE_DEFINITIONS,
+  type CountryCode,
+  type Locale,
+} from '@storynido/shared';
 
 import { useRouter } from '@/i18n/navigation';
+import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE } from '@/lib/country';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import {
-  subscribeMarketingOptIn,
+  subscribePreferences,
   updateMarketingOptIn,
+  updateUserCountry,
   updateUserLocale,
 } from '@/lib/firebase/profile';
 
 /**
- * Idioma de la cuenta: el sitio lo detecta solo (idioma del navegador); acá se elige a mano y
- * queda guardado en el perfil y en este dispositivo.
+ * Idioma y país de la cuenta: el sitio los detecta solos (por la ubicación); acá se eligen a mano
+ * y quedan guardados en el perfil y en este dispositivo.
  */
 export function LanguagePreference({ uid }: { uid: string }) {
   const t = useTranslations('Account');
+  const tCountries = useTranslations('Switchers.countries');
   const locale = useLocale() as Locale;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState(false);
   const [optIn, setOptIn] = useState<boolean | null>(null);
+  const [country, setCountry] = useState<CountryCode | null>(null);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
     let cancelled = false;
     void getFirebaseDb().then((db) => {
-      if (!cancelled) unsubscribe = subscribeMarketingOptIn(db, uid, setOptIn);
+      if (!cancelled)
+        unsubscribe = subscribePreferences(db, uid, (preferences) => {
+          setOptIn(preferences.marketingOptIn);
+          setCountry(preferences.country);
+        });
     });
     return () => {
       cancelled = true;
@@ -45,6 +59,21 @@ export function LanguagePreference({ uid }: { uid: string }) {
     } catch {
       setError(true);
     }
+  }
+
+  async function changeCountry(next: CountryCode) {
+    setError(false);
+    setCountry(next);
+    try {
+      await updateUserCountry(await getFirebaseDb(), uid, next);
+    } catch {
+      setError(true);
+      return;
+    }
+    document.cookie = `${COUNTRY_COOKIE}=${next}; path=/; max-age=${String(COUNTRY_COOKIE_MAX_AGE)}; samesite=lax`;
+    startTransition(() => {
+      router.refresh();
+    });
   }
 
   async function change(next: Locale) {
@@ -86,6 +115,24 @@ export function LanguagePreference({ uid }: { uid: string }) {
         </select>
       </label>
       <p className="text-sm text-muted-foreground">{t('languageNote')}</p>
+      <label htmlFor="account-country" className="mt-2 grid gap-1.5 text-sm">
+        <span className="font-semibold">{t('country')}</span>
+        <select
+          id="account-country"
+          value={country ?? ''}
+          disabled={pending || country === null}
+          onChange={(event) => void changeCountry(event.target.value as CountryCode)}
+          className="h-11 max-w-xs rounded-xl border bg-card px-3 text-base"
+        >
+          {country === null && <option value="" />}
+          {COUNTRY_CODES.map((code) => (
+            <option key={code} value={code}>
+              {tCountries(code)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <p className="text-sm text-muted-foreground">{t('countryNote')}</p>
       <label className="mt-2 flex items-start gap-3 text-sm">
         <input
           id="account-news"

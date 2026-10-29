@@ -277,7 +277,9 @@
     },
     "preferencesTitle": "Preferências",
     "language": "Idioma",
-    "languageNote": "Usamos o idioma do seu navegador; se preferir outro, escolha aqui e vamos lembrar.",
+    "languageNote": "Detectamos pela sua localização; se preferir outro, escolha aqui e nós lembramos. Você também pode mudar no rodapé.",
+    "country": "País",
+    "countryNote": "Detectamos pela sua localização. Define a moeda e os preços que você vê; o frete é calculado com o endereço de cada pedido.",
     "preferencesError": "Não conseguimos salvar sua preferência. Tente de novo.",
     "orders": {
       "title": "Meus pedidos",
@@ -367,7 +369,11 @@
       "title": "Suas histórias em andamento",
       "continue": "Continuar",
       "startNew": "Começar uma nova",
-      "untitled": "História sem nome",
+      "untitled": {
+        "families": "História sem terminar",
+        "events": "História de aniversário sem terminar",
+        "professionals": "História profissional sem terminar"
+      },
       "of": "A história de {name}",
       "updated": "Editado em {date}"
     },

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { startAnonymousSession } from '@/lib/firebase/auth-actions';
-import { createDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
+import { createDraft, isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 
 import { CHANNEL_STORAGE_KEY } from '@/components/landing/remember-channel';
 import { ProActivationCard } from '@/components/pro/pro-activation';
@@ -85,7 +85,15 @@ export function CreateStart({
       await startNew();
       return;
     }
-    const found = await listDrafts(await getFirebaseDb(), user.uid);
+    // Desde el botón de una línea (?line=) solo cuentan los borradores de esa línea.
+    const all = await listDrafts(await getFirebaseDb(), user.uid);
+    const found = channelParam ? all.filter((draft) => draft.channel === channelParam) : all;
+    const empty = found.find(isEmptyDraft);
+    if (empty) {
+      // Un intento anterior que no pasó del primer paso: se sigue ahí, sin listarlo.
+      router.replace({ pathname: '/create/[bookId]', params: { bookId: empty.id } });
+      return;
+    }
     if (found.length === 0) await startNew();
     else setDrafts(found);
   });
@@ -124,7 +132,7 @@ export function CreateStart({
   return (
     <section className="container-page max-w-2xl py-14">
       <h1 className="mb-8 text-3xl font-medium sm:text-4xl">{t('drafts.title')}</h1>
-      <DraftsList drafts={drafts} />
+      <DraftsList drafts={drafts.filter((draft) => !isEmptyDraft(draft))} />
       <Button className="mt-8" size="lg" disabled={busy} onClick={() => void startNew()}>
         {t('drafts.startNew')}
       </Button>

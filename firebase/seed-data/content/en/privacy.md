@@ -8,6 +8,7 @@ At StoryNido we take special care of children's data. This policy explains what 
 - **The child:** name, age, pronouns (optional), interests, pet's and best friend's names, dedication, and 1 to 3 photos.
 - **Your orders:** shipping address, products, amounts and status. Payment details are processed by the payment provider; we never see or store your card.
 - **Usage:** technical data and, only if you accept, analytics and marketing cookies.
+- **Approximate location:** we use your IP address to infer your country and show the site in your language. The lookup runs on our server with the [DB-IP](https://db-ip.com) database (CC BY 4.0 license); we don't store or share your IP.
 
 ## Why we use it
 

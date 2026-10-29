@@ -1,7 +1,7 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { ComponentProps, ReactNode } from 'react';
 
-import type { CountryCode, Locale } from '@storynido/shared';
+import type { Locale } from '@storynido/shared';
 
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
@@ -10,7 +10,6 @@ import { SOCIAL_LINKS } from '@/lib/social';
 import { cn } from '@/lib/utils';
 
 import { CookiePreferencesButton } from './cookie-preferences-button';
-import { CountrySwitcher } from './country-switcher';
 import { LanguageSwitcher } from './language-switcher';
 import { Logo } from './logo';
 import { AUDIENCE_TONES, FAQ_ID, HOW_IT_WORKS_ID } from './site-header';
@@ -43,13 +42,8 @@ const SOCIAL_ICONS: Record<string, ReactNode> = {
 const selectDark =
   'h-9 rounded-full border border-white/15 bg-white/5 px-3 text-sm font-semibold text-white [&>option]:text-foreground';
 
-export async function SiteFooter({
-  country,
-  countries,
-}: {
-  country: CountryCode;
-  countries: CountryCode[];
-}) {
+/** Footer. Solo el idioma se cambia acá; el país va en "Mi cuenta" (somos globales). */
+export async function SiteFooter() {
   const locale = (await getLocale()) as Locale;
   const [t, tLegal, tNav] = await Promise.all([
     getTranslations('Footer'),
@@ -191,12 +185,6 @@ export async function SiteFooter({
           <div className="flex shrink-0 flex-wrap items-center gap-2 lg:flex-nowrap">
             <span className="mr-1 text-white/50">{t('preferences')}</span>
             <LanguageSwitcher id="language-footer" selectClassName={selectDark} />
-            <CountrySwitcher
-              id="country-footer"
-              current={country}
-              countries={countries}
-              selectClassName={selectDark}
-            />
           </div>
         </div>
         <p className="container-page pb-8 text-xs text-white/60">

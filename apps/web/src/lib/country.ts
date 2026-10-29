@@ -25,12 +25,21 @@ export function parseCountry(value: string | null | undefined): CountryCode | nu
   return parsed.success ? parsed.data : null;
 }
 
-/** País por IP (si la infraestructura lo informa), por idioma del navegador o por idioma del sitio. */
-export function detectCountry(headers: Pick<Headers, 'get'>, locale: Locale): CountryCode {
+/**
+ * País por IP (header de la infraestructura o la base local de IP), por idioma del navegador o
+ * por idioma del sitio. `ipCountry` lo calcula el servidor con `countryFromIp`.
+ */
+export function detectCountry(
+  headers: Pick<Headers, 'get'>,
+  locale: Locale,
+  ipCountry: string | null = null,
+): CountryCode {
   for (const header of GEO_HEADERS) {
     const country = parseCountry(headers.get(header));
     if (country) return country;
   }
+  const byIp = parseCountry(ipCountry);
+  if (byIp) return byIp;
   return (
     countryFromAcceptLanguage(headers.get('accept-language')) ??
     LOCALE_DEFINITIONS[locale].defaultCountry
