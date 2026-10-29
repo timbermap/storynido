@@ -30,10 +30,10 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 
 ## 3. Legal y privacidad
 
-| Estado | Qué                                                                                                           | Quién |
-| ------ | ------------------------------------------------------------------------------------------------------------- | ----- |
-| ⬜     | Revisión de un abogado: `PRIVACY.md`, términos y textos de consentimiento (fotos, tutor)                      | 👤    |
-| ⬜     | Dirección postal para los mails de marketing (`EMAIL_POSTAL_ADDRESS`; falta pasarla a Cloud Run en Terraform) | 🤝    |
+| Estado | Qué                                                                                                             | Quién |
+| ------ | --------------------------------------------------------------------------------------------------------------- | ----- |
+| ⬜     | Revisión de un abogado: `PRIVACY.md`, términos y textos de consentimiento (fotos, tutor)                        | 👤    |
+| ⬜     | Dirección postal para el pie de los mails (CAN-SPAM): `email_postal_address` en `infra/envs/production/main.tf` | 👤    |
 
 ## 4. Infraestructura de producción (`storynido-prod`)
 

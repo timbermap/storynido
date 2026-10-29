@@ -254,7 +254,7 @@ module "registry" {
 }
 
 locals {
-  common_env = {
+  common_env = merge({
     APP_ENV        = var.environment
     GCP_PROJECT_ID = var.project_id
     GCP_REGION     = var.region
@@ -277,7 +277,10 @@ locals {
     PUBLIC_API_URL     = var.api_domain != "" ? "https://${var.api_domain}" : "https://api-${data.google_project.this.number}.${var.region}.run.app"
     ADMIN_URL          = var.admin_url != "" ? var.admin_url : "https://${var.public_domain}"
     ADMIN_ALERT_EMAILS = var.alert_email
-  }
+    }, var.email_postal_address != "" ? {
+    # Dirección postal al pie de los mails (CAN-SPAM la exige en los de marketing).
+    EMAIL_POSTAL_ADDRESS = var.email_postal_address
+  } : {})
   # Claves de las imprentas activas (los valores se cargan con infra/scripts/set-secret.sh).
   print_secret_env = merge(
     contains(var.print_providers, "gelato") ? { GELATO_API_KEY = "gelato-api-key" } : {},

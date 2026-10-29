@@ -168,3 +168,9 @@ variable "app_check_domains" {
   type        = list(string)
   description = "Dominios de la web para la clave de reCAPTCHA Enterprise de App Check."
 }
+
+variable "email_postal_address" {
+  type        = string
+  default     = ""
+  description = "Dirección postal del pie de los mails (CAN-SPAM la exige en los de marketing). Vacío: el pie va sin dirección."
+}
