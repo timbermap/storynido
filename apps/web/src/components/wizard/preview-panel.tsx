@@ -70,6 +70,12 @@ export function PreviewPanel({
 }) {
   const t = useTranslations('Wizard.preview');
   const tViewer = useTranslations('Viewer');
+  // Páginas sin ilustrar: ejemplos fijos de la historia y del estilo (sin costo de IA).
+  const examples = {
+    cover: book.storyId ? `/samples/${book.storyId}.webp` : null,
+    page: book.styleId ? `/styles/${book.styleId}.webp` : null,
+    label: tViewer('exampleLabel', { name: childName }),
+  };
   const { user } = useAuth();
   const [preview, setPreview] = useState<PublicPreview | null>(null);
   const [busy, setBusy] = useState<Target | null>(null);
@@ -276,6 +282,7 @@ export function PreviewPanel({
                   : t('pageAlt', { number: page.number ?? 0 })
               }
               lockedLabel={tViewer('locked')}
+              examples={examples}
             />
           </section>
         </div>
@@ -293,6 +300,7 @@ export function PreviewPanel({
                   : t('pageAlt', { number: page.number ?? 0 })
               }
               lockedLabel={tViewer('locked')}
+              examples={examples}
               actions={actions}
               onPageChange={() => {
                 setEditing(null);
@@ -356,6 +364,16 @@ export function PreviewPanel({
               {t('regenerationsLeft', { count: regenerationsLeft })}
             </p>
           </aside>
+        </div>
+      )}
+
+      {data?.stage === 'character' && data.character && !data.character.approved && (
+        // Mientras se lee el cuento, el paso pendiente queda siempre a la vista.
+        <div className="sticky bottom-3 z-20 mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card/95 px-4 py-3 shadow-[0_12px_32px_-12px_rgb(52_42_64/0.35)] backdrop-blur">
+          <p className="text-sm font-semibold">{t('pendingStep', { name: childName })}</p>
+          <a href="#character-review" className={buttonVariants({ size: 'sm' })}>
+            {t('reviewCharacter')}
+          </a>
         </div>
       )}
 

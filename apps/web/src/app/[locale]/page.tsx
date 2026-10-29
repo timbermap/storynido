@@ -147,11 +147,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     {t('hero.pricePrinted', { price: highlights.printed })}
                   </span>
                 )}
-                {highlights.reference && (
-                  <span className="block text-xs">
-                    {t('hero.priceReference', { reference: highlights.reference })}
-                  </span>
-                )}
+                <span className="block text-xs">{t('hero.priceUsd')}</span>
               </p>
             )}
             <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-muted-foreground lg:justify-start">

@@ -103,7 +103,7 @@
       "audienceTitle": "Choose who it is for",
       "priceDigital": "Digital {price}",
       "pricePrinted": "Printed from {price} + shipping",
-      "priceReference": "Prices in US dollars (USD) · {reference}"
+      "priceUsd": "Prices in US dollars (USD)"
     },
     "trust": {
       "preview": "Free preview before you pay",
@@ -562,7 +562,7 @@
       "characterTitle": "This is how we’ll draw {name}",
       "characterText": "Check that it looks right. If something is off, fix it before we illustrate the book.",
       "characterAlt": "Character sheet: {name}, full body",
-      "approve": "Yes, that’s them",
+      "approve": "Yes, that's right: see their cover and 2 pages free",
       "approveNote": "Next we illustrate the cover and the first pages.",
       "correct": "Fix features",
       "saveTraits": "Save and redraw",
@@ -584,7 +584,8 @@
       "approvedBadge": "Character approved",
       "continueAfterApproval": "Choose the format once you approve the character and the sample is up to date.",
       "reviewCharacter": "Review the character",
-      "approveFirst": "First confirm how we'll draw {name}. Then we create the cover and the pages, and you choose the format."
+      "approveFirst": "First confirm how we'll draw {name}. Then we create the cover and the pages, and you choose the format.",
+      "pendingStep": "One step left: confirm how we draw {name}."
     },
     "character": {
       "modeLegend": "How should we create the main character?",
@@ -871,7 +872,8 @@
     "locked": "Illustrated once you confirm your book",
     "thumbnails": "Book pages",
     "noDedication": "Your dedication goes here",
-    "example": "Example"
+    "example": "Example",
+    "exampleLabel": "Style example · in your book, {name} will be the hero"
   },
   "Checkout": {
     "title": "Your book",

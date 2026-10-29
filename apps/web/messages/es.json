@@ -103,7 +103,7 @@
       "audienceTitle": "Elige para quién es",
       "priceDigital": "Digital {price}",
       "pricePrinted": "Impreso desde {price} + envío",
-      "priceReference": "Precios en dólares (USD) · {reference}"
+      "priceUsd": "Precios en dólares (USD)"
     },
     "trust": {
       "preview": "Vista previa gratis antes de pagar",
@@ -562,7 +562,7 @@
       "characterTitle": "Así vamos a dibujar a {name}",
       "characterText": "Revisa que se parezca. Si algo no está bien, corrígelo antes de ilustrar el libro.",
       "characterAlt": "Lámina del personaje: {name} de cuerpo entero",
-      "approve": "Sí, es así",
+      "approve": "Sí, es así: ver su portada y 2 páginas gratis",
       "approveNote": "Después ilustramos la portada y las primeras páginas.",
       "correct": "Corregir rasgos",
       "saveTraits": "Guardar y volver a dibujar",
@@ -584,7 +584,8 @@
       "approvedBadge": "Personaje aprobado",
       "continueAfterApproval": "Elige el formato cuando apruebes al personaje y la muestra esté al día.",
       "reviewCharacter": "Revisar al personaje",
-      "approveFirst": "Primero confirma cómo vamos a dibujar a {name}. Después creamos la portada y las páginas, y eliges el formato."
+      "approveFirst": "Primero confirma cómo vamos a dibujar a {name}. Después creamos la portada y las páginas, y eliges el formato.",
+      "pendingStep": "Falta un paso: confirma cómo dibujamos a {name}."
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
@@ -871,7 +872,8 @@
     "locked": "Se ilustra cuando confirmes tu libro",
     "thumbnails": "Páginas del libro",
     "noDedication": "Aquí irá tu dedicatoria",
-    "example": "Ejemplo"
+    "example": "Ejemplo",
+    "exampleLabel": "Ejemplo del estilo · en tu libro, el protagonista será {name}"
   },
   "Checkout": {
     "title": "Tu libro",

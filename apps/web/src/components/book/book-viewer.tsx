@@ -17,6 +17,17 @@ export interface ViewerPage {
 }
 
 /**
+ * Ilustraciones de ejemplo para las páginas todavía sin ilustrar (no cuestan nada: son
+ * imágenes fijas de la historia y del estilo, con otro protagonista).
+ */
+export interface ViewerExamples {
+  cover: string | null;
+  page: string | null;
+  /** Rótulo sobre el ejemplo ("Ejemplo del estilo · el protagonista será Luci"). */
+  label: string;
+}
+
+/**
  * Visor del libro tipo "Echar un vistazo": todas las páginas en un carrusel, con flechas,
  * teclado, deslizamiento en el celular y miniaturas. Las páginas sin ilustración muestran su
  * texto real y el lugar de la ilustración pendiente.
@@ -29,6 +40,7 @@ export function BookViewer({
   badge,
   actions,
   onPageChange,
+  examples,
 }: {
   title: string;
   pages: ViewerPage[];
@@ -40,6 +52,7 @@ export function BookViewer({
   /** Acciones de la página visible (editar texto, otra ilustración). */
   actions?: (page: ViewerPage) => ReactNode;
   onPageChange?: (page: ViewerPage) => void;
+  examples?: ViewerExamples;
 }) {
   const t = useTranslations('Viewer');
   const [index, setIndex] = useState(0);
@@ -105,6 +118,7 @@ export function BookViewer({
           alt={imageAlt(current)}
           lockedLabel={lockedLabel}
           badge={badge}
+          examples={examples}
           noDedication={t('noDedication')}
           theEnd={t('theEnd')}
         />
@@ -174,15 +188,43 @@ export function BookViewer({
   );
 }
 
+function exampleFor(page: ViewerPage, examples?: ViewerExamples) {
+  const src = page.kind === 'cover' ? examples?.cover : examples?.page;
+  return examples && src ? { src, label: examples.label } : null;
+}
+
 function Illustration({
   src,
   alt,
   lockedLabel,
+  example,
 }: {
   src: string | null;
   alt: string;
   lockedLabel: string;
+  example?: { src: string; label: string } | null;
 }) {
+  const [exampleFailed, setExampleFailed] = useState(false);
+  if (!src && example && !exampleFailed) {
+    // Sin ilustración todavía: un ejemplo del estilo, bien rotulado (no es su libro).
+    return (
+      <div className="relative size-full">
+        {/* eslint-disable-next-line @next/next/no-img-element -- imagen pública de ejemplo */}
+        <img
+          src={example.src}
+          alt=""
+          className="size-full object-cover opacity-80 saturate-[0.85]"
+          draggable={false}
+          onError={() => {
+            setExampleFailed(true);
+          }}
+        />
+        <span className="absolute inset-x-3 bottom-3 rounded-full bg-card/95 px-3 py-1.5 text-center text-xs font-bold text-primary shadow">
+          {example.label}
+        </span>
+      </div>
+    );
+  }
   return src ? (
     // URL firmada de corta duración o imagen de ejemplo: no pasa por el optimizador.
     // eslint-disable-next-line @next/next/no-img-element
@@ -203,6 +245,7 @@ function PageSpread({
   alt,
   lockedLabel,
   badge,
+  examples,
   noDedication,
   theEnd,
 }: {
@@ -211,6 +254,7 @@ function PageSpread({
   alt: string;
   lockedLabel: string;
   badge?: string;
+  examples?: ViewerExamples;
   noDedication: string;
   theEnd: string;
 }) {
@@ -220,7 +264,13 @@ function PageSpread({
   if (page.kind === 'cover') {
     return (
       <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl shadow-[0_17px_45px_rgb(80_52_84/0.18)]">
-        <Illustration src={page.imageUrl} alt={alt} lockedLabel={lockedLabel} />
+        <Illustration
+          key={page.key}
+          src={page.imageUrl}
+          alt={alt}
+          lockedLabel={lockedLabel}
+          example={exampleFor(page, examples)}
+        />
         {/* El título va en la capa tipográfica, nunca dentro de la ilustración. */}
         <h3 className="absolute inset-x-0 top-0 bg-gradient-to-b from-[#fffaf4]/95 to-transparent px-6 pt-6 pb-10 text-center font-display text-2xl leading-tight font-medium sm:text-3xl">
           {title}
@@ -243,7 +293,13 @@ function PageSpread({
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
-        <Illustration src={page.imageUrl} alt={alt} lockedLabel={lockedLabel} />
+        <Illustration
+          key={page.key}
+          src={page.imageUrl}
+          alt={alt}
+          lockedLabel={lockedLabel}
+          example={exampleFor(page, examples)}
+        />
         {badge && <Badge>{badge}</Badge>}
       </div>
       <div className={paper}>
