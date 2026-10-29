@@ -516,7 +516,7 @@
     },
     "lesson": {
       "title": "What do you want them to learn?",
-      "subtitle": "The story carries this message through the adventure, never with a lecture.",
+      "subtitle": "The story carries this message through the adventure, never with a lecture. It’s optional.",
       "custom": "Write my own message",
       "customLabel": "Your message",
       "customPlaceholder": "That Grandpa loves them very much even though he lives far away.",
@@ -791,6 +791,14 @@
         "story": "The story could be better",
         "other": "Something else"
       }
+    },
+    "stageProgress": "Stage {current} of {total}: {name}",
+    "subStep": "{name} ({current} of {total})",
+    "stages": {
+      "child": "Hero",
+      "character": "Their character",
+      "adventure": "The adventure",
+      "preview": "Preview"
     }
   },
   "Landing": {

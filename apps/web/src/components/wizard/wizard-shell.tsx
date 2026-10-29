@@ -7,7 +7,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-import { WIZARD_STEPS, type SaveState, type WizardStep } from './steps';
+import { WIZARD_STAGES, WIZARD_STEPS, stageOf, type SaveState, type WizardStep } from './steps';
 
 /** Armazón del creador: progreso, título del paso (recibe el foco), navegación y guardado. */
 export function WizardShell({
@@ -44,7 +44,24 @@ export function WizardShell({
   // Numeración y progreso sobre los pasos visibles para la línea del libro.
   const visible = WIZARD_STEPS.filter((step) => !hidden.includes(step));
   const total = visible.length;
-  const position = visible.indexOf(WIZARD_STEPS[stepIndex] ?? 'child');
+  const current = WIZARD_STEPS[stepIndex] ?? 'child';
+  const position = visible.indexOf(current);
+  // Etapas: lo que se ve arriba. Dentro de "La aventura", el sub-paso visible (2 de 4).
+  const { index: stageIndex, stage } = stageOf(current);
+  const stageSteps = stage.steps.filter((step) => visible.includes(step));
+  const progressLabel = t('stageProgress', {
+    current: stageIndex + 1,
+    total: WIZARD_STAGES.length,
+    name: t(`stages.${stage.key}`),
+  });
+  const subLabel =
+    stageSteps.length > 1
+      ? t('subStep', {
+          name: t(`steps.${current}`),
+          current: stageSteps.indexOf(current) + 1,
+          total: stageSteps.length,
+        })
+      : null;
 
   // Al cambiar de paso, el foco va al título (lectores de pantalla y teclado).
   useEffect(() => {
@@ -54,7 +71,10 @@ export function WizardShell({
   return (
     <div className="container-page max-w-3xl py-10">
       <div className="flex items-center justify-between gap-4 text-sm font-bold text-muted-foreground">
-        <span>{t('progress', { current: position + 1, total })}</span>
+        <span>
+          {progressLabel}
+          {subLabel && <span className="font-semibold"> · {subLabel}</span>}
+        </span>
         <span role="status" aria-live="polite" className="inline-flex items-center gap-1.5">
           {saveState === 'saving' && (
             <>
@@ -83,7 +103,7 @@ export function WizardShell({
         aria-valuemin={1}
         aria-valuemax={total}
         aria-valuenow={position + 1}
-        aria-label={t('progress', { current: position + 1, total })}
+        aria-label={progressLabel}
       >
         <span
           className="block h-full rounded-full bg-primary transition-all"
@@ -93,28 +113,32 @@ export function WizardShell({
 
       <nav aria-label={t('title')} className="mt-4 hidden sm:block">
         <ol className="flex flex-wrap gap-2 text-xs font-semibold">
-          {visible.map((step, visibleIndex) => {
-            const index = WIZARD_STEPS.indexOf(step);
-            const reachable = index <= maxReached;
+          {WIZARD_STAGES.map((item, index) => {
+            // Cada etapa abre en su primer paso visible; se puede volver a lo ya recorrido.
+            const first = item.steps.find((step) => visible.includes(step));
+            if (!first) return null;
+            const target = WIZARD_STEPS.indexOf(first);
+            const reachable = target <= maxReached;
+            const active = index === stageIndex;
             return (
-              <li key={step}>
+              <li key={item.key}>
                 <button
                   type="button"
                   disabled={!reachable}
-                  aria-current={index === stepIndex ? 'step' : undefined}
+                  aria-current={active ? 'step' : undefined}
                   onClick={() => {
-                    onJump(index);
+                    onJump(target);
                   }}
                   className={cn(
                     'rounded-full px-3 py-1 transition',
-                    index === stepIndex
+                    active
                       ? 'bg-primary text-primary-foreground'
                       : reachable
                         ? 'bg-secondary text-primary hover:bg-secondary/70'
                         : 'bg-muted text-muted-foreground',
                   )}
                 >
-                  {visibleIndex + 1}. {t(`steps.${step}`)}
+                  {index + 1}. {t(`stages.${item.key}`)}
                 </button>
               </li>
             );

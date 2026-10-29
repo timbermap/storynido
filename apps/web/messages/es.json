@@ -516,7 +516,7 @@
     },
     "lesson": {
       "title": "¿Qué quieres que aprenda?",
-      "subtitle": "La historia transmite este mensaje a través de la aventura, sin sermones.",
+      "subtitle": "La historia transmite este mensaje a través de la aventura, sin sermones. Es opcional.",
       "custom": "Escribir mi propio mensaje",
       "customLabel": "Tu mensaje",
       "customPlaceholder": "Que sepa que el abuelo lo quiere mucho aunque viva lejos.",
@@ -791,6 +791,14 @@
         "story": "La historia podría ser mejor",
         "other": "Otra cosa"
       }
+    },
+    "stageProgress": "Etapa {current} de {total}: {name}",
+    "subStep": "{name} ({current} de {total})",
+    "stages": {
+      "child": "Protagonista",
+      "character": "Su personaje",
+      "adventure": "La aventura",
+      "preview": "Muestra"
     }
   },
   "Landing": {
