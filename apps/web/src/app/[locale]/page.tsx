@@ -25,9 +25,8 @@ import { StoryCard } from '@/components/stories/story-card';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
-import { lowestPrice } from '@/lib/offer';
+import { lowestPrice, offerHighlights } from '@/lib/offer';
 import { getContent, getLessons, getOffer, getStories } from '@/lib/server/api';
-import { countryName } from '@/lib/country-names';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
 
@@ -44,6 +43,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getContent('faq', locale).catch(() => null),
   ]);
   const fromPrice = lowestPrice(offer, locale, display.country);
+  const highlights = offerHighlights(offer, locale, display.country);
   const faqItems = faq ? parseFaq(faq.body) : [];
 
   // Cada paso con su color pastel (número e ícono).
@@ -70,10 +70,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const trust = [
     { icon: Globe, text: t('trustInline.formats') },
-    {
-      icon: Truck,
-      text: t('trustInline.shipping', { country: countryName(display.country, locale) }),
-    },
+    { icon: Truck, text: t('trustInline.shipping') },
     { icon: Sparkles, text: t('trustInline.preview') },
   ];
 
@@ -137,9 +134,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {t('hero.explore')}
               </Link>
             </div>
-            {fromPrice && (
-              <p className="mt-4 text-sm font-bold text-muted-foreground">
-                {t('hero.fromPrice', { price: fromPrice })}
+            {highlights && (
+              <p className="mt-4 text-sm text-muted-foreground">
+                {highlights.digital && (
+                  <span className="font-bold text-foreground">
+                    {t('hero.priceDigital', { price: highlights.digital })}
+                  </span>
+                )}
+                {highlights.digital && highlights.printed && ' · '}
+                {highlights.printed && (
+                  <span className="font-bold text-foreground">
+                    {t('hero.pricePrinted', { price: highlights.printed })}
+                  </span>
+                )}
+                {highlights.reference && (
+                  <span className="block text-xs">
+                    {t('hero.priceReference', { reference: highlights.reference })}
+                  </span>
+                )}
               </p>
             )}
             <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-muted-foreground lg:justify-start">

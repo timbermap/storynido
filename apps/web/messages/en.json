@@ -77,7 +77,10 @@
       "explore": "Explore stories",
       "photoLabel": "Their photo",
       "bookAlt": "Open book on a knitted blanket: on one page a curly-haired boy with red glasses floats as an astronaut next to his puppy; on the other, the same boy meets a fox in the forest. Beside it, his illustrated portrait.",
-      "audienceTitle": "Choose who it is for"
+      "audienceTitle": "Choose who it is for",
+      "priceDigital": "Digital {price}",
+      "pricePrinted": "Printed from {price} + shipping",
+      "priceReference": "Prices in US dollars (USD) · {reference}"
     },
     "trust": {
       "preview": "Free preview before you pay",
@@ -135,8 +138,8 @@
       "cta": "Create their story"
     },
     "trustInline": {
-      "formats": "Available as a digital and printed book",
-      "shipping": "Shipping to {country}",
+      "formats": "Digital or printed, with their name and face",
+      "shipping": "We ship worldwide · shipping is calculated from your address",
       "preview": "Free preview"
     },
     "audience": {
@@ -556,7 +559,9 @@
       "illustrating": "Illustrating the cover and the first pages…",
       "readWhile": "Read the whole story",
       "approvedBadge": "Character approved",
-      "continueAfterApproval": "Choose the format once you approve the character and the sample is up to date."
+      "continueAfterApproval": "Choose the format once you approve the character and the sample is up to date.",
+      "reviewCharacter": "Review the character",
+      "approveFirst": "First confirm how we'll draw {name}. Then we create the cover and the pages, and you choose the format."
     },
     "character": {
       "modeLegend": "How should we create the main character?",

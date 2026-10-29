@@ -101,7 +101,10 @@ export function CharacterReview({
 
       <div className="grid content-start gap-5">
         <div>
-          <h2 id="character-review" className="text-[clamp(1.6rem,3vw,2.2rem)] font-medium">
+          <h2
+            id="character-review"
+            className="scroll-mt-28 text-[clamp(1.6rem,3vw,2.2rem)] font-medium"
+          >
             {t('characterTitle', { name: childName })}
           </h2>
           <p className="mt-2 text-muted-foreground">{t('characterText')}</p>

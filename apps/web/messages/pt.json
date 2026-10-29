@@ -77,7 +77,10 @@
       "explore": "Ver histórias",
       "photoLabel": "A foto",
       "bookAlt": "Livro aberto sobre uma manta de tricô: em uma página, um menino de cabelo cacheado e óculos vermelhos flutua como astronauta ao lado do cachorrinho; na outra, o mesmo menino conhece uma raposa na floresta. Ao lado, seu retrato ilustrado.",
-      "audienceTitle": "Escolha para quem é"
+      "audienceTitle": "Escolha para quem é",
+      "priceDigital": "Digital {price}",
+      "pricePrinted": "Impresso a partir de {price} + frete",
+      "priceReference": "Preços em dólares (USD) · {reference}"
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",
@@ -135,8 +138,8 @@
       "cta": "Criar a história"
     },
     "trustInline": {
-      "formats": "Disponível em livro digital e impresso",
-      "shipping": "Entrega para {country}",
+      "formats": "Digital ou impresso, com o nome e o rostinho",
+      "shipping": "Enviamos para o mundo todo · o frete é calculado com o seu endereço",
       "preview": "Prévia grátis"
     },
     "audience": {
@@ -556,7 +559,9 @@
       "illustrating": "Ilustrando a capa e as primeiras páginas…",
       "readWhile": "Leia a história completa",
       "approvedBadge": "Personagem aprovado",
-      "continueAfterApproval": "Escolha o formato quando aprovar o personagem e a amostra estiver atualizada."
+      "continueAfterApproval": "Escolha o formato quando aprovar o personagem e a amostra estiver atualizada.",
+      "reviewCharacter": "Revisar a personagem",
+      "approveFirst": "Primeiro confirme como vamos desenhar {name}. Depois criamos a capa e as páginas, e você escolhe o formato."
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",

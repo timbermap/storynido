@@ -77,7 +77,10 @@
       "explore": "Ver historias",
       "photoLabel": "Su foto",
       "bookAlt": "Libro abierto sobre una manta tejida: en una página, un niño de pelo rizado y anteojos rojos flota como astronauta junto a su perrito; en la otra, el mismo niño conoce a un zorro en el bosque. Al lado, su retrato ilustrado.",
-      "audienceTitle": "Elige para quién es"
+      "audienceTitle": "Elige para quién es",
+      "priceDigital": "Digital {price}",
+      "pricePrinted": "Impreso desde {price} + envío",
+      "priceReference": "Precios en dólares (USD) · {reference}"
     },
     "trust": {
       "preview": "Vista previa gratis antes de pagar",
@@ -135,8 +138,8 @@
       "cta": "Crear su cuento"
     },
     "trustInline": {
-      "formats": "Disponible en digital y libro impreso",
-      "shipping": "Envío a {country}",
+      "formats": "Digital o impreso, con su nombre y su carita",
+      "shipping": "Enviamos a todo el mundo · el envío se calcula con tu dirección",
       "preview": "Vista previa gratis"
     },
     "audience": {
@@ -556,7 +559,9 @@
       "illustrating": "Ilustrando la portada y las primeras páginas…",
       "readWhile": "Lee el cuento completo",
       "approvedBadge": "Personaje aprobado",
-      "continueAfterApproval": "Elige el formato cuando apruebes al personaje y la muestra esté al día."
+      "continueAfterApproval": "Elige el formato cuando apruebes al personaje y la muestra esté al día.",
+      "reviewCharacter": "Revisar al personaje",
+      "approveFirst": "Primero confirma cómo vamos a dibujar a {name}. Después creamos la portada y las páginas, y eliges el formato."
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",

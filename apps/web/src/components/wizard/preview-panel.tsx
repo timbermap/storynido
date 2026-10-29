@@ -391,6 +391,16 @@ export function PreviewPanel({
             >
               {t('continue')}
             </Link>
+          ) : data?.stage === 'character' && data.character && !data.character.approved ? (
+            // Falta aprobar al personaje (más arriba): el botón lleva ahí en vez de estar gris.
+            <>
+              <a href="#character-review" className={buttonVariants({ size: 'lg' })}>
+                {t('reviewCharacter')}
+              </a>
+              <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                {t('approveFirst', { name: childName })}
+              </p>
+            </>
           ) : (
             <>
               <Button size="lg" disabled aria-describedby="continue-soon">
