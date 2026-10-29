@@ -282,8 +282,13 @@
       "accountExists": "Já existe uma conta com esse e-mail. Entre com o método que você usou antes.",
       "network": "Sem conexão. Verifique sua internet e tente novamente.",
       "providerDisabled": "Esse método de login ainda não está disponível.",
-      "generic": "Não conseguimos fazer seu login. Tente novamente em alguns minutos."
-    }
+      "generic": "Não conseguimos fazer seu login. Tente novamente em alguns minutos.",
+      "mfaInvalid": "O código não é válido ou expirou. Tente o próximo.",
+      "mfaUnsupported": "Esta conta usa um segundo fator que ainda não aceitamos aqui."
+    },
+    "mfaTitle": "Verificação em duas etapas",
+    "mfaText": "Digite o código de 6 dígitos do seu app autenticador.",
+    "mfaVerify": "Verificar"
   },
   "Account": {
     "title": "Minha conta",

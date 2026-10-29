@@ -1423,3 +1423,4 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - La ruta `/events` no cambia.
   - El contenido sigue hablando de cumpleaños, porque el kit pide la edad que cumple. Otras ocasiones (fin de año escolar, bautismos) se anuncian recién cuando el creador las soporte.
 - **Ficha de historia:** "Elige la extensión" muestra cada extensión activa que admite la historia, con páginas, uso y formatos. No se muestra en la línea Eventos.
+- **Verificación en dos pasos en el sitio:** las cuentas del equipo tienen TOTP (lo exige el admin), y Google devolvía `auth/multi-factor-auth-required` también en el sitio público. Ahora el panel de login pide el código de 6 dígitos, como el admin. Los clientes no tienen segundo factor, así que no lo ven.

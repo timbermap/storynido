@@ -1,7 +1,9 @@
 import {
   GoogleAuthProvider,
   OAuthProvider,
+  TotpMultiFactorGenerator,
   browserPopupRedirectResolver,
+  getMultiFactorResolver,
   isSignInWithEmailLink,
   linkWithPopup,
   sendSignInLinkToEmail,
@@ -11,6 +13,8 @@ import {
   signOut,
   type AuthCredential,
   type AuthProvider,
+  type MultiFactorError,
+  type MultiFactorResolver,
 } from 'firebase/auth';
 
 import { api } from '../api';
@@ -61,6 +65,22 @@ export async function signInWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
   await signInWithProvider(provider, (error) => GoogleAuthProvider.credentialFromError(error));
+}
+
+/**
+ * Cuentas con segundo factor (el equipo, que también entra al admin): el login devuelve
+ * `auth/multi-factor-auth-required` y se completa con el código de la app autenticadora.
+ */
+export function multiFactorResolver(error: unknown): MultiFactorResolver | null {
+  if (errorCode(error) !== 'auth/multi-factor-auth-required') return null;
+  return getMultiFactorResolver(getFirebaseAuth(), error as MultiFactorError);
+}
+
+/** Completa el login con el código TOTP. Falla con `auth/invalid-verification-code` si no vale. */
+export async function resolveWithTotp(resolver: MultiFactorResolver, code: string): Promise<void> {
+  const hint = resolver.hints.find((item) => item.factorId === TotpMultiFactorGenerator.FACTOR_ID);
+  if (!hint) throw Object.assign(new Error('Sin app autenticadora'), { code: 'auth/mfa-no-totp' });
+  await resolver.resolveSignIn(TotpMultiFactorGenerator.assertionForSignIn(hint.uid, code));
 }
 
 export async function signInWithApple(): Promise<void> {
@@ -139,6 +159,8 @@ export type AuthErrorKey =
   | 'accountExists'
   | 'network'
   | 'providerDisabled'
+  | 'mfaInvalid'
+  | 'mfaUnsupported'
   | 'generic';
 
 /** Clave de mensaje (Auth.errors.*) para los errores más comunes de Firebase Auth. */
@@ -160,12 +182,15 @@ export function authErrorKey(error: unknown): AuthErrorKey {
       return 'accountExists';
     case 'auth/network-request-failed':
       return 'network';
+    case 'auth/invalid-verification-code':
+    case 'auth/totp-challenge-timeout':
+      return 'mfaInvalid';
+    case 'auth/mfa-no-totp':
+      return 'mfaUnsupported';
     case 'auth/operation-not-allowed':
     case 'auth/configuration-not-found':
       return 'providerDisabled';
     default:
-      // Solo el código de Firebase (sin datos de la cuenta), para diagnosticar desde la consola.
-      console.warn('[auth]', code || error);
       return 'generic';
   }
 }

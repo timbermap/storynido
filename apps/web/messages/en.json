@@ -282,8 +282,13 @@
       "accountExists": "An account with that email already exists. Sign in with the method you used before.",
       "network": "No connection. Check your internet and try again.",
       "providerDisabled": "That sign-in method isn't available yet.",
-      "generic": "We couldn't sign you in. Please try again in a few minutes."
-    }
+      "generic": "We couldn't sign you in. Please try again in a few minutes.",
+      "mfaInvalid": "That code isn't valid or has expired. Try the next one.",
+      "mfaUnsupported": "This account uses a second factor we don't support here yet."
+    },
+    "mfaTitle": "Two-step verification",
+    "mfaText": "Enter the 6-digit code from your authenticator app.",
+    "mfaVerify": "Verify"
   },
   "Account": {
     "title": "My account",

@@ -7,8 +7,12 @@ import type { Locale } from '@storynido/shared';
 
 import { Button } from '@/components/ui/button';
 import { getPathname } from '@/i18n/navigation';
+import type { MultiFactorResolver } from 'firebase/auth';
+
 import {
   authErrorKey,
+  multiFactorResolver,
+  resolveWithTotp,
   sendMagicLink,
   signInWithApple,
   signInWithGoogle,
@@ -19,6 +23,7 @@ type Status =
   | { kind: 'idle' }
   | { kind: 'busy' }
   | { kind: 'sent'; email: string }
+  | { kind: 'mfa'; resolver: MultiFactorResolver; error?: AuthErrorKey }
   | { kind: 'error'; key: AuthErrorKey };
 
 /** Panel de inicio de sesión sin contraseñas, reutilizable en cualquier página. */
@@ -35,7 +40,8 @@ export function SignInPanel() {
       await action();
       setStatus({ kind: 'idle' });
     } catch (error) {
-      setStatus({ kind: 'error', key: authErrorKey(error) });
+      const resolver = multiFactorResolver(error);
+      setStatus(resolver ? { kind: 'mfa', resolver } : { kind: 'error', key: authErrorKey(error) });
     }
   }
 
@@ -48,6 +54,10 @@ export function SignInPanel() {
     } catch (error) {
       setStatus({ kind: 'error', key: authErrorKey(error) });
     }
+  }
+
+  if (status.kind === 'mfa') {
+    return <TotpStep resolver={status.resolver} />;
   }
 
   if (status.kind === 'sent') {
@@ -123,5 +133,57 @@ export function SignInPanel() {
         </p>
       )}
     </div>
+  );
+}
+
+/** Segundo paso para cuentas con verificación en dos pasos: el código de la app autenticadora. */
+function TotpStep({ resolver }: { resolver: MultiFactorResolver }) {
+  const t = useTranslations('Auth');
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<AuthErrorKey | null>(null);
+
+  async function onSubmit(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await resolveWithTotp(resolver, code);
+    } catch (caught) {
+      setError(authErrorKey(caught));
+      setCode('');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form className="grid gap-3" onSubmit={(event) => void onSubmit(event)}>
+      <h2 className="text-xl font-medium">{t('mfaTitle')}</h2>
+      <label htmlFor="totp" className="text-sm text-muted-foreground">
+        {t('mfaText')}
+      </label>
+      <input
+        id="totp"
+        required
+        autoComplete="one-time-code"
+        inputMode="numeric"
+        pattern="[0-9]{6}"
+        maxLength={6}
+        value={code}
+        onChange={(event) => {
+          setCode(event.target.value.replace(/\D/g, ''));
+        }}
+        className="h-11 rounded-full border bg-card px-4 text-center text-lg tracking-[0.4em] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      />
+      <Button type="submit" size="lg" disabled={busy || code.length !== 6}>
+        {t('mfaVerify')}
+      </Button>
+      {error && (
+        <p role="alert" className="text-sm font-medium text-red-800">
+          {t(`errors.${error}`)}
+        </p>
+      )}
+    </form>
   );
 }
