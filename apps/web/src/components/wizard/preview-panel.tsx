@@ -1,8 +1,13 @@
 'use client';
 
-import { ApiError, PREVIEW_PAGE_TEXT_MAX, type PublicPreview } from '@storynido/shared';
+import {
+  ApiError,
+  PREVIEW_PAGE_TEXT_MAX,
+  type Locale,
+  type PublicPreview,
+} from '@storynido/shared';
 import { AlertTriangle, CheckCircle2, Loader2, Pencil, RefreshCw, Sparkles } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
@@ -11,6 +16,7 @@ import { BookViewer, type ViewerPage } from '@/components/book/book-viewer';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { formatPrice } from '@/lib/format';
 
 import { CharacterReview } from './character-review';
 import { PreviewFeedback } from './preview-feedback';
@@ -57,6 +63,7 @@ function viewerPages(preview: PreviewData): ViewerPage[] {
 export function PreviewPanel({
   book,
   childName,
+  prices,
   generating,
   generateError,
   onRegenerateAll,
@@ -64,6 +71,7 @@ export function PreviewPanel({
 }: {
   book: WizardData['book'];
   childName: string;
+  prices: WizardData['prices'];
   generating: boolean;
   generateError: string | null;
   onRegenerateAll: () => void;
@@ -71,6 +79,10 @@ export function PreviewPanel({
 }) {
   const t = useTranslations('Wizard.preview');
   const tViewer = useTranslations('Viewer');
+  const tBook = useTranslations('Wizard.book');
+  const locale = useLocale() as Locale;
+  const money = (minor: number) =>
+    prices ? formatPrice(minor, prices.currency, locale, prices.country) : '';
   // Páginas sin ilustrar: ejemplos fijos de la historia y del estilo (sin costo de IA).
   const examples = {
     cover: book.storyId ? `/samples/${book.storyId}.webp` : null,
@@ -412,7 +424,23 @@ export function PreviewPanel({
             >
               {t('continue')}
             </Link>
-          ) : data?.stage === 'character' && data.character && !data.character.approved ? (
+          ) : null}
+          {data?.stage === 'complete' && !data.stale && book.channel !== 'events' && prices && (
+            // Qué cuesta antes de entrar al pago (formato y envío se eligen ahí).
+            <p className="mt-2 text-sm text-muted-foreground tabular-nums">
+              {[
+                prices.digitalMinor != null &&
+                  tBook('priceDigital', { price: money(prices.digitalMinor) }),
+                prices.printedFromMinor != null &&
+                  tBook('pricePrinted', { price: money(prices.printedFromMinor) }),
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+          )}
+          {data?.stage === 'complete' && !data.stale ? null : data?.stage === 'character' &&
+            data.character &&
+            !data.character.approved ? (
             // Falta aprobar al personaje (más arriba): el botón lleva ahí en vez de estar gris.
             <>
               <a href="#character-review" className={buttonVariants({ size: 'lg' })}>

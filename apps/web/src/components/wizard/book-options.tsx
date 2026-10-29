@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import {
   BOOK_LENGTHS,
@@ -10,14 +10,17 @@ import {
   type BookLength,
   type ContentType,
   type EditorialConfig,
+  type Locale,
   type PublicStory,
   type ReadingLevel,
   type TextDensity,
 } from '@storynido/shared';
 
+import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 import { OptionCard } from './option-card';
+import type { PriceHint } from './types';
 
 export interface BookChoice {
   length: BookLength;
@@ -86,17 +89,23 @@ function Chips<T extends string>({
 export function BookOptions({
   story,
   editorial,
+  prices = null,
   age,
   value,
   onChange,
 }: {
   story: PublicStory | undefined;
   editorial: EditorialConfig;
+  /** Sin precios (Eventos: el kit tiene los suyos, o un país donde no se vende) no se muestran. */
+  prices?: PriceHint | null;
   age: number | null;
   value: BookChoice;
   onChange: (value: BookChoice) => void;
 }) {
   const t = useTranslations('Wizard.book');
+  const locale = useLocale() as Locale;
+  const money = (minor: number) =>
+    prices ? formatPrice(minor, prices.currency, locale, prices.country) : '';
   const set = (patch: Partial<BookChoice>) => {
     onChange({ ...value, ...patch });
   };
@@ -177,6 +186,17 @@ export function BookOptions({
                   <span className="mt-1 w-fit rounded-full bg-secondary px-2 py-0.5 text-xs font-bold">
                     {printable ? t('digitalOrPrint') : t('digitalOnly')}
                   </span>
+                  {prices?.digitalMinor != null && (
+                    <span className="text-xs font-semibold tabular-nums">
+                      {t('priceDigital', { price: money(prices.digitalMinor) })}
+                      {printable && prices.printedFromMinor != null && (
+                        <>
+                          <br />
+                          {t('pricePrinted', { price: money(prices.printedFromMinor) })}
+                        </>
+                      )}
+                    </span>
+                  )}
                 </span>
               </OptionCard>
             );

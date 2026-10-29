@@ -102,6 +102,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
       <BookOptions
         story={story}
         editorial={data.editorial}
+        prices={data.book.channel === 'events' ? null : data.prices}
         age={age ?? null}
         value={fitToStory(choice, story)}
         onChange={setChoice}

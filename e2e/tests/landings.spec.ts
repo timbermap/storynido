@@ -114,13 +114,13 @@ test('catálogo: "¿Qué le encanta?" desde Familias, temática y búsqueda sin 
 test('las historias de Eventos y Profesionales vuelven a su landing y crean en su línea', async ({
   page,
 }) => {
-  for (const [landing, line, back] of [
-    ['/es/eventos', 'events', 'Volver a celebraciones'],
-    ['/es/profesionales', 'professionals', 'Volver a profesionales'],
+  for (const [landing, line, back, create] of [
+    ['/es/eventos', 'events', 'Volver a celebraciones', 'Diseñar el kit con esta historia'],
+    ['/es/profesionales', 'professionals', 'Volver a profesionales', 'Crear con esta historia'],
   ] as const) {
     await page.goto(landing);
     await page.locator(`a[href*="line=${line}"][href*="/historias/"]`).first().click();
-    await expect(page.getByRole('link', { name: 'Crear con esta historia' })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: create })).toHaveAttribute(
       'href',
       new RegExp(`line=${line}`),
     );

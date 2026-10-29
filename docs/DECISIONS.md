@@ -1434,3 +1434,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Ficha:** atajo "Hojear páginas de ejemplo" junto al título.
 - **Ya resuelto antes de la auditoría:** objetivos propios del dentista, bloque de extensiones en todas las fichas y selector "Enviar a" (el país se detecta por IP; el revisor navegaba desde Brasil).
 - **Pendiente, bloquea el lanzamiento:** razón social y domicilio del responsable en privacidad y términos.
+
+## 108 · Precios a la vista y kit real en Celebraciones
+
+- **Fecha:** 2026-10-29 · Puntos sin costo de las auditorías.
+- **Landing de Celebraciones, "Tu kit incluye":** las piezas reales del kit (`KIT_PIECES`), con el precio del país (diseño con el mini cuento, más cada pieza) y el total del kit completo. Antes prometía un "mini libro para colorear" que no es una pieza del kit.
+- **Fichas desde Celebraciones:** muestran el kit y sus precios, y el botón dice "Diseñar el kit con esta historia".
+- **Home:** el botón principal es "Crear una vista previa gratis" (baja a "¿Para quién es?") y se suma "Explorar cuentos" (catálogo).
+- **Creador y muestra:** cada extensión muestra el precio digital y, si se imprime, "impreso desde". La muestra terminada repite los precios antes de ir al pago. Es el mismo dato de la ficha; el monto final lo da el checkout. Eventos no los muestra, porque el kit tiene su precio.
+- **Envíos:** "¿Llega a tu país?" con el selector de país: digital, impreso con su plazo, o que todavía no se vende.

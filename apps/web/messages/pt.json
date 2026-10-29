@@ -62,7 +62,12 @@
     "cookies": "Política de cookies",
     "refunds": "Reembolsos",
     "shipping": "Envios",
-    "updated": "Atualizado em {date}"
+    "updated": "Atualizado em {date}",
+    "shipCheckTitle": "Chega ao seu país?",
+    "shipDigital": "Livro digital: disponível, você baixa na hora.",
+    "shipPrinted": "Impresso ({formats}): imprimimos e enviamos; chega em {min} a {max} dias úteis. O frete é calculado com seu endereço.",
+    "shipNoPrint": "Impresso: ainda não imprimimos para este país. Você pode comprar o digital.",
+    "shipNone": "Ainda não vendemos em {country}."
   },
   "Home": {
     "hero": {
@@ -88,7 +93,8 @@
       "digitalNote": "Na hora, para ler na tela",
       "printedNote": "Com frete conforme o país",
       "homeHeadline": "Seu filho, protagonista de <hl>uma história única</hl>.",
-      "script": "Histórias que inspiram, ensinam e ficam para sempre."
+      "script": "Histórias que inspiram, ensinam e ficam para sempre.",
+      "exploreStories": "Explorar histórias"
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",
@@ -227,7 +233,10 @@
     "fewForAge": "Por enquanto há poucas histórias pensadas para {min} a {max} anos. Nelas, o texto e as ilustrações são escritos para a idade do seu filho.",
     "lengthsTitle": "Escolha a extensão",
     "lengthsText": "Ao criar o livro, você escolhe quantas páginas ele tem; em cada uma, os formatos disponíveis.",
-    "browseJump": "Folhear páginas de exemplo"
+    "browseJump": "Folhear páginas de exemplo",
+    "kitTitle": "Seu kit de aniversário",
+    "kitText": "Todas as peças saem do mesmo design, com o aniversariante como protagonista. O preço não muda com a quantidade de convidados.",
+    "createKit": "Criar o kit com esta história"
   },
   "Formats": {
     "digital": "Livro digital (PDF)",
@@ -758,7 +767,9 @@
           "name": "Avançado",
           "text": "Vocabulário mais rico e uma trama com reviravoltas."
         }
-      }
+      },
+      "priceDigital": "Digital {price}",
+      "pricePrinted": "Impresso a partir de {price}"
     },
     "feedback": {
       "title": "O que você melhoraria nesta prévia?",
@@ -800,15 +811,9 @@
           "text": "O mesmo livrinho para cada convidado: não geramos uma história diferente por cópia."
         }
       },
-      "kitTitle": "O que o kit pode incluir",
+      "kitTitle": "Seu kit inclui",
       "kitSubtitle": "Tudo com a mesma ilustração do protagonista. As peças são compradas em digital, com licença por quantidade de cópias.",
       "kit": {
-        "1": "Mini história com o aniversariante",
-        "2": "Mini livro para colorir",
-        "3": "Atividades da festa",
-        "4": "Convites",
-        "5": "Cartões de agradecimento",
-        "6": "Etiquetas e adesivos",
         "7": "Impressão profissional das peças, em quantidade"
       },
       "kitNote": "Hoje você pode criar o design, ver a prévia grátis e comprar o kit digital: imprima em casa ou na gráfica que preferir. Se quiser que imprimamos em quantidade, cotamos à parte conforme o seu país.",
@@ -836,7 +841,10 @@
       "photoLabel": "A foto",
       "kitTagNow": "Disponível hoje · PDF pronto para imprimir",
       "kitTagQuote": "Sob cotação",
-      "viewStory": "Ver a história"
+      "viewStory": "Ver a história",
+      "kitDesign": "Design: {price} (inclui a mini história)",
+      "kitExtra": "+ {price}",
+      "kitFull": "Kit completo: {price}, não importa quantos convidados."
     },
     "professionals": {
       "metaTitle": "Histórias personalizadas para psicopedagogos, professores e terapeutas",

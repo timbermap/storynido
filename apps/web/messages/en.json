@@ -62,7 +62,12 @@
     "cookies": "Cookie policy",
     "refunds": "Refunds",
     "shipping": "Shipping",
-    "updated": "Updated on {date}"
+    "updated": "Updated on {date}",
+    "shipCheckTitle": "Do we ship to your country?",
+    "shipDigital": "Digital book: available, you download it instantly.",
+    "shipPrinted": "Printed ({formats}): we print and ship it; it arrives in {min} to {max} business days. Shipping is calculated with your address.",
+    "shipNoPrint": "Printed: we don't print for this country yet. You can buy the digital book.",
+    "shipNone": "We don't sell in {country} yet."
   },
   "Home": {
     "hero": {
@@ -88,7 +93,8 @@
       "digitalNote": "Instantly, to read on screen",
       "printedNote": "Shipped by country",
       "homeHeadline": "Your child, the hero of <hl>a one-of-a-kind story</hl>.",
-      "script": "Stories that inspire, teach and stay with you forever."
+      "script": "Stories that inspire, teach and stay with you forever.",
+      "exploreStories": "Browse stories"
     },
     "trust": {
       "preview": "Free preview before you pay",
@@ -227,7 +233,10 @@
     "fewForAge": "There are only a few stories designed for ages {min} to {max} for now. In these, the text and illustrations are written for your child's age.",
     "lengthsTitle": "Choose the length",
     "lengthsText": "When you create the book you choose how many pages it has; each one lists the formats it comes in.",
-    "browseJump": "Flip through sample pages"
+    "browseJump": "Flip through sample pages",
+    "kitTitle": "Your birthday kit",
+    "kitText": "Every piece comes from the same design, with the birthday child as the hero. The price doesn't change with the number of guests.",
+    "createKit": "Design the kit with this story"
   },
   "Formats": {
     "digital": "Digital book (PDF)",
@@ -758,7 +767,9 @@
           "name": "Advanced",
           "text": "Richer vocabulary and a plot with twists."
         }
-      }
+      },
+      "priceDigital": "Digital {price}",
+      "pricePrinted": "Printed from {price}"
     },
     "feedback": {
       "title": "What would you improve in this sample?",
@@ -800,15 +811,9 @@
           "text": "The same little book for every guest: we don’t generate a different story per copy."
         }
       },
-      "kitTitle": "What the kit can include",
+      "kitTitle": "Your kit includes",
       "kitSubtitle": "All with the same illustrated hero. Pieces are bought digitally, licensed by number of copies.",
       "kit": {
-        "1": "Mini story starring the birthday child",
-        "2": "Mini coloring book",
-        "3": "Party activities",
-        "4": "Invitations",
-        "5": "Thank-you cards",
-        "6": "Labels and stickers",
         "7": "Professional printing of the pieces, in bulk"
       },
       "kitNote": "Today you can create the design, see the free sample and buy the digital kit: print it at home or at the print shop you prefer. If you'd like us to print it in bulk, we quote it separately for your country.",
@@ -836,7 +841,10 @@
       "photoLabel": "Their photo",
       "kitTagNow": "Available today · print-ready PDF",
       "kitTagQuote": "By quote",
-      "viewStory": "View the story"
+      "viewStory": "View the story",
+      "kitDesign": "Design: {price} (includes the mini story)",
+      "kitExtra": "+ {price}",
+      "kitFull": "Full kit: {price}, no matter how many guests."
     },
     "professionals": {
       "metaTitle": "Personalized stories for educators, therapists and specialists",

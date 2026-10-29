@@ -21,7 +21,10 @@ import { StepStyle } from './step-style';
 import { WIZARD_STEPS, hiddenSteps, type SaveState } from './steps';
 import type { StepNav, WizardData } from './types';
 
-type Catalog = Pick<WizardData, 'stories' | 'lessons' | 'styles' | 'editorial' | 'collections'>;
+type Catalog = Pick<
+  WizardData,
+  'stories' | 'lessons' | 'styles' | 'editorial' | 'collections' | 'prices'
+>;
 
 /** Creador del libro: borrador en Firestore, guardado en cada paso, se retoma donde quedó. */
 export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }) {
@@ -166,6 +169,7 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
       <PreviewPanel
         book={book}
         childName={child?.name ?? ''}
+        prices={catalog.prices}
         generating={generating}
         generateError={generateError}
         onRegenerateAll={() => void generatePreview()}

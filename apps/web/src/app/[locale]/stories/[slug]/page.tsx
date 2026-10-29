@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
 import {
+  KIT_PIECES,
   parseChannel,
   type BookLength,
   type EditorialConfig,
@@ -21,7 +22,7 @@ import { brand } from '@/lib/brand';
 import { countryName } from '@/lib/country-names';
 import { formatPrice } from '@/lib/format';
 import { localizedAlternates } from '@/lib/seo';
-import { getEditorial, getLessons, getOffer, getStory } from '@/lib/server/api';
+import { getEditorial, getEventPricing, getLessons, getOffer, getStory } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
 
@@ -70,6 +71,10 @@ export default async function StoryPage({ params, searchParams }: Props) {
     requestedLine && requestedLine !== 'families' && story.channels.includes(requestedLine)
       ? requestedLine
       : null;
+
+  // Celebraciones: la ficha vende el kit (piezas y precio del país), no el libro individual.
+  const kitPricing = line === 'events' ? await getEventPricing(display.country) : null;
+  const tKit = await getTranslations('Checkout.kit');
 
   const countryLabel = countryName(display.country, locale);
   const price = (amountMinor: number) =>
@@ -306,6 +311,39 @@ export default async function StoryPage({ params, searchParams }: Props) {
             </section>
           )}
 
+          {line === 'events' && (
+            <section aria-labelledby="kit">
+              <h2 id="kit" className="text-xl font-medium">
+                {t('kitTitle')}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t('kitText')}</p>
+              <ul className="mt-3 divide-y rounded-xl border bg-card">
+                {KIT_PIECES.filter(
+                  (piece) => piece === 'mini_book' || !kitPricing || piece in kitPricing.pieces,
+                ).map((piece) => {
+                  const minor =
+                    piece === 'mini_book' ? kitPricing?.designMinor : kitPricing?.pieces[piece];
+                  return (
+                    <li key={piece} className="flex items-center justify-between gap-4 px-5 py-3">
+                      <span>
+                        <span className="block font-medium">{tKit(`pieces.${piece}.name`)}</span>
+                        <span className="block text-sm text-muted-foreground">
+                          {tKit(`pieces.${piece}.text`)}
+                        </span>
+                      </span>
+                      {kitPricing && minor !== undefined && (
+                        <span className="shrink-0 font-semibold">
+                          {piece === 'mini_book' ? '' : '+ '}
+                          {formatPrice(minor, kitPricing.currency, locale, display.country)}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+
           <Link
             href={{
               pathname: '/create',
@@ -313,7 +351,7 @@ export default async function StoryPage({ params, searchParams }: Props) {
             }}
             className={buttonVariants({ size: 'lg' })}
           >
-            {t('create')}
+            {line === 'events' ? t('createKit') : t('create')}
           </Link>
         </div>
       </div>

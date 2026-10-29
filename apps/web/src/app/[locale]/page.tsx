@@ -10,6 +10,7 @@ import { AudienceSelector } from '@/components/landing/audience-selector';
 import { JsonLd } from '@/components/json-ld';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { buttonVariants } from '@/components/ui/button';
+import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { getContent } from '@/lib/server/api';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
@@ -74,9 +75,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   className: 'h-14 w-full rounded-full px-8 text-lg sm:w-auto',
                 })}
               >
-                {t('hero.choose')}
+                {t('hero.cta')}
                 <ArrowRight aria-hidden="true" className="rotate-90" />
               </a>
+              {/* Para quien prefiere mirar primero: el catálogo completo. */}
+              <Link
+                href="/stories"
+                data-track="home_explore"
+                className="border-b-2 border-foreground/25 px-1 pb-0.5 text-lg font-semibold transition-colors hover:border-primary hover:text-primary"
+              >
+                {t('hero.exploreStories')}
+              </Link>
             </div>
             <HeroFacts />
           </div>

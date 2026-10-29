@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
-import type { Locale } from '@storynido/shared';
+import { KIT_PIECES, type Locale } from '@storynido/shared';
 
 import { JsonLd } from '@/components/json-ld';
 import { RememberChannel } from '@/components/landing/remember-channel';
@@ -18,7 +18,9 @@ import { PhotoPromise } from '@/components/landing/photo-promise';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
-import { getCollections, getStories } from '@/lib/server/api';
+import { formatPrice } from '@/lib/format';
+import { getCollections, getEventPricing, getStories } from '@/lib/server/api';
+import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
 
 import eventsArt from '../../../../public/brand/landing-eventos.webp';
@@ -40,11 +42,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /** StoryNido Celebraciones (ruta /events): kits de cumpleaños, un diseño y muchas copias. */
 export default async function EventsPage({ params }: Props) {
   const locale = (await params).locale as Locale;
-  const [t, collections, stories] = await Promise.all([
+  const display = await getDisplayCountry(locale);
+  const [t, tKit, collections, stories, pricing] = await Promise.all([
     getTranslations('Landing.events'),
+    getTranslations('Checkout.kit'),
     getCollections(locale, 'events').catch(() => []),
     getStories(locale, undefined, { channel: 'events' }).catch(() => []),
+    getEventPricing(display.country),
   ]);
+  // Las piezas reales del kit, con el precio del país (el mismo que cobra el checkout).
+  const money = (minor: number) =>
+    pricing ? formatPrice(minor, pricing.currency, locale, display.country) : '';
+  const pieces = KIT_PIECES.filter(
+    (piece) => piece === 'mini_book' || (pricing ? piece in pricing.pieces : true),
+  );
+  const pieceLabel = (piece: (typeof KIT_PIECES)[number]) => {
+    if (!pricing) return t('kitTagNow');
+    if (piece === 'mini_book') return t('kitDesign', { price: money(pricing.designMinor) });
+    return t('kitExtra', { price: money(pricing.pieces[piece] ?? 0) });
+  };
+  const fullKit = pricing
+    ? pricing.designMinor +
+      pieces.reduce(
+        (sum, piece) => sum + (piece === 'mini_book' ? 0 : (pricing.pieces[piece] ?? 0)),
+        0,
+      )
+    : null;
   const cta = (
     <Link href={{ pathname: '/create', query: { line: 'events' } }} className={ctaClass}>
       {t('cta')}
@@ -75,14 +98,19 @@ export default async function EventsPage({ params }: Props) {
       <LandingChecklist
         title={t('kitTitle')}
         subtitle={t('kitSubtitle')}
-        items={(['1', '2', '3', '4', '5', '6', '7'] as const).map((key) => ({
-          title: t(`kit.${key}`),
-          tag:
-            key === '7'
-              ? { label: t('kitTagQuote'), available: false }
-              : { label: t('kitTagNow'), available: true },
-        }))}
-        note={t('kitNote')}
+        items={[
+          ...pieces.map((piece) => ({
+            title: tKit(`pieces.${piece}.name`),
+            text: tKit(`pieces.${piece}.text`),
+            tag: { label: pieceLabel(piece), available: true },
+          })),
+          { title: t('kit.7'), tag: { label: t('kitTagQuote'), available: false } },
+        ]}
+        note={
+          fullKit !== null
+            ? `${t('kitFull', { price: money(fullKit) })} ${t('kitNote')}`
+            : t('kitNote')
+        }
       />
       <LandingCollections
         title={t('collectionsTitle')}

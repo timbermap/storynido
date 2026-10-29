@@ -95,6 +95,15 @@ export async function getOffer(country: CountryCode, locale: Locale): Promise<Of
   }
 }
 
+/** Precio del kit de Eventos en un país; null si no se vende o si la API falla. */
+export async function getEventPricing(country: CountryCode) {
+  try {
+    return (await catalogApi('catalogEventPricing', { query: { country } })).pricing;
+  } catch {
+    return null;
+  }
+}
+
 export async function getContent(
   key: 'terms' | 'privacy' | 'cookies' | 'refunds' | 'shipping' | 'faq',
   locale: Locale,

@@ -1,7 +1,9 @@
 import type {
   Book,
   ContentType,
+  CountryCode,
   EditorialConfig,
+  Offer,
   PublicCollection,
   PublicLesson,
   PublicStory,
@@ -41,4 +43,14 @@ export interface WizardData {
   editorial: EditorialConfig;
   /** Colecciones de Profesionales: sus temas son los objetivos que se pueden elegir. */
   collections: PublicCollection[];
+  /** Precios del país (los mismos de la ficha y el checkout); null si no se vende ahí. */
+  prices: PriceHint | null;
+}
+
+/** Digital y el impreso más barato, en la moneda del país. */
+export interface PriceHint {
+  currency: Offer['currency'];
+  country: CountryCode;
+  digitalMinor: number | null;
+  printedFromMinor: number | null;
 }
