@@ -2,6 +2,7 @@ import {
   BOOK_FORMATS,
   apiRoutes,
   CHARGE_CURRENCY,
+  REFERENCE_CURRENCIES,
   charmPrice,
   unitPriceUsdMinor,
   type BookFormat,
@@ -115,13 +116,15 @@ export function buildOffer(input: {
   const printOptions = BOOK_FORMATS.flatMap((format) =>
     format === 'digital' ? [] : printable(format),
   );
-  const rate = fx.rates[country.currency];
+  // Referencia: la moneda del país o, si cobra en dólares, la de la región (Latinoamérica).
+  const localCurrency =
+    country.currency !== CHARGE_CURRENCY ? country.currency : REFERENCE_CURRENCIES[code];
+  const rate = localCurrency ? fx.rates[localCurrency] : undefined;
   return {
     country: code,
     available: formats.length > 0,
     currency: CHARGE_CURRENCY,
-    local:
-      country.currency !== CHARGE_CURRENCY && rate ? { currency: country.currency, rate } : null,
+    local: localCurrency && rate ? { currency: localCurrency, rate } : null,
     taxBasisPoints: country.taxBasisPoints,
     taxIncludedInPrice: country.taxIncludedInPrice,
     shipping: {

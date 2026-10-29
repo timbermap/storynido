@@ -321,6 +321,24 @@ export const COUNTRY_DEFAULTS: Partial<Record<CountryCode, CountryDefaults>> = {
   BR: { code: 'BR', currency: 'BRL', defaultLocale: 'pt', launchPhase: 3 },
 };
 
+/**
+ * Moneda local de referencia de los países sin configuración propia (Latinoamérica): se muestra
+ * como "≈ ARS 25.000" al lado del precio en dólares. Los que usan dólares no la necesitan
+ * (Ecuador, El Salvador, Panamá, Puerto Rico).
+ */
+export const REFERENCE_CURRENCIES: Partial<Record<CountryCode, Currency>> = {
+  AR: 'ARS',
+  UY: 'UYU',
+  BO: 'BOB',
+  PY: 'PYG',
+  GT: 'GTQ',
+  HN: 'HNL',
+  NI: 'NIO',
+  CR: 'CRC',
+  DO: 'DOP',
+  VE: 'VES',
+};
+
 /** Países con configuración propia (moneda local). */
 export const CONFIGURED_COUNTRIES = Object.keys(COUNTRY_DEFAULTS) as CountryCode[];
 

@@ -1,6 +1,28 @@
 import { z } from 'zod';
 
-export const CURRENCIES = ['MXN', 'USD', 'EUR', 'COP', 'CLP', 'PEN', 'BRL'] as const;
+/**
+ * Monedas conocidas. Se cobra siempre en USD (DECISIONS 097); el resto se usa como referencia
+ * ("≈ ARS 25.000") y en los países con configuración propia.
+ */
+export const CURRENCIES = [
+  'MXN',
+  'USD',
+  'EUR',
+  'COP',
+  'CLP',
+  'PEN',
+  'BRL',
+  'ARS',
+  'UYU',
+  'BOB',
+  'PYG',
+  'GTQ',
+  'HNL',
+  'NIO',
+  'CRC',
+  'DOP',
+  'VES',
+] as const;
 
 export const currencySchema = z.enum(CURRENCIES);
 
@@ -15,6 +37,16 @@ export const CURRENCY_MINOR_UNITS: Record<Currency, number> = {
   CLP: 0,
   PEN: 2,
   BRL: 2,
+  ARS: 2,
+  UYU: 2,
+  BOB: 2,
+  PYG: 0,
+  GTQ: 2,
+  HNL: 2,
+  NIO: 2,
+  CRC: 2,
+  DOP: 2,
+  VES: 2,
 };
 
 /** Los montos se guardan siempre como enteros en la unidad mínima (centavos). */

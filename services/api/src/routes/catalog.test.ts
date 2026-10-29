@@ -1,5 +1,6 @@
 import {
   DEFAULT_PRODUCT_PRICING,
+  defaultCountryConfig,
   type BookFormat,
   type Content,
   type CountryConfig,
@@ -251,7 +252,7 @@ describe('catálogo', () => {
       currency: string;
       formats: { format: string; amountMinor: number }[];
     }>();
-    expect(offer).toMatchObject({ available: true, currency: 'USD' });
+    expect(offer).toMatchObject({ available: true, currency: 'USD', local: null });
     expect(offer.formats[0]).toMatchObject({ format: 'digital', amountMinor: 2099 });
   });
 
@@ -276,6 +277,26 @@ describe('catálogo', () => {
     });
     expect(offer.formats.map((f) => f.format)).toEqual(['digital']);
     expect(offer.printUnavailable).toBe(true);
+  });
+
+  it('Latinoamérica en dólares muestra su moneda de referencia (≈ ARS)', () => {
+    const products = [product('digital')];
+    const pricing = Object.fromEntries(
+      (['digital', 'softcover', 'hardcover'] as const).map((format) => [
+        format,
+        { ...DEFAULT_PRODUCT_PRICING[format], updatedAt: now },
+      ]),
+    ) as Record<BookFormat, ProductPricing>;
+    const offer = buildOffer({
+      code: 'AR',
+      country: defaultCountryConfig('AR'),
+      pricing,
+      fx: { ...TEST_FX, rates: { ...TEST_FX.rates, ARS: 1400 } },
+      products,
+      locale: 'es',
+    });
+    expect(offer.currency).toBe('USD');
+    expect(offer.local).toEqual({ currency: 'ARS', rate: 1400 });
   });
 
   it('un país no activo no está disponible', async () => {

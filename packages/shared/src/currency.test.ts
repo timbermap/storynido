@@ -17,6 +17,6 @@ describe('currency', () => {
   it('rechaza montos no enteros o negativos', () => {
     expect(moneySchema.safeParse({ amountMinor: 10.5, currency: 'USD' }).success).toBe(false);
     expect(moneySchema.safeParse({ amountMinor: -1, currency: 'USD' }).success).toBe(false);
-    expect(moneySchema.safeParse({ amountMinor: 100, currency: 'ARS' }).success).toBe(false);
+    expect(moneySchema.safeParse({ amountMinor: 100, currency: 'XYZ' }).success).toBe(false);
   });
 });
