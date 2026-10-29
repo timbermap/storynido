@@ -99,6 +99,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   return (
     <html
       lang={LOCALE_DEFINITIONS[locale].bcp47}
+      // Scroll suave solo dentro de la página: al cambiar de página Next.js lo apaga y abre arriba.
+      data-scroll-behavior="smooth"
       className={`${fontUi.variable} ${fontContent.variable} ${fontScript.variable}`}
     >
       <body>

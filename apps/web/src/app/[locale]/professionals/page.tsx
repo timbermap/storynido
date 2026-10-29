@@ -72,19 +72,6 @@ export default async function ProfessionalsPage({ params }: Props) {
   return (
     <>
       <RememberChannel channel="professionals" />
-      <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'Service',
-          name: t('metaTitle'),
-          description: t('metaDescription'),
-          audience: {
-            '@type': 'Audience',
-            audienceType: 'Education and child health professionals',
-          },
-          provider: { '@type': 'Organization', name: brand.name, url: absoluteUrl('/') },
-        }}
-      />
       <LandingHero
         eyebrow={t('eyebrow')}
         title={t('title')}
@@ -125,6 +112,20 @@ export default async function ProfessionalsPage({ params }: Props) {
         items={four.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}
       />
       <LandingFinalCta title={t('finalTitle')} cta={cta} />
+      {/* Datos para buscadores (schema.org), después del contenido visible. */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          name: t('metaTitle'),
+          description: t('metaDescription'),
+          audience: {
+            '@type': 'Audience',
+            audienceType: 'Education and child health professionals',
+          },
+          provider: { '@type': 'Organization', name: brand.name, url: absoluteUrl('/') },
+        }}
+      />
     </>
   );
 }

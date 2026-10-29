@@ -65,30 +65,6 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
   return (
     <>
       <RememberChannel channel="families" />
-      <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'Organization',
-          name: brand.name,
-          url: SITE_URL,
-          logo: absoluteUrl('/icon.svg'),
-          email: 'hola@storynido.com',
-        }}
-      />
-      {faqItems.length > 0 && (
-        <JsonLd
-          data={{
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: faqItems.map((item) => ({
-              '@type': 'Question',
-              name: item.question,
-              acceptedAnswer: { '@type': 'Answer', text: item.answer },
-            })),
-          }}
-        />
-      )}
-
       {/* Hero */}
       <section className="overflow-hidden">
         <div className="container-page grid items-center gap-8 pt-8 pb-10 lg:grid-cols-[1fr_1.05fr] lg:gap-12 lg:pt-12 lg:pb-16">
@@ -329,6 +305,30 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
           </Link>
         </div>
       </section>
+      {/* Datos para buscadores (schema.org), después del contenido visible. */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: brand.name,
+          url: SITE_URL,
+          logo: absoluteUrl('/icon.svg'),
+          email: 'hola@storynido.com',
+        }}
+      />
+      {faqItems.length > 0 && (
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqItems.map((item) => ({
+              '@type': 'Question',
+              name: item.question,
+              acceptedAnswer: { '@type': 'Answer', text: item.answer },
+            })),
+          }}
+        />
+      )}
     </>
   );
 }

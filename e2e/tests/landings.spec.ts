@@ -128,3 +128,15 @@ test('las historias de Eventos y Profesionales vuelven a su landing y crean en s
     await expect(page).toHaveURL(new RegExp(`${landing}$`));
   }
 });
+
+test('el menú abre cada landing desde arriba (sin saltos de scroll)', async ({ page }, info) => {
+  // En el celular el menú va en el panel desplegable.
+  test.skip(info.project.name === 'movil');
+  for (const name of ['Para familias', 'Para cumpleaños', 'Para profesionales']) {
+    await page.goto('/es');
+    await page.locator('header').getByRole('link', { name }).click();
+    await page.waitForURL((url) => url.pathname !== '/es');
+    await page.waitForTimeout(500);
+    expect(await page.evaluate(() => window.scrollY)).toBeLessThan(10);
+  }
+});

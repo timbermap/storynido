@@ -55,15 +55,6 @@ export default async function EventsPage({ params }: Props) {
   return (
     <>
       <RememberChannel channel="events" />
-      <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'Service',
-          name: t('metaTitle'),
-          description: t('metaDescription'),
-          provider: { '@type': 'Organization', name: brand.name, url: absoluteUrl('/') },
-        }}
-      />
       <LandingHero
         eyebrow={t('eyebrow')}
         title={t('title')}
@@ -107,6 +98,16 @@ export default async function EventsPage({ params }: Props) {
         items={keys.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}
       />
       <LandingFinalCta title={t('finalTitle')} cta={cta} />
+      {/* Datos para buscadores (schema.org), después del contenido visible. */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          name: t('metaTitle'),
+          description: t('metaDescription'),
+          provider: { '@type': 'Organization', name: brand.name, url: absoluteUrl('/') },
+        }}
+      />
     </>
   );
 }
