@@ -17,7 +17,7 @@ import {
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
-import { getCollections } from '@/lib/server/api';
+import { getCollections, getStories } from '@/lib/server/api';
 import { absoluteUrl } from '@/lib/site';
 
 import eventsArt from '../../../../public/brand/landing-eventos.webp';
@@ -39,9 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /** StoryNido Eventos: kits de cumpleaños (un diseño, muchas copias). Se crea sin cuenta. */
 export default async function EventsPage({ params }: Props) {
   const locale = (await params).locale as Locale;
-  const [t, collections] = await Promise.all([
+  const [t, collections, stories] = await Promise.all([
     getTranslations('Landing.events'),
     getCollections(locale, 'events').catch(() => []),
+    getStories(locale, undefined, { channel: 'events' }).catch(() => []),
   ]);
   const cta = (
     <Link href={{ pathname: '/create', query: { line: 'events' } }} className={ctaClass}>
@@ -87,7 +88,13 @@ export default async function EventsPage({ params }: Props) {
         }))}
         note={t('kitNote')}
       />
-      <LandingCollections title={t('collectionsTitle')} collections={collections} />
+      <LandingCollections
+        title={t('collectionsTitle')}
+        collections={collections}
+        stories={stories}
+        createLabel={t('cta')}
+        line="events"
+      />
       <LandingFaq
         title={t('faqTitle')}
         items={keys.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}

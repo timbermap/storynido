@@ -6,6 +6,7 @@ import { HeroArt } from '@/components/home/hero-art';
 import { HeroBook } from '@/components/home/hero-book';
 import { FaqList, type FaqItem } from '@/components/home/faq-list';
 import { buttonVariants } from '@/components/ui/button';
+import { Link } from '@/i18n/navigation';
 
 /** Secciones compartidas por las landings de cada línea (misma estética que la home). */
 
@@ -142,36 +143,73 @@ export function LandingChecklist({
 export function LandingCollections({
   title,
   collections,
+  stories = [],
+  createLabel,
+  line,
 }: {
   title: string;
   collections: { slug: string; name: string; description: string; topics: string[] }[];
+  /** Historias de la línea: cada tema muestra las suyas, con enlace para empezar con ella. */
+  stories?: { slug: string; title: string; coverImage: string; collectionIds: string[] }[];
+  createLabel?: string;
+  line?: 'events' | 'professionals';
 }) {
   if (collections.length === 0) return null;
   return (
     <section className="container-page py-20 lg:py-24">
       <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">{title}</h2>
       <ul className="mt-10 grid gap-6 sm:grid-cols-2">
-        {collections.map((collection) => (
-          <li
-            key={collection.slug}
-            className="rounded-xl border bg-card p-6 shadow-[var(--shadow-card)]"
-          >
-            <h3 className="text-2xl font-medium">{collection.name}</h3>
-            <p className="mt-2 text-muted-foreground">{collection.description}</p>
-            {collection.topics.length > 0 && (
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {collection.topics.map((topic) => (
-                  <li
-                    key={topic}
-                    className="rounded-full bg-secondary px-3 py-1 text-sm font-bold text-primary"
-                  >
-                    {topic}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
+        {collections.map((collection) => {
+          const own = stories.filter((story) => story.collectionIds.includes(collection.slug));
+          return (
+            <li
+              key={collection.slug}
+              className="rounded-xl border bg-card p-6 shadow-[var(--shadow-card)]"
+            >
+              <h3 className="text-2xl font-medium">{collection.name}</h3>
+              <p className="mt-2 text-muted-foreground">{collection.description}</p>
+              {collection.topics.length > 0 && (
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {collection.topics.map((topic) => (
+                    <li
+                      key={topic}
+                      className="rounded-full bg-secondary px-3 py-1 text-sm font-bold text-primary"
+                    >
+                      {topic}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {own.length > 0 && (
+                <ul className="mt-5 flex flex-wrap gap-3">
+                  {own.map((story) => (
+                    <li key={story.slug} className="w-[7.5rem]">
+                      <Link
+                        href={{
+                          pathname: '/create',
+                          query: { story: story.slug, ...(line ? { line } : {}) },
+                        }}
+                        aria-label={createLabel ? `${createLabel}: ${story.title}` : story.title}
+                        className="group block"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element -- portada pública */}
+                        <img
+                          src={story.coverImage}
+                          alt=""
+                          loading="lazy"
+                          className="aspect-[3/4] w-full rounded-lg object-cover shadow-[var(--shadow-card)] transition group-hover:-translate-y-0.5"
+                        />
+                        <span className="mt-1.5 block text-xs leading-snug font-semibold group-hover:text-primary">
+                          {story.title}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

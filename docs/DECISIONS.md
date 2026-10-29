@@ -1348,3 +1348,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Etapa 2:** con los secretos cargados (Gelato, Cloudprinter, Lulu, Resend, enlace de bajas), imprentas reales y `email_provider = "resend"`.
 - **Etapa 3:** el código real (tag `v*`). Necesita el procesador de pagos o un modo "pagos desactivados", porque la API se niega a arrancar en producción con proveedores simulados.
 - **Dominios:** `api_domain` queda vacío hasta verificar `storynido.com` en Google. Después: `api.storynido.com` en Cloud Run, y `storynido.com`, `www` y `admin.` en App Hosting.
+
+## 101 · Cumpleaños por tema, hero de Eventos y mejoras de la muestra
+
+- **Fecha:** 2026-10-29 · Pedido de Sebastián: ampliar los temas de cumpleaños (para ellos, para ellas, superhéroes, científicos, con buena tendencia).
+- **Colecciones de cumpleaños:** Fiestas mágicas, Superhéroes y heroínas, Ciencia y espacio, Fantasía y reinos, Animales y aventuras, Campeones.
+- **Historias:** las aventuras de Familias que mejor funcionan en una fiesta (superhéroe, espacio, dinosaurios, selva, fondo del mar, reino encantado y fútbol) se ofrecen también en Eventos, sin costo de IA. Cada tema muestra sus tapas con enlace para empezar con esa historia.
+- **Pendiente (con costo, a confirmar):** historias nuevas con portada propia para temas que faltan (científica o inventor, piratas, detectives, princesas y caballeros).
+- **Muestra sin ilustraciones:** en lugar de páginas vacías se muestra la ilustración de ejemplo de la historia y del estilo, rotulada "Ejemplo del estilo · en tu libro, el protagonista será {nombre}". Además, una barra fija recuerda el paso pendiente y el botón para aprobar al personaje dice qué se obtiene.
+- **Hero de Eventos y de la home:** la foto del chico y el libro más grandes; en Eventos, con el retrato "Su foto" y la flecha hacia el libro.

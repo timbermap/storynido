@@ -42,7 +42,7 @@ const ADVENTURE = {
   personalization: ALL_PERSONALIZATION,
 } satisfies Pick<Story, 'channels' | 'collectionIds' | 'personalization'>;
 
-export const SEED_STORIES: SeedStory[] = [
+const ADVENTURES: SeedStory[] = [
   {
     slug: 'aventura-espacial',
     active: true,
@@ -238,6 +238,32 @@ export const SEED_STORIES: SeedStory[] = [
     ...ADVENTURE,
   },
 ];
+
+/**
+ * Cumpleaños por tema (DECISIONS 101): las aventuras de Familias que mejor funcionan en una fiesta
+ * se ofrecen también en Eventos, agrupadas en colecciones de cumpleaños (para ellos, para ellas
+ * y para todos: superhéroes, ciencia y espacio, fantasía, animales y campeones).
+ */
+const BIRTHDAY_THEMES: Record<string, string[]> = {
+  'superheroe-por-un-dia': ['cumple-superheroes'],
+  'aventura-espacial': ['cumple-ciencia-espacio'],
+  'valle-de-los-dinosaurios': ['cumple-animales'],
+  'amigos-de-la-selva': ['cumple-animales'],
+  'secreto-del-fondo-del-mar': ['cumple-animales'],
+  'reino-encantado': ['cumple-fantasia'],
+  'gol-de-campeon': ['cumple-campeones'],
+};
+
+export const SEED_STORIES: SeedStory[] = ADVENTURES.map((story) => {
+  const themes = BIRTHDAY_THEMES[story.slug];
+  return themes
+    ? {
+        ...story,
+        channels: [...new Set([...story.channels, 'events' as const])],
+        collectionIds: [...story.collectionIds, ...themes],
+      }
+    : story;
+});
 
 /** Historias de las colecciones nuevas (fase 07c), con portada en `/samples/<slug>.webp`. */
 const NEW_STORY_BASE = {
