@@ -38,18 +38,7 @@
     "signedInAs": "Conectado como"
   },
   "Switchers": {
-    "language": "Idioma",
-    "country": "País de entrega",
-    "countryHint": "Preços e frete para",
-    "countries": {
-      "MX": "México",
-      "US": "Estados Unidos",
-      "ES": "Espanha",
-      "CO": "Colômbia",
-      "CL": "Chile",
-      "PE": "Peru",
-      "BR": "Brasil"
-    }
+    "language": "Idioma"
   },
   "Footer": {
     "tagline": "Histórias que abraçam.",

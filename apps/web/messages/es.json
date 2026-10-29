@@ -38,18 +38,7 @@
     "signedInAs": "Sesión de"
   },
   "Switchers": {
-    "language": "Idioma",
-    "country": "País de envío",
-    "countryHint": "Precios y envíos para",
-    "countries": {
-      "MX": "México",
-      "US": "Estados Unidos",
-      "ES": "España",
-      "CO": "Colombia",
-      "CL": "Chile",
-      "PE": "Perú",
-      "BR": "Brasil"
-    }
+    "language": "Idioma"
   },
   "Footer": {
     "tagline": "Historias que abrazan.",

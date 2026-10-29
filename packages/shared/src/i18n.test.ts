@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { COUNTRY_CODES, COUNTRY_DEFAULTS } from './countries';
+import { COUNTRY_CODES, countryDefaults } from './countries';
 import {
   LOCALES,
   LOCALE_DEFINITIONS,
@@ -18,7 +18,7 @@ describe('i18n', () => {
 
   it('el idioma por defecto de cada país es un idioma soportado', () => {
     for (const country of COUNTRY_CODES)
-      expect(isLocale(COUNTRY_DEFAULTS[country].defaultLocale)).toBe(true);
+      expect(isLocale(countryDefaults(country).defaultLocale)).toBe(true);
   });
 
   it('valida segmentos de ruta', () => {
@@ -36,7 +36,8 @@ describe('i18n', () => {
     expect(localeFromAcceptLanguage('fr-FR,fr;q=0.9,en-US;q=0.8,es;q=0.7')).toBe('en');
     expect(localeFromAcceptLanguage('de-DE')).toBeNull();
     expect(countryFromAcceptLanguage('es-CO,es;q=0.9')).toBe('CO');
-    expect(countryFromAcceptLanguage('en-GB,en;q=0.9')).toBeNull();
+    expect(countryFromAcceptLanguage('en-GB,en;q=0.9')).toBe('GB');
+    expect(countryFromAcceptLanguage('en,fr;q=0.9')).toBeNull();
     expect(countryFromAcceptLanguage(null)).toBeNull();
   });
 });

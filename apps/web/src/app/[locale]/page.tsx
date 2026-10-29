@@ -27,6 +27,7 @@ import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { lowestPrice } from '@/lib/offer';
 import { getContent, getLessons, getOffer, getStories } from '@/lib/server/api';
+import { countryName } from '@/lib/country-names';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
 
@@ -34,9 +35,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const locale = (await params).locale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [t, tSwitch, tLessons, stories, lessons, offer, faq] = await Promise.all([
+  const [t, tLessons, stories, lessons, offer, faq] = await Promise.all([
     getTranslations('Home'),
-    getTranslations('Switchers'),
     getTranslations('Lessons'),
     getStories(locale).catch(() => []),
     getLessons(locale).catch(() => []),
@@ -72,7 +72,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     { icon: Globe, text: t('trustInline.formats') },
     {
       icon: Truck,
-      text: t('trustInline.shipping', { country: tSwitch(`countries.${display.country}`) }),
+      text: t('trustInline.shipping', { country: countryName(display.country, locale) }),
     },
     { icon: Sparkles, text: t('trustInline.preview') },
   ];

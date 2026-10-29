@@ -38,18 +38,7 @@
     "signedInAs": "Signed in as"
   },
   "Switchers": {
-    "language": "Language",
-    "country": "Shipping country",
-    "countryHint": "Prices and shipping for",
-    "countries": {
-      "MX": "Mexico",
-      "US": "United States",
-      "ES": "Spain",
-      "CO": "Colombia",
-      "CL": "Chile",
-      "PE": "Peru",
-      "BR": "Brazil"
-    }
+    "language": "Language"
   },
   "Footer": {
     "tagline": "Stories that hug.",

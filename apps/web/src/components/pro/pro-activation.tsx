@@ -4,10 +4,11 @@ import { BadgeCheck } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState, type SubmitEvent } from 'react';
 
-import { ApiError, COUNTRY_CODES, PROFESSIONS, type CountryCode } from '@storynido/shared';
+import { ApiError, PROFESSIONS, type CountryCode, type Locale } from '@storynido/shared';
 
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
+import { countriesByName } from '@/lib/country-names';
 
 const inputClass =
   'h-12 w-full rounded-[0.75rem] border-[1.5px] border-[#b9acbf] bg-card px-3.5 text-base text-foreground placeholder:text-[#756b80] focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d8c1f2]';
@@ -21,8 +22,7 @@ type Profession = (typeof PROFESSIONS)[number];
  */
 export function ProActivationForm({ onActivated }: { onActivated: () => void }) {
   const t = useTranslations('Pro.activation');
-  const locale = useLocale();
-  const regions = new Intl.DisplayNames([locale], { type: 'region' });
+  const locale = useLocale() as Locale;
   const [profession, setProfession] = useState<Profession | ''>('');
   const [other, setOther] = useState('');
   const [practice, setPractice] = useState('');
@@ -120,9 +120,9 @@ export function ProActivationForm({ onActivated }: { onActivated: () => void }) 
             setCountry(event.target.value as CountryCode);
           }}
         >
-          {COUNTRY_CODES.map((code) => (
+          {countriesByName(locale).map(({ code, name }) => (
             <option key={code} value={code}>
-              {regions.of(code) ?? code}
+              {name}
             </option>
           ))}
         </select>

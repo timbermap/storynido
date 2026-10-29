@@ -14,8 +14,8 @@ import {
   COLLECTIONS,
   CONTENT_KEYS,
   LOCALES,
-  COUNTRY_CODES,
-  COUNTRY_DEFAULTS,
+  CONFIGURED_COUNTRIES,
+  countryDefaults,
   GLOBAL_DOC_ID,
   DEFAULT_EDITORIAL_CONFIG,
   activityTemplateSchema,
@@ -159,8 +159,8 @@ const batch = {
   },
 };
 
-for (const code of COUNTRY_CODES) {
-  const defaults = COUNTRY_DEFAULTS[code];
+for (const code of CONFIGURED_COUNTRIES) {
+  const defaults = countryDefaults(code);
   const launched = defaults.launchPhase === 1;
   batch.set(
     db.collection(COLLECTIONS.countries).doc(code),
@@ -349,7 +349,7 @@ for (const [code, prices] of Object.entries(EVENT_PRICES) as [
     db.collection(COLLECTIONS.eventPricing).doc(code),
     eventPricingSchema.parse({
       country: code,
-      currency: COUNTRY_DEFAULTS[code].currency,
+      currency: countryDefaults(code).currency,
       active: true,
       designMinor: prices.design,
       pieces: prices.pieces,

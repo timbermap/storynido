@@ -3,16 +3,11 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState, useTransition } from 'react';
 
-import {
-  COUNTRY_CODES,
-  LOCALES,
-  LOCALE_DEFINITIONS,
-  type CountryCode,
-  type Locale,
-} from '@storynido/shared';
+import { LOCALES, LOCALE_DEFINITIONS, type CountryCode, type Locale } from '@storynido/shared';
 
 import { useRouter } from '@/i18n/navigation';
 import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE } from '@/lib/country';
+import { countriesByName } from '@/lib/country-names';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import {
   subscribePreferences,
@@ -27,7 +22,6 @@ import {
  */
 export function LanguagePreference({ uid }: { uid: string }) {
   const t = useTranslations('Account');
-  const tCountries = useTranslations('Switchers.countries');
   const locale = useLocale() as Locale;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -125,9 +119,9 @@ export function LanguagePreference({ uid }: { uid: string }) {
           className="h-11 max-w-xs rounded-xl border bg-card px-3 text-base"
         >
           {country === null && <option value="" />}
-          {COUNTRY_CODES.map((code) => (
+          {countriesByName(locale).map(({ code, name }) => (
             <option key={code} value={code}>
-              {tCountries(code)}
+              {name}
             </option>
           ))}
         </select>

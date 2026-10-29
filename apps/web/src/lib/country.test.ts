@@ -15,9 +15,10 @@ describe('país', () => {
     expect(detectCountry(headers({ 'accept-language': 'es-CL,es;q=0.9' }), 'es')).toBe('CL');
   });
 
-  it('el país de la IP le gana al navegador; uno que no vendemos no cuenta', () => {
+  it('el país de la IP le gana al navegador (cualquier país: somos globales)', () => {
     expect(detectCountry(headers({ 'accept-language': 'en-US' }), 'es', 'PE')).toBe('PE');
-    expect(detectCountry(headers({ 'accept-language': 'es-CL' }), 'es', 'AR')).toBe('CL');
+    expect(detectCountry(headers({ 'accept-language': 'es-CL' }), 'es', 'AR')).toBe('AR');
+    expect(detectCountry(headers({ 'accept-language': 'es-CL' }), 'es', 'XX')).toBe('CL');
   });
 
   it('si no sabe nada, usa el país principal del idioma', () => {
@@ -27,7 +28,8 @@ describe('país', () => {
 
   it('valida códigos', () => {
     expect(parseCountry('mx')).toBe('MX');
-    expect(parseCountry('AR')).toBeNull();
+    expect(parseCountry('AR')).toBe('AR');
+    expect(parseCountry('XX')).toBeNull();
     expect(parseCountry(undefined)).toBeNull();
   });
 

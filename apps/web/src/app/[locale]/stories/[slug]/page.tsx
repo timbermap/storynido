@@ -12,6 +12,7 @@ import { StoryExample } from '@/components/stories/story-example';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
+import { countryName } from '@/lib/country-names';
 import { formatPrice } from '@/lib/format';
 import { localizedAlternates } from '@/lib/seo';
 import { getEditorial, getLessons, getOffer, getStory } from '@/lib/server/api';
@@ -46,18 +47,17 @@ export default async function StoryPage({ params }: Props) {
   const locale = rawLocale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [story, offer, lessons, t, tSwitch, tLessons, editorial] = await Promise.all([
+  const [story, offer, lessons, t, tLessons, editorial] = await Promise.all([
     getStory(locale, slug),
     getOffer(display.country, locale),
     getLessons(locale).catch(() => []),
     getTranslations('Stories'),
-    getTranslations('Switchers'),
     getTranslations('Lessons'),
     getEditorial(),
   ]);
   if (!story) notFound();
 
-  const countryName = tSwitch(`countries.${display.country}`);
+  const countryLabel = countryName(display.country, locale);
   const price = (amountMinor: number) =>
     offer ? formatPrice(amountMinor, offer.currency, locale, display.country) : '';
   const amounts = offer?.formats.map((f) => f.amountMinor) ?? [];
@@ -178,7 +178,7 @@ export default async function StoryPage({ params }: Props) {
                 </ul>
                 <p className="mt-3 text-sm text-muted-foreground">
                   {t('shippingTo', {
-                    country: countryName,
+                    country: countryLabel,
                     price: price(offer.shipping.costMinor),
                     min: offer.shipping.etaDaysMin,
                     max: offer.shipping.etaDaysMax,
@@ -188,7 +188,7 @@ export default async function StoryPage({ params }: Props) {
               </>
             ) : (
               <p className="mt-3 text-muted-foreground">
-                {t('notAvailable', { country: countryName })}
+                {t('notAvailable', { country: countryLabel })}
               </p>
             )}
           </section>
