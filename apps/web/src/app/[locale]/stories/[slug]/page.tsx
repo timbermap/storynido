@@ -141,6 +141,14 @@ export default async function StoryPage({ params, searchParams }: Props) {
             </p>
             <h1 className="mt-2 text-4xl font-medium sm:text-5xl">{story.title}</h1>
             <p className="mt-4 text-lg text-muted-foreground">{story.summary}</p>
+            {/* El ejemplo ilustrado está al final: un atajo para verlo antes de los detalles. */}
+            <a
+              href="#browse"
+              className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              <BookOpen className="size-4" aria-hidden="true" />
+              {t('browseJump')}
+            </a>
           </div>
 
           <section aria-labelledby="sample" className="rounded-xl border bg-card p-6 shadow-sm">
@@ -181,10 +189,14 @@ export default async function StoryPage({ params, searchParams }: Props) {
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">{tLessons('storyCombineText')}</p>
                 <ul className="mt-3 flex flex-wrap gap-2">
-                  {lessons
-                    .filter(
-                      (lesson) => lesson.ageMin <= story.ageMax && lesson.ageMax >= story.ageMin,
-                    )
+                  {(story.suggestedLessons?.length
+                    ? story.suggestedLessons.flatMap((slug) =>
+                        lessons.filter((lesson) => lesson.slug === slug),
+                      )
+                    : lessons.filter(
+                        (lesson) => lesson.ageMin <= story.ageMax && lesson.ageMax >= story.ageMin,
+                      )
+                  )
                     .slice(0, 6)
                     .map((lesson) => (
                       <li key={lesson.slug}>

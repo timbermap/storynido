@@ -62,6 +62,7 @@ export function toPublicStory(story: Story, locale: Locale): PublicStory {
     collectionIds: story.collectionIds,
     personalization: story.personalization,
     objectives: story.objectives?.map((objective) => objective[locale]) ?? [],
+    suggestedLessons: story.suggestedLessons ?? [],
   };
 }
 

@@ -1424,3 +1424,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - El contenido sigue hablando de cumpleaños, porque el kit pide la edad que cumple. Otras ocasiones (fin de año escolar, bautismos) se anuncian recién cuando el creador las soporte.
 - **Ficha de historia:** "Elige la extensión" muestra cada extensión activa que admite la historia, con páginas, uso y formatos. No se muestra en la línea Eventos.
 - **Verificación en dos pasos en el sitio:** las cuentas del equipo tienen TOTP (lo exige el admin), y Google devolvía `auth/multi-factor-auth-required` también en el sitio público. Ahora el panel de login pide el código de 6 dígitos, como el admin. Los clientes no tienen segundo factor, así que no lo ven.
+
+## 107 · Tercera auditoría externa: enseñanzas por historia y promesas alineadas
+
+- **Fecha:** 2026-10-29.
+- **Enseñanzas sugeridas:** cada historia puede tener `suggestedLessons` (slugs, editables en el admin). La ficha muestra solo esas, en vez de todas las de la edad: el fútbol ya no ofrece "Cuidar la naturaleza". El creador las agrupa primero ("Encajan con esta historia") y el resto sigue disponible. Las historias con objetivos propios (Profesionales) no cambian.
+- **"Si no te encanta, no lo pagas"** pasa a "Mira antes de comprar". Podía leerse como una garantía de satisfacción después de la compra, que la política de reembolsos no da para productos personalizados.
+- **Profesionales:** el precio Pro y los descuentos se anuncian como futuros ("publicamos las condiciones cuando abramos las ventas"), no como una ventaja activa.
+- **Ficha:** atajo "Hojear páginas de ejemplo" junto al título.
+- **Ya resuelto antes de la auditoría:** objetivos propios del dentista, bloque de extensiones en todas las fichas y selector "Enviar a" (el país se detecta por IP; el revisor navegaba desde Brasil).
+- **Pendiente, bloquea el lanzamiento:** razón social y domicilio del responsable en privacidad y términos.

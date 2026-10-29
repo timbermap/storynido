@@ -118,8 +118,8 @@
       "contact": "Another question? Write to <mail>hola@storynido.com</mail> and we will get back to you."
     },
     "guarantee": {
-      "title": "If you don't love it, you don't pay",
-      "text": "You see the preview before paying. And if your book arrives with a problem, we'll reprint it or refund you."
+      "title": "See it before you buy",
+      "text": "Create a free preview and decide whether you want to turn it into your book. And if the book has an error or arrives damaged, we fix it, reprint it or refund you."
     },
     "cta": {
       "title": "A story to remember forever.",
@@ -226,7 +226,8 @@
     "shipTo": "Ship to",
     "fewForAge": "There are only a few stories designed for ages {min} to {max} for now. In these, the text and illustrations are written for your child's age.",
     "lengthsTitle": "Choose the length",
-    "lengthsText": "When you create the book you choose how many pages it has; each one lists the formats it comes in."
+    "lengthsText": "When you create the book you choose how many pages it has; each one lists the formats it comes in.",
+    "browseJump": "Flip through sample pages"
   },
   "Formats": {
     "digital": "Digital book (PDF)",
@@ -365,7 +366,8 @@
       "values": "Values",
       "confidence": "Confidence",
       "life": "Life moments",
-      "emotions": "Emotions"
+      "emotions": "Emotions",
+      "suggested": "A good fit for this story"
     },
     "combineTitle": "Combine it with any adventure",
     "combineText": "Pick the adventure they love most: the story is written with this message, adapted to their age.",
@@ -844,7 +846,7 @@
       "subtitle": "For learning specialists, teachers, speech therapists, child psychologists and pediatric dentists: create personalized stories for every child you work with, from one account.",
       "cta": "Create my professional account",
       "ctaSignedIn": "Create a new story",
-      "note": "You can see the examples without an account. You need one to save your projects and earn volume discounts.",
+      "note": "You can see the examples without an account. You need one to create and save your projects for each child.",
       "imageAlt": "Watercolor illustration of an educator reading an illustrated story with a child at a low table.",
       "howTitle": "How it works",
       "steps": {
@@ -877,7 +879,7 @@
         },
         "4": {
           "title": "Professional pricing",
-          "text": "Professional prices and discounts for repeat purchases, enabled together with payments."
+          "text": "There will be Pro pricing and discounts for repeat purchases. We'll publish the terms when sales open."
         }
       },
       "collectionsTitle": "Start from what you need",

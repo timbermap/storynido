@@ -118,8 +118,8 @@
       "contact": "Outra dúvida? Escreva para <mail>hola@storynido.com</mail> e respondemos."
     },
     "guarantee": {
-      "title": "Se você não amar, não paga",
-      "text": "Você vê a prévia antes de pagar. E se o livro chegar com algum problema, reimprimimos ou devolvemos o dinheiro."
+      "title": "Veja antes de comprar",
+      "text": "Você cria uma prévia grátis e decide se quer transformá-la no seu livro. E se o livro tiver um erro ou chegar danificado, corrigimos, reimprimimos ou devolvemos o dinheiro."
     },
     "cta": {
       "title": "Uma história para lembrar para sempre.",
@@ -226,7 +226,8 @@
     "shipTo": "Enviar para",
     "fewForAge": "Por enquanto há poucas histórias pensadas para {min} a {max} anos. Nelas, o texto e as ilustrações são escritos para a idade do seu filho.",
     "lengthsTitle": "Escolha a extensão",
-    "lengthsText": "Ao criar o livro, você escolhe quantas páginas ele tem; em cada uma, os formatos disponíveis."
+    "lengthsText": "Ao criar o livro, você escolhe quantas páginas ele tem; em cada uma, os formatos disponíveis.",
+    "browseJump": "Folhear páginas de exemplo"
   },
   "Formats": {
     "digital": "Livro digital (PDF)",
@@ -365,7 +366,8 @@
       "values": "Valores",
       "confidence": "Confiança",
       "life": "Momentos da vida",
-      "emotions": "Emoções"
+      "emotions": "Emoções",
+      "suggested": "Combinam com esta história"
     },
     "combineTitle": "Combine com qualquer aventura",
     "combineText": "Escolha a aventura de que ele mais gosta: a história é escrita com esta mensagem, adaptada à idade dele.",
@@ -844,7 +846,7 @@
       "subtitle": "Para psicopedagogos, professores, fonoaudiólogos, psicólogos infantis e odontopediatras: crie histórias personalizadas para cada criança com quem você trabalha, a partir de uma única conta.",
       "cta": "Criar minha conta profissional",
       "ctaSignedIn": "Criar uma nova história",
-      "note": "Você vê os exemplos sem conta. Precisa dela para guardar seus projetos e acumular desconto por volume.",
+      "note": "Você vê os exemplos sem conta. Precisa dela para criar e guardar seus projetos por criança.",
       "imageAlt": "Ilustração em aquarela de uma educadora lendo uma história ilustrada com uma criança em uma mesa baixa.",
       "howTitle": "Como funciona",
       "steps": {
@@ -877,7 +879,7 @@
         },
         "4": {
           "title": "Preços para profissionais",
-          "text": "Preços profissionais e descontos por compras recorrentes, ativados junto com os pagamentos."
+          "text": "Haverá preço Pro e descontos por compras recorrentes. Publicamos as condições quando abrirmos as vendas."
         }
       },
       "collectionsTitle": "Comece pelo que você precisa",

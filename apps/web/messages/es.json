@@ -118,8 +118,8 @@
       "contact": "¿Otra duda? Escríbenos a <mail>hola@storynido.com</mail> y te respondemos."
     },
     "guarantee": {
-      "title": "Si no te encanta, no lo pagas",
-      "text": "Ves la vista previa antes de pagar. Y si tu libro llega con algún problema, lo reimprimimos o te devolvemos el dinero."
+      "title": "Mira antes de comprar",
+      "text": "Creas una vista previa gratis y decides si quieres convertirla en tu libro. Y si el libro tiene un error o llega dañado, lo corregimos, lo reimprimimos o te devolvemos el dinero."
     },
     "cta": {
       "title": "Una historia para recordar siempre.",
@@ -226,7 +226,8 @@
     "shipTo": "Enviar a",
     "fewForAge": "Por ahora hay pocas historias pensadas para {min} a {max} años. En estas, el texto y las ilustraciones se escriben para la edad de tu hijo.",
     "lengthsTitle": "Elige la extensión",
-    "lengthsText": "Al crear el libro eliges cuántas páginas tiene; abajo de cada una, los formatos en que sale."
+    "lengthsText": "Al crear el libro eliges cuántas páginas tiene; abajo de cada una, los formatos en que sale.",
+    "browseJump": "Hojear páginas de ejemplo"
   },
   "Formats": {
     "digital": "Libro digital (PDF)",
@@ -365,7 +366,8 @@
       "values": "Valores",
       "confidence": "Confianza",
       "life": "Momentos de la vida",
-      "emotions": "Emociones"
+      "emotions": "Emociones",
+      "suggested": "Encajan con esta historia"
     },
     "combineTitle": "Combínalo con cualquier aventura",
     "combineText": "Elige la aventura que más le guste: la historia se escribe con este mensaje, adaptado a su edad.",
@@ -844,7 +846,7 @@
       "subtitle": "Para psicopedagogos, docentes, fonoaudiólogos, psicólogos infantiles y odontopediatras: crea cuentos personalizados para cada niño con el que trabajas, desde una sola cuenta.",
       "cta": "Crear mi cuenta profesional",
       "ctaSignedIn": "Crear un cuento nuevo",
-      "note": "Ves los ejemplos sin cuenta. La necesitas para guardar tus proyectos y acumular tus compras (con descuento por volumen).",
+      "note": "Ves los ejemplos sin cuenta. La necesitas para crear y guardar tus proyectos por niño.",
       "imageAlt": "Ilustración en acuarela de una educadora leyendo un cuento ilustrado con un niño en una mesa baja.",
       "howTitle": "Cómo funciona",
       "steps": {
@@ -877,7 +879,7 @@
         },
         "4": {
           "title": "Precios para profesionales",
-          "text": "Precios profesionales y descuentos por compras recurrentes, que se activan junto con los pagos."
+          "text": "Habrá precio Pro y descuentos por compras recurrentes. Publicamos las condiciones cuando abramos las ventas."
         }
       },
       "collectionsTitle": "Empieza por lo que necesitas",

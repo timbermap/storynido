@@ -42,6 +42,8 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
     (lesson) => age === undefined || (lesson.ageMin <= age && age <= lesson.ageMax),
   );
 
+  const suggested = story?.suggestedLessons ?? [];
+
   const count = selected.length + (useCustom ? 1 : 0);
   const full = count >= CHILD_LIMITS.maxLessons;
 
@@ -104,8 +106,14 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
       )}
       <fieldset className="grid gap-6">
         <legend className="sr-only">{t('title')}</legend>
-        {LESSON_GROUPS.map((group) => {
-          const items = lessons.filter((lesson) => lesson.group === group);
+        {(['suggested', ...LESSON_GROUPS] as const).map((group) => {
+          // Primero las que encajan con el argumento; después, el resto por grupo.
+          const items =
+            group === 'suggested'
+              ? suggested.flatMap((slug) => lessons.filter((lesson) => lesson.slug === slug))
+              : lessons.filter(
+                  (lesson) => lesson.group === group && !suggested.includes(lesson.slug),
+                );
           if (items.length === 0) return null;
           return (
             <div key={group}>

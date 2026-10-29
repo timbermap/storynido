@@ -427,6 +427,7 @@ export const publicStorySchema = z.object({
   personalization: personalizationSchema,
   /** Objetivos propios de la historia, en el idioma pedido (vacío si no tiene). */
   objectives: z.array(z.string()).optional(),
+  suggestedLessons: z.array(z.string()).optional(),
 });
 
 export type PublicStory = z.infer<typeof publicStorySchema>;

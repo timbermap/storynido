@@ -45,6 +45,7 @@ const ADVENTURE = {
 const ADVENTURES: SeedStory[] = [
   {
     slug: 'aventura-espacial',
+    suggestedLessons: ['valentia', 'lograr-lo-que-te-propongas', 'ser-uno-mismo', 'equivocarse-esta-bien'],
     palette: 'adventure',
     active: true,
     order: 1,
@@ -76,6 +77,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'valle-de-los-dinosaurios',
+    suggestedLessons: ['cuidar-la-naturaleza', 'valentia', 'amistad', 'respetar-las-diferencias'],
     palette: 'nature',
     active: true,
     order: 2,
@@ -107,6 +109,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'reino-encantado',
+    suggestedLessons: ['ser-uno-mismo', 'decir-la-verdad', 'compartir', 'valentia'],
     palette: 'magic',
     active: true,
     order: 3,
@@ -134,6 +137,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'gol-de-campeon',
+    suggestedLessons: ['amistad', 'lograr-lo-que-te-propongas', 'equivocarse-esta-bien', 'manejar-el-enojo'],
     palette: 'celebration',
     active: true,
     order: 4,
@@ -161,6 +165,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'superheroe-por-un-dia',
+    suggestedLessons: ['valentia', 'ser-uno-mismo', 'decir-la-verdad', 'calma-cuando-estoy-nervioso'],
     palette: 'adventure',
     active: true,
     order: 5,
@@ -188,6 +193,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'amigos-de-la-selva',
+    suggestedLessons: ['amistad', 'respetar-las-diferencias', 'cuidar-la-naturaleza', 'compartir'],
     palette: 'nature',
     active: true,
     order: 6,
@@ -215,6 +221,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'secreto-del-fondo-del-mar',
+    suggestedLessons: ['cuidar-la-naturaleza', 'valentia', 'amistad', 'calma-cuando-estoy-nervioso'],
     palette: 'adventure',
     active: true,
     order: 7,
@@ -288,6 +295,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'las-tardes-con-los-abuelos',
+    suggestedLessons: ['compartir', 'decir-la-verdad', 'llega-un-hermanito', 'mudanza'],
     palette: 'bedtime',
     order: 20,
     ageMin: 2,
@@ -358,6 +366,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'el-cumpleanos-mas-magico',
+    suggestedLessons: ['compartir', 'amistad', 'ser-uno-mismo'],
     palette: 'celebration',
     order: 22,
     ageMin: 2,

@@ -37,6 +37,11 @@ export const storySchema = timestampsSchema.extend({
     .array(localizedSchema(z.string().min(1)))
     .max(6)
     .optional(),
+  /**
+   * Enseñanzas que mejor encajan con el argumento (slugs de `lessons`, en orden). La ficha
+   * muestra solo estas y el creador las ofrece primero; el resto sigue disponible.
+   */
+  suggestedLessons: z.array(slugSchema).max(6).optional(),
   /** Fragmento de muestra del texto, por idioma. */
   excerpt: localizedSchema(z.string().min(1)),
   /** Portada de muestra (ruta pública o del bucket de assets). */
