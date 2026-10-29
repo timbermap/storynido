@@ -51,7 +51,7 @@ Contrastes verificados (WCAG 2.2 AA): navy sobre durazno 7,6:1 (hover 6,5:1) · 
 | Público              | Punto     | Fondo     | Texto     |
 | -------------------- | --------- | --------- | --------- |
 | Familias             | `#5FAE9F` | `#E4F3EF` | `#2F6F66` |
-| Cumpleaños y eventos | `#FF8F7A` | `#FFE7DF` | `#A33F33` |
+| Celebraciones (Eventos) | `#FF8F7A` | `#FFE7DF` | `#A33F33` |
 | Profesionales        | `#8C79C9` | `#EEE8FA` | `#5B4A99` |
 
 ## Tipografía (`apps/web/src/lib/fonts.ts`, con `next/font`)

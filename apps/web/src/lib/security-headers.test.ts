@@ -14,6 +14,7 @@ describe('cabeceras de seguridad', () => {
     expect(csp).toContain('https://api.storynido.com');
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toMatch(/frame-src 'self'/);
     expect(csp).not.toContain("'unsafe-eval'");
     expect(csp).not.toContain('googletagmanager');
     expect(csp).not.toContain('localhost');

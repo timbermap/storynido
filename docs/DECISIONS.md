@@ -1410,3 +1410,16 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Objetivos:** las historias con un propósito (dentista, primer día, letras, emociones, frustración) tienen objetivos propios (`stories.objectives`, editables en el admin). La ficha los muestra en vez de las enseñanzas generales y el creador de Profesionales los ofrece como objetivo, en vez de todos los temas de la colección. Sin objetivos, todo sigue como antes.
 - **"Enviar a"** en la ficha: cambia el país de envío y de precios (cookie `sn_country`) sin cuenta. El idioma es independiente.
 - **Catálogo:** si un filtro de edad deja menos de 3 historias, se avisa con honestidad.
+
+## 106 · Login con Google desde el dominio propio, "Celebraciones" y extensiones en la ficha
+
+- **Fecha:** 2026-10-29.
+- **Login con Google:** Chrome y Safari bloquean el almacenamiento entre dominios, y con `authDomain` en `firebaseapp.com` la sesión no volvía al sitio. Ahora `authDomain` es el dominio del sitio (`NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`) y Next reenvía `/__/auth/*` a `<proyecto>.firebaseapp.com`.
+  - **Requisitos:**
+    - la URI `https://<dominio>/__/auth/handler` en el cliente OAuth;
+    - `'self'` en el `frame-src` de la CSP, porque el iframe de login se sirve desde el propio dominio.
+  - **Producción:** ver LAUNCH.
+- **Menú:** "Para cumpleaños" pasa a "Para celebraciones" (es, en y pt), en el pie, la tarjeta de la home, la marca de la landing y el link de volver.
+  - La ruta `/events` no cambia.
+  - El contenido sigue hablando de cumpleaños, porque el kit pide la edad que cumple. Otras ocasiones (fin de año escolar, bautismos) se anuncian recién cuando el creador las soporte.
+- **Ficha de historia:** "Elige la extensión" muestra cada extensión activa que admite la historia, con páginas, uso y formatos. No se muestra en la línea Eventos.

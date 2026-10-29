@@ -61,6 +61,8 @@ export function contentSecurityPolicy({ apiUrl, dev, analytics }: SecurityOption
       ...local,
     ]),
     'frame-src': unique([
+      // El iframe de login de Firebase se sirve desde el dominio propio (/__/auth, DECISIONS 106).
+      "'self'",
       'https://*.firebaseapp.com',
       'https://*.hosted.app',
       'https://accounts.google.com',

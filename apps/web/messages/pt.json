@@ -6,7 +6,7 @@
   },
   "Nav": {
     "families": "Famílias",
-    "events": "Eventos",
+    "events": "Celebrações",
     "professionals": "Profissionais",
     "stories": "Histórias",
     "howItWorks": "Como funciona",
@@ -20,8 +20,8 @@
     "create": "Criar minha história",
     "allStories": "Todas as histórias",
     "allStoriesText": "Escolha a aventura e adaptamos à idade.",
-    "eventsMenu": "Aniversários e eventos",
-    "eventsLanding": "Aniversários e eventos",
+    "eventsMenu": "Celebrações",
+    "eventsLanding": "Celebrações",
     "eventsText": "Mini livros e lembranças: um design, muitas cópias.",
     "eventsCreate": "Criar para um evento",
     "eventsCreateText": "Comece pelo aniversariante.",
@@ -37,7 +37,7 @@
     "accountMenu": "Menu da sua conta",
     "signedInAs": "Conectado como",
     "menuFamilies": "Para famílias",
-    "menuEvents": "Para aniversários",
+    "menuEvents": "Para celebrações",
     "menuProfessionals": "Para profissionais"
   },
   "Switchers": {
@@ -161,7 +161,7 @@
         "cta": "Criar a história"
       },
       "events": {
-        "title": "Eventos",
+        "title": "Celebrações",
         "text": "Mini livros e lembrancinhas de aniversário: um design, muitas cópias.",
         "cta": "Ver kits de aniversário"
       },
@@ -218,13 +218,15 @@
     "emptySearch": "Não encontramos histórias para “{query}”.",
     "clearFilters": "Ver todas as histórias",
     "backTo": {
-      "events": "Voltar a aniversários e eventos",
+      "events": "Voltar a celebrações",
       "professionals": "Voltar a profissionais"
     },
     "objectivesTitle": "O que esta história trabalha",
     "objectivesText": "Ao criá-la, você escolhe um como objetivo principal e a história gira em torno dele.",
     "shipTo": "Enviar para",
-    "fewForAge": "Por enquanto há poucas histórias pensadas para {min} a {max} anos. Nelas, o texto e as ilustrações são escritos para a idade do seu filho."
+    "fewForAge": "Por enquanto há poucas histórias pensadas para {min} a {max} anos. Nelas, o texto e as ilustrações são escritos para a idade do seu filho.",
+    "lengthsTitle": "Escolha a extensão",
+    "lengthsText": "Ao criar o livro, você escolhe quantas páginas ele tem; em cada uma, os formatos disponíveis."
   },
   "Formats": {
     "digital": "Livro digital (PDF)",
@@ -770,7 +772,7 @@
     "events": {
       "metaTitle": "Lembrancinhas e kits de aniversário personalizados",
       "metaDescription": "Uma história de aniversário com o protagonista da festa, para presentear cada convidado. Um design, muitas cópias.",
-      "eyebrow": "StoryNido Eventos",
+      "eyebrow": "StoryNido Celebrações",
       "title": "Lembranças mágicas para compartilhar em cada celebração.",
       "subtitle": "Com uma foto do aniversariante (ou escolhendo as características) fazemos dele o protagonista de uma mini história ilustrada. Um só design que vocês aprovam, com cópias idênticas para todos os convidados.",
       "cta": "Criar o kit de aniversário",

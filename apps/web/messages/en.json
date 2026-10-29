@@ -6,7 +6,7 @@
   },
   "Nav": {
     "families": "Families",
-    "events": "Events",
+    "events": "Celebrations",
     "professionals": "Professionals",
     "stories": "Stories",
     "howItWorks": "How it works",
@@ -20,8 +20,8 @@
     "create": "Create my story",
     "allStories": "All stories",
     "allStoriesText": "Pick the adventure and we tailor it to their age.",
-    "eventsMenu": "Birthdays & events",
-    "eventsLanding": "Birthdays & events",
+    "eventsMenu": "Celebrations",
+    "eventsLanding": "Celebrations",
     "eventsText": "Mini books and keepsakes: one design, many copies.",
     "eventsCreate": "Create for an event",
     "eventsCreateText": "Start with the birthday star.",
@@ -37,7 +37,7 @@
     "accountMenu": "Your account menu",
     "signedInAs": "Signed in as",
     "menuFamilies": "For families",
-    "menuEvents": "For birthdays",
+    "menuEvents": "For celebrations",
     "menuProfessionals": "For professionals"
   },
   "Switchers": {
@@ -161,7 +161,7 @@
         "cta": "Create their story"
       },
       "events": {
-        "title": "Events",
+        "title": "Celebrations",
         "text": "Birthday mini books and keepsakes: one design, many copies.",
         "cta": "See birthday kits"
       },
@@ -218,13 +218,15 @@
     "emptySearch": "We couldn't find stories for “{query}”.",
     "clearFilters": "See all stories",
     "backTo": {
-      "events": "Back to birthdays and events",
+      "events": "Back to celebrations",
       "professionals": "Back to professionals"
     },
     "objectivesTitle": "What this story works on",
     "objectivesText": "When you create it, you choose one as the main goal and the story is built around it.",
     "shipTo": "Ship to",
-    "fewForAge": "There are only a few stories designed for ages {min} to {max} for now. In these, the text and illustrations are written for your child's age."
+    "fewForAge": "There are only a few stories designed for ages {min} to {max} for now. In these, the text and illustrations are written for your child's age.",
+    "lengthsTitle": "Choose the length",
+    "lengthsText": "When you create the book you choose how many pages it has; each one lists the formats it comes in."
   },
   "Formats": {
     "digital": "Digital book (PDF)",
@@ -770,7 +772,7 @@
     "events": {
       "metaTitle": "Personalized birthday favors and kits",
       "metaDescription": "A birthday story starring the guest of honor, to give to every guest. One design, many copies.",
-      "eyebrow": "StoryNido Events",
+      "eyebrow": "StoryNido Celebrations",
       "title": "Magical keepsakes to share at every celebration.",
       "subtitle": "From a photo of the birthday child (or by choosing their features) we make them the hero of an illustrated mini story. One design you approve, with identical copies for every guest.",
       "cta": "Design the birthday kit",

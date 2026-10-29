@@ -55,12 +55,13 @@ export default async function StoryPage({ params, searchParams }: Props) {
   const locale = rawLocale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [story, offer, lessons, t, tLessons, editorial] = await Promise.all([
+  const [story, offer, lessons, t, tLessons, tLengths, editorial] = await Promise.all([
     getStory(locale, slug),
     getOffer(display.country, locale),
     getLessons(locale).catch(() => []),
     getTranslations('Stories'),
     getTranslations('Lessons'),
+    getTranslations('Wizard.book.lengths'),
     getEditorial(),
   ]);
   if (!story) notFound();
@@ -74,6 +75,17 @@ export default async function StoryPage({ params, searchParams }: Props) {
   const price = (amountMinor: number) =>
     offer ? formatPrice(amountMinor, offer.currency, locale, display.country) : '';
   const amounts = offer?.formats.map((f) => f.amountMinor) ?? [];
+  // Comparador: cada extensión que admite la historia, con sus páginas y en qué formatos sale.
+  const formatNames = new Map(offer?.formats.map((f) => [f.format, f.name]) ?? []);
+  const lengthOptions = story.lengths
+    .filter((length) => editorial.lengths[length].active)
+    .map((length) => ({
+      length,
+      pages: editorial.lengths[length].interiorPages,
+      formats: editorial.lengths[length].formats
+        .map((format) => formatNames.get(format))
+        .filter((name): name is string => Boolean(name)),
+    }));
 
   return (
     <article className="container-page py-10 sm:py-14">
@@ -187,6 +199,35 @@ export default async function StoryPage({ params, searchParams }: Props) {
                 </ul>
               </section>
             )
+          )}
+
+          {line !== 'events' && lengthOptions.length > 1 && (
+            <section aria-labelledby="lengths">
+              <h2 id="lengths" className="text-xl font-medium">
+                {t('lengthsTitle')}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t('lengthsText')}</p>
+              <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+                {lengthOptions.map((option) => (
+                  <li key={option.length} className="rounded-xl border bg-card px-4 py-3">
+                    <p className="flex items-baseline justify-between gap-3">
+                      <span className="font-semibold">{tLengths(`${option.length}.name`)}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {t('pages', { count: option.pages })}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {tLengths(`${option.length}.text`)}
+                    </p>
+                    {option.formats.length > 0 && (
+                      <p className="mt-2 text-xs font-semibold text-primary">
+                        {option.formats.join(' · ')}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
 
           {/* El kit de Eventos tiene su propio precio (se ve en el creador), no el de los libros. */}

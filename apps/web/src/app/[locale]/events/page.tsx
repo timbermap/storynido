@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** StoryNido Eventos: kits de cumpleaños (un diseño, muchas copias). Se crea sin cuenta. */
+/** StoryNido Celebraciones (ruta /events): kits de cumpleaños, un diseño y muchas copias. */
 export default async function EventsPage({ params }: Props) {
   const locale = (await params).locale as Locale;
   const [t, collections, stories] = await Promise.all([
