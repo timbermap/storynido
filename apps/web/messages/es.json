@@ -51,7 +51,7 @@
     "pitch": "Cuentos ilustrados donde tu hijo es el protagonista: con su nombre, su carita y lo que más le gusta. En digital o impresos.",
     "follow": "Síguenos",
     "newTab": "se abre en otra pestaña",
-    "preferences": "Idioma y país"
+    "preferences": "Idioma"
   },
   "Legal": {
     "terms": "Términos y condiciones",
@@ -366,7 +366,8 @@
         "professionals": "Cuento profesional sin terminar"
       },
       "of": "El cuento de {name}",
-      "updated": "Editado el {date}"
+      "updated": "Editado el {date}",
+      "savedHere": "Guardado en este navegador. <link>Crea tu cuenta</link> para no perderlo y verlo en otros dispositivos."
     },
     "child": {
       "title": "Cuéntanos sobre el protagonista",

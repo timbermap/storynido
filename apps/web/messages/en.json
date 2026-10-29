@@ -51,7 +51,7 @@
     "pitch": "Illustrated stories where your child is the hero: with their name, their face and the things they love. Digital or printed.",
     "follow": "Follow us",
     "newTab": "opens in a new tab",
-    "preferences": "Language & country"
+    "preferences": "Language"
   },
   "Legal": {
     "terms": "Terms and conditions",
@@ -366,7 +366,8 @@
         "professionals": "Unfinished professional story"
       },
       "of": "{name}'s story",
-      "updated": "Edited on {date}"
+      "updated": "Edited on {date}",
+      "savedHere": "Saved in this browser. <link>Create your account</link> so you don't lose it and can see it on other devices."
     },
     "child": {
       "title": "Tell us about the hero",

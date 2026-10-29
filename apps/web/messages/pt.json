@@ -51,7 +51,7 @@
     "pitch": "Histórias ilustradas em que seu filho é o protagonista: com o nome, o rostinho e o que ele mais gosta. Em digital ou impressas.",
     "follow": "Siga a gente",
     "newTab": "abre em outra aba",
-    "preferences": "Idioma e país"
+    "preferences": "Idioma"
   },
   "Legal": {
     "terms": "Termos e condições",
@@ -366,7 +366,8 @@
         "professionals": "História profissional sem terminar"
       },
       "of": "A história de {name}",
-      "updated": "Editado em {date}"
+      "updated": "Editado em {date}",
+      "savedHere": "Salvo neste navegador. <link>Crie sua conta</link> para não perder e ver em outros dispositivos."
     },
     "child": {
       "title": "Conte sobre o protagonista",

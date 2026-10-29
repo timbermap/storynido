@@ -7,7 +7,7 @@ import type { Channel, Locale } from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
-import { useRouter } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { startAnonymousSession } from '@/lib/firebase/auth-actions';
 import { createDraft, isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
@@ -131,7 +131,18 @@ export function CreateStart({
 
   return (
     <section className="container-page max-w-2xl py-14">
-      <h1 className="mb-8 text-3xl font-medium sm:text-4xl">{t('drafts.title')}</h1>
+      <h1 className="mb-4 text-3xl font-medium sm:text-4xl">{t('drafts.title')}</h1>
+      {!signedIn && (
+        <p className="mb-6 text-sm text-muted-foreground">
+          {t.rich('drafts.savedHere', {
+            link: (chunks) => (
+              <Link href="/login" className="font-semibold text-primary hover:underline">
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
+      )}
       <DraftsList drafts={drafts.filter((draft) => !isEmptyDraft(draft))} />
       <Button className="mt-8" size="lg" disabled={busy} onClick={() => void startNew()}>
         {t('drafts.startNew')}
