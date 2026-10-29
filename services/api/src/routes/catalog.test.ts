@@ -319,9 +319,22 @@ describe('catálogo', () => {
     expect(forSeven.lessons.map((l) => l.slug)).toEqual(['compartir']);
   });
 
-  it('países activos', async () => {
-    expect((await get('/v1/catalog/countries')).json()).toEqual({
-      countries: [{ code: 'MX', currency: 'MXN', defaultLocale: 'es' }],
+  it('países: todos se venden, salvo los que el admin apagó', async () => {
+    const { countries } = (await get('/v1/catalog/countries')).json<{
+      countries: { code: string; currency: string; defaultLocale: string }[];
+    }>();
+    const codes = countries.map((country) => country.code);
+    expect(codes).toContain('MX');
+    expect(codes).toContain('AR');
+    expect(codes).not.toContain('BR');
+    expect(countries.find((country) => country.code === 'MX')).toEqual({
+      code: 'MX',
+      currency: 'MXN',
+      defaultLocale: 'es',
+    });
+    expect(countries.find((country) => country.code === 'AR')).toMatchObject({
+      currency: 'USD',
+      defaultLocale: 'es',
     });
   });
 

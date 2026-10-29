@@ -157,7 +157,8 @@ const batch = {
 
 for (const code of CONFIGURED_COUNTRIES) {
   const defaults = countryDefaults(code);
-  const launched = defaults.launchPhase === 1;
+  // Somos globales (DECISIONS 096): todos los países se venden; el admin apaga el que haga falta.
+  const launched = true;
   batch.set(
     db.collection(COLLECTIONS.countries).doc(code),
     countrySchema.parse({

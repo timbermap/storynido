@@ -38,27 +38,7 @@
     "signedInAs": "Signed in as",
     "menuFamilies": "For families",
     "menuEvents": "For birthdays",
-    "menuProfessionals": "For professionals",
-    "howTitle": "How it works",
-    "exploreTitle": "Explore",
-    "startCta": "Start my story",
-    "flow": {
-      "families": {
-        "step1": "Tell us about your child: name, age and what they love.",
-        "step2": "See the free sample with their character.",
-        "step3": "Choose digital or printed and get it at home."
-      },
-      "events": {
-        "step1": "Choose the theme and the age they turn.",
-        "step2": "We create the story and the kit: invitation, stickers and more.",
-        "step3": "Download it and print as many copies as you need."
-      },
-      "professionals": {
-        "step1": "Activate your professional account (teachers, psychologists, speech therapists, pediatric dentists…).",
-        "step2": "Choose a goal: emotions, routines or first experiences.",
-        "step3": "Create stories for each child, with discounts for frequent purchases."
-      }
-    }
+    "menuProfessionals": "For professionals"
   },
   "Switchers": {
     "language": "Language"
@@ -102,8 +82,11 @@
       "bookAlt": "Open book on a knitted blanket: on one page a curly-haired boy with red glasses floats as an astronaut next to his puppy; on the other, the same boy meets a fox in the forest. Beside it, his illustrated portrait.",
       "audienceTitle": "Choose who it is for",
       "priceDigital": "Digital {price}",
-      "pricePrinted": "Printed from {price} + shipping",
-      "priceUsd": "Prices in US dollars (USD)"
+      "pricePrinted": "Printed from {price}",
+      "priceUsd": "Prices in US dollars (USD)",
+      "choose": "Choose who it is for",
+      "digitalNote": "Instantly, to read on screen",
+      "printedNote": "Shipped by country"
     },
     "trust": {
       "preview": "Free preview before you pay",
@@ -162,8 +145,9 @@
     },
     "trustInline": {
       "formats": "Digital or printed, with their name and face",
-      "shipping": "We ship worldwide · shipping is calculated from your address",
-      "preview": "Free preview"
+      "shipping": "Shipping for printed books is calculated by country",
+      "preview": "Free preview",
+      "global": "We serve families worldwide"
     },
     "audience": {
       "title": "Who is it for?",
@@ -756,17 +740,17 @@
         }
       },
       "kitTitle": "What the kit can include",
-      "kitSubtitle": "All with the same illustration of the birthday child.",
+      "kitSubtitle": "All with the same illustrated hero. Pieces are bought digitally, licensed by number of copies.",
       "kit": {
-        "1": "Mini story book",
+        "1": "Mini story starring the birthday child",
         "2": "Mini coloring book",
-        "3": "Activities",
+        "3": "Party activities",
         "4": "Invitations",
         "5": "Thank-you cards",
         "6": "Labels and stickers",
-        "7": "Party bag favors"
+        "7": "Professional printing of the pieces, in bulk"
       },
-      "kitNote": "Today you can create the birthday story and its free sample. The other kit pieces and ordering in quantity are coming very soon.",
+      "kitNote": "Today you can create the design, see the free sample and buy the digital kit: print it at home or at the print shop you prefer. If you'd like us to print it in bulk, we quote it separately for your country.",
       "collectionsTitle": "Birthday themes",
       "faqTitle": "Frequently asked questions",
       "faq": {
@@ -788,7 +772,10 @@
         }
       },
       "finalTitle": "Let every guest take home a memory of the party",
-      "photoLabel": "Their photo"
+      "photoLabel": "Their photo",
+      "kitTagNow": "Available today · print-ready PDF",
+      "kitTagQuote": "By quote",
+      "viewStory": "View the story"
     },
     "professionals": {
       "metaTitle": "Personalized stories for educators, therapists and specialists",
@@ -798,7 +785,7 @@
       "subtitle": "For learning specialists, teachers, speech therapists, child psychologists and pediatric dentists: create personalized stories for every child you work with, from one account.",
       "cta": "Create my professional account",
       "ctaSignedIn": "Create a new story",
-      "note": "You need an account to save your projects and add up your purchases.",
+      "note": "You can see the examples without an account. You need one to save your projects and earn volume discounts.",
       "imageAlt": "Watercolor illustration of an educator reading an illustrated story with a child at a low table.",
       "howTitle": "How it works",
       "steps": {
@@ -834,7 +821,7 @@
           "text": "Professional prices and discounts for repeat purchases, enabled together with payments."
         }
       },
-      "collectionsTitle": "Collections",
+      "collectionsTitle": "Start from what you need",
       "disclaimer": "StoryNido offers supportive stories. It is not a clinical system, does not replace professional judgment, and never asks for diagnoses or clinical records.",
       "faqTitle": "Frequently asked questions",
       "faq": {
@@ -857,7 +844,10 @@
       },
       "finalTitle": "A story for every child you support",
       "signInTitle": "Create your professional account",
-      "signInText": "That’s how we keep your projects and purchases in one place. It’s quick and password-free."
+      "signInText": "That’s how we keep your projects and purchases in one place. It’s quick and password-free.",
+      "ctaExamples": "See examples for my work",
+      "collectionsSubtitle": "Each collection answers a real situation. Browse the stories, flip through an example, and only then create your account.",
+      "viewStory": "View the story"
     }
   },
   "Viewer": {

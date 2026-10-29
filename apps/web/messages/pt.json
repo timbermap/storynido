@@ -38,27 +38,7 @@
     "signedInAs": "Conectado como",
     "menuFamilies": "Para famílias",
     "menuEvents": "Para aniversários",
-    "menuProfessionals": "Para profissionais",
-    "howTitle": "Como funciona",
-    "exploreTitle": "Explorar",
-    "startCta": "Começar minha história",
-    "flow": {
-      "families": {
-        "step1": "Conte sobre seu filho ou filha: nome, idade e do que gosta.",
-        "step2": "Veja grátis a prévia com a personagem.",
-        "step3": "Escolha digital ou impresso e receba em casa."
-      },
-      "events": {
-        "step1": "Escolha o tema e a idade que vai completar.",
-        "step2": "Criamos a história e o kit: convite, adesivos e mais.",
-        "step3": "Baixe e imprima quantas cópias precisar."
-      },
-      "professionals": {
-        "step1": "Ative sua conta profissional (professores, psicólogos, fonoaudiólogos, odontopediatras…).",
-        "step2": "Escolha um objetivo: emoções, rotinas ou primeiras experiências.",
-        "step3": "Crie histórias para cada criança, com desconto por compras frequentes."
-      }
-    }
+    "menuProfessionals": "Para profissionais"
   },
   "Switchers": {
     "language": "Idioma"
@@ -102,8 +82,11 @@
       "bookAlt": "Livro aberto sobre uma manta de tricô: em uma página, um menino de cabelo cacheado e óculos vermelhos flutua como astronauta ao lado do cachorrinho; na outra, o mesmo menino conhece uma raposa na floresta. Ao lado, seu retrato ilustrado.",
       "audienceTitle": "Escolha para quem é",
       "priceDigital": "Digital {price}",
-      "pricePrinted": "Impresso a partir de {price} + frete",
-      "priceUsd": "Preços em dólares (USD)"
+      "pricePrinted": "Impresso a partir de {price}",
+      "priceUsd": "Preços em dólares (USD)",
+      "choose": "Escolher para quem é",
+      "digitalNote": "Na hora, para ler na tela",
+      "printedNote": "Com frete conforme o país"
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",
@@ -162,8 +145,9 @@
     },
     "trustInline": {
       "formats": "Digital ou impresso, com o nome e o rostinho",
-      "shipping": "Enviamos para o mundo todo · o frete é calculado com o seu endereço",
-      "preview": "Prévia grátis"
+      "shipping": "O frete do impresso é calculado pelo seu país",
+      "preview": "Prévia grátis",
+      "global": "Atendemos o mundo todo"
     },
     "audience": {
       "title": "Para quem é?",
@@ -756,17 +740,17 @@
         }
       },
       "kitTitle": "O que o kit pode incluir",
-      "kitSubtitle": "Tudo com a mesma ilustração do protagonista.",
+      "kitSubtitle": "Tudo com a mesma ilustração do protagonista. As peças são compradas em digital, com licença por quantidade de cópias.",
       "kit": {
-        "1": "Mini história",
+        "1": "Mini história com o aniversariante",
         "2": "Mini livro para colorir",
-        "3": "Atividades",
+        "3": "Atividades da festa",
         "4": "Convites",
         "5": "Cartões de agradecimento",
         "6": "Etiquetas e adesivos",
-        "7": "Lembrancinhas para as sacolinhas"
+        "7": "Impressão profissional das peças, em quantidade"
       },
-      "kitNote": "Hoje você pode criar a história de aniversário e a amostra grátis. As outras peças do kit e a compra em quantidade chegam muito em breve.",
+      "kitNote": "Hoje você pode criar o design, ver a prévia grátis e comprar o kit digital: imprima em casa ou na gráfica que preferir. Se quiser que imprimamos em quantidade, cotamos à parte conforme o seu país.",
       "collectionsTitle": "Temas de aniversário",
       "faqTitle": "Perguntas frequentes",
       "faq": {
@@ -788,7 +772,10 @@
         }
       },
       "finalTitle": "Que cada convidado leve uma lembrança da festa",
-      "photoLabel": "A foto"
+      "photoLabel": "A foto",
+      "kitTagNow": "Disponível hoje · PDF pronto para imprimir",
+      "kitTagQuote": "Sob cotação",
+      "viewStory": "Ver a história"
     },
     "professionals": {
       "metaTitle": "Histórias personalizadas para psicopedagogos, professores e terapeutas",
@@ -798,7 +785,7 @@
       "subtitle": "Para psicopedagogos, professores, fonoaudiólogos, psicólogos infantis e odontopediatras: crie histórias personalizadas para cada criança com quem você trabalha, a partir de uma única conta.",
       "cta": "Criar minha conta profissional",
       "ctaSignedIn": "Criar uma nova história",
-      "note": "Você precisa de uma conta para guardar seus projetos e acumular suas compras.",
+      "note": "Você vê os exemplos sem conta. Precisa dela para guardar seus projetos e acumular desconto por volume.",
       "imageAlt": "Ilustração em aquarela de uma educadora lendo uma história ilustrada com uma criança em uma mesa baixa.",
       "howTitle": "Como funciona",
       "steps": {
@@ -834,7 +821,7 @@
           "text": "Preços profissionais e descontos por compras recorrentes, ativados junto com os pagamentos."
         }
       },
-      "collectionsTitle": "Coleções",
+      "collectionsTitle": "Comece pelo que você precisa",
       "disclaimer": "A StoryNido oferece histórias de acompanhamento. Não é um sistema clínico, não substitui o critério profissional e não pede diagnósticos nem prontuários.",
       "faqTitle": "Perguntas frequentes",
       "faq": {
@@ -857,7 +844,10 @@
       },
       "finalTitle": "Uma história para cada criança que você acompanha",
       "signInTitle": "Crie sua conta profissional",
-      "signInText": "Assim guardamos seus projetos e compras em um só lugar. É rápido e sem senhas."
+      "signInText": "Assim guardamos seus projetos e compras em um só lugar. É rápido e sem senhas.",
+      "ctaExamples": "Ver exemplos para o meu trabalho",
+      "collectionsSubtitle": "Cada coleção responde a uma situação real. Veja as histórias, folheie um exemplo e só depois crie sua conta.",
+      "viewStory": "Ver a história"
     }
   },
   "Viewer": {

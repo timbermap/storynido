@@ -3,13 +3,13 @@ import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
 
-/** "¿Para quién es?": acceso en un clic a cada línea comercial, justo debajo del hero. */
+/** "¿Para quién es?": la puerta de entrada a la landing de cada público (Familias, Cumpleaños y Profesionales). */
 export async function AudienceSelector() {
   const t = await getTranslations('Home.audience');
   const audiences = [
     {
       key: 'families',
-      href: '/create',
+      href: '/families',
       icon: BookHeart,
       card: 'bg-[#f6eefa]',
       tone: 'text-primary',
@@ -41,9 +41,15 @@ export async function AudienceSelector() {
       />
       <div className="relative bg-[#fbf6f0] pb-12 lg:pb-16">
         <div className="container-page">
-          <h2 id="audience" className="sr-only">
-            {t('title')}
-          </h2>
+          <div className="mx-auto max-w-2xl pb-8 text-center">
+            <h2
+              id="audience"
+              className="scroll-mt-28 text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium"
+            >
+              {t('title')}
+            </h2>
+            <p className="mt-3 text-lg text-muted-foreground">{t('subtitle')}</p>
+          </div>
           <ul className="grid gap-4 md:grid-cols-3">
             {audiences.map(({ key, href, icon: Icon, card, tone, ring }) => (
               <li key={key}>

@@ -2,6 +2,8 @@ import {
   BOOK_FORMATS,
   apiRoutes,
   CHARGE_CURRENCY,
+  COUNTRY_CODES,
+  defaultCountryConfig,
   REFERENCE_CURRENCIES,
   charmPrice,
   unitPriceUsdMinor,
@@ -215,13 +217,21 @@ export function registerCatalogRoutes(
     };
   });
 
-  addRoute(app, apiRoutes.catalogCountries, {}, async () => ({
-    countries: (await catalog.countries()).map((country) => ({
-      code: country.code,
-      currency: country.currency,
-      defaultLocale: country.defaultLocale,
-    })),
-  }));
+  // Todos los países se venden (DECISIONS 096): salen de la lista solo los que el admin apagó.
+  addRoute(app, apiRoutes.catalogCountries, {}, async () => {
+    const configured = await catalog.configuredCountries();
+    const off = new Set(configured.filter((country) => !country.active).map((c) => c.code));
+    return {
+      countries: COUNTRY_CODES.filter((code) => !off.has(code)).map((code) => {
+        const country = configured.find((item) => item.code === code) ?? defaultCountryConfig(code);
+        return {
+          code,
+          currency: country.currency,
+          defaultLocale: country.defaultLocale,
+        };
+      }),
+    };
+  });
 
   addRoute(app, apiRoutes.catalogEventPricing, {}, async (request) => {
     const { country } = query<'catalogEventPricing'>(request);

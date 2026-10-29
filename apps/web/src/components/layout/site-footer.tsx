@@ -65,6 +65,7 @@ export async function SiteFooter() {
       title: tNav('families'),
       dot: AUDIENCE_TONES.families.dot,
       links: [
+        { href: '/families', label: tNav('menuFamilies') },
         { href: '/stories', label: tNav('allStories') },
         { href: { pathname: '/', hash: HOW_IT_WORKS_ID }, label: tNav('howItWorks') },
         { href: '/create', label: tNav('familiesCreate') },

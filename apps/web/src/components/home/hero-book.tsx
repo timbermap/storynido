@@ -28,30 +28,31 @@ export function HeroBook({
   image?: StaticImageData;
 }) {
   return (
-    <figure className="relative isolate mx-auto w-full max-w-[50rem] pt-10 pl-[6%] lg:pt-14">
-      <Sparkle className="absolute top-2 right-[14%] z-10 size-7 rotate-12 text-star" />
-      <Sparkle className="absolute right-[-1%] bottom-[8%] z-10 size-8 text-star" />
+    <figure className="relative isolate mx-auto w-full max-w-[40rem] pt-2 pb-6 lg:max-w-none">
+      <Sparkle className="absolute top-[34%] right-[2%] z-10 size-7 rotate-12 text-star" />
+      <Sparkle className="absolute right-[6%] bottom-[2%] z-10 size-9 text-star" />
 
-      <div className="overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-24px_rgb(52_42_64/0.35)]">
+      {/* El libro, más abajo y a la derecha: la foto va encima, bien grande. */}
+      <div className="mt-[20%] ml-auto w-[84%] overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-24px_rgb(52_42_64/0.35)]">
         <Image
           src={image}
           alt={alt}
           priority
           placeholder="blur"
-          sizes="(min-width: 1024px) 760px, 100vw"
+          sizes="(min-width: 1024px) 640px, 90vw"
           className="h-auto w-full"
         />
       </div>
 
       {/* "Su foto": retrato ilustrado del mismo protagonista, no una fotografía. */}
-      <div className="absolute top-0 left-[-2%] z-20 w-[36%] min-w-[8.5rem] -rotate-6 rounded-[0.35rem] bg-white p-[2.5%] pb-0 shadow-[0_18px_36px_rgb(52_42_64/0.26)] sm:left-[-4%]">
+      <div className="absolute top-0 left-0 z-20 w-[46%] -rotate-3 rounded-[0.4rem] bg-white p-[2.5%] pb-0 shadow-[0_22px_44px_rgb(52_42_64/0.28)]">
         <Image
           src={heroPortrait}
           alt=""
-          sizes="(min-width: 1024px) 280px, 36vw"
-          className="aspect-square h-auto w-full rounded-[0.15rem]"
+          sizes="(min-width: 1024px) 380px, 46vw"
+          className="aspect-square h-auto w-full rounded-[0.2rem]"
         />
-        <figcaption className="py-2 text-center font-display text-[clamp(1rem,1.7vw,1.3rem)] text-foreground/80 italic">
+        <figcaption className="py-2.5 text-center font-display text-[clamp(1.05rem,1.9vw,1.45rem)] text-foreground/80 italic">
           {photoLabel}
         </figcaption>
       </div>
@@ -59,7 +60,7 @@ export function HeroBook({
       <svg
         aria-hidden="true"
         viewBox="0 0 120 80"
-        className="absolute top-[2%] left-[33%] z-20 w-[17%] text-primary"
+        className="absolute top-[14%] left-[46%] z-20 w-[18%] text-primary"
         fill="none"
         stroke="currentColor"
         strokeWidth="3"

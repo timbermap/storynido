@@ -1357,3 +1357,18 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Pendiente (con costo, a confirmar):** historias nuevas con portada propia para temas que faltan (científica o inventor, piratas, detectives, princesas y caballeros).
 - **Muestra sin ilustraciones:** en lugar de páginas vacías se muestra la ilustración de ejemplo de la historia y del estilo, rotulada "Ejemplo del estilo · en tu libro, el protagonista será {nombre}". Además, una barra fija recuerda el paso pendiente y el botón para aprobar al personaje dice qué se obtiene.
 - **Hero de Eventos y de la home:** la foto del chico y el libro más grandes; en Eventos, con el retrato "Su foto" y la flecha hacia el libro.
+
+## 102 · Una landing completa por público, menú simple y arreglos de la revisión externa
+
+- **Fecha:** 2026-10-29 · Decisión de Sebastián: simplificar con una landing por persona; el menú las enlaza y cada una termina con su propio "Crear". Se sumó una revisión externa de UX, de la que se verificó cada hallazgo antes de actuar.
+- **Estructura:**
+  - `/` es la puerta de entrada: hero y "¿Para quién es?" con tres tarjetas;
+  - `/familias`, `/eventos` y `/profesionales` son landings completas (hero, cómo funciona, ejemplos, preguntas y su propio "Crear");
+  - la landing de Familias es la home anterior.
+- **Menú:** tres enlaces directos (Para familias, Para cumpleaños, Para profesionales), sin desplegables. El botón de crear del encabezado lleva al creador del público donde estás; en la home baja a "¿Para quién es?".
+- **Hero:** foto del protagonista grande, sobre el libro. Aclara que se atiende en todo el mundo y que el envío del impreso se calcula según el país.
+- **Hallazgos de la revisión que eran reales:**
+  - **Países:** Brasil, España, Colombia, Chile y Perú quedaron inactivos desde el seed ("fase 3") y la lista de países activos era `[MX, US]`. Un visitante de Argentina veía precios de México y uno de Brasil, "no enviamos". Ahora todos los países se venden y salen de la lista solo los que el admin apaga; el seed los activa.
+  - **Kit de Eventos:** la landing decía que las piezas "se suman muy pronto" cuando el kit digital ya se vende. Ahora cada pieza dice "Disponible hoy · PDF listo para imprimir", y la impresión profesional en cantidad figura "Por cotización".
+  - **Profesionales:** pedía la cuenta antes de mostrar nada. Ahora el botón principal lleva a ejemplos por necesidad ("Empieza por lo que necesitas"), con las tapas de cada historia enlazadas a su ficha, y la cuenta se pide al crear.
+- **Pendiente:** unificar las clasificaciones del catálogo (aventura, recuerdos, valores, emociones) en historia, temática y mensaje educativo; filtros por edad y búsqueda en "Explorar historias"; historias nuevas para cumpleaños (con costo, a confirmar).

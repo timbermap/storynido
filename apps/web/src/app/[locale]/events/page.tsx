@@ -85,6 +85,10 @@ export default async function EventsPage({ params }: Props) {
         subtitle={t('kitSubtitle')}
         items={(['1', '2', '3', '4', '5', '6', '7'] as const).map((key) => ({
           title: t(`kit.${key}`),
+          tag:
+            key === '7'
+              ? { label: t('kitTagQuote'), available: false }
+              : { label: t('kitTagNow'), available: true },
         }))}
         note={t('kitNote')}
       />
@@ -92,8 +96,7 @@ export default async function EventsPage({ params }: Props) {
         title={t('collectionsTitle')}
         collections={collections}
         stories={stories}
-        createLabel={t('cta')}
-        line="events"
+        createLabel={t('viewStory')}
       />
       <LandingFaq
         title={t('faqTitle')}

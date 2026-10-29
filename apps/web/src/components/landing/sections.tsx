@@ -1,4 +1,4 @@
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Clock } from 'lucide-react';
 import type { StaticImageData } from 'next/image';
 import type { ReactNode } from 'react';
 
@@ -104,7 +104,8 @@ export function LandingChecklist({
 }: {
   title: string;
   subtitle?: string;
-  items: { title: string; text?: string }[];
+  /** `tag`: lo que aclara el estado de la pieza ("Disponible hoy", "Por cotización"). */
+  items: { title: string; text?: string; tag?: { label: string; available: boolean } }[];
   note?: string;
 }) {
   return (
@@ -122,11 +123,30 @@ export function LandingChecklist({
               key={item.title}
               className="flex gap-3 rounded-xl border bg-card p-5 shadow-[var(--shadow-card)]"
             >
-              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-mint text-success">
-                <Check className="size-4" aria-hidden="true" />
+              <span
+                className={`grid size-8 shrink-0 place-items-center rounded-full ${
+                  item.tag && !item.tag.available
+                    ? 'bg-peach text-[#8a4a2a]'
+                    : 'bg-mint text-success'
+                }`}
+              >
+                {item.tag && !item.tag.available ? (
+                  <Clock className="size-4" aria-hidden="true" />
+                ) : (
+                  <Check className="size-4" aria-hidden="true" />
+                )}
               </span>
               <span>
                 <span className="block font-bold">{item.title}</span>
+                {item.tag && (
+                  <span
+                    className={`mt-0.5 block text-xs font-bold ${
+                      item.tag.available ? 'text-success' : 'text-[#a8633b]'
+                    }`}
+                  >
+                    {item.tag.label}
+                  </span>
+                )}
                 {item.text && <span className="mt-1 block text-muted-foreground">{item.text}</span>}
               </span>
             </li>
@@ -141,23 +161,28 @@ export function LandingChecklist({
 }
 
 export function LandingCollections({
+  id,
   title,
+  subtitle,
   collections,
   stories = [],
   createLabel,
-  line,
 }: {
+  /** Ancla para llegar desde un botón del hero ("Ver ejemplos"). */
+  id?: string;
   title: string;
+  subtitle?: string;
   collections: { slug: string; name: string; description: string; topics: string[] }[];
   /** Historias de la línea: cada tema muestra las suyas, con enlace para empezar con ella. */
   stories?: { slug: string; title: string; coverImage: string; collectionIds: string[] }[];
+  /** Texto del enlace accesible de cada tapa ("Ver la historia"). */
   createLabel?: string;
-  line?: 'events' | 'professionals';
 }) {
   if (collections.length === 0) return null;
   return (
-    <section className="container-page py-20 lg:py-24">
+    <section id={id} className="container-page scroll-mt-28 py-20 lg:py-24">
       <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">{title}</h2>
+      {subtitle && <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{subtitle}</p>}
       <ul className="mt-10 grid gap-6 sm:grid-cols-2">
         {collections.map((collection) => {
           const own = stories.filter((story) => story.collectionIds.includes(collection.slug));
@@ -185,10 +210,8 @@ export function LandingCollections({
                   {own.map((story) => (
                     <li key={story.slug} className="w-[7.5rem]">
                       <Link
-                        href={{
-                          pathname: '/create',
-                          query: { story: story.slug, ...(line ? { line } : {}) },
-                        }}
+                        // La ficha de la historia: edades, fragmento, ejemplo para hojear y precios.
+                        href={{ pathname: '/stories/[slug]', params: { slug: story.slug } }}
                         aria-label={createLabel ? `${createLabel}: ${story.title}` : story.title}
                         className="group block"
                       >

@@ -50,6 +50,8 @@ export interface CatalogRepository {
   lessons(): Promise<Lesson[]>;
   collections(): Promise<Collection[]>;
   countries(): Promise<CountryConfig[]>;
+  /** Todos los países configurados, incluidos los apagados por el admin. */
+  configuredCountries(): Promise<CountryConfig[]>;
   /** Configuración de un país: la propia (aunque esté apagado) o la de fábrica para el resto. */
   country(code: CountryCode): Promise<CountryConfig>;
   /** Margen y costos de cada producto (o los de fábrica si no se cargaron). */
@@ -198,6 +200,16 @@ export class FirestoreCatalog implements CatalogRepository {
         .withConverter(converters.collections)
         .where('active', '==', true)
         .orderBy('order')
+        .get();
+      return snapshot.docs.map((doc) => doc.data());
+    });
+  }
+
+  configuredCountries(): Promise<CountryConfig[]> {
+    return this.cache.get('countries:all', async () => {
+      const snapshot = await this.db
+        .collection(COLLECTIONS.countries)
+        .withConverter(converters.countries)
         .get();
       return snapshot.docs.map((doc) => doc.data());
     });
@@ -358,6 +370,10 @@ export class InMemoryCatalog implements CatalogRepository {
 
   countries() {
     return Promise.resolve((this.data.countries ?? []).filter((c) => c.active));
+  }
+
+  configuredCountries() {
+    return Promise.resolve(this.data.countries ?? []);
   }
 
   country(code: CountryCode) {

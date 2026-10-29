@@ -45,6 +45,34 @@ for (const [locale, pages] of Object.entries(PAGES)) {
       });
     }
 
+    test('la home es la puerta de entrada: tres públicos, cada uno con su landing y su creador', async ({
+      page,
+    }) => {
+      await page.goto(pages.home);
+      for (const [target, line] of [
+        [pages.families, null],
+        [pages.events, 'events'],
+        [pages.professionals, 'professionals'],
+      ] as const) {
+        await page.goto(pages.home);
+        // La tarjeta lleva a la landing del público (no directo al creador).
+        await page
+          .locator(`#audience ~ ul a[href="${target}"], ul a[href="${target}"]`)
+          .first()
+          .click();
+        await expect(page).toHaveURL(new RegExp(`${target}$`));
+        // Y la landing termina en su propio "Crear".
+        const create = page
+          .locator(
+            line
+              ? `a[href*="line=${line}"]:visible`
+              : 'a[href*="/cre"]:visible, a[href*="/criar"]:visible',
+          )
+          .last();
+        await expect(create).toBeVisible();
+      }
+    });
+
     test('cada público llega a su creador (Familias, Eventos y Profesionales)', async ({
       page,
     }) => {

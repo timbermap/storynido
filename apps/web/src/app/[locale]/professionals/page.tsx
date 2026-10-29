@@ -17,7 +17,7 @@ import {
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
-import { getCollections } from '@/lib/server/api';
+import { getCollections, getStories } from '@/lib/server/api';
 import { absoluteUrl } from '@/lib/site';
 
 import professionalsArt from '../../../../public/brand/landing-profesionales.webp';
@@ -42,14 +42,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function ProfessionalsPage({ params }: Props) {
   const locale = (await params).locale as Locale;
-  const [t, collections] = await Promise.all([
+  const [t, collections, stories] = await Promise.all([
     getTranslations('Landing.professionals'),
     getCollections(locale, 'professionals').catch(() => []),
+    getStories(locale, undefined, { channel: 'professionals' }).catch(() => []),
   ]);
   const cta = (
     <Link href={{ pathname: '/create', query: { line: 'professionals' } }} className={ctaClass}>
       {t('cta')}
     </Link>
+  );
+  // Arriba, primero los ejemplos: la cuenta se pide recién al crear.
+  const heroCta = (
+    <>
+      <a href="#examples" className={ctaClass}>
+        {t('ctaExamples')}
+      </a>
+      <Link
+        href={{ pathname: '/create', query: { line: 'professionals' } }}
+        className="inline-flex items-center justify-center border-b-2 border-foreground/25 px-1 pb-0.5 text-lg font-semibold transition-colors hover:border-primary hover:text-primary"
+      >
+        {t('cta')}
+      </Link>
+    </>
   );
   const four = ['1', '2', '3', '4'] as const;
 
@@ -73,10 +88,18 @@ export default async function ProfessionalsPage({ params }: Props) {
         eyebrow={t('eyebrow')}
         title={t('title')}
         subtitle={t('subtitle')}
-        cta={cta}
+        cta={heroCta}
         note={t('note')}
         image={professionalsArt}
         imageAlt={t('imageAlt')}
+      />
+      <LandingCollections
+        id="examples"
+        title={t('collectionsTitle')}
+        subtitle={t('collectionsSubtitle')}
+        collections={collections}
+        stories={stories}
+        createLabel={t('viewStory')}
       />
       <LandingSteps
         title={t('howTitle')}
@@ -93,7 +116,6 @@ export default async function ProfessionalsPage({ params }: Props) {
         }))}
         note={t('disclaimer')}
       />
-      <LandingCollections title={t('collectionsTitle')} collections={collections} />
       <LandingFaq
         title={t('faqTitle')}
         items={four.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}
