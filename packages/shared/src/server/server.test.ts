@@ -6,6 +6,7 @@ import {
   orderLogFields,
   orderTraceId,
   parseServiceEnv,
+  requestSpan,
   traceLogFields,
 } from './index';
 
@@ -27,6 +28,34 @@ describe('server utils', () => {
       stack_trace?: string;
     };
     expect(line.stack_trace).toContain('Error: boom');
+  });
+
+  it('span del request: solo si viene muestreado, con el span de la cabecera', () => {
+    const trace = '105445aa7843bc8bf206b12000100000';
+    const request = {
+      method: 'POST',
+      route: '/run/:step',
+      status: 200,
+      elapsedMs: 1500,
+      service: 'worker',
+    };
+    const now = new Date('2026-10-28T12:00:00Z');
+    expect(requestSpan(`${trace}/255;o=1`, request, now)).toEqual({
+      traceId: trace,
+      spanId: '00000000000000ff',
+      name: 'worker POST /run/:step',
+      start: new Date('2026-10-28T11:59:58.500Z'),
+      end: now,
+      attributes: {
+        '/http/method': 'POST',
+        '/http/route': '/run/:step',
+        '/http/status_code': 200,
+        'g.co/gae/app/module': 'worker',
+      },
+    });
+    expect(requestSpan(`${trace};o=1`, request)?.spanId).toMatch(/^[\da-f]{16}$/);
+    expect(requestSpan(`${trace}/1;o=0`, request)).toBeNull();
+    expect(requestSpan(undefined, request)).toBeNull();
   });
 
   it('traza: lee la cabecera de Cloud Trace o la W3C; la del pedido es estable', () => {

@@ -1,6 +1,7 @@
 import { EmailNotifier } from '@storynido/emails';
 import {
   aiModelSettingsFromEnv,
+  CloudTraceSink,
   createProviderRegistry,
   luluOptionsFromEnv,
   simulatedProviders,
@@ -131,6 +132,17 @@ const checkout = new CheckoutService(
   pro,
 );
 
+// En la nube, los requests muestreados van a Cloud Trace.
+const spans =
+  config.appEnv === 'staging' || config.appEnv === 'production'
+    ? new CloudTraceSink({
+        projectId: config.projectId,
+        onError: (error) => {
+          log.warn({ err: error }, 'cloud trace: no se mandaron spans');
+        },
+      })
+    : undefined;
+
 const app = await buildApp({
   logger: loggerOptions,
   deps: {
@@ -165,6 +177,7 @@ const app = await buildApp({
     notifier,
     pro,
     metrics: new MetricsService(db),
+    spans,
     db,
   },
 });
@@ -174,7 +187,7 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   process.once(signal, () => {
     app.log.info({ signal }, 'shutting down');
     liveConfig.stop();
-    void app.close().then(() => process.exit(0));
+    void Promise.all([app.close(), spans?.close()]).then(() => process.exit(0));
   });
 }
 

@@ -1,3 +1,4 @@
+import type { SpanSink } from '@storynido/shared/server';
 import type { EmailNotifier } from '@storynido/emails';
 import type { MetricsService } from './metrics/service';
 import type { ProService } from './pro/service';
@@ -56,6 +57,8 @@ export interface ApiDeps {
   notifier: EmailNotifier;
   /** Eventos del pipeline del pedido (worker directo en local, Pub/Sub en la nube). */
   pipelineEvents: PipelineEventPublisher;
+  /** Spans de los requests muestreados (Cloud Trace en la nube; sin esto, no se mandan). */
+  spans?: SpanSink;
   db: Firestore;
 }
 

@@ -1,5 +1,5 @@
 import { isAdminRole, roleFromClaims, type Role, type RouteAccess } from '@storynido/shared';
-import { traceLogFields } from '@storynido/shared/server';
+import { requestSpan, traceLogFields } from '@storynido/shared/server';
 import type {
   FastifyInstance,
   FastifyRequest,
@@ -26,6 +26,23 @@ export function registerAuthentication(app: FastifyInstance): void {
       app.deps.config.projectId,
     );
     if (Object.keys(fields).length > 0) request.log = request.log.child(fields);
+    done();
+  });
+
+  // Y queda como un span en Cloud Trace (Cloud Run no lo guarda solo).
+  app.addHook('onResponse', (request, reply, done) => {
+    const spans = app.deps.spans;
+    const header = request.headers['x-cloud-trace-context'] ?? request.headers.traceparent;
+    const span =
+      spans &&
+      requestSpan(Array.isArray(header) ? header[0] : header, {
+        method: request.method,
+        route: request.routeOptions.url ?? 'sin ruta',
+        status: reply.statusCode,
+        elapsedMs: reply.elapsedTime,
+        service: 'api',
+      });
+    if (span) spans.record(span);
     done();
   });
 

@@ -26,6 +26,7 @@ locals {
     "identitytoolkit.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
+    "observability.googleapis.com",
     "pubsub.googleapis.com",
     "recaptchaenterprise.googleapis.com",
     "run.googleapis.com",
@@ -581,6 +582,16 @@ module "github_wif" {
 }
 
 # --- Monitoreo y costos --------------------------------------------------------
+
+# Cloud Run manda sus spans a Cloud Trace, pero no crea el bucket donde se guardan: sin él se
+# descartan. Se crea a mano (30 días de retención, fija).
+resource "google_observability_bucket" "trace" {
+  project   = var.project_id
+  location  = "us"
+  bucket_id = "_Trace"
+
+  depends_on = [module.apis]
+}
 
 module "monitoring" {
   source     = "../monitoring"

@@ -1,4 +1,4 @@
-import { traceLogFields } from '@storynido/shared/server';
+import { requestSpan, traceLogFields, type SpanSink } from '@storynido/shared/server';
 import { pipelineEventSchema, pipelineStepSchema } from '@storynido/shared';
 import Fastify, { type FastifyServerOptions } from 'fastify';
 import { z } from 'zod';
@@ -13,6 +13,8 @@ export interface AppOptions {
   watchdog?: () => { run(): Promise<unknown> };
   /** Proyecto de Google Cloud (para unir los logs con sus trazas). */
   projectId?: string;
+  /** Spans de los requests muestreados (Cloud Trace en la nube). */
+  spans?: SpanSink;
   /** Sin pipeline solo responde el health check. Es una función: se crea con el logger de la app. */
   pipeline?: () => Pipeline;
   /** Postventa diaria (Cloud Scheduler). */
@@ -41,6 +43,7 @@ export function buildApp({
   jobs,
   watchdog,
   projectId,
+  spans,
 }: AppOptions) {
   const app = Fastify({ logger });
 
@@ -52,6 +55,22 @@ export function buildApp({
     if (Object.keys(fields).length > 0) request.log = request.log.child(fields);
     done();
   });
+
+  // Cada paso queda como un span de la traza del pedido en Cloud Trace.
+  if (spans) {
+    app.addHook('onResponse', (request, reply, done) => {
+      const header = request.headers['x-cloud-trace-context'] ?? request.headers.traceparent;
+      const span = requestSpan(Array.isArray(header) ? header[0] : header, {
+        method: request.method,
+        route: request.routeOptions.url ?? 'sin ruta',
+        status: reply.statusCode,
+        elapsedMs: reply.elapsedTime,
+        service: 'worker',
+      });
+      if (span) spans.record(span);
+      done();
+    });
+  }
 
   // Cloud Run reserva las rutas que terminan en "z" (p. ej. /healthz), por eso se usa /health.
   app.get('/health', () => ({ status: 'ok', service: 'worker', version }));

@@ -1,6 +1,7 @@
 import { EmailNotifier } from '@storynido/emails';
 import {
   aiModelSettingsFromEnv,
+  CloudTraceSink,
   createProviderRegistry,
   luluOptionsFromEnv,
   simulatedProviders,
@@ -33,10 +34,22 @@ const firebase =
 // La app y los orquestadores locales llaman al pipeline recién al atender pedidos, cuando ya existe.
 const current = (): Pipeline => pipeline;
 
+// En la nube, los requests muestreados (los pasos de cada pedido) van a Cloud Trace.
+const spans =
+  env.APP_ENV === 'staging' || env.APP_ENV === 'production'
+    ? new CloudTraceSink({
+        projectId: env.GCP_PROJECT_ID,
+        onError: (error) => {
+          app.log.warn({ err: error }, 'cloud trace: no se mandaron spans');
+        },
+      })
+    : undefined;
+
 const app = buildApp({
   logger: cloudLoggingOptions('worker', env.LOG_LEVEL, env.K_REVISION),
   version: env.K_REVISION,
   projectId: env.GCP_PROJECT_ID || 'demo-storynido',
+  spans,
   pipeline: current,
   jobs: () => jobs,
   watchdog: () => watchdog,
@@ -135,7 +148,7 @@ const pipeline = new Pipeline(
 for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   process.once(signal, () => {
     app.log.info({ signal }, 'shutting down');
-    void app.close().then(() => process.exit(0));
+    void Promise.all([app.close(), spans?.close()]).then(() => process.exit(0));
   });
 }
 
