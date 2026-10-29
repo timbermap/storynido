@@ -1,22 +1,22 @@
 'use client';
 
-import { COUNTRY_CODES, COUNTRY_DEFAULTS, CURRENCIES, LOCALES } from '@storynido/shared';
+import { COUNTRY_CODES, CURRENCIES, LOCALES } from '@storynido/shared';
 
 import { ConfigEditor } from '@/components/config/config-editor';
-import { money, yesNo } from '@/lib/format';
+import { yesNo } from '@/lib/format';
 
 export default function CountriesPage() {
   return (
     <ConfigEditor
       kind="countries"
       title="Países"
-      text="Activación, formatos, moneda, impuestos, envío e idioma por defecto. Los precios van en Precios."
+      text="Todos los países se venden: los que no están en esta lista cobran en dólares, sin impuesto propio. Acá se pisa un país (moneda local, impuesto, apagar un formato o el país entero). Los precios salen de Precios y márgenes; el envío se cotiza con cada pedido."
       idFrom={(data) => String(data.code)}
       blank={() => ({
         code: 'MX',
         active: false,
         formats: { digital: true, softcover: false, hardcover: false },
-        currency: COUNTRY_DEFAULTS.MX.currency,
+        currency: 'USD',
         defaultLocale: 'es',
         taxBasisPoints: 0,
         taxIncludedInPrice: true,
@@ -45,14 +45,6 @@ export default function CountriesPage() {
           max: 10000,
         },
         { kind: 'boolean', path: 'taxIncludedInPrice', label: 'Impuesto incluido en el precio' },
-        {
-          kind: 'money',
-          path: 'shipping.costMinor',
-          label: 'Envío al cliente',
-          currencyPath: 'currency',
-        },
-        { kind: 'number', path: 'shipping.etaDaysMin', label: 'Envío: días mínimos', min: 0 },
-        { kind: 'number', path: 'shipping.etaDaysMax', label: 'Envío: días máximos', min: 0 },
       ]}
       columns={[
         { label: 'País', render: (data) => String(data.code) },
@@ -66,11 +58,7 @@ export default function CountriesPage() {
               .join(', ') || '—',
         },
         { label: 'Impuesto', render: (data) => `${String(Number(data.taxBasisPoints) / 100)} %` },
-        {
-          label: 'Envío',
-          render: (data) =>
-            money((data.shipping as { costMinor?: number } | undefined)?.costMinor, data.currency),
-        },
+        { label: 'Moneda', render: (data) => String(data.currency) },
       ]}
     />
   );

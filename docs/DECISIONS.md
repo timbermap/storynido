@@ -1262,3 +1262,35 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - con `?line=`, solo se ofrecen los borradores de esa línea; si no hay, se crea uno y se entra directo;
   - un borrador vacío (sin nombre y en el primer paso) se reutiliza en vez de listarse;
   - en la lista, los borradores sin nombre dicen de qué línea son.
+
+## 096 · Precio = costo + margen; envío cotizado con cada pedido; todos los países
+
+- **Fecha:** 2026-10-29 · Decisión de Sebastián: "para Argentina y demás países, siempre activo; se busca la mejor oferta y se ofrece al cliente, si paga paga". Costo real más margen por producto (incluido el digital), con el tipo de margen elegido en el admin; por defecto, monto fijo.
+- **Países:** los 249 de ISO 3166-1.
+  - Los 7 con configuración propia mantienen su moneda e impuesto.
+  - El resto se vende en dólares, sin impuesto propio, con todos los formatos activos.
+  - El admin puede pisar cualquier país (moneda, impuesto, apagar formatos o el país).
+  - Los nombres salen de `Intl.DisplayNames`.
+- **Márgenes** (`productPricing/{digital|softcover|hardcover}`, en USD; admin → Precios y márgenes):
+  - costo propio: IA, PDF y operación, USD 1 por defecto;
+  - tipo de margen: fijo, porcentaje del costo, o porcentaje con mínimo;
+  - ajuste por extensión;
+  - descuento base Pro;
+  - de fábrica, monto fijo: digital USD 18,99 de margen (19,99 en total), tapa blanda USD 27 y tapa dura USD 28.
+- **Cálculo** (`quote`):
+  - libro = costo propio + impresión + margen + extensión, en dólares;
+  - se convierte con el tipo de cambio del día a la moneda del país del pedido y se redondea hacia arriba a un "precio lindo" (,99; en pesos chilenos, 900);
+  - el envío se cobra al costo, sin margen, redondeado hacia arriba a la unidad.
+  - Cupones, promociones, descuento Pro e impuestos funcionan igual que antes.
+- **Impreso:**
+  - **Sin dirección:** se estima con la imprenta habilitada más barata; el envío queda "se calcula con tu dirección" y no se puede pagar.
+  - **Con la dirección completa:** se cotiza en vivo con todas las imprentas que pueden y gana la más barata. El envío en dólares es el total menos la impresión, igual para todas.
+  - **País del pedido:** es el de la dirección, que se elige en el checkout entre todos los países; define la moneda.
+  - **Aviso de importación:** fuera de los países configurados se avisa que puede haber impuestos de importación.
+- **Imprentas para cualquier destino:** opciones de imprenta con país `*` para Gelato, Cloudprinter y Lulu (y la simulada fuera de producción). Si una no llega, o pide datos que no tenemos (Lulu pide el documento fiscal en Latinoamérica), su cotización falla y queda afuera. Las del país pisan a las globales.
+- **Catálogo:** la oferta muestra el digital exacto y el impreso como "desde", con "el envío se calcula con tu dirección".
+- **Tipo de cambio:** el de `fxRates` del día (open.er-api.com). En los emuladores, el seed carga uno fijo para no depender de internet.
+- **Pendiente:**
+  - el kit de Eventos sigue con precio por país (`eventPricing`) y en países sin configurar no se ofrece;
+  - impuestos de bienes digitales en la UE y otros (IVA OSS), a revisar con el procesador de pagos y el contador;
+  - países con sanciones o sin cobertura de pagos, a definir con el procesador.

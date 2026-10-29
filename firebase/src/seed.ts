@@ -27,15 +27,17 @@ import {
   countrySchema,
   illustrationStyleSchema,
   lessonSchema,
-  priceDocId,
-  priceSchema,
   productSchema,
   siteConfigSchema,
   storySchema,
   userSchema,
   type BookFormat,
   PRINT_FORMATS,
+  ANY_COUNTRY,
   CLOUDPRINTER_PRODUCTS,
+  DEFAULT_PRODUCT_PRICING,
+  productPricingSchema,
+  utcDay,
   DEFAULT_PRO_DISCOUNTS,
   aiModelSchema,
   GELATO_PRODUCTS,
@@ -44,7 +46,6 @@ import {
   eventPricingSchema,
   printOptionId,
   printOptionSchema,
-  type BookLength,
   type CountryCode,
   type Locale,
   type Role,
@@ -128,19 +129,6 @@ for (const { email, displayName, role } of cloud ? [] : USERS) {
     );
 }
 
-/** Precios de ejemplo para desarrollo (los reales se cargan desde el admin). */
-const SAMPLE_PRICES: Partial<Record<CountryCode, Record<BookFormat, number>>> = {
-  MX: { digital: 34900, softcover: 79900, hardcover: 99900 },
-  US: { digital: 1999, softcover: 3999, hardcover: 4999 },
-};
-
-/** Ajuste por extensión: el Mini cuesta menos y la Gran aventura más. */
-const SAMPLE_LENGTH_ADJUSTMENTS: Partial<Record<CountryCode, Partial<Record<BookLength, number>>>> =
-  {
-    MX: { mini: -5000, epic: 10000 },
-    US: { mini: -300, epic: 600 },
-  };
-
 const SAMPLE_SHIPPING: Partial<
   Record<CountryCode, { costMinor: number; etaDaysMin: number; etaDaysMax: number }>
 > = {
@@ -176,26 +164,28 @@ for (const code of CONFIGURED_COUNTRIES) {
       updatedAt: now,
     }),
   );
+}
 
-  const prices = SAMPLE_PRICES[code];
-  if (!prices) continue;
-  for (const format of BOOK_FORMATS) {
-    batch.set(
-      db.collection(COLLECTIONS.prices).doc(priceDocId(code, format)),
-      priceSchema.parse({
-        country: code,
-        format,
-        currency: defaults.currency,
-        amountMinor: prices[format],
-        // Precio Pro base de ejemplo: 10 % menos (editable en el admin).
-        proAmountMinor: Math.round((prices[format] * 0.9) / 100) * 100 - (code === 'US' ? 1 : 0),
-        lengthAdjustmentsMinor: SAMPLE_LENGTH_ADJUSTMENTS[code] ?? {},
-        // En producción se revisan y activan desde el admin antes de vender.
-        active: !production,
-        updatedAt: now,
-      }),
-    );
-  }
+// Precio = costo + margen por producto (DECISIONS 096): los de fábrica, editables en el admin.
+// En producción se revisan y activan antes de vender.
+for (const format of BOOK_FORMATS) {
+  batch.set(
+    db.collection(COLLECTIONS.productPricing).doc(format),
+    productPricingSchema.parse({
+      ...DEFAULT_PRODUCT_PRICING[format],
+      active: !production,
+      updatedAt: now,
+    }),
+  );
+}
+
+// Tipo de cambio fijo en los emuladores: los precios no dependen de internet (local y E2E).
+if (!cloud) {
+  batch.set(db.collection(COLLECTIONS.fxRates).doc(utcDay(now)), {
+    rates: { USD: 1, MXN: 18.5, EUR: 0.92, COP: 4000, CLP: 940, PEN: 3.75, BRL: 5.4 },
+    source: 'seed (fijo, solo emuladores)',
+    date: utcDay(now),
+  });
 }
 
 // Matriz de impresión de ejemplo con la imprenta simulada (la real se habilita desde el admin
@@ -318,6 +308,70 @@ for (const format of PRINT_FORMATS) {
       updatedAt: now,
     }),
   );
+}
+
+// Cualquier destino (DECISIONS 096): las imprentas que envían al mundo se cotizan con la
+// dirección; si una no llega (o pide datos que no tenemos), su cotización falla y queda afuera.
+// El costo es de referencia (EE. UU.) para estimar el precio antes de tener la dirección.
+const WORLDWIDE: {
+  provider: string;
+  sku: Record<'softcover' | 'hardcover', string>;
+  cost: Record<'softcover' | 'hardcover', number>;
+  pagesMin: number;
+}[] = [
+  ...(production
+    ? []
+    : [
+        {
+          provider: 'mock',
+          sku: {
+            softcover: 'photobook-softcover-210x280',
+            hardcover: 'photobook-hardcover-210x280',
+          },
+          cost: { softcover: 900, hardcover: 1400 },
+          pagesMin: 12,
+        },
+      ]),
+  {
+    provider: 'gelato',
+    sku: GELATO_PRODUCTS,
+    cost: { softcover: 986, hardcover: 1283 },
+    pagesMin: 28,
+  },
+  {
+    provider: 'cloudprinter',
+    sku: CLOUDPRINTER_PRODUCTS,
+    cost: { softcover: 1296, hardcover: 3169 },
+    pagesMin: 28,
+  },
+  { provider: 'lulu', sku: LULU_PRODUCTS, cost: LULU_COST, pagesMin: 24 },
+];
+for (const printer of WORLDWIDE) {
+  for (const format of PRINT_FORMATS) {
+    batch.set(
+      db
+        .collection(COLLECTIONS.printOptions)
+        .doc(printOptionId(ANY_COUNTRY, format, printer.provider)),
+      printOptionSchema.parse({
+        country: ANY_COUNTRY,
+        format,
+        provider: printer.provider,
+        sku: printer.sku[format],
+        enabled: true,
+        qaSamplePassed: !production,
+        pages: {
+          min: Math.max(printer.pagesMin, format === 'hardcover' ? 20 : 12),
+          max: 200,
+          multipleOf: 2,
+        },
+        maxQuantity: 100,
+        etaDaysMin: 7,
+        etaDaysMax: 20,
+        productionCostUsdMinor: printer.cost[format],
+        updatedAt: now,
+      }),
+    );
+  }
 }
 
 // Kit de Eventos (DECISIONS 079): precios de ejemplo, editables en el admin (fase 14). El

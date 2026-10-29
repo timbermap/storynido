@@ -175,9 +175,10 @@
     "sampleNote": "This is how the story begins. In your book, the name and details will be your child's.",
     "formats": "Formats and prices",
     "shippingTo": "Shipping to {country}: {price} · arrives in {min} to {max} business days",
+    "shippingQuoted": "Printed to {country}: shipping is calculated from your address · arrives in {min} to {max} business days",
     "taxIncluded": "Taxes included",
     "taxExtra": "Taxes calculated at checkout",
-    "notAvailable": "We don't sell in {country} yet. You can see prices for another country using the selector above.",
+    "notAvailable": "We don't sell in {country} yet. You can choose another country in your account.",
     "back": "All stories",
     "error": "We couldn't load the stories. Please try again in a few minutes.",
     "fallbackNotice": "We don't ship to {preferred} yet. Showing prices for {country}.",
@@ -866,6 +867,7 @@
     "addressTitle": "Shipping address",
     "optional": "optional",
     "address": {
+      "country": "Country",
       "name": "Recipient name",
       "line1": "Street address",
       "line2": "Apartment, suite, etc.",
@@ -1018,7 +1020,11 @@
       "downloadAll": "Download everything (ZIP)",
       "moreCopies": "Order more copies",
       "ready": "Your kit is ready!"
-    }
+    },
+    "fromPrice": "from {price}",
+    "shippingPending": "Shipping: calculated from your address",
+    "addressToQuote": "Complete the address to see shipping and the total.",
+    "importDuties": "International shipping: the recipient may have to pay import duties."
   },
   "Pro": {
     "activation": {

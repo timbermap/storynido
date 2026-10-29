@@ -172,18 +172,31 @@ export default async function StoryPage({ params }: Props) {
                       className="flex items-center justify-between gap-4 px-5 py-3"
                     >
                       <span className="font-medium">{format.name}</span>
-                      <span className="font-semibold">{price(format.amountMinor)}</span>
+                      <span className="font-semibold">
+                        {format.estimated
+                          ? t('from', { price: price(format.amountMinor) })
+                          : price(format.amountMinor)}
+                      </span>
                     </li>
                   ))}
                 </ul>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  {t('shippingTo', {
-                    country: countryLabel,
-                    price: price(offer.shipping.costMinor),
-                    min: offer.shipping.etaDaysMin,
-                    max: offer.shipping.etaDaysMax,
-                  })}{' '}
-                  · {offer.taxIncludedInPrice ? t('taxIncluded') : t('taxExtra')}
+                  {offer.formats.some((format) => format.estimated) &&
+                    `${
+                      offer.shipping.quoted
+                        ? t('shippingQuoted', {
+                            country: countryLabel,
+                            min: offer.shipping.etaDaysMin,
+                            max: offer.shipping.etaDaysMax,
+                          })
+                        : t('shippingTo', {
+                            country: countryLabel,
+                            price: price(offer.shipping.costMinor),
+                            min: offer.shipping.etaDaysMin,
+                            max: offer.shipping.etaDaysMax,
+                          })
+                    } · `}
+                  {offer.taxIncludedInPrice ? t('taxIncluded') : t('taxExtra')}
                 </p>
               </>
             ) : (

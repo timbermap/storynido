@@ -36,16 +36,21 @@ export function PriceSummary({
       value: `−${money(snapshot.discount.minor)}`,
     });
   }
-  rows.push({
-    label:
-      snapshot.shipping.minor > 0
-        ? t('shippingEta', {
-            min: snapshot.shipping.etaDaysMin,
-            max: snapshot.shipping.etaDaysMax,
-          })
-        : t('shippingDigital'),
-    value: snapshot.shipping.minor > 0 ? money(snapshot.shipping.minor) : t('free'),
-  });
+  if (snapshot.shipping.pending) {
+    // Impreso sin dirección: el envío se cotiza al completarla (no está en el total).
+    rows.push({ label: t('shippingPending'), value: '—', muted: true });
+  } else {
+    rows.push({
+      label:
+        snapshot.shipping.minor > 0
+          ? t('shippingEta', {
+              min: snapshot.shipping.etaDaysMin,
+              max: snapshot.shipping.etaDaysMax,
+            })
+          : t('shippingDigital'),
+      value: snapshot.shipping.minor > 0 ? money(snapshot.shipping.minor) : t('free'),
+    });
+  }
   // Sin impuesto configurado (y no incluido), la fila no aporta nada.
   if (snapshot.tax.included || snapshot.tax.minor > 0)
     rows.push({

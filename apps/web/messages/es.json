@@ -175,9 +175,10 @@
     "sampleNote": "Así empieza la historia. En tu libro, el nombre y los detalles serán los de tu hijo.",
     "formats": "Formatos y precios",
     "shippingTo": "Envío a {country}: {price} · llega en {min} a {max} días hábiles",
+    "shippingQuoted": "Impreso a {country}: el envío se calcula con tu dirección · llega en {min} a {max} días hábiles",
     "taxIncluded": "Impuestos incluidos",
     "taxExtra": "Impuestos según tu dirección",
-    "notAvailable": "Todavía no vendemos en {country}. Puedes ver los precios de otro país desde el selector de arriba.",
+    "notAvailable": "Todavía no vendemos en {country}. Puedes elegir otro país en Mi cuenta.",
     "back": "Todas las historias",
     "error": "No pudimos cargar las historias. Inténtalo de nuevo en unos minutos.",
     "fallbackNotice": "Todavía no enviamos a {preferred}. Te mostramos los precios de {country}.",
@@ -866,6 +867,7 @@
     "addressTitle": "Dirección de envío",
     "optional": "opcional",
     "address": {
+      "country": "País",
       "name": "Nombre de quien recibe",
       "line1": "Calle y número",
       "line2": "Colonia, piso o depto.",
@@ -1018,7 +1020,11 @@
       "downloadAll": "Descargar todo (ZIP)",
       "moreCopies": "Pedir más copias",
       "ready": "¡Tu kit está listo!"
-    }
+    },
+    "fromPrice": "desde {price}",
+    "shippingPending": "Envío: se calcula con tu dirección",
+    "addressToQuote": "Completa la dirección para ver el envío y el total.",
+    "importDuties": "Envío internacional: puede haber impuestos de importación que paga quien recibe el libro."
   },
   "Pro": {
     "activation": {

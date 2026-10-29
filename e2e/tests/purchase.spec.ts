@@ -151,7 +151,9 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.getByRole('link', { name: 'Elegir formato' }).click();
   await heading(page, 'Tu libro');
   await page.locator('label', { hasText: 'Tapa blanda' }).click();
-  await expect(body(page)).toContainText('Envío (llega en');
+  // Sin dirección, el envío se cotiza después (no se puede pagar todavía).
+  await expect(page.locator('aside dl')).toContainText('Envío: se calcula con tu dirección');
+  await expect(page.getByRole('button', { name: 'Pagar' })).toBeDisabled();
   const address = {
     name: 'Ana Pérez',
     line1: 'Av. Reforma 123',
@@ -162,6 +164,8 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   };
   for (const [key, value] of Object.entries(address))
     await page.locator(`#address-${key}`).fill(value);
+  // Con la dirección completa se cotiza con las imprentas: envío real y plazo.
+  await expect(page.locator('aside dl')).toContainText('Envío (llega en', { timeout: 30_000 });
 
   // Escenario 22: una fecha de regalo imposible nunca se promete.
   await page.locator('label', { hasText: 'Es un regalo' }).locator('input').check();

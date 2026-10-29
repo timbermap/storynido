@@ -10,12 +10,12 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 
 ## 1. Decisiones pendientes
 
-| Estado | Qué                                                                                        | Quién |
-| ------ | ------------------------------------------------------------------------------------------ | ----- |
-| ⬜     | Procesador de pagos (Gumroad, PagueloFacil o Paymentwall; Paymentwall espera aprobación)   | 👤    |
-| ⬜     | Imprenta para Latinoamérica (respuestas de Cloudprinter, RPI y Peecho)                     | 👤    |
-| ⬜     | BookVault para Europa (sí o no)                                                            | 👤    |
-| ⬜     | Países y precios de la fase 1 (México y EE. UU. según el brief), en Admin → Países/Precios | 👤    |
+| Estado | Qué                                                                                                                               | Quién |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| ⬜     | Procesador de pagos (Gumroad, PagueloFacil o Paymentwall; Paymentwall espera aprobación)                                          | 👤    |
+| ⬜     | Imprenta para Latinoamérica (respuestas de Cloudprinter, RPI y Peecho)                                                            | 👤    |
+| ⬜     | BookVault para Europa (sí o no)                                                                                                   | 👤    |
+| ⬜     | Revisar márgenes por producto (Admin → Precios y márgenes) y activarlos en producción; todos los países se venden (DECISIONS 096) | 👤    |
 
 ## 2. Calidad antes de vender
 

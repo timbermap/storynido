@@ -100,7 +100,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: Power,
   },
   { href: '/countries', label: 'Países', keywords: 'impuestos envío moneda idioma', icon: Globe },
-  { href: '/prices', label: 'Precios', keywords: 'productos formatos extensión pro', icon: Tag },
+  {
+    href: '/prices',
+    label: 'Precios y márgenes',
+    keywords: 'productos formatos extensión pro margen costo',
+    icon: Tag,
+  },
   { href: '/coupons', label: 'Cupones', keywords: 'códigos descuento', icon: Ticket },
   {
     href: '/promotions',

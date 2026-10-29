@@ -2,6 +2,8 @@
 
 import {
   ApiError,
+  CONFIGURED_COUNTRIES,
+  addressProblems,
   type Address,
   type BookFormat,
   type CountryCode,
@@ -18,6 +20,7 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { useConsent } from '@/components/consent/consent-provider';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
+import { countriesByName } from '@/lib/country-names';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +28,12 @@ import { GiftDeadline } from './gift-deadline';
 import { PriceSummary } from './price-summary';
 
 type AddressDraft = Omit<Address, 'country'>;
+
+/** Dirección lista para cotizar: lo obligatorio cargado y las reglas de su país cumplidas. */
+function addressComplete(address: Address): boolean {
+  const required = [address.name, address.line1, address.city, address.postalCode];
+  return required.every((value) => value.trim()) && addressProblems(address).length === 0;
+}
 
 const EMPTY_ADDRESS: AddressDraft = {
   name: '',
@@ -78,27 +87,59 @@ export function Checkout({
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  // País de envío del impreso (cualquiera: la imprenta se cotiza con la dirección).
+  const [shipTo, setShipTo] = useState<CountryCode>(country);
   const print = format !== 'digital';
+  // El pedido es del país de la dirección: define la moneda y las imprentas.
+  const orderCountry = print ? shipTo : country;
+  const shippingAddress: Address | null = print
+    ? {
+        ...address,
+        line2: address.line2?.trim() ? address.line2 : null,
+        state: address.state?.trim() ? address.state.trim() : null,
+        phone: address.phone?.trim() ? address.phone.trim() : null,
+        country: shipTo,
+      }
+    : null;
+  // Con la dirección completa se cotiza con las imprentas (envío real).
+  const addressKey =
+    shippingAddress && addressComplete(shippingAddress) ? JSON.stringify(shippingAddress) : null;
 
-  // El resumen se recalcula en el servidor cada vez que cambia el formato o el cupón.
+  // El resumen se recalcula en el servidor cada vez que cambia el formato, el cupón o la
+  // dirección (con una pausa, para no cotizar con cada tecla).
   useEffect(() => {
     if (!signedIn) return;
     let cancelled = false;
-    api('checkoutQuote', {
-      body: { bookId, format, country, quantity: 1, couponCode: coupon, sourceOrderId: reorderOf },
-    })
-      .then((result) => {
-        if (cancelled) return;
-        setQuote(result);
-        setError(null);
-      })
-      .catch((caught: unknown) => {
-        if (!cancelled) setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
-      });
+    const timer = setTimeout(
+      () => {
+        api('checkoutQuote', {
+          body: {
+            bookId,
+            format,
+            country: orderCountry,
+            quantity: 1,
+            couponCode: coupon,
+            sourceOrderId: reorderOf,
+            shippingAddress: addressKey ? (JSON.parse(addressKey) as Address) : null,
+          },
+        })
+          .then((result) => {
+            if (cancelled) return;
+            setQuote(result);
+            setError(null);
+          })
+          .catch((caught: unknown) => {
+            if (!cancelled)
+              setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
+          });
+      },
+      addressKey ? 600 : 0,
+    );
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
-  }, [bookId, format, country, coupon, reorderOf, signedIn, t]);
+  }, [bookId, format, orderCountry, coupon, reorderOf, signedIn, addressKey, t]);
 
   async function pay() {
     setPaying(true);
@@ -106,18 +147,10 @@ export function Checkout({
     try {
       const body = {
         format,
-        country,
+        country: orderCountry,
         quantity: 1,
         couponCode: coupon,
-        shippingAddress: print
-          ? {
-              ...address,
-              line2: address.line2?.trim() ? address.line2 : null,
-              state: address.state?.trim() ? address.state.trim() : null,
-              phone: address.phone?.trim() ? address.phone.trim() : null,
-              country,
-            }
-          : null,
+        shippingAddress,
         gift: {
           isGift: gift.isGift,
           message: gift.isGift && gift.message.trim() ? gift.message : null,
@@ -179,7 +212,11 @@ export function Checkout({
                   {t(`formats.${option.format}.text`)}
                 </span>
                 <span className="mt-auto pt-2 font-semibold tabular-nums">
-                  {formatPrice(option.amountMinor, offer.currency, locale, country)}
+                  {option.estimated
+                    ? t('fromPrice', {
+                        price: formatPrice(option.amountMinor, offer.currency, locale, country),
+                      })
+                    : formatPrice(option.amountMinor, offer.currency, locale, country)}
                 </span>
               </label>
             ))}
@@ -190,6 +227,24 @@ export function Checkout({
           <fieldset className="grid gap-3">
             <legend className="mb-1 text-lg font-semibold">{t('addressTitle')}</legend>
             <div className="grid gap-3 sm:grid-cols-2">
+              <label className="grid gap-1.5 text-sm sm:col-span-2">
+                <span className="font-semibold">{t('address.country')}</span>
+                <select
+                  id="address-country"
+                  autoComplete="country"
+                  value={shipTo}
+                  onChange={(event) => {
+                    setShipTo(event.target.value as CountryCode);
+                  }}
+                  className={field}
+                >
+                  {countriesByName(locale).map(({ code, name }) => (
+                    <option key={code} value={code}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </label>
               {ADDRESS_FIELDS.map(({ key, optional, autoComplete }) => (
                 <label
                   key={key}
@@ -217,6 +272,9 @@ export function Checkout({
                 </label>
               ))}
             </div>
+            {!CONFIGURED_COUNTRIES.includes(shipTo) && (
+              <p className="text-sm text-muted-foreground">{t('importDuties')}</p>
+            )}
           </fieldset>
         )}
 
@@ -301,7 +359,16 @@ export function Checkout({
             {error}
           </p>
         )}
-        <Button size="lg" disabled={!quote || paying} onClick={() => void pay()}>
+        {print && quote?.snapshot.shipping.pending && (
+          <p role="status" className="text-sm text-muted-foreground">
+            {t('addressToQuote')}
+          </p>
+        )}
+        <Button
+          size="lg"
+          disabled={!quote || paying || (print && quote.snapshot.shipping.pending)}
+          onClick={() => void pay()}
+        >
           {paying ? (
             <Loader2 className="animate-spin" aria-hidden="true" />
           ) : (

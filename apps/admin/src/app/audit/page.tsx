@@ -13,7 +13,7 @@ const ENTITIES = [
   ['siteConfig', 'Sitio'],
   ['aiConfig', 'IA'],
   ['countries', 'Países'],
-  ['prices', 'Precios'],
+  ['productPricing', 'Precios y márgenes'],
   ['coupons', 'Cupones'],
   ['promotions', 'Promociones'],
   ['eventPricing', 'Eventos'],
