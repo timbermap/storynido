@@ -86,7 +86,8 @@ export function PreviewPanel({
   // Páginas sin ilustrar: ejemplos fijos de la historia y del estilo (sin costo de IA).
   const examples = {
     cover: book.storyId ? `/samples/${book.storyId}.webp` : null,
-    page: book.styleId ? `/styles/${book.styleId}.webp` : null,
+    // Un librito de ejemplo por estilo (mismo chico y zorro): public/styles/<estilo>/1-4.webp.
+    pages: book.styleId ? [1, 2, 3, 4].map((n) => `/styles/${book.styleId}/${String(n)}.webp`) : [],
     label: tViewer('exampleLabel', { name: childName }),
   };
   const { user } = useAuth();

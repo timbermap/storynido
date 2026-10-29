@@ -22,7 +22,8 @@ export interface ViewerPage {
  */
 export interface ViewerExamples {
   cover: string | null;
-  page: string | null;
+  /** Páginas de ejemplo del estilo: cada página sin ilustrar muestra una distinta (en rueda). */
+  pages: readonly string[];
   /** Rótulo sobre el ejemplo ("Ejemplo del estilo · el protagonista será Luci"). */
   label: string;
 }
@@ -189,7 +190,13 @@ export function BookViewer({
 }
 
 function exampleFor(page: ViewerPage, examples?: ViewerExamples) {
-  const src = page.kind === 'cover' ? examples?.cover : examples?.page;
+  const pages = examples?.pages ?? [];
+  const src =
+    page.kind === 'cover'
+      ? examples?.cover
+      : pages.length
+        ? pages[((page.number ?? 1) - 1) % pages.length]
+        : null;
   return examples && src ? { src, label: examples.label } : null;
 }
 
