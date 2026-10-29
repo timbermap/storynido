@@ -31,7 +31,7 @@ Fotos: 30 días como máximo. Datos del niño y libros: mientras tengas tu cuent
 
 ## Tus derechos
 
-Puedes acceder a tus datos, corregirlos, borrarlos, oponerte a su uso o pedir una copia. Puedes borrar fotos y perfiles desde tu cuenta o escribirnos a hola@storynido.com. Respondemos dentro de los plazos legales (GDPR, COPPA, Ley Federal de Protección de Datos Personales en Posesión de los Particulares de México y LGPD de Brasil, según corresponda).
+Puedes acceder a tus datos, corregirlos, borrarlos, oponerte a su uso o pedir una copia. Puedes borrar fotos y perfiles desde tu cuenta o escribirnos a hola@storynido.com. Respondemos dentro de los plazos legales (Ley 18.331 de Protección de Datos Personales de Uruguay, GDPR, COPPA, Ley Federal de Protección de Datos Personales en Posesión de los Particulares de México y LGPD de Brasil, según corresponda).
 
 ## Seguridad
 

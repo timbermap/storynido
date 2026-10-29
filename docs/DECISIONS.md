@@ -1502,3 +1502,10 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Ya resuelto en DECISIONS 110:** Mis cuentos, las claves Pro sin traducir y los links a `#drafts`.
 - **Pedidos que "variaron entre cargas":** fue el borrado de los datos de prueba de la cuenta, hecho durante la auditoría.
 - **País inicial Estados Unidos:** el país sale de la IP. El navegador del auditor no salía por Argentina. Se puede cambiar con "Enviar a" y en Mi cuenta.
+
+## 112 · Ley 18.331, historial limpio y descuento por volumen para Profesionales
+
+- **Fecha:** 2026-10-29.
+- **Privacidad:** con el responsable en Uruguay, la política nombra la Ley 18.331 de Protección de Datos Personales entre las leyes que se respetan (es, en y pt). Publicado en staging.
+- **Historial de git:** se sacaron de todos los commits los tres scripts temporales que se habían subido por error (`firebase/src/zz-*`, con el email y el uid de staging del dueño). Los ignora `.gitignore`.
+- **Nuevo flujo de creación (plan aprobado):** Profesionales no tiene suscripción ni packs. El cierre muestra el precio con el descuento por volumen que ya existe y cuánto falta para el próximo nivel. Después del pago se sigue en la página del pedido (generación en vivo y descargas), con un acceso a Mis cuentos, que también muestra el pedido en vivo.

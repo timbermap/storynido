@@ -31,7 +31,7 @@ Fotos: no máximo 30 dias. Dados da criança e livros: enquanto você mantiver s
 
 ## Seus direitos
 
-Você pode acessar, corrigir ou excluir seus dados, se opor ao seu uso ou pedir uma cópia. Pode excluir fotos e perfis na sua conta ou escrever para hola@storynido.com. Respondemos nos prazos legais (LGPD, GDPR, COPPA e demais leis aplicáveis).
+Você pode acessar, corrigir ou excluir seus dados, se opor ao seu uso ou pedir uma cópia. Pode excluir fotos e perfis na sua conta ou escrever para hola@storynido.com. Respondemos nos prazos legais (Lei 18.331 de Proteção de Dados Pessoais do Uruguai, LGPD, GDPR, COPPA e demais leis aplicáveis).
 
 ## Segurança
 

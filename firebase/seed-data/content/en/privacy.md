@@ -31,7 +31,7 @@ Photos: 30 days at most. Child details and books: while you keep your account or
 
 ## Your rights
 
-You can access, correct or delete your data, object to its use, or request a copy. You can delete photos and profiles from your account or email hola@storynido.com. We respond within the legal deadlines (GDPR, COPPA, Mexico's Federal Law on the Protection of Personal Data and Brazil's LGPD, as applicable).
+You can access, correct or delete your data, object to its use, or request a copy. You can delete photos and profiles from your account or email hola@storynido.com. We respond within the legal deadlines (Uruguay's Personal Data Protection Law No. 18.331, GDPR, COPPA, Mexico's Federal Law on the Protection of Personal Data and Brazil's LGPD, as applicable).
 
 ## Security
 
