@@ -25,7 +25,7 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 | ⬜     | Pedido real en staging con IA real, de punta a punta (la traza completa del pedido en Cloud Trace)                                                          | 🤝    |
 | ⬜     | Muestra física de cada SKU (Gelato y Lulu): valida el archivo y habilita `qaSamplePassed` en producción                                                     | 👤    |
 | ⬜     | Panel humano: 25 compradores y 10 profesionales (ver `QA-SCENARIOS.md`)                                                                                     | 👤    |
-| ⬜     | Escenario 22: fecha del regalo con aviso si no llega                                                                                                        | 🤖    |
+| ✅     | Escenario 22: fecha del regalo con aviso si no llega                                                                                                        | 🤖    |
 | ⬜     | Lulu: prueba completa en sandbox (webhook del sandbox registrado y recibido el 2026-10-29; en producción: `infra/scripts/lulu-webhook.sh production <api>`) | 🤝    |
 
 ## 3. Legal y privacidad

@@ -21,6 +21,7 @@ import { api } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
+import { GiftDeadline } from './gift-deadline';
 import { PriceSummary } from './price-summary';
 
 type AddressDraft = Omit<Address, 'country'>;
@@ -247,6 +248,12 @@ export function Checkout({
                 className="w-full rounded-xl border bg-card p-3"
               />
             </label>
+          )}
+          {gift.isGift && print && quote && quote.snapshot.shipping.minor > 0 && (
+            <GiftDeadline
+              etaDaysMin={quote.snapshot.shipping.etaDaysMin}
+              etaDaysMax={quote.snapshot.shipping.etaDaysMax}
+            />
           )}
         </fieldset>
       </div>

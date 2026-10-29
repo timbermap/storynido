@@ -162,6 +162,15 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   };
   for (const [key, value] of Object.entries(address))
     await page.locator(`#address-${key}`).fill(value);
+
+  // Escenario 22: una fecha de regalo imposible nunca se promete.
+  await page.locator('label', { hasText: 'Es un regalo' }).locator('input').check();
+  const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+  await page.locator('#gift-date').fill(tomorrow);
+  await expect(page.locator('#gift-date-status')).toContainText('No llega para esa fecha');
+  await page.locator('#gift-date').fill('2099-12-31');
+  await expect(page.locator('#gift-date-status')).toContainText('Llega a tiempo');
+  await page.locator('label', { hasText: 'Es un regalo' }).locator('input').uncheck();
   await page.locator('#coupon').fill('prueba10');
   await page.getByRole('button', { name: 'Aplicar' }).click();
   await expect(page.locator('aside dl')).toContainText('Cupón PRUEBA10');

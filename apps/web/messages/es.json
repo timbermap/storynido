@@ -882,6 +882,13 @@
     "giftTitle": "Regalo",
     "isGift": "Es un regalo",
     "giftMessage": "Mensaje para la tarjeta",
+    "giftDate": "¿Para qué fecha lo necesitas?",
+    "giftDateHint": "Opcional. Te decimos si el libro impreso llega a tiempo.",
+    "giftDateStatus": {
+      "on_time": "Llega a tiempo: estimamos la entrega entre el {earliest} y el {latest}.",
+      "at_risk": "Puede no llegar a tiempo: estimamos la entrega entre el {earliest} y el {latest}. Si lo necesitas sí o sí para esa fecha, el libro digital está listo en minutos.",
+      "late": "No llega para esa fecha: lo antes posible es el {earliest}. El libro digital está listo en minutos, y el impreso puedes pedirlo después desde tu cuenta."
+    },
     "summaryTitle": "Resumen",
     "coupon": "Cupón",
     "apply": "Aplicar",

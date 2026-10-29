@@ -23,7 +23,7 @@
 | 14  | Admin: configuración                                 | ✅ 2026-10-28 (2FA de staging pendiente, ver 084)   |
 | 15  | Admin: operaciones                                   | ✅ 2026-10-28                                       |
 | 16  | Observabilidad y seguridad                           | ✅ 2026-10-28 (App Check en web: falta la clave)    |
-| 17  | E2E y rendimiento                                    | ✅ 2026-10-28 (panel humano y escenario 22 pend.)   |
+| 17  | E2E y rendimiento                                    | ✅ 2026-10-28 (panel humano pendiente)              |
 | 18  | Documentación y salida                               | ✅ 2026-10-28 docs (salida: ver `LAUNCH.md`)        |
 
 ## Estrategia comercial
