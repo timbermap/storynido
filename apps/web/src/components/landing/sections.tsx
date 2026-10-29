@@ -66,7 +66,7 @@ export function LandingSteps({
   title: string;
   steps: { title: string; text: string }[];
 }) {
-  const tones = ['bg-secondary text-primary', 'bg-peach text-[#8a4a2a]', 'bg-mint text-success'];
+  const tones = ['bg-secondary text-primary', 'bg-peach text-[#a33f33]', 'bg-mint text-success'];
   return (
     <section className="container-page py-20 lg:py-24">
       <h2 className="text-center text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
@@ -83,7 +83,7 @@ export function LandingSteps({
             {index < steps.length - 1 && (
               <ArrowRight
                 aria-hidden="true"
-                className="absolute top-4 -right-5 hidden size-7 text-[#d8b9a8] md:block"
+                className="absolute top-4 -right-5 hidden size-7 text-[#e7b9ad] md:block"
                 strokeWidth={1.5}
               />
             )}
@@ -126,7 +126,7 @@ export function LandingChecklist({
               <span
                 className={`grid size-8 shrink-0 place-items-center rounded-full ${
                   item.tag && !item.tag.available
-                    ? 'bg-peach text-[#8a4a2a]'
+                    ? 'bg-peach text-[#a33f33]'
                     : 'bg-mint text-success'
                 }`}
               >
@@ -141,7 +141,7 @@ export function LandingChecklist({
                 {item.tag && (
                   <span
                     className={`mt-0.5 block text-xs font-bold ${
-                      item.tag.available ? 'text-success' : 'text-[#a8633b]'
+                      item.tag.available ? 'text-success' : 'text-[#a33f33]'
                     }`}
                   >
                     {item.tag.label}

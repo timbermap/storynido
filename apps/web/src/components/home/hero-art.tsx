@@ -17,11 +17,11 @@ export function HeroArt({ alt, src = heroWatercolor }: { alt: string; src?: Stat
     <div className="relative isolate mx-auto w-full max-w-2xl">
       <div
         aria-hidden="true"
-        className="absolute -inset-4 -z-10 rotate-2 rounded-[2.5rem] bg-[radial-gradient(circle_at_30%_20%,#f3e9f9_0%,var(--secondary)_55%,transparent_75%)] opacity-80 blur-md"
+        className="absolute -inset-4 -z-10 rotate-2 rounded-[2.5rem] bg-[radial-gradient(circle_at_30%_20%,#f1ecfb_0%,var(--secondary)_55%,transparent_75%)] opacity-80 blur-md"
       />
       <Sparkle className="absolute -top-5 -left-3 z-10 size-9 rotate-12 text-star" />
       <Sparkle className="absolute -right-2 -bottom-4 z-10 size-7 text-star" />
-      <div className="overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,#fff9f3,#efe4f6)] shadow-[0_17px_45px_rgb(80_52_84/0.08)]">
+      <div className="overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,#fffaf5,#eee8fa)] shadow-[0_17px_45px_rgb(80_52_84/0.08)]">
         <Image
           src={src}
           alt={alt}

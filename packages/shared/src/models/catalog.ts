@@ -1,3 +1,4 @@
+import { paletteKeySchema } from './art-direction';
 import { z } from 'zod';
 
 import {
@@ -23,6 +24,8 @@ export const storySchema = timestampsSchema.extend({
   ageMin: z.number().int().min(CHILD_LIMITS.minAge).max(CHILD_LIMITS.maxAge),
   ageMax: z.number().int().min(CHILD_LIMITS.minAge).max(CHILD_LIMITS.maxAge),
   tags: z.array(z.string()),
+  /** Paleta de los libros de esta historia (sin ella, la del público; ver art-direction.ts). */
+  palette: paletteKeySchema.nullish(),
   pageCount: z.number().int().positive(),
   title: localizedSchema(z.string().min(1)),
   summary: localizedSchema(z.string().min(1)),

@@ -37,14 +37,14 @@ export function NameCoverDemo({ labels }: { labels: NameCoverLabels }) {
         <div className="order-2 lg:order-1">
           <div className="relative mx-auto w-[min(80%,22rem)] [perspective:1400px]">
             <div className="relative -rotate-3 [transform:rotateY(-10deg)]">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-[0.4rem_1rem_1rem_0.4rem] border-l-[12px] border-[#a98ac0] bg-[#faf3ea] shadow-[var(--shadow-book)]">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-[0.4rem_1rem_1rem_0.4rem] border-l-[12px] border-[#a98ac0] bg-[#fff4ea] shadow-[var(--shadow-book)]">
                 <Image
                   src={heroWatercolor}
                   alt=""
                   sizes="(min-width: 1024px) 352px, 80vw"
                   className="absolute inset-x-0 bottom-0 h-[72%] w-full object-cover object-[45%_center]"
                 />
-                <div className="absolute inset-x-0 top-0 h-[46%] bg-[linear-gradient(to_bottom,#faf3ea_62%,transparent)]" />
+                <div className="absolute inset-x-0 top-0 h-[46%] bg-[linear-gradient(to_bottom,#fff4ea_62%,transparent)]" />
                 <p className="relative px-4 pt-6 text-center font-display text-[#46335a]">
                   <span className="block text-base font-semibold sm:text-lg">{t('line1')}</span>
                   <span
@@ -82,7 +82,7 @@ export function NameCoverDemo({ labels }: { labels: NameCoverLabels }) {
             onChange={(event) => {
               setName(event.target.value);
             }}
-            className="mt-2 h-14 w-full max-w-sm rounded-[0.9rem] border-[1.5px] border-[#b9acbf] bg-card px-4 text-xl font-semibold focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d8c1f2]"
+            className="mt-2 h-14 w-full max-w-sm rounded-[0.9rem] border-[1.5px] border-[#b7bcc8] bg-card px-4 text-xl font-semibold focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d9cef0]"
           />
           <div className="mt-6">
             <Link href="/create" className={buttonVariants({ size: 'lg' })}>

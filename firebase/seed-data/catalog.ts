@@ -45,6 +45,7 @@ const ADVENTURE = {
 const ADVENTURES: SeedStory[] = [
   {
     slug: 'aventura-espacial',
+    palette: 'adventure',
     active: true,
     order: 1,
     ageMin: 3,
@@ -75,6 +76,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'valle-de-los-dinosaurios',
+    palette: 'nature',
     active: true,
     order: 2,
     ageMin: 3,
@@ -105,6 +107,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'reino-encantado',
+    palette: 'magic',
     active: true,
     order: 3,
     ageMin: 3,
@@ -131,6 +134,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'gol-de-campeon',
+    palette: 'celebration',
     active: true,
     order: 4,
     ageMin: 4,
@@ -157,6 +161,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'superheroe-por-un-dia',
+    palette: 'adventure',
     active: true,
     order: 5,
     ageMin: 4,
@@ -183,6 +188,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'amigos-de-la-selva',
+    palette: 'nature',
     active: true,
     order: 6,
     ageMin: 2,
@@ -209,6 +215,7 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'secreto-del-fondo-del-mar',
+    palette: 'adventure',
     active: true,
     order: 7,
     ageMin: 3,
@@ -281,6 +288,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'las-tardes-con-los-abuelos',
+    palette: 'bedtime',
     order: 20,
     ageMin: 2,
     ageMax: 9,
@@ -306,6 +314,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'mi-primer-dia-de-clases',
+    palette: 'learning',
     order: 21,
     ageMin: 3,
     ageMax: 7,
@@ -331,6 +340,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'el-cumpleanos-mas-magico',
+    palette: 'celebration',
     order: 22,
     ageMin: 2,
     ageMax: 10,
@@ -356,6 +366,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'las-letras-que-bailan',
+    palette: 'learning',
     order: 23,
     ageMin: 4,
     ageMax: 7,
@@ -381,6 +392,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'el-jardin-de-las-emociones',
+    palette: 'learning',
     order: 24,
     ageMin: 3,
     ageMax: 9,
@@ -406,6 +418,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'un-pasito-mas',
+    palette: 'learning',
     order: 25,
     ageMin: 3,
     ageMax: 9,
@@ -427,6 +440,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'mi-visita-al-dentista',
+    palette: 'learning',
     order: 26,
     ageMin: 3,
     ageMax: 8,

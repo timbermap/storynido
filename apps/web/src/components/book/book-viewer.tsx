@@ -230,7 +230,7 @@ function Illustration({
     // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={alt} className="size-full object-cover" draggable={false} />
   ) : (
-    <div className="grid size-full place-items-center bg-[radial-gradient(circle_at_30%_25%,#f3e9f9,#eadcf2_45%,#f5d9c9)] p-6 text-center">
+    <div className="grid size-full place-items-center bg-[radial-gradient(circle_at_30%_25%,#f1ecfb,#e6ddf6_45%,#ffe3db)] p-6 text-center">
       <span className="grid justify-items-center gap-2 text-sm font-bold text-primary">
         <Lock className="size-6" aria-hidden="true" />
         {lockedLabel}
@@ -259,7 +259,7 @@ function PageSpread({
   theEnd: string;
 }) {
   const paper =
-    'flex min-h-[18rem] flex-col justify-center rounded-xl bg-[#fffaf4] p-6 shadow-[inset_0_0_0_1px_rgb(52_42_64/0.06)] sm:p-10';
+    'flex min-h-[18rem] flex-col justify-center rounded-xl bg-[#fffaf5] p-6 shadow-[inset_0_0_0_1px_rgb(38_50_74/0.06)] sm:p-10';
 
   if (page.kind === 'cover') {
     return (
@@ -272,7 +272,7 @@ function PageSpread({
           example={exampleFor(page, examples)}
         />
         {/* El título va en la capa tipográfica, nunca dentro de la ilustración. */}
-        <h3 className="absolute inset-x-0 top-0 bg-gradient-to-b from-[#fffaf4]/95 to-transparent px-6 pt-6 pb-10 text-center font-display text-2xl leading-tight font-medium sm:text-3xl">
+        <h3 className="absolute inset-x-0 top-0 bg-gradient-to-b from-[#fffaf5]/95 to-transparent px-6 pt-6 pb-10 text-center font-display text-2xl leading-tight font-medium sm:text-3xl">
           {title}
         </h3>
         {badge && <Badge>{badge}</Badge>}

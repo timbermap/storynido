@@ -29,7 +29,7 @@ export async function PhotoToStory() {
 
         <figure className="relative mx-auto w-full max-w-xl">
           {/* Primer plano del personaje (recorte de la ilustración del hero). */}
-          <div className="ml-auto aspect-square w-[82%] overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,#fff9f3,#efe4f6)] shadow-[0_17px_45px_rgb(80_52_84/0.08)]">
+          <div className="ml-auto aspect-square w-[82%] overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,#fffaf5,#eee8fa)] shadow-[0_17px_45px_rgb(80_52_84/0.08)]">
             <Image
               src={heroWatercolor}
               alt=""

@@ -1,3 +1,4 @@
+import { PREVIEW_FEEDBACK_REASONS } from '../models/qa';
 import { z } from 'zod';
 
 import { countryCodeSchema } from '../countries';
@@ -765,6 +766,15 @@ export const apiRoutes = {
     params: bookParamsSchema,
     body: z.object({ traits: characterTraitsSchema, mustKeep: mustKeepSchema }),
     response: publicPreviewSchema,
+  },
+  previewFeedback: {
+    method: 'POST',
+    path: '/v1/books/:bookId/preview/feedback',
+    access: 'user',
+    summary: '"¿Qué mejorarías?" después de la muestra: uno o más motivos, sin texto libre',
+    params: bookParamsSchema,
+    body: z.object({ reasons: z.array(z.enum(PREVIEW_FEEDBACK_REASONS)).min(1).max(5) }),
+    response: z.object({ saved: z.literal(true) }),
   },
   regeneratePreviewIllustration: {
     method: 'POST',

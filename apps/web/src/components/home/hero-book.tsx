@@ -33,7 +33,7 @@ export function HeroBook({
       <Sparkle className="absolute right-[6%] bottom-[2%] z-10 size-9 text-star" />
 
       {/* El libro, más abajo y a la derecha: la foto va encima, bien grande. */}
-      <div className="mt-[20%] ml-auto w-[84%] overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-24px_rgb(52_42_64/0.35)]">
+      <div className="mt-[20%] ml-auto w-[84%] overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-24px_rgb(38_50_74/0.35)]">
         <Image
           src={image}
           alt={alt}
@@ -45,14 +45,14 @@ export function HeroBook({
       </div>
 
       {/* "Su foto": retrato ilustrado del mismo protagonista, no una fotografía. */}
-      <div className="absolute top-0 left-0 z-20 w-[46%] -rotate-3 rounded-[0.4rem] bg-white p-[2.5%] pb-0 shadow-[0_22px_44px_rgb(52_42_64/0.28)]">
+      <div className="absolute top-0 left-0 z-20 w-[46%] -rotate-3 rounded-[0.4rem] bg-white p-[2.5%] pb-0 shadow-[0_22px_44px_rgb(38_50_74/0.28)]">
         <Image
           src={heroPortrait}
           alt=""
           sizes="(min-width: 1024px) 380px, 46vw"
           className="aspect-square h-auto w-full rounded-[0.2rem]"
         />
-        <figcaption className="py-2.5 text-center font-display text-[clamp(1.05rem,1.9vw,1.45rem)] text-foreground/80 italic">
+        <figcaption className="py-2 text-center font-script text-[clamp(1.5rem,2.6vw,2.1rem)] leading-none text-navy">
           {photoLabel}
         </figcaption>
       </div>

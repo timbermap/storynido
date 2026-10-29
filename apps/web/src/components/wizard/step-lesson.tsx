@@ -151,7 +151,7 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
               onChange={(event) => {
                 setCustom(event.target.value);
               }}
-              className="h-24 w-full rounded-[0.75rem] border-[1.5px] border-[#b9acbf] bg-card px-3.5 py-3 text-base focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d8c1f2]"
+              className="h-24 w-full rounded-[0.75rem] border-[1.5px] border-[#b7bcc8] bg-card px-3.5 py-3 text-base focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d9cef0]"
             />
             <p id="custom-lesson-hint" className="text-sm text-muted-foreground">
               {t('customHint', { count: custom.length })}

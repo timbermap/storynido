@@ -23,6 +23,7 @@ import {
   type Memories,
   PREVIEW_ILLUSTRATED_PAGES,
   ProviderError,
+  artDirection,
   buildIllustrationPrompt,
   coverScene,
   describeCharacter,
@@ -30,6 +31,7 @@ import {
   utcDay,
   type AIProvider,
   type BookPreview,
+  type Channel,
   type CharacterSheet,
   type GeneratedImage,
   type ImageData,
@@ -40,6 +42,7 @@ import {
   validGoal,
   acceptsChildPhotos,
   aiModelSchema,
+  type PreviewFeedbackReason,
 } from '@storynido/shared';
 import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
@@ -94,6 +97,8 @@ interface BookData {
   textDensity?: TextDensity;
   readingLevel?: ReadingLevel;
   contentType?: ContentType;
+  /** Línea comercial (los libros anteriores son de Familias). */
+  channel?: Channel;
   preview: (Omit<BookPreview, 'generatedAt'> & { generatedAt: unknown }) | null;
   regenerationsUsed: number;
   previewError?: string | null;
@@ -514,6 +519,15 @@ export class PreviewService {
       },
     );
 
+    // Dirección de arte (paleta, edad, encuadre, qué evitar): queda en la muestra y se congela
+    // en el pedido, así el libro final se ilustra igual que lo aprobado.
+    const direction = artDirection({
+      age: Number(child.age),
+      channel: book.channel ?? 'families',
+      palette: story.palette,
+      coloring: plan.contentType === 'coloring',
+    });
+
     // Etapa 1: solo la lámina del personaje (1 imagen). La portada y las páginas se ilustran
     // cuando el adulto aprueba al personaje: si no se parece, no se gastan más imágenes.
     const character = await this.illustration(ai, track, limits, {
@@ -522,6 +536,7 @@ export class PreviewService {
         scene: CHARACTER_REFERENCE_SCENE,
         character: characterDescription,
         style: style.promptModifier,
+        direction,
       }),
       stylePrompt: style.promptModifier,
       character: { description: characterDescription, photo },
@@ -558,6 +573,7 @@ export class PreviewService {
       photoId: characterKey(book),
       editorialKey: editorialKey(book),
       interiorPages: plan.interiorPages,
+      artDirection: direction,
       activityPages: plan.activityPages,
       words: plan.words,
       plan: storyPlan,
@@ -706,6 +722,22 @@ export class PreviewService {
     });
   }
 
+  /**
+   * "¿Qué mejorarías?" después de la muestra. Un evento por motivo y por libro (repetir la
+   * respuesta no suma de nuevo): sale en el panel de Calidad junto a los demás códigos.
+   */
+  async feedback(uid: string, bookId: string, reasons: readonly PreviewFeedbackReason[]) {
+    await this.ownedBook(uid, bookId);
+    const events = this.bookRef(bookId).collection(COLLECTIONS.qaEvents);
+    await Promise.all(
+      [...new Set(reasons)].map((reason) => {
+        const event: QaEvent = { code: `feedback_${reason}`, at: new Date(), detail: null };
+        return events.doc(`feedback_${reason}`).set(event);
+      }),
+    );
+    return { saved: true as const };
+  }
+
   private async qaEvent(bookId: string, code: QaEvent['code'], detail: QaEvent['detail'] = null) {
     const event: QaEvent = { code, at: new Date(), detail };
     await this.bookRef(bookId).collection(COLLECTIONS.qaEvents).add(event);
@@ -761,6 +793,7 @@ export class PreviewService {
             scene,
             character: description,
             style: style.promptModifier,
+            direction: preview.artDirection,
           }),
           stylePrompt: style.promptModifier,
           character: { description, photo },
@@ -861,6 +894,7 @@ export class PreviewService {
           scene: CHARACTER_REFERENCE_SCENE,
           character: description,
           style: style.promptModifier,
+          direction: preview.artDirection,
         }),
         stylePrompt: style.promptModifier,
         character: { description, photo },
@@ -1046,6 +1080,7 @@ export class PreviewService {
           scene,
           character: description,
           style: style.promptModifier,
+          direction: preview.artDirection,
         }),
         stylePrompt: style.promptModifier,
         character: { description, photo },

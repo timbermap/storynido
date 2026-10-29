@@ -19,17 +19,17 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ loc
         flexDirection: 'column',
         justifyContent: 'center',
         padding: 80,
-        background: 'linear-gradient(135deg, #fff9f2 0%, #ffe7b0 100%)',
+        background: 'linear-gradient(135deg, #fffaf5 0%, #ffe7b0 100%)',
         color: '#2b2233',
       }}
     >
-      <div style={{ fontSize: 40, fontWeight: 800, color: '#79518c' }}>✦ {brand.name}</div>
+      <div style={{ fontSize: 40, fontWeight: 800, color: '#a33f33' }}>✦ {brand.name}</div>
       <div
         style={{ fontSize: 76, fontWeight: 700, lineHeight: 1.05, marginTop: 24, maxWidth: 900 }}
       >
         {t('title')}
       </div>
-      <div style={{ fontSize: 32, marginTop: 28, maxWidth: 900, color: '#69616c' }}>
+      <div style={{ fontSize: 32, marginTop: 28, maxWidth: 900, color: '#555c6e' }}>
         {t('eyebrow')}
       </div>
     </div>,

@@ -1,14 +1,28 @@
-import { Fraunces, Nunito_Sans } from 'next/font/google';
+import { Caveat, Lora, Quicksand } from 'next/font/google';
 
-/** Títulos: serif suave y cálida. Texto: sans muy legible. Se sirven desde el propio sitio. */
-export const fontHeading = Fraunces({
+/**
+ * Tipografías de la marca v3 (docs/BRAND.md): Quicksand para títulos, botones y navegación;
+ * Lora para los textos de contenido; Caveat para detalles y frases emotivas. Se sirven desde el
+ * propio sitio.
+ */
+export const fontUi = Quicksand({
   subsets: ['latin'],
-  variable: '--font-heading',
+  weight: ['500', '600', '700'],
+  variable: '--font-ui',
   display: 'swap',
 });
 
-export const fontBody = Nunito_Sans({
+export const fontContent = Lora({
   subsets: ['latin'],
-  variable: '--font-body',
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+  variable: '--font-content',
+  display: 'swap',
+});
+
+export const fontScript = Caveat({
+  subsets: ['latin'],
+  weight: ['500', '700'],
+  variable: '--font-script-face',
   display: 'swap',
 });

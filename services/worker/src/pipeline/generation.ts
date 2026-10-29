@@ -102,6 +102,8 @@ export interface BookSnapshot {
   scenes: ScenePlan[] | null;
   imagePromptTemplate: string;
   stylePrompt: string;
+  /** Dirección de arte de la muestra (null en muestras anteriores a ella). */
+  artDirection?: string | null;
   character: { description: string; mustKeep: string[]; sheetPath: string };
   /** Ilustraciones aprobadas en la vista previa, copiadas al pedido: índice -> ruta. */
   approved: Record<string, string>;
@@ -351,6 +353,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           scene,
           character: snapshot.character.description,
           style: snapshot.stylePrompt,
+          direction: snapshot.artDirection,
         }),
         stylePrompt: snapshot.stylePrompt,
         character: { description: snapshot.character.description, photo: null },
@@ -413,6 +416,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           plan?: { scenes: ScenePlan[] } | null;
           words?: { min: number; max: number };
           activityPages?: number;
+          artDirection?: string | null;
         }
       | undefined;
     if (!book || preview?.stage !== 'complete' || !preview.character?.approvedAt) {
@@ -503,6 +507,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       scenes: preview.plan?.scenes ?? null,
       imagePromptTemplate: String(story.imagePromptTemplate),
       stylePrompt: String(style.promptModifier),
+      artDirection: preview.artDirection ?? null,
       character: {
         description: describeCharacter(name, sheet, traits, mustKeep),
         mustKeep: mustKeepLabels(traits, mustKeep),

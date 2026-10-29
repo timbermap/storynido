@@ -14,7 +14,7 @@ import { SiteHeader } from '@/components/layout/site-header';
 import { routing } from '@/i18n/routing';
 import { brand } from '@/lib/brand';
 import { CONSENT_COOKIE, parseConsent } from '@/lib/consent';
-import { fontBody, fontHeading } from '@/lib/fonts';
+import { fontContent, fontScript, fontUi } from '@/lib/fonts';
 import { localizedAlternates } from '@/lib/seo';
 import { getSiteMode } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
@@ -49,7 +49,7 @@ export function generateStaticParams() {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#faf0e5',
+  themeColor: '#fff8f1',
 };
 
 export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
@@ -99,7 +99,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   return (
     <html
       lang={LOCALE_DEFINITIONS[locale].bcp47}
-      className={`${fontHeading.variable} ${fontBody.variable}`}
+      className={`${fontUi.variable} ${fontContent.variable} ${fontScript.variable}`}
     >
       <body>
         <NextIntlClientProvider messages={clientMessages}>

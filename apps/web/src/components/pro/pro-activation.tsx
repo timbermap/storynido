@@ -11,7 +11,7 @@ import { api } from '@/lib/api';
 import { countriesByName } from '@/lib/country-names';
 
 const inputClass =
-  'h-12 w-full rounded-[0.75rem] border-[1.5px] border-[#b9acbf] bg-card px-3.5 text-base text-foreground placeholder:text-[#756b80] focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d8c1f2]';
+  'h-12 w-full rounded-[0.75rem] border-[1.5px] border-[#b7bcc8] bg-card px-3.5 text-base text-foreground placeholder:text-[#555c6e] focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d9cef0]';
 const labelClass = 'text-[0.91rem] font-semibold';
 
 type Profession = (typeof PROFESSIONS)[number];

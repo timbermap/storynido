@@ -51,7 +51,7 @@ Los tres piden lo mismo para empezar: ver qué existe antes de cambiar nada.
 | Profesionales: entrar por necesidad, cuenta después             | PARCIAL | Ejemplos primero (102). Falta nombrar las colecciones por necesidad concreta ("Primera visita al dentista", "Manejar la frustración")                                                                                                                                                                                                              |
 | Creador: máximo 4 etapas visibles                               | FALTA   | Hoy son 7 pasos: protagonista, foto, aventura, recuerdos, enseñanza, estilo y resumen. Propuesta: **El chico**, **La aventura** (historia, extensión y estilo), **Su personaje** (foto o rasgos) y **Muestra**, con recuerdos y enseñanza como opcionales después de la muestra. La historia y el público elegidos antes de entrar ya se conservan |
 | Muestra como experiencia de compra                              | PARCIAL | Portada y 2 páginas para hojear, edición, otra ilustración, ejemplos del estilo en vez de páginas vacías, aviso del paso pendiente. Falta el selector de formato con precio dentro de la muestra (hoy está en el checkout)                                                                                                                         |
-| Un color de acción común y colores por público solo de contexto | EXISTE  | Botón principal lavanda en todo el sitio; cada público con su tono (lavanda, durazno y menta)                                                                                                                                                                                                                                                      |
+| Un color de acción común y colores por público solo de contexto | EXISTE  | Marca v3: botón durazno en todo el sitio; cada público con su tono (salvia, durazno y lavanda)                                                                                                                                                                                                                                                     |
 
 ## 3. Dirección de arte (propuesta, solo prompts)
 
@@ -74,7 +74,8 @@ Los tres piden lo mismo para empezar: ver qué existe antes de cambiar nada.
   - **Restricciones negativas:** piel plástica, brillo excesivo, 3D genérico, anatomía rara, objetos al azar y estilos distintos entre páginas.
   - **Espacio libre para el texto,** según la maqueta de cada página.
 - **No copiar** estilos de ilustradores ni personajes protegidos: se toman principios editoriales, no obras.
-- **La marca de la web no cambia** (lavanda editorial, DECISIONS de marca v2). La intensidad de color va **dentro** de los libros.
+- **La marca de la web es suave** (v3, DECISIONS 103). La intensidad de color va **dentro** de los libros.
+- **Implementado** (DECISIONS 103): `artDirection` en `packages/shared/src/models/art-direction.ts`, paleta editable por historia en el admin.
 
 ## 4. Narrativa (propuesta, solo prompts)
 
@@ -89,14 +90,15 @@ Los tres piden lo mismo para empezar: ver qué existe antes de cambiar nada.
   - **Familias:** emoción y vínculo, aventura con verdadero conflicto.
   - **Cumpleaños:** una misión festiva con 2 o 3 mini desafíos y la celebración como recompensa, no solo saludos.
   - **Profesionales:** un objetivo principal por cuento, secuencias realistas (por ejemplo, la visita al dentista paso a paso), validar emociones y nunca prometer resultados clínicos.
+- **Implementado** (DECISIONS 103): `narrativeRules` en `packages/shared/src/providers/prompts.ts`.
 - **Revisión profesional:** antes de promocionar contenido de salud (dentista, emociones) como recurso de preparación, debe revisarlo un profesional.
 
 ## 5. Orden propuesto
 
 | Paso | Qué                                                                                                          | Costo                  | Necesita              |
 | ---- | ------------------------------------------------------------------------------------------------------------ | ---------------------- | --------------------- |
-| 1    | Pregunta "¿Qué mejorarías?" después de la muestra, en el panel                                               | USD 0                  | —                     |
-| 2    | Dirección de arte y reglas narrativas en los prompts (por público y edad)                                    | USD 0 para escribirlas | —                     |
+| 1    | Pregunta "¿Qué mejorarías?" después de la muestra, en el panel (hecho)                                       | USD 0                  | —                     |
+| 2    | Dirección de arte y reglas narrativas en los prompts (hecho)                                                 | USD 0 para escribirlas | —                     |
 | 3    | **Prueba antes y después:** 1 historia por público, mismo protagonista inventado, prompt actual contra nuevo | ~USD 3–5 de IA         | Tu OK                 |
 | 4    | Creador en 4 etapas                                                                                          | USD 0                  | Tu OK sobre el diseño |
 | 5    | Libros de ejemplo por estilo para la muestra (aprobado)                                                      | ~USD 3                 | — (ya aprobado)       |

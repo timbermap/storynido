@@ -43,6 +43,14 @@ export function registerPreviewRoutes(app: FastifyInstance, previews: PreviewSer
     );
   });
 
+  addRoute(app, apiRoutes.previewFeedback, { appCheck: true }, async (request) =>
+    previews.feedback(
+      uid(request),
+      (request.params as ParamsOf<'previewFeedback'>).bookId,
+      (request.body as BodyOf<'previewFeedback'>).reasons,
+    ),
+  );
+
   addRoute(app, apiRoutes.approveCharacter, { appCheck: true }, async (request) =>
     previews.approveCharacter(
       uid(request),

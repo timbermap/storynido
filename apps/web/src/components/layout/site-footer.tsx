@@ -106,7 +106,7 @@ export async function SiteFooter() {
   ];
 
   return (
-    <footer className="mt-24 bg-[#2e2338] text-[0.95rem] text-white/70">
+    <footer className="mt-24 bg-[#26324a] text-[0.95rem] text-white/70">
       <div className="container-page grid gap-12 py-16 lg:grid-cols-[1.25fr_2fr] lg:gap-16">
         <div className="max-w-sm">
           <Logo tone="light" />
@@ -184,7 +184,7 @@ export async function SiteFooter() {
             <CookiePreferencesButton className="text-left transition-colors hover:text-white" />
           </nav>
           <div className="flex shrink-0 flex-wrap items-center gap-2 lg:flex-nowrap">
-            <span className="mr-1 text-white/50">{t('preferences')}</span>
+            <span className="mr-1 text-white/70">{t('preferences')}</span>
             <LanguageSwitcher id="language-footer" selectClassName={selectDark} />
           </div>
         </div>

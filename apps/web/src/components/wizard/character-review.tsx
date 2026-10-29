@@ -193,7 +193,7 @@ export function CharacterReview({
                       key={trait}
                       className={cn(
                         'inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-2 bg-card px-4 text-sm font-bold has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50',
-                        checked ? 'border-primary bg-[#faf6fd]' : 'border-border',
+                        checked ? 'border-primary bg-[#f6f1fc]' : 'border-border',
                       )}
                     >
                       <input

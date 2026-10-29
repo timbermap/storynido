@@ -49,7 +49,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
       icon: Map,
       title: t('how.step2Title'),
       text: t('how.step2Text'),
-      tone: 'bg-peach text-[#8a4a2a]',
+      tone: 'bg-peach text-[#a33f33]',
     },
     {
       icon: BookOpen,
@@ -173,7 +173,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
               {index < steps.length - 1 && (
                 <ArrowRight
                   aria-hidden="true"
-                  className="absolute top-12 -right-5 hidden size-7 text-[#d8b9a8] md:block"
+                  className="absolute top-12 -right-5 hidden size-7 text-[#e7b9ad] md:block"
                   strokeWidth={1.5}
                 />
               )}

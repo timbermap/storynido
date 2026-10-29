@@ -1,6 +1,6 @@
 # StoryNido · Marca y sistema visual
 
-Resumen operativo de la guía de marca v2 ("magia editorial + confianza") aprobada el 2026-10-26, y de cómo está implementada. La guía completa la tiene el equipo de producto.
+Resumen operativo de la **marca v3** ("cálida, luminosa y editorial"), aprobada el 2026-10-29 con el tablero de marca, y de cómo está implementada. Reemplaza a la v2 (lavanda editorial, 2026-10-26) y a su actualización 2.1.
 
 ## Posicionamiento
 
@@ -12,8 +12,8 @@ Resumen operativo de la guía de marca v2 ("magia editorial + confianza") aproba
 
 - Cálida, cercana, imaginativa, clara y segura. Adulto accesible, no tono de jardín.
 - **Español neutro con "tú"** (México, EE. UU. hispano, Latinoamérica). Nunca voseo en el sitio.
-- Lema: **"Historias que abrazan"** · EN: "Stories that hug" · PT: "Histórias que abraçam".
-- Hero: "Tu hijo es el héroe de esta historia." / "Un cuento único con su nombre, su carita y las aventuras que siempre soñó."
+- Lema: **"Historias que inspiran, enseñan y quedan para siempre."** (va en letra manuscrita, Caveat).
+- Hero de la home: "Tu hijo, protagonista de una historia única." y el botón "Elegir para quién es", que baja a las tres entradas por público.
 - CTA principal: **"Crear una vista previa gratis"**.
 - Checkout: "Elige cómo quieres recibir su historia".
 
@@ -30,72 +30,63 @@ Cada cuento combina una **aventura** (escenario) con una **enseñanza** (el mens
 
 ## Paleta (tokens en `apps/web/src/app/globals.css`)
 
-| Token                                          | Hex                                               | Uso                                  |
-| ---------------------------------------------- | ------------------------------------------------- | ------------------------------------ |
-| `--background`                                 | `#FAF0E5`                                         | Fondo crema / papel                  |
-| `--card`                                       | `#FFFFFF`                                         | Tarjetas, formularios, checkout      |
-| `--muted`                                      | `#F8F3FA`                                         | Bloques suaves                       |
-| `--foreground`                                 | `#342A40`                                         | Texto                                |
-| `--muted-foreground`                           | `#69616C`                                         | Texto secundario                     |
-| `--primary`                                    | `#79518C`                                         | Botón principal, enlaces             |
-| `--primary-hover`                              | `#613B75`                                         | Hover                                |
-| `--secondary` / `--accent`                     | `#EADCF2`                                         | Lavanda de marca, badges, destacados |
-| `--peach` `--mint` `--sky` `--butter` `--rose` | `#F5D9C9` `#DDF1E8` `#E1EFFA` `#FBEDC6` `#F9E3ED` | Solo fondos                          |
-| `--success`                                    | `#245D4F`                                         | Íconos de confianza sobre menta      |
-| `--ring`                                       | `#7A4DB1`                                         | Foco                                 |
+| Token                                 | Hex                   | Uso                                           |
+| ------------------------------------- | --------------------- | --------------------------------------------- |
+| `--background`                        | `#FFF8F1`             | Crema de fondo                                |
+| `--card`                              | `#FFFFFF`             | Tarjetas, formularios, checkout               |
+| `--muted`                             | `#FBF1E8`             | Bloques suaves                                |
+| `--foreground` / `--navy`             | `#26324A`             | Texto, foco y pie                             |
+| `--muted-foreground`                  | `#555C6E`             | Texto secundario                              |
+| `--action` / `--action-hover`         | `#FFB6A7` / `#FF9F8A` | **Botón principal** (durazno), con texto navy |
+| `--primary`                           | `#A33F33`             | Coral tinta: enlaces y acentos de texto       |
+| `--sage`                              | `#8AC8BC`             | Salvia: confianza, Familias                   |
+| `--lavender` / `--secondary`          | `#E6DDF6`             | Lavanda: fondos, badges, Profesionales        |
+| `--peach` `--mint` `--sky` `--butter` | pasteles              | Solo fondos, **nunca** texto                  |
+| `--success`                           | `#245D4F`             | Íconos de confianza sobre menta               |
 
-Proporción orientativa: 60 % crema/blanco, 30 % pasteles, 10 % violeta. Los pasteles **nunca** son color de texto.
+Contrastes verificados (WCAG 2.2 AA): navy sobre durazno 7,6:1 (hover 6,5:1) · navy sobre crema 12,2:1 · coral sobre crema 6,0:1 · coral sobre lavanda 4,8:1 · blanco sobre coral 6,3:1 · secundario sobre crema 6,3:1 y sobre lavanda 5,1:1.
 
-Contrastes verificados (WCAG 2.2 AA): blanco sobre violeta 6,2:1 · tinta sobre crema 12:1 · secundario sobre crema 5,3:1 · violeta sobre crema 5,5:1 · violeta sobre lavanda 4,75:1.
+**Un tono por público** (`AUDIENCE_TONES` en `site-header.tsx`), solo de contexto; el botón de acción es el mismo en todo el sitio:
 
-## Tipografía
+| Público              | Punto     | Fondo     | Texto     |
+| -------------------- | --------- | --------- | --------- |
+| Familias             | `#5FAE9F` | `#E4F3EF` | `#2F6F66` |
+| Cumpleaños y eventos | `#FF8F7A` | `#FFE7DF` | `#A33F33` |
+| Profesionales        | `#8C79C9` | `#EEE8FA` | `#5B4A99` |
 
-- Títulos: **Fraunces** 600 (`font-display`), interletrado -0,035 em.
-- Interfaz y texto: **Nunito Sans** (400 a 900).
-- Se cargan con `next/font` (servidas desde el sitio), no con `@import`.
+## Tipografía (`apps/web/src/lib/fonts.ts`, con `next/font`)
+
+- **Quicksand** (600 y 700): interfaz, botones, menú y títulos.
+- **Lora**: texto de lectura y el texto de los libros en el visor.
+- **Caveat**: solo para frases manuscritas cortas (lema, rótulos de fotos). Nunca para párrafos.
 
 ## Componentes
 
-- Botones tipo píldora, altura mínima 44 px, violeta con sombra suave; leve elevación al pasar el mouse (sin movimiento si el usuario lo desactivó).
-- Tarjetas blancas, borde `#E7DFE9`, radio 1,6 rem, sombra `--shadow-card`.
-- Pasos numerados en cuadrado lavanda con número violeta.
-- Íconos de contorno redondeado (lucide), confianza sobre menta.
-- Logo provisorio: estrella de 4 puntas sobre lavanda + "StoryNido" en Nunito Sans Black violeta. **Pendiente: logo definitivo de diseñador y búsqueda de marca registrada.**
+- Botones tipo píldora, mínimo 44 px de alto, durazno con texto navy en Quicksand bold.
+- Tarjetas blancas con borde fino `#EFE3D8` y sombra suave.
+- Logo: palabra "StoryNido" en navy con dos corazones (durazno y salvia). Favicon: círculo navy con los corazones. **Pendiente: logo definitivo de diseñador y búsqueda de marca registrada.**
+- Hero: polaroid grande de la foto ("Su foto", en Caveat) sobre el libro ilustrado.
+- Pie navy, sin selector de país (la venta es global y el envío se calcula por país). El idioma se detecta por IP y se cambia en el pie o en "Mi cuenta".
 
-## Home (estructura)
+## Dentro de los libros: dirección de arte
 
-1. Hero: título, bajada, CTA "Crear una vista previa gratis", precio "desde" y 3 puntos de confianza con íconos de línea (formatos, envío al país del visitante, vista previa gratis).
-2. Cómo funciona: 3 pasos con ícono en círculo blanco, número en círculo pastel (lavanda, durazno, menta) y flechas.
-3. **De su foto a su personaje:** marco tipo polaroid ilustrado ("Su foto") → personaje en acuarela. **Nunca fotos reales de chicos** sin un consentimiento específico para publicidad.
-4. **Su nombre en la portada:** el visitante escribe el nombre y la portada de muestra se actualiza en vivo.
-5. Galería de aventuras, enseñanzas, preguntas frecuentes, garantía y bloque final.
+La marca del sitio es suave; los libros llevan **colores ricos y memorables**. Cada prompt de imagen termina con un bloque fijo (`artDirection` en `packages/shared/src/models/art-direction.ts`) que el admin no puede quitar:
 
-## Actualización 2.1 (2026-10-27): más liviana y actual
-
-- **Pesos:** los títulos (Fraunces) van en peso medio; el texto, sin `black` ni `extrabold`. Lo pesado se veía "web vieja".
-- **Fondos y bordes:** crema más clara (`#fbf7f2`), bordes finos, sombras suaves. Menos cajas: las enseñanzas son columnas con chips finos y las preguntas frecuentes una lista con divisores.
-- **Un color por público:**
-
-  | Público              | Punto y acento        | Fondo     |
-  | -------------------- | --------------------- | --------- |
-  | Familias             | lavanda (`--primary`) | `#f6eefa` |
-  | Cumpleaños y eventos | durazno `#d9895c`     | `#fbeee6` |
-  | Profesionales        | menta `#4f9e82`       | `#eaf5ef` |
-
-  Se usa en el menú, las tarjetas de la home y el pie.
-
-- **Logo provisorio:** corazón lavanda con un destello y el nombre en Fraunces (versión clara para fondos oscuros).
-- **Encabezado:** un menú por público. Sin selector de idioma: el idioma se detecta solo (navegador) y se cambia en el pie o en "Mi cuenta".
-- **Pie oscuro (`#2e2338`):** marca, redes (Instagram, TikTok y YouTube, configurables por ambiente), una columna por público y Ayuda, legales, idioma y país.
+- **Paleta por historia** (campo `palette`, editable en el admin; si falta, la del público): `magic`, `adventure`, `bedtime`, `nature`, `celebration` y `learning`, con 5 HEX cada una.
+- **Criterio por edad:** 2–3 personajes grandes y fondos simples; 4–5 color y una acción clara; 6–8 composición cinematográfica; 9–12 más dramatismo, nada aniñado.
+- **Encuadre con intención** (plano general, medio, primer plano emocional) y el protagonista como foco.
+- **Qué evitar:** caras fotográficas, piel plástica, brillo excesivo, 3D genérico, anatomía rara, objetos al azar, texto en la imagen y cambios de estilo entre páginas.
+- La dirección queda guardada en la muestra y se congela en el pedido: **el libro final se ilustra igual que la muestra aprobada.**
+- No se copian estilos de ilustradores ni personajes protegidos.
 
 ## Movimiento
 
 Flotación suave del libro del hero (CSS), transiciones de 150 a 250 ms. Siempre respetar `prefers-reduced-motion`. **Sin animaciones continuas en el checkout.**
 
-## Pendiente de la guía
+## Pendiente
 
-- Ilustración del hero: en uso `apps/web/public/brand/hero-acuarela.webp` (608×404, recortada de la maqueta). Se reutiliza en la sección foto→personaje (primer plano) y en la portada de muestra. Pedir el original en alta resolución y sumar 2 o 3 acuarelas más (sin texto) para variar.
-- Portadas del catálogo y muestras de estilo: generadas con la acuarela del hero como referencia (ver DECISIONS 049). Las nuevas ilustraciones siguen esa línea: acuarela suave, fondo crema, lavanda y pasteles, niños inventados y sin texto.
-- Portadas reales en acuarela generadas por el pipeline (fase 07).
-- Wizard (fase 06) y checkout (fase 11) con este sistema: un objetivo por pantalla, progreso visible, checkout sereno.
-- Experimentos de copy y CTA (A/B) cuando haya tráfico.
+- Aplicar la v3 al admin y a los emails.
+- Tipografía v3 en el PDF del libro.
+- Libros de ejemplo por estilo para la muestra (aprobado, ~USD 3).
+- Portadas del catálogo regeneradas con la dirección de arte nueva, después de la prueba antes/después.
+- Fotos y video del libro impreso real.

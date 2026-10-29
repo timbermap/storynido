@@ -11,25 +11,25 @@ export async function AudienceSelector() {
       key: 'families',
       href: '/families',
       icon: BookHeart,
-      card: 'bg-[#f6eefa]',
-      tone: 'text-primary',
-      ring: 'border-primary/25 text-primary',
+      card: 'bg-[#e4f3ef]',
+      tone: 'text-[#2f6f66]',
+      ring: 'border-[#2f6f66]/30 text-[#2f6f66]',
     },
     {
       key: 'events',
       href: '/events',
       icon: PartyPopper,
-      card: 'bg-[#fbeee6]',
-      tone: 'text-[#c0764a]',
-      ring: 'border-[#c0764a]/30 text-[#a8633b]',
+      card: 'bg-[#ffe7df]',
+      tone: 'text-[#a33f33]',
+      ring: 'border-[#a33f33]/30 text-[#a33f33]',
     },
     {
       key: 'professionals',
       href: '/professionals',
       icon: GraduationCap,
-      card: 'bg-[#eaf5ef]',
-      tone: 'text-[#3f8f73]',
-      ring: 'border-[#3f8f73]/30 text-[#357a62]',
+      card: 'bg-[#eee8fa]',
+      tone: 'text-[#5b4a99]',
+      ring: 'border-[#5b4a99]/30 text-[#5b4a99]',
     },
   ] as const;
 
@@ -37,9 +37,9 @@ export async function AudienceSelector() {
     <section aria-labelledby="audience" className="relative">
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-16 rounded-t-[50%_100%] bg-[#fbf6f0]"
+        className="absolute inset-x-0 top-0 h-16 rounded-t-[50%_100%] bg-[#fff1e6]"
       />
-      <div className="relative bg-[#fbf6f0] pb-12 lg:pb-16">
+      <div className="relative bg-[#fff1e6] pb-12 lg:pb-16">
         <div className="container-page">
           <div className="mx-auto max-w-2xl pb-8 text-center">
             <h2

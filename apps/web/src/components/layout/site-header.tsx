@@ -11,11 +11,11 @@ import { MobileMenu } from './mobile-menu';
 export const HOW_IT_WORKS_ID = 'how-it-works';
 export const FAQ_ID = 'faq';
 
-/** Cada público con su color: lavanda (familias), durazno (eventos), menta (profesionales). */
+/** Cada público con su color (marca v3): salvia (familias), durazno (celebraciones), lavanda (profesionales). */
 export const AUDIENCE_TONES = {
-  families: { dot: 'bg-primary', panel: 'bg-[#f6eefa]', text: 'text-primary' },
-  events: { dot: 'bg-[#d9895c]', panel: 'bg-[#fbeee6]', text: 'text-[#a8633b]' },
-  professionals: { dot: 'bg-[#4f9e82]', panel: 'bg-[#eaf5ef]', text: 'text-[#357a62]' },
+  families: { dot: 'bg-[#5fae9f]', panel: 'bg-[#e4f3ef]', text: 'text-[#2f6f66]' },
+  events: { dot: 'bg-[#ff8f7a]', panel: 'bg-[#ffe7df]', text: 'text-[#a33f33]' },
+  professionals: { dot: 'bg-[#8c79c9]', panel: 'bg-[#eee8fa]', text: 'text-[#5b4a99]' },
 } as const;
 
 export async function SiteHeader() {
@@ -29,7 +29,7 @@ export async function SiteHeader() {
   ] as const;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[rgb(52_42_64/0.06)] bg-background/90 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-[rgb(38_50_74/0.06)] bg-background/90 backdrop-blur-md">
       <div className="container-page relative flex h-16 items-center justify-between gap-4 lg:h-[4.75rem]">
         <Link href="/" className="flex shrink-0 items-center rounded-xl">
           <Logo />

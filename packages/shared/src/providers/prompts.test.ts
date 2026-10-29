@@ -3,7 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { avatarKey, avatarToSheet, hasMemories, type Avatar } from '../models/character';
 import { storyGoals, validGoal } from '../models/channels';
 import { describeCharacterSheet } from './ai';
-import { buildStoryPrompt, lessonsBlock, renderTemplate, samplePrompts } from './prompts';
+import {
+  buildIllustrationPrompt,
+  buildStoryPrompt,
+  lessonsBlock,
+  narrativeRules,
+  renderTemplate,
+  samplePrompts,
+} from './prompts';
 
 const base = {
   template: 'Cuento de {{pageCount}} páginas para {{childName}} ({{age}}). Enseñanzas: {{lessons}}',
@@ -128,5 +135,29 @@ describe('modo sin foto', () => {
   it('la clave cambia si cambia un rasgo', () => {
     expect(avatarKey(avatar)).not.toBe(avatarKey({ ...avatar, glasses: false }));
     expect(avatarKey(avatar)).toBe(avatarKey({ ...avatar }));
+  });
+});
+
+describe('reglas narrativas y dirección de arte', () => {
+  it('reglas comunes más las del público', () => {
+    const families = narrativeRules({ childName: 'Luci', event: null, goal: null });
+    expect(families).toContain('Luci decide y resuelve');
+    expect(families).toContain('conflicto verdadero');
+    expect(narrativeRules({ childName: 'Luci', goal: 'dentista' })).toContain(
+      'nunca prometas resultados clínicos',
+    );
+  });
+
+  it('la dirección de arte va al final y es opcional', () => {
+    const base = {
+      template: '{{scene}} {{character}} {{style}}',
+      scene: 'S',
+      character: 'C',
+      style: 'E',
+    };
+    expect(buildIllustrationPrompt(base)).toBe('S C E');
+    expect(buildIllustrationPrompt({ ...base, direction: 'Art direction: X' })).toBe(
+      'S C E\n\nArt direction: X',
+    );
   });
 });

@@ -44,7 +44,7 @@
     "language": "Idioma"
   },
   "Footer": {
-    "tagline": "Histórias que abraçam.",
+    "tagline": "Histórias que inspiram, ensinam e ficam para sempre.",
     "legal": "Legal",
     "company": "StoryNido",
     "cookiePreferences": "Preferências de cookies",
@@ -86,7 +86,9 @@
       "priceUsd": "Preços em dólares (USD)",
       "choose": "Escolher para quem é",
       "digitalNote": "Na hora, para ler na tela",
-      "printedNote": "Com frete conforme o país"
+      "printedNote": "Com frete conforme o país",
+      "homeHeadline": "Seu filho, protagonista de <hl>uma história única</hl>.",
+      "script": "Histórias que inspiram, ensinam e ficam para sempre."
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",
@@ -711,6 +713,20 @@
           "name": "Avançado",
           "text": "Vocabulário mais rico e uma trama com reviravoltas."
         }
+      }
+    },
+    "feedback": {
+      "title": "O que você melhoraria nesta prévia?",
+      "subtitle": "Opcional. Ajuda a deixar cada livro melhor.",
+      "send": "Enviar",
+      "thanks": "Obrigado! Usamos isso para melhorar cada livro.",
+      "error": "Não conseguimos enviar. Tente de novo.",
+      "reasons": {
+        "likeness": "Não se parece",
+        "details": "Há dados incorretos",
+        "illustration": "Algo em uma ilustração",
+        "story": "A história poderia ser melhor",
+        "other": "Outra coisa"
       }
     }
   },

@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 
 /** Color de cada grupo: un punto que lo identifica (los pasteles no son texto). */
 const GROUP_DOTS: Record<PublicLesson['group'], string> = {
-  values: 'bg-[#d9895c]',
+  values: 'bg-[#ff8f7a]',
   confidence: 'bg-[#c99a2e]',
   life: 'bg-[#5b8fc4]',
   emotions: 'bg-[#c86b93]',

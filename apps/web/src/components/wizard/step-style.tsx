@@ -13,7 +13,7 @@ import { WizardShell } from './wizard-shell';
 
 /** Respaldo de color si un estilo todavía no tiene ilustración de muestra. */
 const SWATCHES: Record<string, string> = {
-  acuarela: 'bg-[radial-gradient(circle_at_30%_30%,#eadcf2,#c9d9ff_45%,#f5d9c9)]',
+  acuarela: 'bg-[radial-gradient(circle_at_30%_30%,#e6ddf6,#c9d9ff_45%,#ffe3db)]',
   'cartoon-3d': 'bg-[linear-gradient(135deg,#ffb36b,#ff7a8a_50%,#7a6cff)]',
   'cuento-clasico': 'bg-[linear-gradient(135deg,#e8d3a6,#c98a5a_60%,#6b3f2a)]',
   'lapices-de-colores':

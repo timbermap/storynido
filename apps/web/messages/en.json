@@ -44,7 +44,7 @@
     "language": "Language"
   },
   "Footer": {
-    "tagline": "Stories that hug.",
+    "tagline": "Stories that inspire, teach and stay with you forever.",
     "legal": "Legal",
     "company": "StoryNido",
     "cookiePreferences": "Cookie preferences",
@@ -86,7 +86,9 @@
       "priceUsd": "Prices in US dollars (USD)",
       "choose": "Choose who it is for",
       "digitalNote": "Instantly, to read on screen",
-      "printedNote": "Shipped by country"
+      "printedNote": "Shipped by country",
+      "homeHeadline": "Your child, the hero of <hl>a one-of-a-kind story</hl>.",
+      "script": "Stories that inspire, teach and stay with you forever."
     },
     "trust": {
       "preview": "Free preview before you pay",
@@ -711,6 +713,20 @@
           "name": "Advanced",
           "text": "Richer vocabulary and a plot with twists."
         }
+      }
+    },
+    "feedback": {
+      "title": "What would you improve in this sample?",
+      "subtitle": "Optional. It helps us make every book better.",
+      "send": "Send",
+      "thanks": "Thank you! We use it to improve every book.",
+      "error": "We couldn't send it. Please try again.",
+      "reasons": {
+        "likeness": "Doesn't look like them",
+        "details": "Some details are wrong",
+        "illustration": "Something in an illustration",
+        "story": "The story could be better",
+        "other": "Something else"
       }
     }
   },

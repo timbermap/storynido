@@ -1372,3 +1372,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - **Kit de Eventos:** la landing decía que las piezas "se suman muy pronto" cuando el kit digital ya se vende. Ahora cada pieza dice "Disponible hoy · PDF listo para imprimir", y la impresión profesional en cantidad figura "Por cotización".
   - **Profesionales:** pedía la cuenta antes de mostrar nada. Ahora el botón principal lleva a ejemplos por necesidad ("Empieza por lo que necesitas"), con las tapas de cada historia enlazadas a su ficha, y la cuenta se pide al crear.
 - **Pendiente:** unificar las clasificaciones del catálogo (aventura, recuerdos, valores, emociones) en historia, temática y mensaje educativo; filtros por edad y búsqueda en "Explorar historias"; historias nuevas para cumpleaños (con costo, a confirmar).
+
+## 103 · Marca v3, pregunta después de la muestra, dirección de arte y reglas narrativas
+
+- **Fecha:** 2026-10-29 · Decisión de Sebastián: aplicar el tablero de marca nuevo y empezar por los puntos P0 de la auditoría (`AUDITORIA-PRODUCTO.md`) que no cuestan nada.
+- **Marca v3** (reemplaza la v2): crema `#FFF8F1`, botón durazno `#FFB6A7` con texto navy `#26324A`, salvia, lavanda y coral tinta `#A33F33` para acentos de texto. Quicksand para la interfaz y los títulos, Lora para leer y Caveat para frases manuscritas. Detalle en `BRAND.md`.
+- **"¿Qué mejorarías?"** después de la muestra: no se parece, datos incorrectos, ilustración, historia u otro. Se guarda como evento de calidad (`feedback_*`) sin datos del chico, y el panel muestra la tasa de "no se parece".
+- **Dirección de arte:** un bloque fijo al final de cada prompt de imagen, con la paleta de la historia, el criterio por edad, el encuadre y lo que hay que evitar. Se guarda en la muestra y se copia al pedido congelado, así el libro pagado se ilustra con la misma dirección que la muestra. Las muestras anteriores siguen sin ella (no cambian a mitad de camino).
+- **Reglas narrativas** en el prompt de texto: el protagonista decide y resuelve, gancho en la primera página, desafío real, momento visual memorable y final para releer. Eventos: misión con 2 o 3 mini desafíos. Profesionales: un objetivo, secuencia realista, validar emociones y nada de promesas clínicas.
+- **Pendiente:** prueba antes/después (1 historia por público, ~USD 3–5, necesita OK) antes de regenerar portadas del catálogo.

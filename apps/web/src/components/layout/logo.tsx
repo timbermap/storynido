@@ -1,9 +1,12 @@
 import { brand } from '@/lib/brand';
 import { cn } from '@/lib/utils';
 
+const HEART =
+  'M12 21.2C6.6 17.4 2.5 14 2.5 9.4 2.5 6.6 4.7 4.4 7.5 4.4c1.8 0 3.4 1 4.5 2.5 1.1-1.5 2.7-2.5 4.5-2.5 2.8 0 5 2.2 5 5 0 4.6-4.1 8-9.5 11.8z';
+
 /**
- * Logo provisorio: corazón lavanda con un destello y el nombre en la serif de la marca.
- * `tone="light"` para fondos oscuros.
+ * Logo de la marca v3: "StoryNido" en Quicksand, azul profundo, con dos corazones (durazno y
+ * salvia) sobre el final de la palabra. `tone="light"` para fondos oscuros.
  */
 export function Logo({
   className,
@@ -13,25 +16,24 @@ export function Logo({
   tone?: 'dark' | 'light';
 }) {
   return (
-    <span className={cn('inline-flex items-center gap-2', className)}>
-      <svg aria-hidden="true" viewBox="0 0 32 32" className="size-7 shrink-0">
-        <path
-          d="M16 27.5C9 22.6 4 18.4 4 12.6 4 9 6.8 6.3 10.2 6.3c2.4 0 4.5 1.3 5.8 3.3 1.3-2 3.4-3.3 5.8-3.3 3.4 0 6.2 2.7 6.2 6.3 0 5.8-5 10-12 14.9z"
-          fill={tone === 'light' ? '#cdb4e0' : 'var(--primary)'}
-        />
-        <path
-          d="M16 11.2c.4 2.8 1.8 4.3 4.5 4.8-2.7.5-4.1 2-4.5 4.8-.4-2.8-1.8-4.3-4.5-4.8 2.7-.5 4.1-2 4.5-4.8z"
-          fill={tone === 'light' ? '#2e2338' : '#fff'}
-        />
-      </svg>
+    <span className={cn('relative inline-flex items-end pt-3.5', className)}>
       <span
         className={cn(
-          'font-display text-[1.55rem] leading-none font-semibold tracking-[-0.03em]',
-          tone === 'light' ? 'text-white' : 'text-foreground',
+          'font-sans text-[1.7rem] leading-none font-bold tracking-[-0.035em]',
+          tone === 'light' ? 'text-white' : 'text-navy',
         )}
       >
         {brand.name}
       </span>
+      {/* Los dos corazones: uno durazno, uno salvia, apenas superpuestos. */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 40 26"
+        className="absolute -top-1 right-[0.35rem] h-[1.6rem] w-auto"
+      >
+        <path d={HEART} fill="#ffb6a7" transform="translate(2 2) rotate(-12 12 12)" />
+        <path d={HEART} fill="#8ac8bc" transform="translate(17 3) rotate(14 12 12) scale(0.82)" />
+      </svg>
     </span>
   );
 }

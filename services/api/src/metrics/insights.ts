@@ -90,6 +90,13 @@ export class InsightsService {
         note: 'Correcciones del personaje por muestra (no es porcentaje).',
       },
       {
+        metric: 'preview_feedback_likeness_rate',
+        value: rate(withCode('feedback_likeness').size, previews.size),
+        numerator: withCode('feedback_likeness').size,
+        denominator: previews.size,
+        note: 'Muestras en las que respondieron "No se parece" en "¿Qué mejorarías?".',
+      },
+      {
         metric: 'story_edit_rate',
         value: rate(edited.size, approved.size),
         numerator: edited.size,

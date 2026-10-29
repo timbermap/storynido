@@ -633,6 +633,49 @@ describe('configuración de IA', () => {
   });
 });
 
+describe('"¿Qué mejorarías?" después de la muestra', () => {
+  let app: App;
+  let providers: ProviderRegistry;
+
+  beforeAll(async () => {
+    const created = await createTestApp({
+      catalog: new InMemoryCatalog({
+        stories: [story],
+        styles: [style, lineArt],
+        lessons: [lesson],
+      }),
+    });
+    app = created.app;
+    providers = created.providers;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('guarda un código por motivo (sin texto libre) y solo para el dueño del libro', async () => {
+    await db.recursiveDelete(db.collection('books'));
+    await seedBook(providers, 'book-fb');
+    const send = (reasons: string[], token = TOKEN) =>
+      app.inject({
+        method: 'POST',
+        url: '/v1/books/book-fb/preview/feedback',
+        headers: auth(token),
+        payload: { reasons },
+      });
+    expect((await send(['likeness', 'story'])).json()).toEqual({ saved: true });
+    // Repetir la respuesta no suma de nuevo.
+    await send(['likeness']);
+    const codes = (await db.collection('books/book-fb/qaEvents').get()).docs
+      .map((doc) => doc.get('code') as string)
+      .sort();
+    expect(codes).toEqual(['feedback_likeness', 'feedback_story']);
+    expect((await send(['inventado'])).statusCode).toBe(400);
+    expect((await send([], TOKEN)).statusCode).toBe(400);
+    expect((await send(['story'], 'token-luis')).statusCode).toBe(404);
+  });
+});
+
 describe('checkout y pagos (fase 11)', () => {
   let app: App;
   let providers: ProviderRegistry;

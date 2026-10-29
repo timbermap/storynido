@@ -19,7 +19,24 @@ export const QA_CODES = [
   'human_approved',
   // El adulto editó el texto de una página de la muestra (métrica story_edit_rate).
   'text_edited',
+  // "¿Qué mejorarías?" después de la muestra (AUDITORIA-PRODUCTO §1.12): un código por motivo.
+  'feedback_likeness',
+  'feedback_details',
+  'feedback_illustration',
+  'feedback_story',
+  'feedback_other',
 ] as const;
+
+/** Motivos de "¿Qué mejorarías?" (sin texto libre: podría traer datos del niño). */
+export const PREVIEW_FEEDBACK_REASONS = [
+  'likeness',
+  'details',
+  'illustration',
+  'story',
+  'other',
+] as const;
+
+export type PreviewFeedbackReason = (typeof PREVIEW_FEEDBACK_REASONS)[number];
 
 export type QaCode = (typeof QA_CODES)[number];
 

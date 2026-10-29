@@ -35,7 +35,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       icon: Map,
       title: t('how.step2Title'),
       text: t('how.step2Text'),
-      tone: 'bg-peach text-[#8a4a2a]',
+      tone: 'bg-peach text-[#a33f33]',
     },
     {
       icon: BookOpen,
@@ -79,13 +79,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {t('hero.kicker')}
             </p>
             <h1 className="mt-5 text-[clamp(2.5rem,4vw,3.9rem)] leading-[1.04] font-medium tracking-[-0.025em]">
-              {t.rich('hero.headline', {
+              {t.rich('hero.homeHeadline', {
                 br: () => <br />,
                 hl: (chunks) => <span className="text-primary">{chunks}</span>,
               })}
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-muted-foreground lg:mx-0">
               {t('hero.lead')}
+            </p>
+            <p className="mt-4 font-script text-[clamp(1.6rem,2.4vw,2.1rem)] leading-tight text-primary">
+              {t('hero.script')}
             </p>
             <div className="mt-9 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
               <a
@@ -131,7 +134,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {index < steps.length - 1 && (
                 <ArrowRight
                   aria-hidden="true"
-                  className="absolute top-12 -right-5 hidden size-7 text-[#d8b9a8] md:block"
+                  className="absolute top-12 -right-5 hidden size-7 text-[#e7b9ad] md:block"
                   strokeWidth={1.5}
                 />
               )}

@@ -3,36 +3,43 @@
 @plugin '@tailwindcss/typography';
 
 /*
- * StoryNido · sistema visual v2 (dirección "magia editorial + confianza").
- * 60 % crema/blanco, 30 % pasteles, 10 % violeta de acción.
- * Los pasteles son fondos, nunca texto. Contrastes verificados (WCAG 2.2 AA):
- * blanco/violeta 6.2:1 · tinta/crema 12:1 · secundario/crema 5.3:1 · violeta/lavanda 4.75:1.
+ * StoryNido · marca v3 (2026-10-29, docs/BRAND.md): crema, durazno, salvia, lavanda y azul profundo.
+ * Botones durazno con texto azul profundo; los pasteles son fondos, nunca texto.
+ * Contrastes verificados (WCAG 2.2 AA): azul/crema 12.2:1 · azul/durazno 7.6:1 ·
+ * coral tinta/crema 5.1:1 · gris/crema 5.5:1 · azul/lavanda 9.8:1 · azul/salvia 6.8:1.
  */
 :root {
   --radius: 1.1rem;
-  --background: #fbf7f2;
-  --foreground: #342a40;
+  --background: #fff8f1;
+  --foreground: #26324a;
   --card: #ffffff;
-  --card-foreground: #342a40;
-  --primary: #79518c;
-  --primary-hover: #613b75;
+  --card-foreground: #26324a;
+  --primary: #a33f33;
+  --primary-hover: #8a342a;
   --primary-foreground: #ffffff;
-  --secondary: #eadcf2;
-  --secondary-foreground: #342a40;
-  --accent: #eadcf2;
-  --accent-foreground: #342a40;
-  --muted: #f8f3fa;
-  --muted-foreground: #69616c;
-  --border: #ece5ec;
-  --ring: #7a4db1;
-  --peach: #f5d9c9;
-  --mint: #ddf1e8;
+  --secondary: #e6ddf6;
+  --secondary-foreground: #26324a;
+  --accent: #e6ddf6;
+  --accent-foreground: #26324a;
+  --muted: #fbf1e8;
+  --muted-foreground: #555c6e;
+  --border: #efe3d8;
+  --ring: #26324a;
+  --peach: #ffe3db;
+  --mint: #dcefeb;
   --sky: #e1effa;
   --butter: #fbedc6;
   --rose: #f9e3ed;
   --success: #245d4f;
   --destructive: #b3261e;
-  --star: #d6ab68;
+  --star: #f3be65;
+  /* Acción principal (botones): durazno con texto azul profundo. */
+  --action: #ffb6a7;
+  --action-hover: #ff9f8a;
+  --action-foreground: #26324a;
+  --sage: #8ac8bc;
+  --lavender: #e6ddf6;
+  --navy: #26324a;
   color-scheme: light;
 }
 
@@ -52,6 +59,12 @@
   --color-success: var(--success);
   --color-destructive: var(--destructive);
   --color-star: var(--star);
+  --color-action: var(--action);
+  --color-action-hover: var(--action-hover);
+  --color-action-foreground: var(--action-foreground);
+  --color-sage: var(--sage);
+  --color-lavender: var(--lavender);
+  --color-navy: var(--navy);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
@@ -65,10 +78,14 @@
   --radius-lg: var(--radius);
   --radius-xl: 1.6rem;
   --radius-2xl: 2rem;
-  --shadow-card: 0 1px 2px rgb(52 42 64 / 0.04), 0 12px 32px -12px rgb(52 42 64 / 0.12);
-  --shadow-book: 18px 25px 32px rgb(57 36 75 / 0.22);
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-heading), ui-serif, Georgia, serif;
+  --shadow-card: 0 1px 2px rgb(38 50 74 / 0.04), 0 12px 32px -12px rgb(38 50 74 / 0.12);
+  --shadow-book: 18px 25px 32px rgb(38 50 74 / 0.22);
+  --font-sans: var(--font-ui), ui-rounded, system-ui, sans-serif;
+  --font-display: var(--font-ui), ui-rounded, system-ui, sans-serif;
+  --font-serif: var(--font-content), ui-serif, Georgia, serif;
+  --font-script: var(--font-script-face), 'Comic Sans MS', cursive;
+  /* Quicksand se ve liviana en "medium": un punto más de peso. */
+  --font-weight-medium: 600;
 }
 
 @layer base {
@@ -80,15 +97,32 @@
     /* El encabezado es fijo: lo enfocado o desplazado nunca queda tapado (WCAG 2.2, 2.4.11). */
     scroll-padding-top: 6.5rem;
   }
+  /* Texto de contenido en Lora; títulos, navegación, botones y formularios en Quicksand. */
   body {
-    @apply bg-background font-sans text-foreground antialiased;
+    @apply bg-background font-serif text-foreground antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  button,
+  label,
+  input,
+  select,
+  textarea,
+  nav,
+  th,
+  dt,
+  legend,
+  summary {
+    font-family: var(--font-sans);
   }
   h1,
   h2,
   h3 {
-    @apply font-display text-balance;
-    font-weight: 500;
-    letter-spacing: -0.03em;
+    @apply text-balance;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
   ::selection {
     background: var(--accent);

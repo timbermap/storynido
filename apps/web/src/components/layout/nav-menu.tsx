@@ -111,7 +111,7 @@ export function NavMenu({
           align === 'end' ? 'right-0' : '-left-3',
         )}
       >
-        <div className="overflow-hidden rounded-2xl border border-[rgb(55_37_75/0.08)] bg-card shadow-[0_24px_60px_-12px_rgb(52_42_64/0.22)]">
+        <div className="overflow-hidden rounded-2xl border border-[rgb(38_50_74/0.08)] bg-card shadow-[0_24px_60px_-12px_rgb(38_50_74/0.22)]">
           {children}
         </div>
       </div>
@@ -130,11 +130,11 @@ export function NavMenuItem({
   icon?: ReactNode;
 }) {
   return (
-    <span className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors group-hover:bg-[#f6f1f8]">
+    <span className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors group-hover:bg-[#f3eefb]">
       {icon && (
         <span
           aria-hidden="true"
-          className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-[#f6f1f8] text-primary"
+          className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-[#f3eefb] text-primary"
         >
           {icon}
         </span>

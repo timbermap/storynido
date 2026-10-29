@@ -160,6 +160,7 @@ Reglas obligatorias:
       : ''
   }
 - Las enseñanzas se muestran con lo que hacen los personajes, nunca como moraleja explícita ni sermón.
+${narrativeRules(input)}
 - Nada de violencia, miedo intenso, marcas, personajes con derechos de autor ni datos personales reales.
 - Nunca te burles del cuerpo, la apariencia, la higiene, las capacidades o las necesidades del protagonista; nada de castigos que avergüencen, diagnósticos ni promesas de curación. El protagonista puede equivocarse, aprender y pedir ayuda sin quedar humillado.
 - Escribe el nombre del protagonista exactamente así: "${input.childName}" (con sus tildes y mayúsculas).
@@ -167,19 +168,48 @@ Reglas obligatorias:
 - "illustrationPrompt" de cada página: la escena en inglés, en una o dos frases, sin texto dentro de la imagen.`;
 }
 
+/**
+ * Reglas narrativas (AUDITORIA-PRODUCTO §4): lo que separa un cuento memorable de uno genérico.
+ * Las de cada público salen del pedido: eventos traen la fiesta; profesionales, el objetivo.
+ */
+export function narrativeRules(input: Pick<StoryPromptInput, 'childName' | 'event' | 'goal'>) {
+  const rules = [
+    `- ${input.childName} decide y resuelve: no mira la aventura, la protagoniza.`,
+    '- La primera página tiene un gancho que invita a dar vuelta la hoja.',
+    '- Un objetivo claro y un desafío real para su edad, con un momento visual memorable.',
+    '- El final cierra con calidez y deja ganas de releerlo.',
+  ];
+  if (input.event) {
+    rules.push(
+      '- Es una misión festiva con 2 o 3 mini desafíos; la celebración es la recompensa, no una lista de saludos.',
+    );
+  } else if (input.goal) {
+    rules.push(
+      '- Un solo objetivo en todo el cuento, con una secuencia realista y paso a paso de lo que vive el protagonista.',
+      '- Valida lo que siente (está bien tener miedo o frustrarse) y muestra cómo lo atraviesa; nunca prometas resultados clínicos.',
+    );
+  } else {
+    rules.push('- Emoción y vínculo, con un conflicto verdadero que se resuelve.');
+  }
+  return rules.join('\n');
+}
+
 export interface IllustrationPromptInput {
   template: string;
   scene: string;
   character: string;
   style: string;
+  /** Dirección de arte (art-direction.ts): bloque fijo al final, el admin no lo puede quitar. */
+  direction?: string | null;
 }
 
 export function buildIllustrationPrompt(input: IllustrationPromptInput): string {
-  return renderTemplate(input.template, {
+  const body = renderTemplate(input.template, {
     scene: input.scene,
     character: input.character,
     style: input.style,
   });
+  return input.direction ? `${body}\n\n${input.direction}` : body;
 }
 
 /**

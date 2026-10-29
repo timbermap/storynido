@@ -13,6 +13,7 @@ import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 
 import { CharacterReview } from './character-review';
+import { PreviewFeedback } from './preview-feedback';
 import type { WizardData } from './types';
 
 type Target = 'cover' | number;
@@ -369,13 +370,15 @@ export function PreviewPanel({
 
       {data?.stage === 'character' && data.character && !data.character.approved && (
         // Mientras se lee el cuento, el paso pendiente queda siempre a la vista.
-        <div className="sticky bottom-3 z-20 mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card/95 px-4 py-3 shadow-[0_12px_32px_-12px_rgb(52_42_64/0.35)] backdrop-blur">
+        <div className="sticky bottom-3 z-20 mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card/95 px-4 py-3 shadow-[0_12px_32px_-12px_rgb(38_50_74/0.35)] backdrop-blur">
           <p className="text-sm font-semibold">{t('pendingStep', { name: childName })}</p>
           <a href="#character-review" className={buttonVariants({ size: 'sm' })}>
             {t('reviewCharacter')}
           </a>
         </div>
       )}
+
+      {data?.stage === 'complete' && <PreviewFeedback bookId={book.id} />}
 
       {data?.stage === 'complete' && user?.isAnonymous && (
         <section

@@ -186,6 +186,8 @@ export const bookPreviewSchema = z.object({
   editorialKey: z.string().optional(),
   /** Páginas interiores del libro terminado según esas opciones. */
   interiorPages: z.number().int().positive().optional(),
+  /** Dirección de arte con la que se ilustró (se congela: el libro sale igual que la muestra). */
+  artDirection: z.string().nullable().optional(),
   /** Páginas de actividades y rango de palabras con que se escribió (los usa el pipeline). */
   activityPages: z.number().int().nonnegative().optional(),
   words: z.object({ min: z.number().int(), max: z.number().int() }).optional(),
