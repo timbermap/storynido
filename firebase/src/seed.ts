@@ -74,6 +74,14 @@ const cloud = !isUsingEmulators();
 const production = cloudProject === 'storynido-prod';
 /** En la nube, `--refresh-catalog` reescribe historias, estilos y enseñanzas (no la configuración). */
 const refreshCatalog = process.argv.includes('--refresh-catalog');
+/**
+ * `--refresh-content privacy,terms` reescribe esos textos (en los tres idiomas) con los de
+ * seed-data/content: para publicar un cambio legal. Pisa lo editado en el admin.
+ */
+const contentFlag = process.argv.indexOf('--refresh-content');
+const refreshContent = new Set(
+  contentFlag >= 0 ? (process.argv[contentFlag + 1] ?? '').split(',').filter(Boolean) : [],
+);
 const CATALOG_COLLECTIONS = new Set<string>([
   COLLECTIONS.stories,
   COLLECTIONS.collections,
@@ -572,7 +580,11 @@ let created = 0;
 const existing = cloud ? await db.getAll(...writes.map((write) => write.ref)) : [];
 const commit = db.batch();
 writes.forEach((write, index) => {
-  const refreshable = refreshCatalog && CATALOG_COLLECTIONS.has(write.ref.parent.id);
+  const collection = write.ref.parent.id;
+  const refreshable =
+    (refreshCatalog && CATALOG_COLLECTIONS.has(collection)) ||
+    (collection === COLLECTIONS.content &&
+      refreshContent.has((write.data as { key?: string }).key ?? ''));
   if (cloud && existing[index]?.exists && !refreshable) return;
   commit.set(write.ref, write.data);
   created += 1;
@@ -587,8 +599,8 @@ console.info(
 for (const { email, role } of cloud ? [] : USERS) console.info(`  ${email} (${role})`);
 console.info(
   cloud
-    ? '  países, precios de ejemplo, sitio en vivo, IA en Vertex con tope diario de USD 2'
-    : '  países MX y US activos, precios de ejemplo, sitio en vivo, IA en mock',
+    ? `  países con moneda propia, márgenes de fábrica (todo en USD), imprentas para cualquier destino, sitio ${production ? 'en solo vista previa' : 'en vivo'}, IA en Vertex con tope diario de USD 2`
+    : '  países con moneda propia, márgenes de fábrica (todo en USD), tipo de cambio fijo, sitio en vivo, IA en mock',
 );
 console.info(
   `  ${String(SEED_STORIES.length + SEED_NEW_STORIES.length)} historias, ${String(SEED_COLLECTIONS.length)} colecciones, ${String(SEED_LESSONS.length)} enseñanzas, ${String(SEED_STYLES.length)} estilos, ${String(SEED_ACTIVITY_TEMPLATES.length)} actividades, configuración editorial, textos legales y FAQ en ${LOCALES.join(', ')}`,
