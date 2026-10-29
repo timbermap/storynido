@@ -1403,3 +1403,10 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Correcciones guiadas del personaje:** primero "¿Qué no se parece?" (pelo, piel, ojos, anteojos u otra cosa), y solo se muestran esos rasgos. Lo corregido queda fijo en todas las páginas.
 - **Links por público:** desde Eventos y Profesionales, la ficha de una historia recuerda el público. "Crear" abre el creador de esa línea, "Volver" regresa a la landing y Eventos no muestra los precios de los libros, porque el kit tiene los suyos. Antes llevaba al creador y al catálogo de Familias.
 - **Staging:** la web y el admin no se deployan con el push (App Hosting sin repositorio conectado). Se suben con `firebase deploy --only apphosting`; ver RUNBOOK.
+
+## 105 · Objetivos propios por historia y país de envío editable
+
+- **Fecha:** 2026-10-29 · Segunda auditoría externa (`AUDITORIA-PRODUCTO.md` §7).
+- **Objetivos:** las historias con un propósito (dentista, primer día, letras, emociones, frustración) tienen objetivos propios (`stories.objectives`, editables en el admin). La ficha los muestra en vez de las enseñanzas generales y el creador de Profesionales los ofrece como objetivo, en vez de todos los temas de la colección. Sin objetivos, todo sigue como antes.
+- **"Enviar a"** en la ficha: cambia el país de envío y de precios (cookie `sn_country`) sin cuenta. El idioma es independiente.
+- **Catálogo:** si un filtro de edad deja menos de 3 historias, se avisa con honestidad.
