@@ -1325,3 +1325,18 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - tapa blanda Clásico a EE. UU. con Lulu (USD 5,83): 21,20 + 5,83 + 8 = USD 35,99, más el envío.
 - **Por qué el margen de creación es fijo por defecto:** un porcentaje sobre un costo tan chico (USD 1 a 6) daría precios sin relación con el valor, y bajarían si la IA se abarata. Sobre la imprenta el porcentaje sí sirve, porque su costo varía mucho por formato y destino.
 - **Pendiente:** ajustar el costo por página con el costo real de IA por libro (Resumen → costo de IA) cuando haya pedidos reales.
+
+## 099 · Repositorio público mientras no haya ventas; producción con mínimo 0 y ping
+
+- **Fecha:** 2026-10-29 · Decisión de Sebastián.
+- **Por qué público:** se agotaron los 2.000 minutos gratis de GitHub Actions de un repositorio privado, y en uno público son gratis. Vuelve a privado con las primeras ventas o visitas.
+- **Revisión previa:**
+  - no hay claves en todo el historial: gitleaks en cada push más una búsqueda de patrones;
+  - queda visible: el código, los prompts, los documentos de estrategia (reseñas públicas parafraseadas, sin datos personales), la infraestructura y el mail de alertas.
+- **Protecciones para el modo público:**
+  - el deploy de staging corre solo después del CI de un push a `main` de este mismo repositorio, nunca por un pull request ni por una copia;
+  - Workload Identity solo entrega credenciales a `refs/heads/main` y a tags `v*`.
+- **Producción:**
+  - la API arranca con mínimo 0 instancias, más un Cloud Scheduler que llama a `/health` cada 10 minutos (`api_keep_warm`): unos USD 0,10 por mes, contra USD 8 a 10 de una instancia siempre encendida;
+  - con tráfico real se pasa a `min = 1`;
+  - costo fijo estimado sin ventas: unos USD 3 a 5 por mes.

@@ -43,7 +43,9 @@ resource "google_iam_workload_identity_pool_provider" "github" {
     "attribute.environment"         = "assertion.environment"
   }
 
-  attribute_condition = "assertion.repository == \"${var.github_repository}\" && assertion.repository_owner_id == \"${var.github_repository_owner_id}\""
+  # Solo este repositorio y solo desde main o un tag de versión: un pull request (aunque venga de
+  # una copia del repo, que puede ser público) nunca obtiene credenciales.
+  attribute_condition = "assertion.repository == \"${var.github_repository}\" && assertion.repository_owner_id == \"${var.github_repository_owner_id}\" && (assertion.ref == \"refs/heads/main\" || assertion.ref.startsWith(\"refs/tags/v\"))"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"

@@ -174,3 +174,9 @@ variable "email_postal_address" {
   default     = ""
   description = "Dirección postal del pie de los mails (CAN-SPAM la exige en los de marketing). Vacío: el pie va sin dirección."
 }
+
+variable "api_keep_warm" {
+  type        = bool
+  default     = false
+  description = "Ping cada 10 minutos a /health para evitar arranques en frío con mínimo 0 instancias."
+}

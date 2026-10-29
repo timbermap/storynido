@@ -1,6 +1,7 @@
 name: Deploy
 
-# - staging: automático cuando el CI de main termina en verde.
+# - staging: automático cuando el CI de un push a main de este repositorio termina en verde
+#   (nunca por un pull request ni por una copia del repositorio: el repo puede ser público).
 # - production: al publicar un tag v* (por ejemplo v0.1.0) o manualmente.
 # Los deploys están apagados hasta que exista la infraestructura:
 #   gh variable set DEPLOY_ENABLED --body true
@@ -28,7 +29,11 @@ jobs:
   staging:
     if: >-
       vars.DEPLOY_ENABLED == 'true' && (
-        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+        (github.event_name == 'workflow_run' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository) ||
         (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
       )
     uses: ./.github/workflows/_deploy.yml

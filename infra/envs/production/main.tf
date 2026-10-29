@@ -28,10 +28,13 @@ module "environment" {
   billing_account            = var.billing_account
   budget_amount              = var.budget_amount
   budget_currency            = var.budget_currency
-  api_scaling                = { min = 1, max = 20 }
-  worker_scaling             = { min = 0, max = 50 }
-  deletion_protection        = true
-  photo_analyzer             = var.photo_analyzer
+  # Mínimo 0 + ping cada 10 min mientras no haya ventas (≈ USD 0,10/mes contra USD 8-10/mes de
+  # una instancia siempre encendida). Con tráfico real se pasa a min = 1.
+  api_scaling         = { min = 0, max = 20 }
+  api_keep_warm       = true
+  worker_scaling      = { min = 0, max = 50 }
+  deletion_protection = true
+  photo_analyzer      = var.photo_analyzer
   # Gelato (DECISIONS 077).
   print_providers   = ["gelato"]
   gelato_order_type = "order"

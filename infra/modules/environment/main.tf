@@ -496,6 +496,30 @@ resource "google_cloud_scheduler_job" "watchdog" {
   depends_on = [module.apis]
 }
 
+# Mantiene la API "tibia" con mínimo 0 instancias: Cloud Run conserva la instancia unos 15 minutos
+# después de cada pedido, así que un ping cada 10 evita casi todos los arranques en frío por
+# centavos (la alternativa, 1 instancia siempre encendida, cuesta unos USD 8-10 por mes).
+resource "google_cloud_scheduler_job" "api_keep_warm" {
+  count       = var.api_keep_warm ? 1 : 0
+  project     = var.project_id
+  region      = var.region
+  name        = "api-keep-warm"
+  description = "Ping a /health para evitar arranques en frío de la API (mínimo 0 instancias)."
+  schedule    = "*/10 * * * *"
+  time_zone   = "Etc/UTC"
+
+  http_target {
+    http_method = "GET"
+    uri         = "${module.api.uri}/health"
+  }
+
+  retry_config {
+    retry_count = 0
+  }
+
+  depends_on = [module.apis]
+}
+
 # --- Secretos (sin valores: se cargan con gcloud, ver infra/README.md) --------
 
 module "secrets" {
