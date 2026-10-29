@@ -70,6 +70,7 @@ export default async function EventsPage({ params }: Props) {
         note={t('note')}
         image={eventsArt}
         imageAlt={t('imageAlt')}
+        photoLabel={t('photoLabel')}
       />
       <LandingSteps
         title={t('howTitle')}

@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
 
 import heroBook from '../../../public/brand/hero-libro.webp';
 import heroPortrait from '../../../public/brand/hero-retrato.webp';
@@ -17,7 +17,16 @@ function Sparkle({ className }: { className: string }) {
  * IA, niño inventado) y su retrato ilustrado en un marco tipo polaroid ("Su foto").
  * Nunca una foto real de un chico.
  */
-export function HeroBook({ alt, photoLabel }: { alt: string; photoLabel: string }) {
+export function HeroBook({
+  alt,
+  photoLabel,
+  image = heroBook,
+}: {
+  alt: string;
+  photoLabel: string;
+  /** Ilustración principal (por defecto, el libro abierto de la home). */
+  image?: StaticImageData;
+}) {
   return (
     <figure className="relative isolate mx-auto w-full max-w-[50rem] pt-10 pl-[6%] lg:pt-14">
       <Sparkle className="absolute top-2 right-[14%] z-10 size-7 rotate-12 text-star" />
@@ -25,7 +34,7 @@ export function HeroBook({ alt, photoLabel }: { alt: string; photoLabel: string 
 
       <div className="overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-24px_rgb(52_42_64/0.35)]">
         <Image
-          src={heroBook}
+          src={image}
           alt={alt}
           priority
           placeholder="blur"

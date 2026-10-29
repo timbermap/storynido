@@ -736,7 +736,7 @@
       "metaDescription": "A birthday story starring the guest of honor, to give to every guest. One design, many copies.",
       "eyebrow": "StoryNido Events",
       "title": "Magical keepsakes to share at every celebration.",
-      "subtitle": "We create a mini story starring the birthday child. One design you approve, with identical copies for every guest.",
+      "subtitle": "From a photo of the birthday child (or by choosing their features) we make them the hero of an illustrated mini story. One design you approve, with identical copies for every guest.",
       "cta": "Design the birthday kit",
       "note": "You can create the design and see the free sample without an account.",
       "imageAlt": "Watercolor illustration of a birthday party: the birthday child blows out the candles while friends hold the same little gift book.",
@@ -787,7 +787,8 @@
           "a": "Printing times depend on the country; we’ll show them before you confirm the order."
         }
       },
-      "finalTitle": "Let every guest take home a memory of the party"
+      "finalTitle": "Let every guest take home a memory of the party",
+      "photoLabel": "Their photo"
     },
     "professionals": {
       "metaTitle": "Personalized stories for educators, therapists and specialists",

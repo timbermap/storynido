@@ -736,7 +736,7 @@
       "metaDescription": "Un cuento de cumpleaños con el protagonista de la fiesta, para regalar a cada invitado. Un diseño, muchas copias.",
       "eyebrow": "StoryNido Eventos",
       "title": "Recuerdos mágicos para compartir en cada celebración.",
-      "subtitle": "Creamos un mini cuento con el cumpleañero como protagonista. Un solo diseño que ustedes aprueban, con copias idénticas para todos los invitados.",
+      "subtitle": "Con una foto del cumpleañero (o eligiendo sus rasgos) lo convertimos en el protagonista de un mini cuento ilustrado. Un solo diseño que ustedes aprueban, con copias idénticas para todos los invitados.",
       "cta": "Diseñar el kit de cumpleaños",
       "note": "Puedes crear el diseño y ver la muestra gratis sin crear una cuenta.",
       "imageAlt": "Ilustración en acuarela de un cumpleaños: el cumpleañero sopla las velas y sus amigos sostienen el mismo librito de regalo.",
@@ -787,7 +787,8 @@
           "a": "Los plazos de impresión dependen del país; los mostraremos antes de que confirmes el pedido."
         }
       },
-      "finalTitle": "Que cada invitado se lleve un recuerdo de la fiesta"
+      "finalTitle": "Que cada invitado se lleve un recuerdo de la fiesta",
+      "photoLabel": "Su foto"
     },
     "professionals": {
       "metaTitle": "Cuentos personalizados para psicopedagogos, docentes y terapeutas",

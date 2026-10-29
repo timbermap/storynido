@@ -3,6 +3,7 @@ import type { StaticImageData } from 'next/image';
 import type { ReactNode } from 'react';
 
 import { HeroArt } from '@/components/home/hero-art';
+import { HeroBook } from '@/components/home/hero-book';
 import { FaqList, type FaqItem } from '@/components/home/faq-list';
 import { buttonVariants } from '@/components/ui/button';
 
@@ -16,6 +17,7 @@ export function LandingHero({
   note,
   image,
   imageAlt,
+  photoLabel,
 }: {
   eyebrow: string;
   title: string;
@@ -24,6 +26,8 @@ export function LandingHero({
   note: string;
   image: StaticImageData;
   imageAlt: string;
+  /** Con rótulo, la ilustración va con el retrato "Su foto" y la flecha: de la foto al libro. */
+  photoLabel?: string;
 }) {
   return (
     <section className="overflow-hidden">
@@ -44,7 +48,11 @@ export function LandingHero({
           </div>
           <p className="mt-4 text-sm font-bold text-muted-foreground">{note}</p>
         </div>
-        <HeroArt alt={imageAlt} src={image} />
+        {photoLabel ? (
+          <HeroBook alt={imageAlt} photoLabel={photoLabel} image={image} />
+        ) : (
+          <HeroArt alt={imageAlt} src={image} />
+        )}
       </div>
     </section>
   );

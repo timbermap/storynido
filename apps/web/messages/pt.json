@@ -736,7 +736,7 @@
       "metaDescription": "Uma história de aniversário com o protagonista da festa, para presentear cada convidado. Um design, muitas cópias.",
       "eyebrow": "StoryNido Eventos",
       "title": "Lembranças mágicas para compartilhar em cada celebração.",
-      "subtitle": "Criamos uma mini história com o aniversariante como protagonista. Um único design aprovado por vocês, com cópias idênticas para todos os convidados.",
+      "subtitle": "Com uma foto do aniversariante (ou escolhendo as características) fazemos dele o protagonista de uma mini história ilustrada. Um só design que vocês aprovam, com cópias idênticas para todos os convidados.",
       "cta": "Criar o kit de aniversário",
       "note": "Você pode criar o design e ver a amostra grátis sem criar uma conta.",
       "imageAlt": "Ilustração em aquarela de um aniversário: o aniversariante sopra as velas e os amigos seguram o mesmo livrinho de presente.",
@@ -787,7 +787,8 @@
           "a": "Os prazos de impressão dependem do país; vamos mostrá-los antes de você confirmar o pedido."
         }
       },
-      "finalTitle": "Que cada convidado leve uma lembrança da festa"
+      "finalTitle": "Que cada convidado leve uma lembrança da festa",
+      "photoLabel": "A foto"
     },
     "professionals": {
       "metaTitle": "Histórias personalizadas para psicopedagogos, professores e terapeutas",
