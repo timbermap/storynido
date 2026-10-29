@@ -1202,3 +1202,15 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Escenarios del informe (§7.4):** `docs/QA-SCENARIOS.md` relaciona cada uno con su prueba.
   - Los visuales (parecido, estabilidad, ropa), los regionales y los de tono los cubre el panel humano.
   - Falta el escenario 22 (fecha de regalo).
+
+## 091 · Trazas en Cloud Trace y documentación de salida (fase 18)
+
+- **Problema:** Cloud Run no guardaba ningún span. El proyecto no tenía el bucket `_Trace`, y Cloud Run no lo crea (Google: solo lo crean las escrituras a la API de Trace o de Telemetry).
+- **Decisión:**
+  - Terraform habilita la API de Observability y crea el bucket `_Trace` en `us` (30 días de retención).
+  - La API y el worker mandan un span por cada request muestreado a la API v2 de Cloud Trace (`CloudTraceSink`, en lotes cada 5 s; si falla, se pierde y no frena el request).
+  - El span usa como ID el de la cabecera, el mismo que llevan los logs. Así los pasos de un pedido, que llegan con la traza del pedido, quedan en una sola traza.
+  - Sin OpenTelemetry: alcanza con un hook de Fastify, sin instrumentar módulos ESM. Si hace falta ver las llamadas a Firestore o a Vertex como tramos, se suma OpenTelemetry.
+- **Costo:** los primeros 2,5 millones de spans por mes son gratis; staging queda en USD 0.
+- **Documentación de salida:** `docs/RUNBOOK.md` (alertas, pedidos, vuelta atrás, modos del sitio, secretos) y `docs/LAUNCH.md` (lista de salida a producción, con quién hace cada cosa).
+- **Copy:** los mensajes de error de la API que ve el público pasaron a "tú" (había voseo).

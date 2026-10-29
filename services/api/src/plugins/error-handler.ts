@@ -41,7 +41,7 @@ export function registerErrorHandling(app: FastifyInstance): void {
     if (statusCode === 429) {
       return reply
         .status(429)
-        .send(body('rate_limited', 'Demasiadas solicitudes. Probá de nuevo en un momento.'));
+        .send(body('rate_limited', 'Demasiadas solicitudes. Prueba de nuevo en un momento.'));
     }
     if (statusCode >= 400 && statusCode < 500) {
       const message = error instanceof Error ? error.message : 'Solicitud inválida.';

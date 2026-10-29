@@ -18,7 +18,7 @@ export function registerSiteMode(app: FastifyInstance): void {
 
     const mode = app.deps.siteConfig.mode();
     if (mode === 'maintenance') {
-      done(new AppError(503, 'maintenance', 'Estamos haciendo mantenimiento. Volvé en un rato.'));
+      done(new AppError(503, 'maintenance', 'Estamos haciendo mantenimiento. Vuelve en un rato.'));
     } else if (mode === 'preview_only' && availability === 'live_only') {
       done(new AppError(403, 'unavailable_in_mode', 'Las compras están pausadas por el momento.'));
     } else {

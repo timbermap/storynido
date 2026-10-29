@@ -43,7 +43,7 @@ pnpm --filter @storynido/api dev    # http://localhost:8080
 {
   "error": {
     "code": "forbidden",
-    "message": "No tenés permiso para esta acción.",
+    "message": "No tienes permiso para esta acción.",
     "requestId": "req-7"
   }
 }

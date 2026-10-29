@@ -96,7 +96,7 @@ Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cua
 
 ## 7. Producción
 
-Se completa en la fase 18 (checklist de salida).
+Lista de salida paso a paso: [`LAUNCH.md`](LAUNCH.md). Operación diaria: [`RUNBOOK.md`](RUNBOOK.md).
 
 ## Lulu (imprenta de EE. UU.)
 

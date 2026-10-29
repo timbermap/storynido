@@ -2,7 +2,7 @@
 
 Plataforma de cuentos infantiles personalizados con IA, en formato digital (PDF) e impreso bajo demanda. Dominio: [storynido.com](https://storynido.com). El nombre y el dominio son configurables (`BRAND_NAME`, `BRAND_DOMAIN` y sus variantes `NEXT_PUBLIC_*`).
 
-Contexto completo del proyecto: [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) · Decisiones: [docs/DECISIONS.md](docs/DECISIONS.md) · Progreso: [docs/PROGRESS.md](docs/PROGRESS.md)
+Contexto completo del proyecto: [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) · Decisiones: [docs/DECISIONS.md](docs/DECISIONS.md) · Progreso: [docs/PROGRESS.md](docs/PROGRESS.md) · Operación: [docs/RUNBOOK.md](docs/RUNBOOK.md) · Salida a producción: [docs/LAUNCH.md](docs/LAUNCH.md)
 
 ## Estructura
 
@@ -47,6 +47,7 @@ Login local: http://localhost:3000/login con `cliente@storynido.test` (enlace m�
 | `pnpm typecheck`                    | Verificación de tipos                               |
 | `pnpm test`                         | Tests con Vitest                                    |
 | `pnpm format` / `pnpm format:check` | Prettier                                            |
+| `pnpm --filter @storynido/e2e e2e`  | E2E con Playwright (ver `e2e/`; corre en CI)        |
 
 Para trabajar sobre un solo paquete: `pnpm --filter @storynido/web dev`.
 
@@ -76,4 +77,4 @@ GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) corre form
 
 ## Infraestructura y deploy
 
-Terraform para Google Cloud en [infra/](infra/README.md). Staging se despliega solo cuando el CI de `main` pasa; production, al publicar un tag `v*`. Guía completa: [docs/SETUP.md](docs/SETUP.md).
+Terraform para Google Cloud en [infra/](infra/README.md). Staging se despliega solo cuando el CI de `main` pasa; production, al publicar un tag `v*`. Guía completa: [docs/SETUP.md](docs/SETUP.md). Vuelta atrás, alertas y secretos: [docs/RUNBOOK.md](docs/RUNBOOK.md).

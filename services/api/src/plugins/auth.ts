@@ -63,7 +63,7 @@ export function registerAuthentication(app: FastifyInstance): void {
         mfa: typeof firebase?.sign_in_second_factor === 'string',
       };
     } catch {
-      throw unauthorized('La sesión no es válida o venció. Iniciá sesión de nuevo.');
+      throw unauthorized('La sesión no es válida o venció. Inicia sesión de nuevo.');
     }
   });
 }

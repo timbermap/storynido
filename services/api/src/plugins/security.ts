@@ -31,6 +31,6 @@ export async function registerSecurity(app: FastifyInstance): Promise<void> {
     timeWindow: '1 minute',
     keyGenerator: (request) => (request.user ? `uid:${request.user.uid}` : `ip:${request.ip}`),
     errorResponseBuilder: () =>
-      new AppError(429, 'rate_limited', 'Demasiadas solicitudes. Probá de nuevo en un momento.'),
+      new AppError(429, 'rate_limited', 'Demasiadas solicitudes. Prueba de nuevo en un momento.'),
   });
 }
