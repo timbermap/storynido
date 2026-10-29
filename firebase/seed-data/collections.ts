@@ -134,7 +134,11 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     active: true,
     order: 20,
     channel: 'professionals',
-    name: t('¡Qué lindo es aprender!', 'Learning Is Wonderful!', 'Que lindo é aprender!'),
+    name: t(
+      'Motivar la lectura y la curiosidad',
+      'Encouraging reading and curiosity',
+      'Incentivar a leitura e a curiosidade',
+    ),
     description: t(
       'Cuentos que despiertan las ganas de leer, contar y preguntar.',
       'Stories that spark the wish to read, count and ask.',
@@ -153,7 +157,11 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     active: true,
     order: 21,
     channel: 'professionals',
-    name: t('Conozco mis emociones', 'I Know My Feelings', 'Conheço minhas emoções'),
+    name: t(
+      'Reconocer y expresar emociones',
+      'Recognizing and expressing feelings',
+      'Reconhecer e expressar emoções',
+    ),
     description: t(
       'Para reconocer lo que se siente y encontrar palabras para contarlo.',
       'To recognize feelings and find the words to share them.',
@@ -171,7 +179,11 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     active: true,
     order: 22,
     channel: 'professionals',
-    name: t('Mis pequeños logros', 'My Little Wins', 'Minhas pequenas conquistas'),
+    name: t(
+      'Manejar la frustración y no rendirse',
+      'Handling frustration and not giving up',
+      'Lidar com a frustração e não desistir',
+    ),
     description: t(
       'Historias que celebran el esfuerzo y cada paso hacia adelante.',
       'Stories that celebrate effort and every step forward.',
@@ -189,7 +201,11 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     active: true,
     order: 23,
     channel: 'professionals',
-    name: t('Mi primera experiencia', 'My First Time', 'Minha primeira experiência'),
+    name: t(
+      'Prepararse para algo nuevo: dentista, primer día de clases',
+      'Getting ready for something new: dentist, first day of school',
+      'Preparar-se para algo novo: dentista, primeiro dia de aula',
+    ),
     description: t(
       'Para anticipar situaciones nuevas y llegar con confianza.',
       'To prepare for new situations and arrive with confidence.',

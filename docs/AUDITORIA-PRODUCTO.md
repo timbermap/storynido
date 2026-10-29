@@ -102,8 +102,8 @@ Los tres piden lo mismo para empezar: ver qué existe antes de cambiar nada.
 | 3    | (hecho, DECISIONS 103) **Prueba antes y después:** 1 historia por público, mismo protagonista inventado, prompt actual contra nuevo | ~USD 3–5 de IA         | Tu OK                 |
 | 4    | Creador en 4 etapas                                                                                                                 | USD 0                  | Tu OK sobre el diseño |
 | 5    | Libros de ejemplo por estilo para la muestra (aprobado)                                                                             | ~USD 3                 | — (ya aprobado)       |
-| 6    | "¿Qué le encanta?" en Familias y colecciones por necesidad en Profesionales                                                         | USD 0                  | —                     |
-| 7    | Correcciones guiadas del personaje                                                                                                  | USD 0 de desarrollo    | —                     |
+| 6    | (hecho, DECISIONS 104) "¿Qué le encanta?" en Familias y colecciones por necesidad en Profesionales                                  | USD 0                  | —                     |
+| 7    | (hecho, DECISIONS 104) Correcciones guiadas del personaje                                                                           | USD 0 de desarrollo    | —                     |
 | 8    | Fotos y video del libro impreso real                                                                                                | Muestras físicas       | Tus muestras          |
 | 9    | Lámina del acompañante (familiar o mascota)                                                                                         | Más IA por libro       | Decisión de producto  |
 

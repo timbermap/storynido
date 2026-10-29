@@ -6,7 +6,11 @@ From 1 to 3 photos we create an illustrated character inspired by your child, wh
 
 ### What happens to the photos I upload?
 
-They are stored encrypted, used only by our systems to create your book, and automatically deleted after 30 days. You can delete them sooner from your account.
+They are stored encrypted, used only by our systems to create your book, and automatically deleted after 30 days. You can delete them sooner from your account. They are never used to train artificial intelligence models. If you prefer not to upload photos, you can create the character by choosing their features.
+
+### Is it a subscription?
+
+No. You pay once for each book: no subscriptions and no recurring charges.
 
 ### How long does it take?
 

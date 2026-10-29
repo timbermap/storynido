@@ -91,3 +91,40 @@ for (const [locale, pages] of Object.entries(PAGES)) {
     });
   });
 }
+
+test('catálogo: "¿Qué le encanta?" desde Familias, temática y búsqueda sin tildes', async ({
+  page,
+}) => {
+  await page.goto('/es/familias');
+  await page.getByRole('link', { name: 'Los héroes y el deporte' }).click();
+  await expect(page).toHaveURL(/tema=heroes/);
+  const grid = page.locator('main');
+  await expect(grid).toContainText('¡Gol de campeón!');
+  await expect(grid).not.toContainText('La gran aventura espacial');
+
+  await page.goto('/es/historias');
+  await page.getByRole('searchbox', { name: 'Buscar una historia' }).fill('FUTBOL');
+  await page.getByRole('button', { name: 'Buscar' }).click();
+  await expect(page).toHaveURL(/q=FUTBOL/);
+  await expect(grid).toContainText('¡Gol de campeón!');
+  await expect(grid).not.toContainText('La gran aventura espacial');
+  await expectAccessible(page);
+});
+
+test('las historias de Eventos y Profesionales vuelven a su landing y crean en su línea', async ({
+  page,
+}) => {
+  for (const [landing, line, back] of [
+    ['/es/eventos', 'events', 'Volver a cumpleaños y eventos'],
+    ['/es/profesionales', 'professionals', 'Volver a profesionales'],
+  ] as const) {
+    await page.goto(landing);
+    await page.locator(`a[href*="line=${line}"][href*="/historias/"]`).first().click();
+    await expect(page.getByRole('link', { name: 'Crear con esta historia' })).toHaveAttribute(
+      'href',
+      new RegExp(`line=${line}`),
+    );
+    await page.getByRole('link', { name: back }).click();
+    await expect(page).toHaveURL(new RegExp(`${landing}$`));
+  }
+});

@@ -4,7 +4,12 @@ import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
-import type { BookLength, EditorialConfig, Locale } from '@storynido/shared';
+import {
+  parseChannel,
+  type BookLength,
+  type EditorialConfig,
+  type Locale,
+} from '@storynido/shared';
 
 import { JsonLd } from '@/components/json-ld';
 import { CountryNotice } from '@/components/stories/country-notice';
@@ -21,6 +26,7 @@ import { absoluteUrl } from '@/lib/site';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
+  searchParams?: Promise<{ line?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -42,8 +48,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function StoryPage({ params }: Props) {
+export default async function StoryPage({ params, searchParams }: Props) {
   const { locale: rawLocale, slug } = await params;
+  const requestedLine = parseChannel((await searchParams)?.line);
   const locale = rawLocale as Locale;
 
   const display = await getDisplayCountry(locale);
@@ -56,6 +63,11 @@ export default async function StoryPage({ params }: Props) {
     getEditorial(),
   ]);
   if (!story) notFound();
+  // Desde Eventos o Profesionales: la ficha vuelve a esa landing y crea en esa línea.
+  const line =
+    requestedLine && requestedLine !== 'families' && story.channels.includes(requestedLine)
+      ? requestedLine
+      : null;
 
   const countryLabel = countryName(display.country, locale);
   const price = (amountMinor: number) =>
@@ -86,11 +98,13 @@ export default async function StoryPage({ params }: Props) {
       )}
 
       <Link
-        href="/stories"
+        href={
+          line === 'events' ? '/events' : line === 'professionals' ? '/professionals' : '/stories'
+        }
         className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
-        {t('back')}
+        {line ? t(`backTo.${line}`) : t('back')}
       </Link>
 
       <div className="mt-6 grid gap-10 md:grid-cols-[2fr_3fr] md:gap-14">
@@ -156,68 +170,74 @@ export default async function StoryPage({ params }: Props) {
             </section>
           )}
 
-          <section aria-labelledby="formats">
-            <h2 id="formats" className="text-xl font-medium">
-              {t('formats')}
-            </h2>
-            {offer?.available ? (
-              <>
-                <div className="mt-3">
-                  <CountryNotice display={display} />
-                </div>
-                <ul className="mt-3 divide-y rounded-xl border bg-card">
-                  {offer.formats.map((format) => (
-                    <li
-                      key={format.format}
-                      className="flex items-center justify-between gap-4 px-5 py-3"
-                    >
-                      <span className="font-medium">{format.name}</span>
-                      <span className="font-semibold">
-                        {format.estimated
-                          ? t('from', { price: price(format.amountMinor) })
-                          : price(format.amountMinor)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-3 text-sm text-muted-foreground">
-                  {offer.formats.some((format) => format.estimated) &&
-                    `${
-                      offer.shipping.quoted
-                        ? t('shippingQuoted', {
-                            country: countryLabel,
-                            min: offer.shipping.etaDaysMin,
-                            max: offer.shipping.etaDaysMax,
-                          })
-                        : t('shippingTo', {
-                            country: countryLabel,
-                            price: price(offer.shipping.costMinor),
-                            min: offer.shipping.etaDaysMin,
-                            max: offer.shipping.etaDaysMax,
-                          })
-                    } · `}
-                  {offer.taxIncludedInPrice ? t('taxIncluded') : t('taxExtra')}
-                </p>
-                {offer.local && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t('usdNote', {
-                      rate: new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(
-                        offer.local.rate,
-                      ),
-                      currency: offer.local.currency,
-                    })}
+          {/* El kit de Eventos tiene su propio precio (se ve en el creador), no el de los libros. */}
+          {line !== 'events' && (
+            <section aria-labelledby="formats">
+              <h2 id="formats" className="text-xl font-medium">
+                {t('formats')}
+              </h2>
+              {offer?.available ? (
+                <>
+                  <div className="mt-3">
+                    <CountryNotice display={display} />
+                  </div>
+                  <ul className="mt-3 divide-y rounded-xl border bg-card">
+                    {offer.formats.map((format) => (
+                      <li
+                        key={format.format}
+                        className="flex items-center justify-between gap-4 px-5 py-3"
+                      >
+                        <span className="font-medium">{format.name}</span>
+                        <span className="font-semibold">
+                          {format.estimated
+                            ? t('from', { price: price(format.amountMinor) })
+                            : price(format.amountMinor)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    {offer.formats.some((format) => format.estimated) &&
+                      `${
+                        offer.shipping.quoted
+                          ? t('shippingQuoted', {
+                              country: countryLabel,
+                              min: offer.shipping.etaDaysMin,
+                              max: offer.shipping.etaDaysMax,
+                            })
+                          : t('shippingTo', {
+                              country: countryLabel,
+                              price: price(offer.shipping.costMinor),
+                              min: offer.shipping.etaDaysMin,
+                              max: offer.shipping.etaDaysMax,
+                            })
+                      } · `}
+                    {offer.taxIncludedInPrice ? t('taxIncluded') : t('taxExtra')}
                   </p>
-                )}
-              </>
-            ) : (
-              <p className="mt-3 text-muted-foreground">
-                {t('notAvailable', { country: countryLabel })}
-              </p>
-            )}
-          </section>
+                  {offer.local && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t('usdNote', {
+                        rate: new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(
+                          offer.local.rate,
+                        ),
+                        currency: offer.local.currency,
+                      })}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="mt-3 text-muted-foreground">
+                  {t('notAvailable', { country: countryLabel })}
+                </p>
+              )}
+            </section>
+          )}
 
           <Link
-            href={{ pathname: '/create', query: { story: story.slug } }}
+            href={{
+              pathname: '/create',
+              query: line ? { story: story.slug, line } : { story: story.slug },
+            }}
             className={buttonVariants({ size: 'lg' })}
           >
             {t('create')}

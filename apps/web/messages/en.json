@@ -109,7 +109,8 @@
     "gallery": {
       "title": "A universe of adventures",
       "subtitle": "Stories to dream about, where every child can see themselves.",
-      "viewAll": "See all stories"
+      "viewAll": "See all stories",
+      "loves": "What do they love?"
     },
     "faq": {
       "title": "Frequently asked questions",
@@ -202,7 +203,24 @@
     "exampleTitle": "This is a StoryNido book",
     "exampleLocked": "In your book, this page is illustrated with your hero",
     "exampleDedication": "For Martina, who dreams of the stars.",
-    "usdNote": "Prices in US dollars (USD); your bank converts them. Reference: 1 USD ≈ {rate} {currency}."
+    "usdNote": "Prices in US dollars (USD); your bank converts them. Reference: 1 USD ≈ {rate} {currency}.",
+    "themeLabel": "They love",
+    "allThemes": "Everything",
+    "themes": {
+      "space": "Space and science",
+      "animals": "Animals and dinosaurs",
+      "magic": "Magic",
+      "heroes": "Heroes and sports"
+    },
+    "searchLabel": "Search for a story",
+    "searchPlaceholder": "Dinosaurs, soccer, the sea…",
+    "search": "Search",
+    "emptySearch": "We couldn't find stories for “{query}”.",
+    "clearFilters": "See all stories",
+    "backTo": {
+      "events": "Back to birthdays and events",
+      "professionals": "Back to professionals"
+    }
   },
   "Formats": {
     "digital": "Digital book (PDF)",
@@ -550,7 +568,7 @@
       "characterAlt": "Character sheet: {name}, full body",
       "approve": "Yes, that's right: see their cover and 2 pages free",
       "approveNote": "Next we illustrate the cover and the first pages.",
-      "correct": "Fix features",
+      "correct": "Doesn't look right: fix it",
       "saveTraits": "Save and redraw",
       "correctNote": "Redrawing uses your free redo.",
       "mustKeepLegend": "Must stay the same throughout the book",
@@ -571,7 +589,17 @@
       "continueAfterApproval": "Choose the format once you approve the character and the sample is up to date.",
       "reviewCharacter": "Review the character",
       "approveFirst": "First confirm how we'll draw {name}. Then we create the cover and the pages, and you choose the format.",
-      "pendingStep": "One step left: confirm how we draw {name}."
+      "pendingStep": "One step left: confirm how we draw {name}.",
+      "whatsOff": "What doesn't look right?",
+      "whatsOffHint": "Pick what needs fixing and we'll show you just that.",
+      "aspects": {
+        "hair": "The hair",
+        "skinTone": "The skin tone",
+        "eyeColor": "The eyes",
+        "glasses": "The glasses",
+        "distinctive": "Something else (a feature)"
+      },
+      "lockedNote": "What you fix stays the same on every page."
     },
     "character": {
       "modeLegend": "How should we create the main character?",
@@ -1110,5 +1138,13 @@
         "ordered": "Purchased"
       }
     }
+  },
+  "PhotoPromise": {
+    "title": "What we do with the photo",
+    "encrypted": "It's stored encrypted and used only by our systems to create the book.",
+    "deleted": "It's deleted automatically after 30 days, or sooner from your account.",
+    "noTraining": "It's never used to train artificial intelligence models.",
+    "noPhoto": "Prefer not to upload photos? Create the character by choosing their features.",
+    "more": "Read the privacy policy"
   }
 }

@@ -121,6 +121,18 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await expect(body(page)).toContainText('Así vamos a dibujar a Martina', { timeout: 120_000 });
   await expect(page.locator('[aria-live=polite]').first()).toContainText('1 de 17');
 
+  // Corrección guiada: primero qué no se parece y solo esos rasgos.
+  await page.getByRole('button', { name: 'No se parece: corregir' }).click();
+  const save = page.getByRole('button', { name: 'Guardar y volver a dibujar' });
+  await expect(save).toBeDisabled();
+  await expect(page.getByRole('group', { name: 'Color de pelo' })).toHaveCount(0);
+  await page.getByLabel('El pelo').check();
+  await expect(page.getByRole('group', { name: 'Color de pelo' })).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Color de ojos' })).toHaveCount(0);
+  await expect(save).toBeEnabled();
+  await expectAccessible(page);
+  await page.getByRole('button', { name: 'Cancelar' }).click();
+
   // Aprobar sin cuenta pide crearla; el enlace mágico vuelve al mismo cuento.
   await page.getByRole('button', { name: 'Sí, es así' }).click();
   await expect(body(page)).toContainText('Crea tu cuenta para ver la portada y las páginas');

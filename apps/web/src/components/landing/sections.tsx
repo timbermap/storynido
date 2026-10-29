@@ -2,6 +2,8 @@ import { ArrowRight, Check, Clock } from 'lucide-react';
 import type { StaticImageData } from 'next/image';
 import type { ReactNode } from 'react';
 
+import type { Channel } from '@storynido/shared';
+
 import { HeroArt } from '@/components/home/hero-art';
 import { HeroBook } from '@/components/home/hero-book';
 import { FaqList, type FaqItem } from '@/components/home/faq-list';
@@ -167,6 +169,7 @@ export function LandingCollections({
   collections,
   stories = [],
   createLabel,
+  line,
 }: {
   /** Ancla para llegar desde un botón del hero ("Ver ejemplos"). */
   id?: string;
@@ -177,6 +180,8 @@ export function LandingCollections({
   stories?: { slug: string; title: string; coverImage: string; collectionIds: string[] }[];
   /** Texto del enlace accesible de cada tapa ("Ver la historia"). */
   createLabel?: string;
+  /** Público de la landing: la ficha de la historia vuelve a ella y crea en su línea. */
+  line?: Channel;
 }) {
   if (collections.length === 0) return null;
   return (
@@ -211,7 +216,11 @@ export function LandingCollections({
                     <li key={story.slug} className="w-[7.5rem]">
                       <Link
                         // La ficha de la historia: edades, fragmento, ejemplo para hojear y precios.
-                        href={{ pathname: '/stories/[slug]', params: { slug: story.slug } }}
+                        href={{
+                          pathname: '/stories/[slug]',
+                          params: { slug: story.slug },
+                          query: line ? { line } : undefined,
+                        }}
                         aria-label={createLabel ? `${createLabel}: ${story.title}` : story.title}
                         className="group block"
                       >

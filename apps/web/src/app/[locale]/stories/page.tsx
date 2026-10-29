@@ -5,11 +5,14 @@ import type { Locale } from '@storynido/shared';
 
 import { CountryNotice } from '@/components/stories/country-notice';
 import { StoryCard } from '@/components/stories/story-card';
+import { Search } from 'lucide-react';
+
 import { Link } from '@/i18n/navigation';
 import { lowestPrice } from '@/lib/offer';
 import { localizedAlternates } from '@/lib/seo';
 import { getCollections, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
+import { STORY_THEMES, matchesSearch, matchesTheme } from '@/lib/story-themes';
 import { cn } from '@/lib/utils';
 
 const AGE_FILTERS = [
@@ -21,7 +24,7 @@ const AGE_FILTERS = [
 
 interface Props {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ edad?: string; coleccion?: string }>;
+  searchParams: Promise<{ edad?: string; coleccion?: string; tema?: string; q?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -55,14 +58,20 @@ export default async function StoriesPage({ params, searchParams }: Props) {
     stories.some((story) => story.collectionIds.includes(item.slug)),
   );
   const collection = collections.find((item) => item.slug === query.coleccion);
+  const theme = STORY_THEMES.find((item) => item.key === query.tema);
+  const search = query.q?.trim().slice(0, 80) ?? '';
   const visible = stories
     .filter((story) => !filter || (story.ageMin <= filter.max && story.ageMax >= filter.min))
-    .filter((story) => !collection || story.collectionIds.includes(collection.slug));
+    .filter((story) => !collection || story.collectionIds.includes(collection.slug))
+    .filter((story) => !theme || matchesTheme(story, theme.key))
+    .filter((story) => !search || matchesSearch(story, search));
   const withQuery = (extra: Record<string, string | undefined>) => {
     const merged = Object.fromEntries(
       Object.entries({
         edad: filter ? String(filter.min) : undefined,
         coleccion: collection?.slug,
+        tema: theme?.key,
+        q: search || undefined,
         ...extra,
       }).filter((entry): entry is [string, string] => entry[1] !== undefined),
     );
@@ -82,7 +91,45 @@ export default async function StoriesPage({ params, searchParams }: Props) {
         </div>
       </header>
 
-      <nav aria-label={t('filterLabel')} className="mt-8 flex flex-wrap items-center gap-2">
+      <form role="search" action="" className="mt-8 flex max-w-xl gap-2">
+        <label htmlFor="story-search" className="sr-only">
+          {t('searchLabel')}
+        </label>
+        <input
+          id="story-search"
+          name="q"
+          type="search"
+          defaultValue={search}
+          maxLength={80}
+          placeholder={t('searchPlaceholder')}
+          className="h-11 min-w-0 flex-1 rounded-full border bg-card px-5 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        />
+        {filter && <input type="hidden" name="edad" value={filter.min} />}
+        {collection && <input type="hidden" name="coleccion" value={collection.slug} />}
+        {theme && <input type="hidden" name="tema" value={theme.key} />}
+        <button
+          type="submit"
+          aria-label={t('search')}
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-action text-action-foreground transition hover:bg-action-hover"
+        >
+          <Search className="size-5" aria-hidden="true" />
+        </button>
+      </form>
+
+      <nav aria-label={t('themeLabel')} className="mt-5 flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-sm font-semibold">{t('themeLabel')}:</span>
+        <FilterLink href={withQuery({ tema: undefined })} active={!theme} label={t('allThemes')} />
+        {STORY_THEMES.map((item) => (
+          <FilterLink
+            key={item.key}
+            href={withQuery({ tema: item.key })}
+            active={theme?.key === item.key}
+            label={t(`themes.${item.key}`)}
+          />
+        ))}
+      </nav>
+
+      <nav aria-label={t('filterLabel')} className="mt-3 flex flex-wrap items-center gap-2">
         <span className="mr-1 text-sm font-semibold">{t('filterLabel')}:</span>
         <FilterLink href={withQuery({ edad: undefined })} active={!filter} label={t('allAges')} />
         {AGE_FILTERS.map((f) => (
@@ -115,7 +162,14 @@ export default async function StoriesPage({ params, searchParams }: Props) {
       )}
 
       {visible.length === 0 ? (
-        <p className="mt-12 text-muted-foreground">{t('empty')}</p>
+        <div className="mt-12">
+          <p className="text-muted-foreground">
+            {search ? t('emptySearch', { query: search }) : t('empty')}
+          </p>
+          <Link href="/stories" className="mt-3 inline-block font-semibold text-primary">
+            {t('clearFilters')}
+          </Link>
+        </div>
       ) : (
         <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
           {visible.map((story, index) => (

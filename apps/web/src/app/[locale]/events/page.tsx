@@ -14,6 +14,7 @@ import {
   LandingSteps,
   ctaClass,
 } from '@/components/landing/sections';
+import { PhotoPromise } from '@/components/landing/photo-promise';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
@@ -97,7 +98,10 @@ export default async function EventsPage({ params }: Props) {
         collections={collections}
         stories={stories}
         createLabel={t('viewStory')}
+        line="events"
       />
+      <PhotoPromise />
+
       <LandingFaq
         title={t('faqTitle')}
         items={keys.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}

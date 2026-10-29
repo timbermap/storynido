@@ -13,6 +13,7 @@ import { JsonLd } from '@/components/json-ld';
 import { LessonGroups } from '@/components/lessons/lesson-groups';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { StoryCard } from '@/components/stories/story-card';
+import { PhotoPromise } from '@/components/landing/photo-promise';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
@@ -20,14 +21,16 @@ import { lowestPrice, offerHighlights } from '@/lib/offer';
 import { getContent, getLessons, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
+import { STORY_THEMES } from '@/lib/story-themes';
 
 export default async function FamiliesPage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = (await params).locale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [t, tLessons, stories, lessons, offer, faq] = await Promise.all([
+  const [t, tLessons, tStories, stories, lessons, offer, faq] = await Promise.all([
     getTranslations('Home'),
     getTranslations('Lessons'),
+    getTranslations('Stories'),
     getStories(locale).catch(() => []),
     getLessons(locale).catch(() => []),
     getOffer(display.country, locale),
@@ -214,6 +217,27 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
                 {t('gallery.viewAll')}
               </Link>
             </div>
+            {/* ¿Qué le encanta?: cuatro temáticas simples que llevan al catálogo filtrado. */}
+            <nav aria-labelledby="loves-title" className="mt-8">
+              <h3 id="loves-title" className="text-lg font-bold">
+                {t('gallery.loves')}
+              </h3>
+              <ul className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {STORY_THEMES.map(({ key, icon: Icon }) => (
+                  <li key={key}>
+                    <Link
+                      href={{ pathname: '/stories', query: { tema: key } }}
+                      className="flex h-full items-center gap-3 rounded-xl border bg-card p-4 font-semibold shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                    >
+                      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-mint text-success">
+                        <Icon className="size-5" aria-hidden="true" />
+                      </span>
+                      {tStories(`themes.${key}`)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
             <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
               {/* Hasta 6 en la home (dos filas completas); el resto, en el catálogo. */}
               {stories.slice(0, 6).map((story) => (
@@ -238,6 +262,8 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
           </div>
         </section>
       )}
+
+      <PhotoPromise />
 
       {/* Preguntas frecuentes */}
       {faqItems.length > 0 && (

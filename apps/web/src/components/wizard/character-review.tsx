@@ -3,6 +3,7 @@
 import {
   ApiError,
   MUST_KEEP_TRAITS,
+  type AvatarTrait,
   type CharacterTraits,
   type MustKeepTrait,
   type PublicPreview,
@@ -17,6 +18,13 @@ import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 import { AVATAR_TRAITS, TraitPicker, type TraitDraft } from './trait-picker';
+
+/** Qué rasgos del dibujo cambia cada cosa que "no se parece". */
+const ASPECT_TRAITS: Partial<Record<MustKeepTrait, readonly AvatarTrait[]>> = {
+  hair: ['hairColor', 'hairLength', 'hairType'],
+  skinTone: ['skinTone'],
+  eyeColor: ['eyeColor'],
+};
 
 type Character = NonNullable<NonNullable<PublicPreview['preview']>['character']>;
 
@@ -44,7 +52,8 @@ export function CharacterReview({
   const [editing, setEditing] = useState(false);
   const [traits, setTraits] = useState<TraitDraft>(character.traits);
   const [distinctive, setDistinctive] = useState(character.traits.distinctive ?? '');
-  const [mustKeep, setMustKeep] = useState<MustKeepTrait[]>(character.mustKeep);
+  // Corrección guiada: primero qué no se parece; solo eso se muestra y queda fijo después.
+  const [aspects, setAspects] = useState<MustKeepTrait[]>([]);
   const [busy, setBusy] = useState<'approve' | 'save' | null>(null);
   const [needsAccount, setNeedsAccount] = useState(false);
 
@@ -62,13 +71,14 @@ export function CharacterReview({
   }
 
   async function save() {
-    if (AVATAR_TRAITS.some((trait) => !traits[trait])) return;
+    if (aspects.length === 0 || AVATAR_TRAITS.some((trait) => !traits[trait])) return;
     setBusy('save');
     onError(null);
     try {
       const body = {
         traits: { ...(traits as CharacterTraits), distinctive: distinctive.trim() || null },
-        mustKeep,
+        // Lo que se corrigió queda fijo en todas las páginas.
+        mustKeep: [...new Set([...character.mustKeep, ...aspects])],
       };
       onUpdated(await api('updateCharacter', { params: { bookId }, body }));
       setEditing(false);
@@ -167,27 +177,12 @@ export function CharacterReview({
           </>
         ) : (
           <div className="grid gap-6">
-            <TraitPicker idPrefix="character" value={traits} onChange={setTraits} />
-            <div className="grid gap-2">
-              <label htmlFor="character-distinctive" className="font-bold">
-                {t('distinctive')}
-              </label>
-              <input
-                id="character-distinctive"
-                value={distinctive}
-                maxLength={60}
-                placeholder={t('distinctivePlaceholder')}
-                onChange={(event) => {
-                  setDistinctive(event.target.value);
-                }}
-                className="h-11 rounded-lg border bg-card px-3"
-              />
-            </div>
             <fieldset>
-              <legend className="mb-3 font-bold">{t('mustKeepLegend')}</legend>
+              <legend className="font-bold">{t('whatsOff')}</legend>
+              <p className="mt-1 mb-3 text-sm text-muted-foreground">{t('whatsOffHint')}</p>
               <div className="flex flex-wrap gap-2">
                 {MUST_KEEP_TRAITS.map((trait) => {
-                  const checked = mustKeep.includes(trait);
+                  const checked = aspects.includes(trait);
                   return (
                     <label
                       key={trait}
@@ -201,21 +196,47 @@ export function CharacterReview({
                         className="size-4 accent-[var(--primary)]"
                         checked={checked}
                         onChange={(event) => {
-                          setMustKeep((current) =>
+                          setAspects((current) =>
                             event.target.checked
                               ? [...current, trait]
                               : current.filter((item) => item !== trait),
                           );
                         }}
                       />
-                      {t(`mustKeep.${trait}`)}
+                      {t(`aspects.${trait}`)}
                     </label>
                   );
                 })}
               </div>
             </fieldset>
+            {aspects.some((aspect) => ASPECT_TRAITS[aspect]) || aspects.includes('glasses') ? (
+              <TraitPicker
+                idPrefix="character"
+                value={traits}
+                onChange={setTraits}
+                only={aspects.flatMap((aspect) => ASPECT_TRAITS[aspect] ?? [])}
+                showGlasses={aspects.includes('glasses')}
+              />
+            ) : null}
+            {aspects.includes('distinctive') && (
+              <div className="grid gap-2">
+                <label htmlFor="character-distinctive" className="font-bold">
+                  {t('distinctive')}
+                </label>
+                <input
+                  id="character-distinctive"
+                  value={distinctive}
+                  maxLength={60}
+                  placeholder={t('distinctivePlaceholder')}
+                  onChange={(event) => {
+                    setDistinctive(event.target.value);
+                  }}
+                  className="h-11 rounded-lg border bg-card px-3"
+                />
+              </div>
+            )}
             <div className="grid gap-2 sm:flex sm:items-center">
-              <Button disabled={busy !== null} onClick={() => void save()}>
+              <Button disabled={busy !== null || aspects.length === 0} onClick={() => void save()}>
                 {busy === 'save' && <Loader2 className="animate-spin" aria-hidden="true" />}
                 {t('saveTraits')}
               </Button>
@@ -223,12 +244,16 @@ export function CharacterReview({
                 variant="ghost"
                 onClick={() => {
                   setEditing(false);
+                  setAspects([]);
                 }}
               >
                 {t('cancel')}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground">{t('correctNote')}</p>
+            <p className="text-sm text-muted-foreground">
+              {aspects.length > 0 && `${t('lockedNote')} `}
+              {t('correctNote')}
+            </p>
           </div>
         )}
       </div>

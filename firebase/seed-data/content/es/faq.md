@@ -6,7 +6,11 @@ Con 1 a 3 fotos creamos un personaje ilustrado inspirado en tu hijo, que aparece
 
 ### ¿Qué pasa con las fotos que subo?
 
-Se guardan cifradas, solo las usan nuestros sistemas para crear tu libro y se eliminan automáticamente a los 30 días. Puedes borrarlas antes desde tu cuenta.
+Se guardan cifradas, solo las usan nuestros sistemas para crear tu libro y se eliminan automáticamente a los 30 días. Puedes borrarlas antes desde tu cuenta. Nunca se usan para entrenar modelos de inteligencia artificial. Si prefieres no subir fotos, puedes crear el personaje eligiendo sus rasgos.
+
+### ¿Es una suscripción?
+
+No. Pagas una sola vez por cada libro: no hay suscripciones ni cobros recurrentes.
 
 ### ¿Cuánto tarda en llegar?
 

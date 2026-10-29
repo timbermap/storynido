@@ -1392,3 +1392,14 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 
   - **Sigue abierto:** los personajes secundarios (por ejemplo, la mamá) cambian entre páginas, porque no tienen lámina (auditoría §1, punto 11). Además, la IA a veces pone palabras sueltas en los objetos.
 - **Siguiente:** regenerar las portadas del catálogo con la dirección nueva.
+
+## 104 · Descubrimiento por público, foto y correcciones guiadas
+
+- **Fecha:** 2026-10-29 · Puntos de la auditoría sin costo (`AUDITORIA-PRODUCTO.md`).
+- **"¿Qué le encanta?"** en Familias: cuatro temáticas simples (espacio y ciencia, animales y dinosaurios, magia, héroes y deporte) que llevan al catálogo filtrado. Se resuelven con las etiquetas de cada historia.
+- **Catálogo:** filtro por temática y búsqueda por texto (sin tildes ni mayúsculas), además de edad y colección.
+- **Profesionales:** las colecciones se nombran por necesidad concreta ("Prepararse para algo nuevo: dentista, primer día de clases", "Manejar la frustración y no rendirse"…).
+- **"Qué hacemos con la foto"** en las tres landings, y en las preguntas frecuentes "Pagas una sola vez" y "nunca se usa para entrenar IA".
+- **Correcciones guiadas del personaje:** primero "¿Qué no se parece?" (pelo, piel, ojos, anteojos u otra cosa), y solo se muestran esos rasgos. Lo corregido queda fijo en todas las páginas.
+- **Links por público:** desde Eventos y Profesionales, la ficha de una historia recuerda el público. "Crear" abre el creador de esa línea, "Volver" regresa a la landing y Eventos no muestra los precios de los libros, porque el kit tiene los suyos. Antes llevaba al creador y al catálogo de Familias.
+- **Staging:** la web y el admin no se deployan con el push (App Hosting sin repositorio conectado). Se suben con `firebase deploy --only apphosting`; ver RUNBOOK.

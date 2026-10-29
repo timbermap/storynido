@@ -41,15 +41,20 @@ export function TraitPicker({
   value,
   onChange,
   idPrefix,
+  only,
+  showGlasses = true,
 }: {
   value: TraitDraft;
   onChange: (value: TraitDraft) => void;
   idPrefix: string;
+  /** Solo estos rasgos (corrección guiada: lo que no se parece). */
+  only?: readonly AvatarTrait[];
+  showGlasses?: boolean;
 }) {
   const t = useTranslations('Wizard.character');
   return (
     <div className="grid gap-8">
-      {AVATAR_TRAITS.map((trait) => (
+      {(only ?? AVATAR_TRAITS).map((trait) => (
         <fieldset key={trait}>
           <legend className="mb-3 font-bold">{t(trait)}</legend>
           <div className="flex flex-wrap gap-2">
@@ -91,17 +96,19 @@ export function TraitPicker({
         </fieldset>
       ))}
 
-      <label className="inline-flex items-center gap-3 font-bold">
-        <input
-          type="checkbox"
-          className="size-5 accent-[var(--primary)]"
-          checked={value.glasses}
-          onChange={(event) => {
-            onChange({ ...value, glasses: event.target.checked });
-          }}
-        />
-        {t('glasses')}
-      </label>
+      {showGlasses && (
+        <label className="inline-flex items-center gap-3 font-bold">
+          <input
+            type="checkbox"
+            className="size-5 accent-[var(--primary)]"
+            checked={value.glasses}
+            onChange={(event) => {
+              onChange({ ...value, glasses: event.target.checked });
+            }}
+          />
+          {t('glasses')}
+        </label>
+      )}
     </div>
   );
 }

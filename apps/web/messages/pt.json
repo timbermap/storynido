@@ -109,7 +109,8 @@
     "gallery": {
       "title": "Um universo de aventuras",
       "subtitle": "Histórias para sonhar, em que cada criança pode se reconhecer.",
-      "viewAll": "Ver todas as histórias"
+      "viewAll": "Ver todas as histórias",
+      "loves": "Do que ele ou ela mais gosta?"
     },
     "faq": {
       "title": "Perguntas frequentes",
@@ -202,7 +203,24 @@
     "exampleTitle": "Assim é um livro StoryNido",
     "exampleLocked": "No seu livro, esta página é ilustrada com o seu protagonista",
     "exampleDedication": "Para Martina, que sonha com as estrelas.",
-    "usdNote": "Preços em dólares (USD); seu banco faz a conversão. Referência: 1 USD ≈ {rate} {currency}."
+    "usdNote": "Preços em dólares (USD); seu banco faz a conversão. Referência: 1 USD ≈ {rate} {currency}.",
+    "themeLabel": "Adora",
+    "allThemes": "Tudo",
+    "themes": {
+      "space": "O espaço e a ciência",
+      "animals": "Os animais e os dinossauros",
+      "magic": "A magia",
+      "heroes": "Os heróis e o esporte"
+    },
+    "searchLabel": "Buscar uma história",
+    "searchPlaceholder": "Dinossauros, futebol, o mar…",
+    "search": "Buscar",
+    "emptySearch": "Não encontramos histórias para “{query}”.",
+    "clearFilters": "Ver todas as histórias",
+    "backTo": {
+      "events": "Voltar a aniversários e eventos",
+      "professionals": "Voltar a profissionais"
+    }
   },
   "Formats": {
     "digital": "Livro digital (PDF)",
@@ -550,7 +568,7 @@
       "characterAlt": "Ficha do personagem: {name} de corpo inteiro",
       "approve": "Sim, é assim: ver a capa e 2 páginas grátis",
       "approveNote": "Depois ilustramos a capa e as primeiras páginas.",
-      "correct": "Corrigir características",
+      "correct": "Não está parecido: corrigir",
       "saveTraits": "Salvar e desenhar de novo",
       "correctNote": "Desenhar de novo usa sua nova tentativa grátis.",
       "mustKeepLegend": "Tem que ficar igual em todo o livro",
@@ -571,7 +589,17 @@
       "continueAfterApproval": "Escolha o formato quando aprovar o personagem e a amostra estiver atualizada.",
       "reviewCharacter": "Revisar a personagem",
       "approveFirst": "Primeiro confirme como vamos desenhar {name}. Depois criamos a capa e as páginas, e você escolhe o formato.",
-      "pendingStep": "Falta um passo: confirme como desenhamos {name}."
+      "pendingStep": "Falta um passo: confirme como desenhamos {name}.",
+      "whatsOff": "O que não está parecido?",
+      "whatsOffHint": "Marque o que precisa corrigir e mostramos só isso.",
+      "aspects": {
+        "hair": "O cabelo",
+        "skinTone": "O tom de pele",
+        "eyeColor": "Os olhos",
+        "glasses": "Os óculos",
+        "distinctive": "Outra coisa (um traço)"
+      },
+      "lockedNote": "O que você corrigir fica igual em todas as páginas."
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",
@@ -1110,5 +1138,13 @@
         "ordered": "Comprado"
       }
     }
+  },
+  "PhotoPromise": {
+    "title": "O que fazemos com a foto",
+    "encrypted": "Ela é guardada criptografada e usada só pelos nossos sistemas para criar o livro.",
+    "deleted": "É excluída automaticamente após 30 dias, ou antes na sua conta.",
+    "noTraining": "Nunca é usada para treinar modelos de inteligência artificial.",
+    "noPhoto": "Prefere não enviar fotos? Crie o personagem escolhendo as características.",
+    "more": "Ler a política de privacidade"
   }
 }

@@ -109,7 +109,8 @@
     "gallery": {
       "title": "Un universo de aventuras",
       "subtitle": "Historias para soñar, donde cada niño puede reconocerse.",
-      "viewAll": "Ver todas las historias"
+      "viewAll": "Ver todas las historias",
+      "loves": "¿Qué le encanta?"
     },
     "faq": {
       "title": "Preguntas frecuentes",
@@ -202,7 +203,24 @@
     "exampleTitle": "Así es un libro de StoryNido",
     "exampleLocked": "En tu libro, esta página se ilustra con tu protagonista",
     "exampleDedication": "Para Martina, que sueña con las estrellas.",
-    "usdNote": "Precios en dólares (USD); tu banco hace la conversión. Referencia: 1 USD ≈ {rate} {currency}."
+    "usdNote": "Precios en dólares (USD); tu banco hace la conversión. Referencia: 1 USD ≈ {rate} {currency}.",
+    "themeLabel": "Le encanta",
+    "allThemes": "Todo",
+    "themes": {
+      "space": "El espacio y la ciencia",
+      "animals": "Los animales y los dinosaurios",
+      "magic": "La magia",
+      "heroes": "Los héroes y el deporte"
+    },
+    "searchLabel": "Buscar una historia",
+    "searchPlaceholder": "Dinosaurios, fútbol, el mar…",
+    "search": "Buscar",
+    "emptySearch": "No encontramos historias para «{query}».",
+    "clearFilters": "Ver todas las historias",
+    "backTo": {
+      "events": "Volver a cumpleaños y eventos",
+      "professionals": "Volver a profesionales"
+    }
   },
   "Formats": {
     "digital": "Libro digital (PDF)",
@@ -550,7 +568,7 @@
       "characterAlt": "Lámina del personaje: {name} de cuerpo entero",
       "approve": "Sí, es así: ver su portada y 2 páginas gratis",
       "approveNote": "Después ilustramos la portada y las primeras páginas.",
-      "correct": "Corregir rasgos",
+      "correct": "No se parece: corregir",
       "saveTraits": "Guardar y volver a dibujar",
       "correctNote": "Volver a dibujar usa tu regeneración gratis.",
       "mustKeepLegend": "Tiene que mantenerse igual en todo el libro",
@@ -571,7 +589,17 @@
       "continueAfterApproval": "Elige el formato cuando apruebes al personaje y la muestra esté al día.",
       "reviewCharacter": "Revisar al personaje",
       "approveFirst": "Primero confirma cómo vamos a dibujar a {name}. Después creamos la portada y las páginas, y eliges el formato.",
-      "pendingStep": "Falta un paso: confirma cómo dibujamos a {name}."
+      "pendingStep": "Falta un paso: confirma cómo dibujamos a {name}.",
+      "whatsOff": "¿Qué no se parece?",
+      "whatsOffHint": "Marca lo que hay que corregir y te mostramos solo eso.",
+      "aspects": {
+        "hair": "El pelo",
+        "skinTone": "El tono de piel",
+        "eyeColor": "Los ojos",
+        "glasses": "Los anteojos",
+        "distinctive": "Otra cosa (un rasgo)"
+      },
+      "lockedNote": "Lo que corrijas queda fijo en todas las páginas."
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
@@ -1110,5 +1138,13 @@
         "ordered": "Comprado"
       }
     }
+  },
+  "PhotoPromise": {
+    "title": "Qué hacemos con la foto",
+    "encrypted": "Se guarda cifrada y solo la usan nuestros sistemas para crear el libro.",
+    "deleted": "Se borra sola a los 30 días, o antes desde tu cuenta.",
+    "noTraining": "Nunca se usa para entrenar modelos de inteligencia artificial.",
+    "noPhoto": "¿Prefieres no subir fotos? Crea el personaje eligiendo sus rasgos.",
+    "more": "Leer la política de privacidad"
   }
 }

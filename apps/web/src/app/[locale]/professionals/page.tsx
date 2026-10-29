@@ -14,6 +14,7 @@ import {
   LandingSteps,
   ctaClass,
 } from '@/components/landing/sections';
+import { PhotoPromise } from '@/components/landing/photo-promise';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
@@ -100,6 +101,7 @@ export default async function ProfessionalsPage({ params }: Props) {
         collections={collections}
         stories={stories}
         createLabel={t('viewStory')}
+        line="professionals"
       />
       <LandingSteps
         title={t('howTitle')}
@@ -116,6 +118,8 @@ export default async function ProfessionalsPage({ params }: Props) {
         }))}
         note={t('disclaimer')}
       />
+      <PhotoPromise />
+
       <LandingFaq
         title={t('faqTitle')}
         items={four.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}
