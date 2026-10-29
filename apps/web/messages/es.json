@@ -35,7 +35,30 @@
     "preferences": "Preferencias",
     "signOut": "Cerrar sesión",
     "accountMenu": "Menú de tu cuenta",
-    "signedInAs": "Sesión de"
+    "signedInAs": "Sesión de",
+    "menuFamilies": "Para familias",
+    "menuEvents": "Para cumpleaños",
+    "menuProfessionals": "Para profesionales",
+    "howTitle": "Cómo funciona",
+    "exploreTitle": "Explorar",
+    "startCta": "Empezar mi cuento",
+    "flow": {
+      "families": {
+        "step1": "Cuéntanos de tu hijo o hija: nombre, edad y lo que le gusta.",
+        "step2": "Mira gratis la muestra con su personaje.",
+        "step3": "Elige digital o impreso y recíbelo en casa."
+      },
+      "events": {
+        "step1": "Elige la temática y la edad que cumple.",
+        "step2": "Creamos el cuento y el kit: invitación, stickers y más.",
+        "step3": "Descárgalo e imprime todas las copias que necesites."
+      },
+      "professionals": {
+        "step1": "Activa tu cuenta profesional (docentes, psicólogos, fonoaudiólogos, odontopediatras…).",
+        "step2": "Elige un objetivo: emociones, rutinas o primeras experiencias.",
+        "step3": "Crea cuentos para cada chico, con descuento por compras frecuentes."
+      }
+    }
   },
   "Switchers": {
     "language": "Idioma"

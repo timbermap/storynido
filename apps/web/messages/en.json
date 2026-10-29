@@ -35,7 +35,30 @@
     "preferences": "Preferences",
     "signOut": "Sign out",
     "accountMenu": "Your account menu",
-    "signedInAs": "Signed in as"
+    "signedInAs": "Signed in as",
+    "menuFamilies": "For families",
+    "menuEvents": "For birthdays",
+    "menuProfessionals": "For professionals",
+    "howTitle": "How it works",
+    "exploreTitle": "Explore",
+    "startCta": "Start my story",
+    "flow": {
+      "families": {
+        "step1": "Tell us about your child: name, age and what they love.",
+        "step2": "See the free sample with their character.",
+        "step3": "Choose digital or printed and get it at home."
+      },
+      "events": {
+        "step1": "Choose the theme and the age they turn.",
+        "step2": "We create the story and the kit: invitation, stickers and more.",
+        "step3": "Download it and print as many copies as you need."
+      },
+      "professionals": {
+        "step1": "Activate your professional account (teachers, psychologists, speech therapists, pediatric dentists…).",
+        "step2": "Choose a goal: emotions, routines or first experiences.",
+        "step3": "Create stories for each child, with discounts for frequent purchases."
+      }
+    }
   },
   "Switchers": {
     "language": "Language"

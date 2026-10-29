@@ -64,7 +64,7 @@ export async function SiteHeader() {
   }[] = [
     {
       audience: 'families',
-      label: t('families'),
+      label: t('menuFamilies'),
       cta: { href: '/create', label: t('familiesCreate') },
       links: [
         {
@@ -88,7 +88,7 @@ export async function SiteHeader() {
     },
     {
       audience: 'events',
-      label: t('eventsMenu'),
+      label: t('menuEvents'),
       cta: { href: { pathname: '/create', query: { line: 'events' } }, label: t('eventsCreate') },
       links: [
         {
@@ -106,7 +106,7 @@ export async function SiteHeader() {
     },
     {
       audience: 'professionals',
-      label: t('professionals'),
+      label: t('menuProfessionals'),
       cta: {
         href: { pathname: '/create', query: { line: 'professionals' } },
         label: t('professionalsCreate'),
@@ -144,7 +144,7 @@ export async function SiteHeader() {
               <NavMenu
                 key={menu.audience}
                 id={`menu-${menu.audience}`}
-                panelClassName="w-[36rem]"
+                panelClassName="w-[26rem]"
                 label={
                   <>
                     <span aria-hidden="true" className={cn('size-2 rounded-full', tone.dot)} />
@@ -152,26 +152,43 @@ export async function SiteHeader() {
                   </>
                 }
               >
-                <div className="grid grid-cols-[13rem_1fr]">
-                  <div className={cn('flex flex-col p-5', tone.panel)}>
-                    <p className={cn('text-xs font-bold tracking-[0.14em] uppercase', tone.text)}>
-                      {menu.label}
-                    </p>
-                    <p className="mt-2 text-[0.95rem] leading-snug text-foreground/80">
-                      {tAudience(`${menu.audience}.text`)}
-                    </p>
-                    <Link
-                      href={menu.cta.href}
-                      className={cn(
-                        'mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-semibold hover:underline',
-                        tone.text,
-                      )}
-                    >
-                      {menu.cta.label}
-                      <ArrowRight aria-hidden="true" className="size-4" />
-                    </Link>
-                  </div>
-                  <ul className="p-2">
+                {/* Un flujo de arriba abajo: para quién es, cómo funciona, qué explorar y empezar. */}
+                <div className={cn('px-5 pt-5 pb-4', tone.panel)}>
+                  <p className={cn('text-xs font-bold tracking-[0.14em] uppercase', tone.text)}>
+                    {menu.label}
+                  </p>
+                  <p className="mt-1.5 text-[0.95rem] leading-snug text-foreground/80">
+                    {tAudience(`${menu.audience}.text`)}
+                  </p>
+                </div>
+                <div className="px-5 pt-4">
+                  <p className="text-xs font-bold tracking-[0.14em] text-muted-foreground uppercase">
+                    {t('howTitle')}
+                  </p>
+                  <ol className="mt-2 grid gap-2">
+                    {(['step1', 'step2', 'step3'] as const).map((step, index) => (
+                      <li key={step} className="flex items-start gap-3 text-sm leading-snug">
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            'grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white',
+                            tone.dot,
+                          )}
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="text-foreground/85">
+                          {t(`flow.${menu.audience}.${step}`)}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                <div className="px-3 pt-4">
+                  <p className="px-2 text-xs font-bold tracking-[0.14em] text-muted-foreground uppercase">
+                    {t('exploreTitle')}
+                  </p>
+                  <ul className="mt-1">
                     {menu.links.map((link) => (
                       <li key={link.title}>
                         <Link href={link.href} className="group block rounded-xl">
@@ -180,6 +197,15 @@ export async function SiteHeader() {
                       </li>
                     ))}
                   </ul>
+                </div>
+                <div className="p-4 pt-3">
+                  <Link
+                    href={menu.cta.href}
+                    className={buttonVariants({ className: 'w-full justify-center' })}
+                  >
+                    {t('startCta')}
+                    <ArrowRight aria-hidden="true" className="size-4" />
+                  </Link>
                 </div>
               </NavMenu>
             );
