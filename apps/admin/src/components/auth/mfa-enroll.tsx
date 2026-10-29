@@ -19,6 +19,7 @@ export function MfaEnroll() {
   const { user, signOut } = useAdminAuth();
   const [secret, setSecret] = useState<TotpSecret | null>(null);
   const [qr, setQr] = useState<string | null>(null);
+  const [uri, setUri] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export function MfaEnroll() {
       const generated = await TotpMultiFactorGenerator.generateSecret(session);
       const uri = generated.generateQrCodeUrl(user.email ?? user.uid, `${brand.name} Admin`);
       setQr(await QRCode.toDataURL(uri, { margin: 1, width: 220 }));
+      setUri(uri);
       setSecret(generated);
     } catch (caught) {
       const code = typeof caught === 'object' && caught && 'code' in caught ? caught.code : '';
@@ -86,8 +88,19 @@ export function MfaEnroll() {
             // eslint-disable-next-line @next/next/no-img-element -- QR generado en el navegador
             <img src={qr} alt="Código QR para la app autenticadora" className="mx-auto size-56" />
           )}
+          <p className="text-center text-sm text-muted-foreground">
+            Escanea el código con tu app autenticadora (Google Authenticator, 1Password, Authy).
+          </p>
+          {uri && (
+            // En el teléfono no se puede escanear la propia pantalla: el enlace abre la app.
+            <Button asChild variant="outline">
+              <a href={uri}>Abrir en la app autenticadora (desde el teléfono)</a>
+            </Button>
+          )}
           <p className="text-center text-xs text-muted-foreground">
-            ¿No puedes escanearlo? Escribe esta clave en la app:
+            ¿No puedes escanearlo ni abrirla? En la app elige “Ingresar una clave de configuración”,
+            pon cualquier nombre (por ejemplo, StoryNido) y esta clave, con el tipo “Basada en el
+            tiempo”:
             <code className="mt-1 block font-mono text-sm break-all text-foreground">
               {secret.secretKey}
             </code>
