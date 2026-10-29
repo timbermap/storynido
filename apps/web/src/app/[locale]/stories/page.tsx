@@ -161,6 +161,12 @@ export default async function StoriesPage({ params, searchParams }: Props) {
         </nav>
       )}
 
+      {filter && visible.length > 0 && visible.length < 3 && (
+        <p role="note" className="mt-8 max-w-2xl rounded-lg bg-accent px-4 py-3 text-sm">
+          {t('fewForAge', { min: filter.min, max: filter.max })}
+        </p>
+      )}
+
       {visible.length === 0 ? (
         <div className="mt-12">
           <p className="text-muted-foreground">

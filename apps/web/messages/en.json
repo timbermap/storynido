@@ -220,7 +220,11 @@
     "backTo": {
       "events": "Back to birthdays and events",
       "professionals": "Back to professionals"
-    }
+    },
+    "objectivesTitle": "What this story works on",
+    "objectivesText": "When you create it, you choose one as the main goal and the story is built around it.",
+    "shipTo": "Ship to",
+    "fewForAge": "There are only a few stories designed for ages {min} to {max} for now. In these, the text and illustrations are written for your child's age."
   },
   "Formats": {
     "digital": "Digital book (PDF)",

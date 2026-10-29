@@ -98,6 +98,13 @@ export default function StoriesPage() {
           options: CONTENT_TYPES,
         },
         { kind: 'json', path: 'personalization', label: 'Personalización admitida', rows: 6 },
+        {
+          kind: 'json',
+          path: 'objectives',
+          label: 'Objetivos propios (Profesionales)',
+          hint: 'Lista de { "es", "en", "pt" }. Si tiene, reemplazan a los temas de la colección y a las enseñanzas en la ficha.',
+          rows: 6,
+        },
       ]}
       extra={(data) => <PromptTest data={data} />}
       columns={[

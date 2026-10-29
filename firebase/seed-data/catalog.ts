@@ -314,6 +314,24 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'mi-primer-dia-de-clases',
+    objectives: [
+      {
+        es: 'Anticipar cómo será el primer día',
+        en: 'Know what the first day will be like',
+        pt: 'Antecipar como será o primeiro dia',
+      },
+      {
+        es: 'Despedirse con confianza',
+        en: 'Say goodbye with confidence',
+        pt: 'Despedir-se com confiança',
+      },
+      { es: 'Hacer un primer amigo', en: 'Make a first friend', pt: 'Fazer um primeiro amigo' },
+      {
+        es: 'Nombrar los nervios y calmarse',
+        en: 'Name the nerves and calm down',
+        pt: 'Nomear o nervosismo e se acalmar',
+      },
+    ],
     palette: 'learning',
     order: 21,
     ageMin: 3,
@@ -366,6 +384,19 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'las-letras-que-bailan',
+    objectives: [
+      {
+        es: 'Reconocer letras y sus sonidos',
+        en: 'Recognize letters and their sounds',
+        pt: 'Reconhecer letras e seus sons',
+      },
+      { es: 'Jugar con la lectura', en: 'Play with reading', pt: 'Brincar com a leitura' },
+      {
+        es: 'Sentir curiosidad por las palabras',
+        en: 'Feel curious about words',
+        pt: 'Ter curiosidade pelas palavras',
+      },
+    ],
     palette: 'learning',
     order: 23,
     ageMin: 4,
@@ -392,6 +423,19 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'el-jardin-de-las-emociones',
+    objectives: [
+      { es: 'Reconocer emociones', en: 'Recognize feelings', pt: 'Reconhecer emoções' },
+      {
+        es: 'Ponerle palabras a lo que siente',
+        en: 'Put feelings into words',
+        pt: 'Colocar em palavras o que sente',
+      },
+      {
+        es: 'Encontrar formas de calmarse',
+        en: 'Find ways to calm down',
+        pt: 'Encontrar formas de se acalmar',
+      },
+    ],
     palette: 'learning',
     order: 24,
     ageMin: 3,
@@ -418,6 +462,19 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'un-pasito-mas',
+    objectives: [
+      { es: 'Tolerar la frustración', en: 'Cope with frustration', pt: 'Tolerar a frustração' },
+      {
+        es: 'Valorar el esfuerzo y los avances',
+        en: 'Value effort and progress',
+        pt: 'Valorizar o esforço e os avanços',
+      },
+      {
+        es: 'Animarse a pedir ayuda',
+        en: 'Feel able to ask for help',
+        pt: 'Ter coragem de pedir ajuda',
+      },
+    ],
     palette: 'learning',
     order: 25,
     ageMin: 3,
@@ -440,6 +497,28 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'mi-visita-al-dentista',
+    objectives: [
+      {
+        es: 'Conocer el consultorio antes de ir',
+        en: 'Get to know the dental office before going',
+        pt: 'Conhecer o consultório antes de ir',
+      },
+      {
+        es: 'Anticipar los pasos de una consulta',
+        en: 'Know the steps of a routine visit',
+        pt: 'Antecipar os passos de uma consulta',
+      },
+      {
+        es: 'Familiarizarse con los instrumentos',
+        en: 'Become familiar with the tools',
+        pt: 'Familiarizar-se com os instrumentos',
+      },
+      {
+        es: 'Hablar de las dudas y los miedos',
+        en: 'Talk about questions and worries',
+        pt: 'Falar sobre dúvidas e medos',
+      },
+    ],
     palette: 'learning',
     order: 26,
     ageMin: 3,

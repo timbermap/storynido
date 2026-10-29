@@ -140,3 +140,14 @@ test('el menú abre cada landing desde arriba (sin saltos de scroll)', async ({ 
     expect(await page.evaluate(() => window.scrollY)).toBeLessThan(10);
   }
 });
+
+test('ficha profesional: objetivos propios en vez de enseñanzas generales; envío editable', async ({
+  page,
+}) => {
+  await page.goto('/es/historias/mi-visita-al-dentista?line=professionals');
+  await expect(page.getByRole('heading', { name: 'Qué trabaja este cuento' })).toBeVisible();
+  await expect(page.locator('main')).toContainText('Conocer el consultorio antes de ir');
+  await expect(page.getByRole('heading', { name: 'Combínala con una enseñanza' })).toHaveCount(0);
+  await expect(page.getByLabel('Enviar a')).toBeVisible();
+  await expectAccessible(page);
+});

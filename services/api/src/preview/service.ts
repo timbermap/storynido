@@ -38,7 +38,7 @@ import {
   type LessonPrompt,
   type Locale,
   type PublicPreview,
-  storyGoals,
+  storyGoalOptions,
   validGoal,
   acceptsChildPhotos,
   aiModelSchema,
@@ -412,7 +412,7 @@ export class PreviewService {
     // Profesionales: el objetivo tiene que ser uno de los temas de las colecciones de la
     // historia (así no entra texto libre al prompt).
     const goal = book.goal
-      ? validGoal(book.goal, storyGoals(await this.catalog.collections(), story.collectionIds))
+      ? validGoal(book.goal, storyGoalOptions(story, await this.catalog.collections()))
       : null;
 
     // Eventos: la temática de la fiesta también se modera antes de entrar al prompt.

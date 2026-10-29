@@ -59,5 +59,18 @@ export function storyGoals(
     .flatMap((collection) => collection.topics.flatMap((topic) => Object.values(topic)));
 }
 
+/**
+ * Objetivos posibles de una historia: los suyos si los tiene (en todos los idiomas, para validar)
+ * o, si no, los temas de sus colecciones.
+ */
+export function storyGoalOptions(
+  story: { collectionIds: readonly string[]; objectives?: readonly Record<string, string>[] },
+  collections: readonly Pick<Collection, 'slug' | 'topics'>[],
+): string[] {
+  return story.objectives?.length
+    ? story.objectives.flatMap((objective) => Object.values(objective))
+    : storyGoals(collections, story.collectionIds);
+}
+
 export const validGoal = (goal: string | null | undefined, goals: readonly string[]) =>
   goal && goals.includes(goal) ? goal : null;

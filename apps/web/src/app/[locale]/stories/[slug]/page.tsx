@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen, Check } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
@@ -13,6 +13,7 @@ import {
 
 import { JsonLd } from '@/components/json-ld';
 import { CountryNotice } from '@/components/stories/country-notice';
+import { ShipToSelect } from '@/components/stories/ship-to-select';
 import { StoryExample } from '@/components/stories/story-example';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
@@ -144,30 +145,48 @@ export default async function StoryPage({ params, searchParams }: Props) {
             <p className="mt-3 text-sm text-muted-foreground">{t('sampleNote')}</p>
           </section>
 
-          {lessons.length > 0 && (
-            <section aria-labelledby="lessons">
-              <h2 id="lessons" className="text-xl font-medium">
-                {tLessons('storyCombine')}
+          {/* Historia con propósito propio (Profesionales): sus objetivos, no enseñanzas generales. */}
+          {story.objectives?.length ? (
+            <section aria-labelledby="objectives">
+              <h2 id="objectives" className="text-xl font-medium">
+                {t('objectivesTitle')}
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">{tLessons('storyCombineText')}</p>
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {lessons
-                  .filter(
-                    (lesson) => lesson.ageMin <= story.ageMax && lesson.ageMax >= story.ageMin,
-                  )
-                  .slice(0, 6)
-                  .map((lesson) => (
-                    <li key={lesson.slug}>
-                      <Link
-                        href={{ pathname: '/lessons/[slug]', params: { slug: lesson.slug } }}
-                        className="inline-block rounded-full bg-secondary px-3.5 py-1.5 text-sm font-bold text-primary hover:underline"
-                      >
-                        {lesson.name}
-                      </Link>
-                    </li>
-                  ))}
+              <p className="mt-1 text-sm text-muted-foreground">{t('objectivesText')}</p>
+              <ul className="mt-3 grid gap-2">
+                {story.objectives.map((objective) => (
+                  <li key={objective} className="flex items-start gap-2">
+                    <Check className="mt-1 size-4 shrink-0 text-success" aria-hidden="true" />
+                    {objective}
+                  </li>
+                ))}
               </ul>
             </section>
+          ) : (
+            lessons.length > 0 && (
+              <section aria-labelledby="lessons">
+                <h2 id="lessons" className="text-xl font-medium">
+                  {tLessons('storyCombine')}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">{tLessons('storyCombineText')}</p>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {lessons
+                    .filter(
+                      (lesson) => lesson.ageMin <= story.ageMax && lesson.ageMax >= story.ageMin,
+                    )
+                    .slice(0, 6)
+                    .map((lesson) => (
+                      <li key={lesson.slug}>
+                        <Link
+                          href={{ pathname: '/lessons/[slug]', params: { slug: lesson.slug } }}
+                          className="inline-block rounded-full bg-secondary px-3.5 py-1.5 text-sm font-bold text-primary hover:underline"
+                        >
+                          {lesson.name}
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              </section>
+            )
           )}
 
           {/* El kit de Eventos tiene su propio precio (se ve en el creador), no el de los libros. */}
@@ -176,6 +195,7 @@ export default async function StoryPage({ params, searchParams }: Props) {
               <h2 id="formats" className="text-xl font-medium">
                 {t('formats')}
               </h2>
+              <ShipToSelect country={display.country} />
               {offer?.available ? (
                 <>
                   <div className="mt-3">

@@ -220,7 +220,11 @@
     "backTo": {
       "events": "Voltar a aniversários e eventos",
       "professionals": "Voltar a profissionais"
-    }
+    },
+    "objectivesTitle": "O que esta história trabalha",
+    "objectivesText": "Ao criá-la, você escolhe um como objetivo principal e a história gira em torno dele.",
+    "shipTo": "Enviar para",
+    "fewForAge": "Por enquanto há poucas histórias pensadas para {min} a {max} anos. Nelas, o texto e as ilustrações são escritos para a idade do seu filho."
   },
   "Formats": {
     "digital": "Livro digital (PDF)",

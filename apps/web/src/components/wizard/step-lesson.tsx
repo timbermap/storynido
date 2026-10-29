@@ -22,19 +22,21 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [selected, setSelected] = useState<string[]>(book.lessonIds);
   const [useCustom, setUseCustom] = useState(Boolean(book.customLesson));
   const [custom, setCustom] = useState(book.customLesson ?? '');
-  // Profesionales: objetivo general, uno de los temas de las colecciones de la historia.
+  // Profesionales: objetivo general; los de la historia si los tiene, o los temas de sus colecciones.
   const [goal, setGoal] = useState<string | null>(book.goal ?? null);
   const story = data.stories.find((item) => item.slug === book.storyId);
   const goals =
-    book.channel === 'professionals' && story
-      ? [
-          ...new Set(
-            data.collections
-              .filter((collection) => story.collectionIds.includes(collection.slug))
-              .flatMap((collection) => collection.topics),
-          ),
-        ]
-      : [];
+    book.channel === 'professionals' && story?.objectives?.length
+      ? story.objectives
+      : book.channel === 'professionals' && story
+        ? [
+            ...new Set(
+              data.collections
+                .filter((collection) => story.collectionIds.includes(collection.slug))
+                .flatMap((collection) => collection.topics),
+            ),
+          ]
+        : [];
   const age = data.child?.age;
   const lessons = data.lessons.filter(
     (lesson) => age === undefined || (lesson.ageMin <= age && age <= lesson.ageMax),

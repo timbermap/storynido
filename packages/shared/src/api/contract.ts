@@ -424,6 +424,8 @@ export const publicStorySchema = z.object({
   channels: z.array(channelSchema),
   collectionIds: z.array(z.string()),
   personalization: personalizationSchema,
+  /** Objetivos propios de la historia, en el idioma pedido (vacío si no tiene). */
+  objectives: z.array(z.string()).optional(),
 });
 
 export type PublicStory = z.infer<typeof publicStorySchema>;

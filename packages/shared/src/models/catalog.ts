@@ -29,6 +29,14 @@ export const storySchema = timestampsSchema.extend({
   pageCount: z.number().int().positive(),
   title: localizedSchema(z.string().min(1)),
   summary: localizedSchema(z.string().min(1)),
+  /**
+   * Objetivos propios de la historia (Profesionales: "conocer el consultorio"…). Si los tiene,
+   * reemplazan a los temas de la colección como objetivo y a las enseñanzas generales en la ficha.
+   */
+  objectives: z
+    .array(localizedSchema(z.string().min(1)))
+    .max(6)
+    .optional(),
   /** Fragmento de muestra del texto, por idioma. */
   excerpt: localizedSchema(z.string().min(1)),
   /** Portada de muestra (ruta pública o del bucket de assets). */
