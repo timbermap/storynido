@@ -164,6 +164,8 @@ export function authErrorKey(error: unknown): AuthErrorKey {
     case 'auth/configuration-not-found':
       return 'providerDisabled';
     default:
+      // Solo el código de Firebase (sin datos de la cuenta), para diagnosticar desde la consola.
+      console.warn('[auth]', code || error);
       return 'generic';
   }
 }
