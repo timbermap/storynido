@@ -49,6 +49,19 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     ),
     topics: [],
   },
+  {
+    slug: 'grandes-lectores',
+    active: true,
+    order: 4,
+    channel: 'families',
+    name: t('Para grandes lectores', 'For Big Readers', 'Para grandes leitores'),
+    description: t(
+      'Misterios, inventos y expediciones con tramas más largas, para chicos de 9 a 12 años.',
+      'Mysteries, inventions and expeditions with longer plots, for kids aged 9 to 12.',
+      'Mistérios, invenções e expedições com tramas mais longas, para crianças de 9 a 12 anos.',
+    ),
+    topics: [],
+  },
   // --- Eventos --------------------------------------------------------------
   {
     slug: 'cumpleanos',

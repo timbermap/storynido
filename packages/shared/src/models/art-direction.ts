@@ -30,6 +30,10 @@ export const STORY_PALETTES = {
     colors: ['#FF6F76', '#FBC84B', '#31BFC4', '#A78BE4', '#FFF0DB'],
     mood: 'joy and celebration; festive energy from the characters, with confetti used sparingly',
   },
+  explorer: {
+    colors: ['#202D50', '#3A7591', '#6956A6', '#E9AE55', '#F3EBDD'],
+    mood: 'curiosity, suspense and independence for older readers; deep night blues with warm lantern light',
+  },
   learning: {
     colors: ['#418D89', '#90B9D3', '#EAB39B', '#C1ADDF', '#F8F4EA'],
     mood: 'calm, clarity and confidence; friendly, uncluttered and easy to read',

@@ -45,7 +45,12 @@ const ADVENTURE = {
 const ADVENTURES: SeedStory[] = [
   {
     slug: 'aventura-espacial',
-    suggestedLessons: ['valentia', 'lograr-lo-que-te-propongas', 'ser-uno-mismo', 'equivocarse-esta-bien'],
+    suggestedLessons: [
+      'valentia',
+      'lograr-lo-que-te-propongas',
+      'ser-uno-mismo',
+      'equivocarse-esta-bien',
+    ],
     palette: 'adventure',
     active: true,
     order: 1,
@@ -137,7 +142,12 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'gol-de-campeon',
-    suggestedLessons: ['amistad', 'lograr-lo-que-te-propongas', 'equivocarse-esta-bien', 'manejar-el-enojo'],
+    suggestedLessons: [
+      'amistad',
+      'lograr-lo-que-te-propongas',
+      'equivocarse-esta-bien',
+      'manejar-el-enojo',
+    ],
     palette: 'celebration',
     active: true,
     order: 4,
@@ -165,7 +175,12 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'superheroe-por-un-dia',
-    suggestedLessons: ['valentia', 'ser-uno-mismo', 'decir-la-verdad', 'calma-cuando-estoy-nervioso'],
+    suggestedLessons: [
+      'valentia',
+      'ser-uno-mismo',
+      'decir-la-verdad',
+      'calma-cuando-estoy-nervioso',
+    ],
     palette: 'adventure',
     active: true,
     order: 5,
@@ -221,7 +236,12 @@ const ADVENTURES: SeedStory[] = [
   },
   {
     slug: 'secreto-del-fondo-del-mar',
-    suggestedLessons: ['cuidar-la-naturaleza', 'valentia', 'amistad', 'calma-cuando-estoy-nervioso'],
+    suggestedLessons: [
+      'cuidar-la-naturaleza',
+      'valentia',
+      'amistad',
+      'calma-cuando-estoy-nervioso',
+    ],
     palette: 'adventure',
     active: true,
     order: 7,
@@ -290,6 +310,19 @@ const NEW_STORY_BASE = {
   ...EDITORIAL_OPTIONS,
   personalization: ALL_PERSONALIZATION,
 };
+
+/** 9 a 12 años: sin formatos ni extensiones de chicos chicos (nada de colorear ni Mini). */
+const BIG_READER_BASE = {
+  ...NEW_STORY_BASE,
+  ageMin: 9,
+  ageMax: 12,
+  channels: ['families'],
+  collectionIds: ['grandes-lectores'],
+  lengths: ['short', 'classic', 'epic'],
+  textDensities: ['balanced', 'rich'],
+  readingLevels: ['developing', 'advanced'],
+  contentTypes: ['story', 'story_activities'],
+} satisfies Partial<SeedStory>;
 
 export const SEED_NEW_STORIES: SeedStory[] = [
   {
@@ -550,6 +583,118 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: '— Posso contar seus dentes? — perguntou a dentista. Mateo abriu bem a boca, como um leão. — Vinte dentes brilhantes! — anunciou ela.',
     },
     coverImage: '/samples/mi-visita-al-dentista.webp',
+  },
+  // --- Para grandes lectores (9 a 12): tramas más largas, nada aniñado. ---
+  {
+    ...BIG_READER_BASE,
+    slug: 'el-misterio-del-faro',
+    suggestedLessons: [
+      'valentia',
+      'decir-la-verdad',
+      'lograr-lo-que-te-propongas',
+      'ser-uno-mismo',
+    ],
+    palette: 'explorer',
+    order: 30,
+    tags: ['misterio', 'detectives', 'mar'],
+    title: {
+      es: 'El misterio del faro dormido',
+      en: 'The Mystery of the Sleeping Lighthouse',
+      pt: 'O mistério do farol adormecido',
+    },
+    summary: {
+      es: 'Cada noche, la luz del faro del pueblo se apaga a la misma hora. Con una libreta, una linterna y mucha paciencia, tu hijo sigue las pistas hasta descubrir un secreto que nadie esperaba.',
+      en: 'Every night, the town lighthouse goes dark at exactly the same time. With a notebook, a flashlight and a lot of patience, your child follows the clues to a secret nobody expected.',
+      pt: 'Toda noite, a luz do farol da cidade se apaga no mesmo horário. Com um caderno, uma lanterna e muita paciência, seu filho segue as pistas até descobrir um segredo que ninguém esperava.',
+    },
+    excerpt: {
+      es: 'A las nueve y trece en punto, la luz del faro se apagó otra vez. Valentina anotó la hora en su libreta, debajo de las otras seis. —No es una falla —murmuró—. Es una señal.',
+      en: 'At exactly nine thirteen, the lighthouse went dark again. Valentina wrote the time in her notebook, under the other six. "It isn’t a fault," she whispered. "It’s a signal."',
+      pt: 'Às nove e treze em ponto, a luz do farol se apagou outra vez. Valentina anotou a hora no caderno, embaixo das outras seis. — Não é defeito — murmurou. — É um sinal.',
+    },
+    coverImage: '/samples/el-misterio-del-faro.webp',
+  },
+  {
+    ...BIG_READER_BASE,
+    slug: 'el-invento-que-se-escapo',
+    suggestedLessons: [
+      'equivocarse-esta-bien',
+      'lograr-lo-que-te-propongas',
+      'amistad',
+      'manejar-el-enojo',
+    ],
+    palette: 'adventure',
+    order: 31,
+    tags: ['ciencia', 'inventos', 'robots', 'humor'],
+    title: {
+      es: 'El invento que se escapó',
+      en: 'The Invention That Got Away',
+      pt: 'A invenção que fugiu',
+    },
+    summary: {
+      es: 'Para la feria de ciencias, tu hijo construye un robot ayudante. Lo que no esperaba es que el robot tuviera ideas propias. Una aventura de inventos, errores y soluciones ingeniosas.',
+      en: "For the science fair, your child builds a helper robot. What they didn't expect was a robot with ideas of its own. An adventure of inventions, mistakes and clever fixes.",
+      pt: 'Para a feira de ciências, seu filho constrói um robô ajudante. O que ele não esperava era que o robô tivesse ideias próprias. Uma aventura de invenções, erros e soluções engenhosas.',
+    },
+    excerpt: {
+      es: '—Prueba número catorce —dijo Tomás, y conectó el último cable. El robot abrió un ojo, después el otro, y preguntó: —¿Por qué tu cuarto está tan desordenado?',
+      en: '"Test number fourteen," said Tomás, and he plugged in the last cable. The robot opened one eye, then the other, and asked: "Why is your room so messy?"',
+      pt: '— Teste número catorze — disse Tomás, e ligou o último cabo. O robô abriu um olho, depois o outro, e perguntou: — Por que seu quarto está tão bagunçado?',
+    },
+    coverImage: '/samples/el-invento-que-se-escapo.webp',
+  },
+  {
+    ...BIG_READER_BASE,
+    slug: 'la-expedicion-del-mapa-perdido',
+    suggestedLessons: ['valentia', 'respetar-las-diferencias', 'cuidar-la-naturaleza', 'amistad'],
+    palette: 'nature',
+    order: 32,
+    tags: ['exploración', 'aventura', 'naturaleza'],
+    title: {
+      es: 'La expedición del mapa perdido',
+      en: 'The Lost Map Expedition',
+      pt: 'A expedição do mapa perdido',
+    },
+    summary: {
+      es: 'Un mapa antiguo aparece dentro de un libro de la biblioteca. Selva, ríos y ruinas escondidas: una expedición en la que tu hijo descifra símbolos y toma las decisiones del equipo.',
+      en: 'An old map turns up inside a library book. Jungle, rivers and hidden ruins: an expedition where your child decodes symbols and makes the team’s decisions.',
+      pt: 'Um mapa antigo aparece dentro de um livro da biblioteca. Selva, rios e ruínas escondidas: uma expedição em que seu filho decifra símbolos e toma as decisões da equipe.',
+    },
+    excerpt: {
+      es: 'El mapa estaba doblado en ocho y olía a humedad. En una esquina, alguien había dibujado una brújula con una sola flecha. Lucas la giró hacia la ventana, y la flecha no apuntó al norte.',
+      en: 'The map was folded in eight and smelled damp. In one corner, someone had drawn a compass with a single arrow. Lucas turned it toward the window, and the arrow didn’t point north.',
+      pt: 'O mapa estava dobrado em oito e cheirava a umidade. Num canto, alguém tinha desenhado uma bússola com uma única seta. Lucas a virou para a janela, e a seta não apontou para o norte.',
+    },
+    coverImage: '/samples/la-expedicion-del-mapa-perdido.webp',
+  },
+  {
+    ...BIG_READER_BASE,
+    slug: 'un-lunes-al-reves',
+    suggestedLessons: [
+      'ser-uno-mismo',
+      'equivocarse-esta-bien',
+      'calma-cuando-estoy-nervioso',
+      'manejar-el-enojo',
+    ],
+    palette: 'magic',
+    order: 33,
+    tags: ['humor', 'fantasía'],
+    title: {
+      es: 'Un lunes completamente al revés',
+      en: 'A Completely Upside-Down Monday',
+      pt: 'Uma segunda-feira completamente ao contrário',
+    },
+    summary: {
+      es: 'Un lunes, tu hijo se despierta y todo funciona al revés: el perro pasea a la familia, los maestros hacen la tarea y la gravedad se toma el día libre. Para arreglarlo, tendrá que pensar al revés.',
+      en: 'One Monday, your child wakes up and everything works backwards: the dog walks the family, the teachers do the homework and gravity takes the day off. To fix it, they will have to think backwards.',
+      pt: 'Numa segunda-feira, seu filho acorda e tudo funciona ao contrário: o cachorro passeia com a família, os professores fazem a lição e a gravidade tira o dia de folga. Para consertar, ele vai ter que pensar ao contrário.',
+    },
+    excerpt: {
+      es: 'Joaquín bajó a desayunar y encontró a su papá en el techo, untando una tostada. —Buen día —dijo su papá, flotando—. Hoy es uno de esos lunes.',
+      en: 'Joaquín came down to breakfast and found his dad on the ceiling, buttering toast. "Good morning," said his dad, floating. "Today is one of those Mondays."',
+      pt: 'Joaquín desceu para o café e encontrou o pai no teto, passando manteiga numa torrada. — Bom dia — disse o pai, flutuando. — Hoje é uma daquelas segundas.',
+    },
+    coverImage: '/samples/un-lunes-al-reves.webp',
   },
 ];
 
