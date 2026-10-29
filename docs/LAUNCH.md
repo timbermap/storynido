@@ -37,14 +37,14 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 
 ## 4. Infraestructura de producción (`storynido-prod`)
 
-| Estado | Qué                                                                                                                                         | Quién |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| ⬜     | Copiar `infra/envs/production/terraform.tfvars.example` y `backend.hcl.example`, completar (presupuesto, mail de alertas, imprentas, pagos) | 🤝    |
-| ⬜     | `terraform plan` y `apply` en `infra/envs/production` (con OK sobre el plan y estimación de costos)                                         | 👤    |
-| ⬜     | Cargar los secretos con `infra/scripts/set-secret.sh storynido-prod <secreto>` (claves de producción de cada proveedor)                     | 👤    |
-| ⬜     | Backends de App Hosting `web` y `admin` en producción (`firebase apphosting:backends:create`)                                               | 👤    |
-| ⬜     | Variable `DEPLOY_ENABLED` y las variables del ambiente `production` en GitHub (salen de `terraform output github_actions`)                  | 🤝    |
-| ⬜     | Seed de configuración de producción (países, precios, historias, estilos, modelos de IA) sin datos de prueba                                | 🤖    |
+| Estado | Qué                                                                                                                                                                                                                                                                                                                        | Quién |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| ⬜     | Copiar `infra/envs/production/terraform.tfvars.example` y `backend.hcl.example`, completar (presupuesto, mail de alertas, imprentas, pagos)                                                                                                                                                                                | 🤝    |
+| ⬜     | `terraform plan` y `apply` en `infra/envs/production` (con OK sobre el plan y estimación de costos)                                                                                                                                                                                                                        | 👤    |
+| ⬜     | Cargar los secretos con `infra/scripts/set-secret.sh storynido-prod <secreto>` (claves de producción de cada proveedor)                                                                                                                                                                                                    | 👤    |
+| ⬜     | Backends de App Hosting `web` y `admin` en producción (`firebase apphosting:backends:create`)                                                                                                                                                                                                                              | 👤    |
+| ⬜     | Variable `DEPLOY_ENABLED` y las variables del ambiente `production` en GitHub (salen de `terraform output github_actions`)                                                                                                                                                                                                 | 🤝    |
+| ⬜     | Seed de producción, después del `apply`: `pnpm --filter @storynido/firebase seed:cloud --project storynido-prod`. Sin usuarios ni cupones de prueba ni imprentas simuladas; precios inactivos (se revisan y activan en el admin); sitio en "Solo vista previa"; presupuesto de IA de USD 2 por día (subirlo en Admin → IA) | 🤝    |
 
 ## 5. Dominios (requieren autorización en los DNS)
 

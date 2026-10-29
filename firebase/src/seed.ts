@@ -69,6 +69,8 @@ import { initAdmin, isUsingEmulators } from './admin';
 const projectFlag = process.argv.indexOf('--project');
 const cloudProject = projectFlag >= 0 ? process.argv[projectFlag + 1] : undefined;
 const cloud = !isUsingEmulators();
+/** Producción arranca sin nada simulado, con precios inactivos y el sitio en "Solo vista previa". */
+const production = cloudProject === 'storynido-prod';
 /** En la nube, `--refresh-catalog` reescribe historias, estilos y enseñanzas (no la configuración). */
 const refreshCatalog = process.argv.includes('--refresh-catalog');
 const CATALOG_COLLECTIONS = new Set<string>([
@@ -188,7 +190,8 @@ for (const code of COUNTRY_CODES) {
         // Precio Pro base de ejemplo: 10 % menos (editable en el admin).
         proAmountMinor: Math.round((prices[format] * 0.9) / 100) * 100 - (code === 'US' ? 1 : 0),
         lengthAdjustmentsMinor: SAMPLE_LENGTH_ADJUSTMENTS[code] ?? {},
-        active: true,
+        // En producción se revisan y activan desde el admin antes de vender.
+        active: !production,
         updatedAt: now,
       }),
     );
@@ -197,10 +200,14 @@ for (const code of COUNTRY_CODES) {
 
 // Matriz de impresión de ejemplo con la imprenta simulada (la real se habilita desde el admin
 // recién con la muestra física aprobada).
-const SAMPLE_PRINT: Partial<Record<CountryCode, { etaDaysMin: number; etaDaysMax: number }>> = {
-  MX: { etaDaysMin: 6, etaDaysMax: 11 },
-  US: { etaDaysMin: 5, etaDaysMax: 9 },
-};
+// Producción no tiene imprentas simuladas.
+const SAMPLE_PRINT: Partial<Record<CountryCode, { etaDaysMin: number; etaDaysMax: number }>> =
+  production
+    ? {}
+    : {
+        MX: { etaDaysMin: 6, etaDaysMax: 11 },
+        US: { etaDaysMin: 5, etaDaysMax: 9 },
+      };
 for (const [code, eta] of Object.entries(SAMPLE_PRINT) as [
   CountryCode,
   { etaDaysMin: number; etaDaysMax: number },
@@ -244,7 +251,7 @@ for (const format of PRINT_FORMATS) {
       sku: GELATO_PRODUCTS[format],
       enabled: true,
       // En producción se habilita recién con la muestra física aprobada.
-      qaSamplePassed: cloudProject !== 'storynido-prod',
+      qaSamplePassed: !production,
       pages: { min: 28, max: 200, multipleOf: 2 },
       maxQuantity: 100,
       etaDaysMin: 6,
@@ -278,7 +285,7 @@ for (const [code, cloud] of Object.entries(CLOUDPRINTER) as [
         sku: CLOUDPRINTER_PRODUCTS[format],
         enabled: true,
         // En producción se habilita recién con la muestra física aprobada.
-        qaSamplePassed: cloudProject !== 'storynido-prod',
+        qaSamplePassed: !production,
         pages: { min: 28, max: 200, multipleOf: 2 },
         maxQuantity: 100,
         etaDaysMin: cloud.eta[0],
@@ -302,7 +309,7 @@ for (const format of PRINT_FORMATS) {
       provider: 'lulu',
       sku: LULU_PRODUCTS[format],
       enabled: true,
-      qaSamplePassed: cloudProject !== 'storynido-prod',
+      qaSamplePassed: !production,
       pages: { min: 24, max: 200, multipleOf: 2 },
       maxQuantity: 100,
       etaDaysMin: 8,
@@ -428,7 +435,11 @@ for (const format of BOOK_FORMATS) {
 
 batch.set(
   db.collection(COLLECTIONS.siteConfig).doc(GLOBAL_DOC_ID),
-  siteConfigSchema.parse({ mode: 'live', updatedAt: now, updatedBy: 'seed' }),
+  siteConfigSchema.parse({
+    mode: production ? 'preview_only' : 'live',
+    updatedAt: now,
+    updatedBy: 'seed',
+  }),
 );
 
 batch.set(
