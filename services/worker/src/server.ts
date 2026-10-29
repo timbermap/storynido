@@ -9,9 +9,11 @@ import {
 } from '@storynido/providers';
 import { cloudLoggingOptions } from '@storynido/shared/server';
 import { getApps, initializeApp } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
 import { buildApp } from './app';
+import { AnonymousCleanup } from './jobs/anonymous-cleanup';
 import { PostSaleJobs } from './jobs/post-sale';
 import { PipelineWatchdog } from './jobs/watchdog';
 import { loadWorkerEnv } from './config';
@@ -108,7 +110,33 @@ const notifier = new EmailNotifier(db, () => providers.email(), {
   adminUrl: env.ADMIN_URL,
   log: app.log,
 });
-const jobs = new PostSaleJobs(db, notifier);
+const postSale = new PostSaleJobs(db, notifier);
+const anonymousCleanup = new AnonymousCleanup(
+  db,
+  {
+    getUser: async (uid) => {
+      try {
+        const user = await getAuth(firebase).getUser(uid);
+        const lastActive = user.metadata.lastRefreshTime ?? user.metadata.lastSignInTime;
+        return {
+          anonymous: user.providerData.length === 0,
+          lastActive: lastActive ? new Date(lastActive) : null,
+        };
+      } catch (error) {
+        // Solo "no existe" cuenta como borrado; cualquier otro error corta el job.
+        if ((error as { code?: string }).code === 'auth/user-not-found') return null;
+        throw error;
+      }
+    },
+    deleteUser: (uid) => getAuth(firebase).deleteUser(uid),
+  },
+  () => providers.storage(),
+  app.log,
+);
+// Una vez por día: postventa y limpieza de sesiones anónimas abandonadas (privacidad).
+const jobs = {
+  run: async () => ({ ...(await postSale.run()), anonymous: await anonymousCleanup.run() }),
+};
 const watchdog = new PipelineWatchdog(
   db,
   notifier,

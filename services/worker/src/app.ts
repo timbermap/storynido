@@ -3,7 +3,6 @@ import { pipelineEventSchema, pipelineStepSchema } from '@storynido/shared';
 import Fastify, { type FastifyServerOptions } from 'fastify';
 import { z } from 'zod';
 
-import type { PostSaleJobs } from './jobs/post-sale';
 import { StepFailedError, type Pipeline } from './pipeline/pipeline';
 
 export interface AppOptions {
@@ -18,7 +17,7 @@ export interface AppOptions {
   /** Sin pipeline solo responde el health check. Es una función: se crea con el logger de la app. */
   pipeline?: () => Pipeline;
   /** Postventa diaria (Cloud Scheduler). */
-  jobs?: () => PostSaleJobs;
+  jobs?: () => { run(): Promise<unknown> };
 }
 
 const runBody = z.object({

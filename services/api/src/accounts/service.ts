@@ -1,6 +1,12 @@
 import type { EmailNotifier } from '@storynido/emails';
 import type { ProviderRegistry } from '@storynido/providers';
-import { COLLECTIONS, isAdminRole, type AuditLogEntry, type Role } from '@storynido/shared';
+import {
+  COLLECTIONS,
+  isAdminRole,
+  previewPaths,
+  type AuditLogEntry,
+  type Role,
+} from '@storynido/shared';
 
 import { auditEntry } from '../admin/audit';
 import type { RequestUser } from '../types';
@@ -326,19 +332,4 @@ export class AccountService {
     await this.auth.deleteUser(anonymousUid).catch(() => undefined);
     return moved;
   }
-}
-
-/** Rutas de las imágenes de la vista previa guardadas en el libro. */
-function previewPaths(preview: unknown): string[] {
-  if (!preview || typeof preview !== 'object') return [];
-  const value = preview as {
-    character?: { imagePath?: unknown; previewImagePath?: unknown } | null;
-    cover?: { imagePath?: unknown; previewImagePath?: unknown } | null;
-    pages?: { imagePath?: unknown; previewImagePath?: unknown }[];
-  };
-  return [value.character, value.cover, ...(value.pages ?? [])].flatMap((item) =>
-    [item?.imagePath, item?.previewImagePath].filter(
-      (path): path is string => typeof path === 'string',
-    ),
-  );
 }

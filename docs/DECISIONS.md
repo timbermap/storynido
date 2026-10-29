@@ -1230,3 +1230,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - Identity Platform: gratis hasta unos 50.000 usuarios activos por mes; hay que confirmar si los anónimos cuentan;
   - reCAPTCHA: 10.000 verificaciones gratis por mes.
 - **Webhook de Lulu:** se registra por la API con `infra/scripts/lulu-webhook.sh` (Lulu no tiene pantalla). Sandbox registrado y aviso de prueba recibido (rechazado con 400, como corresponde).
+
+## 093 · Sesiones anónimas abandonadas: se borran a los 30 días
+
+- **Problema:** el creador funciona sin cuenta, con una sesión anónima. Si el adulto no crea la cuenta, el borrador y el perfil del chico (nombre, edad, gustos) quedaban guardados para siempre, sin que nadie pudiera borrarlos.
+- **Decisión:** el job diario del worker (`AnonymousCleanup`) borra las sesiones anónimas sin actividad hace más de 30 días, junto con sus borradores, ilustraciones de muestra, perfiles de chicos y fotos.
+  - Nunca toca una cuenta con mail o Google, ni una sesión usada en los últimos 30 días (en Auth o con algún libro reciente), ni a nadie con pedidos.
+  - Solo "el usuario no existe" cuenta como borrado: cualquier otro error de Auth corta el job.
+- **Identity Platform:** `autodelete_anonymous_users = true` borra las sesiones anónimas a los 30 días. Así no cuentan como usuarios activos en el precio. Lo que quede en Firestore lo borra el job.
+- **Constancias:** los consentimientos se conservan (prueba legal); `PRIVACY.md` actualizado.

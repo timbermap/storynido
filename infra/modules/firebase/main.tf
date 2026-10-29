@@ -44,6 +44,11 @@ resource "google_identity_platform_config" "auth" {
 
   authorized_domains = var.auth_authorized_domains
 
+  # Las sesiones anónimas (creador sin cuenta) se borran a los 30 días: no cuentan como usuarios
+  # activos en el precio de Identity Platform y no quedan cuentas huérfanas. Al crear la cuenta
+  # deja de ser anónima y no se borra.
+  autodelete_anonymous_users = true
+
   sign_in {
     allow_duplicate_emails = false
     email {

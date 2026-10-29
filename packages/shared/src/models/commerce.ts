@@ -366,3 +366,18 @@ export const orderSchema = timestampsSchema.extend({
 });
 
 export type Order = z.infer<typeof orderSchema>;
+
+/** Rutas de las imágenes de la vista previa guardadas en un libro (para borrarlas). */
+export function previewPaths(preview: unknown): string[] {
+  if (!preview || typeof preview !== 'object') return [];
+  const value = preview as {
+    character?: { imagePath?: unknown; previewImagePath?: unknown } | null;
+    cover?: { imagePath?: unknown; previewImagePath?: unknown } | null;
+    pages?: { imagePath?: unknown; previewImagePath?: unknown }[];
+  };
+  return [value.character, value.cover, ...(value.pages ?? [])].flatMap((item) =>
+    [item?.imagePath, item?.previewImagePath].filter(
+      (path): path is string => typeof path === 'string',
+    ),
+  );
+}
