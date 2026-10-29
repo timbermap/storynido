@@ -241,7 +241,8 @@
     "browseJump": "Flip through sample pages",
     "kitTitle": "Your celebration kit",
     "kitText": "Every piece comes from the same design, with the guest of honor as the hero. The price doesn't change with the number of guests.",
-    "createKit": "Design the kit with this story"
+    "createKit": "Design the kit with this story",
+    "resultCount": "{count, plural, one {# story} other {# stories}}"
   },
   "Formats": {
     "digital": "Digital book (PDF)",
@@ -386,7 +387,8 @@
       "continue": "Continue",
       "inProgress": "In progress",
       "filter": "Filter by line",
-      "all": "All"
+      "all": "All",
+      "loadFailed": "We couldn't load your stories in progress. Reload the page to try again."
     },
     "myStoriesLink": "Your stories and orders are in My stories →"
   },
@@ -842,7 +844,9 @@
       "families": "A family story",
       "events": "Celebration kit",
       "professionals": "Professional project"
-    }
+    },
+    "startFailed": "We couldn't get your story ready. Check your connection and try again.",
+    "retry": "Try again"
   },
   "Landing": {
     "events": {

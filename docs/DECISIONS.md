@@ -1486,3 +1486,19 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - selector de país con búsqueda;
   - pasada mobile completa;
   - eventos `login_*` por navegador.
+
+## 111 · Auditoría UX (ChatGPT): el creador nunca queda cargando
+
+- **Fecha:** 2026-10-29 · `AUDITORIA_UX_STORYNIDO_STAGING.md`.
+- **"Preparando tu cuento…" para siempre:** con un usuario nuevo, en staging, las tres entradas (`/crear`, `?line=events`, `?story=…`) abrían el creador bien. No se pudo reproducir la sesión del auditor, pero si fallaba leer o crear el borrador (red cortada, permisos, un perfil borrado), la pantalla esperaba sin fin. Ahora:
+  - un perfil ilegible no traba la lista de borradores;
+  - después de 20 s o ante un error, se muestra un aviso con "Reintentar", que recarga la página con una conexión nueva;
+  - Mis cuentos avisa si no pudo cargar la lista.
+
+  Lo cubre una prueba E2E que corta Firestore.
+
+- **Sesión al cargar:** el encabezado muestra un lugar vacío mientras lee la sesión, en vez de "Iniciar sesión", que después cambiaba al avatar.
+- **Catálogo:** con búsqueda o filtros, muestra cuántas historias quedaron. El estado vacío ya existía.
+- **Ya resuelto en DECISIONS 110:** Mis cuentos, las claves Pro sin traducir y los links a `#drafts`.
+- **Pedidos que "variaron entre cargas":** fue el borrado de los datos de prueba de la cuenta, hecho durante la auditoría.
+- **País inicial Estados Unidos:** el país sale de la IP. El navegador del auditor no salía por Argentina. Se puede cambiar con "Enviar a" y en Mi cuenta.

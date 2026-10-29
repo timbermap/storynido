@@ -199,7 +199,10 @@ export async function listDrafts(db: Firestore, uid: string): Promise<DraftSumma
   return Promise.all(
     snapshot.docs.map(async (book) => {
       const childId = book.get('childId') as string | null;
-      const child = childId ? await getDoc(doc(db, COLLECTIONS.children, childId)) : null;
+      // Un perfil borrado (o ilegible) no puede trabar la lista: el borrador queda sin nombre.
+      const child = childId
+        ? await getDoc(doc(db, COLLECTIONS.children, childId)).catch(() => null)
+        : null;
       return {
         id: book.id,
         childName: (child?.get('name') as string | undefined) ?? null,

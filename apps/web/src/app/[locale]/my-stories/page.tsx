@@ -36,6 +36,7 @@ export default function MyStoriesPage() {
   const { status: pro } = useProStatus();
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [line, setLine] = useState<Channel | 'all'>('all');
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!loading && !signedIn) router.replace('/login');
@@ -47,6 +48,11 @@ export default function MyStoriesPage() {
       .then((db) => listDrafts(db, user.uid))
       .then((found) => {
         setDrafts(found.filter((draft) => !isEmptyDraft(draft)));
+      })
+      .catch(() => {
+        // Sin la lista no se queda cargando: se avisa (los pedidos se muestran igual).
+        setFailed(true);
+        setDrafts([]);
       });
   }, [user]);
 
@@ -74,6 +80,12 @@ export default function MyStoriesPage() {
           {t('new')}
         </a>
       </div>
+
+      {failed && (
+        <p role="alert" className="rounded-xl bg-muted p-4 text-sm">
+          {t('loadFailed')}
+        </p>
+      )}
 
       {latest ? (
         <>

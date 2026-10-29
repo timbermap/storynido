@@ -60,6 +60,8 @@ export default async function StoriesPage({ params, searchParams }: Props) {
   const collection = collections.find((item) => item.slug === query.coleccion);
   const theme = STORY_THEMES.find((item) => item.key === query.tema);
   const search = query.q?.trim().slice(0, 80) ?? '';
+  /** Hay búsqueda o filtros: se muestra cuántas historias quedaron. */
+  const narrowed = Boolean(search) || filter !== undefined || collection !== undefined;
   const visible = stories
     .filter((story) => !filter || (story.ageMin <= filter.max && story.ageMax >= filter.min))
     .filter((story) => !collection || story.collectionIds.includes(collection.slug))
@@ -191,17 +193,25 @@ export default async function StoriesPage({ params, searchParams }: Props) {
           </Link>
         </div>
       ) : (
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-          {visible.map((story, index) => (
-            <StoryCard
-              key={story.slug}
-              story={story}
-              fromPrice={fromPrice}
-              headingLevel="h2"
-              priority={index < 2}
-            />
-          ))}
-        </div>
+        <>
+          {/* Con búsqueda o filtros, cuántas quedaron (se anuncia al cambiar). */}
+          {narrowed && (
+            <p role="status" className="mt-8 text-sm font-semibold text-muted-foreground">
+              {t('resultCount', { count: visible.length })}
+            </p>
+          )}
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
+            {visible.map((story, index) => (
+              <StoryCard
+                key={story.slug}
+                story={story}
+                fromPrice={fromPrice}
+                headingLevel="h2"
+                priority={index < 2}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

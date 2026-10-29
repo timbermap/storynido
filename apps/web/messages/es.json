@@ -241,7 +241,8 @@
     "browseJump": "Hojear páginas de ejemplo",
     "kitTitle": "Tu kit para la celebración",
     "kitText": "Todas las piezas salen del mismo diseño, con el homenajeado como protagonista. El precio no cambia con la cantidad de invitados.",
-    "createKit": "Diseñar el kit con esta historia"
+    "createKit": "Diseñar el kit con esta historia",
+    "resultCount": "{count, plural, one {# historia} other {# historias}}"
   },
   "Formats": {
     "digital": "Libro digital (PDF)",
@@ -386,7 +387,8 @@
       "continue": "Continuar",
       "inProgress": "En proceso",
       "filter": "Filtrar por línea",
-      "all": "Todos"
+      "all": "Todos",
+      "loadFailed": "No pudimos cargar tus cuentos en proceso. Recarga la página para intentarlo de nuevo."
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },
@@ -842,7 +844,9 @@
       "families": "Un cuento para la familia",
       "events": "Kit para una celebración",
       "professionals": "Proyecto profesional"
-    }
+    },
+    "startFailed": "No pudimos preparar tu cuento. Revisa tu conexión e inténtalo de nuevo.",
+    "retry": "Reintentar"
   },
   "Landing": {
     "events": {

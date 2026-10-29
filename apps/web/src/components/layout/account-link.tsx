@@ -24,9 +24,15 @@ function initials(name: string | null, email: string | null): string {
  */
 export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' }) {
   const t = useTranslations('Nav');
-  const { user, signedIn } = useAuth();
+  const { user, signedIn, loading } = useAuth();
   // Después de entrar se vuelve a esta página.
   const pathname = usePathname();
+
+  // Mientras se lee la sesión, un lugar vacío del mismo tamaño: sin "Iniciar sesión" que
+  // después cambia al avatar.
+  if (loading) {
+    return <span aria-hidden="true" className="inline-block size-8 rounded-full bg-muted" />;
+  }
 
   if (!signedIn || !user) {
     return (

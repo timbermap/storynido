@@ -24,6 +24,9 @@ import { useProStatus } from '@/components/pro/use-pro-status';
 import { DraftsList } from './drafts-list';
 import { SignInGate } from './sign-in-gate';
 
+/** Más que esto preparando el borrador es un problema (red o permisos): se ofrece reintentar. */
+const START_TIMEOUT_MS = 20_000;
+
 function rememberedChannel(): Channel | null {
   try {
     const value = window.sessionStorage.getItem(CHANNEL_STORAGE_KEY);
@@ -68,6 +71,9 @@ export function CreateStart({
   const router = useRouter();
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [busy, setBusy] = useState(false);
+  // Si leer o crear el borrador falla (red, permisos), se avisa y se puede reintentar: nunca
+  // queda en "Preparando tu cuento…" para siempre.
+  const [failed, setFailed] = useState(false);
 
   async function startNew() {
     if (!user) return;
@@ -112,10 +118,28 @@ export function CreateStart({
     else setDrafts(found);
   });
 
+  const start = useEffectEvent(async () => {
+    setFailed(false);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error('timeout'));
+      }, START_TIMEOUT_MS);
+    });
+    try {
+      await Promise.race([onUser(), timeout]);
+    } catch {
+      setFailed(true);
+      setBusy(false);
+    } finally {
+      clearTimeout(timer);
+    }
+  });
+
   useEffect(() => {
     // Al tener sesión: crear o listar borradores (lectura de Firestore después de montar).
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (user) void onUser();
+    if (user) void start();
   }, [user, signedIn, proReady]);
 
   if (!loading && !signedIn) {
@@ -123,6 +147,24 @@ export function CreateStart({
   }
   if (professional && pro?.accountType === 'family') {
     return <ProActivationCard onActivated={() => void refreshPro()} />;
+  }
+  if (failed) {
+    return (
+      <section className="container-page grid min-h-[60vh] max-w-md place-content-center gap-4 py-20 text-center">
+        <p role="alert" className="text-lg">
+          {t('startFailed')}
+        </p>
+        <Button
+          size="lg"
+          onClick={() => {
+            // Recargar arranca una conexión nueva a Firestore (la anterior puede seguir en espera).
+            window.location.reload();
+          }}
+        >
+          {t('retry')}
+        </Button>
+      </section>
+    );
   }
   if (!drafts) {
     return (
