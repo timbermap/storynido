@@ -19,7 +19,7 @@ function Sparkle({ className }: { className: string }) {
  */
 export function HeroBook({ alt, photoLabel }: { alt: string; photoLabel: string }) {
   return (
-    <figure className="relative isolate mx-auto w-full max-w-[42rem] pt-8 lg:pt-12">
+    <figure className="relative isolate mx-auto w-full max-w-[50rem] pt-10 pl-[6%] lg:pt-14">
       <Sparkle className="absolute top-2 right-[14%] z-10 size-7 rotate-12 text-star" />
       <Sparkle className="absolute right-[-1%] bottom-[8%] z-10 size-8 text-star" />
 
@@ -29,20 +29,20 @@ export function HeroBook({ alt, photoLabel }: { alt: string; photoLabel: string 
           alt={alt}
           priority
           placeholder="blur"
-          sizes="(min-width: 1024px) 640px, 100vw"
+          sizes="(min-width: 1024px) 760px, 100vw"
           className="h-auto w-full"
         />
       </div>
 
       {/* "Su foto": retrato ilustrado del mismo protagonista, no una fotografía. */}
-      <div className="absolute top-0 left-[-3%] z-20 w-[28%] min-w-[7rem] -rotate-6 rounded-[0.35rem] bg-white p-[3%] pb-0 shadow-[0_14px_30px_rgb(52_42_64/0.22)] sm:left-[-7%]">
+      <div className="absolute top-0 left-[-2%] z-20 w-[36%] min-w-[8.5rem] -rotate-6 rounded-[0.35rem] bg-white p-[2.5%] pb-0 shadow-[0_18px_36px_rgb(52_42_64/0.26)] sm:left-[-4%]">
         <Image
           src={heroPortrait}
           alt=""
-          sizes="200px"
+          sizes="(min-width: 1024px) 280px, 36vw"
           className="aspect-square h-auto w-full rounded-[0.15rem]"
         />
-        <figcaption className="py-2 text-center font-display text-[clamp(0.85rem,1.4vw,1.05rem)] text-foreground/80 italic">
+        <figcaption className="py-2 text-center font-display text-[clamp(1rem,1.7vw,1.3rem)] text-foreground/80 italic">
           {photoLabel}
         </figcaption>
       </div>
@@ -50,7 +50,7 @@ export function HeroBook({ alt, photoLabel }: { alt: string; photoLabel: string 
       <svg
         aria-hidden="true"
         viewBox="0 0 120 80"
-        className="absolute top-[1%] left-[24%] z-20 w-[16%] text-primary"
+        className="absolute top-[2%] left-[33%] z-20 w-[17%] text-primary"
         fill="none"
         stroke="currentColor"
         strokeWidth="3"

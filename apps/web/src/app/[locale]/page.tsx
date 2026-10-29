@@ -102,7 +102,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* Hero */}
       <section className="overflow-hidden">
-        <div className="container-page grid items-center gap-6 pt-8 pb-10 lg:grid-cols-[1fr_1fr] lg:gap-8 lg:pt-14 lg:pb-16">
+        <div className="container-page grid items-center gap-6 pt-8 pb-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-10 lg:pt-14 lg:pb-16">
           <div className="text-center lg:text-left">
             <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
               {t('hero.kicker')}
