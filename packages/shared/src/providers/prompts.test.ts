@@ -144,7 +144,7 @@ describe('reglas narrativas y dirección de arte', () => {
     expect(families).toContain('Luci decide y resuelve');
     expect(families).toContain('conflicto verdadero');
     expect(narrativeRules({ childName: 'Luci', goal: 'dentista' })).toContain(
-      'nunca prometas resultados clínicos',
+      'Nunca prometas resultados clínicos',
     );
   });
 

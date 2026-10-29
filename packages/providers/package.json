@@ -11,7 +11,8 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc",
     "test": "vitest run",
-    "eval:character": "tsx scripts/eval-character.ts"
+    "eval:character": "tsx scripts/eval-character.ts",
+    "eval:prompts": "tsx scripts/eval-prompts.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "8.4.0",

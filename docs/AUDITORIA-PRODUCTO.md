@@ -95,17 +95,17 @@ Los tres piden lo mismo para empezar: ver qué existe antes de cambiar nada.
 
 ## 5. Orden propuesto
 
-| Paso | Qué                                                                                                          | Costo                  | Necesita              |
-| ---- | ------------------------------------------------------------------------------------------------------------ | ---------------------- | --------------------- |
-| 1    | Pregunta "¿Qué mejorarías?" después de la muestra, en el panel (hecho)                                       | USD 0                  | —                     |
-| 2    | Dirección de arte y reglas narrativas en los prompts (hecho)                                                 | USD 0 para escribirlas | —                     |
-| 3    | **Prueba antes y después:** 1 historia por público, mismo protagonista inventado, prompt actual contra nuevo | ~USD 3–5 de IA         | Tu OK                 |
-| 4    | Creador en 4 etapas                                                                                          | USD 0                  | Tu OK sobre el diseño |
-| 5    | Libros de ejemplo por estilo para la muestra (aprobado)                                                      | ~USD 3                 | — (ya aprobado)       |
-| 6    | "¿Qué le encanta?" en Familias y colecciones por necesidad en Profesionales                                  | USD 0                  | —                     |
-| 7    | Correcciones guiadas del personaje                                                                           | USD 0 de desarrollo    | —                     |
-| 8    | Fotos y video del libro impreso real                                                                         | Muestras físicas       | Tus muestras          |
-| 9    | Lámina del acompañante (familiar o mascota)                                                                  | Más IA por libro       | Decisión de producto  |
+| Paso | Qué                                                                                                                                 | Costo                  | Necesita              |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | --------------------- |
+| 1    | Pregunta "¿Qué mejorarías?" después de la muestra, en el panel (hecho)                                                              | USD 0                  | —                     |
+| 2    | Dirección de arte y reglas narrativas en los prompts (hecho)                                                                        | USD 0 para escribirlas | —                     |
+| 3    | (hecho, DECISIONS 103) **Prueba antes y después:** 1 historia por público, mismo protagonista inventado, prompt actual contra nuevo | ~USD 3–5 de IA         | Tu OK                 |
+| 4    | Creador en 4 etapas                                                                                                                 | USD 0                  | Tu OK sobre el diseño |
+| 5    | Libros de ejemplo por estilo para la muestra (aprobado)                                                                             | ~USD 3                 | — (ya aprobado)       |
+| 6    | "¿Qué le encanta?" en Familias y colecciones por necesidad en Profesionales                                                         | USD 0                  | —                     |
+| 7    | Correcciones guiadas del personaje                                                                                                  | USD 0 de desarrollo    | —                     |
+| 8    | Fotos y video del libro impreso real                                                                                                | Muestras físicas       | Tus muestras          |
+| 9    | Lámina del acompañante (familiar o mascota)                                                                                         | Más IA por libro       | Decisión de producto  |
 
 ## 6. Cómo medirlo
 

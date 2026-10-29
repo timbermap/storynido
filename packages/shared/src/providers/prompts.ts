@@ -186,7 +186,7 @@ export function narrativeRules(input: Pick<StoryPromptInput, 'childName' | 'even
   } else if (input.goal) {
     rules.push(
       '- Un solo objetivo en todo el cuento, con una secuencia realista y paso a paso de lo que vive el protagonista.',
-      '- Valida lo que siente (está bien tener miedo o frustrarse) y muestra cómo lo atraviesa; nunca prometas resultados clínicos.',
+      '- Nombra lo que siente (nervios, miedo, frustración) y dile que está bien sentirlo; muestra qué lo ayuda a atravesarlo, paso a paso: la emoción no desaparece por arte de magia. Nunca prometas resultados clínicos.',
     );
   } else {
     rules.push('- Emoción y vínculo, con un conflicto verdadero que se resuelve.');
@@ -233,8 +233,9 @@ export function describeCharacter(
 }
 
 /** Escena de la portada: el título va en la capa tipográfica, nunca dentro de la imagen. */
-export function coverScene(title: string, firstScene: string | undefined): string {
-  return `Book cover illustration for "${title}": the main character as the hero of the story, joyful and centered, leaving clear space at the top for the title. ${firstScene ?? ''}`;
+export function coverScene(firstScene: string | undefined): string {
+  // Sin el título: si el prompt lo menciona, el modelo tiende a escribirlo (lo pone el PDF).
+  return `Book cover illustration: the main character as the hero of the story, joyful and centered. Keep the top third as calm, simple background with no lettering: the title is typeset later. ${firstScene ?? ''}`;
 }
 
 /** Datos de ejemplo para probar una plantilla desde el admin (sin datos reales ni IA). */

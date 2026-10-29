@@ -81,6 +81,6 @@ export function artDirection(input: {
     color,
     ageDirection(input.age),
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
-    'Avoid: photographic faces, plastic skin, excessive glow or bloom, glossy generic 3D, oversaturated gradients, malformed anatomy, random decorative objects, text or letters in the image, and any change of style between pages.',
+    'Avoid: photographic faces, plastic skin, excessive glow or bloom, glossy generic 3D, oversaturated gradients, malformed anatomy, random decorative objects, any text, title, letters or signs in the image, clothing that changes between pages, and any change of style between pages.',
   ].join(' ');
 }

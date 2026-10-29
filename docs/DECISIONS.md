@@ -1380,4 +1380,15 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **"¿Qué mejorarías?"** después de la muestra: no se parece, datos incorrectos, ilustración, historia u otro. Se guarda como evento de calidad (`feedback_*`) sin datos del chico, y el panel muestra la tasa de "no se parece".
 - **Dirección de arte:** un bloque fijo al final de cada prompt de imagen, con la paleta de la historia, el criterio por edad, el encuadre y lo que hay que evitar. Se guarda en la muestra y se copia al pedido congelado, así el libro pagado se ilustra con la misma dirección que la muestra. Las muestras anteriores siguen sin ella (no cambian a mitad de camino).
 - **Reglas narrativas** en el prompt de texto: el protagonista decide y resuelve, gancho en la primera página, desafío real, momento visual memorable y final para releer. Eventos: misión con 2 o 3 mini desafíos. Profesionales: un objetivo, secuencia realista, validar emociones y nada de promesas clínicas.
-- **Pendiente:** prueba antes/después (1 historia por público, ~USD 3–5, necesita OK) antes de regenerar portadas del catálogo.
+- **Prueba antes/después** (`pnpm eval:prompts`, USD 2,15 en staging, acuarela, protagonista inventado, una historia por público):
+  - **Imágenes:** la versión nueva tiene más color y profundidad, y más acción por escena.
+  - **Texto:** mejora sobre todo en cumpleaños, que pasa de buscar pistas en casa a una misión con mini desafíos y la fiesta como premio. En Familias, el gancho y las decisiones del protagonista quedan más claros.
+  - **Lo que se corrigió después de la prueba:**
+    - la portada citaba el título y la IA lo escribió dentro de la imagen; ahora la escena de portada no menciona el título;
+    - la ropa cambiaba entre imágenes; ahora la dirección de arte lo prohíbe;
+    - en Profesionales los nervios "desaparecían"; ahora el cuento nombra lo que siente y muestra qué lo ayuda.
+
+    Se repitió el caso del dentista y salió bien.
+
+  - **Sigue abierto:** los personajes secundarios (por ejemplo, la mamá) cambian entre páginas, porque no tienen lámina (auditoría §1, punto 11). Además, la IA a veces pone palabras sueltas en los objetos.
+- **Siguiente:** regenerar las portadas del catálogo con la dirección nueva.
