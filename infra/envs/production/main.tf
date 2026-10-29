@@ -36,4 +36,12 @@ module "environment" {
   print_providers   = ["gelato"]
   gelato_order_type = "order"
   log_level         = "info"
+  # Se suma el dominio del admin cuando exista.
+  auth_authorized_domains = [
+    "storynido.com",
+    "www.storynido.com",
+    "${var.project_id}.firebaseapp.com",
+    "${var.project_id}.web.app",
+  ]
+  app_check_domains = ["storynido.com", "www.storynido.com"]
 }

@@ -19,14 +19,14 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 
 ## 2. Calidad antes de vender
 
-| Estado | Qué                                                                                                     | Quién |
-| ------ | ------------------------------------------------------------------------------------------------------- | ----- |
-| ✅     | E2E, accesibilidad (WCAG 2.2 AA), Lighthouse y carga (fase 17)                                          | 🤖    |
-| ⬜     | Pedido real en staging con IA real, de punta a punta (la traza completa del pedido en Cloud Trace)      | 🤝    |
-| ⬜     | Muestra física de cada SKU (Gelato y Lulu): valida el archivo y habilita `qaSamplePassed` en producción | 👤    |
-| ⬜     | Panel humano: 25 compradores y 10 profesionales (ver `QA-SCENARIOS.md`)                                 | 👤    |
-| ⬜     | Escenario 22: fecha del regalo con aviso si no llega                                                    | 🤖    |
-| ⬜     | Lulu: prueba completa en sandbox y registro del webhook                                                 | 🤝    |
+| Estado | Qué                                                                                                                                                         | Quién |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| ✅     | E2E, accesibilidad (WCAG 2.2 AA), Lighthouse y carga (fase 17)                                                                                              | 🤖    |
+| ⬜     | Pedido real en staging con IA real, de punta a punta (la traza completa del pedido en Cloud Trace)                                                          | 🤝    |
+| ⬜     | Muestra física de cada SKU (Gelato y Lulu): valida el archivo y habilita `qaSamplePassed` en producción                                                     | 👤    |
+| ⬜     | Panel humano: 25 compradores y 10 profesionales (ver `QA-SCENARIOS.md`)                                                                                     | 👤    |
+| ⬜     | Escenario 22: fecha del regalo con aviso si no llega                                                                                                        | 🤖    |
+| ⬜     | Lulu: prueba completa en sandbox (webhook del sandbox registrado y recibido el 2026-10-29; en producción: `infra/scripts/lulu-webhook.sh production <api>`) | 🤝    |
 
 ## 3. Legal y privacidad
 
@@ -58,19 +58,19 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 
 ## 6. Seguridad
 
-| Estado | Qué                                                                                                          | Quién |
-| ------ | ------------------------------------------------------------------------------------------------------------ | ----- |
-| ⬜     | Identity Platform con TOTP (producción ya exige 2FA en el admin: `admin_mfa_required` es `true` por defecto) | 🤝    |
-| ⬜     | Clave de reCAPTCHA Enterprise y App Check en la web (`NEXT_PUBLIC_RECAPTCHA_SITE_KEY`); App Check exigido    | 🤝    |
-| ⬜     | Webhooks de pagos e imprentas registrados con sus secretos                                                   | 👤    |
-| ✅     | Gitleaks y `pnpm audit` en CI; CSP y cabeceras de seguridad; rate limit                                      | 🤖    |
+| Estado | Qué                                                                                                                                               | Quién |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| ⬜     | Identity Platform con TOTP en producción (en staging, aplicado el 2026-10-29; producción ya exige 2FA en el admin por defecto)                    | 🤝    |
+| ⬜     | App Check en producción: la clave sale del `terraform apply` (en staging, clave creada y App Check sin exigir); exigirlo con `APP_CHECK_ENFORCED` | 🤝    |
+| ⬜     | Webhooks de pagos e imprentas registrados con sus secretos                                                                                        | 👤    |
+| ✅     | Gitleaks y `pnpm audit` en CI; CSP y cabeceras de seguridad; rate limit                                                                           | 🤖    |
 
 ## 7. Monitoreo
 
 | Estado | Qué                                                                                        | Quién |
 | ------ | ------------------------------------------------------------------------------------------ | ----- |
 | ✅     | Alertas, panel, Error Reporting y vigía del pipeline (verificado en staging el 2026-10-28) | 🤖    |
-| ⬜     | Spans en Cloud Trace: confirmar en staging que llegan los de la API y el worker            | 🤝    |
+| ✅     | Spans en Cloud Trace: llegan los de la API (verificado en staging el 2026-10-29)           | 🤖    |
 | ⬜     | Presupuesto mensual de producción y mail de alertas confirmados                            | 👤    |
 
 ## 8. Día del lanzamiento

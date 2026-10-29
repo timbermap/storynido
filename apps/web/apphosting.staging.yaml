@@ -17,3 +17,7 @@ env:
   - variable: NEXT_PUBLIC_API_URL
     value: https://api-kxfsarqx2q-uc.a.run.app
     availability: [BUILD, RUNTIME]
+  # App Check (reCAPTCHA Enterprise). Clave pública: sale de `terraform output recaptcha_site_key`.
+  - variable: NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+    value: 6Le1uwUuAAAAADmscEQRYAqjXioQsd3qm4HRMOuu
+    availability: [BUILD, RUNTIME]

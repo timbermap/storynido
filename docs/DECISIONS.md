@@ -1214,3 +1214,19 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Costo:** los primeros 2,5 millones de spans por mes son gratis; staging queda en USD 0.
 - **Documentación de salida:** `docs/RUNBOOK.md` (alertas, pedidos, vuelta atrás, modos del sitio, secretos) y `docs/LAUNCH.md` (lista de salida a producción, con quién hace cada cosa).
 - **Copy:** los mensajes de error de la API que ve el público pasaron a "tú" (había voseo).
+
+## 092 · Identity Platform con TOTP, App Check y webhook de Lulu
+
+- **Fecha:** 2026-10-29. Sebastián pidió avanzar con la seguridad para producción; reemplaza la espera de DECISIONS 084.
+- **Identity Platform (sin vuelta atrás):** Terraform (`google_identity_platform_config`) pasa el Auth de staging a Identity Platform y habilita TOTP como segundo factor.
+  - Replica lo que estaba configurado a mano: enlace por mail, anónimo y los dominios autorizados, ahora versionados en `auth_authorized_domains`.
+  - El proveedor Google sigue configurado en la consola.
+  - Staging pasa a exigir 2FA en el admin (`admin_mfa_required = true` y `NEXT_PUBLIC_ADMIN_MFA_REQUIRED=true`).
+- **App Check:** clave de reCAPTCHA Enterprise por ambiente (solo los dominios de la web) y su configuración de App Check en la app web.
+  - La clave pública va en `apphosting*.yaml` (`NEXT_PUBLIC_RECAPTCHA_SITE_KEY`).
+  - En staging, App Check no se exige, para no cortar el E2E contra staging; producción lo exige por defecto.
+- **Costos:**
+  - staging: USD 0;
+  - Identity Platform: gratis hasta unos 50.000 usuarios activos por mes; hay que confirmar si los anónimos cuentan;
+  - reCAPTCHA: 10.000 verificaciones gratis por mes.
+- **Webhook de Lulu:** se registra por la API con `infra/scripts/lulu-webhook.sh` (Lulu no tiene pantalla). Sandbox registrado y aviso de prueba recibido (rechazado con 400, como corresponde).

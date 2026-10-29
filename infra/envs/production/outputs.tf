@@ -42,3 +42,8 @@ output "secrets" {
   description = "Secretos declarados."
   value       = module.environment.secrets
 }
+
+output "recaptcha_site_key" {
+  description = "Clave pública de reCAPTCHA Enterprise de la web (va en apphosting*.yaml)."
+  value       = module.environment.recaptcha_site_key
+}

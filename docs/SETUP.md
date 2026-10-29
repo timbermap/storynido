@@ -108,3 +108,4 @@ Lista de salida paso a paso: [`LAUNCH.md`](LAUNCH.md). Operación diaria: [`RUNB
   infra/scripts/set-secret.sh storynido-staging lulu-client-secret
   ```
   Después se agrega `lulu` a `print_providers` en `infra/envs/staging/main.tf` (otro plan y apply).
+- **Webhook:** Lulu no tiene pantalla para esto; se registra por su API con `infra/scripts/lulu-webhook.sh sandbox <url-de-la-api>` (o `production`). Lee las claves de `.env.local` sin mostrarlas, no duplica el webhook y pide un envío de prueba (que la API rechaza con 400, porque el trabajo de prueba no existe: confirma que el aviso llega). La API no le cree al aviso: consulta el trabajo en Lulu con nuestras credenciales.

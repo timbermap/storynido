@@ -41,7 +41,17 @@ module "environment" {
   email_provider           = "resend"
   email_link_secret_loaded = true
   log_level                = "debug"
-  # Panel de admin (DECISIONS 084): sin 2FA en staging hasta pasar a Identity Platform.
+  # Panel de admin: 2FA (TOTP) obligatorio desde Identity Platform (DECISIONS 092).
   admin_url          = "https://admin--storynido-staging.us-central1.hosted.app"
-  admin_mfa_required = false
+  admin_mfa_required = true
+  # Identity Platform con TOTP y App Check (fase 18). Los dominios son los que ya estaban en Auth.
+  auth_authorized_domains = [
+    "localhost",
+    "storynido-staging.firebaseapp.com",
+    "storynido-staging.web.app",
+    "staging.storynido.com",
+    "web--storynido-staging.us-central1.hosted.app",
+    "admin--storynido-staging.us-central1.hosted.app",
+  ]
+  app_check_domains = ["staging.storynido.com", "web--storynido-staging.us-central1.hosted.app"]
 }

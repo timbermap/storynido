@@ -18,6 +18,7 @@ locals {
     "cloudtrace.googleapis.com",
     "developerconnect.googleapis.com",
     "firebase.googleapis.com",
+    "firebaseappcheck.googleapis.com",
     "firebaseapphosting.googleapis.com",
     "firebaserules.googleapis.com",
     "firestore.googleapis.com",
@@ -564,8 +565,10 @@ module "firebase" {
   source     = "../firebase"
   depends_on = [module.apis]
 
-  project_id  = var.project_id
-  environment = var.environment
+  project_id              = var.project_id
+  environment             = var.environment
+  auth_authorized_domains = var.auth_authorized_domains
+  app_check_domains       = var.app_check_domains
 }
 
 # --- CI/CD ---------------------------------------------------------------------

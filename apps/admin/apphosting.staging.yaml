@@ -10,7 +10,7 @@ env:
   - variable: NEXT_PUBLIC_API_URL
     value: https://api-kxfsarqx2q-uc.a.run.app
     availability: [BUILD, RUNTIME]
-  # Sin 2FA hasta pasar el proyecto a Identity Platform (DECISIONS 084).
+  # 2FA (TOTP) obligatorio para el staff desde Identity Platform (DECISIONS 092).
   - variable: NEXT_PUBLIC_ADMIN_MFA_REQUIRED
-    value: 'false'
+    value: 'true'
     availability: [BUILD, RUNTIME]

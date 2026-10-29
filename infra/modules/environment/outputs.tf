@@ -51,3 +51,8 @@ output "secrets" {
   description = "Secretos declarados (cargar sus valores con gcloud)."
   value       = module.secrets.ids
 }
+
+output "recaptcha_site_key" {
+  description = "Clave pública de reCAPTCHA Enterprise de la web (NEXT_PUBLIC_RECAPTCHA_SITE_KEY)."
+  value       = module.firebase.recaptcha_site_key
+}

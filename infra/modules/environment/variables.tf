@@ -158,3 +158,13 @@ variable "log_level" {
   default     = "info"
   description = "LOG_LEVEL de los servicios."
 }
+
+variable "auth_authorized_domains" {
+  type        = list(string)
+  description = "Dominios desde los que se puede iniciar sesión (incluye localhost y los de Firebase)."
+}
+
+variable "app_check_domains" {
+  type        = list(string)
+  description = "Dominios de la web para la clave de reCAPTCHA Enterprise de App Check."
+}
