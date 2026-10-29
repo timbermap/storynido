@@ -7,9 +7,8 @@ import type { Channel, Locale } from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
-import { Link, useRouter } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
-import { startAnonymousSession } from '@/lib/firebase/auth-actions';
 import { createDraft, isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 
 import { CHANNEL_STORAGE_KEY } from '@/components/landing/remember-channel';
@@ -29,8 +28,8 @@ function rememberedChannel(): Channel | null {
 }
 
 /**
- * Punto de entrada del creador. Sin sesión abre una anónima (se crea sin cuenta y se vincula
- * al iniciar sesión). Con una historia o enseñanza preseleccionada crea el borrador y entra
+ * Punto de entrada del creador. Pide cuenta en todas las líneas (DECISIONS 106): sin sesiones
+ * anónimas que gasten IA y con los borradores guardados en la cuenta. Con una historia o enseñanza preseleccionada crea el borrador y entra
  * directo; si no, ofrece retomar un borrador o empezar uno nuevo.
  */
 export function CreateStart({
@@ -56,16 +55,13 @@ export function CreateStart({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (remembered) setChannel(remembered);
   }, [channelParam]);
-  // Profesionales necesita cuenta desde el inicio: sus compras se acumulan para el descuento.
-  const needsAccount = channel === 'professionals';
-  // ...y cuenta Pro activa (perfil mínimo) antes del primer borrador.
+  // Profesionales necesita además la cuenta Pro activa (perfil mínimo) antes del primer borrador.
+  const professional = channel === 'professionals';
   const { status: pro, refresh: refreshPro } = useProStatus();
-  const proReady = !needsAccount || pro?.accountType === 'professional';
+  const proReady = !professional || pro?.accountType === 'professional';
   const router = useRouter();
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [busy, setBusy] = useState(false);
-  // Si la sesión anónima no está disponible (proveedor deshabilitado), se pide iniciar sesión.
-  const [anonymousFailed, setAnonymousFailed] = useState(false);
 
   async function startNew() {
     if (!user) return;
@@ -80,7 +76,7 @@ export function CreateStart({
   }
 
   const onUser = useEffectEvent(async () => {
-    if (!user || (needsAccount && !signedIn) || !proReady) return;
+    if (!user || !signedIn || !proReady) return;
     if (storyId || lessonId) {
       await startNew();
       return;
@@ -104,20 +100,12 @@ export function CreateStart({
     if (user) void onUser();
   }, [user, signedIn, proReady]);
 
-  useEffect(() => {
-    if (loading || user || needsAccount) return;
-    startAnonymousSession().catch(() => {
-      setAnonymousFailed(true);
-    });
-  }, [loading, user, needsAccount]);
-
-  if (!loading && needsAccount && !signedIn) {
-    return <SignInGate title={proGate.title} text={proGate.text} />;
+  if (!loading && !signedIn) {
+    return professional ? <SignInGate title={proGate.title} text={proGate.text} /> : <SignInGate />;
   }
-  if (needsAccount && pro?.accountType === 'family') {
+  if (professional && pro?.accountType === 'family') {
     return <ProActivationCard onActivated={() => void refreshPro()} />;
   }
-  if (anonymousFailed && !user) return <SignInGate />;
   if (!drafts) {
     return (
       <p
@@ -132,18 +120,12 @@ export function CreateStart({
   return (
     <section className="container-page max-w-2xl py-14">
       <h1 className="mb-4 text-3xl font-medium sm:text-4xl">{t('drafts.title')}</h1>
-      {!signedIn && (
-        <p className="mb-6 text-sm text-muted-foreground">
-          {t.rich('drafts.savedHere', {
-            link: (chunks) => (
-              <Link href="/login" className="font-semibold text-primary hover:underline">
-                {chunks}
-              </Link>
-            ),
-          })}
-        </p>
-      )}
-      <DraftsList drafts={drafts.filter((draft) => !isEmptyDraft(draft))} />
+      <DraftsList
+        drafts={drafts.filter((draft) => !isEmptyDraft(draft))}
+        onDeleted={(id) => {
+          setDrafts((current) => current?.filter((draft) => draft.id !== id) ?? null);
+        }}
+      />
       <Button className="mt-8" size="lg" disabled={busy} onClick={() => void startNew()}>
         {t('drafts.startNew')}
       </Button>

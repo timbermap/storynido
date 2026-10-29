@@ -55,6 +55,8 @@ export async function AudienceSelector() {
               <li key={key}>
                 <Link
                   href={href}
+                  data-track="persona_selected"
+                  data-track-persona={key}
                   className={`group flex h-full items-center gap-5 rounded-[1.75rem] p-5 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] sm:p-6 ${card}`}
                 >
                   <Icon

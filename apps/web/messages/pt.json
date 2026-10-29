@@ -401,7 +401,11 @@
       },
       "of": "A história de {name}",
       "updated": "Editado em {date}",
-      "savedHere": "Salvo neste navegador. <link>Crie sua conta</link> para não perder e ver em outros dispositivos."
+      "delete": "Excluir {title}",
+      "deleteConfirm": "Excluir esta história? A amostra e as ilustrações são removidas, e não dá para desfazer.",
+      "deleteYes": "Sim, excluir",
+      "deleteNo": "Cancelar",
+      "deleteFailed": "Não conseguimos excluir. Se já tem um pedido, não pode ser excluída; se não, tente de novo."
     },
     "child": {
       "title": "Conte sobre o protagonista",
@@ -770,7 +774,7 @@
       "title": "Lembranças mágicas para compartilhar em cada celebração.",
       "subtitle": "Com uma foto do aniversariante (ou escolhendo as características) fazemos dele o protagonista de uma mini história ilustrada. Um só design que vocês aprovam, com cópias idênticas para todos os convidados.",
       "cta": "Criar o kit de aniversário",
-      "note": "Você pode criar o design e ver a amostra grátis sem criar uma conta.",
+      "note": "Você vê os exemplos sem conta. Para criar o design e ver a amostra grátis, entre com seu e-mail: assim guardamos seu projeto.",
       "imageAlt": "Ilustração em aquarela de um aniversário: o aniversariante sopra as velas e os amigos seguram o mesmo livrinho de presente.",
       "howTitle": "Como funciona",
       "steps": {

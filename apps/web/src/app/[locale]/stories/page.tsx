@@ -118,9 +118,15 @@ export default async function StoriesPage({ params, searchParams }: Props) {
 
       <nav aria-label={t('themeLabel')} className="mt-5 flex flex-wrap items-center gap-2">
         <span className="mr-1 text-sm font-semibold">{t('themeLabel')}:</span>
-        <FilterLink href={withQuery({ tema: undefined })} active={!theme} label={t('allThemes')} />
+        <FilterLink
+          filter="theme"
+          href={withQuery({ tema: undefined })}
+          active={!theme}
+          label={t('allThemes')}
+        />
         {STORY_THEMES.map((item) => (
           <FilterLink
+            filter="theme"
             key={item.key}
             href={withQuery({ tema: item.key })}
             active={theme?.key === item.key}
@@ -131,9 +137,15 @@ export default async function StoriesPage({ params, searchParams }: Props) {
 
       <nav aria-label={t('filterLabel')} className="mt-3 flex flex-wrap items-center gap-2">
         <span className="mr-1 text-sm font-semibold">{t('filterLabel')}:</span>
-        <FilterLink href={withQuery({ edad: undefined })} active={!filter} label={t('allAges')} />
+        <FilterLink
+          filter="age"
+          href={withQuery({ edad: undefined })}
+          active={!filter}
+          label={t('allAges')}
+        />
         {AGE_FILTERS.map((f) => (
           <FilterLink
+            filter="age"
             key={f.min}
             href={withQuery({ edad: String(f.min) })}
             active={filter?.min === f.min}
@@ -146,12 +158,14 @@ export default async function StoriesPage({ params, searchParams }: Props) {
         <nav aria-label={t('collectionLabel')} className="mt-3 flex flex-wrap items-center gap-2">
           <span className="mr-1 text-sm font-semibold">{t('collectionLabel')}:</span>
           <FilterLink
+            filter="collection"
             href={withQuery({ coleccion: undefined })}
             active={!collection}
             label={t('allCollections')}
           />
           {collections.map((item) => (
             <FilterLink
+              filter="collection"
               key={item.slug}
               href={withQuery({ coleccion: item.slug })}
               active={collection?.slug === item.slug}
@@ -197,14 +211,19 @@ function FilterLink({
   href,
   active,
   label,
+  filter,
 }: {
   href: '/stories' | { pathname: '/stories'; query: Record<string, string> };
   active: boolean;
   label: string;
+  /** Qué filtro es, para el evento del embudo (sin datos personales). */
+  filter: 'age' | 'theme' | 'collection';
 }) {
   return (
     <Link
       href={href}
+      data-track="catalog_filter_used"
+      data-track-filter={filter}
       aria-current={active ? 'page' : undefined}
       className={cn(
         'rounded-full border px-4 py-1.5 text-sm font-medium transition',

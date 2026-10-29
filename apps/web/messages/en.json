@@ -401,7 +401,11 @@
       },
       "of": "{name}'s story",
       "updated": "Edited on {date}",
-      "savedHere": "Saved in this browser. <link>Create your account</link> so you don't lose it and can see it on other devices."
+      "delete": "Delete {title}",
+      "deleteConfirm": "Delete this story? The sample and its illustrations are removed, and this can't be undone.",
+      "deleteYes": "Yes, delete",
+      "deleteNo": "Cancel",
+      "deleteFailed": "We couldn't delete it. If it already has an order it can't be deleted; otherwise, try again."
     },
     "child": {
       "title": "Tell us about the hero",
@@ -770,7 +774,7 @@
       "title": "Magical keepsakes to share at every celebration.",
       "subtitle": "From a photo of the birthday child (or by choosing their features) we make them the hero of an illustrated mini story. One design you approve, with identical copies for every guest.",
       "cta": "Design the birthday kit",
-      "note": "You can create the design and see the free sample without an account.",
+      "note": "You can see the examples without an account. To create the design and see the free sample, sign in with your email so we can save your project.",
       "imageAlt": "Watercolor illustration of a birthday party: the birthday child blows out the candles while friends hold the same little gift book.",
       "howTitle": "How it works",
       "steps": {

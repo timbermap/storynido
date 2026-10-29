@@ -50,6 +50,39 @@ export function Analytics() {
     }
   }, [pathname, privatePath, analytics, marketing]);
 
+  // Eventos del embudo público: cualquier elemento con data-track="evento" (y data-track-*
+  // como parámetros). Nunca datos del niño: solo público, historia, filtro o línea.
+  useEffect(() => {
+    if (!analytics || privatePath) return;
+    const onClick = (event: MouseEvent) => {
+      const gtag = (window as unknown as TrackingWindow).gtag;
+      if (!gtag) return;
+      const element = event.target as Element | null;
+      // Cualquier enlace al creador cuenta como "empezó", con su línea.
+      const create = element?.closest<HTMLAnchorElement>(
+        'a[href*="/crear"], a[href*="/create"], a[href*="/criar"]',
+      );
+      if (create) {
+        const line = new URL(create.href).searchParams.get('line') ?? 'families';
+        gtag('event', 'create_started', { line });
+        return;
+      }
+      const target = element?.closest<HTMLElement>('[data-track]');
+      if (!target) return;
+      const params: Record<string, string> = {};
+      for (const [key, value] of Object.entries(target.dataset)) {
+        if (key.startsWith('track') && key !== 'track' && value) {
+          params[key.slice(5).toLowerCase()] = value;
+        }
+      }
+      gtag('event', target.dataset.track, params);
+    };
+    document.addEventListener('click', onClick, { capture: true });
+    return () => {
+      document.removeEventListener('click', onClick, { capture: true });
+    };
+  }, [analytics, privatePath]);
+
   useEffect(() => {
     const gtag = (window as unknown as { gtag?: Gtag }).gtag;
     gtag?.('consent', 'update', {

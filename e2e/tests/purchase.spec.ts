@@ -5,7 +5,7 @@ import { deflateSync } from 'node:zlib';
 
 import { expect, test, type Page } from '@playwright/test';
 
-import { expectAccessible, expectNoHorizontalScroll, magicLink, uniqueEmail } from './helpers';
+import { expectAccessible, expectNoHorizontalScroll, signInAtGate, uniqueEmail } from './helpers';
 
 test.skip(
   ({ isMobile }) => isMobile,
@@ -70,10 +70,12 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   const email = uniqueEmail('e2e');
   await context.addCookies([{ name: 'sn_country', value: 'MX', url: 'http://localhost:3000' }]);
 
-  // --- Creador sin cuenta (sesión anónima) ---
+  // --- Crear pide cuenta: enlace mágico y vuelta al creador ---
   await page.goto('/es/crear');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await signInAtGate(page, email);
   await heading(page, 'Cuéntanos sobre el protagonista');
+  await expect(page.locator('header button[aria-controls="menu-account"]')).toBeVisible();
   await page.locator('#child-name').fill('Martina');
   await page.locator('#child-age').selectOption('5');
   await page.locator('#child-like').fill('dinosaurios');
@@ -132,17 +134,6 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await expect(save).toBeEnabled();
   await expectAccessible(page);
   await page.getByRole('button', { name: 'Cancelar' }).click();
-
-  // Aprobar sin cuenta pide crearla; el enlace mágico vuelve al mismo cuento.
-  await page.getByRole('button', { name: 'Sí, es así' }).click();
-  await expect(body(page)).toContainText('Crea tu cuenta para ver la portada y las páginas');
-  const bookPath = new URL(page.url()).pathname;
-  await page.locator('#email').fill(email);
-  await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
-  await expect(body(page)).toContainText('Revisa tu correo');
-  await page.goto(await magicLink(email));
-  await expect(page).toHaveURL(new RegExp(`${bookPath}$`), { timeout: 30_000 });
-  await expect(page.locator('header button[aria-controls="menu-account"]')).toBeVisible();
 
   // --- Etapa 2: portada y páginas; editar y regenerar ---
   await page.getByRole('button', { name: 'Sí, es así' }).click();

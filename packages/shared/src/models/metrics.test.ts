@@ -63,4 +63,32 @@ describe('métricas del dashboard', () => {
       avgTicketUsd: 30,
     });
   });
+
+  it('embudo del día: libros creados, etapas de la muestra, pagos iniciados y compras', () => {
+    const day = aggregateDay({
+      day: '2026-10-29',
+      final: false,
+      previews: 2,
+      aiCostUsdMicros: 0,
+      fx,
+      orders: [order(), order({ status: 'pending_payment' })],
+      books: [
+        { character: true, approved: true, preview: true },
+        { character: true, approved: false, preview: false },
+        { character: false, approved: false, preview: false },
+      ],
+    });
+    expect(day.funnel).toEqual({
+      started: 3,
+      character: 2,
+      approved: 1,
+      preview: 1,
+      checkout: 2,
+      purchased: 1,
+    });
+    // Sin libros (días anteriores) no hay embudo, y el total lo cuenta aparte.
+    const old = aggregateDay({ ...day, orders: [], aiCostUsdMicros: 0, fx, previews: 0 });
+    expect(old.funnel).toBeUndefined();
+    expect(sumMetrics([day, old])).toMatchObject({ funnel: { started: 3 }, daysWithoutFunnel: 1 });
+  });
 });

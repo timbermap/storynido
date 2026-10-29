@@ -158,6 +158,47 @@ export class PreviewService {
     return { ref, book };
   }
 
+  /**
+   * Borra un borrador del usuario: el libro, sus eventos de calidad y las imágenes de la muestra
+   * (no se espera a la limpieza de 30 días: son ilustraciones del niño). Lo pedido no se borra.
+   */
+  async deleteDraft(uid: string, bookId: string): Promise<{ deleted: true }> {
+    const { ref, book } = await this.ownedBook(uid, bookId);
+    if (book.status === 'preview_generating') {
+      throw new AppError(
+        409,
+        'bad_request',
+        'La muestra se está creando. Espera a que termine para borrarla.',
+      );
+    }
+    // Un pago iniciado también bloquea: el cobro todavía puede confirmarse.
+    const orders = await this.db.collection(COLLECTIONS.orders).where('bookId', '==', bookId).get();
+    const active = orders.docs.some((order) => order.get('status') !== 'cancelled');
+    if (book.status === 'ordered' || active) {
+      throw new AppError(
+        409,
+        'bad_request',
+        'Este cuento ya tiene un pedido y no se puede borrar.',
+      );
+    }
+    const preview = book.preview;
+    const paths = new Set(
+      [
+        preview?.character?.imagePath,
+        preview?.character?.previewImagePath,
+        preview?.characterImagePath,
+        preview?.cover?.imagePath,
+        preview?.cover?.previewImagePath,
+        ...(preview?.pages ?? []).flatMap((page) => [page.imagePath, page.previewImagePath]),
+      ].filter((path): path is string => typeof path === 'string' && path.length > 0),
+    );
+    const storage = this.providers.storage();
+    await Promise.all([...paths].map((path) => storage.delete({ bucket: 'assets', path })));
+    await this.db.recursiveDelete(ref);
+    this.log.info({ bookId, images: paths.size }, 'draft deleted');
+    return { deleted: true };
+  }
+
   // ---------------------------------------------------------------- lectura
 
   async get(uid: string, bookId: string): Promise<PublicPreview> {
@@ -295,7 +336,20 @@ export class PreviewService {
     });
   }
 
-  async generate(uid: string, bookId: string, ip: string): Promise<PublicPreview> {
+  async generate(
+    uid: string,
+    bookId: string,
+    ip: string,
+    anonymous: boolean,
+  ): Promise<PublicPreview> {
+    // Crear pide cuenta en todas las líneas (DECISIONS 106): sin sesiones anónimas que gasten IA.
+    if (anonymous) {
+      throw new AppError(
+        403,
+        'account_required',
+        'Inicia sesión para crear la vista previa. Así guardamos tu borrador y protegemos las fotos.',
+      );
+    }
     const limits = await this.budget.limits();
     await this.budget.ensureAvailable(limits);
     const ref = this.bookRef(bookId);

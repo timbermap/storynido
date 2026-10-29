@@ -31,6 +31,32 @@ export interface MetricsOrder {
   printCostUsdMinor: number | null;
 }
 
+/**
+ * Embudo del día, contado en el servidor con datos propios (en el creador no hay analítica de
+ * terceros: hay datos y fotos del niño). Por día, no por cohorte: lo que pasó ese día.
+ */
+export const FUNNEL_STEPS = [
+  'started',
+  'character',
+  'preview',
+  'approved',
+  'checkout',
+  'purchased',
+] as const;
+
+export type FunnelStep = (typeof FUNNEL_STEPS)[number];
+
+export type Funnel = Record<FunnelStep, number>;
+
+export interface FunnelBook {
+  /** Lámina del personaje generada. */
+  character: boolean;
+  /** Muestra completa (portada y páginas). */
+  preview: boolean;
+  /** Personaje aprobado por el adulto. */
+  approved: boolean;
+}
+
 /** metricsDaily/{AAAA-MM-DD}: agregados del día (los días cerrados no se recalculan). */
 export interface DayMetrics {
   day: string;
@@ -56,6 +82,8 @@ export interface DayMetrics {
   marginUsd: number;
   fxSource: string;
   fxDate: string;
+  /** Ausente en días calculados antes del embudo. */
+  funnel?: Funnel;
 }
 
 const round = (value: number) => Math.round(value * 100) / 100;
@@ -74,6 +102,8 @@ export function aggregateDay(input: {
   previews: number;
   aiCostUsdMicros: number;
   fx: FxRates;
+  /** Libros creados ese día. */
+  books?: readonly FunnelBook[];
 }): DayMetrics {
   const sold = input.orders.filter((order) => REVENUE_ORDER_STATUSES.includes(order.status));
   const revenueByCurrency: Partial<Record<Currency, number>> = {};
@@ -112,6 +142,19 @@ export function aggregateDay(input: {
     marginUsd: round(netRevenueUsd - aiCostUsd - printUsd),
     fxSource: input.fx.source,
     fxDate: input.fx.date,
+    ...(input.books
+      ? {
+          funnel: {
+            started: input.books.length,
+            character: input.books.filter((book) => book.character).length,
+            preview: input.books.filter((book) => book.preview).length,
+            approved: input.books.filter((book) => book.approved).length,
+            // Pedidos creados ese día (cualquier estado) y los que se pagaron.
+            checkout: input.orders.length,
+            purchased: sold.length,
+          },
+        }
+      : {}),
   };
 }
 
@@ -142,5 +185,13 @@ export function sumMetrics(days: readonly DayMetrics[]) {
     avgTicketUsd: orders ? round(money('revenueUsd') / orders) : 0,
     conversionPct: previews ? round((orders / previews) * 100) : 0,
     revenueUsdByCountry,
+    funnel: Object.fromEntries(
+      FUNNEL_STEPS.map((step) => [
+        step,
+        days.reduce((sum, day) => sum + (day.funnel?.[step] ?? 0), 0),
+      ]),
+    ) as Funnel,
+    /** Días del rango sin embudo (calculados antes de que existiera). */
+    daysWithoutFunnel: days.filter((day) => !day.funnel).length,
   };
 }

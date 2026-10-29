@@ -26,6 +26,7 @@ export function registerPreviewRoutes(app: FastifyInstance, previews: PreviewSer
       uid(request),
       (request.params as ParamsOf<'generatePreview'>).bookId,
       request.ip,
+      request.user?.anonymous ?? true,
     ),
   );
 
@@ -42,6 +43,10 @@ export function registerPreviewRoutes(app: FastifyInstance, previews: PreviewSer
       (request.body as BodyOf<'updatePreviewPage'>).text,
     );
   });
+
+  addRoute(app, apiRoutes.deleteDraft, {}, async (request) =>
+    previews.deleteDraft(uid(request), (request.params as ParamsOf<'deleteDraft'>).bookId),
+  );
 
   addRoute(app, apiRoutes.previewFeedback, { appCheck: true }, async (request) =>
     previews.feedback(

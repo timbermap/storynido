@@ -76,7 +76,7 @@ export class MetricsService {
   private async compute(day: string, final: boolean): Promise<DayMetrics> {
     const start = dayStart(day);
     const end = new Date(start.getTime() + DAY_MS);
-    const [orders, usage, budget, fx] = await Promise.all([
+    const [orders, usage, budget, fx, books] = await Promise.all([
       this.db
         .collection(COLLECTIONS.orders)
         .where('createdAt', '>=', start)
@@ -85,6 +85,12 @@ export class MetricsService {
       this.db.collection(COLLECTIONS.aiUsage).where('day', '==', day).get(),
       this.db.collection(COLLECTIONS.aiBudget).doc(day).get(),
       this.fx(day),
+      this.db
+        .collection(COLLECTIONS.books)
+        .where('createdAt', '>=', start)
+        .where('createdAt', '<', end)
+        .select('preview.stage', 'preview.character.approvedAt', 'preview.characterImagePath')
+        .get(),
     ]);
     const previewBooks = new Set(
       usage.docs
@@ -97,6 +103,22 @@ export class MetricsService {
       previews: previewBooks.size,
       aiCostUsdMicros: Number(budget.get('spentUsdMicros') ?? 0),
       fx,
+      books: books.docs.map((doc) => {
+        const preview = doc.get('preview') as
+          | {
+              stage?: string;
+              character?: { approvedAt?: unknown } | null;
+              characterImagePath?: string | null;
+            }
+          | null
+          | undefined;
+        return {
+          character: Boolean(preview?.character ?? preview?.characterImagePath),
+          // Las muestras anteriores a la lámina no tienen etapa: llegaron completas.
+          preview: Boolean(preview && (preview.stage ?? 'complete') === 'complete'),
+          approved: Boolean(preview?.character?.approvedAt),
+        };
+      }),
       orders: orders.docs.map((doc): MetricsOrder => {
         const data = doc.data();
         const routing = data.printRouting as { totalCostUsdMinor?: number } | undefined;

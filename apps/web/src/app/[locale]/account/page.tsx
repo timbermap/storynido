@@ -89,14 +89,21 @@ export default function AccountPage() {
         <dt className="text-muted-foreground">{t('role')}</dt>
         <dd>{t(`roles.${role}`)}</dd>
         <dt className="text-muted-foreground">{t('api')}</dt>
-        <dd role="status">{apiCheck}</dd>
+        <dd>
+          <span role="status">{apiCheck}</span>
+        </dd>
       </dl>
       {pro?.accountType === 'professional' && <ProPanel uid={user.uid} status={pro} />}
       <OrdersList uid={user.uid} />
       {drafts.length > 0 && (
         <section id="drafts" className="grid scroll-mt-28 gap-4">
           <h2 className="text-2xl font-medium">{tWizard('title')}</h2>
-          <DraftsList drafts={drafts} />
+          <DraftsList
+            drafts={drafts}
+            onDeleted={(id) => {
+              setDrafts((current) => current.filter((draft) => draft.id !== id));
+            }}
+          />
         </section>
       )}
       <LanguagePreference uid={user.uid} />

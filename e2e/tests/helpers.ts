@@ -46,6 +46,18 @@ export async function magicLink(email: string): Promise<string> {
   throw new Error(`No llegó el enlace mágico de ${email}`);
 }
 
+/**
+ * Crear pide cuenta (DECISIONS 106): en la puerta del creador se pide el enlace mágico y se
+ * vuelve a la misma página con la sesión iniciada.
+ */
+export async function signInAtGate(page: Page, email: string) {
+  await expect(page.locator('h1').first()).toContainText('Inicia sesión', { timeout: 30_000 });
+  await page.locator('#email').fill(email);
+  await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
+  await expect(page.locator('body')).toContainText('Revisa tu correo');
+  await page.goto(await magicLink(email));
+}
+
 /** Cuenta con contraseña y rol (solo emuladores): para entrar al admin. */
 export async function staffAccount(email: string, role: 'admin' | 'superadmin') {
   const password = 'e2e-secret-123';

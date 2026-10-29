@@ -5,7 +5,6 @@ import {
   isSignInWithEmailLink,
   linkWithPopup,
   sendSignInLinkToEmail,
-  signInAnonymously,
   signInWithCredential,
   signInWithEmailLink,
   signInWithPopup,
@@ -19,16 +18,6 @@ import { getFirebaseAuth } from './client';
 
 const EMAIL_FOR_SIGN_IN_KEY = 'storynido:emailForSignIn';
 const RETURN_TO_KEY = 'storynido:returnTo';
-
-/**
- * Sesión anónima para crear sin cuenta: el borrador queda a nombre de un usuario temporal
- * que se vincula a la cuenta real cuando la persona inicia sesión.
- */
-export async function startAnonymousSession(): Promise<void> {
-  const auth = getFirebaseAuth();
-  await auth.authStateReady();
-  if (!auth.currentUser) await signInAnonymously(auth);
-}
 
 function errorCode(error: unknown): string {
   return typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';

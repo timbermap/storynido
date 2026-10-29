@@ -11,6 +11,15 @@ import { useApi } from '@/lib/use-api';
 
 const RANGES = [7, 30, 90] as const;
 
+const FUNNEL = [
+  { step: 'started', label: 'Empezaron el creador' },
+  { step: 'character', label: 'Vieron su personaje' },
+  { step: 'approved', label: 'Aprobaron el personaje' },
+  { step: 'preview', label: 'Vieron la muestra' },
+  { step: 'checkout', label: 'Iniciaron el pago' },
+  { step: 'purchased', label: 'Compraron' },
+] as const;
+
 const usd = (value: number) =>
   value.toLocaleString('es', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
 
@@ -110,6 +119,35 @@ export default function SummaryPage() {
           hint="Sin impuestos, IA ni impresión; sin comisiones de pago"
         />
       </div>
+
+      {totals && (
+        <Card className="mt-6">
+          <h2 className="font-semibold">Embudo del período</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Contado en el servidor, por día (no por cohorte), sin datos del niño.
+            {totals.daysWithoutFunnel > 0 &&
+              ` ${String(totals.daysWithoutFunnel)} días del rango son anteriores al embudo y no suman.`}
+          </p>
+          <ol className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+            {FUNNEL.map(({ step, label }, index) => {
+              const value = totals.funnel[step] ?? 0;
+              const previous =
+                index > 0 ? (totals.funnel[FUNNEL[index - 1]?.step ?? step] ?? 0) : 0;
+              return (
+                <li key={step} className="rounded-md border p-3">
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="mt-1 text-xl font-semibold tabular-nums">{value}</p>
+                  {index > 0 && previous > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {Math.round((value / previous) * 100)} % del paso anterior
+                    </p>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </Card>
+      )}
 
       <Card className="mt-6">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">

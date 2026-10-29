@@ -225,6 +225,7 @@ export const dayMetricsSchema = z.object({
   marginUsd: z.number(),
   fxSource: z.string(),
   fxDate: z.string(),
+  funnel: z.record(z.string(), z.number()).optional(),
 });
 
 const costStatsSchema = z.object({
@@ -778,6 +779,14 @@ export const apiRoutes = {
     body: z.object({ reasons: z.array(z.enum(PREVIEW_FEEDBACK_REASONS)).min(1).max(5) }),
     response: z.object({ saved: z.literal(true) }),
   },
+  deleteDraft: {
+    method: 'DELETE',
+    path: '/v1/books/:bookId',
+    access: 'user',
+    summary: 'Borra un borrador sin comprar (con su muestra y sus imágenes)',
+    params: bookParamsSchema,
+    response: z.object({ deleted: z.literal(true) }),
+  },
   regeneratePreviewIllustration: {
     method: 'POST',
     path: '/v1/books/:bookId/preview/illustrations/:target/regenerate',
@@ -828,19 +837,24 @@ export const apiRoutes = {
     query: z.object({ days: z.coerce.number().int().min(1).max(366).default(30) }),
     response: z.object({
       days: z.array(dayMetricsSchema),
-      totals: dayMetricsSchema.pick({
-        orders: true,
-        refunds: true,
-        previews: true,
-        revenueUsd: true,
-        netRevenueUsd: true,
-        aiCostUsd: true,
-        printCostUsd: true,
-        marginUsd: true,
-        avgTicketUsd: true,
-        conversionPct: true,
-        revenueUsdByCountry: true,
-      }),
+      totals: dayMetricsSchema
+        .pick({
+          orders: true,
+          refunds: true,
+          previews: true,
+          revenueUsd: true,
+          netRevenueUsd: true,
+          aiCostUsd: true,
+          printCostUsd: true,
+          marginUsd: true,
+          avgTicketUsd: true,
+          conversionPct: true,
+          revenueUsdByCountry: true,
+        })
+        .extend({
+          funnel: z.record(z.string(), z.number()),
+          daysWithoutFunnel: z.number(),
+        }),
     }),
   },
   adminAiCosts: {

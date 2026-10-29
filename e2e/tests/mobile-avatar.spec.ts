@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { expectAccessible, expectNoHorizontalScroll } from './helpers';
+import { expectAccessible, expectNoHorizontalScroll, signInAtGate, uniqueEmail } from './helpers';
 
 test.skip(({ isMobile }) => !isMobile, 'Recorrido pensado para el teléfono (390 px).');
 
@@ -14,6 +14,7 @@ test('móvil, sin foto: rasgos elegidos, libro para colorear Mini y muestra a 39
   test.slow();
   await page.goto('/es/crear');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await signInAtGate(page, uniqueEmail('movil'));
   await heading(page, 'Cuéntanos sobre el protagonista');
   await page.locator('#child-name').fill('Mía');
   await page.locator('#child-age').selectOption('7');

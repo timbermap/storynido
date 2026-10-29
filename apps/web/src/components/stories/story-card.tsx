@@ -23,6 +23,8 @@ export async function StoryCard({
   return (
     <Link
       href={{ pathname: '/stories/[slug]', params: { slug: story.slug } }}
+      data-track="story_opened"
+      data-track-story={story.slug}
       className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)] transition duration-200 hover:-translate-y-1 motion-reduce:hover:translate-y-0"
     >
       <div className="aspect-[3/4] overflow-hidden bg-muted">

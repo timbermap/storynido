@@ -312,14 +312,34 @@ describe('vista previa', () => {
     expect((await db.doc('books/book-1').get()).get('characterTraits')).toBeUndefined();
   });
 
-  it('con una sesión anónima, ilustrar pide cuenta (si así está configurado)', async () => {
+  it('el usuario borra su borrador con la muestra y sus imágenes; con pedido, no', async () => {
     await seedBook(providers, 'book-1');
-    await generate('book-1', `${TOKEN}:anonymous`);
-    const blocked = await approve('book-1', `${TOKEN}:anonymous`);
+    await generateAndApprove('book-1');
+    const preview = (await db.doc('books/book-1').get()).get('preview') as {
+      cover: { imagePath: string };
+    };
+    const del = (bookId: string, token = TOKEN) =>
+      app.inject({ method: 'DELETE', url: `/v1/books/${bookId}`, headers: auth(token) });
+    // De otro usuario: no existe.
+    expect((await del('book-1', 'token-otro')).statusCode).toBe(404);
+    // Con un pedido activo, no se borra.
+    await db.doc('orders/o-1').set({ bookId: 'book-1', status: 'pending_payment' });
+    expect((await del('book-1')).statusCode).toBe(409);
+    await db.doc('orders/o-1').update({ status: 'cancelled' });
+    expect((await del('book-1')).statusCode).toBe(200);
+    expect((await db.doc('books/book-1').get()).exists).toBe(false);
+    expect(
+      await providers.storage().exists({ bucket: 'assets', path: preview.cover.imagePath }),
+    ).toBe(false);
+    await db.doc('orders/o-1').delete();
+  });
+
+  it('con una sesión anónima no se genera la muestra: crear pide cuenta', async () => {
+    await seedBook(providers, 'book-1');
+    const blocked = await generate('book-1', `${TOKEN}:anonymous`);
     expect(blocked.statusCode).toBe(403);
     expect(blocked.json<{ error: { code: string } }>().error.code).toBe('account_required');
-    await setAiConfig({ illustrationsRequireAccount: false });
-    expect((await approve('book-1', `${TOKEN}:anonymous`)).statusCode).toBe(200);
+    expect((await db.doc('books/book-1').get()).get('preview')).toBeFalsy();
   });
 
   it('corregir rasgos vuelve a dibujar la lámina, cuenta como regeneración y queda en el libro', async () => {

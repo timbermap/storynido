@@ -401,7 +401,11 @@
       },
       "of": "El cuento de {name}",
       "updated": "Editado el {date}",
-      "savedHere": "Guardado en este navegador. <link>Crea tu cuenta</link> para no perderlo y verlo en otros dispositivos."
+      "delete": "Borrar {title}",
+      "deleteConfirm": "¿Borrar este cuento? Se eliminan la muestra y sus ilustraciones, y no se puede deshacer.",
+      "deleteYes": "Sí, borrar",
+      "deleteNo": "Cancelar",
+      "deleteFailed": "No pudimos borrarlo. Si ya tiene un pedido, no se puede borrar; si no, intenta de nuevo."
     },
     "child": {
       "title": "Cuéntanos sobre el protagonista",
@@ -770,7 +774,7 @@
       "title": "Recuerdos mágicos para compartir en cada celebración.",
       "subtitle": "Con una foto del cumpleañero (o eligiendo sus rasgos) lo convertimos en el protagonista de un mini cuento ilustrado. Un solo diseño que ustedes aprueban, con copias idénticas para todos los invitados.",
       "cta": "Diseñar el kit de cumpleaños",
-      "note": "Puedes crear el diseño y ver la muestra gratis sin crear una cuenta.",
+      "note": "Ves los ejemplos sin cuenta. Para crear el diseño y ver la muestra gratis, inicias sesión con tu correo: así guardamos tu proyecto.",
       "imageAlt": "Ilustración en acuarela de un cumpleaños: el cumpleañero sopla las velas y sus amigos sostienen el mismo librito de regalo.",
       "howTitle": "Cómo funciona",
       "steps": {
