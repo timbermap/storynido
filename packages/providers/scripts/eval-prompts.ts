@@ -6,7 +6,7 @@
  *   pnpm eval:prompts            # solo estima el costo
  *   pnpm eval:prompts --yes      # genera (cuesta dinero)
  *
- * Opciones: --only slug,slug · --only-after (solo la variante nueva) · --pages 2 (páginas ilustradas además de lámina y portada) · --budget 4 (USD, tope)
+ * Opciones: --only slug,slug · --age 10 · --only-after (solo la variante nueva) · --pages 2 (páginas ilustradas además de lámina y portada) · --budget 4 (USD, tope)
  *           --style acuarela · --model gemini-3.1-flash-image
  * Credenciales: token de gcloud con la configuración "storynido" (nunca la de Timbermap).
  */
@@ -47,6 +47,8 @@ const { values } = parseArgs({
     only: { type: 'string' },
     'only-after': { type: 'boolean', default: false },
     pages: { type: 'string', default: '2' },
+    /** Edad del protagonista inventado (por ejemplo 10 para las historias de 9 a 12). */
+    age: { type: 'string', default: '6' },
     budget: { type: 'string', default: '4' },
     style: { type: 'string', default: 'acuarela' },
     model: { type: 'string', default: 'gemini-3.1-flash-image' },
@@ -62,9 +64,9 @@ if (values.project.startsWith('timbermap')) {
 }
 
 /** Protagonista inventado: nunca la foto de un chico real. */
-const CHILD = { name: 'Mateo', age: 6, pronouns: 'he' as const };
+const CHILD = { name: 'Mateo', age: Number(values.age), pronouns: 'he' as const };
 const SHEET: CharacterSheet = {
-  apparentAge: 'about 6 years old',
+  apparentAge: `about ${values.age} years old`,
   hair: 'short, curly, dark brown hair',
   eyes: 'brown eyes',
   skinTone: 'medium olive skin',
@@ -86,7 +88,13 @@ const ALL_CASES: { channel: Channel; slug: string; event?: BookEvent; goal?: str
   },
 ];
 const ONLY = values.only?.split(',');
-const CASES = ONLY ? ALL_CASES.filter((item) => ONLY.includes(item.slug)) : ALL_CASES;
+// Una historia que no está en los casos fijos se prueba como Familias.
+const CASES = ONLY
+  ? ONLY.map(
+      (slug) =>
+        ALL_CASES.find((item) => item.slug === slug) ?? { channel: 'families' as const, slug },
+    )
+  : ALL_CASES;
 const ALL_VARIANTS = ['antes', 'después'] as const;
 const VARIANTS = values['only-after'] ? (['después'] as const) : ALL_VARIANTS;
 
