@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { currencySchema, type Currency } from '../currency';
 import type { CountryConfig, Coupon, Promotion } from './commerce';
 import type { BookFormat } from './common';
-import type { BookLength } from './editorial';
 import { kitPieceSchema, type EventPricing, type KitSelection } from './kit';
 import type { FxRates } from './metrics';
 import {
@@ -128,7 +127,8 @@ export interface QuoteInput {
   /** Tipo de cambio del día (unidades por dólar). */
   fx: FxRates;
   format: BookFormat;
-  length: BookLength | null;
+  /** Páginas interiores del libro: el costo de IA depende de ellas. */
+  pages: number;
   quantity: number;
   /** Impreso: costo de la imprenta para esta dirección (o la estimación, sin dirección). */
   print?: PrintCost | null;
@@ -187,7 +187,7 @@ export function quote(input: QuoteInput): QuoteResult {
 
   const quantity = Math.max(1, Math.floor(input.quantity));
   const productionUnit = print ? Math.round(print.productionUsdMinor / quantity) : 0;
-  const usd = unitPriceUsdMinor(pricing, productionUnit, input.length);
+  const usd = unitPriceUsdMinor(pricing, productionUnit, input.pages);
   // Profesionales: descuento base del producto (además del de recurrencia).
   const unitUsd = input.pro ? Math.round((usd * (100 - pricing.proPercentOff)) / 100) : usd;
   const local = fromUsdMinor(unitUsd, CHARGE_CURRENCY, input.fx);
@@ -216,7 +216,7 @@ export function quote(input: QuoteInput): QuoteResult {
  * pieza extra. Es digital: sin envío. Descuentos e impuestos, igual que un libro.
  */
 export function quoteKit(
-  input: Omit<QuoteInput, 'pricing' | 'fx' | 'print' | 'format' | 'length' | 'quantity'> & {
+  input: Omit<QuoteInput, 'pricing' | 'fx' | 'print' | 'format' | 'pages' | 'quantity'> & {
     pricing: EventPricing | null;
     kit: KitSelection;
     /** "Pedir más copias" del mismo diseño: no se vuelve a cobrar el diseño. */

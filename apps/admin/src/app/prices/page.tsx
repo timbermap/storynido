@@ -1,34 +1,37 @@
 'use client';
 
-import { BOOK_FORMATS, BOOK_LENGTHS, MARGIN_MODES } from '@storynido/shared';
+import { BOOK_FORMATS, MARGIN_MODES } from '@storynido/shared';
 
 import { ConfigEditor } from '@/components/config/config-editor';
 import { money, yesNo } from '@/lib/format';
 
-const MODE_LABEL: Record<string, string> = {
-  fixed: 'Monto fijo',
-  percent: 'Porcentaje del costo',
-  percent_min: 'Porcentaje, con mínimo',
-};
+/** Resumen de un margen para la tabla ("% con mínimo: 30 % / USD 8,00"). */
+function describe(margin: unknown): string {
+  const value = margin as { mode?: string; fixedUsdMinor?: number; percent?: number } | undefined;
+  if (!value?.mode) return '—';
+  const fixed = money(value.fixedUsdMinor, 'USD');
+  const percent = `${String(value.percent ?? 0)} %`;
+  if (value.mode === 'fixed') return `Fijo: ${fixed}`;
+  if (value.mode === 'percent') return percent;
+  return `${percent}, mín. ${fixed}`;
+}
 
 /**
- * Precio = costo + margen (DECISIONS 096). Un producto por fila; todo en dólares (sin campo de
- * moneda: los montos se editan en USD) y la web lo convierte a la moneda de cada país.
+ * Precio = costo + dos márgenes (DECISIONS 096 a 098), todo en dólares: creación (IA por páginas
+ * + margen) e impresión (imprenta + margen, solo impresos). El envío se cobra al costo.
  */
 export default function PricesPage() {
   return (
     <ConfigEditor
       kind="productPricing"
       title="Precios y márgenes"
-      text="El precio sale del costo real más tu margen, en dólares, y se convierte a la moneda de cada país. En el impreso, el costo es el de la imprenta más barata para esa dirección y el envío se cobra al costo. El margen puede ser un monto fijo, un porcentaje del costo, o un porcentaje con un mínimo."
+      text="Todo en dólares. Precio = creación + impresión + envío. Creación: costo de IA (costo por página × páginas del libro) + margen de creación. Impresión (solo impresos): lo que cobra la imprenta más barata para esa dirección + margen de impresión. El envío se cobra al costo. Cada margen puede ser fijo, un porcentaje del costo, o un porcentaje con mínimo."
       idFrom={(data) => String(data.product)}
       blank={() => ({
         product: 'digital',
-        baseCostUsdMinor: 100,
-        marginMode: 'fixed',
-        marginFixedUsdMinor: 0,
-        marginPercent: 0,
-        lengthAdjustmentsUsdMinor: {},
+        aiCostPerPageUsdMinor: 15,
+        creationMargin: { mode: 'fixed', fixedUsdMinor: 1700, percent: 0 },
+        printMargin: { mode: 'percent_min', fixedUsdMinor: 800, percent: 30 },
         proPercentOff: 10,
         active: false,
       })}
@@ -43,34 +46,49 @@ export default function PricesPage() {
         { kind: 'boolean', path: 'active', label: 'Se vende' },
         {
           kind: 'money',
-          path: 'baseCostUsdMinor',
-          label: 'Costo propio (USD)',
-          hint: 'Aparte de la imprenta: IA, PDF y operación por libro.',
+          path: 'aiCostPerPageUsdMinor',
+          label: 'Costo de IA por página (USD)',
+          hint: 'Con regeneraciones y revisión. El real por libro está en Resumen → costo de IA.',
           currencyPath: 'currency',
         },
-        { kind: 'select', path: 'marginMode', label: 'Tipo de margen', options: MARGIN_MODES },
+        {
+          kind: 'select',
+          path: 'creationMargin.mode',
+          label: 'Margen de creación: tipo',
+          options: MARGIN_MODES,
+        },
         {
           kind: 'money',
-          path: 'marginFixedUsdMinor',
-          label: 'Margen fijo o mínimo (USD)',
-          hint: 'Monto fijo: es el margen. Porcentaje con mínimo: nunca menos que esto.',
+          path: 'creationMargin.fixedUsdMinor',
+          label: 'Margen de creación: fijo o mínimo (USD)',
           currencyPath: 'currency',
         },
         {
           kind: 'number',
-          path: 'marginPercent',
-          label: 'Margen en % del costo',
-          hint: 'Para "porcentaje" y "porcentaje, con mínimo". El envío no lleva margen.',
+          path: 'creationMargin.percent',
+          label: 'Margen de creación: % del costo de IA',
           min: 0,
           max: 1000,
         },
         {
-          kind: 'moneyRecord',
-          path: 'lengthAdjustmentsUsdMinor',
-          label: 'Ajuste por extensión (USD; se suma, puede ser negativo)',
-          keys: BOOK_LENGTHS,
+          kind: 'select',
+          path: 'printMargin.mode',
+          label: 'Margen de impresión: tipo',
+          hint: 'Solo impresos.',
+          options: MARGIN_MODES,
+        },
+        {
+          kind: 'money',
+          path: 'printMargin.fixedUsdMinor',
+          label: 'Margen de impresión: fijo o mínimo (USD)',
           currencyPath: 'currency',
-          signed: true,
+        },
+        {
+          kind: 'number',
+          path: 'printMargin.percent',
+          label: 'Margen de impresión: % de lo que cobra la imprenta',
+          min: 0,
+          max: 1000,
         },
         {
           kind: 'number',
@@ -83,12 +101,12 @@ export default function PricesPage() {
       ]}
       columns={[
         { label: 'Producto', render: (data) => String(data.product) },
-        { label: 'Margen', render: (data) => MODE_LABEL[String(data.marginMode)] ?? '—' },
+        { label: 'IA por página', render: (data) => money(data.aiCostPerPageUsdMinor, 'USD') },
+        { label: 'Creación', render: (data) => describe(data.creationMargin) },
         {
-          label: 'Fijo / mínimo',
-          render: (data) => money(data.marginFixedUsdMinor, 'USD'),
+          label: 'Impresión',
+          render: (data) => (data.product === 'digital' ? '—' : describe(data.printMargin)),
         },
-        { label: '%', render: (data) => `${String(data.marginPercent)} %` },
         { label: 'Se vende', render: (data) => yesNo(data.active) },
       ]}
     />

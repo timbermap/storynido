@@ -94,11 +94,9 @@ describe('admin: interruptor del sitio y auditoría', () => {
 
   const pricing = {
     product: 'digital',
-    baseCostUsdMinor: 100,
-    marginMode: 'fixed',
-    marginFixedUsdMinor: 1899,
-    marginPercent: 0,
-    lengthAdjustmentsUsdMinor: {},
+    aiCostPerPageUsdMinor: 15,
+    creationMargin: { mode: 'fixed', fixedUsdMinor: 1700, percent: 0 },
+    printMargin: { mode: 'percent_min', fixedUsdMinor: 800, percent: 30 },
     proPercentOff: 10,
     active: true,
   };
@@ -107,13 +105,21 @@ describe('admin: interruptor del sitio y auditoría', () => {
     const wrong = await save('productPricing', 'hardcover', pricing);
     expect(wrong.statusCode).toBe(400);
     expect(wrong.json()).toMatchObject({ error: { message: 'El id tiene que ser "digital".' } });
-    const bad = await save('productPricing', 'digital', { ...pricing, marginMode: 'lo que sea' });
+    const bad = await save('productPricing', 'digital', {
+      ...pricing,
+      creationMargin: { ...pricing.creationMargin, mode: 'lo que sea' },
+    });
     expect(bad.statusCode).toBe(400);
 
     expect((await save('productPricing', 'digital', pricing)).statusCode).toBe(200);
-    const percent = { ...pricing, marginMode: 'percent_min', marginPercent: 60 };
+    const percent = {
+      ...pricing,
+      creationMargin: { mode: 'percent_min', fixedUsdMinor: 1500, percent: 60 },
+    };
     expect((await save('productPricing', 'digital', percent)).statusCode).toBe(200);
-    expect((await db.doc('productPricing/digital').get()).get('marginMode')).toBe('percent_min');
+    expect((await db.doc('productPricing/digital').get()).get('creationMargin.mode')).toBe(
+      'percent_min',
+    );
 
     const { entries } = (
       await app.inject({
@@ -122,13 +128,16 @@ describe('admin: interruptor del sitio y auditoría', () => {
         headers: auth(ADMIN),
       })
     ).json<{
-      entries: { action: string; before: { marginMode?: string; updatedAt?: string } | null }[];
+      entries: {
+        action: string;
+        before: { creationMargin?: { mode: string }; updatedAt?: string } | null;
+      }[];
     }>();
     expect(entries.map((entry) => entry.action)).toEqual([
       'productPricing.update',
       'productPricing.create',
     ]);
-    expect(entries[0]?.before?.marginMode).toBe('fixed');
+    expect(entries[0]?.before?.creationMargin?.mode).toBe('fixed');
     // Las fechas del antes y el después vuelven como texto ISO.
     expect(entries[0]?.before?.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     expect(entries[1]?.before).toBeNull();
@@ -139,7 +148,7 @@ describe('admin: interruptor del sitio y auditoría', () => {
       headers: auth(ADMIN),
     });
     expect(list.json()).toMatchObject({
-      items: [{ id: 'digital', data: { marginPercent: 60 } }],
+      items: [{ id: 'digital', data: { creationMargin: { percent: 60 } } }],
     });
   });
 

@@ -236,10 +236,11 @@ describe('catálogo', () => {
     // Todo en dólares (DECISIONS 097); el peso va solo como referencia.
     expect(offer.currency).toBe('USD');
     expect(offer.local).toEqual({ currency: 'MXN', rate: 20 });
-    // Digital: USD 1 + 18,99 = 19,99. Tapa dura: 1 + 14 + 28 = 43 → 43,99.
+    // 24 páginas. Digital: 0,15 × 24 + 17 = 20,60 → 20,99.
+    // Tapa dura: 20,60 + imprenta 14 + 8 (mínimo de impresión) = 42,60 → 42,99.
     expect(offer.formats).toEqual([
-      expect.objectContaining({ format: 'digital', amountMinor: 1999, estimated: false }),
-      expect.objectContaining({ format: 'hardcover', amountMinor: 4399, estimated: true }),
+      expect.objectContaining({ format: 'digital', amountMinor: 2099, estimated: false }),
+      expect.objectContaining({ format: 'hardcover', amountMinor: 4299, estimated: true }),
     ]);
     expect(offer.shipping).toEqual({ costMinor: 0, quoted: true, etaDaysMin: 6, etaDaysMax: 10 });
   });
@@ -251,7 +252,7 @@ describe('catálogo', () => {
       formats: { format: string; amountMinor: number }[];
     }>();
     expect(offer).toMatchObject({ available: true, currency: 'USD' });
-    expect(offer.formats[0]).toMatchObject({ format: 'digital', amountMinor: 1999 });
+    expect(offer.formats[0]).toMatchObject({ format: 'digital', amountMinor: 2099 });
   });
 
   it('sin imprenta habilitada (o sin muestra aprobada) el impreso no se ofrece', () => {

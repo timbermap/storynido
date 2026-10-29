@@ -2,14 +2,14 @@ import { z } from 'zod';
 
 import { CURRENCY_MINOR_UNITS, type Currency } from '../currency';
 import { bookFormatSchema, type BookFormat } from './common';
-import { bookLengthSchema, type BookLength } from './editorial';
 import type { FxRates } from './metrics';
 
 /**
- * Precio por costo + margen (DECISIONS 096). Cada producto (digital, tapa blanda, tapa dura) tiene
- * su margen, que el admin define como monto fijo, porcentaje del costo o porcentaje con mínimo.
- * El impreso se cotiza con cada pedido: imprenta más barata para esa dirección + margen; el envío
- * se cobra al costo. Todo se calcula en dólares y se convierte a la moneda del comprador.
+ * Precio por costo + dos márgenes (DECISIONS 096 y 098), todo en dólares:
+ * - creación: el costo de IA (costo por página × páginas del libro) + margen de creación;
+ * - impresión (solo impresos): lo que cobra la imprenta para esa dirección + margen de impresión.
+ * El envío se cobra al costo. Cada margen se define como monto fijo, porcentaje del costo o
+ * porcentaje con mínimo, por producto (digital, tapa blanda, tapa dura), desde el admin.
  */
 export const MARGIN_MODES = ['fixed', 'percent', 'percent_min'] as const;
 
@@ -17,18 +17,25 @@ export const marginModeSchema = z.enum(MARGIN_MODES);
 
 export type MarginMode = z.infer<typeof marginModeSchema>;
 
-/** productPricing/{producto}: margen y costos propios de un producto (editable en el admin). */
+export const marginSchema = z.object({
+  mode: marginModeSchema,
+  /** Margen fijo (modo `fixed`) o mínimo (modo `percent_min`), en centavos de USD. */
+  fixedUsdMinor: z.number().int().min(0),
+  /** Porcentaje del costo (modos `percent` y `percent_min`). */
+  percent: z.number().min(0).max(1000),
+});
+
+export type Margin = z.infer<typeof marginSchema>;
+
+/** productPricing/{producto}: costos y márgenes de un producto (editable en el admin). */
 export const productPricingSchema = z.object({
   product: bookFormatSchema,
-  /** Costo propio aparte de la imprenta (digital: IA y PDF), en centavos de USD. */
-  baseCostUsdMinor: z.number().int().min(0),
-  marginMode: marginModeSchema,
-  /** Margen fijo (modo `fixed`) o mínimo (modo `percent_min`), en centavos de USD. */
-  marginFixedUsdMinor: z.number().int().min(0),
-  /** Margen en porcentaje del costo (modos `percent` y `percent_min`). */
-  marginPercent: z.number().min(0).max(1000),
-  /** Ajuste por extensión, en centavos de USD (Mini más barato, Gran aventura más caro). */
-  lengthAdjustmentsUsdMinor: z.partialRecord(bookLengthSchema, z.number().int()).default({}),
+  /** Costo de IA por página ilustrada, con regeneraciones y revisión (centavos de USD). */
+  aiCostPerPageUsdMinor: z.number().int().min(0),
+  /** Margen sobre el costo de creación (IA). */
+  creationMargin: marginSchema,
+  /** Margen sobre lo que cobra la imprenta (solo impresos; el digital lo ignora). */
+  printMargin: marginSchema,
   /** Profesionales: descuento base sobre el precio (aparte del de recurrencia). */
   proPercentOff: z.number().int().min(0).max(80).default(0),
   active: z.boolean(),
@@ -38,70 +45,68 @@ export const productPricingSchema = z.object({
 export type ProductPricing = z.infer<typeof productPricingSchema>;
 
 /**
- * Valores por defecto (monto fijo): con la imprenta más barata de EE. UU. dejan los precios
- * cerca de los de lanzamiento (digital USD 19,99; tapa blanda ~39,99 y dura ~49,99 con envío).
+ * Valores de fábrica: USD 0,15 de IA por página, USD 17 de creación y, en impresos, 30 % de la
+ * imprenta con un mínimo de USD 8. Digital clásico (28 páginas): 4,20 + 17 = 21,99.
  */
+const CREATION: Margin = { mode: 'fixed', fixedUsdMinor: 1700, percent: 0 };
+const PRINTING: Margin = { mode: 'percent_min', fixedUsdMinor: 800, percent: 30 };
+
 export const DEFAULT_PRODUCT_PRICING: Record<BookFormat, Omit<ProductPricing, 'updatedAt'>> = {
   digital: {
     product: 'digital',
-    baseCostUsdMinor: 100,
-    marginMode: 'fixed',
-    marginFixedUsdMinor: 1899,
-    marginPercent: 0,
-    lengthAdjustmentsUsdMinor: { mini: -300, epic: 600 },
+    aiCostPerPageUsdMinor: 15,
+    creationMargin: CREATION,
+    printMargin: PRINTING,
     proPercentOff: 10,
     active: true,
   },
   softcover: {
     product: 'softcover',
-    baseCostUsdMinor: 100,
-    marginMode: 'fixed',
-    marginFixedUsdMinor: 2700,
-    marginPercent: 0,
-    lengthAdjustmentsUsdMinor: { mini: -300, epic: 600 },
+    aiCostPerPageUsdMinor: 15,
+    creationMargin: CREATION,
+    printMargin: PRINTING,
     proPercentOff: 10,
     active: true,
   },
   hardcover: {
     product: 'hardcover',
-    baseCostUsdMinor: 100,
-    marginMode: 'fixed',
-    marginFixedUsdMinor: 2800,
-    marginPercent: 0,
-    lengthAdjustmentsUsdMinor: { mini: -300, epic: 600 },
+    aiCostPerPageUsdMinor: 15,
+    creationMargin: CREATION,
+    printMargin: PRINTING,
     proPercentOff: 10,
     active: true,
   },
 };
 
-/** Margen sobre un costo (en centavos de USD), según el modo del producto. */
-export function marginUsdMinor(
-  pricing: Pick<ProductPricing, 'marginMode' | 'marginFixedUsdMinor' | 'marginPercent'>,
-  costUsdMinor: number,
-): number {
-  const percent = Math.round((costUsdMinor * pricing.marginPercent) / 100);
-  switch (pricing.marginMode) {
+/** Margen sobre un costo (en centavos de USD), según su modo. */
+export function marginUsdMinor(margin: Margin, costUsdMinor: number): number {
+  const percent = Math.round((costUsdMinor * margin.percent) / 100);
+  switch (margin.mode) {
     case 'fixed':
-      return pricing.marginFixedUsdMinor;
+      return margin.fixedUsdMinor;
     case 'percent':
       return percent;
     case 'percent_min':
-      return Math.max(percent, pricing.marginFixedUsdMinor);
+      return Math.max(percent, margin.fixedUsdMinor);
   }
 }
 
 /**
- * Precio unitario del libro en centavos de USD: costo propio + impresión (si es impreso) +
- * margen + ajuste por extensión. El envío va aparte y al costo.
+ * Precio unitario del libro en centavos de USD: creación (IA por páginas + margen) e impresión
+ * (imprenta + margen, si es impreso). El envío va aparte y al costo.
  */
 export function unitPriceUsdMinor(
   pricing: ProductPricing | Omit<ProductPricing, 'updatedAt'>,
   productionCostUsdMinor: number,
-  length: BookLength | null,
+  pages: number,
 ): number {
-  const cost = pricing.baseCostUsdMinor + productionCostUsdMinor;
-  const adjustment = length ? (pricing.lengthAdjustmentsUsdMinor[length] ?? 0) : 0;
-  return Math.max(0, cost + marginUsdMinor(pricing, cost) + adjustment);
+  const ai = pricing.aiCostPerPageUsdMinor * Math.max(0, pages);
+  const creation = ai + marginUsdMinor(pricing.creationMargin, ai);
+  const printing =
+    pricing.product === 'digital' || productionCostUsdMinor <= 0
+      ? 0
+      : productionCostUsdMinor + marginUsdMinor(pricing.printMargin, productionCostUsdMinor);
+  return creation + printing;
 }
 
 /** Centavos de USD → unidad mínima de otra moneda (tipo de cambio: unidades por dólar). */

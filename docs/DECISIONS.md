@@ -1308,3 +1308,20 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - la oferta trae `local` (moneda y tipo de cambio del día);
   - la web muestra "Precios en dólares; tu banco hace la conversión. Referencia: 1 USD ≈ 18,5 MXN" y, en el resumen del checkout, "≈ MXN 1.234".
 - **Impuestos:** siguen la configuración del país (por ejemplo, el IVA incluido en México), calculados sobre el monto en dólares.
+
+## 098 · Dos márgenes: creación e impresión
+
+- **Fecha:** 2026-10-29 · Decisión de Sebastián: el costo del digital cambia con las páginas, así que se separan dos márgenes.
+- **Creación**, en todos los productos: costo de IA (costo por página × páginas interiores del libro) + margen de creación. El libro largo cuesta más solo; se eliminan los ajustes manuales por extensión.
+- **Impresión**, solo impresos: lo que cobra la imprenta elegida + margen de impresión. El envío sigue al costo.
+- **Tipo de margen:** cada uno es fijo, porcentaje o porcentaje con mínimo, por producto (Admin → Precios y márgenes).
+- **De fábrica:**
+  - IA: USD 0,15 por página;
+  - creación: USD 17 fijo;
+  - impresión: 30 %, con un mínimo de USD 8.
+- **Ejemplos:**
+  - digital Mini (12 páginas): 1,80 + 17 = USD 18,99;
+  - digital Clásico (28 páginas): 4,20 + 17 = USD 21,99;
+  - tapa blanda Clásico a EE. UU. con Lulu (USD 5,83): 21,20 + 5,83 + 8 = USD 35,99, más el envío.
+- **Por qué el margen de creación es fijo por defecto:** un porcentaje sobre un costo tan chico (USD 1 a 6) daría precios sin relación con el valor, y bajarían si la IA se abarata. Sobre la imprenta el porcentaje sí sirve, porque su costo varía mucho por formato y destino.
+- **Pendiente:** ajustar el costo por página con el costo real de IA por libro (Resumen → costo de IA) cuando haya pedidos reales.

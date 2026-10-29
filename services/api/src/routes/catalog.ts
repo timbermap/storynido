@@ -105,7 +105,7 @@ export function buildOffer(input: {
         name: product.name[locale],
         pageCount: product.pageCount,
         amountMinor: charmPrice(
-          unitPriceUsdMinor(productPricing, production, null),
+          unitPriceUsdMinor(productPricing, production, product.pageCount),
           CHARGE_CURRENCY,
         ),
         estimated: format !== 'digital',
