@@ -32,13 +32,18 @@
     "region": "Idioma y país",
     "familiesCreate": "Crear su cuento",
     "myStories": "Mis cuentos",
-    "preferences": "Preferencias",
+    "preferences": "Ajustes",
     "signOut": "Cerrar sesión",
     "accountMenu": "Menú de tu cuenta",
     "signedInAs": "Sesión de",
     "menuFamilies": "Para familias",
     "menuEvents": "Para celebraciones",
-    "menuProfessionals": "Para profesionales"
+    "menuProfessionals": "Para profesionales",
+    "lines": {
+      "families": "Familia",
+      "events": "Celebración",
+      "professionals": "Profesional"
+    }
   },
   "Switchers": {
     "language": "Idioma"
@@ -351,7 +356,39 @@
       "error": "No pudimos borrar tu cuenta. Intenta de nuevo."
     },
     "news": "Recibir novedades por correo",
-    "newsNote": "Ideas para un cuento nuevo en fechas especiales, recordatorios de borradores y pedidos de opinión. Los avisos de tus pedidos llegan siempre."
+    "newsNote": "Ideas para un cuento nuevo en fechas especiales, recordatorios de borradores y pedidos de opinión. Los avisos de tus pedidos llegan siempre.",
+    "myStories": {
+      "title": "Mis cuentos",
+      "loading": "Cargando tus cuentos…",
+      "new": "Nuevo",
+      "newTitle": "¿Qué quieres crear?",
+      "newOptions": {
+        "families": {
+          "title": "Un cuento para mi hijo",
+          "text": "Con su foto, su nombre y sus cosas favoritas."
+        },
+        "events": {
+          "title": "Un kit para una celebración",
+          "text": "Cumpleaños, bautismo, comunión o egreso: un diseño, muchas copias."
+        },
+        "professionals": {
+          "title": "Un proyecto profesional",
+          "text": "Cuentos por niño, con alias y objetivos de tu trabajo."
+        }
+      },
+      "emptyTitle": "Todavía no has creado ningún cuento",
+      "emptyText": "Empieza con su nombre y una historia: la vista previa es gratis.",
+      "emptyCta": "Crear su primer cuento",
+      "browse": "Ver historias",
+      "resume": "Sigue donde lo dejaste",
+      "storyOf": "El cuento de {name}",
+      "untitled": "Cuento sin terminar",
+      "continue": "Continuar",
+      "inProgress": "En proceso",
+      "filter": "Filtrar por línea",
+      "all": "Todos"
+    },
+    "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },
   "Maintenance": {
     "title": "Estamos haciendo mejoras",
@@ -429,7 +466,7 @@
       "title": "Cuéntanos sobre el protagonista",
       "subtitle": "Con estos datos escribimos una historia pensada para él o ella.",
       "name": "Nombre",
-      "namePlaceholder": "Martina",
+      "namePlaceholder": "Ej.: Martina",
       "age": "Edad",
       "ageOption": "{age, plural, =0 {Menos de 1 año} one {# año} other {# años}}",
       "pronouns": "¿Cómo nos referimos al protagonista? (opcional)",
@@ -444,7 +481,7 @@
       "pet": "Nombre de su mascota (opcional)",
       "friend": "Su mejor amigo o amiga (opcional)",
       "dedication": "Dedicatoria (opcional)",
-      "dedicationPlaceholder": "Para Martina, que cada noche sueña con las estrellas. Con amor, mamá y papá.",
+      "dedicationPlaceholder": "Ej.: Para Martina, que cada noche sueña con las estrellas.",
       "required": "Escribe su nombre para continuar.",
       "event": {
         "title": "Datos de la celebración",
@@ -467,7 +504,8 @@
         "alias": "Alias del proyecto",
         "aliasHint": "Para encontrarlo en tu cuenta. Usa un alias (por ejemplo, «Sofi, 2.º grado»), nunca el apellido.",
         "aliasPlaceholder": "Ej.: Sofi, 2.º grado",
-        "storyName": "Nombre en el cuento"
+        "storyName": "Nombre en el cuento",
+        "dedicationPlaceholder": "Ej.: Para Sofi, que cada día se anima a un poco más."
       }
     },
     "photos": {
@@ -799,6 +837,11 @@
       "character": "Su personaje",
       "adventure": "La aventura",
       "preview": "Muestra"
+    },
+    "lines": {
+      "families": "Un cuento para la familia",
+      "events": "Kit para una celebración",
+      "professionals": "Proyecto profesional"
     }
   },
   "Landing": {
@@ -809,7 +852,7 @@
       "title": "Recuerdos mágicos para compartir en cada celebración.",
       "subtitle": "Para cumpleaños, bautismos, comuniones y egresos. Con una foto del homenajeado (o eligiendo sus rasgos) lo convertimos en el protagonista de un mini cuento ilustrado. Un solo diseño que ustedes aprueban, con copias idénticas para todos los invitados.",
       "cta": "Diseñar el kit",
-      "note": "Ves los ejemplos sin cuenta. Para crear el diseño y ver la muestra gratis, inicias sesión con tu correo: así guardamos tu proyecto.",
+      "note": "Ves los ejemplos sin cuenta. Para crear el diseño y ver la muestra gratis, inicias sesión con Google, Apple o tu correo: así guardamos tu proyecto.",
       "imageAlt": "Ilustración en acuarela de un cumpleaños: el cumpleañero sopla las velas y sus amigos sostienen el mismo librito de regalo.",
       "howTitle": "Cómo funciona",
       "steps": {
@@ -859,7 +902,8 @@
       "viewStory": "Ver la historia",
       "kitDesign": "Diseño: {price} (incluye el mini cuento)",
       "kitExtra": "+ {price}",
-      "kitFull": "Kit completo: {price}, sin importar cuántos invitados."
+      "kitFull": "Kit completo: {price}, sin importar cuántos invitados.",
+      "kitUsd": "Precios en dólares (USD)."
     },
     "professionals": {
       "metaTitle": "Cuentos personalizados para psicopedagogos, docentes y terapeutas",
@@ -868,7 +912,7 @@
       "title": "Historias únicas para acompañar cada aprendizaje y cada etapa.",
       "subtitle": "Para psicopedagogos, docentes, fonoaudiólogos, psicólogos infantiles y odontopediatras: crea cuentos personalizados para cada niño con el que trabajas, desde una sola cuenta.",
       "cta": "Crear mi cuenta profesional",
-      "ctaSignedIn": "Crear un cuento nuevo",
+      "ctaSignedIn": "Nuevo proyecto profesional",
       "note": "Ves los ejemplos sin cuenta. La necesitas para crear y guardar tus proyectos por niño.",
       "imageAlt": "Ilustración en acuarela de una educadora leyendo un cuento ilustrado con un niño en una mesa baja.",
       "howTitle": "Cómo funciona",

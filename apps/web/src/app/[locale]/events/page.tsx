@@ -108,7 +108,7 @@ export default async function EventsPage({ params }: Props) {
         ]}
         note={
           fullKit !== null
-            ? `${t('kitFull', { price: money(fullKit) })} ${t('kitNote')}`
+            ? `${t('kitFull', { price: money(fullKit) })} ${t('kitUsd')} ${t('kitNote')}`
             : t('kitNote')
         }
       />

@@ -120,6 +120,7 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
     };
     return {
       stepIndex: current,
+      line: channel,
       hidden,
       maxReached,
       saveState,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { useState, type SubmitEvent } from 'react';
+import { useEffect, useState, type SubmitEvent } from 'react';
 
 import type { Locale } from '@storynido/shared';
 
@@ -11,6 +11,7 @@ import type { MultiFactorResolver } from 'firebase/auth';
 
 import {
   authErrorKey,
+  completeRedirectSignIn,
   multiFactorResolver,
   resolveWithTotp,
   sendMagicLink,
@@ -33,6 +34,16 @@ export function SignInPanel() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const busy = status.kind === 'busy';
+
+  // Al volver de un login por redirección (navegadores integrados): termina acá, con el
+  // segundo factor si la cuenta lo tiene.
+  useEffect(() => {
+    void completeRedirectSignIn().then((error) => {
+      if (!error) return;
+      const resolver = multiFactorResolver(error);
+      setStatus(resolver ? { kind: 'mfa', resolver } : { kind: 'error', key: authErrorKey(error) });
+    });
+  }, []);
 
   async function run(action: () => Promise<void>) {
     setStatus({ kind: 'busy' });

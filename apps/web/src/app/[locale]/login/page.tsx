@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
@@ -18,5 +19,10 @@ export async function generateMetadata({
 }
 
 export default function LoginPage() {
-  return <LoginView />;
+  // LoginView lee ?next= (useSearchParams): va dentro de Suspense.
+  return (
+    <Suspense>
+      <LoginView />
+    </Suspense>
+  );
 }

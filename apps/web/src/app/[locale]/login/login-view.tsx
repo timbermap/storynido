@@ -1,21 +1,36 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { useRouter } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
+import { takeReturnPath } from '@/lib/firebase/auth-actions';
+
+/** Solo rutas internas: nada de "//otro-sitio" ni URLs absolutas. */
+const safePath = (path: string | null) =>
+  path?.startsWith('/') && !path.startsWith('//') ? path : null;
 
 export function LoginView() {
   const t = useTranslations('Auth');
   const { signedIn, loading } = useAuth();
   const router = useRouter();
+  const next = useSearchParams().get('next');
 
+  // Con sesión: vuelve a donde estaba (?next= o la ruta guardada antes de una redirección);
+  // si no, a Mis cuentos. Nunca a los ajustes.
   useEffect(() => {
-    if (!loading && signedIn) router.replace('/account');
-  }, [loading, signedIn, router]);
+    if (loading || !signedIn) return;
+    const target = safePath(next) ?? takeReturnPath();
+    if (target && !target.includes('/login') && !/\/(ingresar|entrar)/.test(target)) {
+      window.location.replace(target);
+    } else {
+      router.replace('/my-stories');
+    }
+  }, [loading, signedIn, router, next]);
 
   return (
     <section className="container-page flex min-h-[70vh] max-w-sm flex-col justify-center gap-8 py-12">

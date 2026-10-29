@@ -2,7 +2,7 @@
 
 import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState, type KeyboardEvent } from 'react';
+import { useRef, useState, type KeyboardEvent } from 'react';
 
 import {
   CHILD_LIMITS,
@@ -17,6 +17,7 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { saveChild, updateBook } from '@/lib/firebase/drafts';
+import { cn } from '@/lib/utils';
 import { useStepDraft } from '@/lib/use-step-draft';
 
 import type { StepNav, WizardData } from './types';
@@ -51,6 +52,9 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [turningAge, setTurningAge] = useState(book.event?.turningAge ?? null);
   const [theme, setTheme] = useState(book.event?.theme ?? '');
   const [error, setError] = useState<string | null>(null);
+  // El error del nombre va junto al campo, que recibe el foco (auditoría UX).
+  const [nameError, setNameError] = useState<string | null>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   const clearDraft = useStepDraft(
     book.id,
     'child',
@@ -107,9 +111,11 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   async function next() {
     if (!user) return;
     if (name.trim() === '') {
-      setError(t('required'));
+      setNameError(t('required'));
+      nameRef.current?.focus();
       return;
     }
+    setNameError(null);
     setError(null);
     const pending = like.trim() ? [...likes, like.trim()].slice(0, CHILD_LIMITS.maxLikes) : likes;
     const ok = await nav.save(async () => {
@@ -131,7 +137,8 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
                 ...EMPTY_BIRTHDAY,
                 type: occasion,
                 date: eventDate || null,
-                turningAge: occasion === 'birthday' ? turningAge : null,
+                // Sin elegir, la edad que cumple es la del protagonista: no se pide dos veces.
+                turningAge: occasion === 'birthday' ? (turningAge ?? age) : null,
                 theme: blankToNull(theme.slice(0, EVENT_LIMITS.themeMaxLength)),
               },
             }
@@ -182,16 +189,24 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
             </label>
             <input
               id="child-name"
-              className={inputClass}
+              ref={nameRef}
+              className={cn(inputClass, nameError && 'border-red-700')}
               value={name}
               maxLength={CHILD_LIMITS.nameMaxLength}
               autoComplete="off"
               placeholder={t('namePlaceholder')}
-              aria-invalid={error ? true : undefined}
+              aria-invalid={nameError ? true : undefined}
+              aria-describedby={nameError ? 'child-name-error' : undefined}
               onChange={(event) => {
                 setName(event.target.value);
+                if (nameError && event.target.value.trim()) setNameError(null);
               }}
             />
+            {nameError && (
+              <p id="child-name-error" role="alert" className="text-sm font-bold text-red-800">
+                {nameError}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <label htmlFor="child-age" className={labelClass}>
@@ -408,7 +423,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
             className={`${inputClass} h-28 py-3`}
             value={dedication}
             maxLength={CHILD_LIMITS.dedicationMaxLength}
-            placeholder={t('dedicationPlaceholder')}
+            placeholder={isPro ? t('pro.dedicationPlaceholder') : t('dedicationPlaceholder')}
             onChange={(event) => {
               setDedication(event.target.value);
             }}

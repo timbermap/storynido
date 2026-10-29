@@ -5,13 +5,18 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, type ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
+import type { Channel } from '@storynido/shared';
+
 import { cn } from '@/lib/utils';
+
+import { LINE_TONE } from './drafts-list';
 
 import { WIZARD_STAGES, WIZARD_STEPS, stageOf, type SaveState, type WizardStep } from './steps';
 
 /** Armazón del creador: progreso, título del paso (recibe el foco), navegación y guardado. */
 export function WizardShell({
   stepIndex,
+  line,
   hidden,
   maxReached,
   saveState,
@@ -26,6 +31,7 @@ export function WizardShell({
   nextDisabled,
 }: {
   stepIndex: number;
+  line?: Channel;
   hidden: readonly WizardStep[];
   maxReached: number;
   saveState: SaveState;
@@ -40,6 +46,7 @@ export function WizardShell({
   nextDisabled?: boolean;
 }) {
   const t = useTranslations('Wizard');
+  const tLines = useTranslations('Wizard.lines');
   const headingRef = useRef<HTMLHeadingElement>(null);
   // Numeración y progreso sobre los pasos visibles para la línea del libro.
   const visible = WIZARD_STEPS.filter((step) => !hidden.includes(step));
@@ -70,6 +77,17 @@ export function WizardShell({
 
   return (
     <div className="container-page max-w-3xl py-10">
+      {line && (
+        // Qué se está creando, siempre a la vista (cuento, kit o proyecto profesional).
+        <p
+          className={cn(
+            'mb-4 inline-block rounded-full px-3 py-1 text-xs font-bold',
+            LINE_TONE[line],
+          )}
+        >
+          {tLines(line)}
+        </p>
+      )}
       <div className="flex items-center justify-between gap-4 text-sm font-bold text-muted-foreground">
         <span>
           {progressLabel}
@@ -130,7 +148,7 @@ export function WizardShell({
                     onJump(target);
                   }}
                   className={cn(
-                    'rounded-full px-3 py-1 transition',
+                    'rounded-full px-3 py-1 transition disabled:cursor-not-allowed',
                     active
                       ? 'bg-primary text-primary-foreground'
                       : reachable

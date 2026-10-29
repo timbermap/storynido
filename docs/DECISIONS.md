@@ -1455,3 +1455,34 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - La edad que cumple solo se pide en el cumpleaños.
   - Lo religioso se trata con respeto y sin rituales ni doctrina.
 - **CI:** estuvo fallando por formato (Prettier) desde el commit 9a1d8f8, y la API de staging no se deployaba. Ya está corregido.
+
+## 110 · Auditoría UX del área logueada: Mis cuentos, login robusto y arreglos rápidos
+
+- **Fecha:** 2026-10-29 · Auditoría "Auditoría UX StoryNido — áreas logueadas y flujos" (Claude Docs).
+- **Panel Pro con claves sin traducir:** el namespace `Pro` no viajaba al navegador. Se agregó, y `client-namespaces.test.ts` falla si un componente de cliente usa un namespace que no está en `CLIENT_NAMESPACES`.
+- **Mis cuentos** (`/mis-cuentos`) es la home de quien tiene sesión:
+  - "Sigue donde lo dejaste" y los borradores, con la etiqueta de su línea y un filtro por línea si usó más de una;
+  - el panel Pro, los pedidos y "¿Qué quieres crear?", con las tres líneas;
+  - el menú del avatar lleva a Mis cuentos y a Ajustes; ya no hay links a `#drafts`.
+- **Mi cuenta** queda solo para ajustes. El rol y la verificación de la API los ve solo el equipo, y el nombre se muestra solo si existe.
+- **Login:**
+  - después de entrar se vuelve a la página de origen (`?next=` o la ruta guardada); si no hay, a Mis cuentos;
+  - en navegadores integrados (Instagram, Facebook, WhatsApp, TikTok…) o si el popup se bloquea, se entra por redirección (`signInWithRedirect`, con el `authDomain` propio). El panel completa la redirección, incluido el segundo factor.
+- **Borradores:** entrar desde una ficha (`?story=`) reutiliza el borrador vacío de esa línea en lugar de crear otro. Ya se reutilizaba sin historia; los 3 del auditor eran uno por línea y se borraron de staging.
+- **Creador:**
+  - etiqueta de la línea arriba ("Kit para una celebración", "Proyecto profesional");
+  - el error del nombre aparece junto al campo, que recibe el foco;
+  - los ejemplos llevan "Ej.:";
+  - Profesionales tiene su propio ejemplo de dedicatoria;
+  - en Celebraciones, si no se elige la edad que cumple, se usa la del protagonista;
+  - las etapas no alcanzadas se ven deshabilitadas.
+- **Landings:**
+  - "Nuevo proyecto profesional" con sesión iniciada;
+  - "Precios en dólares (USD)" en el kit;
+  - "inicias sesión con Google, Apple o tu correo".
+- **Pendiente de esa auditoría:**
+  - vista previa antes en el creador (fase 4, grande);
+  - temáticas y colecciones clicables con preselección;
+  - selector de país con búsqueda;
+  - pasada mobile completa;
+  - eventos `login_*` por navegador.

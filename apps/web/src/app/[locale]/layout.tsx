@@ -22,22 +22,9 @@ import { SITE_URL } from '@/lib/site';
 
 import { Providers } from './providers';
 
-import '../globals.css';
+import { CLIENT_NAMESPACES } from '@/i18n/client-namespaces';
 
-const CLIENT_NAMESPACES = [
-  'Nav',
-  'Checkout',
-  'Switchers',
-  'Footer',
-  'Consent',
-  'Auth',
-  'Account',
-  'Stories',
-  'Lessons',
-  'Wizard',
-  'Viewer',
-  'Error',
-];
+import '../globals.css';
 
 interface LayoutProps {
   children: ReactNode;

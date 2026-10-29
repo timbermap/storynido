@@ -9,7 +9,13 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
-import { createDraft, isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
+import {
+  createDraft,
+  isEmptyDraft,
+  listDrafts,
+  updateBook,
+  type DraftSummary,
+} from '@/lib/firebase/drafts';
 
 import { CHANNEL_STORAGE_KEY } from '@/components/landing/remember-channel';
 import { ProActivationCard } from '@/components/pro/pro-activation';
@@ -77,12 +83,24 @@ export function CreateStart({
 
   const onUser = useEffectEvent(async () => {
     if (!user || !signedIn || !proReady) return;
+    const db = await getFirebaseDb();
+    const all = await listDrafts(db, user.uid);
     if (storyId || lessonId) {
-      await startNew();
+      // Con una historia elegida: si hay un intento vacío de esta línea, se reutiliza (así entrar
+      // varias veces desde las fichas no deja borradores vacíos sueltos).
+      const reusable = all.find((draft) => draft.channel === channel && isEmptyDraft(draft));
+      if (!reusable) {
+        await startNew();
+        return;
+      }
+      await updateBook(db, reusable.id, {
+        storyId,
+        ...(lessonId ? { lessonIds: [lessonId] } : {}),
+      });
+      router.replace({ pathname: '/create/[bookId]', params: { bookId: reusable.id } });
       return;
     }
     // Desde el botón de una línea (?line=) solo cuentan los borradores de esa línea.
-    const all = await listDrafts(await getFirebaseDb(), user.uid);
     const found = channelParam ? all.filter((draft) => draft.channel === channelParam) : all;
     const empty = found.find(isEmptyDraft);
     if (empty) {

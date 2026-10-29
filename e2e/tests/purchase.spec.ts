@@ -207,8 +207,8 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.getByRole('button', { name: 'Enviar mi opinión' }).click();
   await expect(page.locator('#opinion')).toContainText('¡Gracias por contarnos!');
 
-  // --- Mi cuenta: pedido en vivo, recompra sin IA y borrado ---
-  await page.goto('/es/cuenta');
+  // --- Mis cuentos: pedido en vivo y recompra sin IA; Mi cuenta: borrado ---
+  await page.goto('/es/mis-cuentos');
   await expect(page.locator('#orders li').first()).toContainText('Tu libro fue entregado');
   await page.locator('#orders a', { hasText: 'Pedir de nuevo' }).first().click();
   await expect(body(page)).toContainText('Pides de nuevo el mismo libro');
@@ -219,9 +219,10 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.getByRole('button', { name: 'Simular el pago' }).click();
   await expect(body(page)).toContainText('¡Tu libro está listo!', { timeout: 120_000 });
 
-  await page.goto('/es/cuenta');
+  await page.goto('/es/mis-cuentos');
   await expect(page.locator('#orders li')).toHaveCount(2, { timeout: 30_000 });
   await expectNoHorizontalScroll(page);
+  await page.goto('/es/cuenta');
   await page.locator('#children button', { hasText: 'Borrar datos' }).click();
   await page.locator('#children button', { hasText: 'Sí, borrar' }).click();
   await expect(page.locator('#children')).toContainText('Borramos los datos de Martina');

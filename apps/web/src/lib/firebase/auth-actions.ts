@@ -4,12 +4,14 @@ import {
   TotpMultiFactorGenerator,
   browserPopupRedirectResolver,
   getMultiFactorResolver,
+  getRedirectResult,
   isSignInWithEmailLink,
   linkWithPopup,
   sendSignInLinkToEmail,
   signInWithCredential,
   signInWithEmailLink,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   type AuthCredential,
   type AuthProvider,
@@ -38,6 +40,42 @@ async function signInAndMerge(anonymousToken: string, signIn: () => Promise<unkn
 
 const ALREADY_IN_USE = new Set(['auth/credential-already-in-use', 'auth/email-already-in-use']);
 
+/**
+ * Navegadores integrados (Instagram, Facebook, WhatsApp, TikTok…): no abren popups o los pierden,
+ * y de ahí llega buena parte del tráfico pago. Ahí se entra por redirección.
+ */
+export function isEmbeddedBrowser(userAgent = navigator.userAgent): boolean {
+  return /FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Line\/|TikTok|musical_ly|Snapchat|Twitter/i.test(
+    userAgent,
+  );
+}
+
+/** Popup bloqueado o no soportado: se reintenta por redirección. */
+const POPUP_FAILED = new Set([
+  'auth/popup-blocked',
+  'auth/operation-not-supported-in-this-environment',
+  'auth/web-storage-unsupported',
+]);
+
+/** Redirección: se recuerda dónde estaba para volver ahí (la completa completeRedirectSignIn). */
+async function signInByRedirect(provider: AuthProvider): Promise<void> {
+  rememberReturnPath();
+  await signInWithRedirect(getFirebaseAuth(), provider, browserPopupRedirectResolver);
+}
+
+/**
+ * Al volver de una redirección: termina el login. Devuelve el error (por ejemplo, el de segundo
+ * factor) para que el panel lo muestre; null si no había nada pendiente o salió bien.
+ */
+export async function completeRedirectSignIn(): Promise<unknown> {
+  try {
+    await getRedirectResult(getFirebaseAuth(), browserPopupRedirectResolver);
+    return null;
+  } catch (error) {
+    return error;
+  }
+}
+
 /** Entra con un proveedor; con sesión anónima la vincula para no perder el borrador. */
 async function signInWithProvider(
   provider: AuthProvider,
@@ -46,7 +84,16 @@ async function signInWithProvider(
   const auth = getFirebaseAuth();
   const current = auth.currentUser;
   if (!current?.isAnonymous) {
-    await signInWithPopup(auth, provider, browserPopupRedirectResolver);
+    if (isEmbeddedBrowser()) {
+      await signInByRedirect(provider);
+      return;
+    }
+    try {
+      await signInWithPopup(auth, provider, browserPopupRedirectResolver);
+    } catch (error) {
+      if (!POPUP_FAILED.has(errorCode(error))) throw error;
+      await signInByRedirect(provider);
+    }
     return;
   }
   try {
@@ -133,6 +180,15 @@ export async function completeMagicLink(email: string, url: string): Promise<voi
     window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY);
   } catch {
     // Nada que limpiar.
+  }
+}
+
+/** Guarda dónde está el usuario, para volver ahí después del enlace o la redirección. */
+function rememberReturnPath(): void {
+  try {
+    window.localStorage.setItem(RETURN_TO_KEY, window.location.pathname + window.location.search);
+  } catch {
+    // Sin storage: se vuelve a Mis cuentos.
   }
 }
 

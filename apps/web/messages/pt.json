@@ -32,13 +32,18 @@
     "region": "Idioma e país",
     "familiesCreate": "Criar a história",
     "myStories": "Minhas histórias",
-    "preferences": "Preferências",
+    "preferences": "Configurações",
     "signOut": "Sair",
     "accountMenu": "Menu da sua conta",
     "signedInAs": "Conectado como",
     "menuFamilies": "Para famílias",
     "menuEvents": "Para celebrações",
-    "menuProfessionals": "Para profissionais"
+    "menuProfessionals": "Para profissionais",
+    "lines": {
+      "families": "Família",
+      "events": "Celebração",
+      "professionals": "Profissional"
+    }
   },
   "Switchers": {
     "language": "Idioma"
@@ -351,7 +356,39 @@
       "error": "Não conseguimos apagar sua conta. Tente de novo."
     },
     "news": "Receber novidades por e-mail",
-    "newsNote": "Ideias para uma história nova em datas especiais, lembretes de rascunhos e pedidos de opinião. Os avisos dos seus pedidos chegam sempre."
+    "newsNote": "Ideias para uma história nova em datas especiais, lembretes de rascunhos e pedidos de opinião. Os avisos dos seus pedidos chegam sempre.",
+    "myStories": {
+      "title": "Minhas histórias",
+      "loading": "Carregando suas histórias…",
+      "new": "Nova",
+      "newTitle": "O que você quer criar?",
+      "newOptions": {
+        "families": {
+          "title": "Uma história para meu filho",
+          "text": "Com a foto, o nome e as coisas favoritas dele."
+        },
+        "events": {
+          "title": "Um kit para uma celebração",
+          "text": "Aniversário, batizado, comunhão ou formatura: um design, muitas cópias."
+        },
+        "professionals": {
+          "title": "Um projeto profissional",
+          "text": "Histórias por criança, com apelido e os objetivos do seu trabalho."
+        }
+      },
+      "emptyTitle": "Você ainda não criou nenhuma história",
+      "emptyText": "Comece com o nome e uma história: a prévia é grátis.",
+      "emptyCta": "Criar a primeira história",
+      "browse": "Ver histórias",
+      "resume": "Continue de onde parou",
+      "storyOf": "A história de {name}",
+      "untitled": "História sem terminar",
+      "continue": "Continuar",
+      "inProgress": "Em andamento",
+      "filter": "Filtrar por linha",
+      "all": "Todas"
+    },
+    "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },
   "Maintenance": {
     "title": "Estamos fazendo melhorias",
@@ -429,7 +466,7 @@
       "title": "Conte sobre o protagonista",
       "subtitle": "Com esses dados escrevemos uma história pensada para ele ou ela.",
       "name": "Nome",
-      "namePlaceholder": "Sofia",
+      "namePlaceholder": "Ex.: Sofia",
       "age": "Idade",
       "ageOption": "{age, plural, =0 {Menos de 1 ano} one {# ano} other {# anos}}",
       "pronouns": "Como nos referimos ao protagonista? (opcional)",
@@ -444,7 +481,7 @@
       "pet": "Nome do bichinho (opcional)",
       "friend": "Melhor amigo ou amiga (opcional)",
       "dedication": "Dedicatória (opcional)",
-      "dedicationPlaceholder": "Para Sofia, que toda noite sonha com as estrelas. Com amor, mamãe e papai.",
+      "dedicationPlaceholder": "Ex.: Para Sofia, que toda noite sonha com as estrelas.",
       "required": "Escreva o nome para continuar.",
       "event": {
         "title": "Dados da celebração",
@@ -467,7 +504,8 @@
         "alias": "Apelido do projeto",
         "aliasHint": "Para encontrá-lo na sua conta. Use um apelido (por exemplo, “Sofi, 2º ano”), nunca o sobrenome.",
         "aliasPlaceholder": "Ex.: Sofi, 2º ano",
-        "storyName": "Nome na história"
+        "storyName": "Nome na história",
+        "dedicationPlaceholder": "Ex.: Para a Sofi, que a cada dia se arrisca um pouco mais."
       }
     },
     "photos": {
@@ -799,6 +837,11 @@
       "character": "Seu personagem",
       "adventure": "A aventura",
       "preview": "Prévia"
+    },
+    "lines": {
+      "families": "Uma história para a família",
+      "events": "Kit para uma celebração",
+      "professionals": "Projeto profissional"
     }
   },
   "Landing": {
@@ -809,7 +852,7 @@
       "title": "Lembranças mágicas para compartilhar em cada celebração.",
       "subtitle": "Para aniversários, batizados, comunhões e formaturas. Com uma foto do homenageado (ou escolhendo as características) fazemos dele o protagonista de uma mini história ilustrada. Um só design que vocês aprovam, com cópias idênticas para todos os convidados.",
       "cta": "Criar o kit",
-      "note": "Você vê os exemplos sem conta. Para criar o design e ver a amostra grátis, entre com seu e-mail: assim guardamos seu projeto.",
+      "note": "Você vê os exemplos sem conta. Para criar o design e ver a amostra grátis, entre com Google, Apple ou seu e-mail: assim guardamos seu projeto.",
       "imageAlt": "Ilustração em aquarela de um aniversário: o aniversariante sopra as velas e os amigos seguram o mesmo livrinho de presente.",
       "howTitle": "Como funciona",
       "steps": {
@@ -859,7 +902,8 @@
       "viewStory": "Ver a história",
       "kitDesign": "Design: {price} (inclui a mini história)",
       "kitExtra": "+ {price}",
-      "kitFull": "Kit completo: {price}, não importa quantos convidados."
+      "kitFull": "Kit completo: {price}, não importa quantos convidados.",
+      "kitUsd": "Preços em dólares (USD)."
     },
     "professionals": {
       "metaTitle": "Histórias personalizadas para psicopedagogos, professores e terapeutas",
@@ -868,7 +912,7 @@
       "title": "Histórias únicas para acompanhar cada aprendizado e cada etapa.",
       "subtitle": "Para psicopedagogos, professores, fonoaudiólogos, psicólogos infantis e odontopediatras: crie histórias personalizadas para cada criança com quem você trabalha, a partir de uma única conta.",
       "cta": "Criar minha conta profissional",
-      "ctaSignedIn": "Criar uma nova história",
+      "ctaSignedIn": "Novo projeto profissional",
       "note": "Você vê os exemplos sem conta. Precisa dela para criar e guardar seus projetos por criança.",
       "imageAlt": "Ilustração em aquarela de uma educadora lendo uma história ilustrada com uma criança em uma mesa baixa.",
       "howTitle": "Como funciona",

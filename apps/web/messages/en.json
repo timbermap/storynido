@@ -32,13 +32,18 @@
     "region": "Language & country",
     "familiesCreate": "Create their story",
     "myStories": "My stories",
-    "preferences": "Preferences",
+    "preferences": "Settings",
     "signOut": "Sign out",
     "accountMenu": "Your account menu",
     "signedInAs": "Signed in as",
     "menuFamilies": "For families",
     "menuEvents": "For celebrations",
-    "menuProfessionals": "For professionals"
+    "menuProfessionals": "For professionals",
+    "lines": {
+      "families": "Family",
+      "events": "Celebration",
+      "professionals": "Professional"
+    }
   },
   "Switchers": {
     "language": "Language"
@@ -351,7 +356,39 @@
       "error": "We couldn’t delete your account. Please try again."
     },
     "news": "Get news by email",
-    "newsNote": "Ideas for a new story on special dates, draft reminders and review requests. Updates about your orders always arrive."
+    "newsNote": "Ideas for a new story on special dates, draft reminders and review requests. Updates about your orders always arrive.",
+    "myStories": {
+      "title": "My stories",
+      "loading": "Loading your stories…",
+      "new": "New",
+      "newTitle": "What would you like to create?",
+      "newOptions": {
+        "families": {
+          "title": "A story for my child",
+          "text": "With their photo, their name and their favorite things."
+        },
+        "events": {
+          "title": "A celebration kit",
+          "text": "Birthday, baptism, communion or graduation: one design, many copies."
+        },
+        "professionals": {
+          "title": "A professional project",
+          "text": "Stories for each child, with an alias and your work goals."
+        }
+      },
+      "emptyTitle": "You haven't created a story yet",
+      "emptyText": "Start with their name and a story: the preview is free.",
+      "emptyCta": "Create their first story",
+      "browse": "Browse stories",
+      "resume": "Pick up where you left off",
+      "storyOf": "{name}'s story",
+      "untitled": "Unfinished story",
+      "continue": "Continue",
+      "inProgress": "In progress",
+      "filter": "Filter by line",
+      "all": "All"
+    },
+    "myStoriesLink": "Your stories and orders are in My stories →"
   },
   "Maintenance": {
     "title": "We're making improvements",
@@ -429,7 +466,7 @@
       "title": "Tell us about the hero",
       "subtitle": "We use these details to write a story made just for them.",
       "name": "Name",
-      "namePlaceholder": "Emma",
+      "namePlaceholder": "E.g. Emma",
       "age": "Age",
       "ageOption": "{age, plural, =0 {Under 1 year} one {# year} other {# years}}",
       "pronouns": "How should we refer to the hero? (optional)",
@@ -444,7 +481,7 @@
       "pet": "Their pet's name (optional)",
       "friend": "Their best friend (optional)",
       "dedication": "Dedication (optional)",
-      "dedicationPlaceholder": "For Emma, who dreams of the stars every night. With love, Mom and Dad.",
+      "dedicationPlaceholder": "E.g. For Emma, who dreams of the stars every night.",
       "required": "Enter their name to continue.",
       "event": {
         "title": "Celebration details",
@@ -467,7 +504,8 @@
         "alias": "Project alias",
         "aliasHint": "To find it in your account. Use an alias (for example, “Sofi, 2nd grade”), never a last name.",
         "aliasPlaceholder": "E.g. Sofi, 2nd grade",
-        "storyName": "Name in the story"
+        "storyName": "Name in the story",
+        "dedicationPlaceholder": "E.g. For Sofi, who is a little braver every day."
       }
     },
     "photos": {
@@ -799,6 +837,11 @@
       "character": "Their character",
       "adventure": "The adventure",
       "preview": "Preview"
+    },
+    "lines": {
+      "families": "A family story",
+      "events": "Celebration kit",
+      "professionals": "Professional project"
     }
   },
   "Landing": {
@@ -809,7 +852,7 @@
       "title": "Magical keepsakes to share at every celebration.",
       "subtitle": "For birthdays, baptisms, communions and graduations. From a photo of the guest of honor (or by choosing their features) we make them the hero of an illustrated mini story. One design you approve, with identical copies for every guest.",
       "cta": "Design the kit",
-      "note": "You can see the examples without an account. To create the design and see the free sample, sign in with your email so we can save your project.",
+      "note": "You can see the examples without an account. To create the design and see the free sample, sign in with Google, Apple or your email so we can save your project.",
       "imageAlt": "Watercolor illustration of a birthday party: the birthday child blows out the candles while friends hold the same little gift book.",
       "howTitle": "How it works",
       "steps": {
@@ -859,7 +902,8 @@
       "viewStory": "View the story",
       "kitDesign": "Design: {price} (includes the mini story)",
       "kitExtra": "+ {price}",
-      "kitFull": "Full kit: {price}, no matter how many guests."
+      "kitFull": "Full kit: {price}, no matter how many guests.",
+      "kitUsd": "Prices in US dollars (USD)."
     },
     "professionals": {
       "metaTitle": "Personalized stories for educators, therapists and specialists",
@@ -868,7 +912,7 @@
       "title": "Unique stories to support every learning step and every stage.",
       "subtitle": "For learning specialists, teachers, speech therapists, child psychologists and pediatric dentists: create personalized stories for every child you work with, from one account.",
       "cta": "Create my professional account",
-      "ctaSignedIn": "Create a new story",
+      "ctaSignedIn": "New professional project",
       "note": "You can see the examples without an account. You need one to create and save your projects for each child.",
       "imageAlt": "Watercolor illustration of an educator reading an illustrated story with a child at a low table.",
       "howTitle": "How it works",

@@ -1,5 +1,6 @@
 import type {
   Book,
+  Channel,
   ContentType,
   CountryCode,
   EditorialConfig,
@@ -15,6 +16,8 @@ import type { SaveState, WizardStep } from './steps';
 
 export interface StepNav {
   stepIndex: number;
+  /** Línea del libro: el creador la muestra arriba (Familia, Celebración, Profesional). */
+  line: Channel;
   /** Pasos ocultos para la línea comercial del libro. */
   hidden: readonly WizardStep[];
   maxReached: number;

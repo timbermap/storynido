@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
+import { SignedInLabel } from '@/components/auth/signed-in-label';
 import { JsonLd } from '@/components/json-ld';
 import { RememberChannel } from '@/components/landing/remember-channel';
 import {
@@ -50,7 +51,7 @@ export default async function ProfessionalsPage({ params }: Props) {
   ]);
   const cta = (
     <Link href={{ pathname: '/create', query: { line: 'professionals' } }} className={ctaClass}>
-      {t('cta')}
+      <SignedInLabel guest={t('cta')} member={t('ctaSignedIn')} />
     </Link>
   );
   // Arriba, primero los ejemplos: la cuenta se pide recién al crear.
@@ -63,7 +64,7 @@ export default async function ProfessionalsPage({ params }: Props) {
         href={{ pathname: '/create', query: { line: 'professionals' } }}
         className="inline-flex items-center justify-center border-b-2 border-foreground/25 px-1 pb-0.5 text-lg font-semibold transition-colors hover:border-primary hover:text-primary"
       >
-        {t('cta')}
+        <SignedInLabel guest={t('cta')} member={t('ctaSignedIn')} />
       </Link>
     </>
   );

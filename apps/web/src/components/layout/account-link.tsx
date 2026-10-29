@@ -2,6 +2,7 @@
 
 import { BookHeart, LogOut, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { buttonVariants } from '@/components/ui/button';
@@ -24,10 +25,15 @@ function initials(name: string | null, email: string | null): string {
 export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' }) {
   const t = useTranslations('Nav');
   const { user, signedIn } = useAuth();
+  // Después de entrar se vuelve a esta página.
+  const pathname = usePathname();
 
   if (!signedIn || !user) {
     return (
-      <Link href="/login" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+      <Link
+        href={{ pathname: '/login', query: pathname ? { next: pathname } : {} }}
+        className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+      >
         {t('signIn')}
       </Link>
     );
@@ -36,12 +42,12 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
   const name = user.displayName ?? user.email ?? '';
   const links = [
     {
-      href: { pathname: '/account', hash: 'drafts' },
+      href: '/my-stories',
       title: t('myStories'),
       icon: <BookHeart className="size-4" />,
     },
     {
-      href: { pathname: '/account', hash: 'preferences' },
+      href: '/account',
       title: t('preferences'),
       icon: <Settings className="size-4" />,
     },
