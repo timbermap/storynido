@@ -47,5 +47,6 @@ function withLanguage(request: NextRequest, locale: string): NextRequest {
 
 export const config = {
   // Todo menos archivos estáticos, _next y rutas internas.
-  matcher: '/((?!api|_next|_vercel|.*\\..*).*)',
+  // /__/auth: el login de Firebase que se sirve desde el propio dominio (ver next.config).
+  matcher: '/((?!api|_next|_vercel|__/auth|.*\\..*).*)',
 };

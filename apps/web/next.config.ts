@@ -16,8 +16,30 @@ loadEnvConfig(
   true,
 );
 
+/**
+ * Configuración web de Firebase que App Hosting inyecta en el build. Se expone al navegador para
+ * poder usar el dominio propio como authDomain (NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN): con el de
+ * firebaseapp.com, Chrome y Safari bloquean el almacenamiento entre dominios y el login con Google
+ * no vuelve al sitio. /__/auth/* se reenvía al handler de Firebase del proyecto.
+ */
+const webappConfig = (() => {
+  try {
+    return JSON.parse(process.env.FIREBASE_WEBAPP_CONFIG ?? '') as { authDomain?: string };
+  } catch {
+    return null;
+  }
+})();
+const firebaseAuthHost = webappConfig?.authDomain;
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  env: webappConfig ? { NEXT_PUBLIC_FIREBASE_WEBAPP_CONFIG: JSON.stringify(webappConfig) } : {},
+  rewrites: () =>
+    Promise.resolve(
+      firebaseAuthHost
+        ? [{ source: '/__/auth/:path*', destination: `https://${firebaseAuthHost}/__/auth/:path*` }]
+        : [],
+    ),
   poweredByHeader: false,
   transpilePackages: ['@storynido/shared'],
   pageExtensions: ['ts', 'tsx', 'md', 'mdx'],

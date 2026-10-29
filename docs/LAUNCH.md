@@ -84,3 +84,8 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 4. Revisar Error Reporting y el panel de monitoreo.
 5. Admin → Sitio → "En vivo".
 6. Los primeros días: revisar cada pedido en revisión manual y las alertas.
+
+## Login con Google desde el dominio propio (DECISIONS 106)
+
+- En `apps/web/apphosting.yaml` (producción) agregar `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: storynido.com` cuando el dominio esté conectado.
+- En Google Cloud Console → APIs y servicios → Credenciales → "Web client (auto created by Google Service)", agregar la URI de redirección `https://storynido.com/__/auth/handler`.

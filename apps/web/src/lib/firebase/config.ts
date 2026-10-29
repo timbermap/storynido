@@ -27,11 +27,25 @@ const explicitConfig: FirebaseOptions = {
  * - NEXT_PUBLIC_FIREBASE_*: valores explícitos.
  * - null: initializeApp() sin opciones; Firebase App Hosting inyecta la configuración del proyecto.
  */
+/** Configuración que inyecta App Hosting (ver next.config), con el authDomain propio si lo hay. */
+const hostedConfig = (() => {
+  const raw = process.env.NEXT_PUBLIC_FIREBASE_WEBAPP_CONFIG;
+  if (!raw) return null;
+  try {
+    const config = JSON.parse(raw) as FirebaseOptions;
+    return explicitConfig.authDomain
+      ? { ...config, authDomain: explicitConfig.authDomain }
+      : config;
+  } catch {
+    return null;
+  }
+})();
+
 export const firebaseConfig: FirebaseOptions | null = useFirebaseEmulators
   ? EMULATOR_CONFIG
   : explicitConfig.apiKey
     ? explicitConfig
-    : null;
+    : hostedConfig;
 
 export const EMULATOR_HOSTS = {
   auth: 'http://127.0.0.1:9099',
