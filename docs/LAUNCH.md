@@ -33,6 +33,7 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 | Estado | Qué                                                                                                             | Quién |
 | ------ | --------------------------------------------------------------------------------------------------------------- | ----- |
 | ⬜     | Revisión de un abogado: `PRIVACY.md`, términos y textos de consentimiento (fotos, tutor)                        | 👤    |
+| ⬜     | Responsable en privacidad y términos: hoy dice "StoryNido SRL, Uruguay" (provisorio). Confirmar razón social y domicilio reales y sumar la Ley 18.331 de Uruguay a los derechos | 👤    |
 | ⬜     | Dirección postal para el pie de los mails (CAN-SPAM): `email_postal_address` en `infra/envs/production/main.tf` | 👤    |
 
 ## 4. Infraestructura de producción (`storynido-prod`)

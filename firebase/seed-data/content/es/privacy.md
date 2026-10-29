@@ -1,6 +1,6 @@
 # Política de privacidad
 
-En StoryNido cuidamos especialmente los datos de los niños. Esta política explica qué datos tratamos, para qué, cuánto tiempo y qué derechos tienes. Responsable: [Razón social], [domicilio], hola@storynido.com.
+En StoryNido cuidamos especialmente los datos de los niños. Esta política explica qué datos tratamos, para qué, cuánto tiempo y qué derechos tienes. Responsable: StoryNido SRL, Uruguay, hola@storynido.com.
 
 ## Qué datos tratamos
 

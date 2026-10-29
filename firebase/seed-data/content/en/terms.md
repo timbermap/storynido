@@ -1,6 +1,6 @@
 # Terms and conditions
 
-These terms govern the use of StoryNido (storynido.com), a service provided by [Company name], located at [address] ("StoryNido", "we"). By creating an account or placing an order you accept these terms.
+These terms govern the use of StoryNido (storynido.com), a service provided by StoryNido SRL, based in Uruguay ("StoryNido", "we"). By creating an account or placing an order you accept these terms.
 
 ## 1. The service
 
@@ -48,4 +48,4 @@ We may update these terms. We will notify you of important changes by email or o
 
 ## 12. Contact
 
-[Company name] · [address] · hola@storynido.com
+StoryNido SRL · Uruguay · hola@storynido.com

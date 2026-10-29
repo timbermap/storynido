@@ -1,6 +1,6 @@
 # Política de privacidade
 
-No StoryNido cuidamos com atenção especial dos dados das crianças. Esta política explica quais dados tratamos, para quê, por quanto tempo e quais são seus direitos. Controlador: [Razão social], [endereço], hola@storynido.com.
+No StoryNido cuidamos com atenção especial dos dados das crianças. Esta política explica quais dados tratamos, para quê, por quanto tempo e quais são seus direitos. Controlador: StoryNido SRL, Uruguai, hola@storynido.com.
 
 ## Quais dados tratamos
 

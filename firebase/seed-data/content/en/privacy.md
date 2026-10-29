@@ -1,6 +1,6 @@
 # Privacy policy
 
-At StoryNido we take special care of children's data. This policy explains what data we process, why, for how long, and your rights. Data controller: [Company name], [address], hola@storynido.com.
+At StoryNido we take special care of children's data. This policy explains what data we process, why, for how long, and your rights. Data controller: StoryNido SRL, Uruguay, hola@storynido.com.
 
 ## What data we process
 

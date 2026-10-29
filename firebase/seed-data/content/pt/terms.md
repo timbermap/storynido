@@ -1,6 +1,6 @@
 # Termos e condições
 
-Estes termos regulam o uso do StoryNido (storynido.com), um serviço de [Razão social], com sede em [endereço] ("StoryNido", "nós"). Ao criar uma conta ou fazer um pedido, você aceita estes termos.
+Estes termos regulam o uso do StoryNido (storynido.com), um serviço de StoryNido SRL, com sede em Uruguai ("StoryNido", "nós"). Ao criar uma conta ou fazer um pedido, você aceita estes termos.
 
 ## 1. O serviço
 
@@ -48,4 +48,4 @@ Podemos atualizar estes termos. Avisaremos sobre mudanças importantes por e-mai
 
 ## 12. Contato
 
-[Razão social] · [endereço] · hola@storynido.com
+StoryNido SRL · Uruguai · hola@storynido.com
