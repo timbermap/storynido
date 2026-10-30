@@ -1712,3 +1712,8 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Textos:** el resumen del pago dice "Descuento por volumen N %" (antes no tenía texto y mostraba "Pro N %" como etiqueta). `status` devuelve el descuento de cualquier cuenta.
 - **Pendiente:** el descuento base y la activación del perfil (pantalla "Cuéntanos a qué te dedicas" al crear en Profesionales) siguen. Si se quieren eliminar, el precio de Profesionales pasa a ser el de todos.
 - **Celebraciones: el kit es solo digital.** Se aclara en la landing (etiqueta "Digital · PDF listo para imprimir", "Kit digital completo", nota y preguntas frecuentes) y en el pago, donde un aviso fijo reemplaza el bloque "¿Las quieres impresas? / Pedir cotización". Se quita el ítem "Impresión profesional, por cotización". El endpoint `eventPrintQuote` queda en la API sin uso desde la web.
+
+## 135 · Botón de acción en la garantía de la home
+
+- **Fecha:** 2026-10-30.
+- La tarjeta "Mira antes de comprar" (vista previa gratis y garantía) cierra con el botón "Empezar mi cuento", que baja a "¿Para quién es?" como el del hero. Los tests de la home apuntan al enlace del hero (`.first()`), porque ahora hay dos.

@@ -188,6 +188,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <h2 className="text-2xl font-medium">{t('guarantee.title')}</h2>
             <p className="mt-2 text-muted-foreground">{t('guarantee.text')}</p>
           </div>
+          <AnchorLink
+            target="audience"
+            className={buttonVariants({
+              size: 'lg',
+              className: 'h-14 w-full shrink-0 rounded-full px-8 text-lg sm:ml-auto sm:w-auto',
+            })}
+          >
+            {t('hero.homeCta')}
+            <ArrowRight aria-hidden="true" className="rotate-90" />
+          </AnchorLink>
         </div>
       </section>
       {/* Datos para buscadores (schema.org), después del contenido visible. */}

@@ -184,7 +184,7 @@ test('preguntas frecuentes: la home destaca 4 y la página propia tiene todas y 
 test('el logo vuelve a la home: arriba de todo y sin hash', async ({ page }) => {
   await page.goto('/es');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
-  await page.getByRole('link', { name: 'Empezar mi cuento' }).click();
+  await page.getByRole('link', { name: 'Empezar mi cuento' }).first().click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
   await page.locator('header a').first().click();
   await expect(page).not.toHaveURL(/#/);
@@ -196,7 +196,7 @@ test('¿Para quién es?: los links siguen andando al volver atrás desde una lan
 }) => {
   await page.goto('/es');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
-  await page.getByRole('link', { name: 'Empezar mi cuento' }).click();
+  await page.getByRole('link', { name: 'Empezar mi cuento' }).first().click();
   // El botón baja al selector sin dejar "#audience" ni una entrada propia en el historial.
   await expect(page).not.toHaveURL(/#/);
   await page.locator('a[data-track-persona="families"]').click();
