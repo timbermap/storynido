@@ -12,6 +12,8 @@ export const uniqueEmail = (prefix: string) =>
 
 /** WCAG 2.2 AA con axe: cero violaciones. */
 export async function expectAccessible(page: Page) {
+  // Tras navegar, el <title> puede llegar un instante después del contenido (metadata en streaming).
+  await expect(page).toHaveTitle(/.+/);
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();

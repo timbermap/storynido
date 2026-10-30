@@ -1665,3 +1665,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - El párrafo nombra solo piezas que existen en el kit (invitación, mini cuento, stickers "y más"); "separadores" del brief no existe y no se promete.
 - `LandingHero` suma `priceLine` opcional.
 - La grilla de 4 tarjetas con fotos del brief no se hace: depende de imágenes que no existen y cambia el look.
+
+## 129 · Hero de Profesionales
+
+- **Fecha:** 2026-10-30.
+- Mismo criterio que las otras landings: look ilustrado de antes, textos nuevos. Eyebrow "Para docentes y terapeutas", título "Un cuento para cada niño que acompañas", botón "Crear un proyecto" (con sesión: "Nuevo proyecto"; ya no aparece "Crear mi cuenta profesional") y enlace "Ver las colecciones".
+- Se mantiene la lógica actual: primero los ejemplos (ancla a las colecciones) y la cuenta se pide recién al crear.
+- El párrafo dice "nunca pedimos apellido ni datos clínicos" (coincide con `PRIVACY.md`) y no "no pedimos fotos": en Profesionales sí se pueden subir fotos con autorización del tutor.
+- No se hace la tarjeta "Mis proyectos" con niños de ejemplo ni las fotos del brief (el look no cambia).
+- **E2E:** `expectAccessible` espera a que la página tenga `<title>` antes de medir con axe; sin eso, bajo carga a veces medía antes de que llegara el metadata y daba un `document-title` falso.
+- Con esto quedan hechos los 4 heroes del brief (DECISIONS 125 a 129). Las fotos de `05-prompt-imagenes.md` no se usan por ahora.
