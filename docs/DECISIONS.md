@@ -1682,3 +1682,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Links de "¿Para quién es?" que no andaban:** el botón del hero era un `<a href="#audience">` nativo. Tras tocarlo y entrar a una landing, al volver atrás la URL decía `/es#audience` pero la página mostraba el contenido de Familias (Next no reconoce las entradas de historial creadas por un ancla nativa). `AnchorLink` baja con scroll sin crear entrada en el historial ni dejar el hash; se usa en la home, Profesionales, preguntas frecuentes y Mis cuentos. Test E2E del recorrido.
 - **Ficha de la historia:** sin "Formatos y precios" ni "Enviar a" (precio y país se ven en el creador y el pago). En su lugar, una nota: "El costo de envío del libro impreso se calcula con tu dirección al pagar." Las extensiones pasan de tarjetas (parecían botones) a una lista de datos con los formatos tildados.
 - **Botón de la ficha:** sin sesión dice "Inicia sesión para crear" (kit: "Inicia sesión para diseñar el kit"); con sesión, "Crear con esta historia".
+
+## 131 · El E2E contra staging ya no manda mails reales
+
+- **Fecha:** 2026-10-30.
+- **Problema:** el job "E2E de humo contra staging" (`e2e.yml`) corre `landings.spec.ts` después de cada deploy, y el test de preguntas frecuentes enviaba el formulario de contacto. En staging eso manda un mail real por Resend a soporte ("Laura <laura@example.com>"): 2 mails (escritorio y móvil) por cada deploy, 24 acumulados.
+- **Ahora:** el test solo envía el formulario con la API local (`E2E_START=1`, mails simulados). Contra staging verifica que el formulario exista y el botón esté habilitado, sin enviar. Regla: los tests que corren contra ambientes reales no escriben ni mandan nada.

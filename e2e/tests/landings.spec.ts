@@ -171,6 +171,12 @@ test('preguntas frecuentes: la home destaca 4 y la página propia tiene todas y 
   await form.getByLabel('¿Sobre qué es?').selectOption('order');
   await form.getByLabel('Tu mensaje').fill('¿Puedo cambiar la dirección de envío de mi pedido?');
   await expectAccessible(page);
+  // Solo con la API local (mails simulados). Contra staging o cualquier ambiente real el
+  // formulario manda un mail de verdad a soporte: ahí se verifica que exista, no se envía.
+  if (process.env.E2E_START !== '1') {
+    await expect(form.getByRole('button', { name: 'Enviar mensaje' })).toBeEnabled();
+    return;
+  }
   await form.getByRole('button', { name: 'Enviar mensaje' }).click();
   await expect(form.getByRole('status')).toContainText('¡Mensaje enviado!');
 });
