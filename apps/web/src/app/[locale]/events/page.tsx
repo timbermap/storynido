@@ -84,6 +84,9 @@ export default async function EventsPage({ params }: Props) {
         subtitle={t('subtitle')}
         cta={cta}
         note={t('note')}
+        priceLine={
+          fullKit !== null ? `${t('kitFull', { price: money(fullKit) })} ${t('kitUsd')}` : undefined
+        }
         image={eventsArt}
         imageAlt={t('imageAlt')}
         photoLabel={t('photoLabel')}

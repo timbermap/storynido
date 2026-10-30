@@ -18,6 +18,7 @@ export function LandingHero({
   subtitle,
   cta,
   note,
+  priceLine,
   image,
   imageAlt,
   photoLabel,
@@ -27,6 +28,8 @@ export function LandingHero({
   subtitle: string;
   cta: ReactNode;
   note: string;
+  /** Precio como dato, bajo el botón (opcional). */
+  priceLine?: string;
   image: StaticImageData;
   imageAlt: string;
   /** Con rótulo, la ilustración va con el retrato "Su foto" y la flecha: de la foto al libro. */
@@ -49,6 +52,7 @@ export function LandingHero({
           <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center lg:justify-start">
             {cta}
           </div>
+          {priceLine && <p className="mt-5 text-base font-bold text-foreground">{priceLine}</p>}
           <p className="mt-4 text-sm font-bold text-muted-foreground">{note}</p>
         </div>
         {photoLabel ? (

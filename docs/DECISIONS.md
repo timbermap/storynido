@@ -1657,3 +1657,11 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-30.
 - **Problema:** desde la home, tras tocar el botón del hero la URL quedaba en `/es#audience`. El logo enlazaba a `/`, pero estando ya en la home Next conserva el scroll y no lo subía (medido en staging: quedaba a 168 px).
 - **Ahora:** `LogoLink` (cliente). En la home saca el hash con `history.replaceState` y sube arriba; en cualquier otra página es un enlace normal a la home. Test E2E en `landings.spec.ts`.
+
+## 128 · Hero de Celebraciones
+
+- **Fecha:** 2026-10-30.
+- Mismo criterio que la home y Familias: look ilustrado de antes, textos nuevos. "Toda la celebración, con un mismo protagonista" (no "el cumple": el público incluye bautismos, comuniones y egresos), botón "Armar mi kit" y, bajo el botón, el precio del kit completo del país (el que ya calcula la página, con "Precios en dólares").
+- El párrafo nombra solo piezas que existen en el kit (invitación, mini cuento, stickers "y más"); "separadores" del brief no existe y no se promete.
+- `LandingHero` suma `priceLine` opcional.
+- La grilla de 4 tarjetas con fotos del brief no se hace: depende de imágenes que no existen y cambia el look.
