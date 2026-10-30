@@ -1,52 +1,71 @@
 # Productos, imprentas y líneas
 
-Cruce de lo que ofrece la web (Familias, Celebraciones, Profesionales) con lo que las imprentas integradas pueden producir. Fecha: 2026-10-30. Fuentes: `packages/shared/src/models/editorial.ts`, `kit.ts`, `print.ts`, `firebase/src/seed.ts` y los adaptadores de `packages/providers/src/{gelato,lulu,cloudprinter}`.
+Cruce de lo que ofrece la web (Familias, Celebraciones, Profesionales) con lo que las imprentas pueden producir y entregar. **Verificado el 2026-10-30 contra las APIs reales** de Gelato, Cloudprinter y Lulu (sandbox), pidiendo cotizaciones con nuestros códigos de producto. Cotizar no crea pedidos ni cuesta dinero.
 
-## 1. Qué puede imprimir cada imprenta
+## 1. Libros de la web contra las imprentas
 
-| Imprenta     | Producto                                 | Formato de corte           | Páginas                                                                     | Destinos en el seed                                   | Costo de referencia (USD)         |
-| ------------ | ---------------------------------------- | -------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------- |
-| Gelato       | Fotolibro tapa blanda y tapa dura        | 210×280 mm                 | 28 a 200, pares                                                             | EE. UU. y cualquier país (se cotiza con la dirección) | 9,86 / 12,83                      |
-| Cloudprinter | Fotolibro tapa blanda y tapa dura        | US Letter (215,9×279,4 mm) | 28 a 200, pares                                                             | México, EE. UU. y cualquier país                      | MX 5,23 / 10,79; US 12,96 / 31,69 |
-| Lulu         | Libro color estándar, tapa blanda y dura | US Letter (215,9×279,4 mm) | Tapa dura desde 24; tapa blanda desde 32 (rellena con páginas para dibujar) | EE. UU. y cualquier país                              | 4,94 / 13,51                      |
-| Mock         | Solo desarrollo y staging                | 210×280 mm                 | desde 12                                                                    | Todos                                                 | —                                 |
+Todos los códigos de producto cotizan bien. Lo que acepta cada imprenta (pedido de 1 libro, EE. UU.):
 
-Todas imprimen **libros encuadernados**. Ninguna está integrada para tarjetas, stickers, etiquetas ni cuadernillos.
+| Imprenta     | Tapa blanda                           | Tapa dura                             | Páginas mínimas reales                                | Tamaño real              |
+| ------------ | ------------------------------------- | ------------------------------------- | ----------------------------------------------------- | ------------------------ |
+| Gelato       | 28 p: USD 9,86 · 32 p: 10,51          | 28 p: USD 12,83 · 32 p: 13,73         | **28** (con 24 o menos rechaza)                       | 210×280 mm               |
+| Cloudprinter | 24 p: 11,67 · 28 p: 12,96             | 24 p: 30,40 · 28 p: 31,69             | **24** (con 16 o menos rechaza)                       | US Letter 215,9×279,4 mm |
+| Lulu         | cualquier cantidad (la completa a 32) | cualquier cantidad (la completa a 24) | Tapa blanda 32, tapa dura 24: **rellena con páginas** | US Letter 215,9×279,4 mm |
 
-En producción ninguna imprime todavía: cada opción exige `qaSamplePassed` (muestra física aprobada), y no hay muestras. No hay imprenta decidida para Latinoamérica ni BookVault para Europa.
+Lo que vende la web:
 
-## 2. Qué vende la web
+| Producto                   | Formatos que ofrece           | ¿Se puede entregar?                                                                    |
+| -------------------------- | ----------------------------- | -------------------------------------------------------------------------------------- |
+| Mini (12 p) y Corto (16 p) | Ebook (PDF)                   | Sí. Ninguna imprenta de fotolibros llega a 12 o 16 páginas: solo digital es correcto.  |
+| Clásico (28 p)             | Ebook, tapa blanda, tapa dura | Sí en las tres. En Lulu la tapa blanda sale de 32 páginas (4 de relleno para dibujar). |
+| Gran aventura (32 p)       | Ebook, tapa blanda, tapa dura | Sí en las tres.                                                                        |
 
-| Producto web                                                      | Familias                        | Celebraciones      | Profesionales                   |
-| ----------------------------------------------------------------- | ------------------------------- | ------------------ | ------------------------------- |
-| Libro Mini, 12 páginas                                            | Digital                         | —                  | Digital                         |
-| Libro Corto, 16 páginas                                           | Digital                         | —                  | Digital                         |
-| Libro Clásico, 28 páginas                                         | Digital, tapa blanda, tapa dura | —                  | Digital, tapa blanda, tapa dura |
-| Libro Gran aventura, 32 páginas                                   | Digital, tapa blanda, tapa dura | —                  | Digital, tapa blanda, tapa dura |
-| Kit: mini cuento                                                  | —                               | Digital            | —                               |
-| Kit: actividades, invitación, agradecimiento, stickers, etiquetas | —                               | Digital            | —                               |
-| Impresión en cantidad del kit                                     | —                               | "Se cotiza aparte" | —                               |
+**El ebook no depende de ninguna imprenta.** Lo generamos nosotros: PDF de 210×280 mm, sin sangrado, para leer en pantalla o imprimir en casa.
 
-## 3. Cruce: qué está alineado y qué no
+**El PDF de impresión sí se arma por imprenta**: el worker lee la ficha de cada una (tamaño de corte, sangrado, páginas mínimas y lomo) y rellena con páginas para dibujar cuando hace falta. El texto de la web dice "unos 21×28 cm" porque Lulu y Cloudprinter cortan 6 mm más ancho que Gelato.
 
-**Alineado**
+## 2. Entrega por país (libro de 32 páginas, 1 ejemplar)
 
-- Libros Clásico y Gran aventura (28 y 32 páginas) en tapa blanda y dura: cumplen el mínimo de las tres imprentas. Es el mismo producto en Familias y Profesionales.
-- Mini y Corto (12 y 16 páginas) solo en digital: ninguna imprenta imprime menos de 24 páginas, y la web ya lo dice así.
+Producción + envío en USD y plazo en días. "No" = esa imprenta no cotiza ese destino.
 
-**Desalineado o sin cubrir**
+| País      | Gelato                  | Cloudprinter                         | Lulu                               |
+| --------- | ----------------------- | ------------------------------------ | ---------------------------------- |
+| México    | 14,93 + 30,39 · 11–18 d | **5,75 + 8,26 · 4–8 d**              | No: pide RFC (`recipient_tax_id`)  |
+| Argentina | 14,93 + 30,39 · 6–10 d  | 5,75 + 30,05 · 4–8 d                 | No: pide CUIT (`recipient_tax_id`) |
+| Uruguay   | 14,93 + 30,39 · 6–10 d  | 5,75 + 30,05 · 4–8 d                 | **4,94 + 19,64 · 8–16 d**          |
+| Brasil    | 14,92 + 18,17 · 14–25 d | 5,75 + 30,05 · 4–8 d                 | No: pide CPF (`recipient_tax_id`)  |
+| España    | 11,36 + 5,67 · 7–10 d   | 8,69 + 10,99 · 2–5 d (tapa dura: no) | 5,49 + 8,87 · 8–16 d               |
+| Suiza     | 14,93 + 11,13 · 6–7 d   | 6,44 + 22,86 · 5–10 d                | **4,94 + 10,28 · 8–16 d**          |
+| EE. UU.   | 10,51 · 6–8 d           | 14,25 · 5–10 d                       | 5,88 · 8–16 d                      |
 
-1. **Celebraciones no puede imprimir nada hoy.** Ninguna pieza del kit (invitación, agradecimiento, stickers, etiquetas, actividades) tiene imprenta integrada. La web solo promete el kit digital y cotiza la impresión aparte.
-2. **El mini cuento souvenir probablemente no se puede imprimir con estas imprentas.** Los fotolibros integrados piden 28 páginas o más (24 en tapa dura de Lulu), y un souvenir para invitados es un libro corto. El largo del mini cuento del kit no está fijado en el código; si es menor a 28 páginas, hace falta otro producto (cuadernillo grapado o tapa blanda delgada).
-3. **Formato de corte distinto.** La web dice "21×28 cm". Gelato corta 210×280 mm, pero Lulu y Cloudprinter cortan US Letter (215,9×279,4 mm). Falta un PDF por imprenta (pendiente ya anotado en `PROGRESS.md`).
-4. **Profesionales: descuento y margen de impresión sin cruzar.** El descuento por recurrencia aplica también al impreso, con tope (`physicalMaxPercent`, 15 % por defecto, desde 5 compras en 90 días). Las opciones de imprenta limitan a 100 ejemplares por pedido y el margen mínimo por imprenta sigue pendiente (`PROGRESS.md`), así que el descuento no está verificado contra el costo real de cada imprenta.
-5. **Sin imprenta para Latinoamérica.** Cloudprinter cubre México; el resto del continente se cotiza con la dirección y puede quedar sin opción de impreso.
-6. **Producción cerrada para imprimir** hasta tener muestras físicas de cada producto y país.
+(Tapa blanda; la tapa dura tiene el mismo patrón de países. Lulu cotiza en sandbox.)
 
-## 4. Decisiones que hay que tomar
+**Conclusión:** en los 7 países probados hay al menos 2 imprentas que entregan los dos formatos. Lulu no sirve para México, Argentina ni Brasil mientras no pidamos el documento fiscal del destinatario. El checkout ya descarta una imprenta cuya cotización falla.
 
-1. ¿Celebraciones va a vender impreso (invitaciones, stickers, etiquetas, souvenir) o se queda en kit digital? Si imprime, hay que elegir productos y una imprenta que los tenga.
-2. ¿El souvenir impreso es un libro corto o un cuadernillo? Define qué imprenta sirve.
-3. ¿Se unifica el formato de corte en US Letter o se genera un PDF por imprenta?
-4. ¿Imprenta para Latinoamérica y para Europa?
-5. ¿Profesionales necesita impresión en cantidad con precio propio?
+## 3. Riesgos para "no ofrecer lo que no podemos entregar"
+
+1. **El impreso se ofrece en cualquier país** (la opción de imprenta es comodín `*`) y solo se confirma al ingresar la dirección. En un país que ninguna imprenta alcance, la persona vería "desde USD …" y recién después el aviso. Falta una lista de países verificados por imprenta, o una cotización de prueba por país.
+2. **En producción no se imprime nada** hasta tener la muestra física de cada producto y país (`qaSamplePassed`). Es lo correcto: la web no ofrece impreso hasta entonces.
+3. **Costo de referencia desactualizado.** El seed estima Lulu en USD 4,94 y 13,51; la cotización real es 5,88 y 15,48 (32 páginas, EE. UU.). El precio final usa la cotización real, pero la estimación previa a la dirección queda corta.
+4. **Envío a Latinoamérica caro:** Gelato cobra USD 30 a México, Argentina y Uruguay. Solo Cloudprinter a México baja de USD 10.
+5. **Celebraciones no tiene nada impreso** (kit solo digital, decidido).
+
+## 4. Productos que se podrían sumar (verificados con cotización real de Gelato)
+
+| Producto                                                      | Qué resuelve                                                                           | Evidencia                                                                                                                    |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Cuento grapado de 8 a 24 páginas** (A5 o cuadrado 14,8 cm)  | Imprimir el **Mini y el Corto**, que hoy son solo digitales, y el **souvenir** del kit | Cotiza de 8 a 24 páginas. 12 p, 14,8×14,8 cm: USD 9,62 un ejemplar; **1,71 c/u en 30; 1,46 c/u en 100** (producción)         |
+| **Tarjetas y tarjetas plegadas** (invitación, agradecimiento) | Piezas impresas del kit de Celebraciones                                               | Catálogos `cards`, `folded-cards` y `pack-of-cards-envelopes` (A6, 14,1 cm, A5, DL), disponibles en la mayoría de los países |
+| **Cuaderno de actividades grapado** (A4)                      | Libro para colorear / actividades impreso                                              | Mismo producto grapado, A4, de 8 a 24 páginas: USD 9,96 a 12,68 un ejemplar                                                  |
+| Póster, taza, camiseta infantil, calendario                   | Complementos de regalo con el personaje (Familias)                                     | Existen en el catálogo de Gelato; no se cotizó (cada uno necesita archivo y plantilla propios)                               |
+
+No hay producto de **stickers** ni de etiquetas troqueladas en el catálogo de Gelato: las etiquetas del kit se podrían imprimir como tarjetas chicas, y los stickers siguen siendo solo digitales (para imprimir en casa).
+
+Cualquier producto nuevo exige: una ficha de archivo (corte, sangrado, páginas múltiplo de 4 en el grapado), muestra física y una opción de imprenta en la base antes de ofrecerlo.
+
+## 5. Decisiones
+
+1. ¿Sumamos el cuento grapado para Mini y Corto y para el souvenir? Es el que más cierra huecos.
+2. ¿Pasamos las invitaciones y tarjetas de agradecimiento a impreso en Celebraciones?
+3. ¿Armamos la lista de países verificados por imprenta para no ofrecer impreso donde no entregamos?
+4. ¿Pedimos el documento fiscal del destinatario (México, Argentina, Brasil) para habilitar Lulu?

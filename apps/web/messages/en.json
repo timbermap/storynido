@@ -1039,11 +1039,11 @@
       },
       "softcover": {
         "name": "Softcover",
-        "text": "Printed book, 21×28 cm."
+        "text": "Printed book, about 21×28 cm (8×11 in)."
       },
       "hardcover": {
         "name": "Hardcover",
-        "text": "Printed book, 21×28 cm, to give and keep."
+        "text": "Printed book, about 21×28 cm (8×11 in), to give and keep."
       }
     },
     "addressTitle": "Shipping address",

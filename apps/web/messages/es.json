@@ -1039,11 +1039,11 @@
       },
       "softcover": {
         "name": "Tapa blanda",
-        "text": "Libro impreso de 21×28 cm."
+        "text": "Libro impreso de unos 21×28 cm."
       },
       "hardcover": {
         "name": "Tapa dura",
-        "text": "Libro impreso de 21×28 cm, para regalar y guardar."
+        "text": "Libro impreso de unos 21×28 cm, para regalar y guardar."
       }
     },
     "addressTitle": "Dirección de envío",

@@ -1725,3 +1725,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Familias:** mismas bandas de color que la home ("Cómo funciona" blanco, "Preguntas frecuentes" menta) y botón "Armar mi primer cuento" en la tarjeta de garantía.
 - **Admin:** "Profesionales" pasa a "Descuentos por volumen" y desaparece "nivel Pro" de Clientes.
 - **Logo:** sube de inmediato (`behavior: instant`) en vez de animar, para que no se corte si la página cambia de alto mientras baja. El test espera a que termine el scroll animado antes de volver (era una carrera del test).
+
+## 137 · Productos verificados contra las imprentas
+
+- **Fecha:** 2026-10-30.
+- Se cotizó en las APIs reales de Gelato, Cloudprinter y Lulu (sandbox) cada formato, páginas y siete países; el detalle está en `docs/PRODUCTOS-Y-IMPRENTAS.md`. Los códigos de producto cotizan bien. Mini y Corto solo digitales es correcto (Gelato pide 28 páginas y Cloudprinter 24).
+- En los 7 países probados hay al menos 2 imprentas para tapa blanda y tapa dura. Lulu falla para México, Argentina y Brasil porque pide el documento fiscal del destinatario.
+- El PDF de impresión ya se arma por imprenta (tamaño, sangrado y relleno); la nota de "falta un PDF por imprenta" estaba desactualizada.
+- Los textos de tamaño pasan de "21×28 cm" a "unos 21×28 cm": Lulu y Cloudprinter cortan US Letter (215,9×279,4 mm).
+- **Posible producto nuevo:** cuento grapado de 8 a 24 páginas (cotiza en Gelato; 12 páginas 14,8×14,8 cm a USD 1,71 c/u en 30 ejemplares) para imprimir Mini y Corto y el souvenir. Pendiente de decidir.

@@ -1039,11 +1039,11 @@
       },
       "softcover": {
         "name": "Capa flexível",
-        "text": "Livro impresso de 21×28 cm."
+        "text": "Livro impresso de cerca de 21×28 cm."
       },
       "hardcover": {
         "name": "Capa dura",
-        "text": "Livro impresso de 21×28 cm, para presentear e guardar."
+        "text": "Livro impresso de cerca de 21×28 cm, para presentear e guardar."
       }
     },
     "addressTitle": "Endereço de entrega",
