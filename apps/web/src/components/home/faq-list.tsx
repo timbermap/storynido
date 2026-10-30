@@ -83,3 +83,11 @@ export function FaqList({ items }: { items: FaqItem[] }) {
     </div>
   );
 }
+
+/** Para las landings: la primera pregunta de cada tema (la página de preguntas tiene todas). */
+export function faqHighlights(groups: FaqGroup[], count = 4): FaqItem[] {
+  return groups
+    .map((group) => group.items[0])
+    .filter((item): item is FaqItem => item !== undefined)
+    .slice(0, count);
+}

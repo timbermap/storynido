@@ -38,7 +38,7 @@ export function HeaderSwitch({ children }: { children: ReactNode }) {
           <Logo />
         </span>
         <Link
-          href={{ pathname: '/', hash: 'faq' }}
+          href="/faq"
           target="_blank"
           className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-foreground/80 hover:text-primary"
         >

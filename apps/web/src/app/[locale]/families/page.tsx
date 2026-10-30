@@ -7,7 +7,7 @@ import { HeroBook } from '@/components/home/hero-book';
 import { HeroFacts } from '@/components/home/hero-facts';
 import { NameCoverDemo } from '@/components/home/name-cover-demo';
 import { PhotoToStory } from '@/components/home/photo-to-story';
-import { FaqGroups, parseFaq, parseFaqGroups } from '@/components/home/faq-list';
+import { FaqList, faqHighlights, parseFaqGroups } from '@/components/home/faq-list';
 import { RememberChannel } from '@/components/landing/remember-channel';
 import { JsonLd } from '@/components/json-ld';
 import { LessonGroups } from '@/components/lessons/lesson-groups';
@@ -39,8 +39,8 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
   ]);
   const fromPrice = lowestPrice(offer, locale, display.country);
   const highlights = offerHighlights(offer, locale, display.country);
-  const faqItems = faq ? parseFaq(faq.body) : [];
-  const faqGroups = faq ? parseFaqGroups(faq.body) : [];
+  // Solo las destacadas: todas las preguntas y el contacto están en /faq.
+  const faqItems = faq ? faqHighlights(parseFaqGroups(faq.body)) : [];
 
   // Cada paso con su color pastel (número e ícono).
   const steps = [
@@ -257,7 +257,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
               {t.rich('faq.contact', {
                 form: (chunks) => (
                   <Link
-                    href={{ pathname: '/', hash: CONTACT_ID }}
+                    href={{ pathname: '/faq', hash: CONTACT_ID }}
                     className="font-semibold text-primary underline-offset-4 hover:underline"
                   >
                     {chunks}
@@ -266,7 +266,15 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
               })}
             </p>
           </div>
-          <FaqGroups groups={faqGroups} />
+          <div>
+            <FaqList items={faqItems} />
+            <Link
+              href="/faq"
+              className="mt-6 inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              {t('faq.more')} →
+            </Link>
+          </div>
         </section>
       )}
 
@@ -317,19 +325,6 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
           logo: absoluteUrl('/icon.svg'),
         }}
       />
-      {faqItems.length > 0 && (
-        <JsonLd
-          data={{
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: faqItems.map((item) => ({
-              '@type': 'Question',
-              name: item.question,
-              acceptedAnswer: { '@type': 'Answer', text: item.answer },
-            })),
-          }}
-        />
-      )}
     </>
   );
 }

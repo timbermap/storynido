@@ -152,9 +152,16 @@ test('ficha profesional: objetivos propios en vez de enseñanzas generales; env�
   await expectAccessible(page);
 });
 
-test('contacto: formulario al final de la home, sin el mail a la vista', async ({ page }) => {
+test('preguntas frecuentes: la home destaca 4 y la página propia tiene todas y el contacto', async ({
+  page,
+}) => {
   await page.goto('/es');
   await expect(page.locator('body')).not.toContainText('hola@storynido.com');
+  await expect(page.locator('#faq details')).toHaveCount(4);
+  await page.getByRole('link', { name: /Ver todas las preguntas/ }).click();
+  await expect(page).toHaveURL(/\/es\/preguntas-frecuentes$/);
+  await expect(page.locator('h1')).toContainText('Preguntas frecuentes');
+  expect(await page.locator('details').count()).toBeGreaterThan(10);
   const form = page.locator('#contact');
   await form.getByLabel('Tu nombre').fill('Laura');
   await form.getByLabel('Tu email').fill('laura@example.com');

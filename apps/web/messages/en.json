@@ -128,7 +128,9 @@
     "faq": {
       "title": "Frequently asked questions",
       "more": "See all questions",
-      "contact": "Another question? <form>Write to us with the form</form> and we'll reply."
+      "contact": "Another question? <form>Write to us with the form</form> and we'll reply.",
+      "pageIntro": "Everything people usually ask us, by topic. Can't find your question? <form>Write to us</form>.",
+      "pageDescription": "Answers about how StoryNido works, photos and privacy, prices, shipping, Celebrations and Professionals."
     },
     "guarantee": {
       "title": "See it before you buy",

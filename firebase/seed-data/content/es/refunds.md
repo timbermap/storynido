@@ -16,4 +16,4 @@ Puedes cancelar un pedido sin costo mientras no se haya enviado a imprenta.
 
 ## Cómo pedir un reembolso
 
-Escríbenos con el [formulario de contacto](/es#contact) con tu número de pedido. Los reembolsos se acreditan en el mismo medio de pago, en los plazos de tu banco.
+Escríbenos con el [formulario de contacto](/es/preguntas-frecuentes#contact) con tu número de pedido. Los reembolsos se acreditan en el mismo medio de pago, en los plazos de tu banco.

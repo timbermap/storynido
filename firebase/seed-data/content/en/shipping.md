@@ -18,4 +18,4 @@ The PDF is sent by email, usually within minutes, with a download link.
 
 ## Shipping problems
 
-If your order doesn't arrive within the estimated time or arrives damaged, write to us using the [contact form](/en#contact).
+If your order doesn't arrive within the estimated time or arrives damaged, write to us using the [contact form](/en/faq#contact).

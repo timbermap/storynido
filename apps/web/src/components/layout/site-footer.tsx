@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { CookiePreferencesButton } from './cookie-preferences-button';
 import { LanguageSwitcher } from './language-switcher';
 import { Logo } from './logo';
-import { AUDIENCE_TONES, FAQ_ID, HOW_IT_WORKS_ID } from './site-header';
+import { AUDIENCE_TONES, HOW_IT_WORKS_ID } from './site-header';
 
 type Href = ComponentProps<typeof Link>['href'];
 
@@ -93,12 +93,12 @@ export async function SiteFooter() {
     {
       title: t('help'),
       links: [
-        { href: { pathname: '/', hash: FAQ_ID }, label: tNav('faq') },
+        { href: '/faq', label: tNav('faq') },
         { href: shipping, label: tLegal('shipping') },
         { href: '/blog', label: tNav('blog') },
       ],
       extra: (
-        <Link href={{ pathname: '/', hash: 'contact' }} className="hover:text-white">
+        <Link href={{ pathname: '/faq', hash: 'contact' }} className="hover:text-white">
           {t('contact')}
         </Link>
       ),

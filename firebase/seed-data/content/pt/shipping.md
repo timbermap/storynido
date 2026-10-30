@@ -18,4 +18,4 @@ O PDF é enviado por e-mail, normalmente em minutos, com um link de download.
 
 ## Problemas com o envio
 
-Se o seu pedido não chegar no prazo indicado ou chegar danificado, escreva pelo [formulário de contato](/pt#contact).
+Se o seu pedido não chegar no prazo indicado ou chegar danificado, escreva pelo [formulário de contato](/pt/perguntas-frequentes#contact).

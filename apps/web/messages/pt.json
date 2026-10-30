@@ -128,7 +128,9 @@
     "faq": {
       "title": "Perguntas frequentes",
       "more": "Ver todas as perguntas",
-      "contact": "Outra dúvida? <form>Escreva pelo formulário</form> e respondemos."
+      "contact": "Outra dúvida? <form>Escreva pelo formulário</form> e respondemos.",
+      "pageIntro": "Tudo o que costumam nos perguntar, por tema. Sua dúvida não está aqui? <form>Escreva para nós</form>.",
+      "pageDescription": "Respostas sobre como o StoryNido funciona, fotos e privacidade, preços, envios, Celebrações e Profissionais."
     },
     "guarantee": {
       "title": "Veja antes de comprar",

@@ -1568,3 +1568,10 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - nunca se manda nada a la dirección que carga la persona, así el formulario no sirve para spam;
   - un campo oculto descarta bots y hay un tope de 5 mensajes por conexión y por día (huella de la IP, sin guardar la IP).
 - **El mail del equipo ya no está a la vista** en la home, Familias, el pie, envíos ni reembolsos: todo lleva al formulario. Queda en la política de privacidad y en los términos, donde la ley pide identificar al responsable con un medio de contacto.
+
+## 119 · Preguntas frecuentes en su propia página
+
+- **Fecha:** 2026-10-30.
+- **`/preguntas-frecuentes`** (`/faq`, `/perguntas-frequentes`): todas las preguntas por tema y, al final, el formulario de contacto. Tiene los datos FAQPage para buscadores y está en el sitemap.
+- **La home y Familias** muestran 4 destacadas (la primera de cada tema) y "Ver todas las preguntas". Así la landing no se alarga.
+- **"Ayuda" del creador, el pie, "¿Otra duda?", envíos y reembolsos** llevan a esa página o a su formulario.
