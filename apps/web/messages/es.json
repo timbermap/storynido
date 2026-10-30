@@ -430,6 +430,9 @@
       "emotions": "Emociones",
       "suggested": "Encajan con esta historia"
     },
+    "finalTitle": "Comienza ahora",
+    "finalText": "Elige la aventura, agrega su nombre y mira gratis cómo queda la historia.",
+    "ctaNow": "Comenzar ahora",
     "combineTitle": "Combínalo con cualquier aventura",
     "combineText": "Elige la aventura que más le guste: la historia se escribe con este mensaje, adaptado a su edad.",
     "custom": "¿Prefieres otro mensaje? Al crear el cuento puedes escribir el tuyo, en hasta 150 caracteres.",
@@ -1025,11 +1028,15 @@
     "unavailable": "Todavía no vendemos en tu país. Puedes ver los precios de otro país desde el pie de página.",
     "signInTitle": "Inicia sesión para comprar",
     "signInText": "Así guardamos tu pedido y te avisamos cuando tu libro esté listo.",
+    "formatGroups": {
+      "ebook": "Ebook · para leer en pantalla",
+      "print": "Libro físico · lo imprimimos y te lo enviamos"
+    },
     "formatTitle": "Formato",
     "formats": {
       "digital": {
-        "name": "Digital",
-        "text": "PDF para leer en pantalla e imprimir en casa."
+        "name": "Ebook (PDF)",
+        "text": "Para leer en pantalla o imprimir en casa."
       },
       "softcover": {
         "name": "Tapa blanda",

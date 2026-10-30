@@ -189,40 +189,59 @@ export function Checkout({
       <div className="grid content-start gap-8">
         <fieldset>
           <legend className="text-lg font-semibold">{t('formatTitle')}</legend>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3">
-            {formats.map((option) => (
-              <label
-                key={option.format}
-                className={cn(
-                  'flex cursor-pointer flex-col gap-1 rounded-2xl border-2 bg-card p-4 transition has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50',
-                  format === option.format
-                    ? 'border-primary'
-                    : 'border-border hover:border-primary/40',
-                )}
-              >
-                <input
-                  type="radio"
-                  name="format"
-                  value={option.format}
-                  checked={format === option.format}
-                  onChange={() => {
-                    setFormat(option.format);
-                  }}
-                  className="sr-only"
-                />
-                <span className="font-semibold">{t(`formats.${option.format}.name`)}</span>
-                <span className="text-sm text-muted-foreground">
-                  {t(`formats.${option.format}.text`)}
-                </span>
-                <span className="mt-auto pt-2 font-semibold tabular-nums">
-                  {option.estimated
-                    ? t('fromPrice', {
-                        price: formatPrice(option.amountMinor, offer.currency, locale, country),
-                      })
-                    : formatPrice(option.amountMinor, offer.currency, locale, country)}
-                </span>
-              </label>
-            ))}
+          <div className="mt-3 grid gap-5">
+            {[
+              { key: 'ebook', options: formats.filter((option) => option.format === 'digital') },
+              { key: 'print', options: formats.filter((option) => option.format !== 'digital') },
+            ]
+              .filter((group) => group.options.length > 0)
+              .map((group) => (
+                <div key={group.key} className="grid gap-2">
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    {t(`formatGroups.${group.key}`)}
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {group.options.map((option) => (
+                      <label
+                        key={option.format}
+                        className={cn(
+                          'flex cursor-pointer flex-col gap-1 rounded-2xl border-2 bg-card p-4 transition has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50',
+                          format === option.format
+                            ? 'border-primary'
+                            : 'border-border hover:border-primary/40',
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="format"
+                          value={option.format}
+                          checked={format === option.format}
+                          onChange={() => {
+                            setFormat(option.format);
+                          }}
+                          className="sr-only"
+                        />
+                        <span className="font-semibold">{t(`formats.${option.format}.name`)}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {t(`formats.${option.format}.text`)}
+                        </span>
+                        <span className="mt-auto pt-2 font-semibold tabular-nums">
+                          {option.estimated
+                            ? t('fromPrice', {
+                                price: formatPrice(
+                                  option.amountMinor,
+                                  offer.currency,
+                                  locale,
+                                  country,
+                                ),
+                              })
+                            : formatPrice(option.amountMinor, offer.currency, locale, country)}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
           </div>
         </fieldset>
 

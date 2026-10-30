@@ -85,7 +85,7 @@ export default async function LessonPage({ params }: Props) {
           {t('combineTitle')}
         </h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">{t('combineText')}</p>
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
           {matching.map((story, index) => (
             <StoryCard
               key={story.slug}
@@ -93,10 +93,25 @@ export default async function LessonPage({ params }: Props) {
               fromPrice={fromPrice}
               headingLevel="h3"
               priority={index < 2}
+              compact
             />
           ))}
         </div>
         <p className="mt-8 rounded-xl bg-secondary px-5 py-4 text-sm font-bold">{t('custom')}</p>
+      </section>
+
+      {/* Cierre antes del pie: la misma acción que arriba. */}
+      <section className="mt-16 rounded-2xl bg-secondary px-6 py-12 text-center sm:px-12">
+        <h2 className="text-[clamp(1.7rem,3vw,2.5rem)] leading-[1.1] font-medium">
+          {t('finalTitle')}
+        </h2>
+        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{t('finalText')}</p>
+        <Link
+          href={{ pathname: '/create', query: { lesson: lesson.slug } }}
+          className={buttonVariants({ size: 'lg', className: 'mt-6' })}
+        >
+          {t('ctaNow')}
+        </Link>
       </section>
     </div>
   );

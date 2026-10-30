@@ -10,6 +10,7 @@ export async function StoryCard({
   fromPrice,
   headingLevel = 'h3',
   priority = false,
+  compact = false,
 }: {
   story: PublicStory;
   fromPrice: string | null;
@@ -17,6 +18,8 @@ export async function StoryCard({
   headingLevel?: 'h2' | 'h3';
   /** Las primeras tarjetas visibles se cargan de inmediato. */
   priority?: boolean;
+  /** Más chica y sin protagonismo (por ejemplo, las aventuras de una enseñanza). */
+  compact?: boolean;
 }) {
   const t = await getTranslations('Stories');
   const Heading = headingLevel;
@@ -36,12 +39,20 @@ export async function StoryCard({
           height={800}
           unoptimized
           priority={priority}
-          sizes="(min-width: 1024px) 33vw, 50vw"
+          sizes={compact ? '(min-width: 1024px) 20vw, 33vw' : '(min-width: 1024px) 33vw, 50vw'}
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <Heading className="text-xl leading-snug font-semibold">{story.title}</Heading>
+      <div
+        className={compact ? 'flex flex-1 flex-col gap-1.5 p-3' : 'flex flex-1 flex-col gap-2 p-4'}
+      >
+        <Heading
+          className={
+            compact ? 'text-base leading-snug font-semibold' : 'text-xl leading-snug font-semibold'
+          }
+        >
+          {story.title}
+        </Heading>
         <p className="w-fit rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
           {t('agesFor', { min: story.ageMin, max: story.ageMax })}
         </p>

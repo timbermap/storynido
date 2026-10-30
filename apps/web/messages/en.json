@@ -430,6 +430,9 @@
       "emotions": "Emotions",
       "suggested": "A good fit for this story"
     },
+    "finalTitle": "Start now",
+    "finalText": "Pick the adventure, add their name and see how the story looks, free.",
+    "ctaNow": "Start now",
     "combineTitle": "Combine it with any adventure",
     "combineText": "Pick the adventure they love most: the story is written with this message, adapted to their age.",
     "custom": "Prefer a different message? When you create the story you can write your own, up to 150 characters.",
@@ -1025,11 +1028,15 @@
     "unavailable": "We don’t sell in your country yet. You can see prices for another country from the footer.",
     "signInTitle": "Sign in to buy",
     "signInText": "So we can save your order and let you know when your book is ready.",
+    "formatGroups": {
+      "ebook": "Ebook · to read on a screen",
+      "print": "Printed book · we print it and ship it to you"
+    },
     "formatTitle": "Format",
     "formats": {
       "digital": {
-        "name": "Digital",
-        "text": "PDF to read on screen and print at home."
+        "name": "Ebook (PDF)",
+        "text": "To read on a screen or print at home."
       },
       "softcover": {
         "name": "Softcover",

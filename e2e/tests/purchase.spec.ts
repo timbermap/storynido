@@ -214,7 +214,7 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await expect(page.locator('#orders li').first()).toContainText('Tu libro fue entregado');
   await page.locator('#orders a', { hasText: 'Pedir de nuevo' }).first().click();
   await expect(body(page)).toContainText('Pides de nuevo el mismo libro');
-  await page.locator('label', { hasText: 'Digital' }).click();
+  await page.locator('label', { hasText: 'Ebook' }).click();
   await expect(page.locator('aside dl')).toContainText('Total');
   await page.getByRole('button', { name: 'Pagar' }).click();
   await expect(page).toHaveURL(/\/es\/pedido\//);

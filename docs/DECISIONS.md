@@ -1688,3 +1688,10 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-30.
 - **Problema:** el job "E2E de humo contra staging" (`e2e.yml`) corre `landings.spec.ts` después de cada deploy, y el test de preguntas frecuentes enviaba el formulario de contacto. En staging eso manda un mail real por Resend a soporte ("Laura <laura@example.com>"): 2 mails (escritorio y móvil) por cada deploy, 24 acumulados.
 - **Ahora:** el test solo envía el formulario con la API local (`E2E_START=1`, mails simulados). Contra staging verifica que el formulario exista y el botón esté habilitado, sin enviar. Regla: los tests que corren contra ambientes reales no escriben ni mandan nada.
+
+## 132 · Formatos del pago, enseñanzas y hero de Profesionales
+
+- **Fecha:** 2026-10-30.
+- **Pago:** los formatos se agrupan en "Ebook · para leer en pantalla" (Ebook (PDF)) y "Libro físico · lo imprimimos y te lo enviamos" (tapa blanda y tapa dura), para que se entienda qué es digital y qué se imprime. Los precios y el "desde" no cambian.
+- **Enseñanzas:** las aventuras de "Combínalo con cualquier aventura" van más chicas (`StoryCard` con `compact`, 5 por fila en escritorio) para que no le roben protagonismo al mensaje. Antes del pie hay un cierre con "Comenzar ahora", la misma acción que arriba.
+- **Hero de Profesionales:** sin "Crear un proyecto"; queda solo "Ver las colecciones" (crear sigue en el cierre de la página).

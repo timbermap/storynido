@@ -57,17 +57,9 @@ export default async function ProfessionalsPage({ params }: Props) {
   );
   // Arriba, primero los ejemplos: la cuenta se pide recién al crear.
   const heroCta = (
-    <>
-      <AnchorLink target="examples" className={ctaClass}>
-        {t('ctaExamples')}
-      </AnchorLink>
-      <Link
-        href={{ pathname: '/create', query: { line: 'professionals' } }}
-        className="inline-flex items-center justify-center border-b-2 border-foreground/25 px-1 pb-0.5 text-lg font-semibold transition-colors hover:border-primary hover:text-primary"
-      >
-        <SignedInLabel guest={t('cta')} member={t('ctaSignedIn')} />
-      </Link>
-    </>
+    <AnchorLink target="examples" className={ctaClass}>
+      {t('ctaExamples')}
+    </AnchorLink>
   );
   const four = ['1', '2', '3', '4'] as const;
 
