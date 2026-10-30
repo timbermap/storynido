@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Gift, Map, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowRight, BookOpen, Gift, Map, ShieldCheck, Tablet, UserRound } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
@@ -102,21 +102,28 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
               </Link>
             </div>
             {highlights && (
-              <div className="mt-6 flex flex-wrap justify-center gap-3 lg:justify-start">
+              // Precios como dato, no como botón: sin fondo, con un ícono y una línea divisoria.
+              <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm lg:justify-start">
                 {highlights.digital && (
-                  <p className="rounded-2xl bg-secondary px-4 py-2.5 text-sm text-muted-foreground">
-                    <span className="block font-bold text-foreground">
-                      {t('hero.priceDigital', { price: highlights.digital })}
+                  <p className="flex items-start gap-2.5 text-left">
+                    <Tablet className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+                    <span>
+                      <span className="block font-bold text-foreground">
+                        {t('hero.priceDigital', { price: highlights.digital })}
+                      </span>
+                      <span className="text-muted-foreground">{t('hero.digitalNote')}</span>
                     </span>
-                    {t('hero.digitalNote')}
                   </p>
                 )}
                 {highlights.printed && (
-                  <p className="rounded-2xl bg-peach/60 px-4 py-2.5 text-sm text-muted-foreground">
-                    <span className="block font-bold text-foreground">
-                      {t('hero.pricePrinted', { price: highlights.printed })}
+                  <p className="flex items-start gap-2.5 text-left sm:border-l sm:border-foreground/10 sm:pl-6">
+                    <BookOpen className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+                    <span>
+                      <span className="block font-bold text-foreground">
+                        {t('hero.pricePrinted', { price: highlights.printed })}
+                      </span>
+                      <span className="text-muted-foreground">{t('hero.printedNote')}</span>
                     </span>
-                    {t('hero.printedNote')}
                   </p>
                 )}
                 <p className="w-full text-xs text-muted-foreground lg:text-left">
