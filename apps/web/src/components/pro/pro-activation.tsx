@@ -8,7 +8,7 @@ import { ApiError, PROFESSIONS, type CountryCode, type Locale } from '@storynido
 
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
-import { countriesByName } from '@/lib/country-names';
+import { CountryOptions } from '@/components/country-options';
 
 const inputClass =
   'h-12 w-full rounded-[0.75rem] border-[1.5px] border-[#b7bcc8] bg-card px-3.5 text-base text-foreground placeholder:text-[#555c6e] focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d9cef0]';
@@ -120,11 +120,7 @@ export function ProActivationForm({ onActivated }: { onActivated: () => void }) 
             setCountry(event.target.value as CountryCode);
           }}
         >
-          {countriesByName(locale).map(({ code, name }) => (
-            <option key={code} value={code}>
-              {name}
-            </option>
-          ))}
+          <CountryOptions locale={locale} current={country} />
         </select>
       </div>
       <p className="text-sm text-muted-foreground">{t('note')}</p>

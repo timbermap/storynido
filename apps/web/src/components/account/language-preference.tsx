@@ -7,7 +7,7 @@ import { LOCALES, LOCALE_DEFINITIONS, type CountryCode, type Locale } from '@sto
 
 import { useRouter } from '@/i18n/navigation';
 import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE } from '@/lib/country';
-import { countriesByName } from '@/lib/country-names';
+import { CountryOptions } from '@/components/country-options';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import {
   subscribePreferences,
@@ -119,11 +119,7 @@ export function LanguagePreference({ uid }: { uid: string }) {
           className="h-11 max-w-xs rounded-xl border bg-card px-3 text-base"
         >
           {country === null && <option value="" />}
-          {countriesByName(locale).map(({ code, name }) => (
-            <option key={code} value={code}>
-              {name}
-            </option>
-          ))}
+          <CountryOptions locale={locale} current={country ?? undefined} />
         </select>
       </label>
       <p className="text-sm text-muted-foreground">{t('countryNote')}</p>

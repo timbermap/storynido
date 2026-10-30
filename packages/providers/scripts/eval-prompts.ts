@@ -193,7 +193,12 @@ for (const testCase of CASES) {
       return after ? full : full.replace(`${narrativeRules(input)}\n`, '');
     };
     const direction = after
-      ? artDirection({ age: CHILD.age, channel: testCase.channel, palette: story.palette })
+      ? artDirection({
+          age: CHILD.age,
+          channel: testCase.channel,
+          palette: story.palette,
+          style: style.slug,
+        })
       : null;
 
     const { usage: planUsage, ...storyPlan } = await text.planStory({

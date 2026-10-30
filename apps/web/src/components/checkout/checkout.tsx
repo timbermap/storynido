@@ -21,7 +21,7 @@ import { useConsent } from '@/components/consent/consent-provider';
 import { useProStatus } from '@/components/pro/use-pro-status';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
-import { countriesByName } from '@/lib/country-names';
+import { CountryOptions } from '@/components/country-options';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -241,11 +241,7 @@ export function Checkout({
                   }}
                   className={field}
                 >
-                  {countriesByName(locale).map(({ code, name }) => (
-                    <option key={code} value={code}>
-                      {name}
-                    </option>
-                  ))}
+                  <CountryOptions locale={locale} current={shipTo} />
                 </select>
               </label>
               {ADDRESS_FIELDS.map(({ key, optional, autoComplete }) => (

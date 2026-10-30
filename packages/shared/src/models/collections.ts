@@ -18,6 +18,8 @@ export const COLLECTIONS = {
   illustrationTasks: 'pages',
   /** adminAlerts/{id}: avisos para el admin (solo servidor). */
   adminAlerts: 'adminAlerts',
+  /** loginMetrics/{AAAA-MM-DD}: contadores del login por navegador, método y vía. */
+  loginMetrics: 'loginMetrics',
   /** contactMessages/{id}: mensajes del formulario de contacto (solo el servidor y el admin). */
   contactMessages: 'contactMessages',
   /** contactLimits/{huella de IP y día}: tope de mensajes de contacto por conexión. */

@@ -67,6 +67,21 @@ function ageDirection(age: number): string {
   return 'For ages 9-12: dramatic compositions, rich environmental storytelling and expressive characters that do not look babyish.';
 }
 
+/**
+ * Técnica según el estilo elegido. Sin esto, el gouache se imponía a todos los estilos y el
+ * Cartoon 3D salía pintado a mano (DECISIONS 121).
+ */
+const STYLE_MEDIUM: Record<string, string> = {
+  'cartoon-3d':
+    'polished 3D animated feature film look: stylized rounded characters, soft global illumination, gentle subsurface skin, smooth materials and cinematic depth of field (not a flat drawing, not watercolor)',
+  'lapices-de-colores':
+    'hand-drawn colored pencil illustration with visible pencil strokes and natural paper grain',
+  'cuento-clasico':
+    'classic storybook illustration with fine ink lines and gouache, warm vintage feel',
+};
+const DEFAULT_MEDIUM =
+  'hand-painted digital gouache with subtle watercolor diffusion and natural paper texture';
+
 /** Bloque de dirección de arte para los prompts de imagen. */
 export function artDirection(input: {
   age: number;
@@ -74,17 +89,21 @@ export function artDirection(input: {
   palette?: PaletteKey | null;
   /** Libro para colorear: contornos, sin paleta. */
   coloring?: boolean;
+  /** Estilo elegido (slug): define la técnica. */
+  style?: string | null;
 }): string {
+  const medium = (input.style && STYLE_MEDIUM[input.style]) ?? DEFAULT_MEDIUM;
+  const threeD = input.style === 'cartoon-3d';
   const key = input.palette ?? DEFAULT_PALETTE[input.channel];
   const palette = STORY_PALETTES[key];
   const color = input.coloring
     ? 'Black line art only for coloring: clean closed outlines, no fills, no shading.'
     : `Color palette: ${palette.colors.join(', ')} (${palette.mood}); rich, harmonious, never washed-out pastels.`;
   return [
-    "Art direction: premium children's picture book, hand-painted digital gouache with subtle watercolor diffusion and natural paper texture, as if one illustrator painted the whole book.",
+    `Art direction: premium children's picture book, ${medium}, as if one artist made the whole book.`,
     color,
     ageDirection(input.age),
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
-    'Avoid: photographic faces, plastic skin, excessive glow or bloom, glossy generic 3D, oversaturated gradients, malformed anatomy, random decorative objects, any text, title, letters or signs in the image, clothing that changes between pages, and any change of style between pages.',
+    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, any text, title, letters or signs in the image, clothing that changes between pages, and any change of style between pages.`,
   ].join(' ');
 }

@@ -49,7 +49,9 @@
     "back": "Back"
   },
   "Switchers": {
-    "language": "Language"
+    "language": "Language",
+    "suggestedCountries": "Suggested",
+    "allCountries": "All countries"
   },
   "Footer": {
     "tagline": "Stories that inspire, teach and stay with you forever.",

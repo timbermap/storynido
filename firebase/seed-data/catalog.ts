@@ -713,7 +713,8 @@ export const SEED_STYLES: SeedStyle[] = [
     active: true,
     order: 2,
     name: { es: 'Cartoon 3D', en: '3D cartoon', pt: 'Cartoon 3D' },
-    promptModifier: '3D animated movie style, soft lighting, rounded shapes, vibrant colors',
+    promptModifier:
+      '3D animated feature film style: rendered stylized characters with rounded proportions, soft global illumination, smooth materials, cinematic depth of field and vibrant colors; not a flat drawing, not watercolor',
     sampleImage: '/styles/cartoon-3d.webp',
     contentTypes: ['story', 'activities', 'story_activities'],
   },

@@ -24,4 +24,13 @@ describe('dirección de arte de los libros', () => {
     expect(coloring).toContain('line art');
     expect(coloring).not.toContain('Color palette');
   });
+
+  it('la técnica sigue al estilo: el 3D no se pide pintado a mano ni se prohíbe', () => {
+    const threeD = artDirection({ age: 6, channel: 'families', style: 'cartoon-3d' });
+    expect(threeD).toContain('3D animated feature film');
+    expect(threeD).not.toContain('gouache');
+    expect(threeD).not.toContain('glossy generic 3D');
+    const watercolor = artDirection({ age: 6, channel: 'families', style: 'acuarela' });
+    expect(watercolor).toContain('gouache');
+  });
 });

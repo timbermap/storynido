@@ -149,6 +149,8 @@ export default function SummaryPage() {
         </Card>
       )}
 
+      {totals && <LoginCard logins={totals.logins} />}
+
       <Card className="mt-6">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-semibold">Ingresos por día (USD)</h2>
@@ -246,5 +248,58 @@ export default function SummaryPage() {
         </Card>
       </div>
     </>
+  );
+}
+
+/** Login por tipo de navegador y método (apps como Instagram vs. navegadores comunes). */
+function LoginCard({ logins }: { logins: Record<string, number> }) {
+  const rows = (['embedded', 'standard'] as const).flatMap((browser) =>
+    (['google', 'apple', 'email'] as const).map((method) => {
+      const sum = (stage: string) =>
+        Object.entries(logins)
+          .filter(([key]) => key.startsWith(`${browser}_${method}_`) && key.endsWith(`_${stage}`))
+          .reduce((total, [, value]) => total + value, 0);
+      return { browser, method, started: sum('started'), succeeded: sum('succeeded') };
+    }),
+  );
+  const used = rows.filter((row) => row.started > 0 || row.succeeded > 0);
+  return (
+    <Card className="mt-6">
+      <h2 className="font-semibold">Login por navegador</h2>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Contadores del servidor (en el login no corre Google Analytics). &quot;En apps&quot; son los
+        navegadores de Instagram, Facebook, WhatsApp y TikTok.
+      </p>
+      {used.length === 0 ? (
+        <p className="mt-3 text-sm text-muted-foreground">Sin logins en el período.</p>
+      ) : (
+        <table className="mt-3 w-full text-sm">
+          <thead className="text-left text-xs text-muted-foreground">
+            <tr>
+              <th className="py-1">Navegador</th>
+              <th>Método</th>
+              <th>Empezaron</th>
+              <th>Entraron</th>
+              <th>%</th>
+            </tr>
+          </thead>
+          <tbody className="tabular-nums">
+            {used.map((row) => (
+              <tr key={`${row.browser}-${row.method}`} className="border-t">
+                <td className="py-1">{row.browser === 'embedded' ? 'En apps' : 'Común'}</td>
+                <td>{row.method === 'email' ? 'Enlace por mail' : row.method}</td>
+                <td>{row.started}</td>
+                <td>{row.succeeded}</td>
+                <td>
+                  {row.started > 0
+                    ? `${String(Math.round((row.succeeded / row.started) * 100))} %`
+                    : '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </Card>
   );
 }

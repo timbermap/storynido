@@ -583,6 +583,7 @@ export class PreviewService {
       channel: book.channel ?? 'families',
       palette: story.palette,
       coloring: plan.contentType === 'coloring',
+      style: style.slug,
     });
 
     // Etapa 1: solo la lámina del personaje (1 imagen). La portada y las páginas se ilustran

@@ -3,7 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { initFirebaseAdmin } from '../firebase';
-import { createTestApp } from '../test-helpers';
+import { auth, createTestApp } from '../test-helpers';
 
 import { CONTACT_DAILY_LIMIT } from './contact';
 
@@ -77,5 +77,35 @@ describe('formulario de contacto', () => {
       expect((await post(body())).statusCode).toBe(200);
     }
     expect((await post(body())).statusCode).toBe(429);
+  });
+
+  it('el login se cuenta por navegador, método y vía, y suma en el panel', async () => {
+    const event = (stage: string) =>
+      created.app.inject({
+        method: 'POST',
+        url: '/v1/events/login',
+        payload: { stage, method: 'google', via: 'redirect', browser: 'embedded' },
+      });
+    expect((await event('started')).statusCode).toBe(200);
+    expect((await event('started')).statusCode).toBe(200);
+    expect((await event('succeeded')).statusCode).toBe(200);
+    expect(
+      (
+        await created.app.inject({
+          method: 'POST',
+          url: '/v1/events/login',
+          payload: { stage: 'started', method: 'fax', via: 'redirect', browser: 'embedded' },
+        })
+      ).statusCode,
+    ).toBe(400);
+    const metrics = await created.app.inject({
+      method: 'GET',
+      url: '/v1/admin/metrics?days=1',
+      headers: auth('token-admin:admin'),
+    });
+    expect(metrics.json<{ totals: { logins: Record<string, number> } }>().totals.logins).toEqual({
+      embedded_google_redirect_started: 2,
+      embedded_google_redirect_succeeded: 1,
+    });
   });
 });

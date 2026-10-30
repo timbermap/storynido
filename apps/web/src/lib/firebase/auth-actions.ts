@@ -57,10 +57,48 @@ const POPUP_FAILED = new Set([
   'auth/web-storage-unsupported',
 ]);
 
+type LoginMethod = 'google' | 'apple' | 'email';
+type LoginVia = 'popup' | 'redirect' | 'link';
+const LOGIN_METHOD_KEY = 'storynido:loginMethod';
+
+/**
+ * Cuenta un paso del login (contadores del servidor por navegador, método y vía; sin datos de
+ * la persona). Nunca frena el login: si falla, se ignora.
+ */
+function reportLogin(
+  stage: 'started' | 'succeeded' | 'failed',
+  method: LoginMethod,
+  via: LoginVia,
+) {
+  void api('loginEvent', {
+    body: { stage, method, via, browser: isEmbeddedBrowser() ? 'embedded' : 'standard' },
+  }).catch(() => undefined);
+}
+
+/** Un error que no es un fracaso del login: falta el segundo factor (sigue en el panel). */
+const isMfaStep = (error: unknown) => errorCode(error) === 'auth/multi-factor-auth-required';
+
 /** Redirección: se recuerda dónde estaba para volver ahí (la completa completeRedirectSignIn). */
-async function signInByRedirect(provider: AuthProvider): Promise<void> {
+async function signInByRedirect(provider: AuthProvider, method: LoginMethod): Promise<void> {
   rememberReturnPath();
+  try {
+    window.sessionStorage.setItem(LOGIN_METHOD_KEY, method);
+  } catch {
+    // Sin storage, la vuelta no se cuenta.
+  }
+  reportLogin('started', method, 'redirect');
   await signInWithRedirect(getFirebaseAuth(), provider, browserPopupRedirectResolver);
+}
+
+/** Método del login por redirección en curso (y lo olvida). */
+function takeRedirectMethod(): LoginMethod | null {
+  try {
+    const method = window.sessionStorage.getItem(LOGIN_METHOD_KEY);
+    window.sessionStorage.removeItem(LOGIN_METHOD_KEY);
+    return method === 'google' || method === 'apple' ? method : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -69,9 +107,13 @@ async function signInByRedirect(provider: AuthProvider): Promise<void> {
  */
 export async function completeRedirectSignIn(): Promise<unknown> {
   try {
-    await getRedirectResult(getFirebaseAuth(), browserPopupRedirectResolver);
+    const result = await getRedirectResult(getFirebaseAuth(), browserPopupRedirectResolver);
+    const method = takeRedirectMethod();
+    if (result && method) reportLogin('succeeded', method, 'redirect');
     return null;
   } catch (error) {
+    const method = takeRedirectMethod();
+    if (method && !isMfaStep(error)) reportLogin('failed', method, 'redirect');
     return error;
   }
 }
@@ -80,19 +122,23 @@ export async function completeRedirectSignIn(): Promise<unknown> {
 async function signInWithProvider(
   provider: AuthProvider,
   credentialFromError: (error: never) => AuthCredential | null,
+  method: LoginMethod,
 ): Promise<void> {
   const auth = getFirebaseAuth();
   const current = auth.currentUser;
   if (!current?.isAnonymous) {
     if (isEmbeddedBrowser()) {
-      await signInByRedirect(provider);
+      await signInByRedirect(provider, method);
       return;
     }
+    reportLogin('started', method, 'popup');
     try {
       await signInWithPopup(auth, provider, browserPopupRedirectResolver);
+      reportLogin('succeeded', method, 'popup');
     } catch (error) {
+      if (!isMfaStep(error)) reportLogin('failed', method, 'popup');
       if (!POPUP_FAILED.has(errorCode(error))) throw error;
-      await signInByRedirect(provider);
+      await signInByRedirect(provider, method);
     }
     return;
   }
@@ -111,7 +157,11 @@ async function signInWithProvider(
 export async function signInWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  await signInWithProvider(provider, (error) => GoogleAuthProvider.credentialFromError(error));
+  await signInWithProvider(
+    provider,
+    (error) => GoogleAuthProvider.credentialFromError(error),
+    'google',
+  );
 }
 
 /**
@@ -134,7 +184,7 @@ export async function signInWithApple(): Promise<void> {
   const provider = new OAuthProvider('apple.com');
   provider.addScope('email');
   provider.addScope('name');
-  await signInWithProvider(provider, (error) => OAuthProvider.credentialFromError(error));
+  await signInWithProvider(provider, (error) => OAuthProvider.credentialFromError(error), 'apple');
 }
 
 /** Envía el enlace mágico. El email se recuerda en este navegador para completar el login. */
@@ -143,6 +193,7 @@ export async function sendMagicLink(email: string, finishPath: string): Promise<
     url: `${window.location.origin}${finishPath}`,
     handleCodeInApp: true,
   });
+  reportLogin('started', 'email', 'link');
   try {
     window.localStorage.setItem(EMAIL_FOR_SIGN_IN_KEY, email);
     window.localStorage.setItem(RETURN_TO_KEY, window.location.pathname + window.location.search);
@@ -168,13 +219,19 @@ export async function completeMagicLink(email: string, url: string): Promise<voi
   // La sesión anónima se restaura de forma asíncrona: hay que esperarla para vincularla.
   await auth.authStateReady();
   const current = auth.currentUser;
-  if (current?.isAnonymous) {
-    // No se vincula: si el mail ya tenía cuenta, el intento fallido consume el código del
-    // enlace. Se entra con el enlace (cuenta nueva o existente) y se traspasa lo anónimo.
-    const anonymousToken = await current.getIdToken();
-    await signInAndMerge(anonymousToken, () => signInWithEmailLink(auth, email, url));
-  } else {
-    await signInWithEmailLink(auth, email, url);
+  try {
+    if (current?.isAnonymous) {
+      // No se vincula: si el mail ya tenía cuenta, el intento fallido consume el código del
+      // enlace. Se entra con el enlace (cuenta nueva o existente) y se traspasa lo anónimo.
+      const anonymousToken = await current.getIdToken();
+      await signInAndMerge(anonymousToken, () => signInWithEmailLink(auth, email, url));
+    } else {
+      await signInWithEmailLink(auth, email, url);
+    }
+    reportLogin('succeeded', 'email', 'link');
+  } catch (error) {
+    reportLogin('failed', 'email', 'link');
+    throw error;
   }
   try {
     window.localStorage.removeItem(EMAIL_FOR_SIGN_IN_KEY);

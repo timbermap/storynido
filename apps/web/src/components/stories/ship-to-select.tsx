@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
 import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE } from '@/lib/country';
-import { countriesByName } from '@/lib/country-names';
+import { CountryOptions } from '@/components/country-options';
 
 /**
  * "Enviar a": el país de envío se cambia donde se ven los precios, sin cuenta. El idioma no lo
@@ -31,11 +31,7 @@ export function ShipToSelect({ country }: { country: CountryCode }) {
         }}
         className="h-10 max-w-[16rem] rounded-full border bg-card px-3 font-normal"
       >
-        {countriesByName(locale).map(({ code, name }) => (
-          <option key={code} value={code}>
-            {name}
-          </option>
-        ))}
+        <CountryOptions locale={locale} current={country} />
       </select>
     </label>
   );

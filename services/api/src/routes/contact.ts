@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { COLLECTIONS, apiRoutes } from '@storynido/shared';
+import { FieldValue } from 'firebase-admin/firestore';
 import type { FastifyInstance } from 'fastify';
 import type { z } from 'zod';
 
@@ -11,13 +12,29 @@ import { addRoute } from '../plugins/route';
 export const CONTACT_DAILY_LIMIT = 5;
 
 type ContactBody = z.output<(typeof apiRoutes)['contact']['body']>;
+type LoginEventBody = z.output<(typeof apiRoutes)['loginEvent']['body']>;
 
 /**
- * Formulario de contacto (sin el mail del equipo a la vista). El mensaje queda guardado y llega
+ * Formulario de contacto (sin el mail del equipo a la vista) y contadores del login. El mensaje queda guardado y llega
  * al equipo; nunca se manda nada a la dirección que escribió la persona.
  */
 export function registerContactRoutes(app: FastifyInstance): void {
   const { deps } = app;
+
+  // Login por navegador: solo contadores del día (en el login no corre Google Analytics).
+  addRoute(app, apiRoutes.loginEvent, {}, async (request) => {
+    const { stage, method, via, browser } = request.body as LoginEventBody;
+    const day = new Date().toISOString().slice(0, 10);
+    await deps.db
+      .collection(COLLECTIONS.loginMetrics)
+      .doc(day)
+      .set(
+        { day, counts: { [`${browser}_${method}_${via}_${stage}`]: FieldValue.increment(1) } },
+        { merge: true },
+      );
+    return { ok: true as const };
+  });
+
   addRoute(app, apiRoutes.contact, {}, async (request) => {
     const body = request.body as ContactBody;
     // Trampa para bots: se responde como si nada, sin guardar ni mandar.

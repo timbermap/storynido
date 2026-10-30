@@ -28,6 +28,9 @@ import { orderStatusSchema } from '../order-status';
 import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
 import { roleSchema } from '../roles';
 
+/** Etapas del login que se cuentan (analítica propia: en el login no corre Google Analytics). */
+export const LOGIN_STAGES = ['started', 'succeeded', 'failed'] as const;
+
 /** Temas del formulario de contacto. */
 export const CONTACT_TOPICS = [
   'order',
@@ -866,6 +869,8 @@ export const apiRoutes = {
         .extend({
           funnel: z.record(z.string(), z.number()),
           daysWithoutFunnel: z.number(),
+          /** Login: `navegador_método_vía_etapa` → cantidad en el rango. */
+          logins: z.record(z.string(), z.number()).default({}),
         }),
     }),
   },
@@ -1213,6 +1218,20 @@ export const apiRoutes = {
     summary: 'Borra la cuenta y todos sus datos personales (los pedidos pagados se conservan)',
     body: z.object({ confirm: z.literal(true) }),
     response: z.object({ deleted: z.literal(true) }),
+  },
+  loginEvent: {
+    method: 'POST',
+    path: '/v1/events/login',
+    access: 'public',
+    summary:
+      'Cuenta un paso del login por método, vía y tipo de navegador (contadores diarios, sin datos personales)',
+    body: z.object({
+      stage: z.enum(LOGIN_STAGES),
+      method: z.enum(['google', 'apple', 'email']),
+      via: z.enum(['popup', 'redirect', 'link']),
+      browser: z.enum(['embedded', 'standard']),
+    }),
+    response: z.object({ ok: z.literal(true) }),
   },
   contact: {
     method: 'POST',

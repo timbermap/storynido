@@ -1587,3 +1587,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Temas y colecciones:**
   - cada tema de Celebraciones tiene "Diseñar el kit con este tema", que abre el creador con la temática de la fiesta cargada (`/crear?line=events&tema=…`);
   - cada colección de Profesionales tiene "Crear con esta colección", que abre el creador con su primera historia elegida.
+
+## 121 · Selector de país, login medido por navegador y Cartoon 3D
+
+- **Fecha:** 2026-10-30.
+- **Selector de país** (`CountryOptions`), en "Enviar a", el pago, Mi cuenta y la activación Pro: arriba el país actual y los mercados principales (Argentina, México, Estados Unidos, España, Chile, Colombia, Uruguay, Perú y Brasil), después los 250 en orden alfabético. Es un select nativo: escribir salta al país.
+- **Login por navegador:** en el login no corre Google Analytics, así que se cuenta en el servidor.
+  - `POST /v1/events/login` suma contadores diarios (`loginMetrics/{día}`) por navegador (en apps o común), método (Google, Apple o enlace por mail), vía (popup, redirección o enlace) y etapa (empezó, entró o falló). No guarda datos de la persona.
+  - El paso del segundo factor no cuenta como falla.
+  - El panel del admin muestra "Login por navegador" con la tasa de éxito.
+- **Cartoon 3D:** no se veía 3D porque la dirección de arte imponía "gouache pintado a mano con textura de papel" a todos los estilos y además pedía evitar "3D genérico brillante". Ahora la técnica sigue al estilo (`artDirection({ style })`): 3D de película animada para Cartoon 3D, lápices para Lápices de colores, tinta y gouache para Cuento clásico y gouache para el resto. Su `promptModifier` se reforzó (actualizado en staging). Las muestras del estilo se regeneran aparte.
