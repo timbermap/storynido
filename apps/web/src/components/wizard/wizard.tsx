@@ -1,15 +1,26 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { api } from '@/lib/api';
 import { getFirebaseDb } from '@/lib/firebase/client';
-import { subscribeBook, subscribeChild, updateBook, type ChildFields } from '@/lib/firebase/drafts';
+import type { WizardCatalog } from '@/lib/server/wizard-catalog';
+import { useRouter } from '@/i18n/navigation';
+import {
+  createDraft,
+  subscribeBook,
+  subscribeChild,
+  unsavedDraft,
+  updateBook,
+  type ChildFields,
+  type DraftPreset,
+} from '@/lib/firebase/drafts';
 
 import { PreviewPanel, previewErrorKey } from './preview-panel';
 import { SignInGate } from './sign-in-gate';
+import { WizardSkeleton } from './wizard-skeleton';
 import { StepChild } from './step-child';
 import { StepAvatar } from './step-avatar';
 import { StepLesson } from './step-lesson';
@@ -21,16 +32,31 @@ import { StepStyle } from './step-style';
 import { WIZARD_STEPS, flowFor, reachedIndex, type SaveState, type WizardStep } from './steps';
 import type { StepNav, WizardData } from './types';
 
-type Catalog = Pick<
-  WizardData,
-  'stories' | 'lessons' | 'styles' | 'editorial' | 'collections' | 'prices'
->;
+type Catalog = WizardCatalog;
 
-/** Creador del libro: borrador en Firestore, guardado en cada paso, se retoma donde quedó. */
-export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }) {
+/**
+ * Creador del libro: borrador en Firestore, guardado en cada paso, se retoma donde quedó. Sin
+ * `bookId` arranca con un borrador en memoria y lo crea en el primer guardado real.
+ */
+export function Wizard({
+  bookId: savedId,
+  preset,
+  catalog,
+}: {
+  bookId: string | null;
+  /** Borrador nuevo (sin `bookId`): línea, idioma e historia elegida. */
+  preset?: DraftPreset;
+  catalog: Catalog;
+}) {
   const t = useTranslations('Wizard');
+  const router = useRouter();
   const { user, loading } = useAuth();
-  const [book, setBook] = useState<WizardData['book'] | null | undefined>(undefined);
+  const [book, setBook] = useState<WizardData['book'] | null | undefined>(() =>
+    savedId === null && user && preset ? unsavedDraft(user.uid, preset) : undefined,
+  );
+  // Id del borrador creado en esta visita (primer guardado de un borrador en memoria).
+  const createdId = useRef<string | null>(null);
+  const bookId = savedId ?? '';
   const [child, setChild] = useState<ChildFields | null>(null);
   const [current, setCurrent] = useState<WizardStep | null>(null);
   const [saveState, setSaveState] = useState<SaveState>('idle');
@@ -39,8 +65,14 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
 
+  // Borrador en memoria: se arma cuando hay sesión (todavía no existe en Firestore).
   useEffect(() => {
-    if (!user) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (savedId === null && user && preset && !book) setBook(unsavedDraft(user.uid, preset));
+  }, [savedId, user, preset, book]);
+
+  useEffect(() => {
+    if (!user || savedId === null) return;
     let unsubscribe: (() => void) | undefined;
     const effect = { cancelled: false };
     void getFirebaseDb().then((db) => {
@@ -53,7 +85,7 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
       effect.cancelled = true;
       unsubscribe?.();
     };
-  }, [user, bookId]);
+  }, [user, savedId, bookId]);
 
   const childId = book?.childId ?? null;
   useEffect(() => {
@@ -105,6 +137,15 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
   const index = Math.max(flow.indexOf(step), 0);
   const reached = book ? Math.max(reachedIndex(flow, book), index) : index;
 
+  /** Id del borrador; si todavía está en memoria, lo crea (primer guardado real). */
+  const ensureBook = useCallback(async () => {
+    if (savedId) return savedId;
+    if (createdId.current) return createdId.current;
+    if (!user || !preset) throw new Error('Sin sesión');
+    createdId.current = await createDraft(await getFirebaseDb(), user.uid, preset);
+    return createdId.current;
+  }, [savedId, user, preset]);
+
   const nav = useMemo<StepNav>(
     () => ({
       step,
@@ -113,6 +154,7 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
       line: channel,
       saveState,
       save,
+      ensureBook,
       onBack:
         index > 0
           ? () => {
@@ -127,17 +169,22 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
         if (flow.indexOf(next) > (book ? reachedIndex(flow, book) : 0)) {
           await save(async () => {
             // El paso se guarda por nombre; el índice viejo queda para los borradores anteriores.
-            await updateBook(await getFirebaseDb(), bookId, {
+            await updateBook(await getFirebaseDb(), await ensureBook(), {
               wizardStepKey: next,
               wizardStep: WIZARD_STEPS.indexOf(next),
             });
           });
         }
+        // Recién creado: la URL pasa a la del borrador (y desde ahí se sigue en vivo).
+        if (savedId === null && createdId.current) {
+          router.replace({ pathname: '/create/[bookId]', params: { bookId: createdId.current } });
+          return;
+        }
         setCurrent(next);
         window.scrollTo({ top: 0 });
       },
     }),
-    [step, flow, index, reached, channel, saveState, save, book, bookId],
+    [step, flow, index, reached, channel, saveState, save, ensureBook, book, savedId, router],
   );
 
   if (!loading && !user) return <SignInGate />;
@@ -147,14 +194,7 @@ export function Wizard({ bookId, catalog }: { bookId: string; catalog: Catalog }
     );
   }
   if (loading || !book || (book.childId && !child)) {
-    return (
-      <p
-        role="status"
-        className="container-page min-h-[80vh] py-20 text-center text-muted-foreground"
-      >
-        {t('loading')}
-      </p>
-    );
+    return <WizardSkeleton />;
   }
 
   const data: WizardData = { book, child, ...catalog };

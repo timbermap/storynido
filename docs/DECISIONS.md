@@ -1519,3 +1519,11 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - `wizardStep` se sigue escribiendo por compatibilidad.
   - El borrador nuevo no lo escribe al crearse (la regla de alta no cambia, así la web anterior sigue funcionando). Lo guarda al avanzar.
 - **Reglas de Firestore:** `wizardStepKey` es editable y solo acepta pasos que existen.
+
+## 114 · Nuevo flujo, PR 2: el borrador se crea al primer guardado
+
+- **Fecha:** 2026-10-29.
+- **`/crear`** abre el creador con un borrador en memoria (`unsavedDraft`): abrir la ruta ya no escribe nada en Firestore. En el primer guardado real (el paso del protagonista), `nav.ensureBook()` crea el documento y la URL pasa a `/crear/<id>`. Desde ahí sigue en vivo como antes. Se siguen reutilizando los borradores vacíos anteriores.
+- **El catálogo del creador** se carga en el servidor también en `/crear` (`loadWizardCatalog`, compartido con `/crear/[id]`).
+- **Esqueleto de carga** con la forma del asistente, en lugar del texto suelto "Preparando tu cuento…". El texto queda para lectores de pantalla.
+- **Accesibilidad:** el atajo "Hojear páginas de ejemplo" de la ficha tiene un área táctil de 44 px.

@@ -9,19 +9,16 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
-import {
-  createDraft,
-  isEmptyDraft,
-  listDrafts,
-  updateBook,
-  type DraftSummary,
-} from '@/lib/firebase/drafts';
+import type { WizardCatalog } from '@/lib/server/wizard-catalog';
+import { isEmptyDraft, listDrafts, updateBook, type DraftSummary } from '@/lib/firebase/drafts';
 
 import { CHANNEL_STORAGE_KEY } from '@/components/landing/remember-channel';
 import { ProActivationCard } from '@/components/pro/pro-activation';
 import { useProStatus } from '@/components/pro/use-pro-status';
 
 import { DraftsList } from './drafts-list';
+import { WizardSkeleton } from './wizard-skeleton';
+import { Wizard } from './wizard';
 import { SignInGate } from './sign-in-gate';
 
 /** Más que esto preparando el borrador es un problema (red o permisos): se ofrece reintentar. */
@@ -46,6 +43,7 @@ export function CreateStart({
   lessonId,
   channel: channelParam,
   proGate,
+  catalog,
 }: {
   storyId: string | null;
   lessonId: string | null;
@@ -53,6 +51,7 @@ export function CreateStart({
   channel: Channel | null;
   /** Textos de la puerta de cuenta de Profesionales. */
   proGate: { title: string; text: string };
+  catalog: WizardCatalog;
 }) {
   const t = useTranslations('Wizard');
   const locale = useLocale() as Locale;
@@ -75,16 +74,10 @@ export function CreateStart({
   // queda en "Preparando tu cuento…" para siempre.
   const [failed, setFailed] = useState(false);
 
-  async function startNew() {
-    if (!user) return;
-    setBusy(true);
-    const id = await createDraft(await getFirebaseDb(), user.uid, {
-      language: locale,
-      storyId,
-      lessonId,
-      channel,
-    });
-    router.replace({ pathname: '/create/[bookId]', params: { bookId: id } });
+  // Borrador nuevo: el creador abre acá mismo, en memoria; se guarda en el primer paso.
+  const [fresh, setFresh] = useState(false);
+  function startNew() {
+    setFresh(true);
   }
 
   const onUser = useEffectEvent(async () => {
@@ -96,7 +89,7 @@ export function CreateStart({
       // varias veces desde las fichas no deja borradores vacíos sueltos).
       const reusable = all.find((draft) => draft.channel === channel && isEmptyDraft(draft));
       if (!reusable) {
-        await startNew();
+        startNew();
         return;
       }
       await updateBook(db, reusable.id, {
@@ -114,7 +107,7 @@ export function CreateStart({
       router.replace({ pathname: '/create/[bookId]', params: { bookId: empty.id } });
       return;
     }
-    if (found.length === 0) await startNew();
+    if (found.length === 0) startNew();
     else setDrafts(found);
   });
 
@@ -148,6 +141,15 @@ export function CreateStart({
   if (professional && pro?.accountType === 'family') {
     return <ProActivationCard onActivated={() => void refreshPro()} />;
   }
+  if (fresh) {
+    return (
+      <Wizard
+        bookId={null}
+        preset={{ language: locale, storyId, lessonId, channel }}
+        catalog={catalog}
+      />
+    );
+  }
   if (failed) {
     return (
       <section className="container-page grid min-h-[60vh] max-w-md place-content-center gap-4 py-20 text-center">
@@ -167,14 +169,7 @@ export function CreateStart({
     );
   }
   if (!drafts) {
-    return (
-      <p
-        role="status"
-        className="container-page min-h-[80vh] py-20 text-center text-muted-foreground"
-      >
-        {t('loading')}
-      </p>
-    );
+    return <WizardSkeleton />;
   }
 
   return (
@@ -186,7 +181,7 @@ export function CreateStart({
           setDrafts((current) => current?.filter((draft) => draft.id !== id) ?? null);
         }}
       />
-      <Button className="mt-8" size="lg" disabled={busy} onClick={() => void startNew()}>
+      <Button className="mt-8" size="lg" disabled={busy} onClick={startNew}>
         {t('drafts.startNew')}
       </Button>
     </section>

@@ -120,7 +120,9 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
     const pending = like.trim() ? [...likes, like.trim()].slice(0, CHILD_LIMITS.maxLikes) : likes;
     const ok = await nav.save(async () => {
       const db = await getFirebaseDb();
-      await saveChild(db, user.uid, book.id, book.childId, {
+      // Primer guardado real: si el borrador estaba en memoria, se crea ahora.
+      const id = await nav.ensureBook();
+      await saveChild(db, user.uid, id, book.childId, {
         name: name.trim().slice(0, CHILD_LIMITS.nameMaxLength),
         age,
         pronouns,
@@ -129,7 +131,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
         bestFriendName: blankToNull(friend),
         ...(isPro ? { alias: blankToNull(alias.slice(0, CHILD_LIMITS.nameMaxLength)) } : {}),
       });
-      await updateBook(db, book.id, {
+      await updateBook(db, id, {
         dedication: blankToNull(dedication),
         ...(isEvent
           ? {

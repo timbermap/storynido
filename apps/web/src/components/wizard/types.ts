@@ -29,6 +29,8 @@ export interface StepNav {
   onJump: (step: WizardStep) => void;
   /** Avanza al paso siguiente (y lo registra como alcanzado). */
   goNext: () => Promise<void>;
+  /** Id del borrador; si está en memoria, lo crea (primer guardado real). */
+  ensureBook: () => Promise<string>;
   /** Envuelve un guardado mostrando "Guardando…" / "Guardado" / error. */
   save: (action: () => Promise<void>) => Promise<boolean>;
 }

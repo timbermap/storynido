@@ -149,7 +149,7 @@ export default async function StoryPage({ params, searchParams }: Props) {
             {/* El ejemplo ilustrado está al final: un atajo para verlo antes de los detalles. */}
             <a
               href="#browse"
-              className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+              className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
             >
               <BookOpen className="size-4" aria-hidden="true" />
               {t('browseJump')}

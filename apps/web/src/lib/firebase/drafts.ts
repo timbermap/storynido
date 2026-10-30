@@ -72,21 +72,21 @@ type Timestampish = { toDate(): Date } | null | undefined;
 
 const asDate = (value: Timestampish) => value?.toDate() ?? null;
 
-export async function createDraft(
-  db: Firestore,
-  uid: string,
-  preset: {
-    language: Locale;
-    storyId: string | null;
-    lessonId: string | null;
-    channel: Channel;
-    /** "Repetir configuración" (Profesionales): estilo y opciones editoriales, sin datos del niño. */
-    settings?: ProjectSettings;
-  },
-): Promise<string> {
-  const ref = await addDoc(collection(db, COLLECTIONS.books), {
+/** Lo que define un borrador nuevo: idioma, línea y lo que venga elegido (historia, enseñanza). */
+export interface DraftPreset {
+  language: Locale;
+  storyId: string | null;
+  lessonId: string | null;
+  channel: Channel;
+  /** "Repetir configuración" (Profesionales): estilo y opciones editoriales, sin datos del niño. */
+  settings?: ProjectSettings;
+}
+
+/** Campos de un borrador nuevo (sin las fechas, que pone quien lo guarda). */
+function draftFields(uid: string, preset: DraftPreset) {
+  return {
     ownerUid: uid,
-    status: 'draft',
+    status: 'draft' as const,
     childId: null,
     storyId: preset.storyId,
     styleId: null,
@@ -97,25 +97,46 @@ export async function createDraft(
     wizardStep: 0,
     photoIds: [],
     // Profesionales: arranca sin foto (el avatar evita subir fotos de chicos ajenos).
-    characterMode: preset.channel === 'professionals' ? 'avatar' : 'photo',
+    characterMode: preset.channel === 'professionals' ? ('avatar' as const) : ('photo' as const),
     avatar: null,
     memories: null,
-    // Eventos: el cumpleaños se completa en el paso del protagonista.
+    // Eventos: la ocasión se completa en el paso del protagonista.
     event: preset.channel === 'events' ? EMPTY_BIRTHDAY : null,
     // Profesionales: objetivo general (uno de los temas de la colección), opcional.
     goal: null,
     // Opciones editoriales: se ajustan en el paso de la aventura (sugeridas según la edad).
     // Eventos arranca como mini cuento muy visual (el librito para cada invitado).
     ...DEFAULT_EDITORIAL_CONFIG.defaults,
-    ...(preset.channel === 'events' ? { length: 'mini', textDensity: 'visual' } : {}),
+    ...(preset.channel === 'events'
+      ? { length: 'mini' as const, textDensity: 'visual' as const }
+      : {}),
     ...preset.settings,
     channel: preset.channel,
     preview: null,
     regenerationsUsed: 0,
+  };
+}
+
+export async function createDraft(
+  db: Firestore,
+  uid: string,
+  preset: DraftPreset,
+): Promise<string> {
+  const ref = await addDoc(collection(db, COLLECTIONS.books), {
+    ...draftFields(uid, preset),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
   return ref.id;
+}
+
+/**
+ * Borrador en memoria (id vacío) para mostrar el creador sin escribir nada: el documento se
+ * crea recién en el primer guardado real (DECISIONS 114).
+ */
+export function unsavedDraft(uid: string, preset: DraftPreset): Book & { id: string } {
+  const now = new Date();
+  return { ...draftFields(uid, preset), id: '', createdAt: now, updatedAt: now };
 }
 
 /** Lo que copia "Repetir configuración": historia aparte, nada del niño ni de sus fotos. */
