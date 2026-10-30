@@ -1645,3 +1645,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - No se copia "Envío a todo el mundo": el impreso solo se envía a los países habilitados. Se mantiene "Disponible en todo el mundo" (digital) y "El envío del impreso se calcula según tu país".
 - El botón principal sigue llevando al selector de público (#audience), no directo al creador.
 - Pendiente del brief: Familias (sin la leyenda "Foto real de Martina"), Celebraciones y Profesionales.
+
+## 126 · Hero de Familias y botón de la home
+
+- **Fecha:** 2026-10-30.
+- **Familias:** mismo criterio que la home (DECISIONS 125): look ilustrado de antes, textos nuevos. "Su cara. Su nombre. Su aventura.", "Subes una foto y la convertimos en el personaje del cuento. Lo ves gratis antes de decidir.", botón "Ver su personaje gratis" y la nota "Usamos la foto solo para crear el personaje." (coincide con `PRIVACY.md`). La foto sigue rotulada "Su foto" (ilustrada): no se usa "Foto real de …", que sería falso porque el niño es inventado.
+- **Home:** el botón principal baja al selector "¿Para quién es?", así que dice "Empezar mi cuento" y no promete la vista previa en ese clic; lo gratis queda en la fila de confianza.

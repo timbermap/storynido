@@ -84,14 +84,14 @@
       "eyebrow": "Histórias que abraçam",
       "title": "Seu filho é o herói desta história.",
       "subtitle": "Uma história única com o nome, o rostinho e as aventuras que ele sempre sonhou.",
-      "cta": "Criar uma prévia grátis",
+      "cta": "Ver o personagem grátis",
       "secondary": "Ver como funciona",
       "fromPrice": "A partir de {price}",
       "formats": "Disponível em livro digital e impresso",
       "imageAlt": "Ilustração em aquarela de um menino astronauta e seu cachorro olhando a lua entre as estrelas",
       "kicker": "Histórias personalizadas, feitas com carinho",
-      "headline": "Seu rostinho.<br></br>Sua <hl>grande aventura</hl>.",
-      "lead": "Transforme a foto, as coisas favoritas e os momentos especiais em uma história ilustrada que é só dela.",
+      "headline": "O rosto dele.<br></br>O nome dele.<br></br>A <hl>aventura</hl> dele.",
+      "lead": "Você envia uma foto e a transformamos no personagem da história. Vê de graça antes de decidir.",
       "explore": "Ver histórias",
       "photoLabel": "A foto",
       "bookAlt": "Livro aberto sobre uma manta de tricô: em uma página, um menino de cabelo cacheado e óculos vermelhos flutua como astronauta ao lado do cachorrinho; na outra, o mesmo menino conhece uma raposa na floresta. Ao lado, seu retrato ilustrado.",
@@ -107,7 +107,8 @@
       "exploreStories": "Ver histórias",
       "homeKicker": "Da foto ao livro",
       "homeLead": "Você envia uma foto, vocês escolhem a aventura juntos e em minutos vê a história ilustrada. Se gostar, pode pedir impressa em capa dura.",
-      "homeCta": "Criar uma prévia grátis"
+      "homeCta": "Começar minha história",
+      "photoNote": "Usamos a foto só para criar o personagem."
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",

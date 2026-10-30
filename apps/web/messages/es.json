@@ -84,14 +84,14 @@
       "eyebrow": "Historias que abrazan",
       "title": "Tu hijo es el héroe de esta historia.",
       "subtitle": "Un cuento único con su nombre, su carita y las aventuras que siempre soñó.",
-      "cta": "Crear una vista previa gratis",
+      "cta": "Ver su personaje gratis",
       "secondary": "Ver cómo funciona",
       "fromPrice": "Desde {price}",
       "formats": "Disponible en digital y libro impreso",
       "imageAlt": "Ilustración en acuarela de un niño astronauta y su perro mirando la luna entre estrellas",
       "kicker": "Cuentos personalizados, hechos con cariño",
-      "headline": "Su carita.<br></br>Su <hl>gran aventura</hl>.",
-      "lead": "Convierte su foto, sus cosas favoritas y sus momentos especiales en un cuento ilustrado que es solo suyo.",
+      "headline": "Su cara.<br></br>Su nombre.<br></br>Su <hl>aventura</hl>.",
+      "lead": "Subes una foto y la convertimos en el personaje del cuento. Lo ves gratis antes de decidir.",
       "explore": "Ver historias",
       "photoLabel": "Su foto",
       "bookAlt": "Libro abierto sobre una manta tejida: en una página, un niño de pelo rizado y anteojos rojos flota como astronauta junto a su perrito; en la otra, el mismo niño conoce a un zorro en el bosque. Al lado, su retrato ilustrado.",
@@ -107,7 +107,8 @@
       "exploreStories": "Ver historias",
       "homeKicker": "De su foto a su libro",
       "homeLead": "Subes una foto, eligen juntos la aventura y en minutos ves su cuento ilustrado. Si te encanta, puedes pedirlo impreso en tapa dura.",
-      "homeCta": "Crear vista previa gratis"
+      "homeCta": "Empezar mi cuento",
+      "photoNote": "Usamos la foto solo para crear el personaje."
     },
     "trust": {
       "preview": "Vista previa gratis antes de pagar",

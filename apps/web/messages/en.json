@@ -84,14 +84,14 @@
       "eyebrow": "Stories that hug",
       "title": "Your child is the hero of this story.",
       "subtitle": "A one-of-a-kind story with their name, their face and the adventures they've always dreamed of.",
-      "cta": "Create a free preview",
+      "cta": "See their character free",
       "secondary": "See how it works",
       "fromPrice": "From {price}",
       "formats": "Available as a digital and printed book",
       "imageAlt": "Watercolor illustration of a young astronaut and his dog looking at the moon among the stars",
       "kicker": "Personalized stories, made with heart",
-      "headline": "Their little face.<br></br>Their <hl>big adventure</hl>.",
-      "lead": "Turn their photo, favorite things and special moments into a beautifully illustrated story that's truly theirs.",
+      "headline": "Their face.<br></br>Their name.<br></br>Their <hl>adventure</hl>.",
+      "lead": "Upload a photo and we turn it into the character of the story. See it free before you decide.",
       "explore": "Explore stories",
       "photoLabel": "Their photo",
       "bookAlt": "Open book on a knitted blanket: on one page a curly-haired boy with red glasses floats as an astronaut next to his puppy; on the other, the same boy meets a fox in the forest. Beside it, his illustrated portrait.",
@@ -107,7 +107,8 @@
       "exploreStories": "Browse stories",
       "homeKicker": "From their photo to their book",
       "homeLead": "You upload a photo, choose the adventure together, and in minutes you see their illustrated story. If you love it, you can order it as a hardcover.",
-      "homeCta": "Create a free preview"
+      "homeCta": "Start my story",
+      "photoNote": "We use the photo only to create the character."
     },
     "trust": {
       "preview": "Free preview before you pay",

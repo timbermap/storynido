@@ -101,6 +101,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
                 {t('hero.explore')}
               </Link>
             </div>
+            <p className="mt-4 text-sm text-muted-foreground">{t('hero.photoNote')}</p>
             {highlights && (
               // Precios como dato, no como botón: sin fondo, con un ícono y una línea divisoria.
               <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm lg:justify-start">
