@@ -1625,3 +1625,14 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - `sn_country_choice`: el país elegido a mano ("Enviar a", Mi cuenta o el país guardado en la cuenta). Dura un año y manda sobre la IP.
 - El servidor decide el país de la request con la elegida y, si no hay, con la IP de esa request (no con la cookie detectada).
 - Quien había elegido un país con el selector anterior lo vuelve a elegir una vez.
+
+## 124 · País detectado por IP que se corrige solo
+
+- **Fecha:** 2026-10-30.
+- **Problema:** el proxy guardaba el país detectado en `sn_country` por un año. Un país mal detectado (VPN, viaje, IP vieja) quedaba pegado y se confundía con una elección del visitante.
+- **Ahora, dos cookies:**
+  - `sn_country`: país detectado por la IP; dura un día y el proxy lo recalcula (solo la reescribe si cambió);
+  - `sn_country_choice`: país elegido a mano ("Enviar a", Mi cuenta o el guardado en la cuenta); dura un año y manda sobre la IP.
+- Con país elegido el proxy no detecta nada. Sin elección, `preferredCountry` usa la IP de la request.
+- El aviso de idioma mira primero la elección y después el país detectado.
+- Los E2E que fijaban el país con `sn_country` usan `sn_country_choice`.
