@@ -5,25 +5,30 @@ import { isLocale, localeForCountry } from '@storynido/shared';
 
 import { routing } from './i18n/routing';
 import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE, detectCountry, parseCountry } from './lib/country';
+import { LOCALE_CHOICE_COOKIE } from './lib/locale-choice';
 import { clientIp, countryFromIp } from './lib/server/geoip';
 
 const intl = createIntlMiddleware(routing);
-const LOCALE_COOKIE = 'sn_locale';
 
 /**
  * Idioma en la URL (redirige / a /es, /en o /pt) y país detectado la primera vez. Sin idioma
  * elegido, el idioma sale del país de la IP (Argentina → español, Brasil → portugués, el resto
- * → inglés); si no se sabe, del navegador. Elegirlo en el footer o en la cuenta tiene prioridad.
+ * → inglés); si no se sabe, del navegador. Elegirlo a mano (pie, cuenta o aviso) tiene
+ * prioridad. Visitar una página en otro idioma no cambia nada (DECISIONS 122).
  */
 export default function proxy(request: NextRequest) {
   const segment = request.nextUrl.pathname.split('/')[1] ?? '';
   const hasLocale = isLocale(segment);
   const needsCountry = !parseCountry(request.cookies.get(COUNTRY_COOKIE)?.value);
-  const needsLocale = !hasLocale && !request.cookies.has(LOCALE_COOKIE);
-  const ipCountry = needsCountry || needsLocale ? countryFromIp(clientIp(request.headers)) : null;
+  const choice = request.cookies.get(LOCALE_CHOICE_COOKIE)?.value;
+  const chosen = choice && isLocale(choice) ? choice : null;
+  const needsLocale = !hasLocale;
+  const ipCountry =
+    needsCountry || (needsLocale && !chosen) ? countryFromIp(clientIp(request.headers)) : null;
 
-  const ipLocale = needsLocale ? localeForCountry(ipCountry) : null;
-  const response = intl(ipLocale ? withLanguage(request, ipLocale) : request);
+  const ipLocale = needsLocale && !chosen ? localeForCountry(ipCountry) : null;
+  const target = needsLocale ? (chosen ?? ipLocale) : null;
+  const response = intl(target ? withLanguage(request, target) : request);
 
   if (needsCountry) {
     const locale = hasLocale ? segment : (ipLocale ?? routing.defaultLocale);

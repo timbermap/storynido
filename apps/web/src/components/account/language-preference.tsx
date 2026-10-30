@@ -8,6 +8,7 @@ import { LOCALES, LOCALE_DEFINITIONS, type CountryCode, type Locale } from '@sto
 import { useRouter } from '@/i18n/navigation';
 import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE } from '@/lib/country';
 import { CountryOptions } from '@/components/country-options';
+import { rememberLocaleChoice } from '@/lib/locale-choice';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import {
   subscribePreferences,
@@ -78,6 +79,7 @@ export function LanguagePreference({ uid }: { uid: string }) {
       setError(true);
       return;
     }
+    rememberLocaleChoice(next);
     startTransition(() => {
       router.replace('/account', { locale: next });
     });

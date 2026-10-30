@@ -9,7 +9,9 @@ export const routing = defineRouting({
   locales: LOCALES,
   defaultLocale: DEFAULT_LOCALE,
   localePrefix: 'always',
-  localeCookie: { name: 'sn_locale', maxAge: 60 * 60 * 24 * 365 },
+  // Sin cookie automática: next-intl la guardaba al visitar cualquier página en un idioma y desde
+  // ahí ignoraba la IP. La elección a mano la guarda la web (lib/locale-choice).
+  localeCookie: false,
   pathnames: {
     '/': '/',
     // Líneas comerciales: una landing por público (DECISIONS 102).

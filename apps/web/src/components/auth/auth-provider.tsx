@@ -6,6 +6,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { roleFromClaims, type CountryCode, type Locale, type Role } from '@storynido/shared';
 
 import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE } from '@/lib/country';
+import { LOCALE_CHOICE_COOKIE } from '@/lib/locale-choice';
 
 interface AuthState {
   /** Usuario de Firebase, incluida la sesión anónima del creador. */
@@ -79,7 +80,8 @@ export function AuthProvider({
           if (saved?.country)
             document.cookie = `${COUNTRY_COOKIE}=${saved.country}; path=/; max-age=${age}; samesite=lax`;
           if (saved?.locale)
-            document.cookie = `sn_locale=${saved.locale}; path=/; max-age=${age}; samesite=lax`;
+            // El idioma guardado en la cuenta es una elección: manda sobre el de la IP.
+            document.cookie = `${LOCALE_CHOICE_COOKIE}=${saved.locale}; path=/; max-age=${age}; samesite=lax`;
         })();
       });
     };

@@ -1597,3 +1597,15 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - El paso del segundo factor no cuenta como falla.
   - El panel del admin muestra "Login por navegador" con la tasa de éxito.
 - **Cartoon 3D:** no se veía 3D porque la dirección de arte imponía "gouache pintado a mano con textura de papel" a todos los estilos y además pedía evitar "3D genérico brillante". Ahora la técnica sigue al estilo (`artDirection({ style })`): 3D de película animada para Cartoon 3D, lápices para Lápices de colores, tinta y gouache para Cuento clásico y gouache para el resto. Su `promptModifier` se reforzó (actualizado en staging). Las muestras del estilo se regeneran aparte.
+
+## 122 · Idioma automático por IP que no se pisa solo
+
+- **Fecha:** 2026-10-30.
+- **Problema:** next-intl guardaba la cookie de idioma (`sn_locale`, un año) al visitar cualquier página con idioma en la URL. Bastaba abrir una vez un link en inglés para que `/` mandara siempre a inglés, sin mirar la IP.
+- **Ahora:**
+  - sin cookie automática (`localeCookie: false`);
+  - solo se recuerda el idioma elegido a mano (`sn_lang`): en el pie, en Mi cuenta, el guardado en la cuenta o el aviso de idioma;
+  - sin elección, `/` va al idioma del país de la IP (Argentina → español, Brasil → portugués, el resto → inglés) y, si no se sabe, al del navegador.
+  - La cookie vieja `sn_locale` ya no se lee.
+- **Aviso de idioma:** quien entra por un link en otro idioma que el de su país ve "Este sitio también está en español → Ver en español", escrito en el idioma sugerido. Elegir o cerrar queda recordado. No aparece en el creador ni en el pago.
+- **Copy:** "We serve families worldwide" → "Available worldwide" (es: "Disponible en todo el mundo"), para que no se lea solo como un servicio para familias.

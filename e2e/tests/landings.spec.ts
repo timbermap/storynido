@@ -171,3 +171,24 @@ test('preguntas frecuentes: la home destaca 4 y la página propia tiene todas y 
   await form.getByRole('button', { name: 'Enviar mensaje' }).click();
   await expect(form.getByRole('status')).toContainText('¡Mensaje enviado!');
 });
+
+test('idioma: visitar una página en otro idioma no lo fija; el aviso sugiere el del país', async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  // Desde Argentina (país detectado) con un link en inglés.
+  await context.addCookies([{ name: 'sn_country', value: 'AR', url: String(baseURL) }]);
+  await page.goto('/en/stories');
+  await page.getByRole('button', { name: 'Necessary only' }).click();
+  const banner = page.getByRole('region', { name: 'Este sitio también está en español.' });
+  await expect(banner).toBeVisible();
+  // Haber visto la página en inglés no cambia el idioma de entrada.
+  expect((await context.cookies()).some((cookie) => cookie.name === 'sn_lang')).toBe(false);
+
+  await banner.getByRole('button', { name: 'Ver en español' }).click();
+  await expect(page).toHaveURL(/\/es\/historias/);
+  // Elegido a mano: la raíz respeta esa elección.
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/es$/);
+});

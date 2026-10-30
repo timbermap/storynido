@@ -8,17 +8,13 @@ import { LOCALES, LOCALE_DEFINITIONS, type Locale } from '@storynido/shared';
 
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { LEGAL_SLUGS, legalDocumentFromSlug } from '@/lib/legal';
+import { rememberLocaleChoice } from '@/lib/locale-choice';
 
-/** Cambia de idioma manteniendo la página (con su slug traducido). */
-export function LanguageSwitcher({
-  id,
-  selectClassName,
-}: {
-  id: string;
-  /** Estilo del select (por ejemplo, sobre el pie oscuro). */
-  selectClassName?: string;
-}) {
-  const t = useTranslations('Switchers');
+/**
+ * Cambiar de idioma manteniendo la página (con su slug traducido). Recuerda la elección: desde
+ * ahí manda sobre el idioma del país de la IP.
+ */
+export function useLocaleSwitch() {
   const locale = useLocale() as Locale;
   const pathname = usePathname();
   const params = useParams<{
@@ -31,6 +27,7 @@ export function LanguageSwitcher({
   const [pending, startTransition] = useTransition();
 
   function change(next: Locale) {
+    rememberLocaleChoice(next);
     startTransition(() => {
       if (pathname === '/legal/[document]') {
         const doc = legalDocumentFromSlug(locale, params.document ?? '');
@@ -51,6 +48,21 @@ export function LanguageSwitcher({
       }
     });
   }
+
+  return { locale, change, pending };
+}
+
+/** Selector de idioma del pie de página. */
+export function LanguageSwitcher({
+  id,
+  selectClassName,
+}: {
+  id: string;
+  /** Estilo del select (por ejemplo, sobre el pie oscuro). */
+  selectClassName?: string;
+}) {
+  const t = useTranslations('Switchers');
+  const { locale, change, pending } = useLocaleSwitch();
 
   return (
     <label className="flex items-center gap-2 text-sm">
