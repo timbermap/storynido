@@ -137,8 +137,11 @@ export interface QuoteInput {
   couponCode: string | null;
   promotions: readonly Promotion[];
   now: Date;
-  /** Cuenta profesional: descuento base del producto y por compras elegibles previas. */
-  pro?: { purchases: number; config: ProDiscountConfig } | null;
+  /**
+   * Descuento por recurrencia (compras elegibles previas): vale para cualquier cuenta con sesión.
+   * `professional`: además, el descuento base del producto del perfil profesional.
+   */
+  pro?: { purchases: number; config: ProDiscountConfig; professional: boolean } | null;
 }
 
 export type QuoteResult =
@@ -188,8 +191,10 @@ export function quote(input: QuoteInput): QuoteResult {
   const quantity = Math.max(1, Math.floor(input.quantity));
   const productionUnit = print ? Math.round(print.productionUsdMinor / quantity) : 0;
   const usd = unitPriceUsdMinor(pricing, productionUnit, input.pages);
-  // Profesionales: descuento base del producto (además del de recurrencia).
-  const unitUsd = input.pro ? Math.round((usd * (100 - pricing.proPercentOff)) / 100) : usd;
+  // Perfil profesional: descuento base del producto (además del de recurrencia, que es de todos).
+  const unitUsd = input.pro?.professional
+    ? Math.round((usd * (100 - pricing.proPercentOff)) / 100)
+    : usd;
   const local = fromUsdMinor(unitUsd, CHARGE_CURRENCY, input.fx);
   if (local === null) return { ok: false, error: 'price_missing' };
   const unit = charmPrice(local, CHARGE_CURRENCY);
@@ -284,7 +289,7 @@ function finalize(
         coupon.type === 'percent' ? Math.round((subtotal * coupon.value) / 100) : coupon.value,
       )
     : 0;
-  // Profesionales: descuento por recurrencia (un solo descuento: el mayor de todos).
+  // Descuento por volumen y recurrencia, de todos (un solo descuento: el mayor de todos).
   const percentPro = input.pro ? proPercent(input.pro.purchases, input.pro.config, format) : 0;
   const proMinor = Math.round((subtotal * percentPro) / 100);
   const best = Math.max(couponMinor, promotionMinor, proMinor);
@@ -294,7 +299,7 @@ function finalize(
       : couponMinor === best
         ? { minor: couponMinor, reason: 'coupon' as const, label: coupon?.code ?? null }
         : proMinor === best
-          ? { minor: proMinor, reason: 'pro' as const, label: `Pro ${String(percentPro)} %` }
+          ? { minor: proMinor, reason: 'pro' as const, label: `${String(percentPro)} %` }
           : { minor: promotionMinor, reason: 'promotion' as const, label: promotion?.name ?? null };
 
   const taxable = subtotal - discount.minor + shipping.minor;

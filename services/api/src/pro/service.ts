@@ -53,28 +53,36 @@ export class ProService {
     ).length;
   }
 
-  /** Para el checkout: null si la cuenta es de Familia (el precio de Familias de siempre). */
-  async context(uid: string): Promise<{ purchases: number; config: ProDiscountConfig } | null> {
+  /**
+   * Para el checkout: las compras de la cuenta (el descuento por volumen y recurrencia es de
+   * todos) y si tiene el perfil profesional (que suma el descuento base del producto).
+   */
+  async context(
+    uid: string,
+  ): Promise<{ purchases: number; config: ProDiscountConfig; professional: boolean }> {
     const user = (await this.db.collection(COLLECTIONS.users).doc(uid).get()).data();
-    if (user?.accountType !== 'professional') return null;
     const config = await this.catalog.proDiscounts();
-    return { purchases: await this.purchases(uid, config), config };
+    return {
+      purchases: await this.purchases(uid, config),
+      config,
+      professional: user?.accountType === 'professional',
+    };
   }
 
-  /** Estado para "Mi cuenta" Pro: compras elegibles, descuento actual y el próximo escalón. */
+  /** Estado de la cuenta: compras elegibles, descuento actual y el próximo escalón (de todos). */
   async status(uid: string) {
     const user = (await this.db.collection(COLLECTIONS.users).doc(uid).get()).data();
     const config = await this.catalog.proDiscounts();
-    if (user?.accountType !== 'professional') {
-      return { accountType: 'family' as const, proProfile: null, discount: null };
-    }
     const purchases = await this.purchases(uid, config);
     const next = [...config.tiers]
       .sort((a, b) => a.minPurchases - b.minPurchases)
       .find((tier) => tier.minPurchases > purchases);
+    const professional = user?.accountType === 'professional';
     return {
-      accountType: 'professional' as const,
-      proProfile: (user.proProfile as ProProfile | null | undefined) ?? null,
+      accountType: professional ? ('professional' as const) : ('family' as const),
+      proProfile: professional
+        ? ((user.proProfile as ProProfile | null | undefined) ?? null)
+        : null,
       discount: {
         windowDays: config.windowDays,
         purchases,

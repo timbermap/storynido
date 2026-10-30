@@ -107,7 +107,6 @@ export default async function EventsPage({ params }: Props) {
             text: tKit(`pieces.${piece}.text`),
             tag: { label: pieceLabel(piece), available: true },
           })),
-          { title: t('kit.7'), tag: { label: t('kitTagQuote'), available: false } },
         ]}
         note={
           fullKit !== null

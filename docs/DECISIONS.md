@@ -1703,3 +1703,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Home:** "Cómo funciona" sobre banda blanca y "Preguntas frecuentes" sobre menta suave, para alternar con el crema y la banda durazno de "¿Para quién es?".
 - **Hero de Familias:** un solo botón, "Armar mi primer cuento"; se saca "Ver historias" (el catálogo está en el menú).
 - **Cruce productos × imprentas:** `docs/PRODUCTOS-Y-IMPRENTAS.md`.
+
+## 134 · Descuento por volumen para todos y kit de Celebraciones solo digital
+
+- **Fecha:** 2026-10-30.
+- **Descuento por volumen y recurrencia, de todas las cuentas.** Antes lo calculaba solo para quien activaba el perfil Pro. Ahora el checkout lo aplica a cualquier cuenta con sesión, contando sus compras elegibles en la ventana (5 compras 10 %, 10 compras 15 %, 20 compras 20 %; en impresos con tope de 15 %; un solo descuento, el mayor entre cupón, promoción y este).
+- **Se mantiene** el descuento base del producto (`proPercentOff`), pero solo para quien tiene el perfil profesional: abrirlo a todos habría bajado el precio de Familias desde la primera compra. `quote()` recibe `pro.professional`; `ProService.context` ya no devuelve `null`.
+- **Textos:** el resumen del pago dice "Descuento por volumen N %" (antes no tenía texto y mostraba "Pro N %" como etiqueta). `status` devuelve el descuento de cualquier cuenta.
+- **Pendiente:** el descuento base y la activación del perfil (pantalla "Cuéntanos a qué te dedicas" al crear en Profesionales) siguen. Si se quieren eliminar, el precio de Profesionales pasa a ser el de todos.
+- **Celebraciones: el kit es solo digital.** Se aclara en la landing (etiqueta "Digital · PDF listo para imprimir", "Kit digital completo", nota y preguntas frecuentes) y en el pago, donde un aviso fijo reemplaza el bloque "¿Las quieres impresas? / Pedir cotización". Se quita el ítem "Impresión profesional, por cotización". El endpoint `eventPrintQuote` queda en la API sin uso desde la web.

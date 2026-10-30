@@ -876,7 +876,7 @@
       "metaDescription": "A mini story starring the guest of honor, to give to every guest: birthdays, baptisms, communions and graduations. One design, many copies.",
       "eyebrow": "StoryNido Celebrations",
       "title": "The whole celebration, with one hero",
-      "subtitle": "Invitation, mini story, stickers and more: one design that matches across the whole party. For birthdays, baptisms, communions and graduations.",
+      "subtitle": "Invitation, mini story, stickers and more, in digital: one design that matches across the whole party. For birthdays, baptisms, communions and graduations.",
       "cta": "Build my kit",
       "note": "You can see the examples without an account. To create the design and see the free sample, sign in with Google, Apple or your email so we can save your project.",
       "imageAlt": "Watercolor illustration of a birthday party: the birthday child blows out the candles while friends hold the same little gift book.",
@@ -897,10 +897,8 @@
       },
       "kitTitle": "Your kit includes",
       "kitSubtitle": "All with the same illustrated hero. Pieces are bought digitally, licensed by number of copies.",
-      "kit": {
-        "7": "Professional printing of the pieces, in bulk"
-      },
-      "kitNote": "Today you can create the design, see the free sample and buy the digital kit: print it at home or at the print shop you prefer. If you'd like us to print it in bulk, we quote it separately for your country.",
+      "kit": {},
+      "kitNote": "The whole kit is digital: you create the design, see the free sample and buy the PDF files to print at home or at the print shop you prefer. We don't print or ship the kit.",
       "collectionsTitle": "Party themes",
       "faqTitle": "Frequently asked questions",
       "faq": {
@@ -910,7 +908,7 @@
         },
         "2": {
           "q": "Can I print it at home?",
-          "a": "Yes: the digital version comes ready to print. Printing by us depends on the print partner offering that product in your country; if not, we offer the digital version."
+          "a": "Yes, that's the idea: the kit is digital and comes as print-ready PDFs to print at home or at the print shop you prefer. We don't print or ship the kit."
         },
         "3": {
           "q": "Do I need a photo?",
@@ -918,17 +916,16 @@
         },
         "4": {
           "q": "How far in advance should I order?",
-          "a": "Printing times depend on the country; we’ll show them before you confirm the order."
+          "a": "Since it's digital, you download the files right away. Order a few days ahead so you have time to print the pieces wherever you prefer."
         }
       },
       "finalTitle": "Let every guest take home a memory of the party",
       "photoLabel": "Their photo",
-      "kitTagNow": "Available today · print-ready PDF",
-      "kitTagQuote": "By quote",
+      "kitTagNow": "Digital · print-ready PDF",
       "viewStory": "View the story",
       "kitDesign": "Design: {price} (includes the mini story)",
       "kitExtra": "+ {price}",
-      "kitFull": "Full kit: {price}, no matter how many guests.",
+      "kitFull": "Full digital kit: {price}, no matter how many guests.",
       "kitUsd": "Prices in US dollars (USD).",
       "collectionStart": "Design the kit with this theme"
     },
@@ -1090,7 +1087,8 @@
     },
     "discount": {
       "coupon": "Coupon {label}",
-      "promotion": "Promotion {label}"
+      "promotion": "Promotion {label}",
+      "pro": "Volume discount {label}"
     },
     "shippingEta": "Shipping (arrives in {min} to {max} business days)",
     "shippingDigital": "Digital delivery",
@@ -1195,15 +1193,11 @@
       "time": "Time",
       "place": "Place",
       "invitationNote": "The date comes from the celebration details. Anything left blank becomes a line to fill in by hand.",
-      "printTitle": "Want them printed?",
-      "printText": "For now the pieces are to print at home or at a nearby print shop. If you’d like us to send them printed, ask for a quote and we’ll reply by email.",
-      "printPlaceholder": "Party date, city, any useful detail",
-      "printRequest": "Ask for a quote",
-      "printSent": "Done! We’ll email you the quote.",
       "license": "The license allows {copies} copies of each piece for the celebration.",
       "downloadAll": "Download everything (ZIP)",
       "moreCopies": "Order more copies",
-      "ready": "Your kit is ready!"
+      "ready": "Your kit is ready!",
+      "digitalOnly": "The kit is digital: you get print-ready PDFs to print at home or at the print shop you prefer. We don't print or ship the kit."
     },
     "fromPrice": "from {price}",
     "shippingPending": "Shipping: calculated from your address",
@@ -1214,7 +1208,7 @@
   "Pro": {
     "activation": {
       "title": "Tell us what you do",
-      "text": "To create projects per child and get volume and repeat-order discounts.",
+      "text": "To create projects per child and get the price for people who work with children. Volume and repeat-order discounts apply to every account.",
       "profession": "Profession",
       "professionEmpty": "Choose an option",
       "professionOther": "Which one?",

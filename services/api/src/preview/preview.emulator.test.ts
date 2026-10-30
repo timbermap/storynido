@@ -1002,7 +1002,7 @@ describe('checkout y pagos (fase 11)', () => {
     }
     expect((await status()).discount?.purchases).toBe(5);
     const tier = await quoteDigital();
-    expect(tier.discount).toEqual({ minor: 160, reason: 'pro', label: 'Pro 10 %' });
+    expect(tier.discount).toEqual({ minor: 160, reason: 'pro', label: '10 %' });
     expect(tier.totalMinor).toBe(1599 - 160);
 
     // Un reembolso posterior baja el escalón para las compras siguientes.
@@ -1471,7 +1471,7 @@ describe('checkout y pagos (fase 11)', () => {
     }>().discount;
     expect(discount).toMatchObject({ purchases: 5, digitalPercent: 10, next: { purchases: 10 } });
     const pro = await quoted();
-    expect(pro.discount).toEqual({ minor: 360, reason: 'pro', label: 'Pro 10 %' });
+    expect(pro.discount).toEqual({ minor: 360, reason: 'pro', label: '10 %' });
 
     // Otra cuenta (Familia) no ve el precio Pro.
     const other = await post(

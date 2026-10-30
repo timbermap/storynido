@@ -289,7 +289,11 @@ describe('kit de Eventos', () => {
 });
 
 describe('Profesionales: precio Pro y descuento por recurrencia', () => {
-  const pro = (purchases: number) => ({ purchases, config: DEFAULT_PRO_DISCOUNTS });
+  const pro = (purchases: number, professional = true) => ({
+    purchases,
+    config: DEFAULT_PRO_DISCOUNTS,
+    professional,
+  });
 
   it('escalones: 1–4 base, 5–9 10 %, 10–19 15 %, 20+ 20 % (impresos con tope de 15 %)', () => {
     expect(
@@ -310,11 +314,26 @@ describe('Profesionales: precio Pro y descuento por recurrencia', () => {
     const twelve = quote(input({ pro: pro(12) }));
     if (!twelve.ok) throw new Error('debería cotizar');
     // Tapa dura con 12 compras: 15 % (el tope de impresos también es 15).
-    expect(twelve.snapshot.discount).toEqual({ minor: 585, reason: 'pro', label: 'Pro 15 %' });
+    expect(twelve.snapshot.discount).toEqual({ minor: 585, reason: 'pro', label: '15 %' });
 
     // Un cupón del 10 % no se suma: gana el mayor (15 % Pro).
     const both = quote(input({ pro: pro(12), coupon: coupon(), couponCode: 'BIENVENIDA' }));
     if (!both.ok) throw new Error('debería cotizar');
     expect(both.snapshot.discount.reason).toBe('pro');
+  });
+
+  it('cualquier cuenta tiene el descuento por recurrencia; el base del producto es del perfil profesional', () => {
+    const family = quote(input({ pro: null }));
+    const common = quote(input({ pro: pro(0, false) }));
+    if (!family.ok || !common.ok) throw new Error('debería cotizar');
+    // Sin perfil profesional y sin compras previas: el mismo precio de siempre.
+    expect(common.snapshot.components[0]).toEqual(family.snapshot.components[0]);
+    expect(common.snapshot.discount.reason).toBeNull();
+
+    // Con 12 compras en la ventana, el escalón aplica aunque no sea una cuenta profesional.
+    const twelve = quote(input({ pro: pro(12, false) }));
+    if (!twelve.ok) throw new Error('debería cotizar');
+    expect(twelve.snapshot.discount).toMatchObject({ reason: 'pro', label: '15 %' });
+    expect(twelve.snapshot.components[0]).toEqual(family.snapshot.components[0]);
   });
 });

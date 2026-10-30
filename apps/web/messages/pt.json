@@ -876,7 +876,7 @@
       "metaDescription": "Uma mini história com o protagonista da festa, para presentear cada convidado: aniversários, batizados, comunhões e formaturas. Um design, muitas cópias.",
       "eyebrow": "StoryNido Celebrações",
       "title": "A celebração inteira, com um só protagonista",
-      "subtitle": "Convite, mini história, adesivos e mais: um só design que combina em toda a festa. Para aniversários, batizados, comunhões e formaturas.",
+      "subtitle": "Convite, mini história, adesivos e mais, em digital: um só design que combina em toda a festa. Para aniversários, batizados, comunhões e formaturas.",
       "cta": "Montar meu kit",
       "note": "Você vê os exemplos sem conta. Para criar o design e ver a amostra grátis, entre com Google, Apple ou seu e-mail: assim guardamos seu projeto.",
       "imageAlt": "Ilustração em aquarela de um aniversário: o aniversariante sopra as velas e os amigos seguram o mesmo livrinho de presente.",
@@ -897,10 +897,8 @@
       },
       "kitTitle": "Seu kit inclui",
       "kitSubtitle": "Tudo com a mesma ilustração do protagonista. As peças são compradas em digital, com licença por quantidade de cópias.",
-      "kit": {
-        "7": "Impressão profissional das peças, em quantidade"
-      },
-      "kitNote": "Hoje você pode criar o design, ver a prévia grátis e comprar o kit digital: imprima em casa ou na gráfica que preferir. Se quiser que imprimamos em quantidade, cotamos à parte conforme o seu país.",
+      "kit": {},
+      "kitNote": "Todo o kit é digital: você cria o design, vê a prévia grátis e compra os arquivos em PDF para imprimir em casa ou na gráfica que preferir. Não imprimimos nem enviamos o kit.",
       "collectionsTitle": "Temas para a festa",
       "faqTitle": "Perguntas frequentes",
       "faq": {
@@ -910,7 +908,7 @@
         },
         "2": {
           "q": "Posso imprimir em casa?",
-          "a": "Sim: a versão digital vem pronta para imprimir. A impressão por nossa conta depende de a gráfica oferecer esse produto no seu país; se não, oferecemos a versão digital."
+          "a": "Sim, é a ideia: o kit é digital e vem em PDF pronto para imprimir em casa ou na gráfica que preferir. Não imprimimos nem enviamos o kit."
         },
         "3": {
           "q": "Preciso de uma foto?",
@@ -918,17 +916,16 @@
         },
         "4": {
           "q": "Com quanta antecedência devo pedir?",
-          "a": "Os prazos de impressão dependem do país; vamos mostrá-los antes de você confirmar o pedido."
+          "a": "Como é digital, você baixa os arquivos na hora. Peça com alguns dias de folga para imprimir as peças onde preferir."
         }
       },
       "finalTitle": "Que cada convidado leve uma lembrança da festa",
       "photoLabel": "A foto",
-      "kitTagNow": "Disponível hoje · PDF pronto para imprimir",
-      "kitTagQuote": "Sob cotação",
+      "kitTagNow": "Digital · PDF pronto para imprimir",
       "viewStory": "Ver a história",
       "kitDesign": "Design: {price} (inclui a mini história)",
       "kitExtra": "+ {price}",
-      "kitFull": "Kit completo: {price}, não importa quantos convidados.",
+      "kitFull": "Kit digital completo: {price}, não importa quantos convidados.",
       "kitUsd": "Preços em dólares (USD).",
       "collectionStart": "Criar o kit com este tema"
     },
@@ -1090,7 +1087,8 @@
     },
     "discount": {
       "coupon": "Cupom {label}",
-      "promotion": "Promoção {label}"
+      "promotion": "Promoção {label}",
+      "pro": "Desconto por volume {label}"
     },
     "shippingEta": "Frete (chega em {min} a {max} dias úteis)",
     "shippingDigital": "Entrega digital",
@@ -1195,15 +1193,11 @@
       "time": "Hora",
       "place": "Local",
       "invitationNote": "A data vem dos dados da celebração. O que ficar em branco vira uma linha para completar à mão.",
-      "printTitle": "Quer impressas?",
-      "printText": "Por enquanto as peças são para imprimir em casa ou numa gráfica próxima. Se preferir que enviemos impressas, peça um orçamento e respondemos por e-mail.",
-      "printPlaceholder": "Data da festa, cidade, qualquer detalhe útil",
-      "printRequest": "Pedir orçamento",
-      "printSent": "Pronto! Enviaremos o orçamento por e-mail.",
       "license": "A licença autoriza {copies} cópias de cada peça para a celebração.",
       "downloadAll": "Baixar tudo (ZIP)",
       "moreCopies": "Pedir mais cópias",
-      "ready": "Seu kit está pronto!"
+      "ready": "Seu kit está pronto!",
+      "digitalOnly": "O kit é digital: chega em PDF pronto para imprimir em casa ou na gráfica que preferir. Não imprimimos nem enviamos o kit."
     },
     "fromPrice": "a partir de {price}",
     "shippingPending": "Frete: calculado com o seu endereço",
@@ -1214,7 +1208,7 @@
   "Pro": {
     "activation": {
       "title": "Conte o que você faz",
-      "text": "Para criar projetos por criança e ter acesso aos descontos por volume e por pedidos recorrentes.",
+      "text": "Para criar projetos por criança e ter o preço para quem trabalha com crianças. Os descontos por volume e por pedidos recorrentes valem para todas as contas.",
       "profession": "Profissão",
       "professionEmpty": "Escolha uma opção",
       "professionOther": "Qual?",

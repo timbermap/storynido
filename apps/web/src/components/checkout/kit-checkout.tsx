@@ -60,8 +60,6 @@ export function KitCheckout({
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
-  const [printMessage, setPrintMessage] = useState('');
-  const [printSent, setPrintSent] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -146,24 +144,6 @@ export function KitCheckout({
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
       setPaying(false);
-    }
-  }
-
-  async function requestPrint() {
-    setError(null);
-    try {
-      await api('eventPrintQuote', {
-        body: {
-          bookId,
-          country,
-          pieces: kit.pieces.map((item) => item.piece),
-          copies: kit.pieces[0]?.copies ?? copies,
-          message: printMessage.trim() || null,
-        },
-      });
-      setPrintSent(true);
-    } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
     }
   }
 
@@ -291,40 +271,10 @@ export function KitCheckout({
           </fieldset>
         )}
 
-        <details className="rounded-2xl border bg-card p-4">
-          <summary className="flex cursor-pointer items-center gap-2 font-semibold">
-            <Printer className="size-4 text-primary" aria-hidden="true" />
-            {tKit('printTitle')}
-          </summary>
-          {printSent ? (
-            <p role="status" className="mt-3 text-sm font-semibold text-success">
-              {tKit('printSent')}
-            </p>
-          ) : (
-            <div className="mt-3 grid gap-3 text-sm">
-              <p className="text-muted-foreground">{tKit('printText')}</p>
-              <textarea
-                id="kit-print-message"
-                rows={3}
-                maxLength={1000}
-                value={printMessage}
-                placeholder={tKit('printPlaceholder')}
-                onChange={(event) => {
-                  setPrintMessage(event.target.value);
-                }}
-                className="w-full rounded-xl border bg-background p-3"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                className="justify-self-start"
-                onClick={() => void requestPrint()}
-              >
-                {tKit('printRequest')}
-              </Button>
-            </div>
-          )}
-        </details>
+        <p className="flex items-start gap-2.5 rounded-2xl border bg-card p-4 text-sm text-muted-foreground">
+          <Printer className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+          {tKit('digitalOnly')}
+        </p>
       </div>
 
       <aside className="grid content-start gap-5 self-start rounded-2xl border bg-card p-6 lg:sticky lg:top-24">
