@@ -52,3 +52,5 @@ e2e/perf/results/
 
 # Scripts temporales contra staging (nunca se suben)
 firebase/src/zz-*
+e2e/zz-*
+packages/providers/zz-*
