@@ -7,7 +7,7 @@ import { HeroBook } from '@/components/home/hero-book';
 import { HeroFacts } from '@/components/home/hero-facts';
 import { NameCoverDemo } from '@/components/home/name-cover-demo';
 import { PhotoToStory } from '@/components/home/photo-to-story';
-import { FaqList, parseFaq } from '@/components/home/faq-list';
+import { FaqGroups, parseFaq, parseFaqGroups } from '@/components/home/faq-list';
 import { RememberChannel } from '@/components/landing/remember-channel';
 import { JsonLd } from '@/components/json-ld';
 import { LessonGroups } from '@/components/lessons/lesson-groups';
@@ -16,6 +16,7 @@ import { StoryCard } from '@/components/stories/story-card';
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
+import { CONTACT_ID } from '@/components/home/contact-form';
 import { brand } from '@/lib/brand';
 import { lowestPrice, offerHighlights } from '@/lib/offer';
 import { getContent, getLessons, getOffer, getStories } from '@/lib/server/api';
@@ -39,6 +40,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
   const fromPrice = lowestPrice(offer, locale, display.country);
   const highlights = offerHighlights(offer, locale, display.country);
   const faqItems = faq ? parseFaq(faq.body) : [];
+  const faqGroups = faq ? parseFaqGroups(faq.body) : [];
 
   // Cada paso con su color pastel (número e ícono).
   const steps = [
@@ -253,18 +255,18 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
             </h2>
             <p className="mt-4 max-w-sm text-muted-foreground">
               {t.rich('faq.contact', {
-                mail: (chunks) => (
-                  <a
-                    href="mailto:hola@storynido.com"
+                form: (chunks) => (
+                  <Link
+                    href={{ pathname: '/', hash: CONTACT_ID }}
                     className="font-semibold text-primary underline-offset-4 hover:underline"
                   >
                     {chunks}
-                  </a>
+                  </Link>
                 ),
               })}
             </p>
           </div>
-          <FaqList items={faqItems} />
+          <FaqGroups groups={faqGroups} />
         </section>
       )}
 
@@ -313,7 +315,6 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
           name: brand.name,
           url: SITE_URL,
           logo: absoluteUrl('/icon.svg'),
-          email: 'hola@storynido.com',
         }}
       />
       {faqItems.length > 0 && (

@@ -128,7 +128,7 @@
     "faq": {
       "title": "Perguntas frequentes",
       "more": "Ver todas as perguntas",
-      "contact": "Outra dúvida? Escreva para <mail>hola@storynido.com</mail> e respondemos."
+      "contact": "Outra dúvida? <form>Escreva pelo formulário</form> e respondemos."
     },
     "guarantee": {
       "title": "Veja antes de comprar",
@@ -1243,5 +1243,27 @@
     "noTraining": "Nunca é usada para treinar modelos de inteligência artificial.",
     "noPhoto": "Prefere não enviar fotos? Crie o personagem escolhendo as características.",
     "more": "Ler a política de privacidade"
+  },
+  "Contact": {
+    "title": "Escreva para nós",
+    "text": "Outra dúvida ou um problema com seu pedido? Respondemos por e-mail, normalmente em 1 dia útil.",
+    "name": "Seu nome",
+    "email": "Seu e-mail",
+    "topic": "Sobre o que é?",
+    "message": "Sua mensagem",
+    "send": "Enviar mensagem",
+    "privacy": "Usamos seus dados só para responder.",
+    "sentTitle": "Mensagem enviada!",
+    "sentText": "Respondemos no e-mail que você deixou, normalmente em 1 dia útil.",
+    "error": "Não conseguimos enviar sua mensagem. Tente de novo em alguns minutos.",
+    "limited": "Recebemos várias mensagens da sua conexão hoje. Tente de novo amanhã.",
+    "topics": {
+      "order": "Meu pedido",
+      "product": "Como o StoryNido funciona",
+      "events": "Celebrações e kits",
+      "professionals": "Profissionais",
+      "privacy": "Privacidade e meus dados",
+      "other": "Outra coisa"
+    }
   }
 }

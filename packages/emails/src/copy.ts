@@ -186,6 +186,19 @@ const es: LocaleCopy = {
       paragraphs: [d.message, d.orderId ? `Pedido: ${d.orderId}` : ''].filter(Boolean),
       cta: cta('Abrir en el admin', d.url),
     }),
+    // Al equipo (siempre en español): "Responder" contesta a quien escribió.
+    contact_message: (d) => ({
+      subject: `[Contacto] ${d.topic} · ${d.name}`,
+      preview: d.message.slice(0, 120),
+      heading: 'Mensaje desde el formulario de contacto',
+      paragraphs: [
+        `De: ${d.name} <${d.email}> · idioma ${d.locale}${d.page ? ` · desde ${d.page}` : ''}`,
+        `Tema: ${d.topic}`,
+        d.message,
+        'Responde a este correo para contestarle.',
+      ],
+      cta: null,
+    }),
   },
   footer: {
     transactional: 'Recibes este correo porque tienes una cuenta o un pedido en StoryNido.',
@@ -338,6 +351,7 @@ const en: LocaleCopy = {
       };
     },
     admin_alert: (d) => es.templates.admin_alert(d),
+    contact_message: (d) => es.templates.contact_message(d),
   },
   footer: {
     transactional:
@@ -489,6 +503,7 @@ const pt: LocaleCopy = {
       };
     },
     admin_alert: (d) => es.templates.admin_alert(d),
+    contact_message: (d) => es.templates.contact_message(d),
   },
   footer: {
     transactional: 'Você recebe este e-mail porque tem uma conta ou um pedido no StoryNido.',

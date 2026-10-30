@@ -5,12 +5,13 @@ import type { Locale } from '@storynido/shared';
 
 import { HeroBook } from '@/components/home/hero-book';
 import { HeroFacts } from '@/components/home/hero-facts';
-import { FaqList, parseFaq } from '@/components/home/faq-list';
+import { FaqGroups, parseFaq, parseFaqGroups } from '@/components/home/faq-list';
 import { AudienceSelector } from '@/components/landing/audience-selector';
 import { JsonLd } from '@/components/json-ld';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
+import { CONTACT_ID, ContactForm } from '@/components/home/contact-form';
 import { brand } from '@/lib/brand';
 import { getContent } from '@/lib/server/api';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
@@ -18,11 +19,13 @@ import { SITE_URL, absoluteUrl } from '@/lib/site';
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = (await params).locale as Locale;
 
-  const [t, faq] = await Promise.all([
+  const [t, tContact, faq] = await Promise.all([
     getTranslations('Home'),
+    getTranslations('Contact'),
     getContent('faq', locale).catch(() => null),
   ]);
   const faqItems = faq ? parseFaq(faq.body) : [];
+  const faqGroups = faq ? parseFaqGroups(faq.body) : [];
 
   // Cada paso con su color pastel (número e ícono).
   const steps = [
@@ -142,9 +145,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </h2>
             <p className="mt-4 max-w-sm text-muted-foreground">
               {t.rich('faq.contact', {
-                mail: (chunks) => (
+                form: (chunks) => (
                   <a
-                    href="mailto:hola@storynido.com"
+                    href={`#${CONTACT_ID}`}
                     className="font-semibold text-primary underline-offset-4 hover:underline"
                   >
                     {chunks}
@@ -153,7 +156,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               })}
             </p>
           </div>
-          <FaqList items={faqItems} />
+          <FaqGroups groups={faqGroups} />
         </section>
       )}
 
@@ -169,6 +172,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </div>
         </div>
       </section>
+      {/* Contacto: un formulario, sin el mail del equipo a la vista. */}
+      <section
+        id={CONTACT_ID}
+        aria-labelledby="contact-title"
+        className="container-page grid scroll-mt-28 gap-10 py-20 lg:grid-cols-[1fr_1.6fr] lg:gap-16 lg:py-24"
+      >
+        <div>
+          <h2
+            id="contact-title"
+            className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium"
+          >
+            {tContact('title')}
+          </h2>
+          <p className="mt-4 max-w-sm text-muted-foreground">{tContact('text')}</p>
+        </div>
+        <ContactForm />
+      </section>
       {/* Datos para buscadores (schema.org), después del contenido visible. */}
       <JsonLd
         data={{
@@ -177,7 +197,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           name: brand.name,
           url: SITE_URL,
           logo: absoluteUrl('/icon.svg'),
-          email: 'hola@storynido.com',
         }}
       />
       {faqItems.length > 0 && (

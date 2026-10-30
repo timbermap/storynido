@@ -46,6 +46,14 @@ export const EMAIL_DATA = {
     message: z.string().min(1),
     url,
   }),
+  contact_message: z.object({
+    name: z.string().min(1),
+    email: z.email(),
+    topic: z.string().min(1),
+    message: z.string().min(1),
+    locale: z.string(),
+    page: z.string().nullable(),
+  }),
 } satisfies Record<EmailTemplate, z.ZodType>;
 
 export type EmailData<T extends EmailTemplate> = z.infer<(typeof EMAIL_DATA)[T]>;

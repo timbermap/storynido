@@ -16,4 +16,4 @@ Você pode cancelar um pedido sem custo enquanto ele não tiver sido enviado par
 
 ## Como pedir um reembolso
 
-Escreva para hola@storynido.com com o número do pedido. O reembolso é feito no mesmo meio de pagamento, nos prazos do seu banco.
+Escreva pelo [formulário de contato](/pt#contact) com o número do pedido. O reembolso é feito no mesmo meio de pagamento, nos prazos do seu banco.

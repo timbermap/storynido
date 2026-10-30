@@ -40,6 +40,7 @@ export interface NotifyInput {
   locale?: Locale;
   data: Record<string, unknown>;
   orderId?: string | null;
+  replyTo?: string;
 }
 
 export type NotifyOutcome = 'sent' | 'duplicate' | 'skipped' | 'failed';
@@ -161,6 +162,7 @@ export class EmailNotifier {
         locale,
         data,
         idempotencyKey: input.key,
+        ...(input.replyTo ? { replyTo: input.replyTo } : {}),
       });
       await ref.update({ status: 'sent', messageId, sentAt: new Date(), updatedAt: new Date() });
       return 'sent';
@@ -190,6 +192,25 @@ export class EmailNotifier {
       ),
     );
     return outcomes;
+  }
+
+  /**
+   * Mensaje del formulario de contacto al equipo. Nunca se manda nada a la dirección que
+   * escribió la persona (no sirve para spam): "Responder" le contesta.
+   */
+  async contactMessage(key: string, data: Record<string, unknown> & { email: string }) {
+    return Promise.all(
+      this.options.adminEmails.map((to) =>
+        this.notify({
+          key: `${key}:${to}`,
+          template: 'contact_message',
+          to,
+          locale: 'es',
+          data,
+          replyTo: data.email,
+        }),
+      ),
+    );
   }
 
   /**

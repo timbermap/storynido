@@ -18,6 +18,10 @@ export const COLLECTIONS = {
   illustrationTasks: 'pages',
   /** adminAlerts/{id}: avisos para el admin (solo servidor). */
   adminAlerts: 'adminAlerts',
+  /** contactMessages/{id}: mensajes del formulario de contacto (solo el servidor y el admin). */
+  contactMessages: 'contactMessages',
+  /** contactLimits/{huella de IP y día}: tope de mensajes de contacto por conexión. */
+  contactLimits: 'contactLimits',
   /** printQuoteRequests/{id}: pedidos de cotización de piezas impresas (Eventos). */
   printQuoteRequests: 'printQuoteRequests',
   /** reviews/{pedido}: opiniones de los clientes (privadas; solo el admin las lee). */

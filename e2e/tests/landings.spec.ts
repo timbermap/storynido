@@ -151,3 +151,16 @@ test('ficha profesional: objetivos propios en vez de enseñanzas generales; env�
   await expect(page.getByLabel('Enviar a')).toBeVisible();
   await expectAccessible(page);
 });
+
+test('contacto: formulario al final de la home, sin el mail a la vista', async ({ page }) => {
+  await page.goto('/es');
+  await expect(page.locator('body')).not.toContainText('hola@storynido.com');
+  const form = page.locator('#contact');
+  await form.getByLabel('Tu nombre').fill('Laura');
+  await form.getByLabel('Tu email').fill('laura@example.com');
+  await form.getByLabel('¿Sobre qué es?').selectOption('order');
+  await form.getByLabel('Tu mensaje').fill('¿Puedo cambiar la dirección de envío de mi pedido?');
+  await expectAccessible(page);
+  await form.getByRole('button', { name: 'Enviar mensaje' }).click();
+  await expect(form.getByRole('status')).toContainText('¡Mensaje enviado!');
+});

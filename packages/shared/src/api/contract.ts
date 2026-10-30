@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { countryCodeSchema } from '../countries';
 import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
+
 import { BOOK_FORMATS, bookFormatSchema } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
 import { characterTraitsSchema, mustKeepSchema } from '../models/character';
@@ -26,6 +27,16 @@ import { PHOTO_STATUSES } from '../models/users';
 import { orderStatusSchema } from '../order-status';
 import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
 import { roleSchema } from '../roles';
+
+/** Temas del formulario de contacto. */
+export const CONTACT_TOPICS = [
+  'order',
+  'product',
+  'events',
+  'professionals',
+  'privacy',
+  'other',
+] as const;
 
 export const API_ERROR_CODES = [
   'bad_request',
@@ -1202,6 +1213,24 @@ export const apiRoutes = {
     summary: 'Borra la cuenta y todos sus datos personales (los pedidos pagados se conservan)',
     body: z.object({ confirm: z.literal(true) }),
     response: z.object({ deleted: z.literal(true) }),
+  },
+  contact: {
+    method: 'POST',
+    path: '/v1/contact',
+    access: 'public',
+    summary:
+      'Formulario de contacto: llega al equipo por mail (Responder contesta a quien escribió) y queda guardado',
+    body: z.object({
+      name: z.string().trim().min(1).max(80),
+      email: z.email().max(200),
+      topic: z.enum(CONTACT_TOPICS),
+      message: z.string().trim().min(10).max(2000),
+      locale: localeSchema,
+      page: z.string().max(200).nullable().default(null),
+      /** Trampa para bots: un campo oculto que una persona deja vacío. */
+      website: z.string().max(200).optional(),
+    }),
+    response: z.object({ sent: z.literal(true) }),
   },
   eventPrintQuote: {
     method: 'POST',

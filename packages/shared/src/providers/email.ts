@@ -16,6 +16,7 @@ export const EMAIL_TEMPLATES = [
   'review_request',
   'new_book_suggestion',
   'admin_alert',
+  'contact_message',
 ] as const;
 
 export type EmailTemplate = (typeof EMAIL_TEMPLATES)[number];
@@ -27,6 +28,8 @@ export interface EmailMessage {
   data: Readonly<Record<string, unknown>>;
   /** Evita mandar dos veces el mismo mail (por ejemplo `order-123:shipped`). */
   idempotencyKey: string;
+  /** "Responder" va a esta dirección (formulario de contacto: a quien escribió). */
+  replyTo?: string;
 }
 
 export interface EmailProvider {

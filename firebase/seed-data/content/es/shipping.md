@@ -18,4 +18,4 @@ El PDF se envía por correo electrónico, normalmente en minutos, con un enlace 
 
 ## Problemas con el envío
 
-Si tu pedido no llega en el plazo indicado o llega dañado, escríbenos a hola@storynido.com.
+Si tu pedido no llega en el plazo indicado o llega dañado, escríbenos con el [formulario de contacto](/es#contact).

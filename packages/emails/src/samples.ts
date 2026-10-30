@@ -54,4 +54,12 @@ export const SAMPLE_DATA: { [T in EmailTemplate]: EmailData<T> } = {
     message: 'El pedido quedó en revisión manual: página 8 sin ilustración aprobada.',
     url: 'https://admin.storynido.com/orders/o-123',
   },
+  contact_message: {
+    name: 'Laura',
+    email: 'laura@example.com',
+    topic: 'order',
+    message: '¿Puedo cambiar la dirección de envío de mi pedido?',
+    locale: 'es',
+    page: '/es',
+  },
 };

@@ -98,9 +98,9 @@ export async function SiteFooter() {
         { href: '/blog', label: tNav('blog') },
       ],
       extra: (
-        <a href="mailto:hola@storynido.com" className="hover:text-white">
-          hola@storynido.com
-        </a>
+        <Link href={{ pathname: '/', hash: 'contact' }} className="hover:text-white">
+          {t('contact')}
+        </Link>
       ),
     },
   ];

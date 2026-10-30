@@ -16,4 +16,4 @@ You can cancel an order at no cost as long as it hasn't been sent to print.
 
 ## How to request a refund
 
-Email hola@storynido.com with your order number. Refunds go back to the original payment method, within your bank's processing times.
+Write to us using the [contact form](/en#contact) with your order number. Refunds go back to the original payment method, within your bank's processing times.

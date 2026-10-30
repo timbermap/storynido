@@ -1558,3 +1558,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **PR 8, cierre propio:** el pago, ya en modo foco, es el cierre de cada línea. Familia elige el formato y Celebraciones las piezas y copias del kit. Profesionales ve el descuento por volumen aplicado y cuánto le falta para el próximo nivel.
 - **PR 9, después del pago:** se sigue en la página del pedido (generación en vivo y descargas), con "Ver en Mis cuentos", que también muestra el pedido en vivo.
 - **Lámina del acompañante:** el planificador marca al personaje secundario que se repite (abuela, mascota) con un aspecto fijo en inglés. Al aprobar al protagonista se genera su lámina una vez (unos USD 0,07, solo si hay acompañante), y es la segunda referencia de la portada, las páginas, las regeneraciones y el libro completo (el worker la congela con el pedido). Se borra con el borrador o la cuenta, como el resto de la muestra.
+
+## 118 · Preguntas frecuentes por tema y formulario de contacto
+
+- **Fecha:** 2026-10-30.
+- **Preguntas frecuentes:** agrupadas por tema ("## " en el Markdown): cómo funciona, fotos y privacidad, precios y envíos, Celebraciones y Profesionales. Se suman ver antes de pagar, protagonista reutilizable, sin fotos, borrar datos, cuánto cuesta, envíos por país, problemas con el libro (como dice la política de reembolsos), el kit y sus ocasiones, y Profesionales con descuento por volumen. Familias y la home las muestran igual.
+- **Formulario de contacto** al final de la home (`#contact`). `POST /v1/contact`:
+  - el mensaje queda en `contactMessages` y llega al equipo (`ADMIN_ALERT_EMAILS`) con la plantilla `contact_message`, y "Responder" contesta a quien escribió (`replyTo`);
+  - nunca se manda nada a la dirección que carga la persona, así el formulario no sirve para spam;
+  - un campo oculto descarta bots y hay un tope de 5 mensajes por conexión y por día (huella de la IP, sin guardar la IP).
+- **El mail del equipo ya no está a la vista** en la home, Familias, el pie, envíos ni reembolsos: todo lleva al formulario. Queda en la política de privacidad y en los términos, donde la ley pide identificar al responsable con un medio de contacto.

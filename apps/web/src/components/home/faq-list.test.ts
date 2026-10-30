@@ -1,19 +1,33 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseFaq } from './faq-list';
+import { parseFaq, parseFaqGroups } from './faq-list';
 
-describe('parseFaq', () => {
-  it('separa preguntas y respuestas por encabezados ###', () => {
-    const items = parseFaq(
-      'Intro ignorada\n\n### ¿Uno?\n\nRespuesta uno.\n\n### ¿Dos?\nRespuesta **dos**.\n',
-    );
-    expect(items).toEqual([
-      { question: '¿Uno?', answer: 'Respuesta uno.' },
-      { question: '¿Dos?', answer: 'Respuesta **dos**.' },
+const md = `### ¿Suelta?
+
+Sí.
+
+## Cómo funciona
+
+### ¿Primera?
+
+Uno.
+
+## Fotos
+
+### ¿Segunda?
+
+Dos.`;
+
+describe('preguntas frecuentes', () => {
+  it('agrupa por "## " y deja las sueltas en un grupo sin título', () => {
+    expect(parseFaqGroups(md)).toEqual([
+      { title: null, items: [{ question: '¿Suelta?', answer: 'Sí.' }] },
+      { title: 'Cómo funciona', items: [{ question: '¿Primera?', answer: 'Uno.' }] },
+      { title: 'Fotos', items: [{ question: '¿Segunda?', answer: 'Dos.' }] },
     ]);
   });
 
-  it('descarta preguntas sin respuesta', () => {
-    expect(parseFaq('### ¿Sola?\n')).toEqual([]);
+  it('la lista plana no arrastra los títulos de grupo a las respuestas', () => {
+    expect(parseFaq(md).map((item) => item.answer)).toEqual(['Sí.', 'Uno.', 'Dos.']);
   });
 });

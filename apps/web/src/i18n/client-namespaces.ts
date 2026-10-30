@@ -16,4 +16,5 @@ export const CLIENT_NAMESPACES = [
   'Viewer',
   'Error',
   'Pro',
+  'Contact',
 ];
