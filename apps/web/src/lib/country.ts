@@ -6,8 +6,15 @@ import {
   type Locale,
 } from '@storynido/shared';
 
+/**
+ * País detectado por la IP (lo escribe el proxy): vive un día y se vuelve a calcular, así un
+ * valor viejo o mal detectado se corrige solo (DECISIONS 124).
+ */
 export const COUNTRY_COOKIE = 'sn_country';
-export const COUNTRY_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+export const COUNTRY_COOKIE_MAX_AGE = 60 * 60 * 24;
+/** País elegido a mano ("Enviar a", Mi cuenta o la cuenta guardada): dura un año y manda sobre la IP. */
+export const COUNTRY_CHOICE_COOKIE = 'sn_country_choice';
+export const COUNTRY_CHOICE_MAX_AGE = 60 * 60 * 24 * 365;
 
 /**
  * Headers de país que agregan las CDN o balanceadores comunes. En Google Cloud se

@@ -68,7 +68,9 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
 }) => {
   test.slow();
   const email = uniqueEmail('e2e');
-  await context.addCookies([{ name: 'sn_country', value: 'MX', url: 'http://localhost:3000' }]);
+  await context.addCookies([
+    { name: 'sn_country_choice', value: 'MX', url: 'http://localhost:3000' },
+  ]);
 
   // --- Crear pide cuenta: enlace mágico y vuelta al creador ---
   await page.goto('/es/crear?line=families');

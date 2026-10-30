@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
-import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE } from '@/lib/country';
+import { COUNTRY_CHOICE_COOKIE, COUNTRY_CHOICE_MAX_AGE } from '@/lib/country';
 import { CountryOptions } from '@/components/country-options';
 
 /**
@@ -24,7 +24,7 @@ export function ShipToSelect({ country }: { country: CountryCode }) {
         value={country}
         disabled={pending}
         onChange={(event) => {
-          document.cookie = `${COUNTRY_COOKIE}=${event.target.value}; path=/; max-age=${String(COUNTRY_COOKIE_MAX_AGE)}; samesite=lax`;
+          document.cookie = `${COUNTRY_CHOICE_COOKIE}=${event.target.value}; path=/; max-age=${String(COUNTRY_CHOICE_MAX_AGE)}; samesite=lax`;
           startTransition(() => {
             router.refresh();
           });

@@ -4,7 +4,13 @@ import { NextRequest } from 'next/server';
 import { isLocale, localeForCountry } from '@storynido/shared';
 
 import { routing } from './i18n/routing';
-import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE, detectCountry, parseCountry } from './lib/country';
+import {
+  COUNTRY_CHOICE_COOKIE,
+  COUNTRY_COOKIE,
+  COUNTRY_COOKIE_MAX_AGE,
+  detectCountry,
+  parseCountry,
+} from './lib/country';
 import { LOCALE_CHOICE_COOKIE } from './lib/locale-choice';
 import { clientIp, countryFromIp } from './lib/server/geoip';
 
@@ -19,7 +25,8 @@ const intl = createIntlMiddleware(routing);
 export default function proxy(request: NextRequest) {
   const segment = request.nextUrl.pathname.split('/')[1] ?? '';
   const hasLocale = isLocale(segment);
-  const needsCountry = !parseCountry(request.cookies.get(COUNTRY_COOKIE)?.value);
+  // Con país elegido a mano no se detecta nada; si no, se detecta (y se renueva) por la IP.
+  const needsCountry = !parseCountry(request.cookies.get(COUNTRY_CHOICE_COOKIE)?.value);
   const choice = request.cookies.get(LOCALE_CHOICE_COOKIE)?.value;
   const chosen = choice && isLocale(choice) ? choice : null;
   const needsLocale = !hasLocale;
@@ -32,11 +39,15 @@ export default function proxy(request: NextRequest) {
 
   if (needsCountry) {
     const locale = hasLocale ? segment : (ipLocale ?? routing.defaultLocale);
-    response.cookies.set(COUNTRY_COOKIE, detectCountry(request.headers, locale, ipCountry), {
-      maxAge: COUNTRY_COOKIE_MAX_AGE,
-      sameSite: 'lax',
-      path: '/',
-    });
+    const detected = detectCountry(request.headers, locale, ipCountry);
+    // Solo se escribe si cambió: no se renueva la cookie en cada página.
+    if (request.cookies.get(COUNTRY_COOKIE)?.value !== detected) {
+      response.cookies.set(COUNTRY_COOKIE, detected, {
+        maxAge: COUNTRY_COOKIE_MAX_AGE,
+        sameSite: 'lax',
+        path: '/',
+      });
+    }
   }
 
   return response;

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { localeForCountry, type Locale } from '@storynido/shared';
 
 import { usePathname } from '@/i18n/navigation';
-import { COUNTRY_COOKIE } from '@/lib/country';
+import { COUNTRY_CHOICE_COOKIE, COUNTRY_COOKIE } from '@/lib/country';
 import { LOCALE_CHOICE_COOKIE, readCookie, rememberLocaleChoice } from '@/lib/locale-choice';
 
 import { isFocusPath } from './focus-header';
@@ -31,7 +31,9 @@ export function LanguageSuggestion() {
   useEffect(() => {
     // Las cookies se leen después de montar (la página se sirve igual para todos).
     if (readCookie(LOCALE_CHOICE_COOKIE)) return;
-    const fromCountry = localeForCountry(readCookie(COUNTRY_COOKIE));
+    const fromCountry = localeForCountry(
+      readCookie(COUNTRY_CHOICE_COOKIE) ?? readCookie(COUNTRY_COOKIE),
+    );
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (fromCountry && fromCountry !== locale) setSuggested(fromCountry);
   }, [locale]);

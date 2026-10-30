@@ -1615,3 +1615,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-30.
 - La sección "Hojear un ejemplo" de la ficha de cada historia se quita, con su atajo junto al título y su componente. Mostraba portada, dedicatoria, un fragmento y páginas vacías: parecía un libro de 4 páginas y terminaba la ficha sin una acción.
 - La ficha termina en sus formatos y precios y en "Crear con esta historia". Los ejemplos ilustrados completos (libros de muestra por historia) pueden volver cuando existan.
+
+## 124 · País de envío: detectado por IP en cada visita, elegido a mano si el usuario lo elige
+
+- **Fecha:** 2026-10-30.
+- **Problema:** el país detectado se guardaba en una cookie de un año. Si la primera visita lo detectaba mal (sin IP útil, o por el idioma del navegador), se quedaba fijo aunque después la IP dijera otro país: el auditor veía Estados Unidos desde Argentina.
+- **Ahora, dos cookies:**
+  - `sn_country`: el país detectado (IP, o idioma del navegador si no hay IP). Vive un día y el proxy lo vuelve a calcular; un valor viejo se corrige solo.
+  - `sn_country_choice`: el país elegido a mano ("Enviar a", Mi cuenta o el país guardado en la cuenta). Dura un año y manda sobre la IP.
+- El servidor decide el país de la request con la elegida y, si no hay, con la IP de esa request (no con la cookie detectada).
+- Quien había elegido un país con el selector anterior lo vuelve a elegir una vez.

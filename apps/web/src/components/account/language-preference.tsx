@@ -6,7 +6,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { LOCALES, LOCALE_DEFINITIONS, type CountryCode, type Locale } from '@storynido/shared';
 
 import { useRouter } from '@/i18n/navigation';
-import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE } from '@/lib/country';
+import { COUNTRY_CHOICE_COOKIE, COUNTRY_CHOICE_MAX_AGE } from '@/lib/country';
 import { CountryOptions } from '@/components/country-options';
 import { rememberLocaleChoice } from '@/lib/locale-choice';
 import { getFirebaseDb } from '@/lib/firebase/client';
@@ -65,7 +65,7 @@ export function LanguagePreference({ uid }: { uid: string }) {
       setError(true);
       return;
     }
-    document.cookie = `${COUNTRY_COOKIE}=${next}; path=/; max-age=${String(COUNTRY_COOKIE_MAX_AGE)}; samesite=lax`;
+    document.cookie = `${COUNTRY_CHOICE_COOKIE}=${next}; path=/; max-age=${String(COUNTRY_CHOICE_MAX_AGE)}; samesite=lax`;
     startTransition(() => {
       router.refresh();
     });

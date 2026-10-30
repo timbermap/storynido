@@ -178,7 +178,7 @@ test('idioma: visitar una página en otro idioma no lo fija; el aviso sugiere el
   baseURL,
 }) => {
   // Desde Argentina (país detectado) con un link en inglés.
-  await context.addCookies([{ name: 'sn_country', value: 'AR', url: String(baseURL) }]);
+  await context.addCookies([{ name: 'sn_country_choice', value: 'AR', url: String(baseURL) }]);
   await page.goto('/en/stories');
   await page.getByRole('button', { name: 'Necessary only' }).click();
   const banner = page.getByRole('region', { name: 'Este sitio también está en español.' });

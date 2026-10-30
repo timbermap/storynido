@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 import { roleFromClaims, type CountryCode, type Locale, type Role } from '@storynido/shared';
 
-import { COUNTRY_COOKIE, COUNTRY_COOKIE_MAX_AGE } from '@/lib/country';
+import { COUNTRY_CHOICE_COOKIE, COUNTRY_CHOICE_MAX_AGE } from '@/lib/country';
 import { LOCALE_CHOICE_COOKIE } from '@/lib/locale-choice';
 
 interface AuthState {
@@ -76,9 +76,9 @@ export function AuthProvider({
           }
           // Cuenta existente: su país e idioma quedan en este dispositivo (sin recargar).
           const saved = await readPreferences(db, user.uid).catch(() => null);
-          const age = String(COUNTRY_COOKIE_MAX_AGE);
+          const age = String(COUNTRY_CHOICE_MAX_AGE);
           if (saved?.country)
-            document.cookie = `${COUNTRY_COOKIE}=${saved.country}; path=/; max-age=${age}; samesite=lax`;
+            document.cookie = `${COUNTRY_CHOICE_COOKIE}=${saved.country}; path=/; max-age=${age}; samesite=lax`;
           if (saved?.locale)
             // El idioma guardado en la cuenta es una elección: manda sobre el de la IP.
             document.cookie = `${LOCALE_CHOICE_COOKIE}=${saved.locale}; path=/; max-age=${age}; samesite=lax`;
