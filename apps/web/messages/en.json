@@ -255,10 +255,12 @@
     "resultCount": "{count, plural, one {# story} other {# stories}}",
     "allAgesOption": "All ages",
     "removeFilter": "Remove filter",
-    "clearAll": "Clear filters"
+    "clearAll": "Clear filters",
+    "formatEbook": "Ebook (PDF)",
+    "formatPrinted": "Printed book: {covers}"
   },
   "Formats": {
-    "digital": "Digital book (PDF)",
+    "digital": "Ebook (PDF)",
     "softcover": "Softcover",
     "hardcover": "Hardcover"
   },

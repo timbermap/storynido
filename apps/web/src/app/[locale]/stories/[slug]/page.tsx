@@ -53,13 +53,14 @@ export default async function StoryPage({ params, searchParams }: Props) {
   const locale = rawLocale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [story, offer, lessons, t, tLessons, tLengths, editorial] = await Promise.all([
+  const [story, offer, lessons, t, tLessons, tLengths, tFormats, editorial] = await Promise.all([
     getStory(locale, slug),
     getOffer(display.country, locale),
     getLessons(locale).catch(() => []),
     getTranslations('Stories'),
     getTranslations('Lessons'),
     getTranslations('Wizard.book.lengths'),
+    getTranslations('Formats'),
     getEditorial(),
   ]);
   if (!story) notFound();
@@ -75,16 +76,24 @@ export default async function StoryPage({ params, searchParams }: Props) {
 
   const amounts = offer?.formats.map((f) => f.amountMinor) ?? [];
   // Comparador: cada extensión que admite la historia, con sus páginas y en qué formatos sale.
-  const formatNames = new Map(offer?.formats.map((f) => [f.format, f.name]) ?? []);
+  const offered = new Set(offer?.formats.map((f) => f.format) ?? []);
+  // Cada extensión: el ebook (PDF) y, si se imprime, el libro físico con sus tapas.
   const lengthOptions = story.lengths
     .filter((length) => editorial.lengths[length].active)
-    .map((length) => ({
-      length,
-      pages: editorial.lengths[length].interiorPages,
-      formats: editorial.lengths[length].formats
-        .map((format) => formatNames.get(format))
-        .filter((name): name is string => Boolean(name)),
-    }));
+    .map((length) => {
+      const formats = editorial.lengths[length].formats.filter((format) => offered.has(format));
+      const covers = formats
+        .filter((format) => format !== 'digital')
+        .map((format) => tFormats(format));
+      return {
+        length,
+        pages: editorial.lengths[length].interiorPages,
+        formats: [
+          ...(formats.includes('digital') ? [t('formatEbook')] : []),
+          ...(covers.length > 0 ? [t('formatPrinted', { covers: covers.join(' · ') })] : []),
+        ],
+      };
+    });
 
   return (
     <article className="container-page py-10 sm:py-14">

@@ -18,7 +18,7 @@ export default function CustomersPage() {
     <>
       <PageHeader
         title="Clientes"
-        text="Historial de compras, nivel Pro y borrado de datos a pedido."
+        text="Historial de compras, descuento por volumen y borrado de datos a pedido."
       />
       <form
         className="mb-4 flex gap-2"

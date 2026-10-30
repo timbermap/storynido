@@ -18,7 +18,7 @@ export function LogoLink({ children }: { children: ReactNode }) {
         if (pathname !== '/') return;
         event.preventDefault();
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'instant' });
       }}
     >
       {children}

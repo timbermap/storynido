@@ -255,10 +255,12 @@
     "resultCount": "{count, plural, one {# história} other {# histórias}}",
     "allAgesOption": "Todas as idades",
     "removeFilter": "Remover filtro",
-    "clearAll": "Limpar filtros"
+    "clearAll": "Limpar filtros",
+    "formatEbook": "Ebook (PDF)",
+    "formatPrinted": "Livro físico: {covers}"
   },
   "Formats": {
-    "digital": "Livro digital (PDF)",
+    "digital": "Ebook (PDF)",
     "softcover": "Capa mole",
     "hardcover": "Capa dura"
   },

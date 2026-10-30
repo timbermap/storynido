@@ -12,8 +12,9 @@ import type { CatalogRepository } from '../catalog';
 import { AppError } from '../errors';
 
 /**
- * StoryNido Profesionales (fase 12c): la cuenta Pro la activa la API (el cliente no puede
- * cambiar su tipo de cuenta) y el descuento se calcula acá, contando compras elegibles.
+ * Descuento por volumen y recurrencia (fase 12c): el perfil profesional lo activa la API (el
+ * cliente no puede cambiar su tipo de cuenta) y el descuento se calcula acá, contando las
+ * compras elegibles de cualquier cuenta.
  */
 export class ProService {
   constructor(

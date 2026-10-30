@@ -8,8 +8,8 @@ export default function ProDiscountsPage() {
   return (
     <ConfigEditor
       kind="proDiscounts"
-      title="Profesionales"
-      text="Descuento por recurrencia: compras elegibles dentro de la ventana. Aplica a compras futuras; los pedidos ya hechos no cambian."
+      title="Descuentos por volumen"
+      text="Descuento por volumen y recurrencia para todas las cuentas: compras elegibles dentro de la ventana. Aplica a compras futuras; los pedidos ya hechos no cambian."
       single={{ id: 'global', defaults: { ...DEFAULT_PRO_DISCOUNTS } }}
       blank={() => ({ ...DEFAULT_PRO_DISCOUNTS })}
       fields={[

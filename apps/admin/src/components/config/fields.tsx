@@ -31,7 +31,7 @@ export type FieldSpec = { path: string; label: string; hint?: string } & (
   | { kind: 'date'; nullable?: boolean }
   /** Un monto opcional por clave (ajustes por extensión, piezas del kit). */
   | { kind: 'moneyRecord'; keys: readonly string[]; currencyPath: string; signed?: boolean }
-  /** Escalones del descuento Pro. */
+  /** Escalones del descuento por volumen y recurrencia. */
   | { kind: 'tiers' }
   /** Texto largo (prompts, guías para la IA). */
   | { kind: 'textarea'; rows?: number }

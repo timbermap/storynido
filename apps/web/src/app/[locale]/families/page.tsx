@@ -133,38 +133,44 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
       </section>
 
       {/* Cómo funciona */}
-      <section id={HOW_IT_WORKS_ID} className="container-page scroll-mt-28 py-20 lg:py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
-            {t('how.title')}
-          </h2>
-          <p className="mt-3 text-lg text-muted-foreground">{t('how.subtitle')}</p>
+      <section id={HOW_IT_WORKS_ID} className="scroll-mt-28 bg-white">
+        <div className="container-page py-20 lg:py-24">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
+              {t('how.title')}
+            </h2>
+            <p className="mt-3 text-lg text-muted-foreground">{t('how.subtitle')}</p>
+          </div>
+          <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-6">
+            {steps.map(({ icon: Icon, title, text, tone }, index) => (
+              <li key={title} className="relative flex flex-col items-center text-center">
+                <div className="relative">
+                  <span className="grid size-28 place-items-center rounded-full bg-card shadow-[var(--shadow-card)]">
+                    <Icon
+                      className="size-11 text-primary/80"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span
+                    className={`absolute -top-1 -left-1 grid size-10 place-items-center rounded-full font-display text-lg font-bold ${tone}`}
+                  >
+                    {index + 1}
+                  </span>
+                </div>
+                {index < steps.length - 1 && (
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="absolute top-12 -right-5 hidden size-7 text-[#e7b9ad] md:block"
+                    strokeWidth={1.5}
+                  />
+                )}
+                <h3 className="mt-6 text-2xl leading-tight font-medium">{title}</h3>
+                <p className="mt-2 max-w-xs text-muted-foreground">{text}</p>
+              </li>
+            ))}
+          </ol>
         </div>
-        <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-6">
-          {steps.map(({ icon: Icon, title, text, tone }, index) => (
-            <li key={title} className="relative flex flex-col items-center text-center">
-              <div className="relative">
-                <span className="grid size-28 place-items-center rounded-full bg-card shadow-[var(--shadow-card)]">
-                  <Icon className="size-11 text-primary/80" strokeWidth={1.5} aria-hidden="true" />
-                </span>
-                <span
-                  className={`absolute -top-1 -left-1 grid size-10 place-items-center rounded-full font-display text-lg font-bold ${tone}`}
-                >
-                  {index + 1}
-                </span>
-              </div>
-              {index < steps.length - 1 && (
-                <ArrowRight
-                  aria-hidden="true"
-                  className="absolute top-12 -right-5 hidden size-7 text-[#e7b9ad] md:block"
-                  strokeWidth={1.5}
-                />
-              )}
-              <h3 className="mt-6 text-2xl leading-tight font-medium">{title}</h3>
-              <p className="mt-2 max-w-xs text-muted-foreground">{text}</p>
-            </li>
-          ))}
-        </ol>
       </section>
 
       <PhotoToStory />
@@ -247,41 +253,40 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
 
       {/* Preguntas frecuentes */}
       {faqItems.length > 0 && (
-        <section
-          id={FAQ_ID}
-          className="container-page grid scroll-mt-28 gap-10 py-20 lg:grid-cols-[1fr_1.6fr] lg:gap-16 lg:py-24"
-        >
-          <div>
-            <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
-              {t('faq.title')}
-            </h2>
-            <p className="mt-4 max-w-sm text-muted-foreground">
-              {t.rich('faq.contact', {
-                form: (chunks) => (
-                  <Link
-                    href={{ pathname: '/faq', hash: CONTACT_ID }}
-                    className="font-semibold text-primary underline-offset-4 hover:underline"
-                  >
-                    {chunks}
-                  </Link>
-                ),
-              })}
-            </p>
-          </div>
-          <div>
-            <FaqList items={faqItems} />
-            <Link
-              href="/faq"
-              className="mt-6 inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
-            >
-              {t('faq.more')} →
-            </Link>
+        <section id={FAQ_ID} className="scroll-mt-28 bg-mint/50">
+          <div className="container-page grid gap-10 py-20 lg:grid-cols-[1fr_1.6fr] lg:gap-16 lg:py-24">
+            <div>
+              <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
+                {t('faq.title')}
+              </h2>
+              <p className="mt-4 max-w-sm text-muted-foreground">
+                {t.rich('faq.contact', {
+                  form: (chunks) => (
+                    <Link
+                      href={{ pathname: '/faq', hash: CONTACT_ID }}
+                      className="font-semibold text-primary underline-offset-4 hover:underline"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </p>
+            </div>
+            <div>
+              <FaqList items={faqItems} />
+              <Link
+                href="/faq"
+                className="mt-6 inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
+              >
+                {t('faq.more')} →
+              </Link>
+            </div>
           </div>
         </section>
       )}
 
       {/* Garantía */}
-      <section className="container-page">
+      <section className="container-page py-16 lg:py-20">
         <div className="flex flex-col items-start gap-5 rounded-2xl border bg-card p-8 sm:flex-row sm:items-center sm:p-10">
           <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-mint text-success">
             <ShieldCheck className="size-7" aria-hidden="true" />
@@ -290,6 +295,16 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
             <h2 className="text-2xl font-medium">{t('guarantee.title')}</h2>
             <p className="mt-2 text-muted-foreground">{t('guarantee.text')}</p>
           </div>
+          <Link
+            href="/create"
+            className={buttonVariants({
+              size: 'lg',
+              className: 'h-14 w-full shrink-0 rounded-full px-8 text-lg sm:ml-auto sm:w-auto',
+            })}
+          >
+            {t('hero.cta')}
+            <ArrowRight aria-hidden="true" />
+          </Link>
         </div>
       </section>
 

@@ -49,7 +49,7 @@ export interface ApiDeps {
   accounts: AccountService;
   checkout: CheckoutService;
   fulfillment: FulfillmentService;
-  /** StoryNido Profesionales: cuenta Pro y descuento por recurrencia. */
+  /** Descuento por volumen y recurrencia (de todas las cuentas) y perfil profesional. */
   pro: ProService;
   /** Dashboard del admin: métricas diarias y costo real de IA. */
   metrics: MetricsService;

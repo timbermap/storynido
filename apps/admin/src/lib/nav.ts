@@ -121,8 +121,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   },
   {
     href: '/pro-discounts',
-    label: 'Profesionales',
-    keywords: 'descuento recurrencia escalones pro',
+    label: 'Descuentos por volumen',
+    keywords: 'descuento volumen recurrencia escalones pro profesionales',
     icon: BriefcaseBusiness,
   },
   {

@@ -185,7 +185,14 @@ test('el logo vuelve a la home: arriba de todo y sin hash', async ({ page }) => 
   await page.goto('/es');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   await page.getByRole('link', { name: 'Empezar mi cuento' }).first().click();
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+  // Se espera a que termine de bajar (el scroll es animado) antes de volver con el logo.
+  await expect
+    .poll(async () => {
+      const before = await page.evaluate(() => window.scrollY);
+      await page.waitForTimeout(250);
+      return before > 100 && before === (await page.evaluate(() => window.scrollY));
+    })
+    .toBe(true);
   await page.locator('header a').first().click();
   await expect(page).not.toHaveURL(/#/);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);

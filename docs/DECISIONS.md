@@ -1717,3 +1717,11 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 
 - **Fecha:** 2026-10-30.
 - La tarjeta "Mira antes de comprar" (vista previa gratis y garantía) cierra con el botón "Empezar mi cuento", que baja a "¿Para quién es?" como el del hero. Los tests de la home apuntan al enlace del hero (`.first()`), porque ahora hay dos.
+
+## 136 · Pasada de pendientes: formatos en la ficha, bandas en Familias y limpieza del concepto Pro
+
+- **Fecha:** 2026-10-30.
+- **Ficha de la historia:** las extensiones muestran "Ebook (PDF)" y "Libro físico: tapa blanda · tapa dura" (antes "Libro digital (PDF) / Tapa blanda / Tapa dura"). `Formats.digital` pasa a "Ebook (PDF)". Los nombres de formato guardados en la base (seed, `productPricing`) todavía dicen "Libro digital (PDF)": se ven en pedidos y mails, y se actualizan con un refresh del seed.
+- **Familias:** mismas bandas de color que la home ("Cómo funciona" blanco, "Preguntas frecuentes" menta) y botón "Armar mi primer cuento" en la tarjeta de garantía.
+- **Admin:** "Profesionales" pasa a "Descuentos por volumen" y desaparece "nivel Pro" de Clientes.
+- **Logo:** sube de inmediato (`behavior: instant`) en vez de animar, para que no se corte si la página cambia de alto mientras baja. El test espera a que termine el scroll animado antes de volver (era una carrera del test).
