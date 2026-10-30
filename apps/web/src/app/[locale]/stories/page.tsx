@@ -4,9 +4,8 @@ import { getTranslations } from 'next-intl/server';
 import type { Locale } from '@storynido/shared';
 
 import { CountryNotice } from '@/components/stories/country-notice';
-import { AutoSubmitSelect } from '@/components/stories/auto-submit-select';
 import { StoryCard } from '@/components/stories/story-card';
-import { Search, X } from 'lucide-react';
+import { LayoutGrid, Search, X } from 'lucide-react';
 
 import { Link } from '@/i18n/navigation';
 import { lowestPrice } from '@/lib/offer';
@@ -65,11 +64,23 @@ export default async function StoriesPage({ params, searchParams }: Props) {
   /** Hay búsqueda o filtros: se muestra cuántas historias quedaron. */
   const narrowed =
     Boolean(search) || filter !== undefined || collection !== undefined || theme !== undefined;
-  const visible = stories
-    .filter((story) => !filter || (story.ageMin <= filter.max && story.ageMax >= filter.min))
-    .filter((story) => !collection || story.collectionIds.includes(collection.slug))
-    .filter((story) => !theme || matchesTheme(story, theme.key))
-    .filter((story) => !search || matchesSearch(story, search));
+  // Cada faceta cuenta lo que quedaría al elegirla, con los demás filtros puestos.
+  const overlaps = (
+    story: { ageMin: number; ageMax: number },
+    range: { min: number; max: number },
+  ) => story.ageMin <= range.max && story.ageMax >= range.min;
+  const matches = (story: (typeof stories)[number], skip?: 'age' | 'theme') =>
+    (skip === 'age' || !filter || overlaps(story, filter)) &&
+    (!collection || story.collectionIds.includes(collection.slug)) &&
+    (skip === 'theme' || !theme || matchesTheme(story, theme.key)) &&
+    (!search || matchesSearch(story, search));
+  const visible = stories.filter((story) => matches(story));
+  const ageCount = (range: { min: number; max: number }) =>
+    stories.filter((story) => matches(story, 'age') && overlaps(story, range)).length;
+  const themeCount = (key: string) =>
+    stories.filter((story) => matches(story, 'theme') && matchesTheme(story, key)).length;
+  const allAgesCount = stories.filter((story) => matches(story, 'age')).length;
+  const allThemesCount = stories.filter((story) => matches(story, 'theme')).length;
   const withQuery = (extra: Record<string, string | undefined>) => {
     const merged = Object.fromEntries(
       Object.entries({
@@ -96,9 +107,9 @@ export default async function StoriesPage({ params, searchParams }: Props) {
         </div>
       </header>
 
-      {/* Una barra: buscar y la edad; abajo, los temas. Sin filas de chips repetidas. */}
-      <form role="search" action="" className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <div className="relative min-w-0 flex-1 sm:max-w-xl">
+      {/* Buscar y edad en una fila; los temas, como barra de categorías fija al hacer scroll. */}
+      <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <form role="search" action="" className="relative min-w-0 lg:w-full lg:max-w-md">
           <label htmlFor="story-search" className="sr-only">
             {t('searchLabel')}
           </label>
@@ -113,64 +124,119 @@ export default async function StoriesPage({ params, searchParams }: Props) {
             defaultValue={search}
             maxLength={80}
             placeholder={t('searchPlaceholder')}
-            className="h-12 w-full rounded-full border bg-card pr-28 pl-12 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="h-12 w-full rounded-xl border bg-card pr-24 pl-12 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           />
           <button
             type="submit"
-            className="absolute top-1.5 right-1.5 h-9 rounded-full bg-action px-4 text-sm font-semibold text-action-foreground transition hover:bg-action-hover"
+            className="absolute top-1.5 right-1.5 h-9 rounded-lg bg-action px-4 text-sm font-semibold text-action-foreground transition hover:bg-action-hover"
           >
             {t('search')}
           </button>
-        </div>
-        <label className="flex items-center gap-2 text-sm font-semibold">
-          <span className="sr-only sm:not-sr-only">{t('filterLabel')}</span>
-          <AutoSubmitSelect
-            name="edad"
-            defaultValue={filter ? String(filter.min) : ''}
-            aria-label={t('filterLabel')}
-            data-track="catalog_filter_used"
-            data-track-filter="age"
-            className="h-12 w-full rounded-full border bg-card px-4 text-base font-medium sm:w-auto"
-          >
-            <option value="">{t('allAgesOption')}</option>
-            {AGE_FILTERS.map((f) => (
-              <option key={f.min} value={f.min}>
-                {t('ageRange', { min: f.min, max: f.max })}
-              </option>
-            ))}
-          </AutoSubmitSelect>
-        </label>
-        {collection && <input type="hidden" name="coleccion" value={collection.slug} />}
-        {theme && <input type="hidden" name="tema" value={theme.key} />}
-      </form>
+          {filter && <input type="hidden" name="edad" value={filter.min} />}
+          {collection && <input type="hidden" name="coleccion" value={collection.slug} />}
+          {theme && <input type="hidden" name="tema" value={theme.key} />}
+        </form>
+
+        <nav
+          aria-label={t('filterLabel')}
+          className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 lg:pb-0"
+        >
+          <div className="inline-flex rounded-xl bg-muted p-1">
+            {[
+              { range: null, label: t('allAgesOption'), count: allAgesCount },
+              ...AGE_FILTERS.map((range) => ({
+                range,
+                label: `${String(range.min)}–${String(range.max)}`,
+                count: ageCount(range),
+              })),
+            ].map(({ range, label, count }) => {
+              const active = range ? filter?.min === range.min : !filter;
+              const disabled = !active && count === 0;
+              const className = cn(
+                'inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap transition',
+                active ? 'bg-card text-foreground shadow-sm' : 'text-foreground/70',
+                disabled ? 'pointer-events-none opacity-40' : !active && 'hover:text-foreground',
+              );
+              const content = (
+                <>
+                  {label}
+                  <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                    {count}
+                  </span>
+                </>
+              );
+              return disabled ? (
+                <span key={label} aria-disabled="true" className={className}>
+                  {content}
+                </span>
+              ) : (
+                <Link
+                  key={label}
+                  href={withQuery({ edad: range ? String(range.min) : undefined })}
+                  data-track="catalog_filter_used"
+                  data-track-filter="age"
+                  aria-current={active ? 'true' : undefined}
+                  aria-label={range ? t('ageRange', { min: range.min, max: range.max }) : label}
+                  className={className}
+                >
+                  {content}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
 
       <nav
         aria-label={t('themeLabel')}
-        className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
+        className="sticky top-16 z-20 -mx-4 mt-6 overflow-x-auto border-b bg-background/95 px-4 backdrop-blur sm:mx-0 sm:px-0 lg:top-[4.75rem]"
       >
-        {STORY_THEMES.map(({ key, icon: Icon }) => {
-          const active = theme?.key === key;
-          return (
-            <Link
-              key={key}
-              // Tocar el tema elegido lo quita.
-              href={withQuery({ tema: active ? undefined : key })}
-              data-track="catalog_filter_used"
-              data-track-filter="theme"
-              aria-current={active ? 'page' : undefined}
-              className={cn(
-                'inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition',
-                active
-                  ? 'border-primary bg-secondary text-primary'
-                  : 'bg-card text-foreground/80 hover:border-primary/40',
-              )}
-            >
-              <Icon className="size-4" aria-hidden="true" />
-              {t(`themes.${key}`)}
-              {active && <X className="size-4" aria-label={t('removeFilter')} />}
-            </Link>
-          );
-        })}
+        <ul className="flex min-w-max gap-1 sm:gap-3">
+          {[
+            { key: null, icon: LayoutGrid, count: allThemesCount },
+            ...STORY_THEMES.map(({ key, icon }) => ({ key, icon, count: themeCount(key) })),
+          ].map(({ key, icon: Icon, count }) => {
+            const active = key ? theme?.key === key : !theme;
+            const disabled = !active && count === 0;
+            const inner = (
+              <>
+                <Icon className="size-5" aria-hidden="true" />
+                <span className="text-sm font-semibold whitespace-nowrap">
+                  {key ? t(`themes.${key}`) : t('allThemes')}
+                </span>
+                <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                  {count}
+                </span>
+              </>
+            );
+            const className = cn(
+              'flex min-h-16 flex-col items-center justify-center gap-0.5 border-b-2 px-3 pt-2 pb-1.5 transition',
+              active
+                ? 'border-primary text-primary'
+                : 'border-transparent text-foreground/70 hover:border-foreground/20 hover:text-foreground',
+              disabled && 'pointer-events-none opacity-40',
+            );
+            return (
+              <li key={key ?? 'all'}>
+                {disabled ? (
+                  <span aria-disabled="true" className={className}>
+                    {inner}
+                  </span>
+                ) : (
+                  <Link
+                    href={withQuery({ tema: key ?? undefined })}
+                    data-track="catalog_filter_used"
+                    data-track-filter="theme"
+                    aria-current={active ? 'page' : undefined}
+                    className={className}
+                  >
+                    {inner}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       </nav>
 
       {filter && visible.length > 0 && visible.length < 3 && (
