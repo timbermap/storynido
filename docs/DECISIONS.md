@@ -1651,3 +1651,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-30.
 - **Familias:** mismo criterio que la home (DECISIONS 125): look ilustrado de antes, textos nuevos. "Su cara. Su nombre. Su aventura.", "Subes una foto y la convertimos en el personaje del cuento. Lo ves gratis antes de decidir.", botón "Ver su personaje gratis" y la nota "Usamos la foto solo para crear el personaje." (coincide con `PRIVACY.md`). La foto sigue rotulada "Su foto" (ilustrada): no se usa "Foto real de …", que sería falso porque el niño es inventado.
 - **Home:** el botón principal baja al selector "¿Para quién es?", así que dice "Empezar mi cuento" y no promete la vista previa en ese clic; lo gratis queda en la fila de confianza.
+
+## 127 · El logo vuelve al inicio de la home
+
+- **Fecha:** 2026-10-30.
+- **Problema:** desde la home, tras tocar el botón del hero la URL quedaba en `/es#audience`. El logo enlazaba a `/`, pero estando ya en la home Next conserva el scroll y no lo subía (medido en staging: quedaba a 168 px).
+- **Ahora:** `LogoLink` (cliente). En la home saca el hash con `history.replaceState` y sube arriba; en cualquier otra página es un enlace normal a la home. Test E2E en `landings.spec.ts`.

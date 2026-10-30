@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { AccountLink } from './account-link';
 import { HeaderCta, NavLink } from './header-links';
 import { Logo } from './logo';
+import { LogoLink } from './logo-link';
 import { MobileMenu } from './mobile-menu';
 
 export const HOW_IT_WORKS_ID = 'how-it-works';
@@ -31,9 +32,9 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-[rgb(38_50_74/0.06)] bg-background/90 backdrop-blur-md">
       <div className="container-page relative flex h-16 items-center justify-between gap-4 lg:h-[4.75rem]">
-        <Link href="/" className="flex shrink-0 items-center rounded-xl">
+        <LogoLink>
           <Logo />
-        </Link>
+        </LogoLink>
 
         <nav
           aria-label={t('mainNav')}

@@ -172,6 +172,16 @@ test('preguntas frecuentes: la home destaca 4 y la página propia tiene todas y 
   await expect(form.getByRole('status')).toContainText('¡Mensaje enviado!');
 });
 
+test('el logo vuelve a la home: sin #audience y arriba de todo', async ({ page }) => {
+  await page.goto('/es');
+  await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await page.getByRole('link', { name: 'Empezar mi cuento' }).click();
+  await expect(page).toHaveURL(/#audience$/);
+  await page.locator('header a').first().click();
+  await expect(page).not.toHaveURL(/#/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
+});
+
 test('idioma: visitar una página en otro idioma no lo fija; el aviso sugiere el del país', async ({
   page,
   context,
