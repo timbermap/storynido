@@ -246,7 +246,10 @@
     "kitTitle": "Your celebration kit",
     "kitText": "Every piece comes from the same design, with the guest of honor as the hero. The price doesn't change with the number of guests.",
     "createKit": "Design the kit with this story",
-    "resultCount": "{count, plural, one {# story} other {# stories}}"
+    "resultCount": "{count, plural, one {# story} other {# stories}}",
+    "allAgesOption": "All ages",
+    "removeFilter": "Remove filter",
+    "clearAll": "Clear filters"
   },
   "Formats": {
     "digital": "Digital book (PDF)",

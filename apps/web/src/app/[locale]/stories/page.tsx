@@ -4,8 +4,9 @@ import { getTranslations } from 'next-intl/server';
 import type { Locale } from '@storynido/shared';
 
 import { CountryNotice } from '@/components/stories/country-notice';
+import { AutoSubmitSelect } from '@/components/stories/auto-submit-select';
 import { StoryCard } from '@/components/stories/story-card';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 import { Link } from '@/i18n/navigation';
 import { lowestPrice } from '@/lib/offer';
@@ -42,7 +43,8 @@ export default async function StoriesPage({ params, searchParams }: Props) {
   const t = await getTranslations('Stories');
 
   const query = await searchParams;
-  const requested = Number(query.edad);
+  // "Todas las edades" llega como `edad=` vacío: no es la franja de 0 a 3.
+  const requested = query.edad ? Number(query.edad) : Number.NaN;
   const filter = AGE_FILTERS.find((f) => f.min === requested);
   const display = await getDisplayCountry(locale);
 
@@ -61,7 +63,8 @@ export default async function StoriesPage({ params, searchParams }: Props) {
   const theme = STORY_THEMES.find((item) => item.key === query.tema);
   const search = query.q?.trim().slice(0, 80) ?? '';
   /** Hay búsqueda o filtros: se muestra cuántas historias quedaron. */
-  const narrowed = Boolean(search) || filter !== undefined || collection !== undefined;
+  const narrowed =
+    Boolean(search) || filter !== undefined || collection !== undefined || theme !== undefined;
   const visible = stories
     .filter((story) => !filter || (story.ageMin <= filter.max && story.ageMax >= filter.min))
     .filter((story) => !collection || story.collectionIds.includes(collection.slug))
@@ -93,89 +96,82 @@ export default async function StoriesPage({ params, searchParams }: Props) {
         </div>
       </header>
 
-      <form role="search" action="" className="mt-8 flex max-w-xl gap-2">
-        <label htmlFor="story-search" className="sr-only">
-          {t('searchLabel')}
+      {/* Una barra: buscar y la edad; abajo, los temas. Sin filas de chips repetidas. */}
+      <form role="search" action="" className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <div className="relative min-w-0 flex-1 sm:max-w-xl">
+          <label htmlFor="story-search" className="sr-only">
+            {t('searchLabel')}
+          </label>
+          <Search
+            className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <input
+            id="story-search"
+            name="q"
+            type="search"
+            defaultValue={search}
+            maxLength={80}
+            placeholder={t('searchPlaceholder')}
+            className="h-12 w-full rounded-full border bg-card pr-28 pl-12 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          />
+          <button
+            type="submit"
+            className="absolute top-1.5 right-1.5 h-9 rounded-full bg-action px-4 text-sm font-semibold text-action-foreground transition hover:bg-action-hover"
+          >
+            {t('search')}
+          </button>
+        </div>
+        <label className="flex items-center gap-2 text-sm font-semibold">
+          <span className="sr-only sm:not-sr-only">{t('filterLabel')}</span>
+          <AutoSubmitSelect
+            name="edad"
+            defaultValue={filter ? String(filter.min) : ''}
+            aria-label={t('filterLabel')}
+            data-track="catalog_filter_used"
+            data-track-filter="age"
+            className="h-12 w-full rounded-full border bg-card px-4 text-base font-medium sm:w-auto"
+          >
+            <option value="">{t('allAgesOption')}</option>
+            {AGE_FILTERS.map((f) => (
+              <option key={f.min} value={f.min}>
+                {t('ageRange', { min: f.min, max: f.max })}
+              </option>
+            ))}
+          </AutoSubmitSelect>
         </label>
-        <input
-          id="story-search"
-          name="q"
-          type="search"
-          defaultValue={search}
-          maxLength={80}
-          placeholder={t('searchPlaceholder')}
-          className="h-11 min-w-0 flex-1 rounded-full border bg-card px-5 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        />
-        {filter && <input type="hidden" name="edad" value={filter.min} />}
         {collection && <input type="hidden" name="coleccion" value={collection.slug} />}
         {theme && <input type="hidden" name="tema" value={theme.key} />}
-        <button
-          type="submit"
-          aria-label={t('search')}
-          className="grid size-11 shrink-0 place-items-center rounded-full bg-action text-action-foreground transition hover:bg-action-hover"
-        >
-          <Search className="size-5" aria-hidden="true" />
-        </button>
       </form>
 
-      <nav aria-label={t('themeLabel')} className="mt-5 flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-sm font-semibold">{t('themeLabel')}:</span>
-        <FilterLink
-          filter="theme"
-          href={withQuery({ tema: undefined })}
-          active={!theme}
-          label={t('allThemes')}
-        />
-        {STORY_THEMES.map((item) => (
-          <FilterLink
-            filter="theme"
-            key={item.key}
-            href={withQuery({ tema: item.key })}
-            active={theme?.key === item.key}
-            label={t(`themes.${item.key}`)}
-          />
-        ))}
+      <nav
+        aria-label={t('themeLabel')}
+        className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
+      >
+        {STORY_THEMES.map(({ key, icon: Icon }) => {
+          const active = theme?.key === key;
+          return (
+            <Link
+              key={key}
+              // Tocar el tema elegido lo quita.
+              href={withQuery({ tema: active ? undefined : key })}
+              data-track="catalog_filter_used"
+              data-track-filter="theme"
+              aria-current={active ? 'page' : undefined}
+              className={cn(
+                'inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition',
+                active
+                  ? 'border-primary bg-secondary text-primary'
+                  : 'bg-card text-foreground/80 hover:border-primary/40',
+              )}
+            >
+              <Icon className="size-4" aria-hidden="true" />
+              {t(`themes.${key}`)}
+              {active && <X className="size-4" aria-label={t('removeFilter')} />}
+            </Link>
+          );
+        })}
       </nav>
-
-      <nav aria-label={t('filterLabel')} className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-sm font-semibold">{t('filterLabel')}:</span>
-        <FilterLink
-          filter="age"
-          href={withQuery({ edad: undefined })}
-          active={!filter}
-          label={t('allAges')}
-        />
-        {AGE_FILTERS.map((f) => (
-          <FilterLink
-            filter="age"
-            key={f.min}
-            href={withQuery({ edad: String(f.min) })}
-            active={filter?.min === f.min}
-            label={t('ageRange', { min: f.min, max: f.max })}
-          />
-        ))}
-      </nav>
-
-      {collections.length > 1 && (
-        <nav aria-label={t('collectionLabel')} className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-sm font-semibold">{t('collectionLabel')}:</span>
-          <FilterLink
-            filter="collection"
-            href={withQuery({ coleccion: undefined })}
-            active={!collection}
-            label={t('allCollections')}
-          />
-          {collections.map((item) => (
-            <FilterLink
-              filter="collection"
-              key={item.slug}
-              href={withQuery({ coleccion: item.slug })}
-              active={collection?.slug === item.slug}
-              label={item.name}
-            />
-          ))}
-        </nav>
-      )}
 
       {filter && visible.length > 0 && visible.length < 3 && (
         <p role="note" className="mt-8 max-w-2xl rounded-lg bg-accent px-4 py-3 text-sm">
@@ -194,12 +190,40 @@ export default async function StoriesPage({ params, searchParams }: Props) {
         </div>
       ) : (
         <>
-          {/* Con búsqueda o filtros, cuántas quedaron (se anuncia al cambiar). */}
-          {narrowed && (
-            <p role="status" className="mt-8 text-sm font-semibold text-muted-foreground">
+          {/* Cuántas quedaron y qué filtros hay, cada uno con su ✕ (se anuncia al cambiar). */}
+          <div className="mt-8 flex flex-wrap items-center gap-2 text-sm">
+            <p role="status" className="mr-2 font-semibold text-muted-foreground">
               {t('resultCount', { count: visible.length })}
             </p>
-          )}
+            {[
+              search ? { label: `“${search}”`, href: withQuery({ q: undefined }) } : null,
+              filter
+                ? {
+                    label: t('ageRange', { min: filter.min, max: filter.max }),
+                    href: withQuery({ edad: undefined }),
+                  }
+                : null,
+              collection
+                ? { label: collection.name, href: withQuery({ coleccion: undefined }) }
+                : null,
+            ]
+              .filter((item) => item !== null)
+              .map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-muted px-3 font-medium hover:bg-secondary"
+                >
+                  {item.label}
+                  <X className="size-3.5" aria-label={t('removeFilter')} />
+                </Link>
+              ))}
+            {narrowed && (
+              <Link href="/stories" className="ml-1 font-semibold text-primary hover:underline">
+                {t('clearAll')}
+              </Link>
+            )}
+          </div>
           <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
             {visible.map((story, index) => (
               <StoryCard
@@ -214,33 +238,5 @@ export default async function StoriesPage({ params, searchParams }: Props) {
         </>
       )}
     </div>
-  );
-}
-
-function FilterLink({
-  href,
-  active,
-  label,
-  filter,
-}: {
-  href: '/stories' | { pathname: '/stories'; query: Record<string, string> };
-  active: boolean;
-  label: string;
-  /** Qué filtro es, para el evento del embudo (sin datos personales). */
-  filter: 'age' | 'theme' | 'collection';
-}) {
-  return (
-    <Link
-      href={href}
-      data-track="catalog_filter_used"
-      data-track-filter={filter}
-      aria-current={active ? 'page' : undefined}
-      className={cn(
-        'rounded-full border px-4 py-1.5 text-sm font-medium transition',
-        active ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:bg-muted',
-      )}
-    >
-      {label}
-    </Link>
   );
 }

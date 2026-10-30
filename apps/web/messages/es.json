@@ -246,7 +246,10 @@
     "kitTitle": "Tu kit para la celebración",
     "kitText": "Todas las piezas salen del mismo diseño, con el homenajeado como protagonista. El precio no cambia con la cantidad de invitados.",
     "createKit": "Diseñar el kit con esta historia",
-    "resultCount": "{count, plural, one {# historia} other {# historias}}"
+    "resultCount": "{count, plural, one {# historia} other {# historias}}",
+    "allAgesOption": "Todas las edades",
+    "removeFilter": "Quitar filtro",
+    "clearAll": "Limpiar filtros"
   },
   "Formats": {
     "digital": "Libro digital (PDF)",
