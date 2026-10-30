@@ -49,13 +49,13 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 
 ## 5. Dominios (requieren autorización en los DNS)
 
-| Estado | Qué                                                                                | Quién |
-| ------ | ---------------------------------------------------------------------------------- | ----- |
-| ⬜     | `storynido.com` → App Hosting `web` (producción)                                   | 👤    |
-| ⬜     | `www.storynido.com` → redirección a `storynido.com`                                | 👤    |
-| ⬜     | `api.storynido.com` → Cloud Run `api` (variable `api_domain`)                      | 🤝    |
-| ⬜     | Admin: subdominio propio (por ejemplo `admin.storynido.com`) → App Hosting `admin` | 👤    |
-| ⬜     | Resend: dominio verificado (SPF, DKIM y DMARC) para `hola@storynido.com`           | 👤    |
+| Estado | Qué                                                                                                         | Quién |
+| ------ | ----------------------------------------------------------------------------------------------------------- | ----- |
+| ⬜     | `storynido.com` → App Hosting `web` (producción)                                                            | 👤    |
+| ⬜     | `www.storynido.com` → redirección a `storynido.com`                                                         | 👤    |
+| ⬜     | `api.storynido.com` → Cloud Run `api` (variable `api_domain`)                                               | 🤝    |
+| ⬜     | Admin: subdominio propio (por ejemplo `admin.storynido.com`) → App Hosting `admin`                          | 👤    |
+| ✅     | Resend: dominio verificado (SPF, DKIM y DMARC `p=none`) para `hola@storynido.com`; verificado el 2026-10-30 | 👤    |
 
 ## 6. Seguridad
 
