@@ -94,12 +94,6 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
                 {t('hero.cta')}
                 <ArrowRight aria-hidden="true" />
               </Link>
-              <Link
-                href="/stories"
-                className="border-b-2 border-foreground/25 pb-0.5 text-lg font-semibold transition-colors hover:border-primary hover:text-primary"
-              >
-                {t('hero.explore')}
-              </Link>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">{t('hero.photoNote')}</p>
             {highlights && (

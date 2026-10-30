@@ -84,7 +84,7 @@
       "eyebrow": "Histórias que abraçam",
       "title": "Seu filho é o herói desta história.",
       "subtitle": "Uma história única com o nome, o rostinho e as aventuras que ele sempre sonhou.",
-      "cta": "Ver o personagem grátis",
+      "cta": "Montar minha primeira história",
       "secondary": "Ver como funciona",
       "fromPrice": "A partir de {price}",
       "formats": "Disponível em livro digital e impresso",
@@ -945,7 +945,7 @@
       "howTitle": "Como funciona",
       "steps": {
         "1": {
-          "title": "Crie sua conta profissional",
+          "title": "Crie sua conta",
           "text": "Uma única conta para todos os seus projetos e compras."
         },
         "2": {
@@ -972,8 +972,8 @@
           "text": "Um apelido em vez do nome completo, modo sem foto e nenhum dado clínico."
         },
         "4": {
-          "title": "Preços para profissionais",
-          "text": "Haverá preço Pro e descontos por compras recorrentes. Publicamos as condições quando abrirmos as vendas."
+          "title": "Descontos por volume",
+          "text": "Descontos se você precisa de várias histórias ou pede com frequência. Publicamos as condições quando abrirmos as vendas."
         }
       },
       "collectionsTitle": "Comece pelo que você precisa",
@@ -998,7 +998,7 @@
         }
       },
       "finalTitle": "Uma história para cada criança que você acompanha",
-      "signInTitle": "Crie sua conta profissional",
+      "signInTitle": "Crie sua conta para começar",
       "signInText": "Assim guardamos seus projetos e compras em um só lugar. É rápido e sem senhas.",
       "ctaExamples": "Ver as coleções",
       "collectionsSubtitle": "Cada coleção responde a uma situação real. Veja as histórias, folheie um exemplo e só depois crie sua conta.",
@@ -1213,8 +1213,8 @@
   },
   "Pro": {
     "activation": {
-      "title": "Ative sua conta Pro",
-      "text": "Conte sua profissão para criar projetos por criança e ter acesso ao preço Pro e aos descontos por recorrência.",
+      "title": "Conte o que você faz",
+      "text": "Para criar projetos por criança e ter acesso aos descontos por volume e por pedidos recorrentes.",
       "profession": "Profissão",
       "professionEmpty": "Escolha uma opção",
       "professionOther": "Qual?",
@@ -1222,7 +1222,7 @@
       "practicePlaceholder": "Ex.: Espaço Aprender",
       "country": "País",
       "note": "É a mesma conta e o mesmo login. Não pedimos diagnósticos nem dados clínicos.",
-      "submit": "Ativar conta Pro",
+      "submit": "Salvar e continuar",
       "required": "Escolha sua profissão.",
       "error": "Não conseguimos ativar a conta. Tente novamente.",
       "professions": {
@@ -1236,11 +1236,11 @@
       }
     },
     "account": {
-      "title": "Conta Pro",
+      "title": "Seus projetos",
       "newProject": "Novo projeto",
       "purchases": "{count, plural, =0 {Nenhuma compra} one {# compra} other {# compras}} nos últimos {days} dias",
       "discount": "Seu desconto atual: {digital}% no digital e {print}% no impresso.",
-      "basePrice": "Você tem o preço Pro base.",
+      "basePrice": "Você está no preço base: o desconto cresce com as suas compras.",
       "next": "Com mais {missing, plural, one {# compra} other {# compras}} você chega a {percent}%.",
       "loading": "Carregando projetos…",
       "empty": "Você ainda não tem projetos. Cada criança com quem você trabalha é um projeto.",

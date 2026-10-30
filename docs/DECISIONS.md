@@ -1695,3 +1695,11 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Pago:** los formatos se agrupan en "Ebook · para leer en pantalla" (Ebook (PDF)) y "Libro físico · lo imprimimos y te lo enviamos" (tapa blanda y tapa dura), para que se entienda qué es digital y qué se imprime. Los precios y el "desde" no cambian.
 - **Enseñanzas:** las aventuras de "Combínalo con cualquier aventura" van más chicas (`StoryCard` con `compact`, 5 por fila en escritorio) para que no le roben protagonismo al mensaje. Antes del pie hay un cierre con "Comenzar ahora", la misma acción que arriba.
 - **Hero de Profesionales:** sin "Crear un proyecto"; queda solo "Ver las colecciones" (crear sigue en el cierre de la página).
+
+## 133 · Sin "cuenta profesional", colores entre secciones y botón de Familias
+
+- **Fecha:** 2026-10-30.
+- **Sin "cuenta profesional" / "Cuenta Pro" en los textos:** una persona que trabaja con niños es un usuario más, con fin profesional, que puede pedir varios cuentos. Los textos pasan a "Crea tu cuenta", "Cuéntanos a qué te dedicas", "Tus proyectos" y "Descuentos por volumen", con el foco en descuentos por volumen y por pedidos recurrentes. **Solo es texto:** la lógica sigue igual (la activación por profesión y el descuento por recurrencia, con tope en impresos, siguen siendo del perfil Pro). Pendiente de decidir: que cualquier usuario acceda a los descuentos por volumen sin activar un perfil.
+- **Home:** "Cómo funciona" sobre banda blanca y "Preguntas frecuentes" sobre menta suave, para alternar con el crema y la banda durazno de "¿Para quién es?".
+- **Hero de Familias:** un solo botón, "Armar mi primer cuento"; se saca "Ver historias" (el catálogo está en el menú).
+- **Cruce productos × imprentas:** `docs/PRODUCTOS-Y-IMPRENTAS.md`.
