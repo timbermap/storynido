@@ -1,6 +1,6 @@
 {
   "Meta": {
-    "title": "{brand}: your child is the hero of this story",
+    "title": "{brand}: every child, the hero of a one-of-a-kind story",
     "description": "A one-of-a-kind illustrated story with their name, their face and the adventures they've always dreamed of. See a free preview and get it digital or printed.",
     "skipToContent": "Skip to content"
   },
@@ -102,7 +102,7 @@
       "choose": "Choose who it is for",
       "digitalNote": "Instantly, to read on screen",
       "printedNote": "Shipped by country",
-      "homeHeadline": "Your child, the hero of <hl>a one-of-a-kind story</hl>.",
+      "homeHeadline": "Every child, the hero of <hl>a one-of-a-kind story</hl>.",
       "script": "Stories that inspire, teach and stay with you forever.",
       "exploreStories": "Browse stories"
     },

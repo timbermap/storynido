@@ -1,6 +1,6 @@
 {
   "Meta": {
-    "title": "{brand}: tu hijo es el héroe de esta historia",
+    "title": "{brand}: cada niño, protagonista de una historia única",
     "description": "Un cuento ilustrado único con su nombre, su carita y las aventuras que siempre soñó. Mira una vista previa gratis y recíbelo en digital o impreso.",
     "skipToContent": "Saltar al contenido"
   },
@@ -102,7 +102,7 @@
       "choose": "Elegir para quién es",
       "digitalNote": "Al instante, para leer en pantalla",
       "printedNote": "Con envío según tu país",
-      "homeHeadline": "Tu hijo, protagonista de <hl>una historia única</hl>.",
+      "homeHeadline": "Cada niño, protagonista de <hl>una historia única</hl>.",
       "script": "Historias que inspiran, enseñan y quedan para siempre.",
       "exploreStories": "Explorar cuentos"
     },
