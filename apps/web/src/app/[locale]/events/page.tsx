@@ -118,6 +118,7 @@ export default async function EventsPage({ params }: Props) {
         stories={stories}
         createLabel={t('viewStory')}
         line="events"
+        start={{ label: t('collectionStart'), mode: 'theme' }}
       />
       <PhotoPromise />
 

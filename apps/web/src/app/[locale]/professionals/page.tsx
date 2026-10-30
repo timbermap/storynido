@@ -90,6 +90,7 @@ export default async function ProfessionalsPage({ params }: Props) {
         stories={stories}
         createLabel={t('viewStory')}
         line="professionals"
+        start={{ label: t('collectionStart'), mode: 'story' }}
       />
       <LandingSteps
         title={t('howTitle')}

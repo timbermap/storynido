@@ -64,7 +64,7 @@ export default async function BlogPostPage({ params }: Props) {
       />
       <Link
         href="/blog"
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         {t('back')}

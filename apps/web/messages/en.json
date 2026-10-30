@@ -45,7 +45,8 @@
       "professionals": "Professional"
     },
     "saveAndExit": "Save and exit",
-    "help": "Help"
+    "help": "Help",
+    "back": "Back"
   },
   "Switchers": {
     "language": "Language"
@@ -920,7 +921,8 @@
       "kitDesign": "Design: {price} (includes the mini story)",
       "kitExtra": "+ {price}",
       "kitFull": "Full kit: {price}, no matter how many guests.",
-      "kitUsd": "Prices in US dollars (USD)."
+      "kitUsd": "Prices in US dollars (USD).",
+      "collectionStart": "Design the kit with this theme"
     },
     "professionals": {
       "metaTitle": "Personalized stories for educators, therapists and specialists",
@@ -992,7 +994,8 @@
       "signInText": "That’s how we keep your projects and purchases in one place. It’s quick and password-free.",
       "ctaExamples": "See examples for my work",
       "collectionsSubtitle": "Each collection answers a real situation. Browse the stories, flip through an example, and only then create your account.",
-      "viewStory": "View the story"
+      "viewStory": "View the story",
+      "collectionStart": "Create with this collection"
     }
   },
   "Viewer": {

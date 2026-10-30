@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useEffectEvent, useState } from 'react';
 
-import type { Channel, Locale } from '@storynido/shared';
+import { EMPTY_BIRTHDAY, type Channel, type Locale } from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,7 @@ export function CreateStart({
   channel: channelParam,
   proGate,
   catalog,
+  eventTheme = null,
 }: {
   storyId: string | null;
   lessonId: string | null;
@@ -58,6 +59,8 @@ export function CreateStart({
   /** Textos de la puerta de cuenta de Profesionales. */
   proGate: { title: string; text: string };
   catalog: WizardCatalog;
+  /** Celebraciones: temática que viene de la tarjeta de un tema en la landing. */
+  eventTheme?: string | null;
 }) {
   const t = useTranslations('Wizard');
   const locale = useLocale() as Locale;
@@ -99,8 +102,8 @@ export function CreateStart({
       return;
     }
     if (line !== channel) setChannel(line);
-    if (storyId || lessonId) {
-      // Con una historia elegida: si hay un intento vacío de esta línea, se reutiliza (así entrar
+    if (storyId || lessonId || eventTheme) {
+      // Con una historia (o temática) elegida: si hay un intento vacío de esta línea, se reutiliza (así entrar
       // varias veces desde las fichas no deja borradores vacíos sueltos).
       const reusable = all.find((draft) => draft.channel === line && isEmptyDraft(draft));
       if (!reusable) {
@@ -108,8 +111,11 @@ export function CreateStart({
         return;
       }
       await updateBook(db, reusable.id, {
-        storyId,
+        ...(storyId ? { storyId } : {}),
         ...(lessonId ? { lessonIds: [lessonId] } : {}),
+        ...(eventTheme && line === 'events'
+          ? { event: { ...EMPTY_BIRTHDAY, theme: eventTheme } }
+          : {}),
       });
       router.replace({ pathname: '/create/[bookId]', params: { bookId: reusable.id } });
       return;
@@ -160,7 +166,7 @@ export function CreateStart({
     return (
       <Wizard
         bookId={null}
-        preset={{ language: locale, storyId, lessonId, channel }}
+        preset={{ language: locale, storyId, lessonId, channel, eventTheme }}
         catalog={catalog}
       />
     );

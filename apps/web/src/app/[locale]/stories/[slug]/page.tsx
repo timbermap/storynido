@@ -119,7 +119,7 @@ export default async function StoryPage({ params, searchParams }: Props) {
         href={
           line === 'events' ? '/events' : line === 'professionals' ? '/professionals' : '/stories'
         }
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         {line ? t(`backTo.${line}`) : t('back')}

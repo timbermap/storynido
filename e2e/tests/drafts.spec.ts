@@ -59,3 +59,18 @@ test('si Firestore no responde, el creador no queda cargando', async ({ page }) 
       .or(page.locator('h1', { hasText: 'Elige la aventura' })),
   ).toBeVisible({ timeout: 40_000 });
 });
+
+test('desde un tema de Celebraciones, el creador abre con la temática cargada', async ({
+  page,
+}) => {
+  await page.goto('/es/eventos');
+  await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  const start = page.getByRole('link', { name: /Diseñar el kit con este tema/ }).first();
+  const theme = new URL(String(await start.getAttribute('href')), 'http://x').searchParams.get(
+    'tema',
+  );
+  expect(theme).toBeTruthy();
+  await start.click();
+  await signInAtGate(page, uniqueEmail('tema'));
+  await expect(page.locator('#event-theme')).toHaveValue(String(theme), { timeout: 30_000 });
+});

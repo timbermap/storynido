@@ -1575,3 +1575,15 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **`/preguntas-frecuentes`** (`/faq`, `/perguntas-frequentes`): todas las preguntas por tema y, al final, el formulario de contacto. Tiene los datos FAQPage para buscadores y está en el sitemap.
 - **La home y Familias** muestran 4 destacadas (la primera de cada tema) y "Ver todas las preguntas". Así la landing no se alarga.
 - **"Ayuda" del creador, el pie, "¿Otra duda?", envíos y reembolsos** llevan a esa página o a su formulario.
+
+## 120 · Login en navegadores integrados, pasada en celular y temas que se pueden tocar
+
+- **Fecha:** 2026-10-30.
+- **Login en apps:** verificado en staging con los navegadores integrados de Instagram, Facebook y WhatsApp (user agent simulado): entran por redirección y llegan a Google sin error. Chrome sigue con el popup. La vuelta al sitio necesita una cuenta real.
+- **Pasada en celular (390 px):** 13 páginas públicas sin scroll horizontal. Se corrigió:
+  - **Ficha de historia:** abría desplazada hasta el visor, porque `scrollIntoView` de la miniatura movía toda la página. Ahora solo se desplaza la tira.
+  - **Links de volver y del pie:** pasan a 44 px de área táctil.
+  - **`/nuevo`:** el encabezado dice "Volver" en lugar de "Guardar y salir".
+- **Temas y colecciones:**
+  - cada tema de Celebraciones tiene "Diseñar el kit con este tema", que abre el creador con la temática de la fiesta cargada (`/crear?line=events&tema=…`);
+  - cada colección de Profesionales tiene "Crear con esta colección", que abre el creador con su primera historia elegida.

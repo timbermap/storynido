@@ -45,7 +45,8 @@
       "professionals": "Profissional"
     },
     "saveAndExit": "Salvar e sair",
-    "help": "Ajuda"
+    "help": "Ajuda",
+    "back": "Voltar"
   },
   "Switchers": {
     "language": "Idioma"
@@ -920,7 +921,8 @@
       "kitDesign": "Design: {price} (inclui a mini história)",
       "kitExtra": "+ {price}",
       "kitFull": "Kit completo: {price}, não importa quantos convidados.",
-      "kitUsd": "Preços em dólares (USD)."
+      "kitUsd": "Preços em dólares (USD).",
+      "collectionStart": "Criar o kit com este tema"
     },
     "professionals": {
       "metaTitle": "Histórias personalizadas para psicopedagogos, professores e terapeutas",
@@ -992,7 +994,8 @@
       "signInText": "Assim guardamos seus projetos e compras em um só lugar. É rápido e sem senhas.",
       "ctaExamples": "Ver exemplos para o meu trabalho",
       "collectionsSubtitle": "Cada coleção responde a uma situação real. Veja as histórias, folheie um exemplo e só depois crie sua conta.",
-      "viewStory": "Ver a história"
+      "viewStory": "Ver a história",
+      "collectionStart": "Criar com esta coleção"
     }
   },
   "Viewer": {

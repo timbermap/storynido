@@ -23,16 +23,18 @@ export function HeaderSwitch({ children }: { children: ReactNode }) {
   const t = useTranslations('Nav');
   const pathname = usePathname();
   if (!isFocusPath(pathname)) return children;
+  const choosing = pathname === '/new';
   return (
     <header className="sticky top-0 z-30 border-b border-[rgb(38_50_74/0.06)] bg-background/90 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between gap-4">
-        {/* Cada paso se guarda al avanzar: salir no pierde nada de lo ya guardado. */}
+        {/* Cada paso se guarda al avanzar: salir no pierde nada de lo ya guardado. En /nuevo
+            todavía no hay nada que guardar: solo volver. */}
         <Link
-          href="/my-stories"
+          href={choosing ? '/' : '/my-stories'}
           className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-foreground/80 hover:text-primary"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
-          {t('saveAndExit')}
+          {choosing ? t('back') : t('saveAndExit')}
         </Link>
         <span className="hidden sm:block" aria-hidden="true">
           <Logo />

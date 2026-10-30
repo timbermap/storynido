@@ -69,11 +69,16 @@ export function BookViewer({
     if (page) onPageChange?.(page);
   };
 
-  // La miniatura actual queda a la vista en la tira.
+  // La miniatura actual queda centrada en la tira. Solo se desplaza la tira: scrollIntoView
+  // movía toda la página hasta el visor al cargar (en el celular, la ficha abría a la mitad).
   useEffect(() => {
-    thumbsRef.current
-      ?.querySelector<HTMLElement>('[aria-current="page"]')
-      ?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    const strip = thumbsRef.current;
+    const item = strip?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!strip || !item) return;
+    strip.scrollTo({
+      left: item.offsetLeft - strip.clientWidth / 2 + item.clientWidth / 2,
+      behavior: 'smooth',
+    });
   }, [index]);
 
   if (!current) return null;
@@ -155,7 +160,7 @@ export function BookViewer({
       </div>
 
       <nav aria-label={t('thumbnails')} className="mt-3">
-        <ol ref={thumbsRef} className="flex gap-2 overflow-x-auto pb-2">
+        <ol ref={thumbsRef} className="relative flex gap-2 overflow-x-auto pb-2">
           {pages.map((page, position) => (
             <li key={page.key} className="shrink-0">
               <button

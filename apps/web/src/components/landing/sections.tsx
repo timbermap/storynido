@@ -170,6 +170,7 @@ export function LandingCollections({
   stories = [],
   createLabel,
   line,
+  start,
 }: {
   /** Ancla para llegar desde un botón del hero ("Ver ejemplos"). */
   id?: string;
@@ -182,6 +183,11 @@ export function LandingCollections({
   createLabel?: string;
   /** Público de la landing: la ficha de la historia vuelve a ella y crea en su línea. */
   line?: Channel;
+  /**
+   * Empezar desde la tarjeta: con el tema como temática de la fiesta (Celebraciones) o con la
+   * primera historia de la colección (Profesionales).
+   */
+  start?: { label: string; mode: 'theme' | 'story' };
 }) {
   if (collections.length === 0) return null;
   return (
@@ -209,6 +215,23 @@ export function LandingCollections({
                     </li>
                   ))}
                 </ul>
+              )}
+              {start && line && (start.mode === 'theme' || own[0]) && (
+                <Link
+                  href={{
+                    pathname: '/create',
+                    query:
+                      start.mode === 'theme'
+                        ? { line, tema: collection.name }
+                        : { line, story: own[0]?.slug ?? '' },
+                  }}
+                  data-track="collection_start"
+                  data-track-line={line}
+                  className="mt-5 inline-flex min-h-11 items-center gap-2 font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  {start.label}
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
               )}
               {own.length > 0 && (
                 <ul className="mt-5 flex flex-wrap gap-3">

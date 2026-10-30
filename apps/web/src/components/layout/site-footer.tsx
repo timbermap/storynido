@@ -98,7 +98,10 @@ export async function SiteFooter() {
         { href: '/blog', label: tNav('blog') },
       ],
       extra: (
-        <Link href={{ pathname: '/faq', hash: 'contact' }} className="hover:text-white">
+        <Link
+          href={{ pathname: '/faq', hash: 'contact' }}
+          className="inline-block py-1.5 hover:text-white"
+        >
           {t('contact')}
         </Link>
       ),
@@ -151,10 +154,14 @@ export async function SiteFooter() {
                 )}
                 {column.title}
               </p>
-              <ul className="mt-4 grid gap-2.5">
+              {/* Links con altura para tocarlos cómodos en el celular. */}
+              <ul className="mt-3 grid gap-0.5">
                 {column.links.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href} className="transition-colors hover:text-white">
+                    <Link
+                      href={link.href}
+                      className="inline-block py-1.5 transition-colors hover:text-white"
+                    >
                       {link.label}
                     </Link>
                   </li>

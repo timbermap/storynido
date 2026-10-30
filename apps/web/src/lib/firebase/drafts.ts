@@ -80,6 +80,8 @@ export interface DraftPreset {
   channel: Channel;
   /** "Repetir configuración" (Profesionales): estilo y opciones editoriales, sin datos del niño. */
   settings?: ProjectSettings;
+  /** Celebraciones: temática de la fiesta elegida en la landing. */
+  eventTheme?: string | null;
 }
 
 /** Campos de un borrador nuevo (sin las fechas, que pone quien lo guarda). */
@@ -101,7 +103,8 @@ function draftFields(uid: string, preset: DraftPreset) {
     avatar: null,
     memories: null,
     // Eventos: la ocasión se completa en el paso del protagonista.
-    event: preset.channel === 'events' ? EMPTY_BIRTHDAY : null,
+    event:
+      preset.channel === 'events' ? { ...EMPTY_BIRTHDAY, theme: preset.eventTheme ?? null } : null,
     // Profesionales: objetivo general (uno de los temas de la colección), opcional.
     goal: null,
     // Opciones editoriales: se ajustan en el paso de la aventura (sugeridas según la edad).
