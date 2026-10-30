@@ -37,7 +37,7 @@ test('si Firestore no responde, el creador no queda cargando', async ({ page }) 
   await signInAtGate(page, uniqueEmail('sin-red'));
   await expect(page).toHaveURL(/\/es\/nuevo/, { timeout: 30_000 });
   await page.getByRole('link', { name: /Un cuento para mi hijo/ }).click();
-  await expect(page.locator('h1').first()).toContainText('Cuéntanos sobre el protagonista', {
+  await expect(page.locator('h1').first()).toContainText('Elige la aventura', {
     timeout: 30_000,
   });
   // Sin Firestore (red cortada o bloqueada): o avisa con "Reintentar", o abre el creador en
@@ -48,6 +48,6 @@ test('si Firestore no responde, el creador no queda cargando', async ({ page }) 
     page
       .getByRole('alert')
       .filter({ hasText: 'No pudimos preparar tu cuento' })
-      .or(page.locator('h1', { hasText: 'Cuéntanos sobre el protagonista' })),
+      .or(page.locator('h1', { hasText: 'Elige la aventura' })),
   ).toBeVisible({ timeout: 40_000 });
 });

@@ -24,7 +24,7 @@ export function StepMemories({ nav, data }: { nav: StepNav; data: WizardData }) 
 
   async function save(memories: Memories) {
     const ok = await nav.save(async () => {
-      await updateBook(await getFirebaseDb(), data.book.id, { memories });
+      await updateBook(await getFirebaseDb(), await nav.ensureBook(), { memories });
     });
     if (ok) {
       clearDraft();

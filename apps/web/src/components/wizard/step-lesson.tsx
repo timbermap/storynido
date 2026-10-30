@@ -55,7 +55,7 @@ export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {
 
   async function next() {
     const ok = await nav.save(async () => {
-      await updateBook(await getFirebaseDb(), book.id, {
+      await updateBook(await getFirebaseDb(), await nav.ensureBook(), {
         lessonIds: selected,
         customLesson: useCustom && custom.trim() ? custom.trim() : null,
         ...(goals.length > 0 ? { goal: goal && goals.includes(goal) ? goal : null } : {}),

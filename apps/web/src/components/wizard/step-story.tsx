@@ -45,7 +45,10 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
     }
     const options = fitToStory(choice, story);
     const ok = await nav.save(async () => {
-      await updateBook(await getFirebaseDb(), data.book.id, { storyId: selected, ...options });
+      await updateBook(await getFirebaseDb(), await nav.ensureBook(), {
+        storyId: selected,
+        ...options,
+      });
     });
     if (ok) await nav.goNext();
   }

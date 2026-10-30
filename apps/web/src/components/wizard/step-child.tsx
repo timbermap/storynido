@@ -132,7 +132,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
         ...(isPro ? { alias: blankToNull(alias.slice(0, CHILD_LIMITS.nameMaxLength)) } : {}),
       });
       await updateBook(db, id, {
-        dedication: blankToNull(dedication),
+        dedication: isPro ? null : blankToNull(dedication),
         ...(isEvent
           ? {
               event: {
@@ -416,21 +416,24 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
           </fieldset>
         )}
 
-        <div className="grid gap-2">
-          <label htmlFor="child-dedication" className={labelClass}>
-            {t('dedication')}
-          </label>
-          <textarea
-            id="child-dedication"
-            className={`${inputClass} h-28 py-3`}
-            value={dedication}
-            maxLength={CHILD_LIMITS.dedicationMaxLength}
-            placeholder={isPro ? t('pro.dedicationPlaceholder') : t('dedicationPlaceholder')}
-            onChange={(event) => {
-              setDedication(event.target.value);
-            }}
-          />
-        </div>
+        {/* Profesionales: sin dedicatoria familiar (el libro es para el trabajo). */}
+        {!isPro && (
+          <div className="grid gap-2">
+            <label htmlFor="child-dedication" className={labelClass}>
+              {t('dedication')}
+            </label>
+            <textarea
+              id="child-dedication"
+              className={`${inputClass} h-28 py-3`}
+              value={dedication}
+              maxLength={CHILD_LIMITS.dedicationMaxLength}
+              placeholder={t('dedicationPlaceholder')}
+              onChange={(event) => {
+                setDedication(event.target.value);
+              }}
+            />
+          </div>
+        )}
       </div>
     </WizardShell>
   );

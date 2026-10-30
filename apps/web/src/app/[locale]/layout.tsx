@@ -10,6 +10,7 @@ import { Analytics } from '@/components/consent/analytics';
 import { ConsentBanner } from '@/components/consent/consent-banner';
 import { Maintenance, PreviewOnlyBanner } from '@/components/layout/maintenance';
 import { SiteFooter } from '@/components/layout/site-footer';
+import { HeaderSwitch } from '@/components/layout/focus-header';
 import { SiteHeader } from '@/components/layout/site-header';
 import { routing } from '@/i18n/routing';
 import { brand } from '@/lib/brand';
@@ -101,7 +102,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             ) : (
               <>
                 {mode === 'preview_only' && <PreviewOnlyBanner />}
-                <SiteHeader />
+                <HeaderSwitch>
+                  <SiteHeader />
+                </HeaderSwitch>
                 <main id="main">{children}</main>
                 <SiteFooter />
               </>

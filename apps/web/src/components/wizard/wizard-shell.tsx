@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 import { LINE_TONE } from './drafts-list';
 
-import { WIZARD_STAGES, stageOf, type SaveState, type WizardStep } from './steps';
+import { stageOf, stagesFor, type SaveState, type WizardStep } from './steps';
 
 /** Armazón del creador: progreso, título del paso (recibe el foco), navegación y guardado. */
 export function WizardShell({
@@ -55,12 +55,15 @@ export function WizardShell({
   const visible = flow;
   const total = visible.length;
   const position = visible.indexOf(current);
-  // Etapas: lo que se ve arriba. Dentro de "La aventura", el sub-paso visible (2 de 4).
-  const { index: stageIndex, stage } = stageOf(current);
+  // Etapas: lo que se ve arriba, en el orden del flujo de la línea; dentro de cada una, el
+  // sub-paso visible (1 de 2).
+  const stages = stagesFor(flow);
+  const { stage } = stageOf(current);
+  const stageIndex = stages.findIndex((item) => item.key === stage.key);
   const stageSteps = stage.steps.filter((step) => visible.includes(step));
   const progressLabel = t('stageProgress', {
     current: stageIndex + 1,
-    total: WIZARD_STAGES.length,
+    total: stages.length,
     name: t(`stages.${stage.key}`),
   });
   const subLabel =
@@ -141,7 +144,7 @@ export function WizardShell({
 
       <nav aria-label={t('title')} className="mt-4 hidden sm:block">
         <ol className="flex flex-wrap gap-2 text-xs font-semibold">
-          {WIZARD_STAGES.map((item, index) => {
+          {stages.map((item, index) => {
             // Cada etapa abre en su primer paso visible; se puede volver a lo ya recorrido.
             const first = item.steps.find((step) => visible.includes(step));
             if (!first) return null;

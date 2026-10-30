@@ -25,7 +25,7 @@ export function StepAvatar({ nav, data }: { nav: StepNav; data: WizardData }) {
       return;
     }
     const ok = await nav.save(async () => {
-      await updateBook(await getFirebaseDb(), data.book.id, { avatar: avatar as Avatar });
+      await updateBook(await getFirebaseDb(), await nav.ensureBook(), { avatar: avatar as Avatar });
     });
     if (ok) await nav.goNext();
   }

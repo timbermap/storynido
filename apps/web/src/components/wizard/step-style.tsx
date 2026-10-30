@@ -39,7 +39,7 @@ export function StepStyle({ nav, data }: { nav: StepNav; data: WizardData }) {
       return;
     }
     const ok = await nav.save(async () => {
-      await updateBook(await getFirebaseDb(), data.book.id, { styleId: selected });
+      await updateBook(await getFirebaseDb(), await nav.ensureBook(), { styleId: selected });
     });
     if (ok) await nav.goNext();
   }

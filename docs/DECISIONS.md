@@ -1537,3 +1537,15 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Creador:** antes del primer guardado, "Cambiar" junto a la etiqueta de línea vuelve a `/nuevo`.
 - **Fotos:** si el consentimiento guardado en la sesión ya no existe en el servidor (se borró o cambió de versión), la API responde 403. Antes la web mostraba "No pudimos subir la foto" para siempre; ahora vuelve a pedir el consentimiento. Pasó en staging después de borrar los datos de prueba de la cuenta.
 - **Fotos de cuentas profesionales:** la API exigía la autorización del tutor a toda foto de una cuenta profesional, incluso en un cuento de Familia para su propio hijo, y respondía 403. La web solo la pide en los libros de Profesionales. Ahora la API la exige según la línea del libro (`book.channel === 'professionals'`).
+
+## 116 · Nuevo flujo, PR 4 y 5: modo foco y arranque propio por línea
+
+- **Fecha:** 2026-10-30.
+- **Modo foco** (`HeaderSwitch`): en `/crear`, `/nuevo` y el pago, el encabezado solo tiene "← Guardar y salir" (a Mis cuentos), el logo y "Ayuda" (preguntas frecuentes, en otra pestaña). Sin links de marketing. La etapa, la línea y el guardado los muestra el creador.
+- **Orden por línea** (`FLOWS`):
+  - **Familia y Profesionales:** Aventura (historia y enseñanza u objetivo) → Protagonista (datos y recuerdos) → Su personaje (foto o rasgos, y estilo) → Muestra.
+  - **Celebraciones:** Protagonista (ocasión, fecha, temática y una sola edad) → Aventura → Su personaje → Muestra.
+  - Las etapas se muestran en el orden del flujo (`stagesFor`).
+- **Migración:** un borrador anterior da por hecho todo lo que venía antes en el orden histórico y retoma en el primer paso del flujo nuevo que le falta.
+- **Cualquier paso puede ser el primero:** todos los guardados pasan por `nav.ensureBook()`, que crea el borrador si todavía está en memoria.
+- **Profesionales:** sin dedicatoria.

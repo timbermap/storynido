@@ -43,7 +43,9 @@
       "families": "Familia",
       "events": "Celebración",
       "professionals": "Profesional"
-    }
+    },
+    "saveAndExit": "Guardar y salir",
+    "help": "Ayuda"
   },
   "Switchers": {
     "language": "Idioma"

@@ -74,13 +74,26 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.goto('/es/crear?line=families');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   await signInAtGate(page, email);
+  // Familia arranca por la aventura (DECISIONS 116); el encabezado queda en modo foco.
+  await heading(page, 'Elige la aventura');
+  await expect(page.getByRole('link', { name: 'Guardar y salir' })).toBeVisible();
+  await page.locator('label', { hasText: 'La gran aventura espacial' }).click();
+  await page.locator('label', { hasText: 'Corto' }).click();
+  await page.locator('summary', { hasText: 'Ajustar la lectura' }).click();
+  await page.locator('label', { hasText: 'Más lectura' }).click();
+  await next(page);
+  await heading(page, '¿Qué quieres que aprenda?');
+  await page.locator('label', { hasText: 'Compartir' }).click();
+  await next(page);
   await heading(page, 'Cuéntanos sobre el protagonista');
-  await expect(page.locator('header button[aria-controls="menu-account"]')).toBeVisible();
   await page.locator('#child-name').fill('Martina');
   await page.locator('#child-age').selectOption('5');
   await page.locator('#child-like').fill('dinosaurios');
   await page.keyboard.press('Enter');
   await expectAccessible(page);
+  await next(page);
+  await heading(page, 'Hazlo realmente suyo');
+  await page.locator('#memory-companion').fill('Su abuela Rosa');
   await next(page);
 
   // Foto: el consentimiento del adulto va antes (queda registrado).
@@ -89,19 +102,6 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.getByRole('button', { name: 'Acepto y quiero subir fotos' }).click();
   await page.locator('#photo-input').setInputFiles(testPhoto());
   await expect(page.locator('li', { hasText: 'Lista' })).toBeVisible({ timeout: 60_000 });
-  await next(page);
-
-  await heading(page, 'Elige la aventura');
-  await page.locator('label', { hasText: 'La gran aventura espacial' }).click();
-  await page.locator('label', { hasText: 'Corto' }).click();
-  await page.locator('summary', { hasText: 'Ajustar la lectura' }).click();
-  await page.locator('label', { hasText: 'Más lectura' }).click();
-  await next(page);
-  await heading(page, 'Hazlo realmente suyo');
-  await page.locator('#memory-companion').fill('Su abuela Rosa');
-  await next(page);
-  await heading(page, '¿Qué quieres que aprenda?');
-  await page.locator('label', { hasText: 'Compartir' }).click();
   await next(page);
   await heading(page, 'Elige el estilo de ilustración');
   await page.locator('label', { hasText: 'Acuarela' }).click();
