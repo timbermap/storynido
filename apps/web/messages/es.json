@@ -510,7 +510,11 @@
         "aliasPlaceholder": "Ej.: Sofi, 2.º grado",
         "storyName": "Nombre en el cuento",
         "dedicationPlaceholder": "Ej.: Para Sofi, que cada día se anima a un poco más."
-      }
+      },
+      "reuseTitle": "¿Para quién es este cuento?",
+      "reuseNew": "Alguien nuevo",
+      "reuseLook": "Usamos su aspecto del último cuento; igual lo ves y lo apruebas en la muestra.",
+      "reuseNoLook": "Sus datos ya están; el aspecto lo eliges en el paso del personaje."
     },
     "photos": {
       "title": "Sube de 1 a 3 fotos",

@@ -313,3 +313,66 @@ export async function saveChild(
   await updateBook(db, bookId, { childId: ref.id });
   return ref.id;
 }
+
+/** Un protagonista ya creado, para reutilizarlo en otro cuento (nuevo flujo, PR 6). */
+export interface SavedCharacter {
+  id: string;
+  fields: ChildFields;
+  /** Cómo se lo dibujó en su último libro: rasgos elegidos o sus fotos (si siguen vigentes). */
+  look: Pick<Book, 'characterMode' | 'avatar' | 'photoIds'> | null;
+}
+
+/** Protagonistas del usuario con su aspecto más reciente. */
+export async function listSavedCharacters(db: Firestore, uid: string): Promise<SavedCharacter[]> {
+  const [children, books] = await Promise.all([
+    getDocs(query(collection(db, COLLECTIONS.children), where('ownerUid', '==', uid))),
+    getDocs(query(collection(db, COLLECTIONS.books), where('ownerUid', '==', uid))),
+  ]);
+  const latest = new Map<string, Book>();
+  for (const snapshot of books.docs) {
+    const book = snapshot.data() as Book;
+    if (!book.childId) continue;
+    const current = latest.get(book.childId);
+    const time = (value: unknown) =>
+      value && typeof value === 'object' && 'toMillis' in value
+        ? (value as { toMillis: () => number }).toMillis()
+        : 0;
+    if (!current || time(book.updatedAt) > time(current.updatedAt)) latest.set(book.childId, book);
+  }
+  return Promise.all(
+    children.docs.map(async (child) => {
+      const book = latest.get(child.id);
+      // Las fotos se borran a los 30 días: solo se reutilizan las que siguen válidas.
+      const photoIds = book?.photoIds.length
+        ? (
+            await Promise.all(
+              book.photoIds.map(async (id) => {
+                const photo = await getDoc(doc(db, COLLECTIONS.photos, id)).catch(() => null);
+                return photo?.get('status') === 'valid' ? id : null;
+              }),
+            )
+          ).filter((id): id is string => id !== null)
+        : [];
+      const avatar = book?.avatar ?? null;
+      const look: SavedCharacter['look'] =
+        book?.characterMode === 'avatar' && avatar
+          ? { characterMode: 'avatar', avatar, photoIds: [] }
+          : photoIds.length > 0
+            ? { characterMode: 'photo', avatar: null, photoIds }
+            : null;
+      return {
+        id: child.id,
+        fields: {
+          name: child.get('name') as string,
+          age: child.get('age') as number,
+          pronouns: (child.get('pronouns') as ChildFields['pronouns'] | undefined) ?? null,
+          likes: (child.get('likes') as string[] | undefined) ?? [],
+          petName: (child.get('petName') as string | null | undefined) ?? null,
+          bestFriendName: (child.get('bestFriendName') as string | null | undefined) ?? null,
+          alias: (child.get('alias') as string | null | undefined) ?? null,
+        },
+        look,
+      };
+    }),
+  );
+}

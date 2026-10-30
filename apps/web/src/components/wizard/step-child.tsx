@@ -2,7 +2,7 @@
 
 import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 
 import {
   CHILD_LIMITS,
@@ -16,7 +16,12 @@ import {
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { getFirebaseDb } from '@/lib/firebase/client';
-import { saveChild, updateBook } from '@/lib/firebase/drafts';
+import {
+  listSavedCharacters,
+  saveChild,
+  updateBook,
+  type SavedCharacter,
+} from '@/lib/firebase/drafts';
 import { cn } from '@/lib/utils';
 import { useStepDraft } from '@/lib/use-step-draft';
 
@@ -42,6 +47,28 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [petName, setPetName] = useState(child?.petName ?? '');
   const [friend, setFriend] = useState(child?.bestFriendName ?? '');
   const [dedication, setDedication] = useState(book.dedication ?? '');
+  // Protagonistas ya creados: en un borrador sin protagonista se ofrecen para reutilizar.
+  const [saved, setSaved] = useState<SavedCharacter[]>([]);
+  const [reuse, setReuse] = useState<SavedCharacter | null>(null);
+  useEffect(() => {
+    if (!user || book.childId) return;
+    void getFirebaseDb()
+      .then((db) => listSavedCharacters(db, user.uid))
+      .then(setSaved)
+      .catch(() => undefined);
+  }, [user, book.childId]);
+
+  function pick(character: SavedCharacter | null) {
+    setReuse(character);
+    const fields = character?.fields;
+    setName(fields?.name ?? '');
+    setAge(fields?.age ?? 5);
+    setPronouns(fields?.pronouns ?? null);
+    setLikes(fields?.likes ?? []);
+    setPetName(fields?.petName ?? '');
+    setFriend(fields?.bestFriendName ?? '');
+    setAlias(fields?.alias ?? '');
+  }
   // Profesionales: el alias identifica el proyecto en la cuenta; el nombre es el del cuento.
   const isPro = book.channel === 'professionals';
   const [alias, setAlias] = useState(child?.alias ?? '');
@@ -122,7 +149,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       const db = await getFirebaseDb();
       // Primer guardado real: si el borrador estaba en memoria, se crea ahora.
       const id = await nav.ensureBook();
-      await saveChild(db, user.uid, id, book.childId, {
+      const childId = await saveChild(db, user.uid, id, book.childId ?? reuse?.id ?? null, {
         name: name.trim().slice(0, CHILD_LIMITS.nameMaxLength),
         age,
         pronouns,
@@ -132,6 +159,9 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
         ...(isPro ? { alias: blankToNull(alias.slice(0, CHILD_LIMITS.nameMaxLength)) } : {}),
       });
       await updateBook(db, id, {
+        // Reutilizado: el libro queda con ese protagonista y su aspecto del último cuento
+        // (rasgos o fotos vigentes); la lámina se vuelve a aprobar en la muestra.
+        ...(reuse ? { childId, ...(reuse.look ?? {}) } : {}),
         dedication: isPro ? null : blankToNull(dedication),
         ...(isEvent
           ? {
@@ -162,6 +192,47 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       onNext={() => void next()}
     >
       <div className="grid gap-6">
+        {saved.length > 0 && (
+          <fieldset className="grid gap-2">
+            <legend className="mb-1 font-semibold">{t('reuseTitle')}</legend>
+            <div className="flex flex-wrap gap-2">
+              {[...saved, null].map((character) => {
+                const active = reuse?.id === character?.id || (!reuse && !character);
+                return (
+                  <label
+                    key={character?.id ?? 'new'}
+                    className={cn(
+                      'inline-flex min-h-11 cursor-pointer items-center rounded-full border-2 px-4 text-sm font-semibold transition has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50',
+                      active
+                        ? 'border-primary bg-secondary'
+                        : 'border-border hover:border-primary/40',
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="reuse"
+                      className="sr-only"
+                      checked={active}
+                      onChange={() => {
+                        pick(character);
+                      }}
+                    />
+                    {character
+                      ? isPro && character.fields.alias
+                        ? character.fields.alias
+                        : character.fields.name
+                      : t('reuseNew')}
+                  </label>
+                );
+              })}
+            </div>
+            {reuse && (
+              <p className="text-sm text-muted-foreground">
+                {reuse.look ? t('reuseLook') : t('reuseNoLook')}
+              </p>
+            )}
+          </fieldset>
+        )}
         {isPro && (
           <div className="grid gap-2">
             <label htmlFor="child-alias" className={labelClass}>

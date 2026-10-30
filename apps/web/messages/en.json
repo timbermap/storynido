@@ -510,7 +510,11 @@
         "aliasPlaceholder": "E.g. Sofi, 2nd grade",
         "storyName": "Name in the story",
         "dedicationPlaceholder": "E.g. For Sofi, who is a little braver every day."
-      }
+      },
+      "reuseTitle": "Who is this story for?",
+      "reuseNew": "Someone new",
+      "reuseLook": "We'll use their look from the last story; you still see and approve it in the preview.",
+      "reuseNoLook": "Their details are filled in; you choose the look in the character step."
     },
     "photos": {
       "title": "Upload 1 to 3 photos",

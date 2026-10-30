@@ -510,7 +510,11 @@
         "aliasPlaceholder": "Ex.: Sofi, 2º ano",
         "storyName": "Nome na história",
         "dedicationPlaceholder": "Ex.: Para a Sofi, que a cada dia se arrisca um pouco mais."
-      }
+      },
+      "reuseTitle": "Para quem é esta história?",
+      "reuseNew": "Alguém novo",
+      "reuseLook": "Usamos a aparência da última história; você ainda vê e aprova na prévia.",
+      "reuseNoLook": "Os dados já estão; a aparência você escolhe na etapa do personagem."
     },
     "photos": {
       "title": "Envie de 1 a 3 fotos",

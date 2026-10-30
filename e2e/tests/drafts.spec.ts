@@ -28,6 +28,14 @@ test('crear pide cuenta y el borrador se puede borrar desde Mis cuentos', async 
   await page.reload();
   await expect(page.locator('h1').first()).toBeVisible();
   await expect(page.locator('body')).not.toContainText('El cuento de Tomi');
+
+  // El protagonista queda guardado: un cuento nuevo ofrece reutilizarlo (PR 6).
+  await page.goto('/es/crear?line=events');
+  await expect(page.getByRole('group', { name: '¿Para quién es este cuento?' })).toBeVisible({
+    timeout: 30_000,
+  });
+  await page.locator('label', { hasText: 'Tomi' }).click();
+  await expect(page.locator('#child-name')).toHaveValue('Tomi');
 });
 
 test('si Firestore no responde, el creador no queda cargando', async ({ page }) => {
