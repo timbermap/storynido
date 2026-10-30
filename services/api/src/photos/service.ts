@@ -88,10 +88,10 @@ export class PhotoService {
     ) {
       throw new AppError(403, 'forbidden', 'Necesitamos tu consentimiento antes de subir fotos.');
     }
-    // Profesionales: la foto es de un chico que no es propio; hace falta la declaración de
-    // que tienen la autorización de su madre, padre o tutor.
-    const owner = (await this.db.collection(COLLECTIONS.users).doc(input.uid).get()).data();
-    if (owner?.accountType === 'professional') {
+    // Libros de Profesionales: la foto es de un chico que no es propio; hace falta la
+    // declaración de que tienen la autorización de su madre, padre o tutor. Un profesional que
+    // hace un cuento de Familia para su propio hijo no la necesita (va por la línea del libro).
+    if (book.channel === 'professionals') {
       const guardian = await this.db
         .collection(COLLECTIONS.consents)
         .where('ownerUid', '==', input.uid)

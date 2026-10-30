@@ -56,11 +56,11 @@ async function appWith(registry: ProviderRegistry) {
 
 type App = Awaited<ReturnType<typeof createTestApp>>['app'];
 
-async function seedDraft(uid: string, bookId: string) {
+async function seedDraft(uid: string, bookId: string, channel = 'families') {
   await db.doc(`children/${bookId}-child`).set({ ownerUid: uid, name: 'Martina' });
   await db
     .doc(`books/${bookId}`)
-    .set({ ownerUid: uid, status: 'draft', childId: `${bookId}-child`, photoIds: [] });
+    .set({ ownerUid: uid, status: 'draft', childId: `${bookId}-child`, photoIds: [], channel });
 }
 
 async function consent(app: App, token: string): Promise<string> {
@@ -150,8 +150,8 @@ describe('fotos del protagonista', () => {
     expect(res.statusCode).toBe(403);
   });
 
-  it('un profesional necesita declarar la autorización del tutor antes de subir fotos', async () => {
-    await seedDraft('ana', 'b1');
+  it('un libro de Profesionales necesita la autorización del tutor antes de subir fotos', async () => {
+    await seedDraft('ana', 'b1', 'professionals');
     await db.doc('users/ana').set({ accountType: 'professional' });
     const photoConsent = await consent(app, 'token-ana');
     const ask = () =>
@@ -188,6 +188,23 @@ describe('fotos del protagonista', () => {
       textVersion: GUARDIAN_CONSENT_VERSION,
     });
     expect((await ask()).statusCode).toBe(200);
+  });
+
+  it('un profesional que hace un cuento de Familia (su hijo) no necesita esa declaración', async () => {
+    await seedDraft('ana', 'b1', 'families');
+    await db.doc('users/ana').set({ accountType: 'professional' });
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/photos',
+      headers: auth('token-ana'),
+      payload: {
+        bookId: 'b1',
+        consentId: await consent(app, 'token-ana'),
+        contentType: 'image/jpeg',
+        sizeBytes: 1000,
+      },
+    });
+    expect(res.statusCode).toBe(200);
   });
 
   it('una foto buena se valida, se procesa y queda en el borrador', async () => {

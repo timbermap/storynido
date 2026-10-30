@@ -1536,3 +1536,4 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Encabezado:** fuera de una landing, "Crear mi cuento" lleva a `/nuevo`; en Familias, Celebraciones y Profesionales, al creador de esa línea.
 - **Creador:** antes del primer guardado, "Cambiar" junto a la etiqueta de línea vuelve a `/nuevo`.
 - **Fotos:** si el consentimiento guardado en la sesión ya no existe en el servidor (se borró o cambió de versión), la API responde 403. Antes la web mostraba "No pudimos subir la foto" para siempre; ahora vuelve a pedir el consentimiento. Pasó en staging después de borrar los datos de prueba de la cuenta.
+- **Fotos de cuentas profesionales:** la API exigía la autorización del tutor a toda foto de una cuenta profesional, incluso en un cuento de Familia para su propio hijo, y respondía 403. La web solo la pide en los libros de Profesionales. Ahora la API la exige según la línea del libro (`book.channel === 'professionals'`).
