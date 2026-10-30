@@ -1061,7 +1061,14 @@
       "city": "City",
       "state": "State",
       "postalCode": "ZIP code",
-      "phone": "Phone"
+      "phone": "Phone",
+      "taxId": {
+        "MX": "RFC or CURP of the recipient",
+        "AR": "CUIT, CUIL or DNI of the recipient",
+        "BR": "CPF of the recipient"
+      },
+      "taxIdHint": "Optional. With it we can use a cheaper printer; it is only used for shipping and customs.",
+      "confirm": "I confirm the delivery address is correct."
     },
     "giftTitle": "Gift",
     "isGift": "It’s a gift",
@@ -1090,7 +1097,8 @@
       "book": "Book",
       "length": "Length adjustment",
       "design": "Kit design (includes the mini story)",
-      "piece": "Piece"
+      "piece": "Piece",
+      "copy": "Extra copy"
     },
     "discount": {
       "coupon": "Coupon {label}",
@@ -1210,7 +1218,11 @@
     "shippingPending": "Shipping: calculated from your address",
     "addressToQuote": "Complete the address to see shipping and the total.",
     "importDuties": "International shipping: the recipient may have to pay import duties.",
-    "localReference": "Reference in your currency (charged in US dollars)"
+    "localReference": "Reference in your currency (charged in US dollars)",
+    "copies": {
+      "label": "Number of copies",
+      "hint": "You pay for the creation once; each extra copy costs only its printing (great for party favors)."
+    }
   },
   "Pro": {
     "activation": {

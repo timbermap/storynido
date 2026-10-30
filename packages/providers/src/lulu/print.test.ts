@@ -80,6 +80,20 @@ describe('Lulu', () => {
     });
   });
 
+  it('manda el documento fiscal del destinatario cuando lo hay (México, Argentina, Brasil)', async () => {
+    const api = fake({
+      'POST /print-job-cost-calculations/': () => ({ status: 201, json: cost('11.28', '5.69') }),
+    });
+    await provider(api.fetchImpl).quote(
+      [{ format: 'softcover', pageCount: 32, quantity: 1 }],
+      { ...address, country: 'MX', taxId: 'XAXX010101000' },
+      'USD',
+    );
+    expect(api.calls[0]?.body).toMatchObject({
+      shipping_address: { country_code: 'MX', recipient_tax_id: 'XAXX010101000' },
+    });
+  });
+
   it('sin envío posible al destino, error no reintentable (gana otra imprenta)', async () => {
     const api = fake({
       'POST /print-job-cost-calculations/': () => ({

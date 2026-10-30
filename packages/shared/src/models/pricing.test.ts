@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { BookFormat } from './common';
 import type { CountryConfig, Coupon, Promotion } from './commerce';
 import { DEFAULT_PRODUCT_PRICING } from './product-pricing';
 import type { EventPricing } from './kit';
@@ -30,7 +31,7 @@ const US: CountryConfig = {
 };
 
 const FX = { rates: { MXN: 18.5 }, source: 'test', date: '2026-11-01' };
-const pricing = (format: 'digital' | 'softcover' | 'hardcover' = 'hardcover') => ({
+const pricing = (format: BookFormat = 'hardcover') => ({
   ...DEFAULT_PRODUCT_PRICING[format],
   updatedAt: NOW,
 });
@@ -335,5 +336,39 @@ describe('Profesionales: precio Pro y descuento por recurrencia', () => {
     if (!twelve.ok) throw new Error('debería cotizar');
     expect(twelve.snapshot.discount).toMatchObject({ reason: 'pro', label: '15 %' });
     expect(twelve.snapshot.components[0]).toEqual(family.snapshot.components[0]);
+  });
+});
+
+describe('ejemplares impresos', () => {
+  it('la creación se cobra una vez y cada ejemplar extra paga solo su impresión', () => {
+    const one = quote(
+      input({
+        country: US,
+        format: 'booklet',
+        pricing: pricing('booklet'),
+        pages: 12,
+        print: { productionUsdMinor: 996, shippingUsdMinor: 0, etaDaysMin: 5, etaDaysMax: 9 },
+      }),
+    );
+    // 30 ejemplares: la imprenta cotizó USD 61,24 en total (2,04 c/u).
+    const many = quote(
+      input({
+        country: US,
+        format: 'booklet',
+        pricing: pricing('booklet'),
+        pages: 12,
+        quantity: 30,
+        print: { productionUsdMinor: 6124, shippingUsdMinor: 0, etaDaysMin: 5, etaDaysMax: 9 },
+      }),
+    );
+    if (!one.ok || !many.ok) throw new Error('sin precio');
+    const [book, copy] = many.snapshot.components;
+    expect(book).toMatchObject({ code: 'book', quantity: 1 });
+    expect(copy).toMatchObject({ code: 'copy', quantity: 29 });
+    // Creación una vez (USD 18,80) + 30 ejemplares: nunca 30 veces el precio de uno.
+    expect(many.snapshot.subtotalMinor).toBeLessThan(one.snapshot.subtotalMinor * 30);
+    expect(many.snapshot.subtotalMinor).toBe((book?.totalMinor ?? 0) + (copy?.totalMinor ?? 0));
+    // Cada ejemplar extra cuesta menos que el primero (que lleva la creación).
+    expect(copy?.unitMinor).toBeLessThan(book?.unitMinor ?? 0);
   });
 });

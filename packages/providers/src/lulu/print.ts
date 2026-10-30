@@ -186,6 +186,7 @@ export class LuluPrintProvider implements PrintProvider {
       postcode: address.postalCode,
       // Lulu exige teléfono (la empresa de envíos lo usa para coordinar la entrega).
       phone_number: address.phone ?? '',
+      ...(address.taxId ? { recipient_tax_id: address.taxId } : {}),
       ...(email ? { email } : {}),
     };
   }

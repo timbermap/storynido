@@ -3,6 +3,7 @@
 import {
   ApiError,
   CONFIGURED_COUNTRIES,
+  TAX_ID_COUNTRIES,
   addressProblems,
   type Address,
   type BookFormat,
@@ -44,6 +45,7 @@ const EMPTY_ADDRESS: AddressDraft = {
   state: null,
   postalCode: '',
   phone: null,
+  taxId: null,
 };
 
 const ADDRESS_FIELDS: { key: keyof AddressDraft; optional?: boolean; autoComplete: string }[] = [
@@ -54,6 +56,7 @@ const ADDRESS_FIELDS: { key: keyof AddressDraft; optional?: boolean; autoComplet
   { key: 'state', autoComplete: 'address-level1' },
   { key: 'postalCode', autoComplete: 'postal-code' },
   { key: 'phone', autoComplete: 'tel' },
+  { key: 'taxId', optional: true, autoComplete: 'off' },
 ];
 
 /**
@@ -95,9 +98,15 @@ export function Checkout({
   const format = available && !available.includes(chosenFormat) ? 'digital' : chosenFormat;
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  // Impreso: quien paga confirma que el domicilio de entrega es correcto.
+  // Si cambia la dirección, hay que volver a confirmarla.
+  const [copies, setCopies] = useState(1);
+  const [confirmedKey, setConfirmedKey] = useState<string | null>(null);
   // País de envío del impreso (cualquiera: la imprenta se cotiza con la dirección).
   const [shipTo, setShipTo] = useState<CountryCode>(country);
   const print = format !== 'digital';
+  // Ejemplares: solo el cuento grapado (ideal para souvenirs); lo demás es de a uno.
+  const quantity = format === 'booklet' ? copies : 1;
   // El pedido es del país de la dirección: define la moneda y las imprentas.
   const orderCountry = print ? shipTo : country;
   const shippingAddress: Address | null = print
@@ -106,12 +115,17 @@ export function Checkout({
         line2: address.line2?.trim() ? address.line2 : null,
         state: address.state?.trim() ? address.state.trim() : null,
         phone: address.phone?.trim() ? address.phone.trim() : null,
+        taxId:
+          (TAX_ID_COUNTRIES as readonly string[]).includes(shipTo) && address.taxId?.trim()
+            ? address.taxId.trim()
+            : null,
         country: shipTo,
       }
     : null;
   // Con la dirección completa se cotiza con las imprentas (envío real).
   const addressKey =
     shippingAddress && addressComplete(shippingAddress) ? JSON.stringify(shippingAddress) : null;
+  const confirmed = addressKey !== null && confirmedKey === addressKey;
 
   // El resumen se recalcula en el servidor cada vez que cambia el formato, el cupón o la
   // dirección (con una pausa, para no cotizar con cada tecla).
@@ -125,7 +139,7 @@ export function Checkout({
             bookId,
             format,
             country: orderCountry,
-            quantity: 1,
+            quantity,
             couponCode: coupon,
             sourceOrderId: reorderOf,
             shippingAddress: addressKey ? (JSON.parse(addressKey) as Address) : null,
@@ -147,7 +161,7 @@ export function Checkout({
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [bookId, format, orderCountry, coupon, reorderOf, signedIn, addressKey, t]);
+  }, [bookId, format, quantity, orderCountry, coupon, reorderOf, signedIn, addressKey, t]);
 
   async function pay() {
     setPaying(true);
@@ -156,7 +170,7 @@ export function Checkout({
       const body = {
         format,
         country: orderCountry,
-        quantity: 1,
+        quantity,
         couponCode: coupon,
         shippingAddress,
         gift: {
@@ -250,6 +264,24 @@ export function Checkout({
           </div>
         </fieldset>
 
+        {format === 'booklet' && (
+          <label className="grid max-w-xs gap-1.5 text-sm">
+            <span className="font-semibold">{t('copies.label')}</span>
+            <input
+              id="copies"
+              type="number"
+              min={1}
+              max={200}
+              value={copies}
+              onChange={(event) => {
+                setCopies(Math.min(200, Math.max(1, Math.floor(Number(event.target.value)) || 1)));
+              }}
+              className={field}
+            />
+            <span className="text-muted-foreground">{t('copies.hint')}</span>
+          </label>
+        )}
+
         {print && (
           <fieldset className="grid gap-3">
             <legend className="mb-1 text-lg font-semibold">{t('addressTitle')}</legend>
@@ -268,7 +300,10 @@ export function Checkout({
                   <CountryOptions locale={locale} current={shipTo} />
                 </select>
               </label>
-              {ADDRESS_FIELDS.map(({ key, optional, autoComplete }) => (
+              {ADDRESS_FIELDS.filter(
+                ({ key }) =>
+                  key !== 'taxId' || (TAX_ID_COUNTRIES as readonly string[]).includes(shipTo),
+              ).map(({ key, optional, autoComplete }) => (
                 <label
                   key={key}
                   className={cn(
@@ -277,7 +312,7 @@ export function Checkout({
                   )}
                 >
                   <span className="font-semibold">
-                    {t(`address.${key}`)}
+                    {key === 'taxId' ? t(`address.taxId.${shipTo}`) : t(`address.${key}`)}
                     {optional && (
                       <span className="font-normal text-muted-foreground"> ({t('optional')})</span>
                     )}
@@ -292,11 +327,34 @@ export function Checkout({
                     }}
                     className={field}
                   />
+                  {key === 'taxId' && (
+                    <span className="text-xs text-muted-foreground">{t('address.taxIdHint')}</span>
+                  )}
                 </label>
               ))}
             </div>
             {!CONFIGURED_COUNTRIES.includes(shipTo) && (
               <p className="text-sm text-muted-foreground">{t('importDuties')}</p>
+            )}
+            {addressKey && (
+              <label className="flex items-start gap-3 rounded-xl border bg-card p-3 text-sm">
+                <input
+                  type="checkbox"
+                  checked={confirmed}
+                  onChange={(event) => {
+                    setConfirmedKey(event.target.checked ? addressKey : null);
+                  }}
+                  className="mt-0.5 size-4 accent-[var(--primary)]"
+                />
+                <span>
+                  <span className="font-semibold">{t('address.confirm')}</span>
+                  <span className="mt-1 block text-muted-foreground">
+                    {[address.name, address.line1, address.city, address.postalCode, shipTo].join(
+                      ', ',
+                    )}
+                  </span>
+                </span>
+              </label>
             )}
           </fieldset>
         )}
@@ -400,7 +458,7 @@ export function Checkout({
         )}
         <Button
           size="lg"
-          disabled={!quote || paying || (print && quote.snapshot.shipping.pending)}
+          disabled={!quote || paying || (print && (quote.snapshot.shipping.pending || !confirmed))}
           onClick={() => void pay()}
         >
           {paying ? (

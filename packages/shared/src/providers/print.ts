@@ -12,6 +12,8 @@ export interface PrintAddress {
   postalCode: string;
   country: CountryCode;
   phone: string | null;
+  /** Documento fiscal del destinatario (RFC, CUIT, CPF…): Lulu lo pide en algunos países. */
+  taxId?: string | null;
 }
 
 export interface PrintItem {

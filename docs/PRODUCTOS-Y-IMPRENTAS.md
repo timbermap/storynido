@@ -75,6 +75,6 @@ Cualquier producto nuevo exige una ficha de archivo, muestra física y una opci�
 
 ## 5. Decisiones
 
-1. Cantidad de ejemplares para souvenirs: cobrar la creación una vez y las copias al costo de imprenta por volumen.
+1. Hecho (DECISIONS 139): cantidad de ejemplares del cuento grapado, con la creación cobrada una vez.
 2. Tarjetas impresas en Celebraciones.
-3. Pedir el documento fiscal del destinatario (México, Argentina, Brasil) para habilitar Lulu. Es el ID tributario (RFC, CUIT o CPF) de quien recibe el paquete: Lulu lo pide por aduana, y hoy sin él su cotización falla en esos tres países.
+3. Hecho (DECISIONS 139): el pago pide el documento fiscal (opcional) en México, Argentina y Brasil y Lulu suma una tercera opción.

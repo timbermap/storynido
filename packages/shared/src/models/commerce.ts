@@ -308,6 +308,8 @@ export const addressSchema = z.object({
   postalCode: z.string().min(1).max(20),
   country: countryCodeSchema,
   phone: z.string().max(30).nullable(),
+  /** Documento fiscal del destinatario (RFC, CUIT, CPF). Opcional: habilita a Lulu en México, Argentina y Brasil. */
+  taxId: z.string().trim().max(30).nullable().default(null),
 });
 
 export type Address = z.infer<typeof addressSchema>;
@@ -320,11 +322,18 @@ const ADDRESS_RULES: Partial<
   US: { postalCode: /^\d{5}(-\d{4})?$/, state: /^[A-Z]{2}$/, phone: false },
 };
 
+/** Países donde Lulu pide el documento fiscal del destinatario (aduana). */
+export const TAX_ID_COUNTRIES = ['MX', 'AR', 'BR'] as const;
+
 /** Campos de la dirección que no cumplen las reglas de su país (vacío si está bien). */
 export function addressProblems(address: Address): (keyof Address)[] {
-  const rules = ADDRESS_RULES[address.country];
-  if (!rules) return [];
   const problems: (keyof Address)[] = [];
+  // Opcional, pero si se carga tiene que parecerse a un RFC, CUIT o CPF.
+  if (address.taxId && !/^[A-Za-z0-9.\-/]{5,20}$/.test(address.taxId.trim())) {
+    problems.push('taxId');
+  }
+  const rules = ADDRESS_RULES[address.country];
+  if (!rules) return problems;
   if (!rules.postalCode.test(address.postalCode.trim())) problems.push('postalCode');
   if (!rules.state.test((address.state ?? '').trim().toUpperCase())) problems.push('state');
   if (rules.phone && !/^[+\d][\d\s()-]{6,}$/.test((address.phone ?? '').trim())) {

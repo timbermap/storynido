@@ -6,7 +6,7 @@ En StoryNido cuidamos especialmente los datos de los niños. Esta política expl
 
 - **De tu cuenta:** correo electrónico, nombre, idioma, país y método de inicio de sesión.
 - **Del niño:** nombre, edad, pronombres (opcional), gustos, nombre de su mascota y de su mejor amigo, dedicatoria, y de 1 a 3 fotos.
-- **De tus pedidos:** dirección de envío, productos, importes y estado. Los datos de pago los procesa el proveedor de pagos; nosotros no vemos ni guardamos tu tarjeta.
+- **De tus pedidos:** dirección de envío (y, si lo cargas para envíos a México, Argentina o Brasil, el documento fiscal de quien recibe, que la imprenta usa solo para el envío y la aduana), productos, importes y estado. Los datos de pago los procesa el proveedor de pagos; nosotros no vemos ni guardamos tu tarjeta.
 - **De uso:** datos técnicos y, solo si lo aceptas, cookies de analítica y marketing.
 - **Ubicación aproximada:** con tu dirección IP deducimos el país, para mostrarte el sitio en tu idioma. La consulta se hace en nuestro servidor con la base de [DB-IP](https://db-ip.com) (licencia CC BY 4.0); no guardamos la IP ni la compartimos.
 

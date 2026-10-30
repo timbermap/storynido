@@ -1061,7 +1061,14 @@
       "city": "Ciudad",
       "state": "Estado",
       "postalCode": "Código postal",
-      "phone": "Teléfono"
+      "phone": "Teléfono",
+      "taxId": {
+        "MX": "RFC o CURP de quien recibe",
+        "AR": "CUIT, CUIL o DNI de quien recibe",
+        "BR": "CPF de quem recebe"
+      },
+      "taxIdHint": "Opcional. Con este dato podemos usar una imprenta más económica; solo se usa para el envío y la aduana.",
+      "confirm": "Confirmo que el domicilio de entrega es correcto."
     },
     "giftTitle": "Regalo",
     "isGift": "Es un regalo",
@@ -1090,7 +1097,8 @@
       "book": "Libro",
       "length": "Ajuste por extensión",
       "design": "Diseño del kit (incluye el mini cuento)",
-      "piece": "Pieza"
+      "piece": "Pieza",
+      "copy": "Ejemplar extra"
     },
     "discount": {
       "coupon": "Cupón {label}",
@@ -1210,7 +1218,11 @@
     "shippingPending": "Envío: se calcula con tu dirección",
     "addressToQuote": "Completa la dirección para ver el envío y el total.",
     "importDuties": "Envío internacional: puede haber impuestos de importación que paga quien recibe el libro.",
-    "localReference": "Referencia en tu moneda (se cobra en dólares)"
+    "localReference": "Referencia en tu moneda (se cobra en dólares)",
+    "copies": {
+      "label": "Cantidad de ejemplares",
+      "hint": "Pagas la creación una sola vez; cada ejemplar extra cuesta solo su impresión (ideal para souvenirs)."
+    }
   },
   "Pro": {
     "activation": {

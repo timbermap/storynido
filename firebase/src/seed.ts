@@ -291,13 +291,17 @@ const VERIFIED_PRINT: Record<
     },
   },
   // Lulu (sandbox fuera de producción) pide el documento fiscal del destinatario en México,
-  // Argentina y Brasil: ahí no se ofrece hasta que el checkout lo pida (DECISIONS 138).
+  // Argentina y Brasil: el pago lo pide (opcional) y sin él su cotización falla y gana otra.
   lulu: {
     sku: LULU_PRODUCTS,
     pagesMin: 24,
     countries: {
       US: [559, 1494, 8, 16],
       UY: [494, 1376, 8, 16],
+      // Con el documento fiscal del destinatario (opcional en el pago).
+      MX: [494, 1376, 8, 16],
+      AR: [494, 1376, 8, 16],
+      BR: [494, 1376, 8, 16],
       ES: [549, 1466, 8, 16],
       CH: [494, 1376, 8, 16],
     },

@@ -20,8 +20,8 @@ export const CHARGE_CURRENCY: Currency = 'USD';
 
 /** Un componente del precio (lo que el comprador ve en el resumen y queda en el pedido). */
 export const priceComponentSchema = z.object({
-  /** book/length: libro; design/piece: kit de Eventos (diseño una vez + licencia por pieza). */
-  code: z.enum(['book', 'length', 'design', 'piece']),
+  /** book/length: libro; copy: ejemplares extra (solo impresión); design/piece: kit de Eventos. */
+  code: z.enum(['book', 'copy', 'length', 'design', 'piece']),
   piece: kitPieceSchema.optional(),
   unitMinor: z.number().int(),
   quantity: z.number().int().positive(),
@@ -191,19 +191,42 @@ export function quote(input: QuoteInput): QuoteResult {
   const quantity = Math.max(1, Math.floor(input.quantity));
   const productionUnit = print ? Math.round(print.productionUsdMinor / quantity) : 0;
   const usd = unitPriceUsdMinor(pricing, productionUnit, input.pages);
+  // La creación (IA + margen) se cobra una vez; cada ejemplar extra paga solo su impresión,
+  // al costo por volumen que cotizó la imprenta.
+  const copyUsd = usd - unitPriceUsdMinor(pricing, 0, input.pages);
   // Perfil profesional: descuento base del producto (además del de recurrencia, que es de todos).
-  const unitUsd = input.pro?.professional
-    ? Math.round((usd * (100 - pricing.proPercentOff)) / 100)
-    : usd;
-  const local = fromUsdMinor(unitUsd, CHARGE_CURRENCY, input.fx);
-  if (local === null) return { ok: false, error: 'price_missing' };
-  const unit = charmPrice(local, CHARGE_CURRENCY);
+  const withBase = (value: number) =>
+    input.pro?.professional ? Math.round((value * (100 - pricing.proPercentOff)) / 100) : value;
+  const price = (value: number) => {
+    const local = fromUsdMinor(withBase(value), CHARGE_CURRENCY, input.fx);
+    return local === null ? null : charmPrice(local, CHARGE_CURRENCY);
+  };
+  const unit = price(usd);
+  const copy = price(copyUsd);
+  if (unit === null || copy === null) return { ok: false, error: 'price_missing' };
 
   // El envío se cobra al costo, exacto (en dólares, sin redondear).
   const shippingMinor = print?.shippingUsdMinor ?? 0;
 
   return finalize(
-    [{ code: 'book', unitMinor: unit, quantity, totalMinor: unit * quantity }],
+    [
+      {
+        code: 'book',
+        unitMinor: unit,
+        quantity: print ? 1 : quantity,
+        totalMinor: print ? unit : unit * quantity,
+      },
+      ...(print && quantity > 1
+        ? [
+            {
+              code: 'copy' as const,
+              unitMinor: copy,
+              quantity: quantity - 1,
+              totalMinor: copy * (quantity - 1),
+            },
+          ]
+        : []),
+    ],
     country,
     format,
     input,

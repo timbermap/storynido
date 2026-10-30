@@ -171,6 +171,9 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
     await page.locator(`#address-${key}`).fill(value);
   // Con la dirección completa se cotiza con las imprentas: envío real y plazo.
   await expect(page.locator('aside dl')).toContainText('Envío (llega en', { timeout: 30_000 });
+  // Sin confirmar el domicilio de entrega no se puede pagar.
+  await expect(page.getByRole('button', { name: 'Pagar' })).toBeDisabled();
+  await page.getByLabel('Confirmo que el domicilio de entrega es correcto.').check();
 
   // Escenario 22: una fecha de regalo imposible nunca se promete.
   await page.locator('label', { hasText: 'Es un regalo' }).locator('input').check();
