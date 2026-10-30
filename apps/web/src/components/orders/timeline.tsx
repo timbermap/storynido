@@ -1,6 +1,6 @@
 'use client';
 
-import type { BookFormat, OrderStatus } from '@storynido/shared';
+import type { OrderStatus } from '@storynido/shared';
 import { Check, CircleDashed, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -34,7 +34,7 @@ export const SETTLED_STATUSES = new Set<OrderStatus>([
   'refunded',
 ]);
 
-export const isPrintOrder = (items: { format: BookFormat }[]) =>
+export const isPrintOrder = (items: { format: string }[]) =>
   items.some((item) => item.format !== 'digital');
 
 /** Pasos del pedido según el formato; -1 si el estado no es parte del camino normal. */

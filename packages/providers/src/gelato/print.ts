@@ -1,4 +1,5 @@
 import {
+  GELATO_CARD_US,
   GELATO_PRODUCTS,
   ProviderError,
   printPageCount,
@@ -142,6 +143,16 @@ export class GelatoPrintProvider implements PrintProvider {
     };
   }
 
+  /** Producto de Gelato de un ítem: la tarjeta cambia de papel en EE. UU. */
+  private productUid(item: PrintItem, country: string): string {
+    return item.format === 'card' && country === 'US' ? GELATO_CARD_US : this.products[item.format];
+  }
+
+  /** Las tarjetas no tienen cantidad de páginas: el archivo trae frente y dorso. */
+  private pages(item: PrintItem) {
+    return item.format === 'card' ? {} : { pageCount: item.pageCount };
+  }
+
   private async cheapest(
     items: readonly PrintItem[],
     address: PrintAddress,
@@ -158,8 +169,8 @@ export class GelatoPrintProvider implements PrintProvider {
         recipient: this.recipient(address, 'pedidos@storynido.com'),
         products: items.map((item, index) => ({
           itemReferenceId: `${item.format}-${String(index)}`,
-          productUid: this.products[item.format],
-          pageCount: item.pageCount,
+          productUid: this.productUid(item, address.country),
+          ...this.pages(item),
           quantity: item.quantity,
         })),
       },
@@ -227,8 +238,8 @@ export class GelatoPrintProvider implements PrintProvider {
             }
             return {
               itemReferenceId: `${request.orderId}-${String(index)}`,
-              productUid: this.products[item.format],
-              pageCount: item.pageCount,
+              productUid: this.productUid(item, request.address.country),
+              ...this.pages(item),
               quantity: item.quantity,
               files: [{ type: 'default', url: item.bookPdfUrl }],
             };
@@ -305,6 +316,14 @@ export class GelatoPrintProvider implements PrintProvider {
 
   /** Pliego de tapa según las páginas (el lomo cambia) y un solo PDF con guardas. */
   fileSpec(item: PrintItem): Promise<PrintFileSpec> {
+    // Tarjeta 5×7": un PDF de dos páginas (frente y dorso), 127×178 mm con 3 mm de sangrado.
+    if (item.format === 'card') {
+      return Promise.resolve({
+        packaging: 'booklet',
+        trim: { widthMm: 127, heightMm: 178 },
+        bleedMm: 3,
+      });
+    }
     // Cuento grapado A5: un solo PDF con las tapas como primera y última página (sin lomo).
     if (item.format === 'booklet') {
       return Promise.resolve({

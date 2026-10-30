@@ -1098,7 +1098,8 @@
       "length": "Length adjustment",
       "design": "Kit design (includes the mini story)",
       "piece": "Piece",
-      "copy": "Extra copy"
+      "copy": "Extra copy",
+      "cards": "Printed cards"
     },
     "discount": {
       "coupon": "Coupon {label}",
@@ -1212,7 +1213,21 @@
       "downloadAll": "Download everything (ZIP)",
       "moreCopies": "Order more copies",
       "ready": "Your kit is ready!",
-      "digitalOnly": "The kit is digital: you get print-ready PDFs to print at home or at the print shop you prefer. We don't print or ship the kit."
+      "digitalOnly": "The kit is digital: you get print-ready PDFs to print at home or at the print shop you prefer. We don't print or ship the kit.",
+      "printCards": {
+        "cta": "Print cards",
+        "title": "Printed cards",
+        "subtitle": "Order the invitations and thank-you cards from your kit, printed and shipped to your home.",
+        "piecesTitle": "How many cards do you want?",
+        "piecesText": "5×7\" (12.7 × 17.8 cm) cards, full color on both sides, with your kit's design. Leave 0 for the ones you don't want.",
+        "pieces": {
+          "invitation": "Invitations",
+          "thank_you": "Thank-you cards"
+        },
+        "minimum": "Minimum {min} per design. The price includes printing; shipping is calculated with your address.",
+        "noPieces": "This kit has no invitations or thank-you cards to print.",
+        "error": "We couldn't calculate the order. Please try again."
+      }
     },
     "fromPrice": "from {price}",
     "shippingPending": "Shipping: calculated from your address",

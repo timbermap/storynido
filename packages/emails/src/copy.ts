@@ -23,24 +23,27 @@ export interface LocaleCopy {
   };
 }
 
-const FORMATS: Record<Locale, Record<BookFormat, string>> = {
+const FORMATS: Record<Locale, Record<BookFormat | 'card', string>> = {
   es: {
     digital: 'digital (PDF)',
     softcover: 'impreso, tapa blanda',
     hardcover: 'impreso, tapa dura',
     booklet: 'impreso, cuento grapado',
+    card: 'tarjetas impresas',
   },
   en: {
     digital: 'digital (PDF)',
     softcover: 'printed softcover',
     hardcover: 'printed hardcover',
     booklet: 'printed stapled booklet',
+    card: 'printed cards',
   },
   pt: {
     digital: 'digital (PDF)',
     softcover: 'impresso, capa mole',
     hardcover: 'impresso, capa dura',
     booklet: 'impresso, livrinho grampeado',
+    card: 'cartões impressos',
   },
 };
 

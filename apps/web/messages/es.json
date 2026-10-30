@@ -1098,7 +1098,8 @@
       "length": "Ajuste por extensión",
       "design": "Diseño del kit (incluye el mini cuento)",
       "piece": "Pieza",
-      "copy": "Ejemplar extra"
+      "copy": "Ejemplar extra",
+      "cards": "Tarjetas impresas"
     },
     "discount": {
       "coupon": "Cupón {label}",
@@ -1212,7 +1213,21 @@
       "downloadAll": "Descargar todo (ZIP)",
       "moreCopies": "Pedir más copias",
       "ready": "¡Tu kit está listo!",
-      "digitalOnly": "El kit es digital: te llega en PDF listo para imprimir en casa o en la imprenta que prefieras. No imprimimos ni enviamos el kit."
+      "digitalOnly": "El kit es digital: te llega en PDF listo para imprimir en casa o en la imprenta que prefieras. No imprimimos ni enviamos el kit.",
+      "printCards": {
+        "cta": "Imprimir tarjetas",
+        "title": "Tarjetas impresas",
+        "subtitle": "Pide las invitaciones y los agradecimientos de tu kit impresos y enviados a tu casa.",
+        "piecesTitle": "¿Cuántas tarjetas quieres?",
+        "piecesText": "Tarjetas de 12,7 × 17,8 cm (5×7\"), a todo color de los dos lados, con el diseño de tu kit. Deja en 0 la que no quieras.",
+        "pieces": {
+          "invitation": "Invitaciones",
+          "thank_you": "Tarjetas de agradecimiento"
+        },
+        "minimum": "Mínimo {min} por diseño. El precio incluye la impresión; el envío se calcula con tu dirección.",
+        "noPieces": "Este kit no tiene invitaciones ni tarjetas de agradecimiento para imprimir.",
+        "error": "No pudimos calcular el pedido. Inténtalo de nuevo."
+      }
     },
     "fromPrice": "desde {price}",
     "shippingPending": "Envío: se calcula con tu dirección",

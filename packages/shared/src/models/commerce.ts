@@ -342,12 +342,13 @@ export function addressProblems(address: Address): (keyof Address)[] {
   return problems;
 }
 
-export const ORDER_PIECES = ['book'] as const;
+export const ORDER_PIECES = ['book', 'invitation', 'thank_you'] as const;
 
 /** Una línea del pedido: pieza, formato y cantidad. */
 export const orderItemSchema = z.object({
   piece: z.enum(ORDER_PIECES).default('book'),
-  format: bookFormatSchema,
+  // Las tarjetas impresas del kit son un pedido aparte con formato "card".
+  format: bookFormatSchema.or(z.literal('card')),
   quantity: z.number().int().min(1).max(500),
 });
 

@@ -89,7 +89,7 @@ export interface MockPrintCosts {
 
 const DEFAULT_COSTS: MockPrintCosts = {
   id: 'mock',
-  productionUsdMinor: { softcover: 900, hardcover: 1400, booklet: 700 },
+  productionUsdMinor: { softcover: 900, hardcover: 1400, booklet: 700, card: 25 },
   shippingUsdMinor: SHIPPING_USD_MINOR,
 };
 

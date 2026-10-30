@@ -11,13 +11,16 @@ import {
   printCandidates,
   printPageCount,
   rankPrintQuotes,
+  type cardsOrderBodySchema,
   type checkoutQuoteBodySchema,
   type createCheckoutBodySchema,
   paperFor,
   quote,
+  quoteCards,
   quoteKit,
   type AuditLogEntry,
   type BookFormat,
+  type Address,
   type CountryCode,
   type KitSelection,
   type Coupon,
@@ -26,6 +29,7 @@ import {
   type PaymentEvent,
   type PriceSnapshot,
   type PrintFormat,
+  type PrintItem,
   type PrintRouting,
   type PrintCost,
   type FxRates,
@@ -48,6 +52,7 @@ import type { ConversionReporter } from './conversions';
 type QuoteBody = z.output<typeof checkoutQuoteBodySchema>;
 type PriceBody = Omit<QuoteBody, 'sourceOrderId'>;
 type CheckoutBody = z.output<typeof createCheckoutBodySchema>;
+type CardsBody = z.output<typeof cardsOrderBodySchema>;
 
 /** Una imprenta que tarda más que esto en cotizar queda afuera (las otras siguen). */
 const PRINT_QUOTE_TIMEOUT_MS = 8000;
@@ -172,7 +177,8 @@ export class CheckoutService {
     return [
       'digital',
       ...PRINT_FORMATS.filter(
-        (format) =>
+        (format): format is Exclude<PrintFormat, 'card'> =>
+          format !== 'card' &&
           printCandidates(
             options,
             [{ format, pages: printPageCount(format, pages), quantity: 1 }],
@@ -338,25 +344,32 @@ export class CheckoutService {
     pages: number,
   ): Promise<PrintRouting | null> {
     if (body.format === 'digital' || !body.shippingAddress) return null;
-    const address = body.shippingAddress;
-    const candidates = await this.printCandidates(body, pages);
+    return this.routeItems(
+      [
+        {
+          format: body.format,
+          pageCount: printPageCount(body.format, pages),
+          quantity: body.quantity,
+        },
+      ],
+      body.shippingAddress,
+      await this.printCandidates(body, pages),
+    );
+  }
+
+  /** Cotiza los ítems con cada imprenta candidata y elige la mejor (se congela en el pedido). */
+  private async routeItems(
+    items: readonly PrintItem[],
+    address: Address,
+    candidates: string[],
+  ): Promise<PrintRouting> {
     const results = await Promise.all(
       candidates.map(async (provider) => {
         try {
           const printer = this.providers.printer(provider);
           if (!printer) throw new Error('Imprenta inactiva');
           const quoted = await withTimeout(
-            printer.quote(
-              [
-                {
-                  format: body.format as PrintFormat,
-                  pageCount: printPageCount(body.format, pages),
-                  quantity: body.quantity,
-                },
-              ],
-              address,
-              'USD',
-            ),
+            printer.quote(items, address, 'USD'),
             PRINT_QUOTE_TIMEOUT_MS,
           );
           return { provider, ok: true as const, ...quoted };
@@ -403,6 +416,174 @@ export class CheckoutService {
       ],
       quotedAt: new Date(),
     };
+  }
+
+  // ------------------------------------------------------------------ tarjetas
+
+  /** Kit original de las tarjetas: propio, de Celebraciones, terminado y con esas piezas. */
+  private async cardsSource(uid: string, body: CardsBody) {
+    const sourceRef = this.db.collection(COLLECTIONS.orders).doc(body.sourceOrderId);
+    const source = (await sourceRef.get()).data();
+    if (source?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
+    const generated = ['ready', 'sent_to_print', 'in_production', 'shipped', 'delivered'];
+    if (
+      source.channel !== 'events' ||
+      !generated.includes(String(source.status)) ||
+      !source.snapshot
+    ) {
+      throw new AppError(
+        409,
+        'bad_request',
+        'Las tarjetas se piden de un kit de Celebraciones terminado.',
+      );
+    }
+    const kit = (source.kit ?? null) as { pieces?: { piece: string }[] } | null;
+    for (const { piece } of body.cards) {
+      if (!kit?.pieces?.some((item) => item.piece === piece)) {
+        throw new AppError(409, 'bad_request', 'Ese kit no incluye esa pieza.');
+      }
+    }
+    const book =
+      (await this.db.collection(COLLECTIONS.books).doc(String(source.bookId)).get()).data() ?? {};
+    return { source, book, bookId: String(source.bookId) };
+  }
+
+  private cardItems(body: CardsBody): PrintItem[] {
+    return body.cards.map((card) => ({
+      format: 'card',
+      piece: card.piece,
+      pageCount: 1,
+      quantity: card.copies,
+    }));
+  }
+
+  /** Precio de las tarjetas: con la dirección, la imprenta elegida; sin ella, la estimación. */
+  private async priceCards(body: CardsBody, routing: PrintRouting | null) {
+    const items = this.cardItems(body);
+    const options = await this.catalog.printOptions(body.country);
+    const active = this.providers.printers().map((printer) => printer.id);
+    const candidates = printCandidates(
+      options,
+      items.map((item) => ({ format: item.format, pages: 1, quantity: item.quantity })),
+      active,
+    );
+    if (candidates.length === 0) throw printUnavailable();
+    const print: PrintCost = routing
+      ? {
+          productionUsdMinor: routing.productionCostUsdMinor ?? routing.totalCostUsdMinor,
+          shippingUsdMinor: routing.shippingCostUsdMinor ?? 0,
+          etaDaysMin: routing.etaDaysMin,
+          etaDaysMax: routing.etaDaysMax,
+        }
+      : (() => {
+          const usable = options.filter(
+            (option) => candidates.includes(option.provider) && option.format === 'card',
+          );
+          const copies = items.reduce((sum, item) => sum + item.quantity, 0);
+          return {
+            productionUsdMinor:
+              Math.min(...usable.map((option) => option.productionCostUsdMinor)) * copies,
+            shippingUsdMinor: null,
+            etaDaysMin: Math.min(...usable.map((option) => option.etaDaysMin)),
+            etaDaysMax: Math.max(...usable.map((option) => option.etaDaysMax)),
+          };
+        })();
+    const [country, pricing, fx, coupon, promotions] = await Promise.all([
+      this.catalog.country(body.country),
+      this.catalog.productPricing(),
+      this.options.fx(),
+      body.couponCode ? this.coupon(body.couponCode) : Promise.resolve(null),
+      this.promotions(),
+    ]);
+    const result = quoteCards({
+      country,
+      fx,
+      print,
+      // El margen de impresión es el del cuento grapado (se edita en Precios).
+      margin: pricing.booklet.printMargin,
+      coupon,
+      couponCode: body.couponCode,
+      promotions,
+      now: new Date(),
+    });
+    if (!result.ok) throw new AppError(409, 'bad_request', `No disponible: ${result.error}`);
+    return result;
+  }
+
+  private async routeCards(body: CardsBody): Promise<PrintRouting | null> {
+    const address = body.shippingAddress;
+    if (address?.country !== body.country || addressProblems(address).length > 0) {
+      return null;
+    }
+    const items = this.cardItems(body);
+    const candidates = printCandidates(
+      await this.catalog.printOptions(body.country),
+      items.map((item) => ({ format: item.format, pages: 1, quantity: item.quantity })),
+      this.providers.printers().map((printer) => printer.id),
+    );
+    return this.routeItems(items, address, candidates);
+  }
+
+  async cardsQuote(uid: string, body: CardsBody) {
+    await this.cardsSource(uid, body);
+    const result = await this.priceCards(body, await this.routeCards(body));
+    return { snapshot: result.snapshot, couponError: result.couponError };
+  }
+
+  /** Pedido aparte de tarjetas impresas: reutiliza el diseño aprobado del kit (sin IA). */
+  async createCards(
+    user: { uid: string; email: string | null; anonymous: boolean },
+    body: CardsBody,
+    origin: string,
+  ): Promise<{ orderId: string; checkoutUrl: string }> {
+    if (user.anonymous) {
+      throw new AppError(403, 'account_required', 'Crea tu cuenta para comprar.');
+    }
+    const { source, book, bookId } = await this.cardsSource(user.uid, body);
+    if (!body.shippingAddress)
+      throw new AppError(400, 'bad_request', 'Falta la dirección de envío.');
+    if (body.shippingAddress.country !== body.country) {
+      throw new AppError(400, 'bad_request', 'La dirección tiene que ser del país elegido.');
+    }
+    const problems = addressProblems(body.shippingAddress);
+    if (problems.length > 0) {
+      throw new AppError(400, 'validation_failed', `Revisa la dirección: ${problems.join(', ')}.`);
+    }
+    const printRouting = await this.routeCards(body);
+    const price = await this.priceCards(body, printRouting);
+    const snapshot = source.snapshot as { title?: string };
+    return this.open(user, origin, {
+      bookId,
+      book,
+      body: {
+        format: 'digital',
+        country: body.country,
+        quantity: 1,
+        couponCode: body.couponCode,
+        kit: null,
+        shippingAddress: body.shippingAddress,
+        gift: { isGift: false, message: null },
+        analyticsConsent: body.analyticsConsent,
+        bookId,
+      },
+      price: price.snapshot,
+      title: snapshot.title ?? 'StoryNido',
+      items: body.cards.map((card) => ({
+        piece: card.piece,
+        format: 'card',
+        quantity: card.copies,
+      })),
+      address: body.shippingAddress,
+      fields: {
+        sourceOrderId: body.sourceOrderId,
+        printRouting,
+        snapshot: source.snapshot,
+        snapshotHash: source.snapshotHash ?? null,
+        approval: source.approval ?? null,
+        // Qué piezas se imprimen y cuántas (el worker las maqueta del kit del pedido original).
+        cards: body.cards,
+      },
+    });
   }
 
   private async coupon(code: string): Promise<Coupon | null> {
@@ -543,6 +724,9 @@ export class CheckoutService {
       price: PriceSnapshot;
       title: string;
       fields: Record<string, unknown>;
+      /** Pedido de tarjetas: sus propias líneas y la dirección de entrega. */
+      items?: { piece: string; format: string; quantity: number }[];
+      address?: Address;
     },
   ): Promise<{ orderId: string; checkoutUrl: string }> {
     const { book, body, price } = input;
@@ -556,13 +740,15 @@ export class CheckoutService {
       status: 'pending_payment',
       channel: typeof book.channel === 'string' ? book.channel : 'families',
       // Eventos: una línea por pieza del kit, con las copias que autoriza la licencia.
-      items: body.kit
-        ? body.kit.pieces.map((item) => ({
-            piece: item.piece,
-            format: 'digital',
-            quantity: item.copies,
-          }))
-        : [{ piece: 'book', format: body.format, quantity: body.quantity }],
+      items:
+        input.items ??
+        (body.kit
+          ? body.kit.pieces.map((item) => ({
+              piece: item.piece,
+              format: 'digital',
+              quantity: item.copies,
+            }))
+          : [{ piece: 'book', format: body.format, quantity: body.quantity }]),
       kit: body.kit ? { ...body.kit, paper: paperFor(body.country) } : null,
       country: body.country,
       currency: price.currency,
@@ -576,7 +762,7 @@ export class CheckoutService {
       priceSnapshot: price,
       couponCode: price.discount.reason === 'coupon' ? price.discount.label : null,
       gift: body.gift,
-      shippingAddress: body.format === 'digital' ? null : body.shippingAddress,
+      shippingAddress: input.address ?? (body.format === 'digital' ? null : body.shippingAddress),
       analyticsConsent: body.analyticsConsent,
       payment: { provider: this.providers.payment().id, checkoutSessionId: null, paymentId: null },
       print: null,

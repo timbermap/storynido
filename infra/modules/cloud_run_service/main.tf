@@ -149,10 +149,15 @@ resource "google_cloud_run_v2_service" "this" {
         }
       }
 
+      # El arranque en frío del worker (Chromium, tipografías, SDKs) pasa de los 30 s del valor por
+      # defecto: se espera hasta 2 minutos antes de dar la instancia por caída.
       startup_probe {
         http_get {
           path = "/health"
         }
+        timeout_seconds   = 3
+        period_seconds    = 5
+        failure_threshold = 24
       }
 
       liveness_probe {

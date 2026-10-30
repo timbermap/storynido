@@ -1755,3 +1755,14 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Ejemplares del cuento grapado:** selector de cantidad (1 a 200) solo para este formato. El precio cobra la **creación una vez** (componente `book`) y cada ejemplar extra paga solo su impresión (componente `copy`, "Ejemplar extra"), con el costo por volumen que cotiza Gelato (30 ejemplares: USD 2,04 c/u de producción más el margen de impresión). El descuento base de profesionales se aplica a ambos. El digital sigue cobrando por unidad.
 - **Seed:** Lulu en México, Argentina y Brasil (con el documento fiscal).
 - **Pendiente:** tarjetas impresas del kit de Celebraciones (invitación y agradecimiento, A6). Cotizan bien (DECISIONS 138) pero necesitan un pedido de impresión propio dentro del kit: precio por pieza y cantidad, dirección en el pago del kit, archivo A6 con sangrado y entrega a Gelato.
+
+## 140 · Tarjetas impresas del kit de Celebraciones (pedido aparte)
+
+- **Fecha:** 2026-10-30.
+- **Pedido aparte, enlazado al kit.** El kit sigue siendo 100 % digital. Desde el pedido del kit terminado, "Imprimir tarjetas" abre `/checkout/{libro}?cards={pedido}`: se elige cuántas invitaciones y/o tarjetas de agradecimiento (10 a 200 por diseño), la dirección (con documento fiscal no, no hace falta) y su confirmación. Crea un pedido nuevo (`items` con formato `card`, `sourceOrderId` y `cards`) que reutiliza el diseño aprobado del kit sin volver a la IA, como una recompra.
+- **Producto:** Gelato, tarjeta 5R vertical (127×178 mm) a color de los dos lados: papel de 350 g en todos los países y de 130 lb en EE. UU. (el adaptador elige según el país). El archivo es un PDF de 2 páginas (frente y dorso) con 3 mm de sangrado, armado con el mismo diseño de las piezas digitales, sin marcas de corte ni leyenda de licencia.
+- **Cotización real (2 diseños × 30 copias):** producción USD 13,62 (unos 23 centavos por tarjeta); envío USD 17,54 a 29,32 (EE. UU. 22,78); en los 7 países verificados. 10 copias por diseño: producción USD 4,54.
+- **Precio:** producción cotizada + margen de impresión una sola vez (el de "cuento grapado" en Precios, mínimo USD 8) + envío al costo. Componente `cards` ("Tarjetas impresas"). Solo Gelato, por país verificado, con la muestra física aprobada (`qaSamplePassed`).
+- **Resolución:** la portada de un kit digital es de pantalla (1K): si no llega a 150 dpi en 5×7", la maquetación se frena para revisión.
+- **Mails y estados:** el pedido usa el pipeline y los estados de un impreso; el mail de pago dice "tarjetas impresas". El pedido no ofrece descarga ni recompra.
+- **Pendiente:** muestra física de las tarjetas y un pedido borrador en Gelato que confirme que acepta el PDF de 2 páginas; test de API con emuladores del pedido de tarjetas.

@@ -17,14 +17,16 @@ export interface PrintAddress {
 }
 
 export interface PrintItem {
-  format: 'softcover' | 'hardcover' | 'booklet';
+  format: 'softcover' | 'hardcover' | 'booklet' | 'card';
+  /** Tarjetas: qué pieza del kit es (cada una es un diseño y un archivo propios). */
+  piece?: string;
   pageCount: number;
   quantity: number;
 }
 
 /** Cloudprinter y Lulu solo hacen fotolibros: un cuento grapado nunca debería llegarles. */
 export function photobookFormat(provider: string, format: PrintItem['format']): PhotobookFormat {
-  if (format === 'booklet') {
+  if (format === 'booklet' || format === 'card') {
     throw new ProviderError(provider, 'Solo imprime fotolibros (tapa blanda y tapa dura)');
   }
   return format;

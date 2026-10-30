@@ -4,7 +4,14 @@ import type { BookFormat } from './common';
 import type { CountryConfig, Coupon, Promotion } from './commerce';
 import { DEFAULT_PRODUCT_PRICING } from './product-pricing';
 import type { EventPricing } from './kit';
-import { DEFAULT_PRO_DISCOUNTS, proPercent, quote, quoteKit, type QuoteInput } from './pricing';
+import {
+  DEFAULT_PRO_DISCOUNTS,
+  proPercent,
+  quote,
+  quoteCards,
+  quoteKit,
+  type QuoteInput,
+} from './pricing';
 
 const NOW = new Date('2026-11-01T12:00:00Z');
 
@@ -370,5 +377,47 @@ describe('ejemplares impresos', () => {
     expect(many.snapshot.subtotalMinor).toBe((book?.totalMinor ?? 0) + (copy?.totalMinor ?? 0));
     // Cada ejemplar extra cuesta menos que el primero (que lleva la creación).
     expect(copy?.unitMinor).toBeLessThan(book?.unitMinor ?? 0);
+  });
+});
+
+describe('tarjetas impresas del kit', () => {
+  const base = {
+    country: US,
+    fx: FX,
+    coupon: null,
+    couponCode: null,
+    promotions: [],
+    now: NOW,
+    margin: DEFAULT_PRODUCT_PRICING.booklet.printMargin,
+  };
+
+  it('suma la impresión cotizada, un margen una sola vez y el envío al costo', () => {
+    const result = quoteCards({
+      ...base,
+      print: { productionUsdMinor: 1362, shippingUsdMinor: 1754, etaDaysMin: 14, etaDaysMax: 25 },
+    });
+    if (!result.ok) throw new Error(result.error);
+    // 13,62 + margen mínimo de 8,00 = 21,62 → 21,99.
+    expect(result.snapshot.components).toEqual([
+      { code: 'cards', unitMinor: 2199, quantity: 1, totalMinor: 2199 },
+    ]);
+    expect(result.snapshot.shipping.minor).toBe(1754);
+    expect(result.snapshot.shipping.pending).toBe(false);
+  });
+
+  it('sin dirección el envío queda pendiente', () => {
+    const result = quoteCards({
+      ...base,
+      print: { productionUsdMinor: 1362, shippingUsdMinor: null, etaDaysMin: 5, etaDaysMax: 9 },
+    });
+    if (!result.ok) throw new Error(result.error);
+    expect(result.snapshot.shipping.pending).toBe(true);
+  });
+
+  it('sin imprenta que pueda, no hay precio', () => {
+    expect(quoteCards({ ...base, print: null })).toEqual({
+      ok: false,
+      error: 'format_unavailable',
+    });
   });
 });

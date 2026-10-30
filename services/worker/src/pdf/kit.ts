@@ -281,11 +281,17 @@ function cropMarks(x: number, y: number, width: number, height: number) {
   return lines.join('');
 }
 
-function cardSheet(book: KitBook, copies: number, front: string, back: string) {
+/** Tarjeta lista para la imprenta: frente y dorso a sangre (127×178 mm + 3 mm por lado), sin marcas. */
+export const CARD_PRINT_SIZE = { width: CARD.width + 2 * BLEED, height: CARD.height + 2 * BLEED };
+
+function cardSheet(book: KitBook, copies: number, front: string, back: string, print = false) {
   const paper = PAPER_MM[book.paper];
   const x = (paper.width - CARD.width) / 2;
   const y = (paper.height - CARD.height) / 2;
-  const sheet = (content: string) => `<section class="page" data-label="tarjeta">
+  const sheet = (content: string) =>
+    print
+      ? `<section class="page" data-label="tarjeta"><div class="card" style="left:0;top:0">${content}</div></section>`
+      : `<section class="page" data-label="tarjeta">
   <div class="card" style="left:${String(x - BLEED)}mm;top:${String(y - BLEED)}mm">${content}</div>
   <svg class="marks" viewBox="0 0 ${String(paper.width)} ${String(paper.height)}">${cropMarks(x, y, CARD.width, CARD.height)}</svg>
   <p class="license">${t(book, 'license', { copies })} · ${t(book, 'cut')}</p>
@@ -306,7 +312,7 @@ function cardSheet(book: KitBook, copies: number, front: string, back: string) {
   return { css, pages: [sheet(front), sheet(back)] };
 }
 
-function invitation(book: KitBook, copies: number) {
+function invitation(book: KitBook, copies: number, print = false) {
   const date = formatDate(book);
   const field = (label: string, value: string | null | undefined) =>
     `<p class="row"><b>${t(book, label)}</b>${value ? escapeHtml(value) : '<span class="line"></span>'}</p>`;
@@ -315,15 +321,17 @@ function invitation(book: KitBook, copies: number) {
     copies,
     `<img class="art" src="${book.cover}" alt=""><div class="band"><h1 class="display">${book.occasion === 'birthday' && book.turningAge ? t(book, 'turning') : t(book, 'birthday')}</h1><p>${t(book, 'invite')}</p></div>`,
     `<div class="back"><h2 class="display">${t(book, 'invite')}</h2>${field('when', date)}${field('time', book.invitation?.time)}${field('where', book.invitation?.place)}<p class="row">${t(book, 'waiting')}</p></div>`,
+    print,
   );
 }
 
-function thankYou(book: KitBook, copies: number) {
+function thankYou(book: KitBook, copies: number, print = false) {
   return cardSheet(
     book,
     copies,
     `<img class="art" src="${book.cover}" alt=""><div class="band"><h1 class="display">${t(book, 'thanks')}</h1></div>`,
     `<div class="back"><h2 class="display">${t(book, 'thanks')}</h2><p class="row">${t(book, 'love')}</p></div>`,
+    print,
   );
 }
 
@@ -437,6 +445,20 @@ export function kitPieceDocument(
     piece,
     html: kitDocument(size, built.css, built.pages),
     size,
+    pages: built.pages.length,
+  };
+}
+
+/** Tarjeta para imprimir (invitación o agradecimiento): un PDF de dos páginas, frente y dorso. */
+export function kitCardPrintDocument(
+  book: KitBook,
+  piece: 'invitation' | 'thank_you',
+): KitPieceDocument {
+  const built = piece === 'invitation' ? invitation(book, 0, true) : thankYou(book, 0, true);
+  return {
+    piece,
+    html: kitDocument(CARD_PRINT_SIZE, built.css, built.pages),
+    size: CARD_PRINT_SIZE,
     pages: built.pages.length,
   };
 }

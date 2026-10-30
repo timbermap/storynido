@@ -3,10 +3,11 @@ import { z } from 'zod';
 import { countryCodeSchema } from '../countries';
 
 /**
- * Formatos impresos: fotolibros (tapa blanda y tapa dura) y el cuento grapado (DECISIONS 138),
- * que cubre los libros cortos que ningún fotolibro imprime (menos de 24 páginas).
+ * Formatos impresos: fotolibros (tapa blanda y tapa dura), el cuento grapado (DECISIONS 138), que
+ * cubre los libros cortos que ningún fotolibro imprime (menos de 24 páginas), y la tarjeta 5×7"
+ * del kit de Celebraciones (DECISIONS 140).
  */
-export const PRINT_FORMATS = ['softcover', 'hardcover', 'booklet'] as const;
+export const PRINT_FORMATS = ['softcover', 'hardcover', 'booklet', 'card'] as const;
 
 /** Los que son fotolibros (tapa y lomo): Cloudprinter y Lulu solo hacen estos. */
 export const PHOTOBOOK_FORMATS = ['softcover', 'hardcover'] as const;
@@ -25,7 +26,17 @@ export const GELATO_PRODUCTS: Record<PrintFormat, string> = {
   // Cuento grapado A5 vertical (148×210 mm): papel de 115 g y tapa de 250 g, de 8 a 24 páginas.
   booklet:
     'stitched-multi-page-brochures_pf_a5_pt_115-gsm-coated-silk_cl_4-4_bt_stitched-left_cpt_250-gsm-coated-silk_ver',
+  // Tarjeta 5R vertical (127×178 mm) a color de los dos lados; en EE. UU. es otro papel.
+  card: 'cards_pf_5r_pt_350-gsm-coated-silk_cl_4-4_ver',
 };
+
+/** La tarjeta 5R de Gelato en EE. UU. (el papel de 350 g no se imprime ahí). */
+export const GELATO_CARD_US = 'cards_pf_5r_pt_130-lb-cover-coated-silk_cl_4-4_ver';
+
+/** Piezas del kit que se pueden imprimir como tarjeta, y las copias mínimas y máximas por pedido. */
+export const CARD_PIECES = ['invitation', 'thank_you'] as const;
+export type CardPiece = (typeof CARD_PIECES)[number];
+export const CARD_COPIES = { min: 10, max: 200 } as const;
 
 /** Fotolibros US Letter vertical (21,6 × 27,9 cm): lo más cercano a nuestro 21×28. */
 export const CLOUDPRINTER_PRODUCTS: Record<PhotobookFormat, string> = {

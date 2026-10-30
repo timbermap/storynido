@@ -1,7 +1,7 @@
 'use client';
 
 import { ApiError, type CountryCode, type PublicOrder } from '@storynido/shared';
-import { Download, FlaskConical, Loader2, RotateCcw, Truck } from 'lucide-react';
+import { Download, FlaskConical, Loader2, Printer, RotateCcw, Truck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -99,6 +99,9 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   // Eventos: el kit con sus piezas, para descargar de a una o todo junto.
   const kitFiles = order.files.filter((file) => file !== 'book' && file !== 'kit_zip');
   const isKit = order.files.includes('kit_zip');
+  // Pedido aparte de tarjetas impresas: no hay descarga ni recompra, solo el seguimiento.
+  const isCards = order.items.every((item) => item.format === 'card');
+  const cardPieces = kitFiles.filter((file) => file === 'invitation' || file === 'thank_you');
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="grid content-start gap-6">
@@ -121,7 +124,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 {tKit('downloadAll')}
               </Button>
             )}
-            {order.canDownload && !isKit && (
+            {order.canDownload && !isKit && !isCards && (
               <Button disabled={busy !== null} onClick={() => void run('download')}>
                 {busy === 'download:book' ? (
                   <Loader2 className="animate-spin" aria-hidden="true" />
@@ -142,7 +145,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 {t('track')}
               </a>
             )}
-            {GENERATED_STATUSES.has(order.status) && (
+            {GENERATED_STATUSES.has(order.status) && !isCards && (
               <Link
                 href={{
                   pathname: '/checkout/[bookId]',
@@ -153,6 +156,19 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
               >
                 <RotateCcw aria-hidden="true" />
                 {isKit ? tKit('moreCopies') : t('reorder')}
+              </Link>
+            )}
+            {GENERATED_STATUSES.has(order.status) && isKit && cardPieces.length > 0 && (
+              <Link
+                href={{
+                  pathname: '/checkout/[bookId]',
+                  params: { bookId: order.bookId },
+                  query: { cards: order.orderId },
+                }}
+                className={buttonVariants({ variant: 'outline' })}
+              >
+                <Printer aria-hidden="true" />
+                {tKit('printCards.cta')}
               </Link>
             )}
           </div>

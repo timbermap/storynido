@@ -231,7 +231,7 @@ export class EmailNotifier {
     const uid = String(order.ownerUid);
     const user = (await this.db.collection(COLLECTIONS.users).doc(uid).get()).data();
     const locale = asLocale(user?.locale ?? order.locale);
-    const items = (order.items ?? []) as { format: BookFormat }[];
+    const items = (order.items ?? []) as { format: BookFormat | 'card' }[];
     const print = items.some((item) => item.format !== 'digital');
     const bookTitle = typeof order.bookTitle === 'string' ? order.bookTitle : 'StoryNido';
     const url = this.orderUrl(locale, orderId);

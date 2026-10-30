@@ -1098,7 +1098,8 @@
       "length": "Ajuste por extensão",
       "design": "Design do kit (inclui a mini história)",
       "piece": "Peça",
-      "copy": "Exemplar extra"
+      "copy": "Exemplar extra",
+      "cards": "Cartões impressos"
     },
     "discount": {
       "coupon": "Cupom {label}",
@@ -1212,7 +1213,21 @@
       "downloadAll": "Baixar tudo (ZIP)",
       "moreCopies": "Pedir mais cópias",
       "ready": "Seu kit está pronto!",
-      "digitalOnly": "O kit é digital: chega em PDF pronto para imprimir em casa ou na gráfica que preferir. Não imprimimos nem enviamos o kit."
+      "digitalOnly": "O kit é digital: chega em PDF pronto para imprimir em casa ou na gráfica que preferir. Não imprimimos nem enviamos o kit.",
+      "printCards": {
+        "cta": "Imprimir cartões",
+        "title": "Cartões impressos",
+        "subtitle": "Peça os convites e os agradecimentos do seu kit impressos e enviados para sua casa.",
+        "piecesTitle": "Quantos cartões você quer?",
+        "piecesText": "Cartões de 12,7 × 17,8 cm (5×7\"), coloridos dos dois lados, com o design do seu kit. Deixe 0 nos que você não quiser.",
+        "pieces": {
+          "invitation": "Convites",
+          "thank_you": "Cartões de agradecimento"
+        },
+        "minimum": "Mínimo de {min} por design. O preço inclui a impressão; o frete é calculado com seu endereço.",
+        "noPieces": "Este kit não tem convites nem cartões de agradecimento para imprimir.",
+        "error": "Não conseguimos calcular o pedido. Tente novamente."
+      }
     },
     "fromPrice": "a partir de {price}",
     "shippingPending": "Frete: calculado com o seu endereço",

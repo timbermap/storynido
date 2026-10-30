@@ -49,7 +49,7 @@ import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 import { z } from 'zod';
 
 import { assembleSinglePdf } from '../pdf/assemble';
-import { kitPieceDocument, type KitBook } from '../pdf/kit';
+import { CARD_PRINT_SIZE, kitCardPrintDocument, kitPieceDocument, type KitBook } from '../pdf/kit';
 import { launchBrowser, renderPdf } from '../pdf/render';
 import { textPlacements } from '../pdf/placement';
 import { FORMAT_SPECS, pageSizeMm, printablePages, type FormatSpec } from '../pdf/spec';
@@ -150,8 +150,11 @@ interface Deps {
 }
 
 /** Un PDF maquetado y validado (lo usa la entrega). */
+/** Resolución mínima de la portada en una tarjeta impresa. */
+const CARD_MIN_DPI = 150;
+
 export interface LayoutFile {
-  format: BookFormat;
+  format: BookFormat | 'card';
   kind: string;
   path: string;
   pages: number;
@@ -920,8 +923,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       'digital',
       ...new Set(
         ctx.order.items
-          .map((item) => item.format as BookFormat)
-          .filter((format) => format !== 'digital'),
+          .map((item) => item.format as BookFormat | 'card')
+          // Las tarjetas del kit no son un libro: se maquetan aparte (más abajo).
+          .filter((format): format is BookFormat => format !== 'digital' && format !== 'card'),
       ),
     ];
     const files: LayoutFile[] = [];
@@ -1108,6 +1112,63 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           });
         }
       }
+      // Tarjetas impresas (pedido aparte, DECISIONS 140): frente y dorso del kit del pedido
+      // original, a sangre, en un PDF de dos páginas por pieza.
+      const cardItems = ctx.order.items.filter((item) => item.format === 'card');
+      if (cardItems.length > 0) {
+        const sourceKit = await kitOf(ctx.order.sourceOrderId ?? '');
+        if (!sourceKit || !kitCover) {
+          throw new HumanReviewError('reorder_source', 'El kit original no está disponible.');
+        }
+        const cardBook: KitBook = {
+          language: snapshot.language as Lang,
+          childName: snapshot.childName,
+          title: snapshot.title,
+          occasion: sourceKit.event?.type ?? 'birthday',
+          turningAge:
+            sourceKit.event?.type === 'birthday' ? (sourceKit.event.turningAge ?? null) : null,
+          eventDate: sourceKit.event?.date ?? null,
+          invitation: sourceKit.invitation,
+          cover: kitCover,
+          paper: sourceKit.paper,
+        };
+        // La portada de un kit digital es de pantalla (1K): tiene que alcanzar para 5×7".
+        const coverWidth = (await sharp(sources[0]).metadata()).width;
+        const coverDpi = effectiveDpi(coverWidth, CARD_PRINT_SIZE.width);
+        if (coverDpi < CARD_MIN_DPI) {
+          problems.push(`tarjetas: la portada tiene ${String(Math.round(coverDpi))} dpi`);
+        }
+        for (const item of cardItems) {
+          const piece = item.piece === 'thank_you' ? 'thank_you' : 'invitation';
+          const doc = kitCardPrintDocument(cardBook, piece);
+          const result = await renderPdf(browser, doc.html, doc.size, {
+            bleedMm: 3,
+            title: `${snapshot.title} · ${piece}`,
+          });
+          const check = await validatePdf(result.pdf, {
+            pages: doc.pages,
+            widthMm: doc.size.width,
+            heightMm: doc.size.height,
+            bleedMm: 3,
+          });
+          if (result.overflow.length > 0 || !check.ok) {
+            problems.push(`tarjeta ${piece}: ${[...result.overflow, ...check.errors].join('; ')}`);
+            continue;
+          }
+          const path = `${base}/card-${piece}.pdf`;
+          await storage().upload({ bucket: 'pdfs', path }, result.pdf, 'application/pdf');
+          files.push({
+            format: 'card',
+            kind: piece,
+            path,
+            pages: check.pageCount,
+            bytes: result.pdf.length,
+            sha256: createHash('sha256').update(result.pdf).digest('hex'),
+            // Gelato es la única que imprime tarjetas: maquetadas para ella.
+            printer: printer?.id ?? null,
+          });
+        }
+      }
       if (kit && kitCover) {
         const kitBook: KitBook = {
           language: snapshot.language as Lang,
@@ -1219,8 +1280,14 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         ? (await storage().signedDownloadUrl({ bucket: 'pdfs', path: file.path }, sevenDays)).url
         : null;
     for (const item of printItems) {
-      const mine = files.filter((file) => file.format === item.format);
-      const book = mine.find((file) => file.kind === 'book');
+      // Una tarjeta por pieza: cada diseño es su propio archivo (frente y dorso).
+      const mine = files.filter(
+        (file) =>
+          file.format === item.format && (item.format !== 'card' || file.kind === item.piece),
+      );
+      const book = mine.find(
+        (file) => file.kind === (item.format === 'card' ? item.piece : 'book'),
+      );
       const interior = mine.find((file) => file.kind === 'interior');
       const cover = mine.find((file) => file.kind === 'cover');
       if (!book && (!interior || !cover)) throw new Error(`Faltan los PDF de ${item.format}.`);
@@ -1238,9 +1305,14 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       }
       items.push({
         format: item.format as PrintFormat,
+        ...(item.format === 'card' ? { piece: item.piece } : {}),
         // En un solo PDF van también la tapa y las dos guardas; en el cuento grapado, el archivo
         // entero es el libro (con sus tapas) y cuenta todas sus páginas.
-        pageCount: interior?.pages ?? (book ? book.pages - (item.format === 'booklet' ? 0 : 3) : 0),
+        // Las tarjetas no cuentan páginas (frente y dorso son un solo diseño).
+        pageCount:
+          item.format === 'card'
+            ? 1
+            : (interior?.pages ?? (book ? book.pages - (item.format === 'booklet' ? 0 : 3) : 0)),
         quantity: item.quantity,
         interiorPdfUrl: await signed(interior),
         coverPdfUrl: await signed(cover),

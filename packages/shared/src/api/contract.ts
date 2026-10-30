@@ -5,6 +5,7 @@ import { countryCodeSchema } from '../countries';
 import { currencySchema } from '../currency';
 import { localeSchema } from '../i18n';
 
+import { CARD_COPIES, CARD_PIECES } from '../models/print';
 import { BOOK_FORMATS, bookFormatSchema } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
 import { characterTraitsSchema, mustKeepSchema } from '../models/character';
@@ -337,6 +338,27 @@ export const checkoutQuoteResponseSchema = z.object({
   availableFormats: z.array(bookFormatSchema).optional(),
 });
 
+/** Tarjetas impresas del kit (DECISIONS 140): un pedido aparte, de las piezas de un kit ya comprado. */
+export const cardsOrderBodySchema = z.object({
+  sourceOrderId: z.string().min(1),
+  cards: z
+    .array(
+      z.object({
+        piece: z.enum(CARD_PIECES),
+        copies: z.number().int().min(CARD_COPIES.min).max(CARD_COPIES.max),
+      }),
+    )
+    .min(1)
+    .refine((cards) => new Set(cards.map((card) => card.piece)).size === cards.length, {
+      message: 'Pieza repetida',
+    }),
+  country: countryCodeSchema,
+  /** Con la dirección completa se cotiza con la imprenta (envío real). */
+  shippingAddress: addressSchema.nullable().default(null),
+  couponCode: z.string().trim().toUpperCase().max(32).nullable().default(null),
+  analyticsConsent: z.boolean().default(false),
+});
+
 export const createCheckoutBodySchema = checkoutItemBodySchema.extend({
   shippingAddress: addressSchema.nullable().default(null),
   gift: z
@@ -354,7 +376,9 @@ export const publicOrderSchema = z.object({
   orderId: z.string(),
   bookId: z.string(),
   status: orderStatusSchema,
-  items: z.array(z.object({ format: bookFormatSchema, quantity: z.number().int() })),
+  items: z.array(
+    z.object({ format: bookFormatSchema.or(z.literal('card')), quantity: z.number().int() }),
+  ),
   priceSnapshot: priceSnapshotSchema.nullable(),
   createdAt: z.string(),
   /** El pago se puede simular (solo fuera de producción, con el proveedor simulado). */
@@ -1144,6 +1168,23 @@ export const apiRoutes = {
     summary:
       'Crea el pedido (precio y aprobación congelados) y la sesión de pago; devuelve la URL de pago',
     body: createCheckoutBodySchema,
+    response: createCheckoutResponseSchema,
+  },
+  cardsQuote: {
+    method: 'POST',
+    path: '/v1/cards/quote',
+    access: 'user',
+    summary:
+      'Precio de las tarjetas impresas de un kit (imprenta, margen y envío con la dirección)',
+    body: cardsOrderBodySchema,
+    response: checkoutQuoteResponseSchema,
+  },
+  createCards: {
+    method: 'POST',
+    path: '/v1/cards',
+    access: 'user',
+    summary: 'Crea el pedido de tarjetas impresas de un kit y la sesión de pago',
+    body: cardsOrderBodySchema,
     response: createCheckoutResponseSchema,
   },
   order: {

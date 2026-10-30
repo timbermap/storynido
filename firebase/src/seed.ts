@@ -42,8 +42,10 @@ import {
   utcDay,
   DEFAULT_PRO_DISCOUNTS,
   aiModelSchema,
+  GELATO_CARD_US,
   GELATO_PRODUCTS,
   type PhotobookFormat,
+  type PrintFormat,
   LULU_PRODUCTS,
   proDiscountConfigSchema,
   eventPricingSchema,
@@ -152,6 +154,14 @@ const SAMPLE_SHIPPING: Partial<
   US: { costMinor: 699, etaDaysMin: 4, etaDaysMax: 8 },
 };
 
+/** Páginas que acepta la imprenta simulada según el formato. */
+const mockPages = (format: PrintFormat) =>
+  format === 'booklet'
+    ? { ...BOOKLET_PAGES }
+    : format === 'card'
+      ? { min: 1, max: 1, multipleOf: 1 }
+      : { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 };
+
 const writes: { ref: DocumentReference; data: object }[] = [];
 /** En la nube solo se crean los documentos que faltan; en los emuladores se reescriben. */
 const batch = {
@@ -234,14 +244,17 @@ for (const [code, eta] of Object.entries(SAMPLE_PRINT) as [
           sku: `photobook-${format}-210x280`,
           enabled: true,
           qaSamplePassed: true,
-          pages:
-            format === 'booklet'
-              ? { ...BOOKLET_PAGES }
-              : { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 },
+          pages: mockPages(format),
           maxQuantity: 100,
           ...eta,
           productionCostUsdMinor:
-            (format === 'hardcover' ? 1400 : 900) + (provider === 'mock_alt' ? 150 : 0),
+            (format === 'card'
+              ? 25
+              : format === 'booklet'
+                ? 700
+                : format === 'hardcover'
+                  ? 1400
+                  : 900) + (provider === 'mock_alt' ? 150 : 0),
           updatedAt: now,
         }),
       );
@@ -384,6 +397,44 @@ batch.delete(
   db.collection(COLLECTIONS.printOptions).doc(printOptionId(ANY_COUNTRY, 'booklet', 'gelato')),
 );
 
+// Tarjetas 5×7" del kit de Celebraciones (DECISIONS 140): solo Gelato. Cotización real de 2
+// diseños de 30 copias (USD 13,62 en total: unos 23 centavos por tarjeta) y plazo con el envío.
+// En EE. UU. es otro papel (el SKU lo elige el adaptador según el país).
+const GELATO_CARD: Partial<Record<CountryCode, [etaMin: number, etaMax: number]>> = {
+  US: [7, 11],
+  MX: [11, 18],
+  AR: [5, 7],
+  UY: [5, 7],
+  BR: [14, 25],
+  ES: [5, 6],
+  CH: [5, 6],
+};
+for (const [code, [etaMin, etaMax]] of Object.entries(GELATO_CARD) as [
+  CountryCode,
+  [number, number],
+][]) {
+  batch.set(
+    db.collection(COLLECTIONS.printOptions).doc(printOptionId(code, 'card', 'gelato')),
+    printOptionSchema.parse({
+      country: code,
+      format: 'card',
+      provider: 'gelato',
+      sku: code === 'US' ? GELATO_CARD_US : GELATO_PRODUCTS.card,
+      enabled: true,
+      qaSamplePassed: !production,
+      pages: { min: 1, max: 1, multipleOf: 1 },
+      maxQuantity: 500,
+      etaDaysMin: etaMin,
+      etaDaysMax: etaMax,
+      productionCostUsdMinor: 23,
+      updatedAt: now,
+    }),
+  );
+}
+batch.delete(
+  db.collection(COLLECTIONS.printOptions).doc(printOptionId(ANY_COUNTRY, 'card', 'gelato')),
+);
+
 // La imprenta simulada (fuera de producción) sí atiende cualquier destino, para las pruebas.
 if (!production) {
   for (const format of PRINT_FORMATS) {
@@ -396,14 +447,12 @@ if (!production) {
         sku: `photobook-${format}-210x280`,
         enabled: true,
         qaSamplePassed: true,
-        pages:
-          format === 'booklet'
-            ? { ...BOOKLET_PAGES }
-            : { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 },
+        pages: mockPages(format),
         maxQuantity: 100,
         etaDaysMin: 7,
         etaDaysMax: 20,
-        productionCostUsdMinor: format === 'hardcover' ? 1400 : 900,
+        productionCostUsdMinor:
+          format === 'card' ? 25 : format === 'booklet' ? 700 : format === 'hardcover' ? 1400 : 900,
         updatedAt: now,
       }),
     );

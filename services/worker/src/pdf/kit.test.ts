@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { kitPieceDocument, type KitBook } from './kit';
+import { CARD_PRINT_SIZE, kitCardPrintDocument, kitPieceDocument, type KitBook } from './kit';
 
 const book = (occasion: KitBook['occasion']): KitBook => ({
   language: 'es',
@@ -35,5 +35,23 @@ describe('kit por ocasión', () => {
     expect(kitPieceDocument(book('graduation'), 'activities', 20).html).toContain(
       'Ayuda a Sofi a llegar a su diploma',
     );
+  });
+});
+
+describe('tarjeta para imprimir', () => {
+  it('es un PDF de dos páginas (frente y dorso) del tamaño de la tarjeta con sangrado', () => {
+    const doc = kitCardPrintDocument(book('birthday'), 'invitation');
+    expect(doc.pages).toBe(2);
+    expect(doc.size).toEqual(CARD_PRINT_SIZE);
+    // 127×178 mm más 3 mm de sangrado por lado.
+    expect(doc.size).toEqual({ width: 133, height: 184 });
+    expect(doc.html).toContain('¡Sofi cumple 6!');
+    expect(doc.html).toContain('Casa de la abuela');
+  });
+
+  it('sin marcas de corte ni leyenda de licencia: la imprenta corta sola', () => {
+    const html = kitCardPrintDocument(book('birthday'), 'thank_you').html;
+    expect(html).not.toContain('class="marks"');
+    expect(html).not.toContain('Licencia StoryNido');
   });
 });

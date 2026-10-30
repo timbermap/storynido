@@ -8,7 +8,9 @@ import type { FxRates } from './metrics';
 import {
   charmPrice,
   fromUsdMinor,
+  marginUsdMinor,
   unitPriceUsdMinor,
+  type Margin,
   type ProductPricing,
 } from './product-pricing';
 
@@ -20,8 +22,8 @@ export const CHARGE_CURRENCY: Currency = 'USD';
 
 /** Un componente del precio (lo que el comprador ve en el resumen y queda en el pedido). */
 export const priceComponentSchema = z.object({
-  /** book/length: libro; copy: ejemplares extra (solo impresión); design/piece: kit de Eventos. */
-  code: z.enum(['book', 'copy', 'length', 'design', 'piece']),
+  /** book/length: libro; copy: ejemplares extra (solo impresión); cards: tarjetas impresas del kit; design/piece: kit de Eventos. */
+  code: z.enum(['book', 'copy', 'cards', 'length', 'design', 'piece']),
   piece: kitPieceSchema.optional(),
   unitMinor: z.number().int(),
   quantity: z.number().int().positive(),
@@ -278,6 +280,41 @@ export function quoteKit(
     etaDaysMax: 0,
     pending: false,
   });
+}
+
+/**
+ * Tarjetas impresas del kit de Celebraciones (DECISIONS 140): un pedido aparte, enlazado al kit.
+ * El precio es lo que cotizó la imprenta por todas las tarjetas más un margen de impresión (una
+ * sola vez); el envío se cobra al costo. Es un impreso: aplica el descuento por volumen.
+ */
+export function quoteCards(
+  input: Pick<
+    QuoteInput,
+    'country' | 'fx' | 'coupon' | 'couponCode' | 'promotions' | 'now' | 'pro'
+  > & {
+    print: PrintCost | null;
+    margin: Margin;
+  },
+): QuoteResult {
+  const { country, print } = input;
+  if (!country?.active) return { ok: false, error: 'country_unavailable' };
+  if (!print) return { ok: false, error: 'format_unavailable' };
+  const usd = print.productionUsdMinor + marginUsdMinor(input.margin, print.productionUsdMinor);
+  const local = fromUsdMinor(usd, CHARGE_CURRENCY, input.fx);
+  if (local === null) return { ok: false, error: 'price_missing' };
+  const total = charmPrice(local, CHARGE_CURRENCY);
+  return finalize(
+    [{ code: 'cards', unitMinor: total, quantity: 1, totalMinor: total }],
+    country,
+    'booklet',
+    input,
+    {
+      minor: print.shippingUsdMinor ?? 0,
+      etaDaysMin: print.etaDaysMin,
+      etaDaysMax: print.etaDaysMax,
+      pending: print.shippingUsdMinor === null,
+    },
+  );
 }
 
 function finalize(

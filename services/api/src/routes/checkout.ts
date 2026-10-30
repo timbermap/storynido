@@ -8,6 +8,7 @@ import { addRoute } from '../plugins/route';
 
 type QuoteBody = z.output<(typeof apiRoutes)['checkoutQuote']['body']>;
 type CheckoutBody = z.output<(typeof apiRoutes)['createCheckout']['body']>;
+type CardsBody = z.output<(typeof apiRoutes)['createCards']['body']>;
 
 function user(request: FastifyRequest) {
   if (!request.user) throw new AppError(401, 'unauthorized', 'Inicia sesión.');
@@ -51,6 +52,19 @@ export function registerCheckoutRoutes(app: FastifyInstance, checkout: CheckoutS
       { uid: current.uid, email: current.email, anonymous: current.anonymous },
       (request.params as { orderId: string }).orderId,
       request.body as Omit<CheckoutBody, 'bookId'>,
+      origin(request),
+    );
+  });
+
+  addRoute(app, apiRoutes.cardsQuote, {}, (request) =>
+    checkout.cardsQuote(user(request).uid, request.body as CardsBody),
+  );
+
+  addRoute(app, apiRoutes.createCards, { appCheck: true }, (request) => {
+    const current = user(request);
+    return checkout.createCards(
+      { uid: current.uid, email: current.email, anonymous: current.anonymous },
+      request.body as CardsBody,
       origin(request),
     );
   });

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { GELATO_PRODUCTS, ProviderError, WebhookSignatureError } from '@storynido/shared';
+import {
+  GELATO_CARD_US,
+  GELATO_PRODUCTS,
+  ProviderError,
+  WebhookSignatureError,
+} from '@storynido/shared';
 
 import { GelatoPrintProvider } from './print';
 
@@ -261,5 +266,35 @@ describe('Gelato', () => {
     });
     // No necesita pedir la tapa a Gelato: no hay lomo.
     expect(gelato.calls).toHaveLength(0);
+  });
+});
+
+describe('tarjetas 5×7"', () => {
+  const ADDRESS = {
+    name: 'Ana Pérez',
+    line1: 'Av. Reforma 123',
+    line2: null,
+    city: 'CDMX',
+    state: 'CDMX',
+    postalCode: '06600',
+    country: 'MX' as const,
+    phone: '+52 55 1234 5678',
+  };
+
+  it('cotiza sin cantidad de páginas y usa el papel de EE. UU. solo allá', async () => {
+    const gelato = fakeGelato({ 'orders:quote': () => ({ json: QUOTE }) });
+    const provider = printer(gelato.fetchImpl);
+    const items = [{ format: 'card' as const, piece: 'invitation', pageCount: 1, quantity: 30 }];
+    await provider.quote(items, ADDRESS, 'USD');
+    await provider.quote(items, { ...ADDRESS, country: 'US' }, 'USD');
+    const [mx, us] = gelato.calls.map(
+      (call) => (call.body as { products: Record<string, unknown>[] }).products[0],
+    );
+    expect(mx).toEqual({
+      itemReferenceId: 'card-0',
+      productUid: GELATO_PRODUCTS.card,
+      quantity: 30,
+    });
+    expect(us?.productUid).toBe(GELATO_CARD_US);
   });
 });

@@ -12,7 +12,7 @@ export const EMAIL_DATA = {
   payment_confirmed: z.object({
     bookTitle: title,
     total: z.string().min(1),
-    format: z.enum(BOOK_FORMATS),
+    format: z.enum([...BOOK_FORMATS, 'card']),
     url,
   }),
   digital_ready: z.object({ bookTitle: title, url }),
