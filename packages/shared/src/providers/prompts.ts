@@ -294,3 +294,11 @@ export function samplePrompts(input: {
     }),
   };
 }
+
+/** Escena de la lámina del acompañante: cuerpo entero, fondo liso, sin nadie más. */
+export const companionReferenceScene = (companion: { name: string; look: string }) =>
+  `Character reference sheet of ${companion.name}: ${companion.look}. Full body, neutral friendly pose, plain light background, nobody else in the image.`;
+
+/** Lo que se suma a la descripción del personaje cuando el libro tiene acompañante. */
+export const companionNote = (companion: { name: string; look: string }) =>
+  `Recurring companion ${companion.name}: ${companion.look}. Whenever ${companion.name} appears, draw them identical to the second reference image.`;

@@ -239,6 +239,12 @@ const PLAN_SCHEMA = {
   properties: {
     theme: { type: 'STRING' },
     arc: { type: 'STRING' },
+    companion: {
+      type: 'OBJECT',
+      nullable: true,
+      properties: { name: { type: 'STRING' }, look: { type: 'STRING' } },
+      required: ['name', 'look'],
+    },
     scenes: {
       type: 'ARRAY',
       items: {
@@ -506,7 +512,8 @@ consequence and resolution. At least two personal details from the brief must ch
 No two consecutive scenes may be nearly identical. Exactly ${String(request.pageCount)} scenes, one per narrative page.
 wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min)}-${String(request.wordsPerPage.max)} words` : 'as the brief says'}.
 mustBeVisible / notVisible / continuityFacts in short English phrases for the illustrator. Write theme, arc, sceneGoal and emotionalBeat
-in the language of the brief.
+in the language of the brief. companion: the one secondary character (relative, friend or pet from the brief) who appears in two or
+more scenes, with a fixed look in English (age, hair, skin tone, clothes and colors; species and fur for a pet); null if none recurs.
 
 Brief:
 ${request.prompt}`,
@@ -529,6 +536,7 @@ ${request.prompt}`,
     return {
       theme: plan.theme,
       arc: plan.arc,
+      companion: plan.companion?.name && plan.companion.look ? plan.companion : null,
       scenes: plan.scenes.map((scene, pageIndex) => ({
         ...scene,
         pageIndex,

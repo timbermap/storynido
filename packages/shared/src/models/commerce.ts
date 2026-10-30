@@ -175,6 +175,11 @@ export const bookPreviewSchema = z.object({
       approvedAt: z.date().nullable(),
     })
     .optional(),
+  /** Lámina del acompañante (abuela, mascota): segunda referencia de cada ilustración. */
+  companion: z
+    .object({ name: z.string(), look: z.string(), imagePath: z.string() })
+    .nullable()
+    .optional(),
   /** Lámina del personaje (referencia interna de cada ilustración; el cliente no la ve). */
   characterImagePath: z.string().nullable().optional(),
   pages: z.array(bookPageSchema),
@@ -197,6 +202,7 @@ export const bookPreviewSchema = z.object({
     .object({
       theme: z.string(),
       arc: z.string(),
+      companion: z.object({ name: z.string(), look: z.string() }).nullable().optional(),
       scenes: z.array(
         z.object({
           pageIndex: z.number().int().nonnegative(),
@@ -396,10 +402,11 @@ export function previewPaths(preview: unknown): string[] {
   if (!preview || typeof preview !== 'object') return [];
   const value = preview as {
     character?: { imagePath?: unknown; previewImagePath?: unknown } | null;
+    companion?: { imagePath?: unknown; previewImagePath?: unknown } | null;
     cover?: { imagePath?: unknown; previewImagePath?: unknown } | null;
     pages?: { imagePath?: unknown; previewImagePath?: unknown }[];
   };
-  return [value.character, value.cover, ...(value.pages ?? [])].flatMap((item) =>
+  return [value.character, value.companion, value.cover, ...(value.pages ?? [])].flatMap((item) =>
     [item?.imagePath, item?.previewImagePath].filter(
       (path): path is string => typeof path === 'string',
     ),

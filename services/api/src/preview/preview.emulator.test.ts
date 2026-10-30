@@ -268,6 +268,28 @@ describe('vista previa', () => {
     paint.mockRestore();
   });
 
+  it('con un acompañante que se repite, su lámina es la segunda referencia de cada ilustración', async () => {
+    await seedBook(providers, 'book-1');
+    // El planificador simulado elige a la mascota como acompañante.
+    await db.doc('children/book-1-child').update({ petName: 'Toby' });
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    await generate('book-1');
+    expect((await approve('book-1')).statusCode).toBe(200);
+    const [companionSheet, ...illustrated] = paint.mock.calls.slice(1).map(([request]) => request);
+    expect(companionSheet?.prompt).toContain('Character reference sheet of Toby');
+    expect(companionSheet?.references).toHaveLength(1);
+    expect(illustrated).toHaveLength(3);
+    for (const request of illustrated) {
+      expect(request.references).toHaveLength(2);
+      expect(request.prompt).toContain('Recurring companion Toby');
+    }
+    const book = await db.doc('books/book-1').get();
+    expect(book.get('preview.companion.name')).toBe('Toby');
+    const path = book.get('preview.companion.imagePath') as string;
+    expect(await providers.storage().exists({ bucket: 'assets', path })).toBe(true);
+    paint.mockRestore();
+  });
+
   it('aprobar al personaje ilustra la portada y 2 páginas con marca de agua, y registra el uso', async () => {
     await seedBook(providers, 'book-1');
     await generate('book-1');

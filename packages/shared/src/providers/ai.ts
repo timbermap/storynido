@@ -138,8 +138,17 @@ export interface ScenePlan {
   personalDetail: string | null;
 }
 
+/** Personaje secundario que se repite (abuela, mascota): se dibuja igual en todo el libro. */
+export interface CompanionPlan {
+  name: string;
+  /** Aspecto fijo, en inglés (edad, pelo, ropa y colores; especie y pelaje si es mascota). */
+  look: string;
+}
+
 export interface StoryPlan {
   theme: string;
+  /** El acompañante que más se repite, o null si ninguno vuelve en varias páginas. */
+  companion?: CompanionPlan | null;
   /** Principio, motivación, dificultad, decisión del protagonista y resolución. */
   arc: string;
   scenes: ScenePlan[];

@@ -10,6 +10,7 @@ import {
   GLOBAL_DOC_ID,
   avatarToSheet,
   buildIllustrationPrompt,
+  companionNote,
   countWords,
   normalizeFirestoreData,
   ProviderError,
@@ -105,6 +106,8 @@ export interface BookSnapshot {
   /** Dirección de arte de la muestra (null en muestras anteriores a ella). */
   artDirection?: string | null;
   character: { description: string; mustKeep: string[]; sheetPath: string };
+  /** Acompañante que se repite, con su lámina aprobada en la muestra (DECISIONS 117). */
+  companion?: { name: string; look: string; sheetPath: string } | null;
   /** Ilustraciones aprobadas en la vista previa, copiadas al pedido: índice -> ruta. */
   approved: Record<string, string>;
 }
@@ -345,19 +348,23 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         ? pageScene(coverScene(snapshot.pages[0]?.illustrationPrompt), null, hint)
         : pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint);
     const reference = await load(snapshot.character.sheetPath);
+    const companion = snapshot.companion ?? null;
+    const references = companion ? [reference, await load(companion.sheetPath)] : [reference];
     let cost = 0;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       const image = await provider.image.generateIllustration({
         prompt: buildIllustrationPrompt({
           template: snapshot.imagePromptTemplate,
           scene,
-          character: snapshot.character.description,
+          character: companion
+            ? `${snapshot.character.description}\n${companionNote(companion)}`
+            : snapshot.character.description,
           style: snapshot.stylePrompt,
           direction: snapshot.artDirection,
         }),
         stylePrompt: snapshot.stylePrompt,
         character: { description: snapshot.character.description, photo: null },
-        references: [reference],
+        references,
         aspectRatio: '3:4',
         // Los pedidos impresos se ilustran en 2K (~220 dpi a 21×28 cm; DECISIONS 069).
         resolution: isPrint(ctx.order) ? '2K' : '1K',
@@ -417,6 +424,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           words?: { min: number; max: number };
           activityPages?: number;
           artDirection?: string | null;
+          companion?: { name: string; look: string; imagePath: string } | null;
         }
       | undefined;
     if (!book || preview?.stage !== 'complete' || !preview.character?.approvedAt) {
@@ -471,6 +479,15 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const base = `orders/${ctx.order.id}/approved`;
     const sheetPath = `${base}/character.webp`;
     await copy(preview.character.imagePath, sheetPath);
+    const companion = preview.companion
+      ? {
+          name: preview.companion.name,
+          look: preview.companion.look,
+          sheetPath: `${base}/companion.webp`,
+        }
+      : null;
+    if (companion && preview.companion)
+      await copy(preview.companion.imagePath, companion.sheetPath);
     const approved: Record<string, string> = {};
     const sources: [number, string | null | undefined][] = [
       [0, preview.cover?.imagePath],
@@ -513,6 +530,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         mustKeep: mustKeepLabels(traits, mustKeep),
         sheetPath,
       },
+      companion,
       approved,
     };
     const snapshot: BookSnapshot = { ...content, hash: hashSnapshot(content) };

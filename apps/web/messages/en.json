@@ -1131,7 +1131,8 @@
         "save": "Send my review",
         "thanks": "Thanks for telling us!",
         "error": "We couldn’t save your review. Please try again."
-      }
+      },
+      "toMyStories": "See it in My stories →"
     },
     "reorderSubtitle": "You are ordering the same book again, exactly as it turned out: no need to create it again.",
     "kit": {

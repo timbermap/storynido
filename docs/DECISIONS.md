@@ -1549,3 +1549,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Migración:** un borrador anterior da por hecho todo lo que venía antes en el orden histórico y retoma en el primer paso del flujo nuevo que le falta.
 - **Cualquier paso puede ser el primero:** todos los guardados pasan por `nav.ensureBook()`, que crea el borrador si todavía está en memoria.
 - **Profesionales:** sin dedicatoria.
+
+## 117 · Nuevo flujo, PR 6 a 9, y lámina del acompañante
+
+- **Fecha:** 2026-10-30.
+- **PR 6, protagonista reutilizable:** en un borrador sin protagonista, "¿Para quién es este cuento?" ofrece los perfiles del usuario. Elegir uno completa sus datos y copia al libro su aspecto del último cuento: los rasgos elegidos, o sus fotos si siguen válidas (se borran a los 30 días). La lámina se vuelve a aprobar en la muestra, porque cambia con el estilo y la historia.
+- **PR 7, vista previa antes:** con el orden nuevo, la muestra llega justo después del personaje (lámina, y al aprobarla, portada y primeras páginas).
+- **PR 8, cierre propio:** el pago, ya en modo foco, es el cierre de cada línea. Familia elige el formato y Celebraciones las piezas y copias del kit. Profesionales ve el descuento por volumen aplicado y cuánto le falta para el próximo nivel.
+- **PR 9, después del pago:** se sigue en la página del pedido (generación en vivo y descargas), con "Ver en Mis cuentos", que también muestra el pedido en vivo.
+- **Lámina del acompañante:** el planificador marca al personaje secundario que se repite (abuela, mascota) con un aspecto fijo en inglés. Al aprobar al protagonista se genera su lámina una vez (unos USD 0,07, solo si hay acompañante), y es la segunda referencia de la portada, las páginas, las regeneraciones y el libro completo (el worker la congela con el pedido). Se borra con el borrador o la cuenta, como el resto de la muestra.

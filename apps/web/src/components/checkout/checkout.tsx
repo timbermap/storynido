@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useConsent } from '@/components/consent/consent-provider';
+import { useProStatus } from '@/components/pro/use-pro-status';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { countriesByName } from '@/lib/country-names';
@@ -75,6 +76,8 @@ export function Checkout({
   const locale = useLocale() as Locale;
   const { signedIn, loading } = useAuth();
   const { choice } = useConsent();
+  const { status: pro } = useProStatus();
+  const tPro = useTranslations('Pro.account');
   const formats = offer.formats;
   const [format, setFormat] = useState<BookFormat>(formats[0]?.format ?? 'digital');
   const [address, setAddress] = useState<AddressDraft>(EMPTY_ADDRESS);
@@ -347,7 +350,18 @@ export function Checkout({
           </p>
         )}
         {quote ? (
-          <PriceSummary snapshot={quote.snapshot} country={country} local={offer.local} />
+          <>
+            <PriceSummary snapshot={quote.snapshot} country={country} local={offer.local} />
+            {/* Profesionales: descuento por volumen (sin suscripción); cuánto falta para el próximo. */}
+            {pro?.accountType === 'professional' && pro.discount?.next && (
+              <p className="text-sm text-muted-foreground">
+                {tPro('next', {
+                  missing: pro.discount.next.purchases - pro.discount.purchases,
+                  percent: pro.discount.next.percent,
+                })}
+              </p>
+            )}
+          </>
         ) : (
           <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />

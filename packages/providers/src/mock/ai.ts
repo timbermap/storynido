@@ -109,6 +109,10 @@ export class MockAITextProvider implements AITextProvider {
     return Promise.resolve({
       theme: request.storyTitle,
       arc: `${request.childName} quiere algo, encuentra una dificultad, decide y lo logra.`,
+      // Con mascota, el acompañante que se repite (para probar su lámina sin IA real).
+      companion: request.petName
+        ? { name: request.petName, look: 'a small friendly golden dog with a red collar' }
+        : null,
       scenes: Array.from({ length: request.pageCount }, (_, pageIndex) => ({
         pageIndex,
         sceneGoal: `Escena ${String(pageIndex + 1)}`,

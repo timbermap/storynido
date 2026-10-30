@@ -1131,7 +1131,8 @@
         "save": "Enviar mi opinión",
         "thanks": "¡Gracias por contarnos!",
         "error": "No pudimos guardar tu opinión. Intenta de nuevo."
-      }
+      },
+      "toMyStories": "Ver en Mis cuentos →"
     },
     "reorderSubtitle": "Pides de nuevo el mismo libro, tal como quedó: no hace falta crearlo otra vez.",
     "kit": {

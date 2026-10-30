@@ -25,6 +25,8 @@ import {
   ProviderError,
   artDirection,
   buildIllustrationPrompt,
+  companionNote,
+  companionReferenceScene,
   coverScene,
   describeCharacter,
   buildStoryPrompt,
@@ -187,6 +189,7 @@ export class PreviewService {
         preview?.character?.imagePath,
         preview?.character?.previewImagePath,
         preview?.characterImagePath,
+        preview?.companion?.imagePath,
         preview?.cover?.imagePath,
         preview?.cover?.previewImagePath,
         ...(preview?.pages ?? []).flatMap((page) => [page.imagePath, page.previewImagePath]),
@@ -840,18 +843,45 @@ export class PreviewService {
         bytes: await storage.download({ bucket: 'assets', path: preview.character.imagePath }),
         mimeType: 'image/webp',
       };
+      // Acompañante que se repite (abuela, mascota): su lámina, una vez y con el mismo estilo,
+      // es la segunda referencia de cada ilustración (DECISIONS 117).
+      const companionPlan = preview.plan?.companion ?? null;
+      const companion = companionPlan
+        ? {
+            ...companionPlan,
+            image: (
+              await this.illustration(ai, track, limits, {
+                prompt: buildIllustrationPrompt({
+                  template: story.imagePromptTemplate,
+                  scene: companionReferenceScene(companionPlan),
+                  character: companionPlan.look,
+                  style: style.promptModifier,
+                  direction: preview.artDirection,
+                }),
+                stylePrompt: style.promptModifier,
+                character: { description: companionPlan.look, photo: null },
+                references: [lamina],
+                aspectRatio: '3:4',
+                seed: 0,
+              })
+            ).image,
+          }
+        : null;
+      const sceneCharacter = companion
+        ? `${description}\n${companionNote(companion)}`
+        : description;
       const illustrate = (scene: string, seed: number) =>
         this.illustration(ai, track, limits, {
           prompt: buildIllustrationPrompt({
             template: story.imagePromptTemplate,
             scene,
-            character: description,
+            character: sceneCharacter,
             style: style.promptModifier,
             direction: preview.artDirection,
           }),
           stylePrompt: style.promptModifier,
           character: { description, photo },
-          references: [lamina],
+          references: companion ? [lamina, companion.image] : [lamina],
           aspectRatio: '3:4',
           // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
           resolution: '2K',
@@ -868,6 +898,9 @@ export class PreviewService {
       const folder = `previews/${uid}/${bookId}`;
       const version = Date.now().toString(36);
       const coverPaths = await this.store(`${folder}/cover-${version}`, cover.image);
+      const companionPaths = companion
+        ? await this.store(`${folder}/companion-${version}`, companion.image)
+        : null;
       const pages = await Promise.all(
         preview.pages.map(async (page, index) => {
           const image = illustrated[index];
@@ -883,6 +916,10 @@ export class PreviewService {
         'preview.cover': { imagePath: coverPaths.clean, previewImagePath: coverPaths.preview },
         'preview.pages': pages,
         'preview.character.approvedAt': new Date(),
+        'preview.companion':
+          companion && companionPaths
+            ? { name: companion.name, look: companion.look, imagePath: companionPaths.clean }
+            : null,
         // Los rasgos aprobados sobreviven a una nueva muestra (mientras no cambie la foto o los rasgos).
         'preview.photoId': characterKey({
           ...book,
@@ -1128,17 +1165,24 @@ export class PreviewService {
         target === 'cover'
           ? coverScene(preview.pages[0]?.illustrationPrompt)
           : (preview.pages[target]?.illustrationPrompt ?? '');
+      const companion = preview.companion ?? null;
+      const companionImage: ImageData | null = companion
+        ? {
+            bytes: await storage.download({ bucket: 'assets', path: companion.imagePath }),
+            mimeType: 'image/webp',
+          }
+        : null;
       const { image } = await this.illustration(ai, track, limits, {
         prompt: buildIllustrationPrompt({
           template: story.imagePromptTemplate,
           scene,
-          character: description,
+          character: companion ? `${description}\n${companionNote(companion)}` : description,
           style: style.promptModifier,
           direction: preview.artDirection,
         }),
         stylePrompt: style.promptModifier,
         character: { description, photo },
-        references: [reference],
+        references: companionImage ? [reference, companionImage] : [reference],
         aspectRatio: '3:4',
         // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
         resolution: '2K',

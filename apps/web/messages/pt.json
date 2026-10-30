@@ -1131,7 +1131,8 @@
         "save": "Enviar minha opinião",
         "thanks": "Obrigado por contar!",
         "error": "Não conseguimos salvar sua opinião. Tente de novo."
-      }
+      },
+      "toMyStories": "Ver em Minhas histórias →"
     },
     "reorderSubtitle": "Você pede de novo o mesmo livro, do jeito que ficou: não precisa criá-lo outra vez.",
     "kit": {
