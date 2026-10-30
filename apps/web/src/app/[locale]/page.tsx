@@ -13,16 +13,21 @@ import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { CONTACT_ID } from '@/components/home/contact-form';
 import { brand } from '@/lib/brand';
-import { getContent } from '@/lib/server/api';
+import { getContent, getOffer } from '@/lib/server/api';
+import { getDisplayCountry } from '@/lib/server/request-context';
+import { offerHighlights } from '@/lib/offer';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = (await params).locale as Locale;
 
-  const [t, faq] = await Promise.all([
+  const display = await getDisplayCountry(locale);
+  const [t, faq, offer] = await Promise.all([
     getTranslations('Home'),
     getContent('faq', locale).catch(() => null),
+    getOffer(display.country, locale),
   ]);
+  const highlights = offerHighlights(offer, locale, display.country);
   // Solo las destacadas: todas las preguntas y el contacto están en /faq.
   const faqItems = faq ? faqHighlights(parseFaqGroups(faq.body)) : [];
 
@@ -55,7 +60,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <div className="container-page grid items-center gap-8 pt-8 pb-10 lg:grid-cols-[1fr_1.05fr] lg:gap-12 lg:pt-12 lg:pb-16">
           <div className="text-center lg:text-left">
             <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-              {t('hero.kicker')}
+              {t('hero.homeKicker')}
             </p>
             <h1 className="mt-5 text-[clamp(2.5rem,4vw,3.9rem)] leading-[1.04] font-medium tracking-[-0.025em]">
               {t.rich('hero.homeHeadline', {
@@ -64,7 +69,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               })}
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-muted-foreground lg:mx-0">
-              {t('hero.lead')}
+              {t('hero.homeLead')}
             </p>
             <p className="mt-4 font-script text-[clamp(1.6rem,2.4vw,2.1rem)] leading-tight text-primary">
               {t('hero.script')}
@@ -77,7 +82,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   className: 'h-14 w-full rounded-full px-8 text-lg sm:w-auto',
                 })}
               >
-                {t('hero.cta')}
+                {t('hero.homeCta')}
                 <ArrowRight aria-hidden="true" className="rotate-90" />
               </a>
               {/* Para quien prefiere mirar primero: el catálogo completo. */}
@@ -89,7 +94,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {t('hero.exploreStories')}
               </Link>
             </div>
-            <HeroFacts />
+            <HeroFacts digitalPrice={highlights?.digital ?? null} />
           </div>
           <HeroBook alt={t('hero.bookAlt')} photoLabel={t('hero.photoLabel')} />
         </div>

@@ -3,13 +3,14 @@ import { getTranslations } from 'next-intl/server';
 
 /**
  * Lo que hay que saber de un vistazo: digital o impreso, atendemos en todo el mundo, el envío
- * depende del país y la vista previa es gratis.
+ * depende del país y la vista previa es gratis. En la home, el precio del digital sale de la
+ * configuración de precios del país.
  */
-export async function HeroFacts() {
+export async function HeroFacts({ digitalPrice = null }: { digitalPrice?: string | null }) {
   const t = await getTranslations('Home.trustInline');
   const facts = [
     { icon: Sparkles, text: t('preview') },
-    { icon: Globe, text: t('formats') },
+    { icon: Globe, text: digitalPrice ? t('digitalFrom', { price: digitalPrice }) : t('formats') },
     { icon: MapPin, text: t('global') },
     { icon: Truck, text: t('shipping') },
   ];

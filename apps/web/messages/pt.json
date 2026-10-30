@@ -104,7 +104,10 @@
       "printedNote": "Com frete conforme o país",
       "homeHeadline": "Cada criança, protagonista de <hl>uma história única</hl>.",
       "script": "Histórias que inspiram, ensinam e ficam para sempre.",
-      "exploreStories": "Explorar histórias"
+      "exploreStories": "Ver histórias",
+      "homeKicker": "Da foto ao livro",
+      "homeLead": "Você envia uma foto, vocês escolhem a aventura juntos e em minutos vê a história ilustrada. Se gostar, pode pedir impressa em capa dura.",
+      "homeCta": "Criar uma prévia grátis"
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",
@@ -165,6 +168,7 @@
       "cta": "Criar a história"
     },
     "trustInline": {
+      "digitalFrom": "Digital a partir de {price}",
       "formats": "Digital ou impresso, com o nome e o rostinho",
       "shipping": "O frete do impresso é calculado pelo seu país",
       "preview": "Prévia grátis",

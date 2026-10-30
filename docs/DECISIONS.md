@@ -1636,3 +1636,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - Con país elegido el proxy no detecta nada. Sin elección, `preferredCountry` usa la IP de la request.
 - El aviso de idioma mira primero la elección y después el país detectado.
 - Los E2E que fijaban el país con `sn_country` usan `sn_country_choice`.
+
+## 125 · Hero de la home: textos nuevos, mismo look ilustrado
+
+- **Fecha:** 2026-10-30.
+- Se mantiene el hero ilustrado (libro abierto, "Su foto" ilustrada y flecha a mano; nunca una foto real). Se adoptan del brief de heroes solo los textos: "De su foto a su libro", el párrafo nuevo, "Crear vista previa gratis" y "Ver historias". Claves nuevas solo de la home (`homeKicker`, `homeLead`, `homeCta`); las demás landings no cambian.
+- La fila de confianza muestra "Digital desde {precio}" tomado de la configuración de precios del país (`offerHighlights`), no un número fijo. Por eso la home pasa a leer el país del visitante.
+- No se copia "Envío a todo el mundo": el impreso solo se envía a los países habilitados. Se mantiene "Disponible en todo el mundo" (digital) y "El envío del impreso se calcula según tu país".
+- El botón principal sigue llevando al selector de público (#audience), no directo al creador.
+- Pendiente del brief: Familias (sin la leyenda "Foto real de Martina"), Celebraciones y Profesionales.

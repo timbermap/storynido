@@ -104,7 +104,10 @@
       "printedNote": "Con envío según tu país",
       "homeHeadline": "Cada niño, protagonista de <hl>una historia única</hl>.",
       "script": "Historias que inspiran, enseñan y quedan para siempre.",
-      "exploreStories": "Explorar cuentos"
+      "exploreStories": "Ver historias",
+      "homeKicker": "De su foto a su libro",
+      "homeLead": "Subes una foto, eligen juntos la aventura y en minutos ves su cuento ilustrado. Si te encanta, puedes pedirlo impreso en tapa dura.",
+      "homeCta": "Crear vista previa gratis"
     },
     "trust": {
       "preview": "Vista previa gratis antes de pagar",
@@ -165,6 +168,7 @@
       "cta": "Crear su cuento"
     },
     "trustInline": {
+      "digitalFrom": "Digital desde {price}",
       "formats": "Digital o impreso, con su nombre y su carita",
       "shipping": "El envío del impreso se calcula según tu país",
       "preview": "Vista previa gratis",

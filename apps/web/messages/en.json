@@ -104,7 +104,10 @@
       "printedNote": "Shipped by country",
       "homeHeadline": "Every child, the hero of <hl>a one-of-a-kind story</hl>.",
       "script": "Stories that inspire, teach and stay with you forever.",
-      "exploreStories": "Browse stories"
+      "exploreStories": "Browse stories",
+      "homeKicker": "From their photo to their book",
+      "homeLead": "You upload a photo, choose the adventure together, and in minutes you see their illustrated story. If you love it, you can order it as a hardcover.",
+      "homeCta": "Create a free preview"
     },
     "trust": {
       "preview": "Free preview before you pay",
@@ -165,6 +168,7 @@
       "cta": "Create their story"
     },
     "trustInline": {
+      "digitalFrom": "Digital from {price}",
       "formats": "Digital or printed, with their name and face",
       "shipping": "Shipping for printed books is calculated by country",
       "preview": "Free preview",
