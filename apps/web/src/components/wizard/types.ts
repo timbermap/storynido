@@ -23,6 +23,8 @@ export interface StepNav {
   reached: number;
   /** Línea del libro: el creador la muestra arriba (Familia, Celebración, Profesional). */
   line: Channel;
+  /** Borrador todavía sin guardar: la línea se puede cambiar (vuelve a /nuevo). */
+  fresh?: boolean;
   saveState: SaveState;
   onBack?: () => void;
   /** Ir a un paso ya alcanzado. */

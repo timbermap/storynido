@@ -1,6 +1,6 @@
 'use client';
 
-import { BookHeart, Cake, GraduationCap, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -11,17 +11,12 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { ProPanel } from '@/components/pro/pro-panel';
 import { useProStatus } from '@/components/pro/use-pro-status';
 import { buttonVariants } from '@/components/ui/button';
-import { DraftsList, LINE_TONE } from '@/components/wizard/drafts-list';
+import { DraftsList } from '@/components/wizard/drafts-list';
+import { NewChoice } from '@/components/wizard/new-choice';
 import { Link, useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 import { cn } from '@/lib/utils';
-
-const NEW_OPTIONS: { line: Channel; icon: typeof BookHeart }[] = [
-  { line: 'families', icon: BookHeart },
-  { line: 'events', icon: Cake },
-  { line: 'professionals', icon: GraduationCap },
-];
 
 /**
  * Mis cuentos: la home de quien tiene sesión (auditoría UX, DECISIONS 110). Lo que creó en cada
@@ -160,26 +155,7 @@ export default function MyStoriesPage() {
         <h2 id="new-title" className="text-2xl font-medium">
           {t('newTitle')}
         </h2>
-        <ul className="grid gap-3 sm:grid-cols-3">
-          {NEW_OPTIONS.map(({ line: option, icon: Icon }) => (
-            <li key={option}>
-              <Link
-                href={{ pathname: '/create', query: { line: option } }}
-                className="flex h-full flex-col gap-2 rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] transition hover:border-primary/40"
-              >
-                <span
-                  className={cn('grid size-10 place-items-center rounded-full', LINE_TONE[option])}
-                >
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <span className="font-semibold">{t(`newOptions.${option}.title`)}</span>
-                <span className="text-sm text-muted-foreground">
-                  {t(`newOptions.${option}.text`)}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <NewChoice />
       </section>
     </section>
   );

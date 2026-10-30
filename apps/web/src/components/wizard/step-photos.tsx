@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 
 import {
+  ApiError,
   GUARDIAN_CONSENT_VERSION,
   PHOTO_CONSENT_VERSION,
   PHOTO_RULES,
@@ -111,8 +112,20 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
         current.map((u) => (u.key === key ? { ...u, phase: 'validating' } : u)),
       );
       await api('processPhoto', { params: { photoId } });
-    } catch {
-      setError(t('uploadError'));
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 403 && error.code === 'forbidden') {
+        // El consentimiento guardado en esta sesión ya no vale (se borró o cambió de versión):
+        // se vuelve a pedir en lugar de fallar sin explicación.
+        try {
+          window.sessionStorage.removeItem(consentKey(pro));
+        } catch {
+          // Nada que limpiar.
+        }
+        setConsentId(null);
+        setError(t('consentAgain'));
+      } else {
+        setError(t('uploadError'));
+      }
     } finally {
       setUploads((current) => current.filter((u) => u.key !== key));
       await refresh();

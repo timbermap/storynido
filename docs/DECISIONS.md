@@ -1527,3 +1527,12 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **El catálogo del creador** se carga en el servidor también en `/crear` (`loadWizardCatalog`, compartido con `/crear/[id]`).
 - **Esqueleto de carga** con la forma del asistente, en lugar del texto suelto "Preparando tu cuento…". El texto queda para lectores de pantalla.
 - **Accesibilidad:** el atajo "Hojear páginas de ejemplo" de la ficha tiene un área táctil de 44 px.
+
+## 115 · Nuevo flujo, PR 3: /nuevo y consentimiento de fotos vencido
+
+- **Fecha:** 2026-10-30.
+- **`/nuevo`** (`/new`, `/novo`): "¿Qué quieres crear?", con las tres líneas (`NewChoice`, compartido con Mis cuentos). No cuenta como paso.
+  - `/crear` lo saltea si la línea se conoce: viene en la URL (`?line=`), viene de una landing en esta sesión, eligió una historia (Familia) o tiene borradores en una sola línea.
+- **Encabezado:** fuera de una landing, "Crear mi cuento" lleva a `/nuevo`; en Familias, Celebraciones y Profesionales, al creador de esa línea.
+- **Creador:** antes del primer guardado, "Cambiar" junto a la etiqueta de línea vuelve a `/nuevo`.
+- **Fotos:** si el consentimiento guardado en la sesión ya no existe en el servidor (se borró o cambió de versión), la API responde 403. Antes la web mostraba "No pudimos subir la foto" para siempre; ahora vuelve a pedir el consentimiento. Pasó en staging después de borrar los datos de prueba de la cuenta.

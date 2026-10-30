@@ -24,6 +24,12 @@ import { SignInGate } from './sign-in-gate';
 /** Más que esto preparando el borrador es un problema (red o permisos): se ofrece reintentar. */
 const START_TIMEOUT_MS = 20_000;
 
+/** La única línea en la que el usuario tiene borradores (null si ninguna o varias). */
+function onlyLine(drafts: DraftSummary[]): Channel | null {
+  const lines = new Set(drafts.map((draft) => draft.channel));
+  return lines.size === 1 ? ([...lines][0] ?? null) : null;
+}
+
 function rememberedChannel(): Channel | null {
   try {
     const value = window.sessionStorage.getItem(CHANNEL_STORAGE_KEY);
@@ -84,10 +90,19 @@ export function CreateStart({
     if (!user || !signedIn || !proReady) return;
     const db = await getFirebaseDb();
     const all = await listDrafts(db, user.uid);
+    // Qué crear: la línea de la URL, la de la landing de la que viene, Familias si eligió una
+    // historia, o la única que usó. Si no se sabe, se pregunta en /nuevo (DECISIONS 115).
+    const line =
+      channelParam ?? rememberedChannel() ?? (storyId || lessonId ? 'families' : onlyLine(all));
+    if (!line) {
+      router.replace('/new');
+      return;
+    }
+    if (line !== channel) setChannel(line);
     if (storyId || lessonId) {
       // Con una historia elegida: si hay un intento vacío de esta línea, se reutiliza (así entrar
       // varias veces desde las fichas no deja borradores vacíos sueltos).
-      const reusable = all.find((draft) => draft.channel === channel && isEmptyDraft(draft));
+      const reusable = all.find((draft) => draft.channel === line && isEmptyDraft(draft));
       if (!reusable) {
         startNew();
         return;
@@ -99,8 +114,8 @@ export function CreateStart({
       router.replace({ pathname: '/create/[bookId]', params: { bookId: reusable.id } });
       return;
     }
-    // Desde el botón de una línea (?line=) solo cuentan los borradores de esa línea.
-    const found = channelParam ? all.filter((draft) => draft.channel === channelParam) : all;
+    // Solo cuentan los borradores de esa línea.
+    const found = all.filter((draft) => draft.channel === line);
     const empty = found.find(isEmptyDraft);
     if (empty) {
       // Un intento anterior que no pasó del primer paso: se sigue ahí, sin listarlo.

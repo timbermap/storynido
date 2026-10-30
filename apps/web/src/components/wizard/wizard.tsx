@@ -152,6 +152,7 @@ export function Wizard({
       flow,
       reached,
       line: channel,
+      fresh: savedId === null,
       saveState,
       save,
       ensureBook,

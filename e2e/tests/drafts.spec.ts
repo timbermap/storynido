@@ -31,16 +31,19 @@ test('crear pide cuenta y el borrador se puede borrar desde Mis cuentos', async 
 });
 
 test('si Firestore no responde, el creador no queda cargando', async ({ page }) => {
+  // Sin línea ni historia, un usuario nuevo elige qué crear en /nuevo.
   await page.goto('/es/crear');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   await signInAtGate(page, uniqueEmail('sin-red'));
+  await expect(page).toHaveURL(/\/es\/nuevo/, { timeout: 30_000 });
+  await page.getByRole('link', { name: /Un cuento para mi hijo/ }).click();
   await expect(page.locator('h1').first()).toContainText('Cuéntanos sobre el protagonista', {
     timeout: 30_000,
   });
   // Sin Firestore (red cortada o bloqueada): o avisa con "Reintentar", o abre el creador en
   // memoria (el borrador se crea al guardar). Nunca se queda en el esqueleto de carga.
   await page.route('**/google.firestore.v1.Firestore/**', (route) => route.abort());
-  await page.goto('/es/crear');
+  await page.goto('/es/crear?line=families');
   await expect(
     page
       .getByRole('alert')

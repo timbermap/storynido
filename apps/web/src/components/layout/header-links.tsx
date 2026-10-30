@@ -54,7 +54,10 @@ export function HeaderCta({
         ? { pathname: '/create', query: { line: 'events' } }
         : pathname === '/professionals'
           ? { pathname: '/create', query: { line: 'professionals' } }
-          : '/create';
+          : pathname === '/families'
+            ? { pathname: '/create', query: { line: 'families' } }
+            : // Fuera de una landing no se sabe qué quiere crear: se pregunta.
+              '/new';
   return (
     <Link href={href} className={buttonVariants({ size, className })}>
       {children}

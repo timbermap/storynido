@@ -546,7 +546,8 @@
       "limit": "You already have 3 photos. Delete one to upload another.",
       "needOne": "Upload at least one valid photo to continue.",
       "uploadError": "We couldn't upload the photo. Please try again.",
-      "guardianText": "As a professional, I confirm I have permission from this child's parent or legal guardian to use their photo in educational material."
+      "guardianText": "As a professional, I confirm I have permission from this child's parent or legal guardian to use their photo in educational material.",
+      "consentAgain": "Please confirm your consent again to upload photos."
     },
     "story": {
       "title": "Choose the adventure",
@@ -846,7 +847,8 @@
       "professionals": "Professional project"
     },
     "startFailed": "We couldn't get your story ready. Check your connection and try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "changeLine": "Change"
   },
   "Landing": {
     "events": {

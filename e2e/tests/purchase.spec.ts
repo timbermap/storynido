@@ -71,7 +71,7 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await context.addCookies([{ name: 'sn_country', value: 'MX', url: 'http://localhost:3000' }]);
 
   // --- Crear pide cuenta: enlace mágico y vuelta al creador ---
-  await page.goto('/es/crear');
+  await page.goto('/es/crear?line=families');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   await signInAtGate(page, email);
   await heading(page, 'Cuéntanos sobre el protagonista');

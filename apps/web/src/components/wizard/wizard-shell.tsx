@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, type ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Link } from '@/i18n/navigation';
 import type { Channel } from '@storynido/shared';
 
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ export function WizardShell({
   flow,
   reached,
   line,
+  fresh,
   saveState,
   title,
   subtitle,
@@ -34,6 +36,7 @@ export function WizardShell({
   flow: readonly WizardStep[];
   reached: number;
   line?: Channel;
+  fresh?: boolean;
   saveState: SaveState;
   title: string;
   subtitle?: string;
@@ -78,13 +81,21 @@ export function WizardShell({
     <div className="container-page max-w-3xl py-10">
       {line && (
         // Qué se está creando, siempre a la vista (cuento, kit o proyecto profesional).
-        <p
-          className={cn(
-            'mb-4 inline-block rounded-full px-3 py-1 text-xs font-bold',
-            LINE_TONE[line],
+        <p className="mb-4 flex flex-wrap items-center gap-2">
+          <span
+            className={cn('inline-block rounded-full px-3 py-1 text-xs font-bold', LINE_TONE[line])}
+          >
+            {tLines(line)}
+          </span>
+          {fresh && (
+            // Antes del primer guardado se puede elegir otra línea.
+            <Link
+              href="/new"
+              className="inline-flex min-h-9 items-center px-2 text-xs font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              {t('changeLine')}
+            </Link>
           )}
-        >
-          {tLines(line)}
         </p>
       )}
       <div className="flex items-center justify-between gap-4 text-sm font-bold text-muted-foreground">

@@ -546,7 +546,8 @@
       "limit": "Ya tienes 3 fotos. Elimina una para subir otra.",
       "needOne": "Sube al menos una foto válida para continuar.",
       "uploadError": "No pudimos subir la foto. Inténtalo de nuevo.",
-      "guardianText": "Como profesional, confirmo que tengo la autorización de la madre, el padre o el tutor legal para usar la foto de este niño o niña en un material educativo."
+      "guardianText": "Como profesional, confirmo que tengo la autorización de la madre, el padre o el tutor legal para usar la foto de este niño o niña en un material educativo.",
+      "consentAgain": "Necesitamos que vuelvas a confirmar el consentimiento para subir fotos."
     },
     "story": {
       "title": "Elige la aventura",
@@ -846,7 +847,8 @@
       "professionals": "Proyecto profesional"
     },
     "startFailed": "No pudimos preparar tu cuento. Revisa tu conexión e inténtalo de nuevo.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "changeLine": "Cambiar"
   },
   "Landing": {
     "events": {

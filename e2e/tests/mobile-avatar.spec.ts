@@ -12,7 +12,7 @@ test('móvil, sin foto: rasgos elegidos, libro para colorear Mini y muestra a 39
   page,
 }) => {
   test.slow();
-  await page.goto('/es/crear');
+  await page.goto('/es/crear?line=families');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   await signInAtGate(page, uniqueEmail('movil'));
   await heading(page, 'Cuéntanos sobre el protagonista');
