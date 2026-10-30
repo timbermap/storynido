@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { BOOK_FORMATS, bookFormatSchema } from './common';
+import { bookFormatSchema } from './common';
 
 /** Extensión del libro (docs/estrategia/LINEAS-COMERCIALES.md §3). */
 export const BOOK_LENGTHS = ['mini', 'short', 'classic', 'epic'] as const;
@@ -69,14 +69,14 @@ export const DEFAULT_EDITORIAL_CONFIG: EditorialConfig = {
       interiorPages: 12,
       fixedPages: 2,
       activityShare: 0.25,
-      formats: ['digital'],
+      formats: ['digital', 'booklet'],
       active: true,
     },
     short: {
       interiorPages: 16,
       fixedPages: 2,
       activityShare: 0.25,
-      formats: ['digital'],
+      formats: ['digital', 'booklet'],
       active: true,
     },
     classic: {
@@ -84,14 +84,14 @@ export const DEFAULT_EDITORIAL_CONFIG: EditorialConfig = {
       interiorPages: 28,
       fixedPages: 2,
       activityShare: 0.25,
-      formats: [...BOOK_FORMATS],
+      formats: ['digital', 'softcover', 'hardcover'],
       active: true,
     },
     epic: {
       interiorPages: 32,
       fixedPages: 2,
       activityShare: 0.25,
-      formats: [...BOOK_FORMATS],
+      formats: ['digital', 'softcover', 'hardcover'],
       active: true,
     },
   },

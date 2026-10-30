@@ -15,7 +15,7 @@ export default function CountriesPage() {
       blank={() => ({
         code: 'MX',
         active: false,
-        formats: { digital: true, softcover: false, hardcover: false },
+        formats: { digital: true, softcover: false, hardcover: false, booklet: false },
         currency: 'USD',
         defaultLocale: 'es',
         taxBasisPoints: 0,
@@ -41,6 +41,7 @@ export default function CountriesPage() {
         { kind: 'boolean', path: 'formats.digital', label: 'Digital' },
         { kind: 'boolean', path: 'formats.softcover', label: 'Tapa blanda' },
         { kind: 'boolean', path: 'formats.hardcover', label: 'Tapa dura' },
+        { kind: 'boolean', path: 'formats.booklet', label: 'Cuento grapado' },
         {
           kind: 'number',
           path: 'taxBasisPoints',

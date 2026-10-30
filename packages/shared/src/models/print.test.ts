@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { printAvailability, printCandidates, rankPrintQuotes, type PrintOption } from './print';
+import {
+  BOOKLET_PAGES,
+  printAvailability,
+  printCandidates,
+  printPageCount,
+  rankPrintQuotes,
+  type PrintOption,
+} from './print';
 
 const option = (overrides: Partial<PrintOption> = {}): PrintOption => ({
   country: 'MX',
@@ -70,5 +77,27 @@ describe('varias imprentas', () => {
       quote('c', 1500, 8),
     ]);
     expect(ranked.map((item) => item.provider)).toEqual(['c', 'b', 'a']);
+  });
+});
+
+describe('cuento grapado', () => {
+  it('cuenta las tapas y cierra en múltiplo de 4', () => {
+    // Mini: 12 interiores + 2 tapas = 14 → 16. Corto: 16 + 2 = 18 → 20.
+    expect(printPageCount('booklet', 12)).toBe(16);
+    expect(printPageCount('booklet', 16)).toBe(20);
+    expect(printPageCount('booklet', 14)).toBe(16);
+  });
+
+  it('en los fotolibros cuenta solo las páginas interiores', () => {
+    expect(printPageCount('softcover', 28)).toBe(28);
+  });
+
+  it('un libro clásico no cabe en el grapado (24 páginas máximo)', () => {
+    const booklet = option({ format: 'booklet', pages: { ...BOOKLET_PAGES }, maxQuantity: 500 });
+    expect(printAvailability(booklet, printPageCount('booklet', 12), 30)).toEqual({ ok: true });
+    expect(printAvailability(booklet, printPageCount('booklet', 28), 1)).toEqual({
+      ok: false,
+      reason: 'pages',
+    });
   });
 });

@@ -76,6 +76,16 @@ export const DEFAULT_PRODUCT_PRICING: Record<BookFormat, Omit<ProductPricing, 'u
     proPercentOff: 10,
     active: true,
   },
+  // Cuento grapado (DECISIONS 138): mismo margen de impresión; el mínimo de USD 8 ya cubre
+  // su costo de producción (USD 9,62 a 12,68 en Gelato).
+  booklet: {
+    product: 'booklet',
+    aiCostPerPageUsdMinor: 15,
+    creationMargin: CREATION,
+    printMargin: PRINTING,
+    proPercentOff: 10,
+    active: true,
+  },
 };
 
 /** Margen sobre un costo (en centavos de USD), según su modo. */

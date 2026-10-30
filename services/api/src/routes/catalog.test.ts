@@ -71,7 +71,7 @@ const lesson = (slug: string, order: number, opts: Partial<Lesson> = {}): Lesson
 const mx: CountryConfig = {
   code: 'MX',
   active: true,
-  formats: { digital: true, softcover: false, hardcover: true },
+  formats: { digital: true, softcover: false, hardcover: true, booklet: true },
   currency: 'MXN',
   defaultLocale: 'es',
   taxBasisPoints: 1600,
@@ -257,7 +257,10 @@ describe('catálogo', () => {
   });
 
   it('sin imprenta habilitada (o sin muestra aprobada) el impreso no se ofrece', () => {
-    const country = { ...mx, formats: { digital: true, softcover: true, hardcover: true } };
+    const country = {
+      ...mx,
+      formats: { digital: true, softcover: true, hardcover: true, booklet: true },
+    };
     const products = [product('digital'), product('softcover'), product('hardcover')];
     const pricing = Object.fromEntries(
       (['digital', 'softcover', 'hardcover'] as const).map((format) => [

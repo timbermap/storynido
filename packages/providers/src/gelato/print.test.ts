@@ -247,4 +247,19 @@ describe('Gelato', () => {
     await provider.fileSpec({ format: 'hardcover', pageCount: 28, quantity: 1 });
     expect(gelato.calls).toHaveLength(2);
   });
+
+  it('el cuento grapado es un solo PDF A5 sin lomo y se completa a múltiplo de 4 con las tapas', async () => {
+    const gelato = fakeGelato({});
+    const provider = printer(gelato.fetchImpl);
+    // Mini: 12 páginas interiores + 2 tapas = 14 → 16 en total (2 de relleno).
+    const spec = await provider.fileSpec({ format: 'booklet', pageCount: 12, quantity: 1 });
+    expect(spec).toEqual({
+      packaging: 'booklet',
+      trim: { widthMm: 148, heightMm: 210 },
+      bleedMm: 3,
+      minInteriorPages: 14,
+    });
+    // No necesita pedir la tapa a Gelato: no hay lomo.
+    expect(gelato.calls).toHaveLength(0);
+  });
 });

@@ -28,12 +28,19 @@ const FORMATS: Record<Locale, Record<BookFormat, string>> = {
     digital: 'digital (PDF)',
     softcover: 'impreso, tapa blanda',
     hardcover: 'impreso, tapa dura',
+    booklet: 'impreso, cuento grapado',
   },
-  en: { digital: 'digital (PDF)', softcover: 'printed softcover', hardcover: 'printed hardcover' },
+  en: {
+    digital: 'digital (PDF)',
+    softcover: 'printed softcover',
+    hardcover: 'printed hardcover',
+    booklet: 'printed stapled booklet',
+  },
   pt: {
     digital: 'digital (PDF)',
     softcover: 'impresso, capa mole',
     hardcover: 'impresso, capa dura',
+    booklet: 'impresso, livrinho grampeado',
   },
 };
 

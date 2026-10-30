@@ -10,7 +10,7 @@ const NOW = new Date('2026-11-01T12:00:00Z');
 const MX: CountryConfig = {
   code: 'MX',
   active: true,
-  formats: { digital: true, softcover: true, hardcover: true },
+  formats: { digital: true, softcover: true, hardcover: true, booklet: true },
   currency: 'MXN',
   defaultLocale: 'es',
   taxBasisPoints: 1600,

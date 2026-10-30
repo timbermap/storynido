@@ -74,14 +74,12 @@ export function registerAdminPeopleRoutes(app: FastifyInstance): void {
       ordersList: orders.docs
         .map((order) => toOrderSummary(order, summary.email))
         .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? '')),
-      pro: status.discount
-        ? {
-            purchases: status.discount.purchases,
-            digitalPercent: status.discount.digitalPercent,
-            printPercent: status.discount.printPercent,
-            windowDays: status.discount.windowDays,
-          }
-        : null,
+      pro: {
+        purchases: status.discount.purchases,
+        digitalPercent: status.discount.digitalPercent,
+        printPercent: status.discount.printPercent,
+        windowDays: status.discount.windowDays,
+      },
       privacyRequests: requests.docs.map((entry) => {
         const data = normalizeFirestoreData(entry.data()) as Record<string, unknown>;
         return {

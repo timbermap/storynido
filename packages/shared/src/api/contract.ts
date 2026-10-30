@@ -333,6 +333,8 @@ export const checkoutQuoteBodySchema = checkoutItemBodySchema.extend({
 export const checkoutQuoteResponseSchema = z.object({
   snapshot: priceSnapshotSchema,
   couponError: z.enum(QUOTE_ERRORS).nullable(),
+  /** Formatos que este libro admite (páginas y país): el pago no ofrece los demás. */
+  availableFormats: z.array(bookFormatSchema).optional(),
 });
 
 export const createCheckoutBodySchema = checkoutItemBodySchema.extend({

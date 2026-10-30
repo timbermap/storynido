@@ -78,8 +78,7 @@ export function Checkout({
   const { choice } = useConsent();
   const { status: pro } = useProStatus();
   const tPro = useTranslations('Pro.account');
-  const formats = offer.formats;
-  const [format, setFormat] = useState<BookFormat>(formats[0]?.format ?? 'digital');
+  const [chosenFormat, setFormat] = useState<BookFormat>(offer.formats[0]?.format ?? 'digital');
   const [address, setAddress] = useState<AddressDraft>(EMPTY_ADDRESS);
   const [gift, setGift] = useState({ isGift: false, message: '' });
   const [couponInput, setCouponInput] = useState('');
@@ -87,7 +86,13 @@ export function Checkout({
   const [quote, setQuote] = useState<{
     snapshot: PriceSnapshot;
     couponError: string | null;
+    availableFormats?: BookFormat[];
   } | null>(null);
+  // Solo los formatos que este libro admite (un cuento corto no se imprime como fotolibro).
+  const available = quote?.availableFormats;
+  const formats = offer.formats.filter((option) => !available || available.includes(option.format));
+  // Si el formato elegido no lo admite este libro, vuelve al digital.
+  const format = available && !available.includes(chosenFormat) ? 'digital' : chosenFormat;
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
   // País de envío del impreso (cualquiera: la imprenta se cotiza con la dirección).

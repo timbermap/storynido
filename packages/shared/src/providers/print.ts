@@ -1,6 +1,7 @@
 import type { Currency } from '../currency';
 import type { CountryCode } from '../countries';
-import type { WebhookInput } from './errors';
+import { ProviderError, type WebhookInput } from './errors';
+import type { PhotobookFormat } from '../models/print';
 
 export interface PrintAddress {
   name: string;
@@ -14,9 +15,17 @@ export interface PrintAddress {
 }
 
 export interface PrintItem {
-  format: 'softcover' | 'hardcover';
+  format: 'softcover' | 'hardcover' | 'booklet';
   pageCount: number;
   quantity: number;
+}
+
+/** Cloudprinter y Lulu solo hacen fotolibros: un cuento grapado nunca debería llegarles. */
+export function photobookFormat(provider: string, format: PrintItem['format']): PhotobookFormat {
+  if (format === 'booklet') {
+    throw new ProviderError(provider, 'Solo imprime fotolibros (tapa blanda y tapa dura)');
+  }
+  return format;
 }
 
 export interface PrintQuote {
@@ -31,10 +40,11 @@ export interface PrintQuote {
 
 /**
  * Cómo pide los archivos una imprenta. "separate": tripa y tapa en dos PDF. "single": un solo
- * PDF con el pliego de tapa, una guarda en blanco, la tripa y otra guarda (Gelato).
+ * PDF con el pliego de tapa, una guarda en blanco, la tripa y otra guarda (Gelato). "booklet":
+ * cuento grapado, un solo PDF con portada, páginas y contratapa, una tras otra (sin lomo).
  */
 export interface PrintFileSpec {
-  packaging: 'separate' | 'single';
+  packaging: 'separate' | 'single' | 'booklet';
   /** Tamaño de página al corte de esta imprenta (si no, nuestro 210×280 mm). */
   trim?: { widthMm: number; heightMm: number };
   /** Sangrado del interior que pide la imprenta (si no, el nuestro de 3 mm). */
@@ -45,7 +55,7 @@ export interface PrintFileSpec {
    */
   minInteriorPages?: number;
   /** Pliego de tapa (contratapa + lomo + tapa), en mm, con sangrado o vuelta incluidos. */
-  cover: {
+  cover?: {
     widthMm: number;
     heightMm: number;
     spineLeftMm: number;

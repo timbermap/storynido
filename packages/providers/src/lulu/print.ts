@@ -1,5 +1,7 @@
 import {
   LULU_PRODUCTS,
+  photobookFormat,
+  type PhotobookFormat,
   ProviderError,
   WebhookSignatureError,
   type Currency,
@@ -23,7 +25,7 @@ const TRIM = { widthMm: 215.9, heightMm: 279.4 } as const;
 const BLEED_MM = 3.175;
 
 /** Páginas interiores mínimas por formato (tapa blanda: 32 a 800; tapa dura: desde 24). */
-export const LULU_MIN_PAGES: Record<PrintItem['format'], number> = { softcover: 32, hardcover: 24 };
+export const LULU_MIN_PAGES: Record<PhotobookFormat, number> = { softcover: 32, hardcover: 24 };
 
 /** Niveles de envío que se cotizan (Lulu no tiene GROUND a EE. UU. para estos libros). */
 const SHIPPING_LEVELS = ['MAIL', 'PRIORITY_MAIL'] as const;
@@ -80,7 +82,7 @@ export interface LuluOptions {
 }
 
 /** Páginas que se mandan a Lulu: el mínimo del formato y siempre pares. */
-export function luluPageCount(format: PrintItem['format'], pages: number): number {
+export function luluPageCount(format: PhotobookFormat, pages: number): number {
   const padded = Math.max(pages, LULU_MIN_PAGES[format]);
   return padded % 2 === 0 ? padded : padded + 1;
 }
@@ -167,8 +169,8 @@ export class LuluPrintProvider implements PrintProvider {
 
   private lineItems(items: readonly PrintItem[]) {
     return items.map((item) => ({
-      page_count: luluPageCount(item.format, item.pageCount),
-      pod_package_id: LULU_PRODUCTS[item.format],
+      page_count: luluPageCount(photobookFormat(this.id, item.format), item.pageCount),
+      pod_package_id: LULU_PRODUCTS[photobookFormat(this.id, item.format)],
       quantity: item.quantity,
     }));
   }
@@ -271,7 +273,7 @@ export class LuluPrintProvider implements PrintProvider {
               title: `StoryNido ${request.orderId}`,
               quantity: item.quantity,
               printable_normalization: {
-                pod_package_id: LULU_PRODUCTS[item.format],
+                pod_package_id: LULU_PRODUCTS[photobookFormat(this.id, item.format)],
                 cover: { source_url: item.coverPdfUrl },
                 interior: { source_url: item.interiorPdfUrl },
               },
@@ -340,14 +342,14 @@ export class LuluPrintProvider implements PrintProvider {
 
   /** US Letter con sangrado de 1/8", el mínimo de páginas y la tapa que calcula Lulu. */
   async fileSpec(item: PrintItem): Promise<PrintFileSpec> {
-    const pages = luluPageCount(item.format, item.pageCount);
+    const pages = luluPageCount(photobookFormat(this.id, item.format), item.pageCount);
     const key = `${item.format}:${String(pages)}`;
     let dimensions = this.covers.get(key);
     if (!dimensions) {
       dimensions = this.call('/cover-dimensions/', {
         method: 'POST',
         body: {
-          pod_package_id: LULU_PRODUCTS[item.format],
+          pod_package_id: LULU_PRODUCTS[photobookFormat(this.id, item.format)],
           interior_page_count: pages,
           unit: 'mm',
         },

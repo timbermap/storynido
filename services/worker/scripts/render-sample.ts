@@ -10,7 +10,7 @@ import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { GelatoPrintProvider } from '@storynido/providers';
-import { countWords } from '@storynido/shared';
+import { countWords, printPageCount } from '@storynido/shared';
 import QRCode from 'qrcode';
 import sharp from 'sharp';
 
@@ -126,6 +126,26 @@ try {
           widthMm: size.width,
           heightMm: size.height,
           bleedMm: 0,
+        }),
+        result.overflow,
+      );
+    } else if (spec.format === 'booklet') {
+      // Cuento grapado: un solo PDF con portada, páginas y contratapa; cierra en múltiplo de 4.
+      const interiorCount = interiorPages(layout, spec).length;
+      const filler = printPageCount('booklet', interiorCount) - 2 - interiorCount;
+      const stapled = { ...layout, fillerPages: filler };
+      const result = await renderPdf(browser, digitalHtml(stapled, spec), size, {
+        bleedMm: spec.bleedMm,
+        title: book.title,
+      });
+      writeFileSync(path.join(outDir, 'booklet-libro.pdf'), result.pdf);
+      report(
+        'booklet',
+        await validatePdf(result.pdf, {
+          pages: interiorCount + filler + 2,
+          widthMm: size.width,
+          heightMm: size.height,
+          bleedMm: spec.bleedMm,
         }),
         result.overflow,
       );

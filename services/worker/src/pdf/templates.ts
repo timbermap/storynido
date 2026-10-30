@@ -300,7 +300,7 @@ export function printInteriorHtml(book: LayoutBook, spec: FormatSpec): string {
 }
 
 /** Pliego de tapa: la geometría la da la imprenta (lomo y vuelta según páginas y papel). */
-export type CoverGeometry = PrintFileSpec['cover'];
+export type CoverGeometry = NonNullable<PrintFileSpec['cover']>;
 
 /** Pliego genérico (imprentas sin especificación propia): sangrado común y lomo aproximado. */
 export function defaultCoverGeometry(spec: FormatSpec, interiorCount: number): CoverGeometry {

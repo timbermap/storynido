@@ -19,7 +19,7 @@ export function localizedSchema<T extends z.ZodType>(value: T) {
   );
 }
 
-export const BOOK_FORMATS = ['digital', 'softcover', 'hardcover'] as const;
+export const BOOK_FORMATS = ['digital', 'softcover', 'hardcover', 'booklet'] as const;
 
 export const bookFormatSchema = z.enum(BOOK_FORMATS);
 

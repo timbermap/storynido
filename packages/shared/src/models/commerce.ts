@@ -28,6 +28,8 @@ export const countrySchema = z.object({
     digital: z.boolean(),
     softcover: z.boolean(),
     hardcover: z.boolean(),
+    // Los países anteriores al cuento grapado no lo guardan: se vende (la imprenta decide).
+    booklet: z.boolean().default(true),
   }),
   currency: currencySchema,
   defaultLocale: localeSchema,
@@ -53,7 +55,7 @@ export function defaultCountryConfig(code: CountryCode, now = new Date()): Count
   return {
     code,
     active: true,
-    formats: { digital: true, softcover: true, hardcover: true },
+    formats: { digital: true, softcover: true, hardcover: true, booklet: true },
     currency: defaults.currency,
     defaultLocale: defaults.defaultLocale,
     taxBasisPoints: 0,

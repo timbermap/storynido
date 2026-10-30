@@ -2,6 +2,8 @@ import { timingSafeEqual } from 'node:crypto';
 
 import {
   CLOUDPRINTER_PRODUCTS,
+  photobookFormat,
+  type PhotobookFormat,
   ProviderError,
   WebhookSignatureError,
   type Currency,
@@ -28,7 +30,7 @@ const CASEWRAP_MM = 18;
 /** Papel interior por defecto (200 g, estucado mate: volumen 0,8). */
 const PAPER = { gsm: 200, bulk: 0.8 };
 /** Grosor de tapa para el lomo (docs de Cloudprinter: cómo calcular el lomo). */
-const COVER_THICKNESS_MM: Record<PrintItem['format'], number> = { softcover: 0.5, hardcover: 3 };
+const COVER_THICKNESS_MM: Record<PhotobookFormat, number> = { softcover: 0.5, hardcover: 3 };
 
 /** Plazo estimado por nivel de envío (Cloudprinter no lo informa en la cotización). */
 const ETA_DAYS: Record<string, [number, number]> = {
@@ -91,7 +93,7 @@ export interface CloudprinterOptions {
 }
 
 /** Lomo en mm con la fórmula de Cloudprinter (gramaje × volumen × hojas ÷ 1000 + 2 tapas). */
-export function cloudprinterSpineMm(format: PrintItem['format'], pages: number) {
+export function cloudprinterSpineMm(format: PhotobookFormat, pages: number) {
   const spine = (PAPER.gsm * PAPER.bulk * (pages / 2)) / 1000 + 2 * COVER_THICKNESS_MM[format];
   return Math.round(spine * 100) / 100;
 }
@@ -139,7 +141,7 @@ export class CloudprinterPrintProvider implements PrintProvider {
   private items(items: readonly PrintItem[], reference: string) {
     return items.map((item, index) => ({
       reference: `${reference}-${String(index)}`,
-      product: CLOUDPRINTER_PRODUCTS[item.format],
+      product: CLOUDPRINTER_PRODUCTS[photobookFormat(this.id, item.format)],
       count: String(item.quantity),
       options: [{ type: 'total_pages', count: String(item.pageCount) }],
     }));
@@ -222,7 +224,7 @@ export class CloudprinterPrintProvider implements PrintProvider {
         }
         return {
           reference: `${request.orderId}-${String(index)}`,
-          product: CLOUDPRINTER_PRODUCTS[item.format],
+          product: CLOUDPRINTER_PRODUCTS[photobookFormat(this.id, item.format)],
           count: String(item.quantity),
           quote: shipping.quote,
           files: [
@@ -281,7 +283,7 @@ export class CloudprinterPrintProvider implements PrintProvider {
 
   /** Tamaño US Letter, tripa y tapa por separado; la tapa con su lomo calculado. */
   fileSpec(item: PrintItem): Promise<PrintFileSpec> {
-    const spine = cloudprinterSpineMm(item.format, item.pageCount);
+    const spine = cloudprinterSpineMm(photobookFormat(this.id, item.format), item.pageCount);
     const edge = item.format === 'hardcover' ? CASEWRAP_MM : BLEED_MM;
     return Promise.resolve({
       packaging: 'separate',

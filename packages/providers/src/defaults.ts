@@ -86,7 +86,7 @@ export function createProviderFactories(
       mock_alt: () =>
         new MockPrintProvider(options.mockWebhookSecret, {
           id: 'mock_alt',
-          productionUsdMinor: { softcover: 1050, hardcover: 1550 },
+          productionUsdMinor: { softcover: 1050, hardcover: 1550, booklet: 800 },
           shippingUsdMinor: { US: 299 },
         }),
       ...(gelato ? { gelato: () => new GelatoPrintProvider(gelato) } : {}),

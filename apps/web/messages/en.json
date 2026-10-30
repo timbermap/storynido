@@ -262,7 +262,8 @@
   "Formats": {
     "digital": "Ebook (PDF)",
     "softcover": "Softcover",
-    "hardcover": "Hardcover"
+    "hardcover": "Hardcover",
+    "booklet": "Stapled storybook"
   },
   "Blog": {
     "title": "Blog",
@@ -1044,6 +1045,10 @@
       "hardcover": {
         "name": "Hardcover",
         "text": "Printed book, about 21×28 cm (8×11 in), to give and keep."
+      },
+      "booklet": {
+        "name": "Stapled storybook",
+        "text": "Printed story of about 15×21 cm (6×8 in), stapled. Great for party favors."
       }
     },
     "addressTitle": "Shipping address",

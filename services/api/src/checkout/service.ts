@@ -3,11 +3,13 @@ import type { EmailNotifier } from '@storynido/emails';
 import { isSimulatedPrinter, signMockPaymentWebhook } from '@storynido/providers';
 import {
   COLLECTIONS,
+  PRINT_FORMATS,
   WebhookSignatureError,
   addressProblems,
   assertOrderTransition,
   canTransitionOrder,
   printCandidates,
+  printPageCount,
   rankPrintQuotes,
   type checkoutQuoteBodySchema,
   type createCheckoutBodySchema,
@@ -16,12 +18,14 @@ import {
   quoteKit,
   type AuditLogEntry,
   type BookFormat,
+  type CountryCode,
   type KitSelection,
   type Coupon,
   type Locale,
   type OrderStatus,
   type PaymentEvent,
   type PriceSnapshot,
+  type PrintFormat,
   type PrintRouting,
   type PrintCost,
   type FxRates,
@@ -154,7 +158,28 @@ export class CheckoutService {
         ? await this.routePrint(body, loaded.pages)
         : null;
     const result = await this.price(loaded.book, body, loaded.pages, source !== null, routing);
-    return { snapshot: result.snapshot, couponError: result.couponError };
+    return {
+      snapshot: result.snapshot,
+      couponError: result.couponError,
+      availableFormats: await this.availableFormats(body.country, loaded.pages),
+    };
+  }
+
+  /** Formatos que este libro admite en el país: el digital y los impresos que alguna imprenta puede. */
+  private async availableFormats(country: CountryCode, pages: number): Promise<BookFormat[]> {
+    const options = await this.catalog.printOptions(country);
+    const active = this.providers.printers().map((printer) => printer.id);
+    return [
+      'digital',
+      ...PRINT_FORMATS.filter(
+        (format) =>
+          printCandidates(
+            options,
+            [{ format, pages: printPageCount(format, pages), quantity: 1 }],
+            active,
+          ).length > 0,
+      ),
+    ];
   }
 
   /** El libro tiene que estar aprobado y vigente. */
@@ -298,7 +323,7 @@ export class CheckoutService {
   private async printCandidates(body: PriceBody, pages: number) {
     return printCandidates(
       await this.catalog.printOptions(body.country),
-      [{ format: body.format, pages, quantity: body.quantity }],
+      [{ format: body.format, pages: printPageCount(body.format, pages), quantity: body.quantity }],
       this.providers.printers().map((printer) => printer.id),
     );
   }
@@ -324,8 +349,8 @@ export class CheckoutService {
             printer.quote(
               [
                 {
-                  format: body.format as 'softcover' | 'hardcover',
-                  pageCount: pages,
+                  format: body.format as PrintFormat,
+                  pageCount: printPageCount(body.format, pages),
                   quantity: body.quantity,
                 },
               ],

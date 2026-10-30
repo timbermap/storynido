@@ -14,11 +14,11 @@ Todos los códigos de producto cotizan bien. Lo que acepta cada imprenta (pedido
 
 Lo que vende la web:
 
-| Producto                   | Formatos que ofrece           | ¿Se puede entregar?                                                                    |
-| -------------------------- | ----------------------------- | -------------------------------------------------------------------------------------- |
-| Mini (12 p) y Corto (16 p) | Ebook (PDF)                   | Sí. Ninguna imprenta de fotolibros llega a 12 o 16 páginas: solo digital es correcto.  |
-| Clásico (28 p)             | Ebook, tapa blanda, tapa dura | Sí en las tres. En Lulu la tapa blanda sale de 32 páginas (4 de relleno para dibujar). |
-| Gran aventura (32 p)       | Ebook, tapa blanda, tapa dura | Sí en las tres.                                                                        |
+| Producto                   | Formatos que ofrece           | ¿Se puede entregar?                                                                     |
+| -------------------------- | ----------------------------- | --------------------------------------------------------------------------------------- |
+| Mini (12 p) y Corto (16 p) | Ebook (PDF), cuento grapado   | Sí. Ningún fotolibro llega a 12 o 16 páginas: se imprimen como cuento grapado (Gelato). |
+| Clásico (28 p)             | Ebook, tapa blanda, tapa dura | Sí en las tres. En Lulu la tapa blanda sale de 32 páginas (4 de relleno para dibujar).  |
+| Gran aventura (32 p)       | Ebook, tapa blanda, tapa dura | Sí en las tres.                                                                         |
 
 **El ebook no depende de ninguna imprenta.** Lo generamos nosotros: PDF de 210×280 mm, sin sangrado, para leer en pantalla o imprimir en casa.
 
@@ -44,28 +44,37 @@ Producción + envío en USD y plazo en días. "No" = esa imprenta no cotiza ese 
 
 ## 3. Riesgos para "no ofrecer lo que no podemos entregar"
 
-1. **El impreso se ofrece en cualquier país** (la opción de imprenta es comodín `*`) y solo se confirma al ingresar la dirección. En un país que ninguna imprenta alcance, la persona vería "desde USD …" y recién después el aviso. Falta una lista de países verificados por imprenta, o una cotización de prueba por país.
+1. **Resuelto (DECISIONS 138):** el impreso solo se ofrece en los países verificados de cada imprenta (lista en el seed); fuera de ellos, solo digital. Para sumar un país se cotiza con la imprenta y se agrega a la lista.
 2. **En producción no se imprime nada** hasta tener la muestra física de cada producto y país (`qaSamplePassed`). Es lo correcto: la web no ofrece impreso hasta entonces.
-3. **Costo de referencia desactualizado.** El seed estima Lulu en USD 4,94 y 13,51; la cotización real es 5,88 y 15,48 (32 páginas, EE. UU.). El precio final usa la cotización real, pero la estimación previa a la dirección queda corta.
+3. **Resuelto:** los costos de referencia de Lulu eran los viejos (4,94 / 13,51); ahora son los cotizados.
 4. **Envío a Latinoamérica caro:** Gelato cobra USD 30 a México, Argentina y Uruguay. Solo Cloudprinter a México baja de USD 10.
 5. **Celebraciones no tiene nada impreso** (kit solo digital, decidido).
+6. **Lulu sin México, Argentina y Brasil** hasta que el pago pida el documento fiscal del destinatario (decisión 4 de abajo).
 
-## 4. Productos que se podrían sumar (verificados con cotización real de Gelato)
+## 4. Productos nuevos
 
-| Producto                                                      | Qué resuelve                                                                           | Evidencia                                                                                                                                                               |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Cuento grapado de 8 a 24 páginas** (A5 o cuadrado 14,8 cm)  | Imprimir el **Mini y el Corto**, que hoy son solo digitales, y el **souvenir** del kit | Cotiza de 8 a 24 páginas. 12 p, 14,8×14,8 cm: USD 9,62 un ejemplar; **1,71 c/u en 30; 1,46 c/u en 100** (producción)                                                    |
-| **Tarjetas y tarjetas plegadas** (invitación, agradecimiento) | Piezas impresas del kit de Celebraciones                                               | Catálogos `cards`, `folded-cards` y `pack-of-cards-envelopes` (A6, 14,1 cm, A5, DL). Existen en el catálogo; la disponibilidad por país y el precio **no se cotizaron** |
-| **Cuaderno de actividades grapado** (A4)                      | Libro para colorear / actividades impreso                                              | Mismo producto grapado, A4, de 8 a 24 páginas: USD 9,96 a 12,68 un ejemplar                                                                                             |
-| Póster, taza, camiseta infantil, calendario                   | Complementos de regalo con el personaje (Familias)                                     | Existen en el catálogo de Gelato; no se cotizó (cada uno necesita archivo y plantilla propios)                                                                          |
+**Hecho: cuento grapado A5 (Mini y Corto).** Gelato, 8 a 24 páginas con tapas, múltiplo de 4. Cotización real de 16 páginas, 1 ejemplar, producción USD 9,96 (20 páginas: 10,30):
 
-No hay producto de **stickers** ni de etiquetas troqueladas en el catálogo de Gelato: las etiquetas del kit se podrían imprimir como tarjetas chicas, y los stickers siguen siendo solo digitales (para imprimir en casa).
+| País      | Envío (USD) | Plazo   |
+| --------- | ----------- | ------- |
+| EE. UU.   | 5,04        | 10–12 d |
+| México    | 27,12       | 11–18 d |
+| Argentina | 27,12       | 14–25 d |
+| Uruguay   | 27,12       | 14–25 d |
+| Brasil    | 22,34       | 14–25 d |
+| España    | 4,54        | 7–10 d  |
+| Suiza     | 13,52       | 6–7 d   |
 
-Cualquier producto nuevo exige: una ficha de archivo (corte, sangrado, páginas múltiplo de 4 en el grapado), muestra física y una opción de imprenta en la base antes de ofrecerlo.
+Con 30 ejemplares de 16 páginas la producción baja a USD 2,04 c/u. Falta la muestra física y abrir la cantidad (ver DECISIONS 138).
+
+**Cotizado, no construido: tarjetas A6** (invitación, agradecimiento). 30 tarjetas: producción USD 21,81 y envío USD 6,65 a 20,56; EE. UU. usa otro producto (100 lb: USD 16). Necesita un pedido de impresión propio dentro del kit.
+
+**Existen, sin cotizar:** cuaderno de actividades grapado A4 (mismo producto, otro tamaño), póster, taza, camiseta infantil y calendario. Los stickers siguen solo digitales (Gelato no los tiene).
+
+Cualquier producto nuevo exige una ficha de archivo, muestra física y una opción de imprenta en la base antes de ofrecerlo.
 
 ## 5. Decisiones
 
-1. ¿Sumamos el cuento grapado para Mini y Corto y para el souvenir? Es el que más cierra huecos.
-2. ¿Pasamos las invitaciones y tarjetas de agradecimiento a impreso en Celebraciones?
-3. ¿Armamos la lista de países verificados por imprenta para no ofrecer impreso donde no entregamos?
-4. ¿Pedimos el documento fiscal del destinatario (México, Argentina, Brasil) para habilitar Lulu?
+1. Cantidad de ejemplares para souvenirs: cobrar la creación una vez y las copias al costo de imprenta por volumen.
+2. Tarjetas impresas en Celebraciones.
+3. Pedir el documento fiscal del destinatario (México, Argentina, Brasil) para habilitar Lulu. Es el ID tributario (RFC, CUIT o CPF) de quien recibe el paquete: Lulu lo pide por aduana, y hoy sin él su cotización falla en esos tres países.

@@ -32,6 +32,8 @@ import {
   storySchema,
   userSchema,
   type BookFormat,
+  BOOKLET_PAGES,
+  PHOTOBOOK_FORMATS,
   PRINT_FORMATS,
   ANY_COUNTRY,
   CLOUDPRINTER_PRODUCTS,
@@ -41,6 +43,7 @@ import {
   DEFAULT_PRO_DISCOUNTS,
   aiModelSchema,
   GELATO_PRODUCTS,
+  type PhotobookFormat,
   LULU_PRODUCTS,
   proDiscountConfigSchema,
   eventPricingSchema,
@@ -74,6 +77,11 @@ const cloud = !isUsingEmulators();
 const production = cloudProject === 'storynido-prod';
 /** En la nube, `--refresh-catalog` reescribe historias, estilos y enseñanzas (no la configuración). */
 const refreshCatalog = process.argv.includes('--refresh-catalog');
+/**
+ * En la nube, `--refresh-print` reescribe la matriz de imprentas (printOptions) con los países
+ * verificados del seed y borra las opciones que ya no existen. Pisa lo editado en el admin.
+ */
+const refreshPrint = process.argv.includes('--refresh-print');
 /**
  * `--refresh-content privacy,terms` reescribe esos textos (en los tres idiomas) con los de
  * seed-data/content: para publicar un cambio legal. Pisa lo editado en el admin.
@@ -151,7 +159,7 @@ const batch = {
     writes.push({ ref, data });
   },
   delete(ref: DocumentReference) {
-    if (!cloud) void ref.delete();
+    if (!cloud || (refreshPrint && ref.parent.id === COLLECTIONS.printOptions)) void ref.delete();
   },
 };
 
@@ -226,7 +234,10 @@ for (const [code, eta] of Object.entries(SAMPLE_PRINT) as [
           sku: `photobook-${format}-210x280`,
           enabled: true,
           qaSamplePassed: true,
-          pages: { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 },
+          pages:
+            format === 'booklet'
+              ? { ...BOOKLET_PAGES }
+              : { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 },
           maxQuantity: 100,
           ...eta,
           productionCostUsdMinor:
@@ -238,145 +249,157 @@ for (const [code, eta] of Object.entries(SAMPLE_PRINT) as [
   }
 }
 
-// Gelato (DECISIONS 076): solo EE. UU. (a México sale a pérdida). Fotolibros de 28 a 200
-// páginas pares. Costo y plazo de referencia de su cotización; el real se pide al pagar.
-for (const format of PRINT_FORMATS) {
-  batch.set(
-    db.collection(COLLECTIONS.printOptions).doc(printOptionId('US', format, 'gelato')),
-    printOptionSchema.parse({
-      country: 'US',
-      format,
-      provider: 'gelato',
-      sku: GELATO_PRODUCTS[format],
-      enabled: true,
-      // En producción se habilita recién con la muestra física aprobada.
-      qaSamplePassed: !production,
-      pages: { min: 28, max: 200, multipleOf: 2 },
-      maxQuantity: 100,
-      etaDaysMin: 6,
-      etaDaysMax: 8,
-      productionCostUsdMinor: format === 'hardcover' ? 1283 : 986,
-      updatedAt: now,
-    }),
-  );
-}
-
-// Cloudprinter (DECISIONS 080): fotolibros US Letter producidos cerca del cliente. En México
-// sale mucho más barato que Gelato (que imprime en EE. UU.). Costos de referencia de su
-// cotización (USD); el real se pide al pagar y el enrutador elige el más barato.
-const CLOUDPRINTER: Partial<
-  Record<CountryCode, { eta: [number, number]; cost: Record<'softcover' | 'hardcover', number> }>
+// Imprentas reales (DECISIONS 076, 080, 086, 138): solo se ofrece impreso en los países donde
+// la imprenta cotizó y entregó de verdad (cotizaciones reales del 2026-10-30, libro de 32
+// páginas, 1 ejemplar; costo de producción en centavos de USD y plazo de producción + envío).
+// Fuera de esta lista el libro queda solo digital hasta verificar el país. El envío se cotiza
+// al pagar, con la dirección; el enrutador elige la imprenta más barata.
+type PrintCell = [softcover: number, hardcover: number | null, etaMin: number, etaMax: number];
+const VERIFIED_PRINT: Record<
+  string,
+  {
+    sku: Record<PhotobookFormat, string>;
+    pagesMin: number;
+    countries: Partial<Record<CountryCode, PrintCell>>;
+  }
 > = {
-  MX: { eta: [5, 9], cost: { softcover: 523, hardcover: 1079 } },
-  US: { eta: [5, 10], cost: { softcover: 1296, hardcover: 3169 } },
+  gelato: {
+    sku: GELATO_PRODUCTS,
+    pagesMin: 28,
+    countries: {
+      US: [1051, 1373, 6, 10],
+      MX: [1493, 1950, 11, 18],
+      AR: [1493, 1950, 6, 10],
+      UY: [1493, 1950, 6, 10],
+      BR: [1492, 1948, 14, 25],
+      ES: [1136, 1483, 7, 10],
+      CH: [1493, 1950, 6, 7],
+    },
+  },
+  cloudprinter: {
+    sku: CLOUDPRINTER_PRODUCTS,
+    pagesMin: 24,
+    countries: {
+      US: [1425, 3298, 5, 10],
+      MX: [575, 1131, 4, 8],
+      AR: [575, 1131, 4, 8],
+      UY: [575, 1131, 4, 8],
+      BR: [575, 1131, 4, 8],
+      // A España no cotiza tapa dura.
+      ES: [870, null, 2, 5],
+      CH: [645, 1193, 5, 10],
+    },
+  },
+  // Lulu (sandbox fuera de producción) pide el documento fiscal del destinatario en México,
+  // Argentina y Brasil: ahí no se ofrece hasta que el checkout lo pida (DECISIONS 138).
+  lulu: {
+    sku: LULU_PRODUCTS,
+    pagesMin: 24,
+    countries: {
+      US: [559, 1494, 8, 16],
+      UY: [494, 1376, 8, 16],
+      ES: [549, 1466, 8, 16],
+      CH: [494, 1376, 8, 16],
+    },
+  },
 };
-for (const [code, cloud] of Object.entries(CLOUDPRINTER) as [
-  CountryCode,
-  { eta: [number, number]; cost: Record<'softcover' | 'hardcover', number> },
-][]) {
+for (const [provider, printer] of Object.entries(VERIFIED_PRINT)) {
+  for (const [code, [softcover, hardcover, etaMin, etaMax]] of Object.entries(
+    printer.countries,
+  ) as [CountryCode, PrintCell][]) {
+    for (const format of PHOTOBOOK_FORMATS) {
+      const id = printOptionId(code, format, provider);
+      const cost = format === 'hardcover' ? hardcover : softcover;
+      if (cost === null) {
+        batch.delete(db.collection(COLLECTIONS.printOptions).doc(id));
+        continue;
+      }
+      batch.set(
+        db.collection(COLLECTIONS.printOptions).doc(id),
+        printOptionSchema.parse({
+          country: code,
+          format,
+          provider,
+          sku: printer.sku[format],
+          enabled: true,
+          // En producción se habilita recién con la muestra física aprobada.
+          qaSamplePassed: !production,
+          pages: { min: printer.pagesMin, max: 200, multipleOf: 2 },
+          maxQuantity: 100,
+          etaDaysMin: etaMin,
+          etaDaysMax: etaMax,
+          productionCostUsdMinor: cost,
+          updatedAt: now,
+        }),
+      );
+    }
+  }
+  // Ya no hay opciones "cualquier país" de imprentas reales: se borran las anteriores.
   for (const format of PRINT_FORMATS) {
-    batch.set(
-      db.collection(COLLECTIONS.printOptions).doc(printOptionId(code, format, 'cloudprinter')),
-      printOptionSchema.parse({
-        country: code,
-        format,
-        provider: 'cloudprinter',
-        sku: CLOUDPRINTER_PRODUCTS[format],
-        enabled: true,
-        // En producción se habilita recién con la muestra física aprobada.
-        qaSamplePassed: !production,
-        pages: { min: 28, max: 200, multipleOf: 2 },
-        maxQuantity: 100,
-        etaDaysMin: cloud.eta[0],
-        etaDaysMax: cloud.eta[1],
-        productionCostUsdMinor: cloud.cost[format],
-        updatedAt: now,
-      }),
+    batch.delete(
+      db.collection(COLLECTIONS.printOptions).doc(printOptionId(ANY_COUNTRY, format, provider)),
     );
   }
 }
 
-// Lulu (EE. UU.; DECISIONS 086): la más barata en tapa blanda. Pide 32 páginas en tapa blanda: el
-// libro clásico (28) se completa con páginas para dibujar. Fuera de producción usa el sandbox.
-const LULU_COST: Record<'softcover' | 'hardcover', number> = { softcover: 494, hardcover: 1351 };
-for (const format of PRINT_FORMATS) {
+// Cuento grapado A5 (DECISIONS 138): solo Gelato lo hace. Cotización real de 16 páginas (el Mini
+// con tapas), 1 ejemplar: producción USD 9,96 y plazo de producción + envío. Con más ejemplares el
+// costo unitario baja (30: USD 2,04 c/u); el precio se calcula con el total cotizado al pagar.
+const GELATO_BOOKLET: Partial<Record<CountryCode, [etaMin: number, etaMax: number]>> = {
+  US: [10, 12],
+  MX: [11, 18],
+  AR: [14, 25],
+  UY: [14, 25],
+  BR: [14, 25],
+  ES: [7, 10],
+  CH: [6, 7],
+};
+for (const [code, [etaMin, etaMax]] of Object.entries(GELATO_BOOKLET) as [
+  CountryCode,
+  [number, number],
+][]) {
   batch.set(
-    db.collection(COLLECTIONS.printOptions).doc(printOptionId('US', format, 'lulu')),
+    db.collection(COLLECTIONS.printOptions).doc(printOptionId(code, 'booklet', 'gelato')),
     printOptionSchema.parse({
-      country: 'US',
-      format,
-      provider: 'lulu',
-      sku: LULU_PRODUCTS[format],
+      country: code,
+      format: 'booklet',
+      provider: 'gelato',
+      sku: GELATO_PRODUCTS.booklet,
       enabled: true,
       qaSamplePassed: !production,
-      pages: { min: 24, max: 200, multipleOf: 2 },
-      maxQuantity: 100,
-      etaDaysMin: 8,
-      etaDaysMax: 16,
-      productionCostUsdMinor: LULU_COST[format],
+      pages: { ...BOOKLET_PAGES },
+      maxQuantity: 500,
+      etaDaysMin: etaMin,
+      etaDaysMax: etaMax,
+      productionCostUsdMinor: 996,
       updatedAt: now,
     }),
   );
 }
+batch.delete(
+  db.collection(COLLECTIONS.printOptions).doc(printOptionId(ANY_COUNTRY, 'booklet', 'gelato')),
+);
 
-// Cualquier destino (DECISIONS 096): las imprentas que envían al mundo se cotizan con la
-// dirección; si una no llega (o pide datos que no tenemos), su cotización falla y queda afuera.
-// El costo es de referencia (EE. UU.) para estimar el precio antes de tener la dirección.
-const WORLDWIDE: {
-  provider: string;
-  sku: Record<'softcover' | 'hardcover', string>;
-  cost: Record<'softcover' | 'hardcover', number>;
-  pagesMin: number;
-}[] = [
-  ...(production
-    ? []
-    : [
-        {
-          provider: 'mock',
-          sku: {
-            softcover: 'photobook-softcover-210x280',
-            hardcover: 'photobook-hardcover-210x280',
-          },
-          cost: { softcover: 900, hardcover: 1400 },
-          pagesMin: 12,
-        },
-      ]),
-  {
-    provider: 'gelato',
-    sku: GELATO_PRODUCTS,
-    cost: { softcover: 986, hardcover: 1283 },
-    pagesMin: 28,
-  },
-  {
-    provider: 'cloudprinter',
-    sku: CLOUDPRINTER_PRODUCTS,
-    cost: { softcover: 1296, hardcover: 3169 },
-    pagesMin: 28,
-  },
-  { provider: 'lulu', sku: LULU_PRODUCTS, cost: LULU_COST, pagesMin: 24 },
-];
-for (const printer of WORLDWIDE) {
+// La imprenta simulada (fuera de producción) sí atiende cualquier destino, para las pruebas.
+if (!production) {
   for (const format of PRINT_FORMATS) {
     batch.set(
-      db
-        .collection(COLLECTIONS.printOptions)
-        .doc(printOptionId(ANY_COUNTRY, format, printer.provider)),
+      db.collection(COLLECTIONS.printOptions).doc(printOptionId(ANY_COUNTRY, format, 'mock')),
       printOptionSchema.parse({
         country: ANY_COUNTRY,
         format,
-        provider: printer.provider,
-        sku: printer.sku[format],
+        provider: 'mock',
+        sku: `photobook-${format}-210x280`,
         enabled: true,
-        qaSamplePassed: !production,
-        pages: {
-          min: Math.max(printer.pagesMin, format === 'hardcover' ? 20 : 12),
-          max: 200,
-          multipleOf: 2,
-        },
+        qaSamplePassed: true,
+        pages:
+          format === 'booklet'
+            ? { ...BOOKLET_PAGES }
+            : { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 },
         maxQuantity: 100,
         etaDaysMin: 7,
         etaDaysMax: 20,
-        productionCostUsdMinor: printer.cost[format],
+        productionCostUsdMinor: format === 'hardcover' ? 1400 : 900,
         updatedAt: now,
       }),
     );
@@ -458,6 +481,7 @@ const PRODUCT_NAMES: Record<BookFormat, Record<Locale, string>> = {
   digital: { es: 'Libro digital (PDF)', en: 'Digital book (PDF)', pt: 'Livro digital (PDF)' },
   softcover: { es: 'Tapa blanda', en: 'Softcover', pt: 'Capa mole' },
   hardcover: { es: 'Tapa dura', en: 'Hardcover', pt: 'Capa dura' },
+  booklet: { es: 'Cuento grapado', en: 'Stapled storybook', pt: 'Livro grampeado' },
 };
 
 for (const format of BOOK_FORMATS) {
@@ -465,7 +489,8 @@ for (const format of BOOK_FORMATS) {
     db.collection(COLLECTIONS.products).doc(format),
     productSchema.parse({
       format,
-      pageCount: 28,
+      // El grapado se ofrece en los libros cortos: el precio "desde" es el del Mini (12 páginas).
+      pageCount: format === 'booklet' ? 12 : 28,
       active: true,
       name: PRODUCT_NAMES[format],
       createdAt: now,
@@ -577,6 +602,23 @@ for (const locale of LOCALES) {
   }
 }
 
+// Con --refresh-print, los libros cortos también se ofrecen en cuento grapado (el resto de la
+// configuración editorial no se toca).
+if (cloud && refreshPrint) {
+  await db
+    .collection(COLLECTIONS.editorialConfig)
+    .doc(GLOBAL_DOC_ID)
+    .set(
+      {
+        lengths: {
+          mini: { formats: DEFAULT_EDITORIAL_CONFIG.lengths.mini.formats },
+          short: { formats: DEFAULT_EDITORIAL_CONFIG.lengths.short.formats },
+        },
+      },
+      { merge: true },
+    );
+}
+
 let created = 0;
 const existing = cloud ? await db.getAll(...writes.map((write) => write.ref)) : [];
 const commit = db.batch();
@@ -584,6 +626,7 @@ writes.forEach((write, index) => {
   const collection = write.ref.parent.id;
   const refreshable =
     (refreshCatalog && CATALOG_COLLECTIONS.has(collection)) ||
+    (refreshPrint && collection === COLLECTIONS.printOptions) ||
     (collection === COLLECTIONS.content &&
       refreshContent.has((write.data as { key?: string }).key ?? ''));
   if (cloud && existing[index]?.exists && !refreshable) return;
@@ -600,7 +643,7 @@ console.info(
 for (const { email, role } of cloud ? [] : USERS) console.info(`  ${email} (${role})`);
 console.info(
   cloud
-    ? `  países con moneda propia, márgenes de fábrica (todo en USD), imprentas para cualquier destino, sitio ${production ? 'en solo vista previa' : 'en vivo'}, IA en Vertex con tope diario de USD 2`
+    ? `  países con moneda propia, márgenes de fábrica (todo en USD), imprentas solo en países verificados, sitio ${production ? 'en solo vista previa' : 'en vivo'}, IA en Vertex con tope diario de USD 2`
     : '  países con moneda propia, márgenes de fábrica (todo en USD), tipo de cambio fijo, sitio en vivo, IA en mock',
 );
 console.info(

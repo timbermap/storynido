@@ -1,6 +1,7 @@
 import {
   GELATO_PRODUCTS,
   ProviderError,
+  printPageCount,
   WebhookSignatureError,
   type Currency,
   type PrintAddress,
@@ -304,6 +305,15 @@ export class GelatoPrintProvider implements PrintProvider {
 
   /** Pliego de tapa según las páginas (el lomo cambia) y un solo PDF con guardas. */
   fileSpec(item: PrintItem): Promise<PrintFileSpec> {
+    // Cuento grapado A5: un solo PDF con las tapas como primera y última página (sin lomo).
+    if (item.format === 'booklet') {
+      return Promise.resolve({
+        packaging: 'booklet',
+        trim: { widthMm: 148, heightMm: 210 },
+        bleedMm: 3,
+        minInteriorPages: printPageCount(item.format, item.pageCount) - 2,
+      });
+    }
     const key = `${item.format}:${String(item.pageCount)}`;
     let spec = this.covers.get(key);
     if (!spec) {

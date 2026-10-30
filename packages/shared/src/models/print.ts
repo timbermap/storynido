@@ -2,7 +2,15 @@ import { z } from 'zod';
 
 import { countryCodeSchema } from '../countries';
 
-export const PRINT_FORMATS = ['softcover', 'hardcover'] as const;
+/**
+ * Formatos impresos: fotolibros (tapa blanda y tapa dura) y el cuento grapado (DECISIONS 138),
+ * que cubre los libros cortos que ningún fotolibro imprime (menos de 24 páginas).
+ */
+export const PRINT_FORMATS = ['softcover', 'hardcover', 'booklet'] as const;
+
+/** Los que son fotolibros (tapa y lomo): Cloudprinter y Lulu solo hacen estos. */
+export const PHOTOBOOK_FORMATS = ['softcover', 'hardcover'] as const;
+export type PhotobookFormat = (typeof PHOTOBOOK_FORMATS)[number];
 
 export const printFormatSchema = z.enum(PRINT_FORMATS);
 
@@ -14,16 +22,19 @@ export const GELATO_PRODUCTS: Record<PrintFormat, string> = {
     'photobooks-softcover_pf_210x280-mm-8x11-inch_pt_170-gsm-65lb-coated-silk_cl_4-4_ccl_4-4_bt_glued-left_ct_matt-lamination_prt_1-0_cpt_250-gsm-100-lb-cover-coated-silk_ver',
   hardcover:
     'photobooks-hardcover_pf_210x280-mm-8x11-inch_pt_170-gsm-65lb-coated-silk_cl_4-4_ccl_4-4_bt_glued-left_ct_matt-lamination_prt_1-0_cpt_130-gsm-65-lb-cover-coated-silk_ver',
+  // Cuento grapado A5 vertical (148×210 mm): papel de 115 g y tapa de 250 g, de 8 a 24 páginas.
+  booklet:
+    'stitched-multi-page-brochures_pf_a5_pt_115-gsm-coated-silk_cl_4-4_bt_stitched-left_cpt_250-gsm-coated-silk_ver',
 };
 
 /** Fotolibros US Letter vertical (21,6 × 27,9 cm): lo más cercano a nuestro 21×28. */
-export const CLOUDPRINTER_PRODUCTS: Record<PrintFormat, string> = {
+export const CLOUDPRINTER_PRODUCTS: Record<PhotobookFormat, string> = {
   softcover: 'photobook_pb_us_letter_p_fc',
   hardcover: 'photobook_cw_us_letter_p_fc',
 };
 
 /** Lulu: US Letter a color estándar, papel estucado de 80 lb (tapa blanda y tapa dura). */
-export const LULU_PRODUCTS: Record<PrintFormat, string> = {
+export const LULU_PRODUCTS: Record<PhotobookFormat, string> = {
   softcover: '0850X1100FCSTDPB080CW444GXX',
   hardcover: '0850X1100FCSTDCW080CW444GXX',
 };
@@ -63,6 +74,19 @@ export type PrintOption = z.infer<typeof printOptionSchema>;
 
 export function printOptionId(country: string, format: string, provider: string): string {
   return `${country}_${format}_${provider}`;
+}
+
+/** Rango de páginas del cuento grapado en Gelato (tapas incluidas) y su múltiplo. */
+export const BOOKLET_PAGES = { min: 8, max: 24, multipleOf: 4 } as const;
+
+/**
+ * Páginas que cuenta la imprenta. En los fotolibros son las del interior; en el cuento grapado
+ * entran las dos tapas y el total tiene que ser múltiplo de 4 (se completa con páginas para
+ * dibujar).
+ */
+export function printPageCount(format: string, interiorPages: number): number {
+  if (format !== 'booklet') return interiorPages;
+  return Math.ceil((interiorPages + 2) / BOOKLET_PAGES.multipleOf) * BOOKLET_PAGES.multipleOf;
 }
 
 export type PrintBlock = 'not_offered' | 'sample_pending' | 'pages' | 'quantity';

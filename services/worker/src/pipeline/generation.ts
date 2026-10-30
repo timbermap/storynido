@@ -6,6 +6,7 @@ import { encodeIllustration, type ProviderRegistry } from '@storynido/providers'
 import QRCode from 'qrcode';
 import sharp from 'sharp';
 import {
+  ANY_COUNTRY,
   COLLECTIONS,
   GLOBAL_DOC_ID,
   avatarToSheet,
@@ -17,6 +18,7 @@ import {
   bookEventSchema,
   kitSelectionSchema,
   printCandidates,
+  printPageCount,
   printRoutingSchema,
   printOptionSchema,
   coverScene,
@@ -29,6 +31,7 @@ import {
   type BookFormat,
   type Currency,
   type PrintAddress,
+  type PrintFormat,
   type AiUsage,
   type Avatar,
   type CharacterSheet,
@@ -960,7 +963,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           ...(fileSpec?.bleedMm !== undefined ? { bleedMm: fileSpec.bleedMm } : {}),
         };
         // Mínimo de páginas de la imprenta (Lulu: 32 en tapa blanda): páginas para dibujar.
-        const fillerPages = Math.max(0, (fileSpec?.minInteriorPages ?? 0) - expectedInterior);
+        // El cuento grapado cuenta las tapas y tiene que cerrar en múltiplo de 4.
+        const fillerPages =
+          format === 'booklet'
+            ? printPageCount(format, expectedInterior) - 2 - expectedInterior
+            : Math.max(0, (fileSpec?.minInteriorPages ?? 0) - expectedInterior);
         const size = pageSizeMm(spec);
         const prepared = await Promise.all(
           sources.map(async (bytes) => {
@@ -1011,7 +1018,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         if (format === 'digital') kitCover = layout.cover;
         const interiorCount = interiorPages(layout, spec).length;
         if (format !== 'digital') {
-          printEligible[format] = printablePages(spec, interiorCount);
+          // En el grapado las tapas son páginas del mismo archivo.
+          printEligible[format] = printablePages(
+            spec,
+            format === 'booklet' ? interiorCount + 2 : interiorCount,
+          );
           if (!printEligible[format]) {
             problems.push(`${format}: ${String(interiorCount)} páginas no cumplen con la imprenta`);
             continue;
@@ -1019,7 +1030,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         }
         const cover = fileSpec?.cover ?? defaultCoverGeometry(spec, interiorCount);
         const jobs =
-          format === 'digital'
+          format === 'digital' || format === 'booklet'
             ? [
                 {
                   kind: 'book',
@@ -1226,9 +1237,10 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         md5.set(file.path, createHash('md5').update(bytes).digest('hex'));
       }
       items.push({
-        format: item.format as 'softcover' | 'hardcover',
-        // En un solo PDF van también la tapa y las dos guardas.
-        pageCount: interior?.pages ?? (book ? book.pages - 3 : 0),
+        format: item.format as PrintFormat,
+        // En un solo PDF van también la tapa y las dos guardas; en el cuento grapado, el archivo
+        // entero es el libro (con sus tapas) y cuenta todas sus páginas.
+        pageCount: interior?.pages ?? (book ? book.pages - (item.format === 'booklet' ? 0 : 3) : 0),
         quantity: item.quantity,
         interiorPdfUrl: await signed(interior),
         coverPdfUrl: await signed(cover),
@@ -1249,12 +1261,26 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             .map((quoted) => quoted.provider),
         ]
       : providers.printers().map((printer) => printer.id);
-    const options = (
-      await db.collection(COLLECTIONS.printOptions).where('country', '==', address.country).get()
+    // Las del país y las de "cualquier destino"; la del país pisa a la global de la misma imprenta.
+    const allOptions = (
+      await db
+        .collection(COLLECTIONS.printOptions)
+        .where('country', 'in', [address.country, ANY_COUNTRY])
+        .get()
     ).docs.flatMap((doc) => {
       const parsed = printOptionSchema.safeParse(normalizeFirestoreData(doc.data()));
       return parsed.success ? [parsed.data] : [];
     });
+    const options = allOptions.filter(
+      (option) =>
+        option.country !== ANY_COUNTRY ||
+        !allOptions.some(
+          (other) =>
+            other.country !== ANY_COUNTRY &&
+            other.provider === option.provider &&
+            other.format === option.format,
+        ),
+    );
     const able = printCandidates(
       options,
       items.map((item) => ({

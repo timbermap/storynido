@@ -262,7 +262,8 @@
   "Formats": {
     "digital": "Ebook (PDF)",
     "softcover": "Tapa blanda",
-    "hardcover": "Tapa dura"
+    "hardcover": "Tapa dura",
+    "booklet": "Cuento grapado"
   },
   "Blog": {
     "title": "Blog",
@@ -1044,6 +1045,10 @@
       "hardcover": {
         "name": "Tapa dura",
         "text": "Libro impreso de unos 21×28 cm, para regalar y guardar."
+      },
+      "booklet": {
+        "name": "Cuento grapado",
+        "text": "Cuento impreso de unos 15×21 cm, con grapas. Ideal para souvenirs."
       }
     },
     "addressTitle": "Dirección de envío",

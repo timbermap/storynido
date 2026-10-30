@@ -262,7 +262,8 @@
   "Formats": {
     "digital": "Ebook (PDF)",
     "softcover": "Capa mole",
-    "hardcover": "Capa dura"
+    "hardcover": "Capa dura",
+    "booklet": "Livro grampeado"
   },
   "Blog": {
     "title": "Blog",
@@ -1044,6 +1045,10 @@
       "hardcover": {
         "name": "Capa dura",
         "text": "Livro impresso de cerca de 21×28 cm, para presentear e guardar."
+      },
+      "booklet": {
+        "name": "Livro grampeado",
+        "text": "Livro impresso de uns 15×21 cm, com grampos. Ótimo para lembrancinhas."
       }
     },
     "addressTitle": "Endereço de entrega",

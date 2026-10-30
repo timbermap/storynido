@@ -1,4 +1,4 @@
-import type { BookFormat } from '@storynido/shared';
+import { BOOKLET_PAGES, type BookFormat } from '@storynido/shared';
 
 /** Libro de 21×28 cm vertical: la misma proporción 3:4 de las ilustraciones (DECISIONS 069). */
 export const TRIM_MM = { width: 210, height: 280 } as const;
@@ -54,6 +54,18 @@ export const FORMAT_SPECS: Record<BookFormat, FormatSpec> = {
     maxImagePx: 4000,
     pages: { min: 20, max: 120, multipleOf: 2 },
   },
+  // Cuento grapado A5 (DECISIONS 138): un solo PDF con portada, páginas y contratapa. Las
+  // páginas que cuenta la imprenta incluyen las tapas y son múltiplo de 4.
+  booklet: {
+    format: 'booklet',
+    trimMm: { width: 148, height: 210 },
+    bleedMm: 3,
+    safeMm: 10,
+    minDpi: 200,
+    jpegQuality: 92,
+    maxImagePx: 4000,
+    pages: { ...BOOKLET_PAGES },
+  },
 };
 
 /** Tamaño al corte: el de la imprenta, o nuestro 21×28 cm. */
@@ -72,7 +84,7 @@ export function pageSizeMm(spec: FormatSpec) {
 
 /** Lomo aproximado (papel ~130 g): provisorio hasta tener el cálculo de Gelato por SKU. */
 export function spineMm(interiorPages: number, format: BookFormat): number {
-  if (format === 'digital') return 0;
+  if (format === 'digital' || format === 'booklet') return 0;
   const base = format === 'hardcover' ? 4 : 1;
   return Math.max(base + interiorPages * 0.1, format === 'hardcover' ? 6 : 3);
 }
