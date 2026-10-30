@@ -9,7 +9,7 @@ Todos los códigos de producto cotizan bien. Lo que acepta cada imprenta (pedido
 | Imprenta     | Tapa blanda                           | Tapa dura                             | Páginas mínimas reales                                | Tamaño real              |
 | ------------ | ------------------------------------- | ------------------------------------- | ----------------------------------------------------- | ------------------------ |
 | Gelato       | 28 p: USD 9,86 · 32 p: 10,51          | 28 p: USD 12,83 · 32 p: 13,73         | **28** (con 24 o menos rechaza)                       | 210×280 mm               |
-| Cloudprinter | 24 p: 11,67 · 28 p: 12,96             | 24 p: 30,40 · 28 p: 31,69             | **24** (con 16 o menos rechaza)                       | US Letter 215,9×279,4 mm |
+| Cloudprinter | 24 p: 11,67 · 28 p: 12,96             | 24 p: 30,40 · 28 p: 31,69             | **24** (con 24 acepta; con 16 o menos rechaza)        | US Letter 215,9×279,4 mm |
 | Lulu         | cualquier cantidad (la completa a 32) | cualquier cantidad (la completa a 24) | Tapa blanda 32, tapa dura 24: **rellena con páginas** | US Letter 215,9×279,4 mm |
 
 Lo que vende la web:
@@ -28,19 +28,19 @@ Lo que vende la web:
 
 Producción + envío en USD y plazo en días. "No" = esa imprenta no cotiza ese destino.
 
-| País      | Gelato                  | Cloudprinter                         | Lulu                               |
-| --------- | ----------------------- | ------------------------------------ | ---------------------------------- |
-| México    | 14,93 + 30,39 · 11–18 d | **5,75 + 8,26 · 4–8 d**              | No: pide RFC (`recipient_tax_id`)  |
-| Argentina | 14,93 + 30,39 · 6–10 d  | 5,75 + 30,05 · 4–8 d                 | No: pide CUIT (`recipient_tax_id`) |
-| Uruguay   | 14,93 + 30,39 · 6–10 d  | 5,75 + 30,05 · 4–8 d                 | **4,94 + 19,64 · 8–16 d**          |
-| Brasil    | 14,92 + 18,17 · 14–25 d | 5,75 + 30,05 · 4–8 d                 | No: pide CPF (`recipient_tax_id`)  |
-| España    | 11,36 + 5,67 · 7–10 d   | 8,69 + 10,99 · 2–5 d (tapa dura: no) | 5,49 + 8,87 · 8–16 d               |
-| Suiza     | 14,93 + 11,13 · 6–7 d   | 6,44 + 22,86 · 5–10 d                | **4,94 + 10,28 · 8–16 d**          |
-| EE. UU.   | 10,51 · 6–8 d           | 14,25 · 5–10 d                       | 5,88 · 8–16 d                      |
+| País      | Gelato                    | Cloudprinter                         | Lulu                      |
+| --------- | ------------------------- | ------------------------------------ | ------------------------- |
+| México    | 14,93 + 30,39 · 11–18 d   | **5,75 + 8,26 · 4–8 d**              | No: pide documento fiscal |
+| Argentina | 14,93 + 30,39 · 6–10 d    | 5,75 + 30,05 · 4–8 d                 | No: pide documento fiscal |
+| Uruguay   | 14,93 + 30,39 · 6–10 d    | 5,75 + 30,05 · 4–8 d                 | **4,94 + 19,64 · 8–16 d** |
+| Brasil    | 14,92 + 18,17 · 14–25 d   | 5,75 + 30,05 · 4–8 d                 | No: pide documento fiscal |
+| España    | 11,36 + 5,67 · 7–10 d     | 8,69 + 10,99 · 2–5 d (tapa dura: no) | 5,49 + 8,87 · 8–16 d      |
+| Suiza     | 14,93 + 11,13 · 6–7 d     | 6,44 + 22,86 · 5–10 d                | **4,94 + 10,28 · 8–16 d** |
+| EE. UU.   | 10,51 (envío no cotizado) | 14,25 (envío no cotizado)            | 5,88 (envío no cotizado)  |
 
-(Tapa blanda; la tapa dura tiene el mismo patrón de países. Lulu cotiza en sandbox.)
+(Tapa blanda. La tapa dura sigue el mismo patrón de países, salvo Cloudprinter a España, que no la cotiza. Lulu cotiza en sandbox. Los plazos son los que informó cada imprenta en su cotización; en EE. UU. se midió solo el costo de producción.)
 
-**Conclusión:** en los 7 países probados hay al menos 2 imprentas que entregan los dos formatos. Lulu no sirve para México, Argentina ni Brasil mientras no pidamos el documento fiscal del destinatario. El checkout ya descarta una imprenta cuya cotización falla.
+**Conclusión:** en los 7 países probados hay al menos 2 imprentas que entregan los dos formatos. Lulu no sirve para México, Argentina ni Brasil mientras no pidamos el documento fiscal del destinatario (el checkout hoy no lo pide). El checkout ya descarta una imprenta cuya cotización falla.
 
 ## 3. Riesgos para "no ofrecer lo que no podemos entregar"
 
@@ -52,12 +52,12 @@ Producción + envío en USD y plazo en días. "No" = esa imprenta no cotiza ese 
 
 ## 4. Productos que se podrían sumar (verificados con cotización real de Gelato)
 
-| Producto                                                      | Qué resuelve                                                                           | Evidencia                                                                                                                    |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Cuento grapado de 8 a 24 páginas** (A5 o cuadrado 14,8 cm)  | Imprimir el **Mini y el Corto**, que hoy son solo digitales, y el **souvenir** del kit | Cotiza de 8 a 24 páginas. 12 p, 14,8×14,8 cm: USD 9,62 un ejemplar; **1,71 c/u en 30; 1,46 c/u en 100** (producción)         |
-| **Tarjetas y tarjetas plegadas** (invitación, agradecimiento) | Piezas impresas del kit de Celebraciones                                               | Catálogos `cards`, `folded-cards` y `pack-of-cards-envelopes` (A6, 14,1 cm, A5, DL), disponibles en la mayoría de los países |
-| **Cuaderno de actividades grapado** (A4)                      | Libro para colorear / actividades impreso                                              | Mismo producto grapado, A4, de 8 a 24 páginas: USD 9,96 a 12,68 un ejemplar                                                  |
-| Póster, taza, camiseta infantil, calendario                   | Complementos de regalo con el personaje (Familias)                                     | Existen en el catálogo de Gelato; no se cotizó (cada uno necesita archivo y plantilla propios)                               |
+| Producto                                                      | Qué resuelve                                                                           | Evidencia                                                                                                                                                               |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cuento grapado de 8 a 24 páginas** (A5 o cuadrado 14,8 cm)  | Imprimir el **Mini y el Corto**, que hoy son solo digitales, y el **souvenir** del kit | Cotiza de 8 a 24 páginas. 12 p, 14,8×14,8 cm: USD 9,62 un ejemplar; **1,71 c/u en 30; 1,46 c/u en 100** (producción)                                                    |
+| **Tarjetas y tarjetas plegadas** (invitación, agradecimiento) | Piezas impresas del kit de Celebraciones                                               | Catálogos `cards`, `folded-cards` y `pack-of-cards-envelopes` (A6, 14,1 cm, A5, DL). Existen en el catálogo; la disponibilidad por país y el precio **no se cotizaron** |
+| **Cuaderno de actividades grapado** (A4)                      | Libro para colorear / actividades impreso                                              | Mismo producto grapado, A4, de 8 a 24 páginas: USD 9,96 a 12,68 un ejemplar                                                                                             |
+| Póster, taza, camiseta infantil, calendario                   | Complementos de regalo con el personaje (Familias)                                     | Existen en el catálogo de Gelato; no se cotizó (cada uno necesita archivo y plantilla propios)                                                                          |
 
 No hay producto de **stickers** ni de etiquetas troqueladas en el catálogo de Gelato: las etiquetas del kit se podrían imprimir como tarjetas chicas, y los stickers siguen siendo solo digitales (para imprimir en casa).
 
