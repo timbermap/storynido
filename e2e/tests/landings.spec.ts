@@ -115,8 +115,8 @@ test('las historias de Eventos y Profesionales vuelven a su landing y crean en s
   page,
 }) => {
   for (const [landing, line, back, create] of [
-    ['/es/eventos', 'events', 'Volver a celebraciones', 'Diseñar el kit con esta historia'],
-    ['/es/profesionales', 'professionals', 'Volver a profesionales', 'Crear con esta historia'],
+    ['/es/eventos', 'events', 'Volver a celebraciones', 'Inicia sesión para diseñar el kit'],
+    ['/es/profesionales', 'professionals', 'Volver a profesionales', 'Inicia sesión para crear'],
   ] as const) {
     await page.goto(landing);
     await page.locator(`a[href*="line=${line}"][href*="/historias/"]`).first().click();
@@ -141,14 +141,17 @@ test('el menú abre cada landing desde arriba (sin saltos de scroll)', async ({ 
   }
 });
 
-test('ficha profesional: objetivos propios en vez de enseñanzas generales; envío editable', async ({
+test('ficha profesional: objetivos propios en vez de enseñanzas generales; envío a calcular', async ({
   page,
 }) => {
   await page.goto('/es/historias/mi-visita-al-dentista?line=professionals');
   await expect(page.getByRole('heading', { name: 'Qué trabaja este cuento' })).toBeVisible();
   await expect(page.locator('main')).toContainText('Conocer el consultorio antes de ir');
   await expect(page.getByRole('heading', { name: 'Combínala con una enseñanza' })).toHaveCount(0);
-  await expect(page.getByLabel('Enviar a')).toBeVisible();
+  await expect(page.locator('main')).toContainText(
+    'El costo de envío del libro impreso se calcula',
+  );
+  await expect(page.getByLabel('Enviar a')).toHaveCount(0);
   await expectAccessible(page);
 });
 
@@ -172,14 +175,31 @@ test('preguntas frecuentes: la home destaca 4 y la página propia tiene todas y 
   await expect(form.getByRole('status')).toContainText('¡Mensaje enviado!');
 });
 
-test('el logo vuelve a la home: sin #audience y arriba de todo', async ({ page }) => {
+test('el logo vuelve a la home: arriba de todo y sin hash', async ({ page }) => {
   await page.goto('/es');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   await page.getByRole('link', { name: 'Empezar mi cuento' }).click();
-  await expect(page).toHaveURL(/#audience$/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
   await page.locator('header a').first().click();
   await expect(page).not.toHaveURL(/#/);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
+});
+
+test('¿Para quién es?: los links siguen andando al volver atrás desde una landing', async ({
+  page,
+}) => {
+  await page.goto('/es');
+  await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await page.getByRole('link', { name: 'Empezar mi cuento' }).click();
+  // El botón baja al selector sin dejar "#audience" ni una entrada propia en el historial.
+  await expect(page).not.toHaveURL(/#/);
+  await page.locator('a[data-track-persona="families"]').click();
+  await expect(page).toHaveURL(/\/es\/familias$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/es$/);
+  await expect(page.locator('a[data-track-persona]')).toHaveCount(3);
+  await page.locator('a[data-track-persona="events"]').click();
+  await expect(page).toHaveURL(/\/es\/eventos$/);
 });
 
 test('idioma: visitar una página en otro idioma no lo fija; el aviso sugiere el del país', async ({

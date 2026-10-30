@@ -17,6 +17,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 import { cn } from '@/lib/utils';
+import { AnchorLink } from '@/components/anchor-link';
 
 /**
  * Mis cuentos: la home de quien tiene sesión (auditoría UX, DECISIONS 110). Lo que creó en cada
@@ -70,10 +71,10 @@ export default function MyStoriesPage() {
     <section className="container-page grid max-w-3xl gap-10 py-12">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="text-3xl font-medium sm:text-4xl">{t('title')}</h1>
-        <a href="#new" className={buttonVariants({ size: 'lg' })}>
+        <AnchorLink target="new" className={buttonVariants({ size: 'lg' })}>
           <Plus aria-hidden="true" />
           {t('new')}
-        </a>
+        </AnchorLink>
       </div>
 
       {failed && (

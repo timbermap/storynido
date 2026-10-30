@@ -1675,3 +1675,10 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - No se hace la tarjeta "Mis proyectos" con niños de ejemplo ni las fotos del brief (el look no cambia).
 - **E2E:** `expectAccessible` espera a que la página tenga `<title>` antes de medir con axe; sin eso, bajo carga a veces medía antes de que llegara el metadata y daba un `document-title` falso.
 - Con esto quedan hechos los 4 heroes del brief (DECISIONS 125 a 129). Las fotos de `05-prompt-imagenes.md` no se usan por ahora.
+
+## 130 · Anclas sin historial roto y ficha de historias más simple
+
+- **Fecha:** 2026-10-30.
+- **Links de "¿Para quién es?" que no andaban:** el botón del hero era un `<a href="#audience">` nativo. Tras tocarlo y entrar a una landing, al volver atrás la URL decía `/es#audience` pero la página mostraba el contenido de Familias (Next no reconoce las entradas de historial creadas por un ancla nativa). `AnchorLink` baja con scroll sin crear entrada en el historial ni dejar el hash; se usa en la home, Profesionales, preguntas frecuentes y Mis cuentos. Test E2E del recorrido.
+- **Ficha de la historia:** sin "Formatos y precios" ni "Enviar a" (precio y país se ven en el creador y el pago). En su lugar, una nota: "El costo de envío del libro impreso se calcula con tu dirección al pagar." Las extensiones pasan de tarjetas (parecían botones) a una lista de datos con los formatos tildados.
+- **Botón de la ficha:** sin sesión dice "Inicia sesión para crear" (kit: "Inicia sesión para diseñar el kit"); con sesión, "Crear con esta historia".

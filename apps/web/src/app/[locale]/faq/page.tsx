@@ -8,6 +8,7 @@ import { FaqGroups, parseFaq, parseFaqGroups } from '@/components/home/faq-list'
 import { JsonLd } from '@/components/json-ld';
 import { localizedAlternates } from '@/lib/seo';
 import { getContent } from '@/lib/server/api';
+import { AnchorLink } from '@/components/anchor-link';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -44,12 +45,12 @@ export default async function FaqPage({ params }: Props) {
         <p className="mt-3 text-lg text-muted-foreground">
           {t.rich('pageIntro', {
             form: (chunks) => (
-              <a
-                href={`#${CONTACT_ID}`}
+              <AnchorLink
+                target={CONTACT_ID}
                 className="font-semibold text-primary underline-offset-4 hover:underline"
               >
                 {chunks}
-              </a>
+              </AnchorLink>
             ),
           })}
         </p>

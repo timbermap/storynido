@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, Check } from 'lucide-react';
+import { ArrowLeft, BookOpen, Check, Truck } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
@@ -12,13 +12,11 @@ import {
   type Locale,
 } from '@storynido/shared';
 
+import { SignedInLabel } from '@/components/auth/signed-in-label';
 import { JsonLd } from '@/components/json-ld';
-import { CountryNotice } from '@/components/stories/country-notice';
-import { ShipToSelect } from '@/components/stories/ship-to-select';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
-import { countryName } from '@/lib/country-names';
 import { formatPrice } from '@/lib/format';
 import { localizedAlternates } from '@/lib/seo';
 import { getEditorial, getEventPricing, getLessons, getOffer, getStory } from '@/lib/server/api';
@@ -75,9 +73,6 @@ export default async function StoryPage({ params, searchParams }: Props) {
   const kitPricing = line === 'events' ? await getEventPricing(display.country) : null;
   const tKit = await getTranslations('Checkout.kit');
 
-  const countryLabel = countryName(display.country, locale);
-  const price = (amountMinor: number) =>
-    offer ? formatPrice(amountMinor, offer.currency, locale, display.country) : '';
   const amounts = offer?.formats.map((f) => f.amountMinor) ?? [];
   // Comparador: cada extensión que admite la historia, con sus páginas y en qué formatos sale.
   const formatNames = new Map(offer?.formats.map((f) => [f.format, f.name]) ?? []);
@@ -215,22 +210,35 @@ export default async function StoryPage({ params, searchParams }: Props) {
                 {t('lengthsTitle')}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">{t('lengthsText')}</p>
-              <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+              <ul className="mt-3 divide-y rounded-xl border bg-card">
                 {lengthOptions.map((option) => (
-                  <li key={option.length} className="rounded-xl border bg-card px-4 py-3">
-                    <p className="flex items-baseline justify-between gap-3">
-                      <span className="font-semibold">{tLengths(`${option.length}.name`)}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {t('pages', { count: option.pages })}
-                      </span>
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {tLengths(`${option.length}.text`)}
-                    </p>
-                    {option.formats.length > 0 && (
-                      <p className="mt-2 text-xs font-semibold text-primary">
-                        {option.formats.join(' · ')}
+                  <li
+                    key={option.length}
+                    className="grid gap-x-6 gap-y-2 px-5 py-4 sm:grid-cols-[1fr_auto] sm:items-center"
+                  >
+                    <div>
+                      <p className="flex flex-wrap items-baseline gap-x-3">
+                        <span className="font-semibold">{tLengths(`${option.length}.name`)}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {t('pages', { count: option.pages })}
+                        </span>
                       </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {tLengths(`${option.length}.text`)}
+                      </p>
+                    </div>
+                    {option.formats.length > 0 && (
+                      <ul
+                        aria-label={t('lengthFormats')}
+                        className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground/80 sm:flex-col sm:items-start sm:gap-y-0.5"
+                      >
+                        {option.formats.map((name) => (
+                          <li key={name} className="inline-flex items-center gap-1.5">
+                            <Check className="size-4 text-success" aria-hidden="true" />
+                            {name}
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </li>
                 ))}
@@ -238,68 +246,12 @@ export default async function StoryPage({ params, searchParams }: Props) {
             </section>
           )}
 
-          {/* El kit de Eventos tiene su propio precio (se ve en el creador), no el de los libros. */}
-          {line !== 'events' && (
-            <section aria-labelledby="formats">
-              <h2 id="formats" className="text-xl font-medium">
-                {t('formats')}
-              </h2>
-              <ShipToSelect country={display.country} />
-              {offer?.available ? (
-                <>
-                  <div className="mt-3">
-                    <CountryNotice display={display} />
-                  </div>
-                  <ul className="mt-3 divide-y rounded-xl border bg-card">
-                    {offer.formats.map((format) => (
-                      <li
-                        key={format.format}
-                        className="flex items-center justify-between gap-4 px-5 py-3"
-                      >
-                        <span className="font-medium">{format.name}</span>
-                        <span className="font-semibold">
-                          {format.estimated
-                            ? t('from', { price: price(format.amountMinor) })
-                            : price(format.amountMinor)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    {offer.formats.some((format) => format.estimated) &&
-                      `${
-                        offer.shipping.quoted
-                          ? t('shippingQuoted', {
-                              country: countryLabel,
-                              min: offer.shipping.etaDaysMin,
-                              max: offer.shipping.etaDaysMax,
-                            })
-                          : t('shippingTo', {
-                              country: countryLabel,
-                              price: price(offer.shipping.costMinor),
-                              min: offer.shipping.etaDaysMin,
-                              max: offer.shipping.etaDaysMax,
-                            })
-                      } · `}
-                    {offer.taxIncludedInPrice ? t('taxIncluded') : t('taxExtra')}
-                  </p>
-                  {offer.local && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {t('usdNote', {
-                        rate: new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(
-                          offer.local.rate,
-                        ),
-                        currency: offer.local.currency,
-                      })}
-                    </p>
-                  )}
-                </>
-              ) : (
-                <p className="mt-3 text-muted-foreground">
-                  {t('notAvailable', { country: countryLabel })}
-                </p>
-              )}
-            </section>
+          {/* El precio y el país de envío se ven en el creador y el pago; acá solo se avisa del envío. */}
+          {line !== 'events' && offer?.formats.some((format) => format.estimated) && (
+            <p className="flex items-start gap-2.5 text-sm text-muted-foreground">
+              <Truck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              {t('shippingCalculated')}
+            </p>
           )}
 
           {line === 'events' && (
@@ -342,7 +294,11 @@ export default async function StoryPage({ params, searchParams }: Props) {
             }}
             className={buttonVariants({ size: 'lg' })}
           >
-            {line === 'events' ? t('createKit') : t('create')}
+            {line === 'events' ? (
+              <SignedInLabel guest={t('createKitGuest')} member={t('createKit')} />
+            ) : (
+              <SignedInLabel guest={t('createGuest')} member={t('create')} />
+            )}
           </Link>
         </div>
       </div>

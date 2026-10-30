@@ -23,6 +23,7 @@ import { getCollections, getStories } from '@/lib/server/api';
 import { absoluteUrl } from '@/lib/site';
 
 import professionalsArt from '../../../../public/brand/landing-profesionales.webp';
+import { AnchorLink } from '@/components/anchor-link';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -57,9 +58,9 @@ export default async function ProfessionalsPage({ params }: Props) {
   // Arriba, primero los ejemplos: la cuenta se pide recién al crear.
   const heroCta = (
     <>
-      <a href="#examples" className={ctaClass}>
+      <AnchorLink target="examples" className={ctaClass}>
         {t('ctaExamples')}
-      </a>
+      </AnchorLink>
       <Link
         href={{ pathname: '/create', query: { line: 'professionals' } }}
         className="inline-flex items-center justify-center border-b-2 border-foreground/25 px-1 pb-0.5 text-lg font-semibold transition-colors hover:border-primary hover:text-primary"

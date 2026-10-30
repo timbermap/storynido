@@ -17,6 +17,7 @@ import { getContent, getOffer } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { offerHighlights } from '@/lib/offer';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
+import { AnchorLink } from '@/components/anchor-link';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = (await params).locale as Locale;
@@ -75,8 +76,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {t('hero.script')}
             </p>
             <div className="mt-9 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
-              <a
-                href="#audience"
+              <AnchorLink
+                target="audience"
                 className={buttonVariants({
                   size: 'lg',
                   className: 'h-14 w-full rounded-full px-8 text-lg sm:w-auto',
@@ -84,7 +85,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               >
                 {t('hero.homeCta')}
                 <ArrowRight aria-hidden="true" className="rotate-90" />
-              </a>
+              </AnchorLink>
               {/* Para quien prefiere mirar primero: el catálogo completo. */}
               <Link
                 href="/stories"
