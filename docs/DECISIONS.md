@@ -1609,3 +1609,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - La cookie vieja `sn_locale` ya no se lee.
 - **Aviso de idioma:** quien entra por un link en otro idioma que el de su país ve "Este sitio también está en español → Ver en español", escrito en el idioma sugerido. Elegir o cerrar queda recordado. No aparece en el creador ni en el pago.
 - **Copy:** "We serve families worldwide" → "Available worldwide" (es: "Disponible en todo el mundo"), para que no se lea solo como un servicio para familias.
+
+## 123 · Sin "Hojear un ejemplo" en las fichas
+
+- **Fecha:** 2026-10-30.
+- La sección "Hojear un ejemplo" de la ficha de cada historia se quita, con su atajo junto al título y su componente. Mostraba portada, dedicatoria, un fragmento y páginas vacías: parecía un libro de 4 páginas y terminaba la ficha sin una acción.
+- La ficha termina en sus formatos y precios y en "Crear con esta historia". Los ejemplos ilustrados completos (libros de muestra por historia) pueden volver cuando existan.
