@@ -377,7 +377,6 @@
     "myStories": {
       "title": "My stories",
       "loading": "Loading your stories…",
-      "new": "New",
       "newTitle": "What would you like to create?",
       "newOptions": {
         "families": {
@@ -393,10 +392,6 @@
           "text": "Stories for each child, with an alias and your work goals."
         }
       },
-      "emptyTitle": "You haven't created a story yet",
-      "emptyText": "Start with their name and a story: the preview is free.",
-      "emptyCta": "Create their first story",
-      "browse": "Browse stories",
       "resume": "Pick up where you left off",
       "storyOf": "{name}'s story",
       "untitled": "Unfinished story",
@@ -404,7 +399,8 @@
       "inProgress": "In progress",
       "filter": "Filter by line",
       "all": "All",
-      "loadFailed": "We couldn't load your stories in progress. Reload the page to try again."
+      "loadFailed": "We couldn't load your stories in progress. Reload the page to try again.",
+      "start": "Get started"
     },
     "myStoriesLink": "Your stories and orders are in My stories →"
   },

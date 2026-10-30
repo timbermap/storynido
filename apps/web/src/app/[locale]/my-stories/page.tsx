@@ -1,6 +1,5 @@
 'use client';
 
-import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -17,7 +16,6 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 import { cn } from '@/lib/utils';
-import { AnchorLink } from '@/components/anchor-link';
 
 /**
  * Mis cuentos: la home de quien tiene sesión (auditoría UX, DECISIONS 110). Lo que creó en cada
@@ -69,13 +67,7 @@ export default function MyStoriesPage() {
 
   return (
     <section className="container-page grid max-w-3xl gap-10 py-12">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="text-3xl font-medium sm:text-4xl">{t('title')}</h1>
-        <AnchorLink target="new" className={buttonVariants({ size: 'lg' })}>
-          <Plus aria-hidden="true" />
-          {t('new')}
-        </AnchorLink>
-      </div>
+      <h1 className="text-3xl font-medium sm:text-4xl">{t('title')}</h1>
 
       {failed && (
         <p role="alert" className="rounded-xl bg-muted p-4 text-sm">
@@ -134,20 +126,7 @@ export default function MyStoriesPage() {
             />
           </section>
         </>
-      ) : (
-        <div className="rounded-xl border bg-card p-8 text-center shadow-[var(--shadow-card)]">
-          <h2 className="text-2xl font-medium">{t('emptyTitle')}</h2>
-          <p className="mx-auto mt-2 max-w-md text-muted-foreground">{t('emptyText')}</p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link href="/create" className={buttonVariants({ size: 'lg' })}>
-              {t('emptyCta')}
-            </Link>
-            <Link href="/stories" className={buttonVariants({ size: 'lg', variant: 'outline' })}>
-              {t('browse')}
-            </Link>
-          </div>
-        </div>
-      )}
+      ) : null}
 
       {pro?.accountType === 'professional' && <ProPanel uid={user.uid} status={pro} />}
       <section id="new" aria-labelledby="new-title" className="grid scroll-mt-28 gap-4">

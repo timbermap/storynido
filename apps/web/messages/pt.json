@@ -377,7 +377,6 @@
     "myStories": {
       "title": "Minhas histórias",
       "loading": "Carregando suas histórias…",
-      "new": "Nova",
       "newTitle": "O que você quer criar?",
       "newOptions": {
         "families": {
@@ -393,10 +392,6 @@
           "text": "Histórias por criança, com apelido e os objetivos do seu trabalho."
         }
       },
-      "emptyTitle": "Você ainda não criou nenhuma história",
-      "emptyText": "Comece com o nome e uma história: a prévia é grátis.",
-      "emptyCta": "Criar a primeira história",
-      "browse": "Ver histórias",
       "resume": "Continue de onde parou",
       "storyOf": "A história de {name}",
       "untitled": "História sem terminar",
@@ -404,7 +399,8 @@
       "inProgress": "Em andamento",
       "filter": "Filtrar por linha",
       "all": "Todas",
-      "loadFailed": "Não conseguimos carregar suas histórias em andamento. Recarregue a página para tentar de novo."
+      "loadFailed": "Não conseguimos carregar suas histórias em andamento. Recarregue a página para tentar de novo.",
+      "start": "Começar"
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },

@@ -1776,3 +1776,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
   - **Reglas "no IA" en todos los prompts de imagen** (`artDirection`): rostros únicos y parecidos a la foto (ojos de tamaño natural, expresiones variadas, nunca sonrisas idénticas); trazo y textura con intención, no un filtro uniforme; sin destellos, halos, degradados cinematográficos ni luces mágicas; mismas proporciones, paleta y ropa entre páginas; en los estilos no 3D, piel con variación natural (nada de aerógrafo). El Cartoon 3D conserva su acabado y recibe las mismas reglas, salvo la de piel.
 - **Pendiente:** probar los estilos nuevos con muestras reales (costo de IA: avisar antes), cargar las miniaturas y decidir el estilo de la prueba A/B; testear portada, doble página y miniatura móvil, como pide el documento. Las imágenes del PDF son pruebas conceptuales: conviene revisión de un ilustrador antes de fijar un estilo.
 - **Mis cuentos:** "Mis pedidos" va debajo de "¿Qué te gustaría crear?" (antes arriba).
+
+## 142 · Mis cuentos sin estado vacío y botón "Comenzar" en las tarjetas de crear
+
+- **Fecha:** 2026-10-30.
+- En Mis cuentos desaparecen el aviso "Todavía no has creado ningún cuento" (con sus botones) y el botón "Nuevo": quien no tiene borradores ve directamente "¿Qué te gustaría crear?". Se borran los textos que ya no se usan.
+- Las tarjetas de Familias, Celebraciones y Profesionales (Mis cuentos y la página de nuevo cuento) llevan el botón "Comenzar" al pie (es: Comenzar, en: Get started, pt: Começar). La tarjeta entera sigue siendo el enlace.

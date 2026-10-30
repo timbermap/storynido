@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import type { Channel } from '@storynido/shared';
 
 import { LINE_TONE } from '@/components/wizard/drafts-list';
+import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +34,9 @@ export function NewChoice() {
             </span>
             <span className="font-semibold">{t(`newOptions.${line}.title`)}</span>
             <span className="text-sm text-muted-foreground">{t(`newOptions.${line}.text`)}</span>
+            <span className="mt-auto pt-3">
+              <span className={buttonVariants({ className: 'w-full' })}>{t('start')}</span>
+            </span>
           </Link>
         </li>
       ))}

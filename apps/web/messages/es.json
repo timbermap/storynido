@@ -377,7 +377,6 @@
     "myStories": {
       "title": "Mis cuentos",
       "loading": "Cargando tus cuentos…",
-      "new": "Nuevo",
       "newTitle": "¿Qué quieres crear?",
       "newOptions": {
         "families": {
@@ -393,10 +392,6 @@
           "text": "Cuentos por niño, con alias y objetivos de tu trabajo."
         }
       },
-      "emptyTitle": "Todavía no has creado ningún cuento",
-      "emptyText": "Empieza con su nombre y una historia: la vista previa es gratis.",
-      "emptyCta": "Crear su primer cuento",
-      "browse": "Ver historias",
       "resume": "Sigue donde lo dejaste",
       "storyOf": "El cuento de {name}",
       "untitled": "Cuento sin terminar",
@@ -404,7 +399,8 @@
       "inProgress": "En proceso",
       "filter": "Filtrar por línea",
       "all": "Todos",
-      "loadFailed": "No pudimos cargar tus cuentos en proceso. Recarga la página para intentarlo de nuevo."
+      "loadFailed": "No pudimos cargar tus cuentos en proceso. Recarga la página para intentarlo de nuevo.",
+      "start": "Comenzar"
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },
