@@ -765,8 +765,6 @@
       "typeLegend": "What kind of book?",
       "lengthLegend": "Length",
       "pages": "{count} pages",
-      "digitalOnly": "Digital only",
-      "digitalOrPrint": "Digital or print",
       "adjust": "Adjust the reading",
       "suggested": "Suggested for {age, plural, one {# year} other {# years}}: {density} · {level}",
       "densityLegend": "Amount of text",
@@ -835,8 +833,11 @@
           "text": "Richer vocabulary and a plot with twists."
         }
       },
-      "priceDigital": "Digital {price}",
-      "pricePrinted": "Printed from {price}"
+      "priceDigital": "Ebook {price}",
+      "pricePrinted": "Printed from {price}",
+      "chipEbook": "Ebook",
+      "chipPrint": "Printed book",
+      "chipBooklet": "Stapled storybook"
     },
     "feedback": {
       "title": "What would you improve in this sample?",

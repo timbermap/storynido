@@ -1782,3 +1782,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-30.
 - En Mis cuentos desaparecen el aviso "Todavía no has creado ningún cuento" (con sus botones) y el botón "Nuevo": quien no tiene borradores ve directamente "¿Qué te gustaría crear?". Se borran los textos que ya no se usan.
 - Las tarjetas de Familias, Celebraciones y Profesionales (Mis cuentos y la página de nuevo cuento) llevan el botón "Comenzar" al pie (es: Comenzar, en: Get started, pt: Começar). La tarjeta entera sigue siendo el enlace.
+
+## 143 · Tarjetas de extensión del creador más claras
+
+- **Fecha:** 2026-10-30.
+- Las tarjetas "Mini / Corto / Clásico / Gran aventura" ya no dicen "Solo digital" (Mini y Corto ahora se imprimen como cuento grapado). Cada una muestra dos etiquetas que no se parten: "Ebook" y, si se imprime, "Cuento grapado" (libros cortos) o "Libro físico" (largos).
+- Las etiquetas se alinean abajo de todas las tarjetas (misma altura), el título y el texto tienen interlineado más ajustado y los precios van separados por una línea: "Ebook USD …" y "Impreso desde USD …".

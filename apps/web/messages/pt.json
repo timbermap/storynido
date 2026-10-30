@@ -765,8 +765,6 @@
       "typeLegend": "Que tipo de livro?",
       "lengthLegend": "Extensão",
       "pages": "{count} páginas",
-      "digitalOnly": "Só digital",
-      "digitalOrPrint": "Digital ou impresso",
       "adjust": "Ajustar a leitura",
       "suggested": "Sugerido para {age, plural, one {# ano} other {# anos}}: {density} · {level}",
       "densityLegend": "Quantidade de texto",
@@ -835,8 +833,11 @@
           "text": "Vocabulário mais rico e uma trama com reviravoltas."
         }
       },
-      "priceDigital": "Digital {price}",
-      "pricePrinted": "Impresso a partir de {price}"
+      "priceDigital": "Ebook {price}",
+      "pricePrinted": "Impresso a partir de {price}",
+      "chipEbook": "Ebook",
+      "chipPrint": "Livro físico",
+      "chipBooklet": "Livro grampeado"
     },
     "feedback": {
       "title": "O que você melhoraria nesta prévia?",

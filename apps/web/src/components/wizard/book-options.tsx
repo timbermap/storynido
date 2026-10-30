@@ -162,7 +162,12 @@ export function BookOptions({
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {lengths.map((length) => {
             const config = editorial.lengths[length];
-            const printable = config.formats.some((format) => format !== 'digital');
+            const printed = config.formats.filter((format) => format !== 'digital');
+            const printable = printed.length > 0;
+            // Los libros cortos se imprimen como cuento grapado; los largos, como libro físico.
+            const printLabel = printed.every((format) => format === 'booklet')
+              ? t('chipBooklet')
+              : t('chipPrint');
             return (
               <OptionCard
                 key={length}
@@ -173,27 +178,31 @@ export function BookOptions({
                   set({ length: selected as BookLength });
                 }}
               >
-                <span className="grid gap-1 p-4 pr-10">
-                  <span className="font-display text-lg font-semibold">
+                <span className="flex flex-1 flex-col gap-1.5 p-4 pr-11">
+                  <span className="font-display text-lg leading-tight font-semibold">
                     {t(`lengths.${length}.name`)}
                   </span>
                   <span className="text-sm font-bold text-primary">
                     {t('pages', { count: config.interiorPages })}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-sm leading-snug text-muted-foreground">
                     {t(`lengths.${length}.text`)}
                   </span>
-                  <span className="mt-1 w-fit rounded-full bg-secondary px-2 py-0.5 text-xs font-bold">
-                    {printable ? t('digitalOrPrint') : t('digitalOnly')}
+                  <span className="mt-auto flex flex-wrap gap-1.5 pt-2">
+                    <span className="rounded-full bg-secondary px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
+                      {t('chipEbook')}
+                    </span>
+                    {printable && (
+                      <span className="rounded-full bg-accent px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
+                        {printLabel}
+                      </span>
+                    )}
                   </span>
                   {prices?.digitalMinor != null && (
-                    <span className="text-xs font-semibold tabular-nums">
-                      {t('priceDigital', { price: money(prices.digitalMinor) })}
+                    <span className="grid gap-0.5 border-t pt-2 text-xs font-semibold tabular-nums">
+                      <span>{t('priceDigital', { price: money(prices.digitalMinor) })}</span>
                       {printable && prices.printedFromMinor != null && (
-                        <>
-                          <br />
-                          {t('pricePrinted', { price: money(prices.printedFromMinor) })}
-                        </>
+                        <span>{t('pricePrinted', { price: money(prices.printedFromMinor) })}</span>
                       )}
                     </span>
                   )}

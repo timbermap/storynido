@@ -765,8 +765,6 @@
       "typeLegend": "¿Qué tipo de libro?",
       "lengthLegend": "Extensión",
       "pages": "{count} páginas",
-      "digitalOnly": "Solo digital",
-      "digitalOrPrint": "Digital o impreso",
       "adjust": "Ajustar la lectura",
       "suggested": "Sugerido para {age, plural, one {# año} other {# años}}: {density} · {level}",
       "densityLegend": "Cantidad de texto",
@@ -835,8 +833,11 @@
           "text": "Vocabulario más rico y una trama con giros."
         }
       },
-      "priceDigital": "Digital {price}",
-      "pricePrinted": "Impreso desde {price}"
+      "priceDigital": "Ebook {price}",
+      "pricePrinted": "Impreso desde {price}",
+      "chipEbook": "Ebook",
+      "chipPrint": "Libro físico",
+      "chipBooklet": "Cuento grapado"
     },
     "feedback": {
       "title": "¿Qué mejorarías de esta muestra?",
