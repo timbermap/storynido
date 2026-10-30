@@ -74,11 +74,25 @@ function ageDirection(age: number): string {
 const STYLE_MEDIUM: Record<string, string> = {
   'cartoon-3d':
     'polished 3D animated feature film look: stylized rounded characters, soft global illumination, gentle subsurface skin, smooth materials and cinematic depth of field (not a flat drawing, not watercolor)',
+  // Direcciones de ilustración (DECISIONS 141): técnicas humanas y reconocibles, no "IA genérica".
   'lapices-de-colores':
-    'hand-drawn colored pencil illustration with visible pencil strokes and natural paper grain',
+    'hand-drawn colored pencil illustration: imperfect human lines, visible pencil strokes, natural paper grain and deliberately incomplete coloring that lets the paper show through; vary pressure and hatching from page to page',
   'cuento-clasico':
-    'classic storybook illustration with fine ink lines and gouache, warm vintage feel',
+    'classic narrative editorial illustration: ink line and opaque paint with moderate texture, believable gestures and storytelling scenography, warm vintage feel',
+  'collage-papel':
+    'cut-paper collage in the spirit of hand-made picture books: clean cut-out contours, layered sheets of painted and textured paper, visible paper fibers and very subtle shadows between layers; faces keep enough detail to resemble the child',
+  'minimalismo-grafico':
+    'contemporary graphic minimalism: expressive silhouettes, simple flat backgrounds, a limited palette of a few colors and a clear composition that reads well even as a small thumbnail; faces stay distinctive and true to the photo',
+  'gouache-editorial':
+    'traditional editorial gouache: matte pigment, irregular brush strokes, opaque layers and a controlled palette; faces slightly angular and individual, never overly round',
 };
+
+/**
+ * Reglas para que no se note que es IA (DECISIONS 141): valen para todos los estilos. El 3D conserva
+ * su acabado, pero no sus tics (sonrisas calcadas, brillos).
+ */
+const HUMAN_CRAFT =
+  "Human craft: every face is unique and resembles the reference photo (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions, palette and clothing identical across pages.";
 const DEFAULT_MEDIUM =
   'hand-painted digital gouache with subtle watercolor diffusion and natural paper texture';
 
@@ -103,7 +117,11 @@ export function artDirection(input: {
     `Art direction: premium children's picture book, ${medium}, as if one artist made the whole book.`,
     color,
     ageDirection(input.age),
+    HUMAN_CRAFT,
+    threeD ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, any text, title, letters or signs in the image, clothing that changes between pages, and any change of style between pages.`,
-  ].join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ');
 }

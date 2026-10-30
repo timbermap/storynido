@@ -1766,3 +1766,13 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Resolución:** la portada de un kit digital es de pantalla (1K): si no llega a 150 dpi en 5×7", la maquetación se frena para revisión.
 - **Mails y estados:** el pedido usa el pipeline y los estados de un impreso; el mail de pago dice "tarjetas impresas". El pedido no ofrece descarga ni recompra.
 - **Pendiente:** muestra física de las tarjetas y un pedido borrador en Gelato que confirme que acepta el PDF de 2 páginas; test de API con emuladores del pedido de tarjetas.
+
+## 141 · Direcciones de ilustración y orden de Mis cuentos
+
+- **Fecha:** 2026-10-30.
+- **Documento "5 direcciones de ilustración"** (reducir la apariencia "generada por IA"). Se aplica así:
+  - **Estilos nuevos** en el catálogo: Collage de papel, Minimalismo gráfico y Gouache editorial (sin imagen de muestra hasta tener las miniaturas; el admin los puede apagar). Con Lápices de colores (trazo visible, grano de papel, coloreado incompleto a propósito) son los tres de la prueba A/B que propone el documento: collage contra lápiz contra minimalismo.
+  - **Estilos actuales retocados:** Cuento clásico pasa a "editorial narrativa clásica" (tinta y pintura opaca con textura moderada) y Lápices de colores a líneas imperfectas con coloreado incompleto. Acuarela y Cartoon 3D se mantienen.
+  - **Reglas "no IA" en todos los prompts de imagen** (`artDirection`): rostros únicos y parecidos a la foto (ojos de tamaño natural, expresiones variadas, nunca sonrisas idénticas); trazo y textura con intención, no un filtro uniforme; sin destellos, halos, degradados cinematográficos ni luces mágicas; mismas proporciones, paleta y ropa entre páginas; en los estilos no 3D, piel con variación natural (nada de aerógrafo). El Cartoon 3D conserva su acabado y recibe las mismas reglas, salvo la de piel.
+- **Pendiente:** probar los estilos nuevos con muestras reales (costo de IA: avisar antes), cargar las miniaturas y decidir el estilo de la prueba A/B; testear portada, doble página y miniatura móvil, como pide el documento. Las imágenes del PDF son pruebas conceptuales: conviene revisión de un ilustrador antes de fijar un estilo.
+- **Mis cuentos:** "Mis pedidos" va debajo de "¿Qué te gustaría crear?" (antes arriba).

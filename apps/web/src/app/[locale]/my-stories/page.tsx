@@ -21,7 +21,7 @@ import { AnchorLink } from '@/components/anchor-link';
 
 /**
  * Mis cuentos: la home de quien tiene sesión (auditoría UX, DECISIONS 110). Lo que creó en cada
- * línea para retomar o borrar, sus pedidos y "Nuevo" con las tres líneas. Los ajustes quedan en
+ * línea para retomar o borrar, "Nuevo" con las tres líneas y sus pedidos. Los ajustes quedan en
  * Mi cuenta.
  */
 export default function MyStoriesPage() {
@@ -150,14 +150,14 @@ export default function MyStoriesPage() {
       )}
 
       {pro?.accountType === 'professional' && <ProPanel uid={user.uid} status={pro} />}
-      <OrdersList uid={user.uid} />
-
       <section id="new" aria-labelledby="new-title" className="grid scroll-mt-28 gap-4">
         <h2 id="new-title" className="text-2xl font-medium">
           {t('newTitle')}
         </h2>
         <NewChoice />
       </section>
+
+      <OrdersList uid={user.uid} />
     </section>
   );
 }

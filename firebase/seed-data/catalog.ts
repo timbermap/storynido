@@ -723,7 +723,8 @@ export const SEED_STYLES: SeedStyle[] = [
     active: true,
     order: 3,
     name: { es: 'Cuento clásico', en: 'Classic storybook', pt: 'Conto clássico' },
-    promptModifier: 'classic storybook illustration, ink lines and gouache, warm vintage tones',
+    promptModifier:
+      'classic narrative editorial illustration, ink line and opaque paint with moderate texture, believable gestures, warm vintage tones',
     sampleImage: '/styles/cuento-clasico.webp',
     contentTypes: ['story', 'activities', 'story_activities'],
   },
@@ -732,15 +733,48 @@ export const SEED_STYLES: SeedStyle[] = [
     active: true,
     order: 4,
     name: { es: 'Lápices de colores', en: 'Colored pencils', pt: 'Lápis de cor' },
-    promptModifier: 'colored pencil drawing, hand-drawn texture, cheerful and simple',
+    promptModifier:
+      'colored pencil drawing, imperfect human lines, visible strokes, paper grain and deliberately incomplete coloring',
     sampleImage: '/styles/lapices-de-colores.webp',
+    contentTypes: ['story', 'activities', 'story_activities'],
+  },
+  // Tres direcciones nuevas para probar contra las actuales (DECISIONS 141). Sin imagen de muestra
+  // hasta tener las miniaturas; el admin las puede apagar.
+  {
+    slug: 'collage-papel',
+    active: true,
+    order: 5,
+    name: { es: 'Collage de papel', en: 'Paper collage', pt: 'Colagem de papel' },
+    promptModifier:
+      'cut-paper collage: clean cut-out contours, layered textured paper, visible paper fibers, very subtle shadows between layers, faces detailed enough to resemble the child',
+    sampleImage: null,
+    contentTypes: ['story', 'activities', 'story_activities'],
+  },
+  {
+    slug: 'minimalismo-grafico',
+    active: true,
+    order: 6,
+    name: { es: 'Minimalismo gráfico', en: 'Graphic minimalism', pt: 'Minimalismo gráfico' },
+    promptModifier:
+      'contemporary graphic minimalism: expressive silhouettes, simple backgrounds, a few colors, clear composition that reads as a thumbnail, distinctive faces true to the photo',
+    sampleImage: null,
+    contentTypes: ['story', 'activities', 'story_activities'],
+  },
+  {
+    slug: 'gouache-editorial',
+    active: true,
+    order: 7,
+    name: { es: 'Gouache editorial', en: 'Editorial gouache', pt: 'Guache editorial' },
+    promptModifier:
+      'traditional editorial gouache: matte pigment, irregular brush strokes, opaque layers, controlled palette, individual slightly angular faces',
+    sampleImage: null,
     contentTypes: ['story', 'activities', 'story_activities'],
   },
   {
     // Solo para libros para colorear: contornos limpios, no una acuarela pasada a blanco y negro.
     slug: 'para-colorear',
     active: true,
-    order: 5,
+    order: 8,
     name: { es: 'Para colorear', en: 'Coloring', pt: 'Para colorir' },
     promptModifier:
       'black and white coloring book line art for children, clean bold uniform outlines, no shading, no gray, no color fills, large simple shapes with wide areas to color, plain white background',
