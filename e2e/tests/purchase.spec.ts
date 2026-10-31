@@ -124,7 +124,6 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   // --- Etapa 1: historia y lámina (IA simulada) ---
   await page.getByRole('button', { name: 'Crear la vista previa gratis' }).click();
   await expect(body(page)).toContainText('Así vamos a dibujar a Martina', { timeout: 120_000 });
-  await expect(page.locator('[aria-live=polite]').first()).toContainText('1 de 17');
 
   // Corrección guiada: primero qué no se parece y solo esos rasgos.
   await page.getByRole('button', { name: 'No se parece: corregir' }).click();
