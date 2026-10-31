@@ -37,11 +37,16 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
 
   // Se filtra por el rango completo: una historia aplica si se superpone con el rango elegido.
   // El catálogo es la tienda de Familias, con sus colecciones.
-  const [stories, offer, allCollections] = await Promise.all([
+  const [allStories, offer, allCollections] = await Promise.all([
     getStories(locale, undefined, channel ? { channel } : {}),
     getOffer(display.country, locale),
     getCollections(locale, channel ?? 'families').catch(() => []),
   ]);
+  // Cada catálogo muestra las historias cuya casa principal es esa línea (la primera de `channels`);
+  // las que viven en dos líneas aparecen en la otra solo por búsqueda y enseñanzas (DECISIONS 150).
+  const stories = channel
+    ? allStories.filter((story) => story.channels[0] === channel)
+    : allStories;
   // Solo las colecciones con alguna historia disponible.
   const collections = allCollections.filter((item) =>
     stories.some((story) => story.collectionIds.includes(item.slug)),
