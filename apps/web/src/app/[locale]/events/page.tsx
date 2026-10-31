@@ -15,7 +15,7 @@ import {
   ctaClass,
 } from '@/components/landing/sections';
 import { PhotoPromise } from '@/components/landing/photo-promise';
-import { Link } from '@/i18n/navigation';
+import { AuthLink } from '@/components/auth/auth-link';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
 import { formatPrice } from '@/lib/format';
@@ -69,9 +69,12 @@ export default async function EventsPage({ params }: Props) {
       )
     : null;
   const cta = (
-    <Link href={{ pathname: '/create', query: { line: 'events' } }} className={ctaClass}>
-      {t('cta')}
-    </Link>
+    <AuthLink
+      href={{ pathname: '/create', query: { line: 'events' } }}
+      guest={t('cta')}
+      member={t('cta')}
+      className={ctaClass}
+    />
   );
   const keys = ['1', '2', '3', '4'] as const;
 

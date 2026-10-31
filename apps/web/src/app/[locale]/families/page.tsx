@@ -15,6 +15,7 @@ import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { StoryCard } from '@/components/stories/story-card';
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { buttonVariants } from '@/components/ui/button';
+import { AuthLink } from '@/components/auth/auth-link';
 import { Link } from '@/i18n/navigation';
 import { CONTACT_ID } from '@/components/home/contact-form';
 import { brand } from '@/lib/brand';
@@ -37,6 +38,12 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
     getOffer(display.country, locale),
     getContent('faq', locale).catch(() => null),
   ]);
+  const heroCta = (
+    <>
+      {t('hero.cta')}
+      <ArrowRight aria-hidden="true" />
+    </>
+  );
   const fromPrice = lowestPrice(offer, locale, display.country);
   const highlights = offerHighlights(offer, locale, display.country);
   // Solo las destacadas: todas las preguntas y el contacto están en /faq.
@@ -84,16 +91,15 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
               {t('hero.lead')}
             </p>
             <div className="mt-9 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
-              <Link
+              <AuthLink
                 href="/create"
+                guest={heroCta}
+                member={heroCta}
                 className={buttonVariants({
                   size: 'lg',
                   className: 'h-14 w-full rounded-full px-8 text-lg sm:w-auto',
                 })}
-              >
-                {t('hero.cta')}
-                <ArrowRight aria-hidden="true" />
-              </Link>
+              />
             </div>
             <p className="mt-4 text-sm text-muted-foreground">{t('hero.photoNote')}</p>
             {highlights && (
@@ -295,16 +301,15 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
             <h2 className="text-2xl font-medium">{t('guarantee.title')}</h2>
             <p className="mt-2 text-muted-foreground">{t('guarantee.text')}</p>
           </div>
-          <Link
+          <AuthLink
             href="/create"
+            guest={heroCta}
+            member={heroCta}
             className={buttonVariants({
               size: 'lg',
               className: 'h-14 w-full shrink-0 rounded-full px-8 text-lg sm:ml-auto sm:w-auto',
             })}
-          >
-            {t('hero.cta')}
-            <ArrowRight aria-hidden="true" />
-          </Link>
+          />
         </div>
       </section>
 
@@ -324,12 +329,12 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
           <p className="relative mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
             {t('cta.text')}
           </p>
-          <Link
+          <AuthLink
             href="/create"
+            guest={t('cta.button')}
+            member={t('cta.button')}
             className={buttonVariants({ size: 'lg', className: 'relative mt-8' })}
-          >
-            {t('cta.button')}
-          </Link>
+          />
         </div>
       </section>
       {/* Datos para buscadores (schema.org), después del contenido visible. */}

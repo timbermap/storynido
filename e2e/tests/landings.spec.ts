@@ -66,7 +66,8 @@ for (const [locale, pages] of Object.entries(PAGES)) {
           .locator(
             line
               ? `a[href*="line=${line}"]:visible`
-              : 'a[href*="/cre"]:visible, a[href*="/criar"]:visible',
+              : // Sin sesión, el botón de Familias lleva al login (y de ahí a Mis cuentos).
+                'main a[href$="/ingresar"]:visible, main a[href$="/login"]:visible, main a[href$="/entrar"]:visible',
           )
           .last();
         await expect(create).toBeVisible();
@@ -86,7 +87,11 @@ for (const [locale, pages] of Object.entries(PAGES)) {
       }
       await page.goto(pages.families);
       await expect(
-        page.locator('a[href*="/cre"]:visible, a[href*="/criar"]:visible').first(),
+        page
+          .locator(
+            'main a[href$="/ingresar"]:visible, main a[href$="/login"]:visible, main a[href$="/entrar"]:visible',
+          )
+          .first(),
       ).toBeVisible();
     });
   });

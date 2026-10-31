@@ -8,6 +8,7 @@ import { HeroArt } from '@/components/home/hero-art';
 import { HeroBook } from '@/components/home/hero-book';
 import { FaqList, type FaqItem } from '@/components/home/faq-list';
 import { buttonVariants } from '@/components/ui/button';
+import { AuthLink } from '@/components/auth/auth-link';
 import { Link } from '@/i18n/navigation';
 
 /** Secciones compartidas por las landings de cada línea (misma estética que la home). */
@@ -201,6 +202,12 @@ export function LandingCollections({
       <ul className="mt-10 grid gap-6 sm:grid-cols-2">
         {collections.map((collection) => {
           const own = stories.filter((story) => story.collectionIds.includes(collection.slug));
+          const startLabel = start ? (
+            <>
+              {start.label}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </>
+          ) : null;
           return (
             <li
               key={collection.slug}
@@ -221,7 +228,7 @@ export function LandingCollections({
                 </ul>
               )}
               {start && line && (start.mode === 'theme' || own[0]) && (
-                <Link
+                <AuthLink
                   href={{
                     pathname: '/create',
                     query:
@@ -231,11 +238,10 @@ export function LandingCollections({
                   }}
                   data-track="collection_start"
                   data-track-line={line}
+                  guest={startLabel}
+                  member={startLabel}
                   className="mt-5 inline-flex min-h-11 items-center gap-2 font-semibold text-primary underline-offset-4 hover:underline"
-                >
-                  {start.label}
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
+                />
               )}
               {own.length > 0 && (
                 <ul className="mt-5 flex flex-wrap gap-3">

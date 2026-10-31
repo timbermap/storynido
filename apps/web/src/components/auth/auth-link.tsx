@@ -16,15 +16,18 @@ export function AuthLink({
   guest,
   member,
   className,
+  ...rest
 }: {
   href: ComponentProps<typeof Link>['href'];
   guest: ReactNode;
   member: ReactNode;
   className?: string;
+  'data-track'?: string;
+  'data-track-line'?: string;
 }) {
   const { signedIn } = useAuth();
   return (
-    <Link href={signedIn ? href : '/login'} className={className}>
+    <Link href={signedIn ? href : '/login'} className={className} {...rest}>
       {signedIn ? member : guest}
     </Link>
   );

@@ -1801,3 +1801,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-30.
 - Los dos botones "Empezar mi cuento" de la home (el del hero y el de "Mira antes de comprar") usan `StartStoryLink`: sin sesión llevan al login y de ahí a Mis cuentos; con sesión bajan a "¿Para quién es?", como antes (DECISIONS 135 y 144).
 - Los tests del logo y de "¿Para quién es?" ya no usan ese botón para bajar (ahora van al login): bajan con scroll directo. Nuevo test: sin sesión, el botón lleva al login.
+
+## 146 · Familias y Celebraciones también van al login
+
+- **Fecha:** 2026-10-30.
+- Los botones de crear de Familias (el del inicio, el de "Mira antes de comprar" y el del cierre), el de Celebraciones y los "armar con este tema" de las colecciones usan `AuthLink`: sin sesión llevan al login y de ahí a Mis cuentos; con sesión siguen al creador (DECISIONS 144). Con esto ningún botón de crear manda a una persona sin cuenta directo al formulario.
+- Los tests de las landings comprueban que el botón de Familias lleva al login.
