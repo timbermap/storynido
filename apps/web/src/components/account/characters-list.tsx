@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { listChildren, updateChildProfile, type ChildSummary } from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
+import { clearStepDrafts } from '@/lib/use-step-draft';
 
 const PAGE_SIZE = 5;
 const field = 'h-11 rounded-xl border bg-card px-3';
@@ -63,6 +64,8 @@ export function CharactersList({ uid, onDeleted }: { uid: string; onDeleted?: ()
     try {
       const result = await api('deleteChild', { params: { childId: child.id } });
       setChildren((current) => current?.filter((item) => item.id !== child.id) ?? null);
+      // Los borradores del chico se borraron en el servidor: lo que quedó escrito acá también.
+      clearStepDrafts();
       setMessage({
         text:
           result.keptOrderedBooks > 0

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 
 const PREFIX = 'storynido:draft:';
-const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+// Alcanza para salir a buscar una foto y volver; pasado ese rato una creación nueva empieza vacía.
+const MAX_AGE_MS = 30 * 60 * 1000;
 
 interface Stored<T> {
   at: number;
@@ -13,7 +14,7 @@ interface Stored<T> {
 /**
  * Protege lo que se está escribiendo en un paso del creador: se guarda en este dispositivo
  * mientras se escribe y se recupera si la app se cierra antes de "Siguiente" (por ejemplo, al
- * salir a buscar una foto en el celular). Se borra al guardar el paso y vence a los 7 días.
+ * salir a buscar una foto en el celular). Se borra al guardar el paso y vence a los 30 minutos.
  */
 export function useStepDraft<T>(
   bookId: string,
@@ -59,4 +60,16 @@ export function useStepDraft<T>(
       // Nada que limpiar.
     }
   }, [key]);
+}
+
+/** Borra lo guardado en este dispositivo de un borrador (o de todos): al borrarlo en la nube, o al reutilizarlo para algo nuevo. */
+export function clearStepDrafts(bookId?: string): void {
+  try {
+    const prefix = bookId ? `${PREFIX}${bookId}:` : PREFIX;
+    for (const key of Object.keys(window.localStorage)) {
+      if (key.startsWith(prefix)) window.localStorage.removeItem(key);
+    }
+  } catch {
+    // Sin storage: nada que limpiar.
+  }
 }

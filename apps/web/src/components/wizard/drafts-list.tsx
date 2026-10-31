@@ -8,6 +8,7 @@ import { Pager } from '@/components/pager';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { clearStepDrafts } from '@/lib/use-step-draft';
 import type { DraftSummary } from '@/lib/firebase/drafts';
 import { cn } from '@/lib/utils';
 
@@ -46,6 +47,7 @@ export function DraftsList({
     setFailed(null);
     try {
       await api('deleteDraft', { params: { bookId: id } });
+      clearStepDrafts(id);
       onDeleted(id);
     } catch {
       setFailed(id);

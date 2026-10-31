@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { listChildren, type ChildSummary } from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
+import { clearStepDrafts } from '@/lib/use-step-draft';
 
 /** Perfiles de los chicos y el borrado de sus datos (fotos y borradores) a pedido. */
 export function ChildrenList({ uid }: { uid: string }) {
@@ -30,6 +31,7 @@ export function ChildrenList({ uid }: { uid: string }) {
     try {
       const result = await api('deleteChild', { params: { childId: child.id } });
       setChildren((current) => current.filter((item) => item.id !== child.id));
+      clearStepDrafts();
       setMessage({
         text:
           result.keptOrderedBooks > 0

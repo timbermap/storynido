@@ -11,6 +11,7 @@ import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import type { WizardCatalog } from '@/lib/server/wizard-catalog';
 import { isEmptyDraft, listDrafts, updateBook, type DraftSummary } from '@/lib/firebase/drafts';
+import { clearStepDrafts } from '@/lib/use-step-draft';
 
 import { CHANNEL_STORAGE_KEY } from '@/components/landing/remember-channel';
 import { ProActivationCard } from '@/components/pro/pro-activation';
@@ -110,6 +111,8 @@ export function CreateStart({
         startNew();
         return;
       }
+      // Es una creación nueva: no hereda lo que se escribió antes en este borrador.
+      clearStepDrafts(reusable.id);
       await updateBook(db, reusable.id, {
         ...(storyId ? { storyId } : {}),
         ...(lessonId ? { lessonIds: [lessonId] } : {}),
