@@ -8,6 +8,7 @@ import type { Locale } from '@storynido/shared';
 import { HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { StoryCard } from '@/components/stories/story-card';
 import { buttonVariants } from '@/components/ui/button';
+import { AuthLink } from '@/components/auth/auth-link';
 import { Link } from '@/i18n/navigation';
 import { lowestPrice } from '@/lib/offer';
 import { localizedAlternates } from '@/lib/seo';
@@ -72,12 +73,12 @@ export default async function LessonPage({ params }: Props) {
           {lesson.headline}
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">{lesson.description}</p>
-        <Link
+        <AuthLink
           href={{ pathname: '/create', query: { lesson: lesson.slug } }}
+          guest={t('ctaGuest')}
+          member={t('cta')}
           className={buttonVariants({ size: 'lg', className: 'mt-6' })}
-        >
-          {t('cta')}
-        </Link>
+        />
       </header>
 
       <section className="mt-12" aria-labelledby="combine">
@@ -106,12 +107,12 @@ export default async function LessonPage({ params }: Props) {
           {t('finalTitle')}
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{t('finalText')}</p>
-        <Link
+        <AuthLink
           href={{ pathname: '/create', query: { lesson: lesson.slug } }}
+          guest={t('ctaGuest')}
+          member={t('ctaNow')}
           className={buttonVariants({ size: 'lg', className: 'mt-6' })}
-        >
-          {t('ctaNow')}
-        </Link>
+        />
       </section>
     </div>
   );

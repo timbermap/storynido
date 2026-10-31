@@ -120,9 +120,10 @@ test('las historias de Eventos y Profesionales vuelven a su landing y crean en s
   ] as const) {
     await page.goto(landing);
     await page.locator(`a[href*="line=${line}"][href*="/historias/"]`).first().click();
+    // Sin sesión, el botón lleva al login (y de ahí a Mis cuentos), no al formulario.
     await expect(page.getByRole('link', { name: create })).toHaveAttribute(
       'href',
-      new RegExp(`line=${line}`),
+      /\/(ingresar|login|entrar)$/,
     );
     await page.getByRole('link', { name: back }).click();
     await expect(page).toHaveURL(new RegExp(`${landing}$`));

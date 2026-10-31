@@ -1788,3 +1788,10 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-30.
 - Las tarjetas "Mini / Corto / Clásico / Gran aventura" ya no dicen "Solo digital" (Mini y Corto ahora se imprimen como cuento grapado). Cada una muestra dos etiquetas que no se parten: "Ebook" y, si se imprime, "Cuento grapado" (libros cortos) o "Libro físico" (largos).
 - Las etiquetas se alinean abajo de todas las tarjetas (misma altura), el título y el texto tienen interlineado más ajustado y los precios van separados por una línea: "Ebook USD …" y "Impreso desde USD …".
+
+## 144 · Botones de crear: sin sesión van al login y de ahí a Mis cuentos
+
+- **Fecha:** 2026-10-30.
+- Nuevo `AuthLink`: sin sesión, el botón lleva siempre al login y, una vez dentro, la persona cae en Mis cuentos (no en el formulario del cuento); con sesión sigue directo al creador con la enseñanza o historia elegida. Se aplica a los dos botones de Lecciones ("Empezar a crear…" sin sesión; "Crear un cuento con esta enseñanza" y "Comenzar ahora" con sesión), al de la ficha de cada historia ("Inicia sesión para crear" / "Inicia sesión para diseñar el kit") y al de Profesionales ("Crear un proyecto").
+- Familias y la home no cambian: ahí la vista previa gratis se puede empezar sin cuenta.
+- El test de las fichas de Celebraciones y Profesionales ahora comprueba que el botón lleva al login.

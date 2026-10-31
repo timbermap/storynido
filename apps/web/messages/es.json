@@ -438,7 +438,8 @@
     "back": "Todas las enseñanzas",
     "storyCombine": "Combínala con una enseñanza",
     "storyCombineText": "Al crear el cuento eliges qué mensaje quieres que tenga. Por ejemplo:",
-    "cta": "Crear un cuento con esta enseñanza"
+    "cta": "Crear un cuento con esta enseñanza",
+    "ctaGuest": "Empezar a crear"
   },
   "Wizard": {
     "title": "Crea su cuento",

@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
-import { SignedInLabel } from '@/components/auth/signed-in-label';
+import { AuthLink } from '@/components/auth/auth-link';
 import { JsonLd } from '@/components/json-ld';
 import { RememberChannel } from '@/components/landing/remember-channel';
 import {
@@ -51,9 +51,12 @@ export default async function ProfessionalsPage({ params }: Props) {
     getStories(locale, undefined, { channel: 'professionals' }).catch(() => []),
   ]);
   const cta = (
-    <Link href={{ pathname: '/create', query: { line: 'professionals' } }} className={ctaClass}>
-      <SignedInLabel guest={t('cta')} member={t('ctaSignedIn')} />
-    </Link>
+    <AuthLink
+      href={{ pathname: '/create', query: { line: 'professionals' } }}
+      guest={t('cta')}
+      member={t('ctaSignedIn')}
+      className={ctaClass}
+    />
   );
   // Arriba, primero los ejemplos: la cuenta se pide recién al crear.
   const heroCta = (

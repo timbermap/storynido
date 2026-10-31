@@ -12,7 +12,7 @@ import {
   type Locale,
 } from '@storynido/shared';
 
-import { SignedInLabel } from '@/components/auth/signed-in-label';
+import { AuthLink } from '@/components/auth/auth-link';
 import { JsonLd } from '@/components/json-ld';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
@@ -296,19 +296,15 @@ export default async function StoryPage({ params, searchParams }: Props) {
             </section>
           )}
 
-          <Link
+          <AuthLink
             href={{
               pathname: '/create',
               query: line ? { story: story.slug, line } : { story: story.slug },
             }}
+            guest={line === 'events' ? t('createKitGuest') : t('createGuest')}
+            member={line === 'events' ? t('createKit') : t('create')}
             className={buttonVariants({ size: 'lg' })}
-          >
-            {line === 'events' ? (
-              <SignedInLabel guest={t('createKitGuest')} member={t('createKit')} />
-            ) : (
-              <SignedInLabel guest={t('createGuest')} member={t('create')} />
-            )}
-          </Link>
+          />
         </div>
       </div>
     </article>

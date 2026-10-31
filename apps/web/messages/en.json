@@ -438,7 +438,8 @@
     "back": "All lessons",
     "storyCombine": "Combine it with a lesson",
     "storyCombineText": "When you create the story you choose the message it carries. For example:",
-    "cta": "Create a story with this lesson"
+    "cta": "Create a story with this lesson",
+    "ctaGuest": "Start creating"
   },
   "Wizard": {
     "title": "Create their story",
