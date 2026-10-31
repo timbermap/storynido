@@ -1974,3 +1974,4 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 - **Fecha:** 2026-10-31.
 - **Problema:** dos filas con estilos distintos (las edades se cortaban a la derecha en pantallas angostas; los temas eran pestañas con íconos).
 - **Decisión (opción B de la comparación):** buscador, después **«¿Para quién es?»** con las cuatro etapas como tarjetas (nombre, rango de años y cantidad) y debajo los temas como chips que se acomodan en varias líneas. Tocar la edad o el tema elegido lo quita; se retiró «Todas las edades» y «Todo» (sin filtro es el estado por defecto) y la barra fija al hacer scroll. Los conteos y el quitar con ✕ siguen igual.
+- **Orden por edad (2026-10-31):** el catálogo de Historias se muestra de **menor a mayor edad** (`ageMin`, luego `ageMax`; a igual edad, el orden del catálogo).

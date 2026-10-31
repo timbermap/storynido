@@ -67,7 +67,10 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
     (!collection || story.collectionIds.includes(collection.slug)) &&
     (skip === 'theme' || !theme || matchesTheme(story, theme.key)) &&
     (!search || matchesSearch(story, search));
-  const visible = stories.filter((story) => matches(story));
+  // De menor a mayor edad (a igual edad, el orden del catálogo).
+  const visible = stories
+    .filter((story) => matches(story))
+    .sort((a, b) => a.ageMin - b.ageMin || a.ageMax - b.ageMax);
   const ageCount = (range: { min: number; max: number }) =>
     stories.filter((story) => matches(story, 'age') && overlaps(story, range)).length;
   const themeCount = (key: string) =>
