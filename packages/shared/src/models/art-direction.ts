@@ -53,18 +53,22 @@ export const DEFAULT_PALETTE: Record<Channel, PaletteKey> = {
   professionals: 'learning',
 };
 
-/** Criterio visual por edad del lector. */
+/**
+ * Criterio visual por edad del lector (estudio de estilos, DECISIONS 158): la misma familia visual,
+ * pero con el contraste, la proporción del personaje y el lenguaje (álbum, historieta, novela
+ * gráfica) que corresponden a cada etapa.
+ */
 function ageDirection(age: number): string {
-  if (age <= 3) {
-    return 'For ages 2-3: large characters with clear expressions and strong silhouettes, simple uncluttered backgrounds, soft but visible contrast.';
+  if (age <= 2) {
+    return 'For ages 0-2: saturated, high-contrast colors (red, blue, turquoise, yellow), thick clear outlines, very simple shapes, one single element per scene on a plain background, and a large friendly face in the upper half; avoid pastels and low-contrast washes.';
   }
   if (age <= 5) {
-    return 'For ages 4-5: expressive characters, colorful environments, a touch of magic and one clear action per scene.';
+    return 'For ages 3-5: rounded proportions (head about a quarter of the body), expressive characters, textured brush work, a limited palette, the child plus one or two elements of the theme and one clear action per scene.';
   }
   if (age <= 8) {
-    return 'For ages 6-8: cinematic composition, detailed worlds, dynamic action and memorable secondary characters.';
+    return 'For ages 6-8: taller proportions (head about a fifth of the body), diagonal dynamic compositions, the child in motion, humor, comic-book touches such as motion lines and the occasional panel, and memorable secondary characters.';
   }
-  return 'For ages 9-12: dramatic compositions, rich environmental storytelling and expressive characters that do not look babyish.';
+  return 'For ages 9-12: graphic-novel language with firm ink and flat color, realistic proportions (head about a sixth of the body), cinematic framing, suspense and intrigue; nothing cute or babyish.';
 }
 
 /**

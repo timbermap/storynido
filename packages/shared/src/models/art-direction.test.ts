@@ -13,7 +13,8 @@ describe('dirección de arte de los libros', () => {
   });
 
   it('criterio por edad y lo que hay que evitar', () => {
-    expect(artDirection({ age: 2, channel: 'families' })).toContain('ages 2-3');
+    expect(artDirection({ age: 2, channel: 'families' })).toContain('ages 0-2');
+    expect(artDirection({ age: 4, channel: 'families' })).toContain('ages 3-5');
     expect(artDirection({ age: 7, channel: 'families' })).toContain('ages 6-8');
     expect(artDirection({ age: 11, channel: 'families' })).toContain('ages 9-12');
     expect(artDirection({ age: 5, channel: 'professionals' })).toContain('Avoid:');

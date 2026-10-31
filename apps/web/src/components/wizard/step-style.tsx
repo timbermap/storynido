@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
+import { recommendedStyle } from '@storynido/shared';
+
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
 
@@ -28,7 +30,11 @@ export function StepStyle({ nav, data }: { nav: StepNav; data: WizardData }) {
   const story = data.stories.find((item) => item.slug === data.book.storyId);
   const wanted =
     story?.defaultStyle ??
-    (data.book.channel === 'professionals' ? 'minimalismo-grafico' : 'gouache-editorial');
+    (story
+      ? recommendedStyle(story)
+      : data.book.channel === 'professionals'
+        ? 'minimalismo-grafico'
+        : 'gouache-editorial');
   const recommended =
     data.book.contentType !== 'coloring' && styles.some((style) => style.slug === wanted)
       ? wanted

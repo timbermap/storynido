@@ -151,13 +151,13 @@ export const productSchema = timestampsSchema.extend({
 export type Product = z.infer<typeof productSchema>;
 
 /**
- * Etapas de lectura del catálogo (estudio de catálogo, DECISIONS 149): cuatro, no rangos amplios.
+ * Etapas de lectura del catálogo (DECISIONS 149 y 158): 0–2, 3–5, 6–8 y 9–12, sin que se pisen.
  * Cada historia pertenece a la etapa que contiene el centro de su rango de edad.
  */
 export const AGE_STAGES = [
-  { key: 'babies', min: 0, max: 3 },
-  { key: 'little', min: 3, max: 6 },
-  { key: 'readers', min: 6, max: 9 },
+  { key: 'babies', min: 0, max: 2 },
+  { key: 'little', min: 3, max: 5 },
+  { key: 'readers', min: 6, max: 8 },
   { key: 'big', min: 9, max: 12 },
 ] as const;
 
@@ -169,6 +169,24 @@ export function stageOf(story: { ageMin: number; ageMax: number }): AgeStageKey 
   if (middle < 6) return 'little';
   if (middle < 9) return 'readers';
   return 'big';
+}
+
+/**
+ * Estilo recomendado por etapa y línea (estudio de estilos, DECISIONS 158): bebés con color saturado y
+ * formas simples (collage), 3–5 y 6–8 en gouache (6–8 con recursos de historieta en la dirección de arte),
+ * 9+ con tinta y color plano (cuento clásico, hasta tener el estilo de novela gráfica). Profesionales
+ * usa siempre el minimalismo gráfico.
+ */
+export function recommendedStyle(story: {
+  channels: readonly string[];
+  ageMin: number;
+  ageMax: number;
+}): string {
+  if (story.channels[0] === 'professionals') return 'minimalismo-grafico';
+  const stage = stageOf(story);
+  if (stage === 'babies') return 'collage-papel';
+  if (stage === 'big') return 'cuento-clasico';
+  return 'gouache-editorial';
 }
 
 /** Marca del nombre en los títulos del catálogo ("[Nombre] y el valle de los dinosaurios"). */

@@ -1914,3 +1914,13 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 ### 157d. Navbar de visitante: las tres líneas iguales (2026-10-31)
 
 **Familias ▾** (menta, con las etapas de lectura) · **Celebraciones** (coral) · **Profesionales** (violeta), sin «Para»; **Cómo funciona** aparte y en gris; botón corto **«Crear gratis»** (en Celebraciones «Diseñar el kit», en Profesionales «Probar gratis»). Pendiente: «por ocasión» en el desplegable de Familias (Navidad, Cumpleaños, Hermanito…) hasta que exista el filtro por ocasión.
+
+## 158 · Estudio de estilos, personajes y auditoría de flujos: lo aplicado
+
+- **Fecha:** 2026-10-31.
+- **Fuente:** el documento «StoryNido · Estilos, personajes y auditoría de flujos» (evidencia: bebés miran color saturado de alto contraste; 6–12 años piden historieta y novela gráfica; no «de chiquitos»).
+- **Etapas sin pisarse:** 0–2, 3–5, 6–8 y 9–12 (`AGE_STAGES`; rangos de las historias ajustados: selva, Te quiero siempre y Buenas noches 0–2; 3–5 las de Pequeños, superhéroe incluido; gol de campeón, abuelos y lunes al revés 6–8).
+- **Estilo recomendado por etapa** (`recommendedStyle`, usado por el seed y por el asistente): 0–2 collage de papel, 3–5 y 6–8 gouache editorial, 9–12 cuento clásico (tinta y color plano; hasta tener un estilo de novela gráfica propio) y Profesionales siempre minimalismo gráfico.
+- **Dirección de arte por edad** (`ageDirection`): bebés con colores saturados y contorno grueso (sin pasteles), 3–5 proporciones redondeadas, 6–8 energía de historieta (líneas de movimiento, humor, diagonales) y 9–12 novela gráfica, nada tierno. Aplica a las muestras y libros nuevos; los ya congelados no cambian.
+- **Asistente:** cada línea muestra solo las historias de su línea (las de Profesionales ya no aparecen en el asistente de Familias). En Mis cuentos, con un solo borrador ya no se repite arriba.
+- **No aplicado todavía (decisiones y costo aparte):** el personaje primero en los tres asistentes, perfiles «Mis chicos» separados de «Pacientes», empezar sin cuenta, el elenco de 4 chicos a 2/5/8/11 años, las portadas regeneradas por etapa (≈ USD 2–3), la línea de tiempo «tu hijo, en cada etapa», el mensaje público sobre cómo se usa la IA y la página de Pedidos.

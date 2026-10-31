@@ -95,20 +95,23 @@ export default function MyStoriesPage() {
 
       {latest ? (
         <>
-          <section aria-labelledby="resume" className="rounded-xl bg-secondary p-6">
-            <h2 id="resume" className="text-sm font-bold tracking-wide uppercase">
-              {t('resume')}
-            </h2>
-            <p className="mt-2 font-display text-xl font-semibold">
-              {latest.childName ? t('storyOf', { name: latest.childName }) : t('untitled')}
-            </p>
-            <Link
-              href={{ pathname: '/create/[bookId]', params: { bookId: latest.id } }}
-              className={cn(buttonVariants({ size: 'lg' }), 'mt-4')}
-            >
-              {t('continue')}
-            </Link>
-          </section>
+          {/* Con un solo borrador, "En proceso" ya lo muestra: no se repite arriba. */}
+          {drafts.length > 1 && (
+            <section aria-labelledby="resume" className="rounded-xl bg-secondary p-6">
+              <h2 id="resume" className="text-sm font-bold tracking-wide uppercase">
+                {t('resume')}
+              </h2>
+              <p className="mt-2 font-display text-xl font-semibold">
+                {latest.childName ? t('storyOf', { name: latest.childName }) : t('untitled')}
+              </p>
+              <Link
+                href={{ pathname: '/create/[bookId]', params: { bookId: latest.id } }}
+                className={cn(buttonVariants({ size: 'lg' }), 'mt-4')}
+              >
+                {t('continue')}
+              </Link>
+            </section>
+          )}
 
           <section id="drafts" aria-labelledby="drafts-title" className="grid scroll-mt-28 gap-4">
             <h2 id="drafts-title" className="text-2xl font-medium">

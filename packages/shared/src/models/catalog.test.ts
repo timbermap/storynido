@@ -51,3 +51,24 @@ describe('título partido alrededor del nombre', () => {
     expect(splitTitleAtName('Mi visita al dentista')).toBeNull();
   });
 });
+
+describe('recommendedStyle', () => {
+  it('sigue la etapa y la línea', async () => {
+    const { recommendedStyle } = await import('./catalog');
+    expect(recommendedStyle({ channels: ['families'], ageMin: 0, ageMax: 2 })).toBe(
+      'collage-papel',
+    );
+    expect(recommendedStyle({ channels: ['families'], ageMin: 3, ageMax: 5 })).toBe(
+      'gouache-editorial',
+    );
+    expect(recommendedStyle({ channels: ['events'], ageMin: 6, ageMax: 8 })).toBe(
+      'gouache-editorial',
+    );
+    expect(recommendedStyle({ channels: ['families'], ageMin: 9, ageMax: 12 })).toBe(
+      'cuento-clasico',
+    );
+    expect(
+      recommendedStyle({ channels: ['professionals', 'families'], ageMin: 0, ageMax: 2 }),
+    ).toBe('minimalismo-grafico');
+  });
+});

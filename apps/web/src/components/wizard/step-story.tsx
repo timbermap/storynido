@@ -32,8 +32,12 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const story = data.stories.find((item) => item.slug === selected);
 
   const fits = (min: number, max: number) => age !== undefined && min <= age && age <= max;
-  // Solo las historias de la línea del libro (si no hubiera ninguna, todas).
-  const forChannel = data.stories.filter((item) => item.channels.includes(data.book.channel));
+  // Solo las historias de la línea del libro, no las de otra línea que también la incluyen
+  // (Profesionales sí ve las que lo incluyen). Si no hubiera ninguna, todas.
+  const channel = data.book.channel;
+  const forChannel = data.stories.filter((item) =>
+    channel === 'professionals' ? item.channels.includes(channel) : item.channels[0] === channel,
+  );
   const ordered = (forChannel.length > 0 ? forChannel : data.stories).toSorted(
     (a, b) => Number(fits(b.ageMin, b.ageMax)) - Number(fits(a.ageMin, a.ageMax)),
   );
