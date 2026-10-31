@@ -68,7 +68,7 @@ import {
   SEED_STYLES,
 } from '../seed-data/catalog';
 import { SEED_COLLECTIONS } from '../seed-data/collections';
-import { SEED_LESSONS } from '../seed-data/lessons';
+import { FEATURED_STORY, SEED_LESSONS } from '../seed-data/lessons';
 import { initAdmin, isUsingEmulators } from './admin';
 
 /**
@@ -627,6 +627,7 @@ for (const lesson of SEED_LESSONS) {
     db.collection(COLLECTIONS.lessons).doc(lesson.slug),
     lessonSchema.parse({
       ...lesson,
+      ...(FEATURED_STORY[lesson.slug] ? { featuredStory: FEATURED_STORY[lesson.slug] } : {}),
       active: true,
       sensitive: false,
       createdAt: now,

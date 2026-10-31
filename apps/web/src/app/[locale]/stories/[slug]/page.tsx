@@ -25,7 +25,7 @@ import { absoluteUrl } from '@/lib/site';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
-  searchParams?: Promise<{ line?: string }>;
+  searchParams?: Promise<{ line?: string; lesson?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -56,7 +56,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function StoryPage({ params, searchParams }: Props) {
   const { locale: rawLocale, slug } = await params;
-  const requestedLine = parseChannel((await searchParams)?.line);
+  const query = await searchParams;
+  const requestedLine = parseChannel(query?.line);
   const locale = rawLocale as Locale;
 
   const display = await getDisplayCountry(locale);
@@ -71,6 +72,8 @@ export default async function StoryPage({ params, searchParams }: Props) {
     getEditorial(),
   ]);
   if (!story) notFound();
+  // Enseñanza con la que se llegó o que se tocó acá: acompaña al usuario hasta el asistente.
+  const chosenLesson = lessons.find((lesson) => lesson.slug === query?.lesson);
   // Desde Eventos o Profesionales: la ficha vuelve a esa landing y crea en esa línea.
   const line =
     requestedLine && requestedLine !== 'families' && story.channels.includes(requestedLine)
@@ -127,7 +130,11 @@ export default async function StoryPage({ params, searchParams }: Props) {
 
       <Link
         href={
-          line === 'events' ? '/events' : line === 'professionals' ? '/professionals' : '/stories'
+          line === 'events'
+            ? '/events'
+            : line === 'professionals'
+              ? '/professionals'
+              : '/families/stories'
         }
         className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
       >
@@ -206,8 +213,17 @@ export default async function StoryPage({ params, searchParams }: Props) {
                     .map((lesson) => (
                       <li key={lesson.slug}>
                         <Link
-                          href={{ pathname: '/lessons/[slug]', params: { slug: lesson.slug } }}
-                          className="inline-flex min-h-9 items-center rounded-full bg-secondary px-4 py-1.5 text-sm font-bold text-primary hover:underline"
+                          href={{
+                            pathname: '/stories/[slug]',
+                            params: { slug: story.slug },
+                            query: {
+                              lesson: lesson.slug,
+                              ...(line ? { line } : {}),
+                            },
+                          }}
+                          scroll={false}
+                          aria-current={chosenLesson?.slug === lesson.slug ? 'true' : undefined}
+                          className="inline-flex min-h-9 items-center rounded-full bg-secondary px-4 py-1.5 text-sm font-bold text-primary hover:underline aria-[current=true]:bg-primary aria-[current=true]:text-primary-foreground"
                         >
                           {lesson.name}
                         </Link>
@@ -301,10 +317,20 @@ export default async function StoryPage({ params, searchParams }: Props) {
             </section>
           )}
 
+          {chosenLesson && (
+            <p className="rounded-xl bg-mint px-5 py-3 text-sm font-semibold text-success">
+              {t('youWillCreate', { story: story.title, lesson: chosenLesson.name })}
+            </p>
+          )}
+
           <AuthLink
             href={{
               pathname: '/create',
-              query: line ? { story: story.slug, line } : { story: story.slug },
+              query: {
+                story: story.slug,
+                ...(line ? { line } : {}),
+                ...(chosenLesson ? { lesson: chosenLesson.slug } : {}),
+              },
             }}
             guest={line === 'events' ? t('createKitGuest') : t('createGuest')}
             member={line === 'events' ? t('createKit') : t('create')}

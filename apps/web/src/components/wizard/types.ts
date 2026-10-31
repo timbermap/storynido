@@ -25,6 +25,8 @@ export interface StepNav {
   line: Channel;
   /** Borrador todavía sin guardar: la línea se puede cambiar (vuelve a /nuevo). */
   fresh?: boolean;
+  /** Historia y enseñanza ya elegidas (se muestran arriba en todos los pasos). */
+  choice?: { story: string | null; lesson: string | null };
   saveState: SaveState;
   onBack?: () => void;
   /** Ir a un paso ya alcanzado. */

@@ -282,7 +282,9 @@
       "little": "Little ones",
       "readers": "Readers",
       "big": "Big readers"
-    }
+    },
+    "withLesson": "With: {name}",
+    "youWillCreate": "You will create: {story} + {lesson}"
   },
   "Formats": {
     "digital": "Ebook (PDF)",
@@ -476,7 +478,12 @@
     "storyCombine": "Combine it with a lesson",
     "storyCombineText": "When you create the story you choose the message it carries. For example:",
     "cta": "Create a story with this lesson",
-    "ctaGuest": "Start creating"
+    "ctaGuest": "Start creating",
+    "madeForTitle": "The story made for this moment",
+    "madeForText": "\"{story}\" was written for this; below, other adventures that pair with the same message.",
+    "indexTitle": "All the lessons",
+    "indexText": "Choose what you want them to learn: each one has its own story and pairs with the adventure they like.",
+    "indexMeta": "All the lessons: values, confidence, life moments and emotions"
   },
   "Wizard": {
     "title": "Create their story",
@@ -610,7 +617,8 @@
       "title": "Choose the adventure",
       "subtitle": "The best ones for their age come first.",
       "recommended": "Great for their age",
-      "required": "Choose an adventure to continue."
+      "required": "Choose an adventure to continue.",
+      "idealFor": "Ideal for {name}"
     },
     "lesson": {
       "title": "What do you want them to learn?",
@@ -921,7 +929,10 @@
     },
     "startFailed": "We couldn't get your story ready. Check your connection and try again.",
     "retry": "Try again",
-    "changeLine": "Change"
+    "changeLine": "Change",
+    "choiceStory": "Story: {name}",
+    "choiceLesson": "Lesson: {name}",
+    "choiceChange": "Change"
   },
   "Landing": {
     "events": {

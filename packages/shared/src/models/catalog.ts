@@ -136,6 +136,8 @@ export const lessonSchema = timestampsSchema.extend({
   promptGuidance: z.string().min(1),
   /** Temas que requieren revisión humana (pérdidas, separaciones). Fuera del lanzamiento. */
   sensitive: z.boolean(),
+  /** La historia hecha para esta enseñanza (slug): va primero y destacada en su página. */
+  featuredStory: slugSchema.optional(),
 });
 
 export type Lesson = z.infer<typeof lessonSchema>;

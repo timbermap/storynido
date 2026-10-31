@@ -198,6 +198,7 @@ export function registerCatalogRoutes(
           description: lesson.description[locale],
           ageMin: lesson.ageMin,
           ageMax: lesson.ageMax,
+          featuredStory: lesson.featuredStory ?? null,
         })),
     };
   });

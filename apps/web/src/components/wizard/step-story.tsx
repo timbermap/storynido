@@ -38,8 +38,14 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const forChannel = data.stories.filter((item) =>
     channel === 'professionals' ? item.channels.includes(channel) : item.channels[0] === channel,
   );
+  // Con una enseñanza elegida, las historias que la sugieren van primero («Ideal para…»).
+  const lesson = data.lessons.find((item) => data.book.lessonIds.includes(item.slug));
+  const forLesson = (story: PublicStory) =>
+    lesson !== undefined && (story.suggestedLessons?.includes(lesson.slug) ?? false);
   const ordered = (forChannel.length > 0 ? forChannel : data.stories).toSorted(
-    (a, b) => Number(fits(b.ageMin, b.ageMax)) - Number(fits(a.ageMin, a.ageMax)),
+    (a, b) =>
+      Number(forLesson(b)) - Number(forLesson(a)) ||
+      Number(fits(b.ageMin, b.ageMax)) - Number(fits(a.ageMin, a.ageMax)),
   );
 
   async function next() {
@@ -89,10 +95,16 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
                 <span className="text-xs font-bold text-muted-foreground">
                   {tStories('agesFor', { min: story.ageMin, max: story.ageMax })}
                 </span>
-                {fits(story.ageMin, story.ageMax) && (
+                {lesson && forLesson(story) ? (
                   <span className="w-fit rounded-full bg-mint px-2 py-0.5 text-xs font-semibold text-success">
-                    {t('recommended')}
+                    {t('idealFor', { name: lesson.name })}
                   </span>
+                ) : (
+                  fits(story.ageMin, story.ageMax) && (
+                    <span className="w-fit rounded-full bg-mint px-2 py-0.5 text-xs font-semibold text-success">
+                      {t('recommended')}
+                    </span>
+                  )
                 )}
               </span>
             </OptionCard>

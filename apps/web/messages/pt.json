@@ -282,7 +282,9 @@
       "little": "Pequenos",
       "readers": "Leitores",
       "big": "Grandes leitores"
-    }
+    },
+    "withLesson": "Com: {name}",
+    "youWillCreate": "Você vai criar: {story} + {lesson}"
   },
   "Formats": {
     "digital": "Ebook (PDF)",
@@ -476,7 +478,12 @@
     "storyCombine": "Combine com uma lição",
     "storyCombineText": "Ao criar a história, você escolhe a mensagem que ela vai ter. Por exemplo:",
     "cta": "Criar uma história com esta lição",
-    "ctaGuest": "Começar a criar"
+    "ctaGuest": "Começar a criar",
+    "madeForTitle": "A história feita para este momento",
+    "madeForText": "\"{story}\" foi escrita para isso; abaixo, outras aventuras que combinam com a mesma mensagem.",
+    "indexTitle": "Todas as lições",
+    "indexText": "Escolha o que quer que aprenda: cada uma tem sua história e combina com a aventura de que gosta.",
+    "indexMeta": "Todas as lições: valores, confiança, momentos da vida e emoções"
   },
   "Wizard": {
     "title": "Crie a história",
@@ -610,7 +617,8 @@
       "title": "Escolha a aventura",
       "subtitle": "As ideais para a idade dele aparecem primeiro.",
       "recommended": "Ideal para a idade",
-      "required": "Escolha uma aventura para continuar."
+      "required": "Escolha uma aventura para continuar.",
+      "idealFor": "Ideal para {name}"
     },
     "lesson": {
       "title": "O que você quer que ele aprenda?",
@@ -921,7 +929,10 @@
     },
     "startFailed": "Não conseguimos preparar sua história. Verifique sua conexão e tente de novo.",
     "retry": "Tentar de novo",
-    "changeLine": "Mudar"
+    "changeLine": "Mudar",
+    "choiceStory": "História: {name}",
+    "choiceLesson": "Lição: {name}",
+    "choiceChange": "Mudar"
   },
   "Landing": {
     "events": {

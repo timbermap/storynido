@@ -335,3 +335,10 @@ export const SEED_LESSONS: SeedLesson[] = [
     promptGuidance: `${BASE} Theme: managing nerves and anxiety. The hero learns a gentle calming routine (deep breaths, a comforting object, positive words) and uses it to face the challenge.`,
   },
 ];
+
+/** La historia hecha para cada enseñanza (recorrido historia → enseñanza, DECISIONS 160). */
+export const FEATURED_STORY: Record<string, string> = {
+  'llega-un-hermanito': 'hermano-mayor',
+  'dormir-solo': 'buenas-noches',
+  'primer-dia-de-clases': 'mi-primer-dia-de-clases',
+};

@@ -14,6 +14,7 @@ export async function StoryCard({
   compact = false,
   lineLabel,
   line,
+  lesson,
 }: {
   story: PublicStory;
   fromPrice: string | null;
@@ -27,12 +28,18 @@ export async function StoryCard({
   lineLabel?: string;
   /** Línea desde la que se mira la historia (Profesionales usa su propia portada si la tiene). */
   line?: string | null;
+  /** Enseñanza con la que se llegó: viaja en el link y se ve en la tarjeta («Con: …»). */
+  lesson?: { slug: string; name: string };
 }) {
   const t = await getTranslations('Stories');
   const Heading = headingLevel;
   return (
     <Link
-      href={{ pathname: '/stories/[slug]', params: { slug: story.slug } }}
+      href={{
+        pathname: '/stories/[slug]',
+        params: { slug: story.slug },
+        ...(lesson ? { query: { lesson: lesson.slug } } : {}),
+      }}
       data-track="story_opened"
       data-track-story={story.slug}
       className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)] transition duration-200 hover:-translate-y-1 motion-reduce:hover:translate-y-0"
@@ -67,6 +74,11 @@ export async function StoryCard({
             {t('agesFor', { min: story.ageMin, max: story.ageMax })}
           </span>
         </p>
+        {lesson && (
+          <p className="w-fit rounded-full bg-mint px-2.5 py-0.5 text-xs font-semibold text-success">
+            {t('withLesson', { name: lesson.name })}
+          </p>
+        )}
         {fromPrice && (
           <p className="mt-auto text-sm font-bold text-primary">
             {t('from', { price: fromPrice })}

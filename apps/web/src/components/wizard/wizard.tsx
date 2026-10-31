@@ -153,6 +153,10 @@ export function Wizard({
       reached,
       line: channel,
       fresh: savedId === null,
+      choice: {
+        story: catalog.stories.find((item) => item.slug === book?.storyId)?.title ?? null,
+        lesson: catalog.lessons.find((item) => book?.lessonIds.includes(item.slug))?.name ?? null,
+      },
       saveState,
       save,
       ensureBook,
@@ -185,7 +189,20 @@ export function Wizard({
         window.scrollTo({ top: 0 });
       },
     }),
-    [step, flow, index, reached, channel, saveState, save, ensureBook, book, savedId, router],
+    [
+      step,
+      flow,
+      index,
+      reached,
+      channel,
+      saveState,
+      save,
+      ensureBook,
+      book,
+      savedId,
+      router,
+      catalog,
+    ],
   );
 
   if (!loading && !user) return <SignInGate />;

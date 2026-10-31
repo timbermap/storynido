@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 
 import type { Locale } from '@storynido/shared';
 
-import { HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { StoryCard } from '@/components/stories/story-card';
 import { buttonVariants } from '@/components/ui/button';
 import { AuthLink } from '@/components/auth/auth-link';
@@ -47,16 +46,38 @@ export default async function LessonPage({ params }: Props) {
   ]);
   if (!lesson) notFound();
 
-  // Aventuras cuya edad se superpone con la de la enseñanza.
-  const matching = stories.filter(
-    (story) => story.ageMin <= lesson.ageMax && story.ageMax >= lesson.ageMin,
-  );
+  // Solo historias de Familias que sugieren esta enseñanza y cuya edad se cruza con la suya; la hecha
+  // para ella va primero y destacada, y después las que la tienen en primer lugar de su lista.
+  const overlaps = (story: (typeof stories)[number]) =>
+    story.ageMin <= lesson.ageMax && story.ageMax >= lesson.ageMin;
+  const ofFamilies = stories.filter((story) => story.channels[0] === 'families');
+  const suggested = ofFamilies
+    .filter((story) => story.suggestedLessons?.includes(lesson.slug) && overlaps(story))
+    .toSorted((a, b) => {
+      const rank = (story: (typeof stories)[number]) =>
+        story.slug === lesson.featuredStory
+          ? 0
+          : story.suggestedLessons?.[0] === lesson.slug
+            ? 1
+            : 2;
+      return rank(a) - rank(b);
+    });
+  // Si casi ninguna la sugiere, se completa con las compatibles por edad para no dejar la página vacía.
+  const fallback =
+    suggested.length >= 3
+      ? []
+      : ofFamilies.filter((story) => overlaps(story) && !suggested.includes(story)).slice(0, 4);
+  const matching = [...suggested, ...fallback];
+  const featured = lesson.featuredStory
+    ? matching.find((story) => story.slug === lesson.featuredStory)
+    : undefined;
+  const chip = { slug: lesson.slug, name: lesson.name };
   const fromPrice = lowestPrice(offer, locale, display.country);
 
   return (
     <div className="container-page py-12">
       <Link
-        href={{ pathname: '/', hash: HOW_IT_WORKS_ID }}
+        href="/lessons"
         className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
@@ -74,7 +95,10 @@ export default async function LessonPage({ params }: Props) {
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">{lesson.description}</p>
         <AuthLink
-          href={{ pathname: '/create', query: { lesson: lesson.slug } }}
+          href={{
+            pathname: '/create',
+            query: { lesson: lesson.slug, line: 'families' },
+          }}
           guest={t('ctaGuest')}
           member={t('cta')}
           className={buttonVariants({ size: 'lg', className: 'mt-6' })}
@@ -83,9 +107,11 @@ export default async function LessonPage({ params }: Props) {
 
       <section className="mt-12" aria-labelledby="combine">
         <h2 id="combine" className="text-3xl font-medium">
-          {t('combineTitle')}
+          {featured ? t('madeForTitle') : t('combineTitle')}
         </h2>
-        <p className="mt-2 max-w-2xl text-muted-foreground">{t('combineText')}</p>
+        <p className="mt-2 max-w-2xl text-muted-foreground">
+          {featured ? t('madeForText', { story: featured.title }) : t('combineText')}
+        </p>
         <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
           {matching.map((story, index) => (
             <StoryCard
@@ -95,6 +121,7 @@ export default async function LessonPage({ params }: Props) {
               headingLevel="h3"
               priority={index < 2}
               compact
+              lesson={chip}
             />
           ))}
         </div>
@@ -108,7 +135,10 @@ export default async function LessonPage({ params }: Props) {
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{t('finalText')}</p>
         <AuthLink
-          href={{ pathname: '/create', query: { lesson: lesson.slug } }}
+          href={{
+            pathname: '/create',
+            query: { lesson: lesson.slug, line: 'families' },
+          }}
           guest={t('ctaGuest')}
           member={t('ctaNow')}
           className={buttonVariants({ size: 'lg', className: 'mt-6' })}

@@ -21,6 +21,7 @@ export function WizardShell({
   reached,
   line,
   fresh,
+  choice,
   saveState,
   title,
   subtitle,
@@ -37,6 +38,7 @@ export function WizardShell({
   reached: number;
   line?: Channel;
   fresh?: boolean;
+  choice?: { story: string | null; lesson: string | null };
   saveState: SaveState;
   title: string;
   subtitle?: string;
@@ -99,6 +101,35 @@ export function WizardShell({
               {t('changeLine')}
             </Link>
           )}
+        </p>
+      )}
+      {choice && (choice.story !== null || choice.lesson !== null) && (
+        // Lo que ya se eligió viaja a todos los pasos; «Cambiar» vuelve al paso si ya se pasó por él.
+        <p className="mb-4 flex flex-wrap items-center gap-2 text-sm">
+          {choice.story && (
+            <span className="rounded-full bg-secondary px-3 py-1 font-semibold">
+              {t('choiceStory', { name: choice.story })}
+            </span>
+          )}
+          {choice.lesson && (
+            <span className="rounded-full bg-mint px-3 py-1 font-semibold text-success">
+              {t('choiceLesson', { name: choice.lesson })}
+            </span>
+          )}
+          {flow.includes('story') &&
+            flow.indexOf('story') <= reached &&
+            current !== 'story' &&
+            current !== 'lesson' && (
+              <button
+                type="button"
+                onClick={() => {
+                  onJump('story');
+                }}
+                className="inline-flex min-h-9 items-center px-2 text-xs font-semibold text-primary underline-offset-4 hover:underline"
+              >
+                {t('choiceChange')}
+              </button>
+            )}
         </p>
       )}
       <div className="flex items-center justify-between gap-4 text-sm font-bold text-muted-foreground">

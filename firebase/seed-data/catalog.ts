@@ -605,6 +605,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,
     slug: 'mi-primer-dia-de-clases',
+    suggestedLessons: ['primer-dia-de-clases', 'calma-cuando-estoy-nervioso', 'amistad'],
     objectives: [
       {
         es: 'Anticipar cómo será el primer día',

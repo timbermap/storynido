@@ -501,6 +501,8 @@ export const publicLessonSchema = z.object({
   description: z.string(),
   ageMin: z.number().int(),
   ageMax: z.number().int(),
+  /** La historia hecha para esta enseñanza (slug), si existe. */
+  featuredStory: z.string().nullable().optional(),
 });
 
 export type PublicLesson = z.infer<typeof publicLessonSchema>;
