@@ -5,7 +5,6 @@ import Image from 'next/image';
 import type { PublicStory } from '@storynido/shared';
 
 import { cn } from '@/lib/utils';
-import { useVisitorName } from '@/lib/visitor-name';
 
 type CoverStory = Pick<
   PublicStory,
@@ -61,20 +60,18 @@ export function StoryCover({
   priority = false,
   className,
   alt = '',
-  name,
 }: {
   story: CoverStory;
   alt?: string;
-  /** Nombre del niño del libro: si se conoce, reemplaza al del visitante o al del elenco. */
-  name?: string;
   /** Línea desde la que se mira (Profesionales usa su propia portada y título si la historia los tiene). */
   line?: string | null;
   sizes: string;
   priority?: boolean;
   className?: string;
 }) {
-  const stored = useVisitorName(story.castName ?? '');
-  const visitor = name?.trim() ? name.trim() : stored;
+  // Siempre el nombre del elenco: la ilustración es de ese chico, y un nombre escrito por el visitante
+  // podría no corresponder al dibujo. El nombre propio solo se ve en la demo de la landing de Familias.
+  const visitor = story.castName ?? '';
   const pro = line === 'professionals' && Boolean(story.coverImagePro);
   const src = pro && story.coverImagePro ? story.coverImagePro : story.coverImage;
   const overlay = Boolean(story.coverTitleOverlay);
