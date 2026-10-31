@@ -1910,3 +1910,7 @@ Se regeneraron con `gemini-3-pro-image` (más calidad, ≈ USD 0,17 por imagen; 
 ### 157c. Sin botón «Nuevo proyecto» en Mis cuentos (2026-10-31)
 
 El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se hace desde «¿Qué quieres crear?», que está arriba.
+
+### 157d. Navbar de visitante: las tres líneas iguales (2026-10-31)
+
+**Familias ▾** (menta, con las etapas de lectura) · **Celebraciones** (coral) · **Profesionales** (violeta), sin «Para»; **Cómo funciona** aparte y en gris; botón corto **«Crear gratis»** (en Celebraciones «Diseñar el kit», en Profesionales «Probar gratis»). Pendiente: «por ocasión» en el desplegable de Familias (Navidad, Cumpleaños, Hermanito…) hasta que exista el filtro por ocasión.

@@ -44,7 +44,19 @@ export async function SiteHeader() {
           aria-label={t('mainNav')}
           className="hidden items-center gap-1 text-[0.95rem] font-semibold text-foreground/80 lg:flex"
         >
-          <ExploreMenu id="menu-stories" label={t('storiesMenu')} onlyFamilies />
+          <ExploreMenu
+            id="menu-stories"
+            label={
+              <span className="inline-flex items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className={cn('size-2 rounded-full', AUDIENCE_TONES.families.dot)}
+                />
+                {t('storiesMenu')}
+              </span>
+            }
+            onlyFamilies
+          />
           {links.map((link) => (
             <NavLink key={link.audience} href={link.href}>
               <span
@@ -56,7 +68,7 @@ export async function SiteHeader() {
           ))}
           <Link
             href={{ pathname: '/', hash: HOW_IT_WORKS_ID }}
-            className="rounded-full px-3 py-2 whitespace-nowrap transition-colors hover:text-primary"
+            className="ml-3 rounded-full px-3 py-2 whitespace-nowrap text-muted-foreground transition-colors hover:text-primary"
           >
             {t('howItWorksShort')}
           </Link>
@@ -66,12 +78,11 @@ export async function SiteHeader() {
         <div className="flex items-center gap-1 sm:gap-2">
           <AccountLink />
           <HeaderCta
-            className="px-3 text-sm sm:px-5"
+            className="px-4 text-sm sm:px-5"
             eventsLabel={t('createKit')}
             professionalsLabel={t('tryFree')}
           >
-            <span className="sm:hidden">{t('createShort')}</span>
-            <span className="hidden sm:inline">{t('createPreview')}</span>
+            {t('createFree')}
           </HeaderCta>
           <MobileMenu>
             <nav aria-label={t('mainNav')} className="grid gap-2">
