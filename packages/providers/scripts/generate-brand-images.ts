@@ -40,6 +40,10 @@ const BG: Record<string, string> = {
   lavender: 'pale lavender',
   mustard: 'warm mustard yellow',
   cream: 'warm cream',
+  // Bebés: color saturado (estudio de estilos, DECISIONS 158).
+  yellowSat: 'saturated sunflower yellow',
+  blueSat: 'saturated deep blue',
+  turquoise: 'saturated turquoise',
 };
 
 // --- Elenco (archivo 01) ------------------------------------------------------------------------
@@ -52,6 +56,21 @@ const CAST = {
   sofi: 'Sofi, 7 (long black braids, medium-brown skin, mint dress)',
   alex: 'Alex, 10 (short wavy black hair, light-brown skin, green hoodie)',
 };
+// El mismo chico a distintas edades (DECISIONS 158): mismos rasgos, proporción y ropa según la edad.
+const KID = {
+  tomas:
+    'curly brown hair, round red glasses, light skin with rosy cheeks, blue-and-white striped sweater, green trousers',
+  martina: 'straight dark-brown bob with bangs, freckles, olive skin, coral sweater',
+  benja: 'short black coily hair, warm dark-brown skin, mustard t-shirt, red sneakers',
+  sofi: 'long black braids, medium-brown skin, mint dress',
+};
+const KID_NAME = { tomas: 'Tomás', martina: 'Martina', benja: 'Benja', sofi: 'Sofi' };
+const at = (name: keyof typeof KID, age: number) =>
+  `${KID_NAME[name]}, ${String(age)} (${KID[name]})`;
+// Por etapa: bebés saturado y simple, 6–8 historieta, 9+ novela gráfica.
+const BABY = `Flat gouache or cut-paper picture-book illustration for babies. Saturated high-contrast colors (red, blue, turquoise, sunflower yellow), NO pastels, thick clear outlines, very simple shapes, a single main element on a plain saturated background, a large friendly face in the upper half. Toddler proportions (big head, short limbs). Matte opaque paint, slight hand-made texture.`;
+const READER = `Gouache editorial children's illustration with comic-book energy. Opaque matte paint with visible brush texture, limited palette of navy, coral, mustard, mint. Taller proportions (head about one fifth of the body), diagonal dynamic composition, the child in motion, humor, hand-drawn motion lines, no text or lettering of any kind. Expressive faces with character.`;
+const NOVEL = `Graphic-novel illustration for pre-teen readers. Firm black ink linework with flat color fills, deep navy and terracotta palette, realistic proportions (head about one sixth of the body), cinematic low-angle framing, suspense and intrigue. Nothing cute, nothing babyish, no rounded cartoon face.`;
 const GENERIC = 'a child with short neutral brown hair and a plain t-shirt';
 
 interface Job {
@@ -202,21 +221,21 @@ const JOBS: Job[] = [
   // ---- Portadas Familias (Gouache editorial; archivo 03) --------------------------------------
   cover(
     'te-quiero-siempre',
-    GOUACHE,
-    'coral',
-    `${CAST.lola} hugs the neck of a parent seen from behind (only shoulders, arms and hair visible), her cheek pressed on the parent's shoulder, eyes closed, smiling. Three small flat hearts.`,
+    BABY,
+    'yellowSat',
+    `${at('martina', 2)} hugs the neck of an adult seen from behind (only shoulders, arms and hair visible), cheek on the shoulder, eyes closed, smiling. Three big flat red hearts.`,
   ),
   cover(
     'buenas-noches',
-    GOUACHE,
-    'navy',
-    `${CAST.lola.replace('yellow overalls', 'yellow pajamas')} sits in a small bed holding a soft bunny, yawning. A simple round window with a crescent moon shape and one bedside lamp with a warm circle of light (flat, no glow).`,
+    BABY,
+    'blueSat',
+    `${at('tomas', 2)} in blue pajamas yawning, holding a red bunny. One big flat yellow moon behind. No soft glow.`,
   ),
   cover(
     'amigos-de-la-selva',
-    GOUACHE,
-    'mint',
-    `${CAST.lola} sits on the grass laughing while a big-beaked toucan, a small monkey and a baby elephant look at her. Three big simple leaves. High contrast, very simple shapes for babies.`,
+    BABY,
+    'turquoise',
+    `${at('benja', 2)} laughing in front of an enormous toucan with a big orange beak. Two huge flat green leaves.`,
   ),
   cover(
     'aventura-espacial',
@@ -228,25 +247,25 @@ const JOBS: Job[] = [
     'valle-de-los-dinosaurios',
     GOUACHE,
     'mint',
-    `${CAST.benja} sits on the back of a friendly long-necked green dinosaur that turns its head to look at him. A small volcano shape far away, two big ferns.`,
+    `${at('benja', 5)} sits on the back of a friendly long-necked green dinosaur that turns its head to look at him. A small volcano shape far away, two big ferns.`,
   ),
   cover(
     'reino-encantado',
     GOUACHE,
     'lavender',
-    `${CAST.martina} wears a small mustard crown and holds a paintbrush; behind her a simple castle that is grey on the left and full of color on the right where she painted it.`,
+    `${at('martina', 5)} wears a small mustard crown and holds a paintbrush; behind her a simple castle that is grey on the left and full of color on the right where she painted it.`,
   ),
   cover(
     'secreto-del-fondo-del-mar',
     GOUACHE,
     'mint',
-    `${CAST.sofi} swims underwater inside a clear round bubble helmet next to a big friendly sea turtle. Two coral plants and a small treasure chest at the bottom. Flat blues and terracotta.`,
+    `${at('sofi', 5)} swims underwater inside a clear round bubble helmet next to a big friendly sea turtle. Two coral plants and a small treasure chest. Flat blues and terracotta.`,
   ),
   cover(
     'superheroe-por-un-dia',
     GOUACHE,
     'mustard',
-    `${CAST.benja} in a coral cape and a navy eye mask stands on a rooftop with fists on his hips, a small cat on the chimney looking at him admiringly. Two simple houses below.`,
+    `${at('benja', 5)} in a coral cape and a navy eye mask stands on a rooftop with fists on hips, a small cat on the chimney looking at him admiringly. Two simple houses below.`,
   ),
   cover(
     'la-gran-carrera',
@@ -258,37 +277,37 @@ const JOBS: Job[] = [
     'hermano-mayor',
     GOUACHE,
     'cream',
-    `${CAST.benja} sits on a sofa very carefully holding a baby sibling wrapped in a mint blanket, looking at the viewer proudly.`,
+    `${at('benja', 5)} sits on a sofa very carefully holding a baby wrapped in a mint blanket, looking at the viewer proudly.`,
   ),
   cover(
     'mi-primer-dia-de-clases',
     GOUACHE,
     'mustard',
-    `${CAST.martina} with a big terracotta backpack stands at an open school door holding the strap with both hands, a little nervous but smiling; inside, a glimpse of a colorful classroom.`,
+    `${at('martina', 5)} with a big terracotta backpack stands at an open school door holding the strap with both hands, a little nervous but smiling; inside, a glimpse of a colorful classroom.`,
   ),
   cover(
     'gol-de-campeon',
-    GOUACHE,
+    READER,
     'mint',
-    `${CAST.benja.replace('mustard t-shirt', 'navy jersey with the number 10')} kicks a ball toward a goal, mid-motion, dust lines at his foot. Two teammates far back raising their arms. No magic trail behind the ball.`,
+    `${at('benja', 8)} in a navy jersey with the number 10 kicks a ball diagonally, the ball leaving the frame with speed lines; two teammates celebrating behind. No magic trail.`,
   ),
   cover(
     'las-tardes-con-los-abuelos',
-    GOUACHE,
+    READER,
     'coral',
-    `${CAST.martina} stands on a chair between her grandmother (grey bun, cardigan) and grandfather (glasses, sweater) in a simple kitchen, all three laughing with flour on their hands.`,
+    `${at('martina', 8)} cooking with her grandmother (grey bun, cardigan) and grandfather (glasses, sweater), all three laughing with flour on their hands; a cloud of flour drawn like in a comic.`,
   ),
   cover(
     'un-lunes-al-reves',
-    GOUACHE,
+    READER,
     'mustard',
-    `${CAST.alex} floats upside down holding a cereal bowl while the cereal floats up; in the background, a dog walks a person on a leash. Funny, absurd, energetic.`,
+    `${at('tomas', 8)} upside down with a cereal bowl, the cereal floating upward; behind, the family dog walking a person on a leash. Funny, absurd, energetic. No lettering.`,
   ),
   cover(
     'el-misterio-del-faro',
-    GOUACHE,
+    NOVEL,
     'navy',
-    `${CAST.alex} with a flashlight and a small notebook stands on dark rocks looking up at a tall lighthouse with its light off; one beam of flashlight light (flat shape, no glow). Mystery mood, still friendly.`,
+    `${at('sofi', 11)} seen from behind and below, with a flashlight and a notebook on dark rocks, looking at a tall lighthouse whose light is off; the flashlight beam is a flat shape.`,
   ),
   // ---- Celebraciones -------------------------------------------------------------------------
   cover(
