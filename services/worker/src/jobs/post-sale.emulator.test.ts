@@ -41,7 +41,7 @@ describe('postventa diaria', () => {
     await Promise.all(getApps().map((app) => deleteApp(app)));
   });
 
-  it('reseña a los 7 días, recordatorio de borrador y sugerencia de Navidad, una sola vez', async () => {
+  it('reseña a los 7 días y recordatorio de borrador, una sola vez; el 1 de diciembre ya no sugiere Navidad', async () => {
     await db.doc('orders/o-print').set({
       ownerUid: 'u1',
       bookTitle: 'La aventura',
@@ -64,14 +64,14 @@ describe('postventa diaria', () => {
       updatedAt: ago(2),
     });
     const { email, run } = jobs();
-    expect(await run()).toEqual({ reviews: 1, draftReminders: 1, suggestions: 1, retried: 0 });
+    expect(await run()).toEqual({ reviews: 1, draftReminders: 1, suggestions: 0, retried: 0 });
     expect(email.sent.map((message) => [message.template, message.idempotencyKey])).toEqual(
       expect.arrayContaining([
         ['review_request', 'order:o-print:review_request'],
         ['draft_reminder', 'book:b-draft:draft_reminder'],
-        ['new_book_suggestion', 'suggestion:u1:christmas:2026'],
       ]),
     );
+    expect(email.sent.some((message) => message.template === 'new_book_suggestion')).toBe(false);
     const review = email.sent.find((message) => message.template === 'review_request');
     expect(review?.locale).toBe('en');
     expect(review?.data.url).toBe('https://storynido.test/en/order/o-print#opinion');

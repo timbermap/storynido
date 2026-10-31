@@ -12,7 +12,8 @@ export const OCCASIONS: readonly {
   /** Países donde aplica; null: todos. */
   countries: readonly CountryCode[] | null;
 }[] = [
-  { id: 'christmas', send: { month: 12, day: 1 }, countries: null },
+  // La sugerencia de Navidad está apagada (DECISIONS 156): el producto arranca sin promesas con fecha.
+  // { id: 'christmas', send: { month: 12, day: 1 }, countries: null },
   // Día del Niño en México: 30 de abril.
   { id: 'childrens_day', send: { month: 4, day: 16 }, countries: ['MX'] },
 ];

@@ -1883,3 +1883,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-31.
 - "La Navidad de [Nombre]" se **apaga** (`active: false`): el producto está arrancando y no conviene prometer entregas con fecha. Se conservan el texto en los tres idiomas y la portada (ya generada) por si se retoma. Lo que cierra el estudio sobre Navidad (fecha límite de envío por país) queda sin hacer.
 - **No cambia:** el mail de postventa del 1 de diciembre que sugiere un regalo a quienes ya compraron (`post-sale`, ocasión `christmas`): es una sugerencia, no una promesa de entrega. Si también se quiere evitar, se apaga ahí.
+
+## 156 · Sin mail de Navidad y chequeo de arranque más tolerante (aplicado)
+
+- **Fecha:** 2026-10-31.
+- **Postventa:** se apaga la sugerencia de regalo del 1 de diciembre (`christmas`); queda solo la del Día del Niño en México. El test comprueba que ese día ya no se manda `new_book_suggestion`.
+- **Chequeo de arranque de Cloud Run (API y worker de staging):** aplicado con `terraform apply` (2 cambios, 0 destruidos). Espera hasta 2 minutos antes de dar por caída una instancia nueva: 24 intentos cada 5 segundos, con 3 s de espera por intento (antes, 3 intentos cada 10 s). Es la causa de las alertas "errores en los servicios" del worker en los arranques en frío. `terraform plan` quedó sin cambios.
