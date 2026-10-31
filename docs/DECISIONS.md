@@ -1765,7 +1765,7 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Precio:** producción cotizada + margen de impresión una sola vez (el de "cuento grapado" en Precios, mínimo USD 8) + envío al costo. Componente `cards` ("Tarjetas impresas"). Solo Gelato, por país verificado, con la muestra física aprobada (`qaSamplePassed`).
 - **Resolución:** la portada de un kit digital es de pantalla (1K): si no llega a 150 dpi en 5×7", la maquetación se frena para revisión.
 - **Mails y estados:** el pedido usa el pipeline y los estados de un impreso; el mail de pago dice "tarjetas impresas". El pedido no ofrece descarga ni recompra.
-- **Pendiente:** muestra física de las tarjetas y un pedido borrador en Gelato que confirme que acepta el PDF de 2 páginas; test de API con emuladores del pedido de tarjetas.
+- **Probado:** test de API con emuladores (cotización con dos imprentas simuladas, pieza que el kit no incluye, mínimo de copias y creación del pedido). **Pendiente:** muestra física de las tarjetas y un pedido borrador en Gelato que confirme que acepta el PDF de 2 páginas.
 
 ## 141 · Direcciones de ilustración y orden de Mis cuentos
 

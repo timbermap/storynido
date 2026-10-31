@@ -786,6 +786,20 @@ describe('checkout y pagos (fase 11)', () => {
               productionCostUsdMinor: 1550,
               updatedAt: now,
             },
+            ...['mock', 'mock_alt'].map((provider) => ({
+              country: 'MX' as const,
+              format: 'card' as const,
+              provider,
+              sku: 'card-5x7',
+              enabled: true,
+              qaSamplePassed: true,
+              pages: { min: 1, max: 1, multipleOf: 1 },
+              maxQuantity: 500,
+              etaDaysMin: 5,
+              etaDaysMax: 9,
+              productionCostUsdMinor: 25,
+              updatedAt: now,
+            })),
           ],
           eventPricing: [
             {
@@ -1415,6 +1429,64 @@ describe('checkout y pagos (fase 11)', () => {
     expect((await db.collection('printQuoteRequests').get()).size).toBe(1);
     const alerts = mails((message) => message.template === 'admin_alert');
     expect(alerts.at(-1)?.data.message).toContain('mini_book, stickers × 30 copias');
+  });
+
+  it('tarjetas impresas: pedido aparte de un kit terminado, con su imprenta y su precio', async () => {
+    await approvedBook();
+    await db.doc('books/book-1').update({ channel: 'events' });
+    const kit = {
+      pieces: [
+        { piece: 'mini_book', copies: 20 },
+        { piece: 'invitation', copies: 20 },
+      ],
+      invitation: null,
+    };
+    const { orderId } = (await checkout({ kit })).json<{ orderId: string }>();
+    const body = {
+      sourceOrderId: orderId,
+      cards: [{ piece: 'invitation', copies: 30 }],
+      country: 'MX',
+      shippingAddress: ADDRESS,
+    };
+    // El kit todavía no está terminado.
+    expect((await post('/v1/cards/quote', body)).statusCode).toBe(409);
+    await db.doc(`orders/${orderId}`).update({
+      status: 'ready',
+      snapshot: { title: 'El cumple de Martina', hash: 'h' },
+    });
+
+    // Con la dirección se cotiza con las imprentas: gana la más barata.
+    const quoted = await post('/v1/cards/quote', body);
+    expect(quoted.statusCode).toBe(200);
+    const snapshot = quoted.json<{ snapshot: PriceSnapshot }>().snapshot;
+    expect(snapshot.components.map((item) => [item.code, item.quantity])).toEqual([['cards', 1]]);
+    // 30 tarjetas a 25 centavos más el margen mínimo de impresión (USD 8,00): USD 15,99.
+    expect(snapshot.components[0]?.totalMinor).toBe(1599);
+    expect(snapshot.shipping.pending).toBe(false);
+
+    // Una pieza que el kit no incluye no se imprime; menos de 10 copias, tampoco.
+    const missing = await post('/v1/cards/quote', {
+      ...body,
+      cards: [{ piece: 'thank_you', copies: 30 }],
+    });
+    expect(missing.statusCode).toBe(409);
+    const few = await post('/v1/cards/quote', {
+      ...body,
+      cards: [{ piece: 'invitation', copies: 5 }],
+    });
+    expect(few.statusCode).toBe(400);
+
+    const created = await post('/v1/cards', body);
+    expect(created.statusCode).toBe(200);
+    const order = (
+      await db.doc(`orders/${created.json<{ orderId: string }>().orderId}`).get()
+    ).data();
+    expect(order?.sourceOrderId).toBe(orderId);
+    expect(order?.items).toEqual([{ piece: 'invitation', format: 'card', quantity: 30 }]);
+    expect(order?.cards).toEqual([{ piece: 'invitation', copies: 30 }]);
+    expect(order?.kit).toBeNull();
+    expect((order?.printRouting as { provider: string }).provider).toBe('mock');
+    expect((order?.shippingAddress as { country: string }).country).toBe('MX');
   });
 
   it('Profesionales: precio Pro y descuento por compras elegibles; Familia no los obtiene', async () => {
