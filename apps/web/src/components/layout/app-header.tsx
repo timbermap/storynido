@@ -27,15 +27,7 @@ export async function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/stories"
-            className="rounded-full px-3 py-2 text-sm font-semibold text-foreground/80 hover:text-primary lg:hidden"
-          >
-            {t('explore')}
-          </Link>
-          <div className="hidden lg:block">
-            <CreateMenu />
-          </div>
+          <CreateMenu />
           <AccountLink />
         </div>
       </div>

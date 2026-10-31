@@ -50,9 +50,15 @@
     "explore": "Explorar",
     "createShort": "Criar",
     "orders": "Pedidos",
-    "accountTab": "Conta",
-    "tabsNav": "Navegação da sua conta",
-    "ordersInProgress": "{count, plural, one {# pedido em andamento} other {# pedidos em andamento}}"
+    "ordersInProgress": "{count, plural, one {# pedido em andamento} other {# pedidos em andamento}}",
+    "createPro": "Criar uma história",
+    "storiesMenu": "Histórias",
+    "howItWorksShort": "Como funciona",
+    "createPreview": "Criar prévia grátis",
+    "createKit": "Montar o kit",
+    "tryFree": "Experimentar grátis",
+    "professionalsTemplates": "Modelos profissionais",
+    "adminPanel": "Painel de administração"
   },
   "Switchers": {
     "language": "Idioma",
@@ -914,7 +920,7 @@
       "kitTitle": "Seu kit inclui",
       "kitSubtitle": "Tudo com a mesma ilustração do protagonista. As peças são compradas em digital, com licença por quantidade de cópias.",
       "kit": {},
-      "kitNote": "Todo o kit é digital: você cria o design, vê a prévia grátis e compra os arquivos em PDF para imprimir em casa ou na gráfica que preferir. Não imprimimos nem enviamos o kit.",
+      "kitNote": "Todo o kit é digital: você cria o design, vê a prévia grátis e compra os arquivos em PDF para imprimir em casa ou na gráfica que preferir. Se preferir, depois você pede os convites e os agradecimentos impressos e enviados para sua casa.",
       "collectionsTitle": "Temas para a festa",
       "faqTitle": "Perguntas frequentes",
       "faq": {
@@ -924,7 +930,7 @@
         },
         "2": {
           "q": "Posso imprimir em casa?",
-          "a": "Sim, é a ideia: o kit é digital e vem em PDF pronto para imprimir em casa ou na gráfica que preferir. Não imprimimos nem enviamos o kit."
+          "a": "Sim, é a ideia: o kit é digital e vem em PDF pronto para imprimir em casa ou na gráfica que preferir. O kit em si é digital; depois você pode pedir os convites e os agradecimentos impressos, e o mini livro impresso em quantidade."
         },
         "3": {
           "q": "Preciso de uma foto?",
@@ -943,7 +949,9 @@
       "kitExtra": "+ {price}",
       "kitFull": "Kit digital completo: {price}, não importa quantos convidados.",
       "kitUsd": "Preços em dólares (USD).",
-      "collectionStart": "Criar o kit com este tema"
+      "collectionStart": "Criar o kit com este tema",
+      "catalogTitle": "Temáticas de festa",
+      "catalogSubtitle": "Escolha a temática e monte o kit completo: convite, mini livro, adesivos e mais, com um só protagonista."
     },
     "professionals": {
       "metaTitle": "Histórias personalizadas para psicopedagogos, professores e terapeutas",
@@ -1008,6 +1016,14 @@
         "4": {
           "q": "Há descontos?",
           "a": "Sim, por compras recorrentes da sua conta. Publicaremos os detalhes quando os pagamentos forem habilitados."
+        },
+        "5": {
+          "q": "Posso editar o texto?",
+          "a": "Sim. Antes de pagar você pode mudar o texto de cada página da prévia e gerar de novo a ilustração dessa página."
+        },
+        "6": {
+          "q": "Existe assinatura?",
+          "a": "Não. Você paga cada história e, se fizer muitas, sua conta recebe descontos por volume. Para consultórios e instituições que precisam de quantidade, escreva-nos em Contato."
         }
       },
       "finalTitle": "Uma história para cada criança que você acompanha",
@@ -1016,7 +1032,26 @@
       "ctaExamples": "Ver as coleções",
       "collectionsSubtitle": "Cada coleção responde a uma situação real. Veja as histórias, folheie um exemplo e só depois crie sua conta.",
       "viewStory": "Ver a história",
-      "collectionStart": "Criar com esta coleção"
+      "collectionStart": "Criar com esta coleção",
+      "pricingTitle": "Preço claro, sem assinatura",
+      "pricingSubtitle": "Você paga cada história quando a cria. Quanto mais histórias faz, menos paga por cada uma.",
+      "pricing": {
+        "1": {
+          "title": "A partir de {price} cada história",
+          "text": "O digital, com suas ilustrações e o texto que você ajusta. O livro impresso soma a impressão e o frete, calculado com o endereço."
+        },
+        "2": {
+          "title": "Descontos por volume",
+          "text": "{n1} histórias em {days} dias: {p1}% a menos. {n2} histórias: {p2}%. {n3} histórias: {p3}%. Aplicado à sua conta automaticamente."
+        },
+        "3": {
+          "title": "Prévia grátis antes de pagar",
+          "text": "Você vê a prévia da história sem pagar e só paga se quiser. Sem planos mensais nem mensalidades."
+        }
+      },
+      "pricingNote": "O desconto por volume é calculado com suas compras dos últimos dias; no impresso o teto é menor.",
+      "catalogTitle": "Modelos por objetivo",
+      "catalogSubtitle": "Coleções para antecipar situações e trabalhar emoções, rotinas, escola e linguagem. Escolha o modelo e ajuste o texto."
     }
   },
   "Viewer": {
@@ -1226,7 +1261,7 @@
       "downloadAll": "Baixar tudo (ZIP)",
       "moreCopies": "Pedir mais cópias",
       "ready": "Seu kit está pronto!",
-      "digitalOnly": "O kit é digital: chega em PDF pronto para imprimir em casa ou na gráfica que preferir. Não imprimimos nem enviamos o kit.",
+      "digitalOnly": "O kit é digital: chega em PDF pronto para imprimir em casa ou na gráfica que preferir. Os cartões impressos são pedidos depois, a partir do pedido concluído.",
       "printCards": {
         "cta": "Imprimir cartões",
         "title": "Cartões impressos",
@@ -1240,6 +1275,11 @@
         "minimum": "Mínimo de {min} por design. O preço inclui a impressão; o frete é calculado com seu endereço.",
         "noPieces": "Este kit não tem convites nem cartões de agradecimento para imprimir.",
         "error": "Não conseguimos calcular o pedido. Tente novamente."
+      },
+      "bigBook": {
+        "title": "O livro completo do aniversariante, em capa dura",
+        "text": "A história completa, com o mesmo personagem e sem enviar fotos de novo: a lembrança que fica. Ele é criado em Famílias e o frete é calculado com seu endereço.",
+        "cta": "Criar o livro completo"
       }
     },
     "fromPrice": "a partir de {price}",
@@ -1294,7 +1334,9 @@
         "preview_generating": "Criando a amostra",
         "preview_ready": "Amostra pronta",
         "ordered": "Comprado"
-      }
+      },
+      "loadFailed": "Não conseguimos carregar seus projetos.",
+      "retry": "Tentar de novo"
     }
   },
   "PhotoPromise": {

@@ -24,10 +24,25 @@ export function ProPanel({ uid, status }: { uid: string; status: ProStatus }) {
   const [copying, setCopying] = useState<string | null>(null);
   const discount = status.discount;
 
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
   useEffect(() => {
+    // Sin respuesta en 12 s se avisa: antes quedaba "Cargando proyectos…" para siempre.
+    const timer = setTimeout(() => {
+      setFailed(true);
+    }, 12_000);
     void getFirebaseDb()
       .then((db) => listProjects(db, uid))
-      .then(setProjects);
+      .then((found) => {
+        clearTimeout(timer);
+        setFailed(false);
+        setProjects(found);
+      })
+      .catch(() => {
+        clearTimeout(timer);
+        setFailed(true);
+      });
     api('catalogStories', { query: { locale } })
       .then((result) => {
         setStories(result.stories);
@@ -35,7 +50,10 @@ export function ProPanel({ uid, status }: { uid: string; status: ProStatus }) {
       .catch(() => {
         // Sin catálogo se muestra el proyecto igual, sin el título de la historia.
       });
-  }, [uid, locale]);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [uid, locale, attempt]);
 
   async function repeat(book: ProjectBook) {
     setCopying(book.id);
@@ -89,7 +107,21 @@ export function ProPanel({ uid, status }: { uid: string; status: ProStatus }) {
           )}
         </div>
       )}
-      {projects === null ? (
+      {failed && projects === null ? (
+        <div role="alert" className="grid justify-items-start gap-2 text-sm">
+          <p className="text-destructive">{t('loadFailed')}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setFailed(false);
+              setAttempt((value) => value + 1);
+            }}
+            className="font-semibold text-primary hover:underline"
+          >
+            {t('retry')}
+          </button>
+        </div>
+      ) : projects === null ? (
         <p role="status" className="text-sm text-muted-foreground">
           {t('loading')}
         </p>

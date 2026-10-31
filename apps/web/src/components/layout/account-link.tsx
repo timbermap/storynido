@@ -1,6 +1,14 @@
 'use client';
 
-import { BookHeart, LogOut, Settings } from 'lucide-react';
+import {
+  BookHeart,
+  Compass,
+  CircleHelp,
+  LogOut,
+  ShieldCheck,
+  ShoppingBag,
+  Settings,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 
@@ -24,7 +32,7 @@ function initials(name: string | null, email: string | null): string {
  */
 export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' }) {
   const t = useTranslations('Nav');
-  const { user, signedIn, loading } = useAuth();
+  const { user, signedIn, loading, role } = useAuth();
   // Después de entrar se vuelve a esta página.
   const pathname = usePathname();
 
@@ -46,6 +54,9 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
   }
 
   const name = user.displayName ?? user.email ?? '';
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
+  const isStaff = role === 'admin' || role === 'superadmin';
+  // Menú de la cuenta (reporte de navegación): lo propio, los pedidos, los ajustes y la ayuda.
   const links = [
     {
       href: '/my-stories',
@@ -53,11 +64,34 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
       icon: <BookHeart className="size-4" />,
     },
     {
+      href: { pathname: '/my-stories', hash: 'orders' },
+      title: t('orders'),
+      icon: <ShoppingBag className="size-4" />,
+    },
+    {
+      // En el celular no hay "Explorar" en la barra: vive acá.
+      href: '/families/stories',
+      title: t('explore'),
+      icon: <Compass className="size-4" />,
+      mobileOnly: true,
+    },
+    {
       href: '/account',
       title: t('preferences'),
       icon: <Settings className="size-4" />,
     },
+    {
+      href: '/faq',
+      title: t('help'),
+      icon: <CircleHelp className="size-4" />,
+    },
   ] as const;
+  const adminLink =
+    isStaff && adminUrl ? (
+      <a href={adminUrl} className="group block rounded-xl">
+        <NavMenuItem title={t('adminPanel')} icon={<ShieldCheck className="size-4" />} />
+      </a>
+    ) : null;
   const avatar = (
     <span
       aria-hidden="true"
@@ -88,6 +122,7 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
             <NavMenuItem title={link.title} icon={link.icon} />
           </Link>
         ))}
+        {adminLink}
         {signOut}
       </div>
     );
@@ -111,12 +146,13 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
         </p>
         <ul className="pt-1">
           {links.map((link) => (
-            <li key={link.title}>
+            <li key={link.title} className={'mobileOnly' in link ? 'lg:hidden' : undefined}>
               <Link href={link.href} className="group block rounded-xl">
                 <NavMenuItem title={link.title} icon={link.icon} />
               </Link>
             </li>
           ))}
+          {adminLink && <li>{adminLink}</li>}
           <li>{signOut}</li>
         </ul>
       </div>

@@ -169,8 +169,8 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
                 ...EMPTY_BIRTHDAY,
                 type: occasion,
                 date: eventDate || null,
-                // Sin elegir, la edad que cumple es la del protagonista: no se pide dos veces.
-                turningAge: occasion === 'birthday' ? (turningAge ?? age) : null,
+                // La edad que se pide es la que cumple: no se pregunta dos veces.
+                turningAge: occasion === 'birthday' ? age : null,
                 theme: blankToNull(theme.slice(0, EVENT_LIMITS.themeMaxLength)),
               },
             }
@@ -283,7 +283,8 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
           </div>
           <div className="grid gap-2">
             <label htmlFor="child-age" className={labelClass}>
-              {t('age')}
+              {/* En un cumpleaños la única edad que se pide es la que cumple. */}
+              {isEvent && occasion === 'birthday' ? t('event.turningAge') : t('age')}
             </label>
             <select
               id="child-age"
@@ -443,31 +444,6 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
                   }}
                 />
               </div>
-              {occasion === 'birthday' && (
-                <div className="grid gap-2">
-                  <label htmlFor="event-age" className={labelClass}>
-                    {t('event.turningAge')}
-                  </label>
-                  <select
-                    id="event-age"
-                    className={inputClass}
-                    value={turningAge ?? ''}
-                    onChange={(event) => {
-                      setTurningAge(event.target.value ? Number(event.target.value) : null);
-                    }}
-                  >
-                    <option value="">{t('event.turningAgeEmpty')}</option>
-                    {Array.from(
-                      { length: EVENT_LIMITS.maxTurningAge },
-                      (_, index) => index + 1,
-                    ).map((value) => (
-                      <option key={value} value={value}>
-                        {t('event.years', { count: value })}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
             </div>
             <div className="grid gap-2">
               <label htmlFor="event-theme" className={labelClass}>

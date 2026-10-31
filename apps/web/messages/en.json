@@ -12,7 +12,7 @@
     "howItWorks": "How it works",
     "faq": "FAQ",
     "blog": "Blog",
-    "signIn": "Sign in",
+    "signIn": "Log in",
     "account": "My account",
     "menu": "Menu",
     "closeMenu": "Close menu",
@@ -50,9 +50,15 @@
     "explore": "Explore",
     "createShort": "Create",
     "orders": "Orders",
-    "accountTab": "Account",
-    "tabsNav": "Your account navigation",
-    "ordersInProgress": "{count, plural, one {# order in progress} other {# orders in progress}}"
+    "ordersInProgress": "{count, plural, one {# order in progress} other {# orders in progress}}",
+    "createPro": "Create a story",
+    "storiesMenu": "Stories",
+    "howItWorksShort": "How it works",
+    "createPreview": "Create a free preview",
+    "createKit": "Design the kit",
+    "tryFree": "Try for free",
+    "professionalsTemplates": "Professional templates",
+    "adminPanel": "Admin panel"
   },
   "Switchers": {
     "language": "Language",
@@ -914,7 +920,7 @@
       "kitTitle": "Your kit includes",
       "kitSubtitle": "All with the same illustrated hero. Pieces are bought digitally, licensed by number of copies.",
       "kit": {},
-      "kitNote": "The whole kit is digital: you create the design, see the free sample and buy the PDF files to print at home or at the print shop you prefer. We don't print or ship the kit.",
+      "kitNote": "The whole kit is digital: you create the design, see the free sample and buy the PDF files to print at home or at the print shop you prefer. If you prefer, you can order the invitations and thank-you cards printed and shipped to your home afterwards.",
       "collectionsTitle": "Party themes",
       "faqTitle": "Frequently asked questions",
       "faq": {
@@ -924,7 +930,7 @@
         },
         "2": {
           "q": "Can I print it at home?",
-          "a": "Yes, that's the idea: the kit is digital and comes as print-ready PDFs to print at home or at the print shop you prefer. We don't print or ship the kit."
+          "a": "Yes, that's the idea: the kit is digital and comes as print-ready PDFs to print at home or at the print shop you prefer. The kit itself is digital; afterwards you can order printed invitations and thank-you cards, and the mini story printed in bulk."
         },
         "3": {
           "q": "Do I need a photo?",
@@ -943,7 +949,9 @@
       "kitExtra": "+ {price}",
       "kitFull": "Full digital kit: {price}, no matter how many guests.",
       "kitUsd": "Prices in US dollars (USD).",
-      "collectionStart": "Design the kit with this theme"
+      "collectionStart": "Design the kit with this theme",
+      "catalogTitle": "Party themes",
+      "catalogSubtitle": "Pick the theme and build the full kit: invitation, mini story, stickers and more, with one hero."
     },
     "professionals": {
       "metaTitle": "Personalized stories for educators, therapists and specialists",
@@ -1008,6 +1016,14 @@
         "4": {
           "q": "Are there discounts?",
           "a": "Yes, for repeat purchases from your account. We’ll publish the details when payments are enabled."
+        },
+        "5": {
+          "q": "Can I edit the text?",
+          "a": "Yes. Before paying you can change the text of each page in the preview and regenerate that page’s illustration."
+        },
+        "6": {
+          "q": "Is there a subscription?",
+          "a": "No. You pay for each story and, if you make many, your account gets volume discounts. For clinics and institutions that need larger quantities, write to us from Contact."
         }
       },
       "finalTitle": "A story for every child you support",
@@ -1016,7 +1032,26 @@
       "ctaExamples": "See the collections",
       "collectionsSubtitle": "Each collection answers a real situation. Browse the stories, flip through an example, and only then create your account.",
       "viewStory": "View the story",
-      "collectionStart": "Create with this collection"
+      "collectionStart": "Create with this collection",
+      "pricingTitle": "Clear pricing, no subscription",
+      "pricingSubtitle": "You pay for each story when you create it. The more stories you make, the less you pay for each.",
+      "pricing": {
+        "1": {
+          "title": "From {price} per story",
+          "text": "The digital version, with its illustrations and the text you adjust. A printed book adds printing and shipping, calculated with the address."
+        },
+        "2": {
+          "title": "Volume discounts",
+          "text": "{n1} stories in {days} days: {p1}% off. {n2} stories: {p2}%. {n3} stories: {p3}%. Applied to your account automatically."
+        },
+        "3": {
+          "title": "Free previews before you pay",
+          "text": "You see the story preview without paying and only pay if you want it. No monthly plans or fees."
+        }
+      },
+      "pricingNote": "The volume discount is based on your purchases over the last few days; for printed books the cap is lower.",
+      "catalogTitle": "Templates by goal",
+      "catalogSubtitle": "Collections to anticipate situations and work on emotions, routines, school and language. Pick a template and adjust the text."
     }
   },
   "Viewer": {
@@ -1226,7 +1261,7 @@
       "downloadAll": "Download everything (ZIP)",
       "moreCopies": "Order more copies",
       "ready": "Your kit is ready!",
-      "digitalOnly": "The kit is digital: you get print-ready PDFs to print at home or at the print shop you prefer. We don't print or ship the kit.",
+      "digitalOnly": "The kit is digital: you get print-ready PDFs to print at home or at the print shop you prefer. Printed cards are ordered afterwards, from the finished order.",
       "printCards": {
         "cta": "Print cards",
         "title": "Printed cards",
@@ -1240,6 +1275,11 @@
         "minimum": "Minimum {min} per design. The price includes printing; shipping is calculated with your address.",
         "noPieces": "This kit has no invitations or thank-you cards to print.",
         "error": "We couldn't calculate the order. Please try again."
+      },
+      "bigBook": {
+        "title": "The birthday star's full storybook, in hardcover",
+        "text": "The complete story with the same character and no new photo uploads: the keepsake that lasts. You create it from Families and shipping is calculated with your address.",
+        "cta": "Create the full storybook"
       }
     },
     "fromPrice": "from {price}",
@@ -1294,7 +1334,9 @@
         "preview_generating": "Creating preview",
         "preview_ready": "Preview ready",
         "ordered": "Purchased"
-      }
+      },
+      "loadFailed": "We couldn't load your projects.",
+      "retry": "Try again"
     }
   },
   "PhotoPromise": {

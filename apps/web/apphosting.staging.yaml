@@ -18,6 +18,10 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
     value: staging.storynido.com
     availability: [BUILD, RUNTIME]
+  # Enlace al panel de administración (solo se muestra a quien tiene rol de administrador).
+  - variable: NEXT_PUBLIC_ADMIN_URL
+    value: https://admin--storynido-staging.us-central1.hosted.app
+    availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_API_URL
     value: https://api-kxfsarqx2q-uc.a.run.app
     availability: [BUILD, RUNTIME]

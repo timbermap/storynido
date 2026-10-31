@@ -89,7 +89,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </StartStoryLink>
               {/* Para quien prefiere mirar primero: el catálogo completo. */}
               <Link
-                href="/stories"
+                href="/families/stories"
                 data-track="home_explore"
                 className="border-b-2 border-foreground/25 px-1 pb-0.5 text-lg font-semibold transition-colors hover:border-primary hover:text-primary"
               >

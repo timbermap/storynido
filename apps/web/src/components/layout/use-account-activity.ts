@@ -17,11 +17,11 @@ export function isOrderInProgress(order: Pick<OrderSummary, 'status' | 'items'>)
   return !(order.status === 'ready' && !isPrintOrder(order.items));
 }
 
-/** Cuántos pedidos tiene en curso, en vivo (null mientras se lee). */
-export function useInProgressOrders(): number | null {
+/** Pedidos de la cuenta, en vivo: cuántos tiene y cuántos están en curso (null mientras se lee). */
+export function useOrderCounts(): { total: number; inProgress: number } | null {
   const { user, signedIn } = useAuth();
   const uid = signedIn ? (user?.uid ?? null) : null;
-  const [count, setCount] = useState<number | null>(null);
+  const [count, setCount] = useState<{ total: number; inProgress: number } | null>(null);
 
   useEffect(() => {
     if (!uid) return;
@@ -33,7 +33,8 @@ export function useInProgressOrders(): number | null {
         db,
         uid,
         (orders) => {
-          setCount(orders.filter(isOrderInProgress).length);
+          const real = orders.filter((order) => order.status !== 'pending_payment');
+          setCount({ total: real.length, inProgress: real.filter(isOrderInProgress).length });
         },
         () => {
           setCount(null);

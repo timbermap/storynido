@@ -1,12 +1,10 @@
 'use client';
 
-import type { ComponentProps, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { buttonVariants } from '@/components/ui/button';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-
-type Href = ComponentProps<typeof Link>['href'];
 
 /** Enlace del menú a la landing de un público; queda marcado en la página donde estás. */
 export function NavLink({
@@ -34,33 +32,33 @@ export function NavLink({
 }
 
 /**
- * Botón de crear del encabezado: en la landing de un público lleva a su creador; en la home baja
- * a "¿Para quién es?" (cada público termina en su propio "Crear su cuento").
+ * Botón de crear del encabezado (sin sesión): lleva al login y de ahí a Mis cuentos (DECISIONS 144),
+ * con el texto de la sección: "Crear vista previa gratis", "Diseñar el kit" en Celebraciones y
+ * "Probar gratis" en Profesionales (reporte de navegación).
  */
 export function HeaderCta({
   children,
+  eventsLabel,
+  professionalsLabel,
   size = 'sm',
   className,
 }: {
   children: ReactNode;
+  eventsLabel?: ReactNode;
+  professionalsLabel?: ReactNode;
   size?: 'sm' | 'default';
   className?: string;
 }) {
   const pathname = usePathname();
-  const href: Href =
-    pathname === '/'
-      ? { pathname: '/', hash: 'audience' }
-      : pathname === '/events'
-        ? { pathname: '/create', query: { line: 'events' } }
-        : pathname === '/professionals'
-          ? { pathname: '/create', query: { line: 'professionals' } }
-          : pathname === '/families'
-            ? { pathname: '/create', query: { line: 'families' } }
-            : // Fuera de una landing no se sabe qué quiere crear: se pregunta.
-              '/new';
+  const label =
+    pathname.startsWith('/events') && eventsLabel
+      ? eventsLabel
+      : pathname.startsWith('/professionals') && professionalsLabel
+        ? professionalsLabel
+        : children;
   return (
-    <Link href={href} className={buttonVariants({ size, className })}>
-      {children}
+    <Link href="/login" className={buttonVariants({ size, className })}>
+      {label}
     </Link>
   );
 }

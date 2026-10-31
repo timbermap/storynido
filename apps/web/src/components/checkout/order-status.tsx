@@ -1,7 +1,15 @@
 'use client';
 
 import { ApiError, type CountryCode, type PublicOrder } from '@storynido/shared';
-import { Download, FlaskConical, Loader2, Printer, RotateCcw, Truck } from 'lucide-react';
+import {
+  BookHeart,
+  Download,
+  FlaskConical,
+  Loader2,
+  Printer,
+  RotateCcw,
+  Truck,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -172,6 +180,23 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
               </Link>
             )}
           </div>
+        )}
+        {/* Venta cruzada: el cuento completo del cumpleañero, en tapa dura (DECISIONS 150). */}
+        {GENERATED_STATUSES.has(order.status) && isKit && (
+          <section className="grid gap-3 rounded-2xl border bg-secondary p-5">
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <BookHeart className="size-5 text-primary" aria-hidden="true" />
+              {tKit('bigBook.title')}
+            </h2>
+            <p className="text-sm text-muted-foreground">{tKit('bigBook.text')}</p>
+            <Link
+              href={{ pathname: '/create', query: { line: 'families' } }}
+              data-track="kit_big_book"
+              className={buttonVariants({ className: 'w-fit' })}
+            >
+              {tKit('bigBook.cta')}
+            </Link>
+          </section>
         )}
         {order.canDownload && isKit && (
           <ul className="grid gap-2 sm:grid-cols-2">

@@ -211,7 +211,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
                 </h2>
                 <p className="mt-3 text-lg text-muted-foreground">{t('gallery.subtitle')}</p>
               </div>
-              <Link href="/stories" className={buttonVariants({ variant: 'outline' })}>
+              <Link href="/families/stories" className={buttonVariants({ variant: 'outline' })}>
                 {t('gallery.viewAll')}
               </Link>
             </div>
@@ -224,7 +224,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
                 {STORY_THEMES.map(({ key, icon: Icon }) => (
                   <li key={key}>
                     <Link
-                      href={{ pathname: '/stories', query: { tema: key } }}
+                      href={{ pathname: '/families/stories', query: { tema: key } }}
                       className="flex h-full items-center gap-3 rounded-xl border bg-card p-4 font-semibold shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
                     >
                       <span className="grid size-10 shrink-0 place-items-center rounded-full bg-mint text-success">

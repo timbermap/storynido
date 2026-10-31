@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
-import type { Locale } from '@storynido/shared';
+import { DEFAULT_PRO_DISCOUNTS, type Locale } from '@storynido/shared';
 
 import { AuthLink } from '@/components/auth/auth-link';
 import { JsonLd } from '@/components/json-ld';
@@ -18,7 +18,9 @@ import {
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
-import { getCollections, getStories } from '@/lib/server/api';
+import { lowestPrice } from '@/lib/offer';
+import { getCollections, getOffer, getStories } from '@/lib/server/api';
+import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
 
 import professionalsArt from '../../../../public/brand/landing-profesionales.webp';
@@ -44,11 +46,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function ProfessionalsPage({ params }: Props) {
   const locale = (await params).locale as Locale;
-  const [t, collections, stories] = await Promise.all([
+  const display = await getDisplayCountry(locale);
+  const [t, collections, stories, offer] = await Promise.all([
     getTranslations('Landing.professionals'),
     getCollections(locale, 'professionals').catch(() => []),
     getStories(locale, undefined, { channel: 'professionals' }).catch(() => []),
+    getOffer(display.country, locale),
   ]);
+  const price = lowestPrice(offer, locale, display.country);
+  // Descuentos por volumen (no hay suscripción): los escalones de fábrica de la cuenta.
+  const [first, second, third] = DEFAULT_PRO_DISCOUNTS.tiers;
   const cta = (
     <AuthLink
       href={{ pathname: '/create', query: { line: 'professionals' } }}
@@ -64,6 +71,7 @@ export default async function ProfessionalsPage({ params }: Props) {
     </AnchorLink>
   );
   const four = ['1', '2', '3', '4'] as const;
+  const six = ['1', '2', '3', '4', '5', '6'] as const;
 
   return (
     <>
@@ -87,6 +95,31 @@ export default async function ProfessionalsPage({ params }: Props) {
         line="professionals"
         start={{ label: t('collectionStart'), mode: 'story' }}
       />
+      {/* Precio a la vista y sin suscripción: se paga cada cuento, con descuento por volumen. */}
+      <LandingChecklist
+        title={t('pricingTitle')}
+        subtitle={t('pricingSubtitle')}
+        items={[
+          {
+            title: t('pricing.1.title'),
+            text: t('pricing.1.text', { price: price ?? '—' }),
+          },
+          {
+            title: t('pricing.2.title'),
+            text: t('pricing.2.text', {
+              n1: first?.minPurchases ?? 5,
+              p1: first?.percent ?? 10,
+              n2: second?.minPurchases ?? 10,
+              p2: second?.percent ?? 15,
+              n3: third?.minPurchases ?? 20,
+              p3: third?.percent ?? 20,
+              days: DEFAULT_PRO_DISCOUNTS.windowDays,
+            }),
+          },
+          { title: t('pricing.3.title'), text: t('pricing.3.text') },
+        ]}
+        note={t('pricingNote')}
+      />
       <LandingSteps
         title={t('howTitle')}
         steps={(['1', '2', '3'] as const).map((key) => ({
@@ -106,7 +139,7 @@ export default async function ProfessionalsPage({ params }: Props) {
 
       <LandingFaq
         title={t('faqTitle')}
-        items={four.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}
+        items={six.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}
       />
       <LandingFinalCta title={t('finalTitle')} cta={cta} />
       {/* Datos para buscadores (schema.org), después del contenido visible. */}

@@ -18,6 +18,18 @@ export const routing = defineRouting({
     '/families': { es: '/familias', en: '/families', pt: '/familias' },
     '/events': { es: '/eventos', en: '/events', pt: '/eventos' },
     '/professionals': { es: '/profesionales', en: '/professionals', pt: '/profissionais' },
+    // Un catálogo por línea (estudio de catálogo): Familias, Celebraciones y Profesionales.
+    '/families/stories': {
+      es: '/familias/historias',
+      en: '/families/stories',
+      pt: '/familias/historias',
+    },
+    '/events/themes': { es: '/eventos/tematicas', en: '/events/themes', pt: '/eventos/temas' },
+    '/professionals/templates': {
+      es: '/profesionales/plantillas',
+      en: '/professionals/templates',
+      pt: '/profissionais/modelos',
+    },
     '/stories': { es: '/historias', en: '/stories', pt: '/historias' },
     '/stories/[slug]': { es: '/historias/[slug]', en: '/stories/[slug]', pt: '/historias/[slug]' },
     '/lessons/[slug]': { es: '/ensenanzas/[slug]', en: '/lessons/[slug]', pt: '/licoes/[slug]' },

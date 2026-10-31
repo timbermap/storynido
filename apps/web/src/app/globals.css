@@ -153,10 +153,3 @@
     @apply sr-only rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50;
   }
 }
-
-/* Con la barra inferior del celular (cliente con sesión), el pie no queda tapado. */
-@media (max-width: 1023px) {
-  body:has([data-bottom-tabs]) {
-    padding-bottom: calc(3.75rem + env(safe-area-inset-bottom));
-  }
-}

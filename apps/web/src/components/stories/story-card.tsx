@@ -11,6 +11,7 @@ export async function StoryCard({
   headingLevel = 'h3',
   priority = false,
   compact = false,
+  lineLabel,
 }: {
   story: PublicStory;
   fromPrice: string | null;
@@ -20,6 +21,8 @@ export async function StoryCard({
   priority?: boolean;
   /** Más chica y sin protagonismo (por ejemplo, las aventuras de una enseñanza). */
   compact?: boolean;
+  /** En el buscador general: de qué línea es la historia (Familias, Celebraciones, Profesionales). */
+  lineLabel?: string;
 }) {
   const t = await getTranslations('Stories');
   const Heading = headingLevel;
@@ -53,8 +56,15 @@ export async function StoryCard({
         >
           {story.title}
         </Heading>
-        <p className="w-fit rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
-          {t('agesFor', { min: story.ageMin, max: story.ageMax })}
+        <p className="flex flex-wrap items-center gap-1.5">
+          {lineLabel && (
+            <span className="w-fit rounded-full bg-peach px-2.5 py-0.5 text-xs font-semibold text-[#a33f33]">
+              {lineLabel}
+            </span>
+          )}
+          <span className="w-fit rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
+            {t('agesFor', { min: story.ageMin, max: story.ageMax })}
+          </span>
         </p>
         {fromPrice && (
           <p className="mt-auto text-sm font-bold text-primary">

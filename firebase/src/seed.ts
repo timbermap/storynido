@@ -58,6 +58,7 @@ import {
 
 import {
   SEED_ACTIVITY_TEMPLATES,
+  SEED_DRAFT_STORIES,
   SEED_NEW_STORIES,
   SEED_STORIES,
   SEED_STYLES,
@@ -588,7 +589,7 @@ for (const collection of SEED_COLLECTIONS) {
   );
 }
 
-for (const story of [...SEED_STORIES, ...SEED_NEW_STORIES]) {
+for (const story of [...SEED_STORIES, ...SEED_NEW_STORIES, ...SEED_DRAFT_STORIES]) {
   batch.set(
     db.collection(COLLECTIONS.stories).doc(story.slug),
     storySchema.parse({ ...story, createdAt: now, updatedAt: now }),
@@ -609,7 +610,9 @@ for (const lesson of SEED_LESSONS) {
 }
 
 // Historias que ya no están en el catálogo de ejemplo (p. ej. las que pasaron a ser enseñanzas).
-const seededSlugs = new Set([...SEED_STORIES, ...SEED_NEW_STORIES].map((story) => story.slug));
+const seededSlugs = new Set(
+  [...SEED_STORIES, ...SEED_NEW_STORIES, ...SEED_DRAFT_STORIES].map((story) => story.slug),
+);
 for (const doc of await db.collection(COLLECTIONS.stories).listDocuments()) {
   if (!seededSlugs.has(doc.id)) batch.delete(doc);
 }

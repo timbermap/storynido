@@ -340,6 +340,186 @@ const BIG_READER_BASE = {
   contentTypes: ['story', 'story_activities'],
 } satisfies Partial<SeedStory>;
 
+/**
+ * Historias del estudio de catálogo (DECISIONS 150), en borrador: entran inactivas hasta tener su
+ * portada (la ilustración con IA cuesta y se aprueba antes) y se encienden desde el admin.
+ */
+const DRAFT_BASE = {
+  ...NEW_STORY_BASE,
+  active: false,
+  channels: ['families'],
+} satisfies Partial<SeedStory>;
+
+/** 0 a 3 años: pocas palabras, rima y repetición, para leer en voz alta (solo Mini y Corto). */
+const BABY_BASE = {
+  ...DRAFT_BASE,
+  ageMin: 0,
+  ageMax: 3,
+  lengths: ['mini', 'short'],
+  textDensities: ['visual'],
+  readingLevels: ['beginner'],
+  contentTypes: ['story'],
+} satisfies Partial<SeedStory>;
+
+export const SEED_DRAFT_STORIES: SeedStory[] = [
+  {
+    ...BABY_BASE,
+    slug: 'te-quiero-siempre',
+    order: 40,
+    palette: 'bedtime',
+    collectionIds: ['nuestros-recuerdos'],
+    suggestedLessons: ['ser-uno-mismo'],
+    tags: ['amor', 'vínculo', 'regalo', 'bebés'],
+    title: {
+      es: 'Te quiero siempre, [Nombre]',
+      en: "I'll Love You Always, [Name]",
+      pt: 'Te amo sempre, [Nome]',
+    },
+    summary: {
+      es: 'Un libro para decirle todo lo que sientes: te quiero cuando ríes, cuando duermes, cuando creces y cuando eres chiquito. Con su cara de verdad en cada página, el regalo de nacimiento, de primer año o de los abuelos.',
+      en: 'A book to tell them everything you feel: I love you when you laugh, when you sleep, when you grow and when you are tiny. With their real face on every page, the gift for a birth, a first birthday or from grandparents.',
+      pt: 'Um livro para dizer tudo o que você sente: te amo quando ri, quando dorme, quando cresce e quando é pequeno. Com o rosto de verdade em cada página, o presente de nascimento, de um ano ou dos avós.',
+    },
+    excerpt: {
+      es: 'Te quiero cuando ríes, te quiero cuando duermes. Te quiero chiquito, te quiero cuando creces. [Nombre], te quiero siempre.',
+      en: 'I love you when you laugh, I love you when you sleep. I love you little, I love you as you grow. [Name], I love you always.',
+      pt: 'Te amo quando ri, te amo quando dorme. Te amo pequeno, te amo quando cresce. [Nome], te amo sempre.',
+    },
+    coverImage: '/samples/te-quiero-siempre.webp',
+  },
+  {
+    ...BABY_BASE,
+    slug: 'buenas-noches',
+    order: 41,
+    palette: 'bedtime',
+    collectionIds: ['grandes-momentos'],
+    suggestedLessons: ['dormir-solo'],
+    tags: ['dormir', 'rutina', 'bebés'],
+    title: { es: 'Buenas noches, [Nombre]', en: 'Goodnight, [Name]', pt: 'Boa noite, [Nome]' },
+    summary: {
+      es: 'La rutina de dormir contada con rima: el baño, el pijama, el último abrazo y todas las cosas que también se van a dormir. Para leer en voz baja, todas las noches.',
+      en: 'The bedtime routine told in rhyme: the bath, the pajamas, the last hug and all the things that are going to sleep too. To read softly, every night.',
+      pt: 'A rotina de dormir contada em rima: o banho, o pijama, o último abraço e todas as coisas que também vão dormir. Para ler em voz baixa, todas as noites.',
+    },
+    excerpt: {
+      es: 'Se duerme el sol, se duerme la luna, se duerme el osito en su cuna. Buenas noches, [Nombre], buenas noches, a dormir.',
+      en: 'The sun goes to sleep, the moon goes to sleep, the teddy bear sleeps in its crib. Goodnight, [Name], goodnight, time to sleep.',
+      pt: 'O sol vai dormir, a lua vai dormir, o ursinho dorme no berço. Boa noite, [Nome], boa noite, hora de dormir.',
+    },
+    coverImage: '/samples/buenas-noches.webp',
+  },
+  {
+    ...DRAFT_BASE,
+    slug: 'la-gran-carrera',
+    order: 42,
+    ageMin: 3,
+    ageMax: 6,
+    palette: 'adventure',
+    collectionIds: ['aventuras'],
+    suggestedLessons: ['lograr-lo-que-te-propongas', 'equivocarse-esta-bien'],
+    tags: ['autos', 'carreras', 'camiones', 'vehículos'],
+    title: {
+      es: '[Nombre] y la gran carrera',
+      en: '[Name] and the Great Race',
+      pt: '[Nome] e a grande corrida',
+    },
+    summary: {
+      es: 'Autos, camiones y una pista enorme: tu peque se pone el casco y compite en la carrera más divertida del barrio, con curvas, charcos y un amigo que necesita ayuda.',
+      en: 'Cars, trucks and an enormous track: your little one puts on a helmet and races in the most fun race in the neighborhood, with curves, puddles and a friend who needs help.',
+      pt: 'Carros, caminhões e uma pista enorme: seu pequeno coloca o capacete e compete na corrida mais divertida do bairro, com curvas, poças e um amigo que precisa de ajuda.',
+    },
+    excerpt: {
+      es: '¡Brum, brum! [Nombre] se puso el casco y apretó el volante. La bandera verde bajó y la gran carrera empezó.',
+      en: 'Vroom, vroom! [Name] put on the helmet and gripped the wheel. The green flag dropped and the great race began.',
+      pt: 'Vrum, vrum! [Nome] colocou o capacete e apertou o volante. A bandeira verde baixou e a grande corrida começou.',
+    },
+    coverImage: '/samples/la-gran-carrera.webp',
+  },
+  {
+    ...DRAFT_BASE,
+    slug: 'hermano-mayor',
+    order: 43,
+    ageMin: 3,
+    ageMax: 6,
+    palette: 'magic',
+    collectionIds: ['grandes-momentos'],
+    suggestedLessons: ['llega-un-hermanito', 'compartir'],
+    tags: ['hermanito', 'familia', 'hitos'],
+    title: {
+      es: '[Nombre], hermano mayor',
+      en: '[Name], Big Brother',
+      pt: '[Nome], irmão mais velho',
+    },
+    summary: {
+      es: 'Llega un bebé a casa y [Nombre] descubre lo que significa ser el mayor: mostrar, ayudar, esperar y, sobre todo, ser único para siempre. Sirve igual para hermana mayor.',
+      en: 'A baby comes home and [Name] discovers what being the oldest means: showing, helping, waiting and, above all, being one of a kind forever. It works just as well for a big sister.',
+      pt: 'Chega um bebê em casa e [Nome] descobre o que significa ser o mais velho: mostrar, ajudar, esperar e, acima de tudo, ser único para sempre. Serve igual para irmã mais velha.',
+    },
+    excerpt: {
+      es: 'El bebé lloró y [Nombre] pensó: «¿Y ahora qué hago?». Entonces le ofreció su osito y el bebé, por fin, sonrió.',
+      en: 'The baby cried and [Name] thought: "Now what do I do?" So [Name] offered the teddy bear and the baby, at last, smiled.',
+      pt: 'O bebê chorou e [Nome] pensou: «E agora, o que eu faço?». Então ofereceu o ursinho e o bebê, finalmente, sorriu.',
+    },
+    coverImage: '/samples/hermano-mayor.webp',
+  },
+  {
+    ...DRAFT_BASE,
+    slug: 'la-navidad-de-nombre',
+    order: 44,
+    ageMin: 2,
+    ageMax: 6,
+    palette: 'celebration',
+    collectionIds: ['grandes-momentos'],
+    suggestedLessons: ['compartir', 'amistad'],
+    tags: ['navidad', 'reyes', 'temporada', 'regalo'],
+    title: {
+      es: 'La Navidad de [Nombre]',
+      en: "[Name]'s Christmas",
+      pt: 'O Natal de [Nome]',
+    },
+    summary: {
+      es: 'La noche más esperada del año, con [Nombre] como protagonista: las luces, el árbol, una carta que viaja lejos y un regalo que no se compra. En España, también para la noche de Reyes.',
+      en: 'The most awaited night of the year, starring [Name]: the lights, the tree, a letter that travels far and a gift that cannot be bought. In Spain, also for Three Kings night.',
+      pt: 'A noite mais esperada do ano, com [Nome] como protagonista: as luzes, a árvore, uma carta que viaja longe e um presente que não se compra. Na Espanha, também para a noite de Reis.',
+    },
+    excerpt: {
+      es: 'Esa noche, las luces del árbol parpadearon tres veces. [Nombre] abrió un ojo y escuchó: alguien golpeaba la ventana, despacito, tic, tic, tic.',
+      en: 'That night, the tree lights blinked three times. [Name] opened one eye and listened: someone was knocking on the window, softly, tap, tap, tap.',
+      pt: 'Naquela noite, as luzes da árvore piscaram três vezes. [Nome] abriu um olho e escutou: alguém batia na janela, devagarinho, toc, toc, toc.',
+    },
+    coverImage: '/samples/la-navidad-de-nombre.webp',
+  },
+  {
+    // Solo Celebraciones: la temática de unicornios y arcoíris no tiene versión de Familias.
+    ...DRAFT_BASE,
+    slug: 'unicornio-del-arcoiris',
+    order: 45,
+    ageMin: 3,
+    ageMax: 6,
+    channels: ['events'],
+    palette: 'celebration',
+    collectionIds: ['cumple-fantasia'],
+    suggestedLessons: ['amistad'],
+    tags: ['unicornios', 'arcoíris', 'fantasía', 'cumpleaños'],
+    title: {
+      es: '[Nombre] y el unicornio del arcoíris',
+      en: '[Name] and the Rainbow Unicorn',
+      pt: '[Nome] e o unicórnio do arco-íris',
+    },
+    summary: {
+      es: 'Un unicornio pierde los colores de su arcoíris justo el día de la fiesta, y [Nombre] y sus invitados salen a buscarlos. La temática de unicornios, con todo el kit.',
+      en: 'A unicorn loses the colors of its rainbow on the day of the party, and [Name] and the guests set out to find them. The unicorn theme, with the whole kit.',
+      pt: 'Um unicórnio perde as cores do seu arco-íris justo no dia da festa, e [Nome] e os convidados saem para procurá-las. A temática de unicórnios, com todo o kit.',
+    },
+    excerpt: {
+      es: 'El unicornio llegó a la fiesta con el arcoíris descolorido. «¡Nos faltan los colores!», dijo [Nombre], y todos corrieron a buscarlos.',
+      en: 'The unicorn arrived at the party with a faded rainbow. "We are missing the colors!" said [Name], and everyone ran to find them.',
+      pt: 'O unicórnio chegou à festa com o arco-íris desbotado. «Faltam as cores!», disse [Nome], e todos correram para buscá-las.',
+    },
+    coverImage: '/samples/unicornio-del-arcoiris.webp',
+  },
+];
+
 export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...NEW_STORY_BASE,

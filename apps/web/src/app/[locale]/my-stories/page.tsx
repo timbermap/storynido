@@ -38,16 +38,27 @@ export default function MyStoriesPage() {
 
   useEffect(() => {
     if (!user) return;
+    // Sin respuesta en 12 s se muestra la página igual, con el aviso de que no se pudo leer la lista.
+    const timer = setTimeout(() => {
+      setFailed(true);
+      setDrafts((current) => current ?? []);
+    }, 12_000);
     void getFirebaseDb()
       .then((db) => listDrafts(db, user.uid))
       .then((found) => {
+        clearTimeout(timer);
+        setFailed(false);
         setDrafts(found.filter((draft) => !isEmptyDraft(draft)));
       })
       .catch(() => {
+        clearTimeout(timer);
         // Sin la lista no se queda cargando: se avisa (los pedidos se muestran igual).
         setFailed(true);
         setDrafts([]);
       });
+    return () => {
+      clearTimeout(timer);
+    };
   }, [user]);
 
   if (loading || !user || !signedIn || !drafts) {

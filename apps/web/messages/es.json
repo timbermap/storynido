@@ -12,7 +12,7 @@
     "howItWorks": "Cómo funciona",
     "faq": "Preguntas",
     "blog": "Blog",
-    "signIn": "Iniciar sesión",
+    "signIn": "Ingresar",
     "account": "Mi cuenta",
     "menu": "Menú",
     "closeMenu": "Cerrar menú",
@@ -50,9 +50,15 @@
     "explore": "Explorar",
     "createShort": "Crear",
     "orders": "Pedidos",
-    "accountTab": "Cuenta",
-    "tabsNav": "Navegación de tu cuenta",
-    "ordersInProgress": "{count, plural, one {# pedido en curso} other {# pedidos en curso}}"
+    "ordersInProgress": "{count, plural, one {# pedido en curso} other {# pedidos en curso}}",
+    "createPro": "Crear un cuento",
+    "storiesMenu": "Historias",
+    "howItWorksShort": "Cómo funciona",
+    "createPreview": "Crear vista previa gratis",
+    "createKit": "Diseñar el kit",
+    "tryFree": "Probar gratis",
+    "professionalsTemplates": "Plantillas profesionales",
+    "adminPanel": "Panel de administración"
   },
   "Switchers": {
     "language": "Idioma",
@@ -914,7 +920,7 @@
       "kitTitle": "Tu kit incluye",
       "kitSubtitle": "Todo con la misma ilustración del protagonista. Las piezas se compran en digital, con licencia por cantidad de copias.",
       "kit": {},
-      "kitNote": "Todo el kit es digital: creas el diseño, ves la muestra gratis y compras los archivos en PDF para imprimirlos en casa o en la imprenta que prefieras. No imprimimos ni enviamos el kit.",
+      "kitNote": "Todo el kit es digital: creas el diseño, ves la muestra gratis y compras los archivos en PDF para imprimirlos en casa o en la imprenta que prefieras. Si prefieres, después pides las invitaciones y los agradecimientos impresos y enviados a tu casa.",
       "collectionsTitle": "Temas para la fiesta",
       "faqTitle": "Preguntas frecuentes",
       "faq": {
@@ -924,7 +930,7 @@
         },
         "2": {
           "q": "¿Puedo imprimirlo en casa?",
-          "a": "Sí, es lo que está pensado: el kit es digital y viene en PDF listo para imprimir en casa o en la imprenta que prefieras. Nosotros no imprimimos ni enviamos el kit."
+          "a": "Sí, es lo que está pensado: el kit es digital y viene en PDF listo para imprimir en casa o en la imprenta que prefieras. El kit en sí es digital; después puedes pedir las invitaciones y los agradecimientos impresos, y el mini cuento impreso en cantidad."
         },
         "3": {
           "q": "¿Necesito una foto?",
@@ -943,7 +949,9 @@
       "kitExtra": "+ {price}",
       "kitFull": "Kit digital completo: {price}, sin importar cuántos invitados.",
       "kitUsd": "Precios en dólares (USD).",
-      "collectionStart": "Diseñar el kit con este tema"
+      "collectionStart": "Diseñar el kit con este tema",
+      "catalogTitle": "Temáticas de fiesta",
+      "catalogSubtitle": "Elige la temática y arma el kit completo: invitación, mini cuento, stickers y más, con un mismo protagonista."
     },
     "professionals": {
       "metaTitle": "Cuentos personalizados para psicopedagogos, docentes y terapeutas",
@@ -1008,6 +1016,14 @@
         "4": {
           "q": "¿Hay descuentos?",
           "a": "Sí, por compras recurrentes de tu cuenta. Publicaremos los detalles cuando se habiliten los pagos."
+        },
+        "5": {
+          "q": "¿Puedo editar el texto?",
+          "a": "Sí. Antes de pagar puedes cambiar el texto de cada página de la vista previa y volver a generar la ilustración de esa página."
+        },
+        "6": {
+          "q": "¿Hay suscripción?",
+          "a": "No. Pagas cada cuento y, si haces muchos, tu cuenta recibe descuentos por volumen. Para consultorios e instituciones que necesitan cantidad, escríbenos desde Contacto."
         }
       },
       "finalTitle": "Un cuento para cada niño que acompañas",
@@ -1016,7 +1032,26 @@
       "ctaExamples": "Ver las colecciones",
       "collectionsSubtitle": "Cada colección responde a una situación real. Mira las historias, hojea un ejemplo y recién después crea tu cuenta.",
       "viewStory": "Ver la historia",
-      "collectionStart": "Crear con esta colección"
+      "collectionStart": "Crear con esta colección",
+      "pricingTitle": "Precio claro, sin suscripción",
+      "pricingSubtitle": "Pagas cada cuento cuando lo creas. Cuantos más cuentos haces, menos pagas por cada uno.",
+      "pricing": {
+        "1": {
+          "title": "Desde {price} cada cuento",
+          "text": "El digital, con sus ilustraciones y el texto que tú ajustas. El libro impreso suma su impresión y el envío, que se calcula con la dirección."
+        },
+        "2": {
+          "title": "Descuentos por volumen",
+          "text": "{n1} cuentos en {days} días: {p1} % menos. {n2} cuentos: {p2} %. {n3} cuentos: {p3} %. Aplica a tu cuenta automáticamente, sin pedirlo."
+        },
+        "3": {
+          "title": "Pruebas gratis antes de pagar",
+          "text": "Ves la vista previa del cuento sin pagar y solo pagas si lo quieres. Sin planes mensuales ni cuotas."
+        }
+      },
+      "pricingNote": "El descuento por volumen se calcula con tus compras de los últimos días; en el impreso el tope es menor.",
+      "catalogTitle": "Plantillas por objetivo",
+      "catalogSubtitle": "Colecciones para anticipar situaciones, trabajar emociones, rutinas, escuela y lenguaje. Eliges la plantilla y ajustas el texto."
     }
   },
   "Viewer": {
@@ -1226,7 +1261,7 @@
       "downloadAll": "Descargar todo (ZIP)",
       "moreCopies": "Pedir más copias",
       "ready": "¡Tu kit está listo!",
-      "digitalOnly": "El kit es digital: te llega en PDF listo para imprimir en casa o en la imprenta que prefieras. No imprimimos ni enviamos el kit.",
+      "digitalOnly": "El kit es digital: te llega en PDF listo para imprimir en casa o en la imprenta que prefieras. Las tarjetas impresas se piden después, desde el pedido terminado.",
       "printCards": {
         "cta": "Imprimir tarjetas",
         "title": "Tarjetas impresas",
@@ -1240,6 +1275,11 @@
         "minimum": "Mínimo {min} por diseño. El precio incluye la impresión; el envío se calcula con tu dirección.",
         "noPieces": "Este kit no tiene invitaciones ni tarjetas de agradecimiento para imprimir.",
         "error": "No pudimos calcular el pedido. Inténtalo de nuevo."
+      },
+      "bigBook": {
+        "title": "El cuento grande del cumpleañero, en tapa dura",
+        "text": "La historia completa, con el mismo personaje y sin subir fotos de nuevo: el recuerdo que se guarda. Se crea desde Familias y el envío se calcula con tu dirección.",
+        "cta": "Crear el cuento grande"
       }
     },
     "fromPrice": "desde {price}",
@@ -1294,7 +1334,9 @@
         "preview_generating": "Creando la muestra",
         "preview_ready": "Muestra lista",
         "ordered": "Comprado"
-      }
+      },
+      "loadFailed": "No pudimos cargar tus proyectos.",
+      "retry": "Reintentar"
     }
   },
   "PhotoPromise": {

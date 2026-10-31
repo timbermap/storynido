@@ -13,8 +13,8 @@ import { SiteFooter } from '@/components/layout/site-footer';
 import { HeaderSwitch } from '@/components/layout/focus-header';
 import { LanguageSuggestion } from '@/components/layout/language-suggestion';
 import { AppHeader } from '@/components/layout/app-header';
-import { BottomTabs } from '@/components/layout/bottom-tabs';
 import { SiteHeader } from '@/components/layout/site-header';
+import { StickyCta } from '@/components/layout/sticky-cta';
 import { routing } from '@/i18n/routing';
 import { brand } from '@/lib/brand';
 import { CONSENT_COOKIE, parseConsent } from '@/lib/consent';
@@ -112,7 +112,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 <HeaderSwitch>{customer ? <AppHeader /> : <SiteHeader />}</HeaderSwitch>
                 <main id="main">{children}</main>
                 <SiteFooter />
-                {customer && <BottomTabs />}
+                {!customer && <StickyCta />}
               </>
             )}
             <ConsentBanner />

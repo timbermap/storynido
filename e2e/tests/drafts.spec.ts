@@ -99,7 +99,10 @@ test('con sesión, el navbar es el de la app: sin las páginas que venden y con 
   await page.goto('/es/ingresar');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   // Sin sesión: el navbar de visitante, con los tres públicos.
-  await expect(page.locator('header').getByRole('link', { name: 'Familias' })).toBeVisible();
+  await expect(page.locator('header').getByRole('button', { name: 'Historias' })).toBeVisible();
+  await expect(
+    page.locator('header').getByRole('link', { name: 'Para celebraciones' }),
+  ).toBeVisible();
   const email = uniqueEmail('navbar');
   await page.locator('#email').fill(email);
   await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
@@ -110,12 +113,13 @@ test('con sesión, el navbar es el de la app: sin las páginas que venden y con 
   const header = page.locator('header').first();
   await expect(header.getByRole('link', { name: 'Mis cuentos' })).toBeVisible();
   await expect(header.getByRole('button', { name: 'Crear' })).toBeVisible();
-  await expect(header.getByRole('link', { name: 'Familias' })).toHaveCount(0);
+  await expect(header.getByRole('button', { name: 'Explorar' })).toBeVisible();
+  await expect(header.getByRole('link', { name: 'Para celebraciones' })).toHaveCount(0);
   // El logo lleva a Mis cuentos y la landing de un público conserva el mismo navbar.
   await page.goto('/es/familias');
-  await expect(page.locator('header').first().getByRole('link', { name: 'Familias' })).toHaveCount(
-    0,
-  );
+  await expect(
+    page.locator('header').first().getByRole('link', { name: 'Para celebraciones' }),
+  ).toHaveCount(0);
   await expect(page.locator('header a[href$="/mis-cuentos"]').first()).toBeVisible();
   // "Crear" reúne las tres opciones.
   await page.locator('header').first().getByRole('button', { name: 'Crear' }).click();

@@ -22,6 +22,9 @@ env:
   - variable: NEXT_PUBLIC_SITE_ENV
     value: production
     availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_ADMIN_URL
+    value: https://admin.storynido.com
+    availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_API_URL
     value: https://api.storynido.com
     availability: [BUILD, RUNTIME]
