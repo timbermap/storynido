@@ -50,14 +50,17 @@ export function HeaderCta({
   className?: string;
 }) {
   const pathname = usePathname();
-  const label =
-    pathname.startsWith('/events') && eventsLabel
-      ? eventsLabel
-      : pathname.startsWith('/professionals') && professionalsLabel
-        ? professionalsLabel
-        : children;
+  const inEvents = pathname.startsWith('/events') && Boolean(eventsLabel);
+  const inProfessionals = pathname.startsWith('/professionals') && Boolean(professionalsLabel);
+  const label = inEvents ? eventsLabel : inProfessionals ? professionalsLabel : children;
+  // Crear arranca el creador sin cuenta (en la línea de la sección); "Ingresar" es el único
+  // que lleva al login.
+  const line = inEvents ? 'events' : inProfessionals ? 'professionals' : undefined;
   return (
-    <Link href="/login" className={buttonVariants({ size, className })}>
+    <Link
+      href={line ? { pathname: '/create', query: { line } } : '/create'}
+      className={buttonVariants({ size, className })}
+    >
       {label}
     </Link>
   );

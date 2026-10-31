@@ -1962,3 +1962,9 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 - **Problema:** en el celular el login con Google/Apple abría un popup que mostraba que no se podía (el almacenamiento entre dominios suele estar bloqueado y los popups se pierden al volver a la app).
 - **Decisión:** en celulares y tabletas (`prefersRedirect`) el login va **directo por redirección**, sin intentar el popup; en escritorio sigue el popup con redirección de respaldo. Con sesión anónima (borrador en curso) se guarda su token antes de salir y, al volver (`completeRedirectSignIn`), los borradores se pasan a la cuenta con `mergeAnonymous`.
 - **A verificar en un celular real** (iPhone Safari y Android Chrome); depende de que el `authDomain` propio de staging siga bien configurado.
+
+## 162 · Navbar: «Ingresar» y «Crear gratis» ya no van al mismo lado
+
+- **Fecha:** 2026-10-31.
+- **Problema:** los dos botones de la barra llevaban a `/login`.
+- **Decisión:** «Ingresar» sigue yendo al login (y con sesión es el avatar); **«Crear gratis» abre el creador** (`/create`, que arranca sin cuenta y pide la cuenta recién para guardar o pedir), y en Celebraciones («Diseñar el kit») y Profesionales («Probar gratis») entra con su línea (`?line=events|professionals`), como los botones de cada landing.
