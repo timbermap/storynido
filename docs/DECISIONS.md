@@ -1955,3 +1955,10 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 - **Links rotos:** «Todas las enseñanzas» abre el índice nuevo `/ensenanzas` (agrupado en Valores, Confianza, Momentos de la vida y Emociones) y «Todas las historias» de la ficha lleva al catálogo de Familias, no a la ruta vieja.
 - **Creación nueva vacía:** resuelto en DECISIONS 159 (la copia local de lo escrito vence a los 30 minutos y se limpia al reutilizar o borrar).
 - **Pendiente del documento:** fragmento de ejemplo por enseñanza («Cómo aparece en el cuento», texto a escribir en es/en/pt con tono de acompañar, nunca de solucionar), el fragmento de la ficha con el mismo chico de la portada (la de los dinosaurios cuenta «Leo» y la portada muestra a Benja), imagen propia por enseñanza, la línea para profesionales y la analítica del embudo (`lesson_view`, `lesson_story_click`, `preview_created`/`purchase` con `lessonId`).
+
+## 161 · Login en celular por redirección
+
+- **Fecha:** 2026-10-31.
+- **Problema:** en el celular el login con Google/Apple abría un popup que mostraba que no se podía (el almacenamiento entre dominios suele estar bloqueado y los popups se pierden al volver a la app).
+- **Decisión:** en celulares y tabletas (`prefersRedirect`) el login va **directo por redirección**, sin intentar el popup; en escritorio sigue el popup con redirección de respaldo. Con sesión anónima (borrador en curso) se guarda su token antes de salir y, al volver (`completeRedirectSignIn`), los borradores se pasan a la cuenta con `mergeAnonymous`.
+- **A verificar en un celular real** (iPhone Safari y Android Chrome); depende de que el `authDomain` propio de staging siga bien configurado.

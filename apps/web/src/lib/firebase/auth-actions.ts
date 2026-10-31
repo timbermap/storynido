@@ -50,6 +50,18 @@ export function isEmbeddedBrowser(userAgent = navigator.userAgent): boolean {
   );
 }
 
+/**
+ * Celulares y tabletas: el popup de Google/Apple suele fallar ahí (almacenamiento bloqueado entre
+ * dominios, popups cerrados al volver a la app), así que se entra directo por redirección.
+ */
+export function prefersRedirect(userAgent = navigator.userAgent): boolean {
+  return (
+    isEmbeddedBrowser(userAgent) ||
+    /Android|iPhone|iPad|iPod|Mobile|CriOS|FxiOS/i.test(userAgent) ||
+    (/Macintosh/i.test(userAgent) && navigator.maxTouchPoints > 1)
+  );
+}
+
 /** Popup bloqueado o no soportado: se reintenta por redirección. */
 const POPUP_FAILED = new Set([
   'auth/popup-blocked',
@@ -60,6 +72,7 @@ const POPUP_FAILED = new Set([
 type LoginMethod = 'google' | 'apple' | 'email';
 type LoginVia = 'popup' | 'redirect' | 'link';
 const LOGIN_METHOD_KEY = 'storynido:loginMethod';
+const ANONYMOUS_TOKEN_KEY = 'storynido:anonymousToken';
 
 /**
  * Cuenta un paso del login (contadores del servidor por navegador, método y vía; sin datos de
@@ -79,10 +92,16 @@ function reportLogin(
 const isMfaStep = (error: unknown) => errorCode(error) === 'auth/multi-factor-auth-required';
 
 /** Redirección: se recuerda dónde estaba para volver ahí (la completa completeRedirectSignIn). */
-async function signInByRedirect(provider: AuthProvider, method: LoginMethod): Promise<void> {
+async function signInByRedirect(
+  provider: AuthProvider,
+  method: LoginMethod,
+  anonymousToken?: string,
+): Promise<void> {
   rememberReturnPath();
   try {
     window.sessionStorage.setItem(LOGIN_METHOD_KEY, method);
+    // Con sesión anónima, al volver sus borradores se pasan a la cuenta (ver completeRedirectSignIn).
+    if (anonymousToken) window.sessionStorage.setItem(ANONYMOUS_TOKEN_KEY, anonymousToken);
   } catch {
     // Sin storage, la vuelta no se cuenta.
   }
@@ -101,6 +120,17 @@ function takeRedirectMethod(): LoginMethod | null {
   }
 }
 
+/** Token de la sesión anónima que había antes de la redirección (y lo olvida). */
+function takeAnonymousToken(): string | null {
+  try {
+    const token = window.sessionStorage.getItem(ANONYMOUS_TOKEN_KEY);
+    window.sessionStorage.removeItem(ANONYMOUS_TOKEN_KEY);
+    return token;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Al volver de una redirección: termina el login. Devuelve el error (por ejemplo, el de segundo
  * factor) para que el panel lo muestre; null si no había nada pendiente o salió bien.
@@ -109,7 +139,13 @@ export async function completeRedirectSignIn(): Promise<unknown> {
   try {
     const result = await getRedirectResult(getFirebaseAuth(), browserPopupRedirectResolver);
     const method = takeRedirectMethod();
+    const anonymousToken = takeAnonymousToken();
     if (result && method) reportLogin('succeeded', method, 'redirect');
+    if (result && anonymousToken) {
+      await api('mergeAnonymous', { body: { anonymousIdToken: anonymousToken } }).catch(
+        () => undefined,
+      );
+    }
     return null;
   } catch (error) {
     const method = takeRedirectMethod();
@@ -127,7 +163,7 @@ async function signInWithProvider(
   const auth = getFirebaseAuth();
   const current = auth.currentUser;
   if (!current?.isAnonymous) {
-    if (isEmbeddedBrowser()) {
+    if (prefersRedirect()) {
       await signInByRedirect(provider, method);
       return;
     }
@@ -140,6 +176,10 @@ async function signInWithProvider(
       if (!POPUP_FAILED.has(errorCode(error))) throw error;
       await signInByRedirect(provider, method);
     }
+    return;
+  }
+  if (prefersRedirect()) {
+    await signInByRedirect(provider, method, await current.getIdToken());
     return;
   }
   try {
