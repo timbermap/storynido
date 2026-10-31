@@ -10,7 +10,6 @@ import {
   Settings,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { buttonVariants } from '@/components/ui/button';
@@ -33,8 +32,6 @@ function initials(name: string | null, email: string | null): string {
 export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' }) {
   const t = useTranslations('Nav');
   const { user, signedIn, loading, role } = useAuth();
-  // Después de entrar se vuelve a esta página.
-  const pathname = usePathname();
 
   // Mientras se lee la sesión, un lugar vacío del mismo tamaño: sin "Iniciar sesión" que
   // después cambia al avatar.
@@ -44,10 +41,7 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
 
   if (!signedIn || !user) {
     return (
-      <Link
-        href={{ pathname: '/login', query: pathname ? { next: pathname } : {} }}
-        className={buttonVariants({ variant: 'ghost', size: 'sm' })}
-      >
+      <Link href="/login" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
         {t('signIn')}
       </Link>
     );

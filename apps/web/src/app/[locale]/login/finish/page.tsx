@@ -10,7 +10,7 @@ import {
   completeMagicLink,
   isMagicLink,
   rememberedEmail,
-  takeReturnPath,
+  afterLoginPath,
   type AuthErrorKey,
 } from '@/lib/firebase/auth-actions';
 
@@ -26,14 +26,9 @@ export default function FinishSignInPage() {
     setStatus('signing-in');
     try {
       await completeMagicLink(withEmail, window.location.href);
-      const back = takeReturnPath();
+      const back = afterLoginPath();
       // La ruta guardada ya incluye el idioma: se navega sin volver a prefijarlo.
-      if (
-        back &&
-        !back.includes('/login') &&
-        !back.includes('/ingresar') &&
-        !back.includes('/entrar')
-      ) {
+      if (back) {
         window.location.replace(back);
       } else {
         router.replace('/my-stories');

@@ -110,6 +110,8 @@ test('con sesión, el navbar es el de la app: sin las páginas que venden y con 
   await page.goto(await magicLink(email));
   await expect(page).toHaveURL(/\/es\/mis-cuentos$/, { timeout: 30_000 });
 
+  // La página de quien ya es cliente arranca con "¿Qué quieres crear?".
+  await expect(page.getByRole('heading', { name: '¿Qué quieres crear?' })).toBeVisible();
   const header = page.locator('header').first();
   await expect(header.getByRole('link', { name: 'Mis cuentos' })).toBeVisible();
   await expect(header.getByRole('button', { name: 'Crear' })).toBeVisible();

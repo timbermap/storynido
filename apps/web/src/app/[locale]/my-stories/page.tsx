@@ -80,6 +80,13 @@ export default function MyStoriesPage() {
     <section className="container-page grid max-w-3xl gap-10 py-12">
       <h1 className="text-3xl font-medium sm:text-4xl">{t('title')}</h1>
 
+      <section id="new" aria-labelledby="new-title" className="grid scroll-mt-28 gap-4">
+        <h2 id="new-title" className="text-2xl font-medium">
+          {t('newTitle')}
+        </h2>
+        <NewChoice />
+      </section>
+
       {failed && (
         <p role="alert" className="rounded-xl bg-muted p-4 text-sm">
           {t('loadFailed')}
@@ -140,13 +147,6 @@ export default function MyStoriesPage() {
       ) : null}
 
       {pro?.accountType === 'professional' && <ProPanel uid={user.uid} status={pro} />}
-      <section id="new" aria-labelledby="new-title" className="grid scroll-mt-28 gap-4">
-        <h2 id="new-title" className="text-2xl font-medium">
-          {t('newTitle')}
-        </h2>
-        <NewChoice />
-      </section>
-
       <OrdersList uid={user.uid} />
     </section>
   );

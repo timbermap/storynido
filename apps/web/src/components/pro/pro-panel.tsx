@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { getFirebaseDb } from '@/lib/firebase/client';
+import { AnchorLink } from '@/components/anchor-link';
 import { createDraft, listProjects, type Project, type ProjectBook } from '@/lib/firebase/drafts';
 
 import type { ProStatus } from './use-pro-status';
@@ -82,9 +83,7 @@ export function ProPanel({ uid, status }: { uid: string; status: ProStatus }) {
           {t('title')}
         </h2>
         <Button asChild size="sm">
-          <Link href={{ pathname: '/create', query: { line: 'professionals' } }}>
-            {t('newProject')}
-          </Link>
+          <AnchorLink target="new">{t('newProject')}</AnchorLink>
         </Button>
       </div>
       {discount && (

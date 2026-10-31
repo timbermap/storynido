@@ -260,6 +260,23 @@ export function takeReturnPath(): string | null {
   }
 }
 
+/** Pago y pedido: lo único a lo que se vuelve tras entrar (todo lo demás cae en Mis cuentos). */
+const KEEP_RETURN = /\/(pagar|checkout|pagamento|pedido|order)\//;
+
+/**
+ * Adónde se va después de entrar (DECISIONS 152): siempre a Mis cuentos, la página de quien ya es
+ * cliente, donde ve qué hacer y cuál es el botón de crear. Solo se respeta volver a un pago o a un
+ * pedido; la ruta guardada se borra en todos los casos.
+ */
+export function afterLoginPath(requested?: string | null): string | null {
+  const saved = takeReturnPath();
+  const candidate = [requested, saved].find(
+    (path): path is string =>
+      Boolean(path?.startsWith('/')) && !path?.startsWith('//') && KEEP_RETURN.test(path ?? ''),
+  );
+  return candidate ?? null;
+}
+
 export async function logOut(): Promise<void> {
   await signOut(getFirebaseAuth());
 }

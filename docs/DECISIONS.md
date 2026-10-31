@@ -1851,3 +1851,10 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Carga:** "Cargando proyectos…" quedaba para siempre si la consulta fallaba (no tenía manejo de error). Ahora, si falla o tarda más de 12 s, avisa y ofrece reintentar; Mis cuentos hace lo mismo con su lista.
 - **Descuento por volumen:** el aviso de descuento sigue apareciendo solo para quien tiene el perfil profesional (las familias no lo ven).
 - **Pendiente:** el espacio de Profesionales (Pacientes · Plantillas · Compras) con su barra inferior, y la regla "si solo usó una línea, Explorar lleva directo a ese catálogo".
+
+## 152 · Después de entrar se cae siempre en Mis cuentos, con "¿Qué quieres crear?" primero
+
+- **Fecha:** 2026-10-31.
+- **Destino único.** Tanto el login como la confirmación del enlace mágico llevan a **Mis cuentos**, nunca al creador ni a la página donde estaba la persona. Solo se vuelve a un pago o a un pedido (`afterLoginPath`). La ruta guardada se borra siempre; el link "Ingresar" del encabezado ya no manda `?next=`.
+- **Mis cuentos arranca con "¿Qué quieres crear?"** (las tres líneas, cada una con su botón "Comenzar") arriba de todo; después lo que dejó a medias, los proyectos de Profesionales y los pedidos. El botón "Nuevo proyecto" de "Tus proyectos" baja a esa sección en vez de abrir el creador.
+- **Tests:** el helper que inicia sesión en la puerta del creador comprueba que cae en Mis cuentos y vuelve a la página donde estaba.

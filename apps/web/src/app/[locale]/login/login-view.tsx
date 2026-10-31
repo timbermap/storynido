@@ -8,7 +8,7 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { useRouter } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
-import { takeReturnPath } from '@/lib/firebase/auth-actions';
+import { afterLoginPath } from '@/lib/firebase/auth-actions';
 
 /** Solo rutas internas: nada de "//otro-sitio" ni URLs absolutas. */
 const safePath = (path: string | null) =>
@@ -20,12 +20,12 @@ export function LoginView() {
   const router = useRouter();
   const next = useSearchParams().get('next');
 
-  // Con sesión: vuelve a donde estaba (?next= o la ruta guardada antes de una redirección);
-  // si no, a Mis cuentos. Nunca a los ajustes.
+  // Con sesión: a Mis cuentos (solo se vuelve a un pago o a un pedido). Nunca al creador ni a los
+  // ajustes.
   useEffect(() => {
     if (loading || !signedIn) return;
-    const target = safePath(next) ?? takeReturnPath();
-    if (target && !target.includes('/login') && !/\/(ingresar|entrar)/.test(target)) {
+    const target = afterLoginPath(safePath(next));
+    if (target) {
       window.location.replace(target);
     } else {
       router.replace('/my-stories');

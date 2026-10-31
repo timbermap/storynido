@@ -49,15 +49,19 @@ export async function magicLink(email: string): Promise<string> {
 }
 
 /**
- * Crear pide cuenta (DECISIONS 106): en la puerta del creador se pide el enlace mágico y se
- * vuelve a la misma página con la sesión iniciada.
+ * Crear pide cuenta (DECISIONS 106): en la puerta del creador se pide el enlace mágico. Tras el
+ * enlace se cae en Mis cuentos; el test vuelve a la página donde estaba, ya con la sesión iniciada.
  */
 export async function signInAtGate(page: Page, email: string) {
+  const back = page.url();
   await expect(page.locator('h1').first()).toContainText('Inicia sesión', { timeout: 30_000 });
   await page.locator('#email').fill(email);
   await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
   await expect(page.locator('body')).toContainText('Revisa tu correo');
   await page.goto(await magicLink(email));
+  // Tras entrar siempre se cae en Mis cuentos (DECISIONS 152): se vuelve a la página donde se estaba.
+  await expect(page).toHaveURL(/\/(mis-cuentos|my-stories|minhas-historias)$/, { timeout: 30_000 });
+  await page.goto(back);
 }
 
 /** Cuenta con contraseña y rol (solo emuladores): para entrar al admin. */
