@@ -457,6 +457,17 @@ export const publicStorySchema = z.object({
   tags: z.array(z.string()),
   pageCount: z.number().int(),
   coverImage: z.string(),
+  /** Título partido alrededor del nombre ("La aventura de" / "") para la portada con título; null si no lo lleva. */
+  titleParts: z.object({ before: z.string(), after: z.string() }).nullable().optional(),
+  /** La portada trae el tercio superior vacío: el título se superpone (DECISIONS 157). */
+  coverTitleOverlay: z.boolean().optional(),
+  coverInk: z.enum(['dark', 'light']).optional(),
+  /** Portada de la versión Profesionales, si la historia tiene una. */
+  coverImagePro: z.string().nullable().optional(),
+  titlePro: z.string().nullable().optional(),
+  /** Nombre del elenco que protagoniza la portada. */
+  castName: z.string().optional(),
+  defaultStyle: z.string().nullable().optional(),
   samplePages: z.array(z.string()),
   lengths: z.array(bookLengthSchema),
   textDensities: z.array(textDensitySchema),

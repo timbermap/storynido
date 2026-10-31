@@ -105,8 +105,6 @@
       "headline": "O rosto dele.<br></br>O nome dele.<br></br>A <hl>aventura</hl> dele.",
       "lead": "Você envia uma foto e a transformamos no personagem da história. Vê de graça antes de decidir.",
       "explore": "Ver histórias",
-      "photoLabel": "A foto",
-      "bookAlt": "Livro aberto sobre uma manta de tricô: em uma página, um menino de cabelo cacheado e óculos vermelhos flutua como astronauta ao lado do cachorrinho; na outra, o mesmo menino conhece uma raposa na floresta. Ao lado, seu retrato ilustrado.",
       "audienceTitle": "Escolha para quem é",
       "priceDigital": "Digital {price}",
       "pricePrinted": "Impresso a partir de {price}",
@@ -123,7 +121,10 @@
       "photoNote": "Usamos a foto só para criar o personagem.",
       "homeMember": "Criar outra história",
       "homeContinue": "Continuar minha história",
-      "ctaMember": "Criar outra história"
+      "ctaMember": "Criar outra história",
+      "photoAlt": "Sobre uma mesa de cozinha de madeira, uma polaroid do Tomás, de 5 anos, rindo com seus óculos vermelhos, e ao lado o livro impresso aberto na página em que o mesmo Tomás voa num foguete de papelão.",
+      "pageAlt": "Ilustração de uma menina de franja em cima de uma colina, de braços abertos, gritando de alegria.",
+      "familiasPhotoAlt": "Uma menina de 6 anos ri e aponta para o livro."
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",
@@ -171,7 +172,9 @@
       "point1": "A foto é só uma referência: nunca aparece no livro.",
       "point2": "O personagem fica igual em todas as páginas.",
       "point3": "As fotos são guardadas criptografadas e excluídas automaticamente após 30 dias.",
-      "sample": "Ilustração de exemplo"
+      "sample": "Ilustração de exemplo",
+      "coverLine1": "A grande aventura espacial de",
+      "coverName": "TOMÁS"
     },
     "cover": {
       "title": "O nome dele na capa",
@@ -615,7 +618,18 @@
       "title": "Escolha o estilo de ilustração",
       "subtitle": "É assim que o livro inteiro vai ficar.",
       "required": "Escolha um estilo para continuar.",
-      "coloring": "Para colorir usamos ilustrações com contornos limpos."
+      "coloring": "Para colorir usamos ilustrações com contornos limpos.",
+      "recommended": "Recomendado",
+      "descriptions": {
+        "gouache-editorial": "Tinta opaca e fosca, de formas firmes. O estilo da casa, para qualquer idade.",
+        "collage-papel": "Cores fortes e formas simples, ideal para bebês.",
+        "minimalismo-grafico": "Linhas limpas e muito ar: claro e tranquilo, para leitores a partir dos 6 anos.",
+        "cuento-clasico": "Nanquim fino e um toque de cor, com ar de livro antigo. Ótimo para dar aos avós.",
+        "lapices-de-colores": "Traço de lápis caloroso e artesanal, suave para os pequenos.",
+        "acuarela": "Manchas suaves de água, delicada e terna, para qualquer idade.",
+        "cartoon-3d": "Formas arredondadas com volume, divertido de 4 a 9 anos.",
+        "para-colorear": "Só contornos, para eles pintarem."
+      }
     },
     "review": {
       "title": "Tudo pronto para a prévia!",
@@ -901,7 +915,6 @@
       "subtitle": "Convite, mini história, adesivos e mais, em digital: um só design que combina em toda a festa. Para aniversários, batizados, comunhões e formaturas.",
       "cta": "Montar meu kit",
       "note": "Você vê os exemplos sem conta. Para criar o design e ver a amostra grátis, entre com Google, Apple ou seu e-mail: assim guardamos seu projeto.",
-      "imageAlt": "Ilustração em aquarela de um aniversário: o aniversariante sopra as velas e os amigos seguram o mesmo livrinho de presente.",
       "howTitle": "Como funciona",
       "steps": {
         "1": {
@@ -942,7 +955,6 @@
         }
       },
       "finalTitle": "Que cada convidado leve uma lembrança da festa",
-      "photoLabel": "A foto",
       "kitTagNow": "Digital · PDF pronto para imprimir",
       "viewStory": "Ver a história",
       "kitDesign": "Design: {price} (inclui a mini história)",
@@ -951,7 +963,13 @@
       "kitUsd": "Preços em dólares (USD).",
       "collectionStart": "Criar o kit com este tema",
       "catalogTitle": "Temáticas de festa",
-      "catalogSubtitle": "Escolha a temática e monte o kit completo: convite, mini livro, adesivos e mais, com um só protagonista."
+      "catalogSubtitle": "Escolha a temática e monte o kit completo: convite, mini livro, adesivos e mais, com um só protagonista.",
+      "heroAlt": {
+        "invitation": "Convite impresso com fita coral que diz «Você está convidado!»",
+        "book": "Mini livros impressos, amarrados com fita coral e etiquetas com nomes",
+        "stickers": "Folha de adesivos redondos com o mesmo protagonista",
+        "bookmarks": "Dois marcadores de livro com borla"
+      }
     },
     "professionals": {
       "metaTitle": "Histórias personalizadas para psicopedagogos, professores e terapeutas",
@@ -962,7 +980,7 @@
       "cta": "Criar um projeto",
       "ctaSignedIn": "Novo projeto",
       "note": "Você vê os exemplos sem conta. Precisa dela para criar e guardar seus projetos por criança.",
-      "imageAlt": "Ilustração em aquarela de uma educadora lendo uma história ilustrada com uma criança em uma mesa baixa.",
+      "imageAlt": "Mesa de consultório vista de cima: mãos de uma profissional seguram um livro aberto, ao lado de um tablet com a lista de pacientes, notas e lápis de cor.",
       "howTitle": "Como funciona",
       "steps": {
         "1": {

@@ -1,14 +1,12 @@
 import { ArrowRight, Check, Clock } from 'lucide-react';
-import type { StaticImageData } from 'next/image';
 import type { ReactNode } from 'react';
 
-import type { Channel } from '@storynido/shared';
+import type { Channel, PublicStory } from '@storynido/shared';
 
-import { HeroArt } from '@/components/home/hero-art';
-import { HeroBook } from '@/components/home/hero-book';
 import { FaqList, type FaqItem } from '@/components/home/faq-list';
 import { buttonVariants } from '@/components/ui/button';
 import { AuthLink } from '@/components/auth/auth-link';
+import { StoryCover } from '@/components/stories/story-cover';
 import { Link } from '@/i18n/navigation';
 
 /** Secciones compartidas por las landings de cada línea (misma estética que la home). */
@@ -20,9 +18,7 @@ export function LandingHero({
   cta,
   note,
   priceLine,
-  image,
-  imageAlt,
-  photoLabel,
+  media,
 }: {
   eyebrow: string;
   title: string;
@@ -31,10 +27,8 @@ export function LandingHero({
   note: string;
   /** Precio como dato, bajo el botón (opcional). */
   priceLine?: string;
-  image: StaticImageData;
-  imageAlt: string;
-  /** Con rótulo, la ilustración va con el retrato "Su foto" y la flecha: de la foto al libro. */
-  photoLabel?: string;
+  /** La imagen del hero (cada línea tiene la suya). */
+  media: ReactNode;
 }) {
   return (
     <section className="overflow-hidden">
@@ -56,11 +50,7 @@ export function LandingHero({
           {priceLine && <p className="mt-5 text-base font-bold text-foreground">{priceLine}</p>}
           <p className="mt-4 text-sm font-bold text-muted-foreground">{note}</p>
         </div>
-        {photoLabel ? (
-          <HeroBook alt={imageAlt} photoLabel={photoLabel} image={image} />
-        ) : (
-          <HeroArt alt={imageAlt} src={image} />
-        )}
+        {media}
       </div>
     </section>
   );
@@ -183,7 +173,7 @@ export function LandingCollections({
   subtitle?: string;
   collections: { slug: string; name: string; description: string; topics: string[] }[];
   /** Historias de la línea: cada tema muestra las suyas, con enlace para empezar con ella. */
-  stories?: { slug: string; title: string; coverImage: string; collectionIds: string[] }[];
+  stories?: PublicStory[];
   /** Texto del enlace accesible de cada tapa ("Ver la historia"). */
   createLabel?: string;
   /** Público de la landing: la ficha de la historia vuelve a ella y crea en su línea. */
@@ -257,13 +247,9 @@ export function LandingCollections({
                         aria-label={createLabel ? `${createLabel}: ${story.title}` : story.title}
                         className="group block"
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element -- portada pública */}
-                        <img
-                          src={story.coverImage}
-                          alt=""
-                          loading="lazy"
-                          className="aspect-[3/4] w-full rounded-lg object-cover shadow-[var(--shadow-card)] transition group-hover:-translate-y-0.5"
-                        />
+                        <div className="aspect-[3/4] w-full overflow-hidden rounded-lg shadow-[var(--shadow-card)] transition group-hover:-translate-y-0.5">
+                          <StoryCover story={story} line={line} sizes="8rem" />
+                        </div>
                         <span className="mt-1.5 block text-xs leading-snug font-semibold group-hover:text-primary">
                           {story.title}
                         </span>

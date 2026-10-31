@@ -1,12 +1,12 @@
 'use client';
 
-import Image from 'next/image';
-import { useId, useState } from 'react';
+import { ImageSlot } from '@/components/landing/image-slot';
+import { CoverTitle } from '@/components/stories/story-cover';
+import { useEffect, useId, useState } from 'react';
 
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
-
-import heroWatercolor from '../../../public/brand/hero-acuarela.webp';
+import { readVisitorName, saveVisitorName } from '@/lib/visitor-name';
 
 const MAX_NAME = 14;
 
@@ -29,6 +29,13 @@ export function NameCoverDemo({ labels }: { labels: NameCoverLabels }) {
   const t = (key: keyof NameCoverLabels) => labels[key];
   const id = useId();
   const [name, setName] = useState('');
+  // Si ya escribió un nombre antes, la demo arranca con él (y las portadas del sitio también).
+  useEffect(() => {
+    const stored = readVisitorName();
+    // Leer localStorage solo es posible después de montar.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (stored) setName(stored);
+  }, []);
   const shown = (name.trim() || t('defaultName')).toUpperCase();
 
   return (
@@ -37,24 +44,18 @@ export function NameCoverDemo({ labels }: { labels: NameCoverLabels }) {
         <div className="order-2 lg:order-1">
           <div className="relative mx-auto w-[min(80%,22rem)] [perspective:1400px]">
             <div className="relative -rotate-3 [transform:rotateY(-10deg)]">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-[0.4rem_1rem_1rem_0.4rem] border-l-[12px] border-[#a98ac0] bg-[#fff4ea] shadow-[var(--shadow-book)]">
-                <Image
-                  src={heroWatercolor}
+              <div className="[container-type:inline-size] relative aspect-[3/4] overflow-hidden rounded-[0.4rem_1rem_1rem_0.4rem] border-l-[12px] border-[#a98ac0] bg-[#fff4ea] shadow-[var(--shadow-book)]">
+                <ImageSlot
+                  src="/samples/aventura-espacial.webp"
                   alt=""
+                  width={1200}
+                  height={1600}
                   sizes="(min-width: 1024px) 352px, 80vw"
-                  className="absolute inset-x-0 bottom-0 h-[72%] w-full object-cover object-[45%_center]"
+                  tone="bg-[#26324a]"
                 />
-                <div className="absolute inset-x-0 top-0 h-[46%] bg-[linear-gradient(to_bottom,#fff4ea_62%,transparent)]" />
-                <p className="relative px-4 pt-6 text-center font-display text-[#46335a]">
-                  <span className="block text-base font-semibold sm:text-lg">{t('line1')}</span>
-                  <span
-                    className="block truncate text-[clamp(2rem,7vw,3.1rem)] leading-[1.05] font-bold tracking-wide text-primary"
-                    aria-live="polite"
-                  >
-                    {shown}
-                  </span>
-                  <span className="block text-base font-semibold sm:text-lg">{t('line3')}</span>
-                </p>
+                <span aria-live="polite" className="contents">
+                  <CoverTitle before={t('line1')} name={shown} after={t('line3')} ink="light" />
+                </span>
               </div>
               <div
                 aria-hidden="true"
@@ -81,6 +82,7 @@ export function NameCoverDemo({ labels }: { labels: NameCoverLabels }) {
             placeholder={t('defaultName')}
             onChange={(event) => {
               setName(event.target.value);
+              saveVisitorName(event.target.value);
             }}
             className="mt-2 h-14 w-full max-w-sm rounded-[0.9rem] border-[1.5px] border-[#b7bcc8] bg-card px-4 text-xl font-semibold focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d9cef0]"
           />

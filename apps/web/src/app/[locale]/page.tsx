@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
-import { HeroBook } from '@/components/home/hero-book';
+import { HeroPhoto } from '@/components/home/hero-photo';
 import { HeroFacts } from '@/components/home/hero-facts';
 import { FaqList, faqHighlights, parseFaqGroups } from '@/components/home/faq-list';
 import { AudienceSelector } from '@/components/landing/audience-selector';
@@ -98,7 +98,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
             <HeroFacts digitalPrice={highlights?.digital ?? null} />
           </div>
-          <HeroBook alt={t('hero.bookAlt')} photoLabel={t('hero.photoLabel')} />
+          <HeroPhoto
+            src="/images/heroes/home-transformacion.webp"
+            alt={t('hero.photoAlt')}
+            width={1600}
+            height={1200}
+            tone="bg-[#e9dcc3]"
+          />
         </div>
       </section>
 

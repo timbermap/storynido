@@ -25,6 +25,15 @@ import type { WizardData } from './types';
 type Target = 'cover' | number;
 type PreviewData = NonNullable<PublicPreview['preview']>;
 
+/** Estilos con su librito de ejemplo de cuatro páginas (public/styles/<estilo>/1-4.webp). */
+const STYLES_WITH_EXAMPLE_PAGES = new Set([
+  'acuarela',
+  'cartoon-3d',
+  'cuento-clasico',
+  'lapices-de-colores',
+  'para-colorear',
+]);
+
 const KNOWN_ERRORS = [
   'limit_reached',
   'ai_unavailable',
@@ -87,7 +96,12 @@ export function PreviewPanel({
   const examples = {
     cover: book.storyId ? `/samples/${book.storyId}.webp` : null,
     // Un librito de ejemplo por estilo (mismo chico y zorro): public/styles/<estilo>/1-4.webp.
-    pages: book.styleId ? [1, 2, 3, 4].map((n) => `/styles/${book.styleId}/${String(n)}.webp`) : [],
+    // Los estilos nuevos todavía no tienen su librito de ejemplo: usan la muestra del estilo.
+    pages: book.styleId
+      ? STYLES_WITH_EXAMPLE_PAGES.has(book.styleId)
+        ? [1, 2, 3, 4].map((n) => `/styles/${book.styleId}/${String(n)}.webp`)
+        : [`/styles/${book.styleId}.webp`]
+      : [],
     label: tViewer('exampleLabel', { name: childName }),
   };
   const { user } = useAuth();

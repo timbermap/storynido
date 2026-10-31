@@ -1,9 +1,10 @@
-import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 
 import type { PublicStory } from '@storynido/shared';
 
 import { Link } from '@/i18n/navigation';
+
+import { StoryCover } from './story-cover';
 
 export async function StoryCard({
   story,
@@ -12,6 +13,7 @@ export async function StoryCard({
   priority = false,
   compact = false,
   lineLabel,
+  line,
 }: {
   story: PublicStory;
   fromPrice: string | null;
@@ -23,6 +25,8 @@ export async function StoryCard({
   compact?: boolean;
   /** En el buscador general: de qué línea es la historia (Familias, Celebraciones, Profesionales). */
   lineLabel?: string;
+  /** Línea desde la que se mira la historia (Profesionales usa su propia portada si la tiene). */
+  line?: string | null;
 }) {
   const t = await getTranslations('Stories');
   const Heading = headingLevel;
@@ -34,16 +38,13 @@ export async function StoryCard({
       className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)] transition duration-200 hover:-translate-y-1 motion-reduce:hover:translate-y-0"
     >
       <div className="aspect-[3/4] overflow-hidden bg-muted">
-        {/* SVG propio y liviano: se sirve tal cual (sin optimizador de imágenes). */}
-        <Image
-          src={story.coverImage}
-          alt=""
-          width={600}
-          height={800}
-          unoptimized
+        {/* Imagen propia y liviana: se sirve tal cual (sin optimizador de imágenes). */}
+        <StoryCover
+          story={story}
+          line={line}
           priority={priority}
           sizes={compact ? '(min-width: 1024px) 20vw, 33vw' : '(min-width: 1024px) 33vw, 50vw'}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          className="transition duration-500 group-hover:scale-105"
         />
       </div>
       <div

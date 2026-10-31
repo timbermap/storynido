@@ -27,6 +27,8 @@ const story = (
   active = true,
 ): Story => ({
   slug,
+  coverTitleOverlay: false,
+  coverInk: 'dark',
   active,
   order,
   ageMin,

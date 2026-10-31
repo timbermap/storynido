@@ -16,14 +16,13 @@ import {
 } from '@/components/landing/sections';
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { AuthLink } from '@/components/auth/auth-link';
+import { HeroKit } from '@/components/home/hero-photo';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
 import { formatPrice } from '@/lib/format';
 import { getCollections, getEventPricing, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
-
-import eventsArt from '../../../../public/brand/landing-eventos.webp';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -90,9 +89,16 @@ export default async function EventsPage({ params }: Props) {
         priceLine={
           fullKit !== null ? `${t('kitFull', { price: money(fullKit) })} ${t('kitUsd')}` : undefined
         }
-        image={eventsArt}
-        imageAlt={t('imageAlt')}
-        photoLabel={t('photoLabel')}
+        media={
+          <HeroKit
+            alts={{
+              invitation: t('heroAlt.invitation'),
+              book: t('heroAlt.book'),
+              stickers: t('heroAlt.stickers'),
+              bookmarks: t('heroAlt.bookmarks'),
+            }}
+          />
+        }
       />
       <LandingSteps
         title={t('howTitle')}

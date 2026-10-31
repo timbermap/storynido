@@ -105,8 +105,6 @@
       "headline": "Their face.<br></br>Their name.<br></br>Their <hl>adventure</hl>.",
       "lead": "Upload a photo and we turn it into the character of the story. See it free before you decide.",
       "explore": "Explore stories",
-      "photoLabel": "Their photo",
-      "bookAlt": "Open book on a knitted blanket: on one page a curly-haired boy with red glasses floats as an astronaut next to his puppy; on the other, the same boy meets a fox in the forest. Beside it, his illustrated portrait.",
       "audienceTitle": "Choose who it is for",
       "priceDigital": "Digital {price}",
       "pricePrinted": "Printed from {price}",
@@ -123,7 +121,10 @@
       "photoNote": "We use the photo only to create the character.",
       "homeMember": "Create another story",
       "homeContinue": "Continue my story",
-      "ctaMember": "Create another story"
+      "ctaMember": "Create another story",
+      "photoAlt": "On a wooden kitchen table, a polaroid of five-year-old Tomás laughing in his red glasses, and next to it the printed book open to the page where the same Tomás flies a cardboard rocket.",
+      "pageAlt": "Illustration of a girl with bangs standing on a hill with her arms wide open, shouting with joy.",
+      "familiasPhotoAlt": "A 6-year-old girl laughs and points toward the book."
     },
     "trust": {
       "preview": "Free preview before you pay",
@@ -171,7 +172,9 @@
       "point1": "The photo is only a reference: it never appears in the book.",
       "point2": "Their character looks the same on every page.",
       "point3": "Photos are stored encrypted and deleted automatically after 30 days.",
-      "sample": "Sample illustration"
+      "sample": "Sample illustration",
+      "coverLine1": "The Great Space Adventure of",
+      "coverName": "TOMÁS"
     },
     "cover": {
       "title": "Their name on the cover",
@@ -615,7 +618,18 @@
       "title": "Choose the illustration style",
       "subtitle": "This is how the whole book will look.",
       "required": "Choose a style to continue.",
-      "coloring": "For coloring books we use clean outline illustrations."
+      "coloring": "For coloring books we use clean outline illustrations.",
+      "recommended": "Recommended",
+      "descriptions": {
+        "gouache-editorial": "Opaque matte paint with firm shapes. The house style, for any age.",
+        "collage-papel": "Bold colors and simple shapes, ideal for babies.",
+        "minimalismo-grafico": "Clean lines and lots of air: clear and calm, for readers from age 6.",
+        "cuento-clasico": "Fine ink and a touch of color with an old-fashioned book feel. A great gift for grandparents.",
+        "lapices-de-colores": "Warm, hand-made pencil line, gentle for the youngest.",
+        "acuarela": "Soft water washes, tender and delicate, for any age.",
+        "cartoon-3d": "Rounded shapes with volume, fun for ages 4 to 9.",
+        "para-colorear": "Outlines only, for them to color in."
+      }
     },
     "review": {
       "title": "All set for the preview!",
@@ -901,7 +915,6 @@
       "subtitle": "Invitation, mini story, stickers and more, in digital: one design that matches across the whole party. For birthdays, baptisms, communions and graduations.",
       "cta": "Build my kit",
       "note": "You can see the examples without an account. To create the design and see the free sample, sign in with Google, Apple or your email so we can save your project.",
-      "imageAlt": "Watercolor illustration of a birthday party: the birthday child blows out the candles while friends hold the same little gift book.",
       "howTitle": "How it works",
       "steps": {
         "1": {
@@ -942,7 +955,6 @@
         }
       },
       "finalTitle": "Let every guest take home a memory of the party",
-      "photoLabel": "Their photo",
       "kitTagNow": "Digital · print-ready PDF",
       "viewStory": "View the story",
       "kitDesign": "Design: {price} (includes the mini story)",
@@ -951,7 +963,13 @@
       "kitUsd": "Prices in US dollars (USD).",
       "collectionStart": "Design the kit with this theme",
       "catalogTitle": "Party themes",
-      "catalogSubtitle": "Pick the theme and build the full kit: invitation, mini story, stickers and more, with one hero."
+      "catalogSubtitle": "Pick the theme and build the full kit: invitation, mini story, stickers and more, with one hero.",
+      "heroAlt": {
+        "invitation": "Printed invitation tied with a coral ribbon that reads \"You are invited!\"",
+        "book": "Printed mini storybooks tied with coral ribbon and name tags",
+        "stickers": "A sheet of round stickers with the same hero",
+        "bookmarks": "Two bookmarks with tassels"
+      }
     },
     "professionals": {
       "metaTitle": "Personalized stories for educators, therapists and specialists",
@@ -962,7 +980,7 @@
       "cta": "Create a project",
       "ctaSignedIn": "New project",
       "note": "You can see the examples without an account. You need one to create and save your projects for each child.",
-      "imageAlt": "Watercolor illustration of an educator reading an illustrated story with a child at a low table.",
+      "imageAlt": "Overhead view of a therapist's desk: a professional's hands hold an open book next to a tablet with a list of patients, sticky notes and colored pencils.",
       "howTitle": "How it works",
       "steps": {
         "1": {

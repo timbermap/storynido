@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
-import { HeroBook } from '@/components/home/hero-book';
+import { HeroFamilias } from '@/components/home/hero-photo';
 import { HeroFacts } from '@/components/home/hero-facts';
 import { NameCoverDemo } from '@/components/home/name-cover-demo';
 import { PhotoToStory } from '@/components/home/photo-to-story';
@@ -140,7 +140,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
             )}
             <HeroFacts />
           </div>
-          <HeroBook alt={t('hero.bookAlt')} photoLabel={t('hero.photoLabel')} />
+          <HeroFamilias pageAlt={t('hero.pageAlt')} photoAlt={t('hero.familiasPhotoAlt')} />
         </div>
       </section>
 

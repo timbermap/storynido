@@ -58,7 +58,10 @@ import {
 
 import {
   SEED_ACTIVITY_TEMPLATES,
+  LIGHT_INK_SLUGS,
+  NEW_COVER_SLUGS,
   SEED_DRAFT_STORIES,
+  STORY_CAST,
   SEED_NEW_STORIES,
   SEED_STORIES,
   SEED_STYLES,
@@ -589,10 +592,33 @@ for (const collection of SEED_COLLECTIONS) {
   );
 }
 
+const NEW_COVERS = new Set(NEW_COVER_SLUGS);
+const LIGHT_INK = new Set(LIGHT_INK_SLUGS);
 for (const story of [...SEED_STORIES, ...SEED_NEW_STORIES, ...SEED_DRAFT_STORIES]) {
   batch.set(
     db.collection(COLLECTIONS.stories).doc(story.slug),
-    storySchema.parse({ ...story, createdAt: now, updatedAt: now }),
+    storySchema.parse({
+      ...story,
+      // Rediseño de imágenes (DECISIONS 157): el elenco de la marca, el estilo recomendado por línea
+      // y la portada nueva con el título superpuesto.
+      castName: STORY_CAST[story.slug] ?? story.castName,
+      defaultStyle:
+        story.channels[0] === 'professionals' ? 'minimalismo-grafico' : 'gouache-editorial',
+      ...(NEW_COVERS.has(story.slug) ? { coverTitleOverlay: true } : {}),
+      ...(LIGHT_INK.has(story.slug) ? { coverInk: 'light' } : {}),
+      ...(story.slug === 'mi-primer-dia-de-clases'
+        ? {
+            coverImagePro: '/samples/mi-primer-dia-de-clases-pro.webp',
+            titlePro: {
+              es: 'Mi primer día de clases',
+              en: 'My First Day of School',
+              pt: 'Meu primeiro dia de aula',
+            },
+          }
+        : {}),
+      createdAt: now,
+      updatedAt: now,
+    }),
   );
 }
 

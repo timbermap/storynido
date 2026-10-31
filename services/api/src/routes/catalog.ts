@@ -4,6 +4,7 @@ import {
   CHARGE_CURRENCY,
   COUNTRY_CODES,
   EXAMPLE_CHILD_NAME,
+  splitTitleAtName,
   withChildName,
   defaultCountryConfig,
   REFERENCE_CURRENCIES,
@@ -47,10 +48,18 @@ const params = <K extends keyof typeof apiRoutes>(request: FastifyRequest) =>
 export function toPublicStory(story: Story, locale: Locale): PublicStory {
   return {
     slug: story.slug,
-    // El catálogo es público y todavía no hay nombre: la marca [Nombre] se muestra con uno de ejemplo.
-    title: withChildName(story.title[locale], EXAMPLE_CHILD_NAME),
-    summary: withChildName(story.summary[locale], EXAMPLE_CHILD_NAME),
-    excerpt: withChildName(story.excerpt[locale], EXAMPLE_CHILD_NAME),
+    // El catálogo es público y todavía no hay nombre: la marca [Nombre] se muestra con el del elenco
+    // de la historia (o uno de ejemplo). La portada con título recibe el título partido.
+    title: withChildName(story.title[locale], story.castName ?? EXAMPLE_CHILD_NAME),
+    titleParts: splitTitleAtName(story.title[locale]),
+    coverTitleOverlay: story.coverTitleOverlay,
+    coverInk: story.coverInk,
+    coverImagePro: story.coverImagePro ?? null,
+    titlePro: story.titlePro?.[locale] ?? null,
+    castName: story.castName ?? EXAMPLE_CHILD_NAME,
+    defaultStyle: story.defaultStyle ?? null,
+    summary: withChildName(story.summary[locale], story.castName ?? EXAMPLE_CHILD_NAME),
+    excerpt: withChildName(story.excerpt[locale], story.castName ?? EXAMPLE_CHILD_NAME),
     ageMin: story.ageMin,
     ageMax: story.ageMax,
     tags: story.tags,

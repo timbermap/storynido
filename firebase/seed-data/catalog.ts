@@ -12,7 +12,9 @@ import {
   type Story,
 } from '@storynido/shared';
 
-type SeedStory = Omit<Story, 'createdAt' | 'updatedAt'>;
+/** Las portadas con título y su color de tinta son opcionales en el seed (por defecto, la portada tal cual). */
+type SeedStory = Omit<Story, 'createdAt' | 'updatedAt' | 'coverTitleOverlay' | 'coverInk'> &
+  Partial<Pick<Story, 'coverTitleOverlay' | 'coverInk'>>;
 type SeedStyle = Omit<IllustrationStyle, 'createdAt' | 'updatedAt'>;
 
 const TEXT_PROMPT = `Escribe un cuento infantil de {{pageCount}} páginas titulado "{{storyTitle}}".
@@ -303,6 +305,56 @@ const BIRTHDAY_THEMES: Record<string, string[]> = {
   'reino-encantado': ['cumple-fantasia'],
   'gol-de-campeon': ['cumple-campeones'],
 };
+
+/** Elenco de la marca por historia (rediseño de imágenes, DECISIONS 157). */
+export const STORY_CAST: Record<string, string> = {
+  'te-quiero-siempre': 'Lola',
+  'buenas-noches': 'Lola',
+  'amigos-de-la-selva': 'Lola',
+  'la-navidad-de-nombre': 'Lola',
+  'aventura-espacial': 'Tomás',
+  'la-gran-carrera': 'Tomás',
+  'el-cumpleanos-mas-magico': 'Tomás',
+  'valle-de-los-dinosaurios': 'Benja',
+  'superheroe-por-un-dia': 'Benja',
+  'hermano-mayor': 'Benja',
+  'gol-de-campeon': 'Benja',
+  'reino-encantado': 'Martina',
+  'mi-primer-dia-de-clases': 'Martina',
+  'las-tardes-con-los-abuelos': 'Martina',
+  'secreto-del-fondo-del-mar': 'Sofi',
+  'unicornio-del-arcoiris': 'Sofi',
+  'el-misterio-del-faro': 'Alex',
+  'un-lunes-al-reves': 'Alex',
+};
+
+/** Portadas nuevas con el tercio superior vacío (el título se superpone). Se suman al instalarlas. */
+export const NEW_COVER_SLUGS: string[] = [
+  'te-quiero-siempre',
+  'buenas-noches',
+  'amigos-de-la-selva',
+  'aventura-espacial',
+  'valle-de-los-dinosaurios',
+  'reino-encantado',
+  'secreto-del-fondo-del-mar',
+  'superheroe-por-un-dia',
+  'la-gran-carrera',
+  'hermano-mayor',
+  'mi-primer-dia-de-clases',
+  'gol-de-campeon',
+  'las-tardes-con-los-abuelos',
+  'un-lunes-al-reves',
+  'el-misterio-del-faro',
+  'el-cumpleanos-mas-magico',
+  'unicornio-del-arcoiris',
+  'las-letras-que-bailan',
+  'el-jardin-de-las-emociones',
+  'un-pasito-mas',
+  'mi-visita-al-dentista',
+];
+
+/** Portadas de fondo azul marino: el título va en claro. */
+export const LIGHT_INK_SLUGS = ['aventura-espacial', 'buenas-noches', 'el-misterio-del-faro'];
 
 export const SEED_STORIES: SeedStory[] = ADVENTURES.map((story) => {
   const themes = BIRTHDAY_THEMES[story.slug];
@@ -605,9 +657,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
     channels: ['events', 'families'],
     collectionIds: ['cumpleanos'],
     title: {
-      es: 'El cumpleaños más mágico',
-      en: 'The Most Magical Birthday',
-      pt: 'O aniversário mais mágico',
+      es: 'El cumpleaños de [Nombre]',
+      en: "[Name]'s Birthday",
+      pt: 'O aniversário de [Nome]',
     },
     summary: {
       es: 'Las velas se encienden solas y la fiesta se convierte en una aventura. Un mini cuento con el cumpleañero como protagonista, para regalar a cada invitado.',
@@ -957,7 +1009,7 @@ export const SEED_STYLES: SeedStyle[] = [
     name: { es: 'Collage de papel', en: 'Paper collage', pt: 'Colagem de papel' },
     promptModifier:
       'cut-paper collage: clean cut-out contours, layered textured paper, visible paper fibers, very subtle shadows between layers, faces detailed enough to resemble the child',
-    sampleImage: null,
+    sampleImage: '/styles/collage-papel.webp',
     contentTypes: ['story', 'activities', 'story_activities'],
   },
   {
@@ -967,7 +1019,7 @@ export const SEED_STYLES: SeedStyle[] = [
     name: { es: 'Minimalismo gráfico', en: 'Graphic minimalism', pt: 'Minimalismo gráfico' },
     promptModifier:
       'contemporary graphic minimalism: expressive silhouettes, simple backgrounds, a few colors, clear composition that reads as a thumbnail, distinctive faces true to the photo',
-    sampleImage: null,
+    sampleImage: '/styles/minimalismo-grafico.webp',
     contentTypes: ['story', 'activities', 'story_activities'],
   },
   {
@@ -977,7 +1029,7 @@ export const SEED_STYLES: SeedStyle[] = [
     name: { es: 'Gouache editorial', en: 'Editorial gouache', pt: 'Guache editorial' },
     promptModifier:
       'traditional editorial gouache: matte pigment, irregular brush strokes, opaque layers, controlled palette, individual slightly angular faces',
-    sampleImage: null,
+    sampleImage: '/styles/gouache-editorial.webp',
     contentTypes: ['story', 'activities', 'story_activities'],
   },
   {
@@ -988,7 +1040,7 @@ export const SEED_STYLES: SeedStyle[] = [
     name: { es: 'Para colorear', en: 'Coloring', pt: 'Para colorir' },
     promptModifier:
       'black and white coloring book line art for children, clean bold uniform outlines, no shading, no gray, no color fills, large simple shapes with wide areas to color, plain white background',
-    sampleImage: null,
+    sampleImage: '/styles/para-colorear.webp',
     contentTypes: ['coloring'],
   },
 ];

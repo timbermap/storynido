@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { stageOf, withChildName } from './catalog';
+import { splitTitleAtName, stageOf, withChildName } from './catalog';
 
 describe('etapas de lectura', () => {
   it('cada historia cae en la etapa que contiene el centro de su rango', () => {
@@ -28,5 +28,26 @@ describe('nombre en el título', () => {
 
   it('un título sin marca queda igual', () => {
     expect(withChildName('Mi visita al dentista', 'Tomás')).toBe('Mi visita al dentista');
+  });
+});
+
+describe('título partido alrededor del nombre', () => {
+  it('separa lo que va antes y después de la marca', () => {
+    expect(splitTitleAtName('La gran aventura espacial de [Nombre]')).toEqual({
+      before: 'La gran aventura espacial de',
+      after: '',
+    });
+    expect(splitTitleAtName('[Nombre] y el valle de los dinosaurios')).toEqual({
+      before: '',
+      after: 'y el valle de los dinosaurios',
+    });
+    expect(splitTitleAtName("¡[Name], Champion's Goal!")).toEqual({
+      before: '¡',
+      after: ", Champion's Goal!",
+    });
+  });
+
+  it('un título sin marca no se parte', () => {
+    expect(splitTitleAtName('Mi visita al dentista')).toBeNull();
   });
 });

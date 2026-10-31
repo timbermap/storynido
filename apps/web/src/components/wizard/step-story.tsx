@@ -1,11 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { suggestedReading, type PublicStory } from '@storynido/shared';
 
+import { StoryCover } from '@/components/stories/story-cover';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
 
@@ -75,14 +75,9 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
                 setError(null);
               }}
             >
-              <Image
-                src={story.coverImage}
-                alt=""
-                width={300}
-                height={400}
-                unoptimized
-                className="aspect-[3/4] w-full object-cover"
-              />
+              <div className="aspect-[3/4] w-full overflow-hidden">
+                <StoryCover story={story} sizes="(min-width: 768px) 20vw, 45vw" />
+              </div>
               <span className="grid gap-1.5 p-3">
                 <span className="font-display text-lg leading-snug font-semibold">
                   {story.title}

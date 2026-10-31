@@ -24,12 +24,21 @@ export function StepStyle({ nav, data }: { nav: StepNav; data: WizardData }) {
   const t = useTranslations('Wizard.style');
   // Para colorear solo se ofrece el estilo de contornos (y al revés).
   const styles = data.styles.filter((style) => style.contentTypes.includes(data.book.contentType));
+  // Estilo recomendado: el de la historia o, si no tiene, el de la casa (Profesionales, el minimalista).
+  const story = data.stories.find((item) => item.slug === data.book.storyId);
+  const wanted =
+    story?.defaultStyle ??
+    (data.book.channel === 'professionals' ? 'minimalismo-grafico' : 'gouache-editorial');
+  const recommended =
+    data.book.contentType !== 'coloring' && styles.some((style) => style.slug === wanted)
+      ? wanted
+      : null;
   const [selected, setSelected] = useState(
     styles.some((style) => style.slug === data.book.styleId)
       ? data.book.styleId
       : styles.length === 1
         ? (styles[0]?.slug ?? null)
-        : null,
+        : recommended,
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -82,7 +91,19 @@ export function StepStyle({ nav, data }: { nav: StepNav; data: WizardData }) {
                   className={`block aspect-[4/3] w-full ${SWATCHES[style.slug] ?? 'bg-muted'}`}
                 />
               )}
-              <span className="p-3 font-display text-lg font-semibold">{style.name}</span>
+              {recommended === style.slug && (
+                <span className="absolute top-2 left-2 rounded-full bg-primary px-2.5 py-1 text-xs leading-none font-bold text-primary-foreground shadow">
+                  {t('recommended')}
+                </span>
+              )}
+              <span className="grid gap-1 p-3">
+                <span className="font-display text-lg font-semibold">{style.name}</span>
+                {t.has(`descriptions.${style.slug}`) && (
+                  <span className="text-sm leading-snug text-muted-foreground">
+                    {t(`descriptions.${style.slug}`)}
+                  </span>
+                )}
+              </span>
             </OptionCard>
           ))}
         </div>

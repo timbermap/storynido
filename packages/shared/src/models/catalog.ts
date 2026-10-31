@@ -46,6 +46,21 @@ export const storySchema = timestampsSchema.extend({
   excerpt: localizedSchema(z.string().min(1)),
   /** Portada de muestra (ruta pública o del bucket de assets). */
   coverImage: z.string().min(1),
+  /**
+   * Portada nueva (rediseño de imágenes, DECISIONS 157): el tercio superior está vacío y el título
+   * se superpone con la tipografía de la marca. Sin el flag, la portada se muestra tal cual.
+   */
+  coverTitleOverlay: z.boolean().default(false),
+  /** Color del título sobre el fondo de la portada: oscuro (por defecto) o claro (fondos azul marino). */
+  coverInk: z.enum(['dark', 'light']).default('dark'),
+  /** Portada de la versión Profesionales de la misma historia (otro estilo y chico genérico). */
+  coverImagePro: z.string().nullish(),
+  /** Título de la versión Profesionales, sin el nombre del niño ("Mi primer día de clases"). */
+  titlePro: localizedSchema(z.string().min(1)).nullish(),
+  /** Nombre del elenco de la marca que protagoniza la portada y el fragmento de muestra. */
+  castName: z.string().min(1).max(30).optional(),
+  /** Estilo recomendado para esta historia en el asistente (slug de `illustrationStyles`). */
+  defaultStyle: slugSchema.optional(),
   /** Imágenes de páginas de muestra. */
   samplePages: z.array(z.string()),
   textPromptTemplate: z.string().min(1),
@@ -158,6 +173,19 @@ export function stageOf(story: { ageMin: number; ageMax: number }): AgeStageKey 
 
 /** Marca del nombre en los títulos del catálogo ("[Nombre] y el valle de los dinosaurios"). */
 const NAME_PLACEHOLDER = /\[(?:Nombre|Name|Nome)\]/g;
+
+/**
+ * Parte un título con la marca del nombre en lo que va antes y después ("La aventura de [Nombre]"
+ * → "La aventura de" y ""). Sin marca devuelve null.
+ */
+export function splitTitleAtName(title: string): { before: string; after: string } | null {
+  const match = /\[(?:Nombre|Name|Nome)\]/.exec(title);
+  if (!match) return null;
+  return {
+    before: title.slice(0, match.index).trim(),
+    after: title.slice(match.index + match[0].length).trim(),
+  };
+}
 
 /** Nombre de ejemplo (neutro) para mostrar los títulos del catálogo antes de que se escriba el nombre. */
 export const EXAMPLE_CHILD_NAME = 'Alex';

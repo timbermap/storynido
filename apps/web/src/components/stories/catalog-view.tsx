@@ -294,6 +294,7 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
                 headingLevel="h2"
                 priority={index < 2}
                 lineLabel={channel ? undefined : tLines(story.channels[0] ?? 'families')}
+                line={channel}
               />
             ))}
           </div>

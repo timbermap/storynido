@@ -1,8 +1,8 @@
-import { Camera, Check } from 'lucide-react';
-import Image from 'next/image';
+import { Check } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
-import heroWatercolor from '../../../public/brand/hero-acuarela.webp';
+import { ImageSlot } from '@/components/landing/image-slot';
+import { CoverTitle } from '@/components/stories/story-cover';
 
 /** Muestra la transformación foto → personaje sin usar fotos reales de menores. */
 export async function PhotoToStory() {
@@ -28,41 +28,51 @@ export async function PhotoToStory() {
         </div>
 
         <figure className="relative mx-auto w-full max-w-xl">
-          {/* Primer plano del personaje (recorte de la ilustración del hero). */}
+          {/* Su personaje ilustrado: el mismo chico de la foto, en el estilo de la casa. */}
           <div className="ml-auto aspect-square w-[82%] overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,#fffaf5,#eee8fa)] shadow-[0_17px_45px_rgb(80_52_84/0.08)]">
-            <Image
-              src={heroWatercolor}
+            <ImageSlot
+              src="/images/secciones/personaje.webp"
               alt=""
+              width={900}
+              height={900}
               sizes="(min-width: 1024px) 460px, 80vw"
-              placeholder="blur"
-              className="h-full w-full scale-[1.9] object-cover object-[46%_38%]"
+              tone="bg-[#fff7f2]"
             />
           </div>
           <span className="absolute -top-3 right-4 rounded-full bg-card px-3 py-1 text-xs font-semibold text-primary shadow-[var(--shadow-card)]">
             {t('characterLabel')}
           </span>
 
-          {/* Marco tipo polaroid: representa la foto que sube la familia (no es una foto real). */}
+          {/* La foto de la familia (de muestra), con el marco de una polaroid. */}
           <div className="absolute -bottom-8 -left-2 w-32 -rotate-6 rounded-md bg-card p-2 pb-6 shadow-[var(--shadow-book)] sm:-left-8 sm:w-40">
-            <div className="grid aspect-square place-items-center rounded-sm border-2 border-dashed border-primary/40 bg-sky text-primary">
-              <Camera className="size-9" aria-hidden="true" />
+            <div className="overflow-hidden rounded-sm">
+              <ImageSlot
+                src="/images/secciones/foto-real.webp"
+                alt=""
+                width={900}
+                height={900}
+                sizes="160px"
+                tone="bg-sky"
+              />
             </div>
             <span className="mt-2 block text-center text-xs font-semibold text-muted-foreground">
               {t('photoLabel')}
             </span>
           </div>
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 120 80"
-            className="absolute bottom-10 left-28 w-20 text-primary sm:left-36 sm:w-24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-          >
-            <path d="M6 70 C 30 70, 50 20, 104 18" />
-            <path d="M92 8 L106 18 L94 30" />
-          </svg>
+          {/* La portada que sale de las dos cosas, con su título en tipografía real. */}
+          <div className="absolute -right-2 -bottom-10 w-24 rotate-3 overflow-hidden rounded-md shadow-[var(--shadow-book)] sm:-right-6 sm:w-32">
+            <div className="[container-type:inline-size] relative aspect-[3/4]">
+              <ImageSlot
+                src="/samples/aventura-espacial.webp"
+                alt=""
+                width={1200}
+                height={1600}
+                sizes="128px"
+                tone="bg-[#26324a]"
+              />
+              <CoverTitle before={t('coverLine1')} name={t('coverName')} ink="light" />
+            </div>
+          </div>
           <figcaption className="mt-12 text-right text-xs text-muted-foreground">
             {t('sample')}
           </figcaption>

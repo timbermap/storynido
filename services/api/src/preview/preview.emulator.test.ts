@@ -37,6 +37,8 @@ const now = new Date();
 
 const story: Story = {
   slug: 'aventura-espacial',
+  coverTitleOverlay: false,
+  coverInk: 'dark',
   active: true,
   order: 1,
   ageMin: 3,

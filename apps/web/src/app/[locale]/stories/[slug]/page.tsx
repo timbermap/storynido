@@ -1,6 +1,5 @@
 import { ArrowLeft, BookOpen, Check, Truck } from 'lucide-react';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
@@ -14,6 +13,7 @@ import {
 
 import { AuthLink } from '@/components/auth/auth-link';
 import { JsonLd } from '@/components/json-ld';
+import { StoryCover } from '@/components/stories/story-cover';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
@@ -42,7 +42,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: story.title,
       description: story.summary,
-      images: [{ url: story.coverImage }],
+      // Imagen generada: la portada y el título con el nombre del elenco (api/og/story).
+      images: [
+        {
+          url: absoluteUrl(`/api/og/story?locale=${locale}&slug=${slug}`),
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
   };
 }
@@ -129,15 +136,13 @@ export default async function StoryPage({ params, searchParams }: Props) {
       </Link>
 
       <div className="mt-6 grid gap-10 md:grid-cols-[2fr_3fr] md:gap-14">
-        <div className="mx-auto w-full max-w-sm overflow-hidden rounded-xl shadow-xl ring-1 ring-black/5">
-          <Image
-            src={story.coverImage}
+        <div className="mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl shadow-xl ring-1 ring-black/5">
+          <StoryCover
+            story={story}
+            line={line}
             alt={story.title}
-            width={600}
-            height={800}
-            unoptimized
             priority
-            className="h-full w-full object-cover"
+            sizes="(min-width: 768px) 24rem, 90vw"
           />
         </div>
 

@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { DEFAULT_PRO_DISCOUNTS, type Locale } from '@storynido/shared';
 
 import { AuthLink } from '@/components/auth/auth-link';
+import { HeroPhoto } from '@/components/home/hero-photo';
 import { JsonLd } from '@/components/json-ld';
 import { RememberChannel } from '@/components/landing/remember-channel';
 import {
@@ -23,7 +24,6 @@ import { getCollections, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
 
-import professionalsArt from '../../../../public/brand/landing-profesionales.webp';
 import { AnchorLink } from '@/components/anchor-link';
 
 interface Props {
@@ -82,8 +82,15 @@ export default async function ProfessionalsPage({ params }: Props) {
         subtitle={t('subtitle')}
         cta={heroCta}
         note={t('note')}
-        image={professionalsArt}
-        imageAlt={t('imageAlt')}
+        media={
+          <HeroPhoto
+            src="/images/heroes/pro-mesa.webp"
+            alt={t('imageAlt')}
+            width={1600}
+            height={1200}
+            tone="bg-[#ece7fb]"
+          />
+        }
       />
       <LandingCollections
         id="examples"
