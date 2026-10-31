@@ -101,7 +101,7 @@ export default async function ProfessionalsPage({ params }: Props) {
         subtitle={t('pricingSubtitle')}
         items={[
           {
-            title: t('pricing.1.title'),
+            title: t('pricing.1.title', { price: price ?? '—' }),
             text: t('pricing.1.text', { price: price ?? '—' }),
           },
           {

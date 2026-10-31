@@ -902,11 +902,15 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   },
 ];
 
+/**
+ * Orden de las direcciones de ilustración (auditoría del sitio, DECISIONS 153): el estilo de la
+ * casa primero (Gouache editorial) y, al final, los que más se reconocen como IA.
+ */
 export const SEED_STYLES: SeedStyle[] = [
   {
     slug: 'acuarela',
     active: true,
-    order: 1,
+    order: 6,
     name: { es: 'Acuarela', en: 'Watercolor', pt: 'Aquarela' },
     promptModifier: 'soft watercolor children book illustration, gentle textures, pastel palette',
     sampleImage: '/styles/acuarela.webp',
@@ -915,7 +919,7 @@ export const SEED_STYLES: SeedStyle[] = [
   {
     slug: 'cartoon-3d',
     active: true,
-    order: 2,
+    order: 7,
     name: { es: 'Cartoon 3D', en: '3D cartoon', pt: 'Cartoon 3D' },
     promptModifier:
       '3D animated feature film style: rendered stylized characters with rounded proportions, soft global illumination, smooth materials, cinematic depth of field and vibrant colors; not a flat drawing, not watercolor',
@@ -925,7 +929,7 @@ export const SEED_STYLES: SeedStyle[] = [
   {
     slug: 'cuento-clasico',
     active: true,
-    order: 3,
+    order: 4,
     name: { es: 'Cuento clásico', en: 'Classic storybook', pt: 'Conto clássico' },
     promptModifier:
       'classic narrative editorial illustration, ink line and opaque paint with moderate texture, believable gestures, warm vintage tones',
@@ -935,7 +939,7 @@ export const SEED_STYLES: SeedStyle[] = [
   {
     slug: 'lapices-de-colores',
     active: true,
-    order: 4,
+    order: 5,
     name: { es: 'Lápices de colores', en: 'Colored pencils', pt: 'Lápis de cor' },
     promptModifier:
       'colored pencil drawing, imperfect human lines, visible strokes, paper grain and deliberately incomplete coloring',
@@ -947,7 +951,7 @@ export const SEED_STYLES: SeedStyle[] = [
   {
     slug: 'collage-papel',
     active: true,
-    order: 5,
+    order: 2,
     name: { es: 'Collage de papel', en: 'Paper collage', pt: 'Colagem de papel' },
     promptModifier:
       'cut-paper collage: clean cut-out contours, layered textured paper, visible paper fibers, very subtle shadows between layers, faces detailed enough to resemble the child',
@@ -957,7 +961,7 @@ export const SEED_STYLES: SeedStyle[] = [
   {
     slug: 'minimalismo-grafico',
     active: true,
-    order: 6,
+    order: 3,
     name: { es: 'Minimalismo gráfico', en: 'Graphic minimalism', pt: 'Minimalismo gráfico' },
     promptModifier:
       'contemporary graphic minimalism: expressive silhouettes, simple backgrounds, a few colors, clear composition that reads as a thumbnail, distinctive faces true to the photo',
@@ -967,7 +971,7 @@ export const SEED_STYLES: SeedStyle[] = [
   {
     slug: 'gouache-editorial',
     active: true,
-    order: 7,
+    order: 1,
     name: { es: 'Gouache editorial', en: 'Editorial gouache', pt: 'Guache editorial' },
     promptModifier:
       'traditional editorial gouache: matte pigment, irregular brush strokes, opaque layers, controlled palette, individual slightly angular faces',

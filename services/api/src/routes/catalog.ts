@@ -3,6 +3,8 @@ import {
   apiRoutes,
   CHARGE_CURRENCY,
   COUNTRY_CODES,
+  EXAMPLE_CHILD_NAME,
+  withChildName,
   defaultCountryConfig,
   REFERENCE_CURRENCIES,
   charmPrice,
@@ -45,9 +47,10 @@ const params = <K extends keyof typeof apiRoutes>(request: FastifyRequest) =>
 export function toPublicStory(story: Story, locale: Locale): PublicStory {
   return {
     slug: story.slug,
-    title: story.title[locale],
-    summary: story.summary[locale],
-    excerpt: story.excerpt[locale],
+    // El catálogo es público y todavía no hay nombre: la marca [Nombre] se muestra con uno de ejemplo.
+    title: withChildName(story.title[locale], EXAMPLE_CHILD_NAME),
+    summary: withChildName(story.summary[locale], EXAMPLE_CHILD_NAME),
+    excerpt: withChildName(story.excerpt[locale], EXAMPLE_CHILD_NAME),
     ageMin: story.ageMin,
     ageMax: story.ageMax,
     tags: story.tags,

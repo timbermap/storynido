@@ -35,6 +35,8 @@ export function OrdersList({ uid }: { uid: string }) {
 
   // Los pagos que nunca se completaron no son pedidos para quien compra.
   const visible = orders?.filter((order) => order.status !== 'cancelled' || order.title);
+  // Sin pedidos no hay nada que mostrar: la sección aparece cuando hay el primero.
+  if (!failed && visible?.length === 0) return null;
 
   return (
     <section id="orders" className="grid scroll-mt-28 gap-4">

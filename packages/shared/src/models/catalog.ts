@@ -159,6 +159,9 @@ export function stageOf(story: { ageMin: number; ageMax: number }): AgeStageKey 
 /** Marca del nombre en los títulos del catálogo ("[Nombre] y el valle de los dinosaurios"). */
 const NAME_PLACEHOLDER = /\[(?:Nombre|Name|Nome)\]/g;
 
+/** Nombre de ejemplo (neutro) para mostrar los títulos del catálogo antes de que se escriba el nombre. */
+export const EXAMPLE_CHILD_NAME = 'Alex';
+
 /** El título con el nombre del niño en el lugar de la marca (para el prompt y el libro). */
 export function withChildName(title: string, name: string): string {
   return title.replace(NAME_PLACEHOLDER, name);

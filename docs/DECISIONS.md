@@ -1858,3 +1858,15 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Destino único.** Tanto el login como la confirmación del enlace mágico llevan a **Mis cuentos**, nunca al creador ni a la página donde estaba la persona. Solo se vuelve a un pago o a un pedido (`afterLoginPath`). La ruta guardada se borra siempre; el link "Ingresar" del encabezado ya no manda `?next=`.
 - **Mis cuentos arranca con "¿Qué quieres crear?"** (las tres líneas, cada una con su botón "Comenzar") arriba de todo; después lo que dejó a medias, los proyectos de Profesionales y los pedidos. El botón "Nuevo proyecto" de "Tus proyectos" baja a esa sección en vez de abrir el creador.
 - **Tests:** el helper que inicia sesión en la puerta del creador comprueba que cae en Mis cuentos y vuelve a la página donde estaba.
+
+## 153 · Auditoría completa del sitio: correcciones directas
+
+- **Fecha:** 2026-10-31.
+- **Fuente:** el documento "StoryNido · Auditoría completa del sitio" (puntajes: navegación 7,5/10, home 6,5, Familias 6,5, Celebraciones 7, Profesionales 6, área logueada 6, identidad visual 4). Esta decisión aplica lo que es un error claro; lo que choca con decisiones anteriores queda para decidir (abajo).
+- **Profesionales:** "Desde {price} cada cuento" salía con la variable sin reemplazar (error mío: el título no recibía el precio); ahora muestra el precio real. Se borra "Publicamos las condiciones cuando abramos las ventas", que contradecía la sección de precio: el cuarto beneficio pasa a "El texto lo ajustas tú".
+- **"[Nombre]" literal:** el catálogo público (tarjetas, fichas, títulos de página, datos para buscadores y para compartir) muestra un nombre de ejemplo neutro, "Alex" (`EXAMPLE_CHILD_NAME`), en lugar de la marca. El nombre real del niño se pone al generar el libro (DECISIONS 149).
+- **Navbar sin sesión:** "Historias ▾" queda solo con Familias (etapas); Celebraciones y Profesionales ya tienen su link propio y no se repiten. Con sesión, "Explorar ▾" mantiene las tres líneas.
+- **Mis cuentos:** "Mis pedidos" no aparece hasta que hay un primer pedido.
+- **Estilos:** orden Gouache editorial, Collage de papel, Minimalismo gráfico, Cuento clásico, Lápices de colores, Acuarela, Cartoon 3D y, al final, Para colorear. Gouache editorial es el estilo de la casa para las portadas.
+- **Para decidir (chocan con lo que pediste):** (1) el documento pide **dejar empezar el asistente sin cuenta y pedirla al generar la vista previa**, y **conservar la historia, temática o colección elegida tras el login**; hoy, por tu pedido, todos los botones de crear llevan al login y después se cae en Mis cuentos (DECISIONS 144 y 152). (2) El kit de egreso, la Navidad y las portadas reales dependen de la ilustración con IA (costo).
+- **Pendiente del documento:** reemplazar las imágenes de hero (necesitan fotos reales), muestras de los tres estilos sin imagen, prueba social, precio por formato en las fichas, filtro y sección por ocasión, URL de fichas bajo `/familias/historias/`, página "Cómo funciona", links a redes en el footer, login de Google por redirección y revisión del área logueada en el celular.

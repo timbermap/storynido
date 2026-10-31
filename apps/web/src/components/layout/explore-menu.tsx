@@ -14,7 +14,16 @@ import { NavMenu, NavMenuItem } from './nav-menu';
  * Desplegable de historias ("Historias" sin sesión, "Explorar" con sesión): Familias por etapa de
  * lectura, y los catálogos de Celebraciones y de Profesionales (estudio de catálogo).
  */
-export function ExploreMenu({ label, id }: { label: ReactNode; id: string }) {
+export function ExploreMenu({
+  label,
+  id,
+  onlyFamilies = false,
+}: {
+  label: ReactNode;
+  id: string;
+  /** Sin sesión Celebraciones y Profesionales ya tienen su propio link en la barra. */
+  onlyFamilies?: boolean;
+}) {
   const t = useTranslations('Nav');
   const tStages = useTranslations('Stories.stages');
   const tLines = useTranslations('Nav.lines');
@@ -50,26 +59,28 @@ export function ExploreMenu({ label, id }: { label: ReactNode; id: string }) {
             </li>
           ))}
         </ul>
-        <ul className="mt-1 border-t pt-1">
-          <li>
-            <Link href="/events/themes" className="group block rounded-xl">
-              <NavMenuItem
-                title={t('eventsMenu')}
-                text={t('eventsText')}
-                icon={<Cake className="size-4" />}
-              />
-            </Link>
-          </li>
-          <li>
-            <Link href="/professionals/templates" className="group block rounded-xl">
-              <NavMenuItem
-                title={t('professionalsTemplates')}
-                text={t('professionalsText')}
-                icon={<GraduationCap className="size-4" />}
-              />
-            </Link>
-          </li>
-        </ul>
+        {!onlyFamilies && (
+          <ul className="mt-1 border-t pt-1">
+            <li>
+              <Link href="/events/themes" className="group block rounded-xl">
+                <NavMenuItem
+                  title={t('eventsMenu')}
+                  text={t('eventsText')}
+                  icon={<Cake className="size-4" />}
+                />
+              </Link>
+            </li>
+            <li>
+              <Link href="/professionals/templates" className="group block rounded-xl">
+                <NavMenuItem
+                  title={t('professionalsTemplates')}
+                  text={t('professionalsText')}
+                  icon={<GraduationCap className="size-4" />}
+                />
+              </Link>
+            </li>
+          </ul>
+        )}
       </div>
     </NavMenu>
   );

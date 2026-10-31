@@ -44,7 +44,7 @@ export async function SiteHeader() {
           aria-label={t('mainNav')}
           className="hidden items-center gap-1 text-[0.95rem] font-semibold text-foreground/80 lg:flex"
         >
-          <ExploreMenu id="menu-stories" label={t('storiesMenu')} />
+          <ExploreMenu id="menu-stories" label={t('storiesMenu')} onlyFamilies />
           {links.map((link) => (
             <NavLink key={link.audience} href={link.href}>
               <span
