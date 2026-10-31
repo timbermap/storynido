@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { expectAccessible, signInAtGate, uniqueEmail } from './helpers';
+import { expectAccessible, magicLink, signInAtGate, uniqueEmail } from './helpers';
 
 test.skip(({ isMobile }) => isMobile, 'Alcanza con escritorio.');
 
@@ -66,7 +66,11 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
   // Sin sesión el botón lleva al login (y a Mis cuentos): se entra primero.
   await page.goto('/es/ingresar');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
-  await signInAtGate(page, uniqueEmail('tema'));
+  const email = uniqueEmail('tema');
+  await page.locator('#email').fill(email);
+  await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
+  await expect(page.locator('body')).toContainText('Revisa tu correo');
+  await page.goto(await magicLink(email));
   await expect(page).toHaveURL(/\/es\/mis-cuentos$/, { timeout: 30_000 });
 
   await page.goto('/es/eventos');
