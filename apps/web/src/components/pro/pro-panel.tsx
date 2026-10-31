@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { getFirebaseDb } from '@/lib/firebase/client';
-import { AnchorLink } from '@/components/anchor-link';
 import { createDraft, listProjects, type Project, type ProjectBook } from '@/lib/firebase/drafts';
 
 import type { ProStatus } from './use-pro-status';
@@ -82,9 +81,6 @@ export function ProPanel({ uid, status }: { uid: string; status: ProStatus }) {
           <BadgeCheck className="size-6 text-primary" aria-hidden="true" />
           {t('title')}
         </h2>
-        <Button asChild size="sm">
-          <AnchorLink target="new">{t('newProject')}</AnchorLink>
-        </Button>
       </div>
       {discount && (
         <div className="rounded-2xl border bg-card p-4 text-sm">
