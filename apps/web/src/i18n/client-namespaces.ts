@@ -13,6 +13,7 @@ export const CLIENT_NAMESPACES = [
   'Stories',
   'Lessons',
   'Wizard',
+  'Pager',
   'Viewer',
   'Error',
   'Pro',

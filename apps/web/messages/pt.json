@@ -425,7 +425,12 @@
       "filter": "Filtrar por linha",
       "all": "Todas",
       "loadFailed": "Não conseguimos carregar suas histórias em andamento. Recarregue a página para tentar de novo.",
-      "start": "Começar"
+      "start": "Começar",
+      "tabDrafts": "Em andamento",
+      "tabCharacters": "Personagens",
+      "charactersNote": "As crianças para quem você já criou uma história. Para apagar os dados delas, vá em Ajustes.",
+      "charactersEmpty": "Você ainda não criou nenhum personagem.",
+      "charactersAge": "{age} anos"
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },
@@ -1392,5 +1397,11 @@
       "privacy": "Privacidade e meus dados",
       "other": "Outra coisa"
     }
+  },
+  "Pager": {
+    "label": "Paginação",
+    "previous": "Anterior",
+    "next": "Próxima",
+    "status": "Página {page} de {pages}"
   }
 }

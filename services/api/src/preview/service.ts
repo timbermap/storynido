@@ -117,12 +117,17 @@ function toDate(value: unknown): Date | null {
 }
 
 /** Resultado moderado con un reintento automático si la moderación lo rechaza. */
+/** Pedido extra en los reintentos de una ilustración rechazada por el control de calidad. */
+const RETRY_HINT =
+  'IMPORTANT: draw NO readable text, letters or numbers anywhere (leave calendars, clocks, signs, labels and book covers blank or abstract); keep hands simple and natural, partly hidden or in pockets if needed; faces calm and well formed.';
+
 async function withModeratedRetry<T>(
-  produce: () => Promise<T>,
+  produce: (attempt: number) => Promise<T>,
   check: (value: T) => Promise<boolean>,
+  attempts = 2,
 ): Promise<T> {
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
-    const value = await produce();
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const value = await produce(attempt);
     if (await check(value)) return value;
   }
   throw new AppError(
@@ -723,13 +728,17 @@ export class PreviewService {
     request: Parameters<AIProvider['image']['generateIllustration']>[0],
   ): Promise<{ image: ImageData }> {
     return withModeratedRetry(
-      async () => {
+      async (attempt) => {
         // Cada imagen es la parte cara: se verifica el tope antes de pedirla.
         await this.budget.ensureAvailable(limits);
         try {
+          // El control rechaza sobre todo texto o números legibles (calendarios, carteles, relojes)
+          // y manos o caras deformes: en los reintentos se pide evitarlos de forma explícita.
           const generated = await track(
             'illustration',
-            await ai.image.generateIllustration(request),
+            await ai.image.generateIllustration(
+              attempt === 1 ? request : { ...request, prompt: `${request.prompt} ${RETRY_HINT}` },
+            ),
           );
           return { image: { bytes: generated.bytes, mimeType: generated.mimeType } };
         } catch (error) {
@@ -738,6 +747,8 @@ export class PreviewService {
         }
       },
       async ({ image }) => (await track('moderation', await ai.image.moderateImage(image))).allowed,
+      // Tres intentos: una página que falla el control no tiene que tirar toda la muestra.
+      3,
     );
   }
 

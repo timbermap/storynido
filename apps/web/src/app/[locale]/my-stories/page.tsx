@@ -1,18 +1,18 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import type { Channel } from '@storynido/shared';
 
+import { CharactersList } from '@/components/account/characters-list';
 import { OrdersList } from '@/components/account/orders-list';
 import { useAuth } from '@/components/auth/auth-provider';
 import { ProPanel } from '@/components/pro/pro-panel';
 import { useProStatus } from '@/components/pro/use-pro-status';
-import { buttonVariants } from '@/components/ui/button';
 import { DraftsList } from '@/components/wizard/drafts-list';
 import { NewChoice } from '@/components/wizard/new-choice';
-import { Link, useRouter } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
 import { cn } from '@/lib/utils';
@@ -31,6 +31,12 @@ export default function MyStoriesPage() {
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [line, setLine] = useState<Channel | 'all'>('all');
   const [failed, setFailed] = useState(false);
+  const [tab, setTab] = useState<'drafts' | 'characters'>('drafts');
+  // Libros que ya se ven dentro de «Tus proyectos» (Profesionales): no se repiten en «En proceso».
+  const [projectBooks, setProjectBooks] = useState<Set<string>>(new Set());
+  const onProjectBooks = useCallback((ids: Set<string>) => {
+    setProjectBooks(ids);
+  }, []);
 
   useEffect(() => {
     if (!loading && !signedIn) router.replace('/login');
@@ -72,9 +78,9 @@ export default function MyStoriesPage() {
   }
 
   // Filtro por línea solo para quien usó más de una.
-  const lines = [...new Set(drafts.map((draft) => draft.channel))];
-  const shown = line === 'all' ? drafts : drafts.filter((draft) => draft.channel === line);
-  const latest = drafts[0];
+  const open = drafts.filter((draft) => !projectBooks.has(draft.id));
+  const lines = [...new Set(open.map((draft) => draft.channel))];
+  const shown = line === 'all' ? open : open.filter((draft) => draft.channel === line);
 
   return (
     <section className="container-page grid max-w-3xl gap-10 py-12">
@@ -93,63 +99,90 @@ export default function MyStoriesPage() {
         </p>
       )}
 
-      {latest ? (
-        <>
-          {/* Con un solo borrador, "En proceso" ya lo muestra: no se repite arriba. */}
-          {drafts.length > 1 && (
-            <section aria-labelledby="resume" className="rounded-xl bg-secondary p-6">
-              <h2 id="resume" className="text-sm font-bold tracking-wide uppercase">
-                {t('resume')}
-              </h2>
-              <p className="mt-2 font-display text-xl font-semibold">
-                {latest.childName ? t('storyOf', { name: latest.childName }) : t('untitled')}
-              </p>
-              <Link
-                href={{ pathname: '/create/[bookId]', params: { bookId: latest.id } }}
-                className={cn(buttonVariants({ size: 'lg' }), 'mt-4')}
+      {/* Solapas: lo que está en proceso y los personajes creados. Sin el bloque «Sigue donde lo
+          dejaste»: repetía el primer borrador de la lista. */}
+      {(open.length > 0 || tab === 'characters') && (
+        <section id="drafts" className="grid scroll-mt-28 gap-4">
+          <div role="tablist" aria-label={t('title')} className="flex gap-2 border-b">
+            {(
+              [
+                ['drafts', `${t('tabDrafts')} (${String(open.length)})`],
+                ['characters', t('tabCharacters')],
+              ] as const
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                id={`tab-${key}`}
+                aria-selected={tab === key}
+                aria-controls={`panel-${key}`}
+                onClick={() => {
+                  setTab(key);
+                }}
+                className={cn(
+                  '-mb-px min-h-11 border-b-2 px-4 text-lg font-medium transition',
+                  tab === key
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                )}
               >
-                {t('continue')}
-              </Link>
-            </section>
+                {label}
+              </button>
+            ))}
+          </div>
+          {tab === 'drafts' ? (
+            <div
+              role="tabpanel"
+              id="panel-drafts"
+              aria-labelledby="tab-drafts"
+              className="grid gap-4"
+            >
+              {lines.length > 1 && (
+                <div role="group" aria-label={t('filter')} className="flex flex-wrap gap-2">
+                  {(['all', ...lines] as const).map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      aria-pressed={line === item}
+                      onClick={() => {
+                        setLine(item);
+                      }}
+                      className={cn(
+                        'min-h-9 rounded-full px-4 text-sm font-semibold transition',
+                        line === item
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted hover:bg-secondary',
+                      )}
+                    >
+                      {item === 'all' ? t('all') : tLines(item)}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <DraftsList
+                drafts={shown}
+                onDeleted={(id) => {
+                  setDrafts((current) => current?.filter((draft) => draft.id !== id) ?? null);
+                }}
+              />
+            </div>
+          ) : (
+            <div
+              role="tabpanel"
+              id="panel-characters"
+              aria-labelledby="tab-characters"
+              className="grid gap-4"
+            >
+              <CharactersList uid={user.uid} />
+            </div>
           )}
+        </section>
+      )}
 
-          <section id="drafts" aria-labelledby="drafts-title" className="grid scroll-mt-28 gap-4">
-            <h2 id="drafts-title" className="text-2xl font-medium">
-              {t('inProgress')}
-            </h2>
-            {lines.length > 1 && (
-              <div role="group" aria-label={t('filter')} className="flex flex-wrap gap-2">
-                {(['all', ...lines] as const).map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    aria-pressed={line === item}
-                    onClick={() => {
-                      setLine(item);
-                    }}
-                    className={cn(
-                      'min-h-9 rounded-full px-4 text-sm font-semibold transition',
-                      line === item
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted hover:bg-secondary',
-                    )}
-                  >
-                    {item === 'all' ? t('all') : tLines(item)}
-                  </button>
-                ))}
-              </div>
-            )}
-            <DraftsList
-              drafts={shown}
-              onDeleted={(id) => {
-                setDrafts((current) => current?.filter((draft) => draft.id !== id) ?? null);
-              }}
-            />
-          </section>
-        </>
-      ) : null}
-
-      {pro?.accountType === 'professional' && <ProPanel uid={user.uid} status={pro} />}
+      {pro?.accountType === 'professional' && (
+        <ProPanel uid={user.uid} status={pro} onBooks={onProjectBooks} />
+      )}
       <OrdersList uid={user.uid} />
     </section>
   );

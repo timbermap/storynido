@@ -218,7 +218,7 @@ export async function listDrafts(db: Firestore, uid: string): Promise<DraftSumma
       // Libros sin comprar: borradores y los que ya tienen su muestra.
       where('status', 'in', ['draft', 'preview_generating', 'preview_ready']),
       orderBy('updatedAt', 'desc'),
-      limit(10),
+      limit(50),
     ),
   );
   return Promise.all(

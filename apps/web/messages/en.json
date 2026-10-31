@@ -425,7 +425,12 @@
       "filter": "Filter by line",
       "all": "All",
       "loadFailed": "We couldn't load your stories in progress. Reload the page to try again.",
-      "start": "Get started"
+      "start": "Get started",
+      "tabDrafts": "In progress",
+      "tabCharacters": "Characters",
+      "charactersNote": "The children you have already created a story for. To delete their data, go to Settings.",
+      "charactersEmpty": "You have not created any characters yet.",
+      "charactersAge": "{age} years old"
     },
     "myStoriesLink": "Your stories and orders are in My stories →"
   },
@@ -1392,5 +1397,11 @@
       "privacy": "Privacy and my data",
       "other": "Something else"
     }
+  },
+  "Pager": {
+    "label": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "status": "Page {page} of {pages}"
   }
 }

@@ -15,7 +15,16 @@ import { createDraft, listProjects, type Project, type ProjectBook } from '@/lib
 import type { ProStatus } from './use-pro-status';
 
 /** "Mi cuenta" Pro: descuento vigente, proyectos por alias y "Repetir configuración". */
-export function ProPanel({ uid, status }: { uid: string; status: ProStatus }) {
+export function ProPanel({
+  uid,
+  status,
+  onBooks,
+}: {
+  uid: string;
+  status: ProStatus;
+  /** Ids de los libros que ya se ven en los proyectos (para no repetirlos en «En proceso»). */
+  onBooks?: (ids: Set<string>) => void;
+}) {
   const t = useTranslations('Pro.account');
   const locale = useLocale() as Locale;
   const router = useRouter();
@@ -38,6 +47,7 @@ export function ProPanel({ uid, status }: { uid: string; status: ProStatus }) {
         clearTimeout(timer);
         setFailed(false);
         setProjects(found);
+        onBooks?.(new Set(found.flatMap((project) => project.books.map((book) => book.id))));
       })
       .catch(() => {
         clearTimeout(timer);
@@ -53,7 +63,7 @@ export function ProPanel({ uid, status }: { uid: string; status: ProStatus }) {
     return () => {
       clearTimeout(timer);
     };
-  }, [uid, locale, attempt]);
+  }, [uid, locale, attempt, onBooks]);
 
   async function repeat(book: ProjectBook) {
     setCopying(book.id);

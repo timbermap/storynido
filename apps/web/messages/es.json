@@ -425,7 +425,12 @@
       "filter": "Filtrar por línea",
       "all": "Todos",
       "loadFailed": "No pudimos cargar tus cuentos en proceso. Recarga la página para intentarlo de nuevo.",
-      "start": "Comenzar"
+      "start": "Comenzar",
+      "tabDrafts": "En proceso",
+      "tabCharacters": "Personajes",
+      "charactersNote": "Los chicos para quienes ya creaste un cuento. Para borrar sus datos, ve a Ajustes.",
+      "charactersEmpty": "Todavía no creaste ningún personaje.",
+      "charactersAge": "{age} años"
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },
@@ -1392,5 +1397,11 @@
       "privacy": "Privacidad y mis datos",
       "other": "Otra cosa"
     }
+  },
+  "Pager": {
+    "label": "Paginación",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "status": "Página {page} de {pages}"
   }
 }
