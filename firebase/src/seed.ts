@@ -601,7 +601,7 @@ for (const story of [...SEED_STORIES, ...SEED_NEW_STORIES, ...SEED_DRAFT_STORIES
       ...story,
       // Rediseño de imágenes (DECISIONS 157): el elenco de la marca, el estilo recomendado por línea
       // y la portada nueva con el título superpuesto.
-      castName: STORY_CAST[story.slug] ?? story.castName,
+      ...(STORY_CAST[story.slug] ? { castName: STORY_CAST[story.slug] } : {}),
       defaultStyle:
         story.channels[0] === 'professionals' ? 'minimalismo-grafico' : 'gouache-editorial',
       ...(NEW_COVERS.has(story.slug) ? { coverTitleOverlay: true } : {}),
