@@ -12,6 +12,8 @@ import { Maintenance, PreviewOnlyBanner } from '@/components/layout/maintenance'
 import { SiteFooter } from '@/components/layout/site-footer';
 import { HeaderSwitch } from '@/components/layout/focus-header';
 import { LanguageSuggestion } from '@/components/layout/language-suggestion';
+import { AppHeader } from '@/components/layout/app-header';
+import { BottomTabs } from '@/components/layout/bottom-tabs';
 import { SiteHeader } from '@/components/layout/site-header';
 import { routing } from '@/i18n/routing';
 import { brand } from '@/lib/brand';
@@ -20,6 +22,7 @@ import { fontContent, fontScript, fontUi } from '@/lib/fonts';
 import { localizedAlternates } from '@/lib/seo';
 import { getSiteMode } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
+import { SESSION_COOKIE } from '@/lib/session-hint';
 import { SITE_URL } from '@/lib/site';
 
 import { Providers } from './providers';
@@ -77,6 +80,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
     cookies(),
   ]);
   const consent = parseConsent(cookieStore.get(CONSENT_COOKIE)?.value);
+  // Quien ya es cliente ve el navbar de la app desde el primer pintado (DECISIONS 148).
+  const customer = cookieStore.get(SESSION_COOKIE)?.value === '1';
   // Solo se envían al navegador los textos que usan los componentes de cliente.
   const clientMessages = Object.fromEntries(
     CLIENT_NAMESPACES.filter((namespace) => namespace in messages).map((namespace) => [
@@ -104,11 +109,10 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
               <>
                 {mode === 'preview_only' && <PreviewOnlyBanner />}
                 <LanguageSuggestion />
-                <HeaderSwitch>
-                  <SiteHeader />
-                </HeaderSwitch>
+                <HeaderSwitch>{customer ? <AppHeader /> : <SiteHeader />}</HeaderSwitch>
                 <main id="main">{children}</main>
                 <SiteFooter />
+                {customer && <BottomTabs />}
               </>
             )}
             <ConsentBanner />

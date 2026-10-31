@@ -78,6 +78,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="mt-9 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
               <StartStoryLink
                 target="audience"
+                memberLabel={t('hero.homeMember')}
+                continueLabel={t('hero.homeContinue')}
                 className={buttonVariants({
                   size: 'lg',
                   className: 'h-14 w-full rounded-full px-8 text-lg sm:w-auto',
@@ -189,6 +191,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </div>
           <StartStoryLink
             target="audience"
+            memberLabel={t('hero.homeMember')}
+            continueLabel={t('hero.homeContinue')}
             className={buttonVariants({
               size: 'lg',
               className: 'h-14 w-full shrink-0 rounded-full px-8 text-lg sm:ml-auto sm:w-auto',

@@ -46,7 +46,13 @@
     },
     "saveAndExit": "Guardar y salir",
     "help": "Ayuda",
-    "back": "Volver"
+    "back": "Volver",
+    "explore": "Explorar",
+    "createShort": "Crear",
+    "orders": "Pedidos",
+    "accountTab": "Cuenta",
+    "tabsNav": "Navegación de tu cuenta",
+    "ordersInProgress": "{count, plural, one {# pedido en curso} other {# pedidos en curso}}"
   },
   "Switchers": {
     "language": "Idioma",
@@ -108,7 +114,10 @@
       "homeKicker": "De su foto a su libro",
       "homeLead": "Subes una foto, eligen juntos la aventura y en minutos ves su cuento ilustrado. Si te encanta, puedes pedirlo impreso en tapa dura.",
       "homeCta": "Empezar mi cuento",
-      "photoNote": "Usamos la foto solo para crear el personaje."
+      "photoNote": "Usamos la foto solo para crear el personaje.",
+      "homeMember": "Crear otro cuento",
+      "homeContinue": "Continuar mi cuento",
+      "ctaMember": "Crear otro cuento"
     },
     "trust": {
       "preview": "Vista previa gratis antes de pagar",

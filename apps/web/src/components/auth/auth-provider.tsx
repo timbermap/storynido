@@ -1,12 +1,14 @@
 'use client';
 
 import type { User } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 import { roleFromClaims, type CountryCode, type Locale, type Role } from '@storynido/shared';
 
 import { COUNTRY_CHOICE_COOKIE, COUNTRY_CHOICE_MAX_AGE } from '@/lib/country';
 import { LOCALE_CHOICE_COOKIE } from '@/lib/locale-choice';
+import { hasSessionHint, setSessionHint } from '@/lib/session-hint';
 
 interface AuthState {
   /** Usuario de Firebase, incluida la sesión anónima del creador. */
@@ -35,6 +37,7 @@ export function AuthProvider({
   country: CountryCode;
 }) {
   const [state, setState] = useState<AuthState>({ ...LOGGED_OUT, loading: true });
+  const router = useRouter();
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -46,11 +49,19 @@ export function AuthProvider({
         import('@/lib/firebase/client'),
       ]);
       if (effect.cancelled) return;
+      // La marca de sesión decide el navbar que pinta el servidor: si cambia, se vuelve a pedir.
+      const syncHint = (account: boolean) => {
+        if (hasSessionHint() === account) return;
+        setSessionHint(account);
+        router.refresh();
+      };
       unsubscribe = onIdTokenChanged(getFirebaseAuth(), (user) => {
         if (!user) {
+          syncHint(false);
           setState(LOGGED_OUT);
           return;
         }
+        syncHint(!user.isAnonymous);
         void (async () => {
           const token = await user.getIdTokenResult();
           setState({
@@ -94,7 +105,7 @@ export function AuthProvider({
       window.cancelIdleCallback(idle);
       unsubscribe?.();
     };
-  }, [locale, country]);
+  }, [locale, country, router]);
 
   return <AuthContext value={state}>{children}</AuthContext>;
 }

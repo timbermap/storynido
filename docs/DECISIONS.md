@@ -1813,3 +1813,11 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-30.
 - La pantalla de confirmación del enlace mágico (`/ingresar/confirmar`) llevaba a Cuenta cuando no había una ruta guardada; ahora lleva a Mis cuentos, igual que el resto de los métodos de ingreso. Con una ruta guardada (por ejemplo, el creador) sigue volviendo a ella.
 - El test del tema de Celebraciones inicia sesión primero en la página de login y comprueba que cae en Mis cuentos.
+
+## 148 · Navbar de la app para quien ya es cliente
+
+- **Fecha:** 2026-10-31.
+- **Dos navegaciones.** Sin sesión, el navbar de visitante de siempre (los tres públicos). Con sesión, el navbar de la app: el logo lleva a **Mis cuentos**, enlaces "Mis cuentos" (con la cantidad de pedidos en curso) y "Explorar", el botón **Crear** con las tres opciones adentro (cuento para mi hijo, kit de celebración, proyecto profesional) y el menú de la cuenta. Ya no aparecen Familias, Celebraciones y Profesionales, que son páginas que venden. En el celular, la navegación pasa a una **barra inferior** (Mis cuentos, Crear, Pedidos, Cuenta) que no aparece mientras se crea o se paga.
+- **Sin parpadeo.** El navegador escribe la marca `sn_session=1` al entrar con una cuenta real y la borra al salir; el servidor la lee y pinta el navbar correcto de entrada. Si la marca cambia, `router.refresh()` vuelve a pedir el encabezado. Es solo una pista de interfaz: los datos siguen protegidos por la sesión de Firebase y la API. Cuenta como cookie necesaria (inicio de sesión) en la política de cookies.
+- **Páginas con sesión.** La home y Familias no se bloquean ni se redirigen (SEO y enlaces compartidos): el botón principal pasa a "Continuar mi cuento" (si hay un borrador con datos) o "Crear otro cuento".
+- **Pedidos en curso:** pagados y todavía sin llegar; un digital listo cuenta como terminado.

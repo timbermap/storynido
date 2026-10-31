@@ -38,6 +38,12 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
     getOffer(display.country, locale),
     getContent('faq', locale).catch(() => null),
   ]);
+  const heroMember = (
+    <>
+      {t('hero.ctaMember')}
+      <ArrowRight aria-hidden="true" />
+    </>
+  );
   const heroCta = (
     <>
       {t('hero.cta')}
@@ -94,7 +100,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
               <AuthLink
                 href="/create"
                 guest={heroCta}
-                member={heroCta}
+                member={heroMember}
                 className={buttonVariants({
                   size: 'lg',
                   className: 'h-14 w-full rounded-full px-8 text-lg sm:w-auto',
@@ -304,7 +310,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
           <AuthLink
             href="/create"
             guest={heroCta}
-            member={heroCta}
+            member={heroMember}
             className={buttonVariants({
               size: 'lg',
               className: 'h-14 w-full shrink-0 rounded-full px-8 text-lg sm:ml-auto sm:w-auto',
