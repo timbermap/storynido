@@ -893,9 +893,9 @@
     "stageProgress": "Etapa {current} de {total}: {name}",
     "subStep": "{name} ({current} de {total})",
     "stages": {
-      "child": "Protagonista",
-      "character": "Seu personagem",
+      "character": "O personagem",
       "adventure": "A aventura",
+      "settings": "Ajustes",
       "preview": "Prévia"
     },
     "lines": {

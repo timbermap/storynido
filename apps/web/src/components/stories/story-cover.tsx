@@ -61,16 +61,20 @@ export function StoryCover({
   priority = false,
   className,
   alt = '',
+  name,
 }: {
   story: CoverStory;
   alt?: string;
+  /** Nombre del niño del libro: si se conoce, reemplaza al del visitante o al del elenco. */
+  name?: string;
   /** Línea desde la que se mira (Profesionales usa su propia portada y título si la historia los tiene). */
   line?: string | null;
   sizes: string;
   priority?: boolean;
   className?: string;
 }) {
-  const visitor = useVisitorName(story.castName ?? '');
+  const stored = useVisitorName(story.castName ?? '');
+  const visitor = name?.trim() ? name.trim() : stored;
   const pro = line === 'professionals' && Boolean(story.coverImagePro);
   const src = pro && story.coverImagePro ? story.coverImagePro : story.coverImage;
   const overlay = Boolean(story.coverTitleOverlay);

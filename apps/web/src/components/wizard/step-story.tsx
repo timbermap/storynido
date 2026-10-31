@@ -20,6 +20,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [selected, setSelected] = useState(data.book.storyId);
   const [error, setError] = useState<string | null>(null);
   const age = data.child?.age;
+  const childName = data.child?.name.trim() ?? '';
   // La primera vez que se llega a este paso, la lectura se sugiere según la edad.
   const firstVisit = nav.reached <= nav.flow.indexOf('story');
   const [choice, setChoice] = useState<BookChoice>(() => ({
@@ -80,11 +81,13 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
               }}
             >
               <div className="aspect-[3/4] w-full overflow-hidden">
-                <StoryCover story={story} sizes="(min-width: 768px) 20vw, 45vw" />
+                <StoryCover story={story} name={childName} sizes="(min-width: 768px) 20vw, 45vw" />
               </div>
               <span className="grid gap-1.5 p-3">
                 <span className="font-display text-lg leading-snug font-semibold">
-                  {story.title}
+                  {childName && story.castName
+                    ? story.title.replace(story.castName, childName)
+                    : story.title}
                 </span>
                 <span className="text-xs font-bold text-muted-foreground">
                   {tStories('agesFor', { min: story.ageMin, max: story.ageMax })}

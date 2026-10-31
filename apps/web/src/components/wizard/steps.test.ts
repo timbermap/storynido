@@ -23,9 +23,9 @@ describe('pasos del creador por línea', () => {
     expect(reachedIndex(FLOWS.events, { wizardStep: WIZARD_STEPS.indexOf('lesson') })).toBe(
       FLOWS.events.indexOf('style'),
     );
-    // Familia ahora arranca por la aventura: con solo el protagonista hecho, vuelve a la historia.
+    // Con solo el protagonista hecho, se retoma en el personaje (fotos), el segundo paso.
     expect(reachedIndex(FLOWS.families, { wizardStep: WIZARD_STEPS.indexOf('photos') })).toBe(
-      FLOWS.families.indexOf('story'),
+      FLOWS.families.indexOf('photos'),
     );
   });
 
@@ -39,20 +39,17 @@ describe('pasos del creador por línea', () => {
 });
 
 describe('etapas por línea', () => {
-  it('Familia arranca por la aventura y Celebraciones por el protagonista', async () => {
+  it('las tres líneas arrancan por el personaje', async () => {
     const { stagesFor } = await import('./steps');
-    expect(stagesFor(FLOWS.families).map((stage) => stage.key)).toEqual([
-      'adventure',
-      'child',
-      'character',
-      'preview',
-    ]);
-    expect(stagesFor(FLOWS.events).map((stage) => stage.key)).toEqual([
-      'child',
-      'adventure',
-      'character',
-      'preview',
-    ]);
+    for (const flow of Object.values(FLOWS)) {
+      expect(flow.slice(0, 2)).toEqual(['child', 'photos']);
+      expect(stagesFor(flow).map((stage) => stage.key)).toEqual([
+        'character',
+        'adventure',
+        'settings',
+        'preview',
+      ]);
+    }
   });
 
   it('cada flujo recorre sus etapas sin saltar de una a otra y volver', async () => {

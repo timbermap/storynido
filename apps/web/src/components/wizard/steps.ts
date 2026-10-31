@@ -21,13 +21,13 @@ export type WizardStep = (typeof WIZARD_STEPS)[number];
  * el orden o quitar un paso no rompe borradores: se guarda el nombre del paso, no su posición.
  */
 export const FLOWS: Record<Channel, readonly WizardStep[]> = {
-  // Arranque propio (historia y enseñanza), núcleo compartido (protagonista y personaje con su
-  // estilo) y la muestra (DECISIONS 116).
-  families: ['story', 'lesson', 'child', 'memories', 'photos', 'style', 'review'],
-  // Primero la celebración (ocasión, fecha, temática y una sola edad); sin enseñanza particular.
-  events: ['child', 'memories', 'story', 'photos', 'style', 'review'],
-  // La historia de la colección y su objetivo; después el proyecto (alias) y el personaje.
-  professionals: ['story', 'lesson', 'child', 'memories', 'photos', 'style', 'review'],
+  // El personaje primero (DECISIONS 159): quien lo crea ve a su hijo dibujado en el primer minuto y
+  // todo lo demás (historias, lectura, estilo) se ajusta a su edad. Después la aventura y los ajustes.
+  families: ['child', 'photos', 'story', 'lesson', 'memories', 'style', 'review'],
+  // Primero el homenajeado (con la ocasión, la fecha y una sola edad) y su personaje; sin enseñanza.
+  events: ['child', 'photos', 'story', 'memories', 'style', 'review'],
+  // El paciente (alias) y su personaje; después la historia de la colección y su objetivo.
+  professionals: ['child', 'photos', 'story', 'lesson', 'memories', 'style', 'review'],
 };
 
 export const flowFor = (channel: Channel): readonly WizardStep[] => FLOWS[channel];
@@ -59,9 +59,9 @@ export function reachedIndex(
  * su flujo (`stagesFor`). Recuerdos y enseñanza son opcionales.
  */
 export const WIZARD_STAGES = [
-  { key: 'adventure', steps: ['story', 'lesson'] },
-  { key: 'child', steps: ['child', 'memories'] },
-  { key: 'character', steps: ['photos', 'style'] },
+  { key: 'character', steps: ['child', 'photos'] },
+  { key: 'adventure', steps: ['story'] },
+  { key: 'settings', steps: ['lesson', 'memories', 'style'] },
   { key: 'preview', steps: ['review'] },
 ] as const satisfies readonly { key: string; steps: readonly WizardStep[] }[];
 
