@@ -1902,3 +1902,7 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Estilos del asistente:** muestras de los ocho estilos, badge "Recomendado" (el `defaultStyle` de la historia o el de su línea: gouache en Familias y Celebraciones, minimalismo en Profesionales), preseleccionado, y una frase por estilo en es, en y pt. Los tres estilos nuevos usan su muestra en el visor de ejemplo hasta tener su librito de cuatro páginas.
 - **No se borró nada viejo:** las imágenes anteriores siguen en git y `public/brand/` queda sin referencias hasta que se confirmen las nuevas en staging.
 - **Pendiente:** fotos reales (reemplazar las generadas), el librito de ejemplo de cuatro páginas de los tres estilos nuevos, `defaultStyle` en el formulario del admin, y la portada de la Navidad (la historia está apagada).
+
+### 157b. Fotos de landing rehechas (2026-10-31)
+
+Se regeneraron con `gemini-3-pro-image` (más calidad, ≈ USD 0,17 por imagen; 8 variantes ≈ USD 1,39) y prompts "de cámara" (luz natural, grano, imperfecciones, encuadre casual): Home, Familias (foto), Eventos y Profesionales (sin caras de niños ni de adultos). Eventos pasa de 4 fotos de piezas a **una sola foto del kit completo** (`heroes/kit-completo.webp`; `HeroKit` mantiene sus props). Siguen siendo fotos generadas por IA: **reemplazar por fotos reales antes de producción**.

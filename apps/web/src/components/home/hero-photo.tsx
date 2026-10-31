@@ -66,30 +66,15 @@ export function HeroKit({
 }: {
   alts: Record<'invitation' | 'book' | 'stickers' | 'bookmarks', string>;
 }) {
-  const pieces = [
-    ['kit-invitacion', alts.invitation, 'translate-y-4'],
-    ['kit-cuento', alts.book, '-translate-y-2'],
-    ['kit-stickers', alts.stickers, '-translate-y-2'],
-    ['kit-separadores', alts.bookmarks, 'translate-y-4'],
-  ] as const;
+  // Una sola foto del kit completo; el alt resume las piezas.
+  const alt = [alts.invitation, alts.book, alts.stickers, alts.bookmarks].join(' · ');
   return (
-    <figure className="mx-auto grid w-full max-w-[40rem] grid-cols-2 gap-3 lg:max-w-none lg:grid-cols-4">
-      {pieces.map(([file, alt, shift], index) => (
-        <div
-          key={file}
-          className={`overflow-hidden rounded-2xl shadow-[0_18px_40px_-20px_rgb(38_50_74/0.4)] lg:${shift}`}
-        >
-          <ImageSlot
-            src={`/images/heroes/${file}.webp`}
-            alt={alt}
-            width={900}
-            height={1200}
-            priority={index < 2}
-            sizes="(min-width: 1024px) 160px, 45vw"
-            tone="bg-[#ffe7df]"
-          />
-        </div>
-      ))}
-    </figure>
+    <HeroPhoto
+      src="/images/heroes/kit-completo.webp"
+      alt={alt}
+      width={1600}
+      height={1200}
+      tone="bg-[#ffe7df]"
+    />
   );
 }
