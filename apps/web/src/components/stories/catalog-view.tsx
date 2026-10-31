@@ -4,7 +4,7 @@ import { AGE_STAGES, stageOf, type Channel, type Locale } from '@storynido/share
 
 import { CountryNotice } from '@/components/stories/country-notice';
 import { StoryCard } from '@/components/stories/story-card';
-import { LayoutGrid, Search, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 import { Link } from '@/i18n/navigation';
 import { lowestPrice } from '@/lib/offer';
@@ -72,8 +72,6 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
     stories.filter((story) => matches(story, 'age') && overlaps(story, range)).length;
   const themeCount = (key: string) =>
     stories.filter((story) => matches(story, 'theme') && matchesTheme(story, key)).length;
-  const allAgesCount = stories.filter((story) => matches(story, 'age')).length;
-  const allThemesCount = stories.filter((story) => matches(story, 'theme')).length;
   const withQuery = (extra: Record<string, string | undefined>) => {
     const merged = Object.fromEntries(
       Object.entries({
@@ -98,131 +96,122 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
         </div>
       </header>
 
-      {/* Buscar y edad en una fila; los temas, como barra de categorías fija al hacer scroll. */}
-      <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <form role="search" action="" className="relative min-w-0 lg:w-full lg:max-w-md">
-          <label htmlFor="story-search" className="sr-only">
-            {t('searchLabel')}
-          </label>
-          <Search
-            className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <input
-            id="story-search"
-            name="q"
-            type="search"
-            defaultValue={search}
-            maxLength={80}
-            placeholder={t('searchPlaceholder')}
-            className="h-12 w-full rounded-xl border bg-card pr-24 pl-12 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
-          <button
-            type="submit"
-            className="absolute top-1.5 right-1.5 h-9 rounded-lg bg-action px-4 text-sm font-semibold text-action-foreground transition hover:bg-action-hover"
-          >
-            {t('search')}
-          </button>
-          {filter && <input type="hidden" name="edad" value={filter.min} />}
-          {collection && <input type="hidden" name="coleccion" value={collection.slug} />}
-          {theme && <input type="hidden" name="tema" value={theme.key} />}
-        </form>
-
-        <nav
-          aria-label={t('filterLabel')}
-          className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 lg:pb-0"
+      {/* Buscar; después "¿Para quién es?" (la edad define estilo y texto) y los temas como chips. */}
+      <form role="search" action="" className="relative mt-8 max-w-md min-w-0">
+        <label htmlFor="story-search" className="sr-only">
+          {t('searchLabel')}
+        </label>
+        <Search
+          className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <input
+          id="story-search"
+          name="q"
+          type="search"
+          defaultValue={search}
+          maxLength={80}
+          placeholder={t('searchPlaceholder')}
+          className="h-12 w-full rounded-full border bg-card pr-24 pl-12 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        />
+        <button
+          type="submit"
+          className="absolute top-1.5 right-1.5 h-9 rounded-full bg-action px-4 text-sm font-semibold text-action-foreground transition hover:bg-action-hover"
         >
-          <div className="inline-flex rounded-xl bg-muted p-1">
-            {[
-              { range: null, label: t('allAgesOption'), count: allAgesCount },
-              ...AGE_FILTERS.map((range) => ({
-                range,
-                label: `${t(`stages.${range.key}`)} ${String(range.min)}–${String(range.max)}`,
-                count: ageCount(range),
-              })),
-            ].map(({ range, label, count }) => {
-              const active = range ? filter?.min === range.min : !filter;
-              const disabled = !active && count === 0;
-              const className = cn(
-                'inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap transition',
-                active ? 'bg-card text-foreground shadow-sm' : 'text-foreground/70',
-                disabled ? 'pointer-events-none opacity-40' : !active && 'hover:text-foreground',
-              );
-              const content = (
-                <>
-                  {label}
-                  <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                    {count}
-                  </span>
-                </>
-              );
-              return disabled ? (
-                <span key={label} aria-disabled="true" className={className}>
-                  {content}
-                </span>
-              ) : (
-                <Link
-                  key={label}
-                  href={withQuery({ edad: range ? String(range.min) : undefined })}
-                  data-track="catalog_filter_used"
-                  data-track-filter="age"
-                  aria-current={active ? 'true' : undefined}
-                  aria-label={
-                    range
-                      ? `${t(`stages.${range.key}`)}, ${t('ageRange', { min: range.min, max: range.max })}`
-                      : label
-                  }
-                  className={className}
-                >
-                  {content}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-      </div>
+          {t('search')}
+        </button>
+        {filter && <input type="hidden" name="edad" value={filter.min} />}
+        {collection && <input type="hidden" name="coleccion" value={collection.slug} />}
+        {theme && <input type="hidden" name="tema" value={theme.key} />}
+      </form>
 
-      <nav
-        aria-label={t('themeLabel')}
-        className="sticky top-16 z-20 -mx-4 mt-6 overflow-x-auto border-b bg-background/95 px-4 backdrop-blur sm:mx-0 sm:px-0 lg:top-[4.75rem]"
-      >
-        <ul className="flex min-w-max gap-1 sm:gap-3">
-          {[
-            { key: null, icon: LayoutGrid, count: allThemesCount },
-            ...STORY_THEMES.map(({ key, icon }) => ({ key, icon, count: themeCount(key) })),
-          ].map(({ key, icon: Icon, count }) => {
-            const active = key ? theme?.key === key : !theme;
+      <nav aria-label={t('filterLabel')} className="mt-8">
+        <p className="mb-3 font-display text-lg font-bold">{t('askWho')}</p>
+        <ul className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+          {AGE_FILTERS.map((range) => {
+            const count = ageCount(range);
+            const active = filter?.min === range.min;
             const disabled = !active && count === 0;
+            const className = cn(
+              'flex h-full flex-col gap-0.5 rounded-2xl border p-3.5 text-left transition',
+              active ? 'border-primary bg-primary/15' : 'bg-card hover:border-foreground/30',
+              disabled && 'pointer-events-none opacity-40',
+            );
             const inner = (
               <>
-                <Icon className="size-5" aria-hidden="true" />
-                <span className="text-sm font-semibold whitespace-nowrap">
-                  {key ? t(`themes.${key}`) : t('allThemes')}
+                <span className="font-display text-lg leading-tight font-bold">
+                  {t(`stages.${range.key}`)}
                 </span>
-                <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                  {count}
+                <span className="text-sm text-muted-foreground">
+                  {t('ageRange', { min: range.min, max: range.max })}
+                </span>
+                <span className="mt-1 text-xs font-bold text-primary tabular-nums">
+                  {t('resultCount', { count })}
                 </span>
               </>
             );
-            const className = cn(
-              'flex min-h-16 flex-col items-center justify-center gap-0.5 border-b-2 px-3 pt-2 pb-1.5 transition',
-              active
-                ? 'border-primary text-primary'
-                : 'border-transparent text-foreground/70 hover:border-foreground/20 hover:text-foreground',
-              disabled && 'pointer-events-none opacity-40',
-            );
             return (
-              <li key={key ?? 'all'}>
+              <li key={range.key}>
                 {disabled ? (
                   <span aria-disabled="true" className={className}>
                     {inner}
                   </span>
                 ) : (
                   <Link
-                    href={withQuery({ tema: key ?? undefined })}
+                    // Tocar la edad elegida la quita.
+                    href={withQuery({ edad: active ? undefined : String(range.min) })}
+                    data-track="catalog_filter_used"
+                    data-track-filter="age"
+                    aria-current={active ? 'true' : undefined}
+                    className={className}
+                  >
+                    {inner}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <nav aria-label={t('themeLabel')} className="mt-6">
+        <p className="mb-3 text-xs font-bold tracking-wider text-muted-foreground uppercase">
+          {t('themeLabel')}
+        </p>
+        <ul className="flex flex-wrap gap-2">
+          {STORY_THEMES.map(({ key, icon: Icon }) => {
+            const count = themeCount(key);
+            const active = theme?.key === key;
+            const disabled = !active && count === 0;
+            const className = cn(
+              'inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-sm font-semibold whitespace-nowrap transition',
+              active
+                ? 'border-secondary bg-secondary text-secondary-foreground'
+                : 'bg-card hover:border-foreground/30',
+              disabled && 'pointer-events-none opacity-40',
+            );
+            const inner = (
+              <>
+                <Icon className="size-4" aria-hidden="true" />
+                {t(`themes.${key}`)}
+                <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                  {count}
+                </span>
+              </>
+            );
+            return (
+              <li key={key}>
+                {disabled ? (
+                  <span aria-disabled="true" className={className}>
+                    {inner}
+                  </span>
+                ) : (
+                  <Link
+                    // Tocar el tema elegido lo quita.
+                    href={withQuery({ tema: active ? undefined : key })}
                     data-track="catalog_filter_used"
                     data-track-filter="theme"
-                    aria-current={active ? 'page' : undefined}
+                    aria-current={active ? 'true' : undefined}
                     className={className}
                   >
                     {inner}

@@ -284,7 +284,8 @@
       "big": "Grandes lectores"
     },
     "withLesson": "Con: {name}",
-    "youWillCreate": "Vas a crear: {story} + {lesson}"
+    "youWillCreate": "Vas a crear: {story} + {lesson}",
+    "askWho": "¿Para quién es?"
   },
   "Formats": {
     "digital": "Ebook (PDF)",

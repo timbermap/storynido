@@ -1968,3 +1968,9 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 - **Fecha:** 2026-10-31.
 - **Problema:** los dos botones de la barra llevaban a `/login`.
 - **Decisión:** «Ingresar» sigue yendo al login (y con sesión es el avatar); **«Crear gratis» abre el creador** (`/create`, que arranca sin cuenta y pide la cuenta recién para guardar o pedir), y en Celebraciones («Diseñar el kit») y Profesionales («Probar gratis») entra con su línea (`?line=events|professionals`), como los botones de cada landing.
+
+## 163 · Filtros de Historias: la edad primero
+
+- **Fecha:** 2026-10-31.
+- **Problema:** dos filas con estilos distintos (las edades se cortaban a la derecha en pantallas angostas; los temas eran pestañas con íconos).
+- **Decisión (opción B de la comparación):** buscador, después **«¿Para quién es?»** con las cuatro etapas como tarjetas (nombre, rango de años y cantidad) y debajo los temas como chips que se acomodan en varias líneas. Tocar la edad o el tema elegido lo quita; se retiró «Todas las edades» y «Todo» (sin filtro es el estado por defecto) y la barra fija al hacer scroll. Los conteos y el quitar con ✕ siguen igual.
