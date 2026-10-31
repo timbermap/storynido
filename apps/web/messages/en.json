@@ -428,9 +428,16 @@
       "start": "Get started",
       "tabDrafts": "In progress",
       "tabCharacters": "Characters",
-      "charactersNote": "The children you have already created a story for. To delete their data, go to Settings.",
+      "charactersNote": "The children you have already created a story for. You can change their name and age, or delete their data.",
       "charactersEmpty": "You have not created any characters yet.",
-      "charactersAge": "{age} years old"
+      "charactersAge": "{age} years old",
+      "characterEdit": "Edit",
+      "characterName": "Name",
+      "characterAge": "Age",
+      "characterSave": "Save",
+      "characterSaved": "We saved the changes for {name}.",
+      "characterSaveError": "We could not save the changes. Try again.",
+      "characterEditNote": "Stories already created do not change: the change applies to the next ones."
     },
     "myStoriesLink": "Your stories and orders are in My stories →"
   },

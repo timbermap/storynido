@@ -428,9 +428,16 @@
       "start": "Comenzar",
       "tabDrafts": "En proceso",
       "tabCharacters": "Personajes",
-      "charactersNote": "Los chicos para quienes ya creaste un cuento. Para borrar sus datos, ve a Ajustes.",
+      "charactersNote": "Los chicos para quienes ya creaste un cuento. Puedes cambiar su nombre y edad, o borrar sus datos.",
       "charactersEmpty": "Todavía no creaste ningún personaje.",
-      "charactersAge": "{age} años"
+      "charactersAge": "{age} años",
+      "characterEdit": "Editar",
+      "characterName": "Nombre",
+      "characterAge": "Edad",
+      "characterSave": "Guardar",
+      "characterSaved": "Guardamos los cambios de {name}.",
+      "characterSaveError": "No pudimos guardar los cambios. Intenta de nuevo.",
+      "characterEditNote": "Los cuentos ya creados no cambian: el cambio vale para los próximos."
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },

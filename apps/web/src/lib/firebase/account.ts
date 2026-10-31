@@ -1,11 +1,14 @@
 import { COLLECTIONS, type BookFormat, type OrderStatus } from '@storynido/shared';
 import {
   collection,
+  doc,
   getDocs,
   limit,
   onSnapshot,
   orderBy,
   query,
+  serverTimestamp,
+  updateDoc,
   where,
   type Firestore,
 } from 'firebase/firestore';
@@ -70,4 +73,17 @@ export async function listChildren(db: Firestore, uid: string): Promise<ChildSum
     name: child.get('name') as string,
     age: (child.get('age') as number | null | undefined) ?? null,
   }));
+}
+
+/** Cambia el nombre y la edad de un perfil (las reglas solo dejan tocar sus campos editables). */
+export async function updateChildProfile(
+  db: Firestore,
+  childId: string,
+  fields: { name: string; age: number },
+): Promise<void> {
+  await updateDoc(doc(db, COLLECTIONS.children, childId), {
+    name: fields.name,
+    age: fields.age,
+    updatedAt: serverTimestamp(),
+  });
 }

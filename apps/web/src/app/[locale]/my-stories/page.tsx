@@ -31,6 +31,7 @@ export default function MyStoriesPage() {
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [line, setLine] = useState<Channel | 'all'>('all');
   const [failed, setFailed] = useState(false);
+  const [reloads, setReloads] = useState(0);
   const [tab, setTab] = useState<'drafts' | 'characters'>('drafts');
   // Libros que ya se ven dentro de «Tus proyectos» (Profesionales): no se repiten en «En proceso».
   const [projectBooks, setProjectBooks] = useState<Set<string>>(new Set());
@@ -65,7 +66,7 @@ export default function MyStoriesPage() {
     return () => {
       clearTimeout(timer);
     };
-  }, [user]);
+  }, [user, reloads]);
 
   if (loading || !user || !signedIn || !drafts) {
     return (
@@ -174,7 +175,12 @@ export default function MyStoriesPage() {
               aria-labelledby="tab-characters"
               className="grid gap-4"
             >
-              <CharactersList uid={user.uid} />
+              <CharactersList
+                uid={user.uid}
+                onDeleted={() => {
+                  setReloads((count) => count + 1);
+                }}
+              />
             </div>
           )}
         </section>

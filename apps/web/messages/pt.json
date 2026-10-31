@@ -428,9 +428,16 @@
       "start": "Começar",
       "tabDrafts": "Em andamento",
       "tabCharacters": "Personagens",
-      "charactersNote": "As crianças para quem você já criou uma história. Para apagar os dados delas, vá em Ajustes.",
+      "charactersNote": "As crianças para quem você já criou uma história. Você pode mudar o nome e a idade ou apagar os dados.",
       "charactersEmpty": "Você ainda não criou nenhum personagem.",
-      "charactersAge": "{age} anos"
+      "charactersAge": "{age} anos",
+      "characterEdit": "Editar",
+      "characterName": "Nome",
+      "characterAge": "Idade",
+      "characterSave": "Salvar",
+      "characterSaved": "Salvamos as alterações de {name}.",
+      "characterSaveError": "Não conseguimos salvar as alterações. Tente de novo.",
+      "characterEditNote": "As histórias já criadas não mudam: a alteração vale para as próximas."
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },
