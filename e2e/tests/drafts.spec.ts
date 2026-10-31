@@ -63,14 +63,26 @@ test('si Firestore no responde, el creador no queda cargando', async ({ page }) 
 test('desde un tema de Celebraciones, el creador abre con la temática cargada', async ({
   page,
 }) => {
-  await page.goto('/es/eventos');
+  // Sin sesión el botón lleva al login (y a Mis cuentos): se entra primero.
+  await page.goto('/es/ingresar');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await signInAtGate(page, uniqueEmail('tema'));
+  await expect(page).toHaveURL(/\/es\/mis-cuentos$/, { timeout: 30_000 });
+
+  await page.goto('/es/eventos');
   const start = page.getByRole('link', { name: /Diseñar el kit con este tema/ }).first();
   const theme = new URL(String(await start.getAttribute('href')), 'http://x').searchParams.get(
     'tema',
   );
   expect(theme).toBeTruthy();
   await start.click();
-  await signInAtGate(page, uniqueEmail('tema'));
   await expect(page.locator('#event-theme')).toHaveValue(String(theme), { timeout: 30_000 });
+});
+
+test('sin sesión, el botón de un tema de Celebraciones lleva al login', async ({ page }) => {
+  await page.goto('/es/eventos');
+  await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await expect(
+    page.getByRole('link', { name: /Diseñar el kit con este tema/ }).first(),
+  ).toHaveAttribute('href', /\/ingresar$/);
 });
