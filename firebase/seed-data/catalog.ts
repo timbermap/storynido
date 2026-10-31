@@ -341,12 +341,12 @@ const BIG_READER_BASE = {
 } satisfies Partial<SeedStory>;
 
 /**
- * Historias del estudio de catálogo (DECISIONS 150), en borrador: entran inactivas hasta tener su
- * portada (la ilustración con IA cuesta y se aprueba antes) y se encienden desde el admin.
+ * Historias del estudio de catálogo (DECISIONS 150 y 154), con portada en gouache editorial. Si una
+ * se quiere apagar, se hace desde el admin.
  */
 const DRAFT_BASE = {
   ...NEW_STORY_BASE,
-  active: false,
+  active: true,
   channels: ['families'],
 } satisfies Partial<SeedStory>;
 
