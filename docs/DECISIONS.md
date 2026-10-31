@@ -1795,3 +1795,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - Nuevo `AuthLink`: sin sesión, el botón lleva siempre al login y, una vez dentro, la persona cae en Mis cuentos (no en el formulario del cuento); con sesión sigue directo al creador con la enseñanza o historia elegida. Se aplica a los dos botones de Lecciones ("Empezar a crear…" sin sesión; "Crear un cuento con esta enseñanza" y "Comenzar ahora" con sesión), al de la ficha de cada historia ("Inicia sesión para crear" / "Inicia sesión para diseñar el kit") y al de Profesionales ("Crear un proyecto").
 - Familias y la home no cambian: ahí la vista previa gratis se puede empezar sin cuenta.
 - El test de las fichas de Celebraciones y Profesionales ahora comprueba que el botón lleva al login.
+
+## 145 · "Empezar mi cuento" de la home también va al login
+
+- **Fecha:** 2026-10-30.
+- Los dos botones "Empezar mi cuento" de la home (el del hero y el de "Mira antes de comprar") usan `StartStoryLink`: sin sesión llevan al login y de ahí a Mis cuentos; con sesión bajan a "¿Para quién es?", como antes (DECISIONS 135 y 144).
+- Los tests del logo y de "¿Para quién es?" ya no usan ese botón para bajar (ahora van al login): bajan con scroll directo. Nuevo test: sin sesión, el botón lleva al login.

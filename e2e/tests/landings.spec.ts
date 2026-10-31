@@ -185,8 +185,10 @@ test('preguntas frecuentes: la home destaca 4 y la página propia tiene todas y 
 test('el logo vuelve a la home: arriba de todo y sin hash', async ({ page }) => {
   await page.goto('/es');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
-  await page.getByRole('link', { name: 'Empezar mi cuento' }).first().click();
-  // Se espera a que termine de bajar (el scroll es animado) antes de volver con el logo.
+  // Se baja por la página (sin hash) y se espera a que termine antes de volver con el logo.
+  await page.evaluate(() => {
+    window.scrollTo({ top: 1500, behavior: 'smooth' });
+  });
   await expect
     .poll(async () => {
       const before = await page.evaluate(() => window.scrollY);
@@ -199,14 +201,20 @@ test('el logo vuelve a la home: arriba de todo y sin hash', async ({ page }) => 
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
 });
 
+test('Empezar mi cuento: sin sesión lleva al login', async ({ page }) => {
+  await page.goto('/es');
+  await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await expect(page.getByRole('link', { name: 'Empezar mi cuento' }).first()).toHaveAttribute(
+    'href',
+    /\/ingresar$/,
+  );
+});
+
 test('¿Para quién es?: los links siguen andando al volver atrás desde una landing', async ({
   page,
 }) => {
   await page.goto('/es');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
-  await page.getByRole('link', { name: 'Empezar mi cuento' }).first().click();
-  // El botón baja al selector sin dejar "#audience" ni una entrada propia en el historial.
-  await expect(page).not.toHaveURL(/#/);
   await page.locator('a[data-track-persona="families"]').click();
   await expect(page).toHaveURL(/\/es\/familias$/);
   await page.goBack();

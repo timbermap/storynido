@@ -17,7 +17,7 @@ import { getContent, getOffer } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { offerHighlights } from '@/lib/offer';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
-import { AnchorLink } from '@/components/anchor-link';
+import { StartStoryLink } from '@/components/auth/start-story-link';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = (await params).locale as Locale;
@@ -76,7 +76,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {t('hero.script')}
             </p>
             <div className="mt-9 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
-              <AnchorLink
+              <StartStoryLink
                 target="audience"
                 className={buttonVariants({
                   size: 'lg',
@@ -84,8 +84,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 })}
               >
                 {t('hero.homeCta')}
-                <ArrowRight aria-hidden="true" className="rotate-90" />
-              </AnchorLink>
+              </StartStoryLink>
               {/* Para quien prefiere mirar primero: el catálogo completo. */}
               <Link
                 href="/stories"
@@ -188,7 +187,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <h2 className="text-2xl font-medium">{t('guarantee.title')}</h2>
             <p className="mt-2 text-muted-foreground">{t('guarantee.text')}</p>
           </div>
-          <AnchorLink
+          <StartStoryLink
             target="audience"
             className={buttonVariants({
               size: 'lg',
@@ -196,8 +195,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             })}
           >
             {t('hero.homeCta')}
-            <ArrowRight aria-hidden="true" className="rotate-90" />
-          </AnchorLink>
+          </StartStoryLink>
         </div>
       </section>
       {/* Datos para buscadores (schema.org), después del contenido visible. */}
