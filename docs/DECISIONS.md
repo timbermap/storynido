@@ -1807,3 +1807,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - **Fecha:** 2026-10-30.
 - Los botones de crear de Familias (el del inicio, el de "Mira antes de comprar" y el del cierre), el de Celebraciones y los "armar con este tema" de las colecciones usan `AuthLink`: sin sesión llevan al login y de ahí a Mis cuentos; con sesión siguen al creador (DECISIONS 144). Con esto ningún botón de crear manda a una persona sin cuenta directo al formulario.
 - Los tests de las landings comprueban que el botón de Familias lleva al login.
+
+## 147 · Tras el enlace mágico se cae en Mis cuentos
+
+- **Fecha:** 2026-10-30.
+- La pantalla de confirmación del enlace mágico (`/ingresar/confirmar`) llevaba a Cuenta cuando no había una ruta guardada; ahora lleva a Mis cuentos, igual que el resto de los métodos de ingreso. Con una ruta guardada (por ejemplo, el creador) sigue volviendo a ella.
+- El test del tema de Celebraciones inicia sesión primero en la página de login y comprueba que cae en Mis cuentos.
