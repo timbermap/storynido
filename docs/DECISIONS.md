@@ -1877,3 +1877,9 @@ Las 2 páginas fijas son la dedicatoria y el cierre. En el formato mixto, ~25 % 
 - Se generaron con IA (Vertex, `gemini-3.1-flash-image`, 1K) las seis portadas de las historias nuevas, en **Gouache editorial** como estilo de la casa (auditoría del sitio): personaje al 40–60 % del cuadro, fondo simple, sin brillos ni degradados mágicos, sin texto. **Costo: USD 0,07 por imagen; USD 0,47 en total** (la del unicornio se repitió porque la IA dibujó una paleta de colores con códigos hexadecimales; el prompt ahora prohíbe paletas, muestras y texto).
 - Las seis historias pasan a **activas** en el catálogo de ejemplo: "Te quiero siempre" y "Buenas noches" (Bebés), "La gran carrera", "Hermano mayor" y "La Navidad de [Nombre]" (Pequeños), y el unicornio (solo Celebraciones). El protagonista de las portadas es un chico genérico, no un personaje del catálogo.
 - **Pendiente:** fecha límite de envío por país para la Navidad (el impreso tiene que llegar antes del 24 de diciembre), y probar cada historia nueva con una vista previa real (texto e ilustraciones de las páginas), que todavía no se hizo.
+
+## 155 · La Navidad sale del catálogo
+
+- **Fecha:** 2026-10-31.
+- "La Navidad de [Nombre]" se **apaga** (`active: false`): el producto está arrancando y no conviene prometer entregas con fecha. Se conservan el texto en los tres idiomas y la portada (ya generada) por si se retoma. Lo que cierra el estudio sobre Navidad (fecha límite de envío por país) queda sin hacer.
+- **No cambia:** el mail de postventa del 1 de diciembre que sugiere un regalo a quienes ya compraron (`post-sale`, ocasión `christmas`): es una sugerencia, no una promesa de entrega. Si también se quiere evitar, se apaga ahí.

@@ -464,6 +464,8 @@ export const SEED_DRAFT_STORIES: SeedStory[] = [
   },
   {
     ...DRAFT_BASE,
+    // Apagada (DECISIONS 155): no se lanza con fecha límite de envío; el texto y la portada quedan.
+    active: false,
     slug: 'la-navidad-de-nombre',
     order: 44,
     ageMin: 2,
