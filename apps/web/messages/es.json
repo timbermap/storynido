@@ -937,68 +937,118 @@
   },
   "Landing": {
     "events": {
-      "metaTitle": "Souvenirs y kits personalizados para cumpleaños y celebraciones",
-      "metaDescription": "Un mini cuento con el protagonista de la fiesta, para regalar a cada invitado: cumpleaños, bautismos, comuniones y egresos. Un diseño, muchas copias.",
+      "metaTitle": "Cumpleaños y fiestas: invitación, kit y cuentos para los invitados",
+      "metaDescription": "La fiesta lista, con tu hijo como protagonista: invitación para WhatsApp, decoración para imprimir y un mini cuento para cada invitado.",
       "eyebrow": "StoryNido Celebraciones",
-      "title": "Toda la celebración, con un mismo protagonista",
-      "subtitle": "Invitación, mini cuento, stickers y más, en digital: un solo diseño que combina en toda la fiesta. Para cumpleaños, bautismos, comuniones y egresos.",
-      "cta": "Armar mi kit",
-      "note": "Ves los ejemplos sin cuenta. Para crear el diseño y ver la muestra gratis, inicias sesión con Google, Apple o tu correo: así guardamos tu proyecto.",
+      "title": "La fiesta lista, con tu hijo como protagonista",
+      "subtitle": "Invitación para WhatsApp, decoración para imprimir y un cuento de souvenir para los invitados, todo con el mismo personaje.",
+      "cta": "Crear la invitación gratis",
+      "note": "Sin cuenta ves cómo queda. Te pedimos iniciar sesión recién para guardar o descargar.",
       "howTitle": "Cómo funciona",
       "steps": {
         "1": {
-          "title": "Elige la temática",
-          "text": "Aventura, magia o lo que más le guste al homenajeado."
+          "title": "Eliges el tema (1 minuto)",
+          "text": "Y el nombre del cumpleañero. Con foto o sin foto."
         },
         "2": {
-          "title": "Diseñamos su cuento",
-          "text": "Con su nombre, su edad y su ilustración, con foto o sin foto. Ves una muestra gratis."
+          "title": "Ves la muestra gratis",
+          "text": "Diseñamos el personaje y su mini cuento, y tú lo apruebas antes de pagar."
         },
         "3": {
-          "title": "Un diseño, muchas copias",
-          "text": "El mismo librito para cada invitado: no generamos una historia distinta por copia."
+          "title": "Descargas al instante",
+          "text": "Imprimes en casa o en la imprenta que prefieras, tantas copias como invitados."
         }
       },
-      "kitTitle": "Tu kit incluye",
-      "kitSubtitle": "Todo con la misma ilustración del protagonista. Las piezas se compran en digital, con licencia por cantidad de copias.",
-      "kit": {},
-      "kitNote": "Todo el kit es digital: creas el diseño, ves la muestra gratis y compras los archivos en PDF para imprimirlos en casa o en la imprenta que prefieras. Si prefieres, después pides las invitaciones y los agradecimientos impresos y enviados a tu casa.",
       "collectionsTitle": "Temas para la fiesta",
       "faqTitle": "Preguntas frecuentes",
       "faq": {
         "1": {
           "q": "¿Cada invitado recibe una historia diferente?",
-          "a": "No. Es un único diseño aprobado por ustedes, con copias idénticas para todos. Así es más rápido y más económico."
+          "a": "No: todos reciben el mismo mini cuento, aprobado por ustedes. Así es más rápido y más económico."
         },
         "2": {
-          "q": "¿Puedo imprimirlo en casa?",
-          "a": "Sí, es lo que está pensado: el kit es digital y viene en PDF listo para imprimir en casa o en la imprenta que prefieras. El kit en sí es digital; después puedes pedir las invitaciones y los agradecimientos impresos, y el mini cuento impreso en cantidad."
+          "q": "¿Cómo lo imprimo y lo armo?",
+          "a": "Todo viene en PDF listo para imprimir en casa o en la imprenta que prefieras. Después puedes pedir las invitaciones y los agradecimientos impresos y enviados a tu casa."
         },
         "3": {
           "q": "¿Necesito una foto?",
           "a": "No. Puedes elegir los rasgos del protagonista sin subir ninguna foto."
         },
         "4": {
-          "q": "¿Con cuánta anticipación conviene pedirlo?",
+          "q": "¿Llego a tiempo?",
           "a": "Como es digital, descargas los archivos al instante. Pídelo con unos días de margen para imprimir las piezas donde prefieras."
+        },
+        "5": {
+          "q": "¿Cuántas copias puedo imprimir?",
+          "a": "Las que elijas al comprar, hasta 200 por pieza. La cantidad no cambia el precio."
         }
       },
       "finalTitle": "Que cada invitado se lleve un recuerdo de la fiesta",
-      "kitTagNow": "Digital · PDF listo para imprimir",
       "viewStory": "Ver la historia",
-      "kitDesign": "Diseño: {price} (incluye el mini cuento)",
-      "kitExtra": "+ {price}",
-      "kitFull": "Kit digital completo: {price}, sin importar cuántos invitados.",
-      "kitUsd": "Precios en dólares (USD).",
       "collectionStart": "Diseñar el kit con este tema",
       "catalogTitle": "Temáticas de fiesta",
       "catalogSubtitle": "Elige la temática y arma el kit completo: invitación, mini cuento, stickers y más, con un mismo protagonista.",
-      "heroAlt": {
-        "invitation": "Invitación impresa con cinta coral que dice «¡Estás invitado!»",
-        "book": "Mini cuentos impresos, atados con cinta coral y etiquetas con nombres",
-        "stickers": "Hoja de stickers redondos con el mismo protagonista",
-        "bookmarks": "Dos separadores de libro con borla"
-      }
+      "demo": {
+        "youAreInvited": "¡Estás invitado!",
+        "birthday": "cumple años",
+        "sample": "Muestra: tu invitación final lleva el diseño de tu hijo",
+        "nameLabel": "¿Cómo se llama el cumpleañero?",
+        "namePlaceholder": "Tomás",
+        "themeLabel": "Tema de la fiesta",
+        "cta": "Crear la invitación gratis",
+        "previewAlt": "Invitación de muestra para el cumpleaños de {name}, tema {theme}"
+      },
+      "productsTitle": "Cuatro regalos, un mismo protagonista",
+      "productsSubtitle": "Se compran en este orden, y cada uno resuelve una pregunta de la fiesta.",
+      "products": {
+        "1": {
+          "name": "La invitación",
+          "question": "¿Cómo invito?",
+          "text": "Imagen para WhatsApp y PDF para imprimir, con el nombre y el protagonista."
+        },
+        "2": {
+          "name": "El kit de la fiesta",
+          "question": "¿Cómo decoro sin perder un fin de semana?",
+          "text": "Etiquetas, stickers, agradecimiento y actividades en PDF listos para imprimir."
+        },
+        "3": {
+          "name": "El mini cuento para los invitados",
+          "question": "¿Qué souvenir les doy?",
+          "text": "Un librito con el protagonista, en PDF, para imprimir tantas copias como invitados. Está incluido en el diseño."
+        },
+        "4": {
+          "name": "El libro del cumpleañero",
+          "question": "¿Qué le regalo a él?",
+          "text": "Un libro de Familias con tu hijo como protagonista, en tapa dura. Lo pueden comprar abuelos y tíos."
+        }
+      },
+      "priceFrom": "desde {price}",
+      "priceIncluded": "Incluido en el diseño ({price})",
+      "priceFree": "Precio en el creador",
+      "packagesTitle": "Paquetes",
+      "packagesSubtitle": "Cada paso suma al anterior. El digital se descarga al instante.",
+      "packages": {
+        "invitation": {
+          "name": "Invitación",
+          "text": "Invitación para WhatsApp y PDF, con el diseño del protagonista y el mini cuento."
+        },
+        "party": {
+          "name": "Fiesta digital",
+          "badge": "El más elegido",
+          "text": "Invitación, mini cuento en PDF, kit de decoración completo y agradecimiento.",
+          "saving": "{percent} % menos que comprar cada pieza ({price})"
+        },
+        "printed": {
+          "name": "Fiesta completa",
+          "badge": "Próximamente",
+          "text": "La fiesta digital más los libritos impresos, con el nombre de cada invitado en la tapa. Todavía no se vende: hoy el mini cuento es el mismo para todos."
+        },
+        "book": {
+          "name": "Libro del cumpleañero",
+          "text": "El libro de Familias del festejado, con precio de Familias."
+        }
+      },
+      "packagesNote": "Precios en dólares (USD). Las copias que imprimes no cambian el precio."
     },
     "professionals": {
       "metaTitle": "Cuentos personalizados para psicopedagogos, docentes y terapeutas",
@@ -1199,7 +1249,8 @@
     "discount": {
       "coupon": "Cupón {label}",
       "promotion": "Promoción {label}",
-      "pro": "Descuento por volumen {label}"
+      "pro": "Descuento por volumen {label}",
+      "bundle": "Descuento por kit completo {label}"
     },
     "shippingEta": "Envío (llega en {min} a {max} días hábiles)",
     "shippingDigital": "Entrega digital",

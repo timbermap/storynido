@@ -70,6 +70,8 @@ export const eventPricingSchema = z.object({
   active: z.boolean(),
   designMinor: z.number().int().nonnegative(),
   pieces: z.partialRecord(kitPieceSchema, z.number().int().nonnegative()),
+  /** Descuento por llevar todas las piezas que se ofrecen (kit completo); sin valor, no hay. */
+  bundlePercent: z.number().int().min(0).max(50).optional(),
   updatedAt: z.date(),
 });
 

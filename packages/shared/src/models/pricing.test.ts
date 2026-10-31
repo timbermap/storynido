@@ -265,6 +265,35 @@ describe('kit de Eventos', () => {
     expect(thirty.snapshot.tax.included).toBe(true);
   });
 
+  it('kit completo: descuento por llevar todas las piezas que se ofrecen', () => {
+    const all = ['activities', 'invitation', 'thank_you', 'stickers'].map((piece) => ({
+      piece,
+      copies: 20,
+    }));
+    const full = quoteKit({
+      ...base,
+      pricing: { ...pricing, bundlePercent: 20 },
+      kit: kit([{ piece: 'mini_book', copies: 20 }, ...all]),
+    });
+    const partial = quoteKit({
+      ...base,
+      pricing: { ...pricing, bundlePercent: 20 },
+      kit: kit([
+        { piece: 'mini_book', copies: 20 },
+        { piece: 'stickers', copies: 20 },
+      ]),
+    });
+    if (!full.ok || !partial.ok) throw new Error('debería cotizar');
+    const subtotal = 24900 + 4900 + 6900 + 4900 + 5900;
+    expect(full.snapshot.discount).toEqual({
+      minor: Math.round(subtotal * 0.2),
+      reason: 'bundle',
+      label: '20 %',
+    });
+    expect(full.snapshot.totalMinor).toBe(subtotal - Math.round(subtotal * 0.2));
+    expect(partial.snapshot.discount.minor).toBe(0);
+  });
+
   it('una pieza sin precio no se vende; el cupón aplica igual que en un libro', () => {
     expect(
       quoteKit({

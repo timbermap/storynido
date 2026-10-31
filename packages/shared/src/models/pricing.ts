@@ -37,7 +37,7 @@ export const priceSnapshotSchema = z.object({
   subtotalMinor: z.number().int().nonnegative(),
   discount: z.object({
     minor: z.number().int().nonnegative(),
-    reason: z.enum(['coupon', 'promotion', 'pro']).nullable(),
+    reason: z.enum(['coupon', 'promotion', 'pro', 'bundle']).nullable(),
     /** Código del cupón o nombre de la promoción. */
     label: z.string().nullable(),
   }),
@@ -274,12 +274,20 @@ export function quoteKit(
     if (unit === undefined) return { ok: false, error: 'format_unavailable' };
     components.push({ code: 'piece', piece, unitMinor: unit, quantity: 1, totalMinor: unit });
   }
-  return finalize(components, country, 'digital', input, {
-    minor: 0,
-    etaDaysMin: 0,
-    etaDaysMax: 0,
-    pending: false,
-  });
+  // Kit completo: todas las piezas que se ofrecen, sin que el diseño se vuelva a cobrar.
+  const offered = Object.keys(pricing.pieces);
+  const complete =
+    !input.reuseDesign &&
+    offered.length > 0 &&
+    offered.every((piece) => input.kit.pieces.some((item) => item.piece === piece));
+  return finalize(
+    components,
+    country,
+    'digital',
+    input,
+    { minor: 0, etaDaysMin: 0, etaDaysMax: 0, pending: false },
+    complete ? (pricing.bundlePercent ?? 0) : 0,
+  );
 }
 
 /**
@@ -323,6 +331,8 @@ function finalize(
   format: BookFormat,
   input: Pick<QuoteInput, 'coupon' | 'couponCode' | 'promotions' | 'now' | 'country' | 'pro'>,
   shipping: PriceSnapshot['shipping'],
+  /** Porcentaje por kit completo (Eventos): compite con el resto, se aplica el mayor. */
+  bundlePercent = 0,
 ): QuoteResult {
   const subtotal = Math.max(
     0,
@@ -352,7 +362,8 @@ function finalize(
   // Descuento por volumen y recurrencia, de todos (un solo descuento: el mayor de todos).
   const percentPro = input.pro ? proPercent(input.pro.purchases, input.pro.config, format) : 0;
   const proMinor = Math.round((subtotal * percentPro) / 100);
-  const best = Math.max(couponMinor, promotionMinor, proMinor);
+  const bundleMinor = Math.round((subtotal * bundlePercent) / 100);
+  const best = Math.max(couponMinor, promotionMinor, proMinor, bundleMinor);
   const discount =
     best === 0
       ? { minor: 0, reason: null, label: null }
@@ -360,7 +371,13 @@ function finalize(
         ? { minor: couponMinor, reason: 'coupon' as const, label: coupon?.code ?? null }
         : proMinor === best
           ? { minor: proMinor, reason: 'pro' as const, label: `${String(percentPro)} %` }
-          : { minor: promotionMinor, reason: 'promotion' as const, label: promotion?.name ?? null };
+          : bundleMinor === best
+            ? { minor: bundleMinor, reason: 'bundle' as const, label: `${String(bundlePercent)} %` }
+            : {
+                minor: promotionMinor,
+                reason: 'promotion' as const,
+                label: promotion?.name ?? null,
+              };
 
   const taxable = subtotal - discount.minor + shipping.minor;
   const basisPoints = country.taxBasisPoints;

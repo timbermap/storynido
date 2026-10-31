@@ -30,6 +30,13 @@ export default function EventPricingPage() {
           currencyPath: 'currency',
         },
         {
+          kind: 'number',
+          path: 'bundlePercent',
+          label: 'Descuento por kit completo (%, vacío: ninguno)',
+          min: 0,
+          max: 50,
+        },
+        {
           kind: 'moneyRecord',
           path: 'pieces',
           label: 'Licencia por pieza (vacía: no se ofrece)',

@@ -475,6 +475,8 @@ batch.set(
     currency: 'USD',
     active: true,
     designMinor: 1499,
+    // Kit completo (invitación, agradecimiento, stickers, etiquetas y actividades): US$ 25,15 en vez de 31,44.
+    bundlePercent: 20,
     pieces: { activities: 299, invitation: 399, thank_you: 299, stickers: 349, favor_tags: 299 },
     updatedAt: now,
   }),

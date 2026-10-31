@@ -937,68 +937,118 @@
   },
   "Landing": {
     "events": {
-      "metaTitle": "Personalized favors and kits for birthdays and celebrations",
-      "metaDescription": "A mini story starring the guest of honor, to give to every guest: birthdays, baptisms, communions and graduations. One design, many copies.",
+      "metaTitle": "Birthdays and parties: invitation, kit and storybooks for the guests",
+      "metaDescription": "The party, ready, with your child as the star: a WhatsApp invitation, printable decorations and a mini storybook for every guest.",
       "eyebrow": "StoryNido Celebrations",
-      "title": "The whole celebration, with one hero",
-      "subtitle": "Invitation, mini story, stickers and more, in digital: one design that matches across the whole party. For birthdays, baptisms, communions and graduations.",
-      "cta": "Build my kit",
-      "note": "You can see the examples without an account. To create the design and see the free sample, sign in with Google, Apple or your email so we can save your project.",
+      "title": "The party, ready, with your child as the star",
+      "subtitle": "A WhatsApp invitation, printable decorations and a party-favor storybook for the guests, all with the same character.",
+      "cta": "Create the invitation for free",
+      "note": "You can see how it looks without an account. We only ask you to sign in to save or download.",
       "howTitle": "How it works",
       "steps": {
         "1": {
-          "title": "Choose the theme",
-          "text": "Adventure, magic or whatever the guest of honor loves most."
+          "title": "Pick the theme (1 minute)",
+          "text": "And the birthday child's name. With or without a photo."
         },
         "2": {
-          "title": "We design their story",
-          "text": "With their name, age and illustration, with or without a photo. You see a free sample."
+          "title": "See the free sample",
+          "text": "We design the character and its mini storybook, and you approve it before paying."
         },
         "3": {
-          "title": "One design, many copies",
-          "text": "The same little book for every guest: we don’t generate a different story per copy."
+          "title": "Download instantly",
+          "text": "Print at home or at the print shop you prefer, as many copies as guests."
         }
       },
-      "kitTitle": "Your kit includes",
-      "kitSubtitle": "All with the same illustrated hero. Pieces are bought digitally, licensed by number of copies.",
-      "kit": {},
-      "kitNote": "The whole kit is digital: you create the design, see the free sample and buy the PDF files to print at home or at the print shop you prefer. If you prefer, you can order the invitations and thank-you cards printed and shipped to your home afterwards.",
       "collectionsTitle": "Party themes",
       "faqTitle": "Frequently asked questions",
       "faq": {
         "1": {
           "q": "Does each guest get a different story?",
-          "a": "No. It’s one design you approve, with identical copies for everyone. That makes it faster and more affordable."
+          "a": "No: everyone gets the same mini storybook, approved by you. That is faster and cheaper."
         },
         "2": {
-          "q": "Can I print it at home?",
-          "a": "Yes, that's the idea: the kit is digital and comes as print-ready PDFs to print at home or at the print shop you prefer. The kit itself is digital; afterwards you can order printed invitations and thank-you cards, and the mini story printed in bulk."
+          "q": "How do I print and assemble it?",
+          "a": "Everything comes as a print-ready PDF for home or the print shop you prefer. Afterwards you can order printed invitations and thank-yous shipped to your home."
         },
         "3": {
           "q": "Do I need a photo?",
-          "a": "No. You can choose the main character’s features without uploading any photo."
+          "a": "No. You can choose the character's features without uploading any photo."
         },
         "4": {
-          "q": "How far in advance should I order?",
-          "a": "Since it's digital, you download the files right away. Order a few days ahead so you have time to print the pieces wherever you prefer."
+          "q": "Will it arrive on time?",
+          "a": "Since it is digital, you download the files instantly. Order a few days ahead so you can print the pieces wherever you like."
+        },
+        "5": {
+          "q": "How many copies can I print?",
+          "a": "The number you choose when buying, up to 200 per piece. The quantity does not change the price."
         }
       },
       "finalTitle": "Let every guest take home a memory of the party",
-      "kitTagNow": "Digital · print-ready PDF",
-      "viewStory": "View the story",
-      "kitDesign": "Design: {price} (includes the mini story)",
-      "kitExtra": "+ {price}",
-      "kitFull": "Full digital kit: {price}, no matter how many guests.",
-      "kitUsd": "Prices in US dollars (USD).",
+      "viewStory": "See the story",
       "collectionStart": "Design the kit with this theme",
       "catalogTitle": "Party themes",
       "catalogSubtitle": "Pick the theme and build the full kit: invitation, mini story, stickers and more, with one hero.",
-      "heroAlt": {
-        "invitation": "Printed invitation tied with a coral ribbon that reads \"You are invited!\"",
-        "book": "Printed mini storybooks tied with coral ribbon and name tags",
-        "stickers": "A sheet of round stickers with the same hero",
-        "bookmarks": "Two bookmarks with tassels"
-      }
+      "demo": {
+        "youAreInvited": "You're invited!",
+        "birthday": "is turning a year older",
+        "sample": "Sample: your final invitation uses your child's design",
+        "nameLabel": "What's the birthday child's name?",
+        "namePlaceholder": "Tommy",
+        "themeLabel": "Party theme",
+        "cta": "Create the invitation for free",
+        "previewAlt": "Sample invitation for the birthday of {name}, theme {theme}"
+      },
+      "productsTitle": "Four gifts, one star",
+      "productsSubtitle": "They are bought in this order, and each one answers a question about the party.",
+      "products": {
+        "1": {
+          "name": "The invitation",
+          "question": "How do I invite?",
+          "text": "A WhatsApp image and a printable PDF, with the name and the character."
+        },
+        "2": {
+          "name": "The party kit",
+          "question": "How do I decorate without losing a weekend?",
+          "text": "Tags, stickers, thank-you cards and activities as print-ready PDFs."
+        },
+        "3": {
+          "name": "The mini storybook for the guests",
+          "question": "What favor do I give?",
+          "text": "A little book with the character, as a PDF, to print as many copies as guests. It is included in the design."
+        },
+        "4": {
+          "name": "The birthday child's book",
+          "question": "What do I give them?",
+          "text": "A Families book starring your child, hardcover. Grandparents and aunts and uncles can buy it."
+        }
+      },
+      "priceFrom": "from {price}",
+      "priceIncluded": "Included in the design ({price})",
+      "priceFree": "Price in the creator",
+      "packagesTitle": "Packages",
+      "packagesSubtitle": "Each step adds to the previous one. Digital files download instantly.",
+      "packages": {
+        "invitation": {
+          "name": "Invitation",
+          "text": "A WhatsApp invitation and PDF, with the character design and the mini storybook."
+        },
+        "party": {
+          "name": "Digital party",
+          "badge": "Most popular",
+          "text": "Invitation, mini storybook as PDF, the complete decoration kit and a thank-you.",
+          "saving": "{percent}% less than buying each piece ({price})"
+        },
+        "printed": {
+          "name": "Complete party",
+          "badge": "Coming soon",
+          "text": "The digital party plus printed booklets with each guest's name on the cover. Not for sale yet: today the mini storybook is the same for everyone."
+        },
+        "book": {
+          "name": "Birthday child's book",
+          "text": "The birthday child's Families book, at Families pricing."
+        }
+      },
+      "packagesNote": "Prices in US dollars (USD). The copies you print do not change the price."
     },
     "professionals": {
       "metaTitle": "Personalized stories for educators, therapists and specialists",
@@ -1199,7 +1249,8 @@
     "discount": {
       "coupon": "Coupon {label}",
       "promotion": "Promotion {label}",
-      "pro": "Volume discount {label}"
+      "pro": "Volume discount {label}",
+      "bundle": "Full kit discount {label}"
     },
     "shippingEta": "Shipping (arrives in {min} to {max} business days)",
     "shippingDigital": "Digital delivery",
