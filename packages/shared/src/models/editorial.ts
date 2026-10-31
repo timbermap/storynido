@@ -128,14 +128,20 @@ export const DEFAULT_EDITORIAL_CONFIG: EditorialConfig = {
   },
 };
 
-/** Sugerencias según la edad: el adulto puede cambiarlas ("Ajustar"). */
+/**
+ * Sugerencias según la edad (el adulto puede cambiarlas en "Ajustar"): los bebés, libros cortos y
+ * muy visuales; desde los 6 años, 32 páginas con más texto (docs "Cantidad de texto por edad").
+ */
 export function suggestedReading(age: number): {
+  length: BookLength;
   textDensity: TextDensity;
   readingLevel: ReadingLevel;
 } {
-  if (age <= 4) return { textDensity: 'visual', readingLevel: 'beginner' };
-  if (age <= 7) return { textDensity: 'balanced', readingLevel: 'developing' };
-  return { textDensity: 'balanced', readingLevel: 'advanced' };
+  if (age <= 2) return { length: 'short', textDensity: 'visual', readingLevel: 'beginner' };
+  if (age <= 4) return { length: 'classic', textDensity: 'balanced', readingLevel: 'beginner' };
+  if (age <= 5) return { length: 'classic', textDensity: 'balanced', readingLevel: 'developing' };
+  if (age <= 8) return { length: 'epic', textDensity: 'balanced', readingLevel: 'developing' };
+  return { length: 'epic', textDensity: 'rich', readingLevel: 'advanced' };
 }
 
 export interface EditorialChoice {

@@ -1975,3 +1975,10 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 - **Problema:** dos filas con estilos distintos (las edades se cortaban a la derecha en pantallas angostas; los temas eran pestañas con íconos).
 - **Decisión (opción B de la comparación):** buscador, después **«¿Para quién es?»** con las cuatro etapas como tarjetas (nombre, rango de años y cantidad) y debajo los temas como chips que se acomodan en varias líneas. Tocar la edad o el tema elegido lo quita; se retiró «Todas las edades» y «Todo» (sin filtro es el estado por defecto) y la barra fija al hacer scroll. Los conteos y el quitar con ✕ siguen igual.
 - **Orden por edad (2026-10-31):** el catálogo de Historias se muestra de **menor a mayor edad** (`ageMin`, luego `ageMax`; a igual edad, el orden del catálogo).
+
+## 164 · Cantidad de texto por edad (P0)
+
+- **Fecha:** 2026-10-31.
+- **Fuente:** el documento «Cantidad de texto por edad e historias»: el asistente daba 28 páginas y «Equilibrado» a todos, y a 9 a 12 años sugería 700 a 1.700 palabras (los libros de esa edad tienen 20.000 o más).
+- **Hecho (P0):** `suggestedReading(edad)` ahora también sugiere la **extensión**: 0 a 2, Corto (16) muy visual; 3 y 4, Clásico equilibrado inicial; 5, Clásico en desarrollo; 6 a 8, Gran aventura (32) equilibrado; 9 a 12, Gran aventura con «Más lectura» y nivel avanzado. Celebraciones conserva su Mini. La historia «Hola, animales» (0 a 2) admite solo Mini/Corto, muy visual e inicial, como las demás de bebés.
+- **Pendiente (P1/P2):** la pregunta única «¿Cómo lo van a leer?» con formatos por edad («Leo solo», «Mi primer libro con capítulos», «Novela corta»), precio por formato, novela corta de 64 a 96 páginas (confirmar Lulu/Gelato) e historieta.

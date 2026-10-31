@@ -23,11 +23,20 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   // La primera vez que se llega a este paso, la lectura se sugiere según la edad.
   const firstVisit = nav.reached <= nav.flow.indexOf('story');
   const [choice, setChoice] = useState<BookChoice>(() => ({
-    length: data.book.length ?? data.editorial.defaults.length,
     contentType: data.book.contentType,
     ...(firstVisit && age !== undefined
-      ? suggestedReading(age)
-      : { textDensity: data.book.textDensity, readingLevel: data.book.readingLevel }),
+      ? {
+          ...suggestedReading(age),
+          // Celebraciones arranca como mini cuento para cada invitado, sea cual sea la edad.
+          ...(data.book.channel === 'events' && data.book.length
+            ? { length: data.book.length }
+            : {}),
+        }
+      : {
+          length: data.book.length ?? data.editorial.defaults.length,
+          textDensity: data.book.textDensity,
+          readingLevel: data.book.readingLevel,
+        }),
   }));
   const story = data.stories.find((item) => item.slug === selected);
 

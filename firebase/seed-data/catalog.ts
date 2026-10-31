@@ -250,6 +250,10 @@ const ADVENTURES: SeedStory[] = [
     textPromptTemplate: TEXT_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
     ...EDITORIAL_OPTIONS,
+    // 0 a 2 años: solo libros cortos y muy visuales (nada de 3.800 palabras para un bebé).
+    lengths: ['mini', 'short'],
+    textDensities: ['visual'],
+    readingLevels: ['beginner'],
     ...ADVENTURE,
   },
   {
