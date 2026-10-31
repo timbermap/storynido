@@ -75,6 +75,8 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
 
   await page.goto('/es/eventos');
   const start = page.getByRole('link', { name: /Diseñar el kit con este tema/ }).first();
+  // El enlace pasa de "login" al creador cuando la web detecta la sesión.
+  await expect(start).toHaveAttribute('href', /tema=/);
   const theme = new URL(String(await start.getAttribute('href')), 'http://x').searchParams.get(
     'tema',
   );
