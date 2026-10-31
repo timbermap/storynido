@@ -134,3 +134,32 @@ export const productSchema = timestampsSchema.extend({
 });
 
 export type Product = z.infer<typeof productSchema>;
+
+/**
+ * Etapas de lectura del catálogo (estudio de catálogo, DECISIONS 149): cuatro, no rangos amplios.
+ * Cada historia pertenece a la etapa que contiene el centro de su rango de edad.
+ */
+export const AGE_STAGES = [
+  { key: 'babies', min: 0, max: 3 },
+  { key: 'little', min: 3, max: 6 },
+  { key: 'readers', min: 6, max: 9 },
+  { key: 'big', min: 9, max: 12 },
+] as const;
+
+export type AgeStageKey = (typeof AGE_STAGES)[number]['key'];
+
+export function stageOf(story: { ageMin: number; ageMax: number }): AgeStageKey {
+  const middle = (story.ageMin + story.ageMax) / 2;
+  if (middle < 3) return 'babies';
+  if (middle < 6) return 'little';
+  if (middle < 9) return 'readers';
+  return 'big';
+}
+
+/** Marca del nombre en los títulos del catálogo ("[Nombre] y el valle de los dinosaurios"). */
+const NAME_PLACEHOLDER = /\[(?:Nombre|Name|Nome)\]/g;
+
+/** El título con el nombre del niño en el lugar de la marca (para el prompt y el libro). */
+export function withChildName(title: string, name: string): string {
+  return title.replace(NAME_PLACEHOLDER, name);
+}

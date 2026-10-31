@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
-import type { Locale } from '@storynido/shared';
+import { AGE_STAGES, stageOf, type Locale } from '@storynido/shared';
 
 import { CountryNotice } from '@/components/stories/country-notice';
 import { StoryCard } from '@/components/stories/story-card';
@@ -15,12 +15,8 @@ import { getDisplayCountry } from '@/lib/server/request-context';
 import { STORY_THEMES, matchesSearch, matchesTheme } from '@/lib/story-themes';
 import { cn } from '@/lib/utils';
 
-const AGE_FILTERS = [
-  { min: 0, max: 3 },
-  { min: 4, max: 6 },
-  { min: 7, max: 9 },
-  { min: 10, max: 12 },
-] as const;
+// Cuatro etapas de lectura (DECISIONS 149): cada historia pertenece a una.
+const AGE_FILTERS = AGE_STAGES;
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -68,7 +64,7 @@ export default async function StoriesPage({ params, searchParams }: Props) {
   const overlaps = (
     story: { ageMin: number; ageMax: number },
     range: { min: number; max: number },
-  ) => story.ageMin <= range.max && story.ageMax >= range.min;
+  ) => stageOf(story) === AGE_STAGES.find((stage) => stage.min === range.min)?.key;
   const matches = (story: (typeof stories)[number], skip?: 'age' | 'theme') =>
     (skip === 'age' || !filter || overlaps(story, filter)) &&
     (!collection || story.collectionIds.includes(collection.slug)) &&
@@ -146,7 +142,7 @@ export default async function StoriesPage({ params, searchParams }: Props) {
               { range: null, label: t('allAgesOption'), count: allAgesCount },
               ...AGE_FILTERS.map((range) => ({
                 range,
-                label: `${String(range.min)}–${String(range.max)}`,
+                label: `${t(`stages.${range.key}`)} ${String(range.min)}–${String(range.max)}`,
                 count: ageCount(range),
               })),
             ].map(({ range, label, count }) => {
@@ -176,7 +172,11 @@ export default async function StoriesPage({ params, searchParams }: Props) {
                   data-track="catalog_filter_used"
                   data-track-filter="age"
                   aria-current={active ? 'true' : undefined}
-                  aria-label={range ? t('ageRange', { min: range.min, max: range.max }) : label}
+                  aria-label={
+                    range
+                      ? `${t(`stages.${range.key}`)}, ${t('ageRange', { min: range.min, max: range.max })}`
+                      : label
+                  }
                   className={className}
                 >
                   {content}

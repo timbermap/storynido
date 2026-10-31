@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 
 import { encodeIllustration, watermarkPreview, type ProviderRegistry } from '@storynido/providers';
 import {
+  withChildName,
   COLLECTIONS,
   CHARACTER_REFERENCE_SCENE,
   editorialPlan,
@@ -505,7 +506,8 @@ export class PreviewService {
       petName: (child.petName ?? null) as string | null,
       bestFriendName: (child.bestFriendName ?? null) as string | null,
       dedication: null,
-      storyTitle: story.title[book.language],
+      // El nombre del niño en el título del catálogo ("[Nombre] y el valle…"), no la marca.
+      storyTitle: withChildName(story.title[book.language], String(child.name)),
       lessons: lessonPrompts,
       // Libro de actividades: la historia breve que les da contexto.
       pageCount: Math.max(plan.narrativePages, PREVIEW_ILLUSTRATED_PAGES),

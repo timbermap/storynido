@@ -210,7 +210,7 @@
     "filterLabel": "Edad",
     "allAges": "Todas",
     "ageRange": "{min} a {max} años",
-    "agesFor": "Para {min} a {max} años",
+    "agesFor": "Ideal de {min} a {max} años",
     "pages": "{count} páginas",
     "empty": "No hay historias para esa edad todavía.",
     "from": "desde {price}",
@@ -266,7 +266,13 @@
     "removeFilter": "Quitar filtro",
     "clearAll": "Limpiar filtros",
     "formatEbook": "Ebook (PDF)",
-    "formatPrinted": "Libro físico: {covers}"
+    "formatPrinted": "Libro físico: {covers}",
+    "stages": {
+      "babies": "Bebés",
+      "little": "Pequeños",
+      "readers": "Lectores",
+      "big": "Grandes lectores"
+    }
   },
   "Formats": {
     "digital": "Ebook (PDF)",

@@ -104,14 +104,14 @@ test('catálogo: "¿Qué le encanta?" desde Familias, temática y búsqueda sin 
   await page.getByRole('link', { name: 'Los héroes y el deporte' }).click();
   await expect(page).toHaveURL(/tema=heroes/);
   const grid = page.locator('main');
-  await expect(grid).toContainText('¡Gol de campeón!');
+  await expect(grid).toContainText('gol de campeón');
   await expect(grid).not.toContainText('La gran aventura espacial');
 
   await page.goto('/es/historias');
   await page.getByRole('searchbox', { name: 'Buscar una historia' }).fill('FUTBOL');
   await page.getByRole('button', { name: 'Buscar' }).click();
   await expect(page).toHaveURL(/q=FUTBOL/);
-  await expect(grid).toContainText('¡Gol de campeón!');
+  await expect(grid).toContainText('gol de campeón');
   await expect(grid).not.toContainText('La gran aventura espacial');
   await expectAccessible(page);
 });

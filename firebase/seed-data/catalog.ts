@@ -55,13 +55,13 @@ const ADVENTURES: SeedStory[] = [
     active: true,
     order: 1,
     ageMin: 3,
-    ageMax: 8,
+    ageMax: 6,
     tags: ['espacio', 'aventura'],
     pageCount: 12,
     title: {
-      es: 'La gran aventura espacial',
-      en: 'The Great Space Adventure',
-      pt: 'A grande aventura espacial',
+      es: 'La gran aventura espacial de [Nombre]',
+      en: "[Name]'s Great Space Adventure",
+      pt: 'A grande aventura espacial de [Nome]',
     },
     summary: {
       es: 'Un cohete de cartón se convierte en una nave de verdad y lleva a tu peque a visitar planetas, hacer amigos entre las estrellas y volver a casa justo a tiempo para dormir.',
@@ -87,13 +87,13 @@ const ADVENTURES: SeedStory[] = [
     active: true,
     order: 2,
     ageMin: 3,
-    ageMax: 7,
+    ageMax: 6,
     tags: ['dinosaurios', 'naturaleza'],
     pageCount: 12,
     title: {
-      es: 'El valle de los dinosaurios',
-      en: 'The Valley of the Dinosaurs',
-      pt: 'O vale dos dinossauros',
+      es: '[Nombre] y el valle de los dinosaurios',
+      en: '[Name] and the Dinosaur Valley',
+      pt: '[Nome] e o vale dos dinossauros',
     },
     summary: {
       es: 'Detrás del jardín hay un valle secreto donde viven dinosaurios gigantes y muy amables. Tu peque los ayudará a encontrar un huevo perdido antes de que caiga el sol.',
@@ -119,10 +119,14 @@ const ADVENTURES: SeedStory[] = [
     active: true,
     order: 3,
     ageMin: 3,
-    ageMax: 8,
+    ageMax: 6,
     tags: ['princesas', 'príncipes', 'magia'],
     pageCount: 12,
-    title: { es: 'El reino encantado', en: 'The Enchanted Kingdom', pt: 'O reino encantado' },
+    title: {
+      es: '[Nombre] y el reino de los colores',
+      en: '[Name] and the Kingdom of Colors',
+      pt: '[Nome] e o reino das cores',
+    },
     summary: {
       es: 'Un castillo en las nubes necesita a alguien valiente y bondadoso. Tu peque recibe una corona, un mapa mágico y una misión: devolverle los colores al reino.',
       en: 'A castle in the clouds needs someone brave and kind. Your little one receives a crown, a magic map, and a mission: bring the colors back to the kingdom.',
@@ -151,11 +155,15 @@ const ADVENTURES: SeedStory[] = [
     palette: 'celebration',
     active: true,
     order: 4,
-    ageMin: 4,
-    ageMax: 10,
+    ageMin: 5,
+    ageMax: 9,
     tags: ['fútbol', 'deportes', 'amistad'],
     pageCount: 12,
-    title: { es: '¡Gol de campeón!', en: "Champion's Goal!", pt: 'Gol de campeão!' },
+    title: {
+      es: '¡[Nombre], gol de campeón!',
+      en: "[Name], Champion's Goal!",
+      pt: '[Nome], gol de campeão!',
+    },
     summary: {
       es: 'Es la final del torneo del barrio y el equipo necesita a su mejor jugador. Una historia sobre esfuerzo, compañerismo y el gol más importante del año.',
       en: "It's the final of the neighborhood tournament and the team needs its best player. A story about effort, teamwork, and the most important goal of the year.",
@@ -184,11 +192,15 @@ const ADVENTURES: SeedStory[] = [
     palette: 'adventure',
     active: true,
     order: 5,
-    ageMin: 4,
-    ageMax: 9,
+    ageMin: 3,
+    ageMax: 7,
     tags: ['superhéroes', 'valentía'],
     pageCount: 12,
-    title: { es: 'Superhéroe por un día', en: 'Superhero for a Day', pt: 'Super-herói por um dia' },
+    title: {
+      es: '[Nombre], superhéroe por un día',
+      en: '[Name], Superhero for a Day',
+      pt: '[Nome], super-herói por um dia',
+    },
     summary: {
       es: 'Una capa aparece misteriosamente en la cama de tu peque. Durante un día tendrá superpoderes… y descubrirá que el más grande de todos es ayudar a los demás.',
       en: "A cape mysteriously appears on your little one's bed. For one day they'll have superpowers… and discover that the greatest of all is helping others.",
@@ -212,11 +224,15 @@ const ADVENTURES: SeedStory[] = [
     palette: 'nature',
     active: true,
     order: 6,
-    ageMin: 2,
-    ageMax: 7,
+    ageMin: 0,
+    ageMax: 3,
     tags: ['animales', 'naturaleza', 'amistad'],
     pageCount: 12,
-    title: { es: 'Amigos de la selva', en: 'Jungle Friends', pt: 'Amigos da selva' },
+    title: {
+      es: 'Hola, animales: [Nombre] en la selva',
+      en: 'Hello, animals: [Name] in the jungle',
+      pt: 'Olá, animais: [Nome] na selva',
+    },
     summary: {
       es: 'Un tucán parlanchín invita a tu peque a recorrer la selva: monos acróbatas, un jaguar dormilón y un río lleno de sorpresas.',
       en: 'A chatty toucan invites your little one to explore the jungle: acrobatic monkeys, a sleepy jaguar and a river full of surprises.',
@@ -246,13 +262,13 @@ const ADVENTURES: SeedStory[] = [
     active: true,
     order: 7,
     ageMin: 3,
-    ageMax: 8,
+    ageMax: 6,
     tags: ['mar', 'aventura', 'naturaleza'],
     pageCount: 12,
     title: {
-      es: 'El secreto del fondo del mar',
-      en: 'The Secret of the Deep Sea',
-      pt: 'O segredo do fundo do mar',
+      es: '[Nombre] y el secreto del fondo del mar',
+      en: '[Name] and the Secret of the Deep Sea',
+      pt: '[Nome] e o segredo do fundo do mar',
     },
     summary: {
       es: 'Con una burbuja mágica para respirar bajo el agua, tu peque nada entre delfines, tortugas y corales para descubrir un tesoro muy especial.',
@@ -331,14 +347,14 @@ export const SEED_NEW_STORIES: SeedStory[] = [
     suggestedLessons: ['compartir', 'decir-la-verdad', 'llega-un-hermanito', 'mudanza'],
     palette: 'bedtime',
     order: 20,
-    ageMin: 2,
+    ageMin: 5,
     ageMax: 9,
     channels: ['families'],
     collectionIds: ['nuestros-recuerdos'],
     title: {
-      es: 'Las tardes con los abuelos',
-      en: 'Afternoons with Grandma and Grandpa',
-      pt: 'As tardes com os avós',
+      es: 'Las tardes de [Nombre] con los abuelos',
+      en: "[Name]'s Afternoons with Grandma and Grandpa",
+      pt: 'As tardes de [Nome] com os avós',
     },
     summary: {
       es: 'Una historia hecha con sus recuerdos favoritos con los abuelos: las recetas, los juegos y los secretos que solo ellos comparten.',
@@ -376,13 +392,13 @@ export const SEED_NEW_STORIES: SeedStory[] = [
     palette: 'learning',
     order: 21,
     ageMin: 3,
-    ageMax: 7,
+    ageMax: 6,
     channels: ['families', 'professionals'],
     collectionIds: ['grandes-momentos', 'mi-primera-experiencia'],
     title: {
-      es: 'Mi primer día de clases',
-      en: 'My First Day of School',
-      pt: 'Meu primeiro dia de aula',
+      es: 'El primer día de clases de [Nombre]',
+      en: "[Name]'s First Day of School",
+      pt: 'O primeiro dia de aula de [Nome]',
     },
     summary: {
       es: 'La mochila nueva, el aula llena de colores y un compañero que también está nervioso. Un cuento para llegar al primer día con confianza.',
@@ -588,6 +604,8 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...BIG_READER_BASE,
     slug: 'el-misterio-del-faro',
+    ageMin: 9,
+    ageMax: 12,
     suggestedLessons: [
       'valentia',
       'decir-la-verdad',
@@ -598,9 +616,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
     order: 30,
     tags: ['misterio', 'detectives', 'mar'],
     title: {
-      es: 'El misterio del faro dormido',
-      en: 'The Mystery of the Sleeping Lighthouse',
-      pt: 'O mistério do farol adormecido',
+      es: '[Nombre] y el misterio del faro',
+      en: '[Name] and the Lighthouse Mystery',
+      pt: '[Nome] e o mistério do farol',
     },
     summary: {
       es: 'Cada noche, la luz del faro del pueblo se apaga a la misma hora. Con una libreta, una linterna y mucha paciencia, tu hijo sigue las pistas hasta descubrir un secreto que nadie esperaba.',
@@ -617,6 +635,8 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...BIG_READER_BASE,
     slug: 'el-invento-que-se-escapo',
+    // En pausa (DECISIONS 149): se superpone con otra historia de 9 a 12 años.
+    active: false,
     suggestedLessons: [
       'equivocarse-esta-bien',
       'lograr-lo-que-te-propongas',
@@ -646,6 +666,8 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...BIG_READER_BASE,
     slug: 'la-expedicion-del-mapa-perdido',
+    // En pausa (DECISIONS 149): se superpone con otra historia de 9 a 12 años.
+    active: false,
     suggestedLessons: ['valentia', 'respetar-las-diferencias', 'cuidar-la-naturaleza', 'amistad'],
     palette: 'nature',
     order: 32,
@@ -670,6 +692,8 @@ export const SEED_NEW_STORIES: SeedStory[] = [
   {
     ...BIG_READER_BASE,
     slug: 'un-lunes-al-reves',
+    ageMin: 6,
+    ageMax: 10,
     suggestedLessons: [
       'ser-uno-mismo',
       'equivocarse-esta-bien',
@@ -680,9 +704,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
     order: 33,
     tags: ['humor', 'fantasía'],
     title: {
-      es: 'Un lunes completamente al revés',
-      en: 'A Completely Upside-Down Monday',
-      pt: 'Uma segunda-feira completamente ao contrário',
+      es: 'El lunes al revés de [Nombre]',
+      en: "[Name]'s Upside-Down Monday",
+      pt: 'A segunda-feira ao contrário de [Nome]',
     },
     summary: {
       es: 'Un lunes, tu hijo se despierta y todo funciona al revés: el perro pasea a la familia, los maestros hacen la tarea y la gravedad se toma el día libre. Para arreglarlo, tendrá que pensar al revés.',
