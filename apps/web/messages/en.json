@@ -659,8 +659,8 @@
     },
     "preview": {
       "badge": "Story sample",
-      "generatingTitle": "We're creating their story…",
-      "generatingText": "We're writing the story and illustrating the cover and the first pages. It takes about a minute; you can stay on this page.",
+      "generatingTitle": "We are drawing {name}…",
+      "generatingText": "We are writing the story and drawing {name}. This takes a few minutes because we make sure it looks like them. Then you review it and, only with your OK, we illustrate the cover and the first pages.",
       "cover": "Cover",
       "page": "Page {number}",
       "coverAlt": "Illustrated cover of the story “{title}”",
@@ -714,12 +714,9 @@
       "accountTitle": "Create your account to see the cover and pages",
       "accountText": "It’s free. That’s how we save your story and what you’ve approved.",
       "illustrating": "Illustrating the cover and the first pages…",
-      "readWhile": "Read the whole story",
       "approvedBadge": "Character approved",
       "continueAfterApproval": "Choose the format once you approve the character and the sample is up to date.",
-      "reviewCharacter": "Review the character",
       "approveFirst": "First confirm how we'll draw {name}. Then we create the cover and the pages, and you choose the format.",
-      "pendingStep": "One step left: confirm how we draw {name}.",
       "whatsOff": "What doesn't look right?",
       "whatsOffHint": "Pick what needs fixing and we'll show you just that.",
       "aspects": {
@@ -729,7 +726,15 @@
         "glasses": "The glasses",
         "distinctive": "Something else (a feature)"
       },
-      "lockedNote": "What you fix stays the same on every page."
+      "lockedNote": "What you fix stays the same on every page.",
+      "illustratingText": "We are illustrating the cover and the first pages. It takes a couple of minutes.",
+      "waitSteps": {
+        "character": "We draw {name} (a few minutes)",
+        "review": "You review and confirm the likeness",
+        "illustrate": "We illustrate the cover and 2 pages"
+      },
+      "leaveText": "No need to wait here: it keeps working, you will find it in My stories and we will email you when the preview is ready.",
+      "leaveButton": "Back to My stories"
     },
     "character": {
       "modeLegend": "How should we create the main character?",

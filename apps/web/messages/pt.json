@@ -659,8 +659,8 @@
     },
     "preview": {
       "badge": "Amostra da história",
-      "generatingTitle": "Estamos criando a história…",
-      "generatingText": "Escrevemos a história e ilustramos a capa e as primeiras páginas. Leva cerca de um minuto; você pode ficar nesta página.",
+      "generatingTitle": "Estamos desenhando {name}…",
+      "generatingText": "Escrevemos a história e desenhamos {name}. Isso leva alguns minutos, porque cuidamos para que se pareça. Depois você revisa e, só com o seu OK, ilustramos a capa e as primeiras páginas.",
       "cover": "Capa",
       "page": "Página {number}",
       "coverAlt": "Capa ilustrada da história “{title}”",
@@ -714,12 +714,9 @@
       "accountTitle": "Crie sua conta para ver a capa e as páginas",
       "accountText": "É grátis. Assim guardamos sua história e o que você já aprovou.",
       "illustrating": "Ilustrando a capa e as primeiras páginas…",
-      "readWhile": "Leia a história completa",
       "approvedBadge": "Personagem aprovado",
       "continueAfterApproval": "Escolha o formato quando aprovar o personagem e a amostra estiver atualizada.",
-      "reviewCharacter": "Revisar a personagem",
       "approveFirst": "Primeiro confirme como vamos desenhar {name}. Depois criamos a capa e as páginas, e você escolhe o formato.",
-      "pendingStep": "Falta um passo: confirme como desenhamos {name}.",
       "whatsOff": "O que não está parecido?",
       "whatsOffHint": "Marque o que precisa corrigir e mostramos só isso.",
       "aspects": {
@@ -729,7 +726,15 @@
         "glasses": "Os óculos",
         "distinctive": "Outra coisa (um traço)"
       },
-      "lockedNote": "O que você corrigir fica igual em todas as páginas."
+      "lockedNote": "O que você corrigir fica igual em todas as páginas.",
+      "illustratingText": "Ilustramos a capa e as primeiras páginas. Leva alguns minutos.",
+      "waitSteps": {
+        "character": "Desenhamos {name} (alguns minutos)",
+        "review": "Você revisa e confirma a semelhança",
+        "illustrate": "Ilustramos a capa e 2 páginas"
+      },
+      "leaveText": "Não precisa esperar aqui: continua funcionando, você encontra em Minhas histórias e avisamos por e-mail quando a prévia estiver pronta.",
+      "leaveButton": "Voltar para Minhas histórias"
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",

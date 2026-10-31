@@ -140,6 +140,8 @@ export function PreviewPanel({
   if (isGenerating) {
     // Si ya había un personaje en revisión, lo que se está generando son las ilustraciones.
     const illustrating = data?.stage === 'character';
+    const steps = ['character', 'review', 'illustrate'] as const;
+    const active = illustrating ? 2 : 0;
     return (
       <div className="container-page max-w-3xl py-16 text-center" role="status" aria-live="polite">
         <Loader2 className="mx-auto size-10 animate-spin text-primary" aria-hidden="true" />
@@ -148,13 +150,33 @@ export function PreviewPanel({
           tabIndex={-1}
           className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-medium outline-none"
         >
-          {illustrating ? t('illustrating') : t('generatingTitle')}
+          {illustrating ? t('illustrating') : t('generatingTitle', { name: childName })}
         </h1>
-        {!illustrating && (
-          <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-            {t('generatingText')}
-          </p>
-        )}
+        <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
+          {illustrating ? t('illustratingText') : t('generatingText', { name: childName })}
+        </p>
+        <ol className="mx-auto mt-8 grid max-w-xl gap-2 text-left text-sm sm:grid-cols-3">
+          {steps.map((step, index) => (
+            <li
+              key={step}
+              aria-current={index === active ? 'step' : undefined}
+              className={
+                index === active
+                  ? 'rounded-xl border-2 border-primary bg-card p-3 font-semibold'
+                  : 'rounded-xl border bg-card/60 p-3 text-muted-foreground'
+              }
+            >
+              <span className="block text-xs font-bold tracking-wide uppercase">{index + 1}</span>
+              {t(`waitSteps.${step}`, { name: childName })}
+            </li>
+          ))}
+        </ol>
+        <div className="mx-auto mt-8 grid max-w-xl justify-items-center gap-3">
+          <p className="text-sm text-muted-foreground">{t('leaveText')}</p>
+          <Link href="/my-stories" className={buttonVariants({ variant: 'outline' })}>
+            {t('leaveButton')}
+          </Link>
+        </div>
       </div>
     );
   }
@@ -297,22 +319,6 @@ export function PreviewPanel({
             onUpdated={setPreview}
             onError={setError}
           />
-          <section aria-labelledby="read-while" className="grid gap-4 [&>*]:min-w-0">
-            <h2 id="read-while" className="text-2xl font-medium">
-              {t('readWhile')}
-            </h2>
-            <BookViewer
-              title={data.title}
-              pages={viewerPages(data)}
-              imageAlt={(page) =>
-                page.kind === 'cover'
-                  ? t('coverAlt', { title: data.title })
-                  : t('pageAlt', { number: page.number ?? 0 })
-              }
-              lockedLabel={tViewer('locked')}
-              examples={examples}
-            />
-          </section>
         </div>
       )}
 
@@ -392,16 +398,6 @@ export function PreviewPanel({
               {t('regenerationsLeft', { count: regenerationsLeft })}
             </p>
           </aside>
-        </div>
-      )}
-
-      {data?.stage === 'character' && data.character && !data.character.approved && (
-        // Mientras se lee el cuento, el paso pendiente queda siempre a la vista.
-        <div className="sticky bottom-3 z-20 mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card/95 px-4 py-3 shadow-[0_12px_32px_-12px_rgb(38_50_74/0.35)] backdrop-blur">
-          <p className="text-sm font-semibold">{t('pendingStep', { name: childName })}</p>
-          <a href="#character-review" className={buttonVariants({ size: 'sm' })}>
-            {t('reviewCharacter')}
-          </a>
         </div>
       )}
 

@@ -659,8 +659,8 @@
     },
     "preview": {
       "badge": "Muestra de la historia",
-      "generatingTitle": "Estamos creando su cuento…",
-      "generatingText": "Escribimos la historia e ilustramos la portada y las primeras páginas. Tarda alrededor de un minuto; puedes quedarte en esta página.",
+      "generatingTitle": "Estamos dibujando a {name}…",
+      "generatingText": "Escribimos la historia y dibujamos a {name}. Esto lleva unos minutos, porque cuidamos que se parezca. Después tú lo revisas y, recién con tu OK, ilustramos la portada y las primeras páginas.",
       "cover": "Portada",
       "page": "Página {number}",
       "coverAlt": "Portada ilustrada del cuento «{title}»",
@@ -714,12 +714,9 @@
       "accountTitle": "Crea tu cuenta para ver la portada y las páginas",
       "accountText": "Es gratis. Así guardamos tu cuento y lo que ya aprobaste.",
       "illustrating": "Ilustrando la portada y las primeras páginas…",
-      "readWhile": "Lee el cuento completo",
       "approvedBadge": "Personaje aprobado",
       "continueAfterApproval": "Elige el formato cuando apruebes al personaje y la muestra esté al día.",
-      "reviewCharacter": "Revisar al personaje",
       "approveFirst": "Primero confirma cómo vamos a dibujar a {name}. Después creamos la portada y las páginas, y eliges el formato.",
-      "pendingStep": "Falta un paso: confirma cómo dibujamos a {name}.",
       "whatsOff": "¿Qué no se parece?",
       "whatsOffHint": "Marca lo que hay que corregir y te mostramos solo eso.",
       "aspects": {
@@ -729,7 +726,15 @@
         "glasses": "Los anteojos",
         "distinctive": "Otra cosa (un rasgo)"
       },
-      "lockedNote": "Lo que corrijas queda fijo en todas las páginas."
+      "lockedNote": "Lo que corrijas queda fijo en todas las páginas.",
+      "illustratingText": "Ilustramos la portada y las primeras páginas. Tarda un par de minutos.",
+      "waitSteps": {
+        "character": "Dibujamos a {name} (unos minutos)",
+        "review": "Tú revisas y confirmas el parecido",
+        "illustrate": "Ilustramos la portada y 2 páginas"
+      },
+      "leaveText": "No hace falta esperar acá: sigue trabajando, lo encuentras en Mis cuentos y te escribimos cuando la muestra esté lista.",
+      "leaveButton": "Volver a Mis cuentos"
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
