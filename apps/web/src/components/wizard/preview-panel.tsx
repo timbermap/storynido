@@ -323,7 +323,33 @@ export function PreviewPanel({
       )}
 
       {data?.stage === 'complete' && (
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] [&>*]:min-w-0">
+        <div className="mt-8 grid gap-6 [&>*]:min-w-0">
+          <aside className="rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                {data.character?.approved && (
+                  <p className="inline-flex items-center gap-1.5 text-sm font-bold text-success">
+                    <CheckCircle2 className="size-4" aria-hidden="true" />
+                    {t('approvedBadge')}
+                  </p>
+                )}
+                <h2 className="text-xl font-medium">{t('differencesTitle')}</h2>
+              </div>
+              <p className="text-sm font-bold text-primary">
+                {t('regenerationsLeft', { count: regenerationsLeft })}
+              </p>
+            </div>
+            <ul className="mt-3 grid gap-2 text-muted-foreground md:grid-cols-3 md:gap-6">
+              <li>
+                {t('differencesPages', {
+                  total: data.totalPages,
+                  shown: data.pages.filter((page) => page.imageUrl).length,
+                })}
+              </li>
+              <li>{t('differencesWatermark')}</li>
+              <li>{t('differencesEdit')}</li>
+            </ul>
+          </aside>
           <div className="grid gap-4 [&>*]:min-w-0">
             <BookViewer
               title={data.title}
@@ -375,29 +401,6 @@ export function PreviewPanel({
               </div>
             )}
           </div>
-
-          <aside className="self-start rounded-xl border bg-card p-6 shadow-[var(--shadow-card)]">
-            {data.character?.approved && (
-              <p className="mb-3 inline-flex items-center gap-1.5 text-sm font-bold text-success">
-                <CheckCircle2 className="size-4" aria-hidden="true" />
-                {t('approvedBadge')}
-              </p>
-            )}
-            <h2 className="text-xl font-medium">{t('differencesTitle')}</h2>
-            <ul className="mt-3 grid gap-2 text-muted-foreground">
-              <li>
-                {t('differencesPages', {
-                  total: data.totalPages,
-                  shown: data.pages.filter((page) => page.imageUrl).length,
-                })}
-              </li>
-              <li>{t('differencesWatermark')}</li>
-              <li>{t('differencesEdit')}</li>
-            </ul>
-            <p className="mt-4 text-sm font-bold text-primary">
-              {t('regenerationsLeft', { count: regenerationsLeft })}
-            </p>
-          </aside>
         </div>
       )}
 
