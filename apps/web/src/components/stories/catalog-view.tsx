@@ -52,7 +52,9 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
     : allStories;
   // El buscador aparece cuando hay historias de sobra para que valga la pena (con pocas, el filtro
   // por edad y los temas alcanzan).
-  const showSearch = stories.length >= SEARCH_MIN_STORIES || Boolean(query.q);
+  // En el catálogo general se cuentan solo las de Familias: las de otras líneas no lo justifican.
+  const searchable = stories.filter((story) => story.channels[0] === (channel ?? 'families'));
+  const showSearch = searchable.length >= SEARCH_MIN_STORIES || Boolean(query.q);
   // Solo las colecciones con alguna historia disponible.
   const collections = allCollections.filter((item) =>
     stories.some((story) => story.collectionIds.includes(item.slug)),

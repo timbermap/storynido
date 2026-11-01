@@ -1,6 +1,16 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 import { expectAccessible, expectNoHorizontalScroll } from './helpers';
+
+/** El aviso de cookies tapa tarjetas y botones del celular: se acepta lo necesario antes de hacer clic. */
+async function acceptCookies(page: Page): Promise<void> {
+  await page
+    .getByRole('button', {
+      name: /solo las necesarias|only necessary|apenas as necessárias|só as necessárias/i,
+    })
+    .click({ timeout: 5000 })
+    .catch(() => undefined);
+}
 
 /** Rutas por idioma (i18n/routing.ts) y la línea a la que lleva el botón principal. */
 const PAGES = {
@@ -49,6 +59,7 @@ for (const [locale, pages] of Object.entries(PAGES)) {
       page,
     }) => {
       await page.goto(pages.home);
+      await acceptCookies(page);
       for (const [target, line] of [
         [pages.families, null],
         [pages.events, 'events'],
@@ -56,10 +67,7 @@ for (const [locale, pages] of Object.entries(PAGES)) {
       ] as const) {
         await page.goto(pages.home);
         // La tarjeta lleva a la landing del público (no directo al creador).
-        await page
-          .locator(`#audience ~ ul a[href="${target}"], ul a[href="${target}"]`)
-          .first()
-          .click();
+        await page.locator(`main ul a[href="${target}"]`).first().click();
         await expect(page).toHaveURL(new RegExp(`${target}$`));
         // Y la landing termina en su propio "Crear".
         const create = page
@@ -165,6 +173,7 @@ test('preguntas frecuentes: la home destaca 4 y la página propia tiene todas y 
   page,
 }) => {
   await page.goto('/es');
+  await acceptCookies(page);
   await expect(page.locator('body')).not.toContainText('hola@storynido.com');
   await expect(page.locator('#faq details')).toHaveCount(4);
   await page.getByRole('link', { name: /Ver todas las preguntas/ }).click();
