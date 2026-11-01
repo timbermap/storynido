@@ -2183,3 +2183,12 @@ La demo «Escribe su nombre» ya no muestra solo la portada: al escribir el nomb
 ### 186c. Familias: sin «Un libro de verdad» ni «Mira antes de comprar» (2026-11-01)
 
 Se quitan de la landing de Familias la sección de la foto del libro impreso (que era una imagen de muestra generada con IA) y la tarjeta de garantía. La página termina en las preguntas frecuentes, el contacto y el cierre común. Los textos siguen en los archivos de idioma por si se retoman con una foto real.
+
+## 187 · Precios coherentes en todo el sitio (Eventos y Profesionales)
+
+- **Fecha:** 2026-11-01.
+- **Auditoría:** ningún texto lleva un precio escrito a mano (salen de la configuración y del cálculo del servidor). Las inconsistencias eran de lógica: (1) en Eventos, las sumas de piezas daban 18,98 y 25,15 y la invitación sola era cara frente a las plantillas; (2) en Profesionales, la landing decía «desde 18,99» pero ese perfil paga con 10 % de descuento base.
+- **Eventos (EE. UU., USD):** el diseño cuesta **US$ 9,99** e incluye el personaje, el mini cuento y la invitación (`invitation: 0`: incluida, no es un renglón del resumen y el checkout dice «Incluida en el diseño»). Las piezas extra son **en dólares enteros** (agradecimiento 3; actividades, stickers y etiquetas 4) para que **cualquier combinación termine en ,99** (12,99 · 13,99 · 17,99 …) y el **kit completo cueste US$ 24,99**, sin descuento aparte (`bundlePercent` sale; el cálculo del descuento sigue disponible). Dentro del rango de las invitaciones editables (US$ 7 a 12) y del kit de referencia.
+- **Profesionales:** la API devuelve `proLengthPrices` (el digital por extensión con el descuento base, redondeado como el checkout) y la landing muestra «desde» con ese valor.
+- **Regla general:** «Digital desde» = el digital más barato que de verdad se puede pagar (extensión más corta); «Impreso desde» = tapa blanda Clásico más barata; el catálogo, cada historia, la home, Familias y Profesionales usan las mismas funciones (`lowestPrice`). Nada se redondea en la web: lo que se ve es lo que cobra el servidor.
+- **Margen (a validar la primera semana):** el kit de entrada (9,99) deja ≈ USD 6 después de la IA y las comisiones; el completo (24,99) ≈ USD 21, porque las piezas extra son PDF armados en código, sin costo de IA.

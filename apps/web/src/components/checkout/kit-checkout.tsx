@@ -220,9 +220,11 @@ export function KitCheckout({
                         ? reorderOf
                           ? tKit('includedAgain')
                           : `${tKit('design')} ${pricing ? money(pricing.designMinor) : ''}`
-                        : price !== undefined && price !== null
-                          ? `+ ${money(price)}`
-                          : ''}
+                        : price === 0
+                          ? tKit('free')
+                          : price !== undefined && price !== null
+                            ? `+ ${money(price)}`
+                            : ''}
                     </span>
                   </span>
                 </label>

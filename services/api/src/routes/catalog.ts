@@ -144,6 +144,20 @@ export function buildOffer(input: {
         ),
       }))
     : [];
+  // El perfil profesional paga con su descuento base (igual que `quote`: se descuenta antes de redondear).
+  const proLengthPrices = digital?.active
+    ? BOOK_LENGTHS.map((length) => ({
+        length,
+        amountMinor: charmPrice(
+          Math.round(
+            (unitPriceUsdMinor(digital, 0, DEFAULT_EDITORIAL_CONFIG.lengths[length].interiorPages) *
+              (100 - digital.proPercentOff)) /
+              100,
+          ),
+          CHARGE_CURRENCY,
+        ),
+      }))
+    : [];
   const printOptions = BOOK_FORMATS.flatMap((format) =>
     format === 'digital' ? [] : printable(format),
   );
@@ -166,6 +180,7 @@ export function buildOffer(input: {
     },
     formats,
     lengthPrices,
+    proLengthPrices,
     printUnavailable:
       country.active &&
       BOOK_FORMATS.some((format) => format !== 'digital' && country.formats[format]) &&

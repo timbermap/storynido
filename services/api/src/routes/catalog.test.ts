@@ -235,8 +235,21 @@ describe('catálogo', () => {
       local: unknown;
       shipping: { costMinor: number; quoted: boolean; etaDaysMin: number; etaDaysMax: number };
       formats: { format: string; amountMinor: number; estimated: boolean }[];
+      lengthPrices: { length: string; amountMinor: number }[];
+      proLengthPrices: { length: string; amountMinor: number }[];
     }>();
     expect(offer.available).toBe(true);
+    // El «desde» de cada extensión, y el del perfil profesional (con su descuento base, siempre menor).
+    expect(offer.lengthPrices.map((item) => item.length)).toEqual([
+      'mini',
+      'short',
+      'classic',
+      'epic',
+    ]);
+    expect(offer.proLengthPrices).toHaveLength(4);
+    for (const [index, item] of offer.proLengthPrices.entries()) {
+      expect(item.amountMinor).toBeLessThan(offer.lengthPrices[index]?.amountMinor ?? 0);
+    }
     // Todo en dólares (DECISIONS 097); el peso va solo como referencia.
     expect(offer.currency).toBe('USD');
     expect(offer.local).toEqual({ currency: 'MXN', rate: 20 });

@@ -11,13 +11,15 @@ export function lowestPrice(
   locale: Locale,
   country: CountryCode,
   lengths?: readonly BookLength[],
+  /** Precio del perfil profesional (con su descuento base). */
+  pro = false,
 ): string | null {
   if (!offer?.available) return null;
-  const byLength = (
-    lengths
-      ? offer.lengthPrices.filter((item) => lengths.includes(item.length))
-      : offer.lengthPrices
-  ).map((item) => item.amountMinor);
+  const prices =
+    pro && offer.proLengthPrices.length > 0 ? offer.proLengthPrices : offer.lengthPrices;
+  const byLength = (lengths ? prices.filter((item) => lengths.includes(item.length)) : prices).map(
+    (item) => item.amountMinor,
+  );
   const lowest = byLength.length
     ? Math.min(...byLength)
     : Math.min(...offer.formats.map((f) => f.amountMinor));

@@ -486,6 +486,20 @@ const JOBS: Job[] = [
     `${GENERIC} sits on a doctor's exam table smiling, a friendly doctor (kind eyes, no mask) shows a small round sticker; a simple clean room, calm mood.`,
     true,
   ),
+  cover(
+    'hermano-mayor-pro',
+    MINIMAL,
+    'lavender',
+    `${GENERIC} sits on a simple sofa holding a small wrapped baby carefully in both arms, looking down gently. Calm, tender, minimal graphic style.`,
+    true,
+  ),
+  cover(
+    'chau-panal-pro',
+    MINIMAL,
+    'mint',
+    `${GENERIC} stands in a yellow t-shirt and simple trousers beside a small closed potty, one arm raised proudly, a folded diaper on the floor. Clothed, calm, minimal graphic style.`,
+    true,
+  ),
   // ---- Celebraciones -------------------------------------------------------------------------
   cover(
     'el-cumpleanos-mas-magico',

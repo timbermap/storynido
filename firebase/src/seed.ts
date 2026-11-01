@@ -476,10 +476,11 @@ batch.set(
     country: 'US',
     currency: 'USD',
     active: true,
-    designMinor: 1499,
-    // Kit completo (invitación, agradecimiento, stickers, etiquetas y actividades): US$ 25,15 en vez de 31,44.
-    bundlePercent: 20,
-    pieces: { activities: 299, invitation: 399, thank_you: 299, stickers: 349, favor_tags: 299 },
+    // Precios redondos (DECISIONS 187): el diseño trae el personaje, el mini cuento y la invitación
+    // (US$ 9,99); cada pieza extra, en dólares enteros, así toda combinación termina en ,99 y el kit
+    // completo cuesta US$ 24,99 (sin descuento aparte).
+    designMinor: 999,
+    pieces: { invitation: 0, thank_you: 300, activities: 400, stickers: 400, favor_tags: 400 },
     updatedAt: now,
   }),
 );
@@ -597,6 +598,29 @@ for (const collection of SEED_COLLECTIONS) {
   );
 }
 
+/** Historias de Familias que Profesionales muestra con otra portada (chico genérico) y otro título. */
+const PRO_VARIANTS: Record<
+  string,
+  { coverImagePro: string; titlePro: { es: string; en: string; pt: string } }
+> = {
+  'mi-primer-dia-de-clases': {
+    coverImagePro: '/samples/mi-primer-dia-de-clases-pro.webp',
+    titlePro: {
+      es: 'Mi primer día de clases',
+      en: 'My First Day of School',
+      pt: 'Meu primeiro dia de aula',
+    },
+  },
+  'hermano-mayor': {
+    coverImagePro: '/samples/hermano-mayor-pro.webp',
+    titlePro: { es: 'Soy hermano mayor', en: 'I Am a Big Sibling', pt: 'Sou irmão mais velho' },
+  },
+  'chau-panal': {
+    coverImagePro: '/samples/chau-panal-pro.webp',
+    titlePro: { es: 'Chau, pañal', en: 'Bye-Bye, Diaper', pt: 'Tchau, fralda' },
+  },
+};
+
 const NEW_COVERS = new Set(NEW_COVER_SLUGS);
 const LIGHT_INK = new Set(LIGHT_INK_SLUGS);
 for (const story of [
@@ -617,16 +641,7 @@ for (const story of [
       ...(LIGHT_INK.has(story.slug) ? { coverInk: 'light' } : {}),
       // Bebés centrado (A), pequeños con el nombre en arco (C), lectores a la izquierda (B).
       coverLayout: coverLayoutOf(story),
-      ...(story.slug === 'mi-primer-dia-de-clases'
-        ? {
-            coverImagePro: '/samples/mi-primer-dia-de-clases-pro.webp',
-            titlePro: {
-              es: 'Mi primer día de clases',
-              en: 'My First Day of School',
-              pt: 'Meu primeiro dia de aula',
-            },
-          }
-        : {}),
+      ...(PRO_VARIANTS[story.slug] ?? {}),
       createdAt: now,
       updatedAt: now,
     }),

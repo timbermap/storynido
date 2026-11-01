@@ -238,6 +238,22 @@ describe('kit de Eventos', () => {
     ({ pieces, invitation: null }) as Parameters<typeof quoteKit>[0]['kit'];
   const base = { country: MX, pricing, coupon: null, couponCode: null, promotions: [], now: NOW };
 
+  it('una pieza incluida (precio 0) no suma ni aparece como renglón', () => {
+    const included = quoteKit({
+      ...base,
+      pricing: { ...pricing, pieces: { ...pricing.pieces, invitation: 0 } },
+      kit: kit([
+        { piece: 'mini_book', copies: 10 },
+        { piece: 'invitation', copies: 10 },
+      ]),
+    });
+    if (!included.ok) throw new Error('debería cotizar');
+    expect(included.snapshot.components).toEqual([
+      { code: 'design', unitMinor: 24900, quantity: 1, totalMinor: 24900 },
+    ]);
+    expect(included.snapshot.totalMinor).toBe(24900);
+  });
+
   it('diseño una vez + licencia por pieza; las copias no cambian el precio digital', () => {
     const thirty = quoteKit({
       ...base,

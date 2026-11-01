@@ -272,6 +272,8 @@ export function quoteKit(
     if (piece === 'mini_book') continue;
     const unit = pricing.pieces[piece];
     if (unit === undefined) return { ok: false, error: 'format_unavailable' };
+    // Lo que va incluido en el diseño (precio 0) no es un renglón del resumen.
+    if (unit === 0) continue;
     components.push({ code: 'piece', piece, unitMinor: unit, quantity: 1, totalMinor: unit });
   }
   // Kit completo: todas las piezas que se ofrecen, sin que el diseño se vuelva a cobrar.

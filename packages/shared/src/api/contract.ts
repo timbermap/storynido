@@ -555,6 +555,10 @@ export const offerSchema = z.object({
   lengthPrices: z
     .array(z.object({ length: bookLengthSchema, amountMinor: z.number().int() }))
     .default([]),
+  /** Lo mismo con el descuento base del perfil profesional (lo que de verdad paga). */
+  proLengthPrices: z
+    .array(z.object({ length: bookLengthSchema, amountMinor: z.number().int() }))
+    .default([]),
   /**
    * Moneda local del país, solo como referencia (todo se cobra en dólares; DECISIONS 097):
    * unidades por dólar del día. Null si el país usa dólares o no hay cotización.

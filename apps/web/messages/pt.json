@@ -1437,6 +1437,7 @@
       "piecesNote": "Todas com o mesmo protagonista e o mesmo design.",
       "design": "Design:",
       "includedAgain": "Mesmo design (não é cobrado de novo)",
+      "free": "Incluída no design",
       "pieces": {
         "mini_book": {
           "name": "Mini história",

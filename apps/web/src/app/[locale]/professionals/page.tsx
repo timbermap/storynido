@@ -53,7 +53,7 @@ export default async function ProfessionalsPage({ params }: Props) {
     getStories(locale, undefined, { channel: 'professionals' }).catch(() => []),
     getOffer(display.country, locale),
   ]);
-  const price = lowestPrice(offer, locale, display.country);
+  const price = lowestPrice(offer, locale, display.country, undefined, true);
   // Descuentos por volumen (no hay suscripción): los escalones de fábrica de la cuenta.
   const [first, second, third] = DEFAULT_PRO_DISCOUNTS.tiers;
   const cta = (
