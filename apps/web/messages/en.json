@@ -108,7 +108,7 @@
       "lead": "Upload a photo and we turn it into the character of the story. See it free before you decide.",
       "explore": "Explore stories",
       "audienceTitle": "Choose who it is for",
-      "priceDigital": "Digital {price}",
+      "priceDigital": "Digital from {price}",
       "pricePrinted": "Printed from {price}",
       "priceUsd": "Prices in US dollars (USD)",
       "choose": "Choose who it is for",
@@ -907,7 +907,7 @@
           "text": "Richer vocabulary and a plot with twists."
         }
       },
-      "priceDigital": "Ebook {price}",
+      "priceDigital": "Ebook from {price}",
       "pricePrinted": "Printed from {price}",
       "chipEbook": "Ebook",
       "chipPrint": "Printed book",

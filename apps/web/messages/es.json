@@ -108,7 +108,7 @@
       "lead": "Subes una foto y la convertimos en el personaje del cuento. Lo ves gratis antes de decidir.",
       "explore": "Ver historias",
       "audienceTitle": "Elige para quién es",
-      "priceDigital": "Digital {price}",
+      "priceDigital": "Digital desde {price}",
       "pricePrinted": "Impreso desde {price}",
       "priceUsd": "Precios en dólares (USD)",
       "choose": "Elegir para quién es",
@@ -907,7 +907,7 @@
           "text": "Vocabulario más rico y una trama con giros."
         }
       },
-      "priceDigital": "Ebook {price}",
+      "priceDigital": "Ebook desde {price}",
       "pricePrinted": "Impreso desde {price}",
       "chipEbook": "Ebook",
       "chipPrint": "Libro físico",

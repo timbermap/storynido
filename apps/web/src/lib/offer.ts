@@ -13,11 +13,11 @@ export function lowestPrice(
   lengths?: readonly BookLength[],
 ): string | null {
   if (!offer?.available) return null;
-  const byLength = lengths
-    ? offer.lengthPrices
-        .filter((item) => lengths.includes(item.length))
-        .map((item) => item.amountMinor)
-    : [];
+  const byLength = (
+    lengths
+      ? offer.lengthPrices.filter((item) => lengths.includes(item.length))
+      : offer.lengthPrices
+  ).map((item) => item.amountMinor);
   const lowest = byLength.length
     ? Math.min(...byLength)
     : Math.min(...offer.formats.map((f) => f.amountMinor));
@@ -36,11 +36,16 @@ export function offerHighlights(
   if (!offer?.available) return null;
   const money = (minor: number) => formatPrice(minor, offer.currency, locale, country);
   const digital = offer.formats.find((f) => f.format === 'digital');
+  // El digital «desde» es el más bajo que de verdad se puede pagar (la extensión más corta), el
+  // mismo que muestran las tarjetas del catálogo.
+  const digitalFrom = offer.lengthPrices.length
+    ? Math.min(...offer.lengthPrices.map((item) => item.amountMinor))
+    : digital?.amountMinor;
   const printed = offer.formats
     .filter((f) => f.format !== 'digital')
     .sort((a, b) => a.amountMinor - b.amountMinor)[0];
   return {
-    digital: digital ? money(digital.amountMinor) : null,
+    digital: digitalFrom === undefined ? null : money(digitalFrom),
     printed: printed ? money(printed.amountMinor) : null,
   };
 }
