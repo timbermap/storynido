@@ -6,6 +6,7 @@ import { describeCharacterSheet } from './ai';
 import {
   buildIllustrationPrompt,
   buildStoryPrompt,
+  coverScene,
   lessonsBlock,
   narrativeRules,
   renderTemplate,
@@ -159,5 +160,24 @@ describe('reglas narrativas y dirección de arte', () => {
     expect(buildIllustrationPrompt({ ...base, direction: 'Art direction: X' })).toBe(
       'S C E\n\nArt direction: X',
     );
+  });
+});
+
+describe('escena de la portada', () => {
+  it('es una imagen propia: usa el mundo de la página 1 sin copiar su composición y expresa el título', () => {
+    const scene = coverScene('The hero sits under a tree.', 'Aggi, gol de campeón');
+    expect(scene).toContain('most iconic image');
+    expect(scene).toContain('different composition from the first page');
+    expect(scene).toContain('do not copy this composition');
+    expect(scene).toContain('The hero sits under a tree.');
+    expect(scene).toContain('Aggi, gol de campeón');
+    expect(scene).toContain('never draw the title');
+  });
+
+  it('sin título ni primera escena sigue siendo una portada válida', () => {
+    const scene = coverScene(undefined);
+    expect(scene).toContain('Book cover illustration');
+    expect(scene).not.toContain('Story world');
+    expect(scene).not.toContain('title (');
   });
 });

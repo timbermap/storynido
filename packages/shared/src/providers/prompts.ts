@@ -244,10 +244,19 @@ export function describeCharacter(
   return `${name}: child (${sheet.apparentAge}); ${describeTraits(traits, mustKeep)}; usually wears ${sheet.clothing}${extras}`;
 }
 
-/** Escena de la portada: el título va en la capa tipográfica, nunca dentro de la imagen. */
-export function coverScene(firstScene: string | undefined): string {
-  // Sin el título: si el prompt lo menciona, el modelo tiende a escribirlo (lo pone el PDF).
-  return `Book cover illustration: the main character as the hero of the story, joyful and centered. Keep the top third as calm, simple background with no lettering: the title is typeset later. ${firstScene ?? ''}`;
+/**
+ * Escena de la portada: el título va en la capa tipográfica, nunca dentro de la imagen. La portada
+ * es una imagen propia (emblemática, más amplia que una página), no la primera página repetida:
+ * la escena de la página 1 solo da el mundo de la historia, y el título, su idea.
+ */
+export function coverScene(firstScene: string | undefined, title?: string): string {
+  const concept = title
+    ? ` The cover must express the idea of the book's title (“${title}”) at a glance, as a picture only: never draw the title or any letters.`
+    : '';
+  const world = firstScene
+    ? ` Story world, for the setting and mood only; do not copy this composition: ${firstScene}`
+    : '';
+  return `Book cover illustration, the single most iconic image of the book: the main character as the hero, large, joyful and centered, in a striking hero pose inside the story's most emblematic setting, richer and more dramatic than an inside page, with depth and a clear focal point and a different composition from the first page.${concept} Keep the top third as calm, simple background with no lettering: the title is typeset later.${world}`;
 }
 
 /** Datos de ejemplo para probar una plantilla desde el admin (sin datos reales ni IA). */

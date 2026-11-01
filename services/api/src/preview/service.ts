@@ -903,7 +903,7 @@ export class PreviewService {
         });
       // Todas usan la lámina aprobada como referencia, así que se generan en paralelo.
       const [cover, ...illustrated] = await Promise.all([
-        illustrate(coverScene(preview.pages[0]?.illustrationPrompt), 1),
+        illustrate(coverScene(preview.pages[0]?.illustrationPrompt, preview.title), 1),
         ...preview.pages
           .slice(0, PREVIEW_ILLUSTRATED_PAGES)
           .map((page) => illustrate(page.illustrationPrompt, page.index + 2)),
@@ -1177,7 +1177,7 @@ export class PreviewService {
       };
       const scene =
         target === 'cover'
-          ? coverScene(preview.pages[0]?.illustrationPrompt)
+          ? coverScene(preview.pages[0]?.illustrationPrompt, preview.title)
           : (preview.pages[target]?.illustrationPrompt ?? '');
       const companion = preview.companion ?? null;
       const companionImage: ImageData | null = companion

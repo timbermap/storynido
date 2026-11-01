@@ -25,15 +25,6 @@ import type { WizardData } from './types';
 type Target = 'cover' | number;
 type PreviewData = NonNullable<PublicPreview['preview']>;
 
-/** Estilos con su librito de ejemplo de cuatro páginas (public/styles/<estilo>/1-4.webp). */
-const STYLES_WITH_EXAMPLE_PAGES = new Set([
-  'acuarela',
-  'cartoon-3d',
-  'cuento-clasico',
-  'lapices-de-colores',
-  'para-colorear',
-]);
-
 const KNOWN_ERRORS = [
   'limit_reached',
   'ai_unavailable',
@@ -92,18 +83,6 @@ export function PreviewPanel({
   const locale = useLocale() as Locale;
   const money = (minor: number) =>
     prices ? formatPrice(minor, prices.currency, locale, prices.country) : '';
-  // Páginas sin ilustrar: ejemplos fijos de la historia y del estilo (sin costo de IA).
-  const examples = {
-    cover: book.storyId ? `/samples/${book.storyId}.webp` : null,
-    // Un librito de ejemplo por estilo (mismo chico y zorro): public/styles/<estilo>/1-4.webp.
-    // Los estilos nuevos todavía no tienen su librito de ejemplo: usan la muestra del estilo.
-    pages: book.styleId
-      ? STYLES_WITH_EXAMPLE_PAGES.has(book.styleId)
-        ? [1, 2, 3, 4].map((n) => `/styles/${book.styleId}/${String(n)}.webp`)
-        : [`/styles/${book.styleId}.webp`]
-      : [],
-    label: tViewer('exampleLabel', { name: childName }),
-  };
   const { user } = useAuth();
   const [preview, setPreview] = useState<PublicPreview | null>(null);
   const [busy, setBusy] = useState<Target | null>(null);
@@ -360,7 +339,6 @@ export function PreviewPanel({
                   : t('pageAlt', { number: page.number ?? 0 })
               }
               lockedLabel={tViewer('locked')}
-              examples={examples}
               actions={actions}
               onPageChange={() => {
                 setEditing(null);

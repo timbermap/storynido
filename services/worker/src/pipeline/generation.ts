@@ -358,7 +358,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const page = index === 0 ? null : snapshot.pages[index - 1];
     const scene =
       index === 0
-        ? pageScene(coverScene(snapshot.pages[0]?.illustrationPrompt), null, hint)
+        ? pageScene(coverScene(snapshot.pages[0]?.illustrationPrompt, snapshot.title), null, hint)
         : pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint);
     const reference = await load(snapshot.character.sheetPath);
     const companion = snapshot.companion ?? null;
