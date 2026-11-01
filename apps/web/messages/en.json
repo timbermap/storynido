@@ -1309,6 +1309,11 @@
     "giftMessage": "Message for the card",
     "giftDate": "When do you need it by?",
     "giftDateHint": "Optional. We'll tell you if the printed book arrives in time.",
+    "christmas": {
+      "on_time": "If you order today, it arrives before Christmas: we estimate between {earliest} and {latest}.",
+      "at_risk": "If you order today, it may arrive before Christmas but it isn't guaranteed: we estimate between {earliest} and {latest}. The digital book is ready in minutes.",
+      "late": "If you order today, it won't arrive before Christmas (the earliest is {earliest}). The digital book is ready in minutes."
+    },
     "giftDateStatus": {
       "on_time": "Arrives in time: we estimate delivery between {earliest} and {latest}.",
       "at_risk": "It may not arrive in time: we estimate delivery between {earliest} and {latest}. If you need it by that date no matter what, the digital book is ready in minutes.",

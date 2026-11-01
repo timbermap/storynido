@@ -28,7 +28,7 @@ import { CountryOptions } from '@/components/country-options';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-import { GiftDeadline } from './gift-deadline';
+import { ChristmasNote, GiftDeadline } from './gift-deadline';
 import { PriceSummary } from './price-summary';
 
 type AddressDraft = Omit<Address, 'country'>;
@@ -400,6 +400,12 @@ export function Checkout({
                 className="w-full rounded-xl border bg-card p-3"
               />
             </label>
+          )}
+          {print && quote && quote.snapshot.shipping.minor > 0 && (
+            <ChristmasNote
+              etaDaysMin={quote.snapshot.shipping.etaDaysMin}
+              etaDaysMax={quote.snapshot.shipping.etaDaysMax}
+            />
           )}
           {gift.isGift && print && quote && quote.snapshot.shipping.minor > 0 && (
             <GiftDeadline

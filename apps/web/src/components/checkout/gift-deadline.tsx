@@ -1,6 +1,11 @@
 'use client';
 
-import { deliveryWindow, giftDeadlineStatus, type Locale } from '@storynido/shared';
+import {
+  christmasTarget,
+  deliveryWindow,
+  giftDeadlineStatus,
+  type Locale,
+} from '@storynido/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -61,5 +66,39 @@ export function GiftDeadline({
           t(`giftDateStatus.${status}`, { earliest: date(earliest), latest: date(latest) })}
       </p>
     </div>
+  );
+}
+
+/**
+ * Navidad, sin pasos nuevos: de mediados de octubre al 22 de diciembre dice si este envío llega antes
+ * del 24 de diciembre (cuenta la producción y el peor caso). No pide ninguna fecha.
+ */
+export function ChristmasNote({
+  etaDaysMin,
+  etaDaysMax,
+}: {
+  etaDaysMin: number;
+  etaDaysMax: number;
+}) {
+  const t = useTranslations('Checkout');
+  const locale = useLocale() as Locale;
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const from = new Date(Date.UTC(year, 9, 15));
+  const to = new Date(`${christmasTarget(year)}T00:00:00Z`);
+  if (now < from || now >= to) return null;
+  const { earliest, latest } = deliveryWindow(now, etaDaysMin, etaDaysMax);
+  const date = (value: Date) =>
+    new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(
+      value,
+    );
+  const status = giftDeadlineStatus(christmasTarget(year), now, etaDaysMin, etaDaysMax);
+  return (
+    <p
+      role="note"
+      className="rounded-xl bg-peach/50 px-4 py-3 text-sm font-semibold text-[#7a2f23]"
+    >
+      {t(`christmas.${status}`, { earliest: date(earliest), latest: date(latest) })}
+    </p>
   );
 }

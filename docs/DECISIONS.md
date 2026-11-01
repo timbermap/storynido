@@ -2125,3 +2125,7 @@ El hero de Celebraciones mostraba la invitación como un bloque rosa solo con te
 ### 180b. Foto del libro impreso en Familias (2026-11-01)
 
 Sección «Un libro de verdad, para tener en las manos» en Familias, con una foto de muestra (`heroes/libro-impreso.webp`, USD 0,17 con `gemini-3-pro-image`, con la portada real de «La gran aventura espacial» como referencia y un prompt de cámara: luz natural, grano, migas, taza, mano de un niño sin cara). **Es una foto generada con IA y dice «Foto de muestra»: hay que reemplazarla por una foto real del primer libro impreso antes de producción.** También se recomprimieron los hero (de 266, 325 y 244 KB a 91, 118 y 67 KB) y las fuentes pasan a su versión variable (4 archivos en lugar de 9).
+
+### 180c. Checkout: aviso de Navidad sin pasos nuevos (2026-11-01)
+
+En el checkout del impreso, de mediados de octubre al 22 de diciembre aparece una línea que dice si el envío llega antes del 24 de diciembre (a tiempo, en riesgo o no llega), con la ventana estimada y la alternativa digital. No pide ninguna fecha ni agrega pasos; la fecha del regalo opcional sigue como estaba.
