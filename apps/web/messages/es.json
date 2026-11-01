@@ -1416,7 +1416,8 @@
       },
       "guests": "Nombres de los invitados (opcional)",
       "guestsPlaceholder": "Juana\nMateo\nLola",
-      "guestsNote": "Uno por línea: cada etiqueta sale «Para …» con su nombre ({count} de {max}). Sin lista, las etiquetas salen con «¡Gracias por venir!»."
+      "guestsNote": "Uno por línea: cada etiqueta sale «Para …» con su nombre ({count} de {max}). Sin lista, las etiquetas salen con «¡Gracias por venir!».",
+      "signature": "Incluir la firma «Hecho con StoryNido» en el dorso de la invitación"
     },
     "fromPrice": "desde {price}",
     "shippingPending": "Envío: se calcula con tu dirección",

@@ -38,6 +38,17 @@ describe('kit por ocasión', () => {
   });
 });
 
+describe('firma de la invitación', () => {
+  it('lleva «Hecho con StoryNido» por defecto y se puede quitar', () => {
+    expect(kitPieceDocument(book('birthday'), 'invitation', 20).html).toContain(
+      'Hecho con StoryNido',
+    );
+    expect(
+      kitPieceDocument({ ...book('birthday'), signature: false }, 'invitation', 20).html,
+    ).not.toContain('Hecho con StoryNido');
+  });
+});
+
 describe('etiquetas por invitado', () => {
   it('sin lista, una hoja con la etiqueta genérica', () => {
     const doc = kitPieceDocument(book('birthday'), 'favor_tags', 20);

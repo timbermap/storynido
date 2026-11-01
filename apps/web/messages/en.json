@@ -1416,7 +1416,8 @@
       },
       "guests": "Guest names (optional)",
       "guestsPlaceholder": "Jane\nMatt\nLily",
-      "guestsNote": "One per line: each tag reads “For …” with their name ({count} of {max}). Without a list, the tags say “Thanks for coming!”."
+      "guestsNote": "One per line: each tag reads “For …” with their name ({count} of {max}). Without a list, the tags say “Thanks for coming!”.",
+      "signature": "Include the “Made with StoryNido” signature on the back of the invitation"
     },
     "fromPrice": "from {price}",
     "shippingPending": "Shipping: calculated from your address",

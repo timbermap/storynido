@@ -53,6 +53,7 @@ export function KitCheckout({
   const [time, setTime] = useState('');
   const [place, setPlace] = useState('');
   const [guestsText, setGuestsText] = useState('');
+  const [signature, setSignature] = useState(true);
   const [couponInput, setCouponInput] = useState('');
   const [coupon, setCoupon] = useState<string | null>(null);
   const [quote, setQuote] = useState<{
@@ -93,6 +94,7 @@ export function KitCheckout({
     .slice(0, KIT_LIMITS.maxGuests);
   const kit = {
     guests: pieces.has('favor_tags') ? guests : [],
+    signature,
     pieces: KIT_PIECES.filter((piece) => pieces.has(piece)).map((piece) => ({
       piece,
       copies: Math.min(Math.max(1, copies || 1), KIT_LIMITS.maxCopies),
@@ -275,6 +277,18 @@ export function KitCheckout({
                 />
               </label>
             </div>
+            <label className="flex items-start gap-2.5 text-sm">
+              <input
+                id="kit-signature"
+                type="checkbox"
+                checked={signature}
+                onChange={(event) => {
+                  setSignature(event.target.checked);
+                }}
+                className="mt-0.5 size-4 accent-[var(--primary)]"
+              />
+              <span>{tKit('signature')}</span>
+            </label>
             <p className="text-sm text-muted-foreground">{tKit('invitationNote')}</p>
           </fieldset>
         )}

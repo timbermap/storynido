@@ -1999,3 +1999,9 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 - **Fecha:** 2026-10-31.
 - **Hecho:** al comprar el kit, si se elige «Etiquetas para la bolsita» aparece **«Nombres de los invitados (opcional)»** (uno por línea, hasta 60 de 30 caracteres; `kit.guests`). El PDF sale con **una etiqueta por invitado** («Para Juana», 9 por hoja y tantas hojas como hagan falta) con el mismo personaje; sin lista, la etiqueta genérica «¡Gracias por venir!» de siempre. Los nombres se escapan en el HTML; no cambia el precio.
 - **Sigue sin hacerse:** el librito impreso con el nombre de cada invitado en la tapa y la página final con todos los nombres (necesita imprenta y costo confirmados), la invitación de WhatsApp con firma y el código de descuento en la contratapa (PR 4).
+
+## 167 · Firma «Hecho con StoryNido» en la invitación (auditoría de Eventos, PR 4 parcial)
+
+- **Fecha:** 2026-10-31.
+- **Hecho:** el dorso de la invitación (PDF y tarjeta impresa) lleva una línea discreta «Hecho con StoryNido · storynido.com»; al comprar el kit hay una casilla para **quitarla** (`kit.signature`, por defecto incluida; pedidos anteriores sin el campo la llevan).
+- **No hecho:** la invitación como imagen de WhatsApp de 1080×1350 (hoy es PDF; una imagen necesita un tipo de archivo nuevo en el contrato, la entrega y la página del pedido), el código de descuento en la contratapa del souvenir (necesita un sistema de códigos con atribución) y el aviso del cumpleaños del año siguiente (necesita un recordatorio programado con su consentimiento). La fecha del evento ya se guarda en el libro.

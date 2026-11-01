@@ -1416,7 +1416,8 @@
       },
       "guests": "Nomes dos convidados (opcional)",
       "guestsPlaceholder": "Joana\nMateus\nLola",
-      "guestsNote": "Um por linha: cada etiqueta sai “Para …” com o nome ({count} de {max}). Sem lista, as etiquetas saem com “Obrigado por vir!”."
+      "guestsNote": "Um por linha: cada etiqueta sai “Para …” com o nome ({count} de {max}). Sem lista, as etiquetas saem com “Obrigado por vir!”.",
+      "signature": "Incluir a assinatura “Feito com StoryNido” no verso do convite"
     },
     "fromPrice": "a partir de {price}",
     "shippingPending": "Frete: calculado com o seu endereço",

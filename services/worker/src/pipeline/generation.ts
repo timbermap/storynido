@@ -1131,6 +1131,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           invitation: sourceKit.invitation,
           cover: kitCover,
           paper: sourceKit.paper,
+          signature: sourceKit.signature,
         };
         // La portada de un kit digital es de pantalla (1K): tiene que alcanzar para 5×7".
         const coverWidth = (await sharp(sources[0]).metadata()).width;
@@ -1181,6 +1182,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           cover: kitCover,
           paper: kit.paper,
           guests: kit.guests,
+          signature: kit.signature,
         };
         for (const { piece, copies } of kit.pieces) {
           if (piece === 'mini_book') continue;

@@ -59,6 +59,8 @@ export const kitSelectionSchema = z.object({
     .array(z.string().trim().min(1).max(KIT_LIMITS.guestMaxLength))
     .max(KIT_LIMITS.maxGuests)
     .default([]),
+  /** Invitación con la firma discreta «Hecho con StoryNido»; el cliente puede quitarla. */
+  signature: z.boolean().default(true),
   invitation: z
     .object({
       time: z.string().trim().max(KIT_LIMITS.timeMaxLength).nullable(),

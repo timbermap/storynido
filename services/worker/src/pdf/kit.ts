@@ -26,6 +26,8 @@ export interface KitBook {
   paper: PaperSize;
   /** Invitados: con nombres, las etiquetas de la bolsita salen una por invitado («Para Juana»). */
   guests?: readonly string[];
+  /** Firma discreta «Hecho con StoryNido» en el dorso de la invitación (por defecto sí; se puede quitar). */
+  signature?: boolean;
 }
 
 export const PAPER_MM: Record<PaperSize, { width: number; height: number }> = {
@@ -53,6 +55,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     love: 'Con cariño, {name}',
     tag: '¡Gracias por venir!',
     tagFor: 'Para {guest}',
+    madeWith: 'Hecho con StoryNido · storynido.com',
     years: '¡{age} años!',
     activities: 'Actividades del cumple de {name}',
     maze: 'Ayuda a {name} a llegar a la torta',
@@ -75,6 +78,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     love: 'Love, {name}',
     tag: 'Thanks for coming!',
     tagFor: 'For {guest}',
+    madeWith: 'Made with StoryNido · storynido.com',
     years: '{age} years old!',
     activities: '{name}’s birthday activities',
     maze: 'Help {name} get to the cake',
@@ -97,6 +101,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     love: 'Com carinho, {name}',
     tag: 'Obrigado por vir!',
     tagFor: 'Para {guest}',
+    madeWith: 'Feito com StoryNido · storynido.com',
     years: '{age} anos!',
     activities: 'Atividades do aniversário de {name}',
     maze: 'Ajude {name} a chegar ao bolo',
@@ -311,6 +316,7 @@ function cardSheet(book: KitBook, copies: number, front: string, back: string, p
 .card .back h2 { font-size: 22pt; color: ${LAVENDER}; }
 .card .row { font-size: 12pt; }
 .card .row b { display: block; font-size: 9pt; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8090; }
+.card .made { position: absolute; left: 0; right: 0; bottom: 0; font-size: 7.5pt; color: #8a8090; letter-spacing: 0.04em; }
 .card .line { display: block; margin: 2mm auto 0; width: 70%; border-bottom: 0.4mm solid #c9bfcf; height: 6mm; }
 .marks { position: absolute; inset: 0; width: 100%; height: 100%; }
 .marks line { stroke: #000; stroke-width: 0.25; }`;
@@ -325,7 +331,7 @@ function invitation(book: KitBook, copies: number, print = false) {
     book,
     copies,
     `<img class="art" src="${book.cover}" alt=""><div class="band"><h1 class="display">${book.occasion === 'birthday' && book.turningAge ? t(book, 'turning') : t(book, 'birthday')}</h1><p>${t(book, 'invite')}</p></div>`,
-    `<div class="back"><h2 class="display">${t(book, 'invite')}</h2>${field('when', date)}${field('time', book.invitation?.time)}${field('where', book.invitation?.place)}<p class="row">${t(book, 'waiting')}</p></div>`,
+    `<div class="back"><h2 class="display">${t(book, 'invite')}</h2>${field('when', date)}${field('time', book.invitation?.time)}${field('where', book.invitation?.place)}<p class="row">${t(book, 'waiting')}</p>${book.signature === false ? '' : `<p class="made">${t(book, 'madeWith')}</p>`}</div>`,
     print,
   );
 }
