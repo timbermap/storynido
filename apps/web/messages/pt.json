@@ -933,6 +933,10 @@
           "name": "Eu leio sozinho",
           "text": "Frases curtas e uma ilustração por página, para a criança ler sozinha."
         },
+        "longer_story": {
+          "name": "Conto longo",
+          "text": "Mais texto em cada página, para quem já lê com desenvoltura ou gosta de histórias mais desenvolvidas."
+        },
         "long_illustrated": {
           "name": "História ilustrada longa",
           "text": "Mais texto em cada página e uma trama com reviravoltas."

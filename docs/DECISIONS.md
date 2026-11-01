@@ -2032,3 +2032,10 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 - **Historias nuevas (texto en es/en/pt, sin sembrar todavía):** Cuando naciste, Los mejores del mundo (mamá y papá), Chau pañal, El volcán del enojo, El diente que se cayó (la tradición sigue al idioma: Ratón Pérez, Tooth Fairy, Fada do Dente), El club de detectives, Dentro del videojuego (9 a 12), Feliz cumpleaños (Familias) y La Navidad de Lola (vuelve, ahora como libro de bebé y con la noche de Reyes en español). Quedan en `PENDING_COVER_SLUGS`: **no se siembran hasta tener su portada** con Lola, Sofi, Tomás, Alex o Martina.
 - **Portadas pendientes (≈ USD 1,00 con `gemini-3.1-flash-image`):** las 5 que muestran a otro chico (las 3 de Lola, el faro y el lunes al revés) y las 9 nuevas. Los prompts ya están en `generate-brand-images.ts`. La generación falló porque venció la sesión de gcloud de la config `storynido` (pide reautenticarse); las portadas viejas siguen en su lugar.
 - **No hecho:** francés y alemán (Europa más allá del español y el inglés), ediciones por país del primer día de clases (queda como historia sin fecha), elenco con una versión por etapa para el marketing.
+
+## 171 · Cantidad de texto por edad (P1 parcial): «Cuento largo» para 6 a 8
+
+- **Fecha:** 2026-11-01.
+- Se suma el formato **«Cuento largo»** (6 a 8 años: 32 páginas, «Más lectura», nivel en desarrollo). Con él, cada edad ve entre 1 y 3 formatos y uno solo recomendado.
+- **Precio por formato:** ya sigue al formato. El checkout cobra por las páginas interiores de la muestra (`interiorPages`) y la tarjeta de cada historia parte de su extensión más corta (DECISIONS 170).
+- **Sin hacer (y por qué):** «Mi primer libro con capítulos», «Novela corta» e «Historieta» necesitan páginas de solo texto (sin ilustración), que hoy el pipeline no admite (portada, páginas, calidad de imagen y ubicación del texto suponen una ilustración por página), y la novela corta de 64 o 96 páginas necesita confirmar con Lulu y Gelato el producto y una prueba impresa. No se nombra «con capítulos» a un formato que no los tiene.

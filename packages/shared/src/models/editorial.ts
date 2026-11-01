@@ -207,6 +207,15 @@ export const READING_FORMATS = [
     recommended: true,
   },
   {
+    key: 'longer_story',
+    minAge: 6,
+    maxAge: 8,
+    length: 'epic',
+    textDensity: 'rich',
+    readingLevel: 'developing',
+    recommended: false,
+  },
+  {
     key: 'long_illustrated',
     minAge: 9,
     maxAge: 99,

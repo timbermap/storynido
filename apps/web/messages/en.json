@@ -933,6 +933,10 @@
           "name": "I read it myself",
           "text": "Short sentences and one illustration per page, so they can read it on their own."
         },
+        "longer_story": {
+          "name": "Longer story",
+          "text": "More text on each page, for readers who are already fluent or enjoy a more developed story."
+        },
         "long_illustrated": {
           "name": "Long illustrated story",
           "text": "More text on every page and a plot with twists."

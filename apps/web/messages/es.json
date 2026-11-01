@@ -933,6 +933,10 @@
           "name": "Leo solo",
           "text": "Frases cortas y una ilustración por página, para que lo lea él."
         },
+        "longer_story": {
+          "name": "Cuento largo",
+          "text": "Más texto en cada página, para quien ya lee con soltura o disfruta de historias con más desarrollo."
+        },
         "long_illustrated": {
           "name": "Cuento ilustrado largo",
           "text": "Más texto en cada página y una trama con giros."
