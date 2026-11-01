@@ -183,7 +183,7 @@ export default async function EventsPage({ params }: Props) {
                 key={item.key}
                 className={`flex flex-col rounded-xl border p-5 shadow-[var(--shadow-card)] ${
                   item.featured ? 'border-primary bg-card ring-2 ring-primary/30' : 'bg-card'
-                } ${item.key === 'printed' ? 'opacity-80' : ''}`}
+                } ${item.key === 'printed' ? 'border-dashed' : ''}`}
               >
                 {(item.featured || item.key === 'printed') && (
                   <span className="mb-2 w-fit rounded-full bg-peach px-3 py-0.5 text-xs font-bold text-[#a33f33]">
