@@ -196,6 +196,12 @@
     },
     "familiesMetaTitle": "Cuentos personalizados con su foto y su nombre",
     "familiesMetaDescription": "Crea un libro con tu hijo como protagonista: sube su foto, mira la vista previa gratis y recíbelo digital o impreso.",
+    "printedBook": {
+      "title": "Un libro de verdad, para tener en las manos",
+      "text": "Impreso de unos 21×28 cm, con su nombre y su personaje en cada página. Y si lo prefieres, lo recibes en digital al instante, para leerlo hoy mismo.",
+      "photoAlt": "Un libro infantil impreso sobre una mesa de cocina, con la mano de un niño apoyada en el borde",
+      "badge": "Foto de muestra"
+    },
     "trustInline": {
       "digitalFrom": "Digital desde {price}",
       "formats": "Digital o impreso, con su nombre y su carita",

@@ -196,6 +196,12 @@
     },
     "familiesMetaTitle": "Livros infantis personalizados com a foto e o nome",
     "familiesMetaDescription": "Crie um livro com o seu filho como protagonista: envie a foto, veja a prévia grátis e receba digital ou impresso.",
+    "printedBook": {
+      "title": "Um livro de verdade, para ter nas mãos",
+      "text": "Impresso em cerca de 21×28 cm, com o nome e o personagem dele em cada página. Ou, se preferir, receba o digital na hora e leia hoje mesmo.",
+      "photoAlt": "Um livro infantil impresso sobre uma mesa de cozinha, com a mão de uma criança apoiada na borda",
+      "badge": "Foto de exemplo"
+    },
     "trustInline": {
       "digitalFrom": "Digital a partir de {price}",
       "formats": "Digital ou impresso, com o nome e o rostinho",

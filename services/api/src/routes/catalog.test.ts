@@ -327,16 +327,18 @@ describe('catálogo', () => {
 
   it('países: todos se venden, salvo los que el admin apagó', async () => {
     const { countries } = (await get('/v1/catalog/countries')).json<{
-      countries: { code: string; currency: string; defaultLocale: string }[];
+      countries: { code: string; currency: string; defaultLocale: string; printed: boolean }[];
     }>();
     const codes = countries.map((country) => country.code);
     expect(codes).toContain('MX');
     expect(codes).toContain('AR');
     expect(codes).not.toContain('BR');
+    // `printed`: hay una imprenta habilitada con la muestra aprobada.
     expect(countries.find((country) => country.code === 'MX')).toEqual({
       code: 'MX',
       currency: 'MXN',
       defaultLocale: 'es',
+      printed: expect.any(Boolean),
     });
     expect(countries.find((country) => country.code === 'AR')).toMatchObject({
       currency: 'USD',

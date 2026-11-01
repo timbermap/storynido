@@ -14,6 +14,7 @@ import { JsonLd } from '@/components/json-ld';
 import { LessonGroups } from '@/components/lessons/lesson-groups';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { StoryCard } from '@/components/stories/story-card';
+import { ImageSlot } from '@/components/landing/image-slot';
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { buttonVariants } from '@/components/ui/button';
 import { AuthLink } from '@/components/auth/auth-link';
@@ -337,6 +338,31 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
           </div>
         </section>
       )}
+
+      {/* El libro impreso: una foto de muestra, hasta tener las del libro real. */}
+      <section className="container-page py-12 lg:py-16">
+        <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
+          <figure className="relative overflow-hidden rounded-[1.75rem] bg-muted shadow-[var(--shadow-card)]">
+            <ImageSlot
+              src="/images/heroes/libro-impreso.webp"
+              alt={t('printedBook.photoAlt')}
+              width={1400}
+              height={1050}
+              sizes="(min-width: 1024px) 600px, 92vw"
+              tone="bg-[#f3e3cf]"
+            />
+            <figcaption className="absolute bottom-3 left-3 rounded-full bg-card px-3 py-1 text-xs font-bold shadow-[var(--shadow-card)]">
+              {t('printedBook.badge')}
+            </figcaption>
+          </figure>
+          <div>
+            <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
+              {t('printedBook.title')}
+            </h2>
+            <p className="mt-3 text-lg text-muted-foreground">{t('printedBook.text')}</p>
+          </div>
+        </div>
+      </section>
 
       {/* Garantía */}
       <section className="container-page py-16 lg:py-20">

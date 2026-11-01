@@ -196,6 +196,12 @@
     },
     "familiesMetaTitle": "Personalized children’s books with their photo and name",
     "familiesMetaDescription": "Create a book starring your child: upload their photo, see a free preview and get it as an ebook or printed.",
+    "printedBook": {
+      "title": "A real book to hold in your hands",
+      "text": "Printed at about 21×28 cm, with their name and their character on every page. Or, if you prefer, get it as a digital book right away and read it today.",
+      "photoAlt": "A printed children's book on a kitchen table, with a child's hand resting on its edge",
+      "badge": "Sample photo"
+    },
     "trustInline": {
       "digitalFrom": "Digital from {price}",
       "formats": "Digital or printed, with their name and face",
