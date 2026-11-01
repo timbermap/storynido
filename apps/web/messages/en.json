@@ -188,6 +188,8 @@
       "sample": "Sample cover",
       "cta": "Create their story"
     },
+    "familiesMetaTitle": "Personalized children’s books with their photo and name",
+    "familiesMetaDescription": "Create a book starring your child: upload their photo, see a free preview and get it as an ebook or printed.",
     "trustInline": {
       "digitalFrom": "Digital from {price}",
       "formats": "Digital or printed, with their name and face",

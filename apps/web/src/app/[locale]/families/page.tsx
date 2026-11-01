@@ -1,4 +1,5 @@
 import { ArrowRight, BookOpen, Gift, Map, ShieldCheck, Tablet, UserRound } from 'lucide-react';
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
@@ -22,8 +23,24 @@ import { brand } from '@/lib/brand';
 import { lowestPrice, offerHighlights } from '@/lib/offer';
 import { getContent, getLessons, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
+import { localizedAlternates } from '@/lib/seo';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
 import { STORY_THEMES } from '@/lib/story-themes';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const locale = (await params).locale as Locale;
+  const t = await getTranslations({ locale, namespace: 'Home' });
+  // Título y canónica propios: antes heredaba los de la home.
+  return {
+    title: t('familiesMetaTitle'),
+    description: t('familiesMetaDescription'),
+    alternates: localizedAlternates(locale, () => '/families'),
+  };
+}
 
 export default async function FamiliesPage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = (await params).locale as Locale;

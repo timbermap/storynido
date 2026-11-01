@@ -188,6 +188,8 @@
       "sample": "Portada de muestra",
       "cta": "Crear su cuento"
     },
+    "familiesMetaTitle": "Cuentos personalizados con su foto y su nombre",
+    "familiesMetaDescription": "Crea un libro con tu hijo como protagonista: sube su foto, mira la vista previa gratis y recíbelo digital o impreso.",
     "trustInline": {
       "digitalFrom": "Digital desde {price}",
       "formats": "Digital o impreso, con su nombre y su carita",

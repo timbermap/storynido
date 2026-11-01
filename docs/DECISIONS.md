@@ -2084,3 +2084,10 @@ El hero de Celebraciones mostraba la invitación como un bloque rosa solo con te
 
 - La invitación de muestra del hero deja de recortar el dibujo: es la portada completa del tema y el texto («¡Estás invitado!», el nombre en arco y «cumple años») va en su tercio superior vacío, con la tinta de cada portada.
 - Sección nueva «Su cara, en toda la fiesta» antes de los productos: de la foto al personaje y al kit completo, con tres puntos (el mismo protagonista en cada pieza, el nombre de cada invitado en las etiquetas, y sin foto se dibuja con sus rasgos). Usa imágenes de muestra, nunca fotos de menores.
+
+## 176 · Salir a producción: SEO y entorno (PR 1 de la lista de salida)
+
+- **Fecha:** 2026-11-01.
+- `/familias` tiene título, descripción y canónica propios (antes heredaba los de la home y Google la ignoraba); `/historias` (buscador general) apunta su canónica al catálogo de Familias para no duplicar contenido; se agregan `favicon.ico` (16, 32 y 48 px), `/manifest.webmanifest` e íconos de 192 y 512 px.
+- **robots.txt:** en producción permite todo salvo las cuentas; depende de `NEXT_PUBLIC_SITE_ENV=production`. **Hay que confirmar esa variable en producción** y, de paso, que el sitemap use `storynido.com`.
+- **Sin hacer todavía:** 301 de `/historias` (se resolvió con la canónica), descripción propia de las páginas legales, datos estructurados de producto y de preguntas, caché ISR y una instancia siempre encendida, monitor de errores, prueba de GA4 y Meta Pixel, CSP del proveedor de pago, fecha límite del impreso para Navidad.

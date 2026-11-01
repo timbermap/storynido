@@ -17,7 +17,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: t('title'),
     description: t('subtitle'),
-    alternates: localizedAlternates(locale, () => '/stories'),
+    // El buscador general repite el catálogo de Familias: su canónica es la de Familias.
+    alternates: localizedAlternates(locale, () => '/families/stories'),
   };
 }
 
