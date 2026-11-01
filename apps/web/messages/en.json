@@ -262,7 +262,10 @@
       "space": "Space and science",
       "animals": "Animals and dinosaurs",
       "magic": "Magic",
-      "heroes": "Heroes and sports"
+      "heroes": "Heroes and sports",
+      "moments": "Life’s big moments",
+      "feelings": "Feelings",
+      "mystery": "Mysteries and games"
     },
     "searchLabel": "Search for a story",
     "searchPlaceholder": "Dinosaurs, soccer, the sea…",

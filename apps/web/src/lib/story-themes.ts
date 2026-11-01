@@ -1,4 +1,13 @@
-import { PawPrint, Rocket, Sparkles, Trophy, type LucideIcon } from 'lucide-react';
+import {
+  Baby,
+  PawPrint,
+  Rocket,
+  Search,
+  Smile,
+  Sparkles,
+  Trophy,
+  type LucideIcon,
+} from 'lucide-react';
 
 /**
  * "¿Qué le encanta?": cuatro temáticas simples para elegir historia sin conocer las colecciones
@@ -13,6 +22,25 @@ export const STORY_THEMES: { key: string; icon: LucideIcon; tags: readonly strin
   },
   { key: 'magic', icon: Sparkles, tags: ['magia', 'princesas', 'príncipes', 'fantasía'] },
   { key: 'heroes', icon: Trophy, tags: ['superhéroes', 'deportes', 'fútbol', 'valentía'] },
+  {
+    key: 'moments',
+    icon: Baby,
+    tags: [
+      'nacimiento',
+      'pañal',
+      'diente',
+      'hitos',
+      'cumpleaños',
+      'navidad',
+      'hermanito',
+      'familia',
+      'amor',
+      'mamá',
+      'papá',
+    ],
+  },
+  { key: 'feelings', icon: Smile, tags: ['enojo', 'emociones', 'calma'] },
+  { key: 'mystery', icon: Search, tags: ['misterio', 'detectives', 'videojuegos', 'humor'] },
 ];
 
 export function matchesTheme(story: { tags: readonly string[] }, key: string): boolean {

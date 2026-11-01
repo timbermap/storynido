@@ -262,7 +262,10 @@
       "space": "O espaço e a ciência",
       "animals": "Os animais e os dinossauros",
       "magic": "A magia",
-      "heroes": "Os heróis e o esporte"
+      "heroes": "Os heróis e o esporte",
+      "moments": "Os momentos da vida",
+      "feelings": "As emoções",
+      "mystery": "Mistérios e jogos"
     },
     "searchLabel": "Buscar uma história",
     "searchPlaceholder": "Dinossauros, futebol, o mar…",

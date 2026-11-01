@@ -2129,3 +2129,7 @@ Sección «Un libro de verdad, para tener en las manos» en Familias, con una fo
 ### 180c. Checkout: aviso de Navidad sin pasos nuevos (2026-11-01)
 
 En el checkout del impreso, de mediados de octubre al 22 de diciembre aparece una línea que dice si el envío llega antes del 24 de diciembre (a tiempo, en riesgo o no llega), con la ventana estimada y la alternativa digital. No pide ninguna fecha ni agrega pasos; la fecha del regalo opcional sigue como estaba.
+
+### 181. «Le encanta»: tres temas para las historias nuevas (2026-11-01)
+
+Se suman «Los momentos de la vida» (nacimiento, pañal, diente, cumpleaños, Navidad, hermanito, mamá y papá), «Las emociones» (enojo y calma) y «Misterios y juegos» (detectives y videojuego): las 9 historias nuevas ya aparecen en algún tema. Antes los contadores eran 1, 4, 2 y 2.

@@ -19,7 +19,7 @@ Estado de todo lo pedido en reportes y documentos. Objetivo de salida suave: **1
 
 ## B. Para salir: me faltan
 
-1. Aviso de la fecha límite de Navidad también en el checkout del impreso.
+1. (Hecho: el aviso de Navidad ya está también en el checkout del impreso.)
 2. CSP y Permissions-Policy del proveedor de pago (cuando se elija).
 
 ## C. Para salir: solo tú o terceros
@@ -36,14 +36,14 @@ Estado de todo lo pedido en reportes y documentos. Objetivo de salida suave: **1
 
 ## D. Auditorías y documentos: lo que falta
 
-**Historias:** primer día de clases por país, francés y alemán, elenco con una versión por etapa, temas de «Le encanta» para las 9 historias nuevas.
+**Historias:** primer día de clases por país, francés y alemán, elenco con una versión por etapa.
 **Texto por edad:** capítulos, novela corta e historieta (páginas de solo texto en el pipeline y confirmar 64 o 96 páginas con Lulu y Gelato).
 **Eventos:** renombrar a «Cumpleaños y fiestas» (y URLs), calculadora de cantidad de invitados, foto real del hero, libritos impresos por invitado («próximamente»), código de descuento en el souvenir, recordatorio del año siguiente, temáticas por edad, libro de la clase.
 
 ## E. Plan de portadas (7 PR)
 
 Hecho: 1 (nombre del visitante), 2 (layouts A, B y C), título fuera de la tarjeta.
-Falta: 3 (portada como libro y galería), 4 (temas «Le encanta»), 5 (recortes para redes y A/B), 6 (portada del pedido: lámina del chico, control automático, tapa de imprenta a 300 PPI, contratapa).
+Falta: 3 (portada como libro y galería), 5 (recortes para redes y A/B), 6 (portada del pedido: lámina del chico, control automático, tapa de imprenta a 300 PPI, contratapa).
 
 ## F. Verificaciones abiertas
 
