@@ -34,13 +34,17 @@ export function CoverTitle({
   after?: string;
   ink?: 'dark' | 'light';
 }) {
-  // La puntuación pegada al nombre ("¡" antes, "," después) viaja con él: no queda suelta en su línea.
+  // Lo pegado al nombre viaja con él y no queda suelto en su línea: la puntuación ("¡" antes, ","
+  // después) y el posesivo del inglés ("TOM's", con la "s" en minúscula).
+  let lead = '';
+  let suffix = '';
   if (name) {
-    const lead = /^[\s¡¿"«]*$/u.test(before) ? before.trim() : '';
-    if (lead) before = '';
-    const tail = /^[,.;:!?»"]+/u.exec(after)?.[0] ?? '';
-    name = `${lead}${name}${tail}`;
-    after = after.slice(tail.length).trim();
+    if (/^[\s¡¿"«]*$/u.test(before)) {
+      lead = before.trim();
+      before = '';
+    }
+    suffix = /^(?:['’]s\b)?[,.;:!?»"]*/iu.exec(after)?.[0] ?? '';
+    after = after.slice(suffix.length).trim();
   }
   return (
     <p
@@ -50,7 +54,13 @@ export function CoverTitle({
       )}
     >
       {before && <span className={name ? 'text-[6.2cqw]' : 'text-[8.5cqw]'}>{before}</span>}
-      {name && <span className="text-[13cqw] tracking-tight uppercase">{name}</span>}
+      {name && (
+        <span className="text-[13cqw] tracking-tight uppercase">
+          {lead}
+          {name}
+          <span className="normal-case">{suffix}</span>
+        </span>
+      )}
       {after && <span className="text-[6.2cqw]">{after}</span>}
     </p>
   );
