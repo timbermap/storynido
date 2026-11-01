@@ -105,15 +105,12 @@ export function PartyDemo({
             />
           </div>
         )}
-        <p
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-2 rounded-full text-[0.7rem] font-semibold opacity-90 [text-shadow:0_0_6px_rgb(255_255_255/0.9)]"
-        >
-          {t('sample')}
-        </p>
       </div>
+      <p aria-hidden="true" className="mt-2 text-center text-xs text-muted-foreground">
+        {t('sample')}
+      </p>
 
-      <div className="mt-5 grid gap-4">
+      <div className="mt-4 grid gap-4">
         <div>
           <label htmlFor="party-name" className="text-sm font-bold">
             {t('nameLabel')}
