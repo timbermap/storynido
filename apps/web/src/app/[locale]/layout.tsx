@@ -55,6 +55,7 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
     title: { default: title, template: `%s · ${brand.name}` },
     description,
     applicationName: brand.name,
+    manifest: '/manifest.webmanifest',
     alternates: localizedAlternates(locale, () => '/'),
     openGraph: {
       type: 'website',
