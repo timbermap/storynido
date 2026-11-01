@@ -79,7 +79,7 @@ export async function SiteHeader() {
         <div className="flex items-center gap-1 sm:gap-2">
           <AccountLink />
           <HeaderCta
-            className="px-3 text-[0.8125rem] sm:px-5 sm:text-sm"
+            className="px-2.5 text-[0.8125rem] sm:px-5 sm:text-sm"
             eventsLabel={t('createKit')}
             professionalsLabel={t('tryFree')}
           >
