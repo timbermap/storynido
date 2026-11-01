@@ -107,10 +107,10 @@ test('catálogo: "¿Qué le encanta?" desde Familias, temática y búsqueda sin 
   await expect(grid).toContainText('gol de campeón');
   await expect(grid).not.toContainText('La gran aventura espacial');
 
+  // El buscador se muestra solo con muchas historias (SEARCH_MIN_STORIES): hoy el catálogo no lo tiene.
   await page.goto('/es/historias');
-  await page.getByRole('searchbox', { name: 'Buscar una historia' }).fill('FUTBOL');
-  await page.getByRole('button', { name: 'Buscar' }).click();
-  await expect(page).toHaveURL(/q=FUTBOL/);
+  await expect(page.getByRole('searchbox', { name: 'Buscar una historia' })).toHaveCount(0);
+  await page.goto('/es/historias?q=FUTBOL');
   await expect(grid).toContainText('gol de campeón');
   await expect(grid).not.toContainText('La gran aventura espacial');
   await expectAccessible(page);

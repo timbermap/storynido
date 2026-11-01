@@ -28,6 +28,9 @@ interface CatalogProps {
   channel: Channel | null;
 }
 
+/** Desde cuántas historias de una línea se muestra el buscador. */
+const SEARCH_MIN_STORIES = 40;
+
 export async function CatalogView({ locale, query, base, channel }: CatalogProps) {
   const t = await getTranslations('Stories');
   const tLines = await getTranslations('Nav.lines');
@@ -48,6 +51,9 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
   const stories = channel
     ? allStories.filter((story) => story.channels[0] === channel)
     : allStories;
+  // El buscador aparece cuando hay historias de sobra para que valga la pena (con pocas, el filtro
+  // por edad y los temas alcanzan).
+  const showSearch = stories.length >= SEARCH_MIN_STORIES || Boolean(query.q);
   // Solo las colecciones con alguna historia disponible.
   const collections = allCollections.filter((item) =>
     stories.some((story) => story.collectionIds.includes(item.slug)),
@@ -101,33 +107,35 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
       </header>
 
       {/* Buscar; después "¿Para quién es?" (la edad define estilo y texto) y los temas como chips. */}
-      <form role="search" action="" className="relative mt-8 max-w-md min-w-0">
-        <label htmlFor="story-search" className="sr-only">
-          {t('searchLabel')}
-        </label>
-        <Search
-          className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground"
-          aria-hidden="true"
-        />
-        <input
-          id="story-search"
-          name="q"
-          type="search"
-          defaultValue={search}
-          maxLength={80}
-          placeholder={t('searchPlaceholder')}
-          className="h-12 w-full rounded-full border bg-card pr-24 pl-12 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        />
-        <button
-          type="submit"
-          className="absolute top-1.5 right-1.5 h-9 rounded-full bg-action px-4 text-sm font-semibold text-action-foreground transition hover:bg-action-hover"
-        >
-          {t('search')}
-        </button>
-        {filter && <input type="hidden" name="edad" value={filter.min} />}
-        {collection && <input type="hidden" name="coleccion" value={collection.slug} />}
-        {theme && <input type="hidden" name="tema" value={theme.key} />}
-      </form>
+      {showSearch && (
+        <form role="search" action="" className="relative mt-8 max-w-md min-w-0">
+          <label htmlFor="story-search" className="sr-only">
+            {t('searchLabel')}
+          </label>
+          <Search
+            className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <input
+            id="story-search"
+            name="q"
+            type="search"
+            defaultValue={search}
+            maxLength={80}
+            placeholder={t('searchPlaceholder')}
+            className="h-12 w-full rounded-full border bg-card pr-24 pl-12 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          />
+          <button
+            type="submit"
+            className="absolute top-1.5 right-1.5 h-9 rounded-full bg-action px-4 text-sm font-semibold text-action-foreground transition hover:bg-action-hover"
+          >
+            {t('search')}
+          </button>
+          {filter && <input type="hidden" name="edad" value={filter.min} />}
+          {collection && <input type="hidden" name="coleccion" value={collection.slug} />}
+          {theme && <input type="hidden" name="tema" value={theme.key} />}
+        </form>
+      )}
 
       <nav aria-label={t('filterLabel')} className="mt-8">
         <p className="mb-3 font-display text-lg font-bold">{t('askWho')}</p>

@@ -2133,3 +2133,7 @@ En el checkout del impreso, de mediados de octubre al 22 de diciembre aparece un
 ### 181. «Le encanta»: tres temas para las historias nuevas (2026-11-01)
 
 Se suman «Los momentos de la vida» (nacimiento, pañal, diente, cumpleaños, Navidad, hermanito, mamá y papá), «Las emociones» (enojo y calma) y «Misterios y juegos» (detectives y videojuego): las 9 historias nuevas ya aparecen en algún tema. Antes los contadores eran 1, 4, 2 y 2.
+
+### 181b. Historias: sin buscador hasta tener más historias (2026-11-01)
+
+El catálogo oculta el buscador mientras la línea tenga menos de 40 historias (`SEARCH_MIN_STORIES`): con 24 alcanzan el filtro por edad y los temas. El buscador sigue funcionando si se llega con `?q=` y reaparece solo al llegar a las 40.
