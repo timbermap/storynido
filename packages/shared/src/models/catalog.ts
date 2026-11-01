@@ -17,6 +17,10 @@ import { bookFormatSchema, localizedSchema, timestampsSchema } from './common';
 const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
 /** stories/{storyId}: temática/plantilla de historia. */
+/** Maquetaciones del título sobre la portada. */
+export const COVER_LAYOUTS = ['A', 'B', 'C'] as const;
+export type CoverLayout = (typeof COVER_LAYOUTS)[number];
+
 export const storySchema = timestampsSchema.extend({
   slug: slugSchema,
   active: z.boolean(),
@@ -53,6 +57,11 @@ export const storySchema = timestampsSchema.extend({
   coverTitleOverlay: z.boolean().default(false),
   /** Color del título sobre el fondo de la portada: oscuro (por defecto) o claro (fondos azul marino). */
   coverInk: z.enum(['dark', 'light']).default('dark'),
+  /**
+   * Cómo se acomoda el título sobre la portada: A centrado, B arriba a la izquierda en dos niveles,
+   * C con el nombre más grande en un arco suave.
+   */
+  coverLayout: z.enum(COVER_LAYOUTS).default('A'),
   /** Portada de la versión Profesionales de la misma historia (otro estilo y chico genérico). */
   coverImagePro: z.string().nullish(),
   /** Título de la versión Profesionales, sin el nombre del niño ("Mi primer día de clases"). */
@@ -171,6 +180,13 @@ export function stageOf(story: { ageMin: number; ageMax: number }): AgeStageKey 
   if (middle < 6) return 'little';
   if (middle < 9) return 'readers';
   return 'big';
+}
+
+/** Maquetación del título según la etapa: bebés centrado (A), pequeños con arco (C), lectores a la izquierda (B). */
+export function coverLayoutOf(story: { ageMin: number; ageMax: number }): CoverLayout {
+  const stage = stageOf(story);
+  if (stage === 'babies') return 'A';
+  return stage === 'little' ? 'C' : 'B';
 }
 
 /**

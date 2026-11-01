@@ -13,8 +13,11 @@ import {
 } from '@storynido/shared';
 
 /** Las portadas con título y su color de tinta son opcionales en el seed (por defecto, la portada tal cual). */
-type SeedStory = Omit<Story, 'createdAt' | 'updatedAt' | 'coverTitleOverlay' | 'coverInk'> &
-  Partial<Pick<Story, 'coverTitleOverlay' | 'coverInk'>>;
+type SeedStory = Omit<
+  Story,
+  'createdAt' | 'updatedAt' | 'coverTitleOverlay' | 'coverInk' | 'coverLayout'
+> &
+  Partial<Pick<Story, 'coverTitleOverlay' | 'coverInk' | 'coverLayout'>>;
 type SeedStyle = Omit<IllustrationStyle, 'createdAt' | 'updatedAt'>;
 
 const TEXT_PROMPT = `Escribe un cuento infantil de {{pageCount}} páginas titulado "{{storyTitle}}".

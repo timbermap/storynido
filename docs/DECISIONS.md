@@ -2060,3 +2060,10 @@ En el navbar de visitante, el nombre «Familias» es un link a la landing de Fam
 - **Fecha:** 2026-11-01.
 - Campo «¿Cómo se llama?» arriba del catálogo y bajo la portada de la ficha. El nombre se guarda solo en el navegador (`sn_demo_name`, con try/catch, hasta 14 caracteres, mayúsculas, espacios y tildes tal cual) y **todas** las portadas lo muestran (`useVisitorName`, `useSyncExternalStore`); sin nombre, cada portada sigue con el del elenco. Esto revierte la regla de la decisión 159 («siempre el nombre del elenco»): como el nombre puede no coincidir con el dibujo, el campo aclara «Es un ejemplo: el dibujo es de nuestro personaje; tu libro lleva a tu peque». La demo de la landing usa la misma clave.
 - **Siguen los PR 2 a 6** del plan (título y layouts, libro y galería, catálogo, redes y A/B, portada del pedido).
+
+## 174 · Portadas: tres maquetaciones del título (PR 2 del plan de portadas)
+
+- **Fecha:** 2026-11-01.
+- Campo `coverLayout` ('A' | 'B' | 'C') por historia, expuesto en la API pública y sembrado según la etapa (`coverLayoutOf`): bebés **A** (título centrado), pequeños **C** (nombre más grande en un arco suave, con SVG `textPath` que achica la letra según el largo para que entre entero) y lectores y grandes **B** (arriba a la izquierda, en dos niveles). Sin franja de color: el texto va directo sobre el tercio vacío de la imagen, con `coverInk`. Profesionales, sin nombre, sigue en una sola línea.
+- La fuente de los títulos sale de `--font-cover` (hoy la de la marca): para usar la fuente propia solo hay que cargar el archivo y apuntar esa variable. Pendiente: el archivo y su licencia.
+- Se puede cambiar a mano el layout de una historia en Firestore (`coverLayout`); el admin todavía no tiene el campo.

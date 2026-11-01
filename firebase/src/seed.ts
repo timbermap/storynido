@@ -51,6 +51,7 @@ import {
   eventPricingSchema,
   printOptionId,
   printOptionSchema,
+  coverLayoutOf,
   recommendedStyle,
   type CountryCode,
   type Locale,
@@ -608,6 +609,8 @@ for (const story of [...SEED_STORIES, ...SEED_NEW_STORIES, ...SEED_DRAFT_STORIES
       defaultStyle: recommendedStyle(story),
       ...(NEW_COVERS.has(story.slug) ? { coverTitleOverlay: true } : {}),
       ...(LIGHT_INK.has(story.slug) ? { coverInk: 'light' } : {}),
+      // Bebés centrado (A), pequeños con el nombre en arco (C), lectores a la izquierda (B).
+      coverLayout: coverLayoutOf(story),
       ...(story.slug === 'mi-primer-dia-de-clases'
         ? {
             coverImagePro: '/samples/mi-primer-dia-de-clases-pro.webp',

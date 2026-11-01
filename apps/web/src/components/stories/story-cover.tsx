@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useId } from 'react';
 
 import type { PublicStory } from '@storynido/shared';
 
@@ -15,6 +16,7 @@ type CoverStory = Pick<
   | 'titlePro'
   | 'coverTitleOverlay'
   | 'coverInk'
+  | 'coverLayout'
   | 'coverImagePro'
   | 'castName'
 >;
@@ -28,12 +30,16 @@ export function CoverTitle({
   name,
   after = '',
   ink = 'dark',
+  layout = 'A',
 }: {
   before?: string;
   name?: string;
   after?: string;
   ink?: 'dark' | 'light';
+  /** A centrado, B arriba a la izquierda en dos niveles, C con el nombre en arco suave. */
+  layout?: 'A' | 'B' | 'C';
 }) {
+  const arcId = useId();
   // Lo pegado al nombre viaja con él y no queda suelto en su línea: la puntuación ("¡" antes, ","
   // después) y el posesivo del inglés ("TOM's", con la "s" en minúscula).
   let lead = '';
@@ -46,14 +52,52 @@ export function CoverTitle({
     suffix = /^(?:['’]s\b)?[,.;:!?»"]*/iu.exec(after)?.[0] ?? '';
     after = after.slice(suffix.length).trim();
   }
+  const color = ink === 'light' ? 'text-[#fff7f2]' : 'text-[#26324a]';
+  // Sin franja de color: el texto va directo sobre el tercio vacío de la imagen. La fuente sale de
+  // --font-cover (hoy la de la marca; ahí se carga la propia cuando esté el archivo).
+  const base =
+    'absolute inset-x-0 top-0 grid h-[30%] gap-[1.2cqw] font-[family-name:var(--font-cover)] leading-[1.05] font-semibold';
+  const small = name ? 'text-[6.2cqw]' : 'text-[8.5cqw]';
+  const full = `${lead}${name ?? ''}${suffix}`;
+
+  if (layout === 'C' && name) {
+    // El nombre sigue un arco suave; el tamaño baja con el largo para que entre entero.
+    const size = Math.min(15, 90 / (Math.max(full.length, 4) * 0.62));
+    return (
+      <p className={cn(base, 'content-center justify-items-center px-[7cqw] text-center', color)}>
+        {before && <span className="text-[6.2cqw]">{before}</span>}
+        <span className="sr-only">{full}</span>
+        <svg aria-hidden="true" viewBox="0 0 100 22" className="-my-[1cqw] w-full overflow-visible">
+          <path id={arcId} d="M4 19 Q50 3 96 19" fill="none" />
+          <text
+            fontSize={size}
+            textAnchor="middle"
+            className="fill-current font-[family-name:var(--font-cover)] font-semibold tracking-tight uppercase"
+          >
+            <textPath href={`#${arcId}`} startOffset="50%">
+              {lead}
+              {name}
+              <tspan className="normal-case">{suffix}</tspan>
+            </textPath>
+          </text>
+        </svg>
+        {after && <span className="text-[6.2cqw]">{after}</span>}
+      </p>
+    );
+  }
+
+  const left = layout === 'B' && name;
   return (
     <p
       className={cn(
-        'absolute inset-x-0 top-0 grid h-[30%] content-center justify-items-center gap-[1.2cqw] px-[7cqw] text-center font-display leading-[1.05] font-semibold',
-        ink === 'light' ? 'text-[#fff7f2]' : 'text-[#26324a]',
+        base,
+        left
+          ? 'content-center justify-items-start px-[8cqw] text-left'
+          : 'content-center justify-items-center px-[7cqw] text-center',
+        color,
       )}
     >
-      {before && <span className={name ? 'text-[6.2cqw]' : 'text-[8.5cqw]'}>{before}</span>}
+      {before && <span className={small}>{before}</span>}
       {name && (
         <span className="text-[13cqw] tracking-tight uppercase">
           {lead}
@@ -115,7 +159,13 @@ export function StoryCover({
       {pro || !parts ? (
         <CoverTitle before={pro ? (story.titlePro ?? story.title) : story.title} ink={ink} />
       ) : (
-        <CoverTitle before={parts.before} name={visitor} after={parts.after} ink={ink} />
+        <CoverTitle
+          before={parts.before}
+          name={visitor}
+          after={parts.after}
+          ink={ink}
+          layout={story.coverLayout}
+        />
       )}
     </div>
   );

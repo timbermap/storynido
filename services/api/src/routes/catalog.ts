@@ -58,6 +58,7 @@ export function toPublicStory(story: Story, locale: Locale): PublicStory {
     titleParts: splitTitleAtName(story.title[locale]),
     coverTitleOverlay: story.coverTitleOverlay,
     coverInk: story.coverInk,
+    coverLayout: story.coverLayout,
     coverImagePro: story.coverImagePro ?? null,
     titlePro: story.titlePro?.[locale] ?? null,
     castName: cast,

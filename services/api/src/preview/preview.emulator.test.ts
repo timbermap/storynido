@@ -39,6 +39,7 @@ const story: Story = {
   slug: 'aventura-espacial',
   coverTitleOverlay: false,
   coverInk: 'dark',
+  coverLayout: 'A',
   active: true,
   order: 1,
   ageMin: 3,

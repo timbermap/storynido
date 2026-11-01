@@ -462,6 +462,8 @@ export const publicStorySchema = z.object({
   /** La portada trae el tercio superior vacío: el título se superpone (DECISIONS 157). */
   coverTitleOverlay: z.boolean().optional(),
   coverInk: z.enum(['dark', 'light']).optional(),
+  /** Maquetación del título sobre la portada: A centrado, B a la izquierda, C con el nombre en arco. */
+  coverLayout: z.enum(['A', 'B', 'C']).optional(),
   /** Portada de la versión Profesionales, si la historia tiene una. */
   coverImagePro: z.string().nullable().optional(),
   titlePro: z.string().nullable().optional(),

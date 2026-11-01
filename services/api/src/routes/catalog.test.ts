@@ -29,6 +29,7 @@ const story = (
   slug,
   coverTitleOverlay: false,
   coverInk: 'dark',
+  coverLayout: 'A',
   active,
   order,
   ageMin,
