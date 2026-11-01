@@ -2046,3 +2046,7 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 - **Portadas (USD 1,08 en total, `gemini-3.1-flash-image`):** se rehicieron las 5 que mostraban a otro chico (las 3 de Lola, el faro y el lunes al revés, ahora con Lola y Alex) y se generaron las de las historias nuevas; «Cuando naciste» y «El diente que se cayó» se repitieron porque no dejaban el tercio superior libre para el título. `PENDING_COVER_SLUGS` quedó vacío: se sembraron Cuando naciste, Los mejores del mundo, Chau pañal, El volcán del enojo, El diente que se cayó, El club de detectives, Dentro del videojuego, Feliz cumpleaños y La Navidad de Lola (activa). «Chau pañal» y «El volcán del enojo» son ahora la historia destacada de sus enseñanzas.
 - **Pendiente de la Navidad:** el impreso necesita llegar antes del 24 de diciembre (DECISIONS 155): conviene que el checkout avise la fecha límite de envío antes de vender impresos.
 - **Idioma del cuento:** el paso «Elige la aventura» ofrece Español, English y Português, aparte del idioma del sitio (una familia de EE. UU. puede pedir el cuento en español; una de Argentina, en inglés). El backend ya usaba `book.language` para el texto, el título y la maqueta. Otros idiomas (francés, alemán) requieren traducir el catálogo y las plantillas: siguen pendientes.
+
+### 172b. Familias: un solo llamado al final (2026-11-01)
+
+La tarjeta «Mira antes de comprar» (garantía) ya no lleva botón: quedaba pegada al llamado final y se veían dos botones iguales seguidos. El único botón del cierre es «Crear una vista previa gratis».
