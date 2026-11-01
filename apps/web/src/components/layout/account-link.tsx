@@ -41,7 +41,10 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
 
   if (!signedIn || !user) {
     return (
-      <Link href="/login" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+      <Link
+        href="/login"
+        className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'px-2 sm:px-3' })}
+      >
         {t('signIn')}
       </Link>
     );
