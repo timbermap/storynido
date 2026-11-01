@@ -3,7 +3,7 @@
 # La configuración web de Firebase la inyecta App Hosting (no hace falta NEXT_PUBLIC_FIREBASE_*).
 # Documentación: https://firebase.google.com/docs/app-hosting/configure
 runConfig:
-  minInstances: 1
+  minInstances: 0
   maxInstances: 20
   concurrency: 80
   cpu: 1
