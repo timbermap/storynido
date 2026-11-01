@@ -112,7 +112,12 @@ export default async function EventsPage({ params }: Props) {
         note={t('note')}
         media={
           <PartyDemo
-            themes={collections.map((item) => ({ slug: item.slug, name: item.name }))}
+            themes={collections.map((item) => ({
+              slug: item.slug,
+              name: item.name,
+              // La ilustración de la invitación de muestra: la portada de la primera historia del tema.
+              image: stories.find((story) => story.collectionIds.includes(item.slug))?.coverImage,
+            }))}
             labels={Object.fromEntries(demoKeys.map((key) => [key, t(`demo.${key}`)])) as never}
           />
         }

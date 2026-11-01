@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 import { buttonVariants } from '@/components/ui/button';
@@ -24,7 +25,7 @@ export function PartyDemo({
   themes,
   labels,
 }: {
-  themes: { slug: string; name: string }[];
+  themes: { slug: string; name: string; image?: string | undefined }[];
   /** Textos ya traducidos por el servidor (no viaja todo el namespace de la landing). `previewAlt` lleva {name} y {theme}. */
   labels: Record<
     | 'youAreInvited'
@@ -75,25 +76,38 @@ export function PartyDemo({
         role="img"
         aria-label={t('previewAlt', { name: shown, theme: theme?.name ?? '' })}
         className={cn(
-          'relative grid aspect-[4/5] place-items-center overflow-hidden rounded-2xl bg-gradient-to-b p-6 text-center',
+          'relative flex aspect-[4/5] flex-col overflow-hidden rounded-2xl bg-gradient-to-b text-center',
           TONES[themeIndex % TONES.length],
         )}
       >
-        <div aria-hidden="true" className="grid gap-3">
+        <div aria-hidden="true" className="grid gap-2 px-6 pt-7">
           <p className="text-xs font-bold tracking-[0.14em] uppercase">{t('youAreInvited')}</p>
           <p className="font-display text-[clamp(2rem,6vw,3rem)] leading-tight font-bold break-words">
             {shown}
           </p>
           <p className="text-lg font-medium">{t('birthday')}</p>
           {theme && (
-            <p className="mx-auto mt-2 rounded-full bg-white/60 px-4 py-1.5 text-sm font-bold">
+            <p className="mx-auto mt-1 rounded-full bg-white/60 px-4 py-1.5 text-sm font-bold">
               {theme.name}
             </p>
           )}
         </div>
+        {/* La ilustración del tema (el diseño final lleva a su hijo): recorta el tercio superior vacío. */}
+        {theme?.image && (
+          <div aria-hidden="true" className="relative mt-4 min-h-0 flex-1">
+            <Image
+              src={theme.image}
+              alt=""
+              width={600}
+              height={800}
+              unoptimized
+              className="absolute inset-0 h-full w-full object-cover object-bottom"
+            />
+          </div>
+        )}
         <p
           aria-hidden="true"
-          className="absolute inset-x-0 bottom-3 text-[0.7rem] font-semibold opacity-70"
+          className="absolute inset-x-0 bottom-2 rounded-full text-[0.7rem] font-semibold opacity-90 [text-shadow:0_0_6px_rgb(255_255_255/0.9)]"
         >
           {t('sample')}
         </p>

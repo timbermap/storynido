@@ -2067,3 +2067,7 @@ En el navbar de visitante, el nombre «Familias» es un link a la landing de Fam
 - Campo `coverLayout` ('A' | 'B' | 'C') por historia, expuesto en la API pública y sembrado según la etapa (`coverLayoutOf`): bebés **A** (título centrado), pequeños **C** (nombre más grande en un arco suave, con SVG `textPath` que achica la letra según el largo para que entre entero) y lectores y grandes **B** (arriba a la izquierda, en dos niveles). Sin franja de color: el texto va directo sobre el tercio vacío de la imagen, con `coverInk`. Profesionales, sin nombre, sigue en una sola línea.
 - La fuente de los títulos sale de `--font-cover` (hoy la de la marca): para usar la fuente propia solo hay que cargar el archivo y apuntar esa variable. Pendiente: el archivo y su licencia.
 - Se puede cambiar a mano el layout de una historia en Firestore (`coverLayout`); el admin todavía no tiene el campo.
+
+### 174b. Eventos: la invitación de muestra lleva la ilustración del tema (2026-11-01)
+
+El hero de Celebraciones mostraba la invitación como un bloque rosa solo con texto. Ahora, bajo el nombre, lleva la ilustración del tema elegido (la portada de la primera historia de ese tema, recortada sin el tercio superior vacío) y cambia al cambiar el tema. Sigue diciendo «Muestra: tu invitación final lleva el diseño de tu hijo».
