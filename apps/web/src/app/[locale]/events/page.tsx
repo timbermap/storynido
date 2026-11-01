@@ -15,6 +15,7 @@ import {
 } from '@/components/landing/sections';
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { PartyDemo } from '@/components/events/party-demo';
+import { PartyValue } from '@/components/events/party-value';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
 import { formatPrice } from '@/lib/format';
@@ -120,11 +121,13 @@ export default async function EventsPage({ params }: Props) {
               name: item.name,
               // La ilustración de la invitación de muestra: la portada de la primera historia del tema.
               image: stories.find((story) => story.collectionIds.includes(item.slug))?.coverImage,
+              ink: stories.find((story) => story.collectionIds.includes(item.slug))?.coverInk,
             }))}
             labels={Object.fromEntries(demoKeys.map((key) => [key, t(`demo.${key}`)])) as never}
           />
         }
       />
+      <PartyValue />
       <section className="bg-muted py-20 lg:py-24">
         <div className="container-page">
           <div className="max-w-2xl">

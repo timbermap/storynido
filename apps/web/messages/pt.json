@@ -1049,6 +1049,17 @@
         "cta": "Criar o convite grátis",
         "previewAlt": "Convite de exemplo para o aniversário de {name}, tema {theme}"
       },
+      "value": {
+        "title": "O rosto dele, em toda a festa",
+        "subtitle": "Não é um modelo com um nome: a partir da foto criamos o personagem ilustrado, o mesmo em cada peça.",
+        "point1": "O convite, a decoração e a história de lembrancinha têm o mesmo protagonista.",
+        "point2": "Cada convidado recebe uma lembrança com o nome do aniversariante, e o próprio nome nas etiquetas.",
+        "point3": "Sem foto, desenhamos com as características: cabelo, olhos e o que mais o representa.",
+        "photoLabel": "A foto",
+        "characterLabel": "O personagem",
+        "kitLabel": "A festa toda",
+        "sample": "Imagens de exemplo: o seu kit leva o seu filho."
+      },
       "productsTitle": "Quatro presentes, um mesmo protagonista",
       "productsSubtitle": "Compram-se nesta ordem, e cada um responde a uma pergunta da festa.",
       "products": {

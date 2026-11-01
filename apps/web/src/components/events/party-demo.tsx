@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
+import { CoverTitle } from '@/components/stories/story-cover';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
@@ -25,7 +26,7 @@ export function PartyDemo({
   themes,
   labels,
 }: {
-  themes: { slug: string; name: string; image?: string | undefined }[];
+  themes: { slug: string; name: string; image?: string | undefined; ink?: 'dark' | 'light' }[];
   /** Textos ya traducidos por el servidor (no viaja todo el namespace de la landing). `previewAlt` lleva {name} y {theme}. */
   labels: Record<
     | 'youAreInvited'
@@ -76,35 +77,31 @@ export function PartyDemo({
         role="img"
         aria-label={t('previewAlt', { name: shown, theme: theme?.name ?? '' })}
         className={cn(
-          'relative flex aspect-[4/5] flex-col overflow-hidden rounded-2xl bg-gradient-to-b text-center',
+          '[container-type:inline-size] relative aspect-[3/4] overflow-hidden rounded-2xl bg-gradient-to-b',
           TONES[themeIndex % TONES.length],
         )}
       >
-        <div aria-hidden="true" className="grid gap-2 px-6 pt-7">
-          <p className="text-xs font-bold tracking-[0.14em] uppercase">{t('youAreInvited')}</p>
-          <p className="font-display text-[clamp(2rem,6vw,3rem)] leading-tight font-bold break-words">
-            {shown}
-          </p>
-          <p className="text-lg font-medium">{t('birthday')}</p>
-          {theme && (
-            <p className="mx-auto mt-1 rounded-full bg-white/60 px-4 py-1.5 text-sm font-bold">
-              {theme.name}
-            </p>
-          )}
-        </div>
-        {/* La ilustración del tema (el diseño final lleva a su hijo): recorta el tercio superior vacío. */}
+        {/* La ilustración completa del tema, sin recortes; el texto va en su tercio superior vacío. */}
         {theme?.image && (
-          <div aria-hidden="true" className="relative mt-4 min-h-0 flex-1">
-            <Image
-              src={theme.image}
-              alt=""
-              width={600}
-              height={800}
-              unoptimized
-              className="absolute inset-0 h-full w-full object-cover object-bottom"
-            />
-          </div>
+          <Image
+            src={theme.image}
+            alt=""
+            aria-hidden="true"
+            width={600}
+            height={800}
+            unoptimized
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         )}
+        <div aria-hidden="true">
+          <CoverTitle
+            before={t('youAreInvited')}
+            name={shown}
+            after={t('birthday')}
+            ink={theme?.ink ?? 'dark'}
+            layout="C"
+          />
+        </div>
       </div>
       <p aria-hidden="true" className="mt-2 text-center text-xs text-muted-foreground">
         {t('sample')}

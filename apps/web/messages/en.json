@@ -1049,6 +1049,17 @@
         "cta": "Create the invitation for free",
         "previewAlt": "Sample invitation for the birthday of {name}, theme {theme}"
       },
+      "value": {
+        "title": "Their face, all over the party",
+        "subtitle": "Not a template with a name on it: from their photo we create their illustrated character, the same one on every piece.",
+        "point1": "The invitation, the decorations and the souvenir story all star the same hero.",
+        "point2": "Every guest gets a keepsake with the birthday child’s name, and their own on the tags.",
+        "point3": "No photo? We draw them from their features: hair, eyes and what makes them them.",
+        "photoLabel": "Their photo",
+        "characterLabel": "Their character",
+        "kitLabel": "The whole party",
+        "sample": "Sample images: your kit stars your child."
+      },
       "productsTitle": "Four gifts, one star",
       "productsSubtitle": "They are bought in this order, and each one answers a question about the party.",
       "products": {

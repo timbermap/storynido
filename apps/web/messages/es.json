@@ -1049,6 +1049,17 @@
         "cta": "Crear la invitación gratis",
         "previewAlt": "Invitación de muestra para el cumpleaños de {name}, tema {theme}"
       },
+      "value": {
+        "title": "Su cara, en toda la fiesta",
+        "subtitle": "No es una plantilla con un nombre: con su foto creamos su personaje ilustrado y es el mismo en cada pieza.",
+        "point1": "La invitación, la decoración y el cuento de souvenir llevan al mismo protagonista.",
+        "point2": "Cada invitado recibe un recuerdo con el nombre del cumpleañero, y el suyo en las etiquetas.",
+        "point3": "Sin foto, lo dibujamos con sus rasgos: pelo, ojos y lo que más lo representa.",
+        "photoLabel": "Su foto",
+        "characterLabel": "Su personaje",
+        "kitLabel": "Toda la fiesta",
+        "sample": "Imágenes de muestra: tu kit lleva a tu hijo."
+      },
       "productsTitle": "Cuatro regalos, un mismo protagonista",
       "productsSubtitle": "Se compran en este orden, y cada uno resuelve una pregunta de la fiesta.",
       "products": {
