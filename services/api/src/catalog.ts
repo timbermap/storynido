@@ -63,8 +63,8 @@ export interface CatalogRepository {
    * imprenta tiene las dos para el mismo formato, gana la del país.
    */
   printOptions(country: CountryCode): Promise<PrintOption[]>;
-  /** Países con alguna imprenta habilitada y con la muestra aprobada (`*`: todos). */
-  printedCountries(): Promise<CountryCode[] | 'all'>;
+  /** Países con alguna imprenta activa en este entorno, habilitada y con la muestra aprobada (`*`: todos). */
+  printedCountries(activePrinters: readonly string[]): Promise<CountryCode[] | 'all'>;
   /**
    * Precio del kit de Eventos, en dólares: el del país si tiene uno en USD; si no, el de EE. UU.
    * (el mismo para todo el mundo). Null: no se vende.
@@ -273,13 +273,14 @@ export class FirestoreCatalog implements CatalogRepository {
     });
   }
 
-  printedCountries(): Promise<CountryCode[] | 'all'> {
-    return this.cache.get('print:countries', async () => {
+  printedCountries(activePrinters: readonly string[]): Promise<CountryCode[] | 'all'> {
+    return this.cache.get(`print:countries:${activePrinters.join(',')}`, async () => {
       const snapshot = await this.db.collection(COLLECTIONS.printOptions).get();
       const codes = new Set<string>();
       for (const doc of snapshot.docs) {
         const parsed = printOptionSchema.safeParse(normalizeFirestoreData(doc.data()));
         if (!parsed.success || !parsed.data.enabled || !parsed.data.qaSamplePassed) continue;
+        if (!activePrinters.includes(parsed.data.provider)) continue;
         codes.add(parsed.data.country);
       }
       return codes.has(ANY_COUNTRY) ? 'all' : ([...codes] as CountryCode[]);
@@ -407,8 +408,10 @@ export class InMemoryCatalog implements CatalogRepository {
     );
   }
 
-  printedCountries() {
-    const options = (this.data.printOptions ?? []).filter((o) => o.enabled && o.qaSamplePassed);
+  printedCountries(activePrinters: readonly string[]) {
+    const options = (this.data.printOptions ?? []).filter(
+      (o) => o.enabled && o.qaSamplePassed && activePrinters.includes(o.provider),
+    );
     const codes = new Set<string>(options.map((o) => o.country));
     return Promise.resolve(
       codes.has(ANY_COUNTRY) ? ('all' as const) : ([...codes] as CountryCode[]),

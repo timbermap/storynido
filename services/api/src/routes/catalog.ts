@@ -252,7 +252,7 @@ export function registerCatalogRoutes(
   addRoute(app, apiRoutes.catalogCountries, {}, async () => {
     const [configured, printed] = await Promise.all([
       catalog.configuredCountries(),
-      catalog.printedCountries(),
+      catalog.printedCountries(activePrinters),
     ]);
     const off = new Set(configured.filter((country) => !country.active).map((c) => c.code));
     return {

@@ -338,11 +338,13 @@ describe('catálogo', () => {
       code: 'MX',
       currency: 'MXN',
       defaultLocale: 'es',
-      printed: expect.any(Boolean) as boolean,
+      printed: true,
     });
     expect(countries.find((country) => country.code === 'AR')).toMatchObject({
       currency: 'USD',
       defaultLocale: 'es',
+      // Sin imprenta habilitada: solo el libro digital.
+      printed: false,
     });
   });
 
