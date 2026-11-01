@@ -24,6 +24,8 @@ export interface KitBook {
   /** Portada aprobada (data URI). */
   cover: string;
   paper: PaperSize;
+  /** Invitados: con nombres, las etiquetas de la bolsita salen una por invitado («Para Juana»). */
+  guests?: readonly string[];
 }
 
 export const PAPER_MM: Record<PaperSize, { width: number; height: number }> = {
@@ -50,6 +52,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     thanks: '¡Gracias por venir a mi cumple!',
     love: 'Con cariño, {name}',
     tag: '¡Gracias por venir!',
+    tagFor: 'Para {guest}',
     years: '¡{age} años!',
     activities: 'Actividades del cumple de {name}',
     maze: 'Ayuda a {name} a llegar a la torta',
@@ -71,6 +74,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     thanks: 'Thank you for coming to my party!',
     love: 'Love, {name}',
     tag: 'Thanks for coming!',
+    tagFor: 'For {guest}',
     years: '{age} years old!',
     activities: '{name}’s birthday activities',
     maze: 'Help {name} get to the cake',
@@ -92,6 +96,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     thanks: 'Obrigado por vir ao meu aniversário!',
     love: 'Com carinho, {name}',
     tag: 'Obrigado por vir!',
+    tagFor: 'Para {guest}',
     years: '{age} anos!',
     activities: 'Atividades do aniversário de {name}',
     maze: 'Ajude {name} a chegar ao bolo',
@@ -368,25 +373,34 @@ function favorTags(book: KitBook, copies: number) {
   const tag = { width: 63, height: 89 };
   const columns = 3;
   const rows = 3;
+  const perSheet = columns * rows;
   const gapX = (paper.width - columns * tag.width) / (columns + 1);
   const gapY = (paper.height - 16 - rows * tag.height) / (rows + 1);
-  const items = Array.from({ length: columns * rows }, (_, index) => {
-    const left = gapX + (index % columns) * (tag.width + gapX);
-    const top = gapY + Math.floor(index / columns) * (tag.height + gapY);
-    return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><span class="hole"></span><img src="${book.cover}" alt=""><p class="display">${t(book, 'tag')}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
-  }).join('');
+  // Con lista de invitados: una etiqueta por invitado, con su nombre; sin lista, la genérica.
+  const guests = book.guests ?? [];
+  const labels: (string | null)[] =
+    guests.length > 0 ? [...guests] : Array<null>(perSheet).fill(null);
+  const sheets = Array.from({ length: Math.ceil(labels.length / perSheet) }, (_, sheet) =>
+    labels.slice(sheet * perSheet, (sheet + 1) * perSheet),
+  );
+  const pages = sheets.map((sheet) => {
+    const items = sheet
+      .map((guest, index) => {
+        const left = gapX + (index % columns) * (tag.width + gapX);
+        const top = gapY + Math.floor(index / columns) * (tag.height + gapY);
+        const heading = guest === null ? t(book, 'tag') : t(book, 'tagFor', { guest });
+        return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><span class="hole"></span><img src="${book.cover}" alt=""><p class="display">${heading}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
+      })
+      .join('');
+    return `<section class="page" data-label="etiquetas">${items}<p class="license">${t(book, 'license', { copies })} · ${t(book, 'cut')}</p></section>`;
+  });
   const css = `
 .tag { position: absolute; width: ${String(tag.width)}mm; height: ${String(tag.height)}mm; border: 0.3mm dashed #b9acbf; border-radius: 4mm; overflow: hidden; background: ${PAPER}; text-align: center; }
 .tag .hole { position: absolute; top: 4mm; left: 50%; width: 5mm; height: 5mm; margin-left: -2.5mm; border-radius: 50%; border: 0.3mm solid #b9acbf; background: #fff; z-index: 1; }
 .tag img { display: block; width: 100%; height: 50mm; object-fit: cover; object-position: 50% 60%; }
 .tag p { margin: 3mm 3mm 1mm; font-size: 12pt; }
 .tag small { font-size: 8.5pt; font-weight: 700; color: ${LAVENDER}; }`;
-  return {
-    css,
-    pages: [
-      `<section class="page" data-label="etiquetas">${items}<p class="license">${t(book, 'license', { copies })} · ${t(book, 'cut')}</p></section>`,
-    ],
-  };
+  return { css, pages };
 }
 
 /** Kit de actividades del cumple (laberinto, dibujar la torta, unir palabras). Sin IA. */

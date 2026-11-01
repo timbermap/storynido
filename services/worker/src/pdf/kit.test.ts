@@ -38,6 +38,30 @@ describe('kit por ocasión', () => {
   });
 });
 
+describe('etiquetas por invitado', () => {
+  it('sin lista, una hoja con la etiqueta genérica', () => {
+    const doc = kitPieceDocument(book('birthday'), 'favor_tags', 20);
+    expect(doc.pages).toBe(1);
+    expect(doc.html).toContain('¡Gracias por venir!');
+    expect(doc.html).not.toContain('Para ');
+  });
+
+  it('con lista, una etiqueta por invitado (9 por hoja) y el nombre escapado', () => {
+    const guests = Array.from({ length: 11 }, (_, index) => `Invitado ${String(index + 1)}`);
+    const doc = kitPieceDocument(
+      { ...book('birthday'), guests: [...guests, '<b>Lola</b>'] },
+      'favor_tags',
+      20,
+    );
+    expect(doc.pages).toBe(2);
+    expect(doc.html).toContain('Para Invitado 1');
+    expect(doc.html).toContain('Para Invitado 11');
+    expect(doc.html).toContain('Para &lt;b&gt;Lola&lt;/b&gt;');
+    expect(doc.html).not.toContain('<b>Lola</b>');
+    expect(doc.html).not.toContain('¡Gracias por venir!');
+  });
+});
+
 describe('tarjeta para imprimir', () => {
   it('es un PDF de dos páginas (frente y dorso) del tamaño de la tarjeta con sangrado', () => {
     const doc = kitCardPrintDocument(book('birthday'), 'invitation');

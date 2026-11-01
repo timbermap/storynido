@@ -1413,7 +1413,10 @@
         "title": "El cuento grande del cumpleañero, en tapa dura",
         "text": "La historia completa, con el mismo personaje y sin subir fotos de nuevo: el recuerdo que se guarda. Se crea desde Familias y el envío se calcula con tu dirección.",
         "cta": "Crear el cuento grande"
-      }
+      },
+      "guests": "Nombres de los invitados (opcional)",
+      "guestsPlaceholder": "Juana\nMateo\nLola",
+      "guestsNote": "Uno por línea: cada etiqueta sale «Para …» con su nombre ({count} de {max}). Sin lista, las etiquetas salen con «¡Gracias por venir!»."
     },
     "fromPrice": "desde {price}",
     "shippingPending": "Envío: se calcula con tu dirección",

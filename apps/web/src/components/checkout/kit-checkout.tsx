@@ -52,6 +52,7 @@ export function KitCheckout({
   const [copies, setCopies] = useState(20);
   const [time, setTime] = useState('');
   const [place, setPlace] = useState('');
+  const [guestsText, setGuestsText] = useState('');
   const [couponInput, setCouponInput] = useState('');
   const [coupon, setCoupon] = useState<string | null>(null);
   const [quote, setQuote] = useState<{
@@ -84,7 +85,14 @@ export function KitCheckout({
     };
   }, [country]);
 
+  // Un nombre por línea; sin lista, las etiquetas salen genéricas.
+  const guests = guestsText
+    .split('\n')
+    .map((line) => line.trim().slice(0, KIT_LIMITS.guestMaxLength))
+    .filter(Boolean)
+    .slice(0, KIT_LIMITS.maxGuests);
   const kit = {
+    guests: pieces.has('favor_tags') ? guests : [],
     pieces: KIT_PIECES.filter((piece) => pieces.has(piece)).map((piece) => ({
       piece,
       copies: Math.min(Math.max(1, copies || 1), KIT_LIMITS.maxCopies),
@@ -269,6 +277,25 @@ export function KitCheckout({
             </div>
             <p className="text-sm text-muted-foreground">{tKit('invitationNote')}</p>
           </fieldset>
+        )}
+
+        {pieces.has('favor_tags') && (
+          <label className="grid max-w-md gap-1.5 text-sm">
+            <span className="font-semibold">{tKit('guests')}</span>
+            <textarea
+              id="kit-guests"
+              rows={5}
+              value={guestsText}
+              onChange={(event) => {
+                setGuestsText(event.target.value);
+              }}
+              placeholder={tKit('guestsPlaceholder')}
+              className={field}
+            />
+            <span className="text-muted-foreground">
+              {tKit('guestsNote', { count: guests.length, max: KIT_LIMITS.maxGuests })}
+            </span>
+          </label>
         )}
 
         <p className="flex items-start gap-2.5 rounded-2xl border bg-card p-4 text-sm text-muted-foreground">

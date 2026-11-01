@@ -1413,7 +1413,10 @@
         "title": "The birthday star's full storybook, in hardcover",
         "text": "The complete story with the same character and no new photo uploads: the keepsake that lasts. You create it from Families and shipping is calculated with your address.",
         "cta": "Create the full storybook"
-      }
+      },
+      "guests": "Guest names (optional)",
+      "guestsPlaceholder": "Jane\nMatt\nLily",
+      "guestsNote": "One per line: each tag reads “For …” with their name ({count} of {max}). Without a list, the tags say “Thanks for coming!”."
     },
     "fromPrice": "from {price}",
     "shippingPending": "Shipping: calculated from your address",

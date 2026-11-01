@@ -1180,6 +1180,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           invitation: kit.invitation,
           cover: kitCover,
           paper: kit.paper,
+          guests: kit.guests,
         };
         for (const { piece, copies } of kit.pieces) {
           if (piece === 'mini_book') continue;

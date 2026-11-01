@@ -22,7 +22,13 @@ export type KitPiece = z.infer<typeof kitPieceSchema>;
 /** El librito es el diseño: siempre va. */
 export const REQUIRED_KIT_PIECES: readonly KitPiece[] = ['mini_book'];
 
-export const KIT_LIMITS = { maxCopies: 200, placeMaxLength: 80, timeMaxLength: 30 } as const;
+export const KIT_LIMITS = {
+  maxCopies: 200,
+  placeMaxLength: 80,
+  timeMaxLength: 30,
+  maxGuests: 60,
+  guestMaxLength: 30,
+} as const;
 
 /** Hoja de impresión: Carta en EE. UU., A4 en el resto. */
 export type PaperSize = 'letter' | 'a4';
@@ -48,6 +54,11 @@ export const kitSelectionSchema = z.object({
         message: 'El librito es obligatorio',
       },
     ),
+  /** Nombres de los invitados: las etiquetas de la bolsita salen una por invitado. */
+  guests: z
+    .array(z.string().trim().min(1).max(KIT_LIMITS.guestMaxLength))
+    .max(KIT_LIMITS.maxGuests)
+    .default([]),
   invitation: z
     .object({
       time: z.string().trim().max(KIT_LIMITS.timeMaxLength).nullable(),
