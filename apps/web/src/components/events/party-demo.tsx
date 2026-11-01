@@ -99,7 +99,8 @@ export function PartyDemo({
             name={shown}
             after={t('birthday')}
             ink={theme?.ink ?? 'dark'}
-            layout="C"
+            // Nombres cortos centrados; los largos en arco, que achica la letra para que entren.
+            layout={shown.length > 9 ? 'C' : 'A'}
           />
         </div>
       </div>

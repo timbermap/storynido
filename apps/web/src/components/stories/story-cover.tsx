@@ -67,8 +67,12 @@ export function CoverTitle({
       <p className={cn(base, 'content-center justify-items-center px-[7cqw] text-center', color)}>
         {before && <span className="text-[6.2cqw]">{before}</span>}
         <span className="sr-only">{full}</span>
-        <svg aria-hidden="true" viewBox="0 0 100 22" className="-my-[1cqw] w-full overflow-visible">
-          <path id={arcId} d="M4 19 Q50 3 96 19" fill="none" />
+        <svg
+          aria-hidden="true"
+          viewBox="0 -3 100 19"
+          className="-my-[1cqw] w-full overflow-visible"
+        >
+          <path id={arcId} d="M4 13 Q50 1 96 13" fill="none" />
           <text
             fontSize={size}
             textAnchor="middle"
