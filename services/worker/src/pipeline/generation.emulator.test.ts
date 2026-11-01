@@ -381,13 +381,19 @@ describe('generación del libro (fase 09)', () => {
     expect(layout.files.map((file) => [file.kind, file.pages])).toEqual([
       ['book', 8],
       ['invitation', 2],
+      ['invitation_image', 0],
       ['stickers', 1],
       ['kit_zip', 0],
     ]);
     const zip = unzipSync(
       await providers.storage().download({ bucket: 'pdfs', path: 'orders/o1/g0/kit.zip' }),
     );
-    expect(Object.keys(zip).sort()).toEqual(['invitation.pdf', 'mini-cuento.pdf', 'stickers.pdf']);
+    expect(Object.keys(zip).sort()).toEqual([
+      'invitacion-whatsapp.png',
+      'invitation.pdf',
+      'mini-cuento.pdf',
+      'stickers.pdf',
+    ]);
     // Hoja Carta (EE. UU.) con la licencia de copias.
     const invitation = await PDFDocument.load(zip['invitation.pdf'] ?? new Uint8Array());
     const mm = (points: number) => Math.round((points / 72) * 25.4);
