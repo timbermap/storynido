@@ -91,6 +91,7 @@
     "shipDigital": "Livro digital: disponível, você baixa na hora.",
     "shipPrinted": "Impresso ({formats}): imprimimos e enviamos; chega em {min} a {max} dias úteis. O frete é calculado com seu endereço.",
     "shipNoPrint": "Impresso: ainda não imprimimos para este país. Você pode comprar o digital.",
+    "shipPrintedCountries": "Imprimimos e enviamos livros para: {list}. No resto do mundo, o livro digital.",
     "shipNone": "Ainda não vendemos em {country}."
   },
   "Home": {
@@ -195,7 +196,7 @@
       "formats": "Digital ou impresso, com o nome e o rostinho",
       "shipping": "O frete do impresso é calculado pelo seu país",
       "preview": "Prévia grátis",
-      "global": "Disponível no mundo todo"
+      "global": "Digital no mundo todo; impresso nos países para onde enviamos"
     },
     "audience": {
       "title": "Para quem é?",
@@ -207,7 +208,7 @@
       },
       "events": {
         "title": "Celebrações",
-        "text": "Mini livros e lembrancinhas para aniversários, batizados, comunhões e formaturas: um design, muitas cópias.",
+        "text": "A festa pronta: convite, decoração e uma história para cada convidado, com o seu filho como protagonista.",
         "cta": "Ver kits para celebrações"
       },
       "professionals": {
@@ -264,6 +265,8 @@
     "objectivesTitle": "O que esta história trabalha",
     "objectivesText": "Ao criá-la, você escolhe um como objetivo principal e a história gira em torno dele.",
     "shipTo": "Enviar para",
+    "christmasOpen": "Para o Natal em {country}: peça o livro impresso até {date} e ele chega antes de 24 de dezembro. O digital fica pronto em minutos.",
+    "christmasClosed": "O livro impresso não chega mais antes de 24 de dezembro em {country}. O digital fica pronto em minutos.",
     "fewForAge": "Por enquanto há poucas histórias pensadas para {min} a {max} anos. Nelas, o texto e as ilustrações são escritos para a idade do seu filho.",
     "lengthFormats": "Formatos disponíveis",
     "shippingCalculated": "O frete do livro impresso é calculado com o seu endereço na hora de pagar.",
@@ -425,7 +428,7 @@
         },
         "events": {
           "title": "Um kit para uma celebração",
-          "text": "Aniversário, batizado, comunhão ou formatura: um design, muitas cópias."
+          "text": "Convite, decoração e uma história para cada convidado."
         },
         "professionals": {
           "title": "Um projeto profissional",
@@ -995,7 +998,7 @@
       "eyebrow": "StoryNido Celebrações",
       "title": "A festa pronta, com seu filho como protagonista",
       "subtitle": "Convite para WhatsApp, decoração para imprimir e uma história de lembrancinha para os convidados, tudo com o mesmo personagem.",
-      "cta": "Criar o convite grátis",
+      "cta": "Criar meu kit",
       "note": "Sem conta você vê como fica. Só pedimos para entrar na hora de salvar ou baixar.",
       "howTitle": "Como funciona",
       "steps": {
@@ -1049,7 +1052,7 @@
         "nameLabel": "Como se chama o aniversariante?",
         "namePlaceholder": "Tomás",
         "themeLabel": "Tema da festa",
-        "cta": "Criar o convite grátis",
+        "cta": "Criar meu kit",
         "previewAlt": "Convite de exemplo para o aniversário de {name}, tema {theme}"
       },
       "value": {
@@ -1062,6 +1065,16 @@
         "characterLabel": "O personagem",
         "kitLabel": "A festa toda",
         "sample": "Imagens de exemplo: o seu kit leva o seu filho."
+      },
+      "hero": {
+        "title": "O kit da festa, com a história incluída",
+        "subtitle": "Convite, decoração e uma história ilustrada com o seu filho como protagonista. Tudo com o mesmo personagem, pronto em minutos.",
+        "point1": "Uma história por convidado, com o nome de cada um na etiqueta",
+        "point2": "Convite para WhatsApp e decoração para imprimir",
+        "point3": "Você escolhe entre {count} temas de festa",
+        "price": "{price} · kit digital completo, a história está incluída",
+        "photoAlt": "O kit completo da festa, impresso sobre uma mesa",
+        "badge": "Foto de exemplo do kit"
       },
       "productsTitle": "Quatro presentes, um mesmo protagonista",
       "productsSubtitle": "Compram-se nesta ordem, e cada um responde a uma pergunta da festa.",

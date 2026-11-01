@@ -12,6 +12,7 @@ import {
 } from '@storynido/shared';
 
 import { AuthLink } from '@/components/auth/auth-link';
+import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
 import { JsonLd } from '@/components/json-ld';
 import { StoryCover } from '@/components/stories/story-cover';
 import { VisitorNameField } from '@/components/stories/visitor-name-field';
@@ -325,6 +326,10 @@ export default async function StoryPage({ params, searchParams }: Props) {
             <p className="rounded-xl bg-mint px-5 py-3 text-sm font-semibold text-success">
               {t('youWillCreate', { story: story.title, lesson: chosenLesson.name })}
             </p>
+          )}
+
+          {line !== 'events' && (
+            <ChristmasDeadline offer={offer} country={display.country} locale={locale} />
           )}
 
           <AuthLink

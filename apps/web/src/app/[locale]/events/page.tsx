@@ -14,7 +14,7 @@ import {
   ctaClass,
 } from '@/components/landing/sections';
 import { PhotoPromise } from '@/components/landing/photo-promise';
-import { PartyDemo } from '@/components/events/party-demo';
+import { ImageSlot } from '@/components/landing/image-slot';
 import { PartyValue } from '@/components/events/party-value';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
@@ -79,17 +79,6 @@ export default async function EventsPage({ params }: Props) {
     </Link>
   );
   const keys = ['1', '2', '3', '4', '5'] as const;
-  const demoKeys = [
-    'youAreInvited',
-    'birthday',
-    'sample',
-    'photo',
-    'nameLabel',
-    'namePlaceholder',
-    'themeLabel',
-    'cta',
-    'previewAlt',
-  ] as const;
   const products = [
     {
       key: '1',
@@ -111,20 +100,33 @@ export default async function EventsPage({ params }: Props) {
       <RememberChannel channel="events" />
       <LandingHero
         eyebrow={t('eyebrow')}
-        title={t('title')}
-        subtitle={t('subtitle')}
+        title={t('hero.title')}
+        subtitle={t('hero.subtitle')}
+        bullets={[
+          t('hero.point1'),
+          t('hero.point2'),
+          t('hero.point3', { count: collections.length }),
+        ]}
         cta={cta}
+        priceLine={pricing ? t('hero.price', { price: money(partyMinor) }) : undefined}
         note={t('note')}
         media={
-          <PartyDemo
-            themes={collections.map((item) => ({
-              slug: item.slug,
-              name: item.name,
-              // La ilustración de la invitación de muestra: la portada de la primera historia del tema.
-              image: stories.find((story) => story.collectionIds.includes(item.slug))?.coverImage,
-            }))}
-            labels={Object.fromEntries(demoKeys.map((key) => [key, t(`demo.${key}`)])) as never}
-          />
+          <figure className="relative mx-auto w-full max-w-xl">
+            <div className="overflow-hidden rounded-[1.75rem] bg-muted shadow-[var(--shadow-card)]">
+              <ImageSlot
+                src="/images/heroes/kit-completo.webp"
+                alt={t('hero.photoAlt')}
+                width={1200}
+                height={800}
+                sizes="(min-width: 1024px) 560px, 92vw"
+                priority
+                tone="bg-[#fde7df]"
+              />
+            </div>
+            <figcaption className="absolute bottom-3 left-3 rounded-full bg-card px-3 py-1 text-xs font-bold shadow-[var(--shadow-card)]">
+              {t('hero.badge')}
+            </figcaption>
+          </figure>
         }
       />
       <PartyValue />

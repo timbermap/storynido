@@ -250,7 +250,10 @@ export function registerCatalogRoutes(
 
   // Todos los países se venden (DECISIONS 096): salen de la lista solo los que el admin apagó.
   addRoute(app, apiRoutes.catalogCountries, {}, async () => {
-    const configured = await catalog.configuredCountries();
+    const [configured, printed] = await Promise.all([
+      catalog.configuredCountries(),
+      catalog.printedCountries(),
+    ]);
     const off = new Set(configured.filter((country) => !country.active).map((c) => c.code));
     return {
       countries: COUNTRY_CODES.filter((code) => !off.has(code)).map((code) => {
@@ -259,6 +262,7 @@ export function registerCatalogRoutes(
           code,
           currency: country.currency,
           defaultLocale: country.defaultLocale,
+          printed: printed === 'all' || printed.includes(code),
         };
       }),
     };

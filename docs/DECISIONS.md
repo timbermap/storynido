@@ -2098,3 +2098,11 @@ El hero de Celebraciones mostraba la invitación como un bloque rosa solo con te
 - **Errores del navegador (sin tercero):** `POST /v1/events/client-error` (público, sin sesión) registra con severidad de error en el log del servicio —donde ya miran Error Reporting y las alertas— el mensaje, el seguimiento, la ruta y el idioma, sin usuario ni IP. El navegador limpia antes de mandar (sin correos, parámetros de búsqueda ni ids largos, ruta con `:id`) y manda hasta 5 por visita (`ClientErrorReporter`, y los `error.tsx`).
 - **Producción con `minInstances: 0` por ahora** (decisión de Sebastián): vuelve a 1 cuando haya tráfico de anuncios.
 - **Invitación del hero de Eventos:** el texto va en su propio panel (ya no se sale de la franja del dibujo) y la ilustración muestra su parte inferior sin recortar al personaje; en el primer tema aparece la foto de muestra del mismo chico («Su foto →»), para ver el paso de la foto a la invitación. Texto en inglés: «is having a birthday!» (antes «is turning a year older», que suena a un año).
+
+## 178 · Eventos: hero de la opción B, textos de la home, envíos y fecha límite de Navidad
+
+- **Fecha:** 2026-11-01.
+- **Hero de Eventos (opción B elegida por Sebastián):** «El kit de la fiesta, con su cuento incluido», tres razones, precio del kit completo (25,15 en EE. UU.) y la foto del kit; sale la invitación interactiva (confundía y daba protagonismo a lo gratis). El botón pasa a «Diseñar mi kit»; ver cómo queda la invitación sigue siendo parte del creador, sin cuenta.
+- **Textos:** la tarjeta de Celebraciones en la home y la FAQ del kit ya no hablan de «bautismos, comuniones y egresos: un diseño, muchas copias» ni de licencia de copias; «Disponible en todo el mundo» → «Digital en todo el mundo; impreso en los países donde enviamos».
+- **Envíos:** `catalogCountries` indica qué países tienen imprenta probada (`printed`); la página de envíos lista esos países y dice que en el resto va el libro digital.
+- **Navidad:** la ficha avisa, de mediados de octubre al 23 de diciembre, hasta qué día hay que pedir el impreso para que llegue antes del 24 en el país elegido (`lastOrderDay`: producción + peor caso de envío), o que ya no llega y el digital sí.

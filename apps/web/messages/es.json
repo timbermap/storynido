@@ -91,6 +91,7 @@
     "shipDigital": "Libro digital: disponible, lo descargas al instante.",
     "shipPrinted": "Impreso ({formats}): lo imprimimos y enviamos; llega en {min} a {max} días hábiles. El envío se calcula con tu dirección.",
     "shipNoPrint": "Impreso: todavía no imprimimos para este país. Puedes comprar el digital.",
+    "shipPrintedCountries": "Imprimimos y enviamos libros a: {list}. En el resto del mundo, el libro digital.",
     "shipNone": "Todavía no vendemos en {country}."
   },
   "Home": {
@@ -195,7 +196,7 @@
       "formats": "Digital o impreso, con su nombre y su carita",
       "shipping": "El envío del impreso se calcula según tu país",
       "preview": "Vista previa gratis",
-      "global": "Disponible en todo el mundo"
+      "global": "Digital en todo el mundo; impreso en los países donde enviamos"
     },
     "audience": {
       "title": "¿Para quién es?",
@@ -207,7 +208,7 @@
       },
       "events": {
         "title": "Celebraciones",
-        "text": "Mini cuentos y recuerdos para cumpleaños, bautismos, comuniones y egresos: un diseño, muchas copias.",
+        "text": "La fiesta lista: invitación, decoración y un cuento para cada invitado, con tu hijo como protagonista.",
         "cta": "Ver kits para celebraciones"
       },
       "professionals": {
@@ -264,6 +265,8 @@
     "objectivesTitle": "Qué trabaja este cuento",
     "objectivesText": "Al crearlo eliges uno como objetivo principal y la historia gira en torno a él.",
     "shipTo": "Enviar a",
+    "christmasOpen": "Para Navidad en {country}: pide el libro impreso antes del {date} y llega antes del 24 de diciembre. El digital está listo en minutos.",
+    "christmasClosed": "El impreso ya no llega antes del 24 de diciembre en {country}. El libro digital está listo en minutos.",
     "fewForAge": "Por ahora hay pocas historias pensadas para {min} a {max} años. En estas, el texto y las ilustraciones se escriben para la edad de tu hijo.",
     "lengthFormats": "Formatos disponibles",
     "shippingCalculated": "El costo de envío del libro impreso se calcula con tu dirección al pagar.",
@@ -425,7 +428,7 @@
         },
         "events": {
           "title": "Un kit para una celebración",
-          "text": "Cumpleaños, bautismo, comunión o egreso: un diseño, muchas copias."
+          "text": "Invitación, decoración y un cuento para cada invitado."
         },
         "professionals": {
           "title": "Un proyecto profesional",
@@ -995,7 +998,7 @@
       "eyebrow": "StoryNido Celebraciones",
       "title": "La fiesta lista, con tu hijo como protagonista",
       "subtitle": "Invitación para WhatsApp, decoración para imprimir y un cuento de souvenir para los invitados, todo con el mismo personaje.",
-      "cta": "Crear la invitación gratis",
+      "cta": "Diseñar mi kit",
       "note": "Sin cuenta ves cómo queda. Te pedimos iniciar sesión recién para guardar o descargar.",
       "howTitle": "Cómo funciona",
       "steps": {
@@ -1049,7 +1052,7 @@
         "nameLabel": "¿Cómo se llama el cumpleañero?",
         "namePlaceholder": "Tomás",
         "themeLabel": "Tema de la fiesta",
-        "cta": "Crear la invitación gratis",
+        "cta": "Diseñar mi kit",
         "previewAlt": "Invitación de muestra para el cumpleaños de {name}, tema {theme}"
       },
       "value": {
@@ -1062,6 +1065,16 @@
         "characterLabel": "Su personaje",
         "kitLabel": "Toda la fiesta",
         "sample": "Imágenes de muestra: tu kit lleva a tu hijo."
+      },
+      "hero": {
+        "title": "El kit de la fiesta, con su cuento incluido",
+        "subtitle": "Invitación, decoración y un cuento ilustrado con tu hijo como protagonista. Todo con el mismo personaje, listo en minutos.",
+        "point1": "Un cuento por invitado, con el nombre de cada uno en la etiqueta",
+        "point2": "Invitación para WhatsApp y decoración para imprimir",
+        "point3": "Eliges entre {count} temas de fiesta",
+        "price": "{price} · kit digital completo, el cuento va incluido",
+        "photoAlt": "El kit completo de la fiesta, impreso sobre una mesa",
+        "badge": "Foto de muestra del kit"
       },
       "productsTitle": "Cuatro regalos, un mismo protagonista",
       "productsSubtitle": "Se compran en este orden, y cada uno resuelve una pregunta de la fiesta.",

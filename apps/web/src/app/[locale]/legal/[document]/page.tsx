@@ -10,7 +10,7 @@ import { countryName } from '@/lib/country-names';
 import { formatDate } from '@/lib/format';
 import { LEGAL_SLUGS, legalDocumentFromSlug } from '@/lib/legal';
 import { localizedAlternates } from '@/lib/seo';
-import { getContent, getOffer } from '@/lib/server/api';
+import { getActiveCountries, getContent, getOffer } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 
 interface Props {
@@ -47,6 +47,14 @@ export default async function LegalPage({ params }: Props) {
   // Envíos: qué se puede pedir en el país elegido (el mismo dato que usa el checkout).
   const offer = doc === 'shipping' ? await getOffer(display.country, locale) : null;
   const printed = offer?.formats.filter((format) => format.format !== 'digital') ?? [];
+  // Los países donde de verdad hay imprenta probada (en el resto, solo el libro digital).
+  const printedCountries =
+    doc === 'shipping'
+      ? (await getActiveCountries())
+          .filter((country) => country.printed)
+          .map((country) => countryName(country.code, locale))
+          .toSorted((a, b) => a.localeCompare(b, locale))
+      : [];
 
   return (
     <article className="container-page max-w-3xl py-14">
@@ -60,6 +68,11 @@ export default async function LegalPage({ params }: Props) {
             {t('shipCheckTitle')}
           </h2>
           <ShipToSelect country={display.country} />
+          <p className="mt-4 text-sm">
+            {printedCountries.length > 0
+              ? t('shipPrintedCountries', { list: printedCountries.join(', ') })
+              : t('shipNoPrint')}
+          </p>
           <ul className="mt-4 grid gap-2 text-sm">
             <li>
               {offer?.available && offer.formats.some((format) => format.format === 'digital')

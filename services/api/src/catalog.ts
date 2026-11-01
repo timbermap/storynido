@@ -63,6 +63,8 @@ export interface CatalogRepository {
    * imprenta tiene las dos para el mismo formato, gana la del país.
    */
   printOptions(country: CountryCode): Promise<PrintOption[]>;
+  /** Países con alguna imprenta habilitada y con la muestra aprobada (`*`: todos). */
+  printedCountries(): Promise<CountryCode[] | 'all'>;
   /**
    * Precio del kit de Eventos, en dólares: el del país si tiene uno en USD; si no, el de EE. UU.
    * (el mismo para todo el mundo). Null: no se vende.
@@ -271,6 +273,19 @@ export class FirestoreCatalog implements CatalogRepository {
     });
   }
 
+  printedCountries(): Promise<CountryCode[] | 'all'> {
+    return this.cache.get('print:countries', async () => {
+      const snapshot = await this.db.collection(COLLECTIONS.printOptions).get();
+      const codes = new Set<string>();
+      for (const doc of snapshot.docs) {
+        const parsed = printOptionSchema.safeParse(normalizeFirestoreData(doc.data()));
+        if (!parsed.success || !parsed.data.enabled || !parsed.data.qaSamplePassed) continue;
+        codes.add(parsed.data.country);
+      }
+      return codes.has(ANY_COUNTRY) ? 'all' : ([...codes] as CountryCode[]);
+    });
+  }
+
   printOptions(country: CountryCode): Promise<PrintOption[]> {
     return this.cache.get(`print:${country}`, async () => {
       const snapshot = await this.db
@@ -389,6 +404,14 @@ export class InMemoryCatalog implements CatalogRepository {
   prices(country: CountryCode) {
     return Promise.resolve(
       (this.data.prices ?? []).filter((p) => p.country === country && p.active),
+    );
+  }
+
+  printedCountries() {
+    const options = (this.data.printOptions ?? []).filter((o) => o.enabled && o.qaSamplePassed);
+    const codes = new Set<string>(options.map((o) => o.country));
+    return Promise.resolve(
+      codes.has(ANY_COUNTRY) ? ('all' as const) : ([...codes] as CountryCode[]),
     );
   }
 

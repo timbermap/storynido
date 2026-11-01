@@ -18,6 +18,7 @@ export function LandingHero({
   cta,
   note,
   priceLine,
+  bullets,
   media,
 }: {
   eyebrow: string;
@@ -27,6 +28,8 @@ export function LandingHero({
   note: string;
   /** Precio como dato, bajo el botón (opcional). */
   priceLine?: string;
+  /** Qué incluye, en pocas líneas, bajo el subtítulo (opcional). */
+  bullets?: string[];
   /** La imagen del hero (cada línea tiene la suya). */
   media: ReactNode;
 }) {
@@ -44,6 +47,18 @@ export function LandingHero({
           <p className="mx-auto mt-5 max-w-xl text-[clamp(1.1rem,1.65vw,1.3rem)] leading-relaxed text-muted-foreground lg:mx-0">
             {subtitle}
           </p>
+          {bullets && bullets.length > 0 && (
+            <ul className="mx-auto mt-6 grid max-w-xl gap-2 text-left lg:mx-0">
+              {bullets.map((line) => (
+                <li key={line} className="flex items-start gap-3 font-semibold">
+                  <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-mint text-success">
+                    <Check className="size-4" aria-hidden="true" />
+                  </span>
+                  {line}
+                </li>
+              ))}
+            </ul>
+          )}
           <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center lg:justify-start">
             {cta}
           </div>

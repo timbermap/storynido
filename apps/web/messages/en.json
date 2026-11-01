@@ -91,6 +91,7 @@
     "shipDigital": "Digital book: available, you download it instantly.",
     "shipPrinted": "Printed ({formats}): we print and ship it; it arrives in {min} to {max} business days. Shipping is calculated with your address.",
     "shipNoPrint": "Printed: we don't print for this country yet. You can buy the digital book.",
+    "shipPrintedCountries": "We print and ship books to: {list}. Everywhere else, the digital book.",
     "shipNone": "We don't sell in {country} yet."
   },
   "Home": {
@@ -195,7 +196,7 @@
       "formats": "Digital or printed, with their name and face",
       "shipping": "Shipping for printed books is calculated by country",
       "preview": "Free preview",
-      "global": "Available worldwide"
+      "global": "Digital worldwide; printed in the countries we ship to"
     },
     "audience": {
       "title": "Who is it for?",
@@ -207,7 +208,7 @@
       },
       "events": {
         "title": "Celebrations",
-        "text": "Mini books and keepsakes for birthdays, baptisms, communions and graduations: one design, many copies.",
+        "text": "The party, ready: invitation, decorations and a story for every guest, starring your child.",
         "cta": "See celebration kits"
       },
       "professionals": {
@@ -264,6 +265,8 @@
     "objectivesTitle": "What this story works on",
     "objectivesText": "When you create it, you choose one as the main goal and the story is built around it.",
     "shipTo": "Ship to",
+    "christmasOpen": "For Christmas in {country}: order the printed book by {date} and it arrives before December 24. The digital book is ready in minutes.",
+    "christmasClosed": "The printed book can no longer arrive before December 24 in {country}. The digital book is ready in minutes.",
     "fewForAge": "There are only a few stories designed for ages {min} to {max} for now. In these, the text and illustrations are written for your child's age.",
     "lengthFormats": "Available formats",
     "shippingCalculated": "Shipping for printed books is calculated from your address at checkout.",
@@ -425,7 +428,7 @@
         },
         "events": {
           "title": "A celebration kit",
-          "text": "Birthday, baptism, communion or graduation: one design, many copies."
+          "text": "An invitation, decorations and a story for every guest."
         },
         "professionals": {
           "title": "A professional project",
@@ -995,7 +998,7 @@
       "eyebrow": "StoryNido Celebrations",
       "title": "The party, ready, with your child as the star",
       "subtitle": "A WhatsApp invitation, printable decorations and a party-favor storybook for the guests, all with the same character.",
-      "cta": "Create the invitation for free",
+      "cta": "Design my kit",
       "note": "You can see how it looks without an account. We only ask you to sign in to save or download.",
       "howTitle": "How it works",
       "steps": {
@@ -1049,7 +1052,7 @@
         "nameLabel": "What's the birthday child's name?",
         "namePlaceholder": "Tommy",
         "themeLabel": "Party theme",
-        "cta": "Create the invitation for free",
+        "cta": "Design my kit",
         "previewAlt": "Sample invitation for the birthday of {name}, theme {theme}"
       },
       "value": {
@@ -1062,6 +1065,16 @@
         "characterLabel": "Their character",
         "kitLabel": "The whole party",
         "sample": "Sample images: your kit stars your child."
+      },
+      "hero": {
+        "title": "The party kit, with its story included",
+        "subtitle": "An invitation, decorations and an illustrated story starring your child. Everything with the same character, ready in minutes.",
+        "point1": "One story per guest, with each guest’s name on the tag",
+        "point2": "An invitation for WhatsApp and decorations to print",
+        "point3": "Pick from {count} party themes",
+        "price": "{price} · complete digital kit, the story is included",
+        "photoAlt": "The complete party kit, printed on a table",
+        "badge": "Sample photo of the kit"
       },
       "productsTitle": "Four gifts, one star",
       "productsSubtitle": "They are bought in this order, and each one answers a question about the party.",

@@ -44,3 +44,18 @@ export function giftDeadlineStatus(
   if (earliest <= target) return 'at_risk';
   return 'late';
 }
+
+/** Último día para pedir un impreso y que llegue, aun en el peor caso, antes de `target` (`AAAA-MM-DD`). */
+export function lastOrderDay(target: string, etaDaysMax: number): Date {
+  const date = new Date(`${target}T00:00:00Z`);
+  let left = PRINT_PRODUCTION_BUSINESS_DAYS + etaDaysMax;
+  while (left > 0) {
+    date.setUTCDate(date.getUTCDate() - 1);
+    const weekday = date.getUTCDay();
+    if (weekday !== 0 && weekday !== 6) left -= 1;
+  }
+  return date;
+}
+
+/** Para recibirlo antes del 24 de diciembre: el 23 es el día de llegada más tarde que contamos. */
+export const christmasTarget = (year: number): string => `${String(year)}-12-23`;

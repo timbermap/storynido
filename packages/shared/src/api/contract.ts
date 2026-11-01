@@ -520,6 +520,8 @@ export const publicCountrySchema = z.object({
   code: countryCodeSchema,
   currency: currencySchema,
   defaultLocale: localeSchema,
+  /** Hay una imprenta probada para este país (si no, solo digital). */
+  printed: z.boolean().default(false),
 });
 
 export const offerFormatSchema = z.object({

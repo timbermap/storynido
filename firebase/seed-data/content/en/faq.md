@@ -70,11 +70,11 @@ If the digital file has an error, we fix it or refund you (let us know within 14
 
 ### What does the kit include?
 
-A mini story starring the guest of honor and, if you like, activities, an invitation, a thank-you card, stickers and favor tags. Everything comes from the same design and is downloaded to print at home or at a print shop; the license says how many copies you can make.
+An invitation for WhatsApp, decorations and tags to print, and an illustrated mini story starring the birthday child, so every guest takes home a keepsake. Everything comes from the same design: it downloads instantly and you print it at home or at the print shop you prefer, as many times as you need.
 
 ### Which occasions is it for?
 
-Birthdays, baptisms, First Communions and graduations or the end of the school year. Each occasion has its own wording in the story and the pieces.
+Birthdays and parties: the kit is built around the birthday child and the theme you pick. The story and the pieces are about their party.
 
 ## Professionals
 

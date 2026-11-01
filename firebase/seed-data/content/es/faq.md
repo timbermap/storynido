@@ -70,11 +70,11 @@ Si el archivo digital tiene un error, lo corregimos o te devolvemos el dinero (a
 
 ### ¿Qué incluye el kit?
 
-Un mini cuento con el homenajeado como protagonista y, si quieres, actividades, invitación, tarjeta de agradecimiento, stickers y etiquetas para la bolsita. Todo sale del mismo diseño y se descarga para imprimir en casa o en una imprenta; la licencia indica cuántas copias puedes hacer.
+Invitación para WhatsApp, decoración y etiquetas para imprimir y un mini cuento ilustrado con el cumpleañero como protagonista, para que cada invitado se lleve su recuerdo. Todo sale del mismo diseño: se descarga al instante y lo imprimes en casa o en la imprenta que prefieras, las veces que necesites.
 
 ### ¿Para qué ocasiones sirve?
 
-Cumpleaños, bautismo, primera comunión y egreso o fin de año escolar. Cada ocasión tiene sus propios textos en el cuento y en las piezas.
+Cumpleaños y fiestas: el kit se arma alrededor del cumpleañero y del tema que elijas. El cuento y las piezas hablan de su fiesta.
 
 ## Profesionales
 

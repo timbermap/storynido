@@ -70,11 +70,11 @@ Se o arquivo digital tiver um erro, corrigimos ou devolvemos o dinheiro (avise e
 
 ### O que o kit inclui?
 
-Uma mini história com o homenageado como protagonista e, se quiser, atividades, convite, cartão de agradecimento, adesivos e etiquetas para a lembrancinha. Tudo sai do mesmo design e é baixado para imprimir em casa ou numa gráfica; a licença indica quantas cópias você pode fazer.
+Convite para WhatsApp, decoração e etiquetas para imprimir e uma mini história ilustrada com o aniversariante como protagonista, para que cada convidado leve uma lembrança. Tudo sai do mesmo design: baixa na hora e você imprime em casa ou na gráfica que preferir, quantas vezes precisar.
 
 ### Para quais ocasiões serve?
 
-Aniversário, batizado, primeira comunhão e formatura ou fim do ano escolar. Cada ocasião tem seus próprios textos na história e nas peças.
+Aniversários e festas: o kit é montado em torno do aniversariante e do tema que você escolher. A história e as peças falam da festa dele.
 
 ## Profissionais
 
