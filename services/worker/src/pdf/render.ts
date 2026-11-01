@@ -69,6 +69,22 @@ export async function renderPdf(
   }
 }
 
+/** HTML → PNG de un tamaño fijo en píxeles (imagen para compartir, por ejemplo por WhatsApp). */
+export async function renderPng(
+  browser: Browser,
+  html: string,
+  size: { width: number; height: number },
+): Promise<Uint8Array> {
+  const page = await browser.newPage({ viewport: size, deviceScaleFactor: 1 });
+  try {
+    await page.setContent(html, { waitUntil: 'load' });
+    await page.waitForFunction('window.__fitted === true', null, { timeout: 30_000 });
+    return await page.screenshot({ type: 'png', clip: { x: 0, y: 0, ...size } });
+  } finally {
+    await page.close();
+  }
+}
+
 function setPrintBoxes(page: PDFPage, bleedMm: number) {
   const { width, height } = page.getSize();
   const bleed = bleedMm * PT_PER_MM;

@@ -221,9 +221,11 @@ export class FulfillmentService {
     const filename =
       file === 'kit_zip'
         ? 'storynido-kit.zip'
-        : file === 'book'
-          ? 'storynido.pdf'
-          : `storynido-${file}.pdf`;
+        : file === 'invitation_image'
+          ? 'storynido-invitacion.png'
+          : file === 'book'
+            ? 'storynido.pdf'
+            : `storynido-${file}.pdf`;
     const signed = await this.providers
       .storage()
       .signedDownloadUrl({ bucket: 'pdfs', path: found.path }, 15 * 60, filename);

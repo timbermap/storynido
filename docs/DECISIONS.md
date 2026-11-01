@@ -2005,3 +2005,9 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 - **Fecha:** 2026-10-31.
 - **Hecho:** el dorso de la invitación (PDF y tarjeta impresa) lleva una línea discreta «Hecho con StoryNido · storynido.com»; al comprar el kit hay una casilla para **quitarla** (`kit.signature`, por defecto incluida; pedidos anteriores sin el campo la llevan).
 - **No hecho:** la invitación como imagen de WhatsApp de 1080×1350 (hoy es PDF; una imagen necesita un tipo de archivo nuevo en el contrato, la entrega y la página del pedido), el código de descuento en la contratapa del souvenir (necesita un sistema de códigos con atribución) y el aviso del cumpleaños del año siguiente (necesita un recordatorio programado con su consentimiento). La fecha del evento ya se guarda en el libro.
+
+## 168 · Invitación como imagen para WhatsApp (auditoría de Eventos, PR 4)
+
+- **Fecha:** 2026-10-31.
+- **Hecho:** al comprar la invitación, el kit incluye también **la invitación como imagen PNG de 1080×1350** (4:5, la proporción de WhatsApp), con el personaje, el título, fecha, hora, lugar y la firma «Hecho con StoryNido» (DECISIONS 167, se puede quitar). Se descarga desde el pedido (`file=invitation_image`) y va dentro del ZIP del kit (`invitacion-whatsapp.png`). Se maqueta en el worker con el mismo Chromium del PDF (`renderPng`).
+- **Sigue sin hacerse:** código de descuento en la contratapa del souvenir (sistema de códigos con atribución) y aviso del cumpleaños del año siguiente (recordatorio programado con consentimiento).

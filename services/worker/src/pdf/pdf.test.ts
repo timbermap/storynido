@@ -5,7 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { blend, contrastRatio } from './contrast';
 import { mazeSvg } from './maze';
 import { textPlacements } from './placement';
-import { chromePath, launchBrowser, renderPdf } from './render';
+import { chromePath, launchBrowser, renderPdf, renderPng } from './render';
+import { INVITATION_IMAGE_SIZE, invitationImageHtml } from './kit';
 import { FORMAT_SPECS, pageSizeMm, printablePages } from './spec';
 import {
   DENSITY_LAYOUT,
@@ -104,6 +105,27 @@ describe.skipIf(!chromePath())('PDF', () => {
   afterAll(async () => {
     await browser.close();
   });
+
+  it('la invitación para WhatsApp sale como PNG de 1080×1350', async () => {
+    const png = await renderPng(
+      browser,
+      invitationImageHtml({
+        language: 'es',
+        childName: 'Sofi',
+        title: 'Un día especial',
+        occasion: 'birthday',
+        turningAge: 6,
+        eventDate: '2026-12-05',
+        invitation: { time: '17 h', place: 'Casa de la abuela' },
+        cover: image,
+        paper: 'a4',
+      }),
+      INVITATION_IMAGE_SIZE,
+    );
+    const meta = await sharp(png).metadata();
+    expect(meta.format).toBe('png');
+    expect({ width: meta.width, height: meta.height }).toEqual(INVITATION_IMAGE_SIZE);
+  }, 30_000);
 
   const book = (overrides: Partial<LayoutBook> = {}): LayoutBook => ({
     language: 'es',

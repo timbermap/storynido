@@ -1382,6 +1382,10 @@
         "favor_tags": {
           "name": "Etiquetas para la bolsita",
           "text": "9 etiquetas por hoja, con el agujero marcado."
+        },
+        "invitation_image": {
+          "name": "Invitación para WhatsApp (imagen)",
+          "text": "Invitación para WhatsApp (imagen)"
         }
       },
       "copies": "¿Cuántos invitados?",

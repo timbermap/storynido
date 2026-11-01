@@ -1382,6 +1382,10 @@
         "favor_tags": {
           "name": "Etiquetas para a lembrancinha",
           "text": "9 etiquetas por folha, com o furo marcado."
+        },
+        "invitation_image": {
+          "name": "Convite para WhatsApp (imagem)",
+          "text": "Convite para WhatsApp (imagem)"
         }
       },
       "copies": "Quantos convidados?",

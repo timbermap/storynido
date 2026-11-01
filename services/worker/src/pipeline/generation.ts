@@ -49,8 +49,15 @@ import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 import { z } from 'zod';
 
 import { assembleSinglePdf } from '../pdf/assemble';
-import { CARD_PRINT_SIZE, kitCardPrintDocument, kitPieceDocument, type KitBook } from '../pdf/kit';
-import { launchBrowser, renderPdf } from '../pdf/render';
+import {
+  CARD_PRINT_SIZE,
+  INVITATION_IMAGE_SIZE,
+  invitationImageHtml,
+  kitCardPrintDocument,
+  kitPieceDocument,
+  type KitBook,
+} from '../pdf/kit';
+import { launchBrowser, renderPdf, renderPng } from '../pdf/render';
 import { textPlacements } from '../pdf/placement';
 import { FORMAT_SPECS, pageSizeMm, printablePages, type FormatSpec } from '../pdf/spec';
 import {
@@ -1211,11 +1218,34 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             bytes: result.pdf.length,
             sha256: createHash('sha256').update(result.pdf).digest('hex'),
           });
+          // La invitación también como imagen para WhatsApp.
+          if (piece === 'invitation') {
+            const png = await renderPng(
+              browser,
+              invitationImageHtml(kitBook),
+              INVITATION_IMAGE_SIZE,
+            );
+            const pngPath = `${base}/kit-invitation-whatsapp.png`;
+            await storage().upload({ bucket: 'pdfs', path: pngPath }, png, 'image/png');
+            files.push({
+              format: 'digital',
+              kind: 'invitation_image',
+              path: pngPath,
+              pages: 0,
+              bytes: png.length,
+              sha256: createHash('sha256').update(png).digest('hex'),
+            });
+          }
         }
         // Todo junto en un ZIP (el librito y cada pieza), para descargar de una vez.
         const entries: Record<string, Uint8Array> = {};
         for (const file of files.filter((item) => item.format === 'digital')) {
-          const name = file.kind === 'book' ? 'mini-cuento.pdf' : `${file.kind}.pdf`;
+          const name =
+            file.kind === 'book'
+              ? 'mini-cuento.pdf'
+              : file.kind === 'invitation_image'
+                ? 'invitacion-whatsapp.png'
+                : `${file.kind}.pdf`;
           entries[name] = await storage().download({ bucket: 'pdfs', path: file.path });
         }
         const zip = zipSync(entries, { level: 0 });

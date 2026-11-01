@@ -437,6 +437,38 @@ function activities(book: KitBook, copies: number) {
   };
 }
 
+/** La invitación como imagen para WhatsApp (4:5, 1080×1350 px). */
+export const INVITATION_IMAGE_SIZE = { width: 1080, height: 1350 } as const;
+
+export function invitationImageHtml(book: KitBook): string {
+  const date = formatDate(book);
+  const heading =
+    book.occasion === 'birthday' && book.turningAge ? t(book, 'turning') : t(book, 'birthday');
+  const details = [
+    date ? `<p><b>${t(book, 'when')}</b> ${escapeHtml(date)}</p>` : '',
+    book.invitation?.time
+      ? `<p><b>${t(book, 'time')}</b> ${escapeHtml(book.invitation.time)}</p>`
+      : '',
+    book.invitation?.place
+      ? `<p><b>${t(book, 'where')}</b> ${escapeHtml(book.invitation.place)}</p>`
+      : '',
+  ].join('');
+  const signature = book.signature === false ? '' : `<p class="made">${t(book, 'madeWith')}</p>`;
+  const { width, height } = INVITATION_IMAGE_SIZE;
+  return `<!doctype html><html><head><meta charset="utf-8"><style>${fontFaces()}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: ${String(width)}px; height: ${String(height)}px; }
+body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; background: ${PAPER}; display: flex; flex-direction: column; }
+.art { width: 100%; height: 820px; object-fit: cover; object-position: 50% 75%; display: block; }
+.text { flex: 1; padding: 44px 64px 34px; text-align: center; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+h1 { font-size: 76px; line-height: 1.05; color: ${INK}; }
+.invite { font-size: 36px; font-weight: 700; color: ${LAVENDER}; }
+.details p { font-size: 32px; line-height: 1.35; }
+.details b { font-size: 22px; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8090; margin-right: 8px; }
+.made { font-size: 22px; color: #8a8090; letter-spacing: 0.04em; }
+</style></head><body><img class="art" src="${book.cover}" alt=""><div class="text"><h1 class="display">${heading}</h1><p class="invite">${t(book, 'invite')}</p><div class="details">${details}</div>${signature}</div><script>document.fonts.ready.then(() => { window.__fitted = true; });</script></body></html>`;
+}
+
 export interface KitPieceDocument {
   piece: Exclude<KitPiece, 'mini_book'>;
   html: string;

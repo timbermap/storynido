@@ -1340,7 +1340,9 @@ export const apiRoutes = {
     summary:
       'URL firmada (15 minutos) para descargar el PDF digital de un pedido propio (o una pieza del kit, o el ZIP)',
     params: z.object({ orderId: z.string().min(1) }),
-    query: z.object({ file: z.enum(['book', 'kit_zip', ...KIT_PIECES]).default('book') }),
+    query: z.object({
+      file: z.enum(['book', 'kit_zip', 'invitation_image', ...KIT_PIECES]).default('book'),
+    }),
     response: z.object({ url: z.string(), expiresAt: z.string() }),
   },
   devSimulatePrint: {

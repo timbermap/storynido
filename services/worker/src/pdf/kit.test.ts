@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { CARD_PRINT_SIZE, kitCardPrintDocument, kitPieceDocument, type KitBook } from './kit';
+import {
+  CARD_PRINT_SIZE,
+  INVITATION_IMAGE_SIZE,
+  invitationImageHtml,
+  kitCardPrintDocument,
+  kitPieceDocument,
+  type KitBook,
+} from './kit';
 
 const book = (occasion: KitBook['occasion']): KitBook => ({
   language: 'es',
@@ -46,6 +53,28 @@ describe('firma de la invitación', () => {
     expect(
       kitPieceDocument({ ...book('birthday'), signature: false }, 'invitation', 20).html,
     ).not.toContain('Hecho con StoryNido');
+  });
+});
+
+describe('invitación para WhatsApp', () => {
+  it('es una imagen 4:5 de 1080×1350 con el nombre, los datos y la firma', () => {
+    expect(INVITATION_IMAGE_SIZE).toEqual({ width: 1080, height: 1350 });
+    const html = invitationImageHtml(book('birthday'));
+    expect(html).toContain('¡Sofi cumple 6!');
+    expect(html).toContain('Casa de la abuela');
+    expect(html).toContain('Hecho con StoryNido');
+    expect(invitationImageHtml({ ...book('birthday'), signature: false })).not.toContain(
+      'Hecho con StoryNido',
+    );
+  });
+
+  it('escapa el lugar escrito por el cliente', () => {
+    const html = invitationImageHtml({
+      ...book('birthday'),
+      invitation: { time: null, place: '<script>x</script>' },
+    });
+    expect(html).not.toContain('<script>x</script>');
+    expect(html).toContain('&lt;script&gt;');
   });
 });
 

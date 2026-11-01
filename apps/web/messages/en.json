@@ -1382,6 +1382,10 @@
         "favor_tags": {
           "name": "Favor bag tags",
           "text": "9 tags per sheet, with the hole marked."
+        },
+        "invitation_image": {
+          "name": "WhatsApp invitation (image)",
+          "text": "WhatsApp invitation (image)"
         }
       },
       "copies": "How many guests?",
