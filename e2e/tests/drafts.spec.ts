@@ -99,7 +99,9 @@ test('con sesión, el navbar es el de la app: sin las páginas que venden y con 
   await page.goto('/es/ingresar');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   // Sin sesión: el navbar de visitante, con los tres públicos.
-  await expect(page.locator('header').getByRole('link', { name: 'Familias', exact: true })).toBeVisible();
+  await expect(
+    page.locator('header').getByRole('link', { name: 'Familias', exact: true }),
+  ).toBeVisible();
   await expect(
     page.locator('header').getByRole('link', { name: 'Celebraciones', exact: true }),
   ).toBeVisible();
