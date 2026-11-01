@@ -2115,3 +2115,9 @@ El hero de Celebraciones mostraba la invitación como un bloque rosa solo con te
 - **Meta:** solo `Purchase` (valor y moneda). **Limitación:** el píxel de Meta manda la dirección de la página, que en esa pantalla (`/order/<id>`) lleva el id del pedido (opaco, de una página que exige sesión). Si no se quiere ni eso, se apaga ese evento.
 - Cada evento se manda una sola vez por libro o pedido (clave en `localStorage`, con try/catch).
 - También: portada de muestra de Familias igual a la historia real («La gran aventura espacial de Tomás»), descripción propia de las páginas legales y el consentimiento de la foto que ya existía (versión y registro en el servidor).
+
+## 180 · Términos y privacidad ampliados (borrador de trabajo)
+
+- **Fecha:** 2026-11-01.
+- Sebastián pidió redactarlos («confío en ti»). Se ampliaron en español, inglés y portugués: base legal de cada uso, niños (cuentas solo de adultos, sin recopilar datos de niños), inteligencia artificial (Google Vertex AI, sin usar los datos para entrenar), transferencias internacionales, qué pasa con los datos al borrar la cuenta, reclamo ante la autoridad (URCDP en Uruguay, ANPD en Brasil), precios en USD, reembolsos de un libro hecho a medida, licencia de copias del kit, uso educativo de Profesionales y ley aplicable (Uruguay, sin perjuicio del consumidor).
+- **Siguen siendo un borrador, no asesoramiento legal.** Antes de vender conviene que los lea un abogado y completar el **domicilio legal y el número de empresa (RUT)** de StoryNido SRL, que no están en el repositorio. Los impuestos (IVA en la UE, impuesto de venta en EE. UU.) los decide el contador o el proveedor de pagos.
