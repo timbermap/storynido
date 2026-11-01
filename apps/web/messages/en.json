@@ -187,14 +187,17 @@
       "coverName": "TOMÁS"
     },
     "cover": {
-      "title": "Their name on the cover",
-      "subtitle": "Type their name and see how their book would look.",
+      "title": "Their name, all through the story",
+      "subtitle": "Type their name and see it on the cover, on their character and inside the story.",
       "label": "Hero's name",
       "defaultName": "Tom",
       "line1": "",
       "line3": "'s Great Space Adventure",
       "sample": "Sample cover",
-      "cta": "Create their story"
+      "cta": "Create their story",
+      "characterCaption": "Their character",
+      "storyCaption": "Their story",
+      "storyText": "That night, the cardboard rocket began to glow. {name} put on the helmet, counted to three… and off they zoomed to the Moon!"
     },
     "familiesMetaTitle": "Personalized children’s books with their photo and name",
     "familiesMetaDescription": "Create a book starring your child: upload their photo, see a free preview and get it as an ebook or printed.",

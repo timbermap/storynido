@@ -187,14 +187,17 @@
       "coverName": "TOMÁS"
     },
     "cover": {
-      "title": "O nome dele na capa",
-      "subtitle": "Escreva o nome e veja como ficaria o livro.",
+      "title": "O nome dele, em toda a história",
+      "subtitle": "Escreva o nome e veja na capa, no personagem e dentro da história.",
       "label": "Nome do protagonista",
       "defaultName": "Tomás",
       "line1": "A grande aventura espacial de",
       "line3": "",
       "sample": "Capa de exemplo",
-      "cta": "Criar a história"
+      "cta": "Criar a história",
+      "characterCaption": "O personagem",
+      "storyCaption": "A história",
+      "storyText": "Naquela noite, o foguete de papelão começou a brilhar. {name} colocou o capacete, contou até três… e lá foram eles rumo à Lua!"
     },
     "familiesMetaTitle": "Livros infantis personalizados com a foto e o nome",
     "familiesMetaDescription": "Crie um livro com o seu filho como protagonista: envie a foto, veja a prévia grátis e receba digital ou impresso.",

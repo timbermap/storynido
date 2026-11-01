@@ -19,6 +19,10 @@ export interface NameCoverLabels {
   line3: string;
   sample: string;
   cta: string;
+  characterCaption: string;
+  storyCaption: string;
+  /** El fragmento del cuento: «{name}» se reemplaza por el nombre escrito. */
+  storyText: string;
 }
 
 /**
@@ -36,34 +40,83 @@ export function NameCoverDemo({ labels }: { labels: NameCoverLabels }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored) setName(stored);
   }, []);
-  const shown = (name.trim() || t('defaultName')).toUpperCase();
+  const plain = name.trim() || t('defaultName');
+  const shown = plain.toUpperCase();
+  const [storyBefore = '', storyAfter = ''] = t('storyText').split('{name}');
 
   return (
     <section className="border-y bg-card py-20 lg:py-24">
       <div className="container-page grid items-center gap-12 lg:grid-cols-2">
         <div className="order-2 lg:order-1">
-          <div className="relative mx-auto w-[min(80%,22rem)] [perspective:1400px]">
-            <div className="relative -rotate-3 [transform:rotateY(-10deg)]">
-              <div className="[container-type:inline-size] relative aspect-[3/4] overflow-hidden rounded-[0.4rem_1rem_1rem_0.4rem] border-l-[12px] border-[#a98ac0] bg-[#fff4ea] shadow-[var(--shadow-book)]">
-                <ImageSlot
-                  src="/samples/aventura-espacial.webp"
-                  alt=""
-                  width={1200}
-                  height={1600}
-                  sizes="(min-width: 1024px) 352px, 80vw"
-                  tone="bg-[#26324a]"
+          <div className="grid items-center gap-8 sm:grid-cols-[1.1fr_0.9fr]">
+            <div className="relative mx-auto w-[min(80%,19rem)] [perspective:1400px] sm:w-full">
+              <div className="relative -rotate-3 [transform:rotateY(-10deg)]">
+                <div className="[container-type:inline-size] relative aspect-[3/4] overflow-hidden rounded-[0.4rem_1rem_1rem_0.4rem] border-l-[12px] border-[#a98ac0] bg-[#fff4ea] shadow-[var(--shadow-book)]">
+                  <ImageSlot
+                    src="/samples/aventura-espacial.webp"
+                    alt=""
+                    width={1200}
+                    height={1600}
+                    sizes="(min-width: 1024px) 300px, 80vw"
+                    tone="bg-[#26324a]"
+                  />
+                  <span aria-live="polite" className="contents">
+                    <CoverTitle before={t('line1')} name={shown} after={t('line3')} ink="light" />
+                  </span>
+                </div>
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-y-2 -right-2 w-3 rounded-r-md bg-[repeating-linear-gradient(to_bottom,#fff,#fff_3px,#efe6d6_3px,#efe6d6_4px)]"
                 />
-                <span aria-live="polite" className="contents">
-                  <CoverTitle before={t('line1')} name={shown} after={t('line3')} ink="light" />
-                </span>
               </div>
-              <div
-                aria-hidden="true"
-                className="absolute inset-y-2 -right-2 w-3 rounded-r-md bg-[repeating-linear-gradient(to_bottom,#fff,#fff_3px,#efe6d6_3px,#efe6d6_4px)]"
-              />
             </div>
-            <p className="mt-6 text-center text-xs text-muted-foreground">{t('sample')}</p>
+            <div className="mx-auto grid w-full max-w-xs gap-5 sm:max-w-none">
+              <figure>
+                <div className="relative overflow-hidden rounded-2xl bg-[#fff7f2] shadow-[var(--shadow-card)]">
+                  <ImageSlot
+                    src="/images/secciones/personaje.webp"
+                    alt=""
+                    width={900}
+                    height={900}
+                    sizes="240px"
+                    tone="bg-[#fff7f2]"
+                    className="aspect-[4/3] object-cover object-top"
+                  />
+                  <span className="absolute bottom-2 left-2 rounded-full bg-card px-3 py-1 font-display text-sm font-bold shadow-[var(--shadow-card)]">
+                    {plain}
+                  </span>
+                </div>
+                <figcaption className="mt-2 text-xs font-bold text-muted-foreground">
+                  {t('characterCaption')}
+                </figcaption>
+              </figure>
+              <figure>
+                <div className="overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-card)]">
+                  <ImageSlot
+                    src="/images/secciones/pagina-cohete.webp"
+                    alt=""
+                    width={1200}
+                    height={900}
+                    sizes="240px"
+                    tone="bg-[#26324a]"
+                    className="aspect-[16/9] object-cover"
+                  />
+                  <p
+                    aria-live="polite"
+                    className="px-3 py-2.5 font-serif text-[0.8rem] leading-snug"
+                  >
+                    {storyBefore}
+                    <mark className="rounded bg-peach px-1 font-bold text-foreground">{plain}</mark>
+                    {storyAfter}
+                  </p>
+                </div>
+                <figcaption className="mt-2 text-xs font-bold text-muted-foreground">
+                  {t('storyCaption')}
+                </figcaption>
+              </figure>
+            </div>
           </div>
+          <p className="mt-6 text-center text-xs text-muted-foreground">{t('sample')}</p>
         </div>
 
         <div className="order-1 lg:order-2">

@@ -187,14 +187,17 @@
       "coverName": "TOMÁS"
     },
     "cover": {
-      "title": "Su nombre, en la portada",
-      "subtitle": "Escribe su nombre y mira cómo quedaría su libro.",
+      "title": "Su nombre, en toda la historia",
+      "subtitle": "Escribe su nombre y mira cómo aparece en la portada, en su personaje y dentro del cuento.",
       "label": "Nombre del protagonista",
       "defaultName": "Tomás",
       "line1": "La gran aventura espacial de",
       "line3": "",
       "sample": "Portada de muestra",
-      "cta": "Crear su cuento"
+      "cta": "Crear su cuento",
+      "characterCaption": "Su personaje",
+      "storyCaption": "Su cuento",
+      "storyText": "Esa noche, el cohete de cartón empezó a brillar. {name} se puso el casco, contó hasta tres… ¡y salieron disparados hacia la Luna!"
     },
     "familiesMetaTitle": "Cuentos personalizados con su foto y su nombre",
     "familiesMetaDescription": "Crea un libro con tu hijo como protagonista: sube su foto, mira la vista previa gratis y recíbelo digital o impreso.",

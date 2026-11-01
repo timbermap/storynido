@@ -222,6 +222,9 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
           line3: t('cover.line3'),
           sample: t('cover.sample'),
           cta: t('cover.cta'),
+          characterCaption: t('cover.characterCaption'),
+          storyCaption: t('cover.storyCaption'),
+          storyText: t('cover.storyText'),
         }}
       />
 
