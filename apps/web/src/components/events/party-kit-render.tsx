@@ -42,36 +42,41 @@ export async function PartyKitRender({ story }: { story: PublicStory }) {
             </div>
           </div>
         </div>
-        {/* Las etiquetas con el nombre de cada invitado (a la derecha). */}
+        {/* Las etiquetas con el nombre de cada invitado (a la derecha). Las medidas en cqw van en los
+            hijos: en el mismo elemento que define el contenedor se calcularían contra la pantalla. */}
         <div aria-hidden="true" className="absolute right-0 bottom-[12%] flex w-[34%] gap-[4%]">
           {(['Sofía', 'Mateo'] as const).map((guest, index) => (
             <div
               key={guest}
-              className="[container-type:inline-size] flex-1 rounded-md bg-[#fffdf8] px-[8cqw] pt-[22cqw] pb-[10cqw] text-center font-display text-[#26324a] shadow-[var(--shadow-card)]"
+              className="[container-type:inline-size] flex-1"
               style={{ transform: `rotate(${index === 0 ? -5 : 4}deg)` }}
             >
-              <p className="text-[12cqw] font-semibold">{t('tagFor')}</p>
-              <p className="text-[19cqw] font-bold">{guest}</p>
+              <div className="rounded-md bg-[#fffdf8] px-[8cqw] pt-[22cqw] pb-[10cqw] text-center font-display text-[#26324a] shadow-[var(--shadow-card)]">
+                <p className="text-[12cqw] font-semibold">{t('tagFor')}</p>
+                <p className="text-[19cqw] font-bold">{guest}</p>
+              </div>
             </div>
           ))}
         </div>
         {/* La guirnalda con el nombre del cumpleañero (abajo). */}
         <div
           aria-hidden="true"
-          className="[container-type:inline-size] absolute right-[8%] bottom-0 left-[8%] flex justify-center gap-[1.5cqw]"
+          className="[container-type:inline-size] absolute right-[8%] bottom-0 left-[8%]"
         >
-          {letters.map((letter, index) => (
-            <span
-              key={`${letter}-${String(index)}`}
-              className="grid aspect-[3/4] w-[9cqw] place-items-start justify-center pt-[1.4cqw] font-display text-[5cqw] font-bold text-[#26324a]"
-              style={{
-                background: FLAGS[index % FLAGS.length],
-                clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-              }}
-            >
-              {letter}
-            </span>
-          ))}
+          <div className="flex justify-center gap-[1.5cqw]">
+            {letters.map((letter, index) => (
+              <span
+                key={`${letter}-${String(index)}`}
+                className="grid aspect-[3/4] w-[9cqw] place-items-start justify-center pt-[1.4cqw] font-display text-[5cqw] font-bold text-[#26324a]"
+                style={{
+                  background: FLAGS[index % FLAGS.length],
+                  clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+                }}
+              >
+                {letter}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
       <figcaption className="mt-3 text-center text-xs text-muted-foreground">
