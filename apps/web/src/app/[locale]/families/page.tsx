@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Gift, Map, ShieldCheck, Tablet, UserRound } from 'lucide-react';
+import { ArrowRight, BookOpen, Map, ShieldCheck, Tablet, UserRound } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
@@ -17,6 +17,7 @@ import { AgeTabs } from '@/components/stories/age-tabs';
 import { StoryCard } from '@/components/stories/story-card';
 import { ImageSlot } from '@/components/landing/image-slot';
 import { PhotoPromise } from '@/components/landing/photo-promise';
+import { LandingFinalCta, ctaClass } from '@/components/landing/sections';
 import { buttonVariants } from '@/components/ui/button';
 import { AuthLink } from '@/components/auth/auth-link';
 import { Link } from '@/i18n/navigation';
@@ -382,30 +383,19 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
-      {/* Llamado final: el único botón después de la garantía */}
-      <section className="container-page py-20">
-        <div className="relative overflow-hidden rounded-2xl bg-secondary px-6 py-14 text-center sm:px-12">
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-10 right-[8%] text-[13rem] leading-none text-primary/10"
-          >
-            ✦
-          </span>
-          <Gift className="relative mx-auto size-10 text-primary" aria-hidden="true" />
-          <h2 className="relative mt-4 text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
-            {t('cta.title')}
-          </h2>
-          <p className="relative mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-            {t('cta.text')}
-          </p>
+      {/* Llamado final: el mismo cierre en las cuatro landings */}
+      <LandingFinalCta
+        title={t('cta.title')}
+        text={t('cta.text')}
+        cta={
           <AuthLink
             href="/create"
             guest={t('cta.button')}
             member={t('cta.button')}
-            className={buttonVariants({ size: 'lg', className: 'relative mt-8' })}
+            className={ctaClass}
           />
-        </div>
-      </section>
+        }
+      />
       {/* Datos para buscadores (schema.org), después del contenido visible. */}
       <JsonLd
         data={{

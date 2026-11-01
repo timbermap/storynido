@@ -204,6 +204,10 @@
       "photoAlt": "Um livro infantil impresso sobre uma mesa de cozinha, com a mão de uma criança apoiada na borda",
       "badge": "Foto de exemplo"
     },
+    "finalCta": {
+      "title": "Escolha sua linha e comece grátis",
+      "text": "Famílias, festas ou consultório: veja como fica antes de pagar."
+    },
     "trustInline": {
       "digitalFrom": "Digital a partir de {price}",
       "formats": "Digital ou impresso, com o nome e o rostinho",
@@ -1056,6 +1060,7 @@
         }
       },
       "finalTitle": "Que cada convidado leve uma lembrança da festa",
+      "finalText": "Convite, decoração e uma história para cada convidado, prontos em minutos.",
       "viewStory": "Ver a história",
       "collectionStart": "Criar o kit com este tema",
       "catalogTitle": "Temáticas de festa",
@@ -1218,6 +1223,7 @@
         }
       },
       "finalTitle": "Uma história para cada criança que você acompanha",
+      "finalText": "Uma história para cada criança que você acompanha, pronta em minutos e sem dados clínicos.",
       "signInTitle": "Crie sua conta para começar",
       "signInText": "Assim guardamos seus projetos e compras em um só lugar. É rápido e sem senhas.",
       "ctaExamples": "Ver as coleções",

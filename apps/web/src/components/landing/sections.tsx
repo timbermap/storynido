@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Clock } from 'lucide-react';
+import { ArrowRight, Check, Clock, Gift } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import type { Channel, PublicStory } from '@storynido/shared';
@@ -294,9 +294,21 @@ export function LandingFaq({ title, items }: { title: string; items: FaqItem[] }
   );
 }
 
-export function LandingFinalCta({ title, cta }: { title: string; cta: ReactNode }) {
+/**
+ * Cierre de las cuatro landings (home, Familias, Celebraciones y Profesionales): la misma banda con
+ * el mismo botón, y un título y un texto propios de cada una.
+ */
+export function LandingFinalCta({
+  title,
+  text,
+  cta,
+}: {
+  title: string;
+  text?: string;
+  cta: ReactNode;
+}) {
   return (
-    <section className="container-page pb-20">
+    <section className="container-page py-20">
       <div className="relative overflow-hidden rounded-2xl bg-secondary px-6 py-14 text-center sm:px-12">
         <span
           aria-hidden="true"
@@ -304,9 +316,13 @@ export function LandingFinalCta({ title, cta }: { title: string; cta: ReactNode 
         >
           ✦
         </span>
-        <h2 className="relative text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
+        <Gift className="relative mx-auto size-10 text-primary" aria-hidden="true" />
+        <h2 className="relative mt-4 text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
           {title}
         </h2>
+        {text && (
+          <p className="relative mx-auto mt-3 max-w-xl text-lg text-muted-foreground">{text}</p>
+        )}
         <div className="relative mt-8 flex justify-center">{cta}</div>
       </div>
     </section>

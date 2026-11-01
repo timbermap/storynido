@@ -204,6 +204,10 @@
       "photoAlt": "A printed children's book on a kitchen table, with a child's hand resting on its edge",
       "badge": "Sample photo"
     },
+    "finalCta": {
+      "title": "Pick your line and start for free",
+      "text": "Families, parties or practice: see how it looks before you pay."
+    },
     "trustInline": {
       "digitalFrom": "Digital from {price}",
       "formats": "Digital or printed, with their name and face",
@@ -1056,6 +1060,7 @@
         }
       },
       "finalTitle": "Let every guest take home a memory of the party",
+      "finalText": "An invitation, decorations and a story for every guest, ready in minutes.",
       "viewStory": "See the story",
       "collectionStart": "Design the kit with this theme",
       "catalogTitle": "Party themes",
@@ -1218,6 +1223,7 @@
         }
       },
       "finalTitle": "A story for every child you support",
+      "finalText": "A story for every child you work with, ready in minutes and with no clinical data.",
       "signInTitle": "Create your account to start",
       "signInText": "That’s how we keep your projects and purchases in one place. It’s quick and password-free.",
       "ctaExamples": "See the collections",

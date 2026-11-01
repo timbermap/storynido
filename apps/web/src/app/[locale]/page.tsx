@@ -7,6 +7,7 @@ import { HeroPhoto } from '@/components/home/hero-photo';
 import { HeroFacts } from '@/components/home/hero-facts';
 import { FaqList, faqHighlights, parseFaqGroups } from '@/components/home/faq-list';
 import { AudienceSelector } from '@/components/landing/audience-selector';
+import { LandingFinalCta, ctaClass } from '@/components/landing/sections';
 import { JsonLd } from '@/components/json-ld';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { buttonVariants } from '@/components/ui/button';
@@ -195,19 +196,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <h2 className="text-2xl font-medium">{t('guarantee.title')}</h2>
             <p className="mt-2 text-muted-foreground">{t('guarantee.text')}</p>
           </div>
+        </div>
+      </section>
+      {/* Llamado final: el mismo cierre en las cuatro landings */}
+      <LandingFinalCta
+        title={t('finalCta.title')}
+        text={t('finalCta.text')}
+        cta={
           <StartStoryLink
             target="audience"
             memberLabel={t('hero.homeMember')}
             continueLabel={t('hero.homeContinue')}
-            className={buttonVariants({
-              size: 'lg',
-              className: 'h-14 w-full shrink-0 rounded-full px-8 text-lg sm:ml-auto sm:w-auto',
-            })}
+            className={ctaClass}
           >
             {t('hero.homeCta')}
           </StartStoryLink>
-        </div>
-      </section>
+        }
+      />
       {/* Datos para buscadores (schema.org), después del contenido visible. */}
       <JsonLd
         data={{

@@ -148,7 +148,7 @@ export default async function ProfessionalsPage({ params }: Props) {
         title={t('faqTitle')}
         items={six.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}
       />
-      <LandingFinalCta title={t('finalTitle')} cta={cta} />
+      <LandingFinalCta title={t('finalTitle')} text={t('finalText')} cta={cta} />
       {/* Datos para buscadores (schema.org), después del contenido visible. */}
       <JsonLd
         data={{
