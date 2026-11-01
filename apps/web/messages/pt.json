@@ -81,6 +81,11 @@
     "preferences": "Idioma"
   },
   "Legal": {
+    "termsDescription": "Os termos de uso do StoryNido: o que você compra, como pode usar o livro e os seus direitos.",
+    "privacyDescription": "Como protegemos os dados e as fotos dos seus filhos: o que guardamos, por quanto tempo e como apagar.",
+    "cookiesDescription": "Quais cookies usamos e como escolher quais aceitar.",
+    "refundsDescription": "Quando reimprimimos o seu livro ou devolvemos o dinheiro.",
+    "shippingDescription": "Onde imprimimos e enviamos, quanto demora e quanto custa.",
     "terms": "Termos e condições",
     "privacy": "Política de privacidade",
     "cookies": "Política de cookies",
@@ -183,9 +188,9 @@
       "title": "O nome dele na capa",
       "subtitle": "Escreva o nome e veja como ficaria o livro.",
       "label": "Nome do protagonista",
-      "defaultName": "Sofia",
-      "line1": "A grande aventura de",
-      "line3": "nas estrelas",
+      "defaultName": "Tomás",
+      "line1": "A grande aventura espacial de",
+      "line3": "",
       "sample": "Capa de exemplo",
       "cta": "Criar a história"
     },

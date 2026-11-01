@@ -81,6 +81,11 @@
     "preferences": "Idioma"
   },
   "Legal": {
+    "termsDescription": "Las condiciones de uso de StoryNido: qué compras, cómo puedes usar tu libro y tus derechos.",
+    "privacyDescription": "Cómo cuidamos los datos y las fotos de tus hijos: qué guardamos, por cuánto tiempo y cómo borrarlos.",
+    "cookiesDescription": "Qué cookies usamos y cómo elegir cuáles aceptar.",
+    "refundsDescription": "Cuándo reimprimimos tu libro o te devolvemos el dinero.",
+    "shippingDescription": "Dónde imprimimos y enviamos, cuánto tarda y cuánto cuesta.",
     "terms": "Términos y condiciones",
     "privacy": "Política de privacidad",
     "cookies": "Política de cookies",
@@ -183,9 +188,9 @@
       "title": "Su nombre, en la portada",
       "subtitle": "Escribe su nombre y mira cómo quedaría su libro.",
       "label": "Nombre del protagonista",
-      "defaultName": "Martina",
-      "line1": "La gran aventura de",
-      "line3": "en las estrellas",
+      "defaultName": "Tomás",
+      "line1": "La gran aventura espacial de",
+      "line3": "",
       "sample": "Portada de muestra",
       "cta": "Crear su cuento"
     },

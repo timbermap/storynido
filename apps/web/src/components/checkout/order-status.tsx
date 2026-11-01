@@ -24,8 +24,12 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { OrderReview } from '@/components/orders/order-review';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { trackConversion } from '@/lib/conversions';
 
 import { PriceSummary } from './price-summary';
+
+/** Estados en los que todavía no hay una compra pagada. */
+const UNPAID = new Set(['draft', 'preview_ready', 'pending_payment', 'cancelled', 'refunded']);
 
 /** Mientras el libro está en la imprenta los cambios llegan en días: se consulta más espaciado. */
 const AT_PRINTER = new Set(['sent_to_print', 'in_production', 'shipped']);
@@ -38,6 +42,17 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const tKit = useTranslations('Checkout.kit');
+  // Compra: cuando el pedido ya está pagado (una sola vez por pedido).
+  const paidOrder = order && !UNPAID.has(order.status) ? order : null;
+  useEffect(() => {
+    if (!paidOrder?.priceSnapshot) return;
+    trackConversion(`purchase:${paidOrder.orderId}`, {
+      name: 'purchase',
+      value: paidOrder.priceSnapshot.totalMinor / 100,
+      currency: paidOrder.priceSnapshot.currency,
+      transactionId: paidOrder.orderId,
+    });
+  }, [paidOrder]);
 
   useEffect(() => {
     if (!signedIn) return;

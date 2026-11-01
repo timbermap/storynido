@@ -2106,3 +2106,12 @@ El hero de Celebraciones mostraba la invitación como un bloque rosa solo con te
 - **Textos:** la tarjeta de Celebraciones en la home y la FAQ del kit ya no hablan de «bautismos, comuniones y egresos: un diseño, muchas copias» ni de licencia de copias; «Disponible en todo el mundo» → «Digital en todo el mundo; impreso en los países donde enviamos».
 - **Envíos:** `catalogCountries` indica qué países tienen imprenta probada (`printed`); la página de envíos lista esos países y dice que en el resto va el libro digital.
 - **Navidad:** la ficha avisa, de mediados de octubre al 23 de diciembre, hasta qué día hay que pedir el impreso para que llegue antes del 24 en el país elegido (`lastOrderDay`: producción + peor caso de envío), o que ya no llega y el digital sí.
+
+## 179 · Eventos de conversión sin pasos nuevos (autorizado por Sebastián)
+
+- **Fecha:** 2026-11-01.
+- `preview_created` (la muestra quedó lista, una vez por libro), `begin_checkout` (la primera vez que hay precio para el libro) y `purchase` (el pedido ya está pagado, una vez por pedido). Son eventos que escuchan `Analytics`: solo salen con consentimiento, llevan valor, moneda, línea y el id opaco del pedido, y **nada del niño ni de la persona**. No agregan ningún paso ni clic a quien compra y no tocan el flujo de pago.
+- **GA4:** los tres, con `page_location` y `page_referrer` genéricos (la dirección real lleva el id del libro o del pedido); el bloqueo de las rutas privadas se levanta solo mientras sale el evento.
+- **Meta:** solo `Purchase` (valor y moneda). **Limitación:** el píxel de Meta manda la dirección de la página, que en esa pantalla (`/order/<id>`) lleva el id del pedido (opaco, de una página que exige sesión). Si no se quiere ni eso, se apaga ese evento.
+- Cada evento se manda una sola vez por libro o pedido (clave en `localStorage`, con try/catch).
+- También: portada de muestra de Familias igual a la historia real («La gran aventura espacial de Tomás»), descripción propia de las páginas legales y el consentimiento de la foto que ya existía (versión y registro en el servidor).

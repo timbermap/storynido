@@ -16,6 +16,8 @@ import { Gift, Loader2, Lock } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
+import { trackConversion } from '@/lib/conversions';
+
 import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useConsent } from '@/components/consent/consent-provider';
@@ -98,6 +100,17 @@ export function Checkout({
   const format = available && !available.includes(chosenFormat) ? 'digital' : chosenFormat;
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  // Pago iniciado: la primera vez que hay precio para este libro (una sola vez, sin pasos nuevos).
+  const quotedTotal = quote?.snapshot.totalMinor;
+  const quotedCurrency = quote?.snapshot.currency;
+  useEffect(() => {
+    if (quotedTotal === undefined || !quotedCurrency) return;
+    trackConversion(`begin:${bookId}`, {
+      name: 'begin_checkout',
+      value: quotedTotal / 100,
+      currency: quotedCurrency,
+    });
+  }, [bookId, quotedTotal, quotedCurrency]);
   // Impreso: quien paga confirma que el domicilio de entrega es correcto.
   // Si cambia la dirección, hay que volver a confirmarla.
   const [copies, setCopies] = useState(1);

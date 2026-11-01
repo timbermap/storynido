@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 import { useEffect } from 'react';
 
+import { CONVERSION_EVENT, type ConversionDetail } from '@/lib/conversions';
 import { channelForPath, isPrivatePath } from '@/lib/tracking';
 
 import { useConsent } from './consent-provider';
@@ -82,6 +83,43 @@ export function Analytics() {
       document.removeEventListener('click', onClick, { capture: true });
     };
   }, [analytics, privatePath]);
+
+  // Conversiones (vista previa, pago iniciado y compra): ocurren en rutas privadas, donde no corre
+  // nada más. Salen solo con consentimiento, con valor y moneda, y sin la dirección de la página
+  // (que lleva el id del libro o del pedido).
+  useEffect(() => {
+    const onConversion = (event: Event) => {
+      const detail = (event as CustomEvent<ConversionDetail>).detail;
+      const win = window as unknown as TrackingWindow;
+      const site = window.location.origin;
+      if (analytics && GA_ID && win.gtag) {
+        // El bloqueo de las rutas privadas se levanta solo mientras sale este evento.
+        win[`ga-disable-${GA_ID}`] = false;
+        win.gtag('event', detail.name, {
+          page_location: `${site}/`,
+          page_referrer: `${site}/`,
+          ...(detail.value !== undefined ? { value: detail.value } : {}),
+          ...(detail.currency ? { currency: detail.currency } : {}),
+          ...(detail.transactionId ? { transaction_id: detail.transactionId } : {}),
+          ...(detail.line ? { line: detail.line } : {}),
+        });
+        window.setTimeout(() => {
+          win[`ga-disable-${GA_ID}`] = isPrivatePath(window.location.pathname);
+        }, 2000);
+      }
+      // Meta solo recibe la compra (con valor y moneda): para optimizar anuncios alcanza.
+      if (marketing && win.fbq && detail.name === 'purchase') {
+        win.fbq('track', 'Purchase', {
+          value: detail.value ?? 0,
+          currency: detail.currency ?? 'USD',
+        });
+      }
+    };
+    window.addEventListener(CONVERSION_EVENT, onConversion);
+    return () => {
+      window.removeEventListener(CONVERSION_EVENT, onConversion);
+    };
+  }, [analytics, marketing]);
 
   useEffect(() => {
     const gtag = (window as unknown as { gtag?: Gtag }).gtag;

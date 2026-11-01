@@ -16,6 +16,7 @@ import { BookViewer, type ViewerPage } from '@/components/book/book-viewer';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { trackConversion } from '@/lib/conversions';
 import { formatPrice } from '@/lib/format';
 
 import { CharacterReview } from './character-review';
@@ -115,6 +116,12 @@ export function PreviewPanel({
   }, [isGenerating]);
 
   const data = preview?.preview ?? null;
+  // Vista previa lista: se cuenta una vez por libro (solo la línea, nada del niño).
+  const previewDone = data?.stage === 'complete';
+  useEffect(() => {
+    if (previewDone)
+      trackConversion(`preview:${book.id}`, { name: 'preview_created', line: book.channel });
+  }, [previewDone, book.id, book.channel]);
 
   if (isGenerating) {
     // Si ya había un personaje en revisión, lo que se está generando son las ilustraciones.

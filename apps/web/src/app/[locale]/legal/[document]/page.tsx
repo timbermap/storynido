@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'Legal' });
   return {
     title: t(doc),
+    description: t(`${doc}Description`),
     alternates: localizedAlternates(locale, (target) => ({
       pathname: '/legal/[document]',
       params: { document: LEGAL_SLUGS[target][doc] },

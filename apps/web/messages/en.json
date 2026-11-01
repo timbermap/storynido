@@ -81,6 +81,11 @@
     "preferences": "Language"
   },
   "Legal": {
+    "termsDescription": "StoryNido’s terms of use: what you buy, how you can use your book and your rights.",
+    "privacyDescription": "How we protect your children’s data and photos: what we keep, for how long and how to delete it.",
+    "cookiesDescription": "Which cookies we use and how to choose which ones to accept.",
+    "refundsDescription": "When we reprint your book or refund your money.",
+    "shippingDescription": "Where we print and ship, how long it takes and what it costs.",
     "terms": "Terms and conditions",
     "privacy": "Privacy policy",
     "cookies": "Cookie policy",
@@ -183,9 +188,9 @@
       "title": "Their name on the cover",
       "subtitle": "Type their name and see how their book would look.",
       "label": "Hero's name",
-      "defaultName": "Emma",
-      "line1": "The great adventure of",
-      "line3": "among the stars",
+      "defaultName": "Tom",
+      "line1": "",
+      "line3": "'s Great Space Adventure",
       "sample": "Sample cover",
       "cta": "Create their story"
     },
