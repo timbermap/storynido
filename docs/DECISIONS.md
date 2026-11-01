@@ -2179,3 +2179,7 @@ El desplegable de Familias (y el de «Explorar» con sesión) arranca con «Inic
 ### 186b. Familias: el nombre en la portada, en el personaje y en el cuento (2026-11-01)
 
 La demo «Escribe su nombre» ya no muestra solo la portada: al escribir el nombre cambia también el personaje (con su etiqueta) y un fragmento del cuento con el nombre resaltado, con una página interior nueva de la misma historia (`secciones/pagina-cohete.webp`, USD 0,07). Título nuevo: «Su nombre, en toda la historia».
+
+### 186c. Familias: sin «Un libro de verdad» ni «Mira antes de comprar» (2026-11-01)
+
+Se quitan de la landing de Familias la sección de la foto del libro impreso (que era una imagen de muestra generada con IA) y la tarjeta de garantía. La página termina en las preguntas frecuentes, el contacto y el cierre común. Los textos siguen en los archivos de idioma por si se retoman con una foto real.

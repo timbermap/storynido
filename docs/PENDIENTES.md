@@ -29,7 +29,7 @@ Estado de todo lo pedido en reportes y documentos. Objetivo de salida suave: **1
 3. Correos: dominio verificado (SPF, DKIM, DMARC).
 4. Abogado: revisar términos y privacidad (son un borrador) y completar el domicilio legal y el RUT de StoryNido SRL. Contador: impuestos (IVA UE, impuesto de venta EE. UU.).
 5. Proveedor de pago elegido y probado.
-6. Foto real del primer libro impreso (la actual es de muestra generada con IA) y beta con 20 a 30 familias.
+6. Foto real del primer libro impreso (la foto de muestra generada con IA ya no está en Familias) y beta con 20 a 30 familias.
 7. Medir con la imprenta el plazo real a Argentina, México, España y EE. UU.
 8. Probar el login en un celular real (redirección).
 9. Subir `minInstances` a 1 cuando haya anuncios (hoy 0 en producción).

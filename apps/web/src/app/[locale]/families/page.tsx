@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Map, ShieldCheck, Tablet, UserRound } from 'lucide-react';
+import { ArrowRight, BookOpen, Map, Tablet, UserRound } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
@@ -15,7 +15,6 @@ import { LessonGroups } from '@/components/lessons/lesson-groups';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { AgeTabs } from '@/components/stories/age-tabs';
 import { StoryCard } from '@/components/stories/story-card';
-import { ImageSlot } from '@/components/landing/image-slot';
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { LandingFinalCta, ctaClass } from '@/components/landing/sections';
 import { buttonVariants } from '@/components/ui/button';
@@ -347,44 +346,6 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
           </div>
         </section>
       )}
-
-      {/* El libro impreso: una foto de muestra, hasta tener las del libro real. */}
-      <section className="container-page py-12 lg:py-16">
-        <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
-          <figure className="relative overflow-hidden rounded-[1.75rem] bg-muted shadow-[var(--shadow-card)]">
-            <ImageSlot
-              src="/images/heroes/libro-impreso.webp"
-              alt={t('printedBook.photoAlt')}
-              width={1400}
-              height={1050}
-              sizes="(min-width: 1024px) 600px, 92vw"
-              tone="bg-[#f3e3cf]"
-            />
-            <figcaption className="absolute bottom-3 left-3 rounded-full bg-card px-3 py-1 text-xs font-bold shadow-[var(--shadow-card)]">
-              {t('printedBook.badge')}
-            </figcaption>
-          </figure>
-          <div>
-            <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
-              {t('printedBook.title')}
-            </h2>
-            <p className="mt-3 text-lg text-muted-foreground">{t('printedBook.text')}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Garantía */}
-      <section className="container-page py-16 lg:py-20">
-        <div className="flex flex-col items-start gap-5 rounded-2xl border bg-card p-8 sm:flex-row sm:items-center sm:p-10">
-          <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-mint text-success">
-            <ShieldCheck className="size-7" aria-hidden="true" />
-          </span>
-          <div>
-            <h2 className="text-2xl font-medium">{t('guarantee.title')}</h2>
-            <p className="mt-2 text-muted-foreground">{t('guarantee.text')}</p>
-          </div>
-        </div>
-      </section>
 
       {/* Llamado final: el mismo cierre en las cuatro landings */}
       <LandingFinalCta
