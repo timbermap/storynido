@@ -2148,3 +2148,8 @@ El catálogo oculta el buscador mientras la línea tenga menos de 40 historias (
 ### 182b. Menú de Familias: acceso directo a Familias (2026-11-01)
 
 El desplegable de Familias (y el de «Explorar» con sesión) arranca con «Inicio de Familias», que lleva a la landing, antes de «Todas las historias» y las etapas de edad.
+
+## 183 · Familias: «Un universo de aventuras» con pestañas por edad (opción 2)
+
+- **Fecha:** 2026-11-01.
+- Sebastián eligió la opción 2: cuatro pestañas (Bebés, Pequeños, Lectores, Grandes lectores) y cinco historias de Familias de cada edad por fila (`AgeTabs`, con los paneles armados en el servidor y la pestaña «Pequeños» abierta). Salen las siete cajas de temas de esa sección; los temas siguen en el filtro del catálogo. «Ver todas las historias» lleva al catálogo.

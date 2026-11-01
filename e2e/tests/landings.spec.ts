@@ -97,10 +97,10 @@ for (const [locale, pages] of Object.entries(PAGES)) {
   });
 }
 
-test('catálogo: "¿Qué le encanta?" desde Familias, temática y búsqueda sin tildes', async ({
+test('catálogo: "Le encanta" filtra por temática y el buscador espera a tener muchas historias', async ({
   page,
 }) => {
-  await page.goto('/es/familias');
+  await page.goto('/es/historias');
   await page.getByRole('link', { name: 'Los héroes y el deporte' }).click();
   await expect(page).toHaveURL(/tema=heroes/);
   const grid = page.locator('main');

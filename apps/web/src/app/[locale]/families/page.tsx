@@ -2,7 +2,7 @@ import { ArrowRight, BookOpen, Gift, Map, ShieldCheck, Tablet, UserRound } from 
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
-import type { Locale } from '@storynido/shared';
+import { AGE_STAGES, stageOf, type Locale } from '@storynido/shared';
 
 import { HeroFamilias } from '@/components/home/hero-photo';
 import { HeroFacts } from '@/components/home/hero-facts';
@@ -13,6 +13,7 @@ import { RememberChannel } from '@/components/landing/remember-channel';
 import { JsonLd } from '@/components/json-ld';
 import { LessonGroups } from '@/components/lessons/lesson-groups';
 import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
+import { AgeTabs } from '@/components/stories/age-tabs';
 import { StoryCard } from '@/components/stories/story-card';
 import { ImageSlot } from '@/components/landing/image-slot';
 import { PhotoPromise } from '@/components/landing/photo-promise';
@@ -26,7 +27,6 @@ import { getContent, getLessons, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { localizedAlternates } from '@/lib/seo';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
-import { STORY_THEMES } from '@/lib/story-themes';
 
 export async function generateMetadata({
   params,
@@ -69,6 +69,13 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
     </>
   );
   const highlights = offerHighlights(offer, locale, display.country);
+  // Galería por edad: hasta cinco historias de Familias de cada etapa.
+  const galleryStages = AGE_STAGES.map((stage) => ({
+    ...stage,
+    stories: stories
+      .filter((story) => story.channels[0] === 'families' && stageOf(story) === stage.key)
+      .slice(0, 5),
+  })).filter((stage) => stage.stories.length > 0);
   // Solo las destacadas: todas las preguntas y el contacto están en /faq.
   const faqItems = faq ? faqHighlights(parseFaqGroups(faq.body)) : [];
 
@@ -253,36 +260,34 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
                 {t('gallery.viewAll')}
               </Link>
             </div>
-            {/* ¿Qué le encanta?: cuatro temáticas simples que llevan al catálogo filtrado. */}
-            <nav aria-labelledby="loves-title" className="mt-8">
-              <h3 id="loves-title" className="text-lg font-bold">
-                {t('gallery.loves')}
-              </h3>
-              <ul className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {STORY_THEMES.map(({ key, icon: Icon }) => (
-                  <li key={key}>
-                    <Link
-                      href={{ pathname: '/families/stories', query: { tema: key } }}
-                      className="flex h-full items-center gap-3 rounded-xl border bg-card p-4 font-semibold shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
-                    >
-                      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-mint text-success">
-                        <Icon className="size-5" aria-hidden="true" />
-                      </span>
-                      {tStories(`themes.${key}`)}
-                    </Link>
-                  </li>
+            {/* Una pestaña por edad, con cinco historias de cada una (el catálogo tiene el resto). */}
+            <div className="mt-8">
+              <AgeTabs
+                initial={Math.max(
+                  0,
+                  galleryStages.findIndex((stage) => stage.key === 'little'),
+                )}
+                tabs={galleryStages.map((stage) => ({
+                  key: stage.key,
+                  label: tStories(`stages.${stage.key}`),
+                  range: tStories('ageRange', { min: stage.min, max: stage.max }),
+                }))}
+                panels={galleryStages.map((stage) => (
+                  <div
+                    key={stage.key}
+                    className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+                  >
+                    {stage.stories.map((story) => (
+                      <StoryCard
+                        key={story.slug}
+                        story={story}
+                        compact
+                        fromPrice={lowestPrice(offer, locale, display.country, story.lengths)}
+                      />
+                    ))}
+                  </div>
                 ))}
-              </ul>
-            </nav>
-            <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-              {/* Hasta 6 en la home (dos filas completas); el resto, en el catálogo. */}
-              {stories.slice(0, 6).map((story) => (
-                <StoryCard
-                  key={story.slug}
-                  story={story}
-                  fromPrice={lowestPrice(offer, locale, display.country, story.lengths)}
-                />
-              ))}
+              />
             </div>
           </div>
         </section>
