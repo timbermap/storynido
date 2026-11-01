@@ -338,7 +338,7 @@ describe('catálogo', () => {
       code: 'MX',
       currency: 'MXN',
       defaultLocale: 'es',
-      printed: expect.any(Boolean),
+      printed: expect.any(Boolean) as boolean,
     });
     expect(countries.find((country) => country.code === 'AR')).toMatchObject({
       currency: 'USD',
