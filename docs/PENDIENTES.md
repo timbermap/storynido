@@ -1,4 +1,4 @@
-# Pendientes (2026-11-01, actualizado)
+# Pendientes (2026-11-01, actualizado al cierre del día)
 
 Estado de todo lo pedido en reportes y documentos. Objetivo de salida suave: **16 de noviembre** (Familias y Eventos digital; español, inglés y portugués).
 
@@ -45,8 +45,22 @@ Estado de todo lo pedido en reportes y documentos. Objetivo de salida suave: **1
 Hecho: 2 (layouts A, B y C), título fuera de la tarjeta. El PR 1 (nombre del visitante) se retiró hasta poder hacer coincidir nombre y dibujo.
 Falta: 3 (portada como libro y galería), 5 (recortes para redes y A/B), 6 (portada del pedido: lámina del chico, control automático, tapa de imprenta a 300 PPI, contratapa).
 
+## G. Profesionales (documento «auditoría y estudio de mercado», 2026-11-01)
+
+**P0:**
+
+1. Dos colecciones nuevas: «Calmarme y regularme» e «Historias sociales para el día a día», con 4 historias cada una (con portada: unos USD 0,07 por imagen).
+2. Llevar las 4 colecciones actuales a 4 historias cada una (sumando las que ya existen en Familias: volcán del enojo, Chau pañal, hermano mayor).
+3. Guía para el profesional en cada historia (PDF: objetivo, cómo leerla, cinco preguntas, una actividad y cómo seguir en casa).
+4. Una persona con título que revise el contenido, con nombre y matrícula en la landing (lo tienes que aportar tú).
+
+**P1:** precio profesional más bajo que Familias y packs de créditos con factura; modo historia social (texto mínimo, una acción por página), versión para proyectar y en blanco y negro; «libro de la clase»; landing con resultado en el hero, ejemplo para hojear, filtros por edad, objetivo y rol, y preguntas frecuentes de uso en clase.
+**P2:** colecciones de pantallas y juego, amigos y convivencia, preocupaciones y miedos, mi cuerpo es mío y cambios en la familia (las dos últimas con revisión de especialista); landings por necesidad para buscadores.
+
 ## F. Verificaciones abiertas
 
 - E2E de los últimos commits (cada push cancela la corrida anterior).
+- Encabezado en celular: mide 401 px en 400 (falta 1 px) y 408 en Eventos; el último ajuste está en camino a staging.
+- Notificaciones de GitHub: avisan por correo cada CI fallido. Para apagarlas: GitHub, Settings, Notifications, sección Actions (o Unwatch del repositorio). Yo corro el lint y el formato completos antes de cada push.
 - Falla intermitente del E2E de la home en celular (el banner de cookies tapa la tarjeta de Familias).
 - Que la página de enseñanza no cachee el encabezado de la historia destacada.
