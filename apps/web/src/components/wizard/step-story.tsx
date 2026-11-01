@@ -128,6 +128,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
         age={age ?? null}
         value={fitToStory(choice, story)}
         onChange={setChoice}
+        formats={data.book.channel !== 'events'}
       />
     </WizardShell>
   );

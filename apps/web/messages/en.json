@@ -899,7 +899,42 @@
       "pricePrinted": "Printed from {price}",
       "chipEbook": "Ebook",
       "chipPrint": "Printed book",
-      "chipBooklet": "Stapled storybook"
+      "chipBooklet": "Stapled storybook",
+      "formatLegend": "How will they read it?",
+      "formatPages": "{count} pages",
+      "formatWords": "{min} to {max} words per page",
+      "formatRecommended": "Recommended",
+      "formatCustom": "Adjusted by hand in “Adjust the reading”.",
+      "formats": {
+        "first_words": {
+          "name": "First words",
+          "text": "One sentence per page, with a full-page illustration."
+        },
+        "look_and_tell": {
+          "name": "To look at and tell",
+          "text": "A few sentences per page: you look at it and tell it in your own words."
+        },
+        "read_together_little": {
+          "name": "To read together",
+          "text": "The classic picture book, to read aloud at bedtime."
+        },
+        "long_night_story": {
+          "name": "Long bedtime story",
+          "text": "More story, for the ones who ask for “one more”."
+        },
+        "read_together": {
+          "name": "To read together",
+          "text": "A picture book with a more developed story."
+        },
+        "read_alone": {
+          "name": "I read it myself",
+          "text": "Short sentences and one illustration per page, so they can read it on their own."
+        },
+        "long_illustrated": {
+          "name": "Long illustrated story",
+          "text": "More text on every page and a plot with twists."
+        }
+      }
     },
     "feedback": {
       "title": "What would you improve in this sample?",

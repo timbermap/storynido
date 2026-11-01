@@ -899,7 +899,42 @@
       "pricePrinted": "Impreso desde {price}",
       "chipEbook": "Ebook",
       "chipPrint": "Libro físico",
-      "chipBooklet": "Cuento grapado"
+      "chipBooklet": "Cuento grapado",
+      "formatLegend": "¿Cómo lo van a leer?",
+      "formatPages": "{count} páginas",
+      "formatWords": "{min} a {max} palabras por página",
+      "formatRecommended": "Recomendado",
+      "formatCustom": "Ajustado a mano en «Ajustar la lectura».",
+      "formats": {
+        "first_words": {
+          "name": "Primeras palabras",
+          "text": "Una frase por página, con la ilustración a toda página."
+        },
+        "look_and_tell": {
+          "name": "Para mirar y contar",
+          "text": "Pocas frases por página: se mira y se cuenta con sus palabras."
+        },
+        "read_together_little": {
+          "name": "Para leer juntos",
+          "text": "El álbum ilustrado clásico, para leer en voz alta antes de dormir."
+        },
+        "long_night_story": {
+          "name": "Cuento largo de la noche",
+          "text": "Más historia, para los que piden «otro más»."
+        },
+        "read_together": {
+          "name": "Para leer juntos",
+          "text": "Álbum ilustrado con una historia más desarrollada."
+        },
+        "read_alone": {
+          "name": "Leo solo",
+          "text": "Frases cortas y una ilustración por página, para que lo lea él."
+        },
+        "long_illustrated": {
+          "name": "Cuento ilustrado largo",
+          "text": "Más texto en cada página y una trama con giros."
+        }
+      }
     },
     "feedback": {
       "title": "¿Qué mejorarías de esta muestra?",

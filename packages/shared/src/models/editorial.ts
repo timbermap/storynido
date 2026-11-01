@@ -137,11 +137,102 @@ export function suggestedReading(age: number): {
   textDensity: TextDensity;
   readingLevel: ReadingLevel;
 } {
-  if (age <= 2) return { length: 'short', textDensity: 'visual', readingLevel: 'beginner' };
-  if (age <= 4) return { length: 'classic', textDensity: 'balanced', readingLevel: 'beginner' };
-  if (age <= 5) return { length: 'classic', textDensity: 'balanced', readingLevel: 'developing' };
-  if (age <= 8) return { length: 'epic', textDensity: 'balanced', readingLevel: 'developing' };
-  return { length: 'epic', textDensity: 'rich', readingLevel: 'advanced' };
+  // El formato recomendado de la edad (siempre hay uno: los rangos cubren de 0 en adelante).
+  const format = readingFormatsFor(age)[0] ?? READING_FORMATS[0];
+  return {
+    length: format.length,
+    textDensity: format.textDensity,
+    readingLevel: format.readingLevel,
+  };
+}
+
+/**
+ * "¿Cómo lo van a leer?": formatos editoriales reconocibles por edad (docs "Cantidad de texto por
+ * edad"). Cada uno fija extensión, cantidad de texto y nivel; el adulto ve solo los de la edad de
+ * su hijo. Los de capítulos y la historieta necesitan otra maquetación y todavía no están.
+ */
+export const READING_FORMATS = [
+  {
+    key: 'first_words',
+    minAge: 0,
+    maxAge: 2,
+    length: 'short',
+    textDensity: 'visual',
+    readingLevel: 'beginner',
+    recommended: true,
+  },
+  {
+    key: 'look_and_tell',
+    minAge: 3,
+    maxAge: 5,
+    length: 'short',
+    textDensity: 'visual',
+    readingLevel: 'beginner',
+    recommended: false,
+  },
+  {
+    key: 'read_together_little',
+    minAge: 3,
+    maxAge: 5,
+    length: 'classic',
+    textDensity: 'balanced',
+    readingLevel: 'developing',
+    recommended: true,
+  },
+  {
+    key: 'long_night_story',
+    minAge: 3,
+    maxAge: 5,
+    length: 'epic',
+    textDensity: 'balanced',
+    readingLevel: 'developing',
+    recommended: false,
+  },
+  {
+    key: 'read_together',
+    minAge: 6,
+    maxAge: 8,
+    length: 'classic',
+    textDensity: 'balanced',
+    readingLevel: 'developing',
+    recommended: false,
+  },
+  {
+    key: 'read_alone',
+    minAge: 6,
+    maxAge: 8,
+    length: 'epic',
+    textDensity: 'balanced',
+    readingLevel: 'developing',
+    recommended: true,
+  },
+  {
+    key: 'long_illustrated',
+    minAge: 9,
+    maxAge: 99,
+    length: 'epic',
+    textDensity: 'rich',
+    readingLevel: 'advanced',
+    recommended: true,
+  },
+] as const satisfies readonly {
+  key: string;
+  minAge: number;
+  maxAge: number;
+  length: BookLength;
+  textDensity: TextDensity;
+  readingLevel: ReadingLevel;
+  recommended: boolean;
+}[];
+
+export type ReadingFormat = (typeof READING_FORMATS)[number];
+
+/** Formatos de la edad (el recomendado primero); vacío si no hay edad. */
+export function readingFormatsFor(age: number | null): ReadingFormat[] {
+  if (age === null) return [];
+  return READING_FORMATS.filter((format) => format.minAge <= age && age <= format.maxAge).toSorted(
+    (a, b) => Number(b.recommended) - Number(a.recommended),
+  );
 }
 
 export interface EditorialChoice {

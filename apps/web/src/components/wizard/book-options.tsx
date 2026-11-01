@@ -7,6 +7,7 @@ import {
   BOOK_LENGTHS,
   READING_LEVELS,
   TEXT_DENSITIES,
+  readingFormatsFor,
   type BookLength,
   type ContentType,
   type EditorialConfig,
@@ -93,6 +94,7 @@ export function BookOptions({
   age,
   value,
   onChange,
+  formats = true,
 }: {
   story: PublicStory | undefined;
   editorial: EditorialConfig;
@@ -101,6 +103,8 @@ export function BookOptions({
   age: number | null;
   value: BookChoice;
   onChange: (value: BookChoice) => void;
+  /** "¿Cómo lo van a leer?" en lugar de la extensión (Celebraciones conserva la extensión: su mini cuento no sigue la edad). */
+  formats?: boolean;
 }) {
   const t = useTranslations('Wizard.book');
   const locale = useLocale() as Locale;
@@ -124,6 +128,22 @@ export function BookOptions({
     story ? story.readingLevels.includes(level) : true,
   );
   const coloring = value.contentType === 'coloring';
+  // Formatos de la edad que la historia admite; sin ninguno, queda la extensión de siempre.
+  const readingFormats = readingFormatsFor(age).filter(
+    (format) =>
+      lengths.includes(format.length) &&
+      densities.includes(format.textDensity) &&
+      levels.includes(format.readingLevel) &&
+      editorial.lengths[format.length].active,
+  );
+  const byFormat =
+    formats && !coloring && value.contentType !== 'activities' && readingFormats.length > 0;
+  const current = readingFormats.find(
+    (format) =>
+      format.length === value.length &&
+      format.textDensity === value.textDensity &&
+      format.readingLevel === value.readingLevel,
+  );
 
   return (
     <section aria-labelledby="book-options" className="mt-10 grid gap-8 border-t pt-8">
@@ -157,61 +177,110 @@ export function BookOptions({
         </div>
       </fieldset>
 
-      <fieldset>
-        <legend className="mb-3 font-bold">{t('lengthLegend')}</legend>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {lengths.map((length) => {
-            const config = editorial.lengths[length];
-            const printed = config.formats.filter((format) => format !== 'digital');
-            const printable = printed.length > 0;
-            // Los libros cortos se imprimen como cuento grapado; los largos, como libro físico.
-            const printLabel = printed.every((format) => format === 'booklet')
-              ? t('chipBooklet')
-              : t('chipPrint');
-            return (
-              <OptionCard
-                key={length}
-                name="length"
-                value={length}
-                checked={value.length === length}
-                onSelect={(selected) => {
-                  set({ length: selected as BookLength });
-                }}
-              >
-                <span className="flex flex-1 flex-col gap-1.5 p-4 pr-11">
-                  <span className="font-display text-lg leading-tight font-semibold">
-                    {t(`lengths.${length}.name`)}
-                  </span>
-                  <span className="text-sm font-bold text-primary">
-                    {t('pages', { count: config.interiorPages })}
-                  </span>
-                  <span className="text-sm leading-snug text-muted-foreground">
-                    {t(`lengths.${length}.text`)}
-                  </span>
-                  <span className="mt-auto flex flex-wrap gap-1.5 pt-2">
-                    <span className="rounded-full bg-secondary px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
-                      {t('chipEbook')}
+      {byFormat ? (
+        <fieldset>
+          <legend className="mb-3 font-bold">{t('formatLegend')}</legend>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {readingFormats.map((format) => {
+              const words = editorial.densities[format.textDensity];
+              return (
+                <OptionCard
+                  key={format.key}
+                  name="reading-format"
+                  value={format.key}
+                  checked={current?.key === format.key}
+                  onSelect={() => {
+                    set({
+                      length: format.length,
+                      textDensity: format.textDensity,
+                      readingLevel: format.readingLevel,
+                    });
+                  }}
+                >
+                  <span className="flex flex-1 flex-col gap-1.5 p-4 pr-11">
+                    <span className="font-display text-lg leading-tight font-semibold">
+                      {t(`formats.${format.key}.name`)}
                     </span>
-                    {printable && (
-                      <span className="rounded-full bg-accent px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
-                        {printLabel}
+                    {format.recommended && (
+                      <span className="w-fit rounded-full bg-mint px-2.5 py-1 text-xs leading-none font-bold text-success">
+                        {t('formatRecommended')}
+                      </span>
+                    )}
+                    <span className="text-sm leading-snug text-muted-foreground">
+                      {t(`formats.${format.key}.text`)}
+                    </span>
+                    <span className="mt-auto pt-2 text-sm font-bold text-primary">
+                      {t('formatPages', { count: editorial.lengths[format.length].interiorPages })}
+                    </span>
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      {t('formatWords', { min: words.minWords, max: words.maxWords })}
+                    </span>
+                  </span>
+                </OptionCard>
+              );
+            })}
+          </div>
+          {!current && <p className="mt-2 text-sm text-muted-foreground">{t('formatCustom')}</p>}
+        </fieldset>
+      ) : (
+        <fieldset>
+          <legend className="mb-3 font-bold">{t('lengthLegend')}</legend>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {lengths.map((length) => {
+              const config = editorial.lengths[length];
+              const printed = config.formats.filter((format) => format !== 'digital');
+              const printable = printed.length > 0;
+              // Los libros cortos se imprimen como cuento grapado; los largos, como libro físico.
+              const printLabel = printed.every((format) => format === 'booklet')
+                ? t('chipBooklet')
+                : t('chipPrint');
+              return (
+                <OptionCard
+                  key={length}
+                  name="length"
+                  value={length}
+                  checked={value.length === length}
+                  onSelect={(selected) => {
+                    set({ length: selected as BookLength });
+                  }}
+                >
+                  <span className="flex flex-1 flex-col gap-1.5 p-4 pr-11">
+                    <span className="font-display text-lg leading-tight font-semibold">
+                      {t(`lengths.${length}.name`)}
+                    </span>
+                    <span className="text-sm font-bold text-primary">
+                      {t('pages', { count: config.interiorPages })}
+                    </span>
+                    <span className="text-sm leading-snug text-muted-foreground">
+                      {t(`lengths.${length}.text`)}
+                    </span>
+                    <span className="mt-auto flex flex-wrap gap-1.5 pt-2">
+                      <span className="rounded-full bg-secondary px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
+                        {t('chipEbook')}
+                      </span>
+                      {printable && (
+                        <span className="rounded-full bg-accent px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
+                          {printLabel}
+                        </span>
+                      )}
+                    </span>
+                    {prices?.digitalMinor != null && (
+                      <span className="grid gap-0.5 border-t pt-2 text-xs font-semibold tabular-nums">
+                        <span>{t('priceDigital', { price: money(prices.digitalMinor) })}</span>
+                        {printable && prices.printedFromMinor != null && (
+                          <span>
+                            {t('pricePrinted', { price: money(prices.printedFromMinor) })}
+                          </span>
+                        )}
                       </span>
                     )}
                   </span>
-                  {prices?.digitalMinor != null && (
-                    <span className="grid gap-0.5 border-t pt-2 text-xs font-semibold tabular-nums">
-                      <span>{t('priceDigital', { price: money(prices.digitalMinor) })}</span>
-                      {printable && prices.printedFromMinor != null && (
-                        <span>{t('pricePrinted', { price: money(prices.printedFromMinor) })}</span>
-                      )}
-                    </span>
-                  )}
-                </span>
-              </OptionCard>
-            );
-          })}
-        </div>
-      </fieldset>
+                </OptionCard>
+              );
+            })}
+          </div>
+        </fieldset>
+      )}
 
       {!coloring && (
         <details className="group rounded-xl border bg-card p-4">
