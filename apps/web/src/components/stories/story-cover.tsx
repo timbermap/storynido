@@ -6,7 +6,6 @@ import { useId } from 'react';
 import type { PublicStory } from '@storynido/shared';
 
 import { cn } from '@/lib/utils';
-import { useVisitorName } from '@/lib/visitor-name';
 
 type CoverStory = Pick<
   PublicStory,
@@ -136,9 +135,9 @@ export function StoryCover({
   priority?: boolean;
   className?: string;
 }) {
-  // El nombre que escribió el visitante («¿Cómo se llama?»); sin él, el del elenco de la historia.
-  const typed = useVisitorName();
-  const visitor = typed ?? story.castName ?? '';
+  // Siempre el nombre del elenco: un nombre escrito podría no corresponder al dibujo (un nombre de
+  // varón sobre una nena). El nombre propio vuelve cuando el nombre y el dibujo puedan coincidir.
+  const visitor = story.castName ?? '';
   const pro = line === 'professionals' && Boolean(story.coverImagePro);
   const src = pro && story.coverImagePro ? story.coverImagePro : story.coverImage;
   const overlay = Boolean(story.coverTitleOverlay);

@@ -2137,3 +2137,10 @@ Se suman «Los momentos de la vida» (nacimiento, pañal, diente, cumpleaños, N
 ### 181b. Historias: sin buscador hasta tener más historias (2026-11-01)
 
 El catálogo oculta el buscador mientras la línea tenga menos de 40 historias (`SEARCH_MIN_STORIES`): con 24 alcanzan el filtro por edad y los temas. El buscador sigue funcionando si se llega con `?q=` y reaparece solo al llegar a las 40.
+
+## 182 · Catálogo de historias: filtros a la izquierda (opción B) y sin campo de nombre
+
+- **Fecha:** 2026-11-01.
+- Sebastián eligió la opción B: columna lateral con «¿Para quién es?» (edad, con contador) y los temas de «Le encanta», y las historias a la derecha en tarjetas más chicas (2, 3 y hasta 4 por fila). En el celular los filtros pasan arriba.
+- **Sale el campo «¿Cómo se llama?»** del catálogo y de la ficha, y las portadas vuelven a mostrar siempre el nombre del elenco: un nombre escrito podía quedar sobre un dibujo de otro género (por ejemplo, «Luis» sobre una nena). La demo de la landing de Familias sigue con su propio campo, con el aviso de que es un ejemplo. Queda sin uso el componente `VisitorNameField` y el hook `useVisitorName`, para retomarlos cuando nombre y dibujo puedan coincidir (por ejemplo, eligiendo antes el personaje).
+- El buscador sigue oculto hasta las 40 historias (decisión 181b).

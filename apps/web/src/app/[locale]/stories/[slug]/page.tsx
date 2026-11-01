@@ -15,7 +15,6 @@ import { AuthLink } from '@/components/auth/auth-link';
 import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
 import { JsonLd } from '@/components/json-ld';
 import { StoryCover } from '@/components/stories/story-cover';
-import { VisitorNameField } from '@/components/stories/visitor-name-field';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
@@ -155,7 +154,6 @@ export default async function StoryPage({ params, searchParams }: Props) {
               sizes="(min-width: 768px) 24rem, 90vw"
             />
           </div>
-          <VisitorNameField className="mx-auto mt-5 w-full max-w-sm" />
         </div>
 
         <div className="space-y-6">

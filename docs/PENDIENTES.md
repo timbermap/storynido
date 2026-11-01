@@ -42,7 +42,7 @@ Estado de todo lo pedido en reportes y documentos. Objetivo de salida suave: **1
 
 ## E. Plan de portadas (7 PR)
 
-Hecho: 1 (nombre del visitante), 2 (layouts A, B y C), título fuera de la tarjeta.
+Hecho: 2 (layouts A, B y C), título fuera de la tarjeta. El PR 1 (nombre del visitante) se retiró hasta poder hacer coincidir nombre y dibujo.
 Falta: 3 (portada como libro y galería), 5 (recortes para redes y A/B), 6 (portada del pedido: lámina del chico, control automático, tapa de imprenta a 300 PPI, contratapa).
 
 ## F. Verificaciones abiertas

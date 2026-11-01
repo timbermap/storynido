@@ -4,7 +4,6 @@ import { AGE_STAGES, stageOf, type Channel, type Locale } from '@storynido/share
 
 import { CountryNotice } from '@/components/stories/country-notice';
 import { StoryCard } from '@/components/stories/story-card';
-import { VisitorNameField } from '@/components/stories/visitor-name-field';
 import { Search, X } from 'lucide-react';
 
 import { Link } from '@/i18n/navigation';
@@ -100,7 +99,6 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
       <header className="max-w-2xl">
         <h1 className="text-4xl font-medium sm:text-5xl">{t('title')}</h1>
         <p className="mt-3 text-lg text-muted-foreground">{t('subtitle')}</p>
-        <VisitorNameField className="mt-6" />
         <div className="mt-4">
           <CountryNotice display={display} />
         </div>
@@ -137,170 +135,176 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
         </form>
       )}
 
-      <nav aria-label={t('filterLabel')} className="mt-8">
-        <p className="mb-3 font-display text-lg font-bold">{t('askWho')}</p>
-        <ul className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-          {AGE_FILTERS.map((range) => {
-            const count = ageCount(range);
-            const active = filter?.min === range.min;
-            const disabled = !active && count === 0;
-            const className = cn(
-              'flex h-full flex-col gap-0.5 rounded-2xl border p-3.5 text-left transition',
-              active ? 'border-primary bg-primary/15' : 'bg-card hover:border-foreground/30',
-              disabled && 'pointer-events-none opacity-40',
-            );
-            const inner = (
-              <>
-                <span className="font-display text-lg leading-tight font-bold">
-                  {t(`stages.${range.key}`)}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {t('ageRange', { min: range.min, max: range.max })}
-                </span>
-                <span className="mt-1 text-xs font-bold text-primary tabular-nums">
-                  {t('resultCount', { count })}
-                </span>
-              </>
-            );
-            return (
-              <li key={range.key}>
-                {disabled ? (
-                  <span aria-disabled="true" className={className}>
-                    {inner}
-                  </span>
-                ) : (
-                  <Link
-                    // Tocar la edad elegida la quita.
-                    href={withQuery({ edad: active ? undefined : String(range.min) })}
-                    data-track="catalog_filter_used"
-                    data-track-filter="age"
-                    aria-current={active ? 'true' : undefined}
-                    className={className}
-                  >
-                    {inner}
-                  </Link>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+      {/* Filtros a la izquierda (opción B) y las historias a todo el ancho que queda. */}
+      <div className="mt-8 grid gap-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start">
+        <aside className="grid gap-6 lg:sticky lg:top-24">
+          <nav aria-label={t('filterLabel')} className="mt-8">
+            <p className="mb-2 font-display text-lg font-bold">{t('askWho')}</p>
+            <ul className="grid grid-cols-2 gap-1.5 lg:grid-cols-1">
+              {AGE_FILTERS.map((range) => {
+                const count = ageCount(range);
+                const active = filter?.min === range.min;
+                const disabled = !active && count === 0;
+                const className = cn(
+                  'flex h-full items-baseline justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-left transition',
+                  active ? 'border-primary bg-primary/15' : 'bg-card hover:border-foreground/30',
+                  disabled && 'pointer-events-none opacity-40',
+                );
+                const inner = (
+                  <>
+                    <span className="font-display leading-tight font-bold">
+                      {t(`stages.${range.key}`)}
+                      <span className="ml-2 text-sm font-normal text-muted-foreground">
+                        {range.min}–{range.max}
+                      </span>
+                    </span>
+                    <span className="text-xs font-bold text-primary tabular-nums">{count}</span>
+                  </>
+                );
+                return (
+                  <li key={range.key}>
+                    {disabled ? (
+                      <span aria-disabled="true" className={className}>
+                        {inner}
+                      </span>
+                    ) : (
+                      <Link
+                        // Tocar la edad elegida la quita.
+                        href={withQuery({ edad: active ? undefined : String(range.min) })}
+                        data-track="catalog_filter_used"
+                        data-track-filter="age"
+                        aria-current={active ? 'true' : undefined}
+                        className={className}
+                      >
+                        {inner}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
 
-      <nav aria-label={t('themeLabel')} className="mt-6">
-        <p className="mb-3 text-xs font-bold tracking-wider text-muted-foreground uppercase">
-          {t('themeLabel')}
-        </p>
-        <ul className="flex flex-wrap gap-2">
-          {STORY_THEMES.map(({ key, icon: Icon }) => {
-            const count = themeCount(key);
-            const active = theme?.key === key;
-            const disabled = !active && count === 0;
-            const className = cn(
-              'inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-sm font-semibold whitespace-nowrap transition',
-              active
-                ? 'border-secondary bg-secondary text-secondary-foreground'
-                : 'bg-card hover:border-foreground/30',
-              disabled && 'pointer-events-none opacity-40',
-            );
-            const inner = (
-              <>
-                <Icon className="size-4" aria-hidden="true" />
-                {t(`themes.${key}`)}
-                <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                  {count}
-                </span>
-              </>
-            );
-            return (
-              <li key={key}>
-                {disabled ? (
-                  <span aria-disabled="true" className={className}>
-                    {inner}
-                  </span>
-                ) : (
-                  <Link
-                    // Tocar el tema elegido lo quita.
-                    href={withQuery({ tema: active ? undefined : key })}
-                    data-track="catalog_filter_used"
-                    data-track-filter="theme"
-                    aria-current={active ? 'true' : undefined}
-                    className={className}
-                  >
-                    {inner}
-                  </Link>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      {filter && visible.length > 0 && visible.length < 3 && (
-        <p role="note" className="mt-8 max-w-2xl rounded-lg bg-accent px-4 py-3 text-sm">
-          {t('fewForAge', { min: filter.min, max: filter.max })}
-        </p>
-      )}
-
-      {visible.length === 0 ? (
-        <div className="mt-12">
-          <p className="text-muted-foreground">
-            {search ? t('emptySearch', { query: search }) : t('empty')}
-          </p>
-          <Link href={base} className="mt-3 inline-block font-semibold text-primary">
-            {t('clearFilters')}
-          </Link>
-        </div>
-      ) : (
-        <>
-          {/* Cuántas quedaron y qué filtros hay, cada uno con su ✕ (se anuncia al cambiar). */}
-          <div className="mt-8 flex flex-wrap items-center gap-2 text-sm">
-            <p role="status" className="mr-2 font-semibold text-muted-foreground">
-              {t('resultCount', { count: visible.length })}
+          <nav aria-label={t('themeLabel')}>
+            <p className="mb-3 text-xs font-bold tracking-wider text-muted-foreground uppercase">
+              {t('themeLabel')}
             </p>
-            {[
-              search ? { label: `“${search}”`, href: withQuery({ q: undefined }) } : null,
-              filter
-                ? {
-                    label: t('ageRange', { min: filter.min, max: filter.max }),
-                    href: withQuery({ edad: undefined }),
-                  }
-                : null,
-              collection
-                ? { label: collection.name, href: withQuery({ coleccion: undefined }) }
-                : null,
-            ]
-              .filter((item) => item !== null)
-              .map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-muted px-3 font-medium hover:bg-secondary"
-                >
-                  {item.label}
-                  <X className="size-3.5" aria-label={t('removeFilter')} />
-                </Link>
-              ))}
-            {narrowed && (
-              <Link href={base} className="ml-1 font-semibold text-primary hover:underline">
-                {t('clearAll')}
+            <ul className="flex flex-wrap gap-2">
+              {STORY_THEMES.map(({ key, icon: Icon }) => {
+                const count = themeCount(key);
+                const active = theme?.key === key;
+                const disabled = !active && count === 0;
+                const className = cn(
+                  'inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-[0.8rem] font-semibold transition',
+                  active
+                    ? 'border-secondary bg-secondary text-secondary-foreground'
+                    : 'bg-card hover:border-foreground/30',
+                  disabled && 'pointer-events-none opacity-40',
+                );
+                const inner = (
+                  <>
+                    <Icon className="size-4" aria-hidden="true" />
+                    {t(`themes.${key}`)}
+                    <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                      {count}
+                    </span>
+                  </>
+                );
+                return (
+                  <li key={key}>
+                    {disabled ? (
+                      <span aria-disabled="true" className={className}>
+                        {inner}
+                      </span>
+                    ) : (
+                      <Link
+                        // Tocar el tema elegido lo quita.
+                        href={withQuery({ tema: active ? undefined : key })}
+                        data-track="catalog_filter_used"
+                        data-track-filter="theme"
+                        aria-current={active ? 'true' : undefined}
+                        className={className}
+                      >
+                        {inner}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </aside>
+
+        <div className="min-w-0">
+          {filter && visible.length > 0 && visible.length < 3 && (
+            <p role="note" className="mt-8 max-w-2xl rounded-lg bg-accent px-4 py-3 text-sm">
+              {t('fewForAge', { min: filter.min, max: filter.max })}
+            </p>
+          )}
+
+          {visible.length === 0 ? (
+            <div className="mt-12">
+              <p className="text-muted-foreground">
+                {search ? t('emptySearch', { query: search }) : t('empty')}
+              </p>
+              <Link href={base} className="mt-3 inline-block font-semibold text-primary">
+                {t('clearFilters')}
               </Link>
-            )}
-          </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-            {visible.map((story, index) => (
-              <StoryCard
-                key={story.slug}
-                story={story}
-                fromPrice={lowestPrice(offer, locale, display.country, story.lengths)}
-                headingLevel="h2"
-                priority={index < 2}
-                lineLabel={channel ? undefined : tLines(story.channels[0] ?? 'families')}
-                line={channel}
-              />
-            ))}
-          </div>
-        </>
-      )}
+            </div>
+          ) : (
+            <>
+              {/* Cuántas quedaron y qué filtros hay, cada uno con su ✕ (se anuncia al cambiar). */}
+              <div className="mt-8 flex flex-wrap items-center gap-2 text-sm">
+                <p role="status" className="mr-2 font-semibold text-muted-foreground">
+                  {t('resultCount', { count: visible.length })}
+                </p>
+                {[
+                  search ? { label: `“${search}”`, href: withQuery({ q: undefined }) } : null,
+                  filter
+                    ? {
+                        label: t('ageRange', { min: filter.min, max: filter.max }),
+                        href: withQuery({ edad: undefined }),
+                      }
+                    : null,
+                  collection
+                    ? { label: collection.name, href: withQuery({ coleccion: undefined }) }
+                    : null,
+                ]
+                  .filter((item) => item !== null)
+                  .map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-muted px-3 font-medium hover:bg-secondary"
+                    >
+                      {item.label}
+                      <X className="size-3.5" aria-label={t('removeFilter')} />
+                    </Link>
+                  ))}
+                {narrowed && (
+                  <Link href={base} className="ml-1 font-semibold text-primary hover:underline">
+                    {t('clearAll')}
+                  </Link>
+                )}
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+                {visible.map((story, index) => (
+                  <StoryCard
+                    key={story.slug}
+                    story={story}
+                    fromPrice={lowestPrice(offer, locale, display.country, story.lengths)}
+                    headingLevel="h2"
+                    compact
+                    priority={index < 2}
+                    lineLabel={channel ? undefined : tLines(story.channels[0] ?? 'families')}
+                    line={channel}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
