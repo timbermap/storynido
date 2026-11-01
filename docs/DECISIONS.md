@@ -2196,3 +2196,7 @@ Se quitan de la landing de Familias la sección de la foto del libro impreso (qu
 ### 187b. Home sin la tarjeta «Mira antes de comprar» (2026-11-01)
 
 La tarjeta de garantía («Crea una vista previa gratis… si el libro tiene un error o llega dañado, lo corregimos, lo reimprimimos o te devolvemos el dinero») sale de la home, como ya había salido de Familias. La política de reembolsos sigue en el pie y en las preguntas frecuentes.
+
+### 186d. Eventos: visual del hero, opción 1 (2026-11-01)
+
+Sebastián eligió «el libro, grande y limpio»: la portada del cumpleaños como libro sobre una mancha de color, la invitación asomando detrás y la guirnalda con el nombre colgando arriba. Salen las etiquetas del hero (siguen en el kit y en la landing).
