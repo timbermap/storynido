@@ -9,13 +9,14 @@ import {
   PENDING_COVER_SLUGS,
   SEED_DRAFT_STORIES,
   SEED_NEW_STORIES,
+  SEED_PRO_STORIES,
   SEED_STORIES,
   SEED_STYLES,
   STORY_CAST,
 } from '../seed-data/catalog';
 
 const PUBLIC = path.resolve(__dirname, '../../apps/web/public');
-const ALL = [...SEED_STORIES, ...SEED_NEW_STORIES, ...SEED_DRAFT_STORIES];
+const ALL = [...SEED_STORIES, ...SEED_NEW_STORIES, ...SEED_DRAFT_STORIES, ...SEED_PRO_STORIES];
 
 /** Firestore rechaza `undefined`: el seed no puede mandarlo. */
 function undefinedPaths(value: unknown, trail = ''): string[] {

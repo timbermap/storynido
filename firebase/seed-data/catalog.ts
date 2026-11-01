@@ -383,6 +383,22 @@ export const NEW_COVER_SLUGS: string[] = [
   'el-jardin-de-las-emociones',
   'un-pasito-mas',
   'mi-visita-al-dentista',
+  'el-rincon-de-la-calma',
+  'respiro-como-un-globo',
+  'mi-termometro-verde-amarillo-rojo',
+  'cuando-todo-es-demasiado-ruido',
+  'cuando-cambia-el-plan',
+  'voy-al-supermercado',
+  'los-ruidos-fuertes',
+  'mi-rutina-de-la-manana',
+  'las-letras-de-mi-nombre',
+  'el-sonido-escondido',
+  'detective-de-palabras',
+  'hoy-estoy-triste',
+  'lo-que-siento-en-el-cuerpo',
+  'me-equivoque-y-no-pasa-nada',
+  'esperar-mi-turno',
+  'voy-al-medico-y-me-vacunan',
 ];
 
 /** Portadas de fondo azul marino: el título va en claro. */
@@ -535,11 +551,12 @@ const DRAFT_STORIES: SeedStory[] = [
   {
     ...DRAFT_BASE,
     slug: 'hermano-mayor',
+    channels: ['families', 'professionals'],
     order: 43,
     ageMin: 3,
     ageMax: 5,
     palette: 'magic',
-    collectionIds: ['grandes-momentos'],
+    collectionIds: ['grandes-momentos', 'mi-primera-experiencia'],
     suggestedLessons: ['llega-un-hermanito', 'compartir'],
     tags: ['hermanito', 'familia', 'hitos'],
     title: {
@@ -670,11 +687,12 @@ const DRAFT_STORIES: SeedStory[] = [
   {
     ...BABY_BASE,
     slug: 'chau-panal',
+    channels: ['families', 'professionals'],
     order: 48,
     ageMin: 2,
     ageMax: 3,
     palette: 'learning',
-    collectionIds: ['grandes-momentos'],
+    collectionIds: ['grandes-momentos', 'mis-pequenos-logros'],
     suggestedLessons: ['dejar-el-panal-o-el-chupete'],
     tags: ['pañal', 'hitos', 'bebés'],
     title: {
@@ -697,11 +715,12 @@ const DRAFT_STORIES: SeedStory[] = [
   {
     ...DRAFT_BASE,
     slug: 'el-volcan-del-enojo',
+    channels: ['families', 'professionals'],
     order: 49,
     ageMin: 3,
     ageMax: 5,
     palette: 'magic',
-    collectionIds: ['grandes-momentos'],
+    collectionIds: ['grandes-momentos', 'conozco-mis-emociones'],
     suggestedLessons: ['manejar-el-enojo', 'calma-cuando-estoy-nervioso'],
     tags: ['enojo', 'emociones', 'calma'],
     title: {
@@ -1214,6 +1233,473 @@ export const SEED_NEW_STORIES: SeedStory[] = [
     },
     coverImage: '/samples/un-lunes-al-reves.webp',
   },
+];
+
+/**
+ * Profesionales: historias nuevas de la auditoría de mercado (DECISIONS 184). Chico genérico, sin elenco:
+ * el título no lleva el nombre.
+ */
+function proStory(input: {
+  slug: string;
+  order: number;
+  ageMin: number;
+  ageMax: number;
+  collection: string;
+  lessons: string[];
+  tags: string[];
+  title: { es: string; en: string; pt: string };
+  summary: { es: string; en: string; pt: string };
+  excerpt: { es: string; en: string; pt: string };
+  objective: { es: string; en: string; pt: string };
+}): SeedStory {
+  return {
+    ...NEW_STORY_BASE,
+    slug: input.slug,
+    order: input.order,
+    ageMin: input.ageMin,
+    ageMax: input.ageMax,
+    palette: 'learning',
+    channels: ['professionals', 'families'],
+    collectionIds: [input.collection],
+    suggestedLessons: input.lessons,
+    tags: input.tags,
+    objectives: [input.objective],
+    title: input.title,
+    summary: input.summary,
+    excerpt: input.excerpt,
+    coverImage: `/samples/${input.slug}.webp`,
+  };
+}
+
+export const SEED_PRO_STORIES: SeedStory[] = [
+  proStory({
+    slug: 'el-rincon-de-la-calma',
+    order: 60,
+    ageMin: 4,
+    ageMax: 8,
+    collection: 'calmarme-y-regularme',
+    lessons: ['calma-cuando-estoy-nervioso', 'manejar-el-enojo'],
+    tags: ['calma', 'regulación', 'emociones'],
+    title: { es: 'El rincón de la calma', en: 'The Calm-Down Corner', pt: 'O cantinho da calma' },
+    summary: {
+      es: 'Cuando todo se vuelve demasiado, hay un lugar para parar: un cojín, una luz suave y tres pasos para volver a sentirse bien.',
+      en: 'When everything gets too much, there is a place to pause: a cushion, a soft light and three steps to feel better.',
+      pt: 'Quando tudo fica demais, existe um lugar para parar: uma almofada, uma luz suave e três passos para voltar a se sentir bem.',
+    },
+    excerpt: {
+      es: 'Cuando el ruido se hizo grande, fue al rincón de la calma. Se sentó, apoyó las manos en la panza y esperó. Poco a poco, el ruido se fue haciendo chiquito.',
+      en: 'When the noise grew big, it went to the calm-down corner. It sat down, rested both hands on its belly and waited. Little by little, the noise got smaller.',
+      pt: 'Quando o barulho ficou grande, foi para o cantinho da calma. Sentou, apoiou as mãos na barriga e esperou. Aos poucos, o barulho foi ficando pequeno.',
+    },
+    objective: {
+      es: 'Conocer un lugar y una rutina para calmarse',
+      en: 'Learn a place and a routine to calm down',
+      pt: 'Conhecer um lugar e uma rotina para se acalmar',
+    },
+  }),
+  proStory({
+    slug: 'respiro-como-un-globo',
+    order: 61,
+    ageMin: 3,
+    ageMax: 7,
+    collection: 'calmarme-y-regularme',
+    lessons: ['calma-cuando-estoy-nervioso'],
+    tags: ['calma', 'respiración', 'regulación'],
+    title: {
+      es: 'Respiro como un globo',
+      en: 'I Breathe Like a Balloon',
+      pt: 'Respiro como um balão',
+    },
+    summary: {
+      es: 'Respirar hondo es inflar un globo en la panza y soltarlo despacito. Una historia para practicar la respiración paso a paso.',
+      en: 'Breathing deeply is blowing up a balloon in your belly and letting it out slowly. A story to practice breathing step by step.',
+      pt: 'Respirar fundo é encher um balão na barriga e soltar devagarinho. Uma história para praticar a respiração passo a passo.',
+    },
+    excerpt: {
+      es: 'Inspiró por la nariz y el globo de su panza se infló, grande, grande. Después soltó el aire despacito, ssss, y el globo se desinfló.',
+      en: 'It breathed in through the nose and the balloon in its belly puffed up, big, big. Then it let the air out slowly, ssss, and the balloon went down.',
+      pt: 'Inspirou pelo nariz e o balão da barriga encheu, grande, grande. Depois soltou o ar devagarinho, ssss, e o balão murchou.',
+    },
+    objective: {
+      es: 'Practicar la respiración profunda',
+      en: 'Practice deep breathing',
+      pt: 'Praticar a respiração profunda',
+    },
+  }),
+  proStory({
+    slug: 'mi-termometro-verde-amarillo-rojo',
+    order: 62,
+    ageMin: 4,
+    ageMax: 8,
+    collection: 'calmarme-y-regularme',
+    lessons: ['calma-cuando-estoy-nervioso', 'manejar-el-enojo'],
+    tags: ['calma', 'emociones', 'regulación'],
+    title: {
+      es: 'Mi termómetro: verde, amarillo y rojo',
+      en: 'My Thermometer: Green, Yellow and Red',
+      pt: 'Meu termômetro: verde, amarelo e vermelho',
+    },
+    summary: {
+      es: 'Un termómetro que mide cómo me siento: en verde estoy tranquilo, en amarillo me estoy alterando, en rojo necesito ayuda. Y qué hago en cada color.',
+      en: "A thermometer that measures how I feel: in green I'm calm, in yellow I'm getting upset, in red I need help. And what to do in each color.",
+      pt: 'Um termômetro que mede como me sinto: no verde estou tranquilo, no amarelo estou me alterando, no vermelho preciso de ajuda. E o que fazer em cada cor.',
+    },
+    excerpt: {
+      es: 'Miró su termómetro: estaba en amarillo. Entonces respiró hondo, apretó sus manos y el termómetro bajó un poquito.',
+      en: 'It looked at its thermometer: it was in the yellow. So it took a deep breath, squeezed both hands and the thermometer went down a little.',
+      pt: 'Olhou para o termômetro: estava no amarelo. Então respirou fundo, apertou as mãos e o termômetro baixou um pouquinho.',
+    },
+    objective: {
+      es: 'Identificar el nivel de alteración y elegir qué hacer',
+      en: 'Notice how upset you are and choose what to do',
+      pt: 'Identificar o nível de alteração e escolher o que fazer',
+    },
+  }),
+  proStory({
+    slug: 'cuando-todo-es-demasiado-ruido',
+    order: 63,
+    ageMin: 4,
+    ageMax: 9,
+    collection: 'calmarme-y-regularme',
+    lessons: ['calma-cuando-estoy-nervioso'],
+    tags: ['calma', 'sensorial', 'regulación'],
+    title: {
+      es: 'Cuando todo es demasiado ruido',
+      en: 'When Everything Is Too Loud',
+      pt: 'Quando tudo é barulho demais',
+    },
+    summary: {
+      es: 'Hay días en que los sonidos pinchan. Una historia para reconocer cuándo pasa, pedir una pausa y encontrar lo que ayuda.',
+      en: 'Some days sounds feel sharp. A story to notice when it happens, ask for a break and find what helps.',
+      pt: 'Há dias em que os sons incomodam. Uma história para reconhecer quando acontece, pedir uma pausa e encontrar o que ajuda.',
+    },
+    excerpt: {
+      es: 'Las voces, la puerta, el timbre: todo sonaba muy fuerte. Se puso sus auriculares y el mundo bajó el volumen.',
+      en: 'The voices, the door, the bell: everything sounded very loud. It put on its headphones and the world turned the volume down.',
+      pt: 'As vozes, a porta, a campainha: tudo soava muito alto. Colocou os fones e o mundo baixou o volume.',
+    },
+    objective: {
+      es: 'Reconocer la sobrecarga sensorial y pedir ayuda',
+      en: 'Notice sensory overload and ask for help',
+      pt: 'Reconhecer a sobrecarga sensorial e pedir ajuda',
+    },
+  }),
+  proStory({
+    slug: 'cuando-cambia-el-plan',
+    order: 64,
+    ageMin: 4,
+    ageMax: 9,
+    collection: 'historias-sociales',
+    lessons: ['calma-cuando-estoy-nervioso'],
+    tags: ['historia social', 'cambios', 'rutinas'],
+    title: { es: 'Cuando cambia el plan', en: 'When the Plan Changes', pt: 'Quando o plano muda' },
+    summary: {
+      es: 'A veces el plan cambia. Una historia social: qué pasa, cómo me puedo sentir y qué puedo hacer cuando algo no sale como lo esperaba.',
+      en: "Sometimes the plan changes. A social story: what happens, how I might feel and what I can do when things don't go as expected.",
+      pt: 'Às vezes o plano muda. Uma história social: o que acontece, como posso me sentir e o que posso fazer quando algo não sai como esperado.',
+    },
+    excerpt: {
+      es: 'A veces el plan cambia. Hoy íbamos a ir a la plaza, pero llueve. Puedo sentirme sorprendido. Puedo respirar y mirar el nuevo plan.',
+      en: 'Sometimes the plan changes. Today we were going to the park, but it is raining. I may feel surprised. I can breathe and look at the new plan.',
+      pt: 'Às vezes o plano muda. Hoje íamos ao parque, mas está chovendo. Posso me sentir surpreso. Posso respirar e olhar o novo plano.',
+    },
+    objective: {
+      es: 'Anticipar un cambio de plan y elegir qué hacer',
+      en: 'Anticipate a change of plan and choose what to do',
+      pt: 'Antecipar uma mudança de plano e escolher o que fazer',
+    },
+  }),
+  proStory({
+    slug: 'voy-al-supermercado',
+    order: 65,
+    ageMin: 3,
+    ageMax: 8,
+    collection: 'historias-sociales',
+    lessons: ['primer-dia-de-clases'],
+    tags: ['historia social', 'rutinas', 'lugares nuevos'],
+    title: { es: 'Voy al supermercado', en: 'I Go to the Supermarket', pt: 'Vou ao supermercado' },
+    summary: {
+      es: 'Un paso por vez: entrar, tomar el carrito, buscar lo de la lista, esperar en la fila y salir. Una historia social para anticipar la salida.',
+      en: 'One step at a time: go in, take a cart, find the things on the list, wait in line and leave. A social story to prepare for the outing.',
+      pt: 'Um passo de cada vez: entrar, pegar o carrinho, procurar o da lista, esperar na fila e sair. Uma história social para antecipar o passeio.',
+    },
+    excerpt: {
+      es: 'Hoy voy al supermercado con un adulto. Primero tomo un carrito. Después buscamos las cosas de la lista, una por una.',
+      en: 'Today I go to the supermarket with a grown-up. First I take a cart. Then we look for the things on the list, one by one.',
+      pt: 'Hoje vou ao supermercado com um adulto. Primeiro pego um carrinho. Depois procuramos as coisas da lista, uma por uma.',
+    },
+    objective: {
+      es: 'Anticipar los pasos de una salida al supermercado',
+      en: 'Anticipate the steps of a supermarket trip',
+      pt: 'Antecipar os passos de uma ida ao supermercado',
+    },
+  }),
+  proStory({
+    slug: 'los-ruidos-fuertes',
+    order: 66,
+    ageMin: 3,
+    ageMax: 8,
+    collection: 'historias-sociales',
+    lessons: ['calma-cuando-estoy-nervioso', 'valentia'],
+    tags: ['historia social', 'sensorial', 'ruidos'],
+    title: { es: 'Los ruidos fuertes', en: 'Loud Noises', pt: 'Os barulhos fortes' },
+    summary: {
+      es: 'A veces hay ruidos fuertes: una sirena, un secador, un trueno. Una historia social sobre qué son, que pasan y qué puedo hacer.',
+      en: 'Sometimes there are loud noises: a siren, a hair dryer, thunder. A social story about what they are, that they pass and what I can do.',
+      pt: 'Às vezes há barulhos fortes: uma sirene, um secador, um trovão. Uma história social sobre o que são, que passam e o que posso fazer.',
+    },
+    excerpt: {
+      es: 'A veces hay ruidos fuertes. Una sirena suena fuerte. Los ruidos fuertes pasan. Puedo taparme los oídos o ponerme mis auriculares.',
+      en: 'Sometimes there are loud noises. A siren is loud. Loud noises pass. I can cover my ears or put on my headphones.',
+      pt: 'Às vezes há barulhos fortes. Uma sirene faz barulho forte. Os barulhos fortes passam. Posso tapar os ouvidos ou colocar meus fones.',
+    },
+    objective: {
+      es: 'Saber qué hacer ante los ruidos fuertes',
+      en: 'Know what to do about loud noises',
+      pt: 'Saber o que fazer diante de barulhos fortes',
+    },
+  }),
+  proStory({
+    slug: 'mi-rutina-de-la-manana',
+    order: 67,
+    ageMin: 3,
+    ageMax: 8,
+    collection: 'historias-sociales',
+    lessons: ['lograr-lo-que-te-propongas'],
+    tags: ['historia social', 'rutinas', 'autonomía'],
+    title: { es: 'Mi rutina de la mañana', en: 'My Morning Routine', pt: 'Minha rotina da manhã' },
+    summary: {
+      es: 'Despertarme, vestirme, desayunar y lavarme los dientes, en el orden en que pasa. Una historia social para empezar el día sin apuros.',
+      en: 'Waking up, getting dressed, having breakfast and brushing teeth, in the order it happens. A social story to start the day without rushing.',
+      pt: 'Acordar, me vestir, tomar café e escovar os dentes, na ordem em que acontece. Uma história social para começar o dia sem pressa.',
+    },
+    excerpt: {
+      es: 'Por la mañana me despierto. Después me visto. Después desayuno. Después me lavo los dientes. Cuando termino, estoy listo.',
+      en: 'In the morning I wake up. Then I get dressed. Then I have breakfast. Then I brush my teeth. When I finish, I am ready.',
+      pt: 'De manhã eu acordo. Depois me visto. Depois tomo café. Depois escovo os dentes. Quando termino, estou pronto.',
+    },
+    objective: {
+      es: 'Seguir la secuencia de la rutina de la mañana',
+      en: 'Follow the sequence of the morning routine',
+      pt: 'Seguir a sequência da rotina da manhã',
+    },
+  }),
+  proStory({
+    slug: 'las-letras-de-mi-nombre',
+    order: 68,
+    ageMin: 4,
+    ageMax: 7,
+    collection: 'que-lindo-es-aprender',
+    lessons: ['ser-uno-mismo'],
+    tags: ['letras', 'lectura', 'conciencia fonológica'],
+    title: {
+      es: 'Las letras de mi nombre',
+      en: 'The Letters in My Name',
+      pt: 'As letras do meu nome',
+    },
+    summary: {
+      es: 'Cada letra de mi nombre tiene un sonido y una historia. Una aventura para reconocerlas, jugar con ellas y armar mi nombre.',
+      en: 'Every letter in my name has a sound and a story. An adventure to find them, play with them and build my name.',
+      pt: 'Cada letra do meu nome tem um som e uma história. Uma aventura para reconhecê-las, brincar com elas e montar o meu nome.',
+    },
+    excerpt: {
+      es: 'La primera letra de su nombre se había escondido detrás del sillón. —¡Acá estoy! —sonó—. Y empezó a sonar como su sonido favorito.',
+      en: 'The first letter of the name had hidden behind the couch. "Here I am!" it sounded. And it began to make its favorite sound.',
+      pt: 'A primeira letra do nome tinha se escondido atrás do sofá. — Aqui estou! — soou. E começou a fazer o seu som favorito.',
+    },
+    objective: {
+      es: 'Reconocer las letras y los sonidos del propio nombre',
+      en: 'Recognize the letters and sounds of your own name',
+      pt: 'Reconhecer as letras e os sons do próprio nome',
+    },
+  }),
+  proStory({
+    slug: 'el-sonido-escondido',
+    order: 69,
+    ageMin: 4,
+    ageMax: 7,
+    collection: 'que-lindo-es-aprender',
+    lessons: ['lograr-lo-que-te-propongas'],
+    tags: ['sonidos', 'lenguaje', 'fonoaudiología'],
+    title: { es: 'El sonido escondido', en: 'The Hidden Sound', pt: 'O som escondido' },
+    summary: {
+      es: 'En el bosque se escondió un sonido. Con atención, repeticiones y mucha paciencia, se lo encuentra una y otra vez. El profesional elige el sonido.',
+      en: 'A sound hid in the forest. With attention, repetition and patience, it is found again and again. The professional picks the sound.',
+      pt: 'Um som se escondeu na floresta. Com atenção, repetições e muita paciência, ele é encontrado várias vezes. O profissional escolhe o som.',
+    },
+    excerpt: {
+      es: 'Escuchó con atención: rrr, rrr, rrr. Había un sonido escondido entre las hojas. Lo repitió bajito, y después más fuerte.',
+      en: 'It listened closely: rrr, rrr, rrr. There was a hidden sound among the leaves. It said it softly, and then louder.',
+      pt: 'Escutou com atenção: rrr, rrr, rrr. Havia um som escondido entre as folhas. Repetiu baixinho e depois mais forte.',
+    },
+    objective: {
+      es: 'Practicar un sonido objetivo con repeticiones',
+      en: 'Practice a target sound through repetition',
+      pt: 'Praticar um som-alvo com repetições',
+    },
+  }),
+  proStory({
+    slug: 'detective-de-palabras',
+    order: 70,
+    ageMin: 5,
+    ageMax: 9,
+    collection: 'que-lindo-es-aprender',
+    lessons: ['lograr-lo-que-te-propongas', 'amistad'],
+    tags: ['vocabulario', 'lectura', 'detectives'],
+    title: { es: 'Detective de palabras', en: 'Word Detective', pt: 'Detetive de palavras' },
+    summary: {
+      es: 'Una palabra nueva aparece en el cuento y hay que investigarla: ¿qué significa?, ¿con qué se parece?, ¿dónde la puedo usar? Vocabulario como misterio.',
+      en: 'A new word shows up in the story and it must be investigated: what does it mean, what is it like, where can I use it? Vocabulary as a mystery.',
+      pt: 'Uma palavra nova aparece na história e é preciso investigá-la: o que significa, com o que se parece, onde posso usar? Vocabulário como mistério.',
+    },
+    excerpt: {
+      es: 'Encontró una palabra rara: «enorme». Sacó su lupa. ¿Qué podría significar? Miró pistas: una montaña, un elefante, un helado gigante.',
+      en: 'It found a strange word: "enormous". It took out its magnifying glass. What could it mean? It looked for clues: a mountain, an elephant, a giant ice cream.',
+      pt: 'Encontrou uma palavra estranha: «enorme». Pegou a lupa. O que poderia significar? Procurou pistas: uma montanha, um elefante, um sorvete gigante.',
+    },
+    objective: {
+      es: 'Aprender vocabulario nuevo con pistas del contexto',
+      en: 'Learn new vocabulary from context clues',
+      pt: 'Aprender vocabulário novo com pistas do contexto',
+    },
+  }),
+  proStory({
+    slug: 'hoy-estoy-triste',
+    order: 71,
+    ageMin: 3,
+    ageMax: 9,
+    collection: 'conozco-mis-emociones',
+    lessons: ['calma-cuando-estoy-nervioso'],
+    tags: ['tristeza', 'emociones', 'duelo'],
+    title: { es: 'Hoy estoy triste', en: 'Today I Feel Sad', pt: 'Hoje estou triste' },
+    summary: {
+      es: 'A veces uno se siente triste, y está bien. Una historia para ponerle nombre a la tristeza, saber que pasa y encontrar quién y qué ayuda.',
+      en: "Sometimes you feel sad, and that's okay. A story to name sadness, know that it passes and find who and what helps.",
+      pt: 'Às vezes a gente fica triste, e tudo bem. Uma história para dar nome à tristeza, saber que passa e encontrar quem e o que ajuda.',
+    },
+    excerpt: {
+      es: 'Hoy me siento triste. La tristeza es como una nube pequeña que se queda un rato. No me pasa algo malo por sentirme así.',
+      en: 'Today I feel sad. Sadness is like a small cloud that stays for a while. Nothing is wrong with me for feeling this way.',
+      pt: 'Hoje me sinto triste. A tristeza é como uma nuvem pequena que fica um tempo. Não há nada errado comigo por me sentir assim.',
+    },
+    objective: {
+      es: 'Reconocer la tristeza y buscar consuelo',
+      en: 'Recognize sadness and look for comfort',
+      pt: 'Reconhecer a tristeza e buscar consolo',
+    },
+  }),
+  proStory({
+    slug: 'lo-que-siento-en-el-cuerpo',
+    order: 72,
+    ageMin: 4,
+    ageMax: 9,
+    collection: 'conozco-mis-emociones',
+    lessons: ['calma-cuando-estoy-nervioso', 'manejar-el-enojo'],
+    tags: ['emociones', 'cuerpo', 'interocepción'],
+    title: {
+      es: 'Lo que siento en el cuerpo',
+      en: 'What I Feel in My Body',
+      pt: 'O que sinto no corpo',
+    },
+    summary: {
+      es: 'Cada emoción se siente en alguna parte: el corazón rápido, un nudo en la panza, las manos calientes. Un recorrido para descubrir dónde vive cada una.',
+      en: 'Every feeling shows up somewhere: a racing heart, a knot in the tummy, warm hands. A tour to discover where each one lives.',
+      pt: 'Cada emoção é sentida em algum lugar: o coração acelerado, um nó na barriga, as mãos quentes. Um passeio para descobrir onde mora cada uma.',
+    },
+    excerpt: {
+      es: 'Cuando se enojó, sintió las manos calientes. Cuando tuvo miedo, el corazón le hizo pum, pum, pum. Cuando se alegró, sintió cosquillas.',
+      en: 'When it got angry, its hands felt hot. When it got scared, its heart went boom, boom, boom. When it felt happy, it got tickles.',
+      pt: 'Quando ficou com raiva, sentiu as mãos quentes. Quando teve medo, o coração fez pum, pum, pum. Quando ficou feliz, sentiu cócegas.',
+    },
+    objective: {
+      es: 'Relacionar las emociones con las sensaciones del cuerpo',
+      en: 'Connect feelings to body sensations',
+      pt: 'Relacionar as emoções com as sensações do corpo',
+    },
+  }),
+  proStory({
+    slug: 'me-equivoque-y-no-pasa-nada',
+    order: 73,
+    ageMin: 4,
+    ageMax: 9,
+    collection: 'mis-pequenos-logros',
+    lessons: ['equivocarse-esta-bien'],
+    tags: ['errores', 'frustración', 'perseverancia'],
+    title: {
+      es: 'Me equivoqué y no pasa nada',
+      en: "I Made a Mistake and It's Okay",
+      pt: 'Errei e não tem problema',
+    },
+    summary: {
+      es: 'La torre se cayó, el dibujo salió torcido, la respuesta estaba mal. Una historia para mirar el error como parte de aprender y volver a intentarlo.',
+      en: 'The tower fell, the drawing came out crooked, the answer was wrong. A story to see mistakes as part of learning and try again.',
+      pt: 'A torre caiu, o desenho saiu torto, a resposta estava errada. Uma história para olhar o erro como parte de aprender e tentar de novo.',
+    },
+    excerpt: {
+      es: 'La torre se cayó. Respiró hondo. —Me equivoqué —dijo—, y no pasa nada. Levantó un bloque y empezó de nuevo.',
+      en: 'The tower fell. It took a deep breath. "I made a mistake," it said, "and that\'s okay." It picked up a block and started again.',
+      pt: 'A torre caiu. Respirou fundo. — Errei — disse —, e não tem problema. Pegou um bloco e começou de novo.',
+    },
+    objective: {
+      es: 'Tolerar el error y volver a intentarlo',
+      en: 'Tolerate mistakes and try again',
+      pt: 'Tolerar o erro e tentar de novo',
+    },
+  }),
+  proStory({
+    slug: 'esperar-mi-turno',
+    order: 74,
+    ageMin: 3,
+    ageMax: 7,
+    collection: 'mis-pequenos-logros',
+    lessons: ['compartir', 'amistad'],
+    tags: ['esperar', 'turnos', 'convivencia'],
+    title: { es: 'Esperar mi turno', en: 'Waiting for My Turn', pt: 'Esperar a minha vez' },
+    summary: {
+      es: 'En la fila del tobogán, esperar cuesta. Una historia para contar hasta tres, mirar a los demás y saber que mi turno llega.',
+      en: 'In the slide line, waiting is hard. A story to count to three, watch others and know my turn will come.',
+      pt: 'Na fila do escorregador, esperar custa. Uma história para contar até três, olhar os outros e saber que a minha vez chega.',
+    },
+    excerpt: {
+      es: 'Había una fila para el tobogán. Esperar es difícil. Contó uno, dos, tres. Su turno ya estaba más cerca.',
+      en: 'There was a line for the slide. Waiting is hard. It counted one, two, three. Its turn was getting closer.',
+      pt: 'Havia uma fila para o escorregador. Esperar é difícil. Contou um, dois, três. A sua vez estava mais perto.',
+    },
+    objective: {
+      es: 'Esperar el propio turno con una estrategia',
+      en: 'Wait for your turn using a strategy',
+      pt: 'Esperar a própria vez com uma estratégia',
+    },
+  }),
+  proStory({
+    slug: 'voy-al-medico-y-me-vacunan',
+    order: 75,
+    ageMin: 3,
+    ageMax: 9,
+    collection: 'mi-primera-experiencia',
+    lessons: ['calma-cuando-estoy-nervioso', 'valentia'],
+    tags: ['médico', 'vacuna', 'anticipar'],
+    title: {
+      es: 'Voy al médico y me vacunan',
+      en: 'I Go to the Doctor and Get a Shot',
+      pt: 'Vou ao médico e tomo vacina',
+    },
+    summary: {
+      es: 'Qué pasa en el consultorio, uno por uno: la sala de espera, la balanza, la vacuna, que pica un ratito, y el premio. Para llegar sabiendo qué viene.',
+      en: "What happens at the doctor's, step by step: the waiting room, the scale, the shot that stings for a moment, and the sticker. To arrive knowing what comes.",
+      pt: 'O que acontece no consultório, passo a passo: a sala de espera, a balança, a vacina que dói um pouquinho e o adesivo. Para chegar sabendo o que vem.',
+    },
+    excerpt: {
+      es: 'Hoy voy al médico. Primero espero en la sala. Después el médico me mide y me pesa. La vacuna pica un ratito y pasa.',
+      en: 'Today I go to the doctor. First I wait in the waiting room. Then the doctor measures and weighs me. The shot stings for a little while and passes.',
+      pt: 'Hoje vou ao médico. Primeiro espero na sala. Depois o médico me mede e me pesa. A vacina dói um pouquinho e passa.',
+    },
+    objective: {
+      es: 'Anticipar una consulta y una vacuna',
+      en: "Anticipate a doctor's visit and a shot",
+      pt: 'Antecipar uma consulta e uma vacina',
+    },
+  }),
 ];
 
 /**

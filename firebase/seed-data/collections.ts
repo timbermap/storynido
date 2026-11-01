@@ -210,15 +210,51 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     ],
   },
   {
+    slug: 'calmarme-y-regularme',
+    active: true,
+    order: 24,
+    channel: 'professionals',
+    name: t('Calmarme y regularme', 'Calming down and self-regulation', 'Acalmar-se e se regular'),
+    description: t(
+      'Historias para parar, respirar y encontrar qué ayuda cuando todo es demasiado.',
+      'Stories to pause, breathe and find what helps when everything is too much.',
+      'Histórias para parar, respirar e encontrar o que ajuda quando tudo é demais.',
+    ),
+    topics: [
+      t('Respiración', 'Breathing', 'Respiração'),
+      t('Rincón de la calma', 'Calm-down corner', 'Cantinho da calma'),
+      t('Termómetro de emociones', 'Feelings thermometer', 'Termômetro de emoções'),
+      t('Sobrecarga sensorial', 'Sensory overload', 'Sobrecarga sensorial'),
+    ],
+  },
+  {
+    slug: 'historias-sociales',
+    active: true,
+    order: 25,
+    channel: 'professionals',
+    name: t(
+      'Historias sociales para el día a día',
+      'Social stories for everyday life',
+      'Histórias sociais para o dia a dia',
+    ),
+    description: t(
+      'Frases cortas y en orden, para anticipar rutinas, cambios y lugares nuevos.',
+      'Short sentences in order, to prepare for routines, changes and new places.',
+      'Frases curtas e em ordem, para antecipar rotinas, mudanças e lugares novos.',
+    ),
+    topics: [
+      t('Cambios de plan', 'Changes of plan', 'Mudanças de plano'),
+      t('Lugares nuevos', 'New places', 'Lugares novos'),
+      t('Ruidos fuertes', 'Loud noises', 'Barulhos fortes'),
+      t('Rutinas', 'Routines', 'Rotinas'),
+    ],
+  },
+  {
     slug: 'mi-primera-experiencia',
     active: true,
     order: 23,
     channel: 'professionals',
-    name: t(
-      'Prepararse para algo nuevo: dentista, primer día de clases',
-      'Getting ready for something new: dentist, first day of school',
-      'Preparar-se para algo novo: dentista, primeiro dia de aula',
-    ),
+    name: t('Anticipar lo que viene', 'Getting ready for what comes next', 'Antecipar o que vem'),
     description: t(
       'Para anticipar situaciones nuevas y llegar con confianza.',
       'To prepare for new situations and arrive with confidence.',
@@ -226,6 +262,7 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     ),
     topics: [
       t('Visita al dentista', 'Visiting the dentist', 'Visita ao dentista'),
+      t('Visita al médico', 'Visiting the doctor', 'Visita ao médico'),
       t('Primer día de clases', 'First day of school', 'Primeiro dia de aula'),
       t('Nuevas situaciones', 'New situations', 'Situações novas'),
     ],

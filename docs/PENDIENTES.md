@@ -49,8 +49,8 @@ Falta: 3 (portada como libro y galería), 5 (recortes para redes y A/B), 6 (port
 
 **P0:**
 
-1. Dos colecciones nuevas: «Calmarme y regularme» e «Historias sociales para el día a día», con 4 historias cada una (con portada: unos USD 0,07 por imagen).
-2. Llevar las 4 colecciones actuales a 4 historias cada una (sumando las que ya existen en Familias: volcán del enojo, Chau pañal, hermano mayor).
+1. (Hecho) Dos colecciones nuevas: «Calmarme y regularme» e «Historias sociales para el día a día», con 4 historias cada una.
+2. (Hecho) Las 4 colecciones actuales ya tienen 4 historias cada una.
 3. Guía para el profesional en cada historia (PDF: objetivo, cómo leerla, cinco preguntas, una actividad y cómo seguir en casa).
 4. Una persona con título que revise el contenido, con nombre y matrícula en la landing (lo tienes que aportar tú).
 

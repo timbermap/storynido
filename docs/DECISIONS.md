@@ -2153,3 +2153,12 @@ El desplegable de Familias (y el de «Explorar» con sesión) arranca con «Inic
 
 - **Fecha:** 2026-11-01.
 - Sebastián eligió la opción 2: cuatro pestañas (Bebés, Pequeños, Lectores, Grandes lectores) y cinco historias de Familias de cada edad por fila (`AgeTabs`, con los paneles armados en el servidor y la pestaña «Pequeños» abierta). Salen las siete cajas de temas de esa sección; los temas siguen en el filtro del catálogo. «Ver todas las historias» lleva al catálogo.
+
+## 184 · Profesionales: dos colecciones nuevas y las cuatro actuales a cuatro historias (auditoría de mercado)
+
+- **Fecha:** 2026-11-01.
+- **Fuente:** el documento «Profesionales: auditoría y estudio de mercado» (P0 de contenido).
+- **Colecciones nuevas:** «Calmarme y regularme» (el rincón de la calma, respiro como un globo, mi termómetro verde-amarillo-rojo, cuando todo es demasiado ruido) e «Historias sociales para el día a día» (cuando cambia el plan, voy al supermercado, los ruidos fuertes, mi rutina de la mañana). «Prepararse para algo nuevo» pasa a llamarse **«Anticipar lo que viene»**.
+- **Cuatro por colección:** Motivar la lectura (+ las letras de mi nombre, el sonido escondido, detective de palabras), Emociones (+ hoy estoy triste, lo que siento en el cuerpo y «El volcán del enojo», que ya existía en Familias), Frustración (+ me equivoqué y no pasa nada, esperar mi turno y «Chau pañal») y Anticipar (+ voy al médico y me vacunan y «Hermano mayor»). Las tres de Familias suman `professionals` como segunda línea.
+- **16 historias nuevas** en es/en/pt, con chico genérico y título sin nombre, y 16 portadas en Minimalismo gráfico (**USD 1,08**, `gemini-3.1-flash-image`).
+- **Sin hacer de ese documento:** guía para el profesional en PDF por historia (cambio en la generación), modo historia social con ilustración literal, versión para proyectar y en blanco y negro, precio profesional y packs de créditos con factura, libro de la clase, mejoras de la landing y **la persona con título que revise el contenido** (la tiene que aportar Sebastián). Hasta que alguien la revise, estas historias son borradores: conviene decirlo en la landing o revisarlas antes de venderlas.
