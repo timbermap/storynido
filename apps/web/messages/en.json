@@ -285,7 +285,10 @@
     },
     "withLesson": "With: {name}",
     "youWillCreate": "You will create: {story} + {lesson}",
-    "askWho": "Who is it for?"
+    "askWho": "Who is it for?",
+    "coloringTitle": "Coloring books",
+    "coloringText": "A book with your little one’s drawing to color in, with their character and the scenes of their story.",
+    "coloringCta": "Create a coloring book"
   },
   "Formats": {
     "digital": "Ebook (PDF)",
@@ -856,7 +859,7 @@
         },
         "short": {
           "name": "Short",
-          "text": "Perfect for bedtime."
+          "text": "A shorter book, for one or two sittings."
         },
         "classic": {
           "name": "Classic",

@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   NEW_COVER_SLUGS,
+  PENDING_COVER_SLUGS,
   SEED_DRAFT_STORIES,
   SEED_NEW_STORIES,
   SEED_STORIES,
@@ -47,7 +48,8 @@ describe('catálogo de ejemplo', () => {
   });
 
   it('el elenco y las portadas nuevas apuntan a historias que existen', () => {
-    const slugs = new Set(ALL.map((story) => story.slug));
+    // Las historias a la espera de su portada todavía no se siembran (PENDING_COVER_SLUGS).
+    const slugs = new Set([...ALL.map((story) => story.slug), ...PENDING_COVER_SLUGS]);
     for (const slug of [...Object.keys(STORY_CAST), ...NEW_COVER_SLUGS]) {
       expect(slugs.has(slug), slug).toBe(true);
     }

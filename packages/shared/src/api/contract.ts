@@ -545,6 +545,13 @@ export const offerSchema = z.object({
   }),
   formats: z.array(offerFormatSchema),
   /**
+   * Precio del libro digital según la extensión (más páginas, más IA): sirve para el «desde» de
+   * cada historia, que parte de su extensión más corta.
+   */
+  lengthPrices: z
+    .array(z.object({ length: bookLengthSchema, amountMinor: z.number().int() }))
+    .default([]),
+  /**
    * Moneda local del país, solo como referencia (todo se cobra en dólares; DECISIONS 097):
    * unidades por dólar del día. Null si el país usa dólares o no hay cotización.
    */

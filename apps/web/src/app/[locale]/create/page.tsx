@@ -7,14 +7,20 @@ import { loadWizardCatalog } from '@/lib/server/wizard-catalog';
 
 interface Props {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ story?: string; lesson?: string; line?: string; tema?: string }>;
+  searchParams: Promise<{
+    story?: string;
+    lesson?: string;
+    line?: string;
+    tema?: string;
+    tipo?: string;
+  }>;
 }
 
 const slug = (value: string | undefined) =>
   value && /^[a-z0-9-]{1,80}$/.test(value) ? value : null;
 
 export default async function CreatePage({ params, searchParams }: Props) {
-  const { story, lesson, line, tema } = await searchParams;
+  const { story, lesson, line, tema, tipo } = await searchParams;
   const theme = tema?.trim().slice(0, EVENT_LIMITS.themeMaxLength) ?? null;
   const locale = (await params).locale as Locale;
   // El creador arranca acá mismo (borrador en memoria): necesita el catálogo.
@@ -29,6 +35,8 @@ export default async function CreatePage({ params, searchParams }: Props) {
       // Celebraciones: la temática elegida en la landing (se puede cambiar en el creador).
       eventTheme={theme === '' ? null : theme}
       channel={parseChannel(line)}
+      // Destacado «Para colorear» (Brasil): el libro arranca como libro para colorear.
+      contentType={tipo === 'coloring' ? 'coloring' : null}
       proGate={{ title: t('signInTitle'), text: t('signInText') }}
       catalog={catalog}
     />

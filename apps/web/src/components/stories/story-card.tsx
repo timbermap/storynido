@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import type { PublicStory } from '@storynido/shared';
 
 import { Link } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 
 import { StoryCover } from './story-cover';
 
@@ -58,9 +59,11 @@ export async function StoryCard({
         className={compact ? 'flex flex-1 flex-col gap-1.5 p-3' : 'flex flex-1 flex-col gap-2 p-4'}
       >
         <Heading
-          className={
-            compact ? 'text-base leading-snug font-semibold' : 'text-xl leading-snug font-semibold'
-          }
+          className={cn(
+            compact ? 'text-base leading-snug font-semibold' : 'text-xl leading-snug font-semibold',
+            // La portada ya lleva el título: acá queda solo para lectores de pantalla.
+            story.coverTitleOverlay && 'sr-only',
+          )}
         >
           {story.title}
         </Heading>

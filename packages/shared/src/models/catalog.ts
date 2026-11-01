@@ -207,6 +207,19 @@ export function splitTitleAtName(title: string): { before: string; after: string
   };
 }
 
+/**
+ * Nombres del elenco por idioma (auditoría de historias): los que no viajan se adaptan
+ * (Tomás → Tom en inglés, Benja → Ben y Benjamim). Lola, Alex, Sofi y Martina sirven en los tres.
+ */
+const CAST_NAMES: Record<string, Partial<Record<'es' | 'en' | 'pt', string>>> = {
+  Tomás: { en: 'Tom' },
+  Benja: { en: 'Ben', pt: 'Benjamim' },
+};
+
+export function castNameFor(name: string, locale: 'es' | 'en' | 'pt'): string {
+  return CAST_NAMES[name]?.[locale] ?? name;
+}
+
 /** Nombre de ejemplo (neutro) para mostrar los títulos del catálogo antes de que se escriba el nombre. */
 export const EXAMPLE_CHILD_NAME = 'Alex';
 

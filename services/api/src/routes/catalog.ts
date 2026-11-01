@@ -1,5 +1,8 @@
 import {
   BOOK_FORMATS,
+  castNameFor,
+  BOOK_LENGTHS,
+  DEFAULT_EDITORIAL_CONFIG,
   apiRoutes,
   CHARGE_CURRENCY,
   COUNTRY_CODES,
@@ -46,20 +49,21 @@ const params = <K extends keyof typeof apiRoutes>(request: FastifyRequest) =>
   request.params as ParamsOf<K>;
 
 export function toPublicStory(story: Story, locale: Locale): PublicStory {
+  const cast = castNameFor(story.castName ?? EXAMPLE_CHILD_NAME, locale);
   return {
     slug: story.slug,
     // El catálogo es público y todavía no hay nombre: la marca [Nombre] se muestra con el del elenco
     // de la historia (o uno de ejemplo). La portada con título recibe el título partido.
-    title: withChildName(story.title[locale], story.castName ?? EXAMPLE_CHILD_NAME),
+    title: withChildName(story.title[locale], cast),
     titleParts: splitTitleAtName(story.title[locale]),
     coverTitleOverlay: story.coverTitleOverlay,
     coverInk: story.coverInk,
     coverImagePro: story.coverImagePro ?? null,
     titlePro: story.titlePro?.[locale] ?? null,
-    castName: story.castName ?? EXAMPLE_CHILD_NAME,
+    castName: cast,
     defaultStyle: story.defaultStyle ?? null,
-    summary: withChildName(story.summary[locale], story.castName ?? EXAMPLE_CHILD_NAME),
-    excerpt: withChildName(story.excerpt[locale], story.castName ?? EXAMPLE_CHILD_NAME),
+    summary: withChildName(story.summary[locale], cast),
+    excerpt: withChildName(story.excerpt[locale], cast),
     ageMin: story.ageMin,
     ageMax: story.ageMax,
     tags: story.tags,
@@ -129,6 +133,16 @@ export function buildOffer(input: {
       },
     ];
   });
+  const digital = country.active && country.formats.digital ? pricing.digital : null;
+  const lengthPrices = digital?.active
+    ? BOOK_LENGTHS.map((length) => ({
+        length,
+        amountMinor: charmPrice(
+          unitPriceUsdMinor(digital, 0, DEFAULT_EDITORIAL_CONFIG.lengths[length].interiorPages),
+          CHARGE_CURRENCY,
+        ),
+      }))
+    : [];
   const printOptions = BOOK_FORMATS.flatMap((format) =>
     format === 'digital' ? [] : printable(format),
   );
@@ -150,6 +164,7 @@ export function buildOffer(input: {
       quoted: true,
     },
     formats,
+    lengthPrices,
     printUnavailable:
       country.active &&
       BOOK_FORMATS.some((format) => format !== 'digital' && country.formats[format]) &&

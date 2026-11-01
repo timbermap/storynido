@@ -33,6 +33,14 @@ export function CoverTitle({
   after?: string;
   ink?: 'dark' | 'light';
 }) {
+  // La puntuación pegada al nombre ("¡" antes, "," después) viaja con él: no queda suelta en su línea.
+  if (name) {
+    const lead = /^[\s¡¿"«]*$/u.test(before) ? before.trim() : '';
+    if (lead) before = '';
+    const tail = /^[,.;:!?»"]+/u.exec(after)?.[0] ?? '';
+    name = `${lead}${name}${tail}`;
+    after = after.slice(tail.length).trim();
+  }
   return (
     <p
       className={cn(

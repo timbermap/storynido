@@ -339,6 +339,5 @@ export const SEED_LESSONS: SeedLesson[] = [
 /** La historia hecha para cada enseñanza (recorrido historia → enseñanza, DECISIONS 160). */
 export const FEATURED_STORY: Record<string, string> = {
   'llega-un-hermanito': 'hermano-mayor',
-  'dormir-solo': 'buenas-noches',
   'primer-dia-de-clases': 'mi-primer-dia-de-clases',
 };

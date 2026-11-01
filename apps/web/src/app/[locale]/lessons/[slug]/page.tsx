@@ -72,7 +72,6 @@ export default async function LessonPage({ params }: Props) {
     ? matching.find((story) => story.slug === lesson.featuredStory)
     : undefined;
   const chip = { slug: lesson.slug, name: lesson.name };
-  const fromPrice = lowestPrice(offer, locale, display.country);
 
   return (
     <div className="container-page py-12">
@@ -117,7 +116,7 @@ export default async function LessonPage({ params }: Props) {
             <StoryCard
               key={story.slug}
               story={story}
-              fromPrice={fromPrice}
+              fromPrice={lowestPrice(offer, locale, display.country, story.lengths)}
               headingLevel="h3"
               priority={index < 2}
               compact

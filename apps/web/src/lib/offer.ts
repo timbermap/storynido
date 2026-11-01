@@ -1,15 +1,26 @@
-import type { CountryCode, Locale, Offer } from '@storynido/shared';
+import type { BookLength, CountryCode, Locale, Offer } from '@storynido/shared';
 
 import { formatPrice } from './format';
 
-/** Precio más bajo de la oferta, formateado ("desde $349.00"). */
+/**
+ * Precio más bajo de la oferta, formateado ("desde $349.00"). Con las extensiones que admite una
+ * historia, parte de la más corta de ellas (un libro de bebé no cuesta lo de una gran aventura).
+ */
 export function lowestPrice(
   offer: Offer | null,
   locale: Locale,
   country: CountryCode,
+  lengths?: readonly BookLength[],
 ): string | null {
   if (!offer?.available) return null;
-  const lowest = Math.min(...offer.formats.map((f) => f.amountMinor));
+  const byLength = lengths
+    ? offer.lengthPrices
+        .filter((item) => lengths.includes(item.length))
+        .map((item) => item.amountMinor)
+    : [];
+  const lowest = byLength.length
+    ? Math.min(...byLength)
+    : Math.min(...offer.formats.map((f) => f.amountMinor));
   return Number.isFinite(lowest) ? formatPrice(lowest, offer.currency, locale, country) : null;
 }
 

@@ -44,6 +44,7 @@ const BG: Record<string, string> = {
   yellowSat: 'saturated sunflower yellow',
   blueSat: 'saturated deep blue',
   turquoise: 'saturated turquoise',
+  redSat: 'saturated warm red',
 };
 
 // --- Elenco (archivo 01) ------------------------------------------------------------------------
@@ -63,8 +64,17 @@ const KID = {
   martina: 'straight dark-brown bob with bangs, freckles, olive skin, coral sweater',
   benja: 'short black coily hair, warm dark-brown skin, mustard t-shirt, red sneakers',
   sofi: 'long black braids, medium-brown skin, mint dress',
+  lola: 'light-brown hair in two tiny pigtails, fair skin, yellow overalls',
+  alex: 'short wavy black hair, light-brown skin, green hoodie',
 };
-const KID_NAME = { tomas: 'Tomás', martina: 'Martina', benja: 'Benja', sofi: 'Sofi' };
+const KID_NAME = {
+  tomas: 'Tomás',
+  martina: 'Martina',
+  benja: 'Benja',
+  sofi: 'Sofi',
+  lola: 'Lola',
+  alex: 'Alex',
+};
 const at = (name: keyof typeof KID, age: number) =>
   `${KID_NAME[name]}, ${String(age)} (${KID[name]})`;
 // Por etapa: bebés saturado y simple, 6–8 historieta, 9+ novela gráfica.
@@ -223,19 +233,19 @@ const JOBS: Job[] = [
     'te-quiero-siempre',
     BABY,
     'yellowSat',
-    `${at('martina', 2)} hugs the neck of an adult seen from behind (only shoulders, arms and hair visible), cheek on the shoulder, eyes closed, smiling. Three big flat red hearts.`,
+    `${at('lola', 2)} hugs the neck of an adult seen from behind (only shoulders, arms and hair visible), cheek on the shoulder, eyes closed, smiling. Three big flat red hearts.`,
   ),
   cover(
     'buenas-noches',
     BABY,
     'blueSat',
-    `${at('tomas', 2)} in blue pajamas yawning, holding a red bunny. One big flat yellow moon behind. No soft glow.`,
+    `${at('lola', 2)} in blue pajamas yawning, holding a red bunny. One big flat yellow moon behind. No soft glow.`,
   ),
   cover(
     'amigos-de-la-selva',
     BABY,
     'turquoise',
-    `${at('benja', 2)} laughing in front of an enormous toucan with a big orange beak. Two huge flat green leaves.`,
+    `${at('lola', 2)} laughing in front of an enormous toucan with a big orange beak. Two huge flat green leaves.`,
   ),
   cover(
     'aventura-espacial',
@@ -301,13 +311,67 @@ const JOBS: Job[] = [
     'un-lunes-al-reves',
     READER,
     'mustard',
-    `${at('tomas', 8)} upside down with a cereal bowl, the cereal floating upward; behind, the family dog walking a person on a leash. Funny, absurd, energetic. No lettering.`,
+    `${at('alex', 8)} upside down with a cereal bowl, the cereal floating upward; behind, the family dog walking a person on a leash. Funny, absurd, energetic. No lettering.`,
   ),
   cover(
     'el-misterio-del-faro',
     NOVEL,
     'navy',
-    `${at('sofi', 11)} seen from behind and below, with a flashlight and a notebook on dark rocks, looking at a tall lighthouse whose light is off; the flashlight beam is a flat shape.`,
+    `${at('alex', 11)} seen from behind and below, with a flashlight and a notebook on dark rocks, looking at a tall lighthouse whose light is off; the flashlight beam is a flat shape.`,
+  ),
+  cover(
+    'la-navidad-de-nombre',
+    BABY,
+    'redSat',
+    `${at('lola', 2)} in a red knitted hat looks up at a big flat green fir tree with three round ornaments and one flat yellow star on top. No snow, no glow.`,
+  ),
+  cover(
+    'cuando-naciste',
+    BABY,
+    'turquoise',
+    `A newborn baby with light-brown wisps of hair and fair skin (Lola as a newborn), wrapped snugly in a yellow blanket, eyes wide open, held by two adult hands seen from below (hands only, no faces). Large friendly baby face in the upper half.`,
+  ),
+  cover(
+    'los-mejores-del-mundo',
+    BABY,
+    'yellowSat',
+    `${at('lola', 2)} sits on the shoulders of a tall adult seen from behind (only back, arms and hair, no face), both arms raised high in joy, holding a big flat red heart.`,
+  ),
+  cover(
+    'chau-panal',
+    BABY,
+    'blueSat',
+    `${at('lola', 2)} stands proudly in a yellow t-shirt and colorful trousers next to a small flat red potty with the lid down, one arm raised high, waving goodbye to a folded white diaper on the floor. Big smile.`,
+  ),
+  cover(
+    'el-volcan-del-enojo',
+    GOUACHE,
+    'mustard',
+    `${at('sofi', 5)} stands with fists clenched and puffed red cheeks, taking a deep breath; beside her a small friendly volcano as tall as she is, letting out one puff of red smoke. Flat shapes, no fire glow.`,
+  ),
+  cover(
+    'el-diente-que-se-cayo',
+    READER,
+    'lavender',
+    `${at('sofi', 7)} laughs wide showing a missing front tooth and holds up a tiny tooth between two fingers; a small friendly mouse with a tiny crown peeks from a slipper at the bottom corner. Comic energy.`,
+  ),
+  cover(
+    'el-club-de-detectives',
+    READER,
+    'mint',
+    `${at('tomas', 8)} crouches with a big magnifying glass over a trail of flat paw prints and cookie crumbs, a notebook under his arm; a shaggy dog peeks from behind a tree at the right. Funny and energetic, no lettering.`,
+  ),
+  cover(
+    'dentro-del-videojuego',
+    NOVEL,
+    'navy',
+    `${at('alex', 11)} seen from the side, stepping through a glowing flat doorway made of square pixel blocks into a blocky pixelated landscape; the controller dangles from one hand. No text, no UI, no numbers.`,
+  ),
+  cover(
+    'feliz-cumpleanos',
+    GOUACHE,
+    'coral',
+    `${at('martina', 5)} in a mustard party hat leans over a round cake with a few small candles, cheeks puffed to blow them out, a big flat balloon beside her. Flat confetti shapes.`,
   ),
   // ---- Celebraciones -------------------------------------------------------------------------
   cover(

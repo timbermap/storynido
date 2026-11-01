@@ -285,7 +285,10 @@
     },
     "withLesson": "Com: {name}",
     "youWillCreate": "Você vai criar: {story} + {lesson}",
-    "askWho": "Para quem é?"
+    "askWho": "Para quem é?",
+    "coloringTitle": "Livros para colorir",
+    "coloringText": "Um livro com o desenho do seu pequeno para pintar, com o personagem e as cenas da história.",
+    "coloringCta": "Criar um livro para colorir"
   },
   "Formats": {
     "digital": "Ebook (PDF)",
@@ -856,7 +859,7 @@
         },
         "short": {
           "name": "Curto",
-          "text": "Ideal para ler antes de dormir."
+          "text": "Um livro mais curto, para ler em uma ou duas sentadas."
         },
         "classic": {
           "name": "Clássico",

@@ -25,6 +25,14 @@ Enseñanzas para tejer en la trama:
 Tono cálido y luminoso, un pequeño desafío y un final feliz.
 Cada página: su texto y la escena para ilustrar.`;
 
+/** El diente que se cae (ediciones locales, auditoría de historias): la tradición sigue al idioma del libro. */
+const TOOTH_PROMPT = `${TEXT_PROMPT}
+Tradición del diente según el idioma del libro: en español, el Ratón Pérez (el Ratoncito Pérez) que se lleva el diente de la almohada y deja una moneda; en inglés, la Tooth Fairy (el hada de los dientes); en portugués, a Fada do Dente. Cuenta la costumbre con calidez y sin asustar.`;
+
+/** La Navidad de Lola: en español también puede asomar la noche de Reyes. */
+const CHRISTMAS_PROMPT = `${TEXT_PROMPT}
+Es una historia de Navidad. En español, puede incluir también la carta a los Reyes Magos y la noche del 5 de enero; en inglés y portugués, Christmas y Natal. Sin marcas ni personajes con derechos de autor.`;
+
 const IMAGE_PROMPT = `Children's picture book illustration: {{scene}}. Main character: {{character}}. Art style: {{style}}. Clear composition, warm light, no text in the image.`;
 
 /** Todas las historias de ejemplo admiten todas las opciones editoriales. */
@@ -59,7 +67,7 @@ const ADVENTURES: SeedStory[] = [
     ageMin: 3,
     ageMax: 5,
     tags: ['espacio', 'aventura'],
-    pageCount: 12,
+    pageCount: 26,
     title: {
       es: 'La gran aventura espacial de [Nombre]',
       en: "[Name]'s Great Space Adventure",
@@ -71,9 +79,9 @@ const ADVENTURES: SeedStory[] = [
       pt: 'Um foguete de papelão vira uma nave de verdade e leva seu pequeno para visitar planetas, fazer amigos entre as estrelas e voltar para casa bem na hora de dormir.',
     },
     excerpt: {
-      es: 'Esa noche, el cohete de cartón empezó a brillar. —¿Lista para despegar? —preguntó una voz desde la ventana. Martina se puso el casco, contó hasta tres… ¡y salieron disparados hacia la Luna!',
-      en: 'That night, the cardboard rocket began to glow. "Ready for liftoff?" asked a voice from the window. Martina put on her helmet, counted to three… and off they zoomed to the Moon!',
-      pt: 'Naquela noite, o foguete de papelão começou a brilhar. — Pronta para decolar? — perguntou uma voz na janela. Martina colocou o capacete, contou até três… e lá foram eles rumo à Lua!',
+      es: 'Esa noche, el cohete de cartón empezó a brillar. —¿Listo para despegar? —preguntó una voz desde la ventana. [Nombre] se puso el casco, contó hasta tres… ¡y salieron disparados hacia la Luna!',
+      en: 'That night, the cardboard rocket began to glow. "Ready for liftoff?" asked a voice from the window. [Name] put on the helmet, counted to three… and off they zoomed to the Moon!',
+      pt: 'Naquela noite, o foguete de papelão começou a brilhar. — Pronto para decolar? — perguntou uma voz na janela. [Nome] colocou o capacete, contou até três… e lá foram eles rumo à Lua!',
     },
     coverImage: '/samples/aventura-espacial.webp',
     samplePages: [],
@@ -91,7 +99,7 @@ const ADVENTURES: SeedStory[] = [
     ageMin: 3,
     ageMax: 5,
     tags: ['dinosaurios', 'naturaleza'],
-    pageCount: 12,
+    pageCount: 26,
     title: {
       es: '[Nombre] y el valle de los dinosaurios',
       en: '[Name] and the Dinosaur Valley',
@@ -103,9 +111,9 @@ const ADVENTURES: SeedStory[] = [
       pt: 'Atrás do jardim existe um vale secreto onde vivem dinossauros gigantes e muito gentis. Seu pequeno vai ajudá-los a encontrar um ovo perdido antes do pôr do sol.',
     },
     excerpt: {
-      es: 'El suelo tembló: pum, pum, pum. Leo se escondió detrás de un helecho enorme… ¡y se encontró cara a cara con un triceratops que lloraba porque había perdido su huevo!',
-      en: 'The ground shook: boom, boom, boom. Leo hid behind a giant fern… and came face to face with a triceratops who was crying because she had lost her egg!',
-      pt: 'O chão tremeu: bum, bum, bum. Leo se escondeu atrás de uma samambaia enorme… e ficou cara a cara com um tricerátopo que chorava porque tinha perdido seu ovo!',
+      es: 'El suelo tembló: pum, pum, pum. [Nombre] se escondió detrás de un helecho enorme… ¡y se encontró cara a cara con un triceratops que lloraba porque había perdido su huevo!',
+      en: 'The ground shook: boom, boom, boom. [Name] hid behind a giant fern… and came face to face with a triceratops who was crying because she had lost her egg!',
+      pt: 'O chão tremeu: bum, bum, bum. [Nome] se escondeu atrás de uma samambaia enorme… e ficou cara a cara com um tricerátopo que chorava porque tinha perdido seu ovo!',
     },
     coverImage: '/samples/valle-de-los-dinosaurios.webp',
     samplePages: [],
@@ -123,7 +131,7 @@ const ADVENTURES: SeedStory[] = [
     ageMin: 3,
     ageMax: 5,
     tags: ['princesas', 'príncipes', 'magia'],
-    pageCount: 12,
+    pageCount: 26,
     title: {
       es: '[Nombre] y el reino de los colores',
       en: '[Name] and the Kingdom of Colors',
@@ -135,9 +143,9 @@ const ADVENTURES: SeedStory[] = [
       pt: 'Um castelo nas nuvens precisa de alguém corajoso e bondoso. Seu pequeno recebe uma coroa, um mapa mágico e uma missão: devolver as cores ao reino.',
     },
     excerpt: {
-      es: 'En el reino todo se había vuelto gris. —Solo quien tenga un corazón valiente podrá encontrar los colores —dijo la reina. Sofía apretó el mapa mágico y dio el primer paso.',
-      en: 'Everything in the kingdom had turned gray. "Only someone with a brave heart can find the colors," said the queen. Sofia held the magic map tight and took the first step.',
-      pt: 'No reino, tudo tinha ficado cinza. — Só quem tiver um coração corajoso poderá encontrar as cores — disse a rainha. Sofia segurou firme o mapa mágico e deu o primeiro passo.',
+      es: 'En el reino todo se había vuelto gris. —Solo quien tenga un corazón valiente podrá encontrar los colores —dijo la reina. [Nombre] apretó el mapa mágico y dio el primer paso.',
+      en: 'Everything in the kingdom had turned gray. "Only someone with a brave heart can find the colors," said the queen. [Name] held the magic map tight and took the first step.',
+      pt: 'No reino, tudo tinha ficado cinza. — Só quem tiver um coração corajoso poderá encontrar as cores — disse a rainha. [Nome] segurou firme o mapa mágico e deu o primeiro passo.',
     },
     coverImage: '/samples/reino-encantado.webp',
     samplePages: [],
@@ -160,7 +168,7 @@ const ADVENTURES: SeedStory[] = [
     ageMin: 6,
     ageMax: 8,
     tags: ['fútbol', 'deportes', 'amistad'],
-    pageCount: 12,
+    pageCount: 26,
     title: {
       es: '¡[Nombre], gol de campeón!',
       en: "[Name], Champion's Goal!",
@@ -172,9 +180,9 @@ const ADVENTURES: SeedStory[] = [
       pt: 'É a final do torneio do bairro e o time precisa do seu melhor jogador. Uma história sobre esforço, companheirismo e o gol mais importante do ano.',
     },
     excerpt: {
-      es: 'Quedaba un minuto. Tomás miró a sus amigos, respiró hondo y corrió con la pelota pegada al pie. La tribuna entera se puso de pie: ¡goooool!',
-      en: 'One minute left. Tomás looked at his friends, took a deep breath, and ran with the ball at his feet. The whole crowd jumped up: gooooal!',
-      pt: 'Faltava um minuto. Tomás olhou para os amigos, respirou fundo e correu com a bola colada no pé. A arquibancada inteira se levantou: gooooool!',
+      es: 'Quedaba un minuto. [Nombre] miró a sus amigos, respiró hondo y corrió con la pelota pegada al pie. La tribuna entera se puso de pie: ¡goooool!',
+      en: 'One minute left. [Name] looked at his friends, took a deep breath, and ran with the ball at his feet. The whole crowd jumped up: gooooal!',
+      pt: 'Faltava um minuto. [Nome] olhou para os amigos, respirou fundo e correu com a bola colada no pé. A arquibancada inteira se levantou: gooooool!',
     },
     coverImage: '/samples/gol-de-campeon.webp',
     samplePages: [],
@@ -197,7 +205,7 @@ const ADVENTURES: SeedStory[] = [
     ageMin: 3,
     ageMax: 5,
     tags: ['superhéroes', 'valentía'],
-    pageCount: 12,
+    pageCount: 26,
     title: {
       es: '[Nombre], superhéroe por un día',
       en: '[Name], Superhero for a Day',
@@ -209,9 +217,9 @@ const ADVENTURES: SeedStory[] = [
       pt: 'Uma capa aparece misteriosamente na cama do seu pequeno. Por um dia ele terá superpoderes… e vai descobrir que o maior de todos é ajudar os outros.',
     },
     excerpt: {
-      es: 'La capa roja tenía una nota: «Válida por un día». Valentina se la ató al cuello y, de pronto, ¡sus pies se despegaron del piso!',
-      en: 'The red cape came with a note: "Valid for one day." Valentina tied it around her neck and, suddenly, her feet lifted off the floor!',
-      pt: 'A capa vermelha tinha um bilhete: "Válida por um dia". Valentina amarrou a capa no pescoço e, de repente, seus pés saíram do chão!',
+      es: 'La capa roja tenía una nota: «Válida por un día». [Nombre] se la ató al cuello y, de pronto, ¡los pies se le despegaron del piso!',
+      en: 'The red cape came with a note: "Valid for one day." [Name] tied it around his neck and, suddenly, his feet lifted off the floor!',
+      pt: 'A capa vermelha tinha um bilhete: "Válida por um dia". [Nome] amarrou a capa no pescoço e, de repente, os pés saíram do chão!',
     },
     coverImage: '/samples/superheroe-por-un-dia.webp',
     samplePages: [],
@@ -229,21 +237,21 @@ const ADVENTURES: SeedStory[] = [
     ageMin: 0,
     ageMax: 2,
     tags: ['animales', 'naturaleza', 'amistad'],
-    pageCount: 12,
+    pageCount: 26,
     title: {
       es: 'Hola, animales: [Nombre] en la selva',
       en: 'Hello, animals: [Name] in the jungle',
       pt: 'Olá, animais: [Nome] na selva',
     },
     summary: {
-      es: 'Un tucán parlanchín invita a tu peque a recorrer la selva: monos acróbatas, un jaguar dormilón y un río lleno de sorpresas.',
-      en: 'A chatty toucan invites your little one to explore the jungle: acrobatic monkeys, a sleepy jaguar and a river full of surprises.',
-      pt: 'Um tucano tagarela convida seu pequeno para explorar a selva: macacos acrobatas, uma onça dorminhoca e um rio cheio de surpresas.',
+      es: 'Un libro para decir hola: el tucán, el monito, el jaguar dormilón y [Nombre]. Una frase por página, con repetición para leer en voz alta y señalar con el dedito.',
+      en: 'A book for saying hello: the toucan, the little monkey, the sleepy jaguar and [Name]. One line per page, with repetition to read aloud and point at with a little finger.',
+      pt: 'Um livro para dizer olá: o tucano, o macaquinho, a onça dorminhoca e [Nome]. Uma frase por página, com repetição para ler em voz alta e apontar com o dedinho.',
     },
     excerpt: {
-      es: '—¡Por aquí! —gritó el tucán desde una rama. Valentina apartó unas hojas enormes y vio un río que brillaba como un espejo. Del otro lado, tres monitos la saludaban.',
-      en: '"This way!" called the toucan from a branch. Valentina pushed aside some huge leaves and saw a river shining like a mirror. On the other side, three little monkeys were waving at her.',
-      pt: '— Por aqui! — gritou o tucano de um galho. Valentina afastou umas folhas enormes e viu um rio que brilhava como um espelho. Do outro lado, três macaquinhos acenavam para ela.',
+      es: 'Hola, tucán. Hola, [Nombre]. Hola, monito. Hola, [Nombre]. Shhh, que el jaguar duerme. ¡Chapuzón en el río!',
+      en: 'Hello, toucan. Hello, [Name]. Hello, little monkey. Hello, [Name]. Shhh, the jaguar is sleeping. Splash in the river!',
+      pt: 'Olá, tucano. Olá, [Nome]. Olá, macaquinho. Olá, [Nome]. Shhh, a onça está dormindo. Splash no rio!',
     },
     coverImage: '/samples/amigos-de-la-selva.webp',
     samplePages: [],
@@ -270,7 +278,7 @@ const ADVENTURES: SeedStory[] = [
     ageMin: 3,
     ageMax: 5,
     tags: ['mar', 'aventura', 'naturaleza'],
-    pageCount: 12,
+    pageCount: 26,
     title: {
       es: '[Nombre] y el secreto del fondo del mar',
       en: '[Name] and the Secret of the Deep Sea',
@@ -282,9 +290,9 @@ const ADVENTURES: SeedStory[] = [
       pt: 'Com uma bolha mágica para respirar debaixo d’água, seu pequeno nada entre golfinhos, tartarugas e corais para descobrir um tesouro muito especial.',
     },
     excerpt: {
-      es: 'La burbuja hizo «plop» y, de pronto, Martín podía respirar bajo el agua. Una tortuga muy anciana le guiñó un ojo: —Te estábamos esperando. El tesoro necesita a alguien como tú.',
-      en: 'The bubble went "plop" and suddenly Martín could breathe underwater. A very old turtle winked at him: "We were waiting for you. The treasure needs someone like you."',
-      pt: 'A bolha fez "plop" e, de repente, Martín conseguia respirar debaixo d’água. Uma tartaruga bem velhinha piscou para ele: — Estávamos esperando você. O tesouro precisa de alguém como você.',
+      es: 'La burbuja hizo «plop» y, de pronto, [Nombre] podía respirar bajo el agua. Una tortuga muy anciana le guiñó un ojo: —Te estábamos esperando. El tesoro necesita a alguien como tú.',
+      en: 'The bubble went "plop" and suddenly [Name] could breathe underwater. A very old turtle winked: "We were waiting for you. The treasure needs someone like you."',
+      pt: 'A bolha fez "plop" e, de repente, [Nome] conseguia respirar debaixo d’água. Uma tartaruga bem velhinha piscou: — Estávamos esperando você. O tesouro precisa de alguém como você.',
     },
     coverImage: '/samples/secreto-del-fondo-del-mar.webp',
     samplePages: [],
@@ -316,6 +324,14 @@ export const STORY_CAST: Record<string, string> = {
   'buenas-noches': 'Lola',
   'amigos-de-la-selva': 'Lola',
   'la-navidad-de-nombre': 'Lola',
+  'cuando-naciste': 'Lola',
+  'los-mejores-del-mundo': 'Lola',
+  'chau-panal': 'Lola',
+  'el-volcan-del-enojo': 'Sofi',
+  'el-diente-que-se-cayo': 'Sofi',
+  'el-club-de-detectives': 'Tomás',
+  'dentro-del-videojuego': 'Alex',
+  'feliz-cumpleanos': 'Martina',
   'aventura-espacial': 'Tomás',
   'la-gran-carrera': 'Tomás',
   'el-cumpleanos-mas-magico': 'Tomás',
@@ -344,6 +360,15 @@ export const NEW_COVER_SLUGS: string[] = [
   'superheroe-por-un-dia',
   'la-gran-carrera',
   'hermano-mayor',
+  'la-navidad-de-nombre',
+  'cuando-naciste',
+  'los-mejores-del-mundo',
+  'chau-panal',
+  'el-volcan-del-enojo',
+  'el-diente-que-se-cayo',
+  'el-club-de-detectives',
+  'dentro-del-videojuego',
+  'feliz-cumpleanos',
   'mi-primer-dia-de-clases',
   'gol-de-campeon',
   'las-tardes-con-los-abuelos',
@@ -358,7 +383,14 @@ export const NEW_COVER_SLUGS: string[] = [
 ];
 
 /** Portadas de fondo azul marino: el título va en claro. */
-export const LIGHT_INK_SLUGS = ['aventura-espacial', 'buenas-noches', 'el-misterio-del-faro'];
+export const LIGHT_INK_SLUGS = [
+  'aventura-espacial',
+  'buenas-noches',
+  'el-misterio-del-faro',
+  'la-navidad-de-nombre',
+  'chau-panal',
+  'dentro-del-videojuego',
+];
 
 export const SEED_STORIES: SeedStory[] = ADVENTURES.map((story) => {
   const themes = BIRTHDAY_THEMES[story.slug];
@@ -375,7 +407,7 @@ export const SEED_STORIES: SeedStory[] = ADVENTURES.map((story) => {
 const NEW_STORY_BASE = {
   active: true,
   tags: [],
-  pageCount: 12,
+  pageCount: 26,
   samplePages: [],
   textPromptTemplate: TEXT_PROMPT,
   imagePromptTemplate: IMAGE_PROMPT,
@@ -417,7 +449,23 @@ const BABY_BASE = {
   contentTypes: ['story'],
 } satisfies Partial<SeedStory>;
 
-export const SEED_DRAFT_STORIES: SeedStory[] = [
+/**
+ * Historias nuevas cuya portada todavía no se generó (`generate-brand-images.ts`): no se siembran
+ * hasta tenerla, para no publicar una portada de otro chico. Al generarlas, se vacía esta lista.
+ */
+export const PENDING_COVER_SLUGS: readonly string[] = [
+  'la-navidad-de-nombre',
+  'cuando-naciste',
+  'los-mejores-del-mundo',
+  'chau-panal',
+  'el-volcan-del-enojo',
+  'el-diente-que-se-cayo',
+  'el-club-de-detectives',
+  'dentro-del-videojuego',
+  'feliz-cumpleanos',
+];
+
+const DRAFT_STORIES: SeedStory[] = [
   {
     ...BABY_BASE,
     slug: 'te-quiero-siempre',
@@ -449,7 +497,7 @@ export const SEED_DRAFT_STORIES: SeedStory[] = [
     order: 41,
     palette: 'bedtime',
     collectionIds: ['grandes-momentos'],
-    suggestedLessons: ['dormir-solo'],
+    suggestedLessons: [],
     tags: ['dormir', 'rutina', 'bebés'],
     title: { es: 'Buenas noches, [Nombre]', en: 'Goodnight, [Name]', pt: 'Boa noite, [Nome]' },
     summary: {
@@ -519,13 +567,13 @@ export const SEED_DRAFT_STORIES: SeedStory[] = [
     coverImage: '/samples/hermano-mayor.webp',
   },
   {
-    ...DRAFT_BASE,
-    // Apagada (DECISIONS 155): no se lanza con fecha límite de envío; el texto y la portada quedan.
-    active: false,
+    ...BABY_BASE,
+    // Publicada para la temporada (auditoría de historias): la edición de Reyes es el mismo cuento en español.
+    textPromptTemplate: CHRISTMAS_PROMPT,
     slug: 'la-navidad-de-nombre',
     order: 44,
-    ageMin: 2,
-    ageMax: 5,
+    ageMin: 1,
+    ageMax: 4,
     palette: 'celebration',
     collectionIds: ['grandes-momentos'],
     suggestedLessons: ['compartir', 'amistad'],
@@ -576,7 +624,221 @@ export const SEED_DRAFT_STORIES: SeedStory[] = [
     },
     coverImage: '/samples/unicornio-del-arcoiris.webp',
   },
+  {
+    ...BABY_BASE,
+    slug: 'cuando-naciste',
+    order: 46,
+    palette: 'bedtime',
+    collectionIds: ['grandes-momentos'],
+    suggestedLessons: [],
+    tags: ['nacimiento', 'bebés', 'regalo', 'familia'],
+    title: {
+      es: 'Cuando naciste, [Nombre]',
+      en: 'The Day You Were Born, [Name]',
+      pt: 'Quando você nasceu, [Nome]',
+    },
+    summary: {
+      es: 'El libro de bienvenida: cómo lo esperábamos, el día en que llegó y todo lo que cambió en casa. El regalo de nacimiento para leer en voz baja, con su cara de verdad en cada página.',
+      en: 'The welcome book: how we waited for you, the day you arrived and everything that changed at home. The birth gift to read softly, with their real face on every page.',
+      pt: 'O livro de boas-vindas: como esperávamos por você, o dia em que chegou e tudo o que mudou em casa. O presente de nascimento para ler em voz baixa, com o rosto de verdade em cada página.',
+    },
+    excerpt: {
+      es: 'Te esperábamos, [Nombre]. Y un día llegaste: chiquita, chiquita, con los ojos bien abiertos. Hola, [Nombre]. Ya estás en casa.',
+      en: 'We were waiting for you, [Name]. And one day you arrived: tiny, tiny, with your eyes wide open. Hello, [Name]. You are home.',
+      pt: 'Esperávamos por você, [Nome]. E um dia você chegou: pequenininha, pequenininha, de olhos bem abertos. Olá, [Nome]. Você já está em casa.',
+    },
+    coverImage: '/samples/cuando-naciste.webp',
+  },
+  {
+    ...BABY_BASE,
+    slug: 'los-mejores-del-mundo',
+    order: 47,
+    palette: 'celebration',
+    collectionIds: ['nuestros-recuerdos'],
+    suggestedLessons: [],
+    tags: ['mamá', 'papá', 'amor', 'regalo', 'Día de la Madre', 'Día del Padre'],
+    title: {
+      es: 'Los mejores del mundo, según [Nombre]',
+      en: 'The Best in the World, According to [Name]',
+      pt: 'Os melhores do mundo, segundo [Nome]',
+    },
+    summary: {
+      es: 'Lo que [Nombre] más quiere en el mundo: mamá y papá (o quien lo cuide). Los abrazos, las cosquillas y el cuento de la noche que los hacen los mejores. Para el Día de la Madre, el del Padre o cualquier día.',
+      en: 'What [Name] loves most in the world: Mom and Dad (or whoever takes care of them). The hugs, the tickles and the bedtime story that make them the best. For Mother’s Day, Father’s Day or any day.',
+      pt: 'O que [Nome] mais ama no mundo: mamãe e papai (ou quem cuida). Os abraços, as cócegas e a história de dormir que os tornam os melhores. Para o Dia das Mães, o dos Pais ou qualquer dia.',
+    },
+    excerpt: {
+      es: 'Mamá me abraza fuerte, fuerte. Papá me hace cosquillas, cosquillas. Los mejores del mundo, dice [Nombre]. ¡Y los quiere, y los quiere, y los quiere!',
+      en: 'Mom hugs me tight, tight. Dad tickles me, tickles me. The best in the world, says [Name]. And I love them, and I love them, and I love them!',
+      pt: 'A mamãe me abraça forte, forte. O papai me faz cócegas, cócegas. Os melhores do mundo, diz [Nome]. E eu os amo, e os amo, e os amo!',
+    },
+    coverImage: '/samples/los-mejores-del-mundo.webp',
+  },
+  {
+    ...BABY_BASE,
+    slug: 'chau-panal',
+    order: 48,
+    ageMin: 2,
+    ageMax: 3,
+    palette: 'learning',
+    collectionIds: ['grandes-momentos'],
+    suggestedLessons: ['dejar-el-panal-o-el-chupete'],
+    tags: ['pañal', 'hitos', 'bebés'],
+    title: {
+      es: 'Chau, pañal, [Nombre]',
+      en: 'Bye-Bye, Diaper, [Name]',
+      pt: 'Tchau, fralda, [Nome]',
+    },
+    summary: {
+      es: 'Un libro para despedirse del pañal: la bacinica, los intentos, las risas y la alegría de “¡lo logré!”. Con rima, repetición y sin apuros.',
+      en: 'A book for saying goodbye to diapers: the potty, the tries, the giggles and the joy of “I did it!”. With rhyme, repetition and no rush.',
+      pt: 'Um livro para se despedir da fralda: o peniquinho, as tentativas, as risadas e a alegria do “consegui!”. Com rima, repetição e sem pressa.',
+    },
+    excerpt: {
+      es: 'Chau, pañal. Hola, bacinica. Un intento, dos intentos… ¡plop! ¡Lo logró [Nombre]! Y todos aplauden: ¡bravo, bravo, bravo!',
+      en: 'Bye-bye, diaper. Hello, potty. One try, two tries… plop! [Name] did it! And everyone claps: hooray, hooray, hooray!',
+      pt: 'Tchau, fralda. Olá, peniquinho. Uma tentativa, duas tentativas… plop! [Nome] conseguiu! E todos aplaudem: oba, oba, oba!',
+    },
+    coverImage: '/samples/chau-panal.webp',
+  },
+  {
+    ...DRAFT_BASE,
+    slug: 'el-volcan-del-enojo',
+    order: 49,
+    ageMin: 3,
+    ageMax: 5,
+    palette: 'magic',
+    collectionIds: ['grandes-momentos'],
+    suggestedLessons: ['manejar-el-enojo', 'calma-cuando-estoy-nervioso'],
+    tags: ['enojo', 'emociones', 'calma'],
+    title: {
+      es: '[Nombre] y el volcán del enojo',
+      en: '[Name] and the Anger Volcano',
+      pt: '[Nome] e o vulcão da raiva',
+    },
+    summary: {
+      es: 'Cuando algo sale mal, adentro de [Nombre] empieza a burbujear un volcán. Con respiraciones, un abrazo y un amigo, aprende a dejarlo salir sin que queme a nadie.',
+      en: 'When something goes wrong, a volcano starts to bubble inside [Name]. With deep breaths, a hug and a friend, the volcano learns to let it out without burning anyone.',
+      pt: 'Quando algo dá errado, um vulcão começa a borbulhar dentro de [Nome]. Com respirações, um abraço e um amigo, aprende a deixá-lo sair sem queimar ninguém.',
+    },
+    excerpt: {
+      es: 'La torre de bloques se cayó y, dentro de [Nombre], algo empezó a burbujear: glu, glu, glu. —¡Es mi volcán! —dijo, apretando los puños. Respiró hondo, una, dos, tres veces… y el volcán se calmó.',
+      en: 'The block tower fell down and, inside [Name], something began to bubble: glug, glug, glug. "It’s my volcano!" [Name] said, clenching both fists. A deep breath, one, two, three times… and the volcano calmed down.',
+      pt: 'A torre de blocos caiu e, dentro de [Nome], algo começou a borbulhar: glu, glu, glu. — É o meu vulcão! — disse, apertando os punhos. Respirou fundo, uma, duas, três vezes… e o vulcão se acalmou.',
+    },
+    coverImage: '/samples/el-volcan-del-enojo.webp',
+  },
+  {
+    ...DRAFT_BASE,
+    slug: 'el-diente-que-se-cayo',
+    textPromptTemplate: TOOTH_PROMPT,
+    order: 50,
+    ageMin: 5,
+    ageMax: 8,
+    palette: 'learning',
+    collectionIds: ['grandes-momentos'],
+    suggestedLessons: ['valentia', 'calma-cuando-estoy-nervioso'],
+    tags: ['diente', 'ratón Pérez', 'hitos'],
+    title: {
+      es: '[Nombre] y el diente que se cayó',
+      en: '[Name] and the Wobbly Tooth',
+      pt: '[Nome] e o dente que caiu',
+    },
+    summary: {
+      es: 'El primer diente se mueve, se mueve… y se cae. Una historia para perder el miedo, contar el gran momento y esperar la visita nocturna: Ratón Pérez, hada de los dientes o Fada do Dente, según el idioma.',
+      en: 'The first tooth wobbles, wobbles… and falls out. A story to lose the fear, tell the big moment and wait for the night visitor: the Tooth Fairy, Ratón Pérez or Fada do Dente, depending on the language.',
+      pt: 'O primeiro dente balança, balança… e cai. Uma história para perder o medo, contar o grande momento e esperar a visita da noite: Fada do Dente, Ratón Pérez ou a fada dos dentes, conforme o idioma.',
+    },
+    excerpt: {
+      es: '—¡Se me mueve! —dijo [Nombre], con el dedo en la boca. Esa noche puso el diente bajo la almohada y se quedó despierta, despierta, despierta… hasta que oyó unos pasitos.',
+      en: '"It’s wobbling!" said [Name], finger in mouth. That night [Name] put the tooth under the pillow and stayed awake, awake, awake… until tiny footsteps came.',
+      pt: '— Está mexendo! — disse [Nome], com o dedo na boca. Naquela noite colocou o dente embaixo do travesseiro e ficou acordada, acordada, acordada… até ouvir uns passinhos.',
+    },
+    coverImage: '/samples/el-diente-que-se-cayo.webp',
+  },
+  {
+    ...DRAFT_BASE,
+    slug: 'el-club-de-detectives',
+    order: 51,
+    ageMin: 6,
+    ageMax: 8,
+    palette: 'explorer',
+    collectionIds: ['aventuras'],
+    suggestedLessons: ['amistad', 'lograr-lo-que-te-propongas'],
+    tags: ['misterio', 'detectives', 'humor'],
+    title: {
+      es: 'El club de detectives de [Nombre]',
+      en: "[Name]'s Detective Club",
+      pt: 'O clube de detetives de [Nome]',
+    },
+    summary: {
+      es: 'Desaparecen las galletas del recreo y solo hay una lupa, una libreta y tres amigos para resolver el caso. Un misterio con humor, de capítulos cortos, para leer solo.',
+      en: 'The recess cookies disappear, and all there is to solve the case is a magnifying glass, a notebook and three friends. A mystery with humor and short chapters, to read alone.',
+      pt: 'Os biscoitos do recreio somem, e só há uma lupa, um caderno e três amigos para resolver o caso. Um mistério com humor, de capítulos curtos, para ler sozinho.',
+    },
+    excerpt: {
+      es: 'Caso número uno: ¿quién se comió las galletas del recreo? [Nombre] sacó la lupa, anotó tres pistas en su libreta y siguió las migas… que llevaban directo al perro del conserje.',
+      en: 'Case number one: who ate the recess cookies? [Name] took out the magnifying glass, wrote three clues in the notebook and followed the crumbs… straight to the janitor’s dog.',
+      pt: 'Caso número um: quem comeu os biscoitos do recreio? [Nome] pegou a lupa, anotou três pistas no caderno e seguiu as migalhas… direto até o cachorro do zelador.',
+    },
+    coverImage: '/samples/el-club-de-detectives.webp',
+  },
+  {
+    ...BIG_READER_BASE,
+    slug: 'dentro-del-videojuego',
+    order: 52,
+    suggestedLessons: ['valentia', 'lograr-lo-que-te-propongas'],
+    palette: 'explorer',
+    tags: ['videojuegos', 'aventura', 'misterio'],
+    title: {
+      es: 'Dentro del videojuego de [Nombre]',
+      en: "Inside [Name]'s Video Game",
+      pt: 'Dentro do videogame de [Nome]',
+    },
+    summary: {
+      es: 'Un nivel nuevo, un control que no responde y una regla: para volver a casa hay que terminar el juego. Una novela corta de lógica y suspenso, en capítulos, para lectores grandes.',
+      en: 'A new level, a controller that does not respond and one rule: to get home you have to finish the game. A short novel of logic and suspense, in chapters, for big readers.',
+      pt: 'Uma fase nova, um controle que não responde e uma regra: para voltar para casa é preciso terminar o jogo. Uma novela curta de lógica e suspense, em capítulos, para leitores grandes.',
+    },
+    excerpt: {
+      es: 'La pantalla parpadeó tres veces y el control quedó mudo. Cuando [Nombre] levantó la vista, el cuarto había desaparecido: bajo sus zapatillas había píxeles, y un cartel lejano anunciaba que el nivel uno ya había empezado.',
+      en: 'The screen flickered three times and the controller went dead. When [Name] looked up, the room was gone: pixels lay under the sneakers, and a distant sign announced that level one had already begun.',
+      pt: 'A tela piscou três vezes e o controle ficou mudo. Quando [Nome] levantou os olhos, o quarto tinha sumido: havia pixels sob os tênis, e uma placa distante anunciava que a fase um já tinha começado.',
+    },
+    coverImage: '/samples/dentro-del-videojuego.webp',
+  },
+  {
+    ...DRAFT_BASE,
+    slug: 'feliz-cumpleanos',
+    order: 53,
+    ageMin: 3,
+    ageMax: 5,
+    palette: 'celebration',
+    collectionIds: ['grandes-momentos'],
+    suggestedLessons: ['compartir', 'ser-uno-mismo'],
+    tags: ['cumpleaños', 'regalo', 'fiesta'],
+    title: {
+      es: 'Feliz cumpleaños, [Nombre]',
+      en: 'Happy Birthday, [Name]',
+      pt: 'Feliz aniversário, [Nome]',
+    },
+    summary: {
+      es: 'El regalo de cumpleaños que se queda: el día más esperado del año contado con la torta, las velas, los abrazos y los deseos de [Nombre]. Para regalar a quien cumple, con su cara de verdad en cada página.',
+      en: 'The birthday gift that lasts: the most awaited day of the year told with the cake, the candles, the hugs and [Name]’s wishes. To give to the birthday child, with their real face on every page.',
+      pt: 'O presente de aniversário que fica: o dia mais esperado do ano contado com o bolo, as velas, os abraços e os desejos de [Nome]. Para presentear quem faz aniversário, com o rosto de verdade em cada página.',
+    },
+    excerpt: {
+      es: 'Hoy es el día de [Nombre]. Se despertó con olor a pastel y, en la mesa, el globo más grande de la casa. —¡Feliz cumpleaños! —cantaron todos, y [Nombre] pidió un deseo.',
+      en: 'Today is [Name]’s day. [Name] woke up to the smell of cake and, on the table, the biggest balloon in the house. "Happy birthday!" everyone sang, and [Name] made a wish.',
+      pt: 'Hoje é o dia de [Nome]. Acordou com cheiro de bolo e, na mesa, o maior balão da casa. — Feliz aniversário! — cantaram todos, e [Nome] fez um pedido.',
+    },
+    coverImage: '/samples/feliz-cumpleanos.webp',
+  },
 ];
+
+export const SEED_DRAFT_STORIES: SeedStory[] = DRAFT_STORIES.filter(
+  (story) => !PENDING_COVER_SLUGS.includes(story.slug),
+);
 
 export const SEED_NEW_STORIES: SeedStory[] = [
   {
@@ -600,9 +862,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'Uma história feita com as lembranças favoritas com os avós: as receitas, as brincadeiras e os segredos que só eles compartilham.',
     },
     excerpt: {
-      es: '—¿Te acuerdas de la primera vez que hicimos galletas? —preguntó el abuelo. Martina se rió: aquel día terminó con harina hasta en la nariz.',
-      en: '"Do you remember the first time we baked cookies?" Grandpa asked. Martina laughed: that day ended with flour all the way up her nose.',
-      pt: '— Lembra da primeira vez que fizemos biscoitos? — perguntou o avô. Martina riu: aquele dia terminou com farinha até no nariz.',
+      es: '—¿Te acuerdas de la primera vez que hicimos galletas? —preguntó el abuelo. [Nombre] se rió: aquel día terminó con harina hasta en la nariz.',
+      en: '"Do you remember the first time we baked cookies?" Grandpa asked. [Name] laughed: that day ended with flour all the way up her nose.',
+      pt: '— Lembra da primeira vez que fizemos biscoitos? — perguntou o avô. [Nome] riu: aquele dia terminou com farinha até no nariz.',
     },
     coverImage: '/samples/las-tardes-con-los-abuelos.webp',
   },
@@ -645,9 +907,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'A mochila nova, a sala cheia de cores e um colega que também está nervoso. Uma história para chegar ao primeiro dia com confiança.',
     },
     excerpt: {
-      es: 'En la puerta del aula, Leo apretó la mano de mamá. Entonces vio a un niño que también miraba sus zapatos. —Hola —le dijo—. ¿Te gustan los dinosaurios?',
-      en: 'At the classroom door, Leo squeezed Mom’s hand. Then he saw a boy who was also staring at his shoes. "Hi," he said. "Do you like dinosaurs?"',
-      pt: 'Na porta da sala, Leo apertou a mão da mamãe. Então viu um menino que também olhava para os sapatos. — Oi — disse. — Você gosta de dinossauros?',
+      es: 'En la puerta del aula, [Nombre] apretó la mano de mamá. Entonces vio a un niño que también miraba sus zapatos. —Hola —le dijo—. ¿Te gustan los dinosaurios?',
+      en: 'At the classroom door, [Name] squeezed Mom’s hand. Then she saw a boy who was also staring at his shoes. "Hi," she said. "Do you like dinosaurs?"',
+      pt: 'Na porta da sala, [Nome] apertou a mão da mamãe. Então viu um menino que também olhava para os sapatos. — Oi — disse. — Você gosta de dinossauros?',
     },
     coverImage: '/samples/mi-primer-dia-de-clases.webp',
   },
@@ -672,9 +934,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'As velas se acendem sozinhas e a festa vira uma aventura. Uma mini história com o aniversariante como protagonista, para presentear cada convidado.',
     },
     excerpt: {
-      es: 'Cuando Mateo sopló las velas, el pastel empezó a brillar. —¡Pide un deseo! —gritaron sus amigos. Y el deseo… ¡se hizo realidad!',
-      en: 'When Mateo blew out the candles, the cake began to glow. "Make a wish!" his friends shouted. And the wish… came true!',
-      pt: 'Quando Mateo soprou as velas, o bolo começou a brilhar. — Faça um pedido! — gritaram os amigos. E o pedido… virou realidade!',
+      es: 'Cuando [Nombre] sopló las velas, el pastel empezó a brillar. —¡Pide un deseo! —gritaron sus amigos. Y el deseo… ¡se hizo realidad!',
+      en: 'When [Name] blew out the candles, the cake began to glow. "Make a wish!" the friends shouted. And the wish… came true!',
+      pt: 'Quando [Nome] soprou as velas, o bolo começou a brilhar. — Faça um pedido! — gritaram os amigos. E o pedido… virou realidade!',
     },
     coverImage: '/samples/el-cumpleanos-mas-magico.webp',
   },
@@ -711,9 +973,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'As letras fugiram do livro e só quem as reconhece consegue devolvê-las ao lugar. Uma aventura para brincar com a leitura.',
     },
     excerpt: {
-      es: 'La M se había escondido detrás de la montaña y la S se deslizaba como una serpiente. Sofía sonrió: ya sabía cómo atraparlas.',
-      en: 'The M was hiding behind the mountain and the S slid along like a snake. Sofia smiled: she already knew how to catch them.',
-      pt: 'O M tinha se escondido atrás da montanha e o S deslizava como uma serpente. Sofia sorriu: já sabia como pegá-las.',
+      es: 'La M se había escondido detrás de la montaña y la S se deslizaba como una serpiente. Una sonrisa enorme: —Ya sé cómo atraparlas.',
+      en: 'The M was hiding behind the mountain and the S slid along like a snake. A huge smile: "I know how to catch them."',
+      pt: 'O M tinha se escondido atrás da montanha e o S deslizava como uma serpente. Um sorriso enorme: — Já sei como pegá-las.',
     },
     coverImage: '/samples/las-letras-que-bailan.webp',
   },
@@ -750,9 +1012,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'Neste jardim cada flor guarda uma emoção. Ao percorrê-lo, o protagonista aprende a reconhecer o que sente e a colocar em palavras.',
     },
     excerpt: {
-      es: 'La flor roja temblaba como cuando uno se enoja. Lucas se agachó y le dijo bajito: —Yo también me siento así a veces. ¿Respiramos juntos?',
-      en: 'The red flower trembled the way you do when you get angry. Lucas crouched down and whispered: "I feel like that sometimes too. Shall we breathe together?"',
-      pt: 'A flor vermelha tremia como quando a gente fica bravo. Lucas se abaixou e disse baixinho: — Eu também me sinto assim às vezes. Vamos respirar juntos?',
+      es: 'La flor roja temblaba como cuando uno se enoja. —Yo también me siento así a veces —susurró una voz—. ¿Respiramos juntos?',
+      en: 'The red flower trembled the way you do when you get angry. "I feel like that sometimes too," came a whisper. "Shall we breathe together?"',
+      pt: 'A flor vermelha tremia como quando a gente fica bravo. — Eu também me sinto assim às vezes — sussurrou uma voz. — Vamos respirar juntos?',
     },
     coverImage: '/samples/el-jardin-de-las-emociones.webp',
   },
@@ -785,9 +1047,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'Subir a montanha parece impossível, até que o protagonista descobre que cada passinho conta e que pedir ajuda também é coragem.',
     },
     excerpt: {
-      es: 'Ayer no llegaba ni a la primera piedra. Hoy Martina llegó al árbol grande. —¡Mira cuánto avanzaste! —le dijo el zorro.',
-      en: 'Yesterday she couldn’t even reach the first rock. Today Martina reached the big tree. "Look how far you’ve come!" said the fox.',
-      pt: 'Ontem ela não chegava nem à primeira pedra. Hoje Martina chegou à árvore grande. — Veja quanto você avançou! — disse a raposa.',
+      es: 'Ayer no llegaba ni a la primera piedra. Hoy llegó al árbol grande. —¡Mira cuánto avanzaste! —dijo el zorro.',
+      en: 'Yesterday the first rock was out of reach. Today, the big tree. "Look how far you’ve come!" said the fox.',
+      pt: 'Ontem nem a primeira pedra dava para alcançar. Hoje, a árvore grande. — Veja quanto você avançou! — disse a raposa.',
     },
     coverImage: '/samples/un-pasito-mas.webp',
   },
@@ -833,9 +1095,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'A cadeira que sobe e desce, a luz que parece um sol e uma dentista muito simpática. Uma história para conhecer a consulta antes de ir.',
     },
     excerpt: {
-      es: '—¿Puedo contar tus dientes? —preguntó la dentista. Mateo abrió grande la boca, como un león. —¡Veinte dientes brillantes! —anunció ella.',
-      en: '"May I count your teeth?" the dentist asked. Mateo opened wide, like a lion. "Twenty shiny teeth!" she announced.',
-      pt: '— Posso contar seus dentes? — perguntou a dentista. Mateo abriu bem a boca, como um leão. — Vinte dentes brilhantes! — anunciou ela.',
+      es: '—¿Puedo contar tus dientes? —preguntó la dentista. La boca se abrió grande, como un león. —¡Veinte dientes brillantes! —anunció ella.',
+      en: '"May I count your teeth?" the dentist asked. The mouth opened wide, like a lion. "Twenty shiny teeth!" she announced.',
+      pt: '— Posso contar seus dentes? — perguntou a dentista. A boca se abriu bem, como um leão. — Vinte dentes brilhantes! — anunciou ela.',
     },
     coverImage: '/samples/mi-visita-al-dentista.webp',
   },
@@ -860,14 +1122,14 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: '[Nome] e o mistério do farol',
     },
     summary: {
-      es: 'Cada noche, la luz del faro del pueblo se apaga a la misma hora. Con una libreta, una linterna y mucha paciencia, tu hijo sigue las pistas hasta descubrir un secreto que nadie esperaba.',
+      es: 'Cada noche, la luz del faro del pueblo se apaga a la misma hora. Con una libreta, una linterna y mucha paciencia, tu peque sigue las pistas hasta descubrir un secreto que nadie esperaba.',
       en: 'Every night, the town lighthouse goes dark at exactly the same time. With a notebook, a flashlight and a lot of patience, your child follows the clues to a secret nobody expected.',
-      pt: 'Toda noite, a luz do farol da cidade se apaga no mesmo horário. Com um caderno, uma lanterna e muita paciência, seu filho segue as pistas até descobrir um segredo que ninguém esperava.',
+      pt: 'Toda noite, a luz do farol da cidade se apaga no mesmo horário. Com um caderno, uma lanterna e muita paciência, seu pequeno segue as pistas até descobrir um segredo que ninguém esperava.',
     },
     excerpt: {
-      es: 'A las nueve y trece en punto, la luz del faro se apagó otra vez. Valentina anotó la hora en su libreta, debajo de las otras seis. —No es una falla —murmuró—. Es una señal.',
-      en: 'At exactly nine thirteen, the lighthouse went dark again. Valentina wrote the time in her notebook, under the other six. "It isn’t a fault," she whispered. "It’s a signal."',
-      pt: 'Às nove e treze em ponto, a luz do farol se apagou outra vez. Valentina anotou a hora no caderno, embaixo das outras seis. — Não é defeito — murmurou. — É um sinal.',
+      es: 'A las nueve y trece en punto, la luz del faro se apagó otra vez. [Nombre] anotó la hora en su libreta, debajo de las otras seis. —No es una falla —murmuró—. Es una señal.',
+      en: 'At exactly nine thirteen, the lighthouse went dark again. [Name] wrote the time in a notebook, under the other six. "It isn’t a fault," came the whisper. "It’s a signal."',
+      pt: 'Às nove e treze em ponto, a luz do farol se apagou outra vez. [Nome] anotou a hora no caderno, embaixo das outras seis. — Não é defeito — murmurou. — É um sinal.',
     },
     coverImage: '/samples/el-misterio-del-faro.webp',
   },
@@ -891,9 +1153,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'A invenção que fugiu',
     },
     summary: {
-      es: 'Para la feria de ciencias, tu hijo construye un robot ayudante. Lo que no esperaba es que el robot tuviera ideas propias. Una aventura de inventos, errores y soluciones ingeniosas.',
+      es: 'Para la feria de ciencias, tu peque construye un robot ayudante. Lo que no esperaba es que el robot tuviera ideas propias. Una aventura de inventos, errores y soluciones ingeniosas.',
       en: "For the science fair, your child builds a helper robot. What they didn't expect was a robot with ideas of its own. An adventure of inventions, mistakes and clever fixes.",
-      pt: 'Para a feira de ciências, seu filho constrói um robô ajudante. O que ele não esperava era que o robô tivesse ideias próprias. Uma aventura de invenções, erros e soluções engenhosas.',
+      pt: 'Para a feira de ciências, seu pequeno constrói um robô ajudante. O que ele não esperava era que o robô tivesse ideias próprias. Uma aventura de invenções, erros e soluções engenhosas.',
     },
     excerpt: {
       es: '—Prueba número catorce —dijo Tomás, y conectó el último cable. El robot abrió un ojo, después el otro, y preguntó: —¿Por qué tu cuarto está tan desordenado?',
@@ -917,9 +1179,9 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'A expedição do mapa perdido',
     },
     summary: {
-      es: 'Un mapa antiguo aparece dentro de un libro de la biblioteca. Selva, ríos y ruinas escondidas: una expedición en la que tu hijo descifra símbolos y toma las decisiones del equipo.',
+      es: 'Un mapa antiguo aparece dentro de un libro de la biblioteca. Selva, ríos y ruinas escondidas: una expedición en la que tu peque descifra símbolos y toma las decisiones del equipo.',
       en: 'An old map turns up inside a library book. Jungle, rivers and hidden ruins: an expedition where your child decodes symbols and makes the team’s decisions.',
-      pt: 'Um mapa antigo aparece dentro de um livro da biblioteca. Selva, rios e ruínas escondidas: uma expedição em que seu filho decifra símbolos e toma as decisões da equipe.',
+      pt: 'Um mapa antigo aparece dentro de um livro da biblioteca. Selva, rios e ruínas escondidas: uma expedição em que seu pequeno decifra símbolos e toma as decisões da equipe.',
     },
     excerpt: {
       es: 'El mapa estaba doblado en ocho y olía a humedad. En una esquina, alguien había dibujado una brújula con una sola flecha. Lucas la giró hacia la ventana, y la flecha no apuntó al norte.',
@@ -948,14 +1210,14 @@ export const SEED_NEW_STORIES: SeedStory[] = [
       pt: 'A segunda-feira ao contrário de [Nome]',
     },
     summary: {
-      es: 'Un lunes, tu hijo se despierta y todo funciona al revés: el perro pasea a la familia, los maestros hacen la tarea y la gravedad se toma el día libre. Para arreglarlo, tendrá que pensar al revés.',
+      es: 'Un lunes, tu peque se despierta y todo funciona al revés: el perro pasea a la familia, los maestros hacen la tarea y la gravedad se toma el día libre. Para arreglarlo, tendrá que pensar al revés.',
       en: 'One Monday, your child wakes up and everything works backwards: the dog walks the family, the teachers do the homework and gravity takes the day off. To fix it, they will have to think backwards.',
-      pt: 'Numa segunda-feira, seu filho acorda e tudo funciona ao contrário: o cachorro passeia com a família, os professores fazem a lição e a gravidade tira o dia de folga. Para consertar, ele vai ter que pensar ao contrário.',
+      pt: 'Numa segunda-feira, seu pequeno acorda e tudo funciona ao contrário: o cachorro passeia com a família, os professores fazem a lição e a gravidade tira o dia de folga. Para consertar, ele vai ter que pensar ao contrário.',
     },
     excerpt: {
-      es: 'Joaquín bajó a desayunar y encontró a su papá en el techo, untando una tostada. —Buen día —dijo su papá, flotando—. Hoy es uno de esos lunes.',
-      en: 'Joaquín came down to breakfast and found his dad on the ceiling, buttering toast. "Good morning," said his dad, floating. "Today is one of those Mondays."',
-      pt: 'Joaquín desceu para o café e encontrou o pai no teto, passando manteiga numa torrada. — Bom dia — disse o pai, flutuando. — Hoje é uma daquelas segundas.',
+      es: '[Nombre] bajó a desayunar y encontró a su papá en el techo, untando una tostada. —Buen día —dijo su papá, flotando—. Hoy es uno de esos lunes.',
+      en: '[Name] came down to breakfast and found Dad on the ceiling, buttering toast. "Good morning," said Dad, floating. "Today is one of those Mondays."',
+      pt: '[Nome] desceu para o café e encontrou o pai no teto, passando manteiga numa torrada. — Bom dia — disse o pai, flutuando. — Hoje é uma daquelas segundas.',
     },
     coverImage: '/samples/un-lunes-al-reves.webp',
   },

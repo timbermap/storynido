@@ -87,7 +87,6 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
     );
     return Object.keys(merged).length > 0 ? { pathname: base, query: merged } : base;
   };
-  const fromPrice = lowestPrice(offer, locale, display.country);
 
   return (
     <div className="container-page py-14">
@@ -282,7 +281,7 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
               <StoryCard
                 key={story.slug}
                 story={story}
-                fromPrice={fromPrice}
+                fromPrice={lowestPrice(offer, locale, display.country, story.lengths)}
                 headingLevel="h2"
                 priority={index < 2}
                 lineLabel={channel ? undefined : tLines(story.channels[0] ?? 'families')}

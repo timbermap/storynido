@@ -82,6 +82,8 @@ export interface DraftPreset {
   settings?: ProjectSettings;
   /** Celebraciones: temática de la fiesta elegida en la landing. */
   eventTheme?: string | null;
+  /** Tipo de contenido pedido desde un destacado (por ejemplo, «Para colorear» en Brasil). */
+  contentType?: Book['contentType'] | null;
 }
 
 /** Campos de un borrador nuevo (sin las fechas, que pone quien lo guarda). */
@@ -114,6 +116,7 @@ function draftFields(uid: string, preset: DraftPreset) {
       ? { length: 'mini' as const, textDensity: 'visual' as const }
       : {}),
     ...preset.settings,
+    ...(preset.contentType ? { contentType: preset.contentType } : {}),
     channel: preset.channel,
     preview: null,
     regenerationsUsed: 0,

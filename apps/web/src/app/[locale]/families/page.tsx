@@ -50,7 +50,6 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
       <ArrowRight aria-hidden="true" />
     </>
   );
-  const fromPrice = lowestPrice(offer, locale, display.country);
   const highlights = offerHighlights(offer, locale, display.country);
   // Solo las destacadas: todas las preguntas y el contacto están en /faq.
   const faqItems = faq ? faqHighlights(parseFaqGroups(faq.body)) : [];
@@ -200,6 +199,27 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
         }}
       />
 
+      {/* Brasil: los libros para colorir fueron lo más vendido de 2025 (auditoría de historias). */}
+      {display.country === 'BR' && (
+        <section className="container-page py-12">
+          <div className="flex flex-col items-start gap-5 rounded-2xl bg-peach/60 p-8 sm:flex-row sm:items-center">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl font-medium">{tStories('coloringTitle')}</h2>
+              <p className="mt-2 text-lg text-muted-foreground">{tStories('coloringText')}</p>
+            </div>
+            <AuthLink
+              href={{ pathname: '/create', query: { tipo: 'coloring' } }}
+              guest={tStories('coloringCta')}
+              member={tStories('coloringCta')}
+              className={buttonVariants({
+                size: 'lg',
+                className: 'h-12 w-full shrink-0 rounded-full px-7 sm:ml-auto sm:w-auto',
+              })}
+            />
+          </div>
+        </section>
+      )}
+
       {/* Galería de historias */}
       {stories.length > 0 && (
         <section className="bg-muted py-20 lg:py-24">
@@ -239,7 +259,11 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
             <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
               {/* Hasta 6 en la home (dos filas completas); el resto, en el catálogo. */}
               {stories.slice(0, 6).map((story) => (
-                <StoryCard key={story.slug} story={story} fromPrice={fromPrice} />
+                <StoryCard
+                  key={story.slug}
+                  story={story}
+                  fromPrice={lowestPrice(offer, locale, display.country, story.lengths)}
+                />
               ))}
             </div>
           </div>
