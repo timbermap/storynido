@@ -204,7 +204,7 @@ export function LandingCollections({
     <section id={id} className="container-page scroll-mt-28 py-20 lg:py-24">
       <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">{title}</h2>
       {subtitle && <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{subtitle}</p>}
-      <ul className="mt-10 grid gap-6 sm:grid-cols-2">
+      <ul className="mt-10 grid gap-6 lg:grid-cols-2">
         {collections.map((collection) => {
           const own = stories.filter((story) => story.collectionIds.includes(collection.slug));
           const startLabel = start ? (
@@ -249,9 +249,9 @@ export function LandingCollections({
                 />
               )}
               {own.length > 0 && (
-                <ul className="mt-5 flex flex-wrap gap-3">
+                <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {own.map((story) => (
-                    <li key={story.slug} className="w-[7.5rem]">
+                    <li key={story.slug} className="min-w-0">
                       <Link
                         // La ficha de la historia: edades, fragmento, ejemplo para hojear y precios.
                         href={{
@@ -263,7 +263,11 @@ export function LandingCollections({
                         className="group block"
                       >
                         <div className="aspect-[3/4] w-full overflow-hidden rounded-lg shadow-[var(--shadow-card)] transition group-hover:-translate-y-0.5">
-                          <StoryCover story={story} line={line} sizes="8rem" />
+                          <StoryCover
+                            story={story}
+                            line={line}
+                            sizes="(min-width: 640px) 8rem, 40vw"
+                          />
                         </div>
                         <span className="mt-1.5 block text-xs leading-snug font-semibold group-hover:text-primary">
                           {story.title}
