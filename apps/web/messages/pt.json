@@ -54,6 +54,7 @@
     "ordersInProgress": "{count, plural, one {# pedido em andamento} other {# pedidos em andamento}}",
     "createPro": "Criar uma história",
     "storiesMenu": "Famílias",
+    "storiesMenuToggle": "Ver histórias por idade",
     "howItWorksShort": "Como funciona",
     "createPreview": "Criar prévia grátis",
     "createKit": "Montar o kit",

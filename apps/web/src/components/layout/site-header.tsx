@@ -56,6 +56,7 @@ export async function SiteHeader() {
               </span>
             }
             onlyFamilies
+            href="/families"
           />
           {links.map((link) => (
             <NavLink key={link.audience} href={link.href}>
@@ -87,7 +88,7 @@ export async function SiteHeader() {
           <MobileMenu>
             <nav aria-label={t('mainNav')} className="grid gap-2">
               <Link
-                href="/families/stories"
+                href="/families"
                 className="flex items-center gap-3 rounded-2xl bg-[#e4f3ef] px-4 py-3.5 text-lg font-semibold"
               >
                 <span

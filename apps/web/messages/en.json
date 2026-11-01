@@ -54,6 +54,7 @@
     "ordersInProgress": "{count, plural, one {# order in progress} other {# orders in progress}}",
     "createPro": "Create a story",
     "storiesMenu": "Families",
+    "storiesMenuToggle": "See stories by age",
     "howItWorksShort": "How it works",
     "createPreview": "Create a free preview",
     "createKit": "Design the kit",

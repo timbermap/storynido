@@ -18,17 +18,26 @@ export function ExploreMenu({
   label,
   id,
   onlyFamilies = false,
+  href,
 }: {
   label: ReactNode;
   id: string;
   /** Sin sesión Celebraciones y Profesionales ya tienen su propio link en la barra. */
   onlyFamilies?: boolean;
+  /** El nombre del menú lleva a esta página (la flecha abre el desplegable). */
+  href?: '/families';
 }) {
   const t = useTranslations('Nav');
   const tStages = useTranslations('Stories.stages');
   const tLines = useTranslations('Nav.lines');
   return (
-    <NavMenu id={id} label={label} panelClassName="w-[22rem]">
+    <NavMenu
+      id={id}
+      label={label}
+      href={href}
+      toggleLabel={t('storiesMenuToggle')}
+      panelClassName="w-[22rem]"
+    >
       <div className="p-2">
         <p className="px-3 pt-2 pb-1 text-xs font-bold tracking-wide text-muted-foreground uppercase">
           {tLines('families')}

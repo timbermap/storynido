@@ -3,7 +3,7 @@
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { usePathname } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 /**
@@ -17,6 +17,8 @@ export function NavMenu({
   align = 'start',
   className,
   panelClassName = 'w-[22rem]',
+  href,
+  toggleLabel,
 }: {
   id: string;
   label: ReactNode;
@@ -25,6 +27,10 @@ export function NavMenu({
   className?: string;
   /** Ancho del panel. */
   panelClassName?: string;
+  /** El nombre del menú es un link a su página; la flecha abre el desplegable. */
+  href?: '/families';
+  /** Nombre accesible de la flecha cuando el nombre es un link. */
+  toggleLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -83,25 +89,39 @@ export function NavMenu({
         }, 150);
       }}
     >
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => {
-          if (openedByHover.current) {
-            openedByHover.current = false;
-            return;
-          }
-          setOpen((value) => !value);
-        }}
-        className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 whitespace-nowrap transition-colors hover:text-primary aria-expanded:text-primary"
-      >
-        {label}
-        <ChevronDown
-          aria-hidden="true"
-          className={cn('size-4 transition-transform', open && 'rotate-180')}
-        />
-      </button>
+      <span className="inline-flex items-center">
+        {href && (
+          <Link
+            href={href}
+            className="rounded-full py-2 pr-1 pl-3 whitespace-nowrap transition-colors hover:text-primary"
+          >
+            {label}
+          </Link>
+        )}
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={id}
+          aria-label={href ? toggleLabel : undefined}
+          onClick={() => {
+            if (openedByHover.current) {
+              openedByHover.current = false;
+              return;
+            }
+            setOpen((value) => !value);
+          }}
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full py-2 whitespace-nowrap transition-colors hover:text-primary aria-expanded:text-primary',
+            href ? 'pr-3 pl-1' : 'px-3',
+          )}
+        >
+          {!href && label}
+          <ChevronDown
+            aria-hidden="true"
+            className={cn('size-4 transition-transform', open && 'rotate-180')}
+          />
+        </button>
+      </span>
       <div
         id={id}
         hidden={!open}

@@ -2050,3 +2050,7 @@ El panel «Tus proyectos» ya no tiene el botón «Nuevo proyecto»: crear se ha
 ### 172b. Familias: un solo llamado al final (2026-11-01)
 
 La tarjeta «Mira antes de comprar» (garantía) ya no lleva botón: quedaba pegada al llamado final y se veían dos botones iguales seguidos. El único botón del cierre es «Crear una vista previa gratis».
+
+### 172c. Navbar: «Familias» lleva a Familias (2026-11-01)
+
+En el navbar de visitante, el nombre «Familias» es un link a la landing de Familias (también en el menú del celular, que antes iba al catálogo) y la flecha de al lado abre el desplegable con «Todas las historias» y las etapas de edad. El catálogo sigue a un clic, dentro del desplegable.
