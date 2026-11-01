@@ -1,4 +1,4 @@
-import { ArrowRight, Camera, Check } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { ImageSlot } from '@/components/landing/image-slot';
@@ -10,7 +10,6 @@ import { ImageSlot } from '@/components/landing/image-slot';
 export async function PartyValue({ coverImage }: { coverImage?: string }) {
   const t = await getTranslations('Landing.events.value');
   const steps = [
-    { kind: 'photo', label: t('photoLabel') },
     { kind: 'image', src: '/images/secciones/personaje.webp', label: t('characterLabel') },
     ...(coverImage ? [{ kind: 'image', src: coverImage, label: t('kitLabel') } as const] : []),
   ] as const;
@@ -34,31 +33,25 @@ export async function PartyValue({ coverImage }: { coverImage?: string }) {
           </ul>
         </div>
         <figure>
-          <ol className="grid grid-cols-3 items-start gap-2 sm:gap-4">
+          <ol className="mx-auto grid max-w-md grid-cols-2 items-start gap-6 sm:gap-8">
             {steps.map((step, index) => (
               <li key={step.label} className="relative grid gap-2">
                 <div className="aspect-square overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-card)]">
-                  {step.kind === 'photo' ? (
-                    <div className="grid size-full place-items-center bg-sky text-primary">
-                      <Camera className="size-10 sm:size-14" strokeWidth={1.4} aria-hidden="true" />
-                    </div>
-                  ) : (
-                    <ImageSlot
-                      src={step.src}
-                      alt=""
-                      width={900}
-                      height={900}
-                      sizes="(min-width: 1024px) 200px, 30vw"
-                      tone="bg-[#fff7f2]"
-                      className="h-full object-cover object-bottom"
-                    />
-                  )}
+                  <ImageSlot
+                    src={step.src}
+                    alt=""
+                    width={900}
+                    height={900}
+                    sizes="(min-width: 1024px) 260px, 45vw"
+                    tone="bg-[#fff7f2]"
+                    className="h-full object-cover object-bottom"
+                  />
                 </div>
                 <span className="text-center text-xs font-bold sm:text-sm">{step.label}</span>
                 {index < steps.length - 1 && (
                   <ArrowRight
                     aria-hidden="true"
-                    className="absolute top-1/3 -right-3 size-5 text-primary sm:-right-4"
+                    className="absolute top-1/3 -right-5 size-5 text-primary sm:-right-6"
                   />
                 )}
               </li>
