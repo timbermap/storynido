@@ -2167,3 +2167,11 @@ El desplegable de Familias (y el de «Explorar» con sesión) arranca con «Inic
 
 - **Fecha:** 2026-11-01.
 - Home, Familias, Celebraciones y Profesionales cierran con la misma banda (`LandingFinalCta`: icono de regalo, título, texto y el mismo botón grande), cada una con su propio texto: Home «Elige tu línea y empieza gratis», Familias «Una historia para recordar siempre.», Celebraciones «Que cada invitado se lleve un recuerdo de la fiesta» y Profesionales con su título y un texto sobre cuentos para cada chico que acompañan, sin datos clínicos. La tarjeta de garantía de la home deja de llevar botón (ya no se repite).
+
+## 186 · Eventos: auditoría de mercado (P0 de imágenes y promesa)
+
+- **Fecha:** 2026-11-01.
+- **Fuente:** el documento «Eventos: auditoría y estudio de mercado».
+- **Hecho (P0):** el hero ya no usa la foto generada del kit (traía una etiqueta «Name» en inglés y objetos que el kit no incluye): `PartyKitRender` arma en código, con la ilustración real del cumpleaños, la invitación, el cuento como libro, la guirnalda con el nombre y las etiquetas con el nombre de cada invitado. «Su cara, en toda la fiesta» tampoco muestra la foto de un chico que no existe: un ícono de foto, el personaje ilustrado y el cuento. La promesa del hero ya decía «un cuento por invitado, con el nombre de cada uno en la etiqueta», que es lo que se entrega.
+- **Pendiente de decisión (P0, precios):** la invitación sola a precio de entrada (US$ 7 a 12) y precios redondos (hoy 18,98 y 25,15 salen de sumar piezas). Toca el cálculo del checkout del kit, así que se propone aparte.
+- **Sin hacer (P1 y P2):** nombre de cada invitado en la tapa del librito con PDF único, confirmación de asistencia con link, piezas nuevas del kit (topper, banderín, cartel, etiquetas de golosinas, fondo de fotos, juegos), temas por edad (primer añito, bosque mágico, circo, fútbol), pack de primera comunión, libritos impresos en packs, libro de la clase, versión para colorear, precio mayorista y ocasiones nuevas.

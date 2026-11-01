@@ -1076,6 +1076,12 @@
         "cta": "Criar meu kit",
         "previewAlt": "Convite de exemplo para o aniversário de {name}, tema {theme}"
       },
+      "render": {
+        "alt": "O kit da festa de {name}: convite, história, bandeirinhas e etiquetas",
+        "invited": "Você está convidado!",
+        "tagFor": "Para",
+        "caption": "Exemplo montado com nossas ilustrações; o seu kit leva o seu filho."
+      },
       "value": {
         "title": "O rosto dele, em toda a festa",
         "subtitle": "Não é um modelo com um nome: a partir da foto criamos o personagem ilustrado, o mesmo em cada peça.",

@@ -1076,6 +1076,12 @@
         "cta": "Diseñar mi kit",
         "previewAlt": "Invitación de muestra para el cumpleaños de {name}, tema {theme}"
       },
+      "render": {
+        "alt": "El kit de la fiesta de {name}: invitación, cuento, guirnalda y etiquetas",
+        "invited": "¡Estás invitado!",
+        "tagFor": "Para",
+        "caption": "Ejemplo armado con nuestras ilustraciones; tu kit lleva a tu hijo."
+      },
       "value": {
         "title": "Su cara, en toda la fiesta",
         "subtitle": "No es una plantilla con un nombre: con su foto creamos su personaje ilustrado y es el mismo en cada pieza.",

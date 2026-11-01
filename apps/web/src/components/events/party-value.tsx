@@ -1,4 +1,4 @@
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Camera, Check } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { ImageSlot } from '@/components/landing/image-slot';
@@ -7,12 +7,12 @@ import { ImageSlot } from '@/components/landing/image-slot';
  * El valor agregado de Celebraciones, explicado antes de los productos: de su foto a su personaje
  * y de ahí a todas las piezas de la fiesta. Imágenes de muestra, nunca fotos de menores.
  */
-export async function PartyValue() {
+export async function PartyValue({ coverImage }: { coverImage?: string }) {
   const t = await getTranslations('Landing.events.value');
   const steps = [
-    { src: '/images/secciones/foto-real.webp', label: t('photoLabel'), tone: 'bg-sky' },
-    { src: '/images/secciones/personaje.webp', label: t('characterLabel'), tone: 'bg-[#fff7f2]' },
-    { src: '/images/heroes/kit-completo.webp', label: t('kitLabel'), tone: 'bg-[#fde7df]' },
+    { kind: 'photo', label: t('photoLabel') },
+    { kind: 'image', src: '/images/secciones/personaje.webp', label: t('characterLabel') },
+    ...(coverImage ? [{ kind: 'image', src: coverImage, label: t('kitLabel') } as const] : []),
   ] as const;
   return (
     <section className="container-page py-16 lg:py-20">
@@ -36,17 +36,23 @@ export async function PartyValue() {
         <figure>
           <ol className="grid grid-cols-3 items-start gap-2 sm:gap-4">
             {steps.map((step, index) => (
-              <li key={step.src} className="relative grid gap-2">
+              <li key={step.label} className="relative grid gap-2">
                 <div className="aspect-square overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-card)]">
-                  <ImageSlot
-                    src={step.src}
-                    alt=""
-                    width={900}
-                    height={900}
-                    sizes="(min-width: 1024px) 200px, 30vw"
-                    tone={step.tone}
-                    className="h-full object-cover"
-                  />
+                  {step.kind === 'photo' ? (
+                    <div className="grid size-full place-items-center bg-sky text-primary">
+                      <Camera className="size-10 sm:size-14" strokeWidth={1.4} aria-hidden="true" />
+                    </div>
+                  ) : (
+                    <ImageSlot
+                      src={step.src}
+                      alt=""
+                      width={900}
+                      height={900}
+                      sizes="(min-width: 1024px) 200px, 30vw"
+                      tone="bg-[#fff7f2]"
+                      className="h-full object-cover object-bottom"
+                    />
+                  )}
                 </div>
                 <span className="text-center text-xs font-bold sm:text-sm">{step.label}</span>
                 {index < steps.length - 1 && (

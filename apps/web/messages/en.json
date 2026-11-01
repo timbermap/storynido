@@ -1076,6 +1076,12 @@
         "cta": "Design my kit",
         "previewAlt": "Sample invitation for the birthday of {name}, theme {theme}"
       },
+      "render": {
+        "alt": "{name}'s party kit: invitation, story, bunting and tags",
+        "invited": "You're invited!",
+        "tagFor": "For",
+        "caption": "A sample built from our illustrations; your kit stars your child."
+      },
       "value": {
         "title": "Their face, all over the party",
         "subtitle": "Not a template with a name on it: from their photo we create their illustrated character, the same one on every piece.",

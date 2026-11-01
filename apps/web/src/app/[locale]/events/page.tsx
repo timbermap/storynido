@@ -14,7 +14,7 @@ import {
   ctaClass,
 } from '@/components/landing/sections';
 import { PhotoPromise } from '@/components/landing/photo-promise';
-import { ImageSlot } from '@/components/landing/image-slot';
+import { PartyKitRender } from '@/components/events/party-kit-render';
 import { PartyValue } from '@/components/events/party-value';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
@@ -68,6 +68,9 @@ export default async function EventsPage({ params }: Props) {
   const percent = pricing?.bundlePercent ?? 0;
   const partyMinor = fullMinor - Math.round((fullMinor * percent) / 100);
   const bookFrom = lowestPrice(offer, locale, display.country);
+  // La historia que ilustra el kit del hero (la del cumpleaños; si no está, la primera).
+  const heroStory =
+    stories.find((story) => story.slug === 'el-cumpleanos-mas-magico') ?? stories[0];
 
   const cta = (
     <Link
@@ -110,26 +113,9 @@ export default async function EventsPage({ params }: Props) {
         cta={cta}
         priceLine={pricing ? t('hero.price', { price: money(partyMinor) }) : undefined}
         note={t('note')}
-        media={
-          <figure className="relative mx-auto w-full max-w-xl">
-            <div className="overflow-hidden rounded-[1.75rem] bg-muted shadow-[var(--shadow-card)]">
-              <ImageSlot
-                src="/images/heroes/kit-completo.webp"
-                alt={t('hero.photoAlt')}
-                width={1200}
-                height={800}
-                sizes="(min-width: 1024px) 560px, 92vw"
-                priority
-                tone="bg-[#fde7df]"
-              />
-            </div>
-            <figcaption className="absolute bottom-3 left-3 rounded-full bg-card px-3 py-1 text-xs font-bold shadow-[var(--shadow-card)]">
-              {t('hero.badge')}
-            </figcaption>
-          </figure>
-        }
+        media={heroStory ? <PartyKitRender story={heroStory} /> : null}
       />
-      <PartyValue />
+      <PartyValue coverImage={heroStory?.coverImage} />
       <section className="bg-muted py-20 lg:py-24">
         <div className="container-page">
           <div className="max-w-2xl">
