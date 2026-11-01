@@ -622,7 +622,9 @@
       "subtitle": "As ideais para a idade dele aparecem primeiro.",
       "recommended": "Ideal para a idade",
       "required": "Escolha uma aventura para continuar.",
-      "idealFor": "Ideal para {name}"
+      "idealFor": "Ideal para {name}",
+      "languageTitle": "Idioma da história",
+      "languageHint": "A história é escrita neste idioma, mesmo que você use o site em outro."
     },
     "lesson": {
       "title": "O que você quer que ele aprenda?",

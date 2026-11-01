@@ -622,7 +622,9 @@
       "subtitle": "The best ones for their age come first.",
       "recommended": "Great for their age",
       "required": "Choose an adventure to continue.",
-      "idealFor": "Ideal for {name}"
+      "idealFor": "Ideal for {name}",
+      "languageTitle": "Story language",
+      "languageHint": "The story is written in this language, even if you use the site in another."
     },
     "lesson": {
       "title": "What do you want them to learn?",

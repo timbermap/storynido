@@ -451,19 +451,9 @@ const BABY_BASE = {
 
 /**
  * Historias nuevas cuya portada todavía no se generó (`generate-brand-images.ts`): no se siembran
- * hasta tenerla, para no publicar una portada de otro chico. Al generarlas, se vacía esta lista.
+ * hasta tenerla, para no publicar una portada de otro chico. Hoy no hay ninguna pendiente.
  */
-export const PENDING_COVER_SLUGS: readonly string[] = [
-  'la-navidad-de-nombre',
-  'cuando-naciste',
-  'los-mejores-del-mundo',
-  'chau-panal',
-  'el-volcan-del-enojo',
-  'el-diente-que-se-cayo',
-  'el-club-de-detectives',
-  'dentro-del-videojuego',
-  'feliz-cumpleanos',
-];
+export const PENDING_COVER_SLUGS: readonly string[] = [];
 
 const DRAFT_STORIES: SeedStory[] = [
   {

@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { suggestedReading, type PublicStory } from '@storynido/shared';
+import { LOCALES, suggestedReading, type Locale, type PublicStory } from '@storynido/shared';
 
 import { StoryCover } from '@/components/stories/story-cover';
 import { getFirebaseDb } from '@/lib/firebase/client';
@@ -14,11 +14,20 @@ import { OptionCard } from './option-card';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
+/** Cada idioma en su propio idioma, para que se reconozca sin importar el del sitio. */
+const LANGUAGE_NAMES: Record<Locale, string> = {
+  es: 'Español',
+  en: 'English',
+  pt: 'Português',
+};
+
 export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const t = useTranslations('Wizard.story');
   const tStories = useTranslations('Stories');
   const [selected, setSelected] = useState(data.book.storyId);
   const [error, setError] = useState<string | null>(null);
+  // Idioma del cuento: arranca con el del sitio, pero se puede elegir otro (familias bilingües o de otro país).
+  const [language, setLanguage] = useState<Locale>(data.book.language);
   const age = data.child?.age;
   // La primera vez que se llega a este paso, la lectura se sugiere según la edad.
   const firstVisit = nav.reached <= nav.flow.indexOf('story');
@@ -66,6 +75,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
     const ok = await nav.save(async () => {
       await updateBook(await getFirebaseDb(), await nav.ensureBook(), {
         storyId: selected,
+        language,
         ...options,
       });
     });
@@ -116,6 +126,26 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
                   )
                 )}
               </span>
+            </OptionCard>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="mt-8">
+        <legend className="font-display text-xl font-semibold">{t('languageTitle')}</legend>
+        <p className="mt-1 text-sm text-muted-foreground">{t('languageHint')}</p>
+        <div className="mt-3 grid grid-cols-3 gap-3">
+          {LOCALES.map((code) => (
+            <OptionCard
+              key={code}
+              name="book-language"
+              value={code}
+              checked={language === code}
+              onSelect={() => {
+                setLanguage(code);
+              }}
+            >
+              <span className="p-3 text-center font-semibold">{LANGUAGE_NAMES[code]}</span>
             </OptionCard>
           ))}
         </div>

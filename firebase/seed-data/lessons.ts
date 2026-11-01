@@ -340,4 +340,6 @@ export const SEED_LESSONS: SeedLesson[] = [
 export const FEATURED_STORY: Record<string, string> = {
   'llega-un-hermanito': 'hermano-mayor',
   'primer-dia-de-clases': 'mi-primer-dia-de-clases',
+  'dejar-el-panal-o-el-chupete': 'chau-panal',
+  'manejar-el-enojo': 'el-volcan-del-enojo',
 };
