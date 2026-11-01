@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Map, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowRight, BookOpen, Map, UserRound } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
@@ -186,18 +186,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </section>
       )}
 
-      {/* Garantía */}
-      <section className="container-page py-16 lg:py-20">
-        <div className="flex flex-col items-start gap-5 rounded-2xl border bg-card p-8 sm:flex-row sm:items-center sm:p-10">
-          <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-mint text-success">
-            <ShieldCheck className="size-7" aria-hidden="true" />
-          </span>
-          <div>
-            <h2 className="text-2xl font-medium">{t('guarantee.title')}</h2>
-            <p className="mt-2 text-muted-foreground">{t('guarantee.text')}</p>
-          </div>
-        </div>
-      </section>
       {/* Llamado final: el mismo cierre en las cuatro landings */}
       <LandingFinalCta
         title={t('finalCta.title')}

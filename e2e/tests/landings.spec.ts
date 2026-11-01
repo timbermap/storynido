@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 import { expectAccessible, expectNoHorizontalScroll } from './helpers';
 
@@ -10,6 +10,14 @@ async function acceptCookies(page: Page): Promise<void> {
     })
     .click({ timeout: 5000 })
     .catch(() => undefined);
+}
+
+/** En el celular la barra fija de abajo tapa lo que queda al borde: se centra el elemento antes del clic. */
+async function clickCentered(target: Locator): Promise<void> {
+  await target.evaluate((element) => {
+    element.scrollIntoView({ block: 'center' });
+  });
+  await target.click();
 }
 
 /** Rutas por idioma (i18n/routing.ts) y la línea a la que lleva el botón principal. */
@@ -109,7 +117,7 @@ test('catálogo: "Le encanta" filtra por temática y el buscador espera a tener 
   page,
 }) => {
   await page.goto('/es/historias');
-  await page.getByRole('link', { name: 'Los héroes y el deporte' }).click();
+  await clickCentered(page.getByRole('link', { name: 'Los héroes y el deporte' }));
   await expect(page).toHaveURL(/tema=heroes/);
   const grid = page.locator('main');
   await expect(grid).toContainText('gol de campeón');
@@ -176,7 +184,7 @@ test('preguntas frecuentes: la home destaca 4 y la página propia tiene todas y 
   await acceptCookies(page);
   await expect(page.locator('body')).not.toContainText('hola@storynido.com');
   await expect(page.locator('#faq details')).toHaveCount(4);
-  await page.getByRole('link', { name: /Ver todas las preguntas/ }).click();
+  await clickCentered(page.getByRole('link', { name: /Ver todas las preguntas/ }));
   await expect(page).toHaveURL(/\/es\/preguntas-frecuentes$/);
   await expect(page.locator('h1')).toContainText('Preguntas frecuentes');
   expect(await page.locator('details').count()).toBeGreaterThan(10);

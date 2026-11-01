@@ -2192,3 +2192,7 @@ Se quitan de la landing de Familias la sección de la foto del libro impreso (qu
 - **Profesionales:** la API devuelve `proLengthPrices` (el digital por extensión con el descuento base, redondeado como el checkout) y la landing muestra «desde» con ese valor.
 - **Regla general:** «Digital desde» = el digital más barato que de verdad se puede pagar (extensión más corta); «Impreso desde» = tapa blanda Clásico más barata; el catálogo, cada historia, la home, Familias y Profesionales usan las mismas funciones (`lowestPrice`). Nada se redondea en la web: lo que se ve es lo que cobra el servidor.
 - **Margen (a validar la primera semana):** el kit de entrada (9,99) deja ≈ USD 6 después de la IA y las comisiones; el completo (24,99) ≈ USD 21, porque las piezas extra son PDF armados en código, sin costo de IA.
+
+### 187b. Home sin la tarjeta «Mira antes de comprar» (2026-11-01)
+
+La tarjeta de garantía («Crea una vista previa gratis… si el libro tiene un error o llega dañado, lo corregimos, lo reimprimimos o te devolvemos el dinero») sale de la home, como ya había salido de Familias. La política de reembolsos sigue en el pie y en las preguntas frecuentes.
