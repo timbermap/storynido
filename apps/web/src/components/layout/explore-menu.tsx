@@ -1,6 +1,6 @@
 'use client';
 
-import { BookHeart, Cake, GraduationCap } from 'lucide-react';
+import { BookHeart, Cake, GraduationCap, Home } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
@@ -43,6 +43,15 @@ export function ExploreMenu({
           {tLines('families')}
         </p>
         <ul>
+          <li>
+            <Link href="/families" className="group block rounded-xl">
+              <NavMenuItem
+                title={t('familiesHome')}
+                text={t('familiesHomeText')}
+                icon={<Home className="size-4" />}
+              />
+            </Link>
+          </li>
           <li>
             <Link href="/families/stories" className="group block rounded-xl">
               <NavMenuItem

@@ -2144,3 +2144,7 @@ El catálogo oculta el buscador mientras la línea tenga menos de 40 historias (
 - Sebastián eligió la opción B: columna lateral con «¿Para quién es?» (edad, con contador) y los temas de «Le encanta», y las historias a la derecha en tarjetas más chicas (2, 3 y hasta 4 por fila). En el celular los filtros pasan arriba.
 - **Sale el campo «¿Cómo se llama?»** del catálogo y de la ficha, y las portadas vuelven a mostrar siempre el nombre del elenco: un nombre escrito podía quedar sobre un dibujo de otro género (por ejemplo, «Luis» sobre una nena). La demo de la landing de Familias sigue con su propio campo, con el aviso de que es un ejemplo. Queda sin uso el componente `VisitorNameField` y el hook `useVisitorName`, para retomarlos cuando nombre y dibujo puedan coincidir (por ejemplo, eligiendo antes el personaje).
 - El buscador sigue oculto hasta las 40 historias (decisión 181b).
+
+### 182b. Menú de Familias: acceso directo a Familias (2026-11-01)
+
+El desplegable de Familias (y el de «Explorar» con sesión) arranca con «Inicio de Familias», que lleva a la landing, antes de «Todas las historias» y las etapas de edad.
