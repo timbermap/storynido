@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
+import { ClientErrorReporter } from '@/components/client-error-reporter';
 import { Analytics } from '@/components/consent/analytics';
 import { ConsentBanner } from '@/components/consent/consent-banner';
 import { Maintenance, PreviewOnlyBanner } from '@/components/layout/maintenance';
@@ -118,6 +119,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             )}
             <ConsentBanner />
             <Analytics />
+            <ClientErrorReporter />
           </Providers>
         </NextIntlClientProvider>
       </body>

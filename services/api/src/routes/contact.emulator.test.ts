@@ -108,4 +108,23 @@ describe('formulario de contacto', () => {
       embedded_google_redirect_succeeded: 1,
     });
   });
+
+  it('registra un error del navegador sin pedir sesión y rechaza uno inválido', async () => {
+    const send = (payload: object) =>
+      created.app.inject({ method: 'POST', url: '/v1/events/client-error', payload });
+    expect(
+      (
+        await send({
+          message: 'x is not a function',
+          stack: 'at foo (app.js:1:1)',
+          path: '/es/crear/:id',
+          source: 'window',
+          locale: 'es',
+        })
+      ).statusCode,
+    ).toBe(200);
+    expect(
+      (await send({ message: '', path: '/', source: 'window', locale: 'es' })).statusCode,
+    ).toBe(400);
+  });
 });

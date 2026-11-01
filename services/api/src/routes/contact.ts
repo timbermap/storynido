@@ -13,6 +13,7 @@ export const CONTACT_DAILY_LIMIT = 5;
 
 type ContactBody = z.output<(typeof apiRoutes)['contact']['body']>;
 type LoginEventBody = z.output<(typeof apiRoutes)['loginEvent']['body']>;
+type ClientErrorBody = z.output<(typeof apiRoutes)['clientError']['body']>;
 
 /**
  * Formulario de contacto (sin el mail del equipo a la vista) y contadores del login. El mensaje queda guardado y llega
@@ -32,6 +33,26 @@ export function registerContactRoutes(app: FastifyInstance): void {
         { day, counts: { [`${browser}_${method}_${via}_${stage}`]: FieldValue.increment(1) } },
         { merge: true },
       );
+    return { ok: true as const };
+  });
+
+  // Errores del navegador (el asistente, el pago): al log del servidor con severidad de error, donde
+  // los ve Error Reporting y las alertas. Sin usuario ni IP en el registro, y acotado por el límite
+  // de solicitudes por minuto de la API.
+  addRoute(app, apiRoutes.clientError, {}, (request) => {
+    const body = request.body as ClientErrorBody;
+    request.log.error(
+      {
+        clientError: {
+          message: body.message,
+          stack: body.stack,
+          path: body.path,
+          source: body.source,
+          locale: body.locale,
+        },
+      },
+      `Error del navegador: ${body.message}`,
+    );
     return { ok: true as const };
   });
 

@@ -83,6 +83,7 @@ export default async function EventsPage({ params }: Props) {
     'youAreInvited',
     'birthday',
     'sample',
+    'photo',
     'nameLabel',
     'namePlaceholder',
     'themeLabel',
@@ -121,7 +122,6 @@ export default async function EventsPage({ params }: Props) {
               name: item.name,
               // La ilustración de la invitación de muestra: la portada de la primera historia del tema.
               image: stories.find((story) => story.collectionIds.includes(item.slug))?.coverImage,
-              ink: stories.find((story) => story.collectionIds.includes(item.slug))?.coverInk,
             }))}
             labels={Object.fromEntries(demoKeys.map((key) => [key, t(`demo.${key}`)])) as never}
           />

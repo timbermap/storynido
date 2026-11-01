@@ -1043,8 +1043,9 @@
       "catalogSubtitle": "Pick the theme and build the full kit: invitation, mini story, stickers and more, with one hero.",
       "demo": {
         "youAreInvited": "You're invited!",
-        "birthday": "is turning a year older",
+        "birthday": "is having a birthday!",
         "sample": "Sample: your final invitation uses your child's design",
+        "photo": "Their photo",
         "nameLabel": "What's the birthday child's name?",
         "namePlaceholder": "Tommy",
         "themeLabel": "Party theme",

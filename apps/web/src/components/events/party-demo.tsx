@@ -1,9 +1,9 @@
 'use client';
 
+import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
-import { CoverTitle } from '@/components/stories/story-cover';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
@@ -26,12 +26,13 @@ export function PartyDemo({
   themes,
   labels,
 }: {
-  themes: { slug: string; name: string; image?: string | undefined; ink?: 'dark' | 'light' }[];
+  themes: { slug: string; name: string; image?: string | undefined }[];
   /** Textos ya traducidos por el servidor (no viaja todo el namespace de la landing). `previewAlt` lleva {name} y {theme}. */
   labels: Record<
     | 'youAreInvited'
     | 'birthday'
     | 'sample'
+    | 'photo'
     | 'nameLabel'
     | 'namePlaceholder'
     | 'themeLabel'
@@ -71,38 +72,67 @@ export function PartyDemo({
 
   const theme = themes[themeIndex] ?? themes[0];
   const shown = name.trim() || t('namePlaceholder');
+  // La foto de muestra es del mismo chico que el dibujo del primer tema (el cumpleaños).
+  const showPhoto = themeIndex === 0 && Boolean(theme?.image);
   return (
     <div className="mx-auto w-full max-w-md rounded-3xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
-      <div
-        role="img"
-        aria-label={t('previewAlt', { name: shown, theme: theme?.name ?? '' })}
-        className={cn(
-          '[container-type:inline-size] relative aspect-[3/4] overflow-hidden rounded-2xl bg-gradient-to-b',
-          TONES[themeIndex % TONES.length],
-        )}
-      >
-        {/* La ilustración completa del tema, sin recortes; el texto va en su tercio superior vacío. */}
-        {theme?.image && (
-          <Image
-            src={theme.image}
-            alt=""
+      <div className="relative">
+        <div
+          role="img"
+          aria-label={t('previewAlt', { name: shown, theme: theme?.name ?? '' })}
+          className={cn(
+            'overflow-hidden rounded-2xl bg-gradient-to-b',
+            TONES[themeIndex % TONES.length],
+          )}
+        >
+          {/* El texto va en su propio panel: nunca se sale ni se pisa con el dibujo. */}
+          <div
             aria-hidden="true"
-            width={600}
-            height={800}
-            unoptimized
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        )}
-        <div aria-hidden="true">
-          <CoverTitle
-            before={t('youAreInvited')}
-            name={shown}
-            after={t('birthday')}
-            ink={theme?.ink ?? 'dark'}
-            // Nombres cortos centrados; los largos en arco, que achica la letra para que entren.
-            layout={shown.length > 9 ? 'C' : 'A'}
-          />
+            className={cn(
+              'grid gap-1.5 px-5 pt-6 pb-5 text-center',
+              // Con la foto de muestra en la esquina, el texto se angosta para no tocarla.
+              showPhoto && 'pl-[26%] sm:px-[26%]',
+            )}
+          >
+            <p className="text-xs font-bold tracking-[0.14em] uppercase">{t('youAreInvited')}</p>
+            <p className="font-display text-[clamp(1.9rem,6vw,2.75rem)] leading-tight font-bold break-words">
+              {shown}
+            </p>
+            <p className="text-lg font-medium">{t('birthday')}</p>
+          </div>
+          {/* La ilustración sin su tercio superior vacío, que ya cubre el panel de texto. */}
+          {theme?.image && (
+            <Image
+              src={theme.image}
+              alt=""
+              aria-hidden="true"
+              width={600}
+              height={800}
+              unoptimized
+              className="aspect-[25/24] w-full object-cover object-bottom"
+            />
+          )}
         </div>
+        {/* De su foto a su personaje: la foto de muestra del chico que ilustra esta invitación. */}
+        {showPhoto && (
+          <div
+            aria-hidden="true"
+            className="absolute -top-3 -left-2 flex w-[24%] -rotate-6 flex-col items-center rounded-md bg-card p-1.5 pb-2 shadow-[var(--shadow-book)]"
+          >
+            <Image
+              src="/images/secciones/foto-real.webp"
+              alt=""
+              width={300}
+              height={300}
+              unoptimized
+              className="aspect-square w-full rounded-sm object-cover"
+            />
+            <span className="mt-1 inline-flex items-center gap-0.5 text-[0.65rem] font-bold">
+              {t('photo')}
+              <ArrowRight className="size-3 text-primary" aria-hidden="true" />
+            </span>
+          </div>
+        )}
       </div>
       <p aria-hidden="true" className="mt-2 text-center text-xs text-muted-foreground">
         {t('sample')}

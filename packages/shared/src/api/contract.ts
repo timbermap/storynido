@@ -1298,6 +1298,22 @@ export const apiRoutes = {
     }),
     response: z.object({ ok: z.literal(true) }),
   },
+  clientError: {
+    method: 'POST',
+    path: '/v1/events/client-error',
+    access: 'public',
+    summary:
+      'Un error del navegador, a nuestro log (sin datos personales: ruta sin parámetros, sin usuario)',
+    body: z.object({
+      message: z.string().trim().min(1).max(400),
+      stack: z.string().max(2000).nullable().default(null),
+      /** Solo la ruta: sin parámetros de búsqueda, fragmentos ni ids de pedidos. */
+      path: z.string().max(200),
+      source: z.enum(['window', 'promise', 'boundary']),
+      locale: localeSchema,
+    }),
+    response: z.object({ ok: z.literal(true) }),
+  },
   contact: {
     method: 'POST',
     path: '/v1/contact',
