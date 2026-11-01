@@ -2054,3 +2054,9 @@ La tarjeta «Mira antes de comprar» (garantía) ya no lleva botón: quedaba peg
 ### 172c. Navbar: «Familias» lleva a Familias (2026-11-01)
 
 En el navbar de visitante, el nombre «Familias» es un link a la landing de Familias (también en el menú del celular, que antes iba al catálogo) y la flecha de al lado abre el desplegable con «Todas las historias» y las etapas de edad. El catálogo sigue a un clic, dentro del desplegable.
+
+## 173 · Portadas: nombre del visitante en todo el sitio (PR 1 del plan de portadas)
+
+- **Fecha:** 2026-11-01.
+- Campo «¿Cómo se llama?» arriba del catálogo y bajo la portada de la ficha. El nombre se guarda solo en el navegador (`sn_demo_name`, con try/catch, hasta 14 caracteres, mayúsculas, espacios y tildes tal cual) y **todas** las portadas lo muestran (`useVisitorName`, `useSyncExternalStore`); sin nombre, cada portada sigue con el del elenco. Esto revierte la regla de la decisión 159 («siempre el nombre del elenco»): como el nombre puede no coincidir con el dibujo, el campo aclara «Es un ejemplo: el dibujo es de nuestro personaje; tu libro lleva a tu peque». La demo de la landing usa la misma clave.
+- **Siguen los PR 2 a 6** del plan (título y layouts, libro y galería, catálogo, redes y A/B, portada del pedido).

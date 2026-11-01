@@ -116,6 +116,20 @@ test('catálogo: "¿Qué le encanta?" desde Familias, temática y búsqueda sin 
   await expectAccessible(page);
 });
 
+test('catálogo: el nombre escrito se ve en todas las portadas y se recuerda', async ({ page }) => {
+  await page.goto('/es/historias');
+  const main = page.locator('main');
+  // Sin nombre, cada portada lleva el de su personaje.
+  await expect(main).not.toContainText('Ana María');
+  await page.getByLabel('¿Cómo se llama?').fill('Ana María');
+  await expect(main.getByText('Ana María', { exact: true }).first()).toBeVisible();
+  // Con espacios y tildes tal cual, y también en la ficha de una historia.
+  await page.goto('/es/historias/aventura-espacial');
+  await expect(page.getByLabel('¿Cómo se llama?')).toHaveValue('Ana María');
+  await expect(main.getByText('Ana María', { exact: true }).first()).toBeVisible();
+  await expectAccessible(page);
+});
+
 test('las historias de Eventos y Profesionales vuelven a su landing y crean en su línea', async ({
   page,
 }) => {

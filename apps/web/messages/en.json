@@ -289,7 +289,13 @@
     "askWho": "Who is it for?",
     "coloringTitle": "Coloring books",
     "coloringText": "A book with your little one’s drawing to color in, with their character and the scenes of their story.",
-    "coloringCta": "Create a coloring book"
+    "coloringCta": "Create a coloring book",
+    "visitorName": {
+      "label": "What’s their name?",
+      "placeholder": "Type a name",
+      "note": "This is an example: the drawing is of our character. Your book stars your little one, with their own drawing.",
+      "hint": "Type a name and see every cover with it."
+    }
   },
   "Formats": {
     "digital": "Ebook (PDF)",

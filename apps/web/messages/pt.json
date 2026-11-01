@@ -289,7 +289,13 @@
     "askWho": "Para quem é?",
     "coloringTitle": "Livros para colorir",
     "coloringText": "Um livro com o desenho do seu pequeno para pintar, com o personagem e as cenas da história.",
-    "coloringCta": "Criar um livro para colorir"
+    "coloringCta": "Criar um livro para colorir",
+    "visitorName": {
+      "label": "Qual é o nome?",
+      "placeholder": "Digite um nome",
+      "note": "É um exemplo: o desenho é do nosso personagem. Seu livro leva o seu pequeno, com o próprio desenho.",
+      "hint": "Digite um nome e veja todas as capas com ele."
+    }
   },
   "Formats": {
     "digital": "Ebook (PDF)",

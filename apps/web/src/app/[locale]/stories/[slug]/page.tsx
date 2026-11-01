@@ -14,6 +14,7 @@ import {
 import { AuthLink } from '@/components/auth/auth-link';
 import { JsonLd } from '@/components/json-ld';
 import { StoryCover } from '@/components/stories/story-cover';
+import { VisitorNameField } from '@/components/stories/visitor-name-field';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
@@ -143,14 +144,17 @@ export default async function StoryPage({ params, searchParams }: Props) {
       </Link>
 
       <div className="mt-6 grid gap-10 md:grid-cols-[2fr_3fr] md:gap-14">
-        <div className="mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl shadow-xl ring-1 ring-black/5">
-          <StoryCover
-            story={story}
-            line={line}
-            alt={story.title}
-            priority
-            sizes="(min-width: 768px) 24rem, 90vw"
-          />
+        <div>
+          <div className="mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl shadow-xl ring-1 ring-black/5">
+            <StoryCover
+              story={story}
+              line={line}
+              alt={story.title}
+              priority
+              sizes="(min-width: 768px) 24rem, 90vw"
+            />
+          </div>
+          <VisitorNameField className="mx-auto mt-5 w-full max-w-sm" />
         </div>
 
         <div className="space-y-6">

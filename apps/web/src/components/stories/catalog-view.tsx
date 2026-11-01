@@ -4,6 +4,7 @@ import { AGE_STAGES, stageOf, type Channel, type Locale } from '@storynido/share
 
 import { CountryNotice } from '@/components/stories/country-notice';
 import { StoryCard } from '@/components/stories/story-card';
+import { VisitorNameField } from '@/components/stories/visitor-name-field';
 import { Search, X } from 'lucide-react';
 
 import { Link } from '@/i18n/navigation';
@@ -93,6 +94,7 @@ export async function CatalogView({ locale, query, base, channel }: CatalogProps
       <header className="max-w-2xl">
         <h1 className="text-4xl font-medium sm:text-5xl">{t('title')}</h1>
         <p className="mt-3 text-lg text-muted-foreground">{t('subtitle')}</p>
+        <VisitorNameField className="mt-6" />
         <div className="mt-4">
           <CountryNotice display={display} />
         </div>
