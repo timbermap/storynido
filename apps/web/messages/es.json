@@ -1106,9 +1106,9 @@
           "text": "Etiquetas, stickers, agradecimiento y actividades en PDF listos para imprimir."
         },
         "3": {
-          "name": "El mini cuento para los invitados",
-          "question": "¿Qué souvenir les doy?",
-          "text": "Un librito con el protagonista, en PDF, para imprimir tantas copias como invitados. Está incluido en el diseño."
+          "name": "El cuento para cada invitado",
+          "question": "¿Qué se llevan los invitados?",
+          "text": "Un librito ilustrado con el personaje de tu hijo, en PDF. Lo imprimes una vez por invitado y cada uno se lleva su cuento de recuerdo."
         },
         "4": {
           "name": "El libro del cumpleañero",
@@ -1117,7 +1117,7 @@
         }
       },
       "priceFrom": "desde {price}",
-      "priceIncluded": "Incluido en el diseño ({price})",
+      "priceIncluded": "Incluido en el kit",
       "priceFree": "Precio en el creador",
       "packagesTitle": "Paquetes",
       "packagesSubtitle": "Cada paso suma al anterior. El digital se descarga al instante.",

@@ -1106,9 +1106,9 @@
           "text": "Tags, stickers, thank-you cards and activities as print-ready PDFs."
         },
         "3": {
-          "name": "The mini storybook for the guests",
-          "question": "What favor do I give?",
-          "text": "A little book with the character, as a PDF, to print as many copies as guests. It is included in the design."
+          "name": "A story for every guest",
+          "question": "What do guests take home?",
+          "text": "A little illustrated book starring your child's character, as a PDF. You print one for each guest and everyone takes their story home."
         },
         "4": {
           "name": "The birthday child's book",
@@ -1117,7 +1117,7 @@
         }
       },
       "priceFrom": "from {price}",
-      "priceIncluded": "Included in the design ({price})",
+      "priceIncluded": "Included in the kit",
       "priceFree": "Price in the creator",
       "packagesTitle": "Packages",
       "packagesSubtitle": "Each step adds to the previous one. Digital files download instantly.",

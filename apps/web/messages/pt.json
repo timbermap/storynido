@@ -1106,9 +1106,9 @@
           "text": "Etiquetas, adesivos, agradecimento e atividades em PDF prontos para imprimir."
         },
         "3": {
-          "name": "A mini história para os convidados",
-          "question": "Que lembrancinha dou?",
-          "text": "Um livrinho com o protagonista, em PDF, para imprimir quantas cópias forem os convidados. Está incluído no design."
+          "name": "A história de cada convidado",
+          "question": "O que os convidados levam?",
+          "text": "Um livrinho ilustrado com o personagem do seu filho, em PDF. Você imprime um para cada convidado e todos levam a história de lembrança."
         },
         "4": {
           "name": "O livro do aniversariante",
@@ -1117,7 +1117,7 @@
         }
       },
       "priceFrom": "a partir de {price}",
-      "priceIncluded": "Incluído no design ({price})",
+      "priceIncluded": "Incluído no kit",
       "priceFree": "Preço no criador",
       "packagesTitle": "Pacotes",
       "packagesSubtitle": "Cada passo soma ao anterior. O digital é baixado na hora.",

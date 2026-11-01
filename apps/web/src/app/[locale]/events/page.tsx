@@ -91,7 +91,7 @@ export default async function EventsPage({ params }: Props) {
       key: '2',
       price: pricing && kitMinor > 0 ? t('priceFrom', { price: money(partyMinor) }) : null,
     },
-    { key: '3', price: pricing ? t('priceIncluded', { price: money(pricing.designMinor) }) : null },
+    { key: '3', price: pricing ? t('priceIncluded') : null },
     { key: '4', price: bookFrom ? t('priceFrom', { price: bookFrom }) : null },
   ] as const;
 
