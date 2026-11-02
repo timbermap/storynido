@@ -8,6 +8,12 @@ variable "environment" {
   description = "Nombre del ambiente, para los títulos."
 }
 
+variable "muted_log_alerts" {
+  type        = set(string)
+  default     = []
+  description = "Alertas por log que se dejan apagadas (por ejemplo, en staging, donde los pedidos de prueba fallan seguido)."
+}
+
 variable "alert_email" {
   type        = string
   description = "Email que recibe las alertas."
@@ -265,6 +271,7 @@ resource "google_monitoring_alert_policy" "log_event" {
   project               = var.project_id
   display_name          = "StoryNido ${var.environment}: ${each.value.title}"
   combiner              = "OR"
+  enabled               = !contains(var.muted_log_alerts, each.key)
   notification_channels = [google_monitoring_notification_channel.email.id]
 
   conditions {

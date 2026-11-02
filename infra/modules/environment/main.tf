@@ -634,6 +634,8 @@ module "monitoring" {
   alert_email        = var.alert_email
   api_host           = var.api_domain != "" ? var.api_domain : trimprefix(module.api.uri, "https://")
   cloud_run_services = [module.api.name, module.worker.name]
+  # En staging los pedidos de prueba pasan seguido a revisión manual: ahí no se avisa por mail.
+  muted_log_alerts = var.environment == "staging" ? ["pipeline_failed"] : []
 }
 
 module "budget" {
