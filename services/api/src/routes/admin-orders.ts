@@ -219,9 +219,41 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
             }
           : null
         : null;
+    // Fotos del chico y su personaje aprobado: solo para revisar un pedido en revisión manual.
+    let reference: AdminOrderDetail['reference'] = null;
+    if (base.status === 'qa_failed') {
+      const storage = providers.storage();
+      const book = (await db.collection(COLLECTIONS.books).doc(bookId).get()).data();
+      const childId = typeof book?.childId === 'string' ? book.childId : null;
+      const photoDocs = childId
+        ? await db
+            .collection(COLLECTIONS.photos)
+            .where('ownerUid', '==', String(data.ownerUid))
+            .where('childId', '==', childId)
+            .get()
+        : null;
+      const photos = await Promise.all(
+        (photoDocs?.docs ?? []).flatMap((photo) => {
+          const path = photo.get('storagePath') as string | undefined;
+          return path
+            ? [storage.signedDownloadUrl({ bucket: 'photos', path }, 900).then((link) => link.url)]
+            : [];
+        }),
+      );
+      const sheetPath =
+        (doc.get('snapshot.character.sheetPath') as string | undefined) ??
+        (book?.preview?.character?.previewImagePath as string | undefined);
+      reference = {
+        photos,
+        character: sheetPath
+          ? (await storage.signedDownloadUrl({ bucket: 'assets', path: sheetPath }, 900)).url
+          : null,
+      };
+    }
     return {
       ...base,
       previewBook,
+      reference,
       bookId,
       bookTitle: typeof data.bookTitle === 'string' ? data.bookTitle : null,
       ownerUid: String(data.ownerUid),

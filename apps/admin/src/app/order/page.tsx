@@ -313,6 +313,45 @@ function OrderDetail({ id }: { id: string }) {
         </div>
       </Card>
 
+      {order.reference && (
+        <Card className="mt-4">
+          <h2 className="mb-1 font-semibold">Referencia: foto y personaje</h2>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Para comparar el personaje con la persona real. Solo para revisar este pedido; los
+            enlaces vencen en 15 minutos.
+          </p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {order.reference.photos.map((url, index) => (
+              <figure key={url} className="text-xs">
+                {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de corta duración */}
+                <img
+                  src={url}
+                  alt={`Foto ${String(index + 1)}`}
+                  className="aspect-[3/4] w-full rounded-md border object-cover"
+                />
+                <figcaption className="mt-1 text-muted-foreground">Foto {index + 1}</figcaption>
+              </figure>
+            ))}
+            {order.reference.character && (
+              <figure className="text-xs">
+                {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de corta duración */}
+                <img
+                  src={order.reference.character}
+                  alt="Personaje aprobado"
+                  className="aspect-[3/4] w-full rounded-md border object-cover"
+                />
+                <figcaption className="mt-1 font-semibold">Personaje aprobado</figcaption>
+              </figure>
+            )}
+          </div>
+          {order.reference.photos.length === 0 && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Sin fotos: se borraron (a los 30 días o a pedido) o el personaje se armó con rasgos.
+            </p>
+          )}
+        </Card>
+      )}
+
       {order.previewBook && (
         <Card className="mt-4">
           <h2 className="mb-1 font-semibold">Libro completo (PDF de revisión)</h2>

@@ -202,6 +202,14 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
   }),
   qa: z.array(z.object({ code: z.string(), at: z.string().nullable() })),
   /** Ilustraciones del libro (URLs de 15 minutos) para la revisión manual. */
+  /**
+   * Para comparar el personaje con la persona real: las fotos que subió el adulto (si no se
+   * borraron) y el personaje aprobado. Solo en revisión manual; los enlaces vencen en 15 minutos.
+   */
+  reference: z
+    .object({ photos: z.array(z.string()), character: z.string().nullable() })
+    .nullable()
+    .optional(),
   /** PDF de revisión del libro completo (enlace de 15 minutos); null si aún no se armó. */
   previewBook: z
     .object({

@@ -2263,3 +2263,7 @@ El manifest (`display: standalone`) hacía que el navegador del celular ofrecier
 ## 199 — Revisión: libro completo (PDF) con tapa, aunque falte una página
 
 Un pedido trabado en una página no permitía ver cómo saldría el libro: la maqueta (`layout_pdf`) solo corre después del control de calidad. El admin tiene ahora «Armar libro completo (PDF)» en los pedidos en revisión o listos: el worker (evento `order.preview_book`, sin tocar el estado del pedido ni gastar IA) maqueta el PDF digital con las ilustraciones que existan y un marcador rosa donde falte alguna, y lo guarda en `pdfs` como `review-preview.pdf` (campo `reviewPreview` del pedido, con las páginas faltantes y los textos que no entran). El detalle del pedido muestra el enlace (15 minutos) y los avisos. Es el digital: no reemplaza la prueba de la imprenta.
+
+## 200 — Revisión manual: la foto y el personaje a la vista
+
+Para revisar si el libro se parece a la persona, el detalle de un pedido en revisión manual (`qa_failed`) muestra las fotos que subió el adulto (si no se borraron a los 30 días o a pedido) junto al personaje aprobado (la lámina congelada del pedido, o la de la vista previa). Mismo criterio que las ilustraciones: solo en revisión, enlaces de 15 minutos, nunca en la lista de pedidos ni en otros estados. Sustituye el «sin datos del niño» de la cola.

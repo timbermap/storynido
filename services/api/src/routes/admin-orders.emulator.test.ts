@@ -30,6 +30,7 @@ describe('admin: operación de pedidos', () => {
       COLLECTIONS.users,
       COLLECTIONS.auditLog,
       COLLECTIONS.books,
+      COLLECTIONS.photos,
     ]) {
       await db.recursiveDelete(db.collection(name));
     }
@@ -184,5 +185,22 @@ describe('admin: operación de pedidos', () => {
       ['order.preview_book', 'o1'],
     ]);
     expect((await db.doc('orders/o1').get()).get('status')).toBe('qa_failed');
+  });
+
+  it('en revisión muestra las fotos del chico y su personaje; fuera de revisión no', async () => {
+    await db.doc('books/b1').set({ childId: 'c1' });
+    await db.doc('photos/p1').set({ ownerUid: 'ana', childId: 'c1', storagePath: 'ana/p1.jpg' });
+    await order('o1', {
+      status: 'qa_failed',
+      snapshot: { character: { sheetPath: 'orders/o1/sheet.webp' }, pages: [] },
+    });
+    await order('o2', { status: 'ready' });
+    const open = (await get('/v1/admin/orders/o1')).json<{
+      reference: { photos: string[]; character: string | null } | null;
+    }>();
+    expect(open.reference?.photos).toHaveLength(1);
+    expect(open.reference?.character).toBeTruthy();
+    const closed = (await get('/v1/admin/orders/o2')).json<{ reference: unknown }>();
+    expect(closed.reference).toBeNull();
   });
 });

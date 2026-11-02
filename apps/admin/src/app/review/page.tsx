@@ -15,7 +15,7 @@ export default function ReviewPage() {
     <>
       <PageHeader
         title="Revisión manual"
-        text="Abre el pedido para ver las páginas y aprobar, reintentar o regenerar. Sin datos del niño."
+        text="Abre el pedido para ver la foto, el personaje y las páginas, y aprobar, reintentar o regenerar."
       />
       {error && <Notice tone="error">{error}</Notice>}
       {data && (
