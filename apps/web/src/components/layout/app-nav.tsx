@@ -31,7 +31,11 @@ export function AppNav() {
         {t('myStories')}
       </Link>
       {orders !== null && orders.total > 0 && (
-        <Link href={{ pathname: '/my-stories', hash: 'orders' }} className={LINK}>
+        <Link
+          href="/my-orders"
+          aria-current={pathname === '/my-orders' ? 'page' : undefined}
+          className={LINK}
+        >
           {t('orders')}
           {orders.inProgress > 0 && (
             <span className="grid min-w-5 place-items-center rounded-full bg-primary px-1.5 text-xs leading-5 font-bold text-primary-foreground">

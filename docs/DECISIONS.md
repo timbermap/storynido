@@ -2383,3 +2383,8 @@ La home con sesión (hero según el estado de cada persona, PR #1) tiene que ser
 ## 221 — Navbar con sesión: «Crear» como botón y avatar neutro
 
 En el navbar de quien tiene sesión, «+ Crear» se veía como un enlace más (el estilo de botón coral nunca se aplicaba: apuntaba a un contenedor que ya no existía) y el avatar de la cuenta llevaba el color de la marca, compitiendo con él. Ahora «Crear» es un botón coral relleno y el avatar es gris azulado suave, de un solo color. `NavMenu` acepta `triggerClassName` para estilar el botón que abre el menú.
+
+## 222 — Mis cuentos más simple y Mis pedidos en su propia página
+
+- **«¿Qué quieres crear?» (las tres tarjetas «Comenzar»)** solo se muestra en Mis cuentos cuando la persona todavía no tiene cuentos en proceso ni pedidos; después, el botón «Crear» del navbar y la home con sesión ya llevan al siguiente paso, y las tarjetas dejaban los borradores abajo.
+- **Pedidos** pasa a su propia página, `/mis-pedidos` (`/my-orders`, `/meus-pedidos`): la lista en vivo con su estado, la cronología y «Pedir de nuevo»; sin pedidos dice que todavía no hay. «Pedidos» del navbar y del menú de la cuenta apuntan ahí (con el contador de pedidos en curso). Mis cuentos queda para borradores, personajes y proyectos profesionales. La página es privada (sin analítica y fuera de los buscadores).

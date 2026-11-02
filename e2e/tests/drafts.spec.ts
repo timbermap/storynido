@@ -111,7 +111,7 @@ test('con sesión, el navbar es el de la app: sin las páginas que venden y con 
   await expect(page.locator('body')).toContainText('Revisa tu correo');
   await page.goto(await magicLink(email));
   await expect(page).toHaveURL(/\/es$/, { timeout: 30_000 });
-  // Mis cuentos sigue en el navbar y arranca con "¿Qué quieres crear?".
+  // Mis cuentos sigue en el navbar; en una cuenta nueva arranca con "¿Qué quieres crear?".
   await page.locator('header').first().getByRole('link', { name: 'Mis cuentos' }).click();
   await expect(page).toHaveURL(/\/es\/mis-cuentos$/);
   await expect(page.getByRole('heading', { name: '¿Qué quieres crear?' })).toBeVisible();

@@ -10,7 +10,18 @@ import { subscribeOrders, type OrderSummary } from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
 
 /** Mis pedidos, en vivo: cada cambio del pipeline o de la imprenta se ve sin recargar. */
-export function OrdersList({ uid }: { uid: string }) {
+export function OrdersList({
+  uid,
+  heading = 'h2',
+  showEmpty = false,
+}: {
+  uid: string;
+  /** `h1` cuando es el título de su propia página. */
+  heading?: 'h1' | 'h2';
+  /** En su propia página, sin pedidos se avisa en lugar de ocultar la sección. */
+  showEmpty?: boolean;
+}) {
+  const Heading = heading;
   const t = useTranslations('Account.orders');
   const tOrder = useTranslations('Checkout.order');
   const tFormats = useTranslations('Checkout.formats');
@@ -36,11 +47,15 @@ export function OrdersList({ uid }: { uid: string }) {
   // Los pagos que nunca se completaron no son pedidos para quien compra.
   const visible = orders?.filter((order) => order.status !== 'cancelled' || order.title);
   // Sin pedidos no hay nada que mostrar: la sección aparece cuando hay el primero.
-  if (!failed && visible?.length === 0) return null;
+  if (!failed && visible?.length === 0 && !showEmpty) return null;
 
   return (
     <section id="orders" className="grid scroll-mt-28 gap-4">
-      <h2 className="text-2xl font-medium">{t('title')}</h2>
+      <Heading
+        className={heading === 'h1' ? 'text-3xl font-medium sm:text-4xl' : 'text-2xl font-medium'}
+      >
+        {t('title')}
+      </Heading>
       {failed ? (
         <p role="alert" className="text-sm text-destructive">
           {t('error')}

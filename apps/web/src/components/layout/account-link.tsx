@@ -66,7 +66,7 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
       icon: <BookHeart className="size-4" />,
     },
     {
-      href: { pathname: '/my-stories', hash: 'orders' },
+      href: '/my-orders',
       title: t('orders'),
       icon: <ShoppingBag className="size-4" />,
     },

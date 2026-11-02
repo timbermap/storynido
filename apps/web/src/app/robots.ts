@@ -17,6 +17,9 @@ export default function robots(): MetadataRoute.Robots {
             '/*/mis-cuentos',
             '/*/my-stories',
             '/*/minhas-historias',
+            '/*/mis-pedidos',
+            '/*/my-orders',
+            '/*/meus-pedidos',
           ],
         }
       : { userAgent: '*', disallow: '/' },

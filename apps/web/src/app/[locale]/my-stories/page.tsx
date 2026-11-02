@@ -6,9 +6,9 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Channel } from '@storynido/shared';
 
 import { CharactersList } from '@/components/account/characters-list';
-import { OrdersList } from '@/components/account/orders-list';
 import { useAuth } from '@/components/auth/auth-provider';
 import { ProPanel } from '@/components/pro/pro-panel';
+import { useOrderCounts } from '@/components/layout/use-account-activity';
 import { useProStatus } from '@/components/pro/use-pro-status';
 import { DraftsList } from '@/components/wizard/drafts-list';
 import { NewChoice } from '@/components/wizard/new-choice';
@@ -19,7 +19,8 @@ import { cn } from '@/lib/utils';
 
 /**
  * Mis cuentos: la home de quien tiene sesión (auditoría UX, DECISIONS 110). Lo que creó en cada
- * línea para retomar o borrar, "Nuevo" con las tres líneas y sus pedidos. Los ajustes quedan en
+ * línea para retomar o borrar y sus personajes; las tres líneas para empezar solo si todavía no hay
+ * nada. Los pedidos tienen su propia página. Los ajustes quedan en
  * Mi cuenta.
  */
 export default function MyStoriesPage() {
@@ -28,6 +29,7 @@ export default function MyStoriesPage() {
   const { user, signedIn, loading } = useAuth();
   const router = useRouter();
   const { status: pro } = useProStatus();
+  const orders = useOrderCounts();
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [line, setLine] = useState<Channel | 'all'>('all');
   const [failed, setFailed] = useState(false);
@@ -87,12 +89,16 @@ export default function MyStoriesPage() {
     <section className="container-page grid max-w-3xl gap-10 py-12">
       <h1 className="text-3xl font-medium sm:text-4xl">{t('title')}</h1>
 
-      <section id="new" aria-labelledby="new-title" className="grid scroll-mt-28 gap-4">
-        <h2 id="new-title" className="text-2xl font-medium">
-          {t('newTitle')}
-        </h2>
-        <NewChoice />
-      </section>
+      {/* «¿Qué quieres crear?» solo para quien todavía no tiene cuentos ni pedidos: después, «Crear» del
+          navbar y la home ya llevan al siguiente paso. */}
+      {open.length === 0 && orders !== null && orders.total === 0 && (
+        <section id="new" aria-labelledby="new-title" className="grid scroll-mt-28 gap-4">
+          <h2 id="new-title" className="text-2xl font-medium">
+            {t('newTitle')}
+          </h2>
+          <NewChoice />
+        </section>
+      )}
 
       {failed && (
         <p role="alert" className="rounded-xl bg-muted p-4 text-sm">
@@ -189,7 +195,6 @@ export default function MyStoriesPage() {
       {pro?.accountType === 'professional' && (
         <ProPanel uid={user.uid} status={pro} onBooks={onProjectBooks} />
       )}
-      <OrdersList uid={user.uid} />
     </section>
   );
 }
