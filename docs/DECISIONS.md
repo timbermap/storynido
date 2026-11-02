@@ -2281,3 +2281,7 @@ Se elimina el aviso «Este sitio también está en español» que se mostraba al
 ## 203 — Menú Familias: «Todas las historias» como un filtro más
 
 En el desplegable de Familias, «Todas las historias» tenía el mismo peso que «Inicio de Familias» (ícono y descripción) y competía con la landing. Ahora es una fila compacta, igual que las edades, y la única entrada destacada es el inicio de Familias.
+
+## 204 — Familias: la edad elegida se ve sobre la banda navy
+
+La pestaña de edad seleccionada se pintaba en el color del texto (navy) y desaparecía sobre la banda navy de la galería. Ahora la elegida es un botón durazno con texto navy y sombra; las demás siguen en blanco.

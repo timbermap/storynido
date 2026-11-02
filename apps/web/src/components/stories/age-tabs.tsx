@@ -58,7 +58,7 @@ export function AgeTabs({
             className={cn(
               'grid gap-0.5 rounded-2xl border px-4 py-3 text-left transition',
               active === index
-                ? 'border-foreground bg-foreground text-background'
+                ? 'border-peach bg-peach text-foreground shadow-[var(--shadow-card)]'
                 : 'bg-card hover:border-foreground/40',
             )}
           >
@@ -66,7 +66,7 @@ export function AgeTabs({
             <span
               className={cn(
                 'text-sm',
-                active === index ? 'text-background/80' : 'text-muted-foreground',
+                active === index ? 'text-foreground/75' : 'text-muted-foreground',
               )}
             >
               {tab.range}
