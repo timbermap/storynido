@@ -215,7 +215,9 @@ export function blockDetail(response: GenerateContentResponse): string {
     ...(response.candidates?.[0]?.safetyRatings ?? []),
   ]
     .filter(
-      (rating) => rating.blocked || (rating.probability && rating.probability !== 'NEGLIGIBLE'),
+      (rating) =>
+        rating.blocked === true ||
+        (rating.probability !== undefined && rating.probability !== 'NEGLIGIBLE'),
     )
     .map(
       (rating) =>
