@@ -1148,7 +1148,7 @@
         "badge": "Sample photo of the kit"
       },
       "productsTitle": "Four gifts, one star",
-      "productsSubtitle": "They are bought in this order, and each one answers a question about the party.",
+      "productsSubtitle": "Two ways to buy: the invitation alone, or the complete digital kit, which already includes the invitation and a story for every guest. The birthday child's book is bought separately.",
       "products": {
         "1": {
           "name": "The invitation",
@@ -1172,6 +1172,8 @@
         }
       },
       "priceFrom": "from {price}",
+      "priceInvitation": "{price} · with the character design",
+      "priceKit": "{price} · invitation, decorations and stories included",
       "priceIncluded": "Included in the kit",
       "priceFree": "Price in the creator",
       "packagesTitle": "Packages",

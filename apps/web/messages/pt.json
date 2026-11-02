@@ -1148,7 +1148,7 @@
         "badge": "Foto de exemplo do kit"
       },
       "productsTitle": "Quatro presentes, um mesmo protagonista",
-      "productsSubtitle": "Compram-se nesta ordem, e cada um responde a uma pergunta da festa.",
+      "productsSubtitle": "Há duas formas de comprar: só o convite, ou o kit digital completo, que já inclui o convite e uma história para cada convidado. O livro do aniversariante é comprado à parte.",
       "products": {
         "1": {
           "name": "O convite",
@@ -1172,6 +1172,8 @@
         }
       },
       "priceFrom": "a partir de {price}",
+      "priceInvitation": "{price} · com o design do personagem",
+      "priceKit": "{price} · inclui convite, decoração e histórias",
       "priceIncluded": "Incluído no kit",
       "priceFree": "Preço no criador",
       "packagesTitle": "Pacotes",

@@ -2239,3 +2239,7 @@ Un pedido con la página 18 rechazada por moderación quedaba en `qa_failed` sin
 ## 193 — Cerrar sesión lleva a la landing
 
 Antes, cerrar sesión dejaba al visitante en la página donde estaba (a menudo una privada de Mis cuentos o Mi cuenta, que lo mandaba a iniciar sesión). Ahora el menú de cuenta y el botón de Mi cuenta lo llevan a la portada del idioma actual.
+
+## 194 — Precios de Celebraciones: dos formas de comprar
+
+Las cuatro tarjetas decían «desde» en la invitación ($9.99) y en el kit ($24.99), como si fueran compras sumables; en realidad el kit digital completo ya incluye la invitación y los cuentos de los invitados, y la invitación sola es el diseño del personaje más la pieza. Ahora la invitación dice «$9.99 · con el diseño del personaje», el kit «$24.99 · incluye invitación, decoración y cuentos», y el subtítulo explica las dos formas de comprar (invitación sola o kit completo) y que el libro del cumpleañero va aparte.

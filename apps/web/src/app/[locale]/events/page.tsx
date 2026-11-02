@@ -87,12 +87,12 @@ export default async function EventsPage({ params }: Props) {
       key: '1',
       // Lo que de verdad se paga por una invitación: el diseño (una vez) más la pieza.
       price: pricing
-        ? t('priceFrom', { price: money(pieceMinor('invitation') + pricing.designMinor) })
+        ? t('priceInvitation', { price: money(pieceMinor('invitation') + pricing.designMinor) })
         : null,
     },
     {
       key: '2',
-      price: pricing && kitMinor > 0 ? t('priceFrom', { price: money(partyMinor) }) : null,
+      price: pricing && kitMinor > 0 ? t('priceKit', { price: money(partyMinor) }) : null,
     },
     { key: '3', price: pricing ? t('priceIncluded') : null },
     { key: '4', price: bookFrom ? t('priceFrom', { price: bookFrom }) : null },

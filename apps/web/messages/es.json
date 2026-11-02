@@ -1148,7 +1148,7 @@
         "badge": "Foto de muestra del kit"
       },
       "productsTitle": "Cuatro regalos, un mismo protagonista",
-      "productsSubtitle": "Se compran en este orden, y cada uno resuelve una pregunta de la fiesta.",
+      "productsSubtitle": "Hay dos formas de comprar: solo la invitación, o el kit digital completo, que ya incluye la invitación y un cuento para cada invitado. El libro del cumpleañero se compra aparte.",
       "products": {
         "1": {
           "name": "La invitación",
@@ -1172,6 +1172,8 @@
         }
       },
       "priceFrom": "desde {price}",
+      "priceInvitation": "{price} · con el diseño del personaje",
+      "priceKit": "{price} · incluye invitación, decoración y cuentos",
       "priceIncluded": "Incluido en el kit",
       "priceFree": "Precio en el creador",
       "packagesTitle": "Paquetes",
