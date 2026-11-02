@@ -97,7 +97,7 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
   const avatar = (
     <span
       aria-hidden="true"
-      className="grid size-8 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
+      className="grid size-8 place-items-center rounded-full bg-navy/10 text-xs font-bold text-navy"
     >
       {initials(user.displayName, user.email)}
     </span>

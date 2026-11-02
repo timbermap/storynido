@@ -2379,3 +2379,7 @@ En Mis cuentos, el bloque de Profesionales («Tus proyectos», el descuento por 
 ## 220 — Con sesión, el logo y el ingreso llevan a la home
 
 La home con sesión (hero según el estado de cada persona, PR #1) tiene que ser a donde se llega: el logo del navbar con sesión y el destino tras iniciar sesión (enlace mágico o Google) pasan de Mis cuentos a `/`. Mis cuentos sigue en el navbar y en el menú de la cuenta. Cambia lo dicho en DECISIONS 110, 115 y 152 sobre el logo y la caída tras el ingreso; sigue valiendo que solo se vuelve a un pago o a un pedido, y que el ingreso nunca lleva al creador ni a los ajustes.
+
+## 221 — Navbar con sesión: «Crear» como botón y avatar neutro
+
+En el navbar de quien tiene sesión, «+ Crear» se veía como un enlace más (el estilo de botón coral nunca se aplicaba: apuntaba a un contenedor que ya no existía) y el avatar de la cuenta llevaba el color de la marca, compitiendo con él. Ahora «Crear» es un botón coral relleno y el avatar es gris azulado suave, de un solo color. `NavMenu` acepta `triggerClassName` para estilar el botón que abre el menú.

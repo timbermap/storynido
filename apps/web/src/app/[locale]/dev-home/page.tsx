@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import type { Locale } from '@storynido/shared';
 
+import { AppHeader } from '@/components/layout/app-header';
 import { SignedInHome } from '@/components/home/session/signed-in-home';
 import type { HomeBook, HomeOrder } from '@/lib/home-state';
 import { getOffer, getStories } from '@/lib/server/api';
@@ -17,11 +18,12 @@ export default async function DevHomePage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ estado?: string }>;
+  searchParams: Promise<{ estado?: string; header?: string }>;
 }) {
   if (process.env.NODE_ENV === 'production') notFound();
   const locale = (await params).locale as Locale;
-  const estado = (await searchParams).estado ?? 'nuevo';
+  const query = await searchParams;
+  const estado = query.estado ?? 'nuevo';
   const display = await getDisplayCountry(locale);
   const [offer, stories] = await Promise.all([
     getOffer(display.country, locale),
@@ -76,14 +78,18 @@ export default async function DevHomePage({
   }[estado] ?? { books: [], orders: [] };
 
   return (
-    <SignedInHome
-      stories={families.length > 0 ? families : stories}
-      offer={offer}
-      country={display.country}
-      storyCount={families.length}
-      shippingEstimate={null}
-      christmas={null}
-      previewData={data}
-    />
+    <>
+      {/* Para ver el navbar con sesión en las capturas (el real depende de la sesión). */}
+      {query.header === 'app' && <AppHeader />}
+      <SignedInHome
+        stories={families.length > 0 ? families : stories}
+        offer={offer}
+        country={display.country}
+        storyCount={families.length}
+        shippingEstimate={null}
+        christmas={null}
+        previewData={data}
+      />
+    </>
   );
 }
