@@ -1,5 +1,6 @@
 import type { AdminOrderSummary } from '@storynido/shared';
 import Link from 'next/link';
+import { useState } from 'react';
 
 import { StatusBadge } from '@/components/ui/status';
 import { money } from '@/lib/format';
@@ -8,8 +9,11 @@ import { money } from '@/lib/format';
 export function OrderTable({
   orders,
   extra,
+  showAge = false,
 }: {
   orders: readonly AdminOrderSummary[];
+  /** Cuánto lleva esperando cada pedido (en rojo desde los 2 días): para las colas de trabajo. */
+  showAge?: boolean;
   extra?: { label: string; render: (order: AdminOrderSummary) => React.ReactNode };
 }) {
   if (orders.length === 0) {
@@ -22,6 +26,7 @@ export function OrderTable({
           <tr>
             <th className="px-3 py-2">Pedido</th>
             <th className="px-3 py-2">Fecha</th>
+            {showAge && <th className="px-3 py-2">Espera</th>}
             <th className="px-3 py-2">Cliente</th>
             <th className="px-3 py-2">Estado</th>
             <th className="px-3 py-2">Canal · país</th>
@@ -44,6 +49,11 @@ export function OrderTable({
               <td className="px-3 py-2 text-xs">
                 {order.createdAt ? new Date(order.createdAt).toLocaleString('es') : '—'}
               </td>
+              {showAge && (
+                <td className="px-3 py-2 text-xs font-semibold">
+                  <Age since={order.createdAt} />
+                </td>
+              )}
               <td className="px-3 py-2">{order.customerEmail ?? '—'}</td>
               <td className="px-3 py-2">
                 <StatusBadge status={order.status} />
@@ -62,4 +72,12 @@ export function OrderTable({
       </table>
     </div>
   );
+}
+
+function Age({ since }: { since: string | null }) {
+  const [now] = useState(() => Date.now());
+  if (!since) return <>—</>;
+  const hours = Math.max(0, Math.floor((now - new Date(since).getTime()) / 3_600_000));
+  const label = hours < 48 ? `${String(hours)} h` : `${String(Math.floor(hours / 24))} días`;
+  return <span className={hours >= 48 ? 'text-destructive' : undefined}>{label}</span>;
 }

@@ -2251,3 +2251,7 @@ Con «Cuatro regalos, una estrella» ya mostrando las cuatro piezas con su preci
 ## 196 — Revisión: el texto de cada página junto a su ilustración
 
 En la revisión manual, cada miniatura muestra ahora el texto de la página (la portada, el título), para detectar errores de texto y de imagen a la vez. Queda pendiente la vista previa del libro maquetado completo (tapa incluida), que hoy solo existe después de `quality_check`.
+
+## 197 — Admin: menú por áreas y antigüedad en la cola de revisión
+
+Primeras dos etapas de la auditoría del admin: el menú lateral pasa de una lista plana de 24 secciones a siete áreas (Producción, Logística, Atención, Marketing, Administración, Contenido, Sistema), con Resumen arriba y las mismas pantallas y rutas; la búsqueda sigue filtrando y mantiene los grupos. La cola de Revisión manual muestra cuánto lleva esperando cada pedido (en rojo desde las 48 h). «Calidad y canales» queda en Producción hasta dividirse. No incluido todavía: unificar las cifras de Resumen contra Pedidos/Calidad, traducir los códigos técnicos, aclarar la etiqueta del margen, portadas por área, facturación/pagos reales/exportación y permisos por área.

@@ -21,6 +21,7 @@ export default function ReviewPage() {
       {data && (
         <OrderTable
           orders={data.orders}
+          showAge
           extra={{
             label: 'Motivo',
             render: (order) => {

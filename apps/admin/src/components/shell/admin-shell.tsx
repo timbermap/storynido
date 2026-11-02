@@ -8,7 +8,7 @@ import { useState, type ReactNode } from 'react';
 import { useAdminAuth } from '@/components/auth/admin-auth';
 import { Button } from '@/components/ui/button';
 import { brand } from '@/lib/brand';
-import { searchNav } from '@/lib/nav';
+import { AREAS, searchNav } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 
 import { ThemeToggle } from './theme-toggle';
@@ -20,6 +20,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const items = searchNav(query);
+  const groups = [null, ...AREAS]
+    .map((area) => ({ area, items: items.filter((item) => item.area === area) }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
@@ -45,20 +48,29 @@ export function AdminShell({ children }: { children: ReactNode }) {
             />
           </label>
         </div>
-        <nav aria-label="Secciones" className="grid gap-1 px-3">
-          {items.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              aria-current={pathname === href ? 'page' : undefined}
-              onClick={() => {
-                setOpen(false);
-              }}
-              className="flex h-9 items-center gap-2 rounded-md px-2 text-sm hover:bg-accent aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-primary"
-            >
-              <Icon className="size-4" aria-hidden="true" />
-              {label}
-            </Link>
+        <nav aria-label="Secciones" className="grid gap-4 px-3 pb-6">
+          {groups.map(({ area, items: group }) => (
+            <div key={area ?? 'inicio'} className="grid gap-1">
+              {area && (
+                <p className="px-2 pt-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  {area}
+                </p>
+              )}
+              {group.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={pathname === href ? 'page' : undefined}
+                  onClick={() => {
+                    setOpen(false);
+                  }}
+                  className="flex h-9 items-center gap-2 rounded-md px-2 text-sm hover:bg-accent aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-primary"
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                  {label}
+                </Link>
+              ))}
+            </div>
           ))}
           {items.length === 0 && (
             <p className="px-2 py-1 text-sm text-muted-foreground">Sin resultados.</p>
