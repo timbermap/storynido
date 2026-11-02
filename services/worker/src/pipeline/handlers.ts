@@ -34,6 +34,8 @@ export interface StepResult {
 
 export interface PageContext extends StepContext {
   index: number;
+  /** Intento de esta página (1, 2, 3…): cada reintento pide una escena más simple. */
+  attempt: number;
 }
 
 export interface PageResult {

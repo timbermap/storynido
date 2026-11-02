@@ -1612,6 +1612,11 @@
       "untitled": "Story not chosen",
       "continue": "Continue",
       "repeat": "Repeat settings",
+      "delete": "Delete “{title}”",
+      "deleteConfirm": "Delete this project? The sample and its illustrations are removed, and this can't be undone.",
+      "deleteYes": "Yes, delete",
+      "deleteNo": "No",
+      "deleteError": "We couldn't delete it. Try again.",
       "repeatNote": "“Repeat settings” copies the story, length, density, level and style to a new draft, without the child's data or photos.",
       "status": {
         "draft": "Draft",

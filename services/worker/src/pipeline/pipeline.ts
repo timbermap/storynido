@@ -464,7 +464,7 @@ export class Pipeline {
     const base = await this.context(claim.order, orderId, generation, ILLUSTRATIONS);
     try {
       const result = await withTimeout(
-        this.handlers.illustratePage({ ...base, index }),
+        this.handlers.illustratePage({ ...base, index, attempt: claim.attempts }),
         ILLUSTRATION_PAGE_POLICY.timeoutSeconds,
         `page ${String(index)}`,
       );
@@ -508,6 +508,14 @@ export class Pipeline {
     const total = typeof planned === 'number' ? planned : pagesSnap.size;
     const pages = pagesSnap.docs.map((doc) => doc.data() as PageDoc);
     const failed = pages.filter((page) => page.status === 'failed');
+    // Una página fallida no detiene a las demás: se espera a que todas terminen para que las
+    // buenas queden pintadas (y reintentar no repinte ni gaste de más).
+    const unsettled = pages.filter(
+      (page) => page.status === 'pending' || page.status === 'running',
+    ).length;
+    if (failed.length > 0 && unsettled > 0) {
+      return { state: 'waiting', done: pages.length - unsettled - failed.length, total };
+    }
     if (failed.length > 0) {
       const error = `${String(failed.length)} página(s) sin ilustrar: ${failed[0]?.error ?? ''}`;
       await stepRef.update({ status: 'failed', error, finishedAt: new Date(), leaseUntil: null });

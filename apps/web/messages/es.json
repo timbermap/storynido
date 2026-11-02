@@ -1612,6 +1612,11 @@
       "untitled": "Historia sin elegir",
       "continue": "Continuar",
       "repeat": "Repetir configuración",
+      "delete": "Borrar «{title}»",
+      "deleteConfirm": "¿Borrar este proyecto? Se eliminan la muestra y sus ilustraciones, y no se puede deshacer.",
+      "deleteYes": "Sí, borrar",
+      "deleteNo": "No",
+      "deleteError": "No pudimos borrarlo. Intenta de nuevo.",
       "repeatNote": "«Repetir configuración» copia la historia, la extensión, la densidad, el nivel y el estilo a un borrador nuevo, sin los datos ni las fotos del niño.",
       "status": {
         "draft": "Borrador",

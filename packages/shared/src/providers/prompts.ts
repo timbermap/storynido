@@ -241,7 +241,7 @@ export function describeCharacter(
   const extras = sheet.distinctiveFeatures.length
     ? `; also: ${sheet.distinctiveFeatures.join(', ')}`
     : '';
-  return `${name}: child (${sheet.apparentAge}); ${describeTraits(traits, mustKeep)}; usually wears ${sheet.clothing}${extras}`;
+  return `${name}: child (${sheet.apparentAge}); ${describeTraits(traits, mustKeep)}; everyday outfit: ${sheet.clothing} (use it when it suits the scene; dress the character for the activity, place and weather)${extras}`;
 }
 
 /**

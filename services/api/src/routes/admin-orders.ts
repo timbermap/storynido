@@ -196,7 +196,11 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
             url: done
               ? (await storage.signedDownloadUrl({ bucket: 'assets', path: imagePath }, 900)).url
               : null,
-            error: done ? null : String(task.get('error') ?? 'Sin ilustrar'),
+            error: done
+              ? null
+              : task.get('status') === 'failed'
+                ? String(task.get('error') ?? 'Sin ilustrar')
+                : 'No llegó a pintarse (el pedido se detuvo antes de terminarla).',
           };
         }),
       );

@@ -1,6 +1,6 @@
 'use client';
 
-import { BadgeCheck, Copy } from 'lucide-react';
+import { BadgeCheck, Copy, Loader2, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { getFirebaseDb } from '@/lib/firebase/client';
+import { clearStepDrafts } from '@/lib/use-step-draft';
 import { createDraft, listProjects, type Project, type ProjectBook } from '@/lib/firebase/drafts';
 
 import type { ProStatus } from './use-pro-status';
@@ -31,6 +32,10 @@ export function ProPanel({
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [stories, setStories] = useState<PublicStory[]>([]);
   const [copying, setCopying] = useState<string | null>(null);
+  // Borrar pide confirmación en la misma fila (se pierden la muestra y sus ilustraciones).
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleteFailed, setDeleteFailed] = useState(false);
   const discount = status.discount;
 
   const [failed, setFailed] = useState(false);
@@ -78,6 +83,30 @@ export function ProPanel({
       router.push({ pathname: '/create/[bookId]', params: { bookId: id } });
     } finally {
       setCopying(null);
+    }
+  }
+
+  async function remove(book: ProjectBook) {
+    setDeleting(book.id);
+    setDeleteFailed(false);
+    try {
+      await api('deleteDraft', { params: { bookId: book.id } });
+      clearStepDrafts(book.id);
+      // Sin ese libro; un proyecto que se queda sin libros desaparece de la lista.
+      setProjects(
+        (current) =>
+          current
+            ?.map((project) => ({
+              ...project,
+              books: project.books.filter((item) => item.id !== book.id),
+            }))
+            .filter((project) => project.books.length > 0) ?? null,
+      );
+    } catch {
+      setDeleteFailed(true);
+    } finally {
+      setDeleting(null);
+      setConfirming(null);
     }
   }
 
@@ -161,12 +190,55 @@ export function ProPanel({
                       <Copy className="size-4" aria-hidden="true" />
                       {t('repeat')}
                     </Button>
+                    {book.status !== 'ordered' &&
+                      (confirming === book.id ? (
+                        <span className="flex flex-wrap items-center gap-2" role="alertdialog">
+                          <span>{t('deleteConfirm')}</span>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            disabled={deleting !== null}
+                            onClick={() => void remove(book)}
+                          >
+                            {deleting === book.id && (
+                              <Loader2 className="animate-spin" aria-hidden="true" />
+                            )}
+                            {t('deleteYes')}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={deleting !== null}
+                            onClick={() => {
+                              setConfirming(null);
+                            }}
+                          >
+                            {t('deleteNo')}
+                          </Button>
+                        </span>
+                      ) : (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          aria-label={t('delete', { title: title(book) })}
+                          onClick={() => {
+                            setConfirming(book.id);
+                          }}
+                        >
+                          <Trash2 aria-hidden="true" />
+                        </Button>
+                      ))}
                   </li>
                 ))}
               </ul>
             </li>
           ))}
         </ul>
+      )}
+      {deleteFailed && (
+        <p role="alert" className="text-sm font-semibold text-destructive">
+          {t('deleteError')}
+        </p>
       )}
       <p className="text-xs text-muted-foreground">{t('repeatNote')}</p>
     </section>

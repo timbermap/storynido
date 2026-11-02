@@ -96,7 +96,7 @@ const STYLE_MEDIUM: Record<string, string> = {
  * su acabado, pero no sus tics (sonrisas calcadas, brillos).
  */
 const HUMAN_CRAFT =
-  "Human craft: every face is unique and resembles the reference photo (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions, palette and clothing identical across pages.";
+  "Human craft: every face is unique and resembles the reference photo (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions and palette identical across pages. Clothing: the same outfit through one continuous scene or day, and change it only when the activity, place or weather calls for it, always dressing the character appropriately for what is happening (playing football or any sport: matching sportswear such as shorts or sports leggings, a sports shirt and sports shoes; swimming: swimwear; bedtime: pyjamas; cold or snow: coat, hat and boots; a party or formal event: party clothes). Never long trousers or jeans for sports in summer, never winter clothes on a beach.";
 const DEFAULT_MEDIUM =
   'hand-painted digital gouache with subtle watercolor diffusion and natural paper texture';
 
@@ -124,7 +124,7 @@ export function artDirection(input: {
     HUMAN_CRAFT,
     threeD ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
-    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, any text, title, letters or signs in the image, clothing that changes between pages, and any change of style between pages.`,
+    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, any text, title, letters or signs in the image, clothing that does not suit the activity, place or weather, clothing that changes for no reason between consecutive scenes, and any change of style between pages.`,
   ]
     .filter(Boolean)
     .join(' ');

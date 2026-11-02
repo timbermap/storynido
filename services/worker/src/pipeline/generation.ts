@@ -213,6 +213,22 @@ function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: s
   return `${prompt}${visible}${hidden}${fix}${scene ? calm : ''} No text, letters or words anywhere in the image.`;
 }
 
+/** Texto que se suma a la escena en cada reintento (1: ninguno). */
+const ESCALATION = [
+  '',
+  ' IMPORTANT: draw NO readable text, letters or numbers anywhere (leave calendars, clocks, signs, labels, posters and book covers blank or abstract); keep hands simple and natural, partly hidden or in pockets if needed; faces calm and well formed.',
+  ' SIMPLIFY: one calm, clear composition with the protagonist as the only person, a plain uncluttered background, no small objects with writing, no crowds, hands simple and partly hidden.',
+  ' FINAL FALLBACK: show only the protagonist, friendly and calm, in a simple setting that matches the place of the scene; no other people, no small props, no text of any kind, no complicated background.',
+] as const;
+
+function escalateScene(scene: string, level: number): string {
+  let result = scene;
+  for (let step = 1; step < Math.min(level, ESCALATION.length + 1) && step <= 3; step += 1) {
+    result += ESCALATION[step];
+  }
+  return result;
+}
+
 function hashSnapshot(snapshot: Omit<BookSnapshot, 'hash'>): string {
   return createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
 }
@@ -353,10 +369,12 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     path: string,
     seed: number,
     hint?: string,
+    /** Reintentos de la página: 1 normal; 2, 3 y 4 piden cada vez una escena más simple. */
+    level = 1,
   ): Promise<number> {
     const provider = await ai();
     const page = index === 0 ? null : snapshot.pages[index - 1];
-    const scene =
+    const baseScene =
       index === 0
         ? pageScene(coverScene(snapshot.pages[0]?.illustrationPrompt, snapshot.title), null, hint)
         : pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint);
@@ -365,6 +383,10 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const references = companion ? [reference, await load(companion.sheetPath)] : [reference];
     let cost = 0;
     for (let attempt = 0; attempt < 2; attempt += 1) {
+      // Si la moderación rechaza, cada nuevo intento pide algo más simple, hasta que salga una
+      // imagen aprobada: un libro no se entrega con páginas sin ilustrar.
+      const escalation = Math.min(level + attempt, 4);
+      const scene = escalateScene(baseScene, escalation);
       const image = await provider.image.generateIllustration({
         prompt: buildIllustrationPrompt({
           template: snapshot.imagePromptTemplate,
@@ -1593,7 +1615,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       }
       // La semilla cambia en cada reintento: con la misma, el modelo repetiría la imagen rechazada.
       const seed = ctx.index + 1 + Math.floor(Math.random() * 100_000) * 1000;
-      const cost = await illustrate(ctx, snapshot, ctx.index, path, seed);
+      const cost = await illustrate(ctx, snapshot, ctx.index, path, seed, undefined, ctx.attempt);
       return { imagePath: path, costUsdMicros: cost };
     },
   };

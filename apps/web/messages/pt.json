@@ -1612,6 +1612,11 @@
       "untitled": "História não escolhida",
       "continue": "Continuar",
       "repeat": "Repetir configuração",
+      "delete": "Excluir “{title}”",
+      "deleteConfirm": "Excluir este projeto? A amostra e as ilustrações são removidas, e não dá para desfazer.",
+      "deleteYes": "Sim, excluir",
+      "deleteNo": "Não",
+      "deleteError": "Não conseguimos excluir. Tente de novo.",
       "repeatNote": "“Repetir configuração” copia a história, a extensão, a densidade, o nível e o estilo para um novo rascunho, sem os dados nem as fotos da criança.",
       "status": {
         "draft": "Rascunho",
