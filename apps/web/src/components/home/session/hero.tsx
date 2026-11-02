@@ -187,6 +187,17 @@ export function HeroImage({
       className="object-cover"
     />
   );
+  // La portada generada trae vacío el tercio de arriba: el título va encima, como en el visor del libro.
+  const titled = (src: string, title: string | null) => (
+    <>
+      {img(src, title ?? '')}
+      {title && (
+        <span className="absolute inset-x-0 top-0 bg-gradient-to-b from-[#fffaf5]/95 to-transparent px-3 pt-3 pb-7 text-center font-[family-name:var(--home-display)] text-base leading-tight font-semibold sm:text-lg">
+          {title}
+        </span>
+      )}
+    </>
+  );
   const cover = (story: PublicStory | undefined, name: string | null) =>
     story ? (
       <StoryCover story={story} name={name} sizes="(min-width: 1024px) 300px, 60vw" priority />
@@ -225,7 +236,7 @@ export function HeroImage({
           }
         >
           {state.book.coverUrl
-            ? img(state.book.coverUrl, state.book.title ?? '')
+            ? titled(state.book.coverUrl, state.book.title)
             : cover(byId(state.book.storyId), state.book.childName)}
         </Frame>
       );
@@ -233,7 +244,7 @@ export function HeroImage({
       return (
         <Frame>
           {state.order.coverUrl
-            ? img(state.order.coverUrl, state.order.title ?? '')
+            ? titled(state.order.coverUrl, state.order.title)
             : img('/images/heroes/libro-impreso.webp', '')}
         </Frame>
       );

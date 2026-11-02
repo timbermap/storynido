@@ -54,3 +54,4 @@ e2e/perf/results/
 firebase/src/zz-*
 e2e/zz-*
 packages/providers/zz-*
+.next-*/
