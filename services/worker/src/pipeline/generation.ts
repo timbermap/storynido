@@ -222,11 +222,8 @@ const ESCALATION = [
 ] as const;
 
 function escalateScene(scene: string, level: number): string {
-  let result = scene;
-  for (let step = 1; step < Math.min(level, ESCALATION.length + 1) && step <= 3; step += 1) {
-    result += ESCALATION[step];
-  }
-  return result;
+  // Nivel 2: sin texto legible; 3: además escena simple; 4: además solo el protagonista.
+  return `${scene}${ESCALATION.slice(1, Math.min(Math.max(level, 1), 4)).join('')}`;
 }
 
 function hashSnapshot(snapshot: Omit<BookSnapshot, 'hash'>): string {
