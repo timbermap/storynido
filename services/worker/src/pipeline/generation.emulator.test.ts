@@ -823,6 +823,30 @@ describe('generación del libro (fase 09)', () => {
     expect((await qaCodes()).map((event) => event.code)).toContain('moderation_image');
   });
 
+  it('una escena que la moderación rechaza varias veces se pide cada vez más simple y el libro sale completo', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const image = providers.ai().image;
+    const original = image.moderateImage.bind(image);
+    const generate = vi.spyOn(image, 'generateIllustration');
+    let rejections = 0;
+    vi.spyOn(image, 'moderateImage').mockImplementation(async (data) => {
+      // Los primeros 5 intentos de imagen se rechazan (más que los 2 de una pasada).
+      if (rejections < 5) {
+        rejections += 1;
+        return { allowed: false, categories: ['test'] };
+      }
+      return original(data);
+    });
+    await setup(providers).run();
+
+    expect((await order()).status).toBe('ready');
+    const prompts = generate.mock.calls.map((call) => call[0].prompt);
+    // Cada reintento pide algo más simple que el anterior.
+    expect(prompts.some((prompt) => prompt.includes('SIMPLIFY'))).toBe(true);
+    expect(prompts.some((prompt) => prompt.includes('NO readable text'))).toBe(true);
+  });
+
   it('en un ambiente real nunca usa la IA simulada (el libro no se pinta con placeholders)', async () => {
     const providers = registry();
     await seedBook(providers);
