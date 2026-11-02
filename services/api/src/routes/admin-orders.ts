@@ -242,7 +242,8 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
       );
       const sheetPath =
         (doc.get('snapshot.character.sheetPath') as string | undefined) ??
-        (book?.preview?.character?.previewImagePath as string | undefined);
+        (book?.preview as { character?: { previewImagePath?: string } } | undefined)?.character
+          ?.previewImagePath;
       reference = {
         photos,
         character: sheetPath
