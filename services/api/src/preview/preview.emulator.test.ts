@@ -473,6 +473,11 @@ describe('vista previa', () => {
       .mockRejectedValueOnce(new Error('cuota de Vertex agotada'));
     const failed = await generate('book-1');
     expect(failed.statusCode).toBe(503);
+    // El motivo real queda en la auditoría para el admin (el cliente solo ve el aviso genérico).
+    const audit = await db.collection('auditLog').where('action', '==', 'ai.error').get();
+    expect(JSON.stringify(audit.docs.map((doc) => doc.data().after as unknown))).toContain(
+      'cuota de Vertex',
+    );
     paint.mockRestore();
     const retry = await generate('book-1');
     expect(retry.statusCode).toBe(200);

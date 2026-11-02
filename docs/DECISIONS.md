@@ -2305,3 +2305,7 @@ En Mi cuenta → Personajes, «Editar» abría un formulario con solo nombre y e
 ## 209 — Una muestra que falla no gasta el cupo diario
 
 Cada intento de crear la vista previa reservaba un lugar del cupo diario (3 por persona) antes de llamar a la IA, y si la IA fallaba el lugar no se devolvía: tras tres fallos, la persona veía «Llegaste al límite… podrás crear otra mañana» sin haber recibido nunca una muestra. Ahora, si la generación falla por un error de IA, se devuelve el lugar (de la persona y de la IP). Los rechazos por límite no devuelven nada.
+
+## 210 — El motivo real de una falla de IA queda en Auditoría
+
+Cuando falla la creación de la muestra, la persona ve un aviso genérico y el motivo real (cuota o bloqueo de Vertex, modelo no disponible, error del proveedor) solo quedaba en los logs de Cloud Run. Ahora se guarda una entrada `ai.error` en la auditoría (libro, dónde falló, tipo y mensaje de hasta 500 caracteres), visible en Admin → Auditoría. No incluye datos del niño.

@@ -62,11 +62,14 @@ const STALE_GENERATION_MS = 10 * 60 * 1000;
 const IP_QUOTA_MULTIPLIER = 3;
 
 const notFound = () => new AppError(404, 'not_found', 'No encontramos ese borrador.');
-const generationFailed = () =>
-  new AppError(
-    503,
-    'ai_unavailable',
-    'No pudimos generar la vista previa. Intenta de nuevo en unos minutos; tu borrador queda guardado.',
+const generationFailed = (cause?: unknown) =>
+  Object.assign(
+    new AppError(
+      503,
+      'ai_unavailable',
+      'No pudimos generar la vista previa. Intenta de nuevo en unos minutos; tu borrador queda guardado.',
+    ),
+    { cause },
   );
 
 type Target = 'cover' | number;
@@ -345,6 +348,34 @@ export class PreviewService {
     });
   }
 
+  /**
+   * Deja el motivo real de una falla de IA en la auditoría (el cliente solo ve un aviso genérico),
+   * para que el admin lo vea en Auditoría sin tener que buscar en los logs. No rompe el flujo.
+   */
+  private async auditAiError(where: string, bookId: string, error: unknown): Promise<void> {
+    if (error instanceof AppError && error.code === 'limit_reached') return;
+    // Un error genérico de generación trae el motivo real como causa.
+    const real = error instanceof AppError && error.cause ? error.cause : error;
+    try {
+      await this.db.collection(COLLECTIONS.auditLog).add({
+        actorUid: null,
+        actorEmail: null,
+        action: 'ai.error',
+        entity: COLLECTIONS.books,
+        entityId: bookId,
+        before: null,
+        after: {
+          where,
+          kind: real instanceof Error ? real.name : 'unknown',
+          message: (real instanceof Error ? real.message : String(real)).slice(0, 500),
+        },
+        at: new Date(),
+      });
+    } catch (recordError) {
+      this.log.warn({ err: recordError }, 'could not record AI error');
+    }
+  }
+
   /** Devuelve el cupo diario reservado (la muestra no se llegó a crear). */
   private async refundQuota(uid: string, ip: string): Promise<void> {
     const day = utcDay();
@@ -391,6 +422,7 @@ export class PreviewService {
     } catch (error) {
       const appError = error instanceof AppError ? error : generationFailed();
       this.log.error({ err: error, bookId }, 'preview failed');
+      await this.auditAiError('preview', bookId, error);
       // Una muestra que falló no gasta el cupo diario de la persona.
       if (!(error instanceof AppError && error.code === 'limit_reached')) {
         await this.refundQuota(uid, ip);
@@ -759,7 +791,8 @@ export class PreviewService {
           );
           return { image: { bytes: generated.bytes, mimeType: generated.mimeType } };
         } catch (error) {
-          if (error instanceof ProviderError) throw generationFailed();
+          // El motivo real viaja como causa: la auditoría lo guarda para el admin.
+          if (error instanceof ProviderError) throw generationFailed(error);
           throw error;
         }
       },
@@ -967,7 +1000,8 @@ export class PreviewService {
       if (!anonymous) await this.notifyPreviewReady(uid, bookId);
     } catch (error) {
       await ref.update({ status: 'preview_ready', previewStartedAt: null });
-      throw error instanceof AppError ? error : generationFailed();
+      await this.auditAiError('preview', bookId, error);
+      throw error instanceof AppError ? error : generationFailed(error);
     }
     return this.get(uid, bookId);
   }
@@ -1069,7 +1103,8 @@ export class PreviewService {
       await this.qaEvent(bookId, 'character_corrected', { mustKeep: mustKeep.length });
     } catch (error) {
       await ref.update({ regenerationsUsed: FieldValue.increment(-1) });
-      throw error instanceof AppError ? error : generationFailed();
+      await this.auditAiError('preview', bookId, error);
+      throw error instanceof AppError ? error : generationFailed(error);
     }
     return this.get(uid, bookId);
   }
@@ -1256,7 +1291,8 @@ export class PreviewService {
     } catch (error) {
       // Si falló, la regeneración no se cuenta.
       await ref.update({ regenerationsUsed: FieldValue.increment(-1) });
-      throw error instanceof AppError ? error : generationFailed();
+      await this.auditAiError('preview', bookId, error);
+      throw error instanceof AppError ? error : generationFailed(error);
     }
     return this.get(uid, bookId);
   }
