@@ -115,7 +115,7 @@ export async function createTestApp(
     providers,
     catalog,
     // Los tests corren con los emuladores de test (with-test-emulators.sh).
-    photos: new PhotoService(db, providers),
+    photos: new PhotoService(db, providers, silentLogger),
     previews,
     accounts: new AccountService(
       db,

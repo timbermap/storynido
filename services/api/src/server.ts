@@ -159,7 +159,7 @@ const app = await buildApp({
     siteConfig: liveConfig,
     providers,
     catalog,
-    photos: new PhotoService(db, providers),
+    photos: new PhotoService(db, providers, log),
     previews,
     accounts: new AccountService(
       db,

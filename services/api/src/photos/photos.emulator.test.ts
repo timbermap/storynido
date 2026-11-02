@@ -12,13 +12,13 @@ import {
   createProviderFactories,
   providerSettingsFromEnv,
 } from '@storynido/providers';
-import { GUARDIAN_CONSENT_VERSION, PHOTO_CONSENT_VERSION } from '@storynido/shared';
+import { GUARDIAN_CONSENT_VERSION, PHOTO_CONSENT_VERSION, ProviderError } from '@storynido/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 import sharp from 'sharp';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { initFirebaseAdmin } from '../firebase';
-import { auth, createTestApp } from '../test-helpers';
+import { auth, createTestApp, silentLogger } from '../test-helpers';
 import { PhotoService } from './service';
 
 const db = getFirestore(initFirebaseAdmin('demo-storynido-test'));
@@ -51,7 +51,10 @@ function registryWith(faces?: () => []) {
 }
 
 async function appWith(registry: ProviderRegistry) {
-  return createTestApp({ providers: registry, photos: new PhotoService(db, registry) });
+  return createTestApp({
+    providers: registry,
+    photos: new PhotoService(db, registry, silentLogger),
+  });
 }
 
 type App = Awaited<ReturnType<typeof createTestApp>>['app'];
@@ -328,6 +331,77 @@ describe('fotos rechazadas por el análisis', () => {
         await registry.storage().exists({ bucket: 'photos', path: `ana/b2/${photoId}/original` }),
       ).toBe(false);
       expect((await db.doc('books/b2').get()).get('photoIds')).toEqual([]);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('la IA no puede leer la foto: se rechaza al subir, se borra y se pide otra', async () => {
+    const registry = registryWith();
+    vi.spyOn(registry.ai().text, 'describeCharacter').mockRejectedValue(
+      new ProviderError('vertex', 'ficha del personaje: bloqueado por seguridad', true),
+    );
+    const { app } = await appWith(registry);
+    try {
+      await seedDraft('ana', 'b3');
+      const { photoId, processed } = await upload(
+        app,
+        'token-ana',
+        'b3',
+        await consent(app, 'token-ana'),
+        await jpeg(),
+      );
+      expect(processed.json()).toMatchObject({
+        status: 'rejected',
+        rejectionReasons: ['unreadable'],
+        previewUrl: null,
+      });
+      expect(
+        await registry.storage().exists({ bucket: 'photos', path: `ana/b3/${photoId}/original` }),
+      ).toBe(false);
+      expect((await db.doc('books/b3').get()).get('photoIds')).toEqual([]);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('si la IA no responde (caída), la foto no se rechaza: se lee después', async () => {
+    const registry = registryWith();
+    vi.spyOn(registry.ai().text, 'describeCharacter').mockRejectedValue(
+      new ProviderError('vertex', 'HTTP 503'),
+    );
+    const { app } = await appWith(registry);
+    try {
+      await seedDraft('ana', 'b4');
+      const { photoId, processed } = await upload(
+        app,
+        'token-ana',
+        'b4',
+        await consent(app, 'token-ana'),
+        await jpeg(),
+      );
+      expect(processed.json()).toMatchObject({ status: 'valid', rejectionReasons: [] });
+      expect((await db.doc(`photos/${photoId}`).get()).get('characterSheet')).toBeUndefined();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('si la IA la lee, la ficha queda guardada con la foto (la muestra no la vuelve a pedir)', async () => {
+    const registry = registryWith();
+    const { app } = await appWith(registry);
+    try {
+      await seedDraft('ana', 'b5');
+      const { photoId } = await upload(
+        app,
+        'token-ana',
+        'b5',
+        await consent(app, 'token-ana'),
+        await jpeg(),
+      );
+      const saved = await db.doc(`photos/${photoId}`).get();
+      expect(saved.get('characterSheet')).toBeTruthy();
+      expect(saved.get('characterTraits')).toBeTruthy();
     } finally {
       await app.close();
     }

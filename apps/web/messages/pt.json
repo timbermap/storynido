@@ -682,7 +682,8 @@
         "too_dark": "Está muito escura. Tente uma foto com mais luz.",
         "too_bright": "Está muito clara. Evite flash ou sol direto.",
         "blurry": "Está tremida ou desfocada. Tente uma mais nítida.",
-        "inappropriate": "Não podemos usar esta foto."
+        "inappropriate": "Não podemos usar esta foto.",
+        "unreadable": "Não conseguimos usar esta foto. Tente outra: de frente, bem iluminada e só com o rosto. Ou escolha os traços do personagem."
       },
       "tooLarge": "A foto passa de 15 MB.",
       "badType": "Esse formato não é suportado. Use JPG, PNG ou WebP.",

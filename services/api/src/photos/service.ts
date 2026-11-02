@@ -4,14 +4,17 @@ import {
   GUARDIAN_CONSENT_VERSION,
   PHOTO_CONSENT_VERSION,
   PHOTO_RULES,
+  ProviderError,
   evaluatePhoto,
   type Locale,
   type Photo,
   type PhotoRejectionReason,
   type PublicPhoto,
 } from '@storynido/shared';
+import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 
+import { AiBudget } from '../ai/budget';
 import { AppError } from '../errors';
 
 const UPLOAD_URL_SECONDS = 10 * 60;
@@ -26,10 +29,15 @@ const notFound = () => new AppError(404, 'not_found', 'No encontramos esa foto o
  * procesamiento y borrado. Todo lo escribe el servidor (las reglas lo impiden al cliente).
  */
 export class PhotoService {
+  private readonly budget: AiBudget;
+
   constructor(
     private readonly db: Firestore,
     private readonly providers: ProviderRegistry,
-  ) {}
+    private readonly log: FastifyBaseLogger,
+  ) {
+    this.budget = new AiBudget(db, log);
+  }
 
   async recordConsent(input: {
     uid: string;
@@ -199,6 +207,7 @@ export class PhotoService {
 
     let reasons: PhotoRejectionReason[];
     let processedPath: string | null = null;
+    let extra: Record<string, unknown> = {};
     try {
       const normalized = await normalizeImage(await storage.download(original));
       const analysis = await this.providers.photoAnalyzer().analyze(normalized.bytes);
@@ -213,6 +222,10 @@ export class PhotoService {
           normalized.height,
         );
         await storage.upload({ bucket: 'photos', path: processedPath }, portrait, 'image/jpeg');
+        // Si la IA no puede leer la foto, se avisa ahora (y no recién al crear la muestra).
+        const read = await this.readCharacter(photo, portrait);
+        if (read === 'unreadable') reasons = ['unreadable'];
+        else if (read) extra = read;
       }
     } catch {
       reasons = ['unsupported_format'];
@@ -220,6 +233,7 @@ export class PhotoService {
 
     const updated: Photo = {
       ...photo,
+      ...(reasons.length === 0 ? extra : {}),
       status: reasons.length === 0 ? 'valid' : 'rejected',
       rejectionReasons: reasons,
       processedPath,
@@ -240,6 +254,36 @@ export class PhotoService {
       await batch.commit();
     }
     return this.toPublic(photoId, updated);
+  }
+
+  /**
+   * Pide ahora la ficha del personaje (la misma que pide la muestra, que la reutiliza si está
+   * guardada). Devuelve 'unreadable' si la IA rechaza la foto, los campos a guardar si la lee, y
+   * null si no se pudo saber (IA caída, presupuesto agotado): en ese caso no se rechaza la foto.
+   */
+  private async readCharacter(
+    photo: Photo,
+    portrait: Uint8Array,
+  ): Promise<'unreadable' | Record<string, unknown> | null> {
+    try {
+      const limits = await this.budget.limits();
+      await this.budget.ensureAvailable(limits);
+      const result = await this.providers
+        .ai()
+        .text.describeCharacter({ bytes: portrait, mimeType: 'image/jpeg' });
+      await this.budget.record(
+        result.usage,
+        { kind: 'character', ownerUid: photo.ownerUid, bookId: photo.bookId },
+        limits,
+      );
+      return { characterSheet: result.sheet, characterTraits: result.traits };
+    } catch (error) {
+      if (error instanceof ProviderError && error.message.includes('bloqueado por seguridad')) {
+        return 'unreadable';
+      }
+      this.log.warn({ err: error }, 'could not read character from photo at upload');
+      return null;
+    }
   }
 
   async listForBook(uid: string, bookId: string): Promise<PublicPhoto[]> {

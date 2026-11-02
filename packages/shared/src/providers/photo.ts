@@ -40,6 +40,8 @@ export const PHOTO_REJECTION_REASONS = [
   'too_bright',
   'blurry',
   'inappropriate',
+  /** La IA no puede leer esta foto (la rechazó al describir al personaje). */
+  'unreadable',
 ] as const;
 
 export const photoRejectionReasonSchema = z.enum(PHOTO_REJECTION_REASONS);

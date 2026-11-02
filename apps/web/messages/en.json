@@ -682,7 +682,8 @@
         "too_dark": "It is too dark. Try a photo with more light.",
         "too_bright": "It is too bright. Avoid flash or direct sunlight.",
         "blurry": "It is blurry. Try a sharper one.",
-        "inappropriate": "We can't use this photo."
+        "inappropriate": "We can't use this photo.",
+        "unreadable": "We couldn't use this photo. Try another one: facing the camera, well lit and showing just the face. Or choose the character's traits instead."
       },
       "tooLarge": "The photo is larger than 15 MB.",
       "badType": "That format is not supported. Use JPG, PNG or WebP.",
