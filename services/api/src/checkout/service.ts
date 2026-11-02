@@ -50,6 +50,110 @@ import type { ProService } from '../pro/service';
 import type { ConversionReporter } from './conversions';
 
 type QuoteBody = z.output<typeof checkoutQuoteBodySchema>;
+/** Motivo legible de una cotización fallida (queda en el pedido y lo ve el admin). */
+function quoteErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : 'error';
+  if (message.includes('recipient_tax_id')) {
+    return 'Lulu necesita el documento fiscal de quien recibe (es opcional en el pago): sin él no cotiza.';
+  }
+  if (message.includes('phone_number')) return 'Lulu necesita el teléfono de quien recibe.';
+  return message.slice(0, 200);
+}
+
+/** Direcciones de ejemplo (una por país) para estimar el envío antes de pedir la dirección real. */
+const SAMPLE_ADDRESSES: Record<string, Omit<Address, 'country'>> = {
+  AR: {
+    name: 'Estimación',
+    line1: 'Av. Santa Fe 1000',
+    line2: null,
+    city: 'Buenos Aires',
+    state: 'CABA',
+    postalCode: 'C1059',
+    phone: '+541150000000',
+    taxId: null,
+  },
+  MX: {
+    name: 'Estimación',
+    line1: 'Av. Reforma 100',
+    line2: null,
+    city: 'Ciudad de México',
+    state: 'CDMX',
+    postalCode: '06600',
+    phone: '+525550000000',
+    taxId: null,
+  },
+  US: {
+    name: 'Estimación',
+    line1: '100 Congress Ave',
+    line2: null,
+    city: 'Austin',
+    state: 'TX',
+    postalCode: '78701',
+    phone: '+15125550100',
+    taxId: null,
+  },
+  ES: {
+    name: 'Estimación',
+    line1: 'Calle Mayor 1',
+    line2: null,
+    city: 'Madrid',
+    state: 'Madrid',
+    postalCode: '28013',
+    phone: '+34910000000',
+    taxId: null,
+  },
+  CL: {
+    name: 'Estimación',
+    line1: 'Av. Providencia 1000',
+    line2: null,
+    city: 'Santiago',
+    state: 'RM',
+    postalCode: '7500000',
+    phone: '+56220000000',
+    taxId: null,
+  },
+  CO: {
+    name: 'Estimación',
+    line1: 'Carrera 7 # 32-16',
+    line2: null,
+    city: 'Bogotá',
+    state: 'DC',
+    postalCode: '110111',
+    phone: '+576010000000',
+    taxId: null,
+  },
+  PE: {
+    name: 'Estimación',
+    line1: 'Av. Arequipa 1000',
+    line2: null,
+    city: 'Lima',
+    state: 'Lima',
+    postalCode: '15046',
+    phone: '+5110000000',
+    taxId: null,
+  },
+  BR: {
+    name: 'Estimação',
+    line1: 'Av. Paulista 1000',
+    line2: null,
+    city: 'São Paulo',
+    state: 'SP',
+    postalCode: '01310-100',
+    phone: '+551130000000',
+    taxId: null,
+  },
+  UY: {
+    name: 'Estimación',
+    line1: 'Av. 18 de Julio 1000',
+    line2: null,
+    city: 'Montevideo',
+    state: 'Montevideo',
+    postalCode: '11100',
+    phone: '+59820000000',
+    taxId: null,
+  },
+};
+
 type PriceBody = Omit<QuoteBody, 'sourceOrderId'>;
 type CheckoutBody = z.output<typeof createCheckoutBodySchema>;
 type CardsBody = z.output<typeof cardsOrderBodySchema>;
@@ -335,6 +439,54 @@ export class CheckoutService {
   }
 
   /**
+   * Envío estimado a un país, antes de que la persona cargue su dirección: se cotiza una dirección
+   * de ejemplo de ese país con las mismas imprentas. Se guarda 12 horas. Es una referencia: el
+   * precio exacto sale con la dirección real.
+   */
+  private readonly shippingEstimates = new Map<
+    string,
+    {
+      at: number;
+      value: { shippingUsdMinor: number; etaDaysMin: number; etaDaysMax: number } | null;
+    }
+  >();
+
+  async shippingEstimate(country: string, format: 'softcover' | 'hardcover' | 'booklet') {
+    const key = `${country}:${format}`;
+    const cached = this.shippingEstimates.get(key);
+    if (cached && Date.now() - cached.at < 12 * 60 * 60 * 1000) return cached.value;
+    const sample = SAMPLE_ADDRESSES[country];
+    let value: { shippingUsdMinor: number; etaDaysMin: number; etaDaysMax: number } | null = null;
+    if (sample) {
+      try {
+        const pages = 28;
+        const items = [{ format, pageCount: printPageCount(format, pages), quantity: 1 }];
+        const candidates = printCandidates(
+          await this.catalog.printOptions(country as CountryCode),
+          [{ format, pages: printPageCount(format, pages), quantity: 1 }],
+          this.providers.printers().map((printer) => printer.id),
+        );
+        if (candidates.length > 0) {
+          const routing = await this.routeItems(
+            items,
+            { ...sample, country } as Address,
+            candidates,
+          );
+          value = {
+            shippingUsdMinor: routing.shippingCostUsdMinor ?? 0,
+            etaDaysMin: routing.etaDaysMin,
+            etaDaysMax: routing.etaDaysMax,
+          };
+        }
+      } catch {
+        value = null;
+      }
+    }
+    this.shippingEstimates.set(key, { at: Date.now(), value });
+    return value;
+  }
+
+  /**
    * Elige la imprenta: cotiza con todas las que pueden (ya con la dirección) y gana la más
    * barata en impresión + envío; si empatan, la que llega antes. El precio al cliente no cambia:
    * sale siempre del catálogo. La elección queda congelada en el pedido.
@@ -378,7 +530,7 @@ export class CheckoutService {
           return {
             provider,
             ok: false as const,
-            error: error instanceof Error ? error.message.slice(0, 200) : 'error',
+            error: quoteErrorMessage(error),
           };
         }
       }),

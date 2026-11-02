@@ -2356,3 +2356,11 @@ De la auditoría de producto y conversión (23 acciones priorizadas) se aplican 
 - **Ropa:** el personaje lleva el mismo conjunto durante una escena o un día y lo cambia solo si la actividad, el lugar o el clima lo piden (deporte: ropa deportiva con short; natación: traje de baño; dormir: pijama; frío: abrigo; fiesta: ropa de fiesta); nunca pantalón largo para jugar al fútbol en verano. La ficha del personaje pasa de «suele usar X» a «conjunto de todos los días: X, si va con la escena».
 - **Mis cuentos → Tus proyectos (Profesionales):** cada libro que no se pidió puede borrarse, con confirmación en la fila; un proyecto que se queda sin libros desaparece de la lista.
 - **Alertas:** en staging se apaga el mail de «pedido en revisión manual» (producción lo conserva).
+
+## 217 — Cierre de las acciones pendientes de la auditoría de conversión
+
+- **Kit completo preseleccionado** (Celebraciones): el checkout del kit arranca con todas las piezas marcadas y una línea que dice «Kit completo: invitación, decoración y un cuento para cada invitado, US$ X» (el mismo precio de la landing); se desmarca lo que no se necesite. En una recompra se conserva lo que ya estaba.
+- **Aviso del límite diario antes de bloquear:** el resumen antes de crear la muestra dice «Hoy te quedan N muestras gratis»; con 0, el botón se desactiva y explica que el cuento quedó guardado para terminarlo mañana. La API lo informa en `previewsLeftToday`.
+- **Envío estimado antes de la dirección:** `GET /v1/catalog/shipping-estimate` cotiza una dirección de ejemplo del país (AR, MX, US, ES, CL, CO, PE, BR, UY) con las mismas imprentas y lo guarda 12 horas; el checkout muestra «Envío estimado: unos US$ X, total unos US$ Y, llega en N a M días hábiles; se confirma con tu dirección». Es una referencia: el precio exacto sigue saliendo con la dirección real.
+- **Lulu y los datos del destinatario:** el teléfono ya es obligatorio en el pago y el documento fiscal sigue siendo opcional (con él se puede usar una imprenta más económica). Cuando Lulu no cotiza por falta de esos datos, el pedido guarda un motivo legible en lugar del error crudo; el resto de las imprentas cotiza igual.
+- **Pasada en móvil:** solo las páginas públicas se revisaron a 390 px de ancho; el creador, la muestra y el pago con sesión iniciada siguen sin revisar en móvil.

@@ -123,6 +123,12 @@ export function Checkout({
   // Si cambia la dirección, hay que volver a confirmarla.
   const [copies, setCopies] = useState(1);
   const [confirmedKey, setConfirmedKey] = useState<string | null>(null);
+  // Envío estimado al país elegido, antes de cargar la dirección (el exacto sale con ella).
+  const [estimate, setEstimate] = useState<{
+    shippingUsdMinor: number;
+    etaDaysMin: number;
+    etaDaysMax: number;
+  } | null>(null);
   // País de envío del impreso (cualquiera: la imprenta se cotiza con la dirección).
   const [shipTo, setShipTo] = useState<CountryCode>(country);
   const print = format !== 'digital';
@@ -147,6 +153,22 @@ export function Checkout({
   const addressKey =
     shippingAddress && addressComplete(shippingAddress) ? JSON.stringify(shippingAddress) : null;
   const confirmed = addressKey !== null && confirmedKey === addressKey;
+
+  useEffect(() => {
+    if (format === 'digital') return;
+    let cancelled = false;
+    void api('catalogShippingEstimate', { query: { country: shipTo, format } })
+      .then((result) => {
+        if (!cancelled) setEstimate(result.estimate);
+      })
+      .catch(() => {
+        if (!cancelled) setEstimate(null);
+      });
+    return () => {
+      cancelled = true;
+      setEstimate(null);
+    };
+  }, [format, shipTo]);
 
   // El resumen se recalcula en el servidor cada vez que cambia el formato, el cupón o la
   // dirección (con una pausa, para no cotizar con cada tecla).
@@ -476,6 +498,21 @@ export function Checkout({
         {quote ? (
           <>
             <PriceSummary snapshot={quote.snapshot} country={country} local={offer.local} />
+            {print && quote.snapshot.shipping.pending && estimate && (
+              <p className="rounded-xl bg-peach/60 px-4 py-3 text-sm font-semibold text-navy">
+                {t('shippingEstimate', {
+                  price: formatPrice(estimate.shippingUsdMinor, 'USD', locale, country),
+                  total: formatPrice(
+                    quote.snapshot.totalMinor + estimate.shippingUsdMinor,
+                    'USD',
+                    locale,
+                    country,
+                  ),
+                  min: estimate.etaDaysMin,
+                  max: estimate.etaDaysMax,
+                })}
+              </p>
+            )}
             {/* Profesionales: descuento por volumen (sin suscripción); cuánto falta para el próximo. */}
             {pro?.accountType === 'professional' && pro.discount?.next && (
               <p className="text-sm text-muted-foreground">

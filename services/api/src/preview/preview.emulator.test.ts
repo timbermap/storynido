@@ -465,6 +465,22 @@ describe('vista previa', () => {
     expect(second.json<{ error: { code: string } }>().error.code).toBe('limit_reached');
   });
 
+  it('avisa cuántas muestras gratis le quedan hoy, antes de bloquear', async () => {
+    await setAiConfig({ maxPreviewsPerUserPerDay: 2 });
+    await seedBook(providers, 'book-1');
+    const left = async () =>
+      (
+        await app.inject({
+          method: 'GET',
+          url: '/v1/books/book-1/preview',
+          headers: auth('token-ana'),
+        })
+      ).json<{ previewsLeftToday: number }>().previewsLeftToday;
+    expect(await left()).toBe(2);
+    expect((await generate('book-1')).statusCode).toBe(200);
+    expect(await left()).toBe(1);
+  });
+
   it('una muestra que falla no gasta el cupo diario: se puede volver a intentar', async () => {
     await setAiConfig({ maxPreviewsPerUserPerDay: 1 });
     await seedBook(providers, 'book-1');
@@ -972,6 +988,23 @@ describe('checkout y pagos (fase 11)', () => {
       couponCode: 'NOEXISTE',
     });
     expect(bad.json<{ couponError: string }>().couponError).toBe('coupon_invalid');
+  });
+
+  it('envío estimado a un país antes de pedir la dirección (pública, con la misma cotización)', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/catalog/shipping-estimate?country=MX&format=hardcover',
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json<{ estimate: { shippingUsdMinor: number } | null }>().estimate).toMatchObject({
+      shippingUsdMinor: 550,
+    });
+    // Un país sin dirección de ejemplo no se puede estimar.
+    const none = await app.inject({
+      method: 'GET',
+      url: '/v1/catalog/shipping-estimate?country=JP&format=hardcover',
+    });
+    expect(none.json<{ estimate: unknown }>().estimate).toBeNull();
   });
 
   it('Profesionales: solo la API activa la cuenta; precio Pro y escalón por compras elegibles', async () => {

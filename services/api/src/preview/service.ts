@@ -216,7 +216,16 @@ export class PreviewService {
 
   async get(uid: string, bookId: string): Promise<PublicPreview> {
     const { book } = await this.ownedBook(uid, bookId);
-    return this.toPublic(bookId, book, await this.budget.limits());
+    const limits = await this.budget.limits();
+    const quota = await this.db
+      .collection(COLLECTIONS.previewQuota)
+      .doc(`${uid}_${utcDay()}`)
+      .get();
+    const used = Number(quota.get('count') ?? 0);
+    return {
+      ...(await this.toPublic(bookId, book, limits)),
+      previewsLeftToday: Math.max(0, limits.maxPreviewsPerUserPerDay - used),
+    };
   }
 
   private async toPublic(bookId: string, book: BookData, limits: AiLimits): Promise<PublicPreview> {

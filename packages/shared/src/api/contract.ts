@@ -470,6 +470,8 @@ export const publicPreviewSchema = z.object({
     })
     .nullable(),
   regenerationsLeft: z.number().int().nonnegative(),
+  /** Muestras gratis que le quedan hoy a la persona (el cupo diario); se avisa antes de bloquear. */
+  previewsLeftToday: z.number().int().nonnegative().optional(),
 });
 
 export type PublicPreview = z.infer<typeof publicPreviewSchema>;
@@ -738,6 +740,26 @@ export const apiRoutes = {
     summary: 'Formatos, precios, envío e impuestos de un país',
     query: localeQuerySchema.extend({ country: countryCodeSchema }),
     response: offerSchema,
+  },
+  catalogShippingEstimate: {
+    method: 'GET',
+    path: '/v1/catalog/shipping-estimate',
+    access: 'public',
+    summary:
+      'Envío estimado de un libro impreso a un país (cotización de una dirección de ejemplo); null si no se puede estimar',
+    query: z.object({
+      country: countryCodeSchema,
+      format: z.enum(['softcover', 'hardcover', 'booklet']),
+    }),
+    response: z.object({
+      estimate: z
+        .object({
+          shippingUsdMinor: z.number().int().nonnegative(),
+          etaDaysMin: z.number().int().nonnegative(),
+          etaDaysMax: z.number().int().nonnegative(),
+        })
+        .nullable(),
+    }),
   },
   catalogEventPricing: {
     method: 'GET',

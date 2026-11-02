@@ -1,11 +1,13 @@
 'use client';
 
 import { Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { MEMORY_KEYS, type Locale } from '@storynido/shared';
 
 import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
 import { titleForChild } from '@/lib/story-title';
 
 import type { WizardStep } from './steps';
@@ -26,6 +28,19 @@ export function StepReview({
 }) {
   const t = useTranslations('Wizard.review');
   const locale = useLocale();
+  // Cuántas muestras gratis le quedan hoy: se avisa antes de que el cupo bloquee.
+  const [left, setLeft] = useState<number | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void api('bookPreview', { params: { bookId: data.book.id } })
+      .then((result) => {
+        if (!cancelled) setLeft(result.previewsLeftToday ?? null);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [data.book.id]);
   const tBook = useTranslations('Wizard.book');
   const { book, child } = data;
   const story = data.stories.find((s) => s.slug === book.storyId);
@@ -128,12 +143,18 @@ export function StepReview({
         ))}
       </dl>
       <div className="mt-8 grid gap-2">
-        <Button size="lg" onClick={onGenerate} aria-describedby="preview-note">
+        <Button
+          size="lg"
+          onClick={onGenerate}
+          disabled={left === 0}
+          aria-describedby="preview-note"
+        >
           <Sparkles aria-hidden="true" />
           {t('generate')}
         </Button>
         <p id="preview-note" className="text-sm text-muted-foreground">
-          {t('generateNote')}
+          {left === 0 ? t('limitReached') : t('generateNote')}
+          {left !== null && left > 0 && ` ${t('previewsLeft', { count: left })}`}
         </p>
         {onViewPreview && (
           <Button variant="outline" onClick={onViewPreview}>

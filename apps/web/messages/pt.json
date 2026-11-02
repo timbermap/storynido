@@ -749,6 +749,8 @@
       "customLesson": "Mensagem própria",
       "edit": "Editar",
       "generate": "Criar a prévia grátis",
+      "limitReached": "Hoje você já usou suas prévias grátis. Sua história está salva: termine amanhã com um clique.",
+      "previewsLeft": "{count, plural, one {Hoje resta # prévia grátis.} other {Hoje restam # prévias grátis.}}",
       "generateNote": "É grátis e sem compromisso de compra. Leva cerca de um minuto.",
       "viewPreview": "Ver a amostra",
       "character": "Personagem",
@@ -1325,6 +1327,7 @@
     "exampleLabel": "Exemplo do estilo · no seu livro, {name} será o protagonista"
   },
   "Checkout": {
+    "shippingEstimate": "Frete estimado para o seu país: cerca de {price}, para um total de cerca de {total}. Chega em {min} a {max} dias úteis. Confirmado com o seu endereço.",
     "yourBook": "Seu livro",
     "yourBookText": "Este é o que você aprovou. Escolha como recebê-lo.",
     "title": "Seu livro",
@@ -1496,6 +1499,7 @@
       "title": "Seu kit para a celebração",
       "subtitle": "Um design, muitas cópias: escolha as peças e quantos convidados. Entregamos prontas para imprimir em casa ou numa gráfica.",
       "unavailable": "O kit ainda não está disponível no seu país.",
+      "fullKit": "Kit completo: convite, decoração e uma história para cada convidado, {price}. Já vem tudo marcado: desmarque o que não precisar.",
       "piecesTitle": "Peças do kit",
       "piecesNote": "Todas com o mesmo protagonista e o mesmo design.",
       "design": "Design:",

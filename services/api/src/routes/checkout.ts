@@ -25,6 +25,14 @@ export function registerCheckoutRoutes(app: FastifyInstance, checkout: CheckoutS
     return config.corsOrigins[0] ?? 'http://localhost:3000';
   };
 
+  addRoute(app, apiRoutes.catalogShippingEstimate, {}, async (request) => {
+    const { country, format } = request.query as {
+      country: string;
+      format: 'softcover' | 'hardcover' | 'booklet';
+    };
+    return { estimate: await checkout.shippingEstimate(country, format) };
+  });
+
   addRoute(app, apiRoutes.checkoutQuote, {}, (request) =>
     checkout.quote(user(request).uid, request.body as QuoteBody),
   );

@@ -749,6 +749,8 @@
       "customLesson": "Your own message",
       "edit": "Edit",
       "generate": "Create the free preview",
+      "limitReached": "You've used today's free previews. Your story is saved: finish it tomorrow with one click.",
+      "previewsLeft": "{count, plural, one {You have # free preview left today.} other {You have # free previews left today.}}",
       "generateNote": "It's free, with no obligation to buy. It takes about a minute.",
       "viewPreview": "See the sample",
       "character": "Character",
@@ -1325,6 +1327,7 @@
     "exampleLabel": "Style example · in your book, {name} will be the hero"
   },
   "Checkout": {
+    "shippingEstimate": "Estimated shipping to your country: about {price}, for a total of about {total}. Arrives in {min} to {max} business days. Confirmed with your address.",
     "yourBook": "Your book",
     "yourBookText": "This is the one you approved. Choose how to receive it.",
     "title": "Your book",
@@ -1496,6 +1499,7 @@
       "title": "Your celebration kit",
       "subtitle": "One design, many copies: choose the pieces and how many guests. We hand them to you ready to print at home or at a print shop.",
       "unavailable": "The kit isn’t available in your country yet.",
+      "fullKit": "Complete kit: invitation, decorations and a story for every guest, {price}. Everything is already selected: untick what you don't need.",
       "piecesTitle": "Kit pieces",
       "piecesNote": "All with the same hero and the same design.",
       "design": "Design:",

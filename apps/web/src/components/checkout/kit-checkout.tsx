@@ -72,9 +72,12 @@ export function KitCheckout({
         // Solo las piezas que se venden en el país.
         if (result.pricing) {
           const sold = result.pricing.pieces;
-          setPieces(
-            (current) =>
-              new Set([...current].filter((piece) => piece === 'mini_book' || piece in sold)),
+          // El kit completo viene preseleccionado (lo que promete la landing); se puede desmarcar
+          // lo que no se necesite. En una recompra se conserva lo que ya estaba.
+          setPieces((current) =>
+            reorderOf
+              ? new Set([...current].filter((piece) => piece === 'mini_book' || piece in sold))
+              : new Set(['mini_book', ...KIT_PIECES.filter((piece) => piece in sold)]),
           );
         }
       })
@@ -84,7 +87,7 @@ export function KitCheckout({
     return () => {
       cancelled = true;
     };
-  }, [country]);
+  }, [country, reorderOf]);
 
   // Un nombre por línea; sin lista, las etiquetas salen genéricas.
   const guests = guestsText
@@ -174,6 +177,13 @@ export function KitCheckout({
 
   const money = (minor: number) =>
     pricing ? formatPrice(minor, pricing.currency, locale, country) : '';
+  // Kit completo = el diseño más todas las piezas que se venden, con el descuento del paquete.
+  const fullKitRaw = pricing
+    ? pricing.designMinor + Object.values(pricing.pieces).reduce((sum, value) => sum + value, 0)
+    : 0;
+  const fullKitMinor = pricing
+    ? fullKitRaw - Math.round((fullKitRaw * (pricing.bundlePercent ?? 0)) / 100)
+    : 0;
   const sold = (piece: KitPiece) =>
     piece === 'mini_book' || Boolean(pricing && piece in pricing.pieces);
 
@@ -183,6 +193,11 @@ export function KitCheckout({
         <fieldset>
           <legend className="text-lg font-semibold">{tKit('piecesTitle')}</legend>
           <p className="mt-1 text-sm text-muted-foreground">{tKit('piecesNote')}</p>
+          {!reorderOf && pricing && (
+            <p className="mt-3 rounded-xl bg-mint px-4 py-3 text-sm font-semibold text-success">
+              {tKit('fullKit', { price: money(fullKitMinor) })}
+            </p>
+          )}
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {KIT_PIECES.filter(sold).map((piece) => {
               const required = REQUIRED_KIT_PIECES.includes(piece);
