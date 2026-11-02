@@ -102,7 +102,7 @@ export function CoverTitle({
     >
       {before && <span className={small}>{before}</span>}
       {name && (
-        <span className="text-[13cqw] tracking-tight uppercase">
+        <span className="text-[11.5cqw] tracking-tight uppercase">
           {lead}
           {name}
           <span className="normal-case">{suffix}</span>
