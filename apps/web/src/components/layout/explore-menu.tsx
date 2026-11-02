@@ -1,6 +1,6 @@
 'use client';
 
-import { BookHeart, Cake, GraduationCap, Home } from 'lucide-react';
+import { Cake, GraduationCap, Home } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
@@ -54,11 +54,9 @@ export function ExploreMenu({
           </li>
           <li>
             <Link href="/families/stories" className="group block rounded-xl">
-              <NavMenuItem
-                title={t('allStories')}
-                text={t('allStoriesText')}
-                icon={<BookHeart className="size-4" />}
-              />
+              <span className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold transition-colors group-hover:bg-[#f3eefb]">
+                {t('allStories')}
+              </span>
             </Link>
           </li>
           {AGE_STAGES.map((stage) => (

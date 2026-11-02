@@ -2277,3 +2277,7 @@ Además, las reglas de Firestore solo aceptaban siete países en el perfil (MX, 
 ## 202 — Sin aviso de idioma: se entra en el del país y se cambia en la configuración
 
 Se elimina el aviso «Este sitio también está en español» que se mostraba al abrir un link en otro idioma. La entrada por la raíz ya usa el idioma del país de la IP (o del navegador); un link directo a /en o /pt se respeta tal cual, sin preguntar ni fijar nada; y el idioma (y el país) se cambian a mano desde el pie, el selector de idioma o «Mi cuenta», y esa elección sí se recuerda (DECISIONS 122 y 201).
+
+## 203 — Menú Familias: «Todas las historias» como un filtro más
+
+En el desplegable de Familias, «Todas las historias» tenía el mismo peso que «Inicio de Familias» (ícono y descripción) y competía con la landing. Ahora es una fila compacta, igual que las edades, y la única entrada destacada es el inicio de Familias.
