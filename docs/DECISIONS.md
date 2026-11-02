@@ -2371,3 +2371,7 @@ De la auditoría de producto y conversión (23 acciones priorizadas) se aplican 
 - **Corregirlo en un pedido ya hecho:** en el admin, un pedido en revisión o listo sin teléfono muestra «Teléfono: Falta» y el botón «Cargar teléfono» (`POST /v1/admin/orders/:id/shipping-contact`, solo con el pedido en `qa_failed` o `ready`); queda en la auditoría solo como «teléfono cargado», sin el número. Después se reintenta la entrega.
 - **Personas secundarias:** el plan de la historia fija género y aspecto de quienes se repiten (el profesor, un compañero) y todas las páginas los dibujan igual.
 - **Worker con 4 GiB y 2 pedidos a la vez:** la maqueta del impreso (30 ilustraciones a 2K) superaba los 2 GiB. Aplicado en staging con `gcloud run services update` (el valor de Terraform ya es el mismo).
+
+## 219 — «Tus proyectos» solo con proyectos profesionales
+
+En Mis cuentos, el bloque de Profesionales («Tus proyectos», el descuento por volumen y «Todavía no tienes proyectos») aparecía para cualquier cuenta marcada como profesional, aunque nunca hubiera creado un proyecto. Ahora solo se muestra cuando ya hay al menos un proyecto profesional; hasta entonces Mis cuentos queda igual de simple que para Familias y Celebraciones.

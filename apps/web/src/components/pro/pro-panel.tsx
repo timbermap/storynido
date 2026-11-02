@@ -113,6 +113,11 @@ export function ProPanel({
   const title = (book: ProjectBook) =>
     stories.find((story) => story.slug === book.storyId)?.title ?? t('untitled');
 
+  // «Tus proyectos» y el descuento solo aparecen cuando la persona ya trabajó un proyecto
+  // profesional; mientras tanto Mis cuentos queda simple, igual que para Familias y Celebraciones.
+  // (Mientras carga tampoco se muestra nada, para que no aparezca y desaparezca.)
+  if (!failed && (projects === null || projects.length === 0)) return null;
+
   return (
     <section id="pro" className="grid scroll-mt-28 gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
