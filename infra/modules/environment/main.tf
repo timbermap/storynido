@@ -305,15 +305,17 @@ locals {
 module "worker" {
   source = "../cloud_run_service"
 
-  project_id          = var.project_id
-  region              = var.region
-  name                = "worker"
-  service_account     = local.sa["sn-worker"]
-  min_instances       = var.worker_scaling.min
-  max_instances       = var.worker_scaling.max
-  cpu                 = "2"
-  memory              = "2Gi"
-  concurrency         = 4
+  project_id      = var.project_id
+  region          = var.region
+  name            = "worker"
+  service_account = local.sa["sn-worker"]
+  min_instances   = var.worker_scaling.min
+  max_instances   = var.worker_scaling.max
+  cpu             = "2"
+  # La maqueta del libro impreso (30 ilustraciones a 2K más Chromium) pasaba de 2 GiB y mataba la
+  # instancia; con menos pedidos a la vez por instancia cada uno tiene su memoria.
+  memory              = "4Gi"
+  concurrency         = 2
   timeout_seconds     = 900
   deletion_protection = var.deletion_protection
   labels              = local.labels
