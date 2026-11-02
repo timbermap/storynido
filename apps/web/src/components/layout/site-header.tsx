@@ -37,7 +37,7 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-30 border-b border-[rgb(38_50_74/0.06)] bg-background/90 backdrop-blur-md">
       <div className="container-page relative flex h-16 items-center justify-between gap-3 lg:h-[4.75rem]">
         <LogoLink>
-          <Logo />
+          <Logo className="[&>span:first-child]:text-[1.45rem] sm:[&>span:first-child]:text-[1.7rem]" />
         </LogoLink>
 
         <nav
