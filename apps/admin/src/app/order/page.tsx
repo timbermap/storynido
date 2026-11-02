@@ -316,12 +316,18 @@ function OrderDetail({ id }: { id: string }) {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {order.pages.map((page) => (
               <figure key={page.index} className="text-xs">
-                {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de corta duración */}
-                <img
-                  src={page.url}
-                  alt={page.index === 0 ? 'Portada' : `Página ${String(page.index)}`}
-                  className="aspect-[3/4] w-full rounded-md border object-cover"
-                />
+                {page.url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element -- URL firmada de corta duración */
+                  <img
+                    src={page.url}
+                    alt={page.index === 0 ? 'Portada' : `Página ${String(page.index)}`}
+                    className="aspect-[3/4] w-full rounded-md border object-cover"
+                  />
+                ) : (
+                  <div className="grid aspect-[3/4] w-full place-items-center rounded-md border border-destructive bg-destructive/5 p-2 text-center text-destructive">
+                    Sin ilustrar: {page.error}
+                  </div>
+                )}
                 <figcaption className="mt-1 text-muted-foreground">
                   {page.index === 0 ? 'Portada' : `Página ${String(page.index)}`}
                 </figcaption>

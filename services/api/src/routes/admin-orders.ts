@@ -171,22 +171,26 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
     let pages: AdminOrderDetail['pages'] = [];
     // Las ilustraciones muestran al chico: solo para revisar un pedido en revisión manual.
     if (base.status === 'qa_failed') {
-      const step = await orders
+      // Una tarea por página (generación vigente): también las buenas cuando otra página falló.
+      const generation = Number(doc.get('pipeline.generation') ?? 0);
+      const tasks = await orders
         .doc(orderId)
-        .collection(COLLECTIONS.orderSteps)
-        .doc('generate_illustrations')
+        .collection(COLLECTIONS.illustrationTasks)
+        .where('generation', '==', generation)
         .get();
-      const images = ((step.get('output') as Data | undefined)?.images ?? []) as {
-        index: number;
-        imagePath: string;
-      }[];
       const storage = providers.storage();
       pages = await Promise.all(
-        images.map(async (image) => ({
-          index: image.index,
-          url: (await storage.signedDownloadUrl({ bucket: 'assets', path: image.imagePath }, 900))
-            .url,
-        })),
+        tasks.docs.map(async (task) => {
+          const imagePath = task.get('imagePath') as string | null;
+          const done = task.get('status') === 'succeeded' && imagePath;
+          return {
+            index: Number(task.get('index')),
+            url: done
+              ? (await storage.signedDownloadUrl({ bucket: 'assets', path: imagePath }, 900)).url
+              : null,
+            error: done ? null : String(task.get('error') ?? 'Sin ilustrar'),
+          };
+        }),
       );
     }
     return {

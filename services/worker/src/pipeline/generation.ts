@@ -1482,7 +1482,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         await copy(approved, path);
         return { imagePath: path, costUsdMicros: 0 };
       }
-      const cost = await illustrate(ctx, snapshot, ctx.index, path, ctx.index + 1);
+      // La semilla cambia en cada reintento: con la misma, el modelo repetiría la imagen rechazada.
+      const seed = ctx.index + 1 + Math.floor(Math.random() * 100_000) * 1000;
+      const cost = await illustrate(ctx, snapshot, ctx.index, path, seed);
       return { imagePath: path, costUsdMicros: cost };
     },
   };

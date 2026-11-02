@@ -202,7 +202,14 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
   }),
   qa: z.array(z.object({ code: z.string(), at: z.string().nullable() })),
   /** Ilustraciones del libro (URLs de 15 minutos) para la revisión manual. */
-  pages: z.array(z.object({ index: z.number(), url: z.string() })),
+  /** `url` es null si la página no se pudo pintar (`error` dice por qué). */
+  pages: z.array(
+    z.object({
+      index: z.number(),
+      url: z.string().nullable(),
+      error: z.string().nullable().optional(),
+    }),
+  ),
 });
 
 export type AdminOrderDetail = z.infer<typeof adminOrderDetailSchema>;

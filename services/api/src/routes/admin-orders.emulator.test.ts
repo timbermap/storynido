@@ -145,4 +145,30 @@ describe('admin: operación de pedidos', () => {
       .get();
     expect(audit.docs[0]?.get('after.sent')).toBe(true);
   });
+
+  it('en revisión muestra las páginas buenas y marca la que falló, aunque el paso no haya terminado', async () => {
+    await order('o1', {
+      status: 'qa_failed',
+      pipeline: { generation: 0, failedStep: 'generate_illustrations' },
+    });
+    const tasks = db.collection('orders/o1/pages');
+    await tasks
+      .doc('1')
+      .set({ index: 1, generation: 0, status: 'succeeded', imagePath: 'x/1.webp' });
+    await tasks.doc('2').set({
+      index: 2,
+      generation: 0,
+      status: 'failed',
+      imagePath: null,
+      error: 'La ilustración 2 no pasó la moderación.',
+    });
+    const detail = (await get('/v1/admin/orders/o1')).json<{
+      pages: { index: number; url: string | null; error: string | null }[];
+    }>();
+    expect(detail.pages.map((page) => [page.index, page.url !== null])).toEqual([
+      [1, true],
+      [2, false],
+    ]);
+    expect(detail.pages[1]?.error).toContain('moderación');
+  });
 });
