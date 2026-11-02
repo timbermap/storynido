@@ -830,10 +830,12 @@
       "waitSteps": {
         "character": "We draw {name} (a few minutes)",
         "review": "You review and confirm the likeness",
-        "illustrate": "We illustrate the cover and 2 pages"
+        "illustrate": "We illustrate the cover and 2 pages",
+        "order": "If you like it, you order and we make the full book"
       },
-      "leaveText": "No need to wait here: it keeps working, you will find it in My stories and we will email you when the preview is ready.",
-      "leaveButton": "Back to My stories"
+      "leaveText": "We keep working even if you leave. We’ll email you when the sample is ready. To pick it up again: My stories, “In progress”, Continue.",
+      "leaveButton": "Back to My stories",
+      "leaveTitle": "You can close this screen"
     },
     "character": {
       "modeLegend": "How should we create the main character?",

@@ -830,10 +830,12 @@
       "waitSteps": {
         "character": "Desenhamos {name} (alguns minutos)",
         "review": "Você revisa e confirma a semelhança",
-        "illustrate": "Ilustramos a capa e 2 páginas"
+        "illustrate": "Ilustramos a capa e 2 páginas",
+        "order": "Se gostar, você pede e fazemos o livro completo"
       },
-      "leaveText": "Não precisa esperar aqui: continua funcionando, você encontra em Minhas histórias e avisamos por e-mail quando a prévia estiver pronta.",
-      "leaveButton": "Voltar para Minhas histórias"
+      "leaveText": "Continuamos trabalhando mesmo que você saia. Avisamos por e-mail quando a amostra estiver pronta. Para retomar: Minhas histórias, “Em andamento”, Continuar.",
+      "leaveButton": "Voltar para Minhas histórias",
+      "leaveTitle": "Você pode fechar esta tela"
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",

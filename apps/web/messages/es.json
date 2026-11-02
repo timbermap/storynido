@@ -830,10 +830,12 @@
       "waitSteps": {
         "character": "Dibujamos a {name} (unos minutos)",
         "review": "Tú revisas y confirmas el parecido",
-        "illustrate": "Ilustramos la portada y 2 páginas"
+        "illustrate": "Ilustramos la portada y 2 páginas",
+        "order": "Si te gusta, lo pides y hacemos el libro completo"
       },
-      "leaveText": "No hace falta esperar acá: sigue trabajando, lo encuentras en Mis cuentos y te escribimos cuando la muestra esté lista.",
-      "leaveButton": "Volver a Mis cuentos"
+      "leaveText": "Seguimos trabajando aunque salgas. Te escribimos cuando la muestra esté lista. Para retomarla: Mis cuentos, «En proceso», Continuar.",
+      "leaveButton": "Volver a Mis cuentos",
+      "leaveTitle": "Puedes cerrar esta pantalla"
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",

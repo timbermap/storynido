@@ -126,7 +126,7 @@ export function PreviewPanel({
   if (isGenerating) {
     // Si ya había un personaje en revisión, lo que se está generando son las ilustraciones.
     const illustrating = data?.stage === 'character';
-    const steps = ['character', 'review', 'illustrate'] as const;
+    const steps = ['character', 'review', 'illustrate', 'order'] as const;
     const active = illustrating ? 2 : 0;
     return (
       <div className="container-page max-w-3xl py-16 text-center" role="status" aria-live="polite">
@@ -141,7 +141,7 @@ export function PreviewPanel({
         <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
           {illustrating ? t('illustratingText') : t('generatingText', { name: childName })}
         </p>
-        <ol className="mx-auto mt-8 grid max-w-xl gap-2 text-left text-sm sm:grid-cols-3">
+        <ol className="mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm sm:grid-cols-4">
           {steps.map((step, index) => (
             <li
               key={step}
@@ -157,7 +157,8 @@ export function PreviewPanel({
             </li>
           ))}
         </ol>
-        <div className="mx-auto mt-8 grid max-w-xl justify-items-center gap-3">
+        <div className="mx-auto mt-8 grid max-w-xl justify-items-center gap-2 rounded-2xl border bg-card p-5">
+          <p className="font-semibold">{t('leaveTitle')}</p>
           <p className="text-sm text-muted-foreground">{t('leaveText')}</p>
           <Link href="/my-stories" className={buttonVariants({ variant: 'outline' })}>
             {t('leaveButton')}
