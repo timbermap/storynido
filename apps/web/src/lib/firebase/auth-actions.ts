@@ -300,12 +300,12 @@ export function takeReturnPath(): string | null {
   }
 }
 
-/** Pago y pedido: lo único a lo que se vuelve tras entrar (todo lo demás cae en Mis cuentos). */
+/** Pago y pedido: lo único a lo que se vuelve tras entrar (todo lo demás cae en la home con sesión). */
 const KEEP_RETURN = /\/(pagar|checkout|pagamento|pedido|order)\//;
 
 /**
- * Adónde se va después de entrar (DECISIONS 152): siempre a Mis cuentos, la página de quien ya es
- * cliente, donde ve qué hacer y cuál es el botón de crear. Solo se respeta volver a un pago o a un
+ * Adónde se va después de entrar (DECISIONS 152 y 220): siempre a la home con sesión, donde ve qué
+ * sigue en su libro y cuál es el botón. Solo se respeta volver a un pago o a un
  * pedido; la ruta guardada se borra en todos los casos.
  */
 export function afterLoginPath(requested?: string | null): string | null {

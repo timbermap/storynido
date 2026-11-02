@@ -63,7 +63,7 @@ test('si Firestore no responde, el creador no queda cargando', async ({ page }) 
 test('desde un tema de Celebraciones, el creador abre con la temática cargada', async ({
   page,
 }) => {
-  // Sin sesión el botón lleva al login (y a Mis cuentos): se entra primero.
+  // Sin sesión el botón lleva al login (y a la home con sesión): se entra primero.
   await page.goto('/es/ingresar');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   const email = uniqueEmail('tema');
@@ -71,7 +71,7 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
   await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
   await expect(page.locator('body')).toContainText('Revisa tu correo');
   await page.goto(await magicLink(email));
-  await expect(page).toHaveURL(/\/es\/mis-cuentos$/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/es$/, { timeout: 30_000 });
 
   await page.goto('/es/eventos');
   const start = page.getByRole('link', { name: /Diseñar el kit con este tema/ }).first();
@@ -110,21 +110,22 @@ test('con sesión, el navbar es el de la app: sin las páginas que venden y con 
   await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
   await expect(page.locator('body')).toContainText('Revisa tu correo');
   await page.goto(await magicLink(email));
-  await expect(page).toHaveURL(/\/es\/mis-cuentos$/, { timeout: 30_000 });
-
-  // La página de quien ya es cliente arranca con "¿Qué quieres crear?".
+  await expect(page).toHaveURL(/\/es$/, { timeout: 30_000 });
+  // Mis cuentos sigue en el navbar y arranca con "¿Qué quieres crear?".
+  await page.locator('header').first().getByRole('link', { name: 'Mis cuentos' }).click();
+  await expect(page).toHaveURL(/\/es\/mis-cuentos$/);
   await expect(page.getByRole('heading', { name: '¿Qué quieres crear?' })).toBeVisible();
   const header = page.locator('header').first();
   await expect(header.getByRole('link', { name: 'Mis cuentos' })).toBeVisible();
   await expect(header.getByRole('button', { name: 'Crear' })).toBeVisible();
   await expect(header.getByRole('button', { name: 'Explorar' })).toBeVisible();
   await expect(header.getByRole('link', { name: 'Celebraciones', exact: true })).toHaveCount(0);
-  // El logo lleva a Mis cuentos y la landing de un público conserva el mismo navbar.
+  // El logo lleva a la home con sesión y la landing de un público conserva el mismo navbar.
   await page.goto('/es/familias');
   await expect(
     page.locator('header').first().getByRole('link', { name: 'Celebraciones', exact: true }),
   ).toHaveCount(0);
-  await expect(page.locator('header a[href$="/mis-cuentos"]').first()).toBeVisible();
+  await expect(page.locator('header a[href="/es"]').first()).toBeVisible();
   // "Crear" reúne las tres opciones.
   await page.locator('header').first().getByRole('button', { name: 'Crear' }).click();
   await expect(page.getByRole('link', { name: /Un kit para una celebración/ })).toBeVisible();

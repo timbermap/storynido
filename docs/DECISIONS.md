@@ -2375,3 +2375,7 @@ De la auditoría de producto y conversión (23 acciones priorizadas) se aplican 
 ## 219 — «Tus proyectos» solo con proyectos profesionales
 
 En Mis cuentos, el bloque de Profesionales («Tus proyectos», el descuento por volumen y «Todavía no tienes proyectos») aparecía para cualquier cuenta marcada como profesional, aunque nunca hubiera creado un proyecto. Ahora solo se muestra cuando ya hay al menos un proyecto profesional; hasta entonces Mis cuentos queda igual de simple que para Familias y Celebraciones.
+
+## 220 — Con sesión, el logo y el ingreso llevan a la home
+
+La home con sesión (hero según el estado de cada persona, PR #1) tiene que ser a donde se llega: el logo del navbar con sesión y el destino tras iniciar sesión (enlace mágico o Google) pasan de Mis cuentos a `/`. Mis cuentos sigue en el navbar y en el menú de la cuenta. Cambia lo dicho en DECISIONS 110, 115 y 152 sobre el logo y la caída tras el ingreso; sigue valiendo que solo se vuelve a un pago o a un pedido, y que el ingreso nunca lleva al creador ni a los ajustes.
