@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { LOCALES, suggestedReading, type Locale, type PublicStory } from '@storynido/shared';
@@ -8,6 +8,7 @@ import { LOCALES, suggestedReading, type Locale, type PublicStory } from '@story
 import { StoryCover } from '@/components/stories/story-cover';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
+import { titleForChild } from '@/lib/story-title';
 
 import { BookOptions, type BookChoice } from './book-options';
 import { OptionCard } from './option-card';
@@ -24,6 +25,7 @@ const LANGUAGE_NAMES: Record<Locale, string> = {
 export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const t = useTranslations('Wizard.story');
   const tStories = useTranslations('Stories');
+  const locale = useLocale() as Locale;
   const [selected, setSelected] = useState(data.book.storyId);
   const [error, setError] = useState<string | null>(null);
   // Idioma del cuento: arranca con el del sitio, pero se puede elegir otro (familias bilingües o de otro país).
@@ -109,7 +111,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
               </div>
               <span className="grid gap-1.5 p-3">
                 <span className="font-display text-lg leading-snug font-semibold">
-                  {story.title}
+                  {titleForChild(story, data.child?.name, locale)}
                 </span>
                 <span className="text-xs font-bold text-muted-foreground">
                   {tStories('agesFor', { min: story.ageMin, max: story.ageMax })}

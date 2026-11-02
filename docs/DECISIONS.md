@@ -2330,3 +2330,14 @@ Cuando Vertex bloquea la foto de un niño al describir al personaje:
 ## 213 — La foto se verifica con la IA al subirla
 
 Además de las comprobaciones de siempre (formato, tamaño, una cara, luz, nitidez), al subir la foto se pide la ficha del personaje, la misma que pide la muestra. Si la IA rechaza la foto, se trata como cualquier foto inválida: se borra el original en el momento, no se agrega al borrador y se le pide a la persona otra foto o elegir los rasgos (motivo `unreadable`). Si la IA la lee, la ficha queda guardada con la foto y la muestra la reutiliza (no se paga dos veces). Si la IA no responde (caída o presupuesto diario agotado) no se rechaza la foto: se lee después. El costo se registra en el presupuesto diario. No se tocan los filtros de seguridad (DECISIONS 212).
+
+## 214 — Primeras acciones de la auditoría de conversión (sesión iniciada)
+
+De la auditoría de producto y conversión (23 acciones priorizadas) se aplican las de impacto alto y esfuerzo bajo:
+
+- **Nombre del chico en el creador** (acción 4): las tarjetas de historias, el chip de lo elegido y el resumen usan su nombre («Toto y el valle de los dinosaurios») en lugar del del personaje de ejemplo. La portada ilustrada sigue con el elenco (DECISIONS 157: un nombre escrito podría no corresponder al dibujo).
+- **El checkout muestra el libro** (acción 1): portada y título del cuento aprobado arriba de «Tu libro».
+- **CTA de la muestra** (acción 10): «Elegir formato» pasa a «Quiero este libro».
+- **«Para mi hijo»** (acción 15): «Un cuento para un chico especial» (abuelos, tíos y quien regala también compran).
+- **Personajes duplicados** (acción 8, parte): el selector de protagonista muestra uno solo por nombre y edad; y borrar un cuento avisa que el personaje sigue guardado (borrar un borrador no borra al personaje: eso se hace en Personajes).
+  Quedan para después, en este orden: total con envío antes de la dirección (2, 3), kit completo preseleccionado y alineado con la landing (5), aviso del límite diario antes de bloquear (7b), Mis cuentos con portada y estado (9), y el resto de las acciones medias y bajas del informe. La pasada en móvil sigue pendiente.

@@ -27,6 +27,7 @@ import { api } from '@/lib/api';
 import { CountryOptions } from '@/components/country-options';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { CheckoutBook } from './checkout-book';
 
 import { ChristmasNote, GiftDeadline } from './gift-deadline';
 import { PriceSummary } from './price-summary';
@@ -218,6 +219,7 @@ export function Checkout({
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      {reorderOf === null && <CheckoutBook bookId={bookId} />}
       <div className="grid content-start gap-8">
         <fieldset>
           <legend className="text-lg font-semibold">{t('formatTitle')}</legend>

@@ -1,11 +1,13 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import type { Locale } from '@storynido/shared';
+import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { api } from '@/lib/api';
 import { getFirebaseDb } from '@/lib/firebase/client';
+import { titleForChild } from '@/lib/story-title';
 import type { WizardCatalog } from '@/lib/server/wizard-catalog';
 import { useRouter } from '@/i18n/navigation';
 import {
@@ -49,6 +51,7 @@ export function Wizard({
   catalog: Catalog;
 }) {
   const t = useTranslations('Wizard');
+  const locale = useLocale() as Locale;
   const router = useRouter();
   const { user, loading } = useAuth();
   const [book, setBook] = useState<WizardData['book'] | null | undefined>(() =>
@@ -154,7 +157,10 @@ export function Wizard({
       line: channel,
       fresh: savedId === null,
       choice: {
-        story: catalog.stories.find((item) => item.slug === book?.storyId)?.title ?? null,
+        story: (() => {
+          const picked = catalog.stories.find((item) => item.slug === book?.storyId);
+          return picked ? titleForChild(picked, child?.name, locale) : null;
+        })(),
         lesson: catalog.lessons.find((item) => book?.lessonIds.includes(item.slug))?.name ?? null,
       },
       saveState,
@@ -202,6 +208,8 @@ export function Wizard({
       savedId,
       router,
       catalog,
+      child,
+      locale,
     ],
   );
 

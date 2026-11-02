@@ -153,7 +153,7 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   expect(await page.locator('[role=group] img').first().getAttribute('src')).not.toBe(before);
 
   // --- Checkout: tapa blanda, dirección, cupón y pago simulado ---
-  await page.getByRole('link', { name: 'Elegir formato' }).click();
+  await page.getByRole('link', { name: 'Quiero este libro' }).click();
   await heading(page, 'Tu libro');
   await page.locator('label', { hasText: 'Tapa blanda' }).click();
   // Sin dirección, el envío se cotiza después (no se puede pagar todavía).

@@ -451,7 +451,7 @@
       "newTitle": "¿Qué quieres crear?",
       "newOptions": {
         "families": {
-          "title": "Un cuento para mi hijo",
+          "title": "Un cuento para un chico especial",
           "text": "Con su foto, su nombre y sus cosas favoritas."
         },
         "events": {
@@ -782,7 +782,7 @@
       "staleText": "Esta muestra corresponde a la versión anterior. Créala de nuevo para ver los cambios.",
       "regenerateAll": "Crear la muestra de nuevo",
       "editChoices": "Cambiar mis elecciones",
-      "continue": "Elegir formato",
+      "continue": "Quiero este libro",
       "continueSoon": "Muy pronto podrás elegir el formato y comprar. Tu muestra queda guardada.",
       "failedTitle": "No pudimos crear la muestra",
       "errors": {
@@ -1323,6 +1323,8 @@
     "exampleLabel": "Ejemplo del estilo · en tu libro, el protagonista será {name}"
   },
   "Checkout": {
+    "yourBook": "Tu libro",
+    "yourBookText": "Así quedó el que aprobaste. Elige cómo recibirlo.",
     "title": "Tu libro",
     "subtitle": "Elige el formato. El precio lo calculamos con los impuestos y el envío de tu país.",
     "unavailable": "Todavía no vendemos en tu país. Puedes ver los precios de otro país desde el pie de página.",

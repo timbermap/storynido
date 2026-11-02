@@ -3,9 +3,10 @@
 import { Sparkles } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { MEMORY_KEYS } from '@storynido/shared';
+import { MEMORY_KEYS, type Locale } from '@storynido/shared';
 
 import { Button } from '@/components/ui/button';
+import { titleForChild } from '@/lib/story-title';
 
 import type { WizardStep } from './steps';
 import type { StepNav, WizardData } from './types';
@@ -67,7 +68,11 @@ export function StepReview({
           : `${t('characterPhoto')} · ${t('photoCount', { count: book.photoIds.length })}`,
       step: step('photos'),
     },
-    { label: t('adventure'), value: story?.title ?? '—', step: step('story') },
+    {
+      label: t('adventure'),
+      value: story ? titleForChild(story, child?.name, locale as Locale) : '—',
+      step: step('story'),
+    },
     {
       label: t('book'),
       value: [

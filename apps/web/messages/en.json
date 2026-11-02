@@ -451,7 +451,7 @@
       "newTitle": "What would you like to create?",
       "newOptions": {
         "families": {
-          "title": "A story for my child",
+          "title": "A story for a special kid",
           "text": "With their photo, their name and their favorite things."
         },
         "events": {
@@ -782,7 +782,7 @@
       "staleText": "This sample matches the previous version. Create it again to see your changes.",
       "regenerateAll": "Create the sample again",
       "editChoices": "Change my choices",
-      "continue": "Choose a format",
+      "continue": "I want this book",
       "continueSoon": "Soon you'll be able to choose a format and order. Your sample is saved.",
       "failedTitle": "We couldn't create the sample",
       "errors": {
@@ -1323,6 +1323,8 @@
     "exampleLabel": "Style example · in your book, {name} will be the hero"
   },
   "Checkout": {
+    "yourBook": "Your book",
+    "yourBookText": "This is the one you approved. Choose how to receive it.",
     "title": "Your book",
     "subtitle": "Choose the format. We calculate the price with your country’s taxes and shipping.",
     "unavailable": "We don’t sell in your country yet. You can see prices for another country from the footer.",
