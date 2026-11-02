@@ -202,6 +202,16 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
   }),
   qa: z.array(z.object({ code: z.string(), at: z.string().nullable() })),
   /** Ilustraciones del libro (URLs de 15 minutos) para la revisión manual. */
+  /** PDF de revisión del libro completo (enlace de 15 minutos); null si aún no se armó. */
+  previewBook: z
+    .object({
+      url: z.string(),
+      missing: z.array(z.number()),
+      overflow: z.array(z.string()),
+      at: z.string().nullable(),
+    })
+    .nullable()
+    .optional(),
   /** `url` es null si la página no se pudo pintar (`error` dice por qué). */
   pages: z.array(
     z.object({
@@ -1459,6 +1469,15 @@ export const apiRoutes = {
       'Reintenta un pedido en revisión desde un paso (por defecto el que falló); queda en auditoría',
     params: z.object({ orderId: z.string().min(1) }),
     body: z.object({ fromStep: pipelineStepSchema.optional() }),
+    response: pipelineRequestResponseSchema,
+  },
+  adminPreviewBook: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/preview-book',
+    access: 'admin',
+    summary:
+      'Arma el PDF del libro completo (tapa incluida) con las páginas que existan, para revisarlo; no cambia el pedido',
+    params: z.object({ orderId: z.string().min(1) }),
     response: pipelineRequestResponseSchema,
   },
   adminRegenerateOrder: {

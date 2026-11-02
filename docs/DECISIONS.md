@@ -2259,3 +2259,8 @@ Primeras dos etapas de la auditoría del admin: el menú lateral pasa de una lis
 ## 198 — Sin manifest: la web móvil no se instala como app
 
 El manifest (`display: standalone`) hacía que el navegador del celular ofreciera instalar StoryNido como app. Por ahora solo existe la web móvil: se quita el `manifest.webmanifest` y su enlace. Se conservan los íconos (favicon, 192 y 512 px). Si más adelante se quiere una app instalable, se vuelve a agregar junto con su experiencia sin conexión.
+
+## 199 — Revisión: libro completo (PDF) con tapa, aunque falte una página
+
+Un pedido trabado en una página no permitía ver cómo saldría el libro: la maqueta (`layout_pdf`) solo corre después del control de calidad. El admin tiene ahora «Armar libro completo (PDF)» en los pedidos en revisión o listos: el worker (evento `order.preview_book`, sin tocar el estado del pedido ni gastar IA) maqueta el PDF digital con las ilustraciones que existan y un marcador rosa donde falte alguna, y lo guarda en `pdfs` como `review-preview.pdf` (campo `reviewPreview` del pedido, con las páginas faltantes y los textos que no entran). El detalle del pedido muestra el enlace (15 minutos) y los avisos. Es el digital: no reemplaza la prueba de la imprenta.
+

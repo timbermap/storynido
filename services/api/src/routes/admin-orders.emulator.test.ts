@@ -173,4 +173,16 @@ describe('admin: operación de pedidos', () => {
     expect(detail.pages[1]?.error).toContain('moderación');
     expect(detail.pages.map((page) => page.text)).toEqual(['Hola', 'Chau']);
   });
+
+  it('armar el libro para revisarlo: solo en revisión o listo, publica el evento y no audita ni cambia el pedido', async () => {
+    await order('o1', { status: 'qa_failed' });
+    await order('o2', { status: 'paid' });
+    expect((await post('/v1/admin/orders/o2/preview-book')).statusCode).toBe(409);
+    const ok = await post('/v1/admin/orders/o1/preview-book');
+    expect(ok.statusCode).toBe(200);
+    expect(events.events.map((event) => [event.type, event.orderId])).toEqual([
+      ['order.preview_book', 'o1'],
+    ]);
+    expect((await db.doc('orders/o1').get()).get('status')).toBe('qa_failed');
+  });
 });

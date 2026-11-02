@@ -239,6 +239,23 @@ function OrderDetail({ id }: { id: string }) {
               disabled={busy}
               onClick={() =>
                 void act(
+                  '¿Armar el PDF del libro completo para revisarlo? No cambia el pedido ni gasta IA; tarda un minuto.',
+                  async () => {
+                    await api('adminPreviewBook', { params });
+                    return 'Armando el libro: recarga el pedido en un minuto y aparece el enlace.';
+                  },
+                )
+              }
+            >
+              Armar libro completo (PDF)
+            </Button>
+          )}
+          {(order.status === 'qa_failed' || order.status === 'ready') && (
+            <Button
+              variant="outline"
+              disabled={busy}
+              onClick={() =>
+                void act(
                   '¿Regenerar todo el libro? Vuelve a pintar todas las páginas (costo de IA).',
                   async () => {
                     await api('adminRegenerateOrder', { params });
@@ -295,6 +312,39 @@ function OrderDetail({ id }: { id: string }) {
           </Button>
         </div>
       </Card>
+
+      {order.previewBook && (
+        <Card className="mt-4">
+          <h2 className="mb-1 font-semibold">Libro completo (PDF de revisión)</h2>
+          <p className="mb-2 text-xs text-muted-foreground">
+            Tapa, páginas con su texto y cierre, tal como saldría. Armado el{' '}
+            {order.previewBook.at ? new Date(order.previewBook.at).toLocaleString('es') : '—'}; el
+            enlace vence en 15 minutos.
+          </p>
+          {order.previewBook.missing.length > 0 && (
+            <p className="mb-2 text-sm text-destructive">
+              Faltan ilustraciones (van con un marcador rosa):{' '}
+              {order.previewBook.missing
+                .map((index) => (index === 0 ? 'portada' : `página ${String(index)}`))
+                .join(', ')}
+              .
+            </p>
+          )}
+          {order.previewBook.overflow.length > 0 && (
+            <p className="mb-2 text-sm text-destructive">
+              El texto no entra en: {order.previewBook.overflow.join(', ')}.
+            </p>
+          )}
+          <a
+            href={order.previewBook.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm font-semibold text-primary underline"
+          >
+            Abrir el PDF
+          </a>
+        </Card>
+      )}
 
       {order.pages.length > 0 && !showPages && (
         <Button

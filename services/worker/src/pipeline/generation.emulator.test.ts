@@ -346,6 +346,24 @@ describe('generación del libro (fase 09)', () => {
     ).toBe(true);
   });
 
+  it('vista previa para revisión: arma el PDF con tapa aunque falte una ilustración (marcador) y no cambia el pedido', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const { pipeline, run } = setup(providers);
+    await run();
+    // Se simula una página trabada: sin imagen en la tarea de la página 3.
+    await db
+      .doc('orders/o1/steps/generate_illustrations/pages/3')
+      .update({ status: 'failed', imagePath: null });
+    const before = await order();
+    await pipeline.handleEvent({ type: 'order.preview_book', orderId: 'o1', requestId: 'p1' });
+    const after = await order();
+    const preview = after.reviewPreview as { path: string; missing: number[] };
+    expect(preview.missing).toEqual([3]);
+    expect(await providers.storage().exists({ bucket: 'pdfs', path: preview.path })).toBe(true);
+    expect(after.status).toBe(before.status);
+  });
+
   it('kit de Eventos: cada pieza en PDF y un ZIP, con el mismo diseño (ninguna llamada extra a la IA)', async () => {
     const providers = registry();
     await seedBook(providers);

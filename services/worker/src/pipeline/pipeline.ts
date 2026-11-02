@@ -172,6 +172,10 @@ export class Pipeline {
   // ------------------------------------------------------------------ eventos
 
   async handleEvent(event: PipelineEvent): Promise<EventOutcome> {
+    if (event.type === 'order.preview_book') {
+      await this.previewBook(event.orderId);
+      return { state: 'ignored', reason: 'preview_book' };
+    }
     const orderRef = this.order(event.orderId);
     const eventRef = orderRef.collection(COLLECTIONS.orderEvents).doc(event.requestId);
 
@@ -645,6 +649,36 @@ export class Pipeline {
       sourceOrderId: order.sourceOrderId ?? null,
       humanApproval: order.pipeline?.humanApproval ?? null,
     };
+  }
+
+  /** PDF del libro con las páginas que existan, para que el admin lo revise (no cambia el pedido). */
+  private async previewBook(orderId: string): Promise<void> {
+    const snap = await this.order(orderId).get();
+    const order = snap.data() as OrderDoc | undefined;
+    if (!order || !this.handlers.previewBook) return;
+    const generation = order.pipeline?.generation ?? 0;
+    const pages = await this.pages(orderId).where('generation', '==', generation).get();
+    const images = new Map<number, string>();
+    for (const doc of pages.docs) {
+      const page = doc.data() as PageDoc;
+      if (page.status === 'succeeded' && page.imagePath) images.set(page.index, page.imagePath);
+    }
+    const ctx = await this.context(
+      {
+        id: orderId,
+        ownerUid: order.ownerUid,
+        bookId: order.bookId,
+        status: order.status,
+        channel: order.channel ?? 'families',
+        items: order.items ?? [],
+        sourceOrderId: order.sourceOrderId ?? null,
+        humanApproval: order.pipeline?.humanApproval ?? null,
+      },
+      orderId,
+      generation,
+      'layout_pdf',
+    );
+    await this.handlers.previewBook(ctx, images);
   }
 
   private async context(

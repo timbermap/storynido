@@ -114,6 +114,18 @@ export function registerOrderRoutes(app: FastifyInstance): void {
     return request(req, orderId, { type: 'order.retry_step', fromStep }, ['qa_failed']);
   });
 
+  // Vista previa del libro para revisarlo: no cambia el pedido ni queda como reintento.
+  addRoute(app, apiRoutes.adminPreviewBook, {}, async (req) => {
+    const { orderId } = req.params as Params;
+    const order = await load(orderId);
+    if (!['qa_failed', 'ready'].includes(order.status)) {
+      throw new AppError(409, 'bad_request', `El pedido está en "${order.status}".`);
+    }
+    const requestId = randomUUID();
+    await pipelineEvents.publish({ type: 'order.preview_book', orderId, requestId });
+    return { accepted: true as const, requestId };
+  });
+
   addRoute(app, apiRoutes.adminRegenerateOrder, {}, (req) => {
     const { orderId } = req.params as Params;
     return request(req, orderId, { type: 'order.regenerate' }, ['qa_failed', 'ready']);

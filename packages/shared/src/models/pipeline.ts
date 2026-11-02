@@ -103,7 +103,13 @@ export const orderPipelineSchema = z.object({
 
 export type OrderPipeline = z.infer<typeof orderPipelineSchema>;
 
-export const PIPELINE_EVENT_TYPES = ['order.paid', 'order.retry_step', 'order.regenerate'] as const;
+export const PIPELINE_EVENT_TYPES = [
+  'order.paid',
+  'order.retry_step',
+  'order.regenerate',
+  /** Solo el admin: arma el PDF del libro para revisarlo; no toca el pedido ni el pipeline. */
+  'order.preview_book',
+] as const;
 
 /**
  * Evento que pone en marcha el pipeline (tema de Pub/Sub `order-events`). `requestId` lo

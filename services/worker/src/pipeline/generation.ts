@@ -1452,6 +1452,114 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     };
   }
 
+  /**
+   * Vista previa del libro completo para el admin (digital, con tapa): usa las ilustraciones que
+   * ya existen y un marcador donde falta alguna, así se revisa el texto y la maqueta antes de
+   * resolver la página trabada. No cambia el pedido ni se entrega: es solo para revisar.
+   */
+  async function previewBook(ctx: StepContext, images: Map<number, string>): Promise<void> {
+    const snapshot = await snapshotOf(ctx);
+    const total = snapshot.pages.length + 1;
+    const missing: number[] = [];
+    const sources = await Promise.all(
+      Array.from({ length: total }, async (_, index) => {
+        const path = images.get(index);
+        if (path) return storage().download({ bucket: ASSETS, path });
+        missing.push(index);
+        const label = index === 0 ? 'Portada sin ilustrar' : `Página ${String(index)} sin ilustrar`;
+        return sharp(
+          Buffer.from(
+            `<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="2048"><rect width="100%" height="100%" fill="#f3d9d3"/><text x="768" y="1024" font-size="96" font-family="sans-serif" text-anchor="middle" fill="#a33f33">${label}</text></svg>`,
+          ),
+        )
+          .webp()
+          .toBuffer();
+      }),
+    );
+    const placements = await textPlacements(
+      sources.slice(1).map((image, index) => ({
+        image,
+        words: countWords(snapshot.pages[index]?.text ?? ''),
+      })),
+      { allowCorners: snapshot.textDensity !== 'rich' },
+    );
+    const spec: FormatSpec = FORMAT_SPECS.digital;
+    const size = pageSizeMm(spec);
+    const prepared = await Promise.all(
+      sources.map(async (bytes) => {
+        const jpeg = await sharp(bytes)
+          .resize({ width: spec.maxImagePx, withoutEnlargement: true })
+          .jpeg({ quality: spec.jpegQuality })
+          .toBuffer();
+        return `data:image/jpeg;base64,${jpeg.toString('base64')}`;
+      }),
+    );
+    const activitiesDoc = (
+      await db
+        .collection(COLLECTIONS.orders)
+        .doc(ctx.order.id)
+        .collection('content')
+        .doc('activities')
+        .get()
+    ).data();
+    const activities =
+      activitiesDoc?.generation === ctx.generation
+        ? (activitiesDoc.activities as ActivitySpec[])
+        : [];
+    const layout: LayoutBook = {
+      language: snapshot.language as Lang,
+      title: snapshot.title,
+      childName: snapshot.childName,
+      dedication: snapshot.dedication,
+      contentType: snapshot.contentType,
+      density: (snapshot.textDensity in DENSITY_LAYOUT
+        ? snapshot.textDensity
+        : 'balanced') as Density,
+      readingLevel: snapshot.readingLevel as LayoutBook['readingLevel'],
+      cover: prepared[0] ?? '',
+      pages: snapshot.pages.map((page, index) => ({
+        text: page.text,
+        image: prepared[index + 1] ?? '',
+        placement: placements[index],
+      })),
+      activities,
+      synopsis: snapshot.synopsis ?? null,
+      educationalNotice: ctx.order.channel === 'professionals',
+      fillerPages: 0,
+      qr: {
+        svg: await QRCode.toString(`https://${deps.brandDomain ?? 'storynido.com'}`, {
+          type: 'svg',
+          margin: 0,
+          color: { dark: '#342a40', light: '#0000' },
+        }),
+        label: deps.brandDomain ?? 'storynido.com',
+      },
+    };
+    const browser = await launchBrowser();
+    try {
+      const result = await renderPdf(browser, digitalHtml(layout, spec), size, {
+        bleedMm: spec.bleedMm,
+        title: snapshot.title,
+      });
+      const path = `orders/${ctx.order.id}/g${String(ctx.generation)}/review-preview.pdf`;
+      await storage().upload({ bucket: 'pdfs', path }, result.pdf, 'application/pdf');
+      await db
+        .collection(COLLECTIONS.orders)
+        .doc(ctx.order.id)
+        .update({
+          reviewPreview: {
+            path,
+            generation: ctx.generation,
+            missing: missing.sort((a, b) => a - b),
+            overflow: result.overflow,
+            at: new Date(),
+          },
+        });
+    } finally {
+      await browser.close();
+    }
+  }
+
   return {
     steps: {
       prepare_photo: preparePhoto,
@@ -1461,6 +1569,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       // Fase 12: entrega digital o impresa.
       deliver: (ctx) => deliver(ctx),
     },
+    previewBook,
     planIllustrations: async (ctx) => (await snapshotOf(ctx)).pages.length + 1,
     illustratePage: async (ctx: PageContext) => {
       const snapshot = await snapshotOf(ctx);

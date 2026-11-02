@@ -201,8 +201,27 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
         }),
       );
     }
+    // PDF de revisión (si el admin lo pidió para esta generación): enlace corto, igual que las páginas.
+    const review = doc.get('reviewPreview') as
+      { path: string; missing?: number[]; overflow?: string[]; at?: unknown } | undefined;
+    const previewBook =
+      base.status === 'qa_failed' || base.status === 'ready'
+        ? review
+          ? {
+              url: (
+                await providers
+                  .storage()
+                  .signedDownloadUrl({ bucket: 'pdfs', path: review.path }, 900)
+              ).url,
+              missing: review.missing ?? [],
+              overflow: review.overflow ?? [],
+              at: iso(normalizeFirestoreData(review.at)),
+            }
+          : null
+        : null;
     return {
       ...base,
+      previewBook,
       bookId,
       bookTitle: typeof data.bookTitle === 'string' ? data.bookTitle : null,
       ownerUid: String(data.ownerUid),

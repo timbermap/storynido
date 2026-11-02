@@ -63,6 +63,8 @@ export interface PipelineHandlers {
   /** Cuántas imágenes lleva el libro (portada + páginas ilustradas). */
   planIllustrations(ctx: StepContext): Promise<number>;
   illustratePage(ctx: PageContext): Promise<PageResult>;
+  /** Vista previa del libro completo para revisar (con las páginas que existan). Opcional. */
+  previewBook?(ctx: StepContext, images: Map<number, string>): Promise<void>;
 }
 
 /**
