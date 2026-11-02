@@ -2227,3 +2227,8 @@ De cinco cremas casi iguales a fondos con un rol (tokens `mint-soft` #e3f2ee, `c
 - **Profesionales:** lavanda (hero) · crema · **navy** (precio y descuentos) · menta · blanco · crema · blanco · cierre.
 - **Cierre de las cuatro:** banda terracota a todo el ancho con el botón en blanco (`LandingFinalCta`), como en las redes. Sale la tarjeta lavanda.
 - **No se tocó:** `--muted` (#fbf1e8) sigue en la app para fondos de interfaz; solo dejó de usarse como fondo de sección. El botón principal sigue coral (probar terracota en una sola landing antes de generalizar) y los títulos siguen en Quicksand (decisión de marca v3).
+
+## 191 — Colecciones y temas en carrusel en móvil
+
+Las tarjetas de colecciones/temas (Celebraciones, Profesionales) se apilaban en móvil y alargaban la página. Ahora, bajo `lg`, son un carrusel horizontal con scroll-snap (tarjeta al 85 %, la siguiente asoma para indicar que hay más); en escritorio siguen en dos columnas.
+

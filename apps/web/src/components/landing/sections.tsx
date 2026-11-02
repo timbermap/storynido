@@ -251,7 +251,7 @@ export function LandingCollections({
           {title}
         </h2>
         {subtitle && <p className={cn('mt-3 max-w-2xl text-lg', subtleTone(tone))}>{subtitle}</p>}
-        <ul className="mt-10 grid gap-6 lg:grid-cols-2">
+        <ul className="-mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0">
           {collections.map((collection) => {
             const own = stories.filter((story) => story.collectionIds.includes(collection.slug));
             const startLabel = start ? (
@@ -263,7 +263,7 @@ export function LandingCollections({
             return (
               <li
                 key={collection.slug}
-                className="rounded-xl border bg-card p-6 shadow-[var(--shadow-card)]"
+                className="w-[85%] shrink-0 snap-start rounded-xl border bg-card p-6 shadow-[var(--shadow-card)] sm:w-[60%] lg:w-auto"
               >
                 <h3 className="text-2xl font-medium">{collection.name}</h3>
                 <p className="mt-2 text-muted-foreground">{collection.description}</p>
