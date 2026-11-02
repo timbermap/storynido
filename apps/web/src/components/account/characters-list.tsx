@@ -6,15 +6,14 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { Pager } from '@/components/pager';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { listChildren, updateChildProfile, type ChildSummary } from '@/lib/firebase/account';
+import { listChildren, type ChildSummary } from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { clearStepDrafts } from '@/lib/use-step-draft';
 
 const PAGE_SIZE = 5;
-const field = 'h-11 rounded-xl border bg-card px-3';
 
 /** Los personajes (chicos) para quienes ya se creó un cuento: de a 5 por página, con editar y borrar. */
 export function CharactersList({ uid, onDeleted }: { uid: string; onDeleted?: () => void }) {
@@ -22,7 +21,6 @@ export function CharactersList({ uid, onDeleted }: { uid: string; onDeleted?: ()
   const tChildren = useTranslations('Account.children');
   const [children, setChildren] = useState<ChildSummary[] | null>(null);
   const [page, setPage] = useState(0);
-  const [editing, setEditing] = useState<{ id: string; name: string; age: number } | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
@@ -35,29 +33,6 @@ export function CharactersList({ uid, onDeleted }: { uid: string; onDeleted?: ()
         setChildren([]);
       });
   }, [uid]);
-
-  async function save() {
-    if (!editing) return;
-    const name = editing.name.trim();
-    if (!name) return;
-    setBusy(editing.id);
-    setMessage(null);
-    try {
-      await updateChildProfile(await getFirebaseDb(), editing.id, { name, age: editing.age });
-      setChildren(
-        (current) =>
-          current?.map((item) =>
-            item.id === editing.id ? { ...item, name, age: editing.age } : item,
-          ) ?? null,
-      );
-      setMessage({ text: t('characterSaved', { name }), error: false });
-      setEditing(null);
-    } catch {
-      setMessage({ text: t('characterSaveError'), error: true });
-    } finally {
-      setBusy(null);
-    }
-  }
 
   async function remove(child: ChildSummary) {
     setBusy(child.id);
@@ -106,135 +81,73 @@ export function CharactersList({ uid, onDeleted }: { uid: string; onDeleted?: ()
         <ul className="grid gap-3">
           {children.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE).map((child) => (
             <li key={child.id} className="grid gap-3 rounded-xl border bg-card p-4">
-              {editing?.id === child.id ? (
-                <form
-                  className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto] sm:items-end"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    void save();
-                  }}
-                >
-                  <label className="grid gap-1 text-sm">
-                    <span className="font-semibold">{t('characterName')}</span>
-                    <input
-                      value={editing.name}
-                      maxLength={40}
-                      required
-                      onChange={(event) => {
-                        setEditing({ ...editing, name: event.target.value });
-                      }}
-                      className={field}
-                    />
-                  </label>
-                  <label className="grid gap-1 text-sm">
-                    <span className="font-semibold">{t('characterAge')}</span>
-                    <select
-                      value={editing.age}
-                      onChange={(event) => {
-                        setEditing({ ...editing, age: Number(event.target.value) });
-                      }}
-                      className={field}
+              <div className="flex flex-wrap items-center gap-3">
+                <UserRound className="size-5 text-primary" aria-hidden="true" />
+                <p className="min-w-0 flex-1 font-semibold">
+                  <Link
+                    href={{
+                      pathname: '/my-stories/characters/[childId]',
+                      params: { childId: child.id },
+                    }}
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {child.name}
+                  </Link>
+                  {child.age !== null && (
+                    <span className="font-normal text-muted-foreground">
+                      {' · '}
+                      {t('charactersAge', { age: child.age })}
+                    </span>
+                  )}
+                </p>
+                {confirming === child.id ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm">{tChildren('confirm', { name: child.name })}</span>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={busy !== null}
+                      onClick={() => void remove(child)}
                     >
-                      {Array.from({ length: 13 }, (_, age) => (
-                        <option key={age} value={age}>
-                          {age}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <div className="flex gap-2">
-                    <Button type="submit" size="sm" disabled={busy !== null}>
                       {busy === child.id && <Loader2 className="animate-spin" aria-hidden="true" />}
-                      {t('characterSave')}
+                      {tChildren('confirmDelete')}
                     </Button>
                     <Button
-                      type="button"
                       size="sm"
                       variant="ghost"
+                      disabled={busy !== null}
                       onClick={() => {
-                        setEditing(null);
+                        setConfirming(null);
                       }}
                     >
                       {tChildren('cancel')}
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground sm:col-span-3">
-                    {t('characterEditNote')}
-                  </p>
-                </form>
-              ) : (
-                <div className="flex flex-wrap items-center gap-3">
-                  <UserRound className="size-5 text-primary" aria-hidden="true" />
-                  <p className="min-w-0 flex-1 font-semibold">
+                ) : (
+                  <div className="flex gap-2">
                     <Link
                       href={{
                         pathname: '/my-stories/characters/[childId]',
                         params: { childId: child.id },
                       }}
-                      className="underline-offset-4 hover:underline"
+                      className={buttonVariants({ size: 'sm', variant: 'outline' })}
                     >
-                      {child.name}
+                      <Pencil aria-hidden="true" />
+                      {t('characterEdit')}
                     </Link>
-                    {child.age !== null && (
-                      <span className="font-normal text-muted-foreground">
-                        {' · '}
-                        {t('charactersAge', { age: child.age })}
-                      </span>
-                    )}
-                  </p>
-                  {confirming === child.id ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm">{tChildren('confirm', { name: child.name })}</span>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        disabled={busy !== null}
-                        onClick={() => void remove(child)}
-                      >
-                        {busy === child.id && (
-                          <Loader2 className="animate-spin" aria-hidden="true" />
-                        )}
-                        {tChildren('confirmDelete')}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={busy !== null}
-                        onClick={() => {
-                          setConfirming(null);
-                        }}
-                      >
-                        {tChildren('cancel')}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setMessage(null);
-                          setEditing({ id: child.id, name: child.name, age: child.age ?? 0 });
-                        }}
-                      >
-                        <Pencil aria-hidden="true" />
-                        {t('characterEdit')}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditing(null);
-                          setConfirming(child.id);
-                        }}
-                      >
-                        <Trash2 aria-hidden="true" />
-                        {tChildren('delete')}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setConfirming(child.id);
+                      }}
+                    >
+                      <Trash2 aria-hidden="true" />
+                      {tChildren('delete')}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </li>
           ))}
         </ul>

@@ -1295,6 +1295,8 @@ export const apiRoutes = {
       /** Fotos vigentes (se borran a los 30 días) y cuándo vence la primera en caducar. */
       photos: z.number().int(),
       photosExpireAt: z.string().nullable(),
+      /** Las fotos vigentes, para que la persona vea qué subió (URL firmada, 30 min). */
+      photoUrls: z.array(z.string()),
       books: z.array(
         z.object({
           id: z.string(),

@@ -140,11 +140,24 @@ export class AccountService {
         time: (doc.get('updatedAt') as { toMillis?: () => number } | undefined)?.toMillis?.() ?? 0,
       }))
       .sort((a, b) => b.time - a.time);
+    const photoUrls = await Promise.all(
+      photos.docs.flatMap((doc) => {
+        const path = doc.get('storagePath') as string | undefined;
+        return path
+          ? [
+              storage
+                .signedDownloadUrl({ bucket: 'photos', path }, 30 * 60)
+                .then((link) => link.url),
+            ]
+          : [];
+      }),
+    );
     const withCharacter = sorted.find((book) => book.preview?.character?.previewImagePath);
     return {
       characterImageUrl: await url(withCharacter?.preview?.character?.previewImagePath),
       photos: photos.size,
       photosExpireAt: expiries.length > 0 ? new Date(Math.min(...expiries)).toISOString() : null,
+      photoUrls,
       books: await Promise.all(
         sorted.slice(0, 12).map(async (book) => ({
           id: book.id,

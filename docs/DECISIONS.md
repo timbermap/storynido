@@ -2297,3 +2297,7 @@ El creador combinaba rojo vino y lavanda en casi todo (progreso, pasos, fichas, 
 ## 207 — Integraciones: una fila por imprenta
 
 La lista de proveedores de impresión llega como texto separado por comas («gelato,cloudprinter,lulu») y el panel la probaba como si fuera una sola imprenta, con el error «no está activa». Ahora se separa y hay una fila y una prueba de conexión por imprenta.
+
+## 208 — Personajes: «Editar» abre el perfil completo, con la foto
+
+En Mi cuenta → Personajes, «Editar» abría un formulario con solo nombre y edad. Ahora lleva al perfil del personaje (DECISIONS 188), donde se edita todo (nombre, edad, gustos) y se ve el dibujo aprobado, el libro hecho con él y, si subió fotos, las fotos vigentes (miniaturas; se borran a los 30 días o con «Borrar la foto»). Si el personaje se armó con rasgos y sin foto, lo dice y muestra solo el dibujo.

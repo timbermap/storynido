@@ -507,6 +507,7 @@
       "profilePhotoTitle": "Their photo",
       "profilePhotoNone": "No photos are stored. If you create another story with their photo, we use it and delete it after 30 days.",
       "profilePhotoSome": "{count, plural, one {# photo is stored} other {# photos are stored}}. {count, plural, one {It is} other {They are}} deleted automatically on {date}.",
+      "profilePhotoAlt": "Photo {index} of {name}",
       "profilePhotoKeep": "The character drawing and details stay even if you delete the photo.",
       "profilePhotoDelete": "Delete the photo now",
       "profilePhotoConfirm": "Delete {name}’s photo? This can’t be undone.",

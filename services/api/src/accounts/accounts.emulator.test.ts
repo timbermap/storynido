@@ -194,10 +194,12 @@ describe('borrado de datos a pedido', () => {
       characterImageUrl: string | null;
       photos: number;
       photosExpireAt: string | null;
+      photoUrls: string[];
       books: { id: string; title: string | null; status: string }[];
     }>();
     expect(body.characterImageUrl).toEqual(expect.any(String));
     expect(body.photos).toBe(1);
+    expect(body.photoUrls).toHaveLength(1);
     expect(body.photosExpireAt).toBe('2026-12-01T00:00:00.000Z');
     expect(body.books.map((book) => book.id).sort()).toEqual(['b1', 'b2']);
     expect(body.books.find((book) => book.id === 'b1')?.title).toBe('Martina y la luna');

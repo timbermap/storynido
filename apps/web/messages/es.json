@@ -507,6 +507,7 @@
       "profilePhotoTitle": "Su foto",
       "profilePhotoNone": "No hay fotos guardadas. Si creas otro cuento con su foto, la usamos y la borramos a los 30 días.",
       "profilePhotoSome": "{count, plural, one {Hay # foto guardada. Se borra} other {Hay # fotos guardadas. Se borran}} automáticamente el {date}.",
+      "profilePhotoAlt": "Foto {index} de {name}",
       "profilePhotoKeep": "El dibujo del personaje y sus datos se conservan aunque borres la foto.",
       "profilePhotoDelete": "Borrar la foto ahora",
       "profilePhotoConfirm": "¿Borrar la foto de {name}? No se puede deshacer.",

@@ -43,7 +43,7 @@ export default function IntegrationsPage() {
   if (!data) return <p role="status">Cargando…</p>;
   const active = data.active as Record<string, string | string[]>;
   const rows: { kind: Kind; id?: string; label: string }[] = [
-    ...(Array.isArray(active.print) ? active.print : String(active.print ?? '').split(','))
+    ...(Array.isArray(active.print) ? active.print : (active.print ?? '').split(','))
       .map((id) => id.trim())
       .filter(Boolean)
       .map((id) => ({

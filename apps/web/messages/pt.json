@@ -507,6 +507,7 @@
       "profilePhotoTitle": "Foto",
       "profilePhotoNone": "Não há fotos guardadas. Se você criar outra história com a foto, nós a usamos e apagamos após 30 dias.",
       "profilePhotoSome": "{count, plural, one {Há # foto guardada} other {Há # fotos guardadas}}. {count, plural, one {Ela é apagada} other {Elas são apagadas}} automaticamente em {date}.",
+      "profilePhotoAlt": "Foto {index} de {name}",
       "profilePhotoKeep": "O desenho do personagem e os dados continuam mesmo que você apague a foto.",
       "profilePhotoDelete": "Apagar a foto agora",
       "profilePhotoConfirm": "Apagar a foto de {name}? Não dá para desfazer.",

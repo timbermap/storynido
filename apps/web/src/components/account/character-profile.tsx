@@ -120,7 +120,7 @@ export function CharacterProfile({ childId }: { childId: string }) {
     try {
       await api('deleteChildPhotos', { params: { childId } });
       setProfile((current) =>
-        current ? { ...current, photos: 0, photosExpireAt: null } : current,
+        current ? { ...current, photos: 0, photosExpireAt: null, photoUrls: [] } : current,
       );
       setMessage({ text: t('profilePhotoDeleted', { name }), error: false });
     } catch (caught) {
@@ -306,6 +306,20 @@ export function CharacterProfile({ childId }: { childId: string }) {
               })
             : t('profilePhotoNone')}
         </p>
+        {profile.photoUrls.length > 0 && (
+          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+            {profile.photoUrls.map((url, index) => (
+              <li key={url} className="aspect-[3/4] overflow-hidden rounded-xl border">
+                {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min. */}
+                <img
+                  src={url}
+                  alt={t('profilePhotoAlt', { name, index: index + 1 })}
+                  className="size-full object-cover"
+                />
+              </li>
+            ))}
+          </ul>
+        )}
         <p className="text-sm text-muted-foreground">{t('profilePhotoKeep')}</p>
         {profile.photos > 0 &&
           (confirming ? (
