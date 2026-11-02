@@ -4,6 +4,7 @@ import { avatarKey, avatarToSheet, hasMemories, type Avatar } from '../models/ch
 import { storyGoals, validGoal } from '../models/channels';
 import { describeCharacterSheet } from './ai';
 import {
+  castNote,
   buildIllustrationPrompt,
   buildStoryPrompt,
   coverScene,
@@ -179,5 +180,23 @@ describe('escena de la portada', () => {
     expect(scene).toContain('Book cover illustration');
     expect(scene).not.toContain('Story world');
     expect(scene).not.toContain('title (');
+  });
+});
+
+describe('castNote', () => {
+  it('fija género y aspecto de las personas secundarias y solo las dibuja donde la escena las incluye', () => {
+    const note = castNote([
+      { role: 'the teacher', gender: 'male', look: 'about 40, short gray hair, green cardigan' },
+      { role: 'a classmate', gender: 'unspecified', look: 'curly hair, yellow t-shirt' },
+    ]);
+    expect(note).toContain('the teacher: male, about 40, short gray hair, green cardigan');
+    expect(note).toContain('a classmate: curly hair, yellow t-shirt');
+    expect(note).toContain('never add them to scenes that do not include them');
+  });
+
+  it('sin personas secundarias no agrega nada', () => {
+    expect(castNote(undefined)).toBe('');
+    expect(castNote([])).toBe('');
+    expect(castNote([{ role: ' ', gender: 'male', look: 'x' }])).toBe('');
   });
 });

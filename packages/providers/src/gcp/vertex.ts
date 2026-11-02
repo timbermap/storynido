@@ -289,6 +289,18 @@ const PLAN_SCHEMA = {
       properties: { name: { type: 'STRING' }, look: { type: 'STRING' } },
       required: ['name', 'look'],
     },
+    cast: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          role: { type: 'STRING' },
+          gender: { type: 'STRING', enum: ['male', 'female', 'unspecified'] },
+          look: { type: 'STRING' },
+        },
+        required: ['role', 'gender', 'look'],
+      },
+    },
     scenes: {
       type: 'ARRAY',
       items: {
@@ -558,6 +570,10 @@ wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min
 mustBeVisible / notVisible / continuityFacts in short English phrases for the illustrator. Write theme, arc, sceneGoal and emotionalBeat
 in the language of the brief. companion: the one secondary character (relative, friend or pet from the brief) who appears in two or
 more scenes, with a fixed look in English (age, hair, skin tone, clothes and colors; species and fur for a pet); null if none recurs.
+cast: every OTHER person who appears in two or more scenes (a teacher, a classmate, a neighbor), each with a fixed gender and a fixed
+look in English (age, hair, clothes and colors). Take the gender from the brief and the story (for example "el profe" or "he" means male,
+"la profe" means female); use unspecified only when nothing says it. In mustBeVisible, always name these people with that gender
+("the male teacher") so every scene agrees. Empty array if nobody else recurs.
 
 Brief:
 ${request.prompt}`,
@@ -581,6 +597,7 @@ ${request.prompt}`,
       theme: plan.theme,
       arc: plan.arc,
       companion: plan.companion?.name && plan.companion.look ? plan.companion : null,
+      cast: (plan.cast ?? []).filter((member) => member.role && member.look).slice(0, 4),
       scenes: plan.scenes.map((scene, pageIndex) => ({
         ...scene,
         pageIndex,

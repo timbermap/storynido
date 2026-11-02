@@ -145,8 +145,22 @@ export interface CompanionPlan {
   look: string;
 }
 
+/**
+ * Persona secundaria que aparece en varias páginas sin ser el acompañante principal (el profesor, un
+ * compañero, un vecino). Se fija una vez, con su género y aspecto, para dibujarla igual en todas.
+ */
+export interface CastMember {
+  /** Quién es (en inglés): «the teacher», «a classmate». */
+  role: string;
+  gender: 'male' | 'female' | 'unspecified';
+  /** Aspecto fijo, en inglés (edad, pelo, ropa y colores). */
+  look: string;
+}
+
 export interface StoryPlan {
   theme: string;
+  /** Personas secundarias que se repiten, con género y aspecto fijos (vacío si no hay). */
+  cast?: CastMember[];
   /** El acompañante que más se repite, o null si ninguno vuelve en varias páginas. */
   companion?: CompanionPlan | null;
   /** Principio, motivación, dificultad, decisión del protagonista y resolución. */

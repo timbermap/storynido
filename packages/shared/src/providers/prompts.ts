@@ -6,7 +6,7 @@ import {
   type Memories,
   type MustKeepTrait,
 } from '../models/character';
-import type { CharacterSheet, LessonPrompt, StoryPlan } from './ai';
+import type { CastMember, CharacterSheet, LessonPrompt, StoryPlan } from './ai';
 
 /** Variables que admiten las plantillas de stories (textPromptTemplate / imagePromptTemplate). */
 export type TemplateVariables = Readonly<Record<string, string | number | null | undefined>>;
@@ -311,3 +311,17 @@ export const companionReferenceScene = (companion: { name: string; look: string 
 /** Lo que se suma a la descripción del personaje cuando el libro tiene acompañante. */
 export const companionNote = (companion: { name: string; look: string }) =>
   `Recurring companion ${companion.name}: ${companion.look}. Whenever ${companion.name} appears, draw them identical to the second reference image.`;
+
+/**
+ * Personas secundarias que se repiten, para la ilustración de cada página: mismo género y aspecto
+ * en todas, y solo se dibujan si la escena las incluye.
+ */
+export function castNote(cast: readonly CastMember[] | null | undefined): string {
+  const members = (cast ?? []).filter((member) => member.role.trim() && member.look.trim());
+  if (members.length === 0) return '';
+  const lines = members.map((member) => {
+    const gender = member.gender === 'unspecified' ? '' : `${member.gender}, `;
+    return `${member.role}: ${gender}${member.look}`;
+  });
+  return ` Recurring supporting characters (draw each one with exactly the same gender and look on every page where the scene includes them; never add them to scenes that do not include them): ${lines.join('; ')}.`;
+}

@@ -11,6 +11,7 @@ import {
   GLOBAL_DOC_ID,
   avatarToSheet,
   buildIllustrationPrompt,
+  castNote,
   companionNote,
   countWords,
   normalizeFirestoreData,
@@ -40,6 +41,7 @@ import {
   type MustKeepTrait,
   type PageReview,
   type QaCode,
+  type CastMember,
   type ScenePlan,
   catalogPrices,
 } from '@storynido/shared';
@@ -111,6 +113,8 @@ export interface BookSnapshot {
   activityPages: number;
   pages: { index: number; text: string; illustrationPrompt: string }[];
   scenes: ScenePlan[] | null;
+  /** Personas secundarias con género y aspecto fijos (muestras nuevas; ausente en las anteriores). */
+  cast?: CastMember[];
   imagePromptTemplate: string;
   stylePrompt: string;
   /** Dirección de arte de la muestra (null en muestras anteriores a ella). */
@@ -376,7 +380,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const baseScene =
       index === 0
         ? pageScene(coverScene(snapshot.pages[0]?.illustrationPrompt, snapshot.title), null, hint)
-        : pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint);
+        : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint)}${castNote(snapshot.cast)}`;
     const reference = await load(snapshot.character.sheetPath);
     const companion = snapshot.companion ?? null;
     const references = companion ? [reference, await load(companion.sheetPath)] : [reference];
@@ -466,7 +470,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             mustKeep: MustKeepTrait[];
             approvedAt: unknown;
           };
-          plan?: { scenes: ScenePlan[] } | null;
+          plan?: { scenes: ScenePlan[]; cast?: CastMember[] } | null;
           words?: { min: number; max: number };
           activityPages?: number;
           artDirection?: string | null;
@@ -568,6 +572,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         illustrationPrompt,
       })),
       scenes: preview.plan?.scenes ?? null,
+      // Solo si el plan lo trae: así el libro de una muestra anterior conserva su huella.
+      ...(preview.plan?.cast?.length ? { cast: preview.plan.cast } : {}),
       imagePromptTemplate: String(story.imagePromptTemplate),
       stylePrompt: String(style.promptModifier),
       artDirection: preview.artDirection ?? null,
