@@ -63,7 +63,17 @@ export interface DraftSummary {
   updatedAt: Date | null;
   wizardStep: number;
   channel: Channel;
+  /** `preview_generating`: se está dibujando la muestra; `preview_ready`: ya tiene muestra. */
+  status: 'draft' | 'preview_generating' | 'preview_ready';
+  /** Se está dibujando ahora (una generación de más de 10 minutos se da por colgada). */
+  generating: boolean;
 }
+
+const STALE_GENERATION_MS = 10 * 60 * 1000;
+const isGeneratingNow = (status: string, startedAt: Date | null) =>
+  status === 'preview_generating' &&
+  startedAt !== null &&
+  Date.now() - startedAt.getTime() < STALE_GENERATION_MS;
 
 /** Borrador recién creado al que nunca se le cargó nada (se reutiliza en vez de listarlo). */
 export const isEmptyDraft = (draft: DraftSummary) => !draft.childName && draft.wizardStep === 0;
@@ -237,9 +247,30 @@ export async function listDrafts(db: Firestore, uid: string): Promise<DraftSumma
         updatedAt: asDate(book.get('updatedAt') as Timestampish),
         wizardStep: book.get('wizardStep') as number,
         channel: (book.get('channel') as Channel | undefined) ?? 'families',
+        status: book.get('status') as DraftSummary['status'],
+        generating: isGeneratingNow(
+          book.get('status') as string,
+          asDate(book.get('previewStartedAt') as Timestampish),
+        ),
       };
     }),
   );
+}
+
+/** Estado actual de un borrador (para seguir en vivo una muestra que se está dibujando). */
+export async function readDraftState(
+  db: Firestore,
+  id: string,
+): Promise<Pick<DraftSummary, 'status' | 'generating'> | null> {
+  const book = await getDoc(doc(db, COLLECTIONS.books, id));
+  if (!book.exists()) return null;
+  return {
+    status: book.get('status') as DraftSummary['status'],
+    generating: isGeneratingNow(
+      book.get('status') as string,
+      asDate(book.get('previewStartedAt') as Timestampish),
+    ),
+  };
 }
 
 export function subscribeBook(

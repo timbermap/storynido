@@ -1,4 +1,4 @@
-import { Caveat, Lora, Quicksand } from 'next/font/google';
+import { Caveat, Fraunces, Lora, Quicksand } from 'next/font/google';
 
 /**
  * Tipografías de la marca v3 (docs/BRAND.md): Quicksand para títulos, botones y navegación;
@@ -22,5 +22,15 @@ export const fontContent = Lora({
 export const fontScript = Caveat({
   subsets: ['latin'],
   variable: '--font-script-face',
+  display: 'swap',
+});
+
+/**
+ * Títulos sobre las portadas: Fraunces, la misma del libro impreso y del PDF (más de libro y
+ * menos de interfaz que Quicksand). Solo se usa en las portadas.
+ */
+export const fontCover = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-cover-face',
   display: 'swap',
 });

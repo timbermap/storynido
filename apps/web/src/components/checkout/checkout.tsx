@@ -51,6 +51,9 @@ const EMPTY_ADDRESS: AddressDraft = {
   taxId: null,
 };
 
+/** Países donde la imprenta exige el estado en la dirección. */
+const STATE_REQUIRED: readonly string[] = ['MX', 'US'];
+
 const ADDRESS_FIELDS: { key: keyof AddressDraft; optional?: boolean; autoComplete: string }[] = [
   { key: 'name', autoComplete: 'name' },
   { key: 'line1', autoComplete: 'address-line1' },
@@ -84,6 +87,10 @@ export function Checkout({
   const { choice } = useConsent();
   const { status: pro } = useProStatus();
   const tPro = useTranslations('Pro.account');
+  const stateLabel = (code: string) =>
+    t.has(`address.stateByCountry.${code}`)
+      ? t(`address.stateByCountry.${code}`)
+      : t('address.stateOther');
   const [chosenFormat, setFormat] = useState<BookFormat>(offer.formats[0]?.format ?? 'digital');
   const [address, setAddress] = useState<AddressDraft>(EMPTY_ADDRESS);
   const [gift, setGift] = useState({ isGift: false, message: '' });
@@ -318,35 +325,53 @@ export function Checkout({
               {ADDRESS_FIELDS.filter(
                 ({ key }) =>
                   key !== 'taxId' || (TAX_ID_COUNTRIES as readonly string[]).includes(shipTo),
-              ).map(({ key, optional, autoComplete }) => (
-                <label
-                  key={key}
-                  className={cn(
-                    'grid gap-1.5 text-sm',
-                    (key === 'name' || key === 'line1') && 'sm:col-span-2',
-                  )}
-                >
-                  <span className="font-semibold">
-                    {key === 'taxId' ? t(`address.taxId.${shipTo}`) : t(`address.${key}`)}
-                    {optional && (
-                      <span className="font-normal text-muted-foreground"> ({t('optional')})</span>
+              ).map(({ key, optional: alwaysOptional, autoComplete }) => {
+                // El estado solo es obligatorio donde las imprentas lo exigen (México y EE. UU.);
+                // en otros países se llama provincia, departamento o región, o no existe.
+                const optional =
+                  (alwaysOptional ?? false) ||
+                  (key === 'state' && !STATE_REQUIRED.includes(shipTo));
+                return (
+                  <label
+                    key={key}
+                    className={cn(
+                      'grid gap-1.5 text-sm',
+                      (key === 'name' || key === 'line1') && 'sm:col-span-2',
                     )}
-                  </span>
-                  <input
-                    id={`address-${key}`}
-                    autoComplete={autoComplete}
-                    value={address[key] ?? ''}
-                    required={!optional}
-                    onChange={(event) => {
-                      setAddress((current) => ({ ...current, [key]: event.target.value }));
-                    }}
-                    className={field}
-                  />
-                  {key === 'taxId' && (
-                    <span className="text-xs text-muted-foreground">{t('address.taxIdHint')}</span>
-                  )}
-                </label>
-              ))}
+                  >
+                    <span className="font-semibold">
+                      {key === 'taxId'
+                        ? t(`address.taxId.${shipTo}`)
+                        : key === 'state'
+                          ? stateLabel(shipTo)
+                          : key === 'line2'
+                            ? t(shipTo === 'MX' ? 'address.line2' : 'address.line2Other')
+                            : t(`address.${key}`)}
+                      {optional && (
+                        <span className="font-normal text-muted-foreground">
+                          {' '}
+                          ({t('optional')})
+                        </span>
+                      )}
+                    </span>
+                    <input
+                      id={`address-${key}`}
+                      autoComplete={autoComplete}
+                      value={address[key] ?? ''}
+                      required={!optional}
+                      onChange={(event) => {
+                        setAddress((current) => ({ ...current, [key]: event.target.value }));
+                      }}
+                      className={field}
+                    />
+                    {key === 'taxId' && (
+                      <span className="text-xs text-muted-foreground">
+                        {t('address.taxIdHint')}
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
             </div>
             {!CONFIGURED_COUNTRIES.includes(shipTo) && (
               <p className="text-sm text-muted-foreground">{t('importDuties')}</p>
@@ -364,9 +389,9 @@ export function Checkout({
                 <span>
                   <span className="font-semibold">{t('address.confirm')}</span>
                   <span className="mt-1 block text-muted-foreground">
-                    {[address.name, address.line1, address.city, address.postalCode, shipTo].join(
-                      ', ',
-                    )}
+                    {[address.line1, address.city, address.state, address.postalCode, shipTo]
+                      .filter(Boolean)
+                      .join(', ')}
                   </span>
                 </span>
               </label>

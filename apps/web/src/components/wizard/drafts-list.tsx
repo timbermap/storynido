@@ -1,15 +1,16 @@
 'use client';
 
-import { Loader2, Trash2 } from 'lucide-react';
+import { CheckCircle2, Loader2, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Pager } from '@/components/pager';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { clearStepDrafts } from '@/lib/use-step-draft';
-import type { DraftSummary } from '@/lib/firebase/drafts';
+import { getFirebaseDb } from '@/lib/firebase/client';
+import { readDraftState, type DraftSummary } from '@/lib/firebase/drafts';
 import { cn } from '@/lib/utils';
 
 /** Color de contexto de cada línea (el mismo de su landing). */
@@ -38,6 +39,27 @@ export function DraftsList({
   const [deleting, setDeleting] = useState<string | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
   const [page, setPage] = useState(0);
+  // Estado en vivo de las muestras que se están dibujando (se consulta cada pocos segundos).
+  const [live, setLive] = useState<Record<string, Pick<DraftSummary, 'status' | 'generating'>>>({});
+  const stateOf = (draft: DraftSummary) => live[draft.id] ?? draft;
+  const generatingIds = drafts
+    .filter((draft) => stateOf(draft).generating)
+    .map((draft) => draft.id)
+    .join(',');
+  useEffect(() => {
+    if (!generatingIds) return;
+    const timer = setInterval(() => {
+      void getFirebaseDb().then(async (db) => {
+        for (const id of generatingIds.split(',')) {
+          const next = await readDraftState(db, id).catch(() => null);
+          if (next) setLive((current) => ({ ...current, [id]: next }));
+        }
+      });
+    }, 6000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [generatingIds]);
   const pages = Math.max(1, Math.ceil(drafts.length / pageSize));
   const current = Math.min(page, pages - 1);
   const visible = drafts.slice(current * pageSize, (current + 1) * pageSize);
@@ -80,6 +102,20 @@ export function DraftsList({
                     {tLines(draft.channel)}
                   </span>
                   <p className="font-display text-lg font-semibold">{title}</p>
+                  {stateOf(draft).generating ? (
+                    <p
+                      role="status"
+                      className="mt-1 flex items-center gap-2 text-sm font-semibold text-primary"
+                    >
+                      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                      {t('generating')}
+                    </p>
+                  ) : stateOf(draft).status === 'preview_ready' ? (
+                    <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-success">
+                      <CheckCircle2 className="size-4" aria-hidden="true" />
+                      {t('previewReady')}
+                    </p>
+                  ) : null}
                   {draft.updatedAt && (
                     <p className="text-sm text-muted-foreground">
                       {t('updated', { date: date.format(draft.updatedAt) })}

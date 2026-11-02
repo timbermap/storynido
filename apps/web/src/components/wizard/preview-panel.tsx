@@ -6,7 +6,17 @@ import {
   type Locale,
   type PublicPreview,
 } from '@storynido/shared';
-import { AlertTriangle, CheckCircle2, Loader2, Pencil, RefreshCw, Sparkles } from 'lucide-react';
+import {
+  AlertTriangle,
+  BookOpen,
+  CheckCircle2,
+  Droplets,
+  Loader2,
+  Pencil,
+  PencilLine,
+  RefreshCw,
+  Sparkles,
+} from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
@@ -20,6 +30,8 @@ import { trackConversion } from '@/lib/conversions';
 import { formatPrice } from '@/lib/format';
 
 import { CharacterReview } from './character-review';
+import { cn } from '@/lib/utils';
+
 import { PreviewFeedback } from './preview-feedback';
 import type { WizardData } from './types';
 
@@ -312,30 +324,40 @@ export function PreviewPanel({
 
       {data?.stage === 'complete' && (
         <div className="mt-8 grid gap-6 [&>*]:min-w-0">
-          <aside className="rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
-            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <aside className="rounded-2xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {data.character?.approved && (
-                  <p className="inline-flex items-center gap-1.5 text-sm font-bold text-success">
+                  <p className="inline-flex items-center gap-1.5 rounded-full bg-mint px-3 py-1 text-sm font-bold text-success">
                     <CheckCircle2 className="size-4" aria-hidden="true" />
                     {t('approvedBadge')}
                   </p>
                 )}
                 <h2 className="text-xl font-medium">{t('differencesTitle')}</h2>
               </div>
-              <p className="text-sm font-bold text-primary">
+              <p className="rounded-full border px-3 py-1 text-sm font-bold">
                 {t('regenerationsLeft', { count: regenerationsLeft })}
               </p>
             </div>
-            <ul className="mt-3 grid gap-2 text-muted-foreground md:grid-cols-3 md:gap-6">
-              <li>
-                {t('differencesPages', {
-                  total: data.totalPages,
-                  shown: data.pages.filter((page) => page.imageUrl).length,
-                })}
-              </li>
-              <li>{t('differencesWatermark')}</li>
-              <li>{t('differencesEdit')}</li>
+            <ul className="mt-4 grid gap-4 font-sans text-sm leading-snug md:grid-cols-3 md:gap-6">
+              {[
+                {
+                  icon: BookOpen,
+                  text: t('differencesPages', {
+                    total: data.totalPages,
+                    shown: data.pages.filter((page) => page.imageUrl).length,
+                  }),
+                },
+                { icon: Droplets, text: t('differencesWatermark') },
+                { icon: PencilLine, text: t('differencesEdit') },
+              ].map(({ icon: Icon, text }) => (
+                <li key={text} className="flex items-start gap-3">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-peach text-navy">
+                    <Icon className="size-[18px]" aria-hidden="true" />
+                  </span>
+                  <span className="pt-1.5 text-foreground/80">{text}</span>
+                </li>
+              ))}
             </ul>
           </aside>
           <div className="grid gap-4 [&>*]:min-w-0">
@@ -391,23 +413,6 @@ export function PreviewPanel({
         </div>
       )}
 
-      {data?.stage === 'complete' && <PreviewFeedback bookId={book.id} />}
-
-      {data?.stage === 'complete' && user?.isAnonymous && (
-        <section
-          aria-labelledby="save-story"
-          className="mt-12 grid gap-6 rounded-xl bg-secondary p-6 sm:p-8 md:grid-cols-2 md:items-center"
-        >
-          <div>
-            <h2 id="save-story" className="text-2xl font-medium">
-              {t('saveStoryTitle')}
-            </h2>
-            <p className="mt-2 text-muted-foreground">{t('saveStoryText')}</p>
-          </div>
-          <SignInPanel />
-        </section>
-      )}
-
       {/* Mientras falta confirmar al personaje, el único paso es el botón de arriba: sin barra. */}
       {!(data?.stage === 'character' && data.character && !data.character.approved) && (
         <div className="mt-12 flex flex-col gap-3 border-t pt-8 sm:flex-row sm:items-center">
@@ -423,7 +428,7 @@ export function PreviewPanel({
                   // Eventos: el kit de cumpleaños (un diseño, muchas copias).
                   query: book.channel === 'events' ? { kit: '1' } : {},
                 }}
-                className={buttonVariants({ size: 'lg' })}
+                className={cn(buttonVariants({ size: 'lg' }), 'h-14 px-10 text-lg')}
               >
                 {t('continue')}
               </Link>
@@ -443,7 +448,12 @@ export function PreviewPanel({
             )}
             {data?.stage === 'complete' && !data.stale ? null : (
               <>
-                <Button size="lg" disabled aria-describedby="continue-soon">
+                <Button
+                  size="lg"
+                  disabled
+                  aria-describedby="continue-soon"
+                  className="h-14 px-10 text-lg"
+                >
                   {t('continue')}
                 </Button>
                 <p id="continue-soon" className="mt-2 max-w-sm text-sm text-muted-foreground">
@@ -453,6 +463,23 @@ export function PreviewPanel({
             )}
           </div>
         </div>
+      )}
+
+      {data?.stage === 'complete' && <PreviewFeedback bookId={book.id} />}
+
+      {data?.stage === 'complete' && user?.isAnonymous && (
+        <section
+          aria-labelledby="save-story"
+          className="mt-12 grid gap-6 rounded-xl bg-secondary p-6 sm:p-8 md:grid-cols-2 md:items-center"
+        >
+          <div>
+            <h2 id="save-story" className="text-2xl font-medium">
+              {t('saveStoryTitle')}
+            </h2>
+            <p className="mt-2 text-muted-foreground">{t('saveStoryText')}</p>
+          </div>
+          <SignInPanel />
+        </section>
       )}
     </div>
   );
