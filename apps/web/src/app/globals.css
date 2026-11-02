@@ -162,3 +162,18 @@
     @apply sr-only rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50;
   }
 }
+
+/*
+ * Home con sesión: sus propias tipografías, por variables (para extenderlas a otras páginas o
+ * revertirlas cambiando solo estas dos líneas). Títulos en Fraunces y texto en Figtree.
+ */
+.home-session {
+  --home-display: var(--font-cover-face), Georgia, serif;
+  --home-body: var(--font-home-body), system-ui, sans-serif;
+  font-family: var(--home-body);
+}
+.home-session :is(h1, h2) {
+  font-family: var(--home-display);
+  font-weight: 560;
+  letter-spacing: -0.02em;
+}

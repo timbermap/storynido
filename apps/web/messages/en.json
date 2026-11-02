@@ -1667,5 +1667,128 @@
     "previous": "Previous",
     "next": "Next",
     "status": "Page {page} of {pages}"
+  },
+  "HomeSession": {
+    "new": {
+      "title": "Their story starts with their name",
+      "sub": "Type it and see how it looks. The preview is free.",
+      "cta": "Create their preview",
+      "namePlaceholder": "Main character's name",
+      "nameLabel": "Main character's name",
+      "example": "For example: {title}"
+    },
+    "draft": {
+      "pill": "Draft",
+      "title": "You're almost there: see {name} in their story",
+      "titleNoName": "You're almost there: see their story",
+      "sub": "Pick up where you left off: what you already answered is saved.",
+      "cta": "Continue my story"
+    },
+    "generating": {
+      "pill": "Drawing",
+      "title": "We're drawing {name}",
+      "titleNoName": "We're drawing your character",
+      "sub": "It takes a few minutes. You can close this screen: we'll email you.",
+      "cta": "See my stories",
+      "step1": "Their details and adventure",
+      "step2": "Their illustrated character",
+      "step3": "Cover and 2 pages",
+      "tag": "Sample character"
+    },
+    "character": {
+      "pill": "One step left",
+      "title": "Is this {name}?",
+      "titleNoName": "Is this your character?",
+      "sub": "Confirm the character to see the cover and the first pages.",
+      "cta": "Review the character"
+    },
+    "preview": {
+      "pill": "Your preview is ready",
+      "title": "{name}'s book is ready to finish",
+      "titleNoName": "Your book is ready to finish",
+      "sub": "We already illustrated the cover and the first pages.",
+      "cta": "See {name}'s book",
+      "ctaNoName": "See my book",
+      "price": "Digital from {price}",
+      "pages": "{count} pages"
+    },
+    "orderPreparing": {
+      "pill": "Order in progress",
+      "title": "We're preparing {name}'s book",
+      "titleNoName": "We're preparing your book",
+      "sub": "We'll email you when it ships.",
+      "cta": "See my order"
+    },
+    "orderShipped": {
+      "pill": "Order on its way",
+      "title": "{name}'s book is on its way",
+      "titleNoName": "Your book is on its way",
+      "sub": "You can follow the shipment from your order.",
+      "subWithDate": "Arrives between {from} and {to}.",
+      "cta": "See my order"
+    },
+    "bought": {
+      "pill": "Thanks for your purchase",
+      "title": "What adventure is next for {name}?",
+      "titleNoName": "What adventure is next?",
+      "sub": "Pick another story with the same character.",
+      "cta": "Create another adventure",
+      "fine": "No need to enter their details again.",
+      "tag": "{name}'s character"
+    },
+    "pro": {
+      "pill": "Professionals",
+      "title": "Your projects are waiting",
+      "sub": "Pick up a project or repeat a setup.",
+      "cta": "See my projects"
+    },
+    "rail": {
+      "title": "More adventures for {name}",
+      "titleNoName": "Stories to start with",
+      "all": "See all {count} stories",
+      "from": "from {price}"
+    },
+    "formats": {
+      "title": "A real book, to keep",
+      "hardcover": "Hardcover",
+      "hardcoverText": "To give and keep for years",
+      "softcover": "Softcover",
+      "softcoverText": "Light, to take anywhere",
+      "digital": "Digital (PDF)",
+      "digitalText": "To read right away, on any screen",
+      "plusShipping": "{price} + shipping",
+      "from": "from {price}",
+      "note": "Prices for a {pages}-page book.",
+      "estimate": "Estimated shipping to your country: about {price}.",
+      "photoAlt": "Hardcover printed book on a table"
+    },
+    "how": {
+      "title": "What's next",
+      "step1": "1. Confirm their character",
+      "step1Text": "With a photo or by choosing their traits.",
+      "step2": "2. See the cover and 2 pages",
+      "step2Text": "Free, and you can edit the text.",
+      "step3": "3. Choose how to receive it",
+      "step3Text": "You only pay if you like it.",
+      "alt1": "Sample illustrated character",
+      "alt2": "Sample cover",
+      "alt3": "Printed book"
+    },
+    "faq": {
+      "title": "Before you decide",
+      "all": "See all questions",
+      "q1": "How long does it take to arrive?",
+      "a1": "Before paying you see the estimated date for your address. If you need it for a specific day, you can say so in the order and we'll tell you if it arrives in time.",
+      "q2": "What happens to the photos?",
+      "a2": "They are deleted after 30 days and never used to train AI models. You can also create the character without photos, by choosing their traits.",
+      "q3": "What if I don't love it?",
+      "a3": "You see the preview before paying and can change the text and illustrations. Once sent to print there is no refund for change of mind; if it arrives damaged, we reprint it or refund you."
+    },
+    "sticky": {
+      "preview": "Your book is ready",
+      "other": "Your story is waiting"
+    },
+    "loading": "Loading your stories…",
+    "coverAlt": "Sample cover: {title}"
   }
 }

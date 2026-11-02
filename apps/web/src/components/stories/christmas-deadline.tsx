@@ -22,11 +22,14 @@ export async function ChristmasDeadline({
   country,
   locale,
   now = new Date(),
+  variant = 'box',
 }: {
   offer: Offer | null;
   country: CountryCode;
   locale: Locale;
   now?: Date;
+  /** `line`: una línea de texto discreta (bajo el botón del hero con sesión). */
+  variant?: 'box' | 'line';
 }) {
   const printed = offer?.formats.some((format) => format.format !== 'digital') ?? false;
   if (!offer?.available || !printed) return null;
@@ -44,14 +47,22 @@ export async function ChristmasDeadline({
   }).format(last);
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const open = today <= last;
+  const text = open
+    ? t('christmasOpen', { date, country: countryName(country, locale) })
+    : t('christmasClosed', { country: countryName(country, locale) });
+  if (variant === 'line') {
+    return (
+      <p className="text-sm text-muted-foreground" role="note">
+        {text}
+      </p>
+    );
+  }
   return (
     <p
       className="rounded-xl bg-peach/50 px-4 py-3 text-sm font-semibold text-[#7a2f23]"
       role="note"
     >
-      {open
-        ? t('christmasOpen', { date, country: countryName(country, locale) })
-        : t('christmasClosed', { country: countryName(country, locale) })}
+      {text}
     </p>
   );
 }

@@ -14,6 +14,8 @@ export const routing = defineRouting({
   localeCookie: false,
   pathnames: {
     '/': '/',
+    // Solo desarrollo: la home con sesión con datos de prueba (da 404 en producción).
+    '/dev-home': '/dev-home',
     // Líneas comerciales: una landing por público (DECISIONS 102).
     '/families': { es: '/familias', en: '/families', pt: '/familias' },
     '/events': { es: '/eventos', en: '/events', pt: '/eventos' },
