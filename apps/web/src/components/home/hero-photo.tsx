@@ -110,6 +110,8 @@ export function HeroScene({
           alt={photoAlt}
           width={900}
           height={900}
+          // Parte de la primera pantalla: carga de inmediato (con `lazy` aparecía en blanco).
+          priority
           sizes="(min-width: 1024px) 200px, 30vw"
           tone="bg-[#f4a493]"
           className="rounded-[3px]"
@@ -134,6 +136,7 @@ export function HeroScene({
           alt={characterAlt}
           width={900}
           height={900}
+          priority
           sizes="(min-width: 1024px) 200px, 30vw"
           tone="bg-[#fff1e6]"
           className="rounded-[3px]"
