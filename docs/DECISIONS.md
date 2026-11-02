@@ -2273,3 +2273,7 @@ Para revisar si el libro se parece a la persona, el detalle de un pedido en revi
 Al iniciar sesión, el país y el idioma guardados en la cuenta se aplicaban siempre en el dispositivo (cookies de elección) y mandaban sobre la IP. Pero al crear la cuenta se guardaba lo que se había deducido en ese momento (por ejemplo inglés y Estados Unidos al probar desde un link en inglés), y desde entonces cada inicio de sesión desde Argentina volvía a fijar inglés y «Christmas in United States». Ahora el perfil lleva `localeChosen` y `countryChosen`: los escribe solo «Mi cuenta» al cambiar el idioma o el país, y solo esos valores se aplican al iniciar sesión. Las cuentas existentes no tienen la marca, así que vuelven a guiarse por la IP.
 
 Además, las reglas de Firestore solo aceptaban siete países en el perfil (MX, US, ES, CO, CL, PE, BR): crear o editar el perfil con Argentina (u otro país) se rechazaba. Ahora vale cualquier código ISO de dos letras; el catálogo de países lo sigue gobernando la API.
+
+## 202 — Sin aviso de idioma: se entra en el del país y se cambia en la configuración
+
+Se elimina el aviso «Este sitio también está en español» que se mostraba al abrir un link en otro idioma. La entrada por la raíz ya usa el idioma del país de la IP (o del navegador); un link directo a /en o /pt se respeta tal cual, sin preguntar ni fijar nada; y el idioma (y el país) se cambian a mano desde el pie, el selector de idioma o «Mi cuenta», y esa elección sí se recuerda (DECISIONS 122 y 201).

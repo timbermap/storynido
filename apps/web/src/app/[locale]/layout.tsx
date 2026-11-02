@@ -12,7 +12,6 @@ import { ConsentBanner } from '@/components/consent/consent-banner';
 import { Maintenance, PreviewOnlyBanner } from '@/components/layout/maintenance';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { HeaderSwitch } from '@/components/layout/focus-header';
-import { LanguageSuggestion } from '@/components/layout/language-suggestion';
 import { AppHeader } from '@/components/layout/app-header';
 import { SiteHeader } from '@/components/layout/site-header';
 import { StickyCta } from '@/components/layout/sticky-cta';
@@ -109,7 +108,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             ) : (
               <>
                 {mode === 'preview_only' && <PreviewOnlyBanner />}
-                <LanguageSuggestion />
                 <HeaderSwitch>{customer ? <AppHeader /> : <SiteHeader />}</HeaderSwitch>
                 <main id="main">{children}</main>
                 <SiteFooter />

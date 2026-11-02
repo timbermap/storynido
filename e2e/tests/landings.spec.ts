@@ -247,23 +247,16 @@ test('¿Para quién es?: los links siguen andando al volver atrás desde una lan
   await expect(page).toHaveURL(/\/es\/eventos$/);
 });
 
-test('idioma: visitar una página en otro idioma no lo fija; el aviso sugiere el del país', async ({
+test('idioma: visitar una página en otro idioma no lo fija y no pregunta nada', async ({
   page,
   context,
   baseURL,
 }) => {
-  // Desde Argentina (país detectado) con un link en inglés.
+  // Desde Argentina (país detectado) con un link en inglés: se respeta el link, sin avisos.
   await context.addCookies([{ name: 'sn_country_choice', value: 'AR', url: String(baseURL) }]);
   await page.goto('/en/stories');
   await page.getByRole('button', { name: 'Necessary only' }).click();
-  const banner = page.getByRole('region', { name: 'Este sitio también está en español.' });
-  await expect(banner).toBeVisible();
+  await expect(page.getByRole('region', { name: /español/i })).toHaveCount(0);
   // Haber visto la página en inglés no cambia el idioma de entrada.
   expect((await context.cookies()).some((cookie) => cookie.name === 'sn_lang')).toBe(false);
-
-  await banner.getByRole('button', { name: 'Ver en español' }).click();
-  await expect(page).toHaveURL(/\/es\/historias/);
-  // Elegido a mano: la raíz respeta esa elección.
-  await page.goto('/');
-  await expect(page).toHaveURL(/\/es$/);
 });
