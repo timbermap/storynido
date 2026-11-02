@@ -346,7 +346,7 @@ module "api" {
   max_instances   = var.api_scaling.max
   # La vista previa se genera dentro del request (historia + lámina, o portada y 2 páginas):
   # con modelos reales tarda más de 60 s.
-  timeout_seconds     = 300
+  timeout_seconds = 300
   # Procesa fotos e ilustraciones dentro del request: con 512 MiB se quedaba sin memoria.
   memory              = "1Gi"
   deletion_protection = var.deletion_protection
