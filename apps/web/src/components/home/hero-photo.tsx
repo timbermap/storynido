@@ -78,3 +78,84 @@ export function HeroKit({
     />
   );
 }
+
+/**
+ * Hero de la home: de la foto al libro. El libro impreso de fondo y, encima, dos polaroids pegadas
+ * con cinta: la foto del chico y, al lado, su personaje dibujado (DECISIONS 189). Las dos imágenes
+ * de arriba son de muestra hasta tener fotos reales.
+ */
+export function HeroScene({
+  bookAlt,
+  photoAlt,
+  characterAlt,
+  photoLabel,
+  characterLabel,
+}: {
+  bookAlt: string;
+  photoAlt: string;
+  characterAlt: string;
+  photoLabel: string;
+  characterLabel: string;
+}) {
+  const polaroid =
+    'absolute top-0 z-10 w-[34%] bg-white p-[2.2%] pb-[7%] shadow-[0_16px_28px_-10px_rgb(38_50_74/0.5)] rounded-lg';
+  const tape =
+    'absolute -top-[4%] left-1/2 h-[9%] w-[30%] -translate-x-1/2 -rotate-3 rounded-sm bg-[#f7b5a4]/85';
+  return (
+    <figure className="relative mx-auto w-full max-w-[40rem] pt-[20%] lg:max-w-none">
+      <div className={`${polaroid} left-[10%] -rotate-[5deg]`}>
+        <span aria-hidden="true" className={tape} />
+        <ImageSlot
+          src="/images/secciones/foto-real.webp"
+          alt={photoAlt}
+          width={900}
+          height={900}
+          sizes="(min-width: 1024px) 200px, 30vw"
+          tone="bg-[#f4a493]"
+          className="rounded-[3px]"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-[1%] text-center font-script text-[clamp(1.05rem,2vw,1.5rem)] leading-none"
+        >
+          {photoLabel}
+        </span>
+      </div>
+      <span
+        aria-hidden="true"
+        className="absolute top-[6%] left-[46.5%] z-10 text-3xl font-bold text-[#a33f33]"
+      >
+        →
+      </span>
+      <div className={`${polaroid} left-[52%] rotate-[4deg]`}>
+        <span aria-hidden="true" className={tape} />
+        <ImageSlot
+          src="/images/secciones/personaje.webp"
+          alt={characterAlt}
+          width={900}
+          height={900}
+          sizes="(min-width: 1024px) 200px, 30vw"
+          tone="bg-[#fff1e6]"
+          className="rounded-[3px]"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-[1%] text-center font-script text-[clamp(1.05rem,2vw,1.5rem)] leading-none"
+        >
+          {characterLabel}
+        </span>
+      </div>
+      <div className="relative overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-24px_rgb(38_50_74/0.35)]">
+        <ImageSlot
+          src="/images/heroes/libro-impreso.webp"
+          alt={bookAlt}
+          width={1400}
+          height={1045}
+          priority
+          sizes="(min-width: 1024px) 640px, 92vw"
+          tone="bg-[#e9dcc3]"
+        />
+      </div>
+    </figure>
+  );
+}

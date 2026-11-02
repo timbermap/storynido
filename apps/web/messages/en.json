@@ -128,13 +128,18 @@
       "homeKicker": "From their photo to their book",
       "homeLead": "You upload a photo, choose the adventure together, and in minutes you see their illustrated story. If you love it, you can order it as a hardcover.",
       "homeCta": "Start my story",
-      "photoNote": "We use the photo only to create the character.",
+      "photoNote": "Sign in free with Google or an email link. We use the photo only to create the character.",
       "homeMember": "Create another story",
       "homeContinue": "Continue my story",
       "ctaMember": "Create another story",
       "photoAlt": "On a wooden kitchen table, a polaroid of five-year-old Tomás laughing in his red glasses, and next to it the printed book open to the page where the same Tomás flies a cardboard rocket.",
       "pageAlt": "Illustration of a girl with bangs standing on a hill with her arms wide open, shouting with joy.",
-      "familiasPhotoAlt": "A 6-year-old girl laughs and points toward the book."
+      "familiasPhotoAlt": "A 6-year-old girl laughs and points toward the book.",
+      "sceneBookAlt": "A printed book on a wooden table, with a boy in a cardboard rocket on the cover.",
+      "scenePhotoAlt": "Sample photo of a laughing 5-year-old boy with red glasses.",
+      "sceneCharacterAlt": "The same boy drawn as the story’s character.",
+      "scenePhotoLabel": "their photo",
+      "sceneCharacterLabel": "their character"
     },
     "trust": {
       "preview": "Free preview before you pay",
@@ -1056,7 +1061,7 @@
       "title": "The party, ready, with your child as the star",
       "subtitle": "A WhatsApp invitation, printable decorations and a party-favor storybook for the guests, all with the same character.",
       "cta": "Design my kit",
-      "note": "You can see how it looks without an account. We only ask you to sign in to save or download.",
+      "note": "You create a free account (with Google or an email link) and see the sample before you pay.",
       "howTitle": "How it works",
       "steps": {
         "1": {
@@ -1133,7 +1138,7 @@
       "hero": {
         "title": "The party kit, with its story included",
         "subtitle": "An invitation, decorations and an illustrated story starring your child. Everything with the same character, ready in minutes.",
-        "point1": "One story per guest, with each guest’s name on the tag",
+        "point1": "A keepsake story to print, one per guest, with their name on the tag",
         "point2": "An invitation for WhatsApp and decorations to print",
         "point3": "Pick from {count} party themes",
         "price": "{price} · complete digital kit, the story is included",

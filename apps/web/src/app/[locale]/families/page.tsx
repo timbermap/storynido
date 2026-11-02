@@ -22,6 +22,7 @@ import { AuthLink } from '@/components/auth/auth-link';
 import { Link } from '@/i18n/navigation';
 import { CONTACT_ID } from '@/components/home/contact-form';
 import { brand } from '@/lib/brand';
+import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
 import { lowestPrice, offerHighlights } from '@/lib/offer';
 import { getContent, getLessons, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
@@ -104,6 +105,10 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
   return (
     <>
       <RememberChannel channel="families" />
+      {/* Fecha límite del impreso para Navidad (de mediados de octubre al 23 de diciembre). */}
+      <div className="container-page pt-4 empty:hidden">
+        <ChristmasDeadline offer={offer} country={display.country} locale={locale} />
+      </div>
       {/* Hero */}
       <section className="overflow-hidden">
         <div className="container-page grid items-center gap-8 pt-8 pb-10 lg:grid-cols-[1fr_1.05fr] lg:gap-12 lg:pt-12 lg:pb-16">

@@ -128,13 +128,18 @@
       "homeKicker": "Da foto ao livro",
       "homeLead": "Você envia uma foto, vocês escolhem a aventura juntos e em minutos vê a história ilustrada. Se gostar, pode pedir impressa em capa dura.",
       "homeCta": "Começar minha história",
-      "photoNote": "Usamos a foto só para criar o personagem.",
+      "photoNote": "Entre grátis com o Google ou com um link por e-mail. Usamos a foto só para criar o personagem.",
       "homeMember": "Criar outra história",
       "homeContinue": "Continuar minha história",
       "ctaMember": "Criar outra história",
       "photoAlt": "Sobre uma mesa de cozinha de madeira, uma polaroid do Tomás, de 5 anos, rindo com seus óculos vermelhos, e ao lado o livro impresso aberto na página em que o mesmo Tomás voa num foguete de papelão.",
       "pageAlt": "Ilustração de uma menina de franja em cima de uma colina, de braços abertos, gritando de alegria.",
-      "familiasPhotoAlt": "Uma menina de 6 anos ri e aponta para o livro."
+      "familiasPhotoAlt": "Uma menina de 6 anos ri e aponta para o livro.",
+      "sceneBookAlt": "Um livro impresso sobre uma mesa de madeira, com um menino em um foguete de papelão na capa.",
+      "scenePhotoAlt": "Foto de exemplo de um menino de 5 anos rindo, com óculos vermelhos.",
+      "sceneCharacterAlt": "O mesmo menino desenhado como personagem da história.",
+      "scenePhotoLabel": "a foto",
+      "sceneCharacterLabel": "o personagem"
     },
     "trust": {
       "preview": "Prévia grátis antes de pagar",
@@ -1056,7 +1061,7 @@
       "title": "A festa pronta, com seu filho como protagonista",
       "subtitle": "Convite para WhatsApp, decoração para imprimir e uma história de lembrancinha para os convidados, tudo com o mesmo personagem.",
       "cta": "Criar meu kit",
-      "note": "Sem conta você vê como fica. Só pedimos para entrar na hora de salvar ou baixar.",
+      "note": "Você cria uma conta grátis (com Google ou um link por e-mail) e vê a amostra antes de pagar.",
       "howTitle": "Como funciona",
       "steps": {
         "1": {
@@ -1133,7 +1138,7 @@
       "hero": {
         "title": "O kit da festa, com a história incluída",
         "subtitle": "Convite, decoração e uma história ilustrada com o seu filho como protagonista. Tudo com o mesmo personagem, pronto em minutos.",
-        "point1": "Uma história por convidado, com o nome de cada um na etiqueta",
+        "point1": "Uma história de lembrança para imprimir, uma por convidado, com o nome na etiqueta",
         "point2": "Convite para WhatsApp e decoração para imprimir",
         "point3": "Você escolhe entre {count} temas de festa",
         "price": "{price} · kit digital completo, a história está incluída",

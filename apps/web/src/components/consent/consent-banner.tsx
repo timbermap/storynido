@@ -41,14 +41,15 @@ export function ConsentBanner() {
       {choice === null && !preferencesOpen && (
         <section
           aria-label={t('title')}
-          className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-3xl rounded-xl border bg-card p-5 shadow-lg sm:inset-x-6"
+          className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-4xl rounded-xl border bg-card p-3 shadow-lg sm:inset-x-6 sm:flex sm:items-center sm:gap-4 sm:px-4"
         >
-          <h2 className="text-lg font-medium">{t('title')}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h2 className="sr-only">{t('title')}</h2>
+          <p className="text-sm text-muted-foreground sm:flex-1">
             {t('text')} {policyLink}
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2 sm:mt-0 sm:shrink-0">
             <Button
+              size="sm"
               onClick={() => {
                 save({ analytics: true, marketing: true });
               }}
@@ -56,6 +57,7 @@ export function ConsentBanner() {
               {t('acceptAll')}
             </Button>
             <Button
+              size="sm"
               variant="outline"
               onClick={() => {
                 save({ analytics: false, marketing: false });
@@ -63,7 +65,7 @@ export function ConsentBanner() {
             >
               {t('rejectAll')}
             </Button>
-            <Button variant="ghost" onClick={openPreferences}>
+            <Button size="sm" variant="ghost" onClick={openPreferences}>
               {t('customize')}
             </Button>
           </div>

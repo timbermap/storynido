@@ -3,7 +3,8 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
-import { HeroPhoto } from '@/components/home/hero-photo';
+import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
+import { HeroScene } from '@/components/home/hero-photo';
 import { HeroFacts } from '@/components/home/hero-facts';
 import { FaqList, faqHighlights, parseFaqGroups } from '@/components/home/faq-list';
 import { AudienceSelector } from '@/components/landing/audience-selector';
@@ -57,6 +58,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
+      {/* Fecha límite del impreso para Navidad (de mediados de octubre al 23 de diciembre). */}
+      <div className="container-page pt-4 empty:hidden">
+        <ChristmasDeadline offer={offer} country={display.country} locale={locale} />
+      </div>
       {/* Hero */}
       <section className="overflow-hidden">
         <div className="container-page grid items-center gap-8 pt-8 pb-10 lg:grid-cols-[1fr_1.05fr] lg:gap-12 lg:pt-12 lg:pb-16">
@@ -99,12 +104,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
             <HeroFacts digitalPrice={highlights?.digital ?? null} />
           </div>
-          <HeroPhoto
-            src="/images/heroes/home-transformacion.webp"
-            alt={t('hero.photoAlt')}
-            width={1600}
-            height={1200}
-            tone="bg-[#e9dcc3]"
+          <HeroScene
+            bookAlt={t('hero.sceneBookAlt')}
+            photoAlt={t('hero.scenePhotoAlt')}
+            characterAlt={t('hero.sceneCharacterAlt')}
+            photoLabel={t('hero.scenePhotoLabel')}
+            characterLabel={t('hero.sceneCharacterLabel')}
           />
         </div>
       </section>
