@@ -45,7 +45,11 @@ export async function ensureUserProfile(
 
 /** Idioma preferido de la cuenta (lo cambia el propio usuario desde "Mi cuenta"). */
 export async function updateUserLocale(db: Firestore, uid: string, locale: Locale): Promise<void> {
-  await updateDoc(doc(db, COLLECTIONS.users, uid), { locale, updatedAt: serverTimestamp() });
+  await updateDoc(doc(db, COLLECTIONS.users, uid), {
+    locale,
+    localeChosen: true,
+    updatedAt: serverTimestamp(),
+  });
 }
 
 /** Preferencias de la cuenta en vivo: novedades por correo y país. */
@@ -65,10 +69,17 @@ export function subscribePreferences(
 
 /** País de la cuenta (moneda y precios); también queda en este dispositivo. */
 export async function updateUserCountry(db: Firestore, uid: string, country: CountryCode) {
-  await updateDoc(doc(db, COLLECTIONS.users, uid), { country, updatedAt: serverTimestamp() });
+  await updateDoc(doc(db, COLLECTIONS.users, uid), {
+    country,
+    countryChosen: true,
+    updatedAt: serverTimestamp(),
+  });
 }
 
-/** País e idioma guardados en la cuenta, para aplicarlos en este dispositivo al iniciar sesión. */
+/**
+ * País e idioma que la persona eligió en su cuenta, para aplicarlos en este dispositivo al iniciar
+ * sesión. Lo que se dedujo al crearla (IP o idioma del navegador) no es una elección: no se impone.
+ */
 export async function readPreferences(
   db: Firestore,
   uid: string,
@@ -77,8 +88,8 @@ export async function readPreferences(
   const country = countryCodeSchema.safeParse(snapshot.get('country'));
   const locale = localeSchema.safeParse(snapshot.get('locale'));
   return {
-    country: country.success ? country.data : null,
-    locale: locale.success ? locale.data : null,
+    country: country.success && snapshot.get('countryChosen') === true ? country.data : null,
+    locale: locale.success && snapshot.get('localeChosen') === true ? locale.data : null,
   };
 }
 

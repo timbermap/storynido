@@ -140,6 +140,20 @@ describe('users', () => {
     await assertFails(
       updateDoc(doc(alice(), 'users', ALICE), { role: 'superadmin', updatedAt: serverTimestamp() }),
     );
+    // Marca qué eligió ella (idioma y país), y nada más en ese mapa.
+    await assertSucceeds(
+      updateDoc(doc(alice(), 'users', ALICE), {
+        country: 'AR',
+        countryChosen: true,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(alice(), 'users', ALICE), {
+        countryChosen: 'sí',
+        updatedAt: serverTimestamp(),
+      }),
+    );
     // Tampoco se hace Pro sola (precios y descuentos Pro): lo escribe la API.
     await assertFails(
       updateDoc(doc(alice(), 'users', ALICE), {

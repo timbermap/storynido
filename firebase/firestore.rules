@@ -60,7 +60,8 @@ service cloud.firestore {
     }
 
     function validCountry(value) {
-      return value in ['MX', 'US', 'ES', 'CO', 'CL', 'PE', 'BR'];
+      // Cualquier país ISO (el catálogo de países lo maneja la API, no las reglas).
+      return value is string && value.matches('^[A-Z]{2}$');
     }
 
     function activeOrAdmin() {
@@ -75,7 +76,10 @@ service cloud.firestore {
         && optString(d.photoURL, 2048)
         && validLocale(d.locale)
         && validCountry(d.country)
-        && d.marketingOptIn is bool;
+        && d.marketingOptIn is bool
+        // Qué eligió el propio usuario (no lo que se dedujo al crear la cuenta): solo eso se impone.
+        && d.get('localeChosen', false) is bool
+        && d.get('countryChosen', false) is bool;
     }
 
     match /users/{uid} {
@@ -90,7 +94,7 @@ service cloud.firestore {
         && validUserProfile();
 
       allow update: if isUser(uid)
-        && changesOnly(['displayName', 'photoURL', 'locale', 'country', 'marketingOptIn', 'updatedAt'])
+        && changesOnly(['displayName', 'photoURL', 'locale', 'country', 'marketingOptIn', 'localeChosen', 'countryChosen', 'updatedAt'])
         && isNow('updatedAt')
         && validUserProfile();
 

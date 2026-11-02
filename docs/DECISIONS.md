@@ -2267,3 +2267,9 @@ Un pedido trabado en una página no permitía ver cómo saldría el libro: la ma
 ## 200 — Revisión manual: la foto y el personaje a la vista
 
 Para revisar si el libro se parece a la persona, el detalle de un pedido en revisión manual (`qa_failed`) muestra las fotos que subió el adulto (si no se borraron a los 30 días o a pedido) junto al personaje aprobado (la lámina congelada del pedido, o la de la vista previa). Mismo criterio que las ilustraciones: solo en revisión, enlaces de 15 minutos, nunca en la lista de pedidos ni en otros estados. Sustituye el «sin datos del niño» de la cola.
+
+## 201 — Idioma y país de la cuenta: solo se imponen si los eligió la persona
+
+Al iniciar sesión, el país y el idioma guardados en la cuenta se aplicaban siempre en el dispositivo (cookies de elección) y mandaban sobre la IP. Pero al crear la cuenta se guardaba lo que se había deducido en ese momento (por ejemplo inglés y Estados Unidos al probar desde un link en inglés), y desde entonces cada inicio de sesión desde Argentina volvía a fijar inglés y «Christmas in United States». Ahora el perfil lleva `localeChosen` y `countryChosen`: los escribe solo «Mi cuenta» al cambiar el idioma o el país, y solo esos valores se aplican al iniciar sesión. Las cuentas existentes no tienen la marca, así que vuelven a guiarse por la IP.
+
+Además, las reglas de Firestore solo aceptaban siete países en el perfil (MX, US, ES, CO, CL, PE, BR): crear o editar el perfil con Argentina (u otro país) se rechazaba. Ahora vale cualquier código ISO de dos letras; el catálogo de países lo sigue gobernando la API.
