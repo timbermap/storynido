@@ -2293,3 +2293,7 @@ En «¿Cómo lo van a leer?», cambiar la cantidad de texto o el nivel en «Ajus
 ## 206 — Creador: acentos más actuales (menos vino y lavanda)
 
 El creador combinaba rojo vino y lavanda en casi todo (progreso, pasos, fichas, selección) y se sentía anticuado. Ahora: la barra de progreso es más fina y en coral claro; los pasos y las fichas de lo elegido (historia, enseñanza, rasgos) son blancos con borde fino y letra navy; el paso activo y la opción seleccionada van en navy (tarjetas con borde y tilde navy, chips rellenos); las etiquetas de línea conservan su color de fondo pero con letra navy. El rojo vino queda para el botón principal, los enlaces y los avisos.
+
+## 207 — Integraciones: una fila por imprenta
+
+La lista de proveedores de impresión llega como texto separado por comas («gelato,cloudprinter,lulu») y el panel la probaba como si fuera una sola imprenta, con el error «no está activa». Ahora se separa y hay una fila y una prueba de conexión por imprenta.
