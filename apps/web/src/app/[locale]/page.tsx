@@ -117,7 +117,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <AudienceSelector />
 
       {/* Cómo funciona */}
-      <section id={HOW_IT_WORKS_ID} className="scroll-mt-28 bg-white">
+      <section id={HOW_IT_WORKS_ID} className="scroll-mt-28 bg-mint-soft">
         <div className="container-page py-20 lg:py-24">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
@@ -159,7 +159,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* Preguntas frecuentes */}
       {faqItems.length > 0 && (
-        <section id={FAQ_ID} className="scroll-mt-28 bg-mint/50">
+        <section id={FAQ_ID} className="scroll-mt-28">
           <div className="container-page grid gap-10 py-20 lg:grid-cols-[1fr_1.6fr] lg:gap-16 lg:py-24">
             <div>
               <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">

@@ -37,9 +37,9 @@ export async function AudienceSelector() {
     <section aria-labelledby="audience" className="relative">
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-16 rounded-t-[50%_100%] bg-[#fff1e6]"
+        className="absolute inset-x-0 top-0 h-16 rounded-t-[50%_100%] bg-white"
       />
-      <div className="relative bg-[#fff1e6] pt-10 pb-12 lg:pt-14 lg:pb-16">
+      <div className="relative bg-white pt-10 pb-12 lg:pt-14 lg:pb-16">
         <div className="container-page">
           <div className="mx-auto max-w-2xl pb-8 text-center">
             <h2

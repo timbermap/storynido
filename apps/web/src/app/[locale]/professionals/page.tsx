@@ -77,6 +77,7 @@ export default async function ProfessionalsPage({ params }: Props) {
     <>
       <RememberChannel channel="professionals" />
       <LandingHero
+        tone="lavender"
         eyebrow={t('eyebrow')}
         title={t('title')}
         subtitle={t('subtitle')}
@@ -104,6 +105,7 @@ export default async function ProfessionalsPage({ params }: Props) {
       />
       {/* Precio a la vista y sin suscripción: se paga cada cuento, con descuento por volumen. */}
       <LandingChecklist
+        tone="navy"
         title={t('pricingTitle')}
         subtitle={t('pricingSubtitle')}
         items={[
@@ -128,6 +130,7 @@ export default async function ProfessionalsPage({ params }: Props) {
         note={t('pricingNote')}
       />
       <LandingSteps
+        tone="mint"
         title={t('howTitle')}
         steps={(['1', '2', '3'] as const).map((key) => ({
           title: t(`steps.${key}.title`),
@@ -145,6 +148,7 @@ export default async function ProfessionalsPage({ params }: Props) {
       <PhotoPromise />
 
       <LandingFaq
+        tone="white"
         title={t('faqTitle')}
         items={six.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}
       />

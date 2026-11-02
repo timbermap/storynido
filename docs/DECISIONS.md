@@ -2216,3 +2216,14 @@ Habrá una pantalla de perfil por personaje (después del 16 de nov): datos edit
 - **Textos que prometían de más:** Eventos ya no dice «Sin cuenta ves cómo queda»: dice que se crea una cuenta gratis (Google o enlace al correo) y se ve la muestra antes de pagar. La nota del hero de la home avisa lo mismo. El cuento del kit es «un cuento de recuerdo para imprimir, uno por invitado, con su nombre en la etiqueta»: un PDF que se imprime una vez por invitado.
 - **Banner de cookies** de una línea en escritorio (texto y botones lado a lado) y más bajo en celular.
 - **No se cambia (a decidir):** que el login conserve historia/tema/línea y que los CTA vayan todos a `/crear`. Hoy el creador pide cuenta en todas las líneas (DECISIONS 106) y el login vuelve a Mis cuentos, nunca al creador (110); revertirlo es una decisión de producto. El precio del carrusel de Instagram (US$ 21,99 contra 18,99 del sitio) se corrige fuera del repo.
+
+### 190. Sistema de fondos de las landings (2026-11-01)
+
+De cinco cremas casi iguales a fondos con un rol (tokens `mint-soft` #e3f2ee, `coral-soft` #ffe6df, `lavender-soft` #eee8fa y `navy`; crema y blanco como base). Cada sección de las landings recibe `tone` (`cream`, `white`, `mint`, `coral`, `lavender`, `navy`) y dos secciones seguidas nunca comparten fondo.
+
+- **Home:** crema · blanco («¿Para quién es?») · menta (cómo funciona) · crema (preguntas) · cierre terracota.
+- **Familias:** crema · blanco · **navy** (galería de historias) · crema (enseñanzas) · blanco (la foto) · menta (preguntas) · cierre.
+- **Celebraciones:** coral (hero) · crema · blanco · menta · crema · **navy** (temas) · crema · blanco · cierre.
+- **Profesionales:** lavanda (hero) · crema · **navy** (precio y descuentos) · menta · blanco · crema · blanco · cierre.
+- **Cierre de las cuatro:** banda terracota a todo el ancho con el botón en blanco (`LandingFinalCta`), como en las redes. Sale la tarjeta lavanda.
+- **No se tocó:** `--muted` (#fbf1e8) sigue en la app para fondos de interfaz; solo dejó de usarse como fondo de sección. El botón principal sigue coral (probar terracota en una sola landing antes de generalizar) y los títulos siguen en Quicksand (decisión de marca v3).

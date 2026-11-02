@@ -255,16 +255,23 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
 
       {/* Galería de historias */}
       {stories.length > 0 && (
-        <section className="bg-muted py-20 lg:py-24">
+        <section className="bg-navy py-20 lg:py-24">
           <div className="container-page">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="max-w-2xl">
-                <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
+                <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium text-white">
                   {t('gallery.title')}
                 </h2>
-                <p className="mt-3 text-lg text-muted-foreground">{t('gallery.subtitle')}</p>
+                <p className="mt-3 text-lg text-white/80">{t('gallery.subtitle')}</p>
               </div>
-              <Link href="/families/stories" className={buttonVariants({ variant: 'outline' })}>
+              <Link
+                href="/families/stories"
+                className={buttonVariants({
+                  variant: 'outline',
+                  className:
+                    'border-white/60 bg-transparent text-white hover:bg-white/10 hover:text-white',
+                })}
+              >
                 {t('gallery.viewAll')}
               </Link>
             </div>
@@ -316,11 +323,11 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
         </section>
       )}
 
-      <PhotoPromise />
+      <PhotoPromise tone="white" />
 
       {/* Preguntas frecuentes */}
       {faqItems.length > 0 && (
-        <section id={FAQ_ID} className="scroll-mt-28 bg-mint/50">
+        <section id={FAQ_ID} className="scroll-mt-28 bg-mint-soft">
           <div className="container-page grid gap-10 py-20 lg:grid-cols-[1fr_1.6fr] lg:gap-16 lg:py-24">
             <div>
               <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">

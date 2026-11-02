@@ -102,6 +102,7 @@ export default async function EventsPage({ params }: Props) {
     <>
       <RememberChannel channel="events" />
       <LandingHero
+        tone="coral"
         eyebrow={t('eyebrow')}
         title={t('hero.title')}
         subtitle={t('hero.subtitle')}
@@ -116,7 +117,7 @@ export default async function EventsPage({ params }: Props) {
         media={heroStory ? <PartyKitRender story={heroStory} /> : null}
       />
       <PartyValue coverImage={heroStory?.coverImage} />
-      <section className="bg-muted py-20 lg:py-24">
+      <section className="bg-white py-20 lg:py-24">
         <div className="container-page">
           <div className="max-w-2xl">
             <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
@@ -147,6 +148,7 @@ export default async function EventsPage({ params }: Props) {
         </div>
       </section>
       <LandingSteps
+        tone="mint"
         title={t('howTitle')}
         steps={(['1', '2', '3'] as const).map((key) => ({
           title: t(`steps.${key}.title`),
@@ -206,6 +208,7 @@ export default async function EventsPage({ params }: Props) {
         </section>
       )}
       <LandingCollections
+        tone="navy"
         title={t('collectionsTitle')}
         collections={collections}
         stories={stories}
@@ -216,6 +219,7 @@ export default async function EventsPage({ params }: Props) {
       <PhotoPromise />
 
       <LandingFaq
+        tone="white"
         title={t('faqTitle')}
         items={keys.map((key) => ({ question: t(`faq.${key}.q`), answer: t(`faq.${key}.a`) }))}
       />

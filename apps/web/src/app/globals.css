@@ -40,6 +40,10 @@
   --sage: #8ac8bc;
   --lavender: #e6ddf6;
   --navy: #26324a;
+  /* Fondos de sección con un rol cada uno (DECISIONS 190): proceso, celebración, profesionales. */
+  --mint-soft: #e3f2ee;
+  --coral-soft: #ffe6df;
+  --lavender-soft: #eee8fa;
   color-scheme: light;
 }
 
@@ -65,6 +69,9 @@
   --color-sage: var(--sage);
   --color-lavender: var(--lavender);
   --color-navy: var(--navy);
+  --color-mint-soft: var(--mint-soft);
+  --color-coral-soft: var(--coral-soft);
+  --color-lavender-soft: var(--lavender-soft);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
