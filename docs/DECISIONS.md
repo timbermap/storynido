@@ -2285,3 +2285,7 @@ En el desplegable de Familias, «Todas las historias» tenía el mismo peso que 
 ## 204 — Familias: la edad elegida se ve sobre la banda navy
 
 La pestaña de edad seleccionada se pintaba en el color del texto (navy) y desaparecía sobre la banda navy de la galería. Ahora la elegida es un botón durazno con texto navy y sombra; las demás siguen en blanco.
+
+## 205 — Creador: al ajustar la lectura no se desmarca el formato
+
+En «¿Cómo lo van a leer?», cambiar la cantidad de texto o el nivel en «Ajustar la lectura» dejaba una combinación que no coincidía con ninguna tarjeta, y las tres quedaban sin marcar (parecía que se había borrado la elección). Ahora queda marcada la tarjeta más parecida (primero por extensión, luego por cantidad de texto y nivel) y el aviso «Ajustado a mano» explica que se modificó. Además, «Sugerido para N años» muestra lo del formato recomendado, no lo que está elegido en ese momento.

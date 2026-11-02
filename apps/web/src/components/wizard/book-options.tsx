@@ -145,6 +145,21 @@ export function BookOptions({
       format.readingLevel === value.readingLevel,
   );
 
+  // Si se ajusta a mano y ya no coincide con ninguno, queda marcado el más parecido (no se
+  // "borra" la elección): el aviso de abajo dice que está ajustado.
+  const score = (format: (typeof readingFormats)[number]) =>
+    Number(format.length === value.length) * 2 +
+    Number(format.textDensity === value.textDensity) +
+    Number(format.readingLevel === value.readingLevel);
+  const selectedFormat =
+    current ??
+    readingFormats.reduce<(typeof readingFormats)[number] | undefined>(
+      (best, format) => (!best || score(format) > score(best) ? format : best),
+      undefined,
+    );
+  // Lo sugerido para la edad es el formato recomendado, no lo que está elegido ahora.
+  const suggestedFormat = readingFormats.find((format) => format.recommended) ?? current;
+
   return (
     <section aria-labelledby="book-options" className="mt-10 grid gap-8 border-t pt-8">
       <h2 id="book-options" className="text-2xl font-medium">
@@ -188,7 +203,7 @@ export function BookOptions({
                   key={format.key}
                   name="reading-format"
                   value={format.key}
-                  checked={current?.key === format.key}
+                  checked={selectedFormat?.key === format.key}
                   onSelect={() => {
                     set({
                       length: format.length,
@@ -290,8 +305,8 @@ export function BookOptions({
               <span className="mt-0.5 block text-sm font-normal text-muted-foreground">
                 {t('suggested', {
                   age: age ?? 0,
-                  density: t(`densities.${value.textDensity}.name`),
-                  level: t(`levels.${value.readingLevel}.name`),
+                  density: t(`densities.${(suggestedFormat ?? value).textDensity}.name`),
+                  level: t(`levels.${(suggestedFormat ?? value).readingLevel}.name`),
                 })}
               </span>
             </span>
