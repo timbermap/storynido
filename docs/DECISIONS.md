@@ -2243,3 +2243,7 @@ Antes, cerrar sesión dejaba al visitante en la página donde estaba (a menudo u
 ## 194 — Precios de Celebraciones: dos formas de comprar
 
 Las cuatro tarjetas decían «desde» en la invitación ($9.99) y en el kit ($24.99), como si fueran compras sumables; en realidad el kit digital completo ya incluye la invitación y los cuentos de los invitados, y la invitación sola es el diseño del personaje más la pieza. Ahora la invitación dice «$9.99 · con el diseño del personaje», el kit «$24.99 · incluye invitación, decoración y cuentos», y el subtítulo explica las dos formas de comprar (invitación sola o kit completo) y que el libro del cumpleañero va aparte.
+
+## 195 — Celebraciones: se quita «Packages»
+
+Con «Cuatro regalos, una estrella» ya mostrando las cuatro piezas con su precio, la sección «Packages» repetía lo mismo. Se elimina; el ahorro por kit (si el porcentaje es mayor que 0) y la nota «precios en USD» pasan a la tarjeta del kit y al pie de la sección. El impreso por venir («Fiesta completa») deja de anunciarse en la página, porque no se vende.

@@ -141,10 +141,18 @@ export default async function EventsPage({ params }: Props) {
                   {t(`products.${product.key}.text`)}
                 </p>
                 {product.price && <p className="mt-4 font-bold">{product.price}</p>}
+                {product.key === '2' && percent > 0 && (
+                  <p className="mt-1 text-sm font-bold text-success">
+                    {t('packages.party.saving', { percent, price: money(fullMinor) })}
+                  </p>
+                )}
                 <span className="sr-only">{index + 1}</span>
               </li>
             ))}
           </ol>
+          {pricing && (
+            <p className="mt-6 text-sm font-bold text-muted-foreground">{t('packagesNote')}</p>
+          )}
         </div>
       </section>
       <LandingSteps
@@ -155,58 +163,6 @@ export default async function EventsPage({ params }: Props) {
           text: t(`steps.${key}.text`),
         }))}
       />
-      {pricing && (
-        <section className="container-page py-20 lg:py-24">
-          <div className="max-w-2xl">
-            <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
-              {t('packagesTitle')}
-            </h2>
-            <p className="mt-3 text-lg text-muted-foreground">{t('packagesSubtitle')}</p>
-          </div>
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {(
-              [
-                {
-                  key: 'invitation',
-                  price: money(pieceMinor('invitation') + pricing.designMinor),
-                  featured: false,
-                },
-                { key: 'party', price: money(partyMinor), featured: true },
-                { key: 'printed', price: null, featured: false },
-                {
-                  key: 'book',
-                  price: bookFrom ? t('priceFrom', { price: bookFrom }) : null,
-                  featured: false,
-                },
-              ] as const
-            ).map((item) => (
-              <li
-                key={item.key}
-                className={`flex flex-col rounded-xl border p-5 shadow-[var(--shadow-card)] ${
-                  item.featured ? 'border-primary bg-card ring-2 ring-primary/30' : 'bg-card'
-                } ${item.key === 'printed' ? 'border-dashed' : ''}`}
-              >
-                {(item.featured || item.key === 'printed') && (
-                  <span className="mb-2 w-fit rounded-full bg-peach px-3 py-0.5 text-xs font-bold text-[#a33f33]">
-                    {t(`packages.${item.key}.badge`)}
-                  </span>
-                )}
-                <h3 className="text-xl leading-tight font-medium">
-                  {t(`packages.${item.key}.name`)}
-                </h3>
-                {item.price && <p className="mt-2 text-2xl font-bold">{item.price}</p>}
-                {item.key === 'party' && percent > 0 && (
-                  <p className="mt-1 text-sm font-bold text-success">
-                    {t('packages.party.saving', { percent, price: money(fullMinor) })}
-                  </p>
-                )}
-                <p className="mt-3 text-muted-foreground">{t(`packages.${item.key}.text`)}</p>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-6 text-sm font-bold text-muted-foreground">{t('packagesNote')}</p>
-        </section>
-      )}
       <LandingCollections
         tone="navy"
         title={t('collectionsTitle')}
