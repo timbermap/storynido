@@ -2301,3 +2301,7 @@ La lista de proveedores de impresión llega como texto separado por comas («gel
 ## 208 — Personajes: «Editar» abre el perfil completo, con la foto
 
 En Mi cuenta → Personajes, «Editar» abría un formulario con solo nombre y edad. Ahora lleva al perfil del personaje (DECISIONS 188), donde se edita todo (nombre, edad, gustos) y se ve el dibujo aprobado, el libro hecho con él y, si subió fotos, las fotos vigentes (miniaturas; se borran a los 30 días o con «Borrar la foto»). Si el personaje se armó con rasgos y sin foto, lo dice y muestra solo el dibujo.
+
+## 209 — Una muestra que falla no gasta el cupo diario
+
+Cada intento de crear la vista previa reservaba un lugar del cupo diario (3 por persona) antes de llamar a la IA, y si la IA fallaba el lugar no se devolvía: tras tres fallos, la persona veía «Llegaste al límite… podrás crear otra mañana» sin haber recibido nunca una muestra. Ahora, si la generación falla por un error de IA, se devuelve el lugar (de la persona y de la IP). Los rechazos por límite no devuelven nada.

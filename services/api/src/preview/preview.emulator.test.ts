@@ -465,6 +465,19 @@ describe('vista previa', () => {
     expect(second.json<{ error: { code: string } }>().error.code).toBe('limit_reached');
   });
 
+  it('una muestra que falla no gasta el cupo diario: se puede volver a intentar', async () => {
+    await setAiConfig({ maxPreviewsPerUserPerDay: 1 });
+    await seedBook(providers, 'book-1');
+    const paint = vi
+      .spyOn(providers.ai().image, 'generateIllustration')
+      .mockRejectedValueOnce(new Error('cuota de Vertex agotada'));
+    const failed = await generate('book-1');
+    expect(failed.statusCode).toBe(503);
+    paint.mockRestore();
+    const retry = await generate('book-1');
+    expect(retry.statusCode).toBe(200);
+  });
+
   it('corta cuando se agotó el presupuesto diario, sin tocar el borrador', async () => {
     await setAiConfig({ dailyBudgetUsd: 1 });
     await db.doc(`aiBudget/${utcDay()}`).set({ spentUsdMicros: 1_000_000, calls: 10 });

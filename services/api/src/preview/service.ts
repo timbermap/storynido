@@ -345,6 +345,19 @@ export class PreviewService {
     });
   }
 
+  /** Devuelve el cupo diario reservado (la muestra no se llegó a crear). */
+  private async refundQuota(uid: string, ip: string): Promise<void> {
+    const day = utcDay();
+    const quotas = this.db.collection(COLLECTIONS.previewQuota);
+    const back = { count: FieldValue.increment(-1) };
+    await Promise.all([
+      quotas.doc(`${uid}_${day}`).set(back, { merge: true }),
+      quotas.doc(`ip_${hashIp(ip)}_${day}`).set(back, { merge: true }),
+    ]).catch((error: unknown) => {
+      this.log.warn({ err: error }, 'could not refund preview quota');
+    });
+  }
+
   async generate(
     uid: string,
     bookId: string,
@@ -378,6 +391,10 @@ export class PreviewService {
     } catch (error) {
       const appError = error instanceof AppError ? error : generationFailed();
       this.log.error({ err: error, bookId }, 'preview failed');
+      // Una muestra que falló no gasta el cupo diario de la persona.
+      if (!(error instanceof AppError && error.code === 'limit_reached')) {
+        await this.refundQuota(uid, ip);
+      }
       await ref.update({
         // Si había una vista previa anterior, sigue disponible.
         status: book.preview ? 'preview_ready' : 'draft',
