@@ -59,9 +59,7 @@ function Chips<T extends string>({
             key={value}
             className={cn(
               'cursor-pointer rounded-xl border-2 bg-card p-3 text-sm transition has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50',
-              selected === value
-                ? 'border-primary bg-[#f6f1fc]'
-                : 'border-border hover:border-primary/40',
+              selected === value ? 'border-navy bg-card' : 'border-border hover:border-navy/40',
             )}
           >
             <input
@@ -270,7 +268,7 @@ export function BookOptions({
                       {t(`lengths.${length}.text`)}
                     </span>
                     <span className="mt-auto flex flex-wrap gap-1.5 pt-2">
-                      <span className="rounded-full bg-secondary px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
+                      <span className="rounded-full border bg-card px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
                         {t('chipEbook')}
                       </span>
                       {printable && (

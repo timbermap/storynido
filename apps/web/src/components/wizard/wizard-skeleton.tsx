@@ -15,7 +15,7 @@ export function WizardSkeleton() {
       </p>
       <div aria-hidden="true" className="animate-pulse">
         <div className="h-5 w-40 rounded-full bg-muted" />
-        <div className="mt-4 h-2.5 rounded-full bg-secondary" />
+        <div className="mt-4 h-1.5 rounded-full bg-border" />
         <div className="mt-8 grid gap-6 rounded-xl border bg-card p-6 sm:p-8">
           <div className="h-9 w-3/4 rounded-lg bg-muted" />
           <div className="h-4 w-1/2 rounded bg-muted" />

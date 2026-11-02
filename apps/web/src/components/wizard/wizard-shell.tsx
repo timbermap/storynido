@@ -107,12 +107,12 @@ export function WizardShell({
         // Lo que ya se eligió viaja a todos los pasos; «Cambiar» vuelve al paso si ya se pasó por él.
         <p className="mb-4 flex flex-wrap items-center gap-2 text-sm">
           {choice.story && (
-            <span className="rounded-full bg-secondary px-3 py-1 font-semibold">
+            <span className="rounded-full border bg-card px-3 py-1 font-semibold">
               {t('choiceStory', { name: choice.story })}
             </span>
           )}
           {choice.lesson && (
-            <span className="rounded-full bg-mint px-3 py-1 font-semibold text-success">
+            <span className="rounded-full border bg-card px-3 py-1 font-semibold">
               {t('choiceLesson', { name: choice.lesson })}
             </span>
           )}
@@ -160,7 +160,7 @@ export function WizardShell({
       </div>
 
       <div
-        className="mt-3 h-2.5 overflow-hidden rounded-full bg-secondary"
+        className="mt-3 h-1.5 overflow-hidden rounded-full bg-border"
         role="progressbar"
         aria-valuemin={1}
         aria-valuemax={total}
@@ -168,7 +168,7 @@ export function WizardShell({
         aria-label={progressLabel}
       >
         <span
-          className="block h-full rounded-full bg-primary transition-all"
+          className="block h-full rounded-full bg-action transition-all"
           style={{ width: `${String(((position + 1) / total) * 100)}%` }}
         />
       </div>
@@ -193,10 +193,10 @@ export function WizardShell({
                   className={cn(
                     'rounded-full px-3 py-1 transition disabled:cursor-not-allowed',
                     active
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'border border-navy bg-navy text-white'
                       : reachable
-                        ? 'bg-secondary text-primary hover:bg-secondary/70'
-                        : 'bg-muted text-muted-foreground',
+                        ? 'border bg-card text-foreground hover:border-foreground/40'
+                        : 'border border-transparent bg-muted text-muted-foreground',
                   )}
                 >
                   {index + 1}. {t(`stages.${item.key}`)}

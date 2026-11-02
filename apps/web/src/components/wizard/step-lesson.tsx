@@ -12,7 +12,7 @@ import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
 
 const chipClass =
-  'flex cursor-pointer items-center rounded-full border-2 px-4 py-2 text-sm font-bold transition has-[:checked]:border-primary has-[:checked]:bg-secondary has-[:checked]:text-primary has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-45 has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50';
+  'flex cursor-pointer items-center rounded-full border-2 px-4 py-2 text-sm font-bold transition has-[:checked]:border-navy has-[:checked]:bg-navy has-[:checked]:text-white has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-45 has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50';
 
 /** Hasta 2 enseñanzas; el mensaje propio cuenta como una. */
 export function StepLesson({ nav, data }: { nav: StepNav; data: WizardData }) {

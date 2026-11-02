@@ -210,9 +210,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
                     key={character?.id ?? 'new'}
                     className={cn(
                       'inline-flex min-h-11 cursor-pointer items-center rounded-full border-2 px-4 text-sm font-semibold transition has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50',
-                      active
-                        ? 'border-primary bg-secondary'
-                        : 'border-border hover:border-primary/40',
+                      active ? 'border-navy bg-card' : 'border-border hover:border-primary/40',
                     )}
                   >
                     <input
@@ -316,7 +314,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
             {pronounOptions.map(({ value, label }) => (
               <label
                 key={value ?? 'none'}
-                className="flex cursor-pointer items-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-bold has-[:checked]:border-primary has-[:checked]:bg-secondary has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50"
+                className="flex cursor-pointer items-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-bold has-[:checked]:border-navy has-[:checked]:bg-navy has-[:checked]:text-white has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50"
               >
                 <input
                   type="radio"
@@ -345,7 +343,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
               {likes.map((item) => (
                 <li
                   key={item}
-                  className="inline-flex items-center gap-1 rounded-full bg-secondary py-1 pr-1 pl-3 text-sm font-bold text-primary"
+                  className="inline-flex items-center gap-1 rounded-full border bg-card py-1 pr-1 pl-3 text-sm font-bold text-foreground"
                 >
                   {item}
                   <button

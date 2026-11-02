@@ -124,17 +124,17 @@ export function CharacterReview({
           <>
             <ul className="flex flex-wrap gap-2 text-sm font-bold">
               {AVATAR_TRAITS.map((trait) => (
-                <li key={trait} className="rounded-full bg-secondary px-3 py-1 text-primary">
+                <li key={trait} className="rounded-full border bg-card px-3 py-1 text-foreground">
                   {tCharacter(`options.${trait}.${character.traits[trait]}`)}
                 </li>
               ))}
               {character.traits.glasses && (
-                <li className="rounded-full bg-secondary px-3 py-1 text-primary">
+                <li className="rounded-full border bg-card px-3 py-1 text-foreground">
                   {tCharacter('glasses')}
                 </li>
               )}
               {character.traits.distinctive && (
-                <li className="rounded-full bg-secondary px-3 py-1 text-primary">
+                <li className="rounded-full border bg-card px-3 py-1 text-foreground">
                   {character.traits.distinctive}
                 </li>
               )}
@@ -188,7 +188,7 @@ export function CharacterReview({
                       key={trait}
                       className={cn(
                         'inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-2 bg-card px-4 text-sm font-bold has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50',
-                        checked ? 'border-primary bg-[#f6f1fc]' : 'border-border',
+                        checked ? 'border-navy bg-card' : 'border-border',
                       )}
                     >
                       <input

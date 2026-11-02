@@ -15,8 +15,8 @@ import { cn } from '@/lib/utils';
 /** Color de contexto de cada línea (el mismo de su landing). */
 export const LINE_TONE = {
   families: 'bg-mint text-success',
-  events: 'bg-peach text-[#a33f33]',
-  professionals: 'bg-secondary text-primary',
+  events: 'bg-peach text-navy',
+  professionals: 'bg-secondary text-navy',
 } as const;
 
 /** Borradores para retomar o borrar (en el creador y en Mi cuenta). */
