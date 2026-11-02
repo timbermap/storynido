@@ -598,7 +598,7 @@
       "of": "{name}'s story",
       "updated": "Edited on {date}",
       "delete": "Delete {title}",
-      "deleteConfirm": "Delete this story? The sample and its illustrations are removed, and this can't be undone.",
+      "deleteConfirm": "Delete this story? The sample and its illustrations are removed, and this can't be undone. The character stays saved under “Characters”.",
       "deleteYes": "Yes, delete",
       "deleteNo": "Cancel",
       "deleteFailed": "We couldn't delete it. If it already has an order it can't be deleted; otherwise, try again."

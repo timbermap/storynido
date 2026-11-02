@@ -598,7 +598,7 @@
       "of": "El cuento de {name}",
       "updated": "Editado el {date}",
       "delete": "Borrar {title}",
-      "deleteConfirm": "¿Borrar este cuento? Se eliminan la muestra y sus ilustraciones, y no se puede deshacer.",
+      "deleteConfirm": "¿Borrar este cuento? Se eliminan la muestra y sus ilustraciones, y no se puede deshacer. El personaje sigue guardado en «Personajes».",
       "deleteYes": "Sí, borrar",
       "deleteNo": "Cancelar",
       "deleteFailed": "No pudimos borrarlo. Si ya tiene un pedido, no se puede borrar; si no, intenta de nuevo."

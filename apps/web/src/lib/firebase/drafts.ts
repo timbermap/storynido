@@ -345,8 +345,17 @@ export async function listSavedCharacters(db: Firestore, uid: string): Promise<S
         : 0;
     if (!current || time(book.updatedAt) > time(current.updatedAt)) latest.set(book.childId, book);
   }
+  // Perfiles repetidos (mismo nombre y edad, de borradores que no reutilizaron al personaje): se
+  // muestra uno solo, el que tiene foto o rasgos y, si no, el del libro más reciente.
+  const seen = new Map<string, (typeof children.docs)[number]>();
+  for (const child of children.docs) {
+    const key = `${String(child.get('name')).trim().toLowerCase()}|${String(child.get('age'))}`;
+    const kept = seen.get(key);
+    const rank = (id: string) => (latest.get(id) ? 1 : 0);
+    if (!kept || rank(child.id) > rank(kept.id)) seen.set(key, child);
+  }
   return Promise.all(
-    children.docs.map(async (child) => {
+    [...seen.values()].map(async (child) => {
       const book = latest.get(child.id);
       // Las fotos se borran a los 30 días: solo se reutilizan las que siguen válidas.
       const photoIds = book?.photoIds.length

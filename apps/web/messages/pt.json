@@ -598,7 +598,7 @@
       "of": "A história de {name}",
       "updated": "Editado em {date}",
       "delete": "Excluir {title}",
-      "deleteConfirm": "Excluir esta história? A amostra e as ilustrações são removidas, e não dá para desfazer.",
+      "deleteConfirm": "Excluir esta história? A amostra e as ilustrações são removidas, e não dá para desfazer. O personagem continua salvo em “Personagens”.",
       "deleteYes": "Sim, excluir",
       "deleteNo": "Cancelar",
       "deleteFailed": "Não conseguimos excluir. Se já tem um pedido, não pode ser excluída; se não, tente de novo."
