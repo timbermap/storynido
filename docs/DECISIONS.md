@@ -2309,3 +2309,12 @@ Cada intento de crear la vista previa reservaba un lugar del cupo diario (3 por 
 ## 210 — El motivo real de una falla de IA queda en Auditoría
 
 Cuando falla la creación de la muestra, la persona ve un aviso genérico y el motivo real (cuota o bloqueo de Vertex, modelo no disponible, error del proveedor) solo quedaba en los logs de Cloud Run. Ahora se guarda una entrada `ai.error` en la auditoría (libro, dónde falló, tipo y mensaje de hasta 500 caracteres), visible en Admin → Auditoría. No incluye datos del niño.
+
+## 211 — Muestra fallida: causas halladas en los logs de staging y arreglos
+
+Con acceso de lectura a los logs de staging se vieron tres causas distintas detrás del mismo aviso genérico:
+
+1. **Foto bloqueada por seguridad** al describir al personaje (`[vertex] ficha del personaje: bloqueado por seguridad`, 2 veces): el modelo se niega con algunas fotos de menores. Sin arreglo en el código; el modo «sin foto» (rasgos) lo evita.
+2. **Nombre con tildes cambiadas**: la persona escribió «Angelica», el modelo escribió «Angélica» dos veces y la muestra fallaba con «No logramos escribir el nombre tal cual». Ahora, si la única diferencia son las tildes, el texto se corrige al nombre tal cual lo escribió la persona (`repairNameAccents`); otras variantes siguen siendo un problema.
+3. **Memoria de la API**: una instancia superó los 512 MiB (516 MiB) mientras procesaba imágenes. La API pasa a 1 GiB en Terraform (hay que aplicarlo).
+   Además, los intentos fallidos agotaban el cupo diario (DECISIONS 209) y daban «Llegaste al límite»: se reinició el cupo de staging y los fallos ya lo devuelven.

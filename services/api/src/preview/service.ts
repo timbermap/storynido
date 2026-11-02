@@ -7,6 +7,7 @@ import {
   CHARACTER_REFERENCE_SCENE,
   editorialPlan,
   nameIssues,
+  repairNameAccents,
   traitsKey,
   type CharacterTraits,
   type MustKeepTrait,
@@ -595,7 +596,13 @@ export class PreviewService {
             'review',
             await ai.text.reviewStory(draft, { ...request, prompt }),
           );
-          return { title: draft.title, pages: review.pages, approved: review.approved };
+          // Si el modelo solo cambió las tildes del nombre, se deja como lo escribió la persona.
+          const fix = (text: string) => repairNameAccents(text, requiredNames);
+          return {
+            title: fix(draft.title),
+            pages: review.pages.map((page) => ({ ...page, text: fix(page.text) })),
+            approved: review.approved,
+          };
         };
         // Densidad y nombres exactos: si algo no cumple, 1 reescritura.
         const problems = (draft: { title: string; pages: { text: string }[] }) => ({

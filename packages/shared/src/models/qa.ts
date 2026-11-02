@@ -76,6 +76,25 @@ function distance(a: string, b: string): number {
   return row[b.length] ?? 0;
 }
 
+/**
+ * Corrige solo las diferencias de tildes del nombre (el modelo escribe «Angélica» cuando la
+ * persona escribió «Angelica»): el nombre queda tal cual lo escribió quien creó el cuento. No toca
+ * otras variantes (una letra distinta u otro personaje), que siguen siendo un problema.
+ */
+export function repairNameAccents(text: string, names: readonly string[]): string {
+  let result = text;
+  for (const name of names.filter((item) => item.trim().length > 0)) {
+    const first = name.trim().split(/\s+/)[0] ?? name;
+    if (first.length < 3) continue;
+    result = result.replace(/[\p{L}\p{M}'’-]+/gu, (word) =>
+      word !== first && word.toLowerCase() !== first.toLowerCase() && strip(word) === strip(first)
+        ? first
+        : word,
+    );
+  }
+  return result;
+}
+
 export interface NameIssue {
   name: string;
   problem: 'missing' | 'misspelled';

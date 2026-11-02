@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { describeTraits, traitsKey, type CharacterTraits } from './character';
-import { nameIssues } from './qa';
+import { nameIssues, repairNameAccents } from './qa';
 
 describe('nombre exacto', () => {
   it('acepta el nombre tal cual, con tildes', () => {
@@ -56,6 +56,21 @@ describe('rasgos confirmados', () => {
     expect(traitsKey(traits, ['glasses'])).not.toBe(traitsKey(traits, []));
     expect(traitsKey(traits, ['glasses'])).not.toBe(
       traitsKey({ ...traits, glasses: false }, ['glasses']),
+    );
+  });
+});
+
+describe('repairNameAccents', () => {
+  it('deja el nombre como lo escribió la persona cuando el modelo solo cambió las tildes', () => {
+    expect(repairNameAccents('Angélica miró. Y Angélica sonrió.', ['Angelica'])).toBe(
+      'Angelica miró. Y Angelica sonrió.',
+    );
+    expect(repairNameAccents('Mia saltó.', ['Mía'])).toBe('Mía saltó.');
+  });
+
+  it('no toca otras variantes ni otros personajes', () => {
+    expect(repairNameAccents('Martona corrió con Martín.', ['Martina'])).toBe(
+      'Martona corrió con Martín.',
     );
   });
 });
