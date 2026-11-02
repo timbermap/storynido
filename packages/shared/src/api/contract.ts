@@ -176,6 +176,8 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
       state: z.string().nullable(),
       postalCode: z.string(),
       country: z.string(),
+      /** ¿Tiene teléfono? (la imprenta lo exige; el número no se muestra en la lista). */
+      hasPhone: z.boolean().optional(),
     })
     .nullable(),
   payment: z.object({ provider: z.string(), paymentId: z.string().nullable() }),
@@ -1504,6 +1506,27 @@ export const apiRoutes = {
     params: z.object({ orderId: z.string().min(1) }),
     body: z.object({ fromStep: pipelineStepSchema.optional() }),
     response: pipelineRequestResponseSchema,
+  },
+  adminSetShippingContact: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/shipping-contact',
+    access: 'admin',
+    summary:
+      'Carga el teléfono (y, si hace falta, el documento fiscal) de quien recibe un pedido que la imprenta no aceptó; queda en auditoría',
+    params: z.object({ orderId: z.string().min(1) }),
+    body: z.object({
+      phone: z
+        .string()
+        .trim()
+        .regex(/^[+\d][\d\s()-]{6,}$/),
+      taxId: z
+        .string()
+        .trim()
+        .regex(/^[A-Za-z0-9.\-/]{5,20}$/)
+        .nullable()
+        .optional(),
+    }),
+    response: pipelineRequestResponseSchema.pick({ accepted: true }),
   },
   adminPreviewBook: {
     method: 'POST',

@@ -131,6 +131,15 @@ function OrderDetail({ id }: { id: string }) {
                 (order.print?.trackingNumber ?? '—')
               )}
             </Row>
+            <Row label="Teléfono">
+              {order.shipping?.hasPhone ? (
+                'Cargado'
+              ) : order.shipping ? (
+                <span className="text-destructive">Falta (la imprenta lo exige)</span>
+              ) : (
+                '—'
+              )}
+            </Row>
             <Row label="Destino">
               {order.shipping
                 ? `${order.shipping.name}, ${order.shipping.city}${order.shipping.state ? `, ${order.shipping.state}` : ''} ${order.shipping.postalCode}, ${order.shipping.country}`
@@ -201,6 +210,32 @@ function OrderDetail({ id }: { id: string }) {
               Aprobar páginas
             </Button>
           )}
+          {order.shipping &&
+            !order.shipping.hasPhone &&
+            (order.status === 'qa_failed' || order.status === 'ready') && (
+              <Button
+                variant="outline"
+                disabled={busy}
+                onClick={() => {
+                  const phone = window.prompt(
+                    'Teléfono de quien recibe, con código de país (ej. +54 11 5555 1234):',
+                  );
+                  if (!phone || phone.trim().length < 7) return;
+                  void act(
+                    `¿Cargar el teléfono ${phone.trim()} en este pedido? Después reintenta la entrega.`,
+                    async () => {
+                      await api('adminSetShippingContact', {
+                        params,
+                        body: { phone: phone.trim() },
+                      });
+                      return 'Teléfono cargado. Ahora reintenta desde «deliver».';
+                    },
+                  );
+                }}
+              >
+                Cargar teléfono
+              </Button>
+            )}
           {order.status === 'qa_failed' && (
             <>
               <select

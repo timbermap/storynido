@@ -281,6 +281,7 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
             state: (address.state as string | null | undefined) ?? null,
             postalCode: String(address.postalCode),
             country: String(address.country),
+            hasPhone: typeof address.phone === 'string' && address.phone.trim().length > 0,
           }
         : null,
       payment: {
@@ -310,6 +311,42 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
       })),
       pages: pages.sort((a, b) => a.index - b.index),
     };
+  });
+
+  // Un pedido que la imprenta rechazó por un dato de contacto que faltaba (el teléfono): se completa
+  // acá y se reintenta la entrega. Solo en revisión o listo (antes de enviarlo), y queda auditado
+  // sin guardar el número en la auditoría.
+  addRoute(app, apiRoutes.adminSetShippingContact, {}, async (request) => {
+    const { orderId } = request.params as { orderId: string };
+    const { phone, taxId } = request.body as { phone: string; taxId?: string | null };
+    const doc = await load(orderId);
+    const status = doc.get('status') as OrderStatus;
+    if (status !== 'qa_failed' && status !== 'ready') {
+      throw new AppError(409, 'bad_request', `El pedido está en "${status}".`);
+    }
+    if (!doc.get('shippingAddress')) {
+      throw new AppError(409, 'bad_request', 'El pedido no tiene dirección de envío.');
+    }
+    const before = (doc.get('shippingAddress.phone') as string | null | undefined) ?? null;
+    await auditedWrite(
+      db,
+      request.user,
+      {
+        action: 'order.set_shipping_contact',
+        entity: COLLECTIONS.orders,
+        entityId: orderId,
+        before: { phoneSet: Boolean(before?.trim()) },
+        after: { phoneSet: true, taxIdChanged: taxId !== undefined },
+      },
+      (batch) => {
+        batch.update(orders.doc(orderId), {
+          'shippingAddress.phone': phone,
+          ...(taxId !== undefined ? { 'shippingAddress.taxId': taxId } : {}),
+          updatedAt: new Date(),
+        });
+      },
+    );
+    return { accepted: true as const };
   });
 
   addRoute(app, apiRoutes.adminApproveOrder, {}, async (request) => {

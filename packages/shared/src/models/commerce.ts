@@ -332,13 +332,12 @@ export function addressProblems(address: Address): (keyof Address)[] {
   if (address.taxId && !/^[A-Za-z0-9.\-/]{5,20}$/.test(address.taxId.trim())) {
     problems.push('taxId');
   }
+  // El teléfono lo pide la imprenta en todos los países (Cloudprinter rechaza el pedido sin él).
+  if (!/^[+\d][\d\s()-]{6,}$/.test((address.phone ?? '').trim())) problems.push('phone');
   const rules = ADDRESS_RULES[address.country];
   if (!rules) return problems;
   if (!rules.postalCode.test(address.postalCode.trim())) problems.push('postalCode');
   if (!rules.state.test((address.state ?? '').trim().toUpperCase())) problems.push('state');
-  if (rules.phone && !/^[+\d][\d\s()-]{6,}$/.test((address.phone ?? '').trim())) {
-    problems.push('phone');
-  }
   return problems;
 }
 

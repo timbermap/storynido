@@ -2364,3 +2364,10 @@ De la auditoría de producto y conversión (23 acciones priorizadas) se aplican 
 - **Envío estimado antes de la dirección:** `GET /v1/catalog/shipping-estimate` cotiza una dirección de ejemplo del país (AR, MX, US, ES, CL, CO, PE, BR, UY) con las mismas imprentas y lo guarda 12 horas; el checkout muestra «Envío estimado: unos US$ X, total unos US$ Y, llega en N a M días hábiles; se confirma con tu dirección». Es una referencia: el precio exacto sigue saliendo con la dirección real.
 - **Lulu y los datos del destinatario:** el teléfono ya es obligatorio en el pago y el documento fiscal sigue siendo opcional (con él se puede usar una imprenta más económica). Cuando Lulu no cotiza por falta de esos datos, el pedido guarda un motivo legible en lugar del error crudo; el resto de las imprentas cotiza igual.
 - **Pasada en móvil:** solo las páginas públicas se revisaron a 390 px de ancho; el creador, la muestra y el pago con sesión iniciada siguen sin revisar en móvil.
+
+## 218 — Teléfono obligatorio y carga desde el admin; ilustraciones y maqueta en el pedido de prueba
+
+- **Teléfono obligatorio en todos los países:** Cloudprinter rechazó un pedido de Argentina por falta de teléfono («required parameter phone is missing»). El pago ya lo pedía pero lo dejaba vacío; ahora la validación (`addressProblems`) lo exige en cualquier país, en la web y en la API.
+- **Corregirlo en un pedido ya hecho:** en el admin, un pedido en revisión o listo sin teléfono muestra «Teléfono: Falta» y el botón «Cargar teléfono» (`POST /v1/admin/orders/:id/shipping-contact`, solo con el pedido en `qa_failed` o `ready`); queda en la auditoría solo como «teléfono cargado», sin el número. Después se reintenta la entrega.
+- **Personas secundarias:** el plan de la historia fija género y aspecto de quienes se repiten (el profesor, un compañero) y todas las páginas los dibujan igual.
+- **Worker con 4 GiB y 2 pedidos a la vez:** la maqueta del impreso (30 ilustraciones a 2K) superaba los 2 GiB. Aplicado en staging con `gcloud run services update` (el valor de Terraform ya es el mismo).

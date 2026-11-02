@@ -30,3 +30,23 @@ describe('documento fiscal del destinatario', () => {
     expect(addressProblems({ ...base, taxId: 'mi casa; drop' })).toContain('taxId');
   });
 });
+
+describe('teléfono de quien recibe', () => {
+  it('es obligatorio en todos los países: la imprenta lo exige', () => {
+    expect(addressProblems({ ...base, country: 'AR', state: null, phone: null })).toContain(
+      'phone',
+    );
+    expect(
+      addressProblems({ ...base, country: 'US', state: 'TX', postalCode: '78701', phone: '' }),
+    ).toContain('phone');
+    expect(
+      addressProblems({
+        ...base,
+        country: 'AR',
+        state: null,
+        postalCode: 'C1425',
+        phone: '+54 11 5555 1234',
+      }),
+    ).toEqual([]);
+  });
+});

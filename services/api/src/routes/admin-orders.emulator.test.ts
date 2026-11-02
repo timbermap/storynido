@@ -62,8 +62,10 @@ describe('admin: operación de pedidos', () => {
     });
   const get = (url: string, token = ADMIN) =>
     app.inject({ method: 'GET', url, headers: auth(token) });
-  const post = (url: string, token = ADMIN) =>
-    app.inject({ method: 'POST', url, headers: auth(token) });
+  const post = (url: string, bodyOrToken: string | Record<string, unknown> = ADMIN) =>
+    typeof bodyOrToken === 'string'
+      ? app.inject({ method: 'POST', url, headers: auth(bodyOrToken) })
+      : app.inject({ method: 'POST', url, headers: auth(ADMIN), payload: bodyOrToken });
 
   it('busca por estado, formato, cliente (email) o número de pedido', async () => {
     await order('o1', {});
@@ -202,5 +204,41 @@ describe('admin: operación de pedidos', () => {
     expect(open.reference?.character).toBeTruthy();
     const closed = (await get('/v1/admin/orders/o2')).json<{ reference: unknown }>();
     expect(closed.reference).toBeNull();
+  });
+
+  it('carga el teléfono de quien recibe en un pedido que la imprenta rechazó; queda auditado sin el número', async () => {
+    await order('o1', {
+      status: 'qa_failed',
+      shippingAddress: {
+        name: 'Ana',
+        line1: 'Calle 1',
+        line2: null,
+        city: 'Buenos Aires',
+        state: null,
+        postalCode: 'C1425',
+        country: 'AR',
+        phone: null,
+      },
+    });
+    await order('o2', { status: 'paid' });
+    const detail = async () =>
+      (await get('/v1/admin/orders/o1')).json<{ shipping: { hasPhone: boolean } }>().shipping;
+    expect((await detail()).hasPhone).toBe(false);
+    expect(
+      (await post('/v1/admin/orders/o2/shipping-contact', { phone: '+54 11 5555 1234' }))
+        .statusCode,
+    ).toBe(409);
+    expect((await post('/v1/admin/orders/o1/shipping-contact', { phone: 'abc' })).statusCode).toBe(
+      400,
+    );
+    const ok = await post('/v1/admin/orders/o1/shipping-contact', { phone: '+54 11 5555 1234' });
+    expect(ok.statusCode).toBe(200);
+    expect((await detail()).hasPhone).toBe(true);
+    const audit = await db
+      .collection(COLLECTIONS.auditLog)
+      .where('action', '==', 'order.set_shipping_contact')
+      .get();
+    expect(audit.docs).toHaveLength(1);
+    expect(JSON.stringify(audit.docs[0]?.data())).not.toContain('5555');
   });
 });
