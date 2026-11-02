@@ -15,9 +15,10 @@ async function acceptCookies(page: Page): Promise<void> {
 /** En el celular la barra fija de abajo tapa lo que queda al borde: se centra el elemento antes del clic. */
 async function clickCentered(target: Locator): Promise<void> {
   await target.evaluate((element) => {
-    element.scrollIntoView({ block: 'center' });
+    element.scrollIntoView({ block: 'center', behavior: 'instant' });
   });
-  await target.click();
+  // Ya centrado y sin animación: se hace clic sin que Playwright vuelva a mover la página.
+  await target.click({ force: true });
 }
 
 /** Rutas por idioma (i18n/routing.ts) y la línea a la que lleva el botón principal. */

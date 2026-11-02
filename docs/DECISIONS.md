@@ -2247,3 +2247,7 @@ Las cuatro tarjetas decían «desde» en la invitación ($9.99) y en el kit ($24
 ## 195 — Celebraciones: se quita «Packages»
 
 Con «Cuatro regalos, una estrella» ya mostrando las cuatro piezas con su precio, la sección «Packages» repetía lo mismo. Se elimina; el ahorro por kit (si el porcentaje es mayor que 0) y la nota «precios en USD» pasan a la tarjeta del kit y al pie de la sección. El impreso por venir («Fiesta completa») deja de anunciarse en la página, porque no se vende.
+
+## 196 — Revisión: el texto de cada página junto a su ilustración
+
+En la revisión manual, cada miniatura muestra ahora el texto de la página (la portada, el título), para detectar errores de texto y de imagen a la vez. Queda pendiente la vista previa del libro maquetado completo (tapa incluida), que hoy solo existe después de `quality_check`.

@@ -311,7 +311,8 @@ function OrderDetail({ id }: { id: string }) {
         <Card className="mt-4">
           <h2 className="mb-1 font-semibold">Ilustraciones</h2>
           <p className="mb-3 text-xs text-muted-foreground">
-            Solo para revisar este pedido. Los enlaces vencen en 15 minutos.
+            Imagen y texto de cada página, para revisar este pedido. Los enlaces vencen en 15
+            minutos.
           </p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {order.pages.map((page) => (
@@ -329,7 +330,10 @@ function OrderDetail({ id }: { id: string }) {
                   </div>
                 )}
                 <figcaption className="mt-1 text-muted-foreground">
-                  {page.index === 0 ? 'Portada' : `Página ${String(page.index)}`}
+                  <span className="font-semibold">
+                    {page.index === 0 ? 'Portada' : `Página ${String(page.index)}`}
+                  </span>
+                  {page.text && <span className="mt-0.5 block text-foreground">{page.text}</span>}
                 </figcaption>
               </figure>
             ))}

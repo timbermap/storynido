@@ -180,13 +180,19 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
         .collection(COLLECTIONS.illustrationTasks)
         .where('generation', '==', generation)
         .get();
+      const book = (doc.get('snapshot') ?? {}) as {
+        title?: string;
+        pages?: { text?: string }[];
+      };
       const storage = providers.storage();
       pages = await Promise.all(
         tasks.docs.map(async (task) => {
           const imagePath = task.get('imagePath') as string | null;
           const done = task.get('status') === 'succeeded' && imagePath;
+          const index = Number(task.get('index'));
           return {
-            index: Number(task.get('index')),
+            index,
+            text: (index === 0 ? book.title : book.pages?.[index - 1]?.text) ?? null,
             url: done
               ? (await storage.signedDownloadUrl({ bucket: 'assets', path: imagePath }, 900)).url
               : null,

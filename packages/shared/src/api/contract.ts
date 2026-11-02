@@ -208,6 +208,8 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
       index: z.number(),
       url: z.string().nullable(),
       error: z.string().nullable().optional(),
+      /** Lo que dice la página (la portada lleva el título), para revisar texto e imagen juntos. */
+      text: z.string().nullable().optional(),
     }),
   ),
 });

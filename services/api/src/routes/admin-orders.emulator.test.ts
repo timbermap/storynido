@@ -150,6 +150,7 @@ describe('admin: operación de pedidos', () => {
     await order('o1', {
       status: 'qa_failed',
       pipeline: { generation: 0, failedStep: 'generate_illustrations' },
+      snapshot: { title: 'Aggi', pages: [{ text: 'Hola' }, { text: 'Chau' }] },
     });
     const tasks = db.collection('orders/o1/steps/generate_illustrations/pages');
     await tasks
@@ -163,12 +164,13 @@ describe('admin: operación de pedidos', () => {
       error: 'La ilustración 2 no pasó la moderación.',
     });
     const detail = (await get('/v1/admin/orders/o1')).json<{
-      pages: { index: number; url: string | null; error: string | null }[];
+      pages: { index: number; url: string | null; error: string | null; text: string | null }[];
     }>();
     expect(detail.pages.map((page) => [page.index, page.url !== null])).toEqual([
       [1, true],
       [2, false],
     ]);
     expect(detail.pages[1]?.error).toContain('moderación');
+    expect(detail.pages.map((page) => page.text)).toEqual(['Hola', 'Chau']);
   });
 });
