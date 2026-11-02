@@ -349,22 +349,30 @@ export function SignedInHome({
               src: '/images/secciones/personaje.webp',
               alt: t('how.alt1'),
               contain: true,
+              cover: false,
             },
             {
               key: 'step2',
-              src: sampleStory?.coverImage ?? '',
+              src: '',
               alt: t('how.alt2'),
               contain: false,
+              cover: true,
             },
             {
               key: 'step3',
               src: '/images/heroes/libro-impreso.webp',
               alt: t('how.alt3'),
               contain: false,
+              cover: false,
             },
           ].map((step) => (
             <li key={step.key} className="grid gap-3">
               <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl bg-[#e2f2ec]">
+                {step.cover && sampleStory && (
+                  <span className="absolute inset-y-3 left-1/2 block aspect-[396/524] -translate-x-1/2 overflow-hidden rounded-lg">
+                    <StoryCover story={sampleStory} name={name} sizes="240px" />
+                  </span>
+                )}
                 {step.src && (
                   <Image
                     src={step.src}
