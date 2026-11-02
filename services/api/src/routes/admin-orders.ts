@@ -175,6 +175,8 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
       const generation = Number(doc.get('pipeline.generation') ?? 0);
       const tasks = await orders
         .doc(orderId)
+        .collection(COLLECTIONS.orderSteps)
+        .doc('generate_illustrations')
         .collection(COLLECTIONS.illustrationTasks)
         .where('generation', '==', generation)
         .get();

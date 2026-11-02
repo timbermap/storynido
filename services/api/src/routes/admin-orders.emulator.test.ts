@@ -151,7 +151,7 @@ describe('admin: operación de pedidos', () => {
       status: 'qa_failed',
       pipeline: { generation: 0, failedStep: 'generate_illustrations' },
     });
-    const tasks = db.collection('orders/o1/pages');
+    const tasks = db.collection('orders/o1/steps/generate_illustrations/pages');
     await tasks
       .doc('1')
       .set({ index: 1, generation: 0, status: 'succeeded', imagePath: 'x/1.webp' });

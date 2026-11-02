@@ -321,6 +321,16 @@ export async function logOut(): Promise<void> {
   await signOut(getFirebaseAuth());
 }
 
+/**
+ * Cierra la sesión y vuelve a la portada. Navegación completa: las páginas privadas, al ver que no
+ * hay sesión, se mandan solas a iniciar sesión, y una navegación del router llegaría tarde.
+ */
+export async function logOutToHome(locale: string): Promise<void> {
+  await logOut();
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- navegación completa a propósito
+  window.location.assign(`/${locale}`);
+}
+
 export type AuthErrorKey =
   | 'popupClosed'
   | 'popupBlocked'

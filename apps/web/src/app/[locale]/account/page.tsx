@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 import { ApiError } from '@storynido/shared';
@@ -13,7 +13,7 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { logOut } from '@/lib/firebase/auth-actions';
+import { logOutToHome } from '@/lib/firebase/auth-actions';
 
 /**
  * Mi cuenta: ajustes (datos, preferencias, perfiles de los chicos y borrado). Los cuentos y los
@@ -23,6 +23,7 @@ export default function AccountPage() {
   const t = useTranslations('Account');
   const { user, signedIn, role, loading } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
   const [apiCheck, setApiCheck] = useState<string>(t('verifying'));
   const staff = role === 'admin' || role === 'superadmin';
   // Al borrar la cuenta se cierra la sesión a propósito: no hay que mandar a iniciar sesión.
@@ -97,9 +98,8 @@ export default function AccountPage() {
       <Button
         variant="outline"
         onClick={() => {
-          void logOut().then(() => {
-            router.replace('/');
-          });
+          leaving.current = true;
+          void logOutToHome(locale);
         }}
       >
         {t('signOut')}

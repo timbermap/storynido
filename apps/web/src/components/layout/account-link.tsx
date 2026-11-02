@@ -9,12 +9,12 @@ import {
   ShoppingBag,
   Settings,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { buttonVariants } from '@/components/ui/button';
-import { Link, useRouter } from '@/i18n/navigation';
-import { logOut } from '@/lib/firebase/auth-actions';
+import { Link } from '@/i18n/navigation';
+import { logOutToHome } from '@/lib/firebase/auth-actions';
 
 import { NavMenu, NavMenuItem } from './nav-menu';
 
@@ -32,7 +32,7 @@ function initials(name: string | null, email: string | null): string {
 export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' }) {
   const t = useTranslations('Nav');
   const { user, signedIn, loading, role } = useAuth();
-  const router = useRouter();
+  const locale = useLocale();
 
   // Mientras se lee la sesión, un lugar vacío del mismo tamaño: sin "Iniciar sesión" que
   // después cambia al avatar.
@@ -102,9 +102,7 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
     <button
       type="button"
       onClick={() => {
-        void logOut().then(() => {
-          router.replace('/');
-        });
+        void logOutToHome(locale);
       }}
       className="group block w-full rounded-xl text-left"
     >
