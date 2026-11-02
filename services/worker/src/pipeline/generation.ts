@@ -413,6 +413,18 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         );
         return cost;
       }
+      // Qué categoría la rechazó (solo códigos, sin imagen ni texto): sin esto no se sabe si fue un
+      // problema real de la escena o el bloqueo de seguridad del propio moderador.
+      ctx.log.warn(
+        {
+          orderId: ctx.order.id,
+          index,
+          attempt: attempt + 1,
+          level: escalation,
+          categories: verdict.categories.join(',').slice(0, 120),
+        },
+        'illustration rejected by moderation',
+      );
       await qaEvent(ctx, 'moderation_image', {
         pageIndex: index,
         attempt: attempt + 1,
