@@ -44,7 +44,11 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
     return (
       <Link
         href="/login"
-        className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'px-1.5 sm:px-3' })}
+        className={buttonVariants({
+          variant: 'ghost',
+          size: 'sm',
+          className: 'px-1.5 text-[0.8125rem] sm:px-3 sm:text-sm',
+        })}
       >
         {t('signIn')}
       </Link>
