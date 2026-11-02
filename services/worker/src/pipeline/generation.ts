@@ -217,8 +217,9 @@ function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: s
 const ESCALATION = [
   '',
   ' IMPORTANT: draw NO readable text, letters or numbers anywhere (leave calendars, clocks, signs, labels, posters and book covers blank or abstract); keep hands simple and natural, partly hidden or in pockets if needed; faces calm and well formed.',
-  ' SIMPLIFY: one calm, clear composition with the protagonist as the only person, a plain uncluttered background, no small objects with writing, no crowds, hands simple and partly hidden.',
-  ' FINAL FALLBACK: show only the protagonist, friendly and calm, in a simple setting that matches the place of the scene; no other people, no small props, no text of any kind, no complicated background.',
+  // La moderación rechaza cualquier palabra, letra o número legible: se sacan los objetos que suelen llevarlos.
+  ' NO TEXT-BEARING OBJECTS: do not draw signs, posters, banners, blackboards or whiteboards, screens, maps, labels, packaging with writing, books or papers with visible writing, lockers or doors with numbers, clocks, calendars, license plates, or clothing with prints or lettering. Use plain blank surfaces, or leave those objects out entirely. The protagonist is the only person, on a plain uncluttered background, hands simple and partly hidden.',
+  ' FINAL FALLBACK: a medium shot of only the protagonist, friendly and calm, in a very simple setting that suggests the place (a few soft shapes), with absolutely no signs, posters, boards, screens, papers, numbers, letters or small props, and no other people.',
 ] as const;
 
 function escalateScene(scene: string, level: number): string {

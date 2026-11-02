@@ -843,7 +843,7 @@ describe('generación del libro (fase 09)', () => {
     expect((await order()).status).toBe('ready');
     const prompts = generate.mock.calls.map((call) => call[0].prompt);
     // Cada reintento pide algo más simple que el anterior.
-    expect(prompts.some((prompt) => prompt.includes('SIMPLIFY'))).toBe(true);
+    expect(prompts.some((prompt) => prompt.includes('NO TEXT-BEARING OBJECTS'))).toBe(true);
     expect(prompts.some((prompt) => prompt.includes('NO readable text'))).toBe(true);
   });
 
