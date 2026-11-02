@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { buttonVariants } from '@/components/ui/button';
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { logOut } from '@/lib/firebase/auth-actions';
 
 import { NavMenu, NavMenuItem } from './nav-menu';
@@ -32,6 +32,7 @@ function initials(name: string | null, email: string | null): string {
 export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' }) {
   const t = useTranslations('Nav');
   const { user, signedIn, loading, role } = useAuth();
+  const router = useRouter();
 
   // Mientras se lee la sesión, un lugar vacío del mismo tamaño: sin "Iniciar sesión" que
   // después cambia al avatar.
@@ -100,7 +101,11 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
   const signOut = (
     <button
       type="button"
-      onClick={() => void logOut()}
+      onClick={() => {
+        void logOut().then(() => {
+          router.replace('/');
+        });
+      }}
       className="group block w-full rounded-xl text-left"
     >
       <NavMenuItem title={t('signOut')} icon={<LogOut className="size-4" />} />

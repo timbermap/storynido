@@ -2235,3 +2235,7 @@ Las tarjetas de colecciones/temas (Celebraciones, Profesionales) se apilaban en 
 ## 192 — Revisión de pedidos con una página fallida
 
 Un pedido con la página 18 rechazada por moderación quedaba en `qa_failed` sin miniaturas: el admin las leía del resultado del paso, que no existe si el paso falla. Ahora las lee de las tareas por página de la generación vigente: muestra las buenas y marca la fallida con su motivo. «Reintentar» desde `generate_illustrations` ya repinta solo las páginas fallidas; para que no repita la imagen rechazada, la semilla de cada página es distinta en cada pintada (antes era fija: `índice + 1`).
+
+## 193 — Cerrar sesión lleva a la landing
+
+Antes, cerrar sesión dejaba al visitante en la página donde estaba (a menudo una privada de Mis cuentos o Mi cuenta, que lo mandaba a iniciar sesión). Ahora el menú de cuenta y el botón de Mi cuenta lo llevan a la portada del idioma actual.

@@ -94,7 +94,14 @@ export default function AccountPage() {
       </p>
       <LanguagePreference uid={user.uid} />
       <ChildrenList uid={user.uid} />
-      <Button variant="outline" onClick={() => void logOut()}>
+      <Button
+        variant="outline"
+        onClick={() => {
+          void logOut().then(() => {
+            router.replace('/');
+          });
+        }}
+      >
         {t('signOut')}
       </Button>
       <DeleteAccount
