@@ -2255,3 +2255,7 @@ En la revisión manual, cada miniatura muestra ahora el texto de la página (la 
 ## 197 — Admin: menú por áreas y antigüedad en la cola de revisión
 
 Primeras dos etapas de la auditoría del admin: el menú lateral pasa de una lista plana de 24 secciones a siete áreas (Producción, Logística, Atención, Marketing, Administración, Contenido, Sistema), con Resumen arriba y las mismas pantallas y rutas; la búsqueda sigue filtrando y mantiene los grupos. La cola de Revisión manual muestra cuánto lleva esperando cada pedido (en rojo desde las 48 h). «Calidad y canales» queda en Producción hasta dividirse. No incluido todavía: unificar las cifras de Resumen contra Pedidos/Calidad, traducir los códigos técnicos, aclarar la etiqueta del margen, portadas por área, facturación/pagos reales/exportación y permisos por área.
+
+## 198 — Sin manifest: la web móvil no se instala como app
+
+El manifest (`display: standalone`) hacía que el navegador del celular ofreciera instalar StoryNido como app. Por ahora solo existe la web móvil: se quita el `manifest.webmanifest` y su enlace. Se conservan los íconos (favicon, 192 y 512 px). Si más adelante se quiere una app instalable, se vuelve a agregar junto con su experiencia sin conexión.
