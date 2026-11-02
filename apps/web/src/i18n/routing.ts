@@ -41,6 +41,11 @@ export const routing = defineRouting({
     '/login/finish': { es: '/ingresar/confirmar', en: '/login/finish', pt: '/entrar/confirmar' },
     '/account': { es: '/cuenta', en: '/account', pt: '/conta' },
     '/my-stories': { es: '/mis-cuentos', en: '/my-stories', pt: '/minhas-historias' },
+    '/my-stories/characters/[childId]': {
+      es: '/mis-cuentos/personajes/[childId]',
+      en: '/my-stories/characters/[childId]',
+      pt: '/minhas-historias/personagens/[childId]',
+    },
     '/create': { es: '/crear', en: '/create', pt: '/criar' },
     '/new': { es: '/nuevo', en: '/new', pt: '/novo' },
     '/faq': { es: '/preguntas-frecuentes', en: '/faq', pt: '/perguntas-frequentes' },

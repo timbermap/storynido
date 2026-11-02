@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 
 import { Pager } from '@/components/pager';
 import { Button } from '@/components/ui/button';
+import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { listChildren, updateChildProfile, type ChildSummary } from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
@@ -165,7 +166,15 @@ export function CharactersList({ uid, onDeleted }: { uid: string; onDeleted?: ()
                 <div className="flex flex-wrap items-center gap-3">
                   <UserRound className="size-5 text-primary" aria-hidden="true" />
                   <p className="min-w-0 flex-1 font-semibold">
-                    {child.name}
+                    <Link
+                      href={{
+                        pathname: '/my-stories/characters/[childId]',
+                        params: { childId: child.id },
+                      }}
+                      className="underline-offset-4 hover:underline"
+                    >
+                      {child.name}
+                    </Link>
                     {child.age !== null && (
                       <span className="font-normal text-muted-foreground">
                         {' · '}

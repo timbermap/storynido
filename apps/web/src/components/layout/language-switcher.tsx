@@ -22,6 +22,7 @@ export function useLocaleSwitch() {
     document?: string;
     bookId?: string;
     orderId?: string;
+    childId?: string;
   }>();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -41,6 +42,8 @@ export function useLocaleSwitch() {
         router.replace({ pathname, params: { bookId: params.bookId ?? '' } }, { locale: next });
       } else if (pathname === '/order/[orderId]') {
         router.replace({ pathname, params: { orderId: params.orderId ?? '' } }, { locale: next });
+      } else if (pathname === '/my-stories/characters/[childId]') {
+        router.replace({ pathname, params: { childId: params.childId ?? '' } }, { locale: next });
       } else if (pathname === '/stories/[slug]' || pathname === '/lessons/[slug]') {
         router.replace({ pathname, params: { slug: params.slug ?? '' } }, { locale: next });
       } else {

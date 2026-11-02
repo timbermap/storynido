@@ -2200,3 +2200,11 @@ La tarjeta de garantía («Crea una vista previa gratis… si el libro tiene un 
 ### 186d. Eventos: visual del hero, opción 1 (2026-11-01)
 
 Sebastián eligió «el libro, grande y limpio»: la portada del cumpleaños como libro sobre una mancha de color, la invitación asomando detrás y la guirnalda con el nombre colgando arriba. Salen las etiquetas del hero (siguen en el kit y en la landing).
+
+### 188. Perfil del personaje: qué se guarda y qué se borra (2026-11-01)
+
+Habrá una pantalla de perfil por personaje (después del 16 de nov): datos editables (nombre, edad, pronombres, gustos, mascota, mejor amigo), libros hechos con él, botón «Crear un cuento con [nombre]» y estado de la foto con botón para borrarla.
+
+- **Se borra:** la foto original y la ficha derivada, a los 30 días o antes si hace falta (privacidad, sin cambios).
+- **Se queda:** el personaje ilustrado aprobado (un dibujo generado, no una foto real) y sus datos. Decidido por Sebastián.
+- **Hecho (2026-11-01):** pantalla `/my-stories/characters/[childId]` (es: `/mis-cuentos/personajes/…`), abierta desde el nombre en la solapa Personajes. La API suma `GET /v1/me/children/:childId/profile` (dibujo aprobado del libro más reciente con URL firmada de 30 min, fotos vigentes y cuándo vencen, libros con ese personaje) y `DELETE /v1/me/children/:childId/photos` (borra archivos y registros, deja perfil y dibujo; queda en auditoría). «Crear un cuento con [nombre]» deja el id en `sessionStorage` y el primer paso del wizard lo preselecciona (reutilización que ya existía). Ruta privada: sin analítica y fuera de `robots`.

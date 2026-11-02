@@ -1,5 +1,6 @@
 import type { EmailNotifier } from '@storynido/emails';
 import type { ProviderRegistry } from '@storynido/providers';
+import type { BOOK_STATUSES } from '@storynido/shared';
 import {
   COLLECTIONS,
   isAdminRole,
@@ -98,6 +99,86 @@ export class AccountService {
     if (options.notify !== false)
       await this.notifyDeleted(user, `delete-child:${childId}`, 'child');
     return { photos: photos.size, books: deletedBooks, keptOrderedBooks: kept };
+  }
+
+  /**
+   * Perfil de un personaje: la lámina aprobada de su libro más reciente (un dibujo generado, no
+   * una foto; se conserva), las fotos que todavía no se borraron y los libros hechos con él.
+   */
+  async childProfile(uid: string, childId: string) {
+    await this.ownedChild(uid, childId);
+    const storage = this.providers.storage();
+    const url = async (path: string | null | undefined) =>
+      path ? (await storage.signedDownloadUrl({ bucket: 'assets', path }, 30 * 60)).url : null;
+
+    const photos = await this.db
+      .collection(COLLECTIONS.photos)
+      .where('ownerUid', '==', uid)
+      .where('childId', '==', childId)
+      .get();
+    const expiries = photos.docs
+      .map((doc) => (doc.get('expiresAt') as { toDate(): Date } | undefined)?.toDate().getTime())
+      .filter((time): time is number => typeof time === 'number');
+
+    const books = await this.db
+      .collection(COLLECTIONS.books)
+      .where('ownerUid', '==', uid)
+      .where('childId', '==', childId)
+      .get();
+    const sorted = books.docs
+      .map((doc) => ({
+        id: doc.id,
+        status: doc.get('status') as (typeof BOOK_STATUSES)[number],
+        preview: doc.get('preview') as
+          | {
+              title?: string;
+              cover?: { previewImagePath?: string } | null;
+              character?: { previewImagePath?: string } | null;
+            }
+          | null
+          | undefined,
+        time: (doc.get('updatedAt') as { toMillis?: () => number } | undefined)?.toMillis?.() ?? 0,
+      }))
+      .sort((a, b) => b.time - a.time);
+    const withCharacter = sorted.find((book) => book.preview?.character?.previewImagePath);
+    return {
+      characterImageUrl: await url(withCharacter?.preview?.character?.previewImagePath),
+      photos: photos.size,
+      photosExpireAt: expiries.length > 0 ? new Date(Math.min(...expiries)).toISOString() : null,
+      books: await Promise.all(
+        sorted.slice(0, 12).map(async (book) => ({
+          id: book.id,
+          title: book.preview?.title ?? null,
+          status: book.status,
+          coverUrl: await url(book.preview?.cover?.previewImagePath),
+        })),
+      ),
+    };
+  }
+
+  /** Borra ya las fotos del chico (archivos y registros): el perfil y el personaje quedan. */
+  async deleteChildPhotos(user: { uid: string; email: string | null }, childId: string) {
+    await this.ownedChild(user.uid, childId);
+    const storage = this.providers.storage();
+    const photos = await this.db
+      .collection(COLLECTIONS.photos)
+      .where('ownerUid', '==', user.uid)
+      .where('childId', '==', childId)
+      .get();
+    for (const doc of photos.docs) {
+      for (const path of [doc.get('storagePath'), doc.get('processedPath')]) {
+        if (typeof path === 'string') await storage.delete({ bucket: 'photos', path });
+      }
+      await doc.ref.delete();
+    }
+    await this.audit(user, 'privacy.delete_child_photos', childId, { photos: photos.size });
+    return { photos: photos.size };
+  }
+
+  private async ownedChild(uid: string, childId: string) {
+    const child = (await this.db.collection(COLLECTIONS.children).doc(childId).get()).data();
+    if (child?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Perfil inexistente.');
+    return child;
   }
 
   /**

@@ -24,6 +24,16 @@ export function registerAccountRoutes(app: FastifyInstance, accounts: AccountSer
     return accounts.deleteChild(user, (request.params as { childId: string }).childId);
   });
 
+  addRoute(app, apiRoutes.getChildProfile, {}, (request) => {
+    const user = signedIn(request);
+    return accounts.childProfile(user.uid, (request.params as { childId: string }).childId);
+  });
+
+  addRoute(app, apiRoutes.deleteChildPhotos, {}, (request) => {
+    const user = signedIn(request);
+    return accounts.deleteChildPhotos(user, (request.params as { childId: string }).childId);
+  });
+
   addRoute(app, apiRoutes.deleteAccount, {}, (request) =>
     accounts.deleteAccount(signedIn(request)),
   );

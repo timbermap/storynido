@@ -170,6 +170,66 @@ describe('borrado de datos a pedido', () => {
     send.mockRestore();
   });
 
+  it('perfil del personaje: dibujo aprobado, fotos y libros; borrar la foto conserva lo demás', async () => {
+    await providers
+      .storage()
+      .upload(
+        { bucket: 'assets', path: 'previews/ana/b1/character.webp' },
+        new Uint8Array([1]),
+        'image/webp',
+      );
+    await db.doc('books/b1').update({
+      'preview.title': 'Martina y la luna',
+      'preview.character': { imagePath: 'x', previewImagePath: 'previews/ana/b1/character.webp' },
+    });
+    await db.doc('photos/p1').update({ expiresAt: new Date('2026-12-01T00:00:00Z') });
+
+    const profile = await app.inject({
+      method: 'GET',
+      url: '/v1/me/children/c1/profile',
+      headers: auth('token-ana'),
+    });
+    expect(profile.statusCode).toBe(200);
+    const body = profile.json<{
+      characterImageUrl: string | null;
+      photos: number;
+      photosExpireAt: string | null;
+      books: { id: string; title: string | null; status: string }[];
+    }>();
+    expect(body.characterImageUrl).toEqual(expect.any(String));
+    expect(body.photos).toBe(1);
+    expect(body.photosExpireAt).toBe('2026-12-01T00:00:00.000Z');
+    expect(body.books.map((book) => book.id).sort()).toEqual(['b1', 'b2']);
+    expect(body.books.find((book) => book.id === 'b1')?.title).toBe('Martina y la luna');
+
+    const removed = await app.inject({
+      method: 'DELETE',
+      url: '/v1/me/children/c1/photos',
+      headers: auth('token-ana'),
+    });
+    expect(removed.json()).toEqual({ photos: 1 });
+    expect((await db.doc('photos/p1').get()).exists).toBe(false);
+    expect(
+      await providers.storage().exists({ bucket: 'photos', path: 'ana/b1/p1/original.jpg' }),
+    ).toBe(false);
+    // El perfil y el dibujo del personaje se conservan.
+    expect((await db.doc('children/c1').get()).exists).toBe(true);
+    expect(
+      await providers
+        .storage()
+        .exists({ bucket: 'assets', path: 'previews/ana/b1/character.webp' }),
+    ).toBe(true);
+
+    // El perfil de otra persona no se ve ni se toca.
+    for (const [method, url] of [
+      ['GET', '/v1/me/children/otro/profile'],
+      ['DELETE', '/v1/me/children/otro/photos'],
+    ] as const) {
+      const res = await app.inject({ method, url, headers: auth('token-ana') });
+      expect(res.statusCode).toBe(404);
+    }
+  });
+
   it('borrar la cuenta: datos personales y acceso; necesita confirmación y una cuenta real', async () => {
     const anonymous = await app.inject({
       method: 'DELETE',

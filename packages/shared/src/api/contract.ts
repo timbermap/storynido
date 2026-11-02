@@ -19,7 +19,7 @@ import {
   textDensitySchema,
 } from '../models/editorial';
 import { adminConfigKindSchema, adminDocIdSchema } from '../models/admin-config';
-import { addressSchema } from '../models/commerce';
+import { addressSchema, bookStatusSchema } from '../models/commerce';
 import { KIT_PIECES, eventPricingSchema, kitSelectionSchema } from '../models/kit';
 import { accountTypeSchema, proProfileSchema } from '../models/users';
 import { pipelineStepSchema } from '../models/pipeline';
@@ -1254,6 +1254,38 @@ export const apiRoutes = {
       books: z.number().int(),
       keptOrderedBooks: z.number().int(),
     }),
+  },
+  getChildProfile: {
+    method: 'GET',
+    path: '/v1/me/children/:childId/profile',
+    access: 'user',
+    summary:
+      'Perfil de un personaje: su imagen aprobada, el estado de la foto y los libros hechos con él',
+    params: z.object({ childId: z.string().min(1) }),
+    response: z.object({
+      /** Lámina del personaje aprobado de su libro más reciente (URL firmada, 30 min). */
+      characterImageUrl: z.string().nullable(),
+      /** Fotos vigentes (se borran a los 30 días) y cuándo vence la primera en caducar. */
+      photos: z.number().int(),
+      photosExpireAt: z.string().nullable(),
+      books: z.array(
+        z.object({
+          id: z.string(),
+          title: z.string().nullable(),
+          status: bookStatusSchema,
+          coverUrl: z.string().nullable(),
+        }),
+      ),
+    }),
+  },
+  deleteChildPhotos: {
+    method: 'DELETE',
+    path: '/v1/me/children/:childId/photos',
+    access: 'user',
+    summary:
+      'Borra ya las fotos de un chico (archivos y registros); el perfil y el personaje se conservan',
+    params: z.object({ childId: z.string().min(1) }),
+    response: z.object({ photos: z.number().int() }),
   },
   proActivate: {
     method: 'POST',

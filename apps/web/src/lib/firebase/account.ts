@@ -2,6 +2,7 @@ import { COLLECTIONS, type BookFormat, type OrderStatus } from '@storynido/share
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   limit,
   onSnapshot,
@@ -73,6 +74,44 @@ export async function listChildren(db: Firestore, uid: string): Promise<ChildSum
     name: child.get('name') as string,
     age: (child.get('age') as number | null | undefined) ?? null,
   }));
+}
+
+export interface ChildDetails {
+  name: string;
+  age: number;
+  pronouns: 'she' | 'he' | 'they' | null;
+  likes: string[];
+  petName: string | null;
+  bestFriendName: string | null;
+}
+
+/** Datos completos de un perfil para su pantalla (null si no existe o no es del usuario). */
+export async function getChildDetails(
+  db: Firestore,
+  childId: string,
+): Promise<ChildDetails | null> {
+  const snapshot = await getDoc(doc(db, COLLECTIONS.children, childId)).catch(() => null);
+  if (!snapshot?.exists()) return null;
+  return {
+    name: snapshot.get('name') as string,
+    age: (snapshot.get('age') as number | undefined) ?? 0,
+    pronouns: (snapshot.get('pronouns') as ChildDetails['pronouns'] | undefined) ?? null,
+    likes: (snapshot.get('likes') as string[] | undefined) ?? [],
+    petName: (snapshot.get('petName') as string | null | undefined) ?? null,
+    bestFriendName: (snapshot.get('bestFriendName') as string | null | undefined) ?? null,
+  };
+}
+
+/** Guarda los datos del perfil (las reglas solo dejan tocar sus campos editables). */
+export async function updateChildDetails(
+  db: Firestore,
+  childId: string,
+  fields: ChildDetails,
+): Promise<void> {
+  await updateDoc(doc(db, COLLECTIONS.children, childId), {
+    ...fields,
+    updatedAt: serverTimestamp(),
+  });
 }
 
 /** Cambia el nombre y la edad de un perfil (las reglas solo dejan tocar sus campos editables). */

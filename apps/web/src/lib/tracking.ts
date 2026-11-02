@@ -12,6 +12,7 @@ const PRIVATE_PATHNAMES: AppPathname[] = [
   '/checkout/[bookId]',
   '/order/[orderId]',
   '/account',
+  '/my-stories/characters/[childId]',
   '/login',
   '/login/finish',
 ];

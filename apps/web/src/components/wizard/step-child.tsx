@@ -15,6 +15,7 @@ import {
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
+import { takeReuseCharacter } from '@/lib/reuse-character';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import {
   listSavedCharacters,
@@ -50,13 +51,6 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   // Protagonistas ya creados: en un borrador sin protagonista se ofrecen para reutilizar.
   const [saved, setSaved] = useState<SavedCharacter[]>([]);
   const [reuse, setReuse] = useState<SavedCharacter | null>(null);
-  useEffect(() => {
-    if (!user || book.childId) return;
-    void getFirebaseDb()
-      .then((db) => listSavedCharacters(db, user.uid))
-      .then(setSaved)
-      .catch(() => undefined);
-  }, [user, book.childId]);
 
   function pick(character: SavedCharacter | null) {
     setReuse(character);
@@ -72,6 +66,19 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   // Profesionales: el alias identifica el proyecto en la cuenta; el nombre es el del cuento.
   const isPro = book.channel === 'professionals';
   const [alias, setAlias] = useState(child?.alias ?? '');
+  useEffect(() => {
+    if (!user || book.childId) return;
+    void getFirebaseDb()
+      .then((db) => listSavedCharacters(db, user.uid))
+      .then((found) => {
+        setSaved(found);
+        // Viene del perfil de un personaje ("Crear un cuento con…"): queda elegido.
+        const wanted = takeReuseCharacter();
+        const match = found.find((character) => character.id === wanted);
+        if (match) pick(match);
+      })
+      .catch(() => undefined);
+  }, [user, book.childId]);
   // Eventos: datos del cumpleaños (fecha, edad que cumple y temática).
   const isEvent = book.channel === 'events';
   const [eventDate, setEventDate] = useState(book.event?.date ?? '');

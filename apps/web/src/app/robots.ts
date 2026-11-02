@@ -7,7 +7,18 @@ export default function robots(): MetadataRoute.Robots {
   return {
     // Fuera de producción (staging, previews) no se indexa nada.
     rules: isProduction
-      ? { userAgent: '*', allow: '/', disallow: ['/*/cuenta', '/*/account', '/*/conta'] }
+      ? {
+          userAgent: '*',
+          allow: '/',
+          disallow: [
+            '/*/cuenta',
+            '/*/account',
+            '/*/conta',
+            '/*/mis-cuentos',
+            '/*/my-stories',
+            '/*/minhas-historias',
+          ],
+        }
       : { userAgent: '*', disallow: '/' },
     sitemap: absoluteUrl('/sitemap.xml'),
   };
