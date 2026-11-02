@@ -2318,3 +2318,11 @@ Con acceso de lectura a los logs de staging se vieron tres causas distintas detr
 2. **Nombre con tildes cambiadas**: la persona escribió «Angelica», el modelo escribió «Angélica» dos veces y la muestra fallaba con «No logramos escribir el nombre tal cual». Ahora, si la única diferencia son las tildes, el texto se corrige al nombre tal cual lo escribió la persona (`repairNameAccents`); otras variantes siguen siendo un problema.
 3. **Memoria de la API**: una instancia superó los 512 MiB (516 MiB) mientras procesaba imágenes. La API pasa a 1 GiB en Terraform (hay que aplicarlo).
    Además, los intentos fallidos agotaban el cupo diario (DECISIONS 209) y daban «Llegaste al límite»: se reinició el cupo de staging y los fallos ya lo devuelven.
+
+## 212 — Foto rechazada por la IA: se informa el motivo y se ofrece otro camino (sin aflojar la seguridad)
+
+Cuando Vertex bloquea la foto de un niño al describir al personaje:
+
+- El mensaje de error ahora incluye los códigos del bloqueo (`blockReason`, `finishReason` y las categorías marcadas, sin contenido) para saber qué filtro actuó; queda en los logs y en Auditoría (`ai.error`).
+- La persona ya no ve «no pudimos generar las ilustraciones» sino un aviso propio (`photo_unreadable`): probar otra foto (de frente, bien iluminada, solo el rostro) o elegir los rasgos del personaje; y ese intento no cuenta para su límite diario.
+- **Decisión: no se aflojan los filtros de seguridad** (siguen en el nivel más estricto) ni se envían las fotos a otro proveedor para esquivar el bloqueo. Son fotos de menores, se suben con autorización del adulto, y la seguridad va antes que la tasa de éxito. Queda descartado aflojar umbrales y cualquier respaldo con otro modelo mientras no se revise su política de datos.

@@ -47,12 +47,19 @@ interface UsageMetadata {
   thoughtsTokenCount?: number;
 }
 
+interface SafetyRating {
+  category?: string;
+  probability?: string;
+  blocked?: boolean;
+}
+
 interface GenerateContentResponse {
   candidates?: {
     finishReason?: string;
+    safetyRatings?: SafetyRating[];
     content?: { parts?: { text?: string; inlineData?: { mimeType: string; data: string } }[] };
   }[];
-  promptFeedback?: { blockReason?: string };
+  promptFeedback?: { blockReason?: string; safetyRatings?: SafetyRating[] };
   usageMetadata?: UsageMetadata;
 }
 
@@ -78,12 +85,18 @@ export function vertexCostUsdMicros(
   return Math.ceil(input * price.input + output * price.output);
 }
 
-const SAFETY_SETTINGS = [
+const SAFETY_CATEGORIES = [
   'HARM_CATEGORY_HARASSMENT',
   'HARM_CATEGORY_HATE_SPEECH',
   'HARM_CATEGORY_SEXUALLY_EXPLICIT',
   'HARM_CATEGORY_DANGEROUS_CONTENT',
-].map((category) => ({ category, threshold: 'BLOCK_LOW_AND_ABOVE' }));
+] as const;
+
+/** Estricto por defecto (cuentos, moderación, ilustraciones). */
+const SAFETY_SETTINGS = SAFETY_CATEGORIES.map((category) => ({
+  category,
+  threshold: 'BLOCK_LOW_AND_ABOVE',
+}));
 
 export interface VertexOptions {
   projectId: string;
@@ -187,9 +200,38 @@ function blocked(response: GenerateContentResponse): boolean {
   );
 }
 
+/**
+ * Por qué bloqueó Vertex (solo códigos: motivo, finalización y las categorías marcadas; nada del
+ * contenido). Sirve para saber si es un filtro configurable o uno fijo de protección de menores.
+ */
+export function blockDetail(response: GenerateContentResponse): string {
+  const parts: string[] = [];
+  const blockReason = response.promptFeedback?.blockReason;
+  if (blockReason) parts.push(`blockReason=${blockReason}`);
+  const finishReason = response.candidates?.[0]?.finishReason;
+  if (finishReason) parts.push(`finishReason=${finishReason}`);
+  const ratings = [
+    ...(response.promptFeedback?.safetyRatings ?? []),
+    ...(response.candidates?.[0]?.safetyRatings ?? []),
+  ]
+    .filter(
+      (rating) => rating.blocked || (rating.probability && rating.probability !== 'NEGLIGIBLE'),
+    )
+    .map(
+      (rating) =>
+        `${(rating.category ?? 'UNKNOWN').replace('HARM_CATEGORY_', '')}=${rating.probability ?? '?'}${rating.blocked ? '(blocked)' : ''}`,
+    );
+  if (ratings.length > 0) parts.push(`ratings: ${ratings.join(', ')}`);
+  return parts.length > 0 ? ` (${parts.join('; ')})` : '';
+}
+
 function parseJson(response: GenerateContentResponse, what: string): unknown {
   if (blocked(response))
-    throw new ProviderError('vertex', `${what}: bloqueado por seguridad`, true);
+    throw new ProviderError(
+      'vertex',
+      `${what}: bloqueado por seguridad${blockDetail(response)}`,
+      true,
+    );
   try {
     return JSON.parse(textOf(response)) as unknown;
   } catch (error) {
@@ -664,7 +706,11 @@ Children's picture book illustration. No text, letters, numbers, logos or waterm
       });
       lastUsage = [...lastUsage, usage];
       if (blocked(response)) {
-        throw new ProviderError('vertex', 'Ilustración bloqueada por seguridad', true);
+        throw new ProviderError(
+          'vertex',
+          `Ilustración bloqueada por seguridad${blockDetail(response)}`,
+          true,
+        );
       }
       const inline = response.candidates?.[0]?.content?.parts?.find(
         (part) => part.inlineData,

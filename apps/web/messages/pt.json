@@ -786,6 +786,7 @@
       "failedTitle": "Não conseguimos criar a amostra",
       "errors": {
         "limit_reached": "Você chegou ao limite de amostras ou novas tentativas de hoje. Poderá criar outra amanhã.",
+        "photo_unreadable": "Não conseguimos ler esta foto. Tente outra (de frente, bem iluminada, só o rosto) ou escolha os traços do personagem. Não conta para o seu limite de hoje.",
         "ai_unavailable": "Não conseguimos criar as ilustrações agora. Tente de novo em alguns minutos; seu rascunho fica salvo.",
         "validation_failed": "Esse texto não é adequado para uma história infantil. Mude e tente de novo.",
         "bad_request": "Confira se o protagonista, a foto, a história e o estilo estão completos.",

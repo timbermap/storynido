@@ -29,6 +29,7 @@ type PreviewData = NonNullable<PublicPreview['preview']>;
 const KNOWN_ERRORS = [
   'limit_reached',
   'ai_unavailable',
+  'photo_unreadable',
   'validation_failed',
   'bad_request',
   'account_required',

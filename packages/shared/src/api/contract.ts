@@ -56,6 +56,8 @@ export const API_ERROR_CODES = [
   'limit_reached',
   /** La IA está pausada (presupuesto diario agotado o moderación fallida dos veces). */
   'ai_unavailable',
+  /** La foto no se pudo leer (la IA la rechazó): probar otra o elegir los rasgos. */
+  'photo_unreadable',
   /** Hace falta una cuenta (no alcanza la sesión anónima). */
   'account_required',
   /** El libro no se puede imprimir en este destino (formato, páginas o cantidad). */

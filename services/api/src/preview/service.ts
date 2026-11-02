@@ -768,7 +768,24 @@ export class PreviewService {
     const saved = data.characterSheet as CharacterSheet | null | undefined;
     const savedTraits = data.characterTraits as Avatar | null | undefined;
     if (saved && savedTraits) return { photo, sheet: saved, traits: savedTraits };
-    const { sheet, traits } = await track('character', await ai.text.describeCharacter(photo));
+    let described: Awaited<ReturnType<AIProvider['text']['describeCharacter']>>;
+    try {
+      described = await ai.text.describeCharacter(photo);
+    } catch (error) {
+      // La IA rechazó la foto: no es una caída del servicio, la persona puede probar otra o elegir rasgos.
+      if (error instanceof ProviderError && error.message.includes('bloqueado por seguridad')) {
+        throw Object.assign(
+          new AppError(
+            422,
+            'photo_unreadable',
+            'No pudimos leer esta foto. Prueba con otra o elige los rasgos del personaje.',
+          ),
+          { cause: error },
+        );
+      }
+      throw error;
+    }
+    const { sheet, traits } = await track('character', described);
     // Se guarda en la foto: se borra con ella.
     await ref.update({ characterSheet: sheet, characterTraits: traits, updatedAt: new Date() });
     return { photo, sheet, traits };

@@ -7,6 +7,7 @@ import {
   VertexClient,
   VertexImageProvider,
   VertexTextProvider,
+  blockDetail,
   vertexCostUsdMicros,
 } from './vertex';
 
@@ -165,5 +166,27 @@ describe('marca de agua', () => {
     const stats = await sharp(marked).stats();
     // Un fondo liso sin marca tendría desvío ~0.
     expect(stats.channels[0]?.stdev ?? 0).toBeGreaterThan(1);
+  });
+});
+
+describe('blockDetail', () => {
+  it('resume por qué bloqueó Vertex, solo con códigos (sin contenido)', () => {
+    expect(
+      blockDetail({
+        promptFeedback: { blockReason: 'PROHIBITED_CONTENT' },
+        candidates: [
+          {
+            finishReason: 'SAFETY',
+            safetyRatings: [
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', probability: 'LOW', blocked: true },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', probability: 'NEGLIGIBLE' },
+            ],
+          },
+        ],
+      }),
+    ).toBe(
+      ' (blockReason=PROHIBITED_CONTENT; finishReason=SAFETY; ratings: SEXUALLY_EXPLICIT=LOW(blocked))',
+    );
+    expect(blockDetail({})).toBe('');
   });
 });
