@@ -418,6 +418,12 @@
     "preferencesError": "Não conseguimos salvar sua preferência. Tente de novo.",
     "orders": {
       "title": "Meus pedidos",
+      "group": {
+        "creating": "Criando",
+        "inProgress": "Em andamento",
+        "delivered": "Entregues",
+        "closed": "Cancelados e reembolsados"
+      },
       "loading": "Carregando seus pedidos…",
       "error": "Não conseguimos carregar seus pedidos.",
       "empty": "Você ainda não tem pedidos.",
@@ -447,6 +453,10 @@
     "newsNote": "Ideias para uma história nova em datas especiais, lembretes de rascunhos e pedidos de opinião. Os avisos dos seus pedidos chegam sempre.",
     "myStories": {
       "title": "Minhas histórias",
+      "finishedUntitled": "Seu livro",
+      "view": "Ver",
+      "openHeading": "Em andamento",
+      "finished": "Concluídos",
       "loading": "Carregando suas histórias…",
       "newTitle": "O que você quer criar?",
       "newOptions": {
@@ -514,6 +524,9 @@
       "profilePhotoDeleted": "Apagamos a foto de {name}.",
       "profilePhotoError": "Não conseguimos apagar a foto. Tente novamente.",
       "profileBooksTitle": "Histórias com {name}",
+      "profileBooksOpen": "Em andamento",
+      "profileBooksDone": "Concluídos",
+      "profileViewOrders": "Ver pedidos",
       "profileBooksNone": "Ainda não há histórias com este personagem.",
       "profileBookDraft": "Em andamento",
       "profileBookReady": "Amostra pronta",
@@ -574,7 +587,11 @@
       "memories": "Lembranças",
       "lesson": "Lição",
       "style": "Estilo",
-      "review": "Prévia"
+      "review": "Prévia",
+      "party": "Festa",
+      "kit": "O que você leva",
+      "focus": "Situação",
+      "reading": "Leitura"
     },
     "progress": "Etapa {current} de {total}",
     "back": "Voltar",
@@ -610,6 +627,8 @@
       "subtitle": "Com esses dados escrevemos uma história pensada para ele ou ela.",
       "name": "Nome",
       "namePlaceholder": "Ex.: Sofia",
+      "accentHint": "Você quis dizer {name}?",
+      "accentUse": "Usar {name}",
       "age": "Idade",
       "ageOption": "{age, plural, =0 {Menos de 1 ano} one {# ano} other {# anos}}",
       "pronouns": "Como nos referimos ao protagonista? (opcional)",
@@ -627,28 +646,25 @@
       "dedicationPlaceholder": "Ex.: Para Sofia, que toda noite sonha com as estrelas.",
       "required": "Escreva o nome para continuar.",
       "event": {
-        "title": "Dados da celebração",
-        "note": "Usamos na história. A data nos ajuda a informar os prazos reais de impressão.",
-        "date": "Data da festa",
         "turningAge": "Idade que vai fazer",
-        "turningAgeEmpty": "Escolher",
-        "years": "{count, plural, one {# ano} other {# anos}}",
-        "theme": "Tema da festa (opcional)",
-        "themePlaceholder": "Por exemplo: dinossauros, espaço, princesas",
-        "occasion": "O que vocês vão celebrar?",
         "occasions": {
           "birthday": "Aniversário",
           "baptism": "Batizado",
           "communion": "Primeira comunhão",
           "graduation": "Formatura ou fim do ano escolar"
-        }
+        },
+        "stepTitle": "Quem é o protagonista da festa?",
+        "stepSubtitle": "Aparece no convite, na decoração e na história de lembrança."
       },
       "pro": {
-        "alias": "Apelido do projeto",
-        "aliasHint": "Para encontrá-lo na sua conta. Use um apelido (por exemplo, “Sofi, 2º ano”), nunca o sobrenome.",
-        "aliasPlaceholder": "Ex.: Sofi, 2º ano",
-        "storyName": "Nome na história",
-        "dedicationPlaceholder": "Ex.: Para a Sofi, que a cada dia se arrisca um pouco mais."
+        "stepTitle": "Para quem é a história?",
+        "stepSubtitle": "Cada criança é um projeto na sua conta. Nunca pedimos sobrenome nem dados clínicos.",
+        "alias": "Apelido",
+        "aliasHint": "É também o nome do personagem na história. Não use o sobrenome.",
+        "aliasPlaceholder": "Ex.: Mati",
+        "required": "Escreva um apelido para continuar.",
+        "likes": "O que a representa (opcional)",
+        "likesHint": "Gostos e rotinas que ajudam a criança a se reconhecer. Não inclua diagnósticos."
       },
       "reuseTitle": "Para quem é esta história?",
       "reuseNew": "Alguém novo",
@@ -712,12 +728,7 @@
       "customPlaceholder": "Que ele saiba que o vovô o ama muito, mesmo morando longe.",
       "customHint": "{count}/150 caracteres. Revisamos antes de usar.",
       "pickUpTo": "Escolha até {max} ({count}/{max}). Se não escolher nenhuma, a história terá mesmo assim uma mensagem positiva.",
-      "clear": "Limpar seleção",
-      "goal": {
-        "title": "Objetivo geral (opcional)",
-        "hint": "Orienta a história. É um material educativo: não substitui uma intervenção profissional ou clínica.",
-        "none": "Sem objetivo"
-      }
+      "clear": "Limpar seleção"
     },
     "style": {
       "title": "Escolha o estilo de ilustração",
@@ -761,7 +772,12 @@
       "book": "Seu livro",
       "event": "Celebração",
       "eventTurning": "Faz {count}",
-      "eventEmpty": "Não preenchido"
+      "eventEmpty": "Não preenchido",
+      "kit": "O que você leva",
+      "kitTone": "Tom {tone}",
+      "kitDedication": "Com dedicatória",
+      "goal": "Objetivo",
+      "alias": "Apelido"
     },
     "preview": {
       "badge": "Amostra da história",
@@ -842,7 +858,12 @@
       },
       "leaveText": "Continuamos trabalhando mesmo que você saia. Avisamos por e-mail quando a amostra estiver pronta. Para retomar: Minhas histórias, “Em andamento”, Continuar.",
       "leaveButton": "Voltar para Minhas histórias",
-      "leaveTitle": "Você pode fechar esta tela"
+      "leaveTitle": "Você pode fechar esta tela",
+      "approveAndPay": "Aprovar e pagar",
+      "proPrice": "História digital: {price}",
+      "proVolume": "Quanto mais histórias você faz, menos paga por cada uma. Sem assinatura.",
+      "proNotice": "É material educativo e de acompanhamento: não é clínico nem substitui o seu critério profissional.",
+      "proDifferencesEdit": "Você pode editar o texto de cada página e mudar de novo a história base ou a foto."
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",
@@ -894,7 +915,8 @@
           "blue": "Azuis",
           "gray": "Cinza"
         }
-      }
+      },
+      "recommended": "Recomendado"
     },
     "memories": {
       "title": "Deixe com a cara dele",
@@ -1060,7 +1082,97 @@
     "changeLine": "Mudar",
     "choiceStory": "História: {name}",
     "choiceLesson": "Lição: {name}",
-    "choiceChange": "Mudar"
+    "choiceChange": "Mudar",
+    "party": {
+      "title": "A festa",
+      "subtitle": "Escolha o tema e conte quando e onde. Com isso montamos o convite e a história de lembrança.",
+      "themeLegend": "Tema",
+      "required": "Escolha um tema para continuar.",
+      "occasion": "O que vocês estão comemorando?",
+      "date": "Data",
+      "dateHint": "Vai no convite e nos ajuda a avisar os prazos de impressão.",
+      "place": "Local",
+      "placePlaceholder": "Ex.: Salão Arco-íris ou Em casa"
+    },
+    "kit": {
+      "title": "O que você vai levar?",
+      "subtitle": "Primeiro você vê a sua amostra grátis. Só paga se gostar.",
+      "next": "Continuar para a minha amostra",
+      "recommended": "Recomendado",
+      "fullKit": "Kit digital completo",
+      "invitationOnly": "Só o convite",
+      "invitationOnlyText": "Imagem para WhatsApp e PDF para imprimir, com o personagem.",
+      "copiesNote": "As cópias que você imprimir não mudam o preço.",
+      "includes": {
+        "invitation": "Convite para WhatsApp e PDF",
+        "decoration": "Decoração: etiquetas, adesivos e agradecimento",
+        "keepsake": "Uma história de lembrança por convidado, a mesma para todos",
+        "activities": "Atividades para imprimir"
+      },
+      "dedication": "Dedicatória da história de lembrança (opcional)",
+      "dedicationPlaceholder": "Ex.: Obrigado por vir à minha festa. {name}",
+      "dedicationHint": "Todos os convidados recebem a mesma história, aprovada por você.",
+      "toneLegend": "Tom do convite",
+      "tones": {
+        "fun": {
+          "name": "Divertido",
+          "sample": "“Venha para o meu aniversário!”"
+        },
+        "sweet": {
+          "name": "Carinhoso",
+          "sample": "“Eu adoraria ter você no meu aniversário”"
+        },
+        "adventurous": {
+          "name": "Aventureiro",
+          "sample": "“Entre na aventura do meu aniversário!”"
+        }
+      }
+    },
+    "partyPreview": {
+      "invitationTitle": "O seu convite",
+      "keepsakeTitle": "A história de lembrança",
+      "turning": "{name} faz {age}!",
+      "occasion": {
+        "baptism": "Venha para o meu batizado!",
+        "communion": "Venha para a minha primeira comunhão!",
+        "graduation": "Venha comemorar a minha formatura!"
+      },
+      "priceKit": "Kit digital completo: {price}",
+      "priceInvitation": "Só o convite: {price}",
+      "book": {
+        "title": "Quer dar também o livro de {name}?",
+        "text": "Um livro de Famílias com a história completa e o mesmo personagem. É comprado à parte, depois do kit.",
+        "none": "Agora não",
+        "digital": "Digital",
+        "printed": "Impresso",
+        "priceDigital": "a partir de {price}",
+        "pricePrinted": "a partir de {price}",
+        "afterKit": "Anotado. Depois de pagar o kit, você cria o livro a partir do seu pedido, com o mesmo personagem.",
+        "shareLead": "Avós e tios também podem presentear.",
+        "share": "Enviar o link para eles",
+        "copied": "Link copiado",
+        "shareText": "Estamos preparando a festa de {name}. Se você quiser dar uma história em que seja protagonista, pode criar aqui:"
+      },
+      "differencesEdit": "Você pode editar os textos e mudar de novo o tema ou a foto."
+    },
+    "focus": {
+      "title": "O que você quer trabalhar?",
+      "subtitle": "Comece pela situação. Cada coleção tem objetivos e histórias prontas para adaptar.",
+      "collection": "Coleção",
+      "goal": "Objetivo principal",
+      "goalHint": "A história gira em torno de um.",
+      "story": "História base",
+      "recommended": "Ideal para a idade",
+      "requiredCollection": "Escolha uma coleção para continuar.",
+      "requiredGoal": "Escolha um objetivo para continuar.",
+      "requiredStory": "Escolha uma história base para continuar."
+    },
+    "reading": {
+      "title": "Como se lê",
+      "subtitle": "Extensão, quantidade de texto e nível de leitura são ajustados separadamente.",
+      "length": "Extensão",
+      "notice": "É material educativo e de acompanhamento: não é clínico nem substitui o seu critério profissional."
+    }
   },
   "Landing": {
     "events": {
@@ -1249,7 +1361,7 @@
         },
         "4": {
           "title": "Você ajusta o texto",
-          "text": "Antes de pagar você edita o texto de cada página e gera de novo a ilustração. Leva um aviso de material educativo, não clínico."
+          "text": "Antes de pagar, você edita o texto de cada página, vê a capa e as primeiras páginas ilustradas e pode testar outra ilustração. Você conta com um aviso de material educativo, não clínico."
         }
       },
       "collectionsTitle": "Comece pelo que você precisa",
@@ -1274,7 +1386,7 @@
         },
         "5": {
           "q": "Posso editar o texto?",
-          "a": "Sim. Antes de pagar você pode mudar o texto de cada página da prévia e gerar de novo a ilustração dessa página."
+          "a": "Sim. Antes de pagar, você pode mudar o texto de cada página da prévia. A prévia ilustra a capa e as primeiras páginas, e ali você pode testar outra ilustração."
         },
         "6": {
           "q": "Existe assinatura?",
@@ -1306,8 +1418,10 @@
         }
       },
       "pricingNote": "O desconto por volume é calculado com suas compras dos últimos dias; no impresso o teto é menor.",
-      "catalogTitle": "Modelos por objetivo",
-      "catalogSubtitle": "Coleções para antecipar situações e trabalhar emoções, rotinas, escola e linguagem. Escolha o modelo e ajuste o texto."
+      "catalogTitle": "Modelos de histórias por objetivo",
+      "catalogMetaTitle": "Modelos de histórias por objetivo para professores e terapeutas",
+      "catalogSubtitle": "Para antecipar situações, trabalhar emoções, rotinas, escola ou linguagem. Escolha o modelo, folheie um exemplo e ajuste o texto para cada criança.",
+      "catalogNote": "Você vê tudo sem conta. Só precisa dela para criar."
     }
   },
   "Viewer": {
@@ -1540,8 +1654,16 @@
       "invitationTitle": "Dados do convite",
       "time": "Hora",
       "place": "Local",
-      "invitationNote": "A data vem dos dados da celebração. O que ficar em branco vira uma linha para completar à mão.",
+      "invitationNote": "A data vem dos dados da celebração. O horário e o local vão no convite, por isso são obrigatórios.",
+      "invitationRequired": "Preencha o horário e o local para pagar: eles vão no convite.",
       "license": "A licença autoriza {copies} cópias de cada peça para a celebração.",
+      "printGuide": {
+        "title": "Como imprimir o seu kit",
+        "tip1": "Papel: A4 ou Carta, o que você escolheu. Para o convite e o agradecimento, cartolina de 200 a 250 g é o ideal.",
+        "tip2": "Ao imprimir escolha «tamanho real» ou «100%». Se o programa ajustar a folha, as marcas de corte saem do lugar.",
+        "tip3": "Corte seguindo as marcas. Os adesivos e as etiquetas podem ser impressos em papel adesivo.",
+        "tip4": "A imagem do convite para WhatsApp é um PNG: salve no celular e envie como foto."
+      },
       "downloadAll": "Baixar tudo (ZIP)",
       "moreCopies": "Pedir mais cópias",
       "ready": "Seu kit está pronto!",
@@ -1667,5 +1789,130 @@
     "previous": "Anterior",
     "next": "Próxima",
     "status": "Página {page} de {pages}"
+  },
+  "HomeSession": {
+    "hello": "Olá, {name}",
+    "titleResume": "Continue de onde parou",
+    "titleNew": "O que você quer criar hoje?",
+    "titlePro": "Seus projetos",
+    "nextLabel": "O próximo passo",
+    "events": {
+      "draft": {
+        "title": "Falta pouco para o kit da festa de {name}",
+        "titleNoName": "Falta pouco para o kit da festa",
+        "sub": "Continue de onde parou: o que você já respondeu está salvo.",
+        "cta": "Continuar o kit"
+      },
+      "generating": {
+        "title": "Estamos desenhando {name} para a festa",
+        "titleNoName": "Estamos desenhando o seu personagem para a festa",
+        "sub": "Leva alguns minutos. Você pode fechar esta tela: avisamos por e-mail.",
+        "cta": "Ver minhas histórias"
+      },
+      "character": {
+        "title": "É assim o {name} para a festa?",
+        "titleNoName": "É assim o seu personagem para a festa?",
+        "sub": "Confirme o personagem para ver o kit da festa.",
+        "cta": "Revisar o personagem"
+      },
+      "preview": {
+        "title": "O kit da festa de {name} está pronto",
+        "titleNoName": "O kit da festa está pronto",
+        "sub": "Veja o convite, a decoração e a história antes de pagar.",
+        "cta": "Ver o kit"
+      }
+    },
+    "create": {
+      "title": "Criar algo novo",
+      "families": {
+        "title": "Uma história com o nome dele",
+        "cta": "Criar uma prévia grátis",
+        "link": "Criar uma história",
+        "fine": "Prévia grátis"
+      },
+      "events": {
+        "title": "A festa, com o personagem",
+        "cta": "Montar meu kit",
+        "link": "Montar um kit",
+        "fine": "Amostra grátis"
+      },
+      "professionals": {
+        "title": "Uma história para cada criança que você acompanha",
+        "cta": "Criar um projeto",
+        "link": "Criar um projeto",
+        "fine": "Amostra grátis"
+      },
+      "birthday": {
+        "title": "O livro do aniversariante",
+        "link": "Dar o livro de presente"
+      }
+    },
+    "list": {
+      "title": "Seus projetos",
+      "titlePro": "Projetos por criança",
+      "all": "Ver todos",
+      "continue": "Continuar",
+      "order": "Ver pedido",
+      "storyOf": "A história de {name}",
+      "untitled": "História sem terminar",
+      "kitOf": "Kit da festa de {name}",
+      "kitUntitled": "Kit da festa",
+      "status": {
+        "draft": "Rascunho",
+        "generating": "Desenhando",
+        "character": "Personagem para aprovar",
+        "preview": "Prévia pronta",
+        "kitPreview": "Kit pronto",
+        "preparing": "Pedido em preparação",
+        "shipped": "A caminho",
+        "bought": "Comprado"
+      }
+    },
+    "trust": {
+      "preview": "Prévia grátis antes de pagar",
+      "photos": "Fotos apagadas após 30 dias",
+      "noPhotos": "Também dá para fazer sem fotos"
+    },
+    "draft": {
+      "title": "Falta pouco para ver {name} na história",
+      "titleNoName": "Falta pouco para ver a história",
+      "sub": "Continue de onde parou: o que você já respondeu está salvo.",
+      "cta": "Continuar minha história"
+    },
+    "generating": {
+      "title": "Estamos desenhando {name}",
+      "titleNoName": "Estamos desenhando o seu personagem",
+      "sub": "Leva alguns minutos. Você pode fechar esta tela: avisamos por e-mail.",
+      "cta": "Ver minhas histórias"
+    },
+    "character": {
+      "title": "É assim o {name}?",
+      "titleNoName": "É assim o seu personagem?",
+      "sub": "Confirme o personagem para ver a capa e as primeiras páginas.",
+      "cta": "Revisar o personagem"
+    },
+    "preview": {
+      "title": "O livro de {name} está pronto para terminar",
+      "titleNoName": "Seu livro está pronto para terminar",
+      "sub": "Já ilustramos a capa e as primeiras páginas.",
+      "cta": "Ver o livro de {name}",
+      "ctaNoName": "Ver meu livro",
+      "price": "Digital a partir de {price}"
+    },
+    "orderPreparing": {
+      "title": "Estamos preparando o livro de {name}",
+      "titleNoName": "Estamos preparando o seu livro",
+      "sub": "Avisamos por e-mail quando sair.",
+      "cta": "Ver meu pedido"
+    },
+    "orderShipped": {
+      "title": "O livro de {name} está a caminho",
+      "titleNoName": "Seu livro está a caminho",
+      "sub": "Você pode acompanhar o envio pelo pedido.",
+      "subWithDate": "Chega entre {from} e {to}.",
+      "cta": "Ver meu pedido"
+    },
+    "loading": "Carregando suas histórias…",
+    "coverAlt": "Capa de exemplo: {title}"
   }
 }

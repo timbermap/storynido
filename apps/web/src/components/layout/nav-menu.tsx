@@ -16,6 +16,7 @@ export function NavMenu({
   children,
   align = 'start',
   className,
+  triggerClassName,
   panelClassName = 'w-[22rem]',
   href,
   toggleLabel,
@@ -25,6 +26,8 @@ export function NavMenu({
   children: ReactNode;
   align?: 'start' | 'end';
   className?: string;
+  /** Estilos del botón que abre el menú (por ejemplo, para que se vea como un botón de acción). */
+  triggerClassName?: string;
   /** Ancho del panel. */
   panelClassName?: string;
   /** El nombre del menú es un link a su página; la flecha abre el desplegable. */
@@ -113,6 +116,7 @@ export function NavMenu({
           className={cn(
             'inline-flex items-center gap-1.5 rounded-full py-2 whitespace-nowrap transition-colors hover:text-primary aria-expanded:text-primary',
             href ? 'pr-3 pl-1' : 'px-3',
+            triggerClassName,
           )}
         >
           {!href && label}

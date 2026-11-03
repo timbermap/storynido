@@ -1,4 +1,4 @@
-import { COLLECTIONS, type BookFormat, type OrderStatus } from '@storynido/shared';
+import { COLLECTIONS, type BookFormat, type Channel, type OrderStatus } from '@storynido/shared';
 import {
   collection,
   doc,
@@ -18,6 +18,7 @@ export interface OrderSummary {
   id: string;
   bookId: string;
   title: string | null;
+  channel: Channel;
   status: OrderStatus;
   items: { format: BookFormat; quantity: number }[];
   createdAt: Date | null;
@@ -51,6 +52,7 @@ export function subscribeOrders(
           id: order.id,
           bookId: order.get('bookId') as string,
           title: (order.get('bookTitle') as string | undefined) ?? null,
+          channel: (order.get('channel') as Channel | undefined) ?? 'families',
           status: order.get('status') as OrderStatus,
           items: (order.get('items') as OrderSummary['items'] | undefined) ?? [],
           createdAt: (order.get('createdAt') as Timestampish)?.toDate() ?? null,

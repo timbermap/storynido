@@ -38,10 +38,6 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
     ...(firstVisit && age !== undefined
       ? {
           ...suggestedReading(age),
-          // Celebraciones arranca como mini cuento para cada invitado, sea cual sea la edad.
-          ...(data.book.channel === 'events' && data.book.length
-            ? { length: data.book.length }
-            : {}),
         }
       : {
           length: data.book.length ?? data.editorial.defaults.length,
@@ -52,12 +48,10 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const story = data.stories.find((item) => item.slug === selected);
 
   const fits = (min: number, max: number) => age !== undefined && min <= age && age <= max;
-  // Solo las historias de la línea del libro, no las de otra línea que también la incluyen
-  // (Profesionales sí ve las que lo incluyen). Si no hubiera ninguna, todas.
+  // Solo las historias de la línea del libro, no las de otra línea que también la incluyen.
+  // Si no hubiera ninguna, todas.
   const channel = data.book.channel;
-  const forChannel = data.stories.filter((item) =>
-    channel === 'professionals' ? item.channels.includes(channel) : item.channels[0] === channel,
-  );
+  const forChannel = data.stories.filter((item) => item.channels[0] === channel);
   // Con una enseñanza elegida, las historias que la sugieren van primero («Ideal para…»).
   const lesson = data.lessons.find((item) => data.book.lessonIds.includes(item.slug));
   const forLesson = (story: PublicStory) =>
@@ -156,18 +150,17 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
       <BookOptions
         story={story}
         editorial={data.editorial}
-        prices={data.book.channel === 'events' ? null : data.prices}
+        prices={data.prices}
         age={age ?? null}
         value={fitToStory(choice, story)}
         onChange={setChoice}
-        formats={data.book.channel !== 'events'}
       />
     </WizardShell>
   );
 }
 
 /** Si la historia no admite alguna opción elegida, se usa la primera que sí admite. */
-function fitToStory(choice: BookChoice, story: PublicStory | undefined): BookChoice {
+export function fitToStory(choice: BookChoice, story: PublicStory | undefined): BookChoice {
   if (!story) return choice;
   const pick = <T,>(value: T, allowed: readonly T[]) =>
     allowed.includes(value) ? value : (allowed[0] ?? value);

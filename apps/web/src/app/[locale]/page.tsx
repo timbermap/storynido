@@ -1,4 +1,5 @@
 import { ArrowRight, BookOpen, Map, UserRound } from 'lucide-react';
+import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
@@ -15,7 +16,10 @@ import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { CONTACT_ID } from '@/components/home/contact-form';
 import { brand } from '@/lib/brand';
-import { getContent, getOffer } from '@/lib/server/api';
+import { SignedInHome } from '@/components/home/session/signed-in-home';
+import { homeLineCopy } from '@/components/home/session/line-copy';
+import { getContent, getOffer, getStories } from '@/lib/server/api';
+import { SESSION_COOKIE } from '@/lib/session-hint';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { offerHighlights } from '@/lib/offer';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
@@ -25,6 +29,35 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const locale = (await params).locale as Locale;
 
   const display = await getDisplayCountry(locale);
+
+  // Quien ya tiene sesión (la marca la escribe el navegador al entrar, DECISIONS 110) ve su propia
+  // home desde el primer pintado, sin el parpadeo de la landing de visitante. La marca no es la
+  // sesión: sus datos los lee el navegador con su sesión de Firebase.
+  if ((await cookies()).get(SESSION_COOKIE)?.value === '1') {
+    const [offer, stories, lines] = await Promise.all([
+      getOffer(display.country, locale),
+      // Todas las líneas: las portadas de catálogo ilustran borradores de cualquier línea.
+      getStories(locale).catch(() => []),
+      homeLineCopy(),
+    ]);
+    return (
+      <SignedInHome
+        stories={stories}
+        offer={offer}
+        country={display.country}
+        lines={lines}
+        christmas={
+          <ChristmasDeadline
+            offer={offer}
+            country={display.country}
+            locale={locale}
+            variant="line"
+          />
+        }
+      />
+    );
+  }
+
   const [t, faq, offer] = await Promise.all([
     getTranslations('Home'),
     getContent('faq', locale).catch(() => null),

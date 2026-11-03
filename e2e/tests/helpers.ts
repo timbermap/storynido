@@ -50,7 +50,7 @@ export async function magicLink(email: string): Promise<string> {
 
 /**
  * Crear pide cuenta (DECISIONS 106): en la puerta del creador se pide el enlace mágico. Tras el
- * enlace se cae en Mis cuentos; el test vuelve a la página donde estaba, ya con la sesión iniciada.
+ * enlace se cae en la home con sesión; el test vuelve a la página donde estaba, ya con la sesión iniciada.
  */
 export async function signInAtGate(page: Page, email: string) {
   const back = page.url();
@@ -59,8 +59,8 @@ export async function signInAtGate(page: Page, email: string) {
   await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
   await expect(page.locator('body')).toContainText('Revisa tu correo');
   await page.goto(await magicLink(email));
-  // Tras entrar siempre se cae en Mis cuentos (DECISIONS 152): se vuelve a la página donde se estaba.
-  await expect(page).toHaveURL(/\/(mis-cuentos|my-stories|minhas-historias)$/, { timeout: 30_000 });
+  // Tras entrar siempre se cae en la home con sesión (DECISIONS 220): se vuelve a la página donde se estaba.
+  await expect(page).toHaveURL(/\/(es|en|pt)$/, { timeout: 30_000 });
   await page.goto(back);
 }
 

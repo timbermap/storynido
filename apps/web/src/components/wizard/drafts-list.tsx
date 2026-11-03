@@ -8,10 +8,10 @@ import { Pager } from '@/components/pager';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { cn } from '@/lib/utils';
 import { clearStepDrafts } from '@/lib/use-step-draft';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { readDraftState, type DraftSummary } from '@/lib/firebase/drafts';
-import { cn } from '@/lib/utils';
 
 /** Color de contexto de cada línea (el mismo de su landing). */
 export const LINE_TONE = {
@@ -19,6 +19,21 @@ export const LINE_TONE = {
   events: 'bg-peach text-navy',
   professionals: 'bg-secondary text-navy',
 } as const;
+
+/** Etiqueta de la línea (Familia, Celebración, Profesional), con su color. */
+export function LineBadge({ line }: { line: keyof typeof LINE_TONE }) {
+  const tLines = useTranslations('Nav.lines');
+  return (
+    <span
+      className={cn(
+        'mb-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-bold',
+        LINE_TONE[line],
+      )}
+    >
+      {tLines(line)}
+    </span>
+  );
+}
 
 /** Borradores para retomar o borrar (en el creador y en Mi cuenta). */
 export function DraftsList({
@@ -32,7 +47,6 @@ export function DraftsList({
   pageSize?: number;
 }) {
   const t = useTranslations('Wizard.drafts');
-  const tLines = useTranslations('Nav.lines');
   const date = new Intl.DateTimeFormat(useLocale(), { dateStyle: 'medium' });
   // Borrar pide confirmación en la misma fila: se pierden la muestra y sus ilustraciones.
   const [confirming, setConfirming] = useState<string | null>(null);
@@ -93,14 +107,7 @@ export function DraftsList({
             >
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <span
-                    className={cn(
-                      'mb-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-bold',
-                      LINE_TONE[draft.channel],
-                    )}
-                  >
-                    {tLines(draft.channel)}
-                  </span>
+                  <LineBadge line={draft.channel} />
                   <p className="font-display text-lg font-semibold">{title}</p>
                   {stateOf(draft).generating ? (
                     <p

@@ -172,6 +172,9 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
   shipping: z
     .object({
       name: z.string(),
+      /** Calle y número (y piso o depto): lo que lleva la imprenta junto al nombre de quien recibe. */
+      line1: z.string().optional(),
+      line2: z.string().nullable().optional(),
       city: z.string(),
       state: z.string().nullable(),
       postalCode: z.string(),
@@ -1477,6 +1480,15 @@ export const apiRoutes = {
     path: '/v1/admin/orders/:orderId/cancel-print',
     access: 'admin',
     summary: 'Cancela el pedido en la imprenta si todavía se puede; queda en auditoría',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: z.object({ status: orderStatusSchema }),
+  },
+  adminSimulatePrint: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/simulate-print',
+    access: 'admin',
+    summary:
+      'Solo staging: avanza un paso la imprenta del pedido (producción, envío, entrega) sin llamar a la imprenta',
     params: z.object({ orderId: z.string().min(1) }),
     response: z.object({ status: orderStatusSchema }),
   },

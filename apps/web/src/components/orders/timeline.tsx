@@ -34,6 +34,21 @@ export const SETTLED_STATUSES = new Set<OrderStatus>([
   'refunded',
 ]);
 
+/** Cómo se agrupan los pedidos para quien compra: se arma, está en camino o ya lo tiene. */
+export type OrderGroup = 'creating' | 'inProgress' | 'delivered' | 'closed';
+
+export function orderGroup(status: OrderStatus, print: boolean): OrderGroup {
+  if (status === 'cancelled' || status === 'refunded') return 'closed';
+  if (status === 'delivered') return 'delivered';
+  // Un digital listo se entrega al instante: va directo a «Entregados».
+  if (status === 'ready') return print ? 'inProgress' : 'delivered';
+  if (status === 'sent_to_print' || status === 'in_production' || status === 'shipped') {
+    return 'inProgress';
+  }
+  // Pago, generación y revisión del libro.
+  return 'creating';
+}
+
 export const isPrintOrder = (items: { format: string }[]) =>
   items.some((item) => item.format !== 'digital');
 

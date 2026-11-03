@@ -212,8 +212,8 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.getByRole('button', { name: 'Enviar mi opinión' }).click();
   await expect(page.locator('#opinion')).toContainText('¡Gracias por contarnos!');
 
-  // --- Mis cuentos: pedido en vivo y recompra sin IA; Mi cuenta: borrado ---
-  await page.goto('/es/mis-cuentos');
+  // --- Mis pedidos: pedido en vivo y recompra sin IA; Mi cuenta: borrado ---
+  await page.goto('/es/mis-pedidos');
   await expect(page.locator('#orders li').first()).toContainText('Tu libro fue entregado');
   await page.locator('#orders a', { hasText: 'Pedir de nuevo' }).first().click();
   await expect(body(page)).toContainText('Pides de nuevo el mismo libro');
@@ -224,7 +224,7 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.getByRole('button', { name: 'Simular el pago' }).click();
   await expect(body(page)).toContainText('¡Tu libro está listo!', { timeout: 120_000 });
 
-  await page.goto('/es/mis-cuentos');
+  await page.goto('/es/mis-pedidos');
   await expect(page.locator('#orders li')).toHaveCount(2, { timeout: 30_000 });
   await expectNoHorizontalScroll(page);
   await page.goto('/es/cuenta');

@@ -11,3 +11,12 @@ export function takeReuseCharacter(): string | null {
     return null;
   }
 }
+
+/** Deja el id para que el creador preseleccione a ese personaje («Crear otra aventura»). */
+export function saveReuseCharacter(id: string): void {
+  try {
+    sessionStorage.setItem(REUSE_CHARACTER_KEY, id);
+  } catch {
+    // Sin almacenamiento, el creador simplemente muestra la lista de personajes.
+  }
+}

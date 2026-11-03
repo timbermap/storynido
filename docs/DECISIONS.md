@@ -2375,3 +2375,78 @@ De la auditoría de producto y conversión (23 acciones priorizadas) se aplican 
 ## 219 — «Tus proyectos» solo con proyectos profesionales
 
 En Mis cuentos, el bloque de Profesionales («Tus proyectos», el descuento por volumen y «Todavía no tienes proyectos») aparecía para cualquier cuenta marcada como profesional, aunque nunca hubiera creado un proyecto. Ahora solo se muestra cuando ya hay al menos un proyecto profesional; hasta entonces Mis cuentos queda igual de simple que para Familias y Celebraciones.
+
+## 220 — Con sesión, el logo y el ingreso llevan a la home
+
+La home con sesión (hero según el estado de cada persona, PR #1) tiene que ser a donde se llega: el logo del navbar con sesión y el destino tras iniciar sesión (enlace mágico o Google) pasan de Mis cuentos a `/`. Mis cuentos sigue en el navbar y en el menú de la cuenta. Cambia lo dicho en DECISIONS 110, 115 y 152 sobre el logo y la caída tras el ingreso; sigue valiendo que solo se vuelve a un pago o a un pedido, y que el ingreso nunca lleva al creador ni a los ajustes.
+
+## 221 — Navbar con sesión: «Crear» como botón y avatar neutro
+
+En el navbar de quien tiene sesión, «+ Crear» se veía como un enlace más (el estilo de botón coral nunca se aplicaba: apuntaba a un contenedor que ya no existía) y el avatar de la cuenta llevaba el color de la marca, compitiendo con él. Ahora «Crear» es un botón coral relleno y el avatar es gris azulado suave, de un solo color. `NavMenu` acepta `triggerClassName` para estilar el botón que abre el menú.
+
+## 222 — Mis cuentos más simple y Mis pedidos en su propia página
+
+- **«¿Qué quieres crear?» (las tres tarjetas «Comenzar»)** solo se muestra en Mis cuentos cuando la persona todavía no tiene cuentos en proceso ni pedidos; después, el botón «Crear» del navbar y la home con sesión ya llevan al siguiente paso, y las tarjetas dejaban los borradores abajo.
+- **Pedidos** pasa a su propia página, `/mis-pedidos` (`/my-orders`, `/meus-pedidos`): la lista en vivo con su estado, la cronología y «Pedir de nuevo»; sin pedidos dice que todavía no hay. «Pedidos» del navbar y del menú de la cuenta apuntan ahí (con el contador de pedidos en curso). Mis cuentos queda para borradores, personajes y proyectos profesionales. La página es privada (sin analítica y fuera de los buscadores).
+
+## 223 — Creador de Celebraciones: las preguntas de una fiesta, en las 4 etapas de siempre
+
+El creador de Celebraciones era el formulario de Familias con otro nombre y no reflejaba lo que promete su landing. Se mantienen las 4 etapas, `WizardShell` y las tarjetas; cambian las preguntas. El objetivo es que quien organiza una fiesta con fecha vea su muestra y pague en la misma sesión.
+
+- **Personaje:** nombre, edad que cumple, cómo nos referimos al protagonista (opcional; evita un cuento con el género equivocado) y foto o rasgos. Sin gustos, mascota ni amigo.
+- **Aventura (paso `party`):** temática entre las 6 de la landing (llega elegida con `?tema=`), qué celebran, fecha y lugar. La historia y el estilo ya no se preguntan: salen de la temática y de la edad (`party.ts`).
+- **Ajustes (paso `kit`):** kit digital completo (marcado) o solo la invitación, dedicatoria del cuento de recuerdo y tono de la invitación. Los precios son los mismos de la landing y el pago (`eventPricing`).
+- **Vista previa:** resumen, aprobación del personaje y muestra gratis con la invitación armada en código con la portada aprobada (no genera imágenes ni gasta IA) y el cuento de recuerdo. Ahí mismo se ofrece el libro del cumpleañero (ahora no, digital o impreso) y un enlace para abuelos y tíos, sin datos del niño.
+- **El libro del cumpleañero se paga aparte:** cada pedido es de un solo libro, así que no se suma al total del kit (el prototipo sí lo sumaba). Lo elegido queda en `event.bookChoice` y el libro se crea desde el pedido, con el botón que ya existía.
+- **Al pago** llegan marcado lo elegido y el lugar; se pueden cambiar. «Solo la invitación» sigue incluyendo el mini cuento, porque el diseño lo trae (DECISIONS 187).
+- **Tono:** los textos viven en `INVITATION_TONE_COPY`, usados por la muestra y por el PDF. `fun` es el texto de siempre, así los pedidos anteriores no cambian. Las ocasiones que no son cumpleaños conservan sus textos.
+- **Reglas de Firestore:** `validEvent` aceptaba solo `birthday`, de modo que elegir bautismo, comunión o egreso fallaba al guardar; ahora acepta las 4 ocasiones y los campos nuevos. **Hay que desplegar las reglas junto con la web**, si no el creador no puede guardar `party` ni `kit`.
+- **Borradores existentes:** `party` y `kit` van al final de `WIZARD_STEPS` para no mover el índice histórico; un borrador parado en un paso que Celebraciones ya no tiene retoma en la fiesta. Familias no cambia, salvo los nombres de etapa en español («Personaje», «Aventura», «Vista previa»).
+
+## 224 — Creador de Profesionales: se parte de la situación a trabajar
+
+Mismas 4 etapas y mismos componentes que Familias y Celebraciones (DECISIONS 223), con las preguntas de quien acompaña a varios niños. El objetivo es que el profesional vuelva por cada niño que atiende.
+
+- **Personaje:** un solo alias, que es también el nombre del cuento (antes eran dos campos), edad, foto o rasgos con «Sin foto» recomendado y rasgos opcionales, con el aviso de no cargar diagnósticos. Un proyecto anterior con alias y nombre distintos conserva su nombre mientras no cambie el alias. Con foto sigue la autorización del tutor, sin cambios.
+- **Aventura (paso `focus`):** colección, objetivo principal y cuento base. Los tres son obligatorios.
+- **Ajustes (paso `reading`):** extensión, cantidad de texto y nivel de lectura por separado y a la vista, con lo sugerido para su edad y el aviso de material educativo no clínico. El estilo no se pregunta: sale de la historia. «Repetir configuración» conserva lo copiado.
+- **Extensión inicial:** arranca en Mini (decisión de Sebas), no en la que Familias sugiere por edad: a los 6 años era Gran aventura, de 32 páginas, y subía el precio frente al «desde» de la landing. La cantidad de texto y el nivel siguen la edad.
+- **Landing:** prometía regenerar la ilustración de cada página, pero la muestra ilustra la portada y las primeras páginas, con un límite de regeneraciones. Se ajustó el texto (decisión de Sebas) en lugar de ampliar el límite, que gasta IA.
+- **Vista previa:** el texto editable y la nueva ilustración por página que ya existían, precio profesional de su extensión, una línea sobre el descuento por volumen sin cifras y el aviso no clínico.
+- **Objetivos:** el objetivo sale de los temas de la colección, pero el servidor solo aceptaba los de la historia cuando esta tenía propios, así que se habría descartado sin aviso. `storyGoalOptions` acepta ambos. Siguen siendo textos del catálogo: no entra texto libre al prompt.
+- **No se agrega** pregunta de disciplina ni ficha para el adulto. Enseñanzas, recuerdos y dedicatoria salen de esta línea.
+- **Borradores existentes:** retoman en `focus`. **Hay que desplegar las reglas de Firestore junto con la web** (`focus` y `reading` son pasos nuevos) y la API (`storyGoalOptions`).
+
+## 225 — Calidad antes de salir: control de clones, secundarios distinguibles, zona de texto y créditos
+
+Dos evaluaciones del 2026-11-03 (kit de Celebraciones y cuento de Profesionales) repiten los mismos defectos. Antes del live se corrige lo que se arregla con instrucciones y sin tocar el pipeline:
+
+- **Revisor de páginas:** un clon o gemelo del protagonista en el fondo, o un niño que ocupa su lugar, es `repair` (se regenera la ilustración), no `human_review`. Revisión humana queda para contenido inapropiado, datos sensibles o problemas del texto. Antes, una portada con un clon quedaba trabada en revisión manual.
+- **Dirección de arte:** el protagonista aparece una vez por imagen; los demás son otras personas (otra cara, otro pelo, otra ropa). Se compone con las caras en la franja central y el tercio inferior (o superior) liso, que es donde la maquetación pone el texto (`textPlacements` elige la región más calma, pero no sabe dónde están las caras).
+- **Planificador:** los secundarios se distinguen por silueta (pelo, piel o contextura, y un color de ropa propio que el protagonista no usa) y no se intercambian la ropa; un solo lugar u objeto central con un solo nombre y un solo aspecto, y una sola metáfora por libro.
+- **Texto (Profesionales):** la emoción se nombra con una palabra y una señal del cuerpo; un adulto valida y acompaña; las técnicas llevan conteo y estribillo; el refugio es un lugar al que se va para volver; sin «mágicamente». Para todas las líneas: cada objeto importante se llama siempre igual.
+- **Créditos:** la página final de todos los libros dice que texto e ilustraciones se crearon con ayuda de inteligencia artificial y revisadas por StoryNido, el © y la licencia de uso personal sin reventa.
+- **Kit de Celebraciones:** actividades por edad con palabras del cuento (DECISIONS anteriores del kit), datos de la familia ordenados, hora y lugar obligatorios, y una guía de «cómo imprimir» en el pedido terminado.
+- **Mis cuentos:** dos bloques, En curso y Terminados, igual para las tres líneas.
+
+**Queda para después del live** (docs/PENDIENTES.md, sección H): guía para el adulto y fichas de Profesionales, libro de 24 páginas, formatos de imprenta (21×21, CMYK, PDF/X), 300 ppi y sangrado de 3 mm si el impreso no sale el 16, varias invitaciones por hoja y versión plegable, hojas de personaje para secundarios y objetos, dialecto por país, suscripción y referidos, catálogo de 12 temas.
+
+## 226 — Home con sesión: ajustes de la revisión del 2026-11-03
+
+De la revisión de la home con sesión (feedback del 2026-11-03), lo que entra antes del live y es chico:
+
+- Sin la franja crema vacía antes del footer (el espacio para la barra fija es solo del celular).
+- «Más aventuras» no repite la historia que ya compró o tiene en curso (si quedan menos de cuatro, completa con el resto).
+- El hero de pedido usa la portada real del libro y, si no está, la portada de su historia con el nombre; nunca la foto genérica.
+- El contador de «Pedidos» es neutro (no rojo: son pedidos en curso, no una alerta).
+- El menú de cuenta del escritorio deja de repetir Mis cuentos y Pedidos, que ya están en la barra (en el celular siguen).
+
+Se mantiene lo que la revisión proponía cambiar y ya estaba decidido: «Crear» como botón visible (DECISIONS 221) y el avatar gris.
+
+**Queda para después del live:** navbar y footer en Figtree con la misma grilla, Explorar en tres columnas iguales, secciones según el estado del usuario (sin «Un libro de verdad» ni «Antes de decidir» con un pedido en curso), acordeón de preguntas del sitio, un solo fondo de página, y el criterio para no poner el nombre sobre la cara de otro chico.
+
+## 227 — Una sola home con sesión para las tres líneas
+
+La home con sesión deja de girar alrededor de un cuento de Familias. Es la misma para todos: saludo («Hola, {nombre}» en Caveat, si la cuenta tiene nombre), «Lo próximo» (lo que pide una acción, con el único botón durazno), «Crear algo nuevo» con las tres líneas y «Tus proyectos» con borradores y pedidos de todas las líneas (máximo 4 filas). Al pie, una línea de confianza. Se quitan el carrusel de historias, formatos y precios, «Cómo sigue», las tres preguntas y la barra fija del celular. La tipografía y el botón vuelven a la marca v3 (Quicksand y durazno con texto navy, sin Fraunces/Figtree propios).
+
+Qué línea manda (`pickHomeLine`, función pura con pruebas): 1) la muestra sin comprar más cercana a la compra de cualquier línea; 2) un pedido en curso; 3) perfil profesional activado; 4) la línea por la que entró (RememberChannel); 5) la del último pedido, o Familias. Modo Pro (lista «Proyectos por niño» arriba, botón «Nuevo proyecto» y avance del descuento) cuando Profesionales gana por la regla 1 o 3, o todo lo de la cuenta es profesional. Celebraciones tiene sus propios textos del kit, y con un kit en curso la tarjeta de Familias ofrece «El libro del cumpleañero».

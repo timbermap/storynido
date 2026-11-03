@@ -1,6 +1,6 @@
 import type { ProviderRegistry } from '@storynido/providers';
 import type { EmailNotifier } from '@storynido/emails';
-import { isSimulatedPrinter, signMockPaymentWebhook } from '@storynido/providers';
+import { signMockPaymentWebhook } from '@storynido/providers';
 import {
   COLLECTIONS,
   PRINT_FORMATS,
@@ -969,7 +969,6 @@ export class CheckoutService {
         this.providers.payment().id === 'mock',
       canSimulatePrint:
         this.options.devToolsEnabled &&
-        isSimulatedPrinter(order.print?.provider ?? '') &&
         Boolean(order.print?.externalOrderId) &&
         ['sent_to_print', 'in_production', 'shipped'].includes(order.status),
       canDownload: DOWNLOADABLE_STATUSES.includes(order.status),

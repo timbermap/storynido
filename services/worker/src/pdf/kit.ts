@@ -1,7 +1,14 @@
-import type { EventType, KitPiece, PaperSize } from '@storynido/shared';
+import {
+  INVITATION_TONE_COPY,
+  type EventType,
+  type InvitationTone,
+  type KitPiece,
+  type PaperSize,
+} from '@storynido/shared';
 
 import { fontFaces } from './fonts';
 import { mazeSvg } from './maze';
+import { dotsSvg, plain, secretMessage, wordSearch, wordSearchSvg } from './puzzles';
 
 /**
  * Piezas del kit de Eventos (fase 12b): cumpleaños y otras ocasiones. Se arman con la portada y las ilustraciones del
@@ -17,6 +24,8 @@ export interface KitBook {
   title: string;
   /** Ocasión: cambia los textos de las piezas (el cumpleaños es la base). */
   occasion: EventType;
+  /** Tono de la invitación de cumpleaños (por defecto, el texto de siempre). */
+  tone?: InvitationTone;
   turningAge: number | null;
   /** Fecha del evento (AAAA-MM-DD). */
   eventDate: string | null;
@@ -26,6 +35,10 @@ export interface KitBook {
   paper: PaperSize;
   /** Invitados: con nombres, las etiquetas de la bolsita salen una por invitado («Para Juana»). */
   guests?: readonly string[];
+  /** Palabras del cuento para la sopa de letras (ya en mayúsculas y sin tildes). */
+  storyWords?: readonly string[];
+  /** Otras ilustraciones del cuento (data URI) para variar stickers y etiquetas; la portada va primero. */
+  pictures?: readonly string[];
   /** Firma discreta «Hecho con StoryNido» en el dorso de la invitación (por defecto sí; se puede quitar). */
   signature?: boolean;
 }
@@ -44,6 +57,19 @@ const PAPER = '#fffaf3';
 
 const STRINGS: Record<KitLang, Record<string, string>> = {
   es: {
+    dots: 'Une los puntos del 1 al 10',
+    dotsHint: 'Empieza en el 1 y sigue en orden. ¿Qué dibujo aparece?',
+    search: 'Sopa de letras del cuento',
+    searchHint: 'Encuentra estas palabras. Pueden estar en {directions}.',
+    searchEasy: 'derecha, abajo y en diagonal',
+    searchHard: 'cualquier dirección, también al revés',
+    secret: 'Mensaje secreto',
+    secretHint: 'Cada número es una letra. Usa la tabla para descubrir el mensaje.',
+    secretMsg: 'FELIZ CUMPLE',
+    secretMsgOther: 'MUCHAS FELICITACIONES',
+    solutions: 'Soluciones para los adultos',
+    solSearch: 'Sopa de letras',
+    solSecret: 'Mensaje secreto',
     invite: '¡Te invito a mi cumple!',
     turning: '¡{name} cumple {age}!',
     birthday: '¡Es el cumple de {name}!',
@@ -67,6 +93,19 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     cut: 'Recortar por las marcas',
   },
   en: {
+    dots: 'Connect the dots from 1 to 10',
+    dotsHint: 'Start at 1 and follow the numbers. What picture appears?',
+    search: 'Story word search',
+    searchHint: 'Find these words. They can be placed {directions}.',
+    searchEasy: 'across, down and diagonally',
+    searchHard: 'in any direction, even backwards',
+    secret: 'Secret message',
+    secretHint: 'Each number is a letter. Use the key to read the message.',
+    secretMsg: 'HAPPY BIRTHDAY',
+    secretMsgOther: 'CONGRATULATIONS',
+    solutions: 'Answers for the grown-ups',
+    solSearch: 'Word search',
+    solSecret: 'Secret message',
     invite: 'You’re invited to my party!',
     turning: '{name} is turning {age}!',
     birthday: 'It’s {name}’s birthday!',
@@ -90,6 +129,19 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     cut: 'Cut along the marks',
   },
   pt: {
+    dots: 'Ligue os pontos de 1 a 10',
+    dotsHint: 'Comece no 1 e siga a ordem. Que desenho aparece?',
+    search: 'Caça-palavras da história',
+    searchHint: 'Encontre estas palavras. Elas podem estar {directions}.',
+    searchEasy: 'para a direita, para baixo e na diagonal',
+    searchHard: 'em qualquer direção, até de trás para frente',
+    secret: 'Mensagem secreta',
+    secretHint: 'Cada número é uma letra. Use a tabela para descobrir a mensagem.',
+    secretMsg: 'FELIZ ANIVERSARIO',
+    secretMsgOther: 'PARABENS',
+    solutions: 'Respostas para os adultos',
+    solSearch: 'Caça-palavras',
+    solSecret: 'Mensagem secreta',
     invite: 'Venha para o meu aniversário!',
     turning: '{name} vai fazer {age}!',
     birthday: 'É o aniversário de {name}!',
@@ -235,12 +287,62 @@ const OCCASION_STRINGS: Record<
   },
 };
 
+const SMALL_WORDS = new Set([
+  'de',
+  'del',
+  'la',
+  'las',
+  'el',
+  'los',
+  'y',
+  'e',
+  'en',
+  'da',
+  'do',
+  'of',
+  'the',
+  'and',
+  'at',
+]);
+
+/** «casa de pepe» → «Casa de Pepe»: mayúscula inicial en cada palabra, menos los conectores. */
+export function tidyText(value: string): string {
+  return value
+    .trim()
+    .replace(/\s+/g, ' ')
+    .split(' ')
+    .map((word, index) =>
+      index > 0 && SMALL_WORDS.has(word.toLowerCase())
+        ? word.toLowerCase()
+        : word.charAt(0).toLocaleUpperCase() + word.slice(1),
+    )
+    .join(' ');
+}
+
+/** Datos que escribe la familia, ordenados antes de imprimirlos (el nombre del niño no se toca). */
+function tidyBook(book: KitBook): KitBook {
+  return {
+    ...book,
+    invitation: book.invitation
+      ? {
+          ...book.invitation,
+          place: book.invitation.place ? tidyText(book.invitation.place) : null,
+        }
+      : null,
+    guests: book.guests?.map(tidyText),
+  };
+}
+
 const escapeHtml = (value: string) =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 function t(book: KitBook, key: string, extra: Record<string, string | number> = {}) {
   const occasion = book.occasion === 'birthday' ? undefined : OCCASION_STRINGS[book.occasion];
-  let value = occasion?.[book.language][key] ?? STRINGS[book.language][key] ?? key;
+  const toned =
+    book.occasion === 'birthday' && book.tone && (key === 'invite' || key === 'waiting')
+      ? INVITATION_TONE_COPY[book.language][book.tone][key]
+      : undefined;
+  let value = toned ?? occasion?.[book.language][key] ?? STRINGS[book.language][key] ?? key;
   for (const [name, replacement] of Object.entries({
     name: book.childName,
     age: book.turningAge ?? '',
@@ -347,6 +449,12 @@ function thankYou(book: KitBook, copies: number, print = false) {
 }
 
 /** Hoja de stickers redondos de 2" (50 mm), con el contorno de corte marcado. */
+/** Ilustración de la pieza número `index`: la portada y las demás del cuento, en rotación. */
+function artAt(book: KitBook, index: number): string {
+  const all = [book.cover, ...(book.pictures ?? [])];
+  return all[index % all.length] ?? book.cover;
+}
+
 function stickers(book: KitBook, copies: number) {
   const paper = PAPER_MM[book.paper];
   const size = 50;
@@ -357,7 +465,7 @@ function stickers(book: KitBook, copies: number) {
   const items = Array.from({ length: columns * rows }, (_, index) => {
     const left = gapX + (index % columns) * (size + gapX);
     const top = gapY + Math.floor(index / columns) * (size + gapY);
-    return `<div class="sticker" style="left:${String(left)}mm;top:${String(top)}mm"><img src="${book.cover}" alt=""><p><span class="display">${escapeHtml(book.childName)}</span>${book.turningAge ? `<small>${t(book, 'years')}</small>` : ''}</p></div>`;
+    return `<div class="sticker" style="left:${String(left)}mm;top:${String(top)}mm"><img src="${artAt(book, index)}" alt=""><p><span class="display">${escapeHtml(book.childName)}</span>${book.turningAge ? `<small>${t(book, 'years')}</small>` : ''}</p></div>`;
   }).join('');
   const css = `
 .sticker { position: absolute; width: ${String(size)}mm; height: ${String(size)}mm; border-radius: 50%; overflow: hidden; border: 0.3mm dashed #b9acbf; }
@@ -395,7 +503,7 @@ function favorTags(book: KitBook, copies: number) {
         const left = gapX + (index % columns) * (tag.width + gapX);
         const top = gapY + Math.floor(index / columns) * (tag.height + gapY);
         const heading = guest === null ? t(book, 'tag') : t(book, 'tagFor', { guest });
-        return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><span class="hole"></span><img src="${book.cover}" alt=""><p class="display">${heading}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
+        return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><span class="hole"></span><img src="${artAt(book, index + 1)}" alt=""><p class="display">${heading}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
       })
       .join('');
     return `<section class="page" data-label="etiquetas">${items}<p class="license">${t(book, 'license', { copies })} · ${t(book, 'cut')}</p></section>`;
@@ -409,38 +517,89 @@ function favorTags(book: KitBook, copies: number) {
   return { css, pages };
 }
 
-/** Kit de actividades del cumple (laberinto, dibujar la torta, unir palabras). Sin IA. */
+/** Nivel de las actividades según la edad que cumple (sin edad, el del medio: 6 a 8 años). */
+export type ActivityLevel = 'little' | 'middle' | 'big';
+
+export const activityLevel = (age: number | null): ActivityLevel =>
+  age !== null && age <= 5 ? 'little' : age !== null && age >= 9 ? 'big' : 'middle';
+
+/** Pasatiempos del cumple (sin IA): el nivel sigue la edad y la sopa de letras usa palabras del cuento. */
 function activities(book: KitBook, copies: number) {
-  const words = t(book, 'words').split(' · ');
+  const level = activityLevel(book.turningAge);
+  const seed = book.childName.length * 31 + 7;
   const page = (title: string, body: string, index: number) =>
     `<section class="page" data-label="actividad ${String(index)}"><div class="activity"><p class="kicker">${t(book, 'activities')}</p><h2 class="display">${title}</h2>${body}</div><p class="license">${t(book, 'license', { copies })}</p></section>`;
   const css = `
 .activity { position: absolute; inset: 16mm 16mm 18mm; display: flex; flex-direction: column; gap: 6mm; }
 .activity .kicker { font-size: 9pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: ${LAVENDER}; }
 .activity h2 { font-size: 24pt; }
-.activity svg { width: 100%; flex: 1; }
+.activity svg { width: 100%; flex: 1; min-height: 0; }
 .activity .box { flex: 1; border: 0.6mm dashed #b9acbf; border-radius: 6mm; }
 .activity .hint { font-size: 12pt; color: #69616c; }
-.match { display: grid; grid-template-columns: 1fr 1fr; gap: 14mm 30mm; font-size: 18pt; font-family: 'Fraunces', serif; margin-top: 10mm; }
-.match .right { text-align: right; }`;
-  return {
-    css,
-    pages: [
-      page(t(book, 'maze'), mazeSvg(10, 13, book.childName.length * 31 + 7), 1),
-      page(t(book, 'draw'), `<p class="hint">${t(book, 'drawHint')}</p><div class="box"></div>`, 2),
-      page(
-        t(book, 'match'),
-        `<div class="match">${words.map((word, row) => `<span>${word}</span><span class="right">${[...words].reverse()[row] ?? ''}</span>`).join('')}</div>`,
-        3,
-      ),
-    ],
-  };
+.activity .words { display: flex; flex-wrap: wrap; gap: 3mm 8mm; font-size: 13pt; font-weight: 700; color: ${INK}; letter-spacing: 0.08em; }
+.activity .key { display: flex; flex-wrap: wrap; gap: 2mm; }
+.activity .key span { display: flex; flex-direction: column; align-items: center; width: 10mm; border: 0.3mm solid #b9acbf; border-radius: 2mm; font-size: 11pt; font-weight: 700; }
+.activity .key span small { font-size: 9pt; color: ${LAVENDER}; border-top: 0.3mm solid #b9acbf; width: 100%; text-align: center; }
+.activity .cipher { display: flex; flex-wrap: wrap; gap: 6mm 9mm; }
+.activity .cipher .word { display: flex; gap: 2mm; }
+.activity .cipher .letter { display: flex; flex-direction: column; align-items: center; width: 10mm; font-size: 13pt; font-weight: 700; }
+.activity .cipher .letter i { display: block; width: 100%; height: 9mm; border-bottom: 0.4mm solid ${INK}; }
+.activity .solved { font-size: 14pt; font-weight: 700; letter-spacing: 0.1em; color: ${INK}; }`;
+  const maze =
+    level === 'little'
+      ? mazeSvg(8, 10, seed)
+      : level === 'middle'
+        ? mazeSvg(15, 19, seed)
+        : mazeSvg(20, 26, seed);
+  const pages: string[] = [page(t(book, 'maze'), maze, 1)];
+  if (level === 'little') {
+    pages.push(
+      page(t(book, 'dots'), `<p class="hint">${t(book, 'dotsHint')}</p>${dotsSvg()}`, 2),
+      page(t(book, 'draw'), `<p class="hint">${t(book, 'drawHint')}</p><div class="box"></div>`, 3),
+    );
+    return { css, pages };
+  }
+  const hard = level === 'big';
+  const words = storyWordsOf(book, hard ? 8 : 6, hard ? 14 : 11);
+  const puzzle = wordSearch(words, hard ? 15 : 12, seed + 3, hard);
+  const searchBody = `<p class="hint">${t(book, 'searchHint', { directions: t(book, hard ? 'searchHard' : 'searchEasy') })}</p><div class="words">${puzzle.words.map(escapeHtml).join('<span>·</span>')}</div>${wordSearchSvg(puzzle, false)}`;
+  pages.push(page(t(book, 'search'), searchBody, 2));
+  const message = `${t(book, book.occasion === 'birthday' ? 'secretMsg' : 'secretMsgOther')} ${book.childName}`;
+  const secret = secretMessage(message, seed + 11);
+  const cipher = `<div class="cipher">${secret.words
+    .map(
+      (word) =>
+        `<div class="word">${word.map((number) => `<span class="letter">${String(number)}<i></i></span>`).join('')}</div>`,
+    )
+    .join('')}</div>`;
+  const keyTable = `<div class="key">${secret.key.map((entry) => `<span>${entry.letter}<small>${String(entry.number)}</small></span>`).join('')}</div>`;
+  pages.push(
+    page(t(book, 'secret'), `<p class="hint">${t(book, 'secretHint')}</p>${keyTable}${cipher}`, 3),
+    page(t(book, 'draw'), `<p class="hint">${t(book, 'drawHint')}</p><div class="box"></div>`, 4),
+    page(
+      t(book, 'solutions'),
+      `<p class="hint">${t(book, 'solSearch')}</p>${wordSearchSvg(puzzle, true)}<p class="hint">${t(book, 'solSecret')}</p><p class="solved">${escapeHtml(plain(message).length > 0 ? message.replace(/[^\p{L} ]/gu, '') : message)}</p>`,
+      5,
+    ),
+  );
+  return { css, pages };
+}
+
+/** Palabras de la sopa de letras: las del cuento y, si faltan, las del cumpleaños. */
+function storyWordsOf(book: KitBook, count: number, max: number): string[] {
+  const own = [...(book.storyWords ?? [])].filter((word) => word.length <= max);
+  const fallback = t(book, 'words')
+    .split(' · ')
+    .map(plain)
+    .filter((word) => word.length >= 4 && word.length <= max);
+  return [...new Set([...own, ...fallback])].slice(0, count);
 }
 
 /** La invitación como imagen para WhatsApp (4:5, 1080×1350 px). */
 export const INVITATION_IMAGE_SIZE = { width: 1080, height: 1350 } as const;
 
-export function invitationImageHtml(book: KitBook): string {
+export function invitationImageHtml(raw: KitBook): string {
+  const book = tidyBook(raw);
   const date = formatDate(book);
   const heading =
     book.occasion === 'birthday' && book.turningAge ? t(book, 'turning') : t(book, 'birthday');
@@ -478,10 +637,11 @@ export interface KitPieceDocument {
 
 /** El HTML de cada pieza (el librito es el PDF digital del libro, que ya existe). */
 export function kitPieceDocument(
-  book: KitBook,
+  raw: KitBook,
   piece: Exclude<KitPiece, 'mini_book'>,
   copies: number,
 ): KitPieceDocument {
+  const book = tidyBook(raw);
   const built =
     piece === 'invitation'
       ? invitation(book, copies)
@@ -503,9 +663,10 @@ export function kitPieceDocument(
 
 /** Tarjeta para imprimir (invitación o agradecimiento): un PDF de dos páginas, frente y dorso. */
 export function kitCardPrintDocument(
-  book: KitBook,
+  raw: KitBook,
   piece: 'invitation' | 'thank_you',
 ): KitPieceDocument {
+  const book = tidyBook(raw);
   const built = piece === 'invitation' ? invitation(book, 0, true) : thankYou(book, 0, true);
   return {
     piece,

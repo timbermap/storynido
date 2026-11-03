@@ -32,6 +32,8 @@ const webappConfig = (() => {
 const firebaseAuthHost = webappConfig?.authDomain;
 
 const nextConfig: NextConfig = {
+  // Permite levantar un segundo servidor de desarrollo (otro puerto) sin pisar el `.next` del primero.
+  distDir: process.env.NEXT_DIST_DIR ?? '.next',
   reactStrictMode: true,
   env: webappConfig ? { NEXT_PUBLIC_FIREBASE_WEBAPP_CONFIG: JSON.stringify(webappConfig) } : {},
   rewrites: () =>

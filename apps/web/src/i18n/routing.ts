@@ -14,6 +14,8 @@ export const routing = defineRouting({
   localeCookie: false,
   pathnames: {
     '/': '/',
+    // Solo desarrollo: la home con sesión con datos de prueba (da 404 en producción).
+    '/dev-home': '/dev-home',
     // Líneas comerciales: una landing por público (DECISIONS 102).
     '/families': { es: '/familias', en: '/families', pt: '/familias' },
     '/events': { es: '/eventos', en: '/events', pt: '/eventos' },
@@ -41,6 +43,7 @@ export const routing = defineRouting({
     '/login/finish': { es: '/ingresar/confirmar', en: '/login/finish', pt: '/entrar/confirmar' },
     '/account': { es: '/cuenta', en: '/account', pt: '/conta' },
     '/my-stories': { es: '/mis-cuentos', en: '/my-stories', pt: '/minhas-historias' },
+    '/my-orders': { es: '/mis-pedidos', en: '/my-orders', pt: '/meus-pedidos' },
     '/my-stories/characters/[childId]': {
       es: '/mis-cuentos/personajes/[childId]',
       en: '/my-stories/characters/[childId]',

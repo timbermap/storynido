@@ -40,7 +40,6 @@ export default async function EventsCatalogPage({ params }: Props) {
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{t('catalogSubtitle')}</p>
       </div>
       <LandingCollections
-        title={t('collectionsTitle')}
         collections={collections}
         stories={stories}
         createLabel={t('viewStory')}

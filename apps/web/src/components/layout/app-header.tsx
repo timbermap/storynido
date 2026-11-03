@@ -3,11 +3,11 @@ import { getTranslations } from 'next-intl/server';
 import { AccountLink } from './account-link';
 import { AppNav, CreateMenu } from './app-nav';
 import { Logo } from './logo';
-import { Link } from '@/i18n/navigation';
+import { LogoLink } from './logo-link';
 
 /**
  * Navbar de quien ya es cliente: sin las páginas que venden (Familias, Celebraciones,
- * Profesionales). El logo lleva a Mis cuentos; "Crear" reúne las tres opciones y la cuenta tiene
+ * Profesionales). El logo lleva a la home con sesión (DECISIONS 220); "Crear" reúne las tres opciones y la cuenta tiene
  * su menú. En el celular, la navegación vive en la barra inferior.
  */
 export async function AppHeader() {
@@ -15,9 +15,9 @@ export async function AppHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-[rgb(38_50_74/0.06)] bg-background/90 backdrop-blur-md">
       <div className="container-page relative flex h-16 items-center justify-between gap-4 lg:h-[4.75rem]">
-        <Link href="/my-stories" className="flex shrink-0 items-center rounded-xl">
+        <LogoLink>
           <Logo />
-        </Link>
+        </LogoLink>
 
         <nav
           aria-label={t('mainNav')}

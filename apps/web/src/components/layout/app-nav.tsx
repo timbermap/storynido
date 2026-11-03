@@ -31,10 +31,14 @@ export function AppNav() {
         {t('myStories')}
       </Link>
       {orders !== null && orders.total > 0 && (
-        <Link href={{ pathname: '/my-stories', hash: 'orders' }} className={LINK}>
+        <Link
+          href="/my-orders"
+          aria-current={pathname === '/my-orders' ? 'page' : undefined}
+          className={LINK}
+        >
           {t('orders')}
           {orders.inProgress > 0 && (
-            <span className="grid min-w-5 place-items-center rounded-full bg-primary px-1.5 text-xs leading-5 font-bold text-primary-foreground">
+            <span className="grid min-w-5 place-items-center rounded-full bg-navy/10 px-1.5 text-xs leading-5 font-bold text-navy">
               <span aria-hidden="true">{orders.inProgress}</span>
               <span className="sr-only">{t('ordersInProgress', { count: orders.inProgress })}</span>
             </span>
@@ -61,7 +65,7 @@ export function CreateMenu({ children }: { children?: ReactNode }) {
       id="menu-create"
       align="end"
       panelClassName="w-[min(22rem,calc(100vw-2rem))]"
-      className="[&>button]:bg-action [&>button]:px-5 [&>button]:font-bold [&>button]:text-action-foreground [&>button]:hover:bg-action-hover [&>button]:hover:text-action-foreground [&>button]:aria-expanded:text-action-foreground"
+      triggerClassName="bg-action px-5 font-bold text-action-foreground shadow-sm hover:bg-action-hover hover:text-action-foreground aria-expanded:text-action-foreground"
       label={
         <>
           <Plus className="size-4" aria-hidden="true" />

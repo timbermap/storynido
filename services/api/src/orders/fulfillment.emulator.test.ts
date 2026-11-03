@@ -38,7 +38,12 @@ describe('imprenta, descarga y cancelación (fase 12)', () => {
     }
   });
 
-  async function seedOrder(status: string, print = true, externalOrderId = 'po_1') {
+  async function seedOrder(
+    status: string,
+    print = true,
+    externalOrderId = 'po_1',
+    printer = 'mock',
+  ) {
     await db.doc('orders/o1').set({
       ownerUid: 'ana',
       bookId: 'b1',
@@ -47,7 +52,7 @@ describe('imprenta, descarga y cancelación (fase 12)', () => {
       priceSnapshot: null,
       payment: { provider: 'mock', checkoutSessionId: null, paymentId: 'pay_1' },
       print: print
-        ? { provider: 'mock', externalOrderId, trackingNumber: null, trackingUrl: null }
+        ? { provider: printer, externalOrderId, trackingNumber: null, trackingUrl: null }
         : null,
       createdAt: new Date(),
     });
@@ -131,6 +136,32 @@ describe('imprenta, descarga y cancelación (fase 12)', () => {
     expect((await step()).json<{ status: string }>().status).toBe('shipped');
     expect((await step()).json<{ status: string }>().status).toBe('delivered');
     expect((await step()).statusCode).toBe(409);
+  });
+
+  it('con una imprenta real en staging, la simulación avanza el pedido sin llamarla', async () => {
+    await seedOrder('sent_to_print', true, 'po_real', 'gelato');
+    const step = () =>
+      app.inject({
+        method: 'POST',
+        url: '/v1/dev/orders/o1/simulate-print',
+        headers: auth('token-ana'),
+      });
+    expect((await step()).json<{ status: string }>().status).toBe('in_production');
+    expect((await step()).json<{ status: string }>().status).toBe('shipped');
+    const shipped = (await db.doc('orders/o1').get()).get('print.trackingNumber') as string;
+    expect(shipped).toBeTruthy();
+    expect((await step()).json<{ status: string }>().status).toBe('delivered');
+  });
+
+  it('el admin de staging avanza la imprenta de cualquier pedido', async () => {
+    await seedOrder('sent_to_print', true, 'po_real', 'gelato');
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/admin/orders/o1/simulate-print',
+      headers: auth('token-root:admin:mfa'),
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json<{ status: string }>().status).toBe('in_production');
   });
 
   it('cancelar en la imprenta: se puede antes del envío, después no', async () => {

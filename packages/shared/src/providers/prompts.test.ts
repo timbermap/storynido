@@ -72,6 +72,15 @@ describe('plantillas de prompts', () => {
     const prompt = buildStoryPrompt({ ...base, goal: 'Manejar la frustración' });
     expect(prompt).toContain('«Manejar la frustración»');
     expect(prompt).toContain('no des\nindicaciones terapéuticas ni diagnósticos');
+    // Reglas de acompañamiento: emoción nombrada, adulto que valida, técnica con conteo y sin magia.
+    expect(prompt).toContain('señal del cuerpo');
+    expect(prompt).toContain('Un adulto cercano valida');
+    expect(prompt).toContain('mágicamente');
+    expect(buildStoryPrompt(base)).not.toContain('Un adulto cercano valida');
+  });
+
+  it('todos los libros usan un solo nombre para cada objeto o lugar central', () => {
+    expect(buildStoryPrompt(base)).toContain('una sola metáfora central');
   });
 
   it('el objetivo solo vale si es un tema de las colecciones de la historia', () => {

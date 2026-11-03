@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = await getTranslations({ locale, namespace: 'Landing.professionals' });
   return {
-    title: t('catalogTitle'),
+    title: t('catalogMetaTitle'),
     description: t('metaDescription'),
     alternates: localizedAlternates(locale, () => '/professionals/templates'),
   };
@@ -38,10 +38,9 @@ export default async function ProfessionalsCatalogPage({ params }: Props) {
           {t('catalogTitle')}
         </h1>
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{t('catalogSubtitle')}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{t('catalogNote')}</p>
       </div>
       <LandingCollections
-        title={t('collectionsTitle')}
-        subtitle={t('collectionsSubtitle')}
         collections={collections}
         stories={stories}
         createLabel={t('viewStory')}

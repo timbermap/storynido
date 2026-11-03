@@ -56,7 +56,8 @@ export interface StoryPromptInput {
   /** Recuerdos guiados ya moderados (null si no hay). */
   memories?: Memories | null;
   /** Eventos: cumpleaños (con la temática ya moderada). */
-  event?: BookEvent | null;
+  /** Solo lo que entra al cuento: el lugar y lo que se compra no van al prompt. */
+  event?: Pick<BookEvent, 'type' | 'date' | 'turningAge' | 'theme'> | null;
   /** Profesionales: objetivo general (guía narrativa, nunca clínica). */
   goal?: string | null;
   /** Densidad de texto y nivel de lectura (fase 07b). */
@@ -190,6 +191,7 @@ export function narrativeRules(input: Pick<StoryPromptInput, 'childName' | 'even
     '- La primera página tiene un gancho que invita a dar vuelta la hoja.',
     '- Un objetivo claro y un desafío real para su edad, con un momento visual memorable.',
     '- El final cierra con calidez y deja ganas de releerlo.',
+    '- Cada objeto o lugar importante se llama siempre igual y es el mismo en todas las páginas: una sola metáfora central, no varias.',
   ];
   if (input.event) {
     rules.push(
@@ -199,6 +201,11 @@ export function narrativeRules(input: Pick<StoryPromptInput, 'childName' | 'even
     rules.push(
       '- Un solo objetivo en todo el cuento, con una secuencia realista y paso a paso de lo que vive el protagonista.',
       '- Nombra lo que siente (nervios, miedo, frustración) y dile que está bien sentirlo; muestra qué lo ayuda a atravesarlo, paso a paso: la emoción no desaparece por arte de magia. Nunca prometas resultados clínicos.',
+      '- Nombra la emoción con una palabra y con una señal del cuerpo (por ejemplo, «me siento abrumada» y «el corazón me late rápido»).',
+      '- Un adulto cercano valida lo que siente («está bien necesitar un rato») y lo acompaña sin resolverlo por el protagonista.',
+      '- Si hay una técnica (respirar, contar, apretar un almohadón), descríbela en pasos concretos con conteo y un estribillo corto que se repite al menos dos veces.',
+      '- Si hay un refugio o un rincón, es un lugar al que se va para volver: el final muestra que el protagonista regresa a lo que estaba haciendo.',
+      '- No uses la palabra «mágicamente» ni atajos mágicos: el cambio ocurre porque el protagonista hizo algo.',
     );
   } else {
     rules.push('- Emoción y vínculo, con un conflicto verdadero que se resuelve.');

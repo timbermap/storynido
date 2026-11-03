@@ -574,6 +574,11 @@ cast: every OTHER person who appears in two or more scenes (a teacher, a classma
 look in English (age, hair, clothes and colors). Take the gender from the brief and the story (for example "el profe" or "he" means male,
 "la profe" means female); use unspecified only when nothing says it. In mustBeVisible, always name these people with that gender
 ("the male teacher") so every scene agrees. Empty array if nobody else recurs.
+Recurring characters must be told apart at a glance, even in silhouette: every companion and cast member differs from the protagonist
+in hair color and style, skin tone or build, and has a signature outfit color the protagonist never wears; two characters never swap
+outfits. One central place or object that recurs (a shelter, a ship, a lantern) is described once in continuityFacts with a fixed
+look, is always called by the same name, and is drawn the same way in every scene; use a single central metaphor for the whole book,
+never several.
 
 Brief:
 ${request.prompt}`,
@@ -632,9 +637,10 @@ Do not invent evidence: anything you cannot evaluate without another reference m
 Status:
 - pass: no critical issue.
 - repair: a critical issue that a new illustration of the same scene would fix (missing essential trait, wrong anatomy, text in image,
-  image contradicts the text). repairTarget illustration_only.
-- human_review: wrong or mixed-up protagonist, inappropriate content, sensitive data visible, or a problem in the text itself
-  (repairTarget text_only — the approved text is never changed automatically).
+  image contradicts the text, a second figure in the background that duplicates, clones or looks like a twin of the protagonist, a
+  different child standing in for the protagonist). repairTarget illustration_only. A new illustration fixes all of these.
+- human_review: only inappropriate content, sensitive data visible, or a problem in the text itself (repairTarget text_only — the
+  approved text is never changed automatically). Do not use human_review for drawing mistakes: those are repair.
 
 Protagonist: ${request.character}
 Essential traits (must match in every illustration): ${request.mustKeep.join('; ') || 'none'}

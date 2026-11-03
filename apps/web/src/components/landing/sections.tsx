@@ -223,7 +223,8 @@ export function LandingCollections({
   tone?: SectionTone;
   /** Ancla para llegar desde un botón del hero ("Ver ejemplos"). */
   id?: string;
-  title: string;
+  /** Sin título, la sección no repite encabezado (catálogos que ya tienen su H1). */
+  title?: string;
   subtitle?: string;
   collections: { slug: string; name: string; description: string; topics: string[] }[];
   /** Historias de la línea: cada tema muestra las suyas, con enlace para empezar con ella. */
@@ -241,17 +242,27 @@ export function LandingCollections({
   if (collections.length === 0) return null;
   return (
     <section id={id} className={cn('scroll-mt-28', BAND[tone])}>
-      <div className="container-page py-20 lg:py-24">
-        <h2
+      <div className={cn('container-page', title ? 'py-20 lg:py-24' : 'pt-10 pb-20 lg:pb-24')}>
+        {title && (
+          <h2
+            className={cn(
+              'text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium',
+              headingTone(tone),
+            )}
+          >
+            {title}
+          </h2>
+        )}
+        {title && subtitle && (
+          <p className={cn('mt-3 max-w-2xl text-lg', subtleTone(tone))}>{subtitle}</p>
+        )}
+        <ul
           className={cn(
-            'text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium',
-            headingTone(tone),
+            '-mx-4 flex snap-x snap-mandatory items-start gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0',
+            // Sin encabezado propio, el espacio de arriba ya lo da el padding de la sección.
+            title && 'mt-10',
           )}
         >
-          {title}
-        </h2>
-        {subtitle && <p className={cn('mt-3 max-w-2xl text-lg', subtleTone(tone))}>{subtitle}</p>}
-        <ul className="-mx-4 mt-10 flex snap-x snap-mandatory items-start gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0">
           {collections.map((collection) => {
             const own = stories.filter((story) => story.collectionIds.includes(collection.slug));
             const startLabel = start ? (

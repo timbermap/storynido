@@ -340,12 +340,31 @@ describe('books', () => {
     // Eventos: cumpleaños con fecha, edad y temática; nada más.
     const event = { type: 'birthday', date: '2026-12-05', turningAge: 6, theme: 'dinosaurios' };
     await assertSucceeds(updateDoc(ref, { event, updatedAt: serverTimestamp() }));
+    await assertSucceeds(
+      updateDoc(ref, {
+        event: {
+          ...event,
+          type: 'baptism',
+          turningAge: null,
+          place: 'Parque Lezama',
+          tone: 'sweet',
+          offer: 'invitation',
+          bookChoice: 'printed',
+        },
+        wizardStepKey: 'party',
+        updatedAt: serverTimestamp(),
+      }),
+    );
     for (const bad of [
       { ...event, type: 'wedding' },
       { ...event, date: '5/12/2026' },
       { ...event, turningAge: 40 },
       { ...event, theme: 'x'.repeat(61) },
       { ...event, guests: ['Luis'] },
+      { ...event, place: 'x'.repeat(81) },
+      { ...event, tone: 'solemne' },
+      { ...event, offer: 'gratis' },
+      { ...event, bookChoice: 'tapa' },
     ]) {
       await assertFails(updateDoc(ref, { event: bad, updatedAt: serverTimestamp() }));
     }

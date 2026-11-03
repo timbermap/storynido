@@ -1,5 +1,6 @@
 import type {
   Book,
+  BookLength,
   Channel,
   ContentType,
   CountryCode,
@@ -55,8 +56,19 @@ export interface WizardData {
   editorial: EditorialConfig;
   /** Colecciones de Profesionales: sus temas son los objetivos que se pueden elegir. */
   collections: PublicCollection[];
+  /** Temáticas de Celebraciones (las de la landing). */
+  eventThemes: PublicCollection[];
+  /** Precios del kit y de la invitación en el país; null si no se venden ahí. */
+  eventPrices: EventPriceHint | null;
   /** Precios del país (los mismos de la ficha y el checkout); null si no se vende ahí. */
   prices: PriceHint | null;
+}
+
+export interface EventPriceHint {
+  currency: Offer['currency'];
+  country: CountryCode;
+  fullKitMinor: number;
+  invitationMinor: number;
 }
 
 /** Digital y el impreso más barato, en la moneda del país. */
@@ -65,4 +77,6 @@ export interface PriceHint {
   country: CountryCode;
   digitalMinor: number | null;
   printedFromMinor: number | null;
+  /** Digital con el descuento base del perfil profesional, por extensión. */
+  proByLength: Partial<Record<BookLength, number>>;
 }

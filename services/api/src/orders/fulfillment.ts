@@ -232,23 +232,52 @@ export class FulfillmentService {
     return { url: signed.url, expiresAt: signed.expiresAt.toISOString() };
   }
 
-  /** Imprenta simulada: avanza un paso (en producción → enviado → entregado) por llamada. */
-  async simulatePrint(uid: string, orderId: string) {
+  /**
+   * Imprenta simulada: avanza un paso (en producción → enviado → entregado) por llamada. Solo con
+   * las herramientas de desarrollo (nunca en producción). Con una imprenta real en su sandbox o en
+   * borrador (staging), el paso se aplica directo al pedido, sin firma ni llamada a la imprenta:
+   * sirve para ver qué pasa cuando el pedido se envía y llega al cliente (estado, seguimiento, mails).
+   */
+  async simulatePrint(uid: string | null, orderId: string) {
     const ref = this.db.collection(COLLECTIONS.orders).doc(orderId);
     const order = (await ref.get()).data() as OrderDoc | undefined;
-    if (order?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
+    // Con uid, solo el dueño (herramienta del cliente de pruebas); sin uid, el admin de staging.
+    if (!order || (uid !== null && order.ownerUid !== uid)) {
+      throw new AppError(404, 'not_found', 'Pedido inexistente.');
+    }
     if (!order.print?.externalOrderId) {
       throw new AppError(409, 'bad_request', 'El pedido no está en la imprenta.');
     }
-    if (!this.options.devToolsEnabled || !isSimulatedPrinter(order.print.provider)) {
-      throw new AppError(409, 'bad_request', 'La imprenta no es simulada.');
+    if (!this.options.devToolsEnabled) {
+      throw new AppError(409, 'bad_request', 'La simulación no está disponible.');
     }
     const next = mockPrintWebhookSequence(orderId, order.print.externalOrderId).find((event) =>
       canTransitionOrder(order.status, STATUS_FROM_PRINT[event.data.status]),
     );
     if (!next) throw new AppError(409, 'bad_request', 'No hay más pasos de imprenta.');
-    const webhook = signMockPrintWebhook(this.options.mockWebhookSecret, next);
-    await this.handlePrintWebhook(order.print.provider, webhook.rawBody, webhook.headers);
+    if (isSimulatedPrinter(order.print.provider)) {
+      const webhook = signMockPrintWebhook(this.options.mockWebhookSecret, next);
+      await this.handlePrintWebhook(order.print.provider, webhook.rawBody, webhook.headers);
+    } else {
+      await this.applyStatus(order.print.provider, {
+        type: 'status',
+        eventId: next.id,
+        orderId,
+        externalOrderId: order.print.externalOrderId,
+        status: next.data.status,
+        trackingNumber: next.data.trackingNumber ?? null,
+        trackingUrl: next.data.trackingUrl ?? null,
+      });
+      this.log.info(
+        {
+          event: 'print_simulated',
+          orderId,
+          provider: order.print.provider,
+          status: next.data.status,
+        },
+        'print status simulated on a real printer (dev tools)',
+      );
+    }
     return { status: ((await ref.get()).data() as OrderDoc).status };
   }
 }

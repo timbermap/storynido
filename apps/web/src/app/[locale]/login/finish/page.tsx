@@ -31,7 +31,7 @@ export default function FinishSignInPage() {
       if (back) {
         window.location.replace(back);
       } else {
-        router.replace('/my-stories');
+        router.replace('/');
       }
     } catch (error) {
       setStatus({ error: authErrorKey(error) });

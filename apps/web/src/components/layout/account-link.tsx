@@ -64,11 +64,14 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
       href: '/my-stories',
       title: t('myStories'),
       icon: <BookHeart className="size-4" />,
+      // En el escritorio ya están en la barra: el menú queda con lo propio de la cuenta.
+      mobileOnly: true,
     },
     {
-      href: { pathname: '/my-stories', hash: 'orders' },
+      href: '/my-orders',
       title: t('orders'),
       icon: <ShoppingBag className="size-4" />,
+      mobileOnly: true,
     },
     {
       // En el celular no hay "Explorar" en la barra: vive acá.
@@ -97,7 +100,7 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
   const avatar = (
     <span
       aria-hidden="true"
-      className="grid size-8 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
+      className="grid size-8 place-items-center rounded-full bg-navy/10 text-xs font-bold text-navy"
     >
       {initials(user.displayName, user.email)}
     </span>

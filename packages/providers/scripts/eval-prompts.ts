@@ -26,6 +26,7 @@ import {
   describeCharacterSheet,
   editorialPlan,
   narrativeRules,
+  EMPTY_BIRTHDAY,
   type BookEvent,
   type Channel,
   type CharacterSheet,
@@ -79,7 +80,7 @@ const ALL_CASES: { channel: Channel; slug: string; event?: BookEvent; goal?: str
   {
     channel: 'events',
     slug: 'el-cumpleanos-mas-magico',
-    event: { type: 'birthday', date: null, turningAge: 6, theme: 'dinosaurios' },
+    event: { ...EMPTY_BIRTHDAY, turningAge: 6, theme: 'dinosaurios' },
   },
   {
     channel: 'professionals',

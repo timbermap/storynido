@@ -95,6 +95,18 @@ export async function getOffer(country: CountryCode, locale: Locale): Promise<Of
   }
 }
 
+/** Envío estimado de la tapa dura a un país (centavos de dólar); null si no se puede estimar. */
+export async function getShippingEstimate(country: CountryCode): Promise<number | null> {
+  try {
+    const { estimate } = await catalogApi('catalogShippingEstimate', {
+      query: { country, format: 'hardcover' },
+    });
+    return estimate?.shippingUsdMinor ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** Precio del kit de Eventos en un país; null si no se vende o si la API falla. */
 export async function getEventPricing(country: CountryCode) {
   try {

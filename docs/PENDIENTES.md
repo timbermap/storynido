@@ -64,3 +64,24 @@ Falta: 3 (portada como libro y galería), 5 (recortes para redes y A/B), 6 (port
 - Notificaciones de GitHub: avisan por correo cada CI fallido. Para apagarlas: GitHub, Settings, Notifications, sección Actions (o Unwatch del repositorio). Yo corro el lint y el formato completos antes de cada push.
 - Falla intermitente del E2E de la home en celular (el banner de cookies tapa la tarjeta de Familias).
 - Que la página de enseñanza no cachee el encabezado de la historia destacada.
+
+## H. Después del live (evaluaciones del 2026-11-03)
+
+Origen: evaluación del kit de Celebraciones («Angelica y el reino de los colores») y del cuento de Profesionales («El rincón de la calma»). Lo que se hizo antes del live está en DECISIONS 225.
+
+- [ ] **300 ppi para el impreso** (4K en la generación final, maquetación a 2600 px, `minDpi` 290; las muestras siguen en 2K). Obligatorio antes de ofrecer impreso. Necesita una generación de prueba y la estimación de costo aprobada.
+- [ ] Sangrado de 3 mm en las piezas del kit; varias invitaciones por hoja y versión plegable; stickers recortados alineados a una plancha comercial.
+- [ ] Hoja de personaje fija para secundarios y objetos clave (ropa, utilería), con imagen de referencia por personaje.
+- [ ] Dialecto por país (vos o tú, torta o pastel, formatos de fecha); pasar el país al generador del cuento.
+- [ ] Profesionales: guía de 1 página para el adulto, 3 fichas imprimibles y versión para proyectar; libro de 24 páginas; objetivo, edad y contexto en el formulario; términos para profesionales y tratamiento de datos de menores.
+- [ ] Formatos de imprenta: 21×21 o 20,3×25,4, múltiplo de 4, PDF/X-1a CMYK.
+- [ ] Negocio: suscripción para profesionales, referidos y comisión, catálogo de 12 temas, validación con 5 profesionales reales, métricas semanales (libros con error bloqueante, páginas regeneradas por QA, segundo cuento en 30 días).
+- [ ] Verificar que `BRAND_DOMAIN` de producción sea `storynido.com` (el QR del libro usa el dominio del entorno).
+
+## I. Home con sesión: después del live (revisión del 2026-11-03, DECISIONS 226)
+
+- [ ] Navbar y footer en Figtree y con el mismo contenedor que la página (el logo alinea con el título del hero).
+- [ ] Explorar: tres columnas iguales (Familias, Celebraciones, Profesionales) con su portada y 2 o 3 accesos; «Plantillas profesionales» pasa a «Profesionales».
+- [ ] Secciones según el estado: con un pedido en curso o comprado, sin «Un libro de verdad» ni «Antes de decidir»; el estado del pedido y «Ayuda con tu pedido» en su lugar. Borrador o vista previa: «Cómo sigue» solo con los pasos que faltan.
+- [ ] Preguntas con el acordeón del sitio y un solo fondo de página.
+- [ ] El nombre del protagonista sobre la portada de otro chico: priorizar portadas sin cara o marcar «ilustración de ejemplo»; en «Cómo sigue», el personaje aprobado si existe.

@@ -20,15 +20,15 @@ export function LoginView() {
   const router = useRouter();
   const next = useSearchParams().get('next');
 
-  // Con sesión: a Mis cuentos (solo se vuelve a un pago o a un pedido). Nunca al creador ni a los
-  // ajustes.
+  // Con sesión: a la home con sesión (solo se vuelve a un pago o a un pedido). Nunca al creador ni a
+  // los ajustes.
   useEffect(() => {
     if (loading || !signedIn) return;
     const target = afterLoginPath(safePath(next));
     if (target) {
       window.location.replace(target);
     } else {
-      router.replace('/my-stories');
+      router.replace('/');
     }
   }, [loading, signedIn, router, next]);
 

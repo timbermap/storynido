@@ -18,14 +18,44 @@ describe('pasos del creador por línea', () => {
   });
 
   it('un borrador viejo retoma en el primer paso del flujo nuevo que le falta', () => {
-    // Eventos no tiene enseñanza: parado ahí, ya completó protagonista, fotos, aventura y
-    // recuerdos; sigue en el estilo.
+    // Celebraciones ya no tiene enseñanza ni estilo: un borrador parado ahí sigue en la fiesta.
     expect(reachedIndex(FLOWS.events, { wizardStep: WIZARD_STEPS.indexOf('lesson') })).toBe(
-      FLOWS.events.indexOf('style'),
+      FLOWS.events.indexOf('party'),
     );
+    for (const wizardStepKey of ['story', 'memories', 'style']) {
+      expect(reachedIndex(FLOWS.events, { wizardStepKey, wizardStep: 0 })).toBe(
+        FLOWS.events.indexOf('party'),
+      );
+    }
     // Con solo el protagonista hecho, se retoma en el personaje (fotos), el segundo paso.
     expect(reachedIndex(FLOWS.families, { wizardStep: WIZARD_STEPS.indexOf('photos') })).toBe(
       FLOWS.families.indexOf('photos'),
+    );
+  });
+
+  it('un borrador viejo de Profesionales retoma en la situación a trabajar', () => {
+    for (const wizardStepKey of ['story', 'lesson', 'memories', 'style']) {
+      expect(reachedIndex(FLOWS.professionals, { wizardStepKey, wizardStep: 0 })).toBe(
+        FLOWS.professionals.indexOf('focus'),
+      );
+    }
+    expect(reachedIndex(FLOWS.professionals, { wizardStepKey: 'review', wizardStep: 6 })).toBe(
+      FLOWS.professionals.indexOf('review'),
+    );
+  });
+
+  it('los pasos nuevos no mueven el índice histórico de los borradores viejos', () => {
+    expect(WIZARD_STEPS.slice(0, 7)).toEqual([
+      'child',
+      'photos',
+      'story',
+      'memories',
+      'lesson',
+      'style',
+      'review',
+    ]);
+    expect(reachedIndex(FLOWS.events, { wizardStepKey: 'kit', wizardStep: 0 })).toBe(
+      FLOWS.events.indexOf('kit'),
     );
   });
 

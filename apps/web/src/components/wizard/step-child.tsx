@@ -4,17 +4,11 @@ import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 
-import {
-  CHILD_LIMITS,
-  EMPTY_BIRTHDAY,
-  EVENT_LIMITS,
-  EVENT_TYPES,
-  type Child,
-  type EventType,
-} from '@storynido/shared';
+import { CHILD_LIMITS, EMPTY_BIRTHDAY, turningAgeFor, type Child } from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
+import { suggestAccent } from '@/lib/name-accent';
 import { takeReuseCharacter } from '@/lib/reuse-character';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import {
@@ -27,11 +21,12 @@ import { cn } from '@/lib/utils';
 import { useStepDraft } from '@/lib/use-step-draft';
 
 import type { StepNav, WizardData } from './types';
+import { storyNameFor } from './pro';
 import { WizardShell } from './wizard-shell';
 
-const inputClass =
+export const inputClass =
   'h-12 w-full rounded-[0.75rem] border-[1.5px] border-[#b7bcc8] bg-card px-3.5 text-base text-foreground placeholder:text-[#555c6e] focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d9cef0]';
-const labelClass = 'text-[0.91rem] font-semibold';
+export const labelClass = 'text-[0.91rem] font-semibold';
 
 const blankToNull = (value: string) => (value.trim() === '' ? null : value.trim());
 
@@ -61,11 +56,11 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
     setLikes(fields?.likes ?? []);
     setPetName(fields?.petName ?? '');
     setFriend(fields?.bestFriendName ?? '');
-    setAlias(fields?.alias ?? '');
+    setAlias(fields?.alias ?? fields?.name ?? '');
   }
-  // Profesionales: el alias identifica el proyecto en la cuenta; el nombre es el del cuento.
+  // Profesionales: el alias identifica el proyecto en la cuenta y es también el nombre del cuento.
   const isPro = book.channel === 'professionals';
-  const [alias, setAlias] = useState(child?.alias ?? '');
+  const [alias, setAlias] = useState(child?.alias ?? child?.name ?? '');
   useEffect(() => {
     if (!user || book.childId) return;
     void getFirebaseDb()
@@ -79,12 +74,8 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       })
       .catch(() => undefined);
   }, [user, book.childId]);
-  // Eventos: datos del cumpleaños (fecha, edad que cumple y temática).
+  // Celebraciones: acá solo quién cumple; la fiesta y lo que se lleva tienen sus propias pantallas.
   const isEvent = book.channel === 'events';
-  const [eventDate, setEventDate] = useState(book.event?.date ?? '');
-  const [occasion, setOccasion] = useState<EventType>(book.event?.type ?? 'birthday');
-  const [turningAge, setTurningAge] = useState(book.event?.turningAge ?? null);
-  const [theme, setTheme] = useState(book.event?.theme ?? '');
   const [error, setError] = useState<string | null>(null);
   // El error del nombre va junto al campo, que recibe el foco (auditoría UX).
   const [nameError, setNameError] = useState<string | null>(null);
@@ -102,9 +93,6 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       petName,
       friend,
       dedication,
-      eventDate,
-      turningAge,
-      theme,
     },
     (saved) => {
       setName(saved.name);
@@ -116,9 +104,6 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       setPetName(saved.petName);
       setFriend(saved.friend);
       setDedication(saved.dedication);
-      setEventDate(saved.eventDate);
-      setTurningAge(saved.turningAge);
-      setTheme(saved.theme);
     },
   );
 
@@ -144,8 +129,8 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
 
   async function next() {
     if (!user) return;
-    if (name.trim() === '') {
-      setNameError(t('required'));
+    if ((isPro ? alias : name).trim() === '') {
+      setNameError(isPro ? t('pro.required') : t('required'));
       nameRef.current?.focus();
       return;
     }
@@ -157,7 +142,10 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       // Primer guardado real: si el borrador estaba en memoria, se crea ahora.
       const id = await nav.ensureBook();
       const childId = await saveChild(db, user.uid, id, book.childId ?? reuse?.id ?? null, {
-        name: name.trim().slice(0, CHILD_LIMITS.nameMaxLength),
+        name: (isPro ? storyNameFor(alias, reuse?.fields ?? child) : name.trim()).slice(
+          0,
+          CHILD_LIMITS.nameMaxLength,
+        ),
         age,
         pronouns,
         likes: pending,
@@ -169,19 +157,16 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
         // Reutilizado: el libro queda con ese protagonista y su aspecto del último cuento
         // (rasgos o fotos vigentes); la lámina se vuelve a aprobar en la muestra.
         ...(reuse ? { childId, ...(reuse.look ?? {}) } : {}),
-        dedication: isPro ? null : blankToNull(dedication),
         ...(isEvent
           ? {
+              // La edad que se pide es la que cumple: no se pregunta dos veces.
               event: {
                 ...EMPTY_BIRTHDAY,
-                type: occasion,
-                date: eventDate || null,
-                // La edad que se pide es la que cumple: no se pregunta dos veces.
-                turningAge: occasion === 'birthday' ? age : null,
-                theme: blankToNull(theme.slice(0, EVENT_LIMITS.themeMaxLength)),
+                ...book.event,
+                turningAge: turningAgeFor(book.event?.type ?? 'birthday', age),
               },
             }
-          : {}),
+          : { dedication: isPro ? null : blankToNull(dedication) }),
       });
     });
     if (ok) {
@@ -193,8 +178,8 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   return (
     <WizardShell
       {...nav}
-      title={t('title')}
-      subtitle={t('subtitle')}
+      title={isEvent ? t('event.stepTitle') : isPro ? t('pro.stepTitle') : t('title')}
+      subtitle={isEvent ? t('event.stepSubtitle') : isPro ? t('pro.stepSubtitle') : t('subtitle')}
       error={error}
       onNext={() => void next()}
     >
@@ -238,58 +223,62 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
             )}
           </fieldset>
         )}
-        {isPro && (
-          <div className="grid gap-2">
-            <label htmlFor="child-alias" className={labelClass}>
-              {t('pro.alias')}
-            </label>
-            <p id="alias-hint" className="text-sm text-muted-foreground">
-              {t('pro.aliasHint')}
-            </p>
-            <input
-              id="child-alias"
-              className={inputClass}
-              value={alias}
-              maxLength={CHILD_LIMITS.nameMaxLength}
-              autoComplete="off"
-              aria-describedby="alias-hint"
-              placeholder={t('pro.aliasPlaceholder')}
-              onChange={(event) => {
-                setAlias(event.target.value);
-              }}
-            />
-          </div>
-        )}
         <div className="grid gap-6 sm:grid-cols-[2fr_1fr]">
-          <div className="grid gap-2">
-            <label htmlFor="child-name" className={labelClass}>
-              {isPro ? t('pro.storyName') : t('name')}
+          <div className="grid content-start gap-2">
+            <label htmlFor={isPro ? 'child-alias' : 'child-name'} className={labelClass}>
+              {isPro ? t('pro.alias') : t('name')}
             </label>
             <input
-              id="child-name"
+              id={isPro ? 'child-alias' : 'child-name'}
               ref={nameRef}
               className={cn(inputClass, nameError && 'border-red-700')}
-              value={name}
+              value={isPro ? alias : name}
               maxLength={CHILD_LIMITS.nameMaxLength}
               autoComplete="off"
-              placeholder={t('namePlaceholder')}
+              placeholder={isPro ? t('pro.aliasPlaceholder') : t('namePlaceholder')}
               aria-invalid={nameError ? true : undefined}
-              aria-describedby={nameError ? 'child-name-error' : undefined}
+              aria-describedby={
+                [nameError ? 'child-name-error' : null, isPro ? 'alias-hint' : null]
+                  .filter(Boolean)
+                  .join(' ') || undefined
+              }
               onChange={(event) => {
-                setName(event.target.value);
+                if (isPro) setAlias(event.target.value);
+                else setName(event.target.value);
                 if (nameError && event.target.value.trim()) setNameError(null);
               }}
             />
+            {isPro && (
+              <p id="alias-hint" className="text-sm text-muted-foreground">
+                {t('pro.aliasHint')}
+              </p>
+            )}
+            {!isPro && suggestAccent(name) && (
+              <p className="text-sm text-muted-foreground">
+                {t('accentHint', { name: suggestAccent(name) ?? '' })}{' '}
+                <button
+                  type="button"
+                  className="font-semibold text-primary hover:underline"
+                  onClick={() => {
+                    setName(suggestAccent(name) ?? name);
+                  }}
+                >
+                  {t('accentUse', { name: suggestAccent(name) ?? '' })}
+                </button>
+              </p>
+            )}
             {nameError && (
               <p id="child-name-error" role="alert" className="text-sm font-bold text-red-800">
                 {nameError}
               </p>
             )}
           </div>
-          <div className="grid gap-2">
+          <div className="grid content-start gap-2">
             <label htmlFor="child-age" className={labelClass}>
               {/* En un cumpleaños la única edad que se pide es la que cumple. */}
-              {isEvent && occasion === 'birthday' ? t('event.turningAge') : t('age')}
+              {isEvent && (book.event?.type ?? 'birthday') === 'birthday'
+                ? t('event.turningAge')
+                : t('age')}
             </label>
             <select
               id="child-age"
@@ -331,145 +320,95 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
           </div>
         </fieldset>
 
-        <div className="grid gap-2">
-          <label htmlFor="child-like" className={labelClass}>
-            {t('likes')}
-          </label>
-          <p id="likes-hint" className="text-sm text-muted-foreground">
-            {t('likesHint')}
-          </p>
-          {likes.length > 0 && (
-            <ul className="flex flex-wrap gap-2">
-              {likes.map((item) => (
-                <li
-                  key={item}
-                  className="inline-flex items-center gap-1 rounded-full border bg-card py-1 pr-1 pl-3 text-sm font-bold text-foreground"
-                >
-                  {item}
-                  <button
-                    type="button"
-                    className="grid size-6 place-items-center rounded-full hover:bg-primary/10"
-                    aria-label={t('removeLike', { like: item })}
-                    onClick={() => {
-                      setLikes(likes.filter((l) => l !== item));
-                    }}
-                  >
-                    <X className="size-3.5" aria-hidden="true" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="flex gap-2">
-            <input
-              id="child-like"
-              className={inputClass}
-              value={like}
-              aria-describedby="likes-hint"
-              disabled={likes.length >= CHILD_LIMITS.maxLikes}
-              maxLength={CHILD_LIMITS.likeMaxLength}
-              placeholder={t('likesPlaceholder')}
-              onChange={(event) => {
-                setLike(event.target.value);
-              }}
-              onKeyDown={onLikeKey}
-            />
-            <Button type="button" variant="outline" onClick={addLike} disabled={!like.trim()}>
-              {t('addLike')}
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <label htmlFor="child-pet" className={labelClass}>
-              {t('pet')}
-            </label>
-            <input
-              id="child-pet"
-              className={inputClass}
-              value={petName}
-              maxLength={CHILD_LIMITS.nameMaxLength}
-              onChange={(event) => {
-                setPetName(event.target.value);
-              }}
-            />
-          </div>
-          <div className="grid gap-2">
-            <label htmlFor="child-friend" className={labelClass}>
-              {t('friend')}
-            </label>
-            <input
-              id="child-friend"
-              className={inputClass}
-              value={friend}
-              maxLength={CHILD_LIMITS.nameMaxLength}
-              onChange={(event) => {
-                setFriend(event.target.value);
-              }}
-            />
-          </div>
-        </div>
-
-        {isEvent && (
-          <fieldset className="grid gap-4 rounded-2xl border bg-card p-4">
-            <legend className="px-1 text-base font-semibold">{t('event.title')}</legend>
-            <p className="text-sm text-muted-foreground">{t('event.note')}</p>
+        {/* Celebraciones pregunta lo justo: quien organiza una fiesta tiene apuro. */}
+        {!isEvent && (
+          <>
             <div className="grid gap-2">
-              <label htmlFor="event-occasion" className={labelClass}>
-                {t('event.occasion')}
+              <label htmlFor="child-like" className={labelClass}>
+                {isPro ? t('pro.likes') : t('likes')}
               </label>
-              <select
-                id="event-occasion"
-                className={inputClass}
-                value={occasion}
-                onChange={(event) => {
-                  setOccasion(event.target.value as EventType);
-                }}
-              >
-                {EVENT_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {t(`event.occasions.${type}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <label htmlFor="event-date" className={labelClass}>
-                  {t('event.date')}
-                </label>
+              <p id="likes-hint" className="text-sm text-muted-foreground">
+                {isPro ? t('pro.likesHint') : t('likesHint')}
+              </p>
+              {likes.length > 0 && (
+                <ul className="flex flex-wrap gap-2">
+                  {likes.map((item) => (
+                    <li
+                      key={item}
+                      className="inline-flex items-center gap-1 rounded-full border bg-card py-1 pr-1 pl-3 text-sm font-bold text-foreground"
+                    >
+                      {item}
+                      <button
+                        type="button"
+                        className="grid size-6 place-items-center rounded-full hover:bg-primary/10"
+                        aria-label={t('removeLike', { like: item })}
+                        onClick={() => {
+                          setLikes(likes.filter((l) => l !== item));
+                        }}
+                      >
+                        <X className="size-3.5" aria-hidden="true" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="flex gap-2">
                 <input
-                  id="event-date"
-                  type="date"
+                  id="child-like"
                   className={inputClass}
-                  value={eventDate}
+                  value={like}
+                  aria-describedby="likes-hint"
+                  disabled={likes.length >= CHILD_LIMITS.maxLikes}
+                  maxLength={CHILD_LIMITS.likeMaxLength}
+                  placeholder={t('likesPlaceholder')}
                   onChange={(event) => {
-                    setEventDate(event.target.value);
+                    setLike(event.target.value);
                   }}
+                  onKeyDown={onLikeKey}
                 />
+                <Button type="button" variant="outline" onClick={addLike} disabled={!like.trim()}>
+                  {t('addLike')}
+                </Button>
               </div>
             </div>
-            <div className="grid gap-2">
-              <label htmlFor="event-theme" className={labelClass}>
-                {t('event.theme')}
-              </label>
-              <input
-                id="event-theme"
-                className={inputClass}
-                value={theme}
-                maxLength={EVENT_LIMITS.themeMaxLength}
-                placeholder={t('event.themePlaceholder')}
-                onChange={(event) => {
-                  setTheme(event.target.value);
-                }}
-              />
-            </div>
-          </fieldset>
+
+            {!isPro && (
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <label htmlFor="child-pet" className={labelClass}>
+                    {t('pet')}
+                  </label>
+                  <input
+                    id="child-pet"
+                    className={inputClass}
+                    value={petName}
+                    maxLength={CHILD_LIMITS.nameMaxLength}
+                    onChange={(event) => {
+                      setPetName(event.target.value);
+                    }}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="child-friend" className={labelClass}>
+                    {t('friend')}
+                  </label>
+                  <input
+                    id="child-friend"
+                    className={inputClass}
+                    value={friend}
+                    maxLength={CHILD_LIMITS.nameMaxLength}
+                    onChange={(event) => {
+                      setFriend(event.target.value);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Profesionales: sin dedicatoria familiar (el libro es para el trabajo). */}
-        {!isPro && (
+        {!isPro && !isEvent && (
           <div className="grid gap-2">
             <label htmlFor="child-dedication" className={labelClass}>
               {t('dedication')}

@@ -126,9 +126,12 @@ export function StoryCover({
   priority = false,
   className,
   alt = '',
+  name,
 }: {
   story: CoverStory;
   alt?: string;
+  /** Nombre del protagonista para poner en la portada (si no, el del elenco de la historia). */
+  name?: string | null;
   /** Línea desde la que se mira (Profesionales usa su propia portada y título si la historia los tiene). */
   line?: string | null;
   sizes: string;
@@ -137,7 +140,9 @@ export function StoryCover({
 }) {
   // Siempre el nombre del elenco: un nombre escrito podría no corresponder al dibujo (un nombre de
   // varón sobre una nena). El nombre propio vuelve cuando el nombre y el dibujo puedan coincidir.
-  const visitor = story.castName ?? '';
+  const typedName = name?.trim();
+  const visitor =
+    typedName !== undefined && typedName.length > 0 ? typedName : (story.castName ?? '');
   const pro = line === 'professionals' && Boolean(story.coverImagePro);
   const src = pro && story.coverImagePro ? story.coverImagePro : story.coverImage;
   const overlay = Boolean(story.coverTitleOverlay);

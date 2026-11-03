@@ -65,8 +65,12 @@ export interface DraftSummary {
   channel: Channel;
   /** `preview_generating`: se está dibujando la muestra; `preview_ready`: ya tiene muestra. */
   status: 'draft' | 'preview_generating' | 'preview_ready';
+  /** Historia elegida (para mostrar su portada). */
+  storyId: string | null;
   /** Se está dibujando ahora (una generación de más de 10 minutos se da por colgada). */
   generating: boolean;
+  /** Celebraciones: temática de la fiesta. */
+  eventTheme: string | null;
 }
 
 const STALE_GENERATION_MS = 10 * 60 * 1000;
@@ -248,10 +252,12 @@ export async function listDrafts(db: Firestore, uid: string): Promise<DraftSumma
         wizardStep: book.get('wizardStep') as number,
         channel: (book.get('channel') as Channel | undefined) ?? 'families',
         status: book.get('status') as DraftSummary['status'],
+        storyId: (book.get('storyId') as string | null | undefined) ?? null,
         generating: isGeneratingNow(
           book.get('status') as string,
           asDate(book.get('previewStartedAt') as Timestampish),
         ),
+        eventTheme: (book.get('event.theme') as string | null | undefined) ?? null,
       };
     }),
   );

@@ -83,7 +83,7 @@ for (const [locale, pages] of Object.entries(PAGES)) {
           .locator(
             line
               ? `a[href*="line=${line}"]:visible`
-              : // Sin sesión, el botón de Familias lleva al login (y de ahí a Mis cuentos).
+              : // Sin sesión, el botón de Familias lleva al login (y de ahí a la home con sesión).
                 'main a[href$="/ingresar"]:visible, main a[href$="/login"]:visible, main a[href$="/entrar"]:visible',
           )
           .last();
@@ -142,7 +142,7 @@ test('las historias de Eventos y Profesionales vuelven a su landing y crean en s
   ] as const) {
     await page.goto(landing);
     await page.locator(`a[href*="line=${line}"][href*="/historias/"]`).first().click();
-    // Sin sesión, el botón lleva al login (y de ahí a Mis cuentos), no al formulario.
+    // Sin sesión, el botón lleva al login (y de ahí a la home con sesión), no al formulario.
     await expect(page.getByRole('link', { name: create })).toHaveAttribute(
       'href',
       /\/(ingresar|login|entrar)$/,

@@ -234,6 +234,16 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
             ))}
           </ul>
         )}
+        {order.canDownload && isKit && (
+          <section className="grid gap-2 rounded-2xl border bg-card p-5">
+            <h2 className="text-lg font-semibold">{tKit('printGuide.title')}</h2>
+            <ul className="grid list-disc gap-1.5 pl-5 text-sm text-muted-foreground">
+              {(['tip1', 'tip2', 'tip3', 'tip4'] as const).map((tip) => (
+                <li key={tip}>{tKit(`printGuide.${tip}`)}</li>
+              ))}
+            </ul>
+          </section>
+        )}
         {/* Opinión del cliente (libro recibido o digital listo), una sola vez por pedido. */}
         {order.canReview && <OrderReview orderId={order.orderId} initial={order.review} />}
         {order.tracking?.number && (

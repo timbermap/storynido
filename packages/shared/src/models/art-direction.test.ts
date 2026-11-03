@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_PALETTE, STORY_PALETTES, artDirection } from './art-direction';
+import { DEFAULT_PALETTE, STORY_PALETTES, artDirection, withCurrentGuards } from './art-direction';
 
 describe('dirección de arte de los libros', () => {
   it('paleta de la historia o, si no tiene, la del público', () => {
@@ -33,5 +33,20 @@ describe('dirección de arte de los libros', () => {
     expect(threeD).not.toContain('glossy generic 3D');
     const watercolor = artDirection({ age: 6, channel: 'families', style: 'acuarela' });
     expect(watercolor).toContain('gouache');
+  });
+
+  it('deja lugar para el texto y dibuja al protagonista una sola vez', () => {
+    const direction = artDirection({ age: 6, channel: 'professionals' });
+    expect(direction).toContain('bottom third (or the top third)');
+    expect(direction).toContain('appears exactly once');
+  });
+
+  it('un libro con la dirección de arte congelada antes de las reglas las recibe al generar, una sola vez', () => {
+    const old = "Art direction: premium children's picture book.";
+    const updated = withCurrentGuards(old) ?? '';
+    expect(updated).toContain('appears exactly once');
+    expect(updated).toContain('bottom third (or the top third)');
+    expect(withCurrentGuards(updated)).toBe(updated);
+    expect(withCurrentGuards(null)).toBeNull();
   });
 });

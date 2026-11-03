@@ -11,6 +11,9 @@ import { api } from '@/lib/api';
 import { money } from '@/lib/format';
 import { errorMessage, useApi } from '@/lib/use-api';
 
+// Solo en staging: avanza el envío sin llamar a la imprenta.
+const SIMULATE_PRINT = (process.env.NEXT_PUBLIC_BRAND_DOMAIN ?? '').startsWith('staging');
+
 const usd = (value: number) => `USD ${value.toFixed(2)}`;
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -140,9 +143,18 @@ function OrderDetail({ id }: { id: string }) {
                 '—'
               )}
             </Row>
-            <Row label="Destino">
+            <Row label="Recibe">{order.shipping ? order.shipping.name : '—'}</Row>
+            <Row label="Dirección">
               {order.shipping
-                ? `${order.shipping.name}, ${order.shipping.city}${order.shipping.state ? `, ${order.shipping.state}` : ''} ${order.shipping.postalCode}, ${order.shipping.country}`
+                ? [
+                    order.shipping.line1,
+                    order.shipping.line2,
+                    [order.shipping.postalCode, order.shipping.city].filter(Boolean).join(' '),
+                    order.shipping.state,
+                    order.shipping.country,
+                  ]
+                    .filter(Boolean)
+                    .join(', ')
                 : '—'}
             </Row>
           </dl>
@@ -328,6 +340,22 @@ function OrderDetail({ id }: { id: string }) {
               Cancelar en la imprenta
             </Button>
           )}
+          {SIMULATE_PRINT &&
+            printing &&
+            ['sent_to_print', 'in_production', 'shipped'].includes(order.status) && (
+              <Button
+                variant="outline"
+                disabled={busy}
+                onClick={() =>
+                  void act('¿Avanzar un paso la imprenta (solo staging)?', async () => {
+                    const result = await api('adminSimulatePrint', { params });
+                    return `Imprenta simulada: ${result.status}.`;
+                  })
+                }
+              >
+                Simular imprenta (staging)
+              </Button>
+            )}
           <Button
             variant="destructive"
             disabled={busy || order.status === 'refunded'}

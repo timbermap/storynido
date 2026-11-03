@@ -166,6 +166,9 @@ describe.skipIf(!chromePath())('PDF', () => {
     const pro = last({ educationalNotice: true });
     expect(pro).toContain('Material educativo creado con StoryNido');
     expect(pro).toContain('intervención profesional o clínica');
+    // Todos los libros dicen que se hicieron con IA y la licencia de uso.
+    expect(last({})).toContain('inteligencia artificial');
+    expect(last({})).toContain('no se permite su reventa');
     expect(last({ educationalNotice: true, language: 'en' })).toContain(
       'professional or clinical intervention',
     );
