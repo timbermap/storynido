@@ -51,7 +51,7 @@ export function NextUp({
   // La fecha estimada solo si el pedido la trae (nunca se inventa).
   const sub =
     next.kind === 'order' && next.order.etaFrom !== null && next.order.etaTo !== null
-      ? t('next.eta', { from: day.format(next.order.etaFrom), to: day.format(next.order.etaTo) })
+      ? t('eta', { from: day.format(next.order.etaFrom), to: day.format(next.order.etaTo) })
       : t(`next.${key}.sub`);
   const href: Href =
     next.kind === 'order'
