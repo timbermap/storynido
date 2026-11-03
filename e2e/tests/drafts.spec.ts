@@ -8,13 +8,18 @@ test('crear pide cuenta y el borrador se puede borrar desde Mis cuentos', async 
   await page.goto('/es/crear?line=events');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   await signInAtGate(page, uniqueEmail('borrador'));
-  await expect(page.locator('h1').first()).toContainText('Cuéntanos sobre el protagonista', {
-    timeout: 30_000,
-  });
+  await expect(page.locator('h1').first()).toContainText(
+    '¿Quién es el protagonista de la fiesta?',
+    {
+      timeout: 30_000,
+    },
+  );
   await page.locator('#child-name').fill('Tomi');
   await page.locator('#child-age').selectOption('6');
   await page.getByRole('button', { name: 'Siguiente' }).click();
-  await expect(page.locator('h1').first()).not.toContainText('Cuéntanos sobre el protagonista');
+  await expect(page.locator('h1').first()).not.toContainText(
+    '¿Quién es el protagonista de la fiesta?',
+  );
 
   await page.goto('/es/mis-cuentos');
   const draft = page.locator('#drafts li', { hasText: 'El cuento de Tomi' });
@@ -44,7 +49,7 @@ test('si Firestore no responde, el creador no queda cargando', async ({ page }) 
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   await signInAtGate(page, uniqueEmail('sin-red'));
   await expect(page).toHaveURL(/\/es\/nuevo/, { timeout: 30_000 });
-  await page.getByRole('link', { name: /Un cuento para mi hijo/ }).click();
+  await page.getByRole('link', { name: /Un cuento para un chico especial/ }).click();
   await expect(page.locator('h1').first()).toContainText('Cuéntanos sobre el protagonista', {
     timeout: 30_000,
   });
@@ -82,7 +87,17 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
   );
   expect(theme).toBeTruthy();
   await start.click();
-  await expect(page.locator('#event-theme')).toHaveValue(String(theme), { timeout: 30_000 });
+  // La temática se elige en la etapa Aventura: se recorre el personaje hasta llegar a ella.
+  await page.locator('#child-name').fill('Tomi', { timeout: 30_000 });
+  await page.getByRole('button', { name: 'Siguiente' }).click();
+  await page.locator('label', { hasText: 'Sin foto' }).click();
+  for (const label of ['Morena', 'Negro', 'Corto', 'Rizado', 'Verdes']) {
+    await page.locator('label', { hasText: label }).first().click();
+  }
+  await page.getByRole('button', { name: 'Siguiente' }).click();
+  await expect(page.locator('label', { hasText: String(theme) }).locator('input')).toBeChecked({
+    timeout: 30_000,
+  });
 });
 
 test('sin sesión, el botón de un tema de Celebraciones lleva al login', async ({ page }) => {

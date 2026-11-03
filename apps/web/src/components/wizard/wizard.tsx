@@ -24,6 +24,8 @@ import { PreviewPanel, previewErrorKey } from './preview-panel';
 import { SignInGate } from './sign-in-gate';
 import { WizardSkeleton } from './wizard-skeleton';
 import { StepChild } from './step-child';
+import { StepKit } from './step-kit';
+import { StepParty } from './step-party';
 import { StepAvatar } from './step-avatar';
 import { StepLesson } from './step-lesson';
 import { StepMemories } from './step-memories';
@@ -157,7 +159,9 @@ export function Wizard({
       line: channel,
       fresh: savedId === null,
       choice: {
+        // Celebraciones no elige historia: la temática la trae, y se cambia en la etapa Aventura.
         story: (() => {
+          if (channel === 'events') return null;
           const picked = catalog.stories.find((item) => item.slug === book?.storyId);
           return picked ? titleForChild(picked, child?.name, locale) : null;
         })(),
@@ -230,6 +234,7 @@ export function Wizard({
         book={book}
         childName={child?.name ?? ''}
         prices={catalog.prices}
+        eventPrices={catalog.eventPrices}
         generating={generating}
         generateError={generateError}
         onRegenerateAll={() => void generatePreview()}
@@ -257,6 +262,10 @@ export function Wizard({
       return <StepStory key="story" nav={nav} data={data} />;
     case 'lesson':
       return <StepLesson key="lesson" nav={nav} data={data} />;
+    case 'party':
+      return <StepParty key="party" nav={nav} data={data} />;
+    case 'kit':
+      return <StepKit key="kit" nav={nav} data={data} />;
     case 'style':
       return <StepStyle key="style" nav={nav} data={data} />;
     default:

@@ -1,4 +1,10 @@
-import type { EventType, KitPiece, PaperSize } from '@storynido/shared';
+import {
+  INVITATION_TONE_COPY,
+  type EventType,
+  type InvitationTone,
+  type KitPiece,
+  type PaperSize,
+} from '@storynido/shared';
 
 import { fontFaces } from './fonts';
 import { mazeSvg } from './maze';
@@ -17,6 +23,8 @@ export interface KitBook {
   title: string;
   /** Ocasión: cambia los textos de las piezas (el cumpleaños es la base). */
   occasion: EventType;
+  /** Tono de la invitación de cumpleaños (por defecto, el texto de siempre). */
+  tone?: InvitationTone;
   turningAge: number | null;
   /** Fecha del evento (AAAA-MM-DD). */
   eventDate: string | null;
@@ -240,7 +248,11 @@ const escapeHtml = (value: string) =>
 
 function t(book: KitBook, key: string, extra: Record<string, string | number> = {}) {
   const occasion = book.occasion === 'birthday' ? undefined : OCCASION_STRINGS[book.occasion];
-  let value = occasion?.[book.language][key] ?? STRINGS[book.language][key] ?? key;
+  const toned =
+    book.occasion === 'birthday' && book.tone && (key === 'invite' || key === 'waiting')
+      ? INVITATION_TONE_COPY[book.language][book.tone][key]
+      : undefined;
+  let value = toned ?? occasion?.[book.language][key] ?? STRINGS[book.language][key] ?? key;
   for (const [name, replacement] of Object.entries({
     name: book.childName,
     age: book.turningAge ?? '',

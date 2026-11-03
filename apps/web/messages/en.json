@@ -574,7 +574,9 @@
       "memories": "Memories",
       "lesson": "Lesson",
       "style": "Style",
-      "review": "Preview"
+      "review": "Preview",
+      "party": "Party",
+      "kit": "What you’re getting"
     },
     "progress": "Step {current} of {total}",
     "back": "Back",
@@ -627,21 +629,15 @@
       "dedicationPlaceholder": "E.g. For Emma, who dreams of the stars every night.",
       "required": "Enter their name to continue.",
       "event": {
-        "title": "Celebration details",
-        "note": "We use them in the story. The date helps us tell you real printing times.",
-        "date": "Party date",
         "turningAge": "Turning",
-        "turningAgeEmpty": "Choose",
-        "years": "{count, plural, one {# year old} other {# years old}}",
-        "theme": "Party theme (optional)",
-        "themePlaceholder": "For example: dinosaurs, space, princesses",
-        "occasion": "What are you celebrating?",
         "occasions": {
           "birthday": "Birthday",
           "baptism": "Baptism",
           "communion": "First Communion",
           "graduation": "Graduation or end of school year"
-        }
+        },
+        "stepTitle": "Who’s the star of the party?",
+        "stepSubtitle": "They’ll appear on the invitation, the decorations and the keepsake story."
       },
       "pro": {
         "alias": "Project alias",
@@ -761,7 +757,10 @@
       "book": "Your book",
       "event": "Celebration",
       "eventTurning": "Turning {count}",
-      "eventEmpty": "Not filled in"
+      "eventEmpty": "Not filled in",
+      "kit": "What you’re getting",
+      "kitTone": "{tone} tone",
+      "kitDedication": "With dedication"
     },
     "preview": {
       "badge": "Story sample",
@@ -842,7 +841,8 @@
       },
       "leaveText": "We keep working even if you leave. We’ll email you when the sample is ready. To pick it up again: My stories, “In progress”, Continue.",
       "leaveButton": "Back to My stories",
-      "leaveTitle": "You can close this screen"
+      "leaveTitle": "You can close this screen",
+      "approveAndPay": "Approve and pay"
     },
     "character": {
       "modeLegend": "How should we create the main character?",
@@ -1060,7 +1060,79 @@
     "changeLine": "Change",
     "choiceStory": "Story: {name}",
     "choiceLesson": "Lesson: {name}",
-    "choiceChange": "Change"
+    "choiceChange": "Change",
+    "party": {
+      "title": "The party",
+      "subtitle": "Pick the theme and tell us when and where. We use it to build the invitation and the keepsake story.",
+      "themeLegend": "Theme",
+      "required": "Pick a theme to continue.",
+      "occasion": "What are you celebrating?",
+      "date": "Date",
+      "dateHint": "It goes on the invitation and helps us tell you the printing deadlines.",
+      "place": "Place",
+      "placePlaceholder": "E.g.: Rainbow Hall or At home"
+    },
+    "kit": {
+      "title": "What would you like?",
+      "subtitle": "You see your free sample first. You only pay if you like it.",
+      "next": "Continue to my sample",
+      "recommended": "Recommended",
+      "fullKit": "Full digital kit",
+      "invitationOnly": "Just the invitation",
+      "invitationOnlyText": "WhatsApp image and printable PDF, with their character.",
+      "copiesNote": "The number of copies you print doesn’t change the price.",
+      "includes": {
+        "invitation": "WhatsApp and PDF invitation",
+        "decoration": "Decorations: tags, stickers and thank-you card",
+        "keepsake": "A keepsake story for each guest, the same for everyone",
+        "activities": "Printable activities"
+      },
+      "dedication": "Keepsake story dedication (optional)",
+      "dedicationPlaceholder": "E.g.: Thanks for coming to my party. {name}",
+      "dedicationHint": "Every guest gets the same story, approved by you.",
+      "toneLegend": "Invitation tone",
+      "tones": {
+        "fun": {
+          "name": "Fun",
+          "sample": "“You’re invited to my party!”"
+        },
+        "sweet": {
+          "name": "Sweet",
+          "sample": "“I’d love you to come to my party”"
+        },
+        "adventurous": {
+          "name": "Adventurous",
+          "sample": "“Join the adventure at my party!”"
+        }
+      }
+    },
+    "partyPreview": {
+      "invitationTitle": "Your invitation",
+      "keepsakeTitle": "The keepsake story",
+      "turning": "{name} is turning {age}!",
+      "occasion": {
+        "baptism": "You’re invited to my baptism!",
+        "communion": "You’re invited to my First Communion!",
+        "graduation": "Come celebrate my graduation!"
+      },
+      "priceKit": "Full digital kit: {price}",
+      "priceInvitation": "Just the invitation: {price}",
+      "book": {
+        "title": "Would you also like to give {name} their own book?",
+        "text": "A Families book with the full story and the same character. It’s bought separately, after the kit.",
+        "none": "Not now",
+        "digital": "Digital",
+        "printed": "Printed",
+        "priceDigital": "from {price}",
+        "pricePrinted": "from {price}",
+        "afterKit": "Noted. After paying for the kit, you can create the book from your order with the same character.",
+        "shareLead": "Grandparents, aunts and uncles can give it too.",
+        "share": "Send them the link",
+        "copied": "Link copied",
+        "shareText": "We’re getting {name}’s party ready. If you’d like to give a story that stars them, you can create it here:"
+      },
+      "differencesEdit": "You can edit the text and change the theme or the photo again."
+    }
   },
   "Landing": {
     "events": {

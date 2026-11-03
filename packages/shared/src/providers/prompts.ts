@@ -56,7 +56,8 @@ export interface StoryPromptInput {
   /** Recuerdos guiados ya moderados (null si no hay). */
   memories?: Memories | null;
   /** Eventos: cumpleaños (con la temática ya moderada). */
-  event?: BookEvent | null;
+  /** Solo lo que entra al cuento: el lugar y lo que se compra no van al prompt. */
+  event?: Pick<BookEvent, 'type' | 'date' | 'turningAge' | 'theme'> | null;
   /** Profesionales: objetivo general (guía narrativa, nunca clínica). */
   goal?: string | null;
   /** Densidad de texto y nivel de lectura (fase 07b). */

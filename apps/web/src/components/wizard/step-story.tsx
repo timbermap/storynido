@@ -38,10 +38,6 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
     ...(firstVisit && age !== undefined
       ? {
           ...suggestedReading(age),
-          // Celebraciones arranca como mini cuento para cada invitado, sea cual sea la edad.
-          ...(data.book.channel === 'events' && data.book.length
-            ? { length: data.book.length }
-            : {}),
         }
       : {
           length: data.book.length ?? data.editorial.defaults.length,
@@ -156,18 +152,17 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
       <BookOptions
         story={story}
         editorial={data.editorial}
-        prices={data.book.channel === 'events' ? null : data.prices}
+        prices={data.prices}
         age={age ?? null}
         value={fitToStory(choice, story)}
         onChange={setChoice}
-        formats={data.book.channel !== 'events'}
       />
     </WizardShell>
   );
 }
 
 /** Si la historia no admite alguna opción elegida, se usa la primera que sí admite. */
-function fitToStory(choice: BookChoice, story: PublicStory | undefined): BookChoice {
+export function fitToStory(choice: BookChoice, story: PublicStory | undefined): BookChoice {
   if (!story) return choice;
   const pick = <T,>(value: T, allowed: readonly T[]) =>
     allowed.includes(value) ? value : (allowed[0] ?? value);

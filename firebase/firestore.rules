@@ -176,16 +176,21 @@ service cloud.firestore {
         && optString(m.get('favorite', null), 150));
     }
 
-    // Eventos (fase 12b): cumpleaños con fecha, edad que cumple y temática (todo opcional).
+    // Eventos (fase 12b): ocasión, fecha, edad que cumple, temática, lugar y lo que se lleva (EVENT_TYPES,
+    // INVITATION_TONES, KIT_OFFERS y BIRTHDAY_BOOK_CHOICES en packages/shared/src/models/events.ts).
     function validEvent(e) {
       return e == null || (e is map
-        && e.keys().hasOnly(['type', 'date', 'turningAge', 'theme'])
-        && e.type == 'birthday'
+        && e.keys().hasOnly(['type', 'date', 'turningAge', 'theme', 'place', 'tone', 'offer', 'bookChoice'])
+        && e.type in ['birthday', 'baptism', 'communion', 'graduation']
         && (e.get('date', null) == null
           || (e.date is string && e.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
         && (e.get('turningAge', null) == null
           || (e.turningAge is int && e.turningAge >= 1 && e.turningAge <= 15))
-        && optString(e.get('theme', null), 60));
+        && optString(e.get('theme', null), 60)
+        && optString(e.get('place', null), 80)
+        && e.get('tone', 'fun') in ['fun', 'sweet', 'adventurous']
+        && e.get('offer', 'full_kit') in ['full_kit', 'invitation']
+        && e.get('bookChoice', 'none') in ['none', 'digital', 'printed']);
     }
 
     function validBookEdits() {
@@ -199,7 +204,7 @@ service cloud.firestore {
         && optString(d.dedication, 500)
         && d.wizardStep is int && d.wizardStep >= 0 && d.wizardStep <= 10
         // Paso por nombre (DECISIONS 113); los borradores anteriores no lo tienen.
-        && d.get('wizardStepKey', null) in [null, 'child', 'photos', 'story', 'memories', 'lesson', 'style', 'review']
+        && d.get('wizardStepKey', null) in [null, 'child', 'photos', 'story', 'memories', 'lesson', 'style', 'review', 'party', 'kit']
         && d.photoIds is list && d.photoIds.size() <= 3
         // Los borradores anteriores al modo sin foto no tienen estos campos.
         && d.get('characterMode', 'photo') in ['photo', 'avatar']

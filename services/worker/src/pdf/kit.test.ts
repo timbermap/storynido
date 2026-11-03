@@ -45,6 +45,26 @@ describe('kit por ocasión', () => {
   });
 });
 
+describe('tono de la invitación', () => {
+  it('sin tono, el texto de siempre; con tono, el elegido', () => {
+    expect(kitPieceDocument(book('birthday'), 'invitation', 20).html).toContain(
+      '¡Te invito a mi cumple!',
+    );
+    const sweet = kitPieceDocument({ ...book('birthday'), tone: 'sweet' }, 'invitation', 20).html;
+    expect(sweet).toContain('Me encantaría que vengas a mi cumple');
+    expect(sweet).toContain('Te esperamos con cariño');
+  });
+
+  it('las demás ocasiones conservan sus propios textos', () => {
+    const html = kitPieceDocument(
+      { ...book('baptism'), tone: 'adventurous' },
+      'invitation',
+      20,
+    ).html;
+    expect(html).toContain('¡Te invito a mi bautismo!');
+  });
+});
+
 describe('firma de la invitación', () => {
   it('lleva «Hecho con StoryNido» por defecto y se puede quitar', () => {
     expect(kitPieceDocument(book('birthday'), 'invitation', 20).html).toContain(

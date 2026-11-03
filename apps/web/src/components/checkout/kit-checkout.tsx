@@ -2,14 +2,18 @@
 
 import {
   ApiError,
+  COLLECTIONS,
   KIT_LIMITS,
   KIT_PIECES,
   REQUIRED_KIT_PIECES,
+  type BookEvent,
   type CountryCode,
+  type KitOffer,
   type KitPiece,
   type Locale,
   type PriceSnapshot,
 } from '@storynido/shared';
+import { doc, getDoc } from 'firebase/firestore';
 import { Loader2, Lock, Printer } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -18,7 +22,9 @@ import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useConsent } from '@/components/consent/consent-provider';
 import { Button } from '@/components/ui/button';
+import { piecesForOffer } from '@/components/wizard/party';
 import { api } from '@/lib/api';
+import { getFirebaseDb } from '@/lib/firebase/client';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -62,6 +68,7 @@ export function KitCheckout({
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const [chosen, setChosen] = useState<KitOffer | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,14 +77,12 @@ export function KitCheckout({
         if (cancelled) return;
         setPricing(result.pricing);
         // Solo las piezas que se venden en el país.
-        if (result.pricing) {
+        if (result.pricing && reorderOf) {
           const sold = result.pricing.pieces;
-          // El kit completo viene preseleccionado (lo que promete la landing); se puede desmarcar
-          // lo que no se necesite. En una recompra se conserva lo que ya estaba.
-          setPieces((current) =>
-            reorderOf
-              ? new Set([...current].filter((piece) => piece === 'mini_book' || piece in sold))
-              : new Set(['mini_book', ...KIT_PIECES.filter((piece) => piece in sold)]),
+          // En una recompra se conserva lo que ya estaba.
+          setPieces(
+            (current) =>
+              new Set([...current].filter((piece) => piece === 'mini_book' || piece in sold)),
           );
         }
       })
@@ -88,6 +93,33 @@ export function KitCheckout({
       cancelled = true;
     };
   }, [country, reorderOf]);
+
+  // Lo elegido en el creador (kit completo o solo invitación, lugar) llega marcado y se puede cambiar.
+  useEffect(() => {
+    if (!signedIn || reorderOf) return;
+    let cancelled = false;
+    void getFirebaseDb()
+      .then((db) => getDoc(doc(db, COLLECTIONS.books, bookId)))
+      .then((book) => {
+        if (cancelled) return;
+        const event = book.get('event') as Partial<BookEvent> | null | undefined;
+        setChosen(event?.offer ?? 'full_kit');
+        if (event?.place) setPlace((current) => current || (event.place ?? ''));
+      })
+      .catch(() => {
+        if (!cancelled) setChosen('full_kit');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [bookId, reorderOf, signedIn]);
+
+  const soldKey = pricing ? Object.keys(pricing.pieces).join() : null;
+  useEffect(() => {
+    if (reorderOf || !chosen || soldKey === null) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPieces(new Set(piecesForOffer(chosen, soldKey.split(','))));
+  }, [chosen, soldKey, reorderOf]);
 
   // Un nombre por línea; sin lista, las etiquetas salen genéricas.
   const guests = guestsText
@@ -193,7 +225,7 @@ export function KitCheckout({
         <fieldset>
           <legend className="text-lg font-semibold">{tKit('piecesTitle')}</legend>
           <p className="mt-1 text-sm text-muted-foreground">{tKit('piecesNote')}</p>
-          {!reorderOf && pricing && (
+          {!reorderOf && pricing && chosen !== 'invitation' && (
             <p className="mt-3 rounded-xl bg-mint px-4 py-3 text-sm font-semibold text-success">
               {tKit('fullKit', { price: money(fullKitMinor) })}
             </p>

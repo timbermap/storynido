@@ -574,7 +574,9 @@
       "memories": "Lembranças",
       "lesson": "Lição",
       "style": "Estilo",
-      "review": "Prévia"
+      "review": "Prévia",
+      "party": "Festa",
+      "kit": "O que você leva"
     },
     "progress": "Etapa {current} de {total}",
     "back": "Voltar",
@@ -627,21 +629,15 @@
       "dedicationPlaceholder": "Ex.: Para Sofia, que toda noite sonha com as estrelas.",
       "required": "Escreva o nome para continuar.",
       "event": {
-        "title": "Dados da celebração",
-        "note": "Usamos na história. A data nos ajuda a informar os prazos reais de impressão.",
-        "date": "Data da festa",
         "turningAge": "Idade que vai fazer",
-        "turningAgeEmpty": "Escolher",
-        "years": "{count, plural, one {# ano} other {# anos}}",
-        "theme": "Tema da festa (opcional)",
-        "themePlaceholder": "Por exemplo: dinossauros, espaço, princesas",
-        "occasion": "O que vocês vão celebrar?",
         "occasions": {
           "birthday": "Aniversário",
           "baptism": "Batizado",
           "communion": "Primeira comunhão",
           "graduation": "Formatura ou fim do ano escolar"
-        }
+        },
+        "stepTitle": "Quem é o protagonista da festa?",
+        "stepSubtitle": "Aparece no convite, na decoração e na história de lembrança."
       },
       "pro": {
         "alias": "Apelido do projeto",
@@ -761,7 +757,10 @@
       "book": "Seu livro",
       "event": "Celebração",
       "eventTurning": "Faz {count}",
-      "eventEmpty": "Não preenchido"
+      "eventEmpty": "Não preenchido",
+      "kit": "O que você leva",
+      "kitTone": "Tom {tone}",
+      "kitDedication": "Com dedicatória"
     },
     "preview": {
       "badge": "Amostra da história",
@@ -842,7 +841,8 @@
       },
       "leaveText": "Continuamos trabalhando mesmo que você saia. Avisamos por e-mail quando a amostra estiver pronta. Para retomar: Minhas histórias, “Em andamento”, Continuar.",
       "leaveButton": "Voltar para Minhas histórias",
-      "leaveTitle": "Você pode fechar esta tela"
+      "leaveTitle": "Você pode fechar esta tela",
+      "approveAndPay": "Aprovar e pagar"
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",
@@ -1060,7 +1060,79 @@
     "changeLine": "Mudar",
     "choiceStory": "História: {name}",
     "choiceLesson": "Lição: {name}",
-    "choiceChange": "Mudar"
+    "choiceChange": "Mudar",
+    "party": {
+      "title": "A festa",
+      "subtitle": "Escolha o tema e conte quando e onde. Com isso montamos o convite e a história de lembrança.",
+      "themeLegend": "Tema",
+      "required": "Escolha um tema para continuar.",
+      "occasion": "O que vocês estão comemorando?",
+      "date": "Data",
+      "dateHint": "Vai no convite e nos ajuda a avisar os prazos de impressão.",
+      "place": "Local",
+      "placePlaceholder": "Ex.: Salão Arco-íris ou Em casa"
+    },
+    "kit": {
+      "title": "O que você vai levar?",
+      "subtitle": "Primeiro você vê a sua amostra grátis. Só paga se gostar.",
+      "next": "Continuar para a minha amostra",
+      "recommended": "Recomendado",
+      "fullKit": "Kit digital completo",
+      "invitationOnly": "Só o convite",
+      "invitationOnlyText": "Imagem para WhatsApp e PDF para imprimir, com o personagem.",
+      "copiesNote": "As cópias que você imprimir não mudam o preço.",
+      "includes": {
+        "invitation": "Convite para WhatsApp e PDF",
+        "decoration": "Decoração: etiquetas, adesivos e agradecimento",
+        "keepsake": "Uma história de lembrança por convidado, a mesma para todos",
+        "activities": "Atividades para imprimir"
+      },
+      "dedication": "Dedicatória da história de lembrança (opcional)",
+      "dedicationPlaceholder": "Ex.: Obrigado por vir à minha festa. {name}",
+      "dedicationHint": "Todos os convidados recebem a mesma história, aprovada por você.",
+      "toneLegend": "Tom do convite",
+      "tones": {
+        "fun": {
+          "name": "Divertido",
+          "sample": "“Venha para o meu aniversário!”"
+        },
+        "sweet": {
+          "name": "Carinhoso",
+          "sample": "“Eu adoraria ter você no meu aniversário”"
+        },
+        "adventurous": {
+          "name": "Aventureiro",
+          "sample": "“Entre na aventura do meu aniversário!”"
+        }
+      }
+    },
+    "partyPreview": {
+      "invitationTitle": "O seu convite",
+      "keepsakeTitle": "A história de lembrança",
+      "turning": "{name} faz {age}!",
+      "occasion": {
+        "baptism": "Venha para o meu batizado!",
+        "communion": "Venha para a minha primeira comunhão!",
+        "graduation": "Venha comemorar a minha formatura!"
+      },
+      "priceKit": "Kit digital completo: {price}",
+      "priceInvitation": "Só o convite: {price}",
+      "book": {
+        "title": "Quer dar também o livro de {name}?",
+        "text": "Um livro de Famílias com a história completa e o mesmo personagem. É comprado à parte, depois do kit.",
+        "none": "Agora não",
+        "digital": "Digital",
+        "printed": "Impresso",
+        "priceDigital": "a partir de {price}",
+        "pricePrinted": "a partir de {price}",
+        "afterKit": "Anotado. Depois de pagar o kit, você cria o livro a partir do seu pedido, com o mesmo personagem.",
+        "shareLead": "Avós e tios também podem presentear.",
+        "share": "Enviar o link para eles",
+        "copied": "Link copiado",
+        "shareText": "Estamos preparando a festa de {name}. Se você quiser dar uma história em que seja protagonista, pode criar aqui:"
+      },
+      "differencesEdit": "Você pode editar os textos e mudar de novo o tema ou a foto."
+    }
   },
   "Landing": {
     "events": {

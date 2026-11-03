@@ -1171,6 +1171,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           childName: snapshot.childName,
           title: snapshot.title,
           occasion: sourceKit.event?.type ?? 'birthday',
+          tone: sourceKit.event?.tone,
           turningAge:
             sourceKit.event?.type === 'birthday' ? (sourceKit.event.turningAge ?? null) : null,
           eventDate: sourceKit.event?.date ?? null,
@@ -1222,6 +1223,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           childName: snapshot.childName,
           title: snapshot.title,
           occasion: kit.event?.type ?? 'birthday',
+          tone: kit.event?.tone,
           turningAge: kit.event?.type === 'birthday' ? (kit.event.turningAge ?? null) : null,
           eventDate: kit.event?.date ?? null,
           invitation: kit.invitation,

@@ -2388,3 +2388,17 @@ En el navbar de quien tiene sesión, «+ Crear» se veía como un enlace más (e
 
 - **«¿Qué quieres crear?» (las tres tarjetas «Comenzar»)** solo se muestra en Mis cuentos cuando la persona todavía no tiene cuentos en proceso ni pedidos; después, el botón «Crear» del navbar y la home con sesión ya llevan al siguiente paso, y las tarjetas dejaban los borradores abajo.
 - **Pedidos** pasa a su propia página, `/mis-pedidos` (`/my-orders`, `/meus-pedidos`): la lista en vivo con su estado, la cronología y «Pedir de nuevo»; sin pedidos dice que todavía no hay. «Pedidos» del navbar y del menú de la cuenta apuntan ahí (con el contador de pedidos en curso). Mis cuentos queda para borradores, personajes y proyectos profesionales. La página es privada (sin analítica y fuera de los buscadores).
+
+## 223 — Creador de Celebraciones: las preguntas de una fiesta, en las 4 etapas de siempre
+
+El creador de Celebraciones era el formulario de Familias con otro nombre y no reflejaba lo que promete su landing. Se mantienen las 4 etapas, `WizardShell` y las tarjetas; cambian las preguntas. El objetivo es que quien organiza una fiesta con fecha vea su muestra y pague en la misma sesión.
+
+- **Personaje:** nombre, edad que cumple, cómo nos referimos al protagonista (opcional; evita un cuento con el género equivocado) y foto o rasgos. Sin gustos, mascota ni amigo.
+- **Aventura (paso `party`):** temática entre las 6 de la landing (llega elegida con `?tema=`), qué celebran, fecha y lugar. La historia y el estilo ya no se preguntan: salen de la temática y de la edad (`party.ts`).
+- **Ajustes (paso `kit`):** kit digital completo (marcado) o solo la invitación, dedicatoria del cuento de recuerdo y tono de la invitación. Los precios son los mismos de la landing y el pago (`eventPricing`).
+- **Vista previa:** resumen, aprobación del personaje y muestra gratis con la invitación armada en código con la portada aprobada (no genera imágenes ni gasta IA) y el cuento de recuerdo. Ahí mismo se ofrece el libro del cumpleañero (ahora no, digital o impreso) y un enlace para abuelos y tíos, sin datos del niño.
+- **El libro del cumpleañero se paga aparte:** cada pedido es de un solo libro, así que no se suma al total del kit (el prototipo sí lo sumaba). Lo elegido queda en `event.bookChoice` y el libro se crea desde el pedido, con el botón que ya existía.
+- **Al pago** llegan marcado lo elegido y el lugar; se pueden cambiar. «Solo la invitación» sigue incluyendo el mini cuento, porque el diseño lo trae (DECISIONS 187).
+- **Tono:** los textos viven en `INVITATION_TONE_COPY`, usados por la muestra y por el PDF. `fun` es el texto de siempre, así los pedidos anteriores no cambian. Las ocasiones que no son cumpleaños conservan sus textos.
+- **Reglas de Firestore:** `validEvent` aceptaba solo `birthday`, de modo que elegir bautismo, comunión o egreso fallaba al guardar; ahora acepta las 4 ocasiones y los campos nuevos. **Hay que desplegar las reglas junto con la web**, si no el creador no puede guardar `party` ni `kit`.
+- **Borradores existentes:** `party` y `kit` van al final de `WIZARD_STEPS` para no mover el índice histórico; un borrador parado en un paso que Celebraciones ya no tiene retoma en la fiesta. Familias no cambia, salvo los nombres de etapa en español («Personaje», «Aventura», «Vista previa»).

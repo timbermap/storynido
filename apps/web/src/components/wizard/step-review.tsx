@@ -54,6 +54,7 @@ export function StepReview({
   const step = (name: WizardStep) => name;
 
   const event = book.channel === 'events' ? book.event : null;
+  const tKit = useTranslations('Wizard.kit');
   const tOccasions = useTranslations('Wizard.child.event.occasions');
   const eventValue = event
     ? [
@@ -67,6 +68,7 @@ export function StepReview({
             )
           : null,
         event.theme,
+        event.place,
       ]
         .filter(Boolean)
         .join(' · ') || t('eventEmpty')
@@ -74,7 +76,6 @@ export function StepReview({
 
   const rows: { label: string; value: string; step: WizardStep }[] = [
     { label: t('protagonist'), value: child?.name ?? '—', step: step('child') },
-    ...(eventValue ? [{ label: t('event'), value: eventValue, step: step('child') }] : []),
     {
       label: t('character'),
       value:
@@ -83,6 +84,22 @@ export function StepReview({
           : `${t('characterPhoto')} · ${t('photoCount', { count: book.photoIds.length })}`,
       step: step('photos'),
     },
+    ...(eventValue ? [{ label: t('event'), value: eventValue, step: step('party') }] : []),
+    ...(event
+      ? [
+          {
+            label: t('kit'),
+            value: [
+              tKit(event.offer === 'invitation' ? 'invitationOnly' : 'fullKit'),
+              t('kitTone', { tone: tKit(`tones.${event.tone}.name`) }),
+              book.dedication && event.offer === 'full_kit' ? t('kitDedication') : null,
+            ]
+              .filter(Boolean)
+              .join(' · '),
+            step: step('kit'),
+          },
+        ]
+      : []),
     {
       label: t('adventure'),
       value: story ? titleForChild(story, child?.name, locale as Locale) : '—',

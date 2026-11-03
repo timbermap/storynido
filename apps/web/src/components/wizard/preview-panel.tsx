@@ -30,6 +30,7 @@ import { trackConversion } from '@/lib/conversions';
 import { formatPrice } from '@/lib/format';
 
 import { CharacterReview } from './character-review';
+import { BirthdayBookOffer, InvitationPreview } from './party-preview';
 import { cn } from '@/lib/utils';
 
 import { PreviewFeedback } from './preview-feedback';
@@ -78,6 +79,7 @@ export function PreviewPanel({
   book,
   childName,
   prices,
+  eventPrices,
   generating,
   generateError,
   onRegenerateAll,
@@ -86,6 +88,7 @@ export function PreviewPanel({
   book: WizardData['book'];
   childName: string;
   prices: WizardData['prices'];
+  eventPrices: WizardData['eventPrices'];
   generating: boolean;
   generateError: string | null;
   onRegenerateAll: () => void;
@@ -94,6 +97,8 @@ export function PreviewPanel({
   const t = useTranslations('Wizard.preview');
   const tViewer = useTranslations('Viewer');
   const tBook = useTranslations('Wizard.book');
+  const tParty = useTranslations('Wizard.partyPreview');
+  const isEvent = book.channel === 'events';
   const locale = useLocale() as Locale;
   const money = (minor: number) =>
     prices ? formatPrice(minor, prices.currency, locale, prices.country) : '';
@@ -324,6 +329,21 @@ export function PreviewPanel({
 
       {data?.stage === 'complete' && (
         <div className="mt-8 grid gap-6 [&>*]:min-w-0">
+          {isEvent && (
+            // Primero lo que se manda a los invitados: es lo que decide la compra.
+            <section aria-labelledby="party-invitation" className="grid gap-3">
+              <h2 id="party-invitation" className="text-xl font-medium">
+                {tParty('invitationTitle')}
+              </h2>
+              <div className="max-w-sm">
+                <InvitationPreview
+                  book={book}
+                  childName={childName}
+                  imageUrl={data.coverUrl ?? data.character?.imageUrl ?? null}
+                />
+              </div>
+            </section>
+          )}
           <aside className="rounded-2xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
               <div className="flex flex-wrap items-center gap-3">
@@ -349,7 +369,10 @@ export function PreviewPanel({
                   }),
                 },
                 { icon: Droplets, text: t('differencesWatermark') },
-                { icon: PencilLine, text: t('differencesEdit') },
+                {
+                  icon: PencilLine,
+                  text: isEvent ? tParty('differencesEdit') : t('differencesEdit'),
+                },
               ].map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-start gap-3">
                   <span className="grid size-9 shrink-0 place-items-center rounded-full bg-peach text-navy">
@@ -361,6 +384,7 @@ export function PreviewPanel({
             </ul>
           </aside>
           <div className="grid gap-4 [&>*]:min-w-0">
+            {isEvent && <h2 className="text-xl font-medium">{tParty('keepsakeTitle')}</h2>}
             <BookViewer
               title={data.title}
               pages={viewerPages(data)}
@@ -413,6 +437,12 @@ export function PreviewPanel({
         </div>
       )}
 
+      {isEvent && data?.stage === 'complete' && !data.stale && (
+        <div className="mt-8">
+          <BirthdayBookOffer book={book} childName={childName} prices={prices} />
+        </div>
+      )}
+
       {/* Mientras falta confirmar al personaje, el único paso es el botón de arriba: sin barra. */}
       {!(data?.stage === 'character' && data.character && !data.character.approved) && (
         <div className="mt-12 flex flex-col gap-3 border-t pt-8 sm:flex-row sm:items-center">
@@ -430,9 +460,30 @@ export function PreviewPanel({
                 }}
                 className={cn(buttonVariants({ size: 'lg' }), 'h-14 px-10 text-lg')}
               >
-                {t('continue')}
+                {isEvent ? t('approveAndPay') : t('continue')}
               </Link>
             ) : null}
+            {data?.stage === 'complete' && !data.stale && isEvent && eventPrices && (
+              <p className="mt-2 text-sm text-muted-foreground tabular-nums">
+                {book.event?.offer === 'invitation'
+                  ? tParty('priceInvitation', {
+                      price: formatPrice(
+                        eventPrices.invitationMinor,
+                        eventPrices.currency,
+                        locale,
+                        eventPrices.country,
+                      ),
+                    })
+                  : tParty('priceKit', {
+                      price: formatPrice(
+                        eventPrices.fullKitMinor,
+                        eventPrices.currency,
+                        locale,
+                        eventPrices.country,
+                      ),
+                    })}
+              </p>
+            )}
             {data?.stage === 'complete' && !data.stale && book.channel !== 'events' && prices && (
               // Qué cuesta antes de entrar al pago (formato y envío se eligen ahí).
               <p className="mt-2 text-sm text-muted-foreground tabular-nums">

@@ -574,7 +574,9 @@
       "memories": "Recuerdos",
       "lesson": "Enseñanza",
       "style": "Estilo",
-      "review": "Vista previa"
+      "review": "Vista previa",
+      "party": "Fiesta",
+      "kit": "Qué llevas"
     },
     "progress": "Paso {current} de {total}",
     "back": "Atrás",
@@ -627,21 +629,15 @@
       "dedicationPlaceholder": "Ej.: Para Martina, que cada noche sueña con las estrellas.",
       "required": "Escribe su nombre para continuar.",
       "event": {
-        "title": "Datos de la celebración",
-        "note": "Los usamos en el cuento. La fecha nos sirve para avisarte los plazos reales de impresión.",
-        "date": "Fecha de la fiesta",
         "turningAge": "Edad que cumple",
-        "turningAgeEmpty": "Elegir",
-        "years": "{count, plural, one {# año} other {# años}}",
-        "theme": "Temática de la fiesta (opcional)",
-        "themePlaceholder": "Por ejemplo: dinosaurios, espacio, princesas",
-        "occasion": "¿Qué celebran?",
         "occasions": {
           "birthday": "Cumpleaños",
           "baptism": "Bautismo",
           "communion": "Primera comunión",
           "graduation": "Egreso o fin de año escolar"
-        }
+        },
+        "stepTitle": "¿Quién es el protagonista de la fiesta?",
+        "stepSubtitle": "Aparece en la invitación, la decoración y el cuento de recuerdo."
       },
       "pro": {
         "alias": "Alias del proyecto",
@@ -761,7 +757,10 @@
       "book": "Tu libro",
       "event": "Celebración",
       "eventTurning": "Cumple {count}",
-      "eventEmpty": "Sin completar"
+      "eventEmpty": "Sin completar",
+      "kit": "Qué llevas",
+      "kitTone": "Tono {tone}",
+      "kitDedication": "Con dedicatoria"
     },
     "preview": {
       "badge": "Muestra de la historia",
@@ -842,7 +841,8 @@
       },
       "leaveText": "Seguimos trabajando aunque salgas. Te escribimos cuando la muestra esté lista. Para retomarla: Mis cuentos, «En proceso», Continuar.",
       "leaveButton": "Volver a Mis cuentos",
-      "leaveTitle": "Puedes cerrar esta pantalla"
+      "leaveTitle": "Puedes cerrar esta pantalla",
+      "approveAndPay": "Aprobar y pagar"
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
@@ -1045,10 +1045,10 @@
     "stageProgress": "Etapa {current} de {total}: {name}",
     "subStep": "{name} ({current} de {total})",
     "stages": {
-      "character": "Su personaje",
-      "adventure": "La aventura",
+      "character": "Personaje",
+      "adventure": "Aventura",
       "settings": "Ajustes",
-      "preview": "Muestra"
+      "preview": "Vista previa"
     },
     "lines": {
       "families": "Un cuento para la familia",
@@ -1060,7 +1060,79 @@
     "changeLine": "Cambiar",
     "choiceStory": "Historia: {name}",
     "choiceLesson": "Enseñanza: {name}",
-    "choiceChange": "Cambiar"
+    "choiceChange": "Cambiar",
+    "party": {
+      "title": "La fiesta",
+      "subtitle": "Elige la temática y cuéntanos cuándo y dónde. Con eso armamos la invitación y el cuento de recuerdo.",
+      "themeLegend": "Temática",
+      "required": "Elige una temática para continuar.",
+      "occasion": "¿Qué celebran?",
+      "date": "Fecha",
+      "dateHint": "Va en la invitación y nos sirve para avisarte los plazos de impresión.",
+      "place": "Lugar",
+      "placePlaceholder": "Ej.: Salón Arcoíris o En casa"
+    },
+    "kit": {
+      "title": "¿Qué llevas?",
+      "subtitle": "Primero ves tu muestra gratis. Pagas solo si te gusta.",
+      "next": "Continuar a mi muestra",
+      "recommended": "Recomendado",
+      "fullKit": "Kit digital completo",
+      "invitationOnly": "Solo la invitación",
+      "invitationOnlyText": "Imagen para WhatsApp y PDF para imprimir, con su personaje.",
+      "copiesNote": "Las copias que imprimas no cambian el precio.",
+      "includes": {
+        "invitation": "Invitación para WhatsApp y PDF",
+        "decoration": "Decoración: etiquetas, stickers y agradecimiento",
+        "keepsake": "Un cuento de recuerdo por invitado, el mismo para todos",
+        "activities": "Actividades para imprimir"
+      },
+      "dedication": "Dedicatoria del cuento de recuerdo (opcional)",
+      "dedicationPlaceholder": "Ej.: Gracias por venir a mi fiesta. {name}",
+      "dedicationHint": "Todos los invitados reciben el mismo cuento, aprobado por ti.",
+      "toneLegend": "Tono de la invitación",
+      "tones": {
+        "fun": {
+          "name": "Divertido",
+          "sample": "«¡Te invito a mi cumple!»"
+        },
+        "sweet": {
+          "name": "Tierno",
+          "sample": "«Me encantaría que vengas a mi cumple»"
+        },
+        "adventurous": {
+          "name": "Aventurero",
+          "sample": "«¡Súmate a la aventura de mi cumple!»"
+        }
+      }
+    },
+    "partyPreview": {
+      "invitationTitle": "Tu invitación",
+      "keepsakeTitle": "El cuento de recuerdo",
+      "turning": "¡{name} cumple {age}!",
+      "occasion": {
+        "baptism": "¡Te invito a mi bautismo!",
+        "communion": "¡Te invito a mi primera comunión!",
+        "graduation": "¡Te invito a festejar mi egreso!"
+      },
+      "priceKit": "Kit digital completo: {price}",
+      "priceInvitation": "Solo la invitación: {price}",
+      "book": {
+        "title": "¿Le regalas también su libro a {name}?",
+        "text": "Un libro de Familias con su historia completa, con el mismo personaje. Se compra aparte, después del kit.",
+        "none": "Ahora no",
+        "digital": "Digital",
+        "printed": "Impreso",
+        "priceDigital": "desde {price}",
+        "pricePrinted": "desde {price}",
+        "afterKit": "Anotado. Después de pagar el kit, desde tu pedido creas su libro con el mismo personaje.",
+        "shareLead": "También lo pueden regalar abuelos y tíos.",
+        "share": "Enviarles el enlace",
+        "copied": "Enlace copiado",
+        "shareText": "Estamos preparando la fiesta de {name}. Si quieres regalarle un cuento donde sea protagonista, puedes crearlo aquí:"
+      },
+      "differencesEdit": "Puedes editar los textos y volver a cambiar la temática o la foto."
+    }
   },
   "Landing": {
     "events": {

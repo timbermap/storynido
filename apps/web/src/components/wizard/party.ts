@@ -1,0 +1,85 @@
+import {
+  KIT_PIECES,
+  recommendedStyle,
+  suggestedReading,
+  type Book,
+  type EventPricing,
+  type KitOffer,
+  type KitPiece,
+  type PublicCollection,
+  type PublicStory,
+} from '@storynido/shared';
+
+import type { StyleOption } from './types';
+
+const normalize = (value: string) => value.trim().toLocaleLowerCase();
+
+/** La temática que llega de la landing (`?tema=`) o de un borrador: por nombre o por slug. */
+export function matchTheme(
+  themes: readonly PublicCollection[],
+  theme: string | null | undefined,
+): PublicCollection | null {
+  if (!theme) return null;
+  const wanted = normalize(theme);
+  return (
+    themes.find((item) => normalize(item.name) === wanted || normalize(item.slug) === wanted) ??
+    null
+  );
+}
+
+/**
+ * La historia del cuento de recuerdo: la temática ya dice de qué va, así que no se pregunta. Se
+ * conserva la que ya estaba si es de esa temática; si no, la primera que le queda bien a su edad.
+ */
+export function storyForTheme(
+  stories: readonly PublicStory[],
+  themeSlug: string,
+  age: number | undefined,
+  currentId: string | null,
+): PublicStory | null {
+  const events = stories.filter((story) => story.channels.includes('events'));
+  const inTheme = events.filter((story) => story.collectionIds.includes(themeSlug));
+  const options = inTheme.length > 0 ? inTheme : events;
+  const fits = (story: PublicStory) =>
+    age !== undefined && story.ageMin <= age && age <= story.ageMax;
+  return (
+    options.find((story) => story.slug === currentId) ?? options.find(fits) ?? options[0] ?? null
+  );
+}
+
+/** El estilo del kit: el recomendado de la historia, si se ofrece para su tipo de contenido. */
+export function styleForStory(
+  story: PublicStory,
+  styles: readonly StyleOption[],
+  contentType: Book['contentType'],
+): string | null {
+  const wanted = story.defaultStyle ?? recommendedStyle(story);
+  const usable = styles.filter((style) => style.contentTypes.includes(contentType));
+  return usable.find((style) => style.slug === wanted)?.slug ?? usable[0]?.slug ?? null;
+}
+
+/** Opciones editoriales del mini cuento: breve sea cual sea la edad, con la lectura según ella. */
+export function partyBookOptions(age: number | undefined) {
+  return {
+    ...(age === undefined ? {} : suggestedReading(age)),
+    length: 'mini' as const,
+  };
+}
+
+/** Las piezas que se marcan en el pago según lo que eligió en el creador. */
+export function piecesForOffer(offer: KitOffer, sold: readonly string[]): KitPiece[] {
+  const pieces: KitPiece[] = offer === 'invitation' ? ['invitation'] : [...KIT_PIECES];
+  return ['mini_book', ...pieces.filter((piece) => piece !== 'mini_book' && sold.includes(piece))];
+}
+
+/** Lo que cuesta cada opción, con la misma cuenta que la landing y el pago. */
+export function offerPrices(
+  pricing: Pick<EventPricing, 'designMinor' | 'pieces' | 'bundlePercent'>,
+) {
+  const pieces = Object.values(pricing.pieces);
+  const full = pricing.designMinor + pieces.reduce((sum, value) => sum + value, 0);
+  return {
+    invitationMinor: pricing.designMinor + (pricing.pieces.invitation ?? 0),
+    fullKitMinor: full - Math.round((full * (pricing.bundlePercent ?? 0)) / 100),
+  };
+}
