@@ -62,7 +62,19 @@
     "createKit": "Design the kit",
     "tryFree": "Try for free",
     "professionalsTemplates": "Professional templates",
-    "adminPanel": "Admin panel"
+    "adminPanel": "Admin panel",
+    "myStoriesToggle": "See your stories by status",
+    "storiesCreating": "In progress",
+    "storiesInProgress": "On the way",
+    "storiesDone": "Finished",
+    "characters": "Characters",
+    "tabBar": "App navigation",
+    "home": "Home",
+    "catalog": "Catalog",
+    "accountShort": "Account",
+    "createTitle": "What do you want to create?",
+    "close": "Close",
+    "catalogLines": "Catalogs by line"
   },
   "Switchers": {
     "language": "Language",
@@ -482,7 +494,6 @@
       "all": "All",
       "loadFailed": "We couldn't load your stories in progress. Reload the page to try again.",
       "start": "Get started",
-      "tabDrafts": "In progress",
       "tabCharacters": "Characters",
       "charactersNote": "The children you have already created a story for. You can change their name and age, or delete their data.",
       "charactersEmpty": "You have not created any characters yet.",
@@ -531,7 +542,13 @@
       "profileBookDraft": "In progress",
       "profileBookReady": "Sample ready",
       "profileBookOrdered": "Ordered",
-      "profileCancel": "Cancel"
+      "profileCancel": "Cancel",
+      "tabCreating": "In progress",
+      "tabInProgress": "On the way",
+      "tabDone": "Finished",
+      "emptyCreating": "You have no stories in progress.",
+      "emptyInProgress": "You have no orders on the way.",
+      "emptyDone": "You don't have any finished stories yet."
     },
     "myStoriesLink": "Your stories and orders are in My stories →"
   },

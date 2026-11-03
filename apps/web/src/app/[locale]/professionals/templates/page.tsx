@@ -5,6 +5,7 @@ import type { Locale } from '@storynido/shared';
 
 import { LandingCollections } from '@/components/landing/sections';
 import { RememberChannel } from '@/components/landing/remember-channel';
+import { CatalogLineChips } from '@/components/layout/catalog-line-chips';
 import { localizedAlternates } from '@/lib/seo';
 import { getCollections, getStories } from '@/lib/server/api';
 
@@ -33,6 +34,7 @@ export default async function ProfessionalsCatalogPage({ params }: Props) {
   return (
     <>
       <RememberChannel channel="professionals" />
+      <CatalogLineChips />
       <div className="container-page pt-14">
         <h1 className="text-[clamp(2rem,4vw,3rem)] leading-tight font-medium">
           {t('catalogTitle')}

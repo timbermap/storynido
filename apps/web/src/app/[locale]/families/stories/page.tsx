@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import type { Locale } from '@storynido/shared';
 
 import { RememberChannel } from '@/components/landing/remember-channel';
+import { CatalogLineChips } from '@/components/layout/catalog-line-chips';
 import { CatalogView } from '@/components/stories/catalog-view';
 import { localizedAlternates } from '@/lib/seo';
 
@@ -28,6 +29,7 @@ export default async function FamiliesStoriesPage({ params, searchParams }: Prop
   return (
     <>
       <RememberChannel channel="families" />
+      <CatalogLineChips />
       <CatalogView
         locale={locale as Locale}
         query={query}

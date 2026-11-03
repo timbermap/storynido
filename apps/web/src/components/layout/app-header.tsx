@@ -1,14 +1,15 @@
 import { getTranslations } from 'next-intl/server';
 
 import { AccountLink } from './account-link';
-import { AppNav, CreateMenu } from './app-nav';
+import { AppNav, CreateMenu, MyStoriesMenu } from './app-nav';
 import { Logo } from './logo';
 import { LogoLink } from './logo-link';
 
 /**
- * Navbar de quien ya es cliente: sin las páginas que venden (Familias, Celebraciones,
- * Profesionales). El logo lleva a la home con sesión (DECISIONS 220); "Crear" reúne las tres opciones y la cuenta tiene
- * su menú. En el celular, la navegación vive en la barra inferior.
+ * Navbar de quien ya es cliente (opción 1, "tres puertas"): los catálogos de las tres líneas al
+ * centro; Mis cuentos, Crear y la cuenta a la derecha. El logo lleva a la home con sesión
+ * (DECISIONS 220). En el celular solo quedan el logo y el avatar: el resto vive en la barra
+ * inferior (AppTabBar).
  */
 export async function AppHeader() {
   const t = await getTranslations('Nav');
@@ -27,7 +28,8 @@ export async function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <CreateMenu />
+          <MyStoriesMenu className="max-lg:hidden" />
+          <CreateMenu className="max-lg:hidden" />
           <AccountLink />
         </div>
       </div>

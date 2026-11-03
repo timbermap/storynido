@@ -20,6 +20,7 @@ export function NavMenu({
   panelClassName = 'w-[22rem]',
   href,
   toggleLabel,
+  current = false,
 }: {
   id: string;
   label: ReactNode;
@@ -31,9 +32,11 @@ export function NavMenu({
   /** Ancho del panel. */
   panelClassName?: string;
   /** El nombre del menú es un link a su página; la flecha abre el desplegable. */
-  href?: '/families';
+  href?: '/families' | '/my-stories';
   /** Nombre accesible de la flecha cuando el nombre es un link. */
   toggleLabel?: string;
+  /** El nombre-link marca la página actual. */
+  current?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -96,7 +99,8 @@ export function NavMenu({
         {href && (
           <Link
             href={href}
-            className="rounded-full py-2 pr-1 pl-3 whitespace-nowrap transition-colors hover:text-primary"
+            aria-current={current ? 'page' : undefined}
+            className="inline-flex items-center gap-2 rounded-full py-2 pr-1 pl-3 whitespace-nowrap transition-colors hover:text-primary aria-[current=page]:text-primary"
           >
             {label}
           </Link>

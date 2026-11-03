@@ -4,6 +4,7 @@ import { BookOpen, ChevronRight, RotateCcw } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
+import { isOrderDone, isOrderInProgress } from '@/components/layout/use-account-activity';
 import {
   GENERATED_STATUSES,
   OrderTimeline,
@@ -22,14 +23,20 @@ export function OrdersList({
   uid,
   heading = 'h2',
   showEmpty = false,
+  status,
+  emptyLabel,
 }: {
   uid: string;
-  /** `h1` cuando es el título de su propia página. */
-  heading?: 'h1' | 'h2';
+  /** `h1` cuando es el título de su propia página; `null` dentro de una solapa que ya lo nombra. */
+  heading?: 'h1' | 'h2' | null;
   /** En su propia página, sin pedidos se avisa en lugar de ocultar la sección. */
   showEmpty?: boolean;
+  /** Solo los pedidos en curso o solo los terminados (solapas de Mis cuentos). */
+  status?: 'inProgress' | 'done';
+  /** Aviso cuando no hay pedidos (por defecto, el de la lista completa). */
+  emptyLabel?: string;
 }) {
-  const Heading = heading;
+  const Heading = heading ?? 'h2';
   const t = useTranslations('Account.orders');
   const tOrder = useTranslations('Checkout.order');
   const tFormats = useTranslations('Checkout.formats');
@@ -53,17 +60,27 @@ export function OrdersList({
   }, [uid]);
 
   // Los pagos que nunca se completaron no son pedidos para quien compra.
-  const visible = orders?.filter((order) => order.status !== 'cancelled' || order.title);
+  const visible = orders?.filter(
+    (order) =>
+      (order.status !== 'cancelled' || order.title) &&
+      (status === 'inProgress'
+        ? isOrderInProgress(order)
+        : status === 'done'
+          ? isOrderDone(order)
+          : true),
+  );
   // Sin pedidos no hay nada que mostrar: la sección aparece cuando hay el primero.
   if (!failed && visible?.length === 0 && !showEmpty) return null;
 
   return (
     <section id="orders" className="grid scroll-mt-28 gap-4">
-      <Heading
-        className={heading === 'h1' ? 'text-3xl font-medium sm:text-4xl' : 'text-2xl font-medium'}
-      >
-        {t('title')}
-      </Heading>
+      {heading !== null && (
+        <Heading
+          className={heading === 'h1' ? 'text-3xl font-medium sm:text-4xl' : 'text-2xl font-medium'}
+        >
+          {t('title')}
+        </Heading>
+      )}
       {failed ? (
         <p role="alert" className="text-sm text-destructive">
           {t('error')}
@@ -73,7 +90,7 @@ export function OrdersList({
           {t('loading')}
         </p>
       ) : visible.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('empty')}</p>
+        <p className="text-sm text-muted-foreground">{emptyLabel ?? t('empty')}</p>
       ) : (
         <div className="grid gap-8">
           {GROUPS.map((group) => {
