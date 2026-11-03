@@ -1230,6 +1230,8 @@ describe('checkout y pagos (fase 11)', () => {
     expect(quoted.json<{ snapshot: { totalMinor: number } }>().snapshot.totalMinor).toBeGreaterThan(
       0,
     );
+    // Un libro creado en digital no ofrece impresos (el checkout no queda trabado).
+    expect(quoted.json<{ availableFormats: string[] }>().availableFormats).toEqual(['digital']);
 
     const toPrint = await post(`/v1/orders/${orderId}/reorder`, {
       format: 'hardcover',
