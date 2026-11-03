@@ -1,4 +1,4 @@
-import { Caveat, Figtree, Fraunces, Lora, Quicksand } from 'next/font/google';
+import { Caveat, Fraunces, Lora, Quicksand } from 'next/font/google';
 
 /**
  * Tipografías de la marca v3 (docs/BRAND.md): Quicksand para títulos, botones y navegación;
@@ -33,15 +33,4 @@ export const fontCover = Fraunces({
   subsets: ['latin'],
   variable: '--font-cover-face',
   display: 'swap',
-});
-
-/**
- * Texto de la home con sesión (Figtree). Sin precarga: solo se baja donde se usa, así la landing
- * para visitantes no paga un archivo más.
- */
-export const fontHomeBody = Figtree({
-  subsets: ['latin'],
-  variable: '--font-home-body',
-  display: 'swap',
-  preload: false,
 });

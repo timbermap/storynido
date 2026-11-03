@@ -17,7 +17,8 @@ import { Link } from '@/i18n/navigation';
 import { CONTACT_ID } from '@/components/home/contact-form';
 import { brand } from '@/lib/brand';
 import { SignedInHome } from '@/components/home/session/signed-in-home';
-import { getContent, getOffer, getShippingEstimate, getStories } from '@/lib/server/api';
+import { homeLineCopy } from '@/components/home/session/line-copy';
+import { getContent, getOffer, getStories } from '@/lib/server/api';
 import { SESSION_COOKIE } from '@/lib/session-hint';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { offerHighlights } from '@/lib/offer';
@@ -33,20 +34,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   // home desde el primer pintado, sin el parpadeo de la landing de visitante. La marca no es la
   // sesión: sus datos los lee el navegador con su sesión de Firebase.
   if ((await cookies()).get(SESSION_COOKIE)?.value === '1') {
-    const [offer, stories, estimate] = await Promise.all([
+    const [offer, stories, lines] = await Promise.all([
       getOffer(display.country, locale),
-      getStories(locale, undefined, { channel: 'families' }).catch(() => []),
-      getShippingEstimate(display.country),
+      // Todas las líneas: las portadas de catálogo ilustran borradores de cualquier línea.
+      getStories(locale).catch(() => []),
+      homeLineCopy(),
     ]);
-    const families = stories.filter((story) => story.channels[0] === 'families');
-    const shown = families.length > 0 ? families : stories;
     return (
       <SignedInHome
-        stories={shown}
+        stories={stories}
         offer={offer}
         country={display.country}
-        storyCount={shown.length}
-        shippingEstimate={estimate}
+        lines={lines}
         christmas={
           <ChristmasDeadline
             offer={offer}

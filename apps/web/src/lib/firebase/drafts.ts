@@ -69,6 +69,8 @@ export interface DraftSummary {
   storyId: string | null;
   /** Se está dibujando ahora (una generación de más de 10 minutos se da por colgada). */
   generating: boolean;
+  /** Celebraciones: temática de la fiesta. */
+  eventTheme: string | null;
 }
 
 const STALE_GENERATION_MS = 10 * 60 * 1000;
@@ -255,6 +257,7 @@ export async function listDrafts(db: Firestore, uid: string): Promise<DraftSumma
           book.get('status') as string,
           asDate(book.get('previewStartedAt') as Timestampish),
         ),
+        eventTheme: (book.get('event.theme') as string | null | undefined) ?? null,
       };
     }),
   );

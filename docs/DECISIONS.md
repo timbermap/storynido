@@ -2444,3 +2444,9 @@ De la revisión de la home con sesión (feedback del 2026-11-03), lo que entra a
 Se mantiene lo que la revisión proponía cambiar y ya estaba decidido: «Crear» como botón visible (DECISIONS 221) y el avatar gris.
 
 **Queda para después del live:** navbar y footer en Figtree con la misma grilla, Explorar en tres columnas iguales, secciones según el estado del usuario (sin «Un libro de verdad» ni «Antes de decidir» con un pedido en curso), acordeón de preguntas del sitio, un solo fondo de página, y el criterio para no poner el nombre sobre la cara de otro chico.
+
+## 227 — Una sola home con sesión para las tres líneas
+
+La home con sesión deja de girar alrededor de un cuento de Familias. Es la misma para todos: saludo («Hola, {nombre}» en Caveat, si la cuenta tiene nombre), «Lo próximo» (lo que pide una acción, con el único botón durazno), «Crear algo nuevo» con las tres líneas y «Tus proyectos» con borradores y pedidos de todas las líneas (máximo 4 filas). Al pie, una línea de confianza. Se quitan el carrusel de historias, formatos y precios, «Cómo sigue», las tres preguntas y la barra fija del celular. La tipografía y el botón vuelven a la marca v3 (Quicksand y durazno con texto navy, sin Fraunces/Figtree propios).
+
+Qué línea manda (`pickHomeLine`, función pura con pruebas): 1) la muestra sin comprar más cercana a la compra de cualquier línea; 2) un pedido en curso; 3) perfil profesional activado; 4) la línea por la que entró (RememberChannel); 5) la del último pedido, o Familias. Modo Pro (lista «Proyectos por niño» arriba, botón «Nuevo proyecto» y avance del descuento) cuando Profesionales gana por la regla 1 o 3, o todo lo de la cuenta es profesional. Celebraciones tiene sus propios textos del kit, y con un kit en curso la tarjeta de Familias ofrece «El libro del cumpleañero».

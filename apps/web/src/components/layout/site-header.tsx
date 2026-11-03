@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
+import { AUDIENCE_TONES } from '@/lib/audience-tones';
 import { cn } from '@/lib/utils';
 
 import { AccountLink } from './account-link';
@@ -13,12 +14,7 @@ import { MobileMenu } from './mobile-menu';
 export const HOW_IT_WORKS_ID = 'how-it-works';
 export const FAQ_ID = 'faq';
 
-/** Cada público con su color (marca v3): salvia (familias), durazno (celebraciones), lavanda (profesionales). */
-export const AUDIENCE_TONES = {
-  families: { dot: 'bg-[#5fae9f]', panel: 'bg-[#e4f3ef]', text: 'text-[#2f6f66]' },
-  events: { dot: 'bg-[#ff8f7a]', panel: 'bg-[#ffe7df]', text: 'text-[#a33f33]' },
-  professionals: { dot: 'bg-[#8c79c9]', panel: 'bg-[#eee8fa]', text: 'text-[#5b4a99]' },
-} as const;
+export { AUDIENCE_TONES };
 
 /**
  * Navbar de visitante (reporte de navegación): lo que busca quien llega por primera vez —

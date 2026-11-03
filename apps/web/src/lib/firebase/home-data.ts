@@ -4,9 +4,9 @@ import type { Firestore } from 'firebase/firestore';
 import { COLLECTIONS } from '@storynido/shared';
 
 import { api } from '@/lib/api';
-import type { HomeBook, HomeChannel, HomeOrder } from '@/lib/home-state';
+import type { HomeBook, HomeChannel, HomeOrder, HomeProject } from '@/lib/home-state';
 
-import { isEmptyDraft, listDrafts } from './drafts';
+import { isEmptyDraft, listDrafts, listProjects } from './drafts';
 
 type Timestampish = { toDate(): Date } | null | undefined;
 
@@ -30,16 +30,29 @@ async function previewOf(bookId: string) {
   return api('bookPreview', { params: { bookId } }).catch(() => null);
 }
 
+/** Perfil y descuento Pro (de la API); null si no se pudo leer. */
+export type HomePro = Awaited<ReturnType<typeof api<'proStatus'>>> | null;
+
+export interface HomeData {
+  books: HomeBook[];
+  orders: HomeOrder[];
+  /** Proyectos profesionales por niño (solo si la cuenta tiene alguno; null si no se pudieron leer). */
+  projects: HomeProject[] | null;
+  pro: HomePro;
+}
+
+/** Perfil profesional activado: tipo de cuenta profesional o perfil con profesión. */
+export const hasProProfile = (pro: HomePro) =>
+  pro !== null && (pro.accountType === 'professional' || pro.proProfile !== null);
+
 /**
- * Lo que la home con sesión necesita saber: los cuentos sin comprar (con su etapa) y los pedidos.
- * Solo lee lo propio, con la sesión de la persona (reglas de Firestore y API). A las muestras
- * listas les pide a la API su etapa y su portada; es un puñado de libros como mucho.
+ * Lo que la home con sesión necesita saber: los cuentos sin comprar (con su etapa), los pedidos,
+ * los proyectos profesionales y el perfil Pro. Solo lee lo propio, con la sesión de la persona
+ * (reglas de Firestore y API). A las muestras listas les pide a la API su etapa y su portada; es
+ * un puñado de libros como mucho.
  */
-export async function loadHomeData(
-  db: Firestore,
-  uid: string,
-): Promise<{ books: HomeBook[]; orders: HomeOrder[] }> {
-  const [drafts, orderDocs] = await Promise.all([
+export async function loadHomeData(db: Firestore, uid: string): Promise<HomeData> {
+  const [drafts, orderDocs, pro] = await Promise.all([
     listDrafts(db, uid).then((all) => all.filter((draft) => !isEmptyDraft(draft))),
     getDocs(
       query(
@@ -49,6 +62,8 @@ export async function loadHomeData(
         limit(10),
       ),
     ),
+    // Sin la API la home sigue igual, sin las pistas del perfil Pro.
+    api('proStatus').catch(() => null),
   ]);
 
   const recentReady = drafts
@@ -80,6 +95,7 @@ export async function loadHomeData(
       storyId: draft.storyId,
       characterUrl: preview?.character?.imageUrl ?? null,
       totalPages: preview?.totalPages ?? null,
+      eventTheme: draft.eventTheme,
       stage,
       updatedAt: draft.updatedAt?.getTime() ?? 0,
     };
@@ -119,5 +135,25 @@ export async function loadHomeData(
       };
     }),
   );
-  return { books, orders };
+
+  // Las filas profesionales van por niño, con su alias (como en Mis cuentos).
+  const hasPro = [...books, ...orders].some((item) => item.channel === 'professionals');
+  const projects = hasPro
+    ? await listProjects(db, uid)
+        .then((found) =>
+          found.map((project) => ({
+            childId: project.childId,
+            label: project.label,
+            books: project.books.map((book) => ({
+              id: book.id,
+              status: book.status,
+              storyId: book.storyId,
+              settings: book.settings,
+              updatedAt: book.updatedAt?.getTime() ?? 0,
+            })),
+          })),
+        )
+        .catch(() => null)
+    : [];
+  return { books, orders, projects, pro };
 }
