@@ -117,7 +117,13 @@ export function SignedInHome({
   }, [state]);
 
   const railName = name ?? null;
-  const tales = stories.slice(0, 4);
+  // «Más aventuras» no repite historias que ya compró o tiene en curso.
+  const taken = new Set([
+    ...(data?.books.map((book) => book.storyId) ?? []),
+    ...(data?.orders.map((order) => order.storyId) ?? []),
+  ]);
+  const fresh = stories.filter((story) => !taken.has(story.slug));
+  const tales = (fresh.length >= 4 ? fresh : stories).slice(0, 4);
   const sampleStory = tales[0] ?? stories[0];
 
   if (!state || !hero) {
@@ -155,7 +161,7 @@ export function SignedInHome({
   );
 
   return (
-    <div className="home-session pb-16 text-foreground">
+    <div className="home-session pb-16 text-foreground lg:pb-0">
       {/* Hero: en el celular primero la portada, después el título y el botón. */}
       <section className="mx-auto grid max-w-[1240px] gap-8 px-5 pt-6 pb-10 sm:px-8 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:gap-14 lg:pt-14 lg:pb-16">
         <div className="order-2 grid min-w-0 content-center gap-4 lg:order-1">

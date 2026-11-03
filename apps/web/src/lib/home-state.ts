@@ -34,6 +34,8 @@ export interface HomeOrder {
   channel: HomeChannel;
   childName: string | null;
   childId: string | null;
+  /** Historia del libro pedido (para no recomendarla de nuevo y para su portada). */
+  storyId: string | null;
   title: string | null;
   coverUrl: string | null;
   characterUrl: string | null;

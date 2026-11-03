@@ -245,7 +245,7 @@ export function HeroImage({
         <Frame>
           {state.order.coverUrl
             ? titled(state.order.coverUrl, state.order.title)
-            : img('/images/heroes/libro-impreso.webp', '')}
+            : cover(byId(state.order.storyId), state.order.childName)}
         </Frame>
       );
     case 'bought':

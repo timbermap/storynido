@@ -22,6 +22,7 @@ const order = (over: Partial<HomeOrder> = {}): HomeOrder => ({
   channel: 'families',
   childName: 'Toto',
   childId: 'c1',
+  storyId: null,
   title: null,
   coverUrl: null,
   characterUrl: null,

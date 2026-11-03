@@ -2430,3 +2430,17 @@ Dos evaluaciones del 2026-11-03 (kit de Celebraciones y cuento de Profesionales)
 - **Mis cuentos:** dos bloques, En curso y Terminados, igual para las tres líneas.
 
 **Queda para después del live** (docs/PENDIENTES.md, sección H): guía para el adulto y fichas de Profesionales, libro de 24 páginas, formatos de imprenta (21×21, CMYK, PDF/X), 300 ppi y sangrado de 3 mm si el impreso no sale el 16, varias invitaciones por hoja y versión plegable, hojas de personaje para secundarios y objetos, dialecto por país, suscripción y referidos, catálogo de 12 temas.
+
+## 226 — Home con sesión: ajustes de la revisión del 2026-11-03
+
+De la revisión de la home con sesión (feedback del 2026-11-03), lo que entra antes del live y es chico:
+
+- Sin la franja crema vacía antes del footer (el espacio para la barra fija es solo del celular).
+- «Más aventuras» no repite la historia que ya compró o tiene en curso (si quedan menos de cuatro, completa con el resto).
+- El hero de pedido usa la portada real del libro y, si no está, la portada de su historia con el nombre; nunca la foto genérica.
+- El contador de «Pedidos» es neutro (no rojo: son pedidos en curso, no una alerta).
+- El menú de cuenta del escritorio deja de repetir Mis cuentos y Pedidos, que ya están en la barra (en el celular siguen).
+
+Se mantiene lo que la revisión proponía cambiar y ya estaba decidido: «Crear» como botón visible (DECISIONS 221) y el avatar gris.
+
+**Queda para después del live:** navbar y footer en Figtree con la misma grilla, Explorar en tres columnas iguales, secciones según el estado del usuario (sin «Un libro de verdad» ni «Antes de decidir» con un pedido en curso), acordeón de preguntas del sitio, un solo fondo de página, y el criterio para no poner el nombre sobre la cara de otro chico.

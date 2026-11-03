@@ -38,7 +38,7 @@ export function AppNav() {
         >
           {t('orders')}
           {orders.inProgress > 0 && (
-            <span className="grid min-w-5 place-items-center rounded-full bg-primary px-1.5 text-xs leading-5 font-bold text-primary-foreground">
+            <span className="grid min-w-5 place-items-center rounded-full bg-navy/10 px-1.5 text-xs leading-5 font-bold text-navy">
               <span aria-hidden="true">{orders.inProgress}</span>
               <span className="sr-only">{t('ordersInProgress', { count: orders.inProgress })}</span>
             </span>

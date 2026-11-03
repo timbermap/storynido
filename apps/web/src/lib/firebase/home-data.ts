@@ -16,12 +16,13 @@ const channelOf = (value: unknown): HomeChannel =>
 async function childOf(
   db: Firestore,
   bookId: string,
-): Promise<{ childId: string | null; childName: string | null }> {
+): Promise<{ childId: string | null; childName: string | null; storyId: string | null }> {
   const book = await getDoc(doc(db, COLLECTIONS.books, bookId)).catch(() => null);
   const childId = (book?.get('childId') as string | null | undefined) ?? null;
-  if (!childId) return { childId: null, childName: null };
+  const storyId = (book?.get('storyId') as string | null | undefined) ?? null;
+  if (!childId) return { childId: null, childName: null, storyId };
   const child = await getDoc(doc(db, COLLECTIONS.children, childId)).catch(() => null);
-  return { childId, childName: (child?.get('name') as string | undefined) ?? null };
+  return { childId, childName: (child?.get('name') as string | undefined) ?? null, storyId };
 }
 
 /** Portada y título de un libro (la API firma las imágenes; solo para quien es su dueño). */
@@ -97,7 +98,7 @@ export async function loadHomeData(
         shipping.pending !== true &&
         typeof shipping.etaDaysMin === 'number' &&
         typeof shipping.etaDaysMax === 'number';
-      const { childId, childName } = await childOf(db, bookId);
+      const { childId, childName, storyId } = await childOf(db, bookId);
       // Solo los dos pedidos más recientes necesitan portada para mostrarse.
       const preview = index < 2 ? await previewOf(bookId) : null;
       return {
@@ -106,6 +107,7 @@ export async function loadHomeData(
         channel: channelOf(order.get('channel')),
         childName,
         childId,
+        storyId,
         title: (order.get('bookTitle') as string | undefined) ?? preview?.preview?.title ?? null,
         coverUrl: preview?.preview?.coverUrl ?? null,
         characterUrl: preview?.preview?.character?.imageUrl ?? null,

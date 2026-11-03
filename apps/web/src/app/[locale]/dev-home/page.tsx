@@ -54,6 +54,7 @@ export default async function DevHomePage({
     channel: 'families',
     childName: 'Toto',
     childId: 'c1',
+    storyId: sample?.slug ?? null,
     title: 'Toto y el valle de los dinosaurios',
     coverUrl: sample?.coverImage ?? null,
     characterUrl: '/images/secciones/personaje.webp',
