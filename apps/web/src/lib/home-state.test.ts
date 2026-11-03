@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildHomeRows,
+  HOME_ROWS,
+  ordersWithCover,
   orderLines,
   parseRemembered,
   pickHomeLine,
@@ -278,5 +280,23 @@ describe('buildHomeRows', () => {
       book: { id: 'p2' },
       preview: { id: 'p2' },
     });
+  });
+});
+
+describe('ordersWithCover', () => {
+  it('pide portada para todos los pedidos que caben en la lista, no solo los dos primeros', () => {
+    // El tercer pedido comprado salía con la imagen genérica de la línea.
+    expect([...ordersWithCover(['ready', 'delivered', 'delivered'])]).toEqual([0, 1, 2]);
+  });
+
+  it('no gasta lugares en pedidos que no aparecen', () => {
+    expect([
+      ...ordersWithCover(['pending_payment', 'cancelled', 'paid', 'refunded', 'delivered']),
+    ]).toEqual([2, 4]);
+  });
+
+  it('se queda en las filas visibles de la home', () => {
+    const many = Array.from({ length: 10 }, () => 'delivered');
+    expect(ordersWithCover(many).size).toBe(HOME_ROWS);
   });
 });

@@ -189,6 +189,22 @@ export function orderLines(line: HomeChannel): HomeChannel[] {
   return [line, ...HOME_CHANNELS.filter((other) => other !== line)];
 }
 
+/** Filas visibles de «Tus proyectos» en la home; el resto queda en Mis cuentos. */
+export const HOME_ROWS = 4;
+
+/**
+ * Qué pedidos (por posición, del más reciente al más viejo) necesitan portada: los que pueden
+ * llegar a la lista de la home. Los pendientes de pago, cancelados o reembolsados no aparecen, así
+ * que no gastan lugar.
+ */
+export function ordersWithCover(statuses: readonly string[], max = HOME_ROWS): Set<number> {
+  const picked = new Set<number>();
+  statuses.forEach((status, index) => {
+    if (picked.size < max && BOUGHT.has(status)) picked.add(index);
+  });
+  return picked;
+}
+
 /** Una fila de «Tus proyectos». */
 export type HomeRow =
   | { kind: 'book'; key: string; line: HomeChannel; book: HomeBook; at: number }

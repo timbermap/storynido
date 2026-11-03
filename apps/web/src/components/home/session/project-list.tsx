@@ -11,7 +11,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { createDraft } from '@/lib/firebase/drafts';
 import type { HomePro } from '@/lib/firebase/home-data';
-import { isOpenOrder, isShipped, type HomeRow } from '@/lib/home-state';
+import { HOME_ROWS, isOpenOrder, isShipped, type HomeRow } from '@/lib/home-state';
 import { titleForChild } from '@/lib/story-title';
 import { cn } from '@/lib/utils';
 
@@ -19,7 +19,7 @@ import { bookStatus, type Translate } from './next-card';
 import { LineChip, Thumb, cardClass, type LineCopy } from './parts';
 
 /** Filas visibles en la home; el resto queda en Mis cuentos. */
-export const MAX_ROWS = 4;
+export const MAX_ROWS = HOME_ROWS;
 
 const actionClass =
   'inline-flex min-h-11 items-center text-[0.92rem] font-bold whitespace-nowrap text-primary underline-offset-4 hover:underline disabled:opacity-60';

@@ -4,7 +4,14 @@ import type { Firestore } from 'firebase/firestore';
 import { COLLECTIONS } from '@storynido/shared';
 
 import { api } from '@/lib/api';
-import type { HomeBook, HomeChannel, HomeOrder, HomeProject } from '@/lib/home-state';
+import {
+  HOME_ROWS,
+  ordersWithCover,
+  type HomeBook,
+  type HomeChannel,
+  type HomeOrder,
+  type HomeProject,
+} from '@/lib/home-state';
 import { addBusinessDays } from '@/lib/order-state';
 
 import { isEmptyDraft, listDrafts, listProjects } from './drafts';
@@ -70,7 +77,7 @@ export async function loadHomeData(db: Firestore, uid: string): Promise<HomeData
   const recentReady = drafts
     .filter((draft) => draft.status === 'preview_ready')
     .sort((a, b) => (b.updatedAt?.getTime() ?? 0) - (a.updatedAt?.getTime() ?? 0))
-    .slice(0, 3);
+    .slice(0, HOME_ROWS);
   const previews = new Map(
     await Promise.all(
       recentReady.map(async (draft) => [draft.id, await previewOf(draft.id)] as const),
@@ -102,6 +109,9 @@ export async function loadHomeData(db: Firestore, uid: string): Promise<HomeData
     };
   });
 
+  // Portada para cada pedido que puede llegar a la lista (antes solo los dos primeros documentos,
+  // y el tercero se veía con la imagen genérica de la línea).
+  const withCover = ordersWithCover(orderDocs.docs.map((order) => order.get('status') as string));
   const orders: HomeOrder[] = await Promise.all(
     orderDocs.docs.map(async (order, index) => {
       const bookId = order.get('bookId') as string;
@@ -114,9 +124,10 @@ export async function loadHomeData(db: Firestore, uid: string): Promise<HomeData
         shipping.pending !== true &&
         typeof shipping.etaDaysMin === 'number' &&
         typeof shipping.etaDaysMax === 'number';
-      const { childId, childName, storyId } = await childOf(db, bookId);
-      // Solo los dos pedidos más recientes necesitan portada para mostrarse.
-      const preview = index < 2 ? await previewOf(bookId) : null;
+      const [{ childId, childName, storyId }, preview] = await Promise.all([
+        childOf(db, bookId),
+        withCover.has(index) ? previewOf(bookId) : Promise.resolve(null),
+      ]);
       return {
         id: order.id,
         bookId,
