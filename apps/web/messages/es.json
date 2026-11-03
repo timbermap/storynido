@@ -62,7 +62,19 @@
     "createKit": "Diseñar el kit",
     "tryFree": "Probar gratis",
     "professionalsTemplates": "Plantillas profesionales",
-    "adminPanel": "Panel de administración"
+    "adminPanel": "Panel de administración",
+    "myStoriesToggle": "Ver tus cuentos por estado",
+    "storiesCreating": "En creación",
+    "storiesInProgress": "En curso",
+    "storiesDone": "Terminados",
+    "characters": "Personajes",
+    "tabBar": "Navegación de la app",
+    "home": "Inicio",
+    "catalog": "Catálogo",
+    "accountShort": "Cuenta",
+    "createTitle": "¿Qué quieres crear?",
+    "close": "Cerrar",
+    "catalogLines": "Catálogos por línea"
   },
   "Switchers": {
     "language": "Idioma",
@@ -482,7 +494,6 @@
       "all": "Todos",
       "loadFailed": "No pudimos cargar tus cuentos en proceso. Recarga la página para intentarlo de nuevo.",
       "start": "Comenzar",
-      "tabDrafts": "En proceso",
       "tabCharacters": "Personajes",
       "charactersNote": "Los chicos para quienes ya creaste un cuento. Puedes cambiar su nombre y edad, o borrar sus datos.",
       "charactersEmpty": "Todavía no creaste ningún personaje.",
@@ -531,7 +542,13 @@
       "profileBookDraft": "En proceso",
       "profileBookReady": "Muestra lista",
       "profileBookOrdered": "Pedido",
-      "profileCancel": "Cancelar"
+      "profileCancel": "Cancelar",
+      "tabCreating": "En creación",
+      "tabInProgress": "En curso",
+      "tabDone": "Terminados",
+      "emptyCreating": "No tienes cuentos en creación.",
+      "emptyInProgress": "No tienes pedidos en curso.",
+      "emptyDone": "Todavía no tienes cuentos terminados."
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },

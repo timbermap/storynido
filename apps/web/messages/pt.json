@@ -62,7 +62,19 @@
     "createKit": "Montar o kit",
     "tryFree": "Experimentar grátis",
     "professionalsTemplates": "Modelos profissionais",
-    "adminPanel": "Painel de administração"
+    "adminPanel": "Painel de administração",
+    "myStoriesToggle": "Ver suas histórias por status",
+    "storiesCreating": "Em criação",
+    "storiesInProgress": "Em andamento",
+    "storiesDone": "Concluídas",
+    "characters": "Personagens",
+    "tabBar": "Navegação do app",
+    "home": "Início",
+    "catalog": "Catálogo",
+    "accountShort": "Conta",
+    "createTitle": "O que você quer criar?",
+    "close": "Fechar",
+    "catalogLines": "Catálogos por linha"
   },
   "Switchers": {
     "language": "Idioma",
@@ -482,7 +494,6 @@
       "all": "Todas",
       "loadFailed": "Não conseguimos carregar suas histórias em andamento. Recarregue a página para tentar de novo.",
       "start": "Começar",
-      "tabDrafts": "Em andamento",
       "tabCharacters": "Personagens",
       "charactersNote": "As crianças para quem você já criou uma história. Você pode mudar o nome e a idade ou apagar os dados.",
       "charactersEmpty": "Você ainda não criou nenhum personagem.",
@@ -531,7 +542,13 @@
       "profileBookDraft": "Em andamento",
       "profileBookReady": "Amostra pronta",
       "profileBookOrdered": "Pedido feito",
-      "profileCancel": "Cancelar"
+      "profileCancel": "Cancelar",
+      "tabCreating": "Em criação",
+      "tabInProgress": "Em andamento",
+      "tabDone": "Concluídas",
+      "emptyCreating": "Você não tem histórias em criação.",
+      "emptyInProgress": "Você não tem pedidos em andamento.",
+      "emptyDone": "Você ainda não tem histórias concluídas."
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },

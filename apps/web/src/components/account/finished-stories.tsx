@@ -5,16 +5,26 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { LineBadge } from '@/components/wizard/drafts-list';
-import { GENERATED_STATUSES } from '@/components/orders/timeline';
+import { isOrderDone } from '@/components/layout/use-account-activity';
 import { Link } from '@/i18n/navigation';
 import { subscribeOrders, type OrderSummary } from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
 
 /**
- * Cuentos terminados: los pedidos cuyo libro ya está generado (listo, en imprenta o entregado), sin
- * importar la línea. Los que todavía se están armando se siguen en Pedidos.
+ * Cuentos terminados: los pedidos entregados, o digitales y listos, sin importar la línea. Los
+ * que todavía están en camino (también los impresos en la imprenta) van en En curso.
  */
-export function FinishedStories({ uid }: { uid: string }) {
+export function FinishedStories({
+  uid,
+  heading = true,
+  emptyLabel,
+}: {
+  uid: string;
+  /** Sin título dentro de la solapa Terminados de Mis cuentos, que ya lo nombra. */
+  heading?: boolean;
+  /** Sin pedidos terminados se avisa con este texto en lugar de ocultar la sección. */
+  emptyLabel?: string;
+}) {
   const t = useTranslations('Account.myStories');
   const tFormats = useTranslations('Checkout.formats');
   const tOrder = useTranslations('Checkout.order');
@@ -36,14 +46,29 @@ export function FinishedStories({ uid }: { uid: string }) {
     };
   }, [uid]);
 
-  const finished = orders?.filter((order) => GENERATED_STATUSES.has(order.status)) ?? [];
-  if (finished.length === 0) return null;
+  const finished = orders?.filter(isOrderDone) ?? [];
+  if (orders === null && emptyLabel) {
+    return (
+      <p role="status" className="text-sm text-muted-foreground">
+        {t('loading')}
+      </p>
+    );
+  }
+  if (finished.length === 0) {
+    return emptyLabel ? <p className="text-sm text-muted-foreground">{emptyLabel}</p> : null;
+  }
 
   return (
-    <section id="finished" aria-labelledby="finished-title" className="grid scroll-mt-28 gap-4">
-      <h2 id="finished-title" className="text-2xl font-medium">
-        {t('finished')} ({finished.length})
-      </h2>
+    <section
+      id="finished"
+      aria-labelledby={heading ? 'finished-title' : undefined}
+      className="grid scroll-mt-28 gap-4"
+    >
+      {heading && (
+        <h2 id="finished-title" className="text-2xl font-medium">
+          {t('finished')} ({finished.length})
+        </h2>
+      )}
       <ul className="grid gap-3">
         {finished.map((order) => (
           <li

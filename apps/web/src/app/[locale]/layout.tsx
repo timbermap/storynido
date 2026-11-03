@@ -13,6 +13,7 @@ import { Maintenance, PreviewOnlyBanner } from '@/components/layout/maintenance'
 import { SiteFooter } from '@/components/layout/site-footer';
 import { HeaderSwitch } from '@/components/layout/focus-header';
 import { AppHeader } from '@/components/layout/app-header';
+import { AppTabBar } from '@/components/layout/app-tab-bar';
 import { SiteHeader } from '@/components/layout/site-header';
 import { StickyCta } from '@/components/layout/sticky-cta';
 import { routing } from '@/i18n/routing';
@@ -111,7 +112,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 <HeaderSwitch>{customer ? <AppHeader /> : <SiteHeader />}</HeaderSwitch>
                 <main id="main">{children}</main>
                 <SiteFooter />
-                {!customer && <StickyCta />}
+                {customer ? <AppTabBar /> : <StickyCta />}
               </>
             )}
             <ConsentBanner />

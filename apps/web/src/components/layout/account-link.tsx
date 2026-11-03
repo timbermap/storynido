@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  BookHeart,
-  Compass,
-  CircleHelp,
-  LogOut,
-  ShieldCheck,
-  ShoppingBag,
-  Settings,
-} from 'lucide-react';
+import { BookHeart, CircleHelp, LogOut, ShieldCheck, Settings } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { useAuth } from '@/components/auth/auth-provider';
@@ -58,26 +50,14 @@ export function AccountLink({ variant = 'menu' }: { variant?: 'menu' | 'list' })
   const name = user.displayName ?? user.email ?? '';
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
   const isStaff = role === 'admin' || role === 'superadmin';
-  // Menú de la cuenta (reporte de navegación): lo propio, los pedidos, los ajustes y la ayuda.
+  // Menú de la cuenta: Mis cuentos (solo en el celular), los ajustes y la ayuda. Los pedidos viven en Mis cuentos (En
+  // curso / Terminados) y los catálogos en el navbar o en la barra inferior.
   const links = [
     {
       href: '/my-stories',
       title: t('myStories'),
       icon: <BookHeart className="size-4" />,
-      // En el escritorio ya están en la barra: el menú queda con lo propio de la cuenta.
-      mobileOnly: true,
-    },
-    {
-      href: '/my-orders',
-      title: t('orders'),
-      icon: <ShoppingBag className="size-4" />,
-      mobileOnly: true,
-    },
-    {
-      // En el celular no hay "Explorar" en la barra: vive acá.
-      href: '/families/stories',
-      title: t('explore'),
-      icon: <Compass className="size-4" />,
+      // En el escritorio ya está en la barra: el menú queda con lo propio de la cuenta.
       mobileOnly: true,
     },
     {
