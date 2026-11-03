@@ -418,6 +418,12 @@
     "preferencesError": "No pudimos guardar tu preferencia. Intenta de nuevo.",
     "orders": {
       "title": "Mis pedidos",
+      "group": {
+        "creating": "Creando",
+        "inProgress": "En curso",
+        "delivered": "Entregados",
+        "closed": "Cancelados y reembolsados"
+      },
       "loading": "Cargando tus pedidos…",
       "error": "No pudimos cargar tus pedidos.",
       "empty": "Todavía no tienes pedidos.",

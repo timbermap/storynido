@@ -418,6 +418,12 @@
     "preferencesError": "We couldn't save your preference. Please try again.",
     "orders": {
       "title": "My orders",
+      "group": {
+        "creating": "Being created",
+        "inProgress": "In progress",
+        "delivered": "Delivered",
+        "closed": "Cancelled and refunded"
+      },
       "loading": "Loading your orders…",
       "error": "We couldn’t load your orders.",
       "empty": "You don’t have any orders yet.",
