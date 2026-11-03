@@ -420,7 +420,11 @@ export function KitCheckout({
         {invitationIncomplete && (
           <p className="text-sm font-semibold text-destructive">{tKit('invitationRequired')}</p>
         )}
-        <Button size="lg" disabled={!quote || paying || invitationIncomplete} onClick={() => void pay()}>
+        <Button
+          size="lg"
+          disabled={!quote || paying || invitationIncomplete}
+          onClick={() => void pay()}
+        >
           {paying ? (
             <Loader2 className="animate-spin" aria-hidden="true" />
           ) : (
