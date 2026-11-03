@@ -367,26 +367,57 @@ export function CharacterProfile({ childId }: { childId: string }) {
         {profile.books.length === 0 ? (
           <p className="rounded-xl border bg-card p-5">{t('profileBooksNone')}</p>
         ) : (
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {profile.books.map((book) => (
-              <li key={book.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
-                {book.coverUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min.
-                  <img src={book.coverUrl} alt="" className="h-20 w-16 rounded-md object-cover" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{book.title ?? t('untitled')}</p>
-                  <p className="text-sm text-muted-foreground">{statusLabel(book.status)}</p>
-                </div>
-                <Link
-                  href={{ pathname: '/create/[bookId]', params: { bookId: book.id } }}
-                  className={buttonVariants({ size: 'sm', variant: 'outline' })}
-                >
-                  {t('continue')}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          // Igual que Mis cuentos: lo que sigue en curso y lo que ya se compró.
+          (
+            [
+              ['open', profile.books.filter((book) => book.status !== 'ordered')],
+              ['done', profile.books.filter((book) => book.status === 'ordered')],
+            ] as const
+          ).map(([group, books]) =>
+            books.length === 0 ? null : (
+              <div key={group} className="grid gap-3">
+                <h3 className="text-lg font-medium">
+                  {t(group === 'open' ? 'profileBooksOpen' : 'profileBooksDone')} ({books.length})
+                </h3>
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {books.map((book) => (
+                    <li
+                      key={book.id}
+                      className="flex items-center gap-3 rounded-xl border bg-card p-3"
+                    >
+                      {book.coverUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min.
+                        <img
+                          src={book.coverUrl}
+                          alt=""
+                          className="h-20 w-16 rounded-md object-cover"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold">{book.title ?? t('untitled')}</p>
+                        <p className="text-sm text-muted-foreground">{statusLabel(book.status)}</p>
+                      </div>
+                      {group === 'open' ? (
+                        <Link
+                          href={{ pathname: '/create/[bookId]', params: { bookId: book.id } }}
+                          className={buttonVariants({ size: 'sm', variant: 'outline' })}
+                        >
+                          {t('continue')}
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/my-orders"
+                          className={buttonVariants({ size: 'sm', variant: 'outline' })}
+                        >
+                          {t('profileViewOrders')}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ),
+          )
         )}
       </section>
     </section>
