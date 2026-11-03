@@ -94,7 +94,7 @@ export default function MyStoriesPage() {
       {open.length > 0 && (
         <section id="drafts" aria-labelledby="drafts-title" className="grid scroll-mt-28 gap-4">
           <h2 id="drafts-title" className="text-2xl font-medium">
-            {t('inProgress')} ({open.length})
+            {t('openHeading')} ({open.length})
           </h2>
           <DraftsList
             drafts={open}

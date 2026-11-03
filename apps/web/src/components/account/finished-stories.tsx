@@ -4,6 +4,7 @@ import { BookOpen, ChevronRight, RotateCcw } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
+import { LineBadge } from '@/components/wizard/drafts-list';
 import { GENERATED_STATUSES } from '@/components/orders/timeline';
 import { Link } from '@/i18n/navigation';
 import { subscribeOrders, type OrderSummary } from '@/lib/firebase/account';
@@ -51,6 +52,7 @@ export function FinishedStories({ uid }: { uid: string }) {
           >
             <BookOpen className="size-5 shrink-0 text-primary" aria-hidden="true" />
             <div className="min-w-0 flex-1">
+              <LineBadge line={order.channel} />
               <p className="truncate font-semibold">{order.title ?? t('finishedUntitled')}</p>
               <p className="text-sm text-muted-foreground">
                 {tFormats(`${order.items[0]?.format ?? 'digital'}.name`)}
