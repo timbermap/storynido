@@ -28,10 +28,13 @@ export function NextUp({
   next,
   lines,
   stories,
+  placement = 'top',
 }: {
   next: HomeNext;
   lines: LineCopy;
   stories: PublicStory[];
+  /** Debajo de las solapas (pedido en curso) la etiqueta dice «Tu pedido» en vez de «Lo próximo». */
+  placement?: 'top' | 'below';
 }) {
   const t = useTranslations('Account.myStories.library');
   const locale = useLocale();
@@ -85,7 +88,7 @@ export function NextUp({
       </span>
       <div className="grid min-w-0 gap-1.5">
         <p className="text-xs font-bold tracking-[0.08em] text-muted-foreground uppercase">
-          {t('nextLabel')}
+          {t(placement === 'below' ? 'orderLabel' : 'nextLabel')}
         </p>
         <div className="flex flex-wrap gap-1.5">
           <LineChip line={item.channel} label={lines[item.channel].chip} />

@@ -5,6 +5,7 @@ import {
   ideasFor,
   isCardsOrder,
   linesUsed,
+  nextUpPlacement,
   orderShelf,
   pickNextUp,
   type LibraryOrder,
@@ -113,5 +114,18 @@ describe('ideasFor', () => {
 
   it('sin gustos ni kit pendiente solo sugiere lo que se sabe', () => {
     expect(ideasFor({ likes: [] }, { hasKit: true })).toEqual([{ kind: 'moment' }]);
+  });
+});
+
+describe('nextUpPlacement', () => {
+  it('lo que pide una acción va arriba; el pedido en curso, debajo de las solapas', () => {
+    expect(nextUpPlacement({ kind: 'preview', book: book({ stage: 'preview' }) })).toBe('top');
+    expect(nextUpPlacement({ kind: 'character', book: book({ stage: 'character' }) })).toBe('top');
+    expect(nextUpPlacement({ kind: 'generating', book: book({ stage: 'generating' }) })).toBe(
+      'top',
+    );
+    expect(
+      nextUpPlacement({ kind: 'order', order: order({ status: 'shipped' }), shipped: true }),
+    ).toBe('below');
   });
 });

@@ -56,6 +56,14 @@ export function pickNextUp(
   return order ? { kind: 'order', order, shipped: isShipped(order) } : null;
 }
 
+/**
+ * Dónde va «Lo próximo» en Mis cuentos: arriba si pide una acción (muestra, personaje, dibujando);
+ * un pedido en curso no pide nada, así que baja debajo de las solapas.
+ */
+export function nextUpPlacement(next: HomeNext): 'top' | 'below' {
+  return next.kind === 'order' ? 'below' : 'top';
+}
+
 /** Las líneas que usó la cuenta (borradores y pedidos), en el orden de siempre. */
 export function linesUsed(
   books: readonly { channel: HomeChannel }[],
