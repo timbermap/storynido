@@ -58,8 +58,8 @@ export function styleForStory(
   return usable.find((style) => style.slug === wanted)?.slug ?? usable[0]?.slug ?? null;
 }
 
-/** Opciones editoriales del mini cuento: breve sea cual sea la edad, con la lectura según ella. */
-export function partyBookOptions(age: number | undefined) {
+/** Opciones editoriales iniciales de Celebraciones y Profesionales: mini, con la lectura según la edad. */
+export function miniBookOptions(age: number | undefined) {
   return {
     ...(age === undefined ? {} : suggestedReading(age)),
     length: 'mini' as const,

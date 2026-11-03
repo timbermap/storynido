@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { suggestedReading, type Locale } from '@storynido/shared';
+import type { Locale } from '@storynido/shared';
 
 import { StoryCover } from '@/components/stories/story-cover';
 import { getFirebaseDb } from '@/lib/firebase/client';
@@ -11,7 +11,7 @@ import { updateBook } from '@/lib/firebase/drafts';
 import { titleForChild } from '@/lib/story-title';
 
 import { OptionCard } from './option-card';
-import { styleForStory } from './party';
+import { miniBookOptions, styleForStory } from './party';
 import { baseStories, collectionOfDraft } from './pro';
 import { fitToStory } from './step-story';
 import type { StepNav, WizardData } from './types';
@@ -66,9 +66,9 @@ export function StepFocus({ nav, data }: { nav: StepNav; data: WizardData }) {
             length: book.length ?? data.editorial.defaults.length,
             textDensity: book.textDensity,
             readingLevel: book.readingLevel,
-            // Sin estilo es la primera vez: la lectura se sugiere según la edad. «Repetir
-            // configuración» ya trae estilo y conserva lo que copió.
-            ...(book.styleId === null && age !== undefined ? suggestedReading(age) : {}),
+            // Sin estilo es la primera vez: arranca en Mini, con la lectura según la edad.
+            // «Repetir configuración» ya trae estilo y conserva lo que copió.
+            ...(book.styleId === null ? miniBookOptions(age) : {}),
           },
           story,
         ),

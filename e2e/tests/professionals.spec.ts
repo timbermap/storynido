@@ -82,6 +82,8 @@ test('Profesionales: del alias a la vista previa con texto editable y precio', a
   await heading(page, 'Cómo se lee');
   await expect(page.locator('body')).toContainText('Etapa 3 de 4: Ajustes');
   await expect(page.locator('body')).toContainText('no es clínico');
+  await expect(page.locator('body')).toContainText('12 páginas');
+  await expect(page.locator('label', { hasText: 'Mini' }).locator('input')).toBeChecked();
   await page.locator('label', { hasText: 'Más lectura' }).click();
   await page.locator('label', { hasText: 'Inicial' }).click();
   await expectAccessible(page);

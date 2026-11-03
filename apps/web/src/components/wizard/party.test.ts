@@ -6,7 +6,7 @@ import { turningAgeFor } from '@storynido/shared';
 import {
   matchTheme,
   offerPrices,
-  partyBookOptions,
+  miniBookOptions,
   piecesForOffer,
   storyForTheme,
   styleForStory,
@@ -73,8 +73,8 @@ describe('estilo y opciones del kit', () => {
   });
 
   it('el cuento de recuerdo siempre es mini', () => {
-    expect(partyBookOptions(10).length).toBe('mini');
-    expect(partyBookOptions(undefined)).toEqual({ length: 'mini' });
+    expect(miniBookOptions(10).length).toBe('mini');
+    expect(miniBookOptions(undefined)).toEqual({ length: 'mini' });
   });
 });
 

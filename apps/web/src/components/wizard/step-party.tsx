@@ -12,7 +12,7 @@ import { useStepDraft } from '@/lib/use-step-draft';
 import type { Locale } from '@storynido/shared';
 
 import { OptionCard } from './option-card';
-import { matchTheme, partyBookOptions, storyForTheme, styleForStory } from './party';
+import { matchTheme, miniBookOptions, storyForTheme, styleForStory } from './party';
 import { inputClass, labelClass } from './step-child';
 import { fitToStory } from './step-story';
 import type { StepNav, WizardData } from './types';
@@ -62,7 +62,7 @@ export function StepParty({ nav, data }: { nav: StepNav; data: WizardData }) {
             contentType: book.contentType,
             textDensity: book.textDensity,
             readingLevel: book.readingLevel,
-            ...partyBookOptions(age),
+            ...miniBookOptions(age),
           },
           story,
         ),

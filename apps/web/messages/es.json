@@ -1346,7 +1346,7 @@
         },
         "4": {
           "title": "El texto lo ajustas tú",
-          "text": "Antes de pagar editas el texto de cada página y vuelves a generar su ilustración. Cuentas con un aviso de material educativo, no clínico."
+          "text": "Antes de pagar editas el texto de cada página, ves la portada y las primeras páginas ilustradas y puedes probar otra ilustración. Cuentas con un aviso de material educativo, no clínico."
         }
       },
       "collectionsTitle": "Empieza por lo que necesitas",
@@ -1371,7 +1371,7 @@
         },
         "5": {
           "q": "¿Puedo editar el texto?",
-          "a": "Sí. Antes de pagar puedes cambiar el texto de cada página de la vista previa y volver a generar la ilustración de esa página."
+          "a": "Sí. Antes de pagar puedes cambiar el texto de cada página de la vista previa. La vista previa ilustra la portada y las primeras páginas, y ahí puedes probar otra ilustración."
         },
         "6": {
           "q": "¿Hay suscripción?",
