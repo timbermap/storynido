@@ -1418,8 +1418,10 @@
         }
       },
       "pricingNote": "The volume discount is based on your purchases over the last few days; for printed books the cap is lower.",
-      "catalogTitle": "Templates by goal",
-      "catalogSubtitle": "Collections to anticipate situations and work on emotions, routines, school and language. Pick a template and adjust the text."
+      "catalogTitle": "Story templates by goal",
+      "catalogMetaTitle": "Story templates by goal for teachers and therapists",
+      "catalogSubtitle": "Prepare for new situations, work on emotions, routines, school or language. Pick a template, browse a sample and adjust the text for each child.",
+      "catalogNote": "Browse everything without an account. You only need one to create."
     }
   },
   "Viewer": {

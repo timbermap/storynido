@@ -1418,8 +1418,10 @@
         }
       },
       "pricingNote": "O desconto por volume é calculado com suas compras dos últimos dias; no impresso o teto é menor.",
-      "catalogTitle": "Modelos por objetivo",
-      "catalogSubtitle": "Coleções para antecipar situações e trabalhar emoções, rotinas, escola e linguagem. Escolha o modelo e ajuste o texto."
+      "catalogTitle": "Modelos de histórias por objetivo",
+      "catalogMetaTitle": "Modelos de histórias por objetivo para professores e terapeutas",
+      "catalogSubtitle": "Para antecipar situações, trabalhar emoções, rotinas, escola ou linguagem. Escolha o modelo, folheie um exemplo e ajuste o texto para cada criança.",
+      "catalogNote": "Você vê tudo sem conta. Só precisa dela para criar."
     }
   },
   "Viewer": {

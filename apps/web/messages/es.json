@@ -1418,8 +1418,10 @@
         }
       },
       "pricingNote": "El descuento por volumen se calcula con tus compras de los últimos días; en el impreso el tope es menor.",
-      "catalogTitle": "Plantillas por objetivo",
-      "catalogSubtitle": "Colecciones para anticipar situaciones, trabajar emociones, rutinas, escuela y lenguaje. Eliges la plantilla y ajustas el texto."
+      "catalogTitle": "Plantillas de cuentos por objetivo",
+      "catalogMetaTitle": "Plantillas de cuentos por objetivo para docentes y terapeutas",
+      "catalogSubtitle": "Para anticipar situaciones, trabajar emociones, rutinas, escuela o lenguaje. Elige la plantilla, hojea un ejemplo y ajusta el texto para cada niño.",
+      "catalogNote": "Ves todo sin cuenta. Solo la necesitas para crear."
     }
   },
   "Viewer": {
