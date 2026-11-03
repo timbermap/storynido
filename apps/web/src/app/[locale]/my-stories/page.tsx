@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 
-import type { Channel } from '@storynido/shared';
 
 import { CharactersList } from '@/components/account/characters-list';
 import { useAuth } from '@/components/auth/auth-provider';
@@ -25,13 +24,11 @@ import { cn } from '@/lib/utils';
  */
 export default function MyStoriesPage() {
   const t = useTranslations('Account.myStories');
-  const tLines = useTranslations('Nav.lines');
   const { user, signedIn, loading } = useAuth();
   const router = useRouter();
   const { status: pro } = useProStatus();
   const orders = useOrderCounts();
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
-  const [line, setLine] = useState<Channel | 'all'>('all');
   const [failed, setFailed] = useState(false);
   const [reloads, setReloads] = useState(0);
   const [tab, setTab] = useState<'drafts' | 'characters'>('drafts');
@@ -80,10 +77,7 @@ export default function MyStoriesPage() {
     );
   }
 
-  // Filtro por línea solo para quien usó más de una.
   const open = drafts.filter((draft) => !projectBooks.has(draft.id));
-  const lines = [...new Set(open.map((draft) => draft.channel))];
-  const shown = line === 'all' ? open : open.filter((draft) => draft.channel === line);
 
   return (
     <section className="container-page grid max-w-3xl gap-10 py-12">
@@ -145,30 +139,8 @@ export default function MyStoriesPage() {
               aria-labelledby="tab-drafts"
               className="grid gap-4"
             >
-              {lines.length > 1 && (
-                <div role="group" aria-label={t('filter')} className="flex flex-wrap gap-2">
-                  {(['all', ...lines] as const).map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      aria-pressed={line === item}
-                      onClick={() => {
-                        setLine(item);
-                      }}
-                      className={cn(
-                        'min-h-9 rounded-full px-4 text-sm font-semibold transition',
-                        line === item
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-secondary',
-                      )}
-                    >
-                      {item === 'all' ? t('all') : tLines(item)}
-                    </button>
-                  ))}
-                </div>
-              )}
               <DraftsList
-                drafts={shown}
+                drafts={open}
                 onDeleted={(id) => {
                   setDrafts((current) => current?.filter((draft) => draft.id !== id) ?? null);
                 }}
@@ -193,7 +165,7 @@ export default function MyStoriesPage() {
       )}
 
       {pro?.accountType === 'professional' && (
-        <ProPanel uid={user.uid} status={pro} onBooks={onProjectBooks} />
+        <ProPanel uid={user.uid} onBooks={onProjectBooks} />
       )}
     </section>
   );

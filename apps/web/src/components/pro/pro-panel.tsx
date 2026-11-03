@@ -13,16 +13,17 @@ import { getFirebaseDb } from '@/lib/firebase/client';
 import { clearStepDrafts } from '@/lib/use-step-draft';
 import { createDraft, listProjects, type Project, type ProjectBook } from '@/lib/firebase/drafts';
 
-import type { ProStatus } from './use-pro-status';
 
-/** "Mi cuenta" Pro: descuento vigente, proyectos por alias y "Repetir configuración". */
+/** Un proyecto profesional «de verdad» es el que ya compró un cuento. */
+const hasPurchase = (projects: Project[]) =>
+  projects.some((project) => project.books.some((book) => book.status === 'ordered'));
+
+/** "Mi cuenta" Pro: proyectos por alias y "Repetir configuración". */
 export function ProPanel({
   uid,
-  status,
   onBooks,
 }: {
   uid: string;
-  status: ProStatus;
   /** Ids de los libros que ya se ven en los proyectos (para no repetirlos en «En proceso»). */
   onBooks?: (ids: Set<string>) => void;
 }) {
@@ -36,7 +37,6 @@ export function ProPanel({
   const [confirming, setConfirming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [deleteFailed, setDeleteFailed] = useState(false);
-  const discount = status.discount;
 
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -52,7 +52,12 @@ export function ProPanel({
         clearTimeout(timer);
         setFailed(false);
         setProjects(found);
-        onBooks?.(new Set(found.flatMap((project) => project.books.map((book) => book.id))));
+        // Mientras no haya una compra, los borradores profesionales se ven en «En proceso».
+        onBooks?.(
+          hasPurchase(found)
+            ? new Set(found.flatMap((project) => project.books.map((book) => book.id)))
+            : new Set(),
+        );
       })
       .catch(() => {
         clearTimeout(timer);
@@ -113,10 +118,9 @@ export function ProPanel({
   const title = (book: ProjectBook) =>
     stories.find((story) => story.slug === book.storyId)?.title ?? t('untitled');
 
-  // «Tus proyectos» y el descuento solo aparecen cuando la persona ya trabajó un proyecto
-  // profesional; mientras tanto Mis cuentos queda simple, igual que para Familias y Celebraciones.
+  // «Tus proyectos» solo aparece cuando la persona ya compró un cuento profesional; mientras tanto Mis cuentos queda simple, igual que para Familias y Celebraciones.
   // (Mientras carga tampoco se muestra nada, para que no aparezca y desaparezca.)
-  if (!failed && (projects === null || projects.length === 0)) return null;
+  if (!failed && (projects === null || !hasPurchase(projects))) return null;
 
   return (
     <section id="pro" className="grid scroll-mt-28 gap-4">
@@ -126,26 +130,6 @@ export function ProPanel({
           {t('title')}
         </h2>
       </div>
-      {discount && (
-        <div className="rounded-2xl border bg-card p-4 text-sm">
-          <p className="font-semibold">
-            {t('purchases', { count: discount.purchases, days: discount.windowDays })}
-          </p>
-          <p className="mt-1">
-            {discount.digitalPercent > 0
-              ? t('discount', { digital: discount.digitalPercent, print: discount.printPercent })
-              : t('basePrice')}
-          </p>
-          {discount.next && (
-            <p className="mt-1 text-muted-foreground">
-              {t('next', {
-                missing: discount.next.purchases - discount.purchases,
-                percent: discount.next.percent,
-              })}
-            </p>
-          )}
-        </div>
-      )}
       {failed && projects === null ? (
         <div role="alert" className="grid justify-items-start gap-2 text-sm">
           <p className="text-destructive">{t('loadFailed')}</p>
