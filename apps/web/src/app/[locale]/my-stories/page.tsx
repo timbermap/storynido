@@ -1,20 +1,17 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-
+import { useEffect, useState } from 'react';
 
 import { CharactersList } from '@/components/account/characters-list';
 import { useAuth } from '@/components/auth/auth-provider';
-import { ProPanel } from '@/components/pro/pro-panel';
+import { FinishedStories } from '@/components/account/finished-stories';
 import { useOrderCounts } from '@/components/layout/use-account-activity';
-import { useProStatus } from '@/components/pro/use-pro-status';
 import { DraftsList } from '@/components/wizard/drafts-list';
 import { NewChoice } from '@/components/wizard/new-choice';
 import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
-import { cn } from '@/lib/utils';
 
 /**
  * Mis cuentos: la home de quien tiene sesión (auditoría UX, DECISIONS 110). Lo que creó en cada
@@ -26,17 +23,10 @@ export default function MyStoriesPage() {
   const t = useTranslations('Account.myStories');
   const { user, signedIn, loading } = useAuth();
   const router = useRouter();
-  const { status: pro } = useProStatus();
   const orders = useOrderCounts();
   const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [reloads, setReloads] = useState(0);
-  const [tab, setTab] = useState<'drafts' | 'characters'>('drafts');
-  // Libros que ya se ven dentro de «Tus proyectos» (Profesionales): no se repiten en «En proceso».
-  const [projectBooks, setProjectBooks] = useState<Set<string>>(new Set());
-  const onProjectBooks = useCallback((ids: Set<string>) => {
-    setProjectBooks(ids);
-  }, []);
 
   useEffect(() => {
     if (!loading && !signedIn) router.replace('/login');
@@ -77,7 +67,7 @@ export default function MyStoriesPage() {
     );
   }
 
-  const open = drafts.filter((draft) => !projectBooks.has(draft.id));
+  const open = drafts;
 
   return (
     <section className="container-page grid max-w-3xl gap-10 py-12">
@@ -100,73 +90,38 @@ export default function MyStoriesPage() {
         </p>
       )}
 
-      {/* Solapas: lo que está en proceso y los personajes creados. Sin el bloque «Sigue donde lo
-          dejaste»: repetía el primer borrador de la lista. */}
-      {(open.length > 0 || tab === 'characters') && (
-        <section id="drafts" className="grid scroll-mt-28 gap-4">
-          <div role="tablist" aria-label={t('title')} className="flex gap-2 border-b">
-            {(
-              [
-                ['drafts', `${t('tabDrafts')} (${String(open.length)})`],
-                ['characters', t('tabCharacters')],
-              ] as const
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                type="button"
-                role="tab"
-                id={`tab-${key}`}
-                aria-selected={tab === key}
-                aria-controls={`panel-${key}`}
-                onClick={() => {
-                  setTab(key);
-                }}
-                className={cn(
-                  '-mb-px min-h-11 border-b-2 px-4 text-lg font-medium transition',
-                  tab === key
-                    ? 'border-primary text-foreground'
-                    : 'border-transparent text-muted-foreground hover:text-foreground',
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          {tab === 'drafts' ? (
-            <div
-              role="tabpanel"
-              id="panel-drafts"
-              aria-labelledby="tab-drafts"
-              className="grid gap-4"
-            >
-              <DraftsList
-                drafts={open}
-                onDeleted={(id) => {
-                  setDrafts((current) => current?.filter((draft) => draft.id !== id) ?? null);
-                }}
-              />
-            </div>
-          ) : (
-            <div
-              role="tabpanel"
-              id="panel-characters"
-              aria-labelledby="tab-characters"
-              className="grid gap-4"
-            >
-              <CharactersList
-                uid={user.uid}
-                onDeleted={() => {
-                  setReloads((count) => count + 1);
-                }}
-              />
-            </div>
-          )}
+      {/* Dos bloques, sin importar la línea: lo que está en curso y lo que ya está terminado. */}
+      {open.length > 0 && (
+        <section id="drafts" aria-labelledby="drafts-title" className="grid scroll-mt-28 gap-4">
+          <h2 id="drafts-title" className="text-2xl font-medium">
+            {t('inProgress')} ({open.length})
+          </h2>
+          <DraftsList
+            drafts={open}
+            onDeleted={(id) => {
+              setDrafts((current) => current?.filter((draft) => draft.id !== id) ?? null);
+            }}
+          />
         </section>
       )}
 
-      {pro?.accountType === 'professional' && (
-        <ProPanel uid={user.uid} onBooks={onProjectBooks} />
-      )}
+      <FinishedStories uid={user.uid} />
+
+      <section
+        id="characters"
+        aria-labelledby="characters-title"
+        className="grid scroll-mt-28 gap-4"
+      >
+        <h2 id="characters-title" className="text-2xl font-medium">
+          {t('tabCharacters')}
+        </h2>
+        <CharactersList
+          uid={user.uid}
+          onDeleted={() => {
+            setReloads((count) => count + 1);
+          }}
+        />
+      </section>
     </section>
   );
 }

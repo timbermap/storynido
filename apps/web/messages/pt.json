@@ -447,6 +447,10 @@
     "newsNote": "Ideias para uma história nova em datas especiais, lembretes de rascunhos e pedidos de opinião. Os avisos dos seus pedidos chegam sempre.",
     "myStories": {
       "title": "Minhas histórias",
+      "finishedUntitled": "Seu livro",
+      "view": "Ver",
+      "inProgress": "Em andamento",
+      "finished": "Concluídos",
       "loading": "Carregando suas histórias…",
       "newTitle": "O que você quer criar?",
       "newOptions": {

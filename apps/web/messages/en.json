@@ -447,6 +447,10 @@
     "newsNote": "Ideas for a new story on special dates, draft reminders and review requests. Updates about your orders always arrive.",
     "myStories": {
       "title": "My stories",
+      "finishedUntitled": "Your book",
+      "view": "View",
+      "inProgress": "In progress",
+      "finished": "Finished",
       "loading": "Loading your stories…",
       "newTitle": "What would you like to create?",
       "newOptions": {

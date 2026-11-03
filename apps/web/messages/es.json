@@ -447,6 +447,10 @@
     "newsNote": "Ideas para un cuento nuevo en fechas especiales, recordatorios de borradores y pedidos de opinión. Los avisos de tus pedidos llegan siempre.",
     "myStories": {
       "title": "Mis cuentos",
+      "finishedUntitled": "Tu libro",
+      "view": "Ver",
+      "inProgress": "En curso",
+      "finished": "Terminados",
       "loading": "Cargando tus cuentos…",
       "newTitle": "¿Qué quieres crear?",
       "newOptions": {
