@@ -106,14 +106,14 @@ const DEFAULT_MEDIUM =
  * un niño del fondo y el control de calidad lo mandaba a revisión manual (portada de un pedido
  * profesional).
  */
-const ONE_PROTAGONIST =
+export const ONE_PROTAGONIST =
   "The main character appears exactly once in each image. Every other child or adult is a different person: different face, hair color and hairstyle, and different clothes; nobody in the background wears the main character's outfit or looks like a twin or clone.";
 
 /**
  * La maquetación pone el texto en la región más calma de cada página: la imagen tiene que dejarle
  * lugar. Sin esto, el panel de texto tapaba caras (informe de Profesionales).
  */
-const TEXT_ZONE =
+export const TEXT_ZONE =
   'Compose for a printed page with text: keep every face and the main action inside the middle band of the image, and leave the bottom third (or the top third) as plain, calm background such as sky, wall, floor or grass, with no heads or faces in it.';
 
 export function artDirection(input: {
@@ -145,4 +145,15 @@ export function artDirection(input: {
   ]
     .filter(Boolean)
     .join(' ');
+}
+
+/**
+ * La dirección de arte se congela en la muestra y en el pedido: los libros armados antes de estas
+ * reglas no las traen. Se las suma al generar, sin duplicarlas, para que también las usen las
+ * regeneraciones y reparaciones de pedidos existentes.
+ */
+export function withCurrentGuards(direction: string | null | undefined): string | null {
+  if (!direction) return null;
+  const missing = [ONE_PROTAGONIST, TEXT_ZONE].filter((rule) => !direction.includes(rule));
+  return missing.length > 0 ? `${direction} ${missing.join(' ')}` : direction;
 }

@@ -44,6 +44,7 @@ import {
   type CastMember,
   type ScenePlan,
   catalogPrices,
+  withCurrentGuards,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
@@ -399,7 +400,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             ? `${snapshot.character.description}\n${companionNote(companion)}`
             : snapshot.character.description,
           style: snapshot.stylePrompt,
-          direction: snapshot.artDirection,
+          direction: withCurrentGuards(snapshot.artDirection),
         }),
         stylePrompt: snapshot.stylePrompt,
         character: { description: snapshot.character.description, photo: null },
