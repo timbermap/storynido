@@ -5,7 +5,6 @@ import {
   ideasFor,
   isCardsOrder,
   linesUsed,
-  nextUpPlacement,
   orderShelf,
   pickNextUp,
   type LibraryOrder,
@@ -63,25 +62,17 @@ describe('orderShelf', () => {
 });
 
 describe('pickNextUp', () => {
-  it('la muestra lista gana al personaje por aprobar, a lo que se dibuja y al pedido', () => {
-    const next = pickNextUp(
-      [
-        book({ id: 'g', stage: 'generating', updatedAt: 9 }),
-        book({ id: 'c', stage: 'character', updatedAt: 8 }),
-        book({ id: 'p', stage: 'preview', updatedAt: 1 }),
-      ],
-      [order({ status: 'shipped' })],
-    );
+  it('la muestra lista gana al personaje por aprobar y a lo que se dibuja', () => {
+    const next = pickNextUp([
+      book({ id: 'g', stage: 'generating', updatedAt: 9 }),
+      book({ id: 'c', stage: 'character', updatedAt: 8 }),
+      book({ id: 'p', stage: 'preview', updatedAt: 1 }),
+    ]);
     expect(next).toMatchObject({ kind: 'preview', book: { id: 'p' } });
   });
 
-  it('un borrador a medias no va en «Lo próximo»: gana el pedido en curso', () => {
-    const next = pickNextUp([book({ stage: 'draft' })], [order({ status: 'shipped' })]);
-    expect(next).toMatchObject({ kind: 'order', shipped: true });
-  });
-
-  it('sin nada que pida una acción no hay tarjeta', () => {
-    expect(pickNextUp([book({ stage: 'draft' })], [order({ status: 'delivered' })])).toBeNull();
+  it('un borrador a medias no va en «Lo próximo»', () => {
+    expect(pickNextUp([book({ stage: 'draft' })])).toBeNull();
   });
 });
 
@@ -114,18 +105,5 @@ describe('ideasFor', () => {
 
   it('sin gustos ni kit pendiente solo sugiere lo que se sabe', () => {
     expect(ideasFor({ likes: [] }, { hasKit: true })).toEqual([{ kind: 'moment' }]);
-  });
-});
-
-describe('nextUpPlacement', () => {
-  it('lo que pide una acción va arriba; el pedido en curso, debajo de las solapas', () => {
-    expect(nextUpPlacement({ kind: 'preview', book: book({ stage: 'preview' }) })).toBe('top');
-    expect(nextUpPlacement({ kind: 'character', book: book({ stage: 'character' }) })).toBe('top');
-    expect(nextUpPlacement({ kind: 'generating', book: book({ stage: 'generating' }) })).toBe(
-      'top',
-    );
-    expect(
-      nextUpPlacement({ kind: 'order', order: order({ status: 'shipped' }), shipped: true }),
-    ).toBe('below');
   });
 });

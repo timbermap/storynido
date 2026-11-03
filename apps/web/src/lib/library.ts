@@ -8,7 +8,6 @@ import type { BookFormat, OrderStatus } from '@storynido/shared';
 
 import {
   HOME_CHANNELS,
-  isShipped,
   type HomeBook,
   type HomeChannel,
   type HomeNext,
@@ -36,32 +35,21 @@ const NEXT_RANK: Partial<Record<HomeBook['stage'], number>> = {
   generating: 1,
 };
 
+/** Lo que va en «Lo próximo» de Mis cuentos: solo un libro que pide una acción. */
+export type LibraryNext = Extract<HomeNext, { book: HomeBook }>;
+
 /**
  * La tarjeta «Lo próximo» (la única con el botón durazno): muestra lista > personaje por aprobar >
- * dibujando > pedido en curso. Un borrador a medias no va: está en «En creación».
+ * dibujando. Un borrador a medias no va (está en «En creación») y un pedido en curso tampoco
+ * (no pide nada: está en «En curso», con sus pasos y la fecha estimada).
  */
-export function pickNextUp(
-  books: readonly HomeBook[],
-  orders: readonly LibraryOrder[],
-): HomeNext | null {
+export function pickNextUp(books: readonly HomeBook[]): LibraryNext | null {
   const book = books
     .filter((item) => NEXT_RANK[item.stage] !== undefined)
     .sort(
       (a, b) => (NEXT_RANK[b.stage] ?? 0) - (NEXT_RANK[a.stage] ?? 0) || b.updatedAt - a.updatedAt,
     )[0];
-  if (book) return { kind: book.stage, book };
-  const order = orders
-    .filter((item) => orderShelf(item) === 'inProgress')
-    .sort((a, b) => b.createdAt - a.createdAt)[0];
-  return order ? { kind: 'order', order, shipped: isShipped(order) } : null;
-}
-
-/**
- * Dónde va «Lo próximo» en Mis cuentos: arriba si pide una acción (muestra, personaje, dibujando);
- * un pedido en curso no pide nada, así que baja debajo de las solapas.
- */
-export function nextUpPlacement(next: HomeNext): 'top' | 'below' {
-  return next.kind === 'order' ? 'below' : 'top';
+  return book ? { kind: book.stage, book } : null;
 }
 
 /** Las líneas que usó la cuenta (borradores y pedidos), en el orden de siempre. */

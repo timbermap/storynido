@@ -1,8 +1,7 @@
 'use client';
 
 import { ArrowRight } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
-import type { ComponentProps } from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { PublicStory } from '@storynido/shared';
 
@@ -15,65 +14,30 @@ import {
 } from '@/components/home/session/parts';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
-import type { HomeNext } from '@/lib/home-state';
+import type { LibraryNext } from '@/lib/library';
 import { cn } from '@/lib/utils';
-
-type Href = ComponentProps<typeof Link>['href'];
 
 /**
  * «Lo próximo»: lo que pide una acción ahora (la muestra lista, el personaje por aprobar, lo que
- * se está dibujando o el pedido en curso), con el único botón durazno de la pantalla.
+ * se está dibujando), con el único botón durazno de la pantalla.
  */
 export function NextUp({
   next,
   lines,
   stories,
-  placement = 'top',
 }: {
-  next: HomeNext;
+  next: LibraryNext;
   lines: LineCopy;
   stories: PublicStory[];
-  /** Debajo de las solapas (pedido en curso) la etiqueta dice «Tu pedido» en vez de «Lo próximo». */
-  placement?: 'top' | 'below';
 }) {
   const t = useTranslations('Account.myStories.library');
-  const locale = useLocale();
-  const day = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' });
 
-  const item = next.kind === 'order' ? next.order : next.book;
-  const key =
-    next.kind === 'order'
-      ? next.shipped
-        ? 'shipped'
-        : 'preparing'
-      : next.kind === 'preview' && next.book.channel === 'events'
-        ? 'kitPreview'
-        : next.kind;
+  const item = next.book;
+  const key = next.kind === 'preview' && item.channel === 'events' ? 'kitPreview' : next.kind;
   const name = item.childName;
   const title = name ? t(`next.${key}.title`, { name }) : t(`next.${key}.titleNoName`);
-  // La fecha estimada solo si el pedido la trae (nunca se inventa).
-  const sub =
-    next.kind === 'order' && next.order.etaFrom !== null && next.order.etaTo !== null
-      ? t('eta', { from: day.format(next.order.etaFrom), to: day.format(next.order.etaTo) })
-      : t(`next.${key}.sub`);
-  const href: Href =
-    next.kind === 'order'
-      ? { pathname: '/order/[orderId]', params: { orderId: next.order.id } }
-      : { pathname: '/create/[bookId]', params: { bookId: next.book.id } };
-  const status =
-    next.kind === 'order'
-      ? t(next.shipped ? 'status.shipped' : 'status.preparing')
-      : t(`status.${key}`);
-  const story =
-    next.kind === 'order'
-      ? stories.find((s) => s.slug === next.order.storyId)
-      : stories.find((s) => s.slug === next.book.storyId);
-  const src =
-    next.kind === 'order'
-      ? next.order.coverUrl
-      : next.kind === 'character'
-        ? next.book.characterUrl
-        : next.book.coverUrl;
+  const story = stories.find((s) => s.slug === item.storyId);
+  const src = next.kind === 'character' ? item.characterUrl : item.coverUrl;
 
   return (
     <section
@@ -88,11 +52,11 @@ export function NextUp({
       </span>
       <div className="grid min-w-0 gap-1.5">
         <p className="text-xs font-bold tracking-[0.08em] text-muted-foreground uppercase">
-          {t(placement === 'below' ? 'orderLabel' : 'nextLabel')}
+          {t('nextLabel')}
         </p>
         <div className="flex flex-wrap gap-1.5">
           <LineChip line={item.channel} label={lines[item.channel].chip} />
-          <StatusChip>{status}</StatusChip>
+          <StatusChip>{t(`status.${key}`)}</StatusChip>
         </div>
         <h2
           id="next-title"
@@ -100,11 +64,11 @@ export function NextUp({
         >
           {title}
         </h2>
-        <p className="text-muted-foreground">{sub}</p>
+        <p className="text-muted-foreground">{t(`next.${key}.sub`)}</p>
       </div>
       <div className="col-span-full sm:col-span-1">
         <Link
-          href={href}
+          href={{ pathname: '/create/[bookId]', params: { bookId: item.id } }}
           className={buttonVariants({ size: 'lg', className: 'w-full sm:w-auto' })}
           data-track="lo-proximo"
           data-track-state={key}
