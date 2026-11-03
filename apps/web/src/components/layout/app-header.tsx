@@ -7,7 +7,7 @@ import { LogoLink } from './logo-link';
 
 /**
  * Navbar de quien ya es cliente (opción 1, "tres puertas"): los catálogos de las tres líneas al
- * centro; Mis cuentos, Crear y la cuenta a la derecha. El logo lleva a la home con sesión
+ * centro; Mis cuentos, la cuenta y Crear a la derecha. El logo lleva a la home con sesión
  * (DECISIONS 220). En el celular solo quedan el logo y el avatar: el resto vive en la barra
  * inferior (AppTabBar).
  */
@@ -29,8 +29,9 @@ export async function AppHeader() {
 
         <div className="flex items-center gap-2">
           <MyStoriesMenu className="max-lg:hidden" />
-          <CreateMenu className="max-lg:hidden" />
           <AccountLink />
+          {/* Crear cierra la barra, igual que en el navbar de visitante. */}
+          <CreateMenu className="max-lg:hidden" />
         </div>
       </div>
     </header>
