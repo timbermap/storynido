@@ -956,6 +956,7 @@
         "limit_reached": "Llegaste al límite de muestras o regeneraciones por hoy. Podrás crear otra mañana.",
         "photo_unreadable": "No pudimos leer esta foto. Prueba con otra (de frente, bien iluminada, solo el rostro) o elige los rasgos del personaje. No cuenta para tu límite de hoy.",
         "ai_unavailable": "No pudimos generar las ilustraciones en este momento. Intenta de nuevo en unos minutos; tu borrador queda guardado.",
+        "ai_budget_exhausted": "Alcanzamos el límite de generación por hoy. Vuelve a intentarlo mañana; tu borrador queda guardado.",
         "validation_failed": "Ese texto no es apto para un cuento infantil. Cámbialo e intenta de nuevo.",
         "bad_request": "Revisa que estén completos el protagonista, la foto, la historia y el estilo.",
         "generic": "Algo salió mal. Intenta de nuevo en unos minutos.",

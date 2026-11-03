@@ -54,8 +54,10 @@ export const API_ERROR_CODES = [
   'unavailable_in_mode',
   /** Se alcanzó un límite (regeneraciones, vistas previas por día). */
   'limit_reached',
-  /** La IA está pausada (presupuesto diario agotado o moderación fallida dos veces). */
+  /** La IA no pudo generar (proveedor caído, control de calidad o moderación fallida). */
   'ai_unavailable',
+  /** Se agotó el presupuesto diario de IA: vuelve a haber generación al día siguiente (UTC). */
+  'ai_budget_exhausted',
   /** La foto no se pudo leer (la IA la rechazó): probar otra o elegir los rasgos. */
   'photo_unreadable',
   /** Hace falta una cuenta (no alcanza la sesión anónima). */

@@ -505,7 +505,7 @@ describe('vista previa', () => {
     await seedBook(providers, 'book-1');
     const res = await generate('book-1');
     expect(res.statusCode).toBe(503);
-    expect(res.json<{ error: { code: string } }>().error.code).toBe('ai_unavailable');
+    expect(res.json<{ error: { code: string } }>().error.code).toBe('ai_budget_exhausted');
     expect((await db.doc('books/book-1').get()).get('status')).toBe('draft');
   });
 

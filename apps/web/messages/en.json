@@ -956,6 +956,7 @@
         "limit_reached": "You've reached today's limit of samples or redos. You can create another one tomorrow.",
         "photo_unreadable": "We couldn't read this photo. Try another one (facing the camera, well lit, just the face) or choose the character's traits instead. It doesn't count toward today's limit.",
         "ai_unavailable": "We couldn't create the illustrations right now. Please try again in a few minutes; your draft is saved.",
+        "ai_budget_exhausted": "We've reached today's generation limit. Please try again tomorrow; your draft is saved.",
         "validation_failed": "That text isn't suitable for a children's story. Please change it and try again.",
         "bad_request": "Make sure the main character, photo, story and style are complete.",
         "generic": "Something went wrong. Please try again in a few minutes.",
