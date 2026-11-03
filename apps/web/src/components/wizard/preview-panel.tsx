@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  ApiError,
-  PREVIEW_PAGE_TEXT_MAX,
-  type Locale,
-  type PublicPreview,
-} from '@storynido/shared';
+import { PREVIEW_PAGE_TEXT_MAX, type Locale, type PublicPreview } from '@storynido/shared';
 import {
   AlertTriangle,
   BookOpen,
@@ -33,25 +28,12 @@ import { CharacterReview } from './character-review';
 import { BirthdayBookOffer, InvitationPreview } from './party-preview';
 import { cn } from '@/lib/utils';
 
+import { previewErrorKey } from './preview-errors';
 import { PreviewFeedback } from './preview-feedback';
 import type { WizardData } from './types';
 
 type Target = 'cover' | number;
 type PreviewData = NonNullable<PublicPreview['preview']>;
-
-const KNOWN_ERRORS = [
-  'limit_reached',
-  'ai_unavailable',
-  'photo_unreadable',
-  'validation_failed',
-  'bad_request',
-  'account_required',
-];
-
-/** Código de error de la API traducible ("generic" si no lo conocemos). */
-export function previewErrorKey(error: unknown): string {
-  return error instanceof ApiError && KNOWN_ERRORS.includes(error.code) ? error.code : 'generic';
-}
 
 /** Páginas del visor: portada, dedicatoria, el cuento completo y el cierre. */
 function viewerPages(preview: PreviewData): ViewerPage[] {

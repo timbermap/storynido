@@ -36,7 +36,7 @@ export interface UsageContext {
 export const budgetExceeded = () =>
   new AppError(
     503,
-    'ai_unavailable',
+    'ai_budget_exhausted',
     'Alcanzamos el límite de generación por hoy. Vuelve a intentarlo mañana; tu borrador queda guardado.',
   );
 

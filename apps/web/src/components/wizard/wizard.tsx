@@ -20,7 +20,8 @@ import {
   type DraftPreset,
 } from '@/lib/firebase/drafts';
 
-import { PreviewPanel, previewErrorKey } from './preview-panel';
+import { previewErrorKey } from './preview-errors';
+import { PreviewPanel } from './preview-panel';
 import { SignInGate } from './sign-in-gate';
 import { WizardSkeleton } from './wizard-skeleton';
 import { StepChild } from './step-child';
