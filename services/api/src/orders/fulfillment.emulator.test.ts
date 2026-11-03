@@ -153,6 +153,17 @@ describe('imprenta, descarga y cancelación (fase 12)', () => {
     expect((await step()).json<{ status: string }>().status).toBe('delivered');
   });
 
+  it('el admin de staging avanza la imprenta de cualquier pedido', async () => {
+    await seedOrder('sent_to_print', true, 'po_real', 'gelato');
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/admin/orders/o1/simulate-print',
+      headers: auth('token-root:admin:mfa'),
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json<{ status: string }>().status).toBe('in_production');
+  });
+
   it('cancelar en la imprenta: se puede antes del envío, después no', async () => {
     // Otro pedido de imprenta: la imprenta simulada recuerda los que ya despachó.
     await seedOrder('sent_to_print', true, 'po_cancel');

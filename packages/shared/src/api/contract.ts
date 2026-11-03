@@ -1483,6 +1483,15 @@ export const apiRoutes = {
     params: z.object({ orderId: z.string().min(1) }),
     response: z.object({ status: orderStatusSchema }),
   },
+  adminSimulatePrint: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/simulate-print',
+    access: 'admin',
+    summary:
+      'Solo staging: avanza un paso la imprenta del pedido (producción, envío, entrega) sin llamar a la imprenta',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: z.object({ status: orderStatusSchema }),
+  },
   adminRefundOrder: {
     method: 'POST',
     path: '/v1/admin/orders/:orderId/refund',

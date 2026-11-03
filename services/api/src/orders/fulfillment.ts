@@ -238,10 +238,13 @@ export class FulfillmentService {
    * borrador (staging), el paso se aplica directo al pedido, sin firma ni llamada a la imprenta:
    * sirve para ver qué pasa cuando el pedido se envía y llega al cliente (estado, seguimiento, mails).
    */
-  async simulatePrint(uid: string, orderId: string) {
+  async simulatePrint(uid: string | null, orderId: string) {
     const ref = this.db.collection(COLLECTIONS.orders).doc(orderId);
     const order = (await ref.get()).data() as OrderDoc | undefined;
-    if (order?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
+    // Con uid, solo el dueño (herramienta del cliente de pruebas); sin uid, el admin de staging.
+    if (!order || (uid !== null && order.ownerUid !== uid)) {
+      throw new AppError(404, 'not_found', 'Pedido inexistente.');
+    }
     if (!order.print?.externalOrderId) {
       throw new AppError(409, 'bad_request', 'El pedido no está en la imprenta.');
     }

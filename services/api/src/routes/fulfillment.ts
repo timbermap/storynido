@@ -38,6 +38,10 @@ export function registerFulfillmentRoutes(app: FastifyInstance, fulfillment: Ful
     addRoute(app, apiRoutes.devSimulatePrint, {}, (request) =>
       fulfillment.simulatePrint(user(request).uid, orderId(request)),
     );
+    // El admin de staging recorre el envío de cualquier pedido sin entrar como el cliente.
+    addRoute(app, apiRoutes.adminSimulatePrint, {}, (request) =>
+      fulfillment.simulatePrint(null, orderId(request)),
+    );
   }
 
   // Webhook de la imprenta: cuerpo crudo para verificar la firma.
