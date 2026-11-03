@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Locale } from '@storynido/shared';
 
 import { AppHeader } from '@/components/layout/app-header';
+import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
 import { homeLineCopy } from '@/components/home/session/line-copy';
 import { SignedInHome, type HomePreview } from '@/components/home/session/signed-in-home';
 import type { HomePro } from '@/lib/firebase/home-data';
@@ -20,7 +21,7 @@ export default async function DevHomePage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ estado?: string; header?: string; nombre?: string }>;
+  searchParams: Promise<{ estado?: string; header?: string; nombre?: string; navidad?: string }>;
 }) {
   if (process.env.NODE_ENV === 'production') notFound();
   const locale = (await params).locale as Locale;
@@ -177,7 +178,18 @@ export default async function DevHomePage({
         offer={offer}
         country={display.country}
         lines={lines}
-        christmas={null}
+        christmas={
+          // `?navidad=1`: la línea de Navidad bajo «Lo próximo», con una fecha fija dentro de la temporada.
+          query.navidad === '1' ? (
+            <ChristmasDeadline
+              offer={offer}
+              country={display.country}
+              locale={locale}
+              now={new Date(Date.UTC(2026, 10, 3))}
+              variant="line"
+            />
+          ) : null
+        }
         previewData={data}
       />
     </>
