@@ -2,34 +2,15 @@
 
 import { useEffect, useState } from 'react';
 
-import { isPrintOrder } from '@/components/orders/timeline';
-import { subscribeOrders, type OrderSummary } from '@/lib/firebase/account';
+import { subscribeOrders } from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { isEmptyDraft, listDrafts, type DraftSummary } from '@/lib/firebase/drafts';
+import { isOrderDone, isOrderInProgress } from '@/lib/order-state';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { usePathname } from '@/i18n/navigation';
 
-/** Un pedido "en curso": pagado y todavía sin llegar (un digital listo ya está terminado). */
-export function isOrderInProgress(order: Pick<OrderSummary, 'status' | 'items'>): boolean {
-  const unpaidOrClosed = [
-    'draft',
-    'preview_ready',
-    'pending_payment',
-    'cancelled',
-    'refunded',
-    'delivered',
-  ];
-  if (unpaidOrClosed.includes(order.status)) {
-    return false;
-  }
-  return !(order.status === 'ready' && !isPrintOrder(order.items));
-}
-
-/** Un pedido "terminado": entregado, o digital y listo. */
-export function isOrderDone(order: Pick<OrderSummary, 'status' | 'items'>): boolean {
-  return order.status === 'delivered' || (order.status === 'ready' && !isPrintOrder(order.items));
-}
+export { isOrderDone, isOrderInProgress };
 
 export interface OrderCounts {
   total: number;

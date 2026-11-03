@@ -28,6 +28,11 @@ export function catalogHref(line: Channel) {
   return CATALOG_LINES.find((item) => item.line === line)?.href ?? '/families/stories';
 }
 
+/** Mis cuentos queda marcado también en sus personajes y en la página de cada pedido. */
+export function isMyStoriesPath(pathname: string): boolean {
+  return isLinePath(pathname, '/my-stories') || pathname.startsWith('/order/');
+}
+
 /** La página es de esa línea: su catálogo o cualquier página bajo su prefijo. */
 export function isLinePath(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -106,7 +111,7 @@ export function MyStoriesMenu({ className }: { className?: string }) {
       id="menu-my-stories"
       align="end"
       href="/my-stories"
-      current={pathname === '/my-stories'}
+      current={isMyStoriesPath(pathname)}
       toggleLabel={t('myStoriesToggle')}
       className={cn('text-[0.95rem] font-semibold text-foreground/80', className)}
       panelClassName="w-[15rem]"

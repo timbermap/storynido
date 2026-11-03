@@ -74,12 +74,15 @@ export function Checkout({
   offer,
   country,
   reorderOf = null,
+  preferPrint = false,
 }: {
   bookId: string;
   offer: Offer;
   country: CountryCode;
   /** Recompra: el pedido cuyo libro ya generado se vuelve a pedir (sin IA). */
   reorderOf?: string | null;
+  /** «Pedirlo impreso» desde Mis cuentos: arranca con el primer formato impreso. */
+  preferPrint?: boolean;
 }) {
   const t = useTranslations('Checkout');
   const locale = useLocale() as Locale;
@@ -91,7 +94,12 @@ export function Checkout({
     t.has(`address.stateByCountry.${code}`)
       ? t(`address.stateByCountry.${code}`)
       : t('address.stateOther');
-  const [chosenFormat, setFormat] = useState<BookFormat>(offer.formats[0]?.format ?? 'digital');
+  const [chosenFormat, setFormat] = useState<BookFormat>(
+    (preferPrint ? offer.formats.find((option) => option.format !== 'digital') : undefined)
+      ?.format ??
+      offer.formats[0]?.format ??
+      'digital',
+  );
   const [address, setAddress] = useState<AddressDraft>(EMPTY_ADDRESS);
   const [gift, setGift] = useState({ isGift: false, message: '' });
   const [couponInput, setCouponInput] = useState('');
@@ -104,8 +112,12 @@ export function Checkout({
   // Solo los formatos que este libro admite (un cuento corto no se imprime como fotolibro).
   const available = quote?.availableFormats;
   const formats = offer.formats.filter((option) => !available || available.includes(option.format));
-  // Si el formato elegido no lo admite este libro, vuelve al digital.
-  const format = available && !available.includes(chosenFormat) ? 'digital' : chosenFormat;
+  // Si el formato elegido no lo admite este libro, vuelve al digital (o al primer impreso que
+  // admita, si se llegó por «Pedirlo impreso»).
+  const fallback =
+    (preferPrint ? formats.find((option) => option.format !== 'digital')?.format : undefined) ??
+    'digital';
+  const format = available && !available.includes(chosenFormat) ? fallback : chosenFormat;
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
   // Pago iniciado: la primera vez que hay precio para este libro (una sola vez, sin pasos nuevos).

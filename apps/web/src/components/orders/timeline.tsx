@@ -4,18 +4,31 @@ import type { OrderStatus } from '@storynido/shared';
 import { Check, CircleDashed, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { isPrintOrder } from '@/lib/order-state';
 import { cn } from '@/lib/utils';
 
-const DIGITAL_STEPS = ['pending_payment', 'paid', 'generating', 'ready'] as const;
-const PRINT_STEPS = [
-  'pending_payment',
-  'paid',
-  'generating',
-  'sent_to_print',
-  'in_production',
-  'shipped',
-  'delivered',
-] as const;
+/**
+ * Pasos que ve quien compra (cinco en el impreso; el digital no pasa por imprenta ni envío). El
+ * pago y su confirmación son un solo paso: «Pagado».
+ */
+export const PRINT_STEPS = ['paid', 'creating', 'printing', 'shipping', 'delivered'] as const;
+export const DIGITAL_STEPS = ['paid', 'creating', 'delivered'] as const;
+
+export type TimelineStep = (typeof PRINT_STEPS)[number];
+
+/** En qué paso está cada estado del pedido (los que no son parte del camino normal no están). */
+const STEP_OF: Partial<Record<OrderStatus, TimelineStep>> = {
+  pending_payment: 'paid',
+  paid: 'creating',
+  generating: 'creating',
+  qa_failed: 'creating',
+  // Un impreso pasa por "listo" un instante antes de ir a la imprenta.
+  ready: 'printing',
+  sent_to_print: 'printing',
+  in_production: 'printing',
+  shipped: 'shipping',
+  delivered: 'delivered',
+};
 
 /** Estados en los que el libro ya está generado (se puede descargar o volver a pedir). */
 export const GENERATED_STATUSES = new Set<OrderStatus>([
@@ -49,14 +62,17 @@ export function orderGroup(status: OrderStatus, print: boolean): OrderGroup {
   return 'creating';
 }
 
-export const isPrintOrder = (items: { format: string }[]) =>
-  items.some((item) => item.format !== 'digital');
+export { isPrintOrder };
 
-/** Pasos del pedido según el formato; -1 si el estado no es parte del camino normal. */
+/**
+ * Pasos del pedido según el formato y en cuál está (-1 si el estado no es parte del camino
+ * normal). El último paso, cuando se llega, cuenta como hecho.
+ */
 export function timelineFor(status: OrderStatus, print: boolean) {
-  const steps: readonly OrderStatus[] = print ? PRINT_STEPS : DIGITAL_STEPS;
-  // Un impreso pasa por "listo" un instante antes de ir a la imprenta.
-  const current = steps.indexOf(print && status === 'ready' ? 'sent_to_print' : status);
+  const steps: readonly TimelineStep[] = print ? PRINT_STEPS : DIGITAL_STEPS;
+  // Un digital listo ya está entregado: se descarga al instante.
+  const step = !print && status === 'ready' ? 'delivered' : STEP_OF[status];
+  const current = step ? steps.indexOf(step) : -1;
   return { steps, current };
 }
 
@@ -75,24 +91,36 @@ export function OrderTimeline({
   if (current < 0) return null;
   const last = current === steps.length - 1;
 
+  const done = (index: number) => index < current || (last && index === current);
+
   if (compact) {
     return (
-      <div
-        role="img"
+      <ol
         aria-label={t('progress', { current: current + 1, total: steps.length })}
-        className="flex gap-1"
+        className="grid gap-1 sm:gap-1.5"
+        style={{ gridTemplateColumns: `repeat(${String(steps.length)}, minmax(0, 1fr))` }}
       >
         {steps.map((step, index) => (
-          <span
-            key={step}
-            className={cn(
-              'h-1.5 flex-1 rounded-full',
-              index <= current ? 'bg-primary' : 'bg-border',
-              index === current && !last && 'animate-pulse',
-            )}
-          />
+          <li key={step} className="grid min-w-0 gap-1">
+            <span
+              className={cn(
+                'h-1.5 rounded-full',
+                index <= current ? 'bg-primary' : 'bg-border',
+                index === current && !last && 'animate-pulse motion-reduce:animate-none',
+              )}
+            />
+            <span
+              aria-current={index === current ? 'step' : undefined}
+              className={cn(
+                'text-[0.625rem] leading-tight tracking-tight sm:text-xs sm:tracking-normal',
+                index === current ? 'font-bold text-foreground' : 'text-muted-foreground',
+              )}
+            >
+              {t(`steps.${step}`)}
+            </span>
+          </li>
         ))}
-      </div>
+      </ol>
     );
   }
 
@@ -103,13 +131,12 @@ export function OrderTimeline({
           <span
             className={cn(
               'grid size-7 place-items-center rounded-full border-2',
-              (index < current || (last && index === current)) &&
-                'border-primary bg-primary text-primary-foreground',
+              done(index) && 'border-primary bg-primary text-primary-foreground',
               index === current && !last && 'border-primary text-primary',
               index > current && 'border-border text-muted-foreground',
             )}
           >
-            {index < current || (last && index === current) ? (
+            {done(index) ? (
               <Check className="size-4" aria-hidden="true" />
             ) : index === current ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />

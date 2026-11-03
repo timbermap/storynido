@@ -9,7 +9,14 @@ import type { Channel } from '@storynido/shared';
 import { CHANNEL_STORAGE_KEY } from '@/components/landing/remember-channel';
 import { Link, usePathname } from '@/i18n/navigation';
 
-import { CATALOG_LINES, CreateOptions, InProgressDot, catalogHref, isLinePath } from './app-nav';
+import {
+  CATALOG_LINES,
+  CreateOptions,
+  InProgressDot,
+  catalogHref,
+  isLinePath,
+  isMyStoriesPath,
+} from './app-nav';
 import { isFocusPath } from './focus-header';
 import { useOrderCounts } from './use-account-activity';
 
@@ -62,7 +69,7 @@ export function AppTabBar() {
   if (isFocusPath(pathname)) return null;
 
   const onCatalog = CATALOG_LINES.some((item) => isLinePath(pathname, item.prefix));
-  const onMyStories = pathname === '/my-stories' || pathname.startsWith('/my-stories/');
+  const onMyStories = isMyStoriesPath(pathname);
 
   return (
     <>

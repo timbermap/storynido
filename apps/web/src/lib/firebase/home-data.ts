@@ -10,10 +10,10 @@ import { isEmptyDraft, listDrafts, listProjects } from './drafts';
 
 type Timestampish = { toDate(): Date } | null | undefined;
 
-const channelOf = (value: unknown): HomeChannel =>
+export const channelOf = (value: unknown): HomeChannel =>
   value === 'events' || value === 'professionals' ? value : 'families';
 
-async function childOf(
+export async function childOf(
   db: Firestore,
   bookId: string,
 ): Promise<{ childId: string | null; childName: string | null; storyId: string | null }> {
@@ -26,7 +26,7 @@ async function childOf(
 }
 
 /** Portada y título de un libro (la API firma las imágenes; solo para quien es su dueño). */
-async function previewOf(bookId: string) {
+export async function previewOf(bookId: string) {
   return api('bookPreview', { params: { bookId } }).catch(() => null);
 }
 

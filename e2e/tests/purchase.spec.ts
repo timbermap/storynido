@@ -213,10 +213,12 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.getByRole('button', { name: 'Enviar mi opinión' }).click();
   await expect(page.locator('#opinion')).toContainText('¡Gracias por contarnos!');
 
-  // --- Mis pedidos: pedido en vivo y recompra sin IA; Mi cuenta: borrado ---
-  await page.goto('/es/mis-pedidos');
-  await expect(page.locator('#orders li').first()).toContainText('Tu libro fue entregado');
-  await page.locator('#orders a', { hasText: 'Pedir de nuevo' }).first().click();
+  // --- Mis cuentos: el entregado queda en el estante y se recompra sin IA; Mi cuenta: borrado ---
+  await page.goto('/es/mis-cuentos?estado=terminados');
+  const shelf = page.locator('#panel-terminados > ul > li');
+  await expect(shelf).toHaveCount(1, { timeout: 30_000 });
+  await expect(shelf.first()).toContainText('Tapa');
+  await shelf.first().getByRole('link', { name: 'Pedir otra copia' }).click();
   await expect(body(page)).toContainText('Pides de nuevo el mismo libro');
   await page.locator('label', { hasText: 'Ebook' }).click();
   await expect(page.locator('aside dl')).toContainText('Total');
@@ -225,8 +227,8 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.getByRole('button', { name: 'Simular el pago' }).click();
   await expect(body(page)).toContainText('¡Tu libro está listo!', { timeout: 120_000 });
 
-  await page.goto('/es/mis-pedidos');
-  await expect(page.locator('#orders li')).toHaveCount(2, { timeout: 30_000 });
+  await page.goto('/es/mis-cuentos?estado=terminados');
+  await expect(shelf).toHaveCount(2, { timeout: 30_000 });
   await expectNoHorizontalScroll(page);
   await page.goto('/es/cuenta');
   await page.locator('#children button', { hasText: 'Borrar datos' }).click();

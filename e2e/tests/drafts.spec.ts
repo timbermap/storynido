@@ -133,13 +133,17 @@ test('con sesión, el navbar es el de la app: sin las páginas que venden y con 
   const header = page.locator('header').first();
   await expect(header.getByRole('link', { name: 'Mis cuentos' })).toBeVisible();
   await expect(header.getByRole('button', { name: 'Crear' })).toBeVisible();
-  await expect(header.getByRole('button', { name: 'Explorar' })).toBeVisible();
-  await expect(header.getByRole('link', { name: 'Celebraciones', exact: true })).toHaveCount(0);
+  // Las tres puertas: el catálogo de cada línea (no las landings que venden).
+  await expect(header.getByRole('link', { name: 'Celebraciones', exact: true })).toHaveAttribute(
+    'href',
+    '/es/eventos/tematicas',
+  );
+  await expect(header.getByRole('link', { name: /Cómo funciona/ })).toHaveCount(0);
   // El logo lleva a la home con sesión y la landing de un público conserva el mismo navbar.
   await page.goto('/es/familias');
   await expect(
     page.locator('header').first().getByRole('link', { name: 'Celebraciones', exact: true }),
-  ).toHaveCount(0);
+  ).toHaveAttribute('href', '/es/eventos/tematicas');
   await expect(page.locator('header a[href="/es"]').first()).toBeVisible();
   // "Crear" reúne las tres opciones.
   await page.locator('header').first().getByRole('button', { name: 'Crear' }).click();
