@@ -537,18 +537,148 @@
       "profileBooksTitle": "Histórias com {name}",
       "profileBooksOpen": "Em andamento",
       "profileBooksDone": "Concluídos",
-      "profileViewOrders": "Ver pedidos",
       "profileBooksNone": "Ainda não há histórias com este personagem.",
       "profileBookDraft": "Em andamento",
       "profileBookReady": "Amostra pronta",
-      "profileBookOrdered": "Pedido feito",
+      "profileBookOrdered": "Pedido em andamento",
       "profileCancel": "Cancelar",
       "tabCreating": "Em criação",
       "tabInProgress": "Em andamento",
       "tabDone": "Concluídas",
       "emptyCreating": "Você não tem histórias em criação.",
       "emptyInProgress": "Você não tem pedidos em andamento.",
-      "emptyDone": "Você ainda não tem histórias concluídas."
+      "emptyDone": "Você ainda não tem histórias concluídas.",
+      "hello": "Olá, {name}",
+      "profileViewOrder": "Ver pedido",
+      "profileBooksCreating": "Em criação",
+      "profileBookDone": "Concluído",
+      "library": {
+        "summary": "{books, plural, one {# livro} other {# livros}} · {characters, plural, one {# personagem} other {# personagens}}",
+        "nextLabel": "O próximo passo",
+        "eta": "Chega entre {from} e {to}.",
+        "next": {
+          "preview": {
+            "title": "A prévia de {name} está pronta",
+            "titleNoName": "Sua prévia está pronta",
+            "sub": "Já ilustramos a capa e as primeiras páginas. Veja antes de pagar.",
+            "cta": "Ver a prévia"
+          },
+          "kitPreview": {
+            "title": "O kit da festa de {name} está pronto",
+            "titleNoName": "O kit da festa está pronto",
+            "sub": "Veja o convite, a decoração e a história antes de pagar.",
+            "cta": "Ver a prévia"
+          },
+          "character": {
+            "title": "{name} é assim?",
+            "titleNoName": "Seu personagem é assim?",
+            "sub": "Aprove e seguimos com a capa e as primeiras páginas.",
+            "cta": "Revisar o personagem"
+          },
+          "generating": {
+            "title": "Estamos desenhando {name}",
+            "titleNoName": "Estamos desenhando seu personagem",
+            "sub": "Leva alguns minutos. Pode fechar esta tela: avisamos por e-mail.",
+            "cta": "Ver o andamento"
+          },
+          "preparing": {
+            "title": "Estamos preparando o livro de {name}",
+            "titleNoName": "Estamos preparando seu livro",
+            "sub": "Avisamos por e-mail a cada etapa.",
+            "cta": "Ver o pedido"
+          },
+          "shipped": {
+            "title": "O livro de {name} está a caminho",
+            "titleNoName": "Seu livro está a caminho",
+            "sub": "Você pode acompanhar o envio pelo seu pedido.",
+            "cta": "Acompanhar o envio"
+          }
+        },
+        "status": {
+          "draft": "Rascunho",
+          "generating": "Desenhando",
+          "character": "Personagem para aprovar",
+          "preview": "Prévia pronta",
+          "kitPreview": "Kit pronto",
+          "preparing": "Em preparação",
+          "printing": "Na gráfica",
+          "shipped": "A caminho"
+        },
+        "filterAll": "Todas",
+        "seePreview": "Ver a prévia",
+        "viewOrder": "Ver pedido",
+        "track": "Acompanhar o envio",
+        "read": "Ver",
+        "readLabel": "Ver {title}",
+        "download": "Baixar PDF",
+        "downloadError": "Não conseguimos preparar o download. Tente de novo.",
+        "reorder": "Pedir de novo",
+        "anotherCopy": "Pedir outra cópia",
+        "paperTitle": "Querem em papel?",
+        "paperCta": "Pedir impresso",
+        "cards": "Cartões impressos",
+        "createWith": "Criar outra história com {name}",
+        "characters": {
+          "stories": "{count, plural, =0 {Nenhuma história ainda} one {# história} other {# histórias}}",
+          "likes": "Do que gosta",
+          "delete": "Apagar {name}",
+          "add": "Adicionar outra criança",
+          "addText": "Uma história nova, com a foto e as coisas favoritas."
+        },
+        "ideas": {
+          "title": "Ideias para {name}",
+          "likes": {
+            "title": "Outra aventura com {like}",
+            "text": "Uma história nova de {name} com o que mais gosta. Já temos os dados.",
+            "cta": "Criar esta aventura"
+          },
+          "birthday": {
+            "title": "O aniversário, com o personagem",
+            "text": "Um kit de Celebrações: convite, decoração e uma história para cada convidado.",
+            "cta": "Criar o kit"
+          },
+          "moment": {
+            "title": "Uma história para um momento",
+            "text": "Compartilhar, dormir sozinho, a chegada de um irmãozinho: uma aventura que acompanha o que {name} está vivendo.",
+            "cta": "Ver as lições"
+          }
+        },
+        "empty": {
+          "creating": "Você não tem histórias em criação.",
+          "creatingWithCharacter": "Você não tem histórias em criação. Outra aventura para {name}? Já temos os dados e o personagem.",
+          "createWith": "Criar outra história com {name}",
+          "inProgress": "Você não tem pedidos em andamento. Quando pagar um livro, verá aqui cada etapa: criação, gráfica e envio.",
+          "done": "Você ainda não tem histórias concluídas. Aqui ficam os livros entregues e os digitais prontos, para ver, baixar ou pedir de novo.",
+          "start": "Criar uma prévia grátis"
+        },
+        "welcome": {
+          "text": "Aqui você vai encontrar tudo o que criar, organizado por status.",
+          "creating": {
+            "title": "Em criação",
+            "text": "As histórias que você começou, para continuar quando quiser."
+          },
+          "inProgress": {
+            "title": "Em andamento",
+            "text": "Seus pedidos, da criação à entrega."
+          },
+          "done": {
+            "title": "Concluídas",
+            "text": "Seus livros, para ver ou pedir de novo."
+          },
+          "characters": {
+            "title": "Personagens",
+            "text": "As crianças das suas histórias, para criar outra aventura."
+          },
+          "cta": "Criar uma prévia grátis",
+          "kit": "Criar um kit de celebração",
+          "pro": "Criar um projeto profissional"
+        },
+        "trust": {
+          "preview": "Prévia grátis antes de pagar",
+          "photos": "Fotos apagadas após 30 dias",
+          "reorder": "Você pode pedir qualquer livro de novo"
+        }
+      }
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },
@@ -1593,16 +1723,6 @@
         "draft": "Pedido em preparação.",
         "preview_ready": "Pedido em preparação."
       },
-      "steps": {
-        "pending_payment": "Pagamento",
-        "paid": "Pagamento confirmado",
-        "generating": "Criação do livro",
-        "ready": "Livro pronto",
-        "sent_to_print": "Na gráfica",
-        "in_production": "Imprimindo",
-        "shipped": "A caminho",
-        "delivered": "Entregue"
-      },
       "simulateTitle": "Modo de teste",
       "simulateText": "Os pagamentos são simulados neste ambiente: ninguém paga nada.",
       "simulate": "Simular o pagamento",
@@ -1623,7 +1743,14 @@
         "thanks": "Obrigado por contar!",
         "error": "Não conseguimos salvar sua opinião. Tente de novo."
       },
-      "toMyStories": "Ver em Minhas histórias →"
+      "toMyStories": "Ver em Minhas histórias →",
+      "steps": {
+        "paid": "Pago",
+        "creating": "Criando",
+        "printing": "Imprimindo",
+        "shipping": "A caminho",
+        "delivered": "Entregue"
+      }
     },
     "reorderSubtitle": "Você pede de novo o mesmo livro, do jeito que ficou: não precisa criá-lo outra vez.",
     "kit": {

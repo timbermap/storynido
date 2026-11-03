@@ -28,6 +28,7 @@ export interface ChildSummary {
   id: string;
   name: string;
   age: number | null;
+  likes: string[];
 }
 
 type Timestampish = { toDate(): Date } | null | undefined;
@@ -75,6 +76,7 @@ export async function listChildren(db: Firestore, uid: string): Promise<ChildSum
     id: child.id,
     name: child.get('name') as string,
     age: (child.get('age') as number | null | undefined) ?? null,
+    likes: (child.get('likes') as string[] | undefined) ?? [],
   }));
 }
 

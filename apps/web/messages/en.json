@@ -535,20 +535,150 @@
       "profilePhotoDeleted": "We deleted {name}’s photo.",
       "profilePhotoError": "We couldn’t delete the photo. Please try again.",
       "profileBooksTitle": "Stories with {name}",
-      "profileBooksOpen": "In progress",
+      "profileBooksOpen": "On the way",
       "profileBooksDone": "Finished",
-      "profileViewOrders": "View orders",
       "profileBooksNone": "There are no stories with this character yet.",
       "profileBookDraft": "In progress",
       "profileBookReady": "Sample ready",
-      "profileBookOrdered": "Ordered",
+      "profileBookOrdered": "Order in progress",
       "profileCancel": "Cancel",
       "tabCreating": "In progress",
       "tabInProgress": "On the way",
       "tabDone": "Finished",
       "emptyCreating": "You have no stories in progress.",
       "emptyInProgress": "You have no orders on the way.",
-      "emptyDone": "You don't have any finished stories yet."
+      "emptyDone": "You don't have any finished stories yet.",
+      "hello": "Hi, {name}",
+      "profileViewOrder": "View order",
+      "profileBooksCreating": "In progress",
+      "profileBookDone": "Finished",
+      "library": {
+        "summary": "{books, plural, one {# book} other {# books}} · {characters, plural, one {# character} other {# characters}}",
+        "nextLabel": "Up next",
+        "eta": "Arrives between {from} and {to}.",
+        "next": {
+          "preview": {
+            "title": "{name}’s preview is ready",
+            "titleNoName": "Your preview is ready",
+            "sub": "We’ve illustrated the cover and the first pages. Take a look before you pay.",
+            "cta": "See the preview"
+          },
+          "kitPreview": {
+            "title": "The party kit for {name} is ready",
+            "titleNoName": "The party kit is ready",
+            "sub": "See the invitation, the decorations and the story before you pay.",
+            "cta": "See the preview"
+          },
+          "character": {
+            "title": "Is this {name}?",
+            "titleNoName": "Is this your character?",
+            "sub": "Approve it and we’ll move on to the cover and the first pages.",
+            "cta": "Review the character"
+          },
+          "generating": {
+            "title": "We’re drawing {name}",
+            "titleNoName": "We’re drawing your character",
+            "sub": "It takes a few minutes. You can close this screen: we’ll email you.",
+            "cta": "See the progress"
+          },
+          "preparing": {
+            "title": "We’re preparing {name}’s book",
+            "titleNoName": "We’re preparing your book",
+            "sub": "We’ll email you at every step.",
+            "cta": "View the order"
+          },
+          "shipped": {
+            "title": "{name}’s book is on its way",
+            "titleNoName": "Your book is on its way",
+            "sub": "You can track the shipment from your order.",
+            "cta": "Track the shipment"
+          }
+        },
+        "status": {
+          "draft": "Draft",
+          "generating": "Drawing",
+          "character": "Character to approve",
+          "preview": "Preview ready",
+          "kitPreview": "Kit ready",
+          "preparing": "Being prepared",
+          "printing": "At the printer",
+          "shipped": "On its way"
+        },
+        "filterAll": "All",
+        "seePreview": "See the preview",
+        "viewOrder": "View order",
+        "track": "Track the shipment",
+        "read": "View",
+        "readLabel": "View {title}",
+        "download": "Download PDF",
+        "downloadError": "We couldn’t prepare the download. Please try again.",
+        "reorder": "Order again",
+        "anotherCopy": "Order another copy",
+        "paperTitle": "Want it on paper?",
+        "paperCta": "Order it printed",
+        "cards": "Printed cards",
+        "createWith": "Create another story with {name}",
+        "characters": {
+          "stories": "{count, plural, =0 {No stories yet} one {# story} other {# stories}}",
+          "likes": "What they like",
+          "delete": "Delete {name}",
+          "add": "Add another child",
+          "addText": "A new story, with their photo and favorite things."
+        },
+        "ideas": {
+          "title": "Ideas for {name}",
+          "likes": {
+            "title": "Another adventure with {like}",
+            "text": "A new story for {name} with what they love most. We already have their details.",
+            "cta": "Create this adventure"
+          },
+          "birthday": {
+            "title": "Their birthday, with their character",
+            "text": "A Celebrations kit: invitation, decorations and a story for every guest.",
+            "cta": "Design the kit"
+          },
+          "moment": {
+            "title": "A story for a moment",
+            "text": "Sharing, sleeping alone, a new sibling: an adventure that goes along with what {name} is living.",
+            "cta": "See the lessons"
+          }
+        },
+        "empty": {
+          "creating": "You have no stories in progress.",
+          "creatingWithCharacter": "You have no stories in progress. Another adventure for {name}? We already have their details and character.",
+          "createWith": "Create another story with {name}",
+          "inProgress": "You have no orders on the way. Once you pay for a book, you’ll see every step here: creation, printing and shipping.",
+          "done": "You have no finished stories yet. Delivered books and ready digital ones stay here, to view, download or order again.",
+          "start": "Create a free preview"
+        },
+        "welcome": {
+          "text": "Everything you create will be here, sorted by status.",
+          "creating": {
+            "title": "In progress",
+            "text": "The stories you started, to pick up whenever you want."
+          },
+          "inProgress": {
+            "title": "On the way",
+            "text": "Your orders, from creation to delivery."
+          },
+          "done": {
+            "title": "Finished",
+            "text": "Your books, to view or order again."
+          },
+          "characters": {
+            "title": "Characters",
+            "text": "The children in your stories, to create another adventure for them."
+          },
+          "cta": "Create a free preview",
+          "kit": "Design a celebration kit",
+          "pro": "Create a professional project"
+        },
+        "trust": {
+          "preview": "Free preview before you pay",
+          "photos": "Photos deleted after 30 days",
+          "reorder": "You can reorder any book"
+        }
+      }
     },
     "myStoriesLink": "Your stories and orders are in My stories →"
   },
@@ -1593,16 +1723,6 @@
         "draft": "Order being prepared.",
         "preview_ready": "Order being prepared."
       },
-      "steps": {
-        "pending_payment": "Payment",
-        "paid": "Payment confirmed",
-        "generating": "Creating the book",
-        "ready": "Book ready",
-        "sent_to_print": "At the printer",
-        "in_production": "Printing",
-        "shipped": "On its way",
-        "delivered": "Delivered"
-      },
       "simulateTitle": "Test mode",
       "simulateText": "Payments are simulated in this environment: nobody pays anything.",
       "simulate": "Simulate the payment",
@@ -1623,7 +1743,14 @@
         "thanks": "Thanks for telling us!",
         "error": "We couldn’t save your review. Please try again."
       },
-      "toMyStories": "See it in My stories →"
+      "toMyStories": "See it in My stories →",
+      "steps": {
+        "paid": "Paid",
+        "creating": "Creating",
+        "printing": "Printing",
+        "shipping": "On its way",
+        "delivered": "Delivered"
+      }
     },
     "reorderSubtitle": "You are ordering the same book again, exactly as it turned out: no need to create it again.",
     "kit": {

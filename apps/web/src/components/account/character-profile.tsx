@@ -9,8 +9,15 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { getChildDetails, updateChildDetails, type ChildDetails } from '@/lib/firebase/account';
+import {
+  getChildDetails,
+  subscribeOrders,
+  updateChildDetails,
+  type ChildDetails,
+  type OrderSummary,
+} from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
+import { isOrderDone } from '@/lib/order-state';
 import { REUSE_CHARACTER_KEY } from '@/lib/reuse-character';
 
 type Profile = Awaited<ReturnType<typeof loadProfile>>;
@@ -30,7 +37,8 @@ export function CharacterProfile({ childId }: { childId: string }) {
   const t = useTranslations('Account.myStories');
   const date = new Intl.DateTimeFormat(useLocale(), { dateStyle: 'long' });
   const router = useRouter();
-  const { signedIn, loading } = useAuth();
+  const { user, signedIn, loading } = useAuth();
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [details, setDetails] = useState<ChildDetails | null | undefined>(undefined);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [likes, setLikes] = useState('');
@@ -61,6 +69,25 @@ export function CharacterProfile({ childId }: { childId: string }) {
         setFailed(true);
       });
   }, [signedIn, childId]);
+
+  // El estado de cada libro pedido sale de su pedido, igual que en Mis cuentos (un impreso en
+  // camino sigue en curso aunque el libro ya esté comprado).
+  const uid = signedIn ? (user?.uid ?? null) : null;
+  useEffect(() => {
+    if (!uid) return;
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+    void getFirebaseDb().then((db) => {
+      if (cancelled) return;
+      unsubscribe = subscribeOrders(db, uid, setOrders, () => {
+        setOrders([]);
+      });
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, [uid]);
 
   if (failed || details === null) {
     return (
@@ -143,12 +170,31 @@ export function CharacterProfile({ childId }: { childId: string }) {
     router.push({ pathname: '/create', query: { line: 'families' } });
   }
 
-  const statusLabel = (status: Profile['books'][number]['status']) =>
-    status === 'ordered'
-      ? t('profileBookOrdered')
-      : status === 'preview_ready'
-        ? t('profileBookReady')
-        : t('profileBookDraft');
+  type ProfileBook = Profile['books'][number];
+  // El pedido más reciente de cada libro (los pagos que no se completaron no cuentan).
+  const orderOf = (book: ProfileBook) =>
+    orders.find(
+      (order) =>
+        order.bookId === book.id &&
+        order.status !== 'pending_payment' &&
+        order.status !== 'cancelled',
+    );
+  const groupOf = (book: ProfileBook): 'creating' | 'inProgress' | 'done' => {
+    if (book.status !== 'ordered') return 'creating';
+    const order = orderOf(book);
+    return order && isOrderDone(order) ? 'done' : 'inProgress';
+  };
+  const statusLabel = (book: ProfileBook) => {
+    const group = groupOf(book);
+    if (group === 'done') return t('profileBookDone');
+    if (group === 'inProgress') return t('profileBookOrdered');
+    return book.status === 'preview_ready' ? t('profileBookReady') : t('profileBookDraft');
+  };
+  const GROUP_TITLE = {
+    creating: 'profileBooksCreating',
+    inProgress: 'profileBooksOpen',
+    done: 'profileBooksDone',
+  } as const;
 
   return (
     <section className="container-page grid max-w-3xl gap-8 py-12">
@@ -367,57 +413,66 @@ export function CharacterProfile({ childId }: { childId: string }) {
         {profile.books.length === 0 ? (
           <p className="rounded-xl border bg-card p-5">{t('profileBooksNone')}</p>
         ) : (
-          // Igual que Mis cuentos: lo que sigue en curso y lo que ya se compró.
-          (
-            [
-              ['open', profile.books.filter((book) => book.status !== 'ordered')],
-              ['done', profile.books.filter((book) => book.status === 'ordered')],
-            ] as const
-          ).map(([group, books]) =>
-            books.length === 0 ? null : (
+          // Igual que Mis cuentos: en creación, en curso (pedido sin llegar) y terminados.
+          (['creating', 'inProgress', 'done'] as const).map((group) => {
+            const books = profile.books.filter((book) => groupOf(book) === group);
+            if (books.length === 0) return null;
+            return (
               <div key={group} className="grid gap-3">
                 <h3 className="text-lg font-medium">
-                  {t(group === 'open' ? 'profileBooksOpen' : 'profileBooksDone')} ({books.length})
+                  {t(GROUP_TITLE[group])} ({books.length})
                 </h3>
                 <ul className="grid gap-3 sm:grid-cols-2">
-                  {books.map((book) => (
-                    <li
-                      key={book.id}
-                      className="flex items-center gap-3 rounded-xl border bg-card p-3"
-                    >
-                      {book.coverUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min.
-                        <img
-                          src={book.coverUrl}
-                          alt=""
-                          className="h-20 w-16 rounded-md object-cover"
-                        />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-semibold">{book.title ?? t('untitled')}</p>
-                        <p className="text-sm text-muted-foreground">{statusLabel(book.status)}</p>
-                      </div>
-                      {group === 'open' ? (
-                        <Link
-                          href={{ pathname: '/create/[bookId]', params: { bookId: book.id } }}
-                          className={buttonVariants({ size: 'sm', variant: 'outline' })}
-                        >
-                          {t('continue')}
-                        </Link>
-                      ) : (
-                        <Link
-                          href="/my-orders"
-                          className={buttonVariants({ size: 'sm', variant: 'outline' })}
-                        >
-                          {t('profileViewOrders')}
-                        </Link>
-                      )}
-                    </li>
-                  ))}
+                  {books.map((book) => {
+                    const order = orderOf(book);
+                    return (
+                      <li
+                        key={book.id}
+                        className="flex items-center gap-3 rounded-xl border bg-card p-3"
+                      >
+                        {book.coverUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min.
+                          <img
+                            src={book.coverUrl}
+                            alt=""
+                            className="h-20 w-16 shrink-0 rounded-md object-cover"
+                          />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="line-clamp-2 font-semibold">
+                            {book.title ?? t('untitled')}
+                          </p>
+                          <p className="text-sm text-muted-foreground">{statusLabel(book)}</p>
+                        </div>
+                        {group === 'creating' ? (
+                          <Link
+                            href={{ pathname: '/create/[bookId]', params: { bookId: book.id } }}
+                            className={buttonVariants({ size: 'sm', variant: 'outline' })}
+                          >
+                            {t('continue')}
+                          </Link>
+                        ) : (
+                          <Link
+                            href={
+                              order
+                                ? { pathname: '/order/[orderId]', params: { orderId: order.id } }
+                                : {
+                                    pathname: '/my-stories',
+                                    query: { estado: group === 'done' ? 'terminados' : 'en-curso' },
+                                  }
+                            }
+                            className={buttonVariants({ size: 'sm', variant: 'outline' })}
+                          >
+                            {t('profileViewOrder')}
+                          </Link>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
-            ),
-          )
+            );
+          })
         )}
       </section>
     </section>

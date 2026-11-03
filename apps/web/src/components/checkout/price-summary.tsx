@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 
-import type { CountryCode, Locale, Offer, PriceSnapshot } from '@storynido/shared';
+import type { BookFormat, CountryCode, Locale, Offer, PriceSnapshot } from '@storynido/shared';
 
 import { formatPrice, localReference } from '@/lib/format';
 
@@ -11,14 +11,19 @@ export function PriceSummary({
   snapshot,
   country,
   local = null,
+  format = null,
 }: {
   snapshot: PriceSnapshot;
   country: CountryCode;
   /** Moneda local de referencia (todo se cobra en dólares). */
   local?: Offer['local'];
+  /** Formato pedido: la fila del libro dice cuál es («Cuento grapado») en vez de «Libro». */
+  format?: BookFormat | null;
 }) {
   const t = useTranslations('Checkout');
   const locale = useLocale() as Locale;
+  const componentLabel = (code: PriceSnapshot['components'][number]['code']) =>
+    code === 'book' && format ? t(`formats.${format}.name`) : t(`component.${code}`);
   const money = (minor: number) => formatPrice(minor, snapshot.currency, locale, country);
   const rows: { label: string; value: string; muted?: boolean }[] = snapshot.components.map(
     (component) => ({
@@ -26,8 +31,8 @@ export function PriceSummary({
         component.code === 'piece' && component.piece
           ? t(`kit.pieces.${component.piece}.name`)
           : component.quantity > 1
-            ? `${t(`component.${component.code}`)} × ${String(component.quantity)}`
-            : t(`component.${component.code}`),
+            ? `${componentLabel(component.code)} × ${String(component.quantity)}`
+            : componentLabel(component.code),
       value: money(component.totalMinor),
     }),
   );

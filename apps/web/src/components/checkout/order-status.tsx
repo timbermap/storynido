@@ -1,6 +1,6 @@
 'use client';
 
-import { ApiError, type CountryCode, type PublicOrder } from '@storynido/shared';
+import { ApiError, type BookFormat, type CountryCode, type PublicOrder } from '@storynido/shared';
 import {
   BookHeart,
   Download,
@@ -21,6 +21,7 @@ import {
   isPrintOrder,
 } from '@/components/orders/timeline';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { OrderHeader } from '@/components/orders/order-header';
 import { OrderReview } from '@/components/orders/order-review';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
@@ -125,9 +126,15 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   // Pedido aparte de tarjetas impresas: no hay descarga ni recompra, solo el seguimiento.
   const isCards = order.items.every((item) => item.format === 'card');
   const cardPieces = kitFiles.filter((file) => file === 'invitation' || file === 'thank_you');
+  // El kit dice sus piezas en el resumen: el formato solo se nombra para un libro.
+  const bookItem = order.items.find(
+    (item): item is { format: BookFormat; quantity: number } => item.format !== 'card',
+  );
+  const format = isKit ? null : (bookItem?.format ?? null);
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="grid content-start gap-6">
+        <OrderHeader orderId={order.orderId} bookId={order.bookId} format={format} />
         <p role="status" aria-live="polite" className="text-xl font-medium">
           {isKit && order.status === 'ready' ? tKit('ready') : t(`status.${order.status}`)}
         </p>
@@ -282,7 +289,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
       </div>
       {order.priceSnapshot && (
         <aside className="self-start rounded-2xl border bg-card p-6">
-          <PriceSummary snapshot={order.priceSnapshot} country={country} />
+          <PriceSummary snapshot={order.priceSnapshot} country={country} format={format} />
         </aside>
       )}
     </div>
