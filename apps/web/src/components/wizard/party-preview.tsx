@@ -37,8 +37,7 @@ export function InvitationPreview({
   const t = useTranslations('Wizard.partyPreview');
   const locale = useLocale() as Locale;
   const event = book.event;
-  const copy =
-    INVITATION_TONE_COPY[book.language][event?.tone ?? 'fun'];
+  const copy = INVITATION_TONE_COPY[book.language][event?.tone ?? 'fun'];
   const date = event?.date
     ? new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(
         new Date(`${event.date}T00:00:00Z`),
@@ -48,7 +47,11 @@ export function InvitationPreview({
     <figure className="m-0 overflow-hidden rounded-2xl border bg-peach shadow-[var(--shadow-card)]">
       {imageUrl && (
         // eslint-disable-next-line @next/next/no-img-element -- imagen firmada de la muestra
-        <img src={imageUrl} alt="" className="block aspect-[4/5] w-full bg-card object-cover object-top" />
+        <img
+          src={imageUrl}
+          alt=""
+          className="block aspect-[4/5] w-full bg-card object-cover object-top"
+        />
       )}
       <figcaption className="grid gap-1 p-5 text-center">
         <p className="font-display text-2xl leading-tight font-semibold">
