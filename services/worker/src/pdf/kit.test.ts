@@ -81,7 +81,7 @@ describe('invitación para WhatsApp', () => {
     expect(INVITATION_IMAGE_SIZE).toEqual({ width: 1080, height: 1350 });
     const html = invitationImageHtml(book('birthday'));
     expect(html).toContain('¡Sofi cumple 6!');
-    expect(html).toContain('Casa de la abuela');
+    expect(html).toContain('Casa de la Abuela');
     expect(html).toContain('Hecho con StoryNido');
     expect(invitationImageHtml({ ...book('birthday'), signature: false })).not.toContain(
       'Hecho con StoryNido',
@@ -130,12 +130,61 @@ describe('tarjeta para imprimir', () => {
     // 127×178 mm más 3 mm de sangrado por lado.
     expect(doc.size).toEqual({ width: 133, height: 184 });
     expect(doc.html).toContain('¡Sofi cumple 6!');
-    expect(doc.html).toContain('Casa de la abuela');
+    expect(doc.html).toContain('Casa de la Abuela');
   });
 
   it('sin marcas de corte ni leyenda de licencia: la imprenta corta sola', () => {
     const html = kitCardPrintDocument(book('birthday'), 'thank_you').html;
     expect(html).not.toContain('class="marks"');
     expect(html).not.toContain('Licencia StoryNido');
+  });
+});
+
+describe('actividades por edad', () => {
+  const withAge = (turningAge: number): KitBook => ({
+    ...book('birthday'),
+    turningAge,
+    storyWords: ['PLANETA', 'COHETE', 'ESTRELLA', 'GALAXIA', 'SOFI', 'ASTRONAUTA'],
+  });
+
+  it('a los 4 años, laberinto chico, unir puntos y dibujar', () => {
+    const doc = kitPieceDocument(withAge(4), 'activities', 20);
+    expect(doc.pages).toBe(3);
+    expect(doc.html).toContain('Une los puntos del 1 al 10');
+    expect(doc.html).not.toContain('Sopa de letras');
+  });
+
+  it('a los 8 años hay sopa de letras con palabras del cuento, mensaje secreto y soluciones', () => {
+    const doc = kitPieceDocument(withAge(8), 'activities', 20);
+    expect(doc.pages).toBe(5);
+    expect(doc.html).toContain('Sopa de letras del cuento');
+    expect(doc.html).toContain('ASTRONAUTA');
+    expect(doc.html).toContain('Mensaje secreto');
+    expect(doc.html).toContain('Soluciones para los adultos');
+    expect(doc.html).not.toContain('Une cada palabra con su dibujo');
+  });
+
+  it('a los 10 años el laberinto y la sopa son más grandes', () => {
+    const small = kitPieceDocument(withAge(8), 'activities', 20).html.length;
+    expect(kitPieceDocument(withAge(10), 'activities', 20).html.length).toBeGreaterThan(small);
+  });
+});
+
+describe('datos de la familia', () => {
+  it('el lugar y los invitados salen con mayúsculas', () => {
+    const input: KitBook = {
+      ...book('birthday'),
+      invitation: { time: '16:00', place: 'casa de pepe Elortondo 2126' },
+      guests: ['juan perez'],
+    };
+    expect(kitPieceDocument(input, 'invitation', 20).html).toContain('Casa de Pepe Elortondo 2126');
+    expect(kitPieceDocument(input, 'favor_tags', 20).html).toContain('Juan Perez');
+  });
+
+  it('las etiquetas y los stickers rotan las ilustraciones del cuento', () => {
+    const input: KitBook = { ...book('birthday'), pictures: ['data:image/png;base64,BBBB'] };
+    const html = kitPieceDocument(input, 'stickers', 20).html;
+    expect(html).toContain('BBBB');
+    expect(html).toContain('AAAA');
   });
 });

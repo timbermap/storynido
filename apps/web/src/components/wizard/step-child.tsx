@@ -8,6 +8,7 @@ import { CHILD_LIMITS, EMPTY_BIRTHDAY, turningAgeFor, type Child } from '@storyn
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
+import { suggestAccent } from '@/lib/name-accent';
 import { takeReuseCharacter } from '@/lib/reuse-character';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import {
@@ -250,6 +251,20 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
             {isPro && (
               <p id="alias-hint" className="text-sm text-muted-foreground">
                 {t('pro.aliasHint')}
+              </p>
+            )}
+            {!isPro && suggestAccent(name) && (
+              <p className="text-sm text-muted-foreground">
+                {t('accentHint', { name: suggestAccent(name) ?? '' })}{' '}
+                <button
+                  type="button"
+                  className="font-semibold text-primary hover:underline"
+                  onClick={() => {
+                    setName(suggestAccent(name) ?? name);
+                  }}
+                >
+                  {t('accentUse', { name: suggestAccent(name) ?? '' })}
+                </button>
               </p>
             )}
             {nameError && (

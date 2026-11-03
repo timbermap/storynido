@@ -138,6 +138,8 @@ export function KitCheckout({
       ? { time: time.trim() || null, place: place.trim() || null }
       : null,
   };
+  // La hora y el lugar van impresos en la invitación: sin ellos queda una línea vacía.
+  const invitationIncomplete = pieces.has('invitation') && (!time.trim() || !place.trim());
   const kitKey = JSON.stringify(kit);
 
   useEffect(() => {
@@ -304,6 +306,7 @@ export function KitCheckout({
                 <span className="font-semibold">{tKit('time')}</span>
                 <input
                   id="kit-time"
+                  required
                   value={time}
                   maxLength={KIT_LIMITS.timeMaxLength}
                   placeholder="16:00"
@@ -317,6 +320,7 @@ export function KitCheckout({
                 <span className="font-semibold">{tKit('place')}</span>
                 <input
                   id="kit-place"
+                  required
                   value={place}
                   maxLength={KIT_LIMITS.placeMaxLength}
                   onChange={(event) => {
@@ -413,7 +417,10 @@ export function KitCheckout({
             {error}
           </p>
         )}
-        <Button size="lg" disabled={!quote || paying} onClick={() => void pay()}>
+        {invitationIncomplete && (
+          <p className="text-sm font-semibold text-destructive">{tKit('invitationRequired')}</p>
+        )}
+        <Button size="lg" disabled={!quote || paying || invitationIncomplete} onClick={() => void pay()}>
           {paying ? (
             <Loader2 className="animate-spin" aria-hidden="true" />
           ) : (

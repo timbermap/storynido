@@ -1,5 +1,5 @@
 /** Generador determinístico (misma semilla, mismo laberinto) para las páginas de actividades. */
-function random(seed: number) {
+export function random(seed: number) {
   let state = seed >>> 0 || 1;
   return () => {
     state = (state * 1664525 + 1013904223) >>> 0;

@@ -59,6 +59,7 @@ import {
   kitPieceDocument,
   type KitBook,
 } from '../pdf/kit';
+import { storyWords } from '../pdf/puzzles';
 import { launchBrowser, renderPdf, renderPng } from '../pdf/render';
 import { textPlacements } from '../pdf/placement';
 import { FORMAT_SPECS, pageSizeMm, printablePages, type FormatSpec } from '../pdf/spec';
@@ -990,6 +991,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     // Eventos: las piezas del kit salen de la portada aprobada del librito (sin IA).
     const kit = await kitOf(ctx.order.id);
     let kitCover: string | null = null;
+    let kitPictures: string[] = [];
     const browser = await launchBrowser();
     try {
       for (const format of formats) {
@@ -1065,7 +1067,13 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           fillerPages,
           qr,
         };
-        if (format === 'digital') kitCover = layout.cover;
+        if (format === 'digital') {
+          kitCover = layout.cover;
+          // Para variar las piezas: unas pocas páginas repartidas por el cuento.
+          const images = layout.pages.map((page) => page.image).filter(Boolean);
+          const step = Math.max(1, Math.floor(images.length / 5));
+          kitPictures = images.filter((_, index) => index % step === 0).slice(0, 5);
+        }
         const interiorCount = interiorPages(layout, spec).length;
         if (format !== 'digital') {
           // En el grapado las tapas son páginas del mismo archivo.
@@ -1231,6 +1239,13 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           paper: kit.paper,
           guests: kit.guests,
           signature: kit.signature,
+          pictures: kitPictures,
+          storyWords: storyWords(
+            snapshot.pages.map((page) => page.text),
+            snapshot.childName,
+            8,
+            14,
+          ),
         };
         for (const { piece, copies } of kit.pieces) {
           if (piece === 'mini_book') continue;
