@@ -159,9 +159,17 @@ export function NextCard({
           {model.cta}
           <ArrowRight className="size-5" aria-hidden="true" />
         </Link>
-        {model.fine && <p className="text-sm text-muted-foreground">{model.fine}</p>}
-        {familiesBook && christmas}
+        {/* El ancho de la columna lo da solo el botón: lo de abajo se ajusta a él y no la ensancha. */}
+        {model.fine && (
+          <p className="text-sm text-muted-foreground sm:w-0 sm:min-w-full sm:text-right">
+            {model.fine}
+          </p>
+        )}
       </div>
+      {/* Navidad en su propia fila, a lo ancho del texto y del botón (una línea larga no aprieta el título). */}
+      {familiesBook && christmas && (
+        <div className="col-span-full min-w-0 empty:hidden sm:col-start-2">{christmas}</div>
+      )}
     </section>
   );
 }
