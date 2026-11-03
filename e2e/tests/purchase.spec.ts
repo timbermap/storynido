@@ -96,7 +96,8 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
 
   await heading(page, 'Elige la aventura');
   await page.locator('label', { hasText: 'La gran aventura espacial' }).click();
-  await page.locator('label', { hasText: 'Corto' }).click();
+  // «¿Cómo lo van a leer?»: para 5 años, el formato corto es «Para mirar y contar» (16 páginas).
+  await page.locator('label', { hasText: 'Para mirar y contar' }).click();
   await page.locator('summary', { hasText: 'Ajustar la lectura' }).click();
   await page.locator('label', { hasText: 'Más lectura' }).click();
   await next(page);
