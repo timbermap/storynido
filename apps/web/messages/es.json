@@ -555,6 +555,7 @@
       "library": {
         "summary": "{books, plural, one {# libro} other {# libros}} · {characters, plural, one {# personaje} other {# personajes}}",
         "nextLabel": "Lo próximo",
+        "orderLabel": "Tu pedido",
         "eta": "Llega entre el {from} y el {to}.",
         "next": {
           "preview": {
