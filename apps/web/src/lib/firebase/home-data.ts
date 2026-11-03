@@ -5,6 +5,7 @@ import { COLLECTIONS } from '@storynido/shared';
 
 import { api } from '@/lib/api';
 import type { HomeBook, HomeChannel, HomeOrder, HomeProject } from '@/lib/home-state';
+import { addBusinessDays } from '@/lib/order-state';
 
 import { isEmptyDraft, listDrafts, listProjects } from './drafts';
 
@@ -108,7 +109,6 @@ export async function loadHomeData(db: Firestore, uid: string): Promise<HomeData
       const items = (order.get('items') as { format: string }[] | undefined) ?? [];
       const shipping = order.get('priceSnapshot.shipping') as
         { etaDaysMin?: number; etaDaysMax?: number; pending?: boolean } | undefined;
-      const day = 24 * 60 * 60 * 1000;
       const hasEta =
         shipping !== undefined &&
         shipping.pending !== true &&
@@ -130,8 +130,8 @@ export async function loadHomeData(db: Firestore, uid: string): Promise<HomeData
         status: order.get('status') as string,
         print: items.some((item) => item.format !== 'digital' && item.format !== 'card'),
         createdAt: created,
-        etaFrom: hasEta ? created + (shipping.etaDaysMin ?? 0) * day : null,
-        etaTo: hasEta ? created + (shipping.etaDaysMax ?? 0) * day : null,
+        etaFrom: hasEta ? addBusinessDays(created, shipping.etaDaysMin ?? 0) : null,
+        etaTo: hasEta ? addBusinessDays(created, shipping.etaDaysMax ?? 0) : null,
       };
     }),
   );

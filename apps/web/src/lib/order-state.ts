@@ -29,3 +29,18 @@ export function isOrderInProgress(order: OrderLike): boolean {
 export function isOrderDone(order: OrderLike): boolean {
   return order.status === 'delivered' || (order.status === 'ready' && !isPrintOrder(order.items));
 }
+
+/**
+ * La fecha a la que se llega sumando días hábiles (lunes a viernes): el envío se cotiza así
+ * («llega en 14 a 23 días hábiles»), no en días corridos.
+ */
+export function addBusinessDays(from: number, days: number): number {
+  const date = new Date(from);
+  let left = days;
+  while (left > 0) {
+    date.setDate(date.getDate() + 1);
+    const weekday = date.getDay();
+    if (weekday !== 0 && weekday !== 6) left -= 1;
+  }
+  return date.getTime();
+}

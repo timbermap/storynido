@@ -5,6 +5,7 @@ import { COLLECTIONS } from '@storynido/shared';
 
 import type { HomeBook, HomeOrder } from '@/lib/home-state';
 import type { LibraryOrder } from '@/lib/library';
+import { addBusinessDays } from '@/lib/order-state';
 
 import { listChildren, type ChildSummary } from './account';
 import { isEmptyDraft, listDrafts } from './drafts';
@@ -14,7 +15,6 @@ type Timestampish = { toDate(): Date } | null | undefined;
 
 /** Pedidos con portada generada (los demás usan la de su historia del catálogo). */
 const COVERS = 12;
-const DAY = 24 * 60 * 60 * 1000;
 
 export interface LibraryData {
   books: HomeBook[];
@@ -108,8 +108,8 @@ export async function loadLibraryData(db: Firestore, uid: string): Promise<Libra
           status: order.get('status') as string,
           print: items.some((item) => item.format !== 'digital' && item.format !== 'card'),
           createdAt: created,
-          etaFrom: hasEta ? created + (shipping.etaDaysMin ?? 0) * DAY : null,
-          etaTo: hasEta ? created + (shipping.etaDaysMax ?? 0) * DAY : null,
+          etaFrom: hasEta ? addBusinessDays(created, shipping.etaDaysMin ?? 0) : null,
+          etaTo: hasEta ? addBusinessDays(created, shipping.etaDaysMax ?? 0) : null,
         };
         return { ...base, items };
       }),
