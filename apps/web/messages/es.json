@@ -1646,6 +1646,13 @@
       "invitationNote": "La fecha sale de los datos de la celebración. La hora y el lugar van en la invitación, por eso son obligatorios.",
       "invitationRequired": "Completa la hora y el lugar para pagar: van en la invitación.",
       "license": "La licencia autoriza {copies} copias de cada pieza para la celebración.",
+      "printGuide": {
+        "title": "Cómo imprimir tu kit",
+        "tip1": "Papel: A4 o Carta, el que elegiste. Para la invitación y el agradecimiento, mejor cartulina de 200 a 250 g.",
+        "tip2": "Al imprimir elige «tamaño real» o «100 %». Si el programa ajusta la hoja, las marcas de corte se corren.",
+        "tip3": "Corta siguiendo las marcas. Los stickers y las etiquetas se pueden imprimir en papel autoadhesivo.",
+        "tip4": "La imagen de la invitación para WhatsApp es un PNG: guárdala en el celular y envíala como foto."
+      },
       "downloadAll": "Descargar todo (ZIP)",
       "moreCopies": "Pedir más copias",
       "ready": "¡Tu kit está listo!",

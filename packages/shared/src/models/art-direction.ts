@@ -107,7 +107,14 @@ const DEFAULT_MEDIUM =
  * profesional).
  */
 const ONE_PROTAGONIST =
-  'The main character appears exactly once in each image. Every other child or adult is a different person: different face, hair color and hairstyle, and different clothes; nobody in the background wears the main character\'s outfit or looks like a twin or clone.';
+  "The main character appears exactly once in each image. Every other child or adult is a different person: different face, hair color and hairstyle, and different clothes; nobody in the background wears the main character's outfit or looks like a twin or clone.";
+
+/**
+ * La maquetación pone el texto en la región más calma de cada página: la imagen tiene que dejarle
+ * lugar. Sin esto, el panel de texto tapaba caras (informe de Profesionales).
+ */
+const TEXT_ZONE =
+  'Compose for a printed page with text: keep every face and the main action inside the middle band of the image, and leave the bottom third (or the top third) as plain, calm background such as sky, wall, floor or grass, with no heads or faces in it.';
 
 export function artDirection(input: {
   age: number;
@@ -133,6 +140,7 @@ export function artDirection(input: {
     threeD ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     ONE_PROTAGONIST,
+    TEXT_ZONE,
     `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, a second copy, twin or look-alike of the main character anywhere in the image, any text, title, letters or signs in the image, clothing that does not suit the activity, place or weather, clothing that changes for no reason between consecutive scenes, and any change of style between pages.`,
   ]
     .filter(Boolean)

@@ -2416,3 +2416,17 @@ Mismas 4 etapas y mismos componentes que Familias y Celebraciones (DECISIONS 223
 - **Objetivos:** el objetivo sale de los temas de la colección, pero el servidor solo aceptaba los de la historia cuando esta tenía propios, así que se habría descartado sin aviso. `storyGoalOptions` acepta ambos. Siguen siendo textos del catálogo: no entra texto libre al prompt.
 - **No se agrega** pregunta de disciplina ni ficha para el adulto. Enseñanzas, recuerdos y dedicatoria salen de esta línea.
 - **Borradores existentes:** retoman en `focus`. **Hay que desplegar las reglas de Firestore junto con la web** (`focus` y `reading` son pasos nuevos) y la API (`storyGoalOptions`).
+
+## 225 — Calidad antes de salir: control de clones, secundarios distinguibles, zona de texto y créditos
+
+Dos evaluaciones del 2026-11-03 (kit de Celebraciones y cuento de Profesionales) repiten los mismos defectos. Antes del live se corrige lo que se arregla con instrucciones y sin tocar el pipeline:
+
+- **Revisor de páginas:** un clon o gemelo del protagonista en el fondo, o un niño que ocupa su lugar, es `repair` (se regenera la ilustración), no `human_review`. Revisión humana queda para contenido inapropiado, datos sensibles o problemas del texto. Antes, una portada con un clon quedaba trabada en revisión manual.
+- **Dirección de arte:** el protagonista aparece una vez por imagen; los demás son otras personas (otra cara, otro pelo, otra ropa). Se compone con las caras en la franja central y el tercio inferior (o superior) liso, que es donde la maquetación pone el texto (`textPlacements` elige la región más calma, pero no sabe dónde están las caras).
+- **Planificador:** los secundarios se distinguen por silueta (pelo, piel o contextura, y un color de ropa propio que el protagonista no usa) y no se intercambian la ropa; un solo lugar u objeto central con un solo nombre y un solo aspecto, y una sola metáfora por libro.
+- **Texto (Profesionales):** la emoción se nombra con una palabra y una señal del cuerpo; un adulto valida y acompaña; las técnicas llevan conteo y estribillo; el refugio es un lugar al que se va para volver; sin «mágicamente». Para todas las líneas: cada objeto importante se llama siempre igual.
+- **Créditos:** la página final de todos los libros dice que texto e ilustraciones se crearon con ayuda de inteligencia artificial y revisadas por StoryNido, el © y la licencia de uso personal sin reventa.
+- **Kit de Celebraciones:** actividades por edad con palabras del cuento (DECISIONS anteriores del kit), datos de la familia ordenados, hora y lugar obligatorios, y una guía de «cómo imprimir» en el pedido terminado.
+- **Mis cuentos:** dos bloques, En curso y Terminados, igual para las tres líneas.
+
+**Queda para después del live** (docs/PENDIENTES.md, sección H): guía para el adulto y fichas de Profesionales, libro de 24 páginas, formatos de imprenta (21×21, CMYK, PDF/X), 300 ppi y sangrado de 3 mm si el impreso no sale el 16, varias invitaciones por hoja y versión plegable, hojas de personaje para secundarios y objetos, dialecto por país, suscripción y referidos, catálogo de 12 temas.

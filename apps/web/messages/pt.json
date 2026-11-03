@@ -1646,6 +1646,13 @@
       "invitationNote": "A data vem dos dados da celebração. O horário e o local vão no convite, por isso são obrigatórios.",
       "invitationRequired": "Preencha o horário e o local para pagar: eles vão no convite.",
       "license": "A licença autoriza {copies} cópias de cada peça para a celebração.",
+      "printGuide": {
+        "title": "Como imprimir o seu kit",
+        "tip1": "Papel: A4 ou Carta, o que você escolheu. Para o convite e o agradecimento, cartolina de 200 a 250 g é o ideal.",
+        "tip2": "Ao imprimir escolha «tamanho real» ou «100%». Se o programa ajustar a folha, as marcas de corte saem do lugar.",
+        "tip3": "Corte seguindo as marcas. Os adesivos e as etiquetas podem ser impressos em papel adesivo.",
+        "tip4": "A imagem do convite para WhatsApp é um PNG: salve no celular e envie como foto."
+      },
       "downloadAll": "Baixar tudo (ZIP)",
       "moreCopies": "Pedir mais cópias",
       "ready": "Seu kit está pronto!",

@@ -54,6 +54,8 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     madeFor: 'Un cuento de StoryNido creado para {name}',
     notice:
       'Material educativo creado con StoryNido. No reemplaza ni constituye una intervención profesional o clínica.',
+    credits:
+      'Texto e ilustraciones creados con ayuda de inteligencia artificial y revisados por StoryNido. © {year} StoryNido. Edición personalizada para uso personal; no se permite su reventa.',
     storyFor: 'Un cuento para {name}',
     activity: 'Actividad',
     drawings: 'Mis dibujos',
@@ -67,6 +69,8 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     madeFor: 'A StoryNido story made for {name}',
     notice:
       'Educational material made with StoryNido. It does not replace or constitute a professional or clinical intervention.',
+    credits:
+      'Text and illustrations created with the help of artificial intelligence and reviewed by StoryNido. © {year} StoryNido. Personalized edition for personal use; resale is not permitted.',
     storyFor: 'A story for {name}',
     activity: 'Activity',
     drawings: 'My drawings',
@@ -80,6 +84,8 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     madeFor: 'Uma história StoryNido criada para {name}',
     notice:
       'Material educativo criado com o StoryNido. Não substitui nem constitui uma intervenção profissional ou clínica.',
+    credits:
+      'Texto e ilustrações criados com ajuda de inteligência artificial e revisados pelo StoryNido. © {year} StoryNido. Edição personalizada para uso pessoal; a revenda não é permitida.',
     storyFor: 'Uma história para {name}',
     activity: 'Atividade',
     drawings: 'Meus desenhos',
@@ -93,8 +99,12 @@ export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => `&#${String(char.charCodeAt(0))};`);
 }
 
-function text(book: LayoutBook, key: string): string {
-  return (STRINGS[book.language][key] ?? key).replace('{name}', book.childName);
+function text(book: LayoutBook, key: string, extra: Record<string, string | number> = {}): string {
+  let value = (STRINGS[book.language][key] ?? key).replace('{name}', book.childName);
+  for (const [name, replacement] of Object.entries(extra)) {
+    value = value.replaceAll(`{${name}}`, String(replacement));
+  }
+  return value;
 }
 
 const paragraphs = (value: string) =>
@@ -273,7 +283,7 @@ export function interiorPages(book: LayoutBook, spec: FormatSpec): string[] {
     ...book.pages.map((page, index) => storyPage(book, spec, page, index + 1)),
     ...book.activities.map((activity, index) => activityPage(book, activity, index)),
     ...Array.from({ length: book.fillerPages ?? 0 }, () => drawingPage(book)),
-    `<section class="page" data-label="fin"><div class="center" style="gap:6mm"><p style="font-family:'Fraunces',serif;font-weight:600;font-size:40pt">${escapeHtml(text(book, 'end'))}</p><p style="font-size:11pt;color:#69616c">${escapeHtml(text(book, 'madeFor'))}</p>${book.educationalNotice ? `<p class="notice" style="margin-top:10mm;max-width:130mm;font-size:9pt;line-height:1.4;color:#69616c">${escapeHtml(text(book, 'notice'))}</p>` : ''}</div></section>`,
+    `<section class="page" data-label="fin"><div class="center" style="gap:6mm"><p style="font-family:'Fraunces',serif;font-weight:600;font-size:40pt">${escapeHtml(text(book, 'end'))}</p><p style="font-size:11pt;color:#69616c">${escapeHtml(text(book, 'madeFor'))}</p>${book.educationalNotice ? `<p class="notice" style="margin-top:10mm;max-width:130mm;font-size:9pt;line-height:1.4;color:#69616c">${escapeHtml(text(book, 'notice'))}</p>` : ''}<p class="credits" style="margin-top:${book.educationalNotice ? '4mm' : '10mm'};max-width:130mm;font-size:8pt;line-height:1.4;color:#69616c">${escapeHtml(text(book, 'credits', { year: new Date().getFullYear() }))}</p></div></section>`,
   ];
 }
 

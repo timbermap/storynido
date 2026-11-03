@@ -34,4 +34,10 @@ describe('dirección de arte de los libros', () => {
     const watercolor = artDirection({ age: 6, channel: 'families', style: 'acuarela' });
     expect(watercolor).toContain('gouache');
   });
+
+  it('deja lugar para el texto y dibuja al protagonista una sola vez', () => {
+    const direction = artDirection({ age: 6, channel: 'professionals' });
+    expect(direction).toContain('bottom third (or the top third)');
+    expect(direction).toContain('appears exactly once');
+  });
 });

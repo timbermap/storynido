@@ -1646,6 +1646,13 @@
       "invitationNote": "The date comes from the celebration details. The time and place go on the invitation, so they are required.",
       "invitationRequired": "Add the time and place to pay: they go on the invitation.",
       "license": "The license allows {copies} copies of each piece for the celebration.",
+      "printGuide": {
+        "title": "How to print your kit",
+        "tip1": "Paper: A4 or Letter, whichever you chose. For the invitation and the thank-you card, 200 to 250 gsm card stock works best.",
+        "tip2": "When printing choose “actual size” or “100%”. If the program fits the page, the crop marks move.",
+        "tip3": "Cut along the marks. Stickers and tags can be printed on self-adhesive paper.",
+        "tip4": "The WhatsApp invitation is a PNG image: save it to your phone and send it as a photo."
+      },
       "downloadAll": "Download everything (ZIP)",
       "moreCopies": "Order more copies",
       "ready": "Your kit is ready!",

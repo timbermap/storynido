@@ -574,6 +574,11 @@ cast: every OTHER person who appears in two or more scenes (a teacher, a classma
 look in English (age, hair, clothes and colors). Take the gender from the brief and the story (for example "el profe" or "he" means male,
 "la profe" means female); use unspecified only when nothing says it. In mustBeVisible, always name these people with that gender
 ("the male teacher") so every scene agrees. Empty array if nobody else recurs.
+Recurring characters must be told apart at a glance, even in silhouette: every companion and cast member differs from the protagonist
+in hair color and style, skin tone or build, and has a signature outfit color the protagonist never wears; two characters never swap
+outfits. One central place or object that recurs (a shelter, a ship, a lantern) is described once in continuityFacts with a fixed
+look, is always called by the same name, and is drawn the same way in every scene; use a single central metaphor for the whole book,
+never several.
 
 Brief:
 ${request.prompt}`,
