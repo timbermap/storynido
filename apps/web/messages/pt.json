@@ -1669,124 +1669,126 @@
     "status": "Página {page} de {pages}"
   },
   "HomeSession": {
-    "new": {
-      "title": "A história dele começa com o nome",
-      "sub": "Digite e veja como fica. A prévia é grátis.",
-      "cta": "Criar a prévia",
-      "namePlaceholder": "Nome do protagonista",
-      "nameLabel": "Nome do protagonista",
-      "example": "Por exemplo: {title}"
+    "hello": "Olá, {name}",
+    "titleResume": "Continue de onde parou",
+    "titleNew": "O que você quer criar hoje?",
+    "titlePro": "Seus projetos",
+    "nextLabel": "O próximo passo",
+    "events": {
+      "draft": {
+        "title": "Falta pouco para o kit da festa de {name}",
+        "titleNoName": "Falta pouco para o kit da festa",
+        "sub": "Continue de onde parou: o que você já respondeu está salvo.",
+        "cta": "Continuar o kit"
+      },
+      "generating": {
+        "title": "Estamos desenhando {name} para a festa",
+        "titleNoName": "Estamos desenhando o seu personagem para a festa",
+        "sub": "Leva alguns minutos. Você pode fechar esta tela: avisamos por e-mail.",
+        "cta": "Ver minhas histórias"
+      },
+      "character": {
+        "title": "É assim o {name} para a festa?",
+        "titleNoName": "É assim o seu personagem para a festa?",
+        "sub": "Confirme o personagem para ver o kit da festa.",
+        "cta": "Revisar o personagem"
+      },
+      "preview": {
+        "title": "O kit da festa de {name} está pronto",
+        "titleNoName": "O kit da festa está pronto",
+        "sub": "Veja o convite, a decoração e a história antes de pagar.",
+        "cta": "Ver o kit"
+      }
+    },
+    "create": {
+      "title": "Criar algo novo",
+      "families": {
+        "title": "Uma história com o nome dele",
+        "cta": "Criar uma prévia grátis",
+        "link": "Criar uma história",
+        "fine": "Prévia grátis"
+      },
+      "events": {
+        "title": "A festa, com o personagem",
+        "cta": "Montar meu kit",
+        "link": "Montar um kit",
+        "fine": "Amostra grátis"
+      },
+      "professionals": {
+        "title": "Uma história para cada criança que você acompanha",
+        "cta": "Criar um projeto",
+        "link": "Criar um projeto",
+        "fine": "Amostra grátis"
+      },
+      "birthday": {
+        "title": "O livro do aniversariante",
+        "link": "Dar o livro de presente"
+      }
+    },
+    "list": {
+      "title": "Seus projetos",
+      "titlePro": "Projetos por criança",
+      "all": "Ver todos",
+      "continue": "Continuar",
+      "order": "Ver pedido",
+      "storyOf": "A história de {name}",
+      "untitled": "História sem terminar",
+      "kitOf": "Kit da festa de {name}",
+      "kitUntitled": "Kit da festa",
+      "status": {
+        "draft": "Rascunho",
+        "generating": "Desenhando",
+        "character": "Personagem para aprovar",
+        "preview": "Prévia pronta",
+        "kitPreview": "Kit pronto",
+        "preparing": "Pedido em preparação",
+        "shipped": "A caminho",
+        "bought": "Comprado"
+      }
+    },
+    "trust": {
+      "preview": "Prévia grátis antes de pagar",
+      "photos": "Fotos apagadas após 30 dias",
+      "noPhotos": "Também dá para fazer sem fotos"
     },
     "draft": {
-      "pill": "Rascunho",
       "title": "Falta pouco para ver {name} na história",
       "titleNoName": "Falta pouco para ver a história",
       "sub": "Continue de onde parou: o que você já respondeu está salvo.",
       "cta": "Continuar minha história"
     },
     "generating": {
-      "pill": "Desenhando",
       "title": "Estamos desenhando {name}",
       "titleNoName": "Estamos desenhando o seu personagem",
       "sub": "Leva alguns minutos. Você pode fechar esta tela: avisamos por e-mail.",
-      "cta": "Ver minhas histórias",
-      "step1": "Os dados e a aventura",
-      "step2": "O personagem ilustrado",
-      "step3": "Capa e 2 páginas",
-      "tag": "Personagem de exemplo"
+      "cta": "Ver minhas histórias"
     },
     "character": {
-      "pill": "Falta um passo",
       "title": "É assim o {name}?",
       "titleNoName": "É assim o seu personagem?",
       "sub": "Confirme o personagem para ver a capa e as primeiras páginas.",
       "cta": "Revisar o personagem"
     },
     "preview": {
-      "pill": "Sua prévia está pronta",
       "title": "O livro de {name} está pronto para terminar",
       "titleNoName": "Seu livro está pronto para terminar",
       "sub": "Já ilustramos a capa e as primeiras páginas.",
       "cta": "Ver o livro de {name}",
       "ctaNoName": "Ver meu livro",
-      "price": "Digital a partir de {price}",
-      "pages": "{count} páginas"
+      "price": "Digital a partir de {price}"
     },
     "orderPreparing": {
-      "pill": "Pedido em andamento",
       "title": "Estamos preparando o livro de {name}",
       "titleNoName": "Estamos preparando o seu livro",
       "sub": "Avisamos por e-mail quando sair.",
       "cta": "Ver meu pedido"
     },
     "orderShipped": {
-      "pill": "Pedido a caminho",
       "title": "O livro de {name} está a caminho",
       "titleNoName": "Seu livro está a caminho",
       "sub": "Você pode acompanhar o envio pelo pedido.",
       "subWithDate": "Chega entre {from} e {to}.",
       "cta": "Ver meu pedido"
-    },
-    "bought": {
-      "pill": "Obrigado pela compra",
-      "title": "Qual aventura vem agora para {name}?",
-      "titleNoName": "Qual aventura vem agora?",
-      "sub": "Escolha outra história com o mesmo personagem.",
-      "cta": "Criar outra aventura",
-      "fine": "Sem precisar preencher os dados de novo.",
-      "tag": "O personagem de {name}"
-    },
-    "pro": {
-      "pill": "Profissionais",
-      "title": "Seus projetos estão esperando",
-      "sub": "Continue um projeto ou repita uma configuração.",
-      "cta": "Ver meus projetos"
-    },
-    "rail": {
-      "title": "Mais aventuras para {name}",
-      "titleNoName": "Histórias para começar",
-      "all": "Ver as {count} histórias",
-      "from": "a partir de {price}"
-    },
-    "formats": {
-      "title": "Um livro de verdade, para guardar",
-      "hardcover": "Capa dura",
-      "hardcoverText": "Para presentear e guardar por anos",
-      "softcover": "Capa mole",
-      "softcoverText": "Leve, para levar para todo lado",
-      "digital": "Digital (PDF)",
-      "digitalText": "Para ler na hora, em qualquer tela",
-      "plusShipping": "{price} + frete",
-      "from": "a partir de {price}",
-      "note": "Preços de um livro de {pages} páginas.",
-      "estimate": "Frete estimado para o seu país: cerca de {price}.",
-      "photoAlt": "Livro impresso de capa dura sobre uma mesa"
-    },
-    "how": {
-      "title": "O que vem depois",
-      "step1": "1. Você confirma o personagem",
-      "step1Text": "Com foto ou escolhendo os traços.",
-      "step2": "2. Vê a capa e 2 páginas",
-      "step2Text": "Grátis, e você pode editar o texto.",
-      "step3": "3. Escolhe como receber",
-      "step3Text": "Você só paga se gostar.",
-      "alt1": "Personagem ilustrado de exemplo",
-      "alt2": "Capa de exemplo",
-      "alt3": "Livro impresso"
-    },
-    "faq": {
-      "title": "Antes de decidir",
-      "all": "Ver todas as perguntas",
-      "q1": "Quanto tempo leva para chegar?",
-      "a1": "Antes de pagar você vê a data estimada para o seu endereço. Se precisar para um dia específico, pode indicar no pedido e avisamos se chega.",
-      "q2": "O que acontece com as fotos?",
-      "a2": "São apagadas em 30 dias e nunca são usadas para treinar modelos de inteligência artificial. Você também pode criar o personagem sem fotos, escolhendo os traços.",
-      "q3": "E se eu não gostar?",
-      "a3": "Você vê a prévia antes de pagar e pode mudar o texto e as ilustrações. Depois de enviado para a gráfica não há devolução por arrependimento; se chegar danificado, reimprimimos ou devolvemos o dinheiro."
-    },
-    "sticky": {
-      "preview": "Seu livro está pronto",
-      "other": "Sua história está esperando"
     },
     "loading": "Carregando suas histórias…",
     "coverAlt": "Capa de exemplo: {title}"
