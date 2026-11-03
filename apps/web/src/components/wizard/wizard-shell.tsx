@@ -77,6 +77,9 @@ export function WizardShell({
         })
       : null;
 
+  // Dónde se cambia lo elegido: Profesionales elige su cuento base junto con el objetivo.
+  const choiceStep = flow.includes('story') ? 'story' : flow.includes('focus') ? 'focus' : null;
+
   // Al cambiar de paso, el foco va al título (lectores de pantalla y teclado).
   useEffect(() => {
     headingRef.current?.focus();
@@ -116,14 +119,14 @@ export function WizardShell({
               {t('choiceLesson', { name: choice.lesson })}
             </span>
           )}
-          {flow.includes('story') &&
-            flow.indexOf('story') <= reached &&
-            current !== 'story' &&
+          {choiceStep &&
+            flow.indexOf(choiceStep) <= reached &&
+            current !== choiceStep &&
             current !== 'lesson' && (
               <button
                 type="button"
                 onClick={() => {
-                  onJump('story');
+                  onJump(choiceStep);
                 }}
                 className="inline-flex min-h-9 items-center px-2 text-xs font-semibold text-primary underline-offset-4 hover:underline"
               >

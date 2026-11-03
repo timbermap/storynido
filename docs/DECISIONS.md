@@ -2402,3 +2402,15 @@ El creador de Celebraciones era el formulario de Familias con otro nombre y no r
 - **Tono:** los textos viven en `INVITATION_TONE_COPY`, usados por la muestra y por el PDF. `fun` es el texto de siempre, así los pedidos anteriores no cambian. Las ocasiones que no son cumpleaños conservan sus textos.
 - **Reglas de Firestore:** `validEvent` aceptaba solo `birthday`, de modo que elegir bautismo, comunión o egreso fallaba al guardar; ahora acepta las 4 ocasiones y los campos nuevos. **Hay que desplegar las reglas junto con la web**, si no el creador no puede guardar `party` ni `kit`.
 - **Borradores existentes:** `party` y `kit` van al final de `WIZARD_STEPS` para no mover el índice histórico; un borrador parado en un paso que Celebraciones ya no tiene retoma en la fiesta. Familias no cambia, salvo los nombres de etapa en español («Personaje», «Aventura», «Vista previa»).
+
+## 224 — Creador de Profesionales: se parte de la situación a trabajar
+
+Mismas 4 etapas y mismos componentes que Familias y Celebraciones (DECISIONS 223), con las preguntas de quien acompaña a varios niños. El objetivo es que el profesional vuelva por cada niño que atiende.
+
+- **Personaje:** un solo alias, que es también el nombre del cuento (antes eran dos campos), edad, foto o rasgos con «Sin foto» recomendado y rasgos opcionales, con el aviso de no cargar diagnósticos. Un proyecto anterior con alias y nombre distintos conserva su nombre mientras no cambie el alias. Con foto sigue la autorización del tutor, sin cambios.
+- **Aventura (paso `focus`):** colección, objetivo principal y cuento base. Los tres son obligatorios.
+- **Ajustes (paso `reading`):** extensión, cantidad de texto y nivel de lectura por separado y a la vista, con lo sugerido para su edad y el aviso de material educativo no clínico. El estilo no se pregunta: sale de la historia. «Repetir configuración» conserva lo copiado.
+- **Vista previa:** el texto editable y la nueva ilustración por página que ya existían, precio profesional de su extensión, una línea sobre el descuento por volumen sin cifras y el aviso no clínico.
+- **Objetivos:** el objetivo sale de los temas de la colección, pero el servidor solo aceptaba los de la historia cuando esta tenía propios, así que se habría descartado sin aviso. `storyGoalOptions` acepta ambos. Siguen siendo textos del catálogo: no entra texto libre al prompt.
+- **No se agrega** pregunta de disciplina ni ficha para el adulto. Enseñanzas, recuerdos y dedicatoria salen de esta línea.
+- **Borradores existentes:** retoman en `focus`. **Hay que desplegar las reglas de Firestore junto con la web** (`focus` y `reading` son pasos nuevos) y la API (`storyGoalOptions`).

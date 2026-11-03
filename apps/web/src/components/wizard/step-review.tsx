@@ -53,6 +53,7 @@ export function StepReview({
   const memories = MEMORY_KEYS.filter((key) => book.memories?.[key]).length;
   const step = (name: WizardStep) => name;
 
+  const isPro = book.channel === 'professionals';
   const event = book.channel === 'events' ? book.event : null;
   const tKit = useTranslations('Wizard.kit');
   const tOccasions = useTranslations('Wizard.child.event.occasions');
@@ -75,7 +76,11 @@ export function StepReview({
     : null;
 
   const rows: { label: string; value: string; step: WizardStep }[] = [
-    { label: t('protagonist'), value: child?.name ?? '—', step: step('child') },
+    {
+      label: isPro ? t('alias') : t('protagonist'),
+      value: (isPro ? child?.alias : null) ?? child?.name ?? '—',
+      step: step('child'),
+    },
     {
       label: t('character'),
       value:
@@ -100,10 +105,11 @@ export function StepReview({
           },
         ]
       : []),
+    ...(isPro ? [{ label: t('goal'), value: book.goal ?? '—', step: step('focus') }] : []),
     {
       label: t('adventure'),
       value: story ? titleForChild(story, child?.name, locale as Locale) : '—',
-      step: step('story'),
+      step: isPro ? step('focus') : step('story'),
     },
     {
       label: t('book'),
@@ -117,7 +123,7 @@ export function StepReview({
       ]
         .filter(Boolean)
         .join(' · '),
-      step: step('story'),
+      step: isPro ? step('reading') : step('story'),
     },
     {
       label: t('memories'),

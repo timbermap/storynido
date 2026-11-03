@@ -576,7 +576,9 @@
       "style": "Estilo",
       "review": "Prévia",
       "party": "Festa",
-      "kit": "O que você leva"
+      "kit": "O que você leva",
+      "focus": "Situação",
+      "reading": "Leitura"
     },
     "progress": "Etapa {current} de {total}",
     "back": "Voltar",
@@ -640,11 +642,14 @@
         "stepSubtitle": "Aparece no convite, na decoração e na história de lembrança."
       },
       "pro": {
-        "alias": "Apelido do projeto",
-        "aliasHint": "Para encontrá-lo na sua conta. Use um apelido (por exemplo, “Sofi, 2º ano”), nunca o sobrenome.",
-        "aliasPlaceholder": "Ex.: Sofi, 2º ano",
-        "storyName": "Nome na história",
-        "dedicationPlaceholder": "Ex.: Para a Sofi, que a cada dia se arrisca um pouco mais."
+        "stepTitle": "Para quem é a história?",
+        "stepSubtitle": "Cada criança é um projeto na sua conta. Nunca pedimos sobrenome nem dados clínicos.",
+        "alias": "Apelido",
+        "aliasHint": "É também o nome do personagem na história. Não use o sobrenome.",
+        "aliasPlaceholder": "Ex.: Mati",
+        "required": "Escreva um apelido para continuar.",
+        "likes": "O que a representa (opcional)",
+        "likesHint": "Gostos e rotinas que ajudam a criança a se reconhecer. Não inclua diagnósticos."
       },
       "reuseTitle": "Para quem é esta história?",
       "reuseNew": "Alguém novo",
@@ -708,12 +713,7 @@
       "customPlaceholder": "Que ele saiba que o vovô o ama muito, mesmo morando longe.",
       "customHint": "{count}/150 caracteres. Revisamos antes de usar.",
       "pickUpTo": "Escolha até {max} ({count}/{max}). Se não escolher nenhuma, a história terá mesmo assim uma mensagem positiva.",
-      "clear": "Limpar seleção",
-      "goal": {
-        "title": "Objetivo geral (opcional)",
-        "hint": "Orienta a história. É um material educativo: não substitui uma intervenção profissional ou clínica.",
-        "none": "Sem objetivo"
-      }
+      "clear": "Limpar seleção"
     },
     "style": {
       "title": "Escolha o estilo de ilustração",
@@ -760,7 +760,9 @@
       "eventEmpty": "Não preenchido",
       "kit": "O que você leva",
       "kitTone": "Tom {tone}",
-      "kitDedication": "Com dedicatória"
+      "kitDedication": "Com dedicatória",
+      "goal": "Objetivo",
+      "alias": "Apelido"
     },
     "preview": {
       "badge": "Amostra da história",
@@ -842,7 +844,11 @@
       "leaveText": "Continuamos trabalhando mesmo que você saia. Avisamos por e-mail quando a amostra estiver pronta. Para retomar: Minhas histórias, “Em andamento”, Continuar.",
       "leaveButton": "Voltar para Minhas histórias",
       "leaveTitle": "Você pode fechar esta tela",
-      "approveAndPay": "Aprovar e pagar"
+      "approveAndPay": "Aprovar e pagar",
+      "proPrice": "História digital: {price}",
+      "proVolume": "Quanto mais histórias você faz, menos paga por cada uma. Sem assinatura.",
+      "proNotice": "É material educativo e de acompanhamento: não é clínico nem substitui o seu critério profissional.",
+      "proDifferencesEdit": "Você pode editar o texto de cada página e mudar de novo a história base ou a foto."
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",
@@ -894,7 +900,8 @@
           "blue": "Azuis",
           "gray": "Cinza"
         }
-      }
+      },
+      "recommended": "Recomendado"
     },
     "memories": {
       "title": "Deixe com a cara dele",
@@ -1132,6 +1139,24 @@
         "shareText": "Estamos preparando a festa de {name}. Se você quiser dar uma história em que seja protagonista, pode criar aqui:"
       },
       "differencesEdit": "Você pode editar os textos e mudar de novo o tema ou a foto."
+    },
+    "focus": {
+      "title": "O que você quer trabalhar?",
+      "subtitle": "Comece pela situação. Cada coleção tem objetivos e histórias prontas para adaptar.",
+      "collection": "Coleção",
+      "goal": "Objetivo principal",
+      "goalHint": "A história gira em torno de um.",
+      "story": "História base",
+      "recommended": "Ideal para a idade",
+      "requiredCollection": "Escolha uma coleção para continuar.",
+      "requiredGoal": "Escolha um objetivo para continuar.",
+      "requiredStory": "Escolha uma história base para continuar."
+    },
+    "reading": {
+      "title": "Como se lê",
+      "subtitle": "Extensão, quantidade de texto e nível de leitura são ajustados separadamente.",
+      "length": "Extensão",
+      "notice": "É material educativo e de acompanhamento: não é clínico nem substitui o seu critério profissional."
     }
   },
   "Landing": {

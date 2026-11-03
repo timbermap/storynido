@@ -33,6 +33,17 @@ describe('pasos del creador por línea', () => {
     );
   });
 
+  it('un borrador viejo de Profesionales retoma en la situación a trabajar', () => {
+    for (const wizardStepKey of ['story', 'lesson', 'memories', 'style']) {
+      expect(reachedIndex(FLOWS.professionals, { wizardStepKey, wizardStep: 0 })).toBe(
+        FLOWS.professionals.indexOf('focus'),
+      );
+    }
+    expect(reachedIndex(FLOWS.professionals, { wizardStepKey: 'review', wizardStep: 6 })).toBe(
+      FLOWS.professionals.indexOf('review'),
+    );
+  });
+
   it('los pasos nuevos no mueven el índice histórico de los borradores viejos', () => {
     expect(WIZARD_STEPS.slice(0, 7)).toEqual([
       'child',

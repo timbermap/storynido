@@ -204,7 +204,7 @@ service cloud.firestore {
         && optString(d.dedication, 500)
         && d.wizardStep is int && d.wizardStep >= 0 && d.wizardStep <= 10
         // Paso por nombre (DECISIONS 113); los borradores anteriores no lo tienen.
-        && d.get('wizardStepKey', null) in [null, 'child', 'photos', 'story', 'memories', 'lesson', 'style', 'review', 'party', 'kit']
+        && d.get('wizardStepKey', null) in [null, 'child', 'photos', 'story', 'memories', 'lesson', 'style', 'review', 'party', 'kit', 'focus', 'reading']
         && d.photoIds is list && d.photoIds.size() <= 3
         // Los borradores anteriores al modo sin foto no tienen estos campos.
         && d.get('characterMode', 'photo') in ['photo', 'avatar']

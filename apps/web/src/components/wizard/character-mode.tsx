@@ -45,6 +45,11 @@ export function CharacterModeChooser({ nav, data }: { nav: StepNav; data: Wizard
             <span className="flex gap-3 p-4 pr-12">
               <Icon className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
               <span>
+                {value === 'avatar' && data.book.channel === 'professionals' && (
+                  <span className="mb-1 block w-fit rounded-full bg-mint px-2.5 py-0.5 text-xs font-bold text-success">
+                    {t('recommended')}
+                  </span>
+                )}
                 <span className="block font-display text-lg font-semibold">{title}</span>
                 <span className="mt-1 block text-sm text-muted-foreground">{text}</span>
               </span>

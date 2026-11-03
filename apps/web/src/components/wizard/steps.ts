@@ -15,6 +15,9 @@ export const WIZARD_STEPS = [
   // Celebraciones (DECISIONS 223). Van al final: el índice de los anteriores no cambia.
   'party',
   'kit',
+  // Profesionales (DECISIONS 224).
+  'focus',
+  'reading',
 ] as const;
 
 export type WizardStep = (typeof WIZARD_STEPS)[number];
@@ -29,8 +32,8 @@ export const FLOWS: Record<Channel, readonly WizardStep[]> = {
   families: ['child', 'photos', 'story', 'lesson', 'memories', 'style', 'review'],
   // El cumpleañero y su personaje, la fiesta y qué lleva: la historia y el estilo salen de la temática.
   events: ['child', 'photos', 'party', 'kit', 'review'],
-  // El paciente (alias) y su personaje; después la historia de la colección y su objetivo.
-  professionals: ['child', 'photos', 'story', 'lesson', 'memories', 'style', 'review'],
+  // El niño (alias) y su personaje; la situación a trabajar y cómo se lee. El estilo sale de la historia.
+  professionals: ['child', 'photos', 'focus', 'reading', 'review'],
 };
 
 export const flowFor = (channel: Channel): readonly WizardStep[] => FLOWS[channel];
@@ -63,8 +66,8 @@ export function reachedIndex(
  */
 export const WIZARD_STAGES = [
   { key: 'character', steps: ['child', 'photos'] },
-  { key: 'adventure', steps: ['story', 'party'] },
-  { key: 'settings', steps: ['lesson', 'memories', 'style', 'kit'] },
+  { key: 'adventure', steps: ['story', 'party', 'focus'] },
+  { key: 'settings', steps: ['lesson', 'memories', 'style', 'kit', 'reading'] },
   { key: 'preview', steps: ['review'] },
 ] as const satisfies readonly { key: string; steps: readonly WizardStep[] }[];
 

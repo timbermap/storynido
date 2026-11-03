@@ -576,7 +576,9 @@
       "style": "Estilo",
       "review": "Vista previa",
       "party": "Fiesta",
-      "kit": "Qué llevas"
+      "kit": "Qué llevas",
+      "focus": "Situación",
+      "reading": "Lectura"
     },
     "progress": "Paso {current} de {total}",
     "back": "Atrás",
@@ -640,11 +642,14 @@
         "stepSubtitle": "Aparece en la invitación, la decoración y el cuento de recuerdo."
       },
       "pro": {
-        "alias": "Alias del proyecto",
-        "aliasHint": "Para encontrarlo en tu cuenta. Usa un alias (por ejemplo, «Sofi, 2.º grado»), nunca el apellido.",
-        "aliasPlaceholder": "Ej.: Sofi, 2.º grado",
-        "storyName": "Nombre en el cuento",
-        "dedicationPlaceholder": "Ej.: Para Sofi, que cada día se anima a un poco más."
+        "stepTitle": "¿Para quién es el cuento?",
+        "stepSubtitle": "Cada niño es un proyecto en tu cuenta. Nunca pedimos apellido ni datos clínicos.",
+        "alias": "Alias",
+        "aliasHint": "Es también el nombre del personaje en el cuento. No uses el apellido.",
+        "aliasPlaceholder": "Ej.: Mati",
+        "required": "Escribe un alias para continuar.",
+        "likes": "Lo que lo representa (opcional)",
+        "likesHint": "Gustos y rutinas que ayudan a que se reconozca. No cargues diagnósticos."
       },
       "reuseTitle": "¿Para quién es este cuento?",
       "reuseNew": "Alguien nuevo",
@@ -708,12 +713,7 @@
       "customPlaceholder": "Que sepa que el abuelo lo quiere mucho aunque viva lejos.",
       "customHint": "{count}/150 caracteres. Lo revisamos antes de usarlo.",
       "pickUpTo": "Elige hasta {max} ({count}/{max}). Si no eliges ninguna, la historia igual tendrá un mensaje positivo.",
-      "clear": "Quitar selección",
-      "goal": {
-        "title": "Objetivo general (opcional)",
-        "hint": "Orienta la historia. Es un material educativo: no reemplaza una intervención profesional ni clínica.",
-        "none": "Sin objetivo"
-      }
+      "clear": "Quitar selección"
     },
     "style": {
       "title": "Elige el estilo de ilustración",
@@ -760,7 +760,9 @@
       "eventEmpty": "Sin completar",
       "kit": "Qué llevas",
       "kitTone": "Tono {tone}",
-      "kitDedication": "Con dedicatoria"
+      "kitDedication": "Con dedicatoria",
+      "goal": "Objetivo",
+      "alias": "Alias"
     },
     "preview": {
       "badge": "Muestra de la historia",
@@ -842,7 +844,11 @@
       "leaveText": "Seguimos trabajando aunque salgas. Te escribimos cuando la muestra esté lista. Para retomarla: Mis cuentos, «En proceso», Continuar.",
       "leaveButton": "Volver a Mis cuentos",
       "leaveTitle": "Puedes cerrar esta pantalla",
-      "approveAndPay": "Aprobar y pagar"
+      "approveAndPay": "Aprobar y pagar",
+      "proPrice": "Cuento digital: {price}",
+      "proVolume": "Cuantos más cuentos haces, menos pagas por cada uno. Sin suscripción.",
+      "proNotice": "Es material educativo y de acompañamiento: no es clínico ni reemplaza tu criterio profesional.",
+      "proDifferencesEdit": "Puedes editar el texto de cada página y volver a cambiar el cuento base o la foto."
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
@@ -894,7 +900,8 @@
           "blue": "Azules",
           "gray": "Grises"
         }
-      }
+      },
+      "recommended": "Recomendado"
     },
     "memories": {
       "title": "Hazlo realmente suyo",
@@ -1132,6 +1139,24 @@
         "shareText": "Estamos preparando la fiesta de {name}. Si quieres regalarle un cuento donde sea protagonista, puedes crearlo aquí:"
       },
       "differencesEdit": "Puedes editar los textos y volver a cambiar la temática o la foto."
+    },
+    "focus": {
+      "title": "¿Qué quieres trabajar?",
+      "subtitle": "Empieza por la situación. Cada colección tiene objetivos y cuentos listos para adaptar.",
+      "collection": "Colección",
+      "goal": "Objetivo principal",
+      "goalHint": "La historia gira en torno a uno.",
+      "story": "Cuento base",
+      "recommended": "Ideal para su edad",
+      "requiredCollection": "Elige una colección para continuar.",
+      "requiredGoal": "Elige un objetivo para continuar.",
+      "requiredStory": "Elige un cuento base para continuar."
+    },
+    "reading": {
+      "title": "Cómo se lee",
+      "subtitle": "Extensión, cantidad de texto y nivel de lectura se ajustan por separado.",
+      "length": "Extensión",
+      "notice": "Es material educativo y de acompañamiento: no es clínico ni reemplaza tu criterio profesional."
     }
   },
   "Landing": {

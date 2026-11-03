@@ -24,6 +24,8 @@ import { PreviewPanel, previewErrorKey } from './preview-panel';
 import { SignInGate } from './sign-in-gate';
 import { WizardSkeleton } from './wizard-skeleton';
 import { StepChild } from './step-child';
+import { StepFocus } from './step-focus';
+import { StepReading } from './step-reading';
 import { StepKit } from './step-kit';
 import { StepParty } from './step-party';
 import { StepAvatar } from './step-avatar';
@@ -266,6 +268,10 @@ export function Wizard({
       return <StepParty key="party" nav={nav} data={data} />;
     case 'kit':
       return <StepKit key="kit" nav={nav} data={data} />;
+    case 'focus':
+      return <StepFocus key="focus" nav={nav} data={data} />;
+    case 'reading':
+      return <StepReading key="reading" nav={nav} data={data} />;
     case 'style':
       return <StepStyle key="style" nav={nav} data={data} />;
     default:

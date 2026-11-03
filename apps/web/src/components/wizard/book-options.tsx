@@ -33,7 +33,7 @@ export interface BookChoice {
 /** Orden en el que se ofrecen los tipos (el más simple primero). */
 const TYPE_ORDER: ContentType[] = ['story', 'story_activities', 'coloring', 'activities'];
 
-function Chips<T extends string>({
+export function Chips<T extends string>({
   name,
   legend,
   values,
@@ -92,7 +92,6 @@ export function BookOptions({
   age,
   value,
   onChange,
-  formats = true,
 }: {
   story: PublicStory | undefined;
   editorial: EditorialConfig;
@@ -101,8 +100,6 @@ export function BookOptions({
   age: number | null;
   value: BookChoice;
   onChange: (value: BookChoice) => void;
-  /** "¿Cómo lo van a leer?" en lugar de la extensión (Celebraciones conserva la extensión: su mini cuento no sigue la edad). */
-  formats?: boolean;
 }) {
   const t = useTranslations('Wizard.book');
   const locale = useLocale() as Locale;
@@ -134,8 +131,7 @@ export function BookOptions({
       levels.includes(format.readingLevel) &&
       editorial.lengths[format.length].active,
   );
-  const byFormat =
-    formats && !coloring && value.contentType !== 'activities' && readingFormats.length > 0;
+  const byFormat = !coloring && value.contentType !== 'activities' && readingFormats.length > 0;
   const current = readingFormats.find(
     (format) =>
       format.length === value.length &&

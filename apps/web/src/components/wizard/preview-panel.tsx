@@ -99,6 +99,8 @@ export function PreviewPanel({
   const tBook = useTranslations('Wizard.book');
   const tParty = useTranslations('Wizard.partyPreview');
   const isEvent = book.channel === 'events';
+  const isPro = book.channel === 'professionals';
+  const proMinor = isPro && book.length ? prices?.proByLength[book.length] : undefined;
   const locale = useLocale() as Locale;
   const money = (minor: number) =>
     prices ? formatPrice(minor, prices.currency, locale, prices.country) : '';
@@ -371,7 +373,11 @@ export function PreviewPanel({
                 { icon: Droplets, text: t('differencesWatermark') },
                 {
                   icon: PencilLine,
-                  text: isEvent ? tParty('differencesEdit') : t('differencesEdit'),
+                  text: isEvent
+                    ? tParty('differencesEdit')
+                    : isPro
+                      ? t('proDifferencesEdit')
+                      : t('differencesEdit'),
                 },
               ].map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-start gap-3">
@@ -460,7 +466,7 @@ export function PreviewPanel({
                 }}
                 className={cn(buttonVariants({ size: 'lg' }), 'h-14 px-10 text-lg')}
               >
-                {isEvent ? t('approveAndPay') : t('continue')}
+                {isEvent || isPro ? t('approveAndPay') : t('continue')}
               </Link>
             ) : null}
             {data?.stage === 'complete' && !data.stale && isEvent && eventPrices && (
@@ -484,7 +490,13 @@ export function PreviewPanel({
                     })}
               </p>
             )}
-            {data?.stage === 'complete' && !data.stale && book.channel !== 'events' && prices && (
+            {data?.stage === 'complete' && !data.stale && isPro && proMinor !== undefined && (
+              <div className="mt-2 grid gap-0.5 text-sm text-muted-foreground tabular-nums">
+                <p>{t('proPrice', { price: money(proMinor) })}</p>
+                <p>{t('proVolume')}</p>
+              </div>
+            )}
+            {data?.stage === 'complete' && !data.stale && !isEvent && !isPro && prices && (
               // Qué cuesta antes de entrar al pago (formato y envío se eligen ahí).
               <p className="mt-2 text-sm text-muted-foreground tabular-nums">
                 {[
@@ -514,6 +526,10 @@ export function PreviewPanel({
             )}
           </div>
         </div>
+      )}
+
+      {data?.stage === 'complete' && isPro && (
+        <p className="mt-6 rounded-xl bg-secondary p-4 text-sm">{t('proNotice')}</p>
       )}
 
       {data?.stage === 'complete' && <PreviewFeedback bookId={book.id} />}

@@ -1,5 +1,6 @@
 import type {
   Book,
+  BookLength,
   Channel,
   ContentType,
   CountryCode,
@@ -76,4 +77,6 @@ export interface PriceHint {
   country: CountryCode;
   digitalMinor: number | null;
   printedFromMinor: number | null;
+  /** Digital con el descuento base del perfil profesional, por extensión. */
+  proByLength: Partial<Record<BookLength, number>>;
 }

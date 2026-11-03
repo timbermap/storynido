@@ -576,7 +576,9 @@
       "style": "Style",
       "review": "Preview",
       "party": "Party",
-      "kit": "What you’re getting"
+      "kit": "What you’re getting",
+      "focus": "Situation",
+      "reading": "Reading"
     },
     "progress": "Step {current} of {total}",
     "back": "Back",
@@ -640,11 +642,14 @@
         "stepSubtitle": "They’ll appear on the invitation, the decorations and the keepsake story."
       },
       "pro": {
-        "alias": "Project alias",
-        "aliasHint": "To find it in your account. Use an alias (for example, “Sofi, 2nd grade”), never a last name.",
-        "aliasPlaceholder": "E.g. Sofi, 2nd grade",
-        "storyName": "Name in the story",
-        "dedicationPlaceholder": "E.g. For Sofi, who is a little braver every day."
+        "stepTitle": "Who is this story for?",
+        "stepSubtitle": "Each child is a project in your account. We never ask for a last name or clinical data.",
+        "alias": "Alias",
+        "aliasHint": "It’s also the character’s name in the story. Don’t use a last name.",
+        "aliasPlaceholder": "E.g.: Mati",
+        "required": "Enter an alias to continue.",
+        "likes": "What represents them (optional)",
+        "likesHint": "Interests and routines that help them see themselves. Don’t include diagnoses."
       },
       "reuseTitle": "Who is this story for?",
       "reuseNew": "Someone new",
@@ -708,12 +713,7 @@
       "customPlaceholder": "That Grandpa loves them very much even though he lives far away.",
       "customHint": "{count}/150 characters. We'll review it before using it.",
       "pickUpTo": "Choose up to {max} ({count}/{max}). If you don't choose any, the story will still carry a positive message.",
-      "clear": "Clear selection",
-      "goal": {
-        "title": "General goal (optional)",
-        "hint": "It guides the story. This is educational material: it does not replace a professional or clinical intervention.",
-        "none": "No goal"
-      }
+      "clear": "Clear selection"
     },
     "style": {
       "title": "Choose the illustration style",
@@ -760,7 +760,9 @@
       "eventEmpty": "Not filled in",
       "kit": "What you’re getting",
       "kitTone": "{tone} tone",
-      "kitDedication": "With dedication"
+      "kitDedication": "With dedication",
+      "goal": "Goal",
+      "alias": "Alias"
     },
     "preview": {
       "badge": "Story sample",
@@ -842,7 +844,11 @@
       "leaveText": "We keep working even if you leave. We’ll email you when the sample is ready. To pick it up again: My stories, “In progress”, Continue.",
       "leaveButton": "Back to My stories",
       "leaveTitle": "You can close this screen",
-      "approveAndPay": "Approve and pay"
+      "approveAndPay": "Approve and pay",
+      "proPrice": "Digital story: {price}",
+      "proVolume": "The more stories you make, the less you pay for each. No subscription.",
+      "proNotice": "This is educational, supportive material: it isn’t clinical and doesn’t replace your professional judgment.",
+      "proDifferencesEdit": "You can edit the text of each page and change the base story or the photo again."
     },
     "character": {
       "modeLegend": "How should we create the main character?",
@@ -894,7 +900,8 @@
           "blue": "Blue",
           "gray": "Gray"
         }
-      }
+      },
+      "recommended": "Recommended"
     },
     "memories": {
       "title": "Make it truly theirs",
@@ -1132,6 +1139,24 @@
         "shareText": "We’re getting {name}’s party ready. If you’d like to give a story that stars them, you can create it here:"
       },
       "differencesEdit": "You can edit the text and change the theme or the photo again."
+    },
+    "focus": {
+      "title": "What do you want to work on?",
+      "subtitle": "Start with the situation. Each collection has goals and stories ready to adapt.",
+      "collection": "Collection",
+      "goal": "Main goal",
+      "goalHint": "The story revolves around one.",
+      "story": "Base story",
+      "recommended": "Right for their age",
+      "requiredCollection": "Choose a collection to continue.",
+      "requiredGoal": "Choose a goal to continue.",
+      "requiredStory": "Choose a base story to continue."
+    },
+    "reading": {
+      "title": "How it reads",
+      "subtitle": "Length, amount of text and reading level are set separately.",
+      "length": "Length",
+      "notice": "This is educational, supportive material: it isn’t clinical and doesn’t replace your professional judgment."
     }
   },
   "Landing": {

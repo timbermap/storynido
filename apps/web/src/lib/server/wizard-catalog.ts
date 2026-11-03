@@ -50,6 +50,9 @@ export async function loadWizardCatalog(locale: Locale): Promise<WizardCatalog> 
         digitalMinor:
           offer.formats.find((format) => format.format === 'digital')?.amountMinor ?? null,
         printedFromMinor: printed.length ? Math.min(...printed.map((f) => f.amountMinor)) : null,
+        proByLength: Object.fromEntries(
+          offer.proLengthPrices.map((item) => [item.length, item.amountMinor]),
+        ),
       }
     : null;
   const eventPrices = eventPricing

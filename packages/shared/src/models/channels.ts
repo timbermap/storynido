@@ -60,16 +60,17 @@ export function storyGoals(
 }
 
 /**
- * Objetivos posibles de una historia: los suyos si los tiene (en todos los idiomas, para validar)
- * o, si no, los temas de sus colecciones.
+ * Objetivos posibles de una historia: los suyos y los temas de sus colecciones (en todos los
+ * idiomas, para validar). Son textos del catálogo: nunca entra texto libre al prompt.
  */
 export function storyGoalOptions(
   story: { collectionIds: readonly string[]; objectives?: readonly Record<string, string>[] },
   collections: readonly Pick<Collection, 'slug' | 'topics'>[],
 ): string[] {
-  return story.objectives?.length
-    ? story.objectives.flatMap((objective) => Object.values(objective))
-    : storyGoals(collections, story.collectionIds);
+  return [
+    ...(story.objectives ?? []).flatMap((objective) => Object.values(objective)),
+    ...storyGoals(collections, story.collectionIds),
+  ];
 }
 
 export const validGoal = (goal: string | null | undefined, goals: readonly string[]) =>

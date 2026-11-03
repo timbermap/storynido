@@ -48,12 +48,10 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const story = data.stories.find((item) => item.slug === selected);
 
   const fits = (min: number, max: number) => age !== undefined && min <= age && age <= max;
-  // Solo las historias de la línea del libro, no las de otra línea que también la incluyen
-  // (Profesionales sí ve las que lo incluyen). Si no hubiera ninguna, todas.
+  // Solo las historias de la línea del libro, no las de otra línea que también la incluyen.
+  // Si no hubiera ninguna, todas.
   const channel = data.book.channel;
-  const forChannel = data.stories.filter((item) =>
-    channel === 'professionals' ? item.channels.includes(channel) : item.channels[0] === channel,
-  );
+  const forChannel = data.stories.filter((item) => item.channels[0] === channel);
   // Con una enseñanza elegida, las historias que la sugieren van primero («Ideal para…»).
   const lesson = data.lessons.find((item) => data.book.lessonIds.includes(item.slug));
   const forLesson = (story: PublicStory) =>
