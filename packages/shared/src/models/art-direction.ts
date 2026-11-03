@@ -101,6 +101,14 @@ const DEFAULT_MEDIUM =
   'hand-painted digital gouache with subtle watercolor diffusion and natural paper texture';
 
 /** Bloque de dirección de arte para los prompts de imagen. */
+/**
+ * El protagonista aparece una sola vez por imagen. Sin esto, el modelo repetía su ropa y su cara en
+ * un niño del fondo y el control de calidad lo mandaba a revisión manual (portada de un pedido
+ * profesional).
+ */
+const ONE_PROTAGONIST =
+  'The main character appears exactly once in each image. Every other child or adult is a different person: different face, hair color and hairstyle, and different clothes; nobody in the background wears the main character\'s outfit or looks like a twin or clone.';
+
 export function artDirection(input: {
   age: number;
   channel: Channel;
@@ -124,7 +132,8 @@ export function artDirection(input: {
     HUMAN_CRAFT,
     threeD ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
-    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, any text, title, letters or signs in the image, clothing that does not suit the activity, place or weather, clothing that changes for no reason between consecutive scenes, and any change of style between pages.`,
+    ONE_PROTAGONIST,
+    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, a second copy, twin or look-alike of the main character anywhere in the image, any text, title, letters or signs in the image, clothing that does not suit the activity, place or weather, clothing that changes for no reason between consecutive scenes, and any change of style between pages.`,
   ]
     .filter(Boolean)
     .join(' ');

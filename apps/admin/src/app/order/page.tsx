@@ -140,9 +140,18 @@ function OrderDetail({ id }: { id: string }) {
                 '—'
               )}
             </Row>
-            <Row label="Destino">
+            <Row label="Recibe">{order.shipping ? order.shipping.name : '—'}</Row>
+            <Row label="Dirección">
               {order.shipping
-                ? `${order.shipping.name}, ${order.shipping.city}${order.shipping.state ? `, ${order.shipping.state}` : ''} ${order.shipping.postalCode}, ${order.shipping.country}`
+                ? [
+                    order.shipping.line1,
+                    order.shipping.line2,
+                    [order.shipping.postalCode, order.shipping.city].filter(Boolean).join(' '),
+                    order.shipping.state,
+                    order.shipping.country,
+                  ]
+                    .filter(Boolean)
+                    .join(', ')
                 : '—'}
             </Row>
           </dl>

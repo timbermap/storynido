@@ -277,6 +277,8 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
       shipping: address
         ? {
             name: String(address.name),
+            line1: String(address.line1 ?? ''),
+            line2: (address.line2 as string | null | undefined) ?? null,
             city: String(address.city),
             state: (address.state as string | null | undefined) ?? null,
             postalCode: String(address.postalCode),

@@ -172,6 +172,9 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
   shipping: z
     .object({
       name: z.string(),
+      /** Calle y número (y piso o depto): lo que lleva la imprenta junto al nombre de quien recibe. */
+      line1: z.string().optional(),
+      line2: z.string().nullable().optional(),
       city: z.string(),
       state: z.string().nullable(),
       postalCode: z.string(),

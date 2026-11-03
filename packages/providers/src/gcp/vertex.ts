@@ -632,9 +632,10 @@ Do not invent evidence: anything you cannot evaluate without another reference m
 Status:
 - pass: no critical issue.
 - repair: a critical issue that a new illustration of the same scene would fix (missing essential trait, wrong anatomy, text in image,
-  image contradicts the text). repairTarget illustration_only.
-- human_review: wrong or mixed-up protagonist, inappropriate content, sensitive data visible, or a problem in the text itself
-  (repairTarget text_only — the approved text is never changed automatically).
+  image contradicts the text, a second figure in the background that duplicates, clones or looks like a twin of the protagonist, a
+  different child standing in for the protagonist). repairTarget illustration_only. A new illustration fixes all of these.
+- human_review: only inappropriate content, sensitive data visible, or a problem in the text itself (repairTarget text_only — the
+  approved text is never changed automatically). Do not use human_review for drawing mistakes: those are repair.
 
 Protagonist: ${request.character}
 Essential traits (must match in every illustration): ${request.mustKeep.join('; ') || 'none'}
