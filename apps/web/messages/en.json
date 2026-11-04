@@ -806,6 +806,10 @@
       "reuseNoLook": "Their details are filled in; you choose the look in the character step."
     },
     "photos": {
+      "reusedTitle": "{name}'s photos from the last story",
+      "reusedText": "We already have them: no need to upload them again.",
+      "reusedKeep": "Use these photos",
+      "reusedChange": "Choose others",
       "title": "Upload 1 to 3 photos",
       "subtitle": "We use them to draw a character that looks like the child. The photos themselves are not printed in the book.",
       "tipsTitle": "For the best result",

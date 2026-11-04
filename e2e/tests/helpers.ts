@@ -1,3 +1,7 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { deflateSync } from 'node:zlib';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page } from '@playwright/test';
 
@@ -136,4 +140,49 @@ export async function readField(path: string, field: string): Promise<unknown> {
   const doc = (await response.json()) as { fields?: Record<string, Record<string, unknown>> };
   const value = doc.fields?.[field];
   return value ? Object.values(value)[0] : undefined;
+}
+
+/** CRC32 de un bloque PNG. */
+function crc32(buffer: Buffer): number {
+  let crc = ~0;
+  for (const byte of buffer) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
+  }
+  return ~crc >>> 0;
+}
+
+function chunk(type: string, data: Buffer): Buffer {
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(data.length);
+  const body = Buffer.concat([Buffer.from(type), data]);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(body));
+  return Buffer.concat([length, body, crc]);
+}
+
+/** Foto de prueba sintética en PNG (un tablero nítido y bien iluminado; no es una persona). */
+export function testPhoto(): string {
+  const [w, h] = [1200, 1600];
+  const rows = Buffer.alloc((w * 3 + 1) * h);
+  for (let y = 0; y < h; y += 1) {
+    const row = y * (w * 3 + 1);
+    for (let x = 0; x < w; x += 1) {
+      const value = (Math.floor(x / 8) + Math.floor(y / 8)) % 2 ? 165 : 105;
+      rows.fill(value, row + 1 + x * 3, row + 4 + x * 3);
+    }
+  }
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(w, 0);
+  header.writeUInt32BE(h, 4);
+  header.set([8, 2, 0, 0, 0], 8);
+  const png = Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', header),
+    chunk('IDAT', deflateSync(rows)),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
+  const file = path.join(mkdtempSync(path.join(tmpdir(), 'storynido-e2e-')), 'foto.png');
+  writeFileSync(file, png);
+  return file;
 }

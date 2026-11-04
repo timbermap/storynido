@@ -17,6 +17,8 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { getFirebaseDb } from '@/lib/firebase/client';
+import { unlinkPhotos } from '@/lib/firebase/drafts';
 import { LEGAL_SLUGS } from '@/lib/legal';
 
 import { CharacterModeChooser } from './character-mode';
@@ -55,6 +57,8 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [guardianChecked, setGuardianChecked] = useState(false);
   const pro = data.book.channel === 'professionals';
   const [error, setError] = useState<string | null>(null);
+  const chooseRef = useRef<HTMLButtonElement>(null);
+  const [reuseChoice, setReuseChoice] = useState<'keep' | 'change'>('keep');
   const bookId = data.book.id;
 
   const refresh = useCallback(async () => {
@@ -73,7 +77,28 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
 
   const valid = photos.filter((photo) => photo.status === 'valid');
   const rejected = photos.filter((photo) => photo.status === 'rejected');
+  // Personaje reutilizado: sus fotos del cuento anterior (otro bookId) ya están en el libro.
+  const reused = valid.filter((photo) => photo.bookId !== bookId);
+  const own = valid.filter((photo) => photo.bookId === bookId);
   const slotsLeft = PHOTO_RULES.maxPhotosPerBook - valid.length - uploads.length;
+
+  /** «Elegir otras»: las fotos del cuento anterior salen solo de este libro (no se borran). */
+  async function chooseOthers() {
+    const ok = await nav.save(async () => {
+      await unlinkPhotos(
+        await getFirebaseDb(),
+        bookId,
+        reused.map((photo) => photo.id),
+      );
+      await refresh();
+    });
+    if (ok) {
+      window.setTimeout(() => {
+        chooseRef.current?.focus();
+        inputRef.current?.click();
+      }, 0);
+    }
+  }
 
   async function giveConsent() {
     if (!user) return;
@@ -196,7 +221,58 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
           </ul>
         </div>
 
-        {!consentId ? (
+        {reused.length > 0 && (
+          <fieldset className="rounded-xl border-2 border-navy/20 p-5">
+            <legend className="px-1 font-display text-lg font-semibold">
+              {t('reusedTitle', { name: data.child?.name ?? '' })}
+            </legend>
+            <p className="text-sm text-muted-foreground">{t('reusedText')}</p>
+            <ul className="mt-4 grid grid-cols-3 gap-3 sm:max-w-md">
+              {reused.map((photo, index) => (
+                <li key={photo.id} className="overflow-hidden rounded-lg border bg-card">
+                  {photo.previewUrl && (
+                    // URL firmada de corta duración: se muestra tal cual.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={photo.previewUrl}
+                      alt={t('preview', { number: index + 1 })}
+                      className="aspect-square w-full object-cover"
+                    />
+                  )}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-2 border-navy bg-card px-4 text-sm font-semibold">
+                <input
+                  type="radio"
+                  name="reused-photos"
+                  checked={reuseChoice === 'keep'}
+                  className="accent-[var(--primary)]"
+                  onChange={() => {
+                    setReuseChoice('keep');
+                  }}
+                />
+                {t('reusedKeep')}
+              </label>
+              <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-2 border-border px-4 text-sm font-semibold hover:border-primary/40">
+                <input
+                  type="radio"
+                  name="reused-photos"
+                  checked={reuseChoice === 'change'}
+                  className="accent-[var(--primary)]"
+                  onChange={() => {
+                    setReuseChoice('change');
+                    void chooseOthers();
+                  }}
+                />
+                {t('reusedChange')}
+              </label>
+            </div>
+          </fieldset>
+        )}
+
+        {reused.length > 0 ? null : !consentId ? (
           <div className="rounded-xl border-2 border-primary/30 p-5">
             <p className="flex items-center gap-2 font-semibold">
               <ShieldCheck className="size-5 text-primary" aria-hidden="true" />
@@ -263,6 +339,7 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
               disabled={slotsLeft <= 0}
             />
             <Button
+              ref={chooseRef}
               size="lg"
               variant="outline"
               disabled={slotsLeft <= 0}
@@ -278,9 +355,9 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
           </div>
         )}
 
-        {(photos.length > 0 || uploads.length > 0) && (
+        {(own.length > 0 || uploads.length > 0) && (
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            {valid.map((photo, index) => (
+            {own.map((photo, index) => (
               <li key={photo.id} className="overflow-hidden rounded-xl border bg-card">
                 {photo.previewUrl && (
                   // URL firmada de corta duración: se muestra tal cual.

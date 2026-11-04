@@ -10,6 +10,7 @@ import {
 } from '@storynido/shared';
 import {
   addDoc,
+  arrayRemove,
   collection,
   doc,
   getDoc,
@@ -339,6 +340,19 @@ export function subscribeChild(
 
 export async function updateBook(db: Firestore, bookId: string, edits: BookEdits): Promise<void> {
   await updateDoc(doc(db, COLLECTIONS.books, bookId), { ...edits, updatedAt: serverTimestamp() });
+}
+
+/** Saca fotos de este borrador sin borrarlas (las de un personaje reutilizado son de otro cuento). */
+export async function unlinkPhotos(
+  db: Firestore,
+  bookId: string,
+  photoIds: string[],
+): Promise<void> {
+  if (photoIds.length === 0) return;
+  await updateDoc(doc(db, COLLECTIONS.books, bookId), {
+    photoIds: arrayRemove(...photoIds),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 /** Crea o actualiza el perfil del protagonista y lo vincula al borrador. */
