@@ -73,18 +73,23 @@ export function Welcome() {
 export function EmptyState({
   kind,
   child,
+  hasIdeas = false,
 }: {
   kind: 'creating' | 'inProgress' | 'done';
   child: ChildSummary | null;
+  /** Debajo van las «Ideas para…»: ellas son la acción, así que acá queda solo el texto. */
+  hasIdeas?: boolean;
 }) {
   const t = useTranslations('Account.myStories.library.empty');
   const createWith = useCreateWith();
   return (
     <div className="grid justify-items-start gap-3 rounded-2xl border border-dashed border-navy/25 p-6">
       <p className="text-muted-foreground">
-        {kind === 'creating' && child ? t('creatingWithCharacter', { name: child.name }) : t(kind)}
+        {kind === 'creating' && child && !hasIdeas
+          ? t('creatingWithCharacter', { name: child.name })
+          : t(kind)}
       </p>
-      {kind === 'creating' && child && (
+      {kind === 'creating' && child && !hasIdeas && (
         <Button
           variant="outline"
           data-track="crear-con-personaje"
@@ -95,7 +100,7 @@ export function EmptyState({
           {t('createWith', { name: child.name })}
         </Button>
       )}
-      {!(kind === 'creating' && child) && (
+      {!(kind === 'creating' && child) && !(kind === 'creating' && hasIdeas) && (
         <Link
           href={{ pathname: '/create', query: { line: 'families' } }}
           className="font-bold text-primary underline-offset-4 hover:underline"
