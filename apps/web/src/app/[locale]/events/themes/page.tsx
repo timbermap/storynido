@@ -49,6 +49,7 @@ export default async function EventsCatalogPage({ params }: Props) {
         collections={birthdays}
         stories={stories}
         createLabel={t('viewStory')}
+        viewLabel={t('viewStoryLink')}
         line="events"
         start={{ label: t('collectionStart'), mode: 'theme' }}
       />
@@ -58,6 +59,7 @@ export default async function EventsCatalogPage({ params }: Props) {
         collections={occasions}
         stories={stories}
         createLabel={t('viewStory')}
+        viewLabel={t('viewStoryLink')}
         line="events"
         start={{ label: t('collectionStart'), mode: 'theme' }}
       />

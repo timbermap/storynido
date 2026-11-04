@@ -79,7 +79,7 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
   await expect(page).toHaveURL(/\/es$/, { timeout: 30_000 });
 
   await page.goto('/es/eventos');
-  const start = page.getByRole('link', { name: /Diseñar el kit con este tema/ }).first();
+  const start = page.locator('main a[data-track="collection_start"]').first();
   // El enlace pasa de "login" al creador cuando la web detecta la sesión.
   await expect(start).toHaveAttribute('href', /tema=/);
   const theme = new URL(String(await start.getAttribute('href')), 'http://x').searchParams.get(
@@ -87,7 +87,7 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
   );
   expect(theme).toBeTruthy();
   await start.click();
-  // La temática se elige en la etapa Aventura: se recorre el personaje hasta llegar a ella.
+  // La temática se elige en la etapa Celebración: se recorre el personaje hasta llegar a ella.
   await page.locator('#child-name').fill('Tomi', { timeout: 30_000 });
   await page.getByRole('button', { name: 'Siguiente' }).click();
   await page.locator('label', { hasText: 'Sin foto' }).click();
@@ -103,9 +103,10 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
 test('sin sesión, el botón de un tema de Celebraciones lleva al login', async ({ page }) => {
   await page.goto('/es/eventos');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
-  await expect(
-    page.getByRole('link', { name: /Diseñar el kit con este tema/ }).first(),
-  ).toHaveAttribute('href', /\/ingresar$/);
+  await expect(page.locator('main a[data-track="collection_start"]').first()).toHaveAttribute(
+    'href',
+    /\/ingresar$/,
+  );
 });
 
 test('con sesión, el navbar es el de la app: sin las páginas que venden y con Crear', async ({
