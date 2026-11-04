@@ -710,7 +710,7 @@
       "newCharacter": {
         "back": "Back to Characters",
         "title": "Add another child",
-        "text": "Save their details and photo (or their traits). Then create their drawing or a story with them whenever you like.",
+        "text": "Save their details and photo (or their traits). Then create their drawing or a story with their character whenever you like.",
         "likesPlaceholder": "For example: dinosaurs, painting, the sea",
         "looks": "How should we draw them?",
         "withPhoto": "With their photo",
@@ -719,7 +719,9 @@
         "photoNote": "Face forward and clearly visible. It is deleted after 30 days; you can delete it sooner.",
         "save": "Save character",
         "saveNote": "No story is created and no AI generation is used.",
-        "error": "We could not save it. Please try again."
+        "error": "We could not save it. Please try again.",
+        "pronouns": "Pronouns (optional)",
+        "photoChange": "Choose another photo"
       }
     },
     "myStoriesLink": "Your stories and orders are in My stories →"

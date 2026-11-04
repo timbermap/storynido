@@ -710,7 +710,7 @@
       "newCharacter": {
         "back": "Voltar para Personagens",
         "title": "Adicionar outra criança",
-        "text": "Salve os dados e a foto (ou os traços). Depois você cria o desenho ou uma história quando quiser.",
+        "text": "Salve os dados e a foto (ou os traços). Depois você cria o desenho ou uma história com o personagem quando quiser.",
         "likesPlaceholder": "Por exemplo: dinossauros, pintar, o mar",
         "looks": "Como vamos desenhar?",
         "withPhoto": "Com a foto",
@@ -719,7 +719,9 @@
         "photoNote": "Rosto de frente e bem visível. É apagada após 30 dias; você pode apagá-la antes.",
         "save": "Salvar personagem",
         "saveNote": "Nenhuma história é criada e nenhuma geração de IA é usada.",
-        "error": "Não conseguimos salvar. Tente de novo."
+        "error": "Não conseguimos salvar. Tente de novo.",
+        "pronouns": "Pronome (opcional)",
+        "photoChange": "Escolher outra foto"
       }
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"

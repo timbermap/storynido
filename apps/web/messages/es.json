@@ -710,7 +710,7 @@
       "newCharacter": {
         "back": "Volver a Personajes",
         "title": "Agregar a otro chico",
-        "text": "Guarda sus datos y su foto (o sus rasgos). Después creas su dibujo o un cuento con él cuando quieras.",
+        "text": "Guarda sus datos y su foto (o sus rasgos). Después creas su dibujo o un cuento con su personaje cuando quieras.",
         "likesPlaceholder": "Por ejemplo: dinosaurios, pintar, el mar",
         "looks": "¿Cómo lo dibujamos?",
         "withPhoto": "Con su foto",
@@ -719,7 +719,9 @@
         "photoNote": "Cara de frente y bien visible. Se borra a los 30 días; puedes borrarla antes.",
         "save": "Guardar personaje",
         "saveNote": "No se crea ningún cuento ni se usa ninguna generación de IA.",
-        "error": "No pudimos guardarlo. Intenta de nuevo."
+        "error": "No pudimos guardarlo. Intenta de nuevo.",
+        "pronouns": "Pronombre (opcional)",
+        "photoChange": "Elegir otra foto"
       }
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"

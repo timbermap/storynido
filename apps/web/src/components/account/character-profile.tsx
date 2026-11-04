@@ -325,7 +325,7 @@ export function CharacterProfile({ childId }: { childId: string }) {
             {t('profileLikesHint')}
           </span>
         </label>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
           <label className="grid gap-1 text-sm">
             <span className="font-semibold">{t('profilePet')}</span>
             <input

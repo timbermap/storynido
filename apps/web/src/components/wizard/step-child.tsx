@@ -1,13 +1,11 @@
 'use client';
 
-import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { CHILD_LIMITS, EMPTY_BIRTHDAY, turningAgeFor, type Child } from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
-import { Button } from '@/components/ui/button';
 import { suggestAccent } from '@/lib/name-accent';
 import { takeReuseCharacter } from '@/lib/reuse-character';
 import { getFirebaseDb } from '@/lib/firebase/client';
@@ -22,6 +20,7 @@ import { useStepDraft } from '@/lib/use-step-draft';
 
 import type { StepNav, WizardData } from './types';
 import { storyNameFor } from './pro';
+import { LikesInput, withPendingLike } from './likes-input';
 import { WizardShell } from './wizard-shell';
 
 export const inputClass =
@@ -113,20 +112,6 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
     { value: null, label: t('they') },
   ];
 
-  function addLike() {
-    const value = like.trim().slice(0, CHILD_LIMITS.likeMaxLength);
-    if (value && likes.length < CHILD_LIMITS.maxLikes && !likes.includes(value))
-      setLikes([...likes, value]);
-    setLike('');
-  }
-
-  function onLikeKey(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter' || event.key === ',') {
-      event.preventDefault();
-      addLike();
-    }
-  }
-
   async function next() {
     if (!user) return;
     if ((isPro ? alias : name).trim() === '') {
@@ -136,7 +121,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
     }
     setNameError(null);
     setError(null);
-    const pending = like.trim() ? [...likes, like.trim()].slice(0, CHILD_LIMITS.maxLikes) : likes;
+    const pending = withPendingLike(likes, like);
     const ok = await nav.save(async () => {
       const db = await getFirebaseDb();
       // Primer guardado real: si el borrador estaba en memoria, se crea ahora.
@@ -323,57 +308,20 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
         {/* Celebraciones pregunta lo justo: quien organiza una fiesta tiene apuro. */}
         {!isEvent && (
           <>
-            <div className="grid gap-2">
-              <label htmlFor="child-like" className={labelClass}>
-                {isPro ? t('pro.likes') : t('likes')}
-              </label>
-              <p id="likes-hint" className="text-sm text-muted-foreground">
-                {isPro ? t('pro.likesHint') : t('likesHint')}
-              </p>
-              {likes.length > 0 && (
-                <ul className="flex flex-wrap gap-2">
-                  {likes.map((item) => (
-                    <li
-                      key={item}
-                      className="inline-flex items-center gap-1 rounded-full border bg-card py-1 pr-1 pl-3 text-sm font-bold text-foreground"
-                    >
-                      {item}
-                      <button
-                        type="button"
-                        className="grid size-6 place-items-center rounded-full hover:bg-primary/10"
-                        aria-label={t('removeLike', { like: item })}
-                        onClick={() => {
-                          setLikes(likes.filter((l) => l !== item));
-                        }}
-                      >
-                        <X className="size-3.5" aria-hidden="true" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <div className="flex gap-2">
-                <input
-                  id="child-like"
-                  className={inputClass}
-                  value={like}
-                  aria-describedby="likes-hint"
-                  disabled={likes.length >= CHILD_LIMITS.maxLikes}
-                  maxLength={CHILD_LIMITS.likeMaxLength}
-                  placeholder={t('likesPlaceholder')}
-                  onChange={(event) => {
-                    setLike(event.target.value);
-                  }}
-                  onKeyDown={onLikeKey}
-                />
-                <Button type="button" variant="outline" onClick={addLike} disabled={!like.trim()}>
-                  {t('addLike')}
-                </Button>
-              </div>
-            </div>
+            <LikesInput
+              id="child-like"
+              label={isPro ? t('pro.likes') : t('likes')}
+              hint={isPro ? t('pro.likesHint') : t('likesHint')}
+              likes={likes}
+              onLikes={setLikes}
+              like={like}
+              onLike={setLike}
+              labelClassName={labelClass}
+              inputClassName={inputClass}
+            />
 
             {!isPro && (
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-2 sm:items-end">
                 <div className="grid gap-2">
                   <label htmlFor="child-pet" className={labelClass}>
                     {t('pet')}

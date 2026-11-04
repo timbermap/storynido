@@ -9,12 +9,13 @@ import {
   type Locale,
 } from '@storynido/shared';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { Loader2 } from 'lucide-react';
+import { ImagePlus, Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
+import { LikesInput, withPendingLike } from '@/components/wizard/likes-input';
 import { AVATAR_TRAITS, TraitPicker, type TraitDraft } from '@/components/wizard/trait-picker';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
@@ -44,10 +45,12 @@ export function NewCharacter() {
   const [name, setName] = useState('');
   const [age, setAge] = useState(5);
   const [pronouns, setPronouns] = useState<(typeof PRONOUNS)[number] | null>(null);
-  const [likes, setLikes] = useState('');
+  const [likes, setLikes] = useState<string[]>([]);
+  const [like, setLike] = useState('');
   const [mode, setMode] = useState<'photo' | 'avatar'>('photo');
   const [consent, setConsent] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const photoInput = useRef<HTMLInputElement>(null);
   const [traits, setTraits] = useState<TraitDraft>({ glasses: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,11 +93,8 @@ export function NewCharacter() {
         name: name.trim().slice(0, CHILD_LIMITS.nameMaxLength),
         age,
         pronouns,
-        likes: likes
-          .split(',')
-          .map((like) => like.trim().slice(0, CHILD_LIMITS.likeMaxLength))
-          .filter(Boolean)
-          .slice(0, CHILD_LIMITS.maxLikes),
+        // Lo que quedó escrito sin agregar también se guarda.
+        likes: withPendingLike(likes, like),
         petName: null,
         bestFriendName: null,
         createdAt: serverTimestamp(),
@@ -148,7 +148,7 @@ export function NewCharacter() {
             }}
           />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
           <div className="grid gap-2">
             <label htmlFor="new-child-age" className="font-semibold">
               {tChild('age')}
@@ -170,7 +170,7 @@ export function NewCharacter() {
           </div>
           <div className="grid gap-2">
             <label htmlFor="new-child-pronouns" className="font-semibold">
-              {tChild('pronouns')}
+              {t('pronouns')}
             </label>
             <select
               id="new-child-pronouns"
@@ -189,20 +189,17 @@ export function NewCharacter() {
             </select>
           </div>
         </div>
-        <div className="grid gap-2">
-          <label htmlFor="new-child-likes" className="font-semibold">
-            {tChild('likes')}
-          </label>
-          <input
-            id="new-child-likes"
-            className={field}
-            value={likes}
-            placeholder={t('likesPlaceholder')}
-            onChange={(event) => {
-              setLikes(event.target.value);
-            }}
-          />
-        </div>
+        <LikesInput
+          id="new-child-likes"
+          label={tChild('likes')}
+          hint={tChild('likesHint')}
+          likes={likes}
+          onLikes={setLikes}
+          like={like}
+          onLike={setLike}
+          labelClassName="font-semibold"
+          inputClassName={field}
+        />
 
         <fieldset className="grid gap-3">
           <legend className="mb-1 font-semibold">{t('looks')}</legend>
@@ -255,19 +252,39 @@ export function NewCharacter() {
                 </Link>
               </span>
             </label>
-            <label htmlFor="new-child-photo" className="font-semibold">
-              {t('photo')}
-            </label>
+            <p className="font-semibold">{t('photo')}</p>
+            {/* Botón propio (como en el paso de fotos): el del navegador dice «Choose File». */}
             <input
+              ref={photoInput}
               id="new-child-photo"
               type="file"
               accept={PHOTO_RULES.allowedTypes.join(',')}
+              className="sr-only"
+              tabIndex={-1}
               disabled={!consent}
               onChange={(event) => {
                 setFile(event.target.files?.[0] ?? null);
               }}
             />
-            <p className="text-sm text-muted-foreground">{t('photoNote')}</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!consent}
+                onClick={() => photoInput.current?.click()}
+              >
+                <ImagePlus aria-hidden="true" />
+                {file ? t('photoChange') : tPhotos('choose')}
+              </Button>
+              {file && (
+                <span className="min-w-0 truncate text-sm font-semibold" aria-live="polite">
+                  {file.name}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {tPhotos('formats')}. {t('photoNote')}
+            </p>
           </div>
         ) : (
           <TraitPicker idPrefix="new-child" value={traits} onChange={setTraits} />
