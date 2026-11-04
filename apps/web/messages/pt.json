@@ -806,6 +806,10 @@
       "reuseNoLook": "Os dados já estão; a aparência você escolhe na etapa do personagem."
     },
     "photos": {
+      "reusedTitle": "Fotos de {name} da última história",
+      "reusedText": "Já temos essas fotos: não precisa enviá-las de novo.",
+      "reusedKeep": "Usar estas fotos",
+      "reusedChange": "Escolher outras",
       "title": "Envie de 1 a 3 fotos",
       "subtitle": "Com elas desenhamos um personagem parecido com a criança. As fotos não aparecem no livro.",
       "tipsTitle": "Para um resultado melhor",

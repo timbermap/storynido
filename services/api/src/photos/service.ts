@@ -122,7 +122,13 @@ export class PhotoService {
       .where('bookId', '==', input.bookId)
       .get();
     const active = existing.docs.filter((doc) => doc.get('status') !== 'rejected');
-    if (active.length >= PHOTO_RULES.maxPhotosPerBook) {
+    // Las fotos de un personaje reutilizado (de su cuento anterior) también cuentan para el límite.
+    const own = new Set(existing.docs.map((doc) => doc.id));
+    const reused = await this.reusedPhotos(
+      input.uid,
+      ((book.photoIds as string[] | undefined) ?? []).filter((id) => !own.has(id)),
+    );
+    if (active.length + reused.length >= PHOTO_RULES.maxPhotosPerBook) {
       throw new AppError(
         409,
         'bad_request',
@@ -286,6 +292,17 @@ export class PhotoService {
     }
   }
 
+  /** Fotos de otro cuento del mismo dueño que siguen válidas (las vencidas ya no existen). */
+  private async reusedPhotos(uid: string, ids: string[]) {
+    if (ids.length === 0) return [];
+    const docs = await this.db.getAll(
+      ...ids.map((id) => this.db.collection(COLLECTIONS.photos).doc(id)),
+    );
+    return docs.filter(
+      (doc) => doc.exists && doc.get('ownerUid') === uid && doc.get('status') === 'valid',
+    );
+  }
+
   async listForBook(uid: string, bookId: string): Promise<PublicPhoto[]> {
     const book = await this.db.collection(COLLECTIONS.books).doc(bookId).get();
     if (book.get('ownerUid') !== uid) throw notFound();
@@ -294,8 +311,21 @@ export class PhotoService {
       .where('ownerUid', '==', uid)
       .where('bookId', '==', bookId)
       .get();
+    // Personaje reutilizado: sus fotos válidas del cuento anterior están en photoIds con otro
+    // bookId. Se muestran para usarlas o elegir otras (las vencidas ya no existen y no salen).
+    const own = new Set(snapshot.docs.map((doc) => doc.id));
+    const reusedIds = ((book.get('photoIds') as string[] | undefined) ?? []).filter(
+      (id) => !own.has(id),
+    );
+    const reused = await this.reusedPhotos(uid, reusedIds);
+    // Las que vencieron (se borran a los 30 días) salen del libro: se piden nuevas como siempre.
+    // Solo se tocan las de otro cuento: las propias recién subidas nunca se quitan acá.
+    const gone = reusedIds.filter((id) => !reused.some((doc) => doc.id === id));
+    if (gone.length > 0) {
+      await book.ref.update({ photoIds: FieldValue.arrayRemove(...gone), updatedAt: new Date() });
+    }
     const photos = await Promise.all(
-      snapshot.docs.map((doc) => this.toPublic(doc.id, doc.data() as Photo)),
+      [...snapshot.docs, ...reused].map((doc) => this.toPublic(doc.id, doc.data() as Photo)),
     );
     return photos.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }

@@ -806,6 +806,10 @@
       "reuseNoLook": "Sus datos ya están; el aspecto lo eliges en el paso del personaje."
     },
     "photos": {
+      "reusedTitle": "Fotos de {name} de su último cuento",
+      "reusedText": "Ya las tenemos: no hace falta subirlas de nuevo.",
+      "reusedKeep": "Usar estas fotos",
+      "reusedChange": "Elegir otras",
       "title": "Sube de 1 a 3 fotos",
       "subtitle": "Con ellas dibujamos un personaje que se parece al niño. Las fotos no aparecen en el libro.",
       "tipsTitle": "Para un mejor resultado",

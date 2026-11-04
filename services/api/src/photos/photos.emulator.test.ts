@@ -266,6 +266,51 @@ describe('fotos del protagonista', () => {
     expect(fourth.statusCode).toBe(409);
   });
 
+  it('las fotos de un personaje reutilizado se listan y cuentan para el límite', async () => {
+    await seedDraft('ana', 'b1');
+    const consentId = await consent(app, 'token-ana');
+    const first = await upload(app, 'token-ana', 'b1', consentId, await jpeg());
+    const second = await upload(app, 'token-ana', 'b1', consentId, await jpeg());
+    // Cuento nuevo con el mismo personaje: copia las fotos del anterior (como hace el creador).
+    await seedDraft('ana', 'b2');
+    await db.doc('books/b2').update({ photoIds: [first.photoId, second.photoId, 'vencida'] });
+
+    const list = await app.inject({
+      method: 'GET',
+      url: '/v1/books/b2/photos',
+      headers: auth('token-ana'),
+    });
+    const photos = list.json<{ photos: { id: string; bookId: string }[] }>().photos;
+    // La vencida (ya no existe) no sale; las otras vienen con su cuento de origen.
+    expect(photos.map((photo) => photo.id).sort()).toEqual([first.photoId, second.photoId].sort());
+    expect(photos.every((photo) => photo.bookId === 'b1')).toBe(true);
+    // La vencida también sale del libro nuevo.
+    expect((await db.doc('books/b2').get()).get('photoIds')).toEqual([
+      first.photoId,
+      second.photoId,
+    ]);
+
+    // 2 reutilizadas + 1 propia llegan al máximo de 3: la cuarta no se acepta.
+    await upload(app, 'token-ana', 'b2', consentId, await jpeg());
+    const fourth = await app.inject({
+      method: 'POST',
+      url: '/v1/photos',
+      headers: auth('token-ana'),
+      payload: { bookId: 'b2', consentId, contentType: 'image/jpeg', sizeBytes: 1000 },
+    });
+    expect(fourth.statusCode).toBe(409);
+
+    // Las fotos de otro usuario nunca se listan, aunque estén en photoIds.
+    await seedDraft('bob', 'b3');
+    await db.doc('books/b3').update({ photoIds: [first.photoId] });
+    const foreign = await app.inject({
+      method: 'GET',
+      url: '/v1/books/b3/photos',
+      headers: auth('token-bob'),
+    });
+    expect(foreign.json<{ photos: unknown[] }>().photos).toEqual([]);
+  });
+
   it('un archivo que no es una imagen se rechaza y se borra', async () => {
     await seedDraft('ana', 'b1');
     const { photoId, processed } = await upload(
