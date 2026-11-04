@@ -60,13 +60,16 @@ export function WizardShell({
   // Etapas: lo que se ve arriba, en el orden del flujo de la línea; dentro de cada una, el
   // sub-paso visible (1 de 2).
   const stages = stagesFor(flow);
+  // En Celebraciones, la etapa de la fiesta se llama «Celebración» (no «Aventura»).
+  const stageName = (key: string) =>
+    t(`stages.${key === 'adventure' && flow.includes('party') ? 'celebration' : key}`);
   const { stage } = stageOf(current);
   const stageIndex = stages.findIndex((item) => item.key === stage.key);
   const stageSteps = stage.steps.filter((step) => visible.includes(step));
   const progressLabel = t('stageProgress', {
     current: stageIndex + 1,
     total: stages.length,
-    name: t(`stages.${stage.key}`),
+    name: stageName(stage.key),
   });
   const subLabel =
     stageSteps.length > 1
@@ -202,7 +205,7 @@ export function WizardShell({
                         : 'border border-transparent bg-muted text-muted-foreground',
                   )}
                 >
-                  {index + 1}. {t(`stages.${item.key}`)}
+                  {index + 1}. {stageName(item.key)}
                 </button>
               </li>
             );

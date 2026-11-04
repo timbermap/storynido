@@ -1,5 +1,6 @@
 import {
   KIT_PIECES,
+  type EventType,
   recommendedStyle,
   suggestedReading,
   type Book,
@@ -25,6 +26,27 @@ export function matchTheme(
     themes.find((item) => normalize(item.name) === wanted || normalize(item.slug) === wanted) ??
     null
   );
+}
+
+/**
+ * La temática y la ocasión con que arranca un kit. Lo que viene en la URL manda; si solo viene la
+ * historia (el «Crear» de la ficha), salen de su colección: la historia de la primera comunión
+ * arranca como primera comunión, con su temática elegida.
+ */
+export function eventPresetFor(
+  themes: readonly PublicCollection[],
+  stories: readonly PublicStory[],
+  storyId: string | null,
+  theme: string | null,
+  type: EventType | null,
+): { theme: string | null; type: EventType | null } {
+  const story = storyId ? stories.find((item) => item.slug === storyId) : undefined;
+  const own = story ? themes.filter((item) => story.collectionIds.includes(item.slug)) : [];
+  const collection = own.find((item) => item.eventType) ?? own[0];
+  return {
+    theme: theme ?? collection?.name ?? null,
+    type: type ?? collection?.eventType ?? null,
+  };
 }
 
 /**

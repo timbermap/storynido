@@ -1204,6 +1204,7 @@
     "stages": {
       "character": "Their character",
       "adventure": "The adventure",
+      "celebration": "Celebration",
       "settings": "Settings",
       "preview": "Preview"
     },

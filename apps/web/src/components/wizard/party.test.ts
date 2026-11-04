@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { turningAgeFor } from '@storynido/shared';
 
 import {
+  eventPresetFor,
   matchTheme,
   offerPrices,
   miniBookOptions,
@@ -114,5 +115,43 @@ describe('edad que cumple', () => {
     expect(turningAgeFor('birthday', 6)).toBe(6);
     expect(turningAgeFor('birthday', 0)).toBeNull();
     expect(turningAgeFor('baptism', 6)).toBeNull();
+  });
+});
+
+describe('temática y ocasión con que arranca el kit', () => {
+  const themes = [
+    { slug: 'cumpleanos', name: 'El clásico de cumpleaños' },
+    { slug: 'primera-comunion', name: 'Mi primera comunión', eventType: 'communion' },
+  ] as PublicCollection[];
+  const stories = [
+    story('feliz', ['cumpleanos']),
+    story('comunion', ['primera-comunion']),
+    story('solo-familias', ['aventuras']),
+  ];
+
+  it('lo que viene en la URL manda', () => {
+    expect(eventPresetFor(themes, stories, 'comunion', 'Campeones', 'birthday')).toEqual({
+      theme: 'Campeones',
+      type: 'birthday',
+    });
+  });
+
+  it('con solo la historia, la temática y la ocasión salen de su colección', () => {
+    expect(eventPresetFor(themes, stories, 'comunion', null, null)).toEqual({
+      theme: 'Mi primera comunión',
+      type: 'communion',
+    });
+    expect(eventPresetFor(themes, stories, 'feliz', null, null)).toEqual({
+      theme: 'El clásico de cumpleaños',
+      type: null,
+    });
+  });
+
+  it('sin historia o sin colección de Celebraciones, no inventa nada', () => {
+    expect(eventPresetFor(themes, stories, null, null, null)).toEqual({ theme: null, type: null });
+    expect(eventPresetFor(themes, stories, 'solo-familias', null, null)).toEqual({
+      theme: null,
+      type: null,
+    });
   });
 });
