@@ -205,6 +205,25 @@ describe('borrado de datos a pedido', () => {
     expect(body.photos).toBe(1);
     expect(body.photoUrls).toHaveLength(1);
     expect(body.photoIds).toEqual(['p1']);
+
+    // Una foto rechazada (su archivo ya no existe) no se muestra ni cuenta.
+    await db.doc('photos/p-rechazada').set({
+      ownerUid: 'ana',
+      childId: 'c1',
+      storagePath: 'ana/child-c1/p-rechazada/original',
+      processedPath: null,
+      status: 'rejected',
+    });
+    const again = (
+      await app.inject({
+        method: 'GET',
+        url: '/v1/me/children/c1/profile',
+        headers: auth('token-ana'),
+      })
+    ).json<{ photoIds: string[]; photos: number }>();
+    expect(again.photoIds).toEqual(['p1']);
+    expect(again.photos).toBe(1);
+    await db.doc('photos/p-rechazada').delete();
     expect(body.photosExpireAt).toBe('2099-12-01T00:00:00.000Z');
     expect(body.validPhotos).toBe(1);
     expect(body.books.map((book) => book.id).sort()).toEqual(['b1', 'b2']);

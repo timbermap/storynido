@@ -517,7 +517,6 @@
       "profileLoadError": "Não conseguimos carregar este personagem.",
       "profileMissing": "Este personagem não existe ou já foi apagado.",
       "profileImageAlt": "Desenho de {name}",
-      "profileNoImage": "Ainda não há desenho aprovado. Ele aparece quando você aprova o personagem em uma história.",
       "profileDataTitle": "Dados",
       "profilePronouns": "Como nos referimos a essa pessoa?",
       "profileLikes": "Do que gosta",
@@ -726,7 +725,10 @@
       },
       "profilePhotoAddAnother": "Adicionar outra",
       "profilePhotoRemove": "Remover a foto {index}",
-      "profilePhotoUploadError": "Não conseguimos enviar a foto. Tente outra."
+      "profilePhotoUploadError": "Não conseguimos enviar a foto. Tente outra.",
+      "profileNoDrawing": "Ainda não tem desenho.",
+      "profileNoDrawingNoPhoto": "Ainda não tem desenho. Envie uma foto abaixo para criá-lo.",
+      "profilePhotoRejected": "Esta foto não serve."
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },

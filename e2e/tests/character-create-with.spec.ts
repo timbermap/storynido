@@ -50,7 +50,7 @@ test('crear otro cuento con un personaje: se elige qué crear y su dibujo se pue
   await charactersTab(page);
   await page.getByRole('link', { name: 'Ver perfil' }).first().click();
   await heading(page, 'Martina');
-  await page.getByRole('button', { name: 'Crear su dibujo' }).click();
+  await page.getByRole('button', { name: 'Crear su dibujo' }).first().click();
   await expect(page.getByText('El nuevo', { exact: true })).toBeVisible({ timeout: 60_000 });
   await expect(page).toHaveURL(/personajes\//);
 });

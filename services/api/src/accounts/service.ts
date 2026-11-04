@@ -123,7 +123,10 @@ export class AccountService {
       .where('ownerUid', '==', uid)
       .where('childId', '==', childId)
       .get();
-    const expiries = photos.docs
+    // Solo las fotos válidas: una rechazada ya no tiene archivo (se borra al rechazarla) y una
+    // pendiente todavía no terminó de subirse; mostrarlas dejaba la miniatura rota.
+    const shown = photos.docs.filter((doc) => doc.get('status') === 'valid');
+    const expiries = shown
       .map((doc) => (doc.get('expiresAt') as { toDate(): Date } | undefined)?.toDate().getTime())
       .filter((time): time is number => typeof time === 'number');
 
@@ -148,11 +151,11 @@ export class AccountService {
       }))
       .sort((a, b) => b.time - a.time);
     // Los ids van en el mismo orden que las URL: para quitar una foto desde el perfil.
-    const photoIds = photos.docs
+    const photoIds = shown
       .filter((doc) => typeof doc.get('storagePath') === 'string')
       .map((doc) => doc.id);
     const photoUrls = await Promise.all(
-      photos.docs.flatMap((doc) => {
+      shown.flatMap((doc) => {
         const path = doc.get('storagePath') as string | undefined;
         return path
           ? [
@@ -171,7 +174,7 @@ export class AccountService {
     const withCharacter = sorted.find((book) => book.preview?.character?.previewImagePath);
     return {
       characterImageUrl: await url(withCharacter?.preview?.character?.previewImagePath),
-      photos: photos.size,
+      photos: shown.length,
       validPhotos,
       photosExpireAt: expiries.length > 0 ? new Date(Math.min(...expiries)).toISOString() : null,
       photoUrls,

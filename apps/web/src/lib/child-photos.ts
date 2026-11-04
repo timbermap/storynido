@@ -31,3 +31,19 @@ export function acceptedPhotos(list: FileList | null): File[] {
       item.size <= PHOTO_RULES.maxBytes,
   );
 }
+
+/**
+ * Sube las fotos y devuelve los motivos de las que no sirvieron (esas se borran: no tienen archivo
+ * y dejarían la miniatura rota). Las que sirven quedan en el personaje.
+ */
+export async function uploadChildPhotos(childId: string, photos: File[], locale: Locale) {
+  const rejected: string[] = [];
+  for (const photo of photos) {
+    const result = await uploadChildPhoto(childId, photo, locale);
+    if (result.status === 'rejected') {
+      rejected.push(...result.rejectionReasons);
+      await api('deletePhoto', { params: { photoId: result.id } }).catch(() => undefined);
+    }
+  }
+  return [...new Set(rejected)];
+}
