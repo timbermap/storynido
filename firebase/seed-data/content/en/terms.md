@@ -12,7 +12,7 @@ You must be an adult to use the service. Accounts belong to responsible adults; 
 
 ## 3. Data and photos you upload
 
-You declare that you are the child's parent or legal guardian, or have their authorization, and that you have the right to use the photos you upload. We use those photos only to create the book you ordered and delete them after 30 days. See the [Privacy policy](/en/legal/privacy).
+You declare that you are the child's parent or legal guardian, or have their authorization, and that you have the right to use the photos you upload. We use those photos only to create the child's character and their books, and delete them after 30 days. See the [Privacy policy](/en/legal/privacy).
 
 ## 4. Generated content
 
