@@ -10,7 +10,7 @@ const next = (page: Page) => page.getByRole('button', { name: 'Siguiente' }).cli
 async function cardHref(page: Page) {
   await page.goto('/es/eventos/tematicas');
   const card = page.locator('li', { has: page.locator('h3', { hasText: 'Mi primera comunión' }) });
-  const link = card.getByRole('link', { name: /Diseñar el kit con este tema/ });
+  const link = card.locator('a[data-track="collection_start"]');
   // Sin sesión lleva a ingresar; con sesión (ya cargada), al creador.
   await expect(link).toHaveAttribute('href', /crear/, { timeout: 15_000 });
   return link.getAttribute('href');

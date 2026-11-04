@@ -335,7 +335,20 @@ const BIRTHDAY_THEMES: Record<string, string[]> = {
   'secreto-del-fondo-del-mar': ['cumple-animales'],
   'reino-encantado': ['cumple-fantasia'],
   'gol-de-campeon': ['cumple-campeones'],
+  'la-gran-carrera': ['cumple-campeones'],
 };
+
+/** Suma Celebraciones y sus temáticas de cumpleaños a las historias de BIRTHDAY_THEMES. */
+function withBirthdayThemes(story: SeedStory): SeedStory {
+  const themes = BIRTHDAY_THEMES[story.slug];
+  return themes
+    ? {
+        ...story,
+        channels: [...new Set([...story.channels, 'events' as const])],
+        collectionIds: [...story.collectionIds, ...themes],
+      }
+    : story;
+}
 
 /** Elenco de la marca por historia (rediseño de imágenes, DECISIONS 157). */
 export const STORY_CAST: Record<string, string> = {
@@ -431,16 +444,7 @@ export const LIGHT_INK_SLUGS = [
   'dentro-del-videojuego',
 ];
 
-export const SEED_STORIES: SeedStory[] = ADVENTURES.map((story) => {
-  const themes = BIRTHDAY_THEMES[story.slug];
-  return themes
-    ? {
-        ...story,
-        channels: [...new Set([...story.channels, 'events' as const])],
-        collectionIds: [...story.collectionIds, ...themes],
-      }
-    : story;
-});
+export const SEED_STORIES: SeedStory[] = ADVENTURES.map(withBirthdayThemes);
 
 /** Historias de las colecciones nuevas (fase 07c), con portada en `/samples/<slug>.webp`. */
 const NEW_STORY_BASE = {
@@ -932,7 +936,7 @@ const DRAFT_STORIES: SeedStory[] = [
 
 export const SEED_DRAFT_STORIES: SeedStory[] = DRAFT_STORIES.filter(
   (story) => !PENDING_COVER_SLUGS.includes(story.slug),
-);
+).map(withBirthdayThemes);
 
 export const SEED_NEW_STORIES: SeedStory[] = [
   {

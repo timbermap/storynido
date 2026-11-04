@@ -216,6 +216,7 @@ export function LandingCollections({
   collections,
   stories = [],
   createLabel,
+  viewLabel,
   line,
   start,
   tone = 'cream',
@@ -238,6 +239,8 @@ export function LandingCollections({
   stories?: PublicStory[];
   /** Texto del enlace accesible de cada tapa ("Ver la historia"). */
   createLabel?: string;
+  /** Enlace chico debajo de las tapas cuando la tarjeta tiene 1 o 2 historias ("Ver el cuento"). */
+  viewLabel?: string;
   /** Público de la landing: la ficha de la historia vuelve a ella y crea en su línea. */
   line?: Channel;
   /**
@@ -278,11 +281,13 @@ export function LandingCollections({
                 <ArrowRight className="size-4" aria-hidden="true" />
               </>
             ) : null;
-            return (
-              <li
-                key={collection.slug}
-                className="w-[85%] shrink-0 snap-start rounded-xl border bg-card p-6 shadow-[var(--shadow-card)] sm:w-[60%] lg:w-auto"
-              >
+            const storyHref = (slug: string) => ({
+              pathname: '/stories/[slug]' as const,
+              params: { slug },
+              query: line ? { line } : undefined,
+            });
+            const text = (
+              <>
                 <h3 className="text-2xl font-medium">{collection.name}</h3>
                 <p className="mt-2 text-muted-foreground">{collection.description}</p>
                 {collection.topics.length > 0 && (
@@ -319,17 +324,67 @@ export function LandingCollections({
                     className="mt-5 inline-flex min-h-11 items-center gap-2 font-semibold text-primary underline-offset-4 hover:underline"
                   />
                 )}
-                {own.length > 0 && (
+              </>
+            );
+            // Con 1 o 2 historias la tapa va al costado (arriba en el celular) y no queda la
+            // tarjeta a medio llenar; con 3 o más, la grilla de tapas debajo del texto.
+            const side = own.length > 0 && own.length <= 2;
+            return (
+              <li
+                key={collection.slug}
+                className="w-[85%] shrink-0 snap-start rounded-xl border bg-card p-6 shadow-[var(--shadow-card)] sm:w-[60%] lg:w-auto"
+              >
+                {side ? (
+                  <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
+                    <ul
+                      className={cn(
+                        'grid gap-3 lg:w-[40%] lg:shrink-0',
+                        own.length === 2 ? 'max-w-[18rem] grid-cols-2' : 'max-w-[11rem]',
+                        'lg:max-w-none',
+                      )}
+                    >
+                      {own.map((story) => (
+                        <li key={story.slug} className="min-w-0">
+                          {/* La tapa también lleva a la ficha, sin competir con el botón: el
+                              enlace accesible es «Ver el cuento». */}
+                          <Link
+                            href={storyHref(story.slug)}
+                            tabIndex={-1}
+                            aria-hidden="true"
+                            className="group block"
+                          >
+                            <div className="aspect-[3/4] w-full overflow-hidden rounded-lg shadow-[var(--shadow-card)] transition group-hover:-translate-y-0.5">
+                              <StoryCover
+                                story={story}
+                                line={line}
+                                sizes="(min-width: 1024px) 14rem, 45vw"
+                              />
+                            </div>
+                          </Link>
+                          <Link
+                            href={storyHref(story.slug)}
+                            aria-label={
+                              createLabel ? `${createLabel}: ${story.title}` : story.title
+                            }
+                            className="mt-1.5 inline-flex min-h-8 items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-primary"
+                          >
+                            {viewLabel ?? story.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="min-w-0 flex-1">{text}</div>
+                  </div>
+                ) : (
+                  text
+                )}
+                {!side && own.length > 0 && (
                   <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {own.map((story) => (
                       <li key={story.slug} className="min-w-0">
                         <Link
                           // La ficha de la historia: edades, fragmento, ejemplo para hojear y precios.
-                          href={{
-                            pathname: '/stories/[slug]',
-                            params: { slug: story.slug },
-                            query: line ? { line } : undefined,
-                          }}
+                          href={storyHref(story.slug)}
                           aria-label={createLabel ? `${createLabel}: ${story.title}` : story.title}
                           className="group block"
                         >
