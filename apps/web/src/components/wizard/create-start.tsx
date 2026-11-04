@@ -24,6 +24,7 @@ import { ProActivationCard } from '@/components/pro/pro-activation';
 import { useProStatus } from '@/components/pro/use-pro-status';
 
 import { DraftsList } from './drafts-list';
+import { eventPresetFor } from './party';
 import { WizardSkeleton } from './wizard-skeleton';
 import { Wizard } from './wizard';
 import { SignInGate } from './sign-in-gate';
@@ -102,6 +103,12 @@ export function CreateStart({
     setFresh(true);
   }
 
+  // Celebraciones: la temática y la ocasión de la URL o, si solo viene la historia, de su colección.
+  const eventPreset = (line: Channel) =>
+    line === 'events'
+      ? eventPresetFor(catalog.eventThemes, catalog.stories, storyId, eventTheme, eventType)
+      : { theme: null, type: null };
+
   const onUser = useEffectEvent(async () => {
     if (!user || !signedIn || !proReady) return;
     const db = await getFirebaseDb();
@@ -125,16 +132,17 @@ export function CreateStart({
       }
       // Es una creación nueva: no hereda lo que se escribió antes en este borrador.
       clearStepDrafts(reusable.id);
+      const party = eventPreset(line);
       await updateBook(db, reusable.id, {
         ...(storyId ? { storyId } : {}),
         ...(lessonId ? { lessonIds: [lessonId] } : {}),
         ...(contentType ? { contentType } : {}),
-        ...((eventTheme || eventType) && line === 'events'
+        ...(party.theme || party.type
           ? {
               event: {
                 ...EMPTY_BIRTHDAY,
-                ...(eventType ? { type: eventType } : {}),
-                theme: eventTheme,
+                ...(party.type ? { type: party.type } : {}),
+                theme: party.theme,
               },
             }
           : {}),
@@ -193,8 +201,8 @@ export function CreateStart({
           storyId,
           lessonId,
           channel,
-          eventTheme,
-          eventType,
+          eventTheme: eventPreset(channel).theme,
+          eventType: eventPreset(channel).type,
           contentType,
         }}
         catalog={catalog}

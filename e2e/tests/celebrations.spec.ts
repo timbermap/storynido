@@ -50,7 +50,7 @@ test('Celebraciones: de la temática de la landing a la muestra y el pago del ki
 
   // Aventura: la temática llega elegida y se puede cambiar; la historia no se pregunta.
   await heading(page, 'La fiesta');
-  await expect(page.locator('body')).toContainText('Etapa 2 de 4: Aventura');
+  await expect(page.locator('body')).toContainText('Etapa 2 de 4: Celebración');
   await expect(page.locator('label', { hasText: 'Campeones' }).locator('input')).toBeChecked();
   await page.locator('#event-date').fill('2026-12-12');
   await page.locator('#event-place').fill('Parque Lezama');
