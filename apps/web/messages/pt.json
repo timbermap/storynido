@@ -495,7 +495,7 @@
       "loadFailed": "Não conseguimos carregar suas histórias em andamento. Recarregue a página para tentar de novo.",
       "start": "Começar",
       "tabCharacters": "Personagens",
-      "charactersNote": "As crianças para quem você já criou uma história. Você pode mudar o nome e a idade ou apagar os dados.",
+      "charactersNote": "Suas crianças e os personagens. Você pode mudar o nome e a idade, criar o desenho ou apagar os dados.",
       "charactersEmpty": "Você ainda não criou nenhum personagem.",
       "charactersAge": "{age} anos",
       "characterEdit": "Editar",
@@ -610,7 +610,7 @@
           "likes": "Do que gosta",
           "delete": "Apagar {name}",
           "add": "Adicionar outra criança",
-          "addText": "Uma história nova, com a foto e as coisas favoritas."
+          "addText": "Salve os dados e a foto; depois você decide se cria uma história."
         },
         "ideas": {
           "title": "Ideias para {name}",

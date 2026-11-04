@@ -495,7 +495,7 @@
       "loadFailed": "We couldn't load your stories in progress. Reload the page to try again.",
       "start": "Get started",
       "tabCharacters": "Characters",
-      "charactersNote": "The children you have already created a story for. You can change their name and age, or delete their data.",
+      "charactersNote": "Your kids and their characters. You can change their name and age, create their drawing or delete their data.",
       "charactersEmpty": "You have not created any characters yet.",
       "charactersAge": "{age} years old",
       "characterEdit": "Edit",
@@ -610,7 +610,7 @@
           "likes": "What they like",
           "delete": "Delete {name}",
           "add": "Add another child",
-          "addText": "A new story, with their photo and favorite things."
+          "addText": "Save their details and photo; then decide whether to create a story."
         },
         "ideas": {
           "title": "Ideas for {name}",

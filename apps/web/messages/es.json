@@ -495,7 +495,7 @@
       "loadFailed": "No pudimos cargar tus cuentos en proceso. Recarga la página para intentarlo de nuevo.",
       "start": "Comenzar",
       "tabCharacters": "Personajes",
-      "charactersNote": "Los chicos para quienes ya creaste un cuento. Puedes cambiar su nombre y edad, o borrar sus datos.",
+      "charactersNote": "Tus chicos y sus personajes. Puedes cambiar su nombre y edad, crear su dibujo o borrar sus datos.",
       "charactersEmpty": "Todavía no creaste ningún personaje.",
       "charactersAge": "{age} años",
       "characterEdit": "Editar",
@@ -610,7 +610,7 @@
           "likes": "Lo que le gusta",
           "delete": "Borrar a {name}",
           "add": "Agregar a otro chico",
-          "addText": "Un cuento nuevo, con su foto y sus cosas favoritas."
+          "addText": "Guarda sus datos y su foto; después decides si crear un cuento."
         },
         "ideas": {
           "title": "Ideas para {name}",
