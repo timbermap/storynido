@@ -544,7 +544,7 @@ const JOBS: Job[] = [
   softCover(
     'el-tesoro-de-la-isla',
     'mint',
-    `${at('tomas', 6)} as a friendly pirate in a simple pirate hat and striped shirt, holding an unrolled treasure map with a red X, standing on a sandy beach of a small island with a palm tree; a small wooden ship with a plain sail waits in the water behind him. No weapons, no swords, no skulls.`,
+    `${at('tomas', 6)} as a friendly pirate in a simple pirate hat and striped shirt, holding an unrolled treasure map with a red X, standing on the sandy beach of a small island with a palm tree. The whole background is continuous gouache sea and sky: a soft pale sky in the top third fading into calm blue-green sea behind the island that reaches both side edges of the cover, with no white or empty areas. A small wooden ship with a plain sail floats on the water behind him. No weapons, no swords, no skulls, no text.`,
   ),
   softCover(
     'mi-primer-anito',
