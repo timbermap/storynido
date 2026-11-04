@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
+import { LikesInput, withPendingLike } from '@/components/wizard/likes-input';
 import { AVATAR_TRAITS, TraitPicker, type TraitDraft } from '@/components/wizard/trait-picker';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
@@ -44,7 +45,8 @@ export function NewCharacter() {
   const [name, setName] = useState('');
   const [age, setAge] = useState(5);
   const [pronouns, setPronouns] = useState<(typeof PRONOUNS)[number] | null>(null);
-  const [likes, setLikes] = useState('');
+  const [likes, setLikes] = useState<string[]>([]);
+  const [like, setLike] = useState('');
   const [mode, setMode] = useState<'photo' | 'avatar'>('photo');
   const [consent, setConsent] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -90,11 +92,8 @@ export function NewCharacter() {
         name: name.trim().slice(0, CHILD_LIMITS.nameMaxLength),
         age,
         pronouns,
-        likes: likes
-          .split(',')
-          .map((like) => like.trim().slice(0, CHILD_LIMITS.likeMaxLength))
-          .filter(Boolean)
-          .slice(0, CHILD_LIMITS.maxLikes),
+        // Lo que quedó escrito sin agregar también se guarda.
+        likes: withPendingLike(likes, like),
         petName: null,
         bestFriendName: null,
         createdAt: serverTimestamp(),
@@ -148,7 +147,7 @@ export function NewCharacter() {
             }}
           />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
           <div className="grid gap-2">
             <label htmlFor="new-child-age" className="font-semibold">
               {tChild('age')}
@@ -170,7 +169,7 @@ export function NewCharacter() {
           </div>
           <div className="grid gap-2">
             <label htmlFor="new-child-pronouns" className="font-semibold">
-              {tChild('pronouns')}
+              {t('pronouns')}
             </label>
             <select
               id="new-child-pronouns"
@@ -189,20 +188,17 @@ export function NewCharacter() {
             </select>
           </div>
         </div>
-        <div className="grid gap-2">
-          <label htmlFor="new-child-likes" className="font-semibold">
-            {tChild('likes')}
-          </label>
-          <input
-            id="new-child-likes"
-            className={field}
-            value={likes}
-            placeholder={t('likesPlaceholder')}
-            onChange={(event) => {
-              setLikes(event.target.value);
-            }}
-          />
-        </div>
+        <LikesInput
+          id="new-child-likes"
+          label={tChild('likes')}
+          hint={tChild('likesHint')}
+          likes={likes}
+          onLikes={setLikes}
+          like={like}
+          onLike={setLike}
+          labelClassName="font-semibold"
+          inputClassName={field}
+        />
 
         <fieldset className="grid gap-3">
           <legend className="mb-1 font-semibold">{t('looks')}</legend>

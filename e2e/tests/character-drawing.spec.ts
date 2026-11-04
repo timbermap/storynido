@@ -21,12 +21,24 @@ test('agregar a un chico sin cuento y crear, usar, ajustar y descartar su dibujo
   await heading(page, 'Agregar a otro chico');
   await page.locator('#new-child-name').fill('Lu');
   await page.locator('#new-child-age').selectOption('4');
+  // «¿Qué le gusta?» como en el creador: Enter agrega un chip; lo que queda escrito se guarda igual.
+  await page.locator('#new-child-likes').fill('dinosaurios');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('li', { hasText: 'dinosaurios' })).toBeVisible();
+  await page.locator('#new-child-likes').fill('pintar');
   await page.locator('label', { hasText: 'Sin foto, con sus rasgos' }).click();
   for (const label of ['Morena', 'Negro', 'Corto', 'Rizado', 'Verdes']) {
     await page.locator('label', { hasText: label }).first().click();
   }
   await page.getByRole('button', { name: 'Guardar personaje' }).click();
   await heading(page, 'Lu');
+  await expect
+    .poll(() =>
+      page
+        .locator('main input')
+        .evaluateAll((els) => els.map((el) => (el as HTMLInputElement).value).join('|')),
+    )
+    .toContain('dinosaurios, pintar');
   // Ningún cuento nuevo.
   await expect(page.locator('body')).not.toContainText('Borrador');
 
