@@ -145,6 +145,8 @@ export function CharacterProfile({ childId }: { childId: string }) {
   const name = details.name;
 
   const photoSlots = Math.max(0, PHOTO_RULES.maxPhotosPerBook - profile.photos);
+  // El botón del recuadro aparece solo con una foto válida cargada (con rasgos se crea desde «Su dibujo»).
+  const withPhoto = profile.photos > 0 && profile.drawing.canDraw;
 
   async function reloadProfile() {
     setProfile(await loadProfile(childId));
@@ -277,10 +279,8 @@ export function CharacterProfile({ childId }: { childId: string }) {
             />
           ) : (
             <div className="grid size-full place-content-center justify-items-center gap-3 p-4 text-center text-sm text-muted-foreground">
-              <p>
-                {profile.drawing.canDraw ? t('profileNoDrawing') : t('profileNoDrawingNoPhoto')}
-              </p>
-              {profile.drawing.canDraw && !profile.drawing.candidateUrl && (
+              <p>{withPhoto ? t('profileNoDrawing') : t('profileNoDrawingNoPhoto')}</p>
+              {withPhoto && !profile.drawing.candidateUrl && (
                 <Button
                   type="button"
                   size="sm"
