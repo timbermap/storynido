@@ -533,7 +533,7 @@
       "profileCreate": "Create a story with {name}",
       "profileCreateNote": "Their name, age and interests will already be filled in.",
       "profilePhotoTitle": "Their photo",
-      "profilePhotoNone": "No photos are stored. If you create another story with their photo, we use it and delete it after 30 days.",
+      "profilePhotoNone": "No photos saved. Upload one to create or update their drawing; it is deleted after 30 days.",
       "profilePhotoSome": "{count, plural, one {# photo is stored} other {# photos are stored}}. {count, plural, one {It is} other {They are}} deleted automatically on {date}.",
       "profilePhotoAlt": "Photo {index} of {name}",
       "profilePhotoKeep": "The character drawing and details stay even if you delete the photo.",
@@ -715,14 +715,18 @@
         "looks": "How should we draw them?",
         "withPhoto": "With their photo",
         "withoutPhoto": "No photo, with their traits",
-        "photo": "Their photo",
         "photoNote": "Face forward and clearly visible. It is deleted after 30 days; you can delete it sooner.",
         "save": "Save character",
         "saveNote": "No story is created and no AI generation is used.",
         "error": "We could not save it. Please try again.",
         "pronouns": "Pronouns (optional)",
-        "photoChange": "Choose another photo"
-      }
+        "photoPreview": "Chosen photo {number}",
+        "photos": "Their photos (up to 3)",
+        "photoRemove": "Remove photo {number}"
+      },
+      "profilePhotoAddAnother": "Add another",
+      "profilePhotoRemove": "Remove photo {index}",
+      "profilePhotoUploadError": "We could not upload the photo. Try another one."
     },
     "myStoriesLink": "Your stories and orders are in My stories →"
   },

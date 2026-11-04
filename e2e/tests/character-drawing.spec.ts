@@ -32,13 +32,9 @@ test('agregar a un chico sin cuento y crear, usar, ajustar y descartar su dibujo
   }
   await page.getByRole('button', { name: 'Guardar personaje' }).click();
   await heading(page, 'Lu');
-  await expect
-    .poll(() =>
-      page
-        .locator('main input')
-        .evaluateAll((els) => els.map((el) => (el as HTMLInputElement).value).join('|')),
-    )
-    .toContain('dinosaurios, pintar');
+  // En el perfil, los gustos también son chips.
+  await expect(page.locator('li', { hasText: 'dinosaurios' })).toBeVisible();
+  await expect(page.locator('li', { hasText: 'pintar' })).toBeVisible();
   // Ningún cuento nuevo.
   await expect(page.locator('body')).not.toContainText('Borrador');
 
@@ -64,9 +60,27 @@ test('agregar a un chico sin cuento y crear, usar, ajustar y descartar su dibujo
   await page.locator('#new-child-name').fill('Teo');
   await page.locator('input[type=checkbox]').first().check();
   await page.locator('#new-child-photo').setInputFiles(testPhoto());
+  // Vista previa antes de guardar, con quitar.
+  await expect(page.getByRole('img', { name: 'Foto elegida 1' })).toBeVisible();
+  await page.getByRole('button', { name: 'Quitar la foto 1' }).click();
+  await expect(page.getByRole('img', { name: 'Foto elegida 1' })).toHaveCount(0);
+  await page.locator('#new-child-photo').setInputFiles(testPhoto());
   await page.getByRole('button', { name: 'Guardar personaje' }).click();
   await heading(page, 'Teo');
   await expect(page.getByRole('button', { name: 'Crear su dibujo' })).toBeVisible({
     timeout: 60_000,
   });
+
+  // En el perfil: quitar la foto y volver a subir una desde ahí (sin cuento).
+  await page.getByRole('button', { name: 'Quitar la foto 1' }).click();
+  await expect(page.locator('body')).toContainText('No hay fotos guardadas', { timeout: 30_000 });
+  await page
+    .locator('section', { hasText: 'No hay fotos guardadas' })
+    .locator('input[type=checkbox]')
+    .check();
+  await page.locator('#profile-photo').setInputFiles(testPhoto());
+  await expect(page.getByRole('button', { name: 'Quitar la foto 1' })).toBeVisible({
+    timeout: 60_000,
+  });
+  await expect(page.getByRole('button', { name: 'Crear su dibujo' })).toBeVisible();
 });

@@ -3,13 +3,12 @@
 import {
   CHILD_LIMITS,
   COLLECTIONS,
-  PHOTO_CONSENT_VERSION,
   PHOTO_RULES,
   type Avatar,
   type Locale,
 } from '@storynido/shared';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { ImagePlus, Loader2 } from 'lucide-react';
+import { ImagePlus, Loader2, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
@@ -19,6 +18,7 @@ import { LikesInput, withPendingLike } from '@/components/wizard/likes-input';
 import { AVATAR_TRAITS, TraitPicker, type TraitDraft } from '@/components/wizard/trait-picker';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { acceptedPhotos, uploadChildPhoto } from '@/lib/child-photos';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { LEGAL_SLUGS } from '@/lib/legal';
 import { cn } from '@/lib/utils';
@@ -49,8 +49,21 @@ export function NewCharacter() {
   const [like, setLike] = useState('');
   const [mode, setMode] = useState<'photo' | 'avatar'>('photo');
   const [consent, setConsent] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const photoInput = useRef<HTMLInputElement>(null);
+  // Vista previa local de las fotos elegidas (no se suben hasta guardar).
+  const [previews, setPreviews] = useState<string[]>([]);
+  useEffect(() => {
+    const urls = files.map((item) => URL.createObjectURL(item));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPreviews(urls);
+    return () => {
+      urls.forEach((url) => {
+        URL.revokeObjectURL(url);
+      });
+    };
+  }, [files]);
+  const slotsLeft = PHOTO_RULES.maxPhotosPerBook - files.length;
   const [traits, setTraits] = useState<TraitDraft>({ glasses: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,25 +75,8 @@ export function NewCharacter() {
   const ready =
     name.trim() !== '' &&
     (mode === 'photo'
-      ? consent && file !== null
+      ? consent && files.length > 0
       : AVATAR_TRAITS.every((trait) => Boolean(traits[trait])));
-
-  async function uploadPhoto(childId: string, photo: File) {
-    const { consentId } = await api('createConsent', {
-      body: { type: 'photo_upload', textVersion: PHOTO_CONSENT_VERSION, locale },
-    });
-    const { photoId, upload } = await api('createPhoto', {
-      body: {
-        childId,
-        consentId,
-        contentType: photo.type as (typeof PHOTO_RULES.allowedTypes)[number],
-        sizeBytes: photo.size,
-      },
-    });
-    const put = await fetch(upload.url, { method: 'PUT', headers: upload.headers, body: photo });
-    if (!put.ok) throw new Error('upload');
-    return api('processPhoto', { params: { photoId } });
-  }
 
   async function save() {
     if (!user || !ready) return;
@@ -100,9 +96,11 @@ export function NewCharacter() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      if (mode === 'photo' && file) {
-        // Si la foto no sirve, el personaje queda igual: en su perfil se ve el motivo y se sube otra.
-        await uploadPhoto(ref.id, file).catch(() => undefined);
+      if (mode === 'photo' && files.length > 0) {
+        // Si alguna foto no sirve, el personaje queda igual: en su perfil se ve y se sube otra.
+        for (const photo of files) {
+          await uploadChildPhoto(ref.id, photo, locale).catch(() => undefined);
+        }
       } else {
         await api('setChildAvatar', {
           params: { childId: ref.id },
@@ -252,38 +250,66 @@ export function NewCharacter() {
                 </Link>
               </span>
             </label>
-            <p className="font-semibold">{t('photo')}</p>
+            <p className="font-semibold">{t('photos')}</p>
             {/* Botón propio (como en el paso de fotos): el del navegador dice «Choose File». */}
             <input
               ref={photoInput}
               id="new-child-photo"
               type="file"
+              multiple
               accept={PHOTO_RULES.allowedTypes.join(',')}
               className="sr-only"
               tabIndex={-1}
-              disabled={!consent}
+              disabled={!consent || slotsLeft <= 0}
               onChange={(event) => {
-                setFile(event.target.files?.[0] ?? null);
+                const chosen = acceptedPhotos(event.target.files);
+                event.target.value = '';
+                setFiles((current) =>
+                  [...current, ...chosen].slice(0, PHOTO_RULES.maxPhotosPerBook),
+                );
               }}
             />
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={!consent}
-                onClick={() => photoInput.current?.click()}
-              >
-                <ImagePlus aria-hidden="true" />
-                {file ? t('photoChange') : tPhotos('choose')}
-              </Button>
-              {file && (
-                <span className="min-w-0 truncate text-sm font-semibold" aria-live="polite">
-                  {file.name}
-                </span>
-              )}
-            </div>
+            {files.length > 0 && (
+              <ul className="grid grid-cols-3 gap-3 sm:max-w-md" aria-live="polite">
+                {files.map((item, index) => (
+                  <li
+                    key={`${item.name}-${String(index)}`}
+                    className="relative overflow-hidden rounded-xl border bg-muted"
+                  >
+                    {previews[index] && (
+                      // eslint-disable-next-line @next/next/no-img-element -- URL local de la foto elegida.
+                      <img
+                        src={previews[index]}
+                        alt={t('photoPreview', { number: index + 1 })}
+                        className="aspect-square w-full object-cover"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      className="absolute top-1.5 right-1.5 grid size-8 place-items-center rounded-full bg-card/90 text-foreground shadow hover:bg-card"
+                      aria-label={t('photoRemove', { number: index + 1 })}
+                      onClick={() => {
+                        setFiles((current) => current.filter((_, i) => i !== index));
+                      }}
+                    >
+                      <X className="size-4" aria-hidden="true" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-fit"
+              disabled={!consent || slotsLeft <= 0}
+              onClick={() => photoInput.current?.click()}
+            >
+              <ImagePlus aria-hidden="true" />
+              {tPhotos('choose')}
+            </Button>
             <p className="text-sm text-muted-foreground">
-              {tPhotos('formats')}. {t('photoNote')}
+              {slotsLeft <= 0 ? tPhotos('limit') : tPhotos('formats')}. {t('photoNote')}
             </p>
           </div>
         ) : (

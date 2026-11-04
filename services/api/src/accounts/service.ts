@@ -147,6 +147,10 @@ export class AccountService {
         time: (doc.get('updatedAt') as { toMillis?: () => number } | undefined)?.toMillis?.() ?? 0,
       }))
       .sort((a, b) => b.time - a.time);
+    // Los ids van en el mismo orden que las URL: para quitar una foto desde el perfil.
+    const photoIds = photos.docs
+      .filter((doc) => typeof doc.get('storagePath') === 'string')
+      .map((doc) => doc.id);
     const photoUrls = await Promise.all(
       photos.docs.flatMap((doc) => {
         const path = doc.get('storagePath') as string | undefined;
@@ -171,6 +175,7 @@ export class AccountService {
       validPhotos,
       photosExpireAt: expiries.length > 0 ? new Date(Math.min(...expiries)).toISOString() : null,
       photoUrls,
+      photoIds,
       books: await Promise.all(
         sorted.slice(0, 12).map(async (book) => ({
           id: book.id,

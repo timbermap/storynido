@@ -1377,6 +1377,8 @@ export const apiRoutes = {
       validPhotos: z.number().int().default(0),
       /** Las fotos vigentes, para que la persona vea qué subió (URL firmada, 30 min). */
       photoUrls: z.array(z.string()),
+      /** Los ids de esas fotos, en el mismo orden (para quitar una). */
+      photoIds: z.array(z.string()).default([]),
       /** Su dibujo: el actual, uno nuevo por aprobar y si se puede crear (fotos vigentes o rasgos). */
       drawing: characterDrawingSchema.default({
         candidateUrl: null,

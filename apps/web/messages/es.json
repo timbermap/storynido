@@ -533,7 +533,7 @@
       "profileCreate": "Crear un cuento con {name}",
       "profileCreateNote": "Ya tendrá cargados su nombre, edad y gustos.",
       "profilePhotoTitle": "Su foto",
-      "profilePhotoNone": "No hay fotos guardadas. Si creas otro cuento con su foto, la usamos y la borramos a los 30 días.",
+      "profilePhotoNone": "No hay fotos guardadas. Sube una para crear o actualizar su dibujo; se borra a los 30 días.",
       "profilePhotoSome": "{count, plural, one {Hay # foto guardada. Se borra} other {Hay # fotos guardadas. Se borran}} automáticamente el {date}.",
       "profilePhotoAlt": "Foto {index} de {name}",
       "profilePhotoKeep": "El dibujo del personaje y sus datos se conservan aunque borres la foto.",
@@ -715,14 +715,18 @@
         "looks": "¿Cómo lo dibujamos?",
         "withPhoto": "Con su foto",
         "withoutPhoto": "Sin foto, con sus rasgos",
-        "photo": "Su foto",
         "photoNote": "Cara de frente y bien visible. Se borra a los 30 días; puedes borrarla antes.",
         "save": "Guardar personaje",
         "saveNote": "No se crea ningún cuento ni se usa ninguna generación de IA.",
         "error": "No pudimos guardarlo. Intenta de nuevo.",
         "pronouns": "Pronombre (opcional)",
-        "photoChange": "Elegir otra foto"
-      }
+        "photoPreview": "Foto elegida {number}",
+        "photos": "Sus fotos (hasta 3)",
+        "photoRemove": "Quitar la foto {number}"
+      },
+      "profilePhotoAddAnother": "Agregar otra",
+      "profilePhotoRemove": "Quitar la foto {index}",
+      "profilePhotoUploadError": "No pudimos subir la foto. Prueba con otra."
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },

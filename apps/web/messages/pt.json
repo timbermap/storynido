@@ -533,7 +533,7 @@
       "profileCreate": "Criar uma história com {name}",
       "profileCreateNote": "Nome, idade e gostos já virão preenchidos.",
       "profilePhotoTitle": "Foto",
-      "profilePhotoNone": "Não há fotos guardadas. Se você criar outra história com a foto, nós a usamos e apagamos após 30 dias.",
+      "profilePhotoNone": "Não há fotos salvas. Envie uma para criar ou atualizar o desenho; ela é apagada após 30 dias.",
       "profilePhotoSome": "{count, plural, one {Há # foto guardada} other {Há # fotos guardadas}}. {count, plural, one {Ela é apagada} other {Elas são apagadas}} automaticamente em {date}.",
       "profilePhotoAlt": "Foto {index} de {name}",
       "profilePhotoKeep": "O desenho do personagem e os dados continuam mesmo que você apague a foto.",
@@ -715,14 +715,18 @@
         "looks": "Como vamos desenhar?",
         "withPhoto": "Com a foto",
         "withoutPhoto": "Sem foto, com os traços",
-        "photo": "A foto",
         "photoNote": "Rosto de frente e bem visível. É apagada após 30 dias; você pode apagá-la antes.",
         "save": "Salvar personagem",
         "saveNote": "Nenhuma história é criada e nenhuma geração de IA é usada.",
         "error": "Não conseguimos salvar. Tente de novo.",
         "pronouns": "Pronome (opcional)",
-        "photoChange": "Escolher outra foto"
-      }
+        "photoPreview": "Foto escolhida {number}",
+        "photos": "As fotos (até 3)",
+        "photoRemove": "Remover a foto {number}"
+      },
+      "profilePhotoAddAnother": "Adicionar outra",
+      "profilePhotoRemove": "Remover a foto {index}",
+      "profilePhotoUploadError": "Não conseguimos enviar a foto. Tente outra."
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },
