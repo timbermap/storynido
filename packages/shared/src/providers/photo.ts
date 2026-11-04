@@ -63,7 +63,7 @@ export const PHOTO_RULES = {
 } as const;
 
 /** Consentimiento vigente para subir fotos (cambia si cambia el texto). */
-export const PHOTO_CONSENT_VERSION = 'photo-upload-v1';
+export const PHOTO_CONSENT_VERSION = 'photo-upload-v2';
 /**
  * Profesionales: declaración de que tienen la autorización de la madre, el padre o el tutor
  * del chico para usar su foto. El texto lo revisa un abogado antes del lanzamiento.

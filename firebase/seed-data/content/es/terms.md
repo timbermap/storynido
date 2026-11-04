@@ -12,7 +12,7 @@ Para usar el servicio debes ser mayor de edad. Las cuentas son de adultos respon
 
 ## 3. Datos y fotos que subes
 
-Declaras que eres el padre, la madre o el tutor legal del niño, o que cuentas con su autorización, y que tienes derecho a usar las fotos que subes. Solo usamos esas fotos para crear el libro que pediste y las eliminamos a los 30 días. Consulta la [Política de privacidad](/es/legal/privacidad).
+Declaras que eres el padre, la madre o el tutor legal del niño, o que cuentas con su autorización, y que tienes derecho a usar las fotos que subes. Solo usamos esas fotos para crear el personaje del niño y sus libros, y las eliminamos a los 30 días. Consulta la [Política de privacidad](/es/legal/privacidad).
 
 ## 4. Contenido generado
 

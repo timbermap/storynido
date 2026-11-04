@@ -12,7 +12,7 @@ Para usar o serviço você deve ser maior de idade. As contas são de adultos re
 
 ## 3. Dados e fotos que você envia
 
-Você declara que é pai, mãe ou responsável legal da criança, ou que tem a autorização dela, e que tem o direito de usar as fotos que envia. Usamos essas fotos apenas para criar o livro que você pediu e as apagamos em 30 dias. Veja a [Política de privacidade](/pt/legal/privacidade).
+Você declara que é pai, mãe ou responsável legal da criança, ou que tem a autorização dela, e que tem o direito de usar as fotos que envia. Usamos essas fotos apenas para criar o personagem da criança e os livros dela, e as apagamos em 30 dias. Veja a [Política de privacidade](/pt/legal/privacidade).
 
 ## 4. Conteúdo gerado
 

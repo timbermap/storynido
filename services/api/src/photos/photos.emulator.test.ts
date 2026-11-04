@@ -153,6 +153,26 @@ describe('fotos del protagonista', () => {
     expect(res.statusCode).toBe(403);
   });
 
+  it('un consentimiento de una versión anterior ya no vale: se vuelve a pedir', async () => {
+    await seedDraft('ana', 'b1');
+    // Aceptado con el texto anterior (photo-upload-v1).
+    await db.doc('consents/viejo').set({
+      ownerUid: 'ana',
+      type: 'photo_upload',
+      textVersion: 'photo-upload-v1',
+      locale: 'es',
+    });
+    expect(PHOTO_CONSENT_VERSION).not.toBe('photo-upload-v1');
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/photos',
+      headers: auth('token-ana'),
+      payload: { bookId: 'b1', consentId: 'viejo', contentType: 'image/jpeg', sizeBytes: 1000 },
+    });
+    expect(res.statusCode).toBe(403);
+    expect(res.json<{ error: { code: string } }>().error.code).toBe('forbidden');
+  });
+
   it('un libro de Profesionales necesita la autorización del tutor antes de subir fotos', async () => {
     await seedDraft('ana', 'b1', 'professionals');
     await db.doc('users/ana').set({ accountType: 'professional' });
