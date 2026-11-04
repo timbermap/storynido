@@ -26,6 +26,8 @@ export const aiConfigSchema = z.object({
   maxRegenerationsPerBook: z.number().int().min(0).max(50),
   /** Vistas previas completas por usuario y por día (anti abuso). */
   maxPreviewsPerUserPerDay: z.number().int().min(1).max(100),
+  /** Vistas previas y ajustes del personaje por usuario y por semana (anti abuso, silencioso). */
+  maxPreviewsPerUserPerWeek: z.number().int().min(1).max(500).default(15),
   /**
    * La etapa 2 de la muestra (portada y páginas, la parte cara) pide cuenta: filtra curiosos
    * y deja el contacto. La etapa 1 (texto + personaje) sigue sin cuenta.
@@ -77,6 +79,16 @@ export type AiBudgetDay = z.infer<typeof aiBudgetDaySchema>;
 /** Día UTC en formato AAAA-MM-DD. */
 export function utcDay(date: Date = new Date()): string {
   return date.toISOString().slice(0, 10);
+}
+
+/** Semana ISO en UTC (por ejemplo, 2026-W45): la clave del tope semanal. */
+export function utcIsoWeek(date: Date = new Date()): string {
+  const day = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const weekday = day.getUTCDay() || 7;
+  day.setUTCDate(day.getUTCDate() + 4 - weekday);
+  const yearStart = new Date(Date.UTC(day.getUTCFullYear(), 0, 1));
+  const week = Math.ceil(((day.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
+  return `${String(day.getUTCFullYear())}-W${String(week).padStart(2, '0')}`;
 }
 
 export const CONTENT_KEYS = [

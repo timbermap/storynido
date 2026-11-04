@@ -588,6 +588,7 @@ batch.set(
     // Estrategia comercial: 1 regeneración gratis por vista previa (configurable).
     maxRegenerationsPerBook: 1,
     maxPreviewsPerUserPerDay: cloud ? 3 : 5,
+    maxPreviewsPerUserPerWeek: cloud ? 10 : 15,
     // La portada y las páginas ilustradas piden cuenta (la etapa 1 no).
     illustrationsRequireAccount: true,
     dailyBudgetUsd: cloud ? 2 : 20,

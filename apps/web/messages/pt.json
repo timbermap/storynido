@@ -961,14 +961,15 @@
       "continueSoon": "Em breve você poderá escolher o formato e comprar. Sua amostra fica salva.",
       "failedTitle": "Não conseguimos criar a amostra",
       "errors": {
-        "limit_reached": "Você chegou ao limite de amostras ou novas tentativas de hoje. Poderá criar outra amanhã.",
+        "limit_reached": "Você já testou várias versões hoje. Salvamos tudo e amanhã você continua.",
         "photo_unreadable": "Não conseguimos ler esta foto. Tente outra (de frente, bem iluminada, só o rosto) ou escolha os traços do personagem. Não conta para o seu limite de hoje.",
         "ai_unavailable": "Não conseguimos criar as ilustrações agora. Tente de novo em alguns minutos; seu rascunho fica salvo.",
         "ai_budget_exhausted": "Atingimos o limite de geração de hoje. Tente de novo amanhã; seu rascunho fica salvo.",
         "validation_failed": "Esse texto não é adequado para uma história infantil. Mude e tente de novo.",
         "bad_request": "Confira se o protagonista, a foto, a história e o estilo estão completos.",
         "generic": "Algo deu errado. Tente de novo em alguns minutos.",
-        "account_required": "Crie sua conta grátis para ver a capa e as páginas ilustradas."
+        "account_required": "Crie sua conta grátis para ver a capa e as páginas ilustradas.",
+        "limit_reached_week": "Você já testou várias versões esta semana. Salvamos tudo e em alguns dias você continua."
       },
       "saveStoryTitle": "Salve sua história",
       "saveStoryText": "Crie sua conta grátis para não perder esta amostra e continuar em qualquer dispositivo.",
@@ -977,7 +978,7 @@
       "characterAlt": "Ficha do personagem: {name} de corpo inteiro",
       "approve": "Sim, é assim: ver a capa e 2 páginas grátis",
       "approveNote": "Depois ilustramos a capa e as primeiras páginas.",
-      "correct": "Não está parecido: corrigir",
+      "correct": "Ajustar a semelhança",
       "saveTraits": "Salvar e desenhar de novo",
       "correctNote": "Desenhar de novo usa sua nova tentativa grátis.",
       "mustKeepLegend": "Tem que ficar igual em todo o livro",
@@ -995,7 +996,7 @@
       "illustrating": "Ilustrando a capa e as primeiras páginas…",
       "approvedBadge": "Personagem aprovado",
       "continueAfterApproval": "Escolha o formato quando aprovar o personagem e a amostra estiver atualizada.",
-      "whatsOff": "O que não está parecido?",
+      "whatsOff": "O que vamos ajustar?",
       "whatsOffHint": "Marque o que precisa corrigir e mostramos só isso.",
       "aspects": {
         "hair": "O cabelo",
@@ -1019,7 +1020,11 @@
       "proPrice": "História digital: {price}",
       "proVolume": "Quanto mais histórias você faz, menos paga por cada uma. Sem assinatura.",
       "proNotice": "É material educativo e de acompanhamento: não é clínico nem substitui o seu critério profissional.",
-      "proDifferencesEdit": "Você pode editar o texto de cada página e mudar de novo a história base ou a foto."
+      "proDifferencesEdit": "Você pode editar o texto de cada página e mudar de novo a história base ou a foto.",
+      "adjustNote": "Mais alguma coisa? (opcional)",
+      "adjustNotePlaceholder": "Por exemplo: que pareça um pouco mais novo",
+      "lastAdjustment": "Este é o último ajuste incluído.",
+      "noAdjustmentsLeft": "Você já usou os ajustes incluídos: pode aprovar ou criar uma nova prévia."
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",

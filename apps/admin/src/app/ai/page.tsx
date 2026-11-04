@@ -139,9 +139,14 @@ export default function AiPage() {
           </Field>
         </Card>
         <Card className="grid gap-4 sm:grid-cols-2">
-          <Field label="Regeneraciones por libro">{number('maxRegenerationsPerBook')}</Field>
+          <Field label="Ajustes por libro (personaje e ilustraciones)">
+            {number('maxRegenerationsPerBook')}
+          </Field>
           <Field label="Vistas previas por usuario y día">
             {number('maxPreviewsPerUserPerDay')}
+          </Field>
+          <Field label="Vistas previas y ajustes por usuario y semana">
+            {number('maxPreviewsPerUserPerWeek')}
           </Field>
           <Field
             label="Presupuesto diario (USD)"

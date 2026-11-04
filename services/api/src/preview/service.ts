@@ -33,6 +33,7 @@ import {
   describeCharacter,
   buildStoryPrompt,
   utcDay,
+  utcIsoWeek,
   type AIProvider,
   type BookPreview,
   type Channel,
@@ -280,6 +281,7 @@ export class PreviewService {
     const day = utcDay();
     const quotas = this.db.collection(COLLECTIONS.previewQuota);
     const userQuota = quotas.doc(`${uid}_${day}`);
+    const weekQuota = quotas.doc(`${uid}_${utcIsoWeek()}`);
     // La IP se guarda con un hash corto: alcanza para limitar sin conservar la dirección.
     const ipQuota = quotas.doc(`ip_${hashIp(ip)}_${day}`);
     // Catálogo de modelos: si el modelo de imagen activo no puede recibir fotos de chicos
@@ -291,10 +293,11 @@ export class PreviewService {
     const photosAllowed = !entry?.success || acceptsChildPhotos(entry.data);
 
     await this.db.runTransaction(async (tx) => {
-      const [bookSnap, userSnap, ipSnap] = await Promise.all([
+      const [bookSnap, userSnap, ipSnap, weekSnap] = await Promise.all([
         tx.get(ref),
         tx.get(userQuota),
         tx.get(ipQuota),
+        tx.get(weekQuota),
       ]);
       const book = bookSnap.data() as BookData | undefined;
       if (book?.ownerUid !== uid) throw notFound();
@@ -339,16 +342,19 @@ export class PreviewService {
         usedByUser >= limits.maxPreviewsPerUserPerDay ||
         usedByIp >= limits.maxPreviewsPerUserPerDay * IP_QUOTA_MULTIPLIER
       ) {
-        throw new AppError(
-          429,
-          'limit_reached',
-          'Llegaste al máximo de vistas previas por hoy. Podrás crear otra mañana.',
-        );
+        throw dailyLimit();
       }
+      const usedThisWeek = Number(weekSnap.get('count') ?? 0);
+      if (usedThisWeek >= limits.maxPreviewsPerUserPerWeek) throw weeklyLimit();
 
       const expiresAt = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
       tx.set(userQuota, { count: usedByUser + 1, expiresAt }, { merge: true });
       tx.set(ipQuota, { count: usedByIp + 1, expiresAt }, { merge: true });
+      tx.set(
+        weekQuota,
+        { count: usedThisWeek + 1, expiresAt: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000) },
+        { merge: true },
+      );
       tx.update(ref, {
         status: 'preview_generating',
         previewStartedAt: new Date(),
@@ -394,6 +400,7 @@ export class PreviewService {
     await Promise.all([
       quotas.doc(`${uid}_${day}`).set(back, { merge: true }),
       quotas.doc(`ip_${hashIp(ip)}_${day}`).set(back, { merge: true }),
+      quotas.doc(`${uid}_${utcIsoWeek()}`).set(back, { merge: true }),
     ]).catch((error: unknown) => {
       this.log.warn({ err: error }, 'could not refund preview quota');
     });
@@ -1048,13 +1055,16 @@ export class PreviewService {
     bookId: string,
     traits: CharacterTraits,
     mustKeep: MustKeepTrait[],
+    note: string | null = null,
   ): Promise<PublicPreview> {
     const limits = await this.budget.limits();
     await this.budget.ensureAvailable(limits);
     const { ref, book, preview } = await this.readyBook(uid, bookId);
     const ai = this.providers.ai();
-    if (traits.distinctive) {
-      const verdict = await ai.text.moderateText(traits.distinctive);
+    // El rasgo distintivo y la nota del ajuste son texto libre: se moderan juntos.
+    const freeText = [traits.distinctive, note].filter(Boolean).join('\n');
+    if (freeText) {
+      const verdict = await ai.text.moderateText(freeText);
       if (verdict.usage) {
         await this.budget.record(
           verdict.usage,
@@ -1070,13 +1080,16 @@ export class PreviewService {
         );
       }
     }
-    await this.reserveRegeneration(ref, limits);
+    // Un ajuste del parecido usa uno de los del libro y cuenta para los topes por día y semana.
+    await this.reserveAdjustment(uid, ref, limits);
 
     try {
       const { story, style, child } = await this.context(uid, book, preview);
       const track = this.tracker(uid, bookId, limits);
       const { photo, sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
-      const description = describeCharacter(String(child.name), sheet, traits, mustKeep);
+      const description = `${describeCharacter(String(child.name), sheet, traits, mustKeep)}${
+        note ? `\nCorrection requested by the parent (apply it): ${note}` : ''
+      }`;
       const { image } = await this.illustration(ai, track, limits, {
         prompt: buildIllustrationPrompt({
           template: story.imagePromptTemplate,
@@ -1136,6 +1149,7 @@ export class PreviewService {
       await this.qaEvent(bookId, 'character_corrected', { mustKeep: mustKeep.length });
     } catch (error) {
       await ref.update({ regenerationsUsed: FieldValue.increment(-1) });
+      await this.refundUserQuota(uid);
       await this.auditAiError('preview', bookId, error);
       throw error instanceof AppError ? error : generationFailed(error);
     }
@@ -1154,6 +1168,58 @@ export class PreviewService {
         );
       }
       tx.update(ref, { regenerationsUsed: FieldValue.increment(1) });
+    });
+  }
+
+  /**
+   * Reserva un ajuste del personaje: uno de los del libro y uno de los topes del usuario (día y
+   * semana), en la misma transacción.
+   */
+  private async reserveAdjustment(uid: string, ref: DocumentReference, limits: AiLimits) {
+    const quotas = this.db.collection(COLLECTIONS.previewQuota);
+    const dayQuota = quotas.doc(`${uid}_${utcDay()}`);
+    const weekQuota = quotas.doc(`${uid}_${utcIsoWeek()}`);
+    await this.db.runTransaction(async (tx) => {
+      const [bookSnap, daySnap, weekSnap] = await Promise.all([
+        tx.get(ref),
+        tx.get(dayQuota),
+        tx.get(weekQuota),
+      ]);
+      if (Number(bookSnap.get('regenerationsUsed') ?? 0) >= limits.maxRegenerationsPerBook) {
+        throw new AppError(
+          429,
+          'limit_reached',
+          'Ya usaste los ajustes incluidos de esta muestra. Puedes aprobarla o crear una nueva.',
+        );
+      }
+      const usedToday = Number(daySnap.get('count') ?? 0);
+      const usedThisWeek = Number(weekSnap.get('count') ?? 0);
+      if (usedToday >= limits.maxPreviewsPerUserPerDay) throw dailyLimit();
+      if (usedThisWeek >= limits.maxPreviewsPerUserPerWeek) throw weeklyLimit();
+      const day = 24 * 60 * 60 * 1000;
+      tx.update(ref, { regenerationsUsed: FieldValue.increment(1) });
+      tx.set(
+        dayQuota,
+        { count: usedToday + 1, expiresAt: new Date(Date.now() + 2 * day) },
+        { merge: true },
+      );
+      tx.set(
+        weekQuota,
+        { count: usedThisWeek + 1, expiresAt: new Date(Date.now() + 8 * day) },
+        { merge: true },
+      );
+    });
+  }
+
+  /** Devuelve los topes del usuario (el ajuste no se llegó a hacer). */
+  private async refundUserQuota(uid: string): Promise<void> {
+    const quotas = this.db.collection(COLLECTIONS.previewQuota);
+    const back = { count: FieldValue.increment(-1) };
+    await Promise.all([
+      quotas.doc(`${uid}_${utcDay()}`).set(back, { merge: true }),
+      quotas.doc(`${uid}_${utcIsoWeek()}`).set(back, { merge: true }),
+    ]).catch((error: unknown) => {
+      this.log.warn({ err: error }, 'could not refund adjustment quota');
     });
   }
 
@@ -1395,4 +1461,22 @@ function defaultMustKeep(traits: CharacterTraits): MustKeepTrait[] {
 /** Hash corto de la IP con el día: limita sin guardar ni registrar la dirección. */
 function hashIp(ip: string): string {
   return createHash('sha256').update(`${utcDay()}|${ip}`).digest('hex').slice(0, 16);
+}
+
+/** Tope diario: un aviso amable, sin sonar a error (el borrador queda guardado). */
+function dailyLimit() {
+  return new AppError(
+    429,
+    'limit_reached',
+    'Ya probaste varias versiones hoy. Guardamos todo y mañana sigues.',
+  );
+}
+
+/** Tope semanal (silencioso hasta alcanzarlo). */
+function weeklyLimit() {
+  return new AppError(
+    429,
+    'limit_reached_week',
+    'Ya probaste varias versiones esta semana. Guardamos todo y en unos días sigues.',
+  );
 }

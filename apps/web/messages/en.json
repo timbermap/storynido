@@ -961,14 +961,15 @@
       "continueSoon": "Soon you'll be able to choose a format and order. Your sample is saved.",
       "failedTitle": "We couldn't create the sample",
       "errors": {
-        "limit_reached": "You've reached today's limit of samples or redos. You can create another one tomorrow.",
+        "limit_reached": "You've tried several versions today. We saved everything, so you can pick up tomorrow.",
         "photo_unreadable": "We couldn't read this photo. Try another one (facing the camera, well lit, just the face) or choose the character's traits instead. It doesn't count toward today's limit.",
         "ai_unavailable": "We couldn't create the illustrations right now. Please try again in a few minutes; your draft is saved.",
         "ai_budget_exhausted": "We've reached today's generation limit. Please try again tomorrow; your draft is saved.",
         "validation_failed": "That text isn't suitable for a children's story. Please change it and try again.",
         "bad_request": "Make sure the main character, photo, story and style are complete.",
         "generic": "Something went wrong. Please try again in a few minutes.",
-        "account_required": "Create a free account to see the cover and illustrated pages."
+        "account_required": "Create a free account to see the cover and illustrated pages.",
+        "limit_reached_week": "You've tried several versions this week. We saved everything, so you can pick up in a few days."
       },
       "saveStoryTitle": "Save your story",
       "saveStoryText": "Create a free account so you don’t lose this sample and can pick it up on any device.",
@@ -977,7 +978,7 @@
       "characterAlt": "Character sheet: {name}, full body",
       "approve": "Yes, that's right: see their cover and 2 pages free",
       "approveNote": "Next we illustrate the cover and the first pages.",
-      "correct": "Doesn't look right: fix it",
+      "correct": "Adjust the likeness",
       "saveTraits": "Save and redraw",
       "correctNote": "Redrawing uses your free redo.",
       "mustKeepLegend": "Must stay the same throughout the book",
@@ -995,7 +996,7 @@
       "illustrating": "Illustrating the cover and the first pages…",
       "approvedBadge": "Character approved",
       "continueAfterApproval": "Choose the format once you approve the character and the sample is up to date.",
-      "whatsOff": "What doesn't look right?",
+      "whatsOff": "What should we adjust?",
       "whatsOffHint": "Pick what needs fixing and we'll show you just that.",
       "aspects": {
         "hair": "The hair",
@@ -1019,7 +1020,11 @@
       "proPrice": "Digital story: {price}",
       "proVolume": "The more stories you make, the less you pay for each. No subscription.",
       "proNotice": "This is educational, supportive material: it isn’t clinical and doesn’t replace your professional judgment.",
-      "proDifferencesEdit": "You can edit the text of each page and change the base story or the photo again."
+      "proDifferencesEdit": "You can edit the text of each page and change the base story or the photo again.",
+      "adjustNote": "Anything else? (optional)",
+      "adjustNotePlaceholder": "For example: make them look a little younger",
+      "lastAdjustment": "This is the last included adjustment.",
+      "noAdjustmentsLeft": "You have used the included adjustments: you can approve it or create a new preview."
     },
     "character": {
       "modeLegend": "How should we create the main character?",

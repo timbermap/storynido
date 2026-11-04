@@ -2,6 +2,7 @@ import { ApiError } from '@storynido/shared';
 
 const KNOWN_ERRORS = [
   'limit_reached',
+  'limit_reached_week',
   'ai_unavailable',
   'ai_budget_exhausted',
   'photo_unreadable',

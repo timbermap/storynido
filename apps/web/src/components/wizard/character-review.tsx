@@ -54,6 +54,8 @@ export function CharacterReview({
   const [distinctive, setDistinctive] = useState(character.traits.distinctive ?? '');
   // Corrección guiada: primero qué no se parece; solo eso se muestra y queda fijo después.
   const [aspects, setAspects] = useState<MustKeepTrait[]>([]);
+  // «Ajustar el parecido»: lo que no entra en los rasgos (la edad, por ejemplo), en pocas palabras.
+  const [note, setNote] = useState('');
   const [busy, setBusy] = useState<'approve' | 'save' | null>(null);
   const [needsAccount, setNeedsAccount] = useState(false);
 
@@ -71,7 +73,9 @@ export function CharacterReview({
   }
 
   async function save() {
-    if (aspects.length === 0 || AVATAR_TRAITS.some((trait) => !traits[trait])) return;
+    if ((aspects.length === 0 && !note.trim()) || AVATAR_TRAITS.some((trait) => !traits[trait])) {
+      return;
+    }
     setBusy('save');
     onError(null);
     try {
@@ -79,9 +83,11 @@ export function CharacterReview({
         traits: { ...(traits as CharacterTraits), distinctive: distinctive.trim() || null },
         // Lo que se corrigió queda fijo en todas las páginas.
         mustKeep: [...new Set([...character.mustKeep, ...aspects])],
+        note: note.trim() || null,
       };
       onUpdated(await api('updateCharacter', { params: { bookId }, body }));
       setEditing(false);
+      setNote('');
     } catch (error) {
       onError(error instanceof ApiError ? error.code : 'generic');
     } finally {
@@ -172,7 +178,10 @@ export function CharacterReview({
               </div>
             )}
             <p className="text-sm text-muted-foreground">
-              {t('approveNote')} {t('regenerationsLeft', { count: regenerationsLeft })}
+              {t('approveNote')}
+              {/* Sin contador: solo se avisa en el último ajuste incluido o cuando ya no quedan. */}
+              {regenerationsLeft === 1 && ` ${t('lastAdjustment')}`}
+              {regenerationsLeft === 0 && ` ${t('noAdjustmentsLeft')}`}
             </p>
           </>
         ) : (
@@ -235,8 +244,29 @@ export function CharacterReview({
                 />
               </div>
             )}
+            <div className="grid gap-2">
+              <label htmlFor="character-note" className="font-bold">
+                {t('adjustNote')}
+              </label>
+              <input
+                id="character-note"
+                value={note}
+                maxLength={120}
+                placeholder={t('adjustNotePlaceholder')}
+                onChange={(event) => {
+                  setNote(event.target.value);
+                }}
+                className="h-11 rounded-lg border bg-card px-3"
+              />
+            </div>
+            {regenerationsLeft === 1 && (
+              <p className="text-sm font-semibold">{t('lastAdjustment')}</p>
+            )}
             <div className="grid gap-2 sm:flex sm:items-center">
-              <Button disabled={busy !== null || aspects.length === 0} onClick={() => void save()}>
+              <Button
+                disabled={busy !== null || (aspects.length === 0 && !note.trim())}
+                onClick={() => void save()}
+              >
                 {busy === 'save' && <Loader2 className="animate-spin" aria-hidden="true" />}
                 {t('saveTraits')}
               </Button>
@@ -245,6 +275,7 @@ export function CharacterReview({
                 onClick={() => {
                   setEditing(false);
                   setAspects([]);
+                  setNote('');
                 }}
               >
                 {t('cancel')}

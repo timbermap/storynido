@@ -20,6 +20,7 @@ export const AI_CONFIG_DEFAULTS: Omit<AiConfig, 'updatedAt' | 'updatedBy'> = {
   imageModel: 'mock-image',
   maxRegenerationsPerBook: 3,
   maxPreviewsPerUserPerDay: 5,
+  maxPreviewsPerUserPerWeek: 15,
   illustrationsRequireAccount: true,
   dailyBudgetUsd: 5,
   budgetAlertPercent: 80,
