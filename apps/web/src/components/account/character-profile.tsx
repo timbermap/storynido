@@ -3,13 +3,14 @@
 import { ApiError, CHILD_LIMITS, PHOTO_RULES, type Locale } from '@storynido/shared';
 import { ImagePlus, Loader2, Trash2, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { acceptedPhotos, uploadChildPhoto } from '@/lib/child-photos';
+import { acceptedPhotos, uploadChildPhotos } from '@/lib/child-photos';
 import {
   getChildDetails,
   subscribeOrders,
@@ -40,6 +41,14 @@ const PRONOUNS = ['she', 'he', 'they'] as const;
 export function CharacterProfile({ childId }: { childId: string }) {
   const t = useTranslations('Account.myStories');
   const tPhotos = useTranslations('Wizard.photos');
+  /** «La foto no sirve: …» con los motivos del paso de fotos (cara, luz, nitidez, IA). */
+  function rejectedText(reasons: string[]) {
+    return [
+      t('profilePhotoRejected'),
+      ...reasons.map((reason) => tPhotos(`reasons.${reason}` as 'reasons.no_face')),
+    ].join(' ');
+  }
+
   const locale = useLocale() as Locale;
   const date = new Intl.DateTimeFormat(useLocale(), { dateStyle: 'long' });
   const router = useRouter();
@@ -53,6 +62,8 @@ export function CharacterProfile({ childId }: { childId: string }) {
   const [photoConsent, setPhotoConsent] = useState(false);
   const [uploading, setUploading] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
+  // «Crear su dibujo» desde el recuadro del retrato: lo pide el panel del dibujo.
+  const [drawSignal, setDrawSignal] = useState(0);
   const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -62,6 +73,15 @@ export function CharacterProfile({ childId }: { childId: string }) {
   useEffect(() => {
     if (!loading && !signedIn) router.replace('/login');
   }, [loading, signedIn, router]);
+
+  // Viene de «Agregar a otro chico» con fotos que no sirvieron: se avisa con sus motivos.
+  const rejectedFromForm = useSearchParams().get('rechazadas');
+  useEffect(() => {
+    if (!rejectedFromForm) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMessage({ text: rejectedText(rejectedFromForm.split(',')), error: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rejectedFromForm]);
 
   useEffect(() => {
     if (!signedIn) return;
@@ -125,6 +145,8 @@ export function CharacterProfile({ childId }: { childId: string }) {
   const name = details.name;
 
   const photoSlots = Math.max(0, PHOTO_RULES.maxPhotosPerBook - profile.photos);
+  // El botón del recuadro aparece solo con una foto válida cargada (con rasgos se crea desde «Su dibujo»).
+  const withPhoto = profile.photos > 0 && profile.drawing.canDraw;
 
   async function reloadProfile() {
     setProfile(await loadProfile(childId));
@@ -135,8 +157,9 @@ export function CharacterProfile({ childId }: { childId: string }) {
     setUploading(true);
     setMessage(null);
     try {
-      for (const photo of chosen) await uploadChildPhoto(childId, photo, locale);
+      const rejected = await uploadChildPhotos(childId, chosen, locale);
       await reloadProfile();
+      if (rejected.length > 0) setMessage({ text: rejectedText(rejected), error: true });
     } catch {
       setMessage({ text: t('profilePhotoUploadError'), error: true });
     } finally {
@@ -255,9 +278,21 @@ export function CharacterProfile({ childId }: { childId: string }) {
               className="size-full object-cover"
             />
           ) : (
-            <p className="grid size-full place-items-center p-4 text-center text-sm text-muted-foreground">
-              {t('profileNoImage')}
-            </p>
+            <div className="grid size-full place-content-center justify-items-center gap-3 p-4 text-center text-sm text-muted-foreground">
+              <p>{withPhoto ? t('profileNoDrawing') : t('profileNoDrawingNoPhoto')}</p>
+              {withPhoto && !profile.drawing.candidateUrl && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    setDrawSignal((count) => count + 1);
+                    document.getElementById('dibujo')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  {t('drawing.create')}
+                </Button>
+              )}
+            </div>
           )}
         </div>
         <div className="grid gap-3">
@@ -277,6 +312,7 @@ export function CharacterProfile({ childId }: { childId: string }) {
           name={name}
           currentUrl={profile.characterImageUrl}
           drawing={profile.drawing}
+          startSignal={drawSignal}
           onChange={({ imageUrl, drawing }) => {
             setProfile((current) =>
               current

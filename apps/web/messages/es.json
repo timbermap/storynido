@@ -517,7 +517,6 @@
       "profileLoadError": "No pudimos cargar este personaje.",
       "profileMissing": "Este personaje no existe o ya fue borrado.",
       "profileImageAlt": "Dibujo de {name}",
-      "profileNoImage": "Todavía no hay dibujo aprobado. Aparece cuando apruebas el personaje en un cuento.",
       "profileDataTitle": "Sus datos",
       "profilePronouns": "¿Cómo nos referimos a esta persona?",
       "profileLikes": "Qué le gusta",
@@ -726,7 +725,10 @@
       },
       "profilePhotoAddAnother": "Agregar otra",
       "profilePhotoRemove": "Quitar la foto {index}",
-      "profilePhotoUploadError": "No pudimos subir la foto. Prueba con otra."
+      "profilePhotoUploadError": "No pudimos subir la foto. Prueba con otra.",
+      "profileNoDrawing": "Todavía no tiene dibujo.",
+      "profileNoDrawingNoPhoto": "Todavía no tiene dibujo. Sube una foto más abajo para crearlo.",
+      "profilePhotoRejected": "Esta foto no sirve."
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },

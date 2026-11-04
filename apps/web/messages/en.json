@@ -517,7 +517,6 @@
       "profileLoadError": "We couldn’t load this character.",
       "profileMissing": "This character doesn’t exist or was already deleted.",
       "profileImageAlt": "Drawing of {name}",
-      "profileNoImage": "There’s no approved drawing yet. It shows up once you approve the character in a story.",
       "profileDataTitle": "Their details",
       "profilePronouns": "How should we refer to them?",
       "profileLikes": "What they like",
@@ -726,7 +725,10 @@
       },
       "profilePhotoAddAnother": "Add another",
       "profilePhotoRemove": "Remove photo {index}",
-      "profilePhotoUploadError": "We could not upload the photo. Try another one."
+      "profilePhotoUploadError": "We could not upload the photo. Try another one.",
+      "profileNoDrawing": "No drawing yet.",
+      "profileNoDrawingNoPhoto": "No drawing yet. Upload a photo below to create it.",
+      "profilePhotoRejected": "This photo won't work."
     },
     "myStoriesLink": "Your stories and orders are in My stories →"
   },

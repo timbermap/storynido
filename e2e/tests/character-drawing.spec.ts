@@ -38,8 +38,11 @@ test('agregar a un chico sin cuento y crear, usar, ajustar y descartar su dibujo
   // Ningún cuento nuevo.
   await expect(page.locator('body')).not.toContainText('Borrador');
 
+  // Sin dibujo ni foto: el recuadro del retrato invita a subir una foto (el botón queda en «Su dibujo»).
+  await expect(page.locator('body')).toContainText('Sube una foto más abajo para crearlo.');
+  await expect(page.getByRole('button', { name: 'Crear su dibujo' })).toHaveCount(1);
   // Crear su dibujo → el de ahora (ninguno) y el nuevo, lado a lado → usarlo.
-  await page.getByRole('button', { name: 'Crear su dibujo' }).click();
+  await page.getByRole('button', { name: 'Crear su dibujo' }).first().click();
   await expect(page.getByText('El nuevo', { exact: true })).toBeVisible({ timeout: 60_000 });
   await page.getByRole('button', { name: 'Usar este dibujo' }).click();
   await expect(page.getByRole('img', { name: 'Lu', exact: false }).first()).toBeVisible();
@@ -67,9 +70,10 @@ test('agregar a un chico sin cuento y crear, usar, ajustar y descartar su dibujo
   await page.locator('#new-child-photo').setInputFiles(testPhoto());
   await page.getByRole('button', { name: 'Guardar personaje' }).click();
   await heading(page, 'Teo');
-  await expect(page.getByRole('button', { name: 'Crear su dibujo' })).toBeVisible({
+  await expect(page.getByRole('button', { name: 'Crear su dibujo' }).first()).toBeVisible({
     timeout: 60_000,
   });
+  await expectThumbnailLoaded(page, 'Foto 1 de Teo');
 
   // En el perfil: quitar la foto y volver a subir una desde ahí (sin cuento).
   await page.getByRole('button', { name: 'Quitar la foto 1' }).click();
@@ -82,5 +86,21 @@ test('agregar a un chico sin cuento y crear, usar, ajustar y descartar su dibujo
   await expect(page.getByRole('button', { name: 'Quitar la foto 1' })).toBeVisible({
     timeout: 60_000,
   });
-  await expect(page.getByRole('button', { name: 'Crear su dibujo' })).toBeVisible();
+  // La miniatura carga de verdad (antes una foto rechazada o pendiente quedaba rota).
+  await expectThumbnailLoaded(page, 'Foto 1 de Teo');
+  // Con la foto cargada, el recuadro del retrato ofrece crear el dibujo ahí mismo.
+  await expect(page.locator('body')).toContainText('Todavía no tiene dibujo.');
+  await expect(page.getByRole('button', { name: 'Crear su dibujo' })).toHaveCount(2);
+  await expect(page.locator('body')).not.toContainText('No pudimos subir la foto');
+  await expect(page.getByRole('button', { name: 'Crear su dibujo' }).first()).toBeVisible();
 });
+
+async function expectThumbnailLoaded(page: Page, name: string) {
+  const thumbnail = page.getByRole('img', { name });
+  await expect(thumbnail).toBeVisible({ timeout: 30_000 });
+  await expect
+    .poll(() => thumbnail.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth), {
+      timeout: 30_000,
+    })
+    .toBeGreaterThan(0);
+}

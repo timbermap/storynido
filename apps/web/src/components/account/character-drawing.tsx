@@ -8,7 +8,7 @@ import {
 } from '@storynido/shared';
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
@@ -30,12 +30,15 @@ export function CharacterDrawing({
   name,
   currentUrl,
   drawing,
+  startSignal = 0,
   onChange,
 }: {
   childId: string;
   name: string;
   currentUrl: string | null;
   drawing: Drawing;
+  /** Cada vez que sube, se pide un dibujo nuevo (el botón del recuadro del retrato). */
+  startSignal?: number;
   onChange: (next: { imageUrl: string | null; drawing: Drawing }) => void;
 }) {
   const t = useTranslations('Account.myStories.drawing');
@@ -68,6 +71,14 @@ export function CharacterDrawing({
 
   const draw = (body: { mustKeep?: MustKeepTrait[]; note?: string | null } = {}) =>
     api('generateChildDrawing', { params: { childId }, body });
+
+  const requested = useRef(startSignal);
+  useEffect(() => {
+    if (startSignal === requested.current) return;
+    requested.current = startSignal;
+    void run('draw', () => draw());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startSignal]);
 
   if (!drawing.canDraw && !drawing.candidateUrl) return null;
 

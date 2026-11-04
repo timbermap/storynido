@@ -18,7 +18,7 @@ import { LikesInput, withPendingLike } from '@/components/wizard/likes-input';
 import { AVATAR_TRAITS, TraitPicker, type TraitDraft } from '@/components/wizard/trait-picker';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { acceptedPhotos, uploadChildPhoto } from '@/lib/child-photos';
+import { acceptedPhotos, uploadChildPhotos } from '@/lib/child-photos';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { LEGAL_SLUGS } from '@/lib/legal';
 import { cn } from '@/lib/utils';
@@ -96,11 +96,10 @@ export function NewCharacter() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+      let rejected: string[] = [];
       if (mode === 'photo' && files.length > 0) {
-        // Si alguna foto no sirve, el personaje queda igual: en su perfil se ve y se sube otra.
-        for (const photo of files) {
-          await uploadChildPhoto(ref.id, photo, locale).catch(() => undefined);
-        }
+        // Si alguna foto no sirve, el personaje queda igual: el perfil avisa el motivo.
+        rejected = await uploadChildPhotos(ref.id, files, locale).catch(() => []);
       } else {
         await api('setChildAvatar', {
           params: { childId: ref.id },
@@ -110,6 +109,7 @@ export function NewCharacter() {
       router.push({
         pathname: '/my-stories/characters/[childId]',
         params: { childId: ref.id },
+        ...(rejected.length > 0 ? { query: { rechazadas: rejected.join(',') } } : {}),
       });
     } catch {
       setError(t('error'));
