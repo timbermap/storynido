@@ -1334,7 +1334,10 @@
       "subtitle": "Extensão, quantidade de texto e nível de leitura são ajustados separadamente.",
       "length": "Extensão",
       "notice": "É material educativo e de acompanhamento: não é clínico nem substitui o seu critério profissional."
-    }
+    },
+    "chosenTitle": "Você vai criar",
+    "chosenChange": "Trocar",
+    "chosenLesson": "Ensinamento: {name}"
   },
   "Landing": {
     "events": {

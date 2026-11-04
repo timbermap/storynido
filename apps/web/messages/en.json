@@ -1334,7 +1334,10 @@
       "subtitle": "Length, amount of text and reading level are set separately.",
       "length": "Length",
       "notice": "This is educational, supportive material: it isn’t clinical and doesn’t replace your professional judgment."
-    }
+    },
+    "chosenTitle": "You're creating",
+    "chosenChange": "Change",
+    "chosenLesson": "Lesson: {name}"
   },
   "Landing": {
     "events": {
