@@ -208,8 +208,32 @@ export class PreviewService {
     );
     const storage = this.providers.storage();
     await Promise.all([...paths].map((path) => storage.delete({ bucket: 'assets', path })));
+    // Las fotos subidas en este cuento se borran también, salvo las que otro cuento sigue usando
+    // (un personaje reutilizado): esas quedan y vencen a los 30 días como siempre.
+    const photos = await this.db
+      .collection(COLLECTIONS.photos)
+      .where('ownerUid', '==', uid)
+      .where('bookId', '==', bookId)
+      .get();
+    let photosDeleted = 0;
+    for (const photo of photos.docs) {
+      // Solo array-contains (índice simple); el dueño se filtra acá.
+      const users = await this.db
+        .collection(COLLECTIONS.books)
+        .where('photoIds', 'array-contains', photo.id)
+        .get();
+      if (users.docs.some((other) => other.id !== bookId && other.get('ownerUid') === uid)) {
+        continue;
+      }
+      const files = [photo.get('storagePath'), photo.get('processedPath')].filter(
+        (path): path is string => typeof path === 'string' && path.length > 0,
+      );
+      await Promise.all(files.map((path) => storage.delete({ bucket: 'photos', path })));
+      await photo.ref.delete();
+      photosDeleted += 1;
+    }
     await this.db.recursiveDelete(ref);
-    this.log.info({ bookId, images: paths.size }, 'draft deleted');
+    this.log.info({ bookId, images: paths.size, photos: photosDeleted }, 'draft deleted');
     return { deleted: true };
   }
 

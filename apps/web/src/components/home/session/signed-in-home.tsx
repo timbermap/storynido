@@ -14,7 +14,7 @@ import { hasProProfile, loadHomeData, type HomeData } from '@/lib/firebase/home-
 import { formatPrice } from '@/lib/format';
 import {
   buildHomeRows,
-  orderLines,
+  HOME_CHANNELS,
   parseRemembered,
   pickHomeLine,
   type HomeChannel,
@@ -152,7 +152,8 @@ export function SignedInHome({
   const heading = proList ? t('titlePro') : next ? t('titleResume') : t('titleNew');
   const cards = (
     <LineCards
-      order={orderLines(view.line)}
+      // Orden fijo (Familias, Celebraciones, Profesionales); la línea que manda solo se destaca.
+      order={[...HOME_CHANNELS]}
       lead={lead}
       lines={lines}
       birthday={birthday}

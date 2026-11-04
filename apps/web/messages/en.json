@@ -74,7 +74,14 @@
     "accountShort": "Account",
     "createTitle": "What do you want to create?",
     "close": "Close",
-    "catalogLines": "Catalogs by line"
+    "catalogLines": "Catalogs by line",
+    "exitTitle": "Leave the creator?",
+    "exitText": "Your story stays saved as it is; pick it up whenever you like.",
+    "discard": "Discard this story",
+    "discardConfirm": "Discard this story? The draft and the photos you uploaded to it are deleted. This cannot be undone.",
+    "discardYes": "Yes, discard",
+    "discardError": "We could not discard it. Please try again.",
+    "cancel": "Cancel"
   },
   "Switchers": {
     "language": "Language",
@@ -1335,6 +1342,7 @@
       "length": "Length",
       "notice": "This is educational, supportive material: it isn’t clinical and doesn’t replace your professional judgment."
     },
+    "subStepCount": "({current} of {total})",
     "chosenTitle": "You're creating",
     "chosenChange": "Change",
     "chosenLesson": "Lesson: {name}"

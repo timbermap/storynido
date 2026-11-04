@@ -71,13 +71,20 @@ export function WizardShell({
     total: stages.length,
     name: stageName(stage.key),
   });
+  // Si el paso se llama igual que la etapa («Personaje · Personaje (2 de 2)»), no se repite.
+  const sameName = t(`steps.${current}`) === stageName(stage.key);
   const subLabel =
     stageSteps.length > 1
-      ? t('subStep', {
-          name: t(`steps.${current}`),
-          current: stageSteps.indexOf(current) + 1,
-          total: stageSteps.length,
-        })
+      ? sameName
+        ? t('subStepCount', {
+            current: stageSteps.indexOf(current) + 1,
+            total: stageSteps.length,
+          })
+        : t('subStep', {
+            name: t(`steps.${current}`),
+            current: stageSteps.indexOf(current) + 1,
+            total: stageSteps.length,
+          })
       : null;
 
   // Dónde se cambia lo elegido: Profesionales elige su cuento base junto con el objetivo.
@@ -141,7 +148,12 @@ export function WizardShell({
       <div className="flex items-center justify-between gap-4 text-sm font-bold text-muted-foreground">
         <span>
           {progressLabel}
-          {subLabel && <span className="font-semibold"> · {subLabel}</span>}
+          {subLabel && (
+            <span className="font-semibold">
+              {sameName ? ' ' : ' · '}
+              {subLabel}
+            </span>
+          )}
         </span>
         <span role="status" aria-live="polite" className="inline-flex items-center gap-1.5">
           {saveState === 'saving' && (
