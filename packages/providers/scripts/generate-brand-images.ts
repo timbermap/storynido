@@ -513,6 +513,19 @@ const JOBS: Job[] = [
     'lavender',
     `${CAST.sofi} rides a friendly white unicorn with a short simple rainbow mane (flat stripes, no shine) over two round hills.`,
   ),
+  // Ocasiones (primera comunión y graduación): respeto religioso, sin figuras sagradas ni efectos.
+  cover(
+    'mi-primera-comunion',
+    GOUACHE,
+    'cream',
+    `Martina, 8 (straight dark-brown bob with bangs, freckles, olive skin) wears a simple white First Communion dress and holds a small white candle and a simple rosary in her hands, smiling calmly. Behind her, a simple small church exterior with a plain wooden door, and her family (a grandmother, her parents) standing close by. Warm natural daylight. No religious figures of any kind, no Jesus, no Virgin Mary, no saints, no angels, no halos, no rays of light, no glow, no host, no chalice.`,
+  ),
+  cover(
+    'mi-graduacion',
+    GOUACHE,
+    'mint',
+    `Benja, 6 (short black coily hair, warm dark-brown skin, red sneakers) wears a tiny navy graduation gown and cap and holds a rolled diploma tied with a coral ribbon, beaming. Around him in a simple school patio, two classmates in small gowns cheer, and a few flat balloons float. Blank diploma with no writing.`,
+  ),
   // ---- Profesionales (Minimalismo gráfico, chico genérico) -------------------------------------
   cover(
     'las-letras-que-bailan',

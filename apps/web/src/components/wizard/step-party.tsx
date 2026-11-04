@@ -105,6 +105,8 @@ export function StepParty({ nav, data }: { nav: StepNav; data: WizardData }) {
                 checked={themeSlug === theme.slug}
                 onSelect={(value) => {
                   setThemeSlug(value);
+                  // Una colección de ocasión (primera comunión, graduación) trae su ocasión.
+                  if (theme.eventType) setOccasion(theme.eventType);
                   setError(null);
                 }}
               >

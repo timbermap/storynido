@@ -31,6 +31,10 @@ export default async function EventsCatalogPage({ params }: Props) {
     getCollections(locale, 'events').catch(() => []),
     getStories(locale, undefined, { channel: 'events' }).catch(() => []),
   ]);
+  const isOccasion = (item: (typeof collections)[number]) =>
+    Boolean(item.eventType && item.eventType !== 'birthday');
+  const birthdays = collections.filter((item) => !isOccasion(item));
+  const occasions = collections.filter(isOccasion);
   return (
     <>
       <RememberChannel channel="events" />
@@ -42,7 +46,16 @@ export default async function EventsCatalogPage({ params }: Props) {
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{t('catalogSubtitle')}</p>
       </div>
       <LandingCollections
-        collections={collections}
+        collections={birthdays}
+        stories={stories}
+        createLabel={t('viewStory')}
+        line="events"
+        start={{ label: t('collectionStart'), mode: 'theme' }}
+      />
+      {/* Las ocasiones que no son cumpleaños (primera comunión, graduación), con su subtítulo. */}
+      <LandingCollections
+        title={t('otherCelebrations')}
+        collections={occasions}
         stories={stories}
         createLabel={t('viewStory')}
         line="events"

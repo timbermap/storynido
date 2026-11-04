@@ -122,7 +122,7 @@ test('Celebraciones: solo la invitación llega así al pago', async ({ page, isM
   await heading(page, 'La fiesta');
   await next(page);
   await expect(page.locator('body')).toContainText('Elige una temática para continuar.');
-  await page.locator('label', { hasText: 'Fiestas mágicas' }).click();
+  await page.locator('label', { hasText: 'El clásico de cumpleaños' }).click();
   // Las demás ocasiones también se guardan.
   await page.locator('#event-occasion').selectOption('baptism');
   await next(page);

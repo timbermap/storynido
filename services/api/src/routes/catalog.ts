@@ -259,6 +259,7 @@ export function registerCatalogRoutes(
           name: item.name[locale],
           description: item.description[locale],
           topics: item.topics.map((topic) => topic[locale]),
+          ...(item.eventType ? { eventType: item.eventType } : {}),
         })),
     };
   });

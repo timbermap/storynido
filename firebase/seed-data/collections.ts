@@ -68,13 +68,17 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     active: true,
     order: 10,
     channel: 'events',
-    name: t('Fiestas mágicas', 'Magical parties', 'Festas mágicas'),
+    name: t('El clásico de cumpleaños', 'The classic birthday', 'O aniversário clássico'),
     description: t(
       'Cuentos de cumpleaños con el protagonista de la fiesta, para regalar a cada invitado.',
       'Birthday stories starring the guest of honor, to give to every guest.',
       'Histórias de aniversário com o protagonista da festa, para presentear cada convidado.',
     ),
-    topics: [],
+    topics: [
+      t('Pastel y velas', 'Cake and candles', 'Bolo e velas'),
+      t('Globos', 'Balloons', 'Balões'),
+      t('Deseos', 'Wishes', 'Desejos'),
+    ],
   },
   {
     slug: 'cumple-superheroes',
@@ -87,7 +91,11 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
       'The birthday hero with a cape and superpowers, to hand out to every guest.',
       'O aniversariante com capa e superpoderes, para entregar a cada convidado.',
     ),
-    topics: [],
+    topics: [
+      t('Capas y superpoderes', 'Capes and superpowers', 'Capas e superpoderes'),
+      t('Salvar la ciudad', 'Saving the city', 'Salvar a cidade'),
+      t('Héroes y heroínas', 'Heroes and heroines', 'Heróis e heroínas'),
+    ],
   },
   {
     slug: 'cumple-ciencia-espacio',
@@ -100,33 +108,52 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
       'Astronauts, explorers and inventors: a party for the most curious.',
       'Astronautas, exploradores e inventores: uma festa para os mais curiosos.',
     ),
-    topics: [],
+    topics: [
+      t('Astronautas', 'Astronauts', 'Astronautas'),
+      t('Científicas e inventores', 'Scientists and inventors', 'Cientistas e inventores'),
+      t('Robots', 'Robots', 'Robôs'),
+      t('Planetas', 'Planets', 'Planetas'),
+    ],
   },
   {
     slug: 'cumple-fantasia',
     active: true,
     order: 13,
     channel: 'events',
-    name: t('Fantasía y reinos', 'Fantasy & kingdoms', 'Fantasia e reinos'),
+    name: t(
+      'Princesas, caballeros y dragones',
+      'Princesses, knights and dragons',
+      'Princesas, cavaleiros e dragões',
+    ),
     description: t(
       'Reinos mágicos, princesas, caballeros y criaturas encantadas.',
       'Magical kingdoms, princesses, knights and enchanted creatures.',
       'Reinos mágicos, princesas, cavaleiros e criaturas encantadas.',
     ),
-    topics: [],
+    topics: [
+      t('Princesas', 'Princesses', 'Princesas'),
+      t('Caballeros', 'Knights', 'Cavaleiros'),
+      t('Dragones', 'Dragons', 'Dragões'),
+      t('Castillos', 'Castles', 'Castelos'),
+      t('Unicornios', 'Unicorns', 'Unicórnios'),
+    ],
   },
   {
     slug: 'cumple-animales',
     active: true,
     order: 14,
     channel: 'events',
-    name: t('Animales y aventuras', 'Animals & adventures', 'Animais e aventuras'),
+    name: t('Dinosaurios y animales', 'Dinosaurs and animals', 'Dinossauros e animais'),
     description: t(
       'Dinosaurios, selva y fondo del mar: una fiesta salvaje.',
       'Dinosaurs, jungle and deep sea: a wild party.',
       'Dinossauros, selva e fundo do mar: uma festa selvagem.',
     ),
-    topics: [],
+    topics: [
+      t('Dinosaurios', 'Dinosaurs', 'Dinossauros'),
+      t('Safari y selva', 'Safari and jungle', 'Safári e selva'),
+      t('Fondo del mar', 'Under the sea', 'Fundo do mar'),
+    ],
   },
   {
     slug: 'cumple-campeones',
@@ -139,7 +166,49 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
       'For those who live for sport: goals, medals and teamwork.',
       'Para quem vive o esporte: gols, medalhas e trabalho em equipe.',
     ),
-    topics: [],
+    topics: [
+      t('Fútbol', 'Soccer', 'Futebol'),
+      t('Básquet', 'Basketball', 'Basquete'),
+      t('Béisbol', 'Baseball', 'Beisebol'),
+      t('Carreras', 'Racing', 'Corridas'),
+    ],
+  },
+  // Ocasiones (no son temáticas de cumpleaños): la tarjeta abre el creador con la ocasión.
+  {
+    slug: 'primera-comunion',
+    active: true,
+    order: 30,
+    channel: 'events',
+    name: t('Mi primera comunión', 'My First Communion', 'Minha primeira comunhão'),
+    description: t(
+      'Un recuerdo para cada invitado, con tu hijo o tu hija como protagonista del día.',
+      'A keepsake for every guest, with your child as the star of the day.',
+      'Uma lembrança para cada convidado, com seu filho ou sua filha como protagonista do dia.',
+    ),
+    topics: [
+      t('Vela y rosario', 'Candle and rosary', 'Vela e terço'),
+      t('Familia y padrinos', 'Family and godparents', 'Família e padrinhos'),
+      t('Compartir', 'Sharing', 'Partilhar'),
+    ],
+    eventType: 'communion',
+  },
+  {
+    slug: 'graduacion',
+    active: true,
+    order: 31,
+    channel: 'events',
+    name: t('Mi graduación', 'My Graduation', 'Minha formatura'),
+    description: t(
+      'Kínder, jardín o primaria: un librito para cada compañero, para cerrar el año juntos.',
+      'Preschool, kindergarten or elementary school: a little book for every classmate to close the year together.',
+      'Educação infantil ou ensino fundamental: um livrinho para cada colega, para fechar o ano juntos.',
+    ),
+    topics: [
+      t('Kínder y jardín', 'Kindergarten and preschool', 'Educação infantil'),
+      t('Primaria', 'Elementary school', 'Ensino fundamental'),
+      t('Fin de año', 'End of the school year', 'Fim de ano'),
+    ],
+    eventType: 'graduation',
   },
   // --- Profesionales --------------------------------------------------------
   {

@@ -174,9 +174,9 @@ const EVENT_STORY: Record<BookEvent['type'], (name: string, age: number | null) 
       age ? ` cumple ${String(age)} años` : ' festeja su cumpleaños'
     }.\nLa historia termina con la celebración (torta, velas y amigos).`,
   baptism: (name) =>
-    `Es un cuento para regalar a los invitados del bautismo de ${name}.\nLa historia habla de bienvenida, familia y cariño, y termina con la celebración junto a sus seres queridos. Trata lo religioso con respeto y sin detalles de rituales.`,
+    `Es un cuento para regalar a los invitados del bautismo de ${name}.\nLa historia habla de bienvenida, familia y cariño, y termina con la celebración junto a sus seres queridos. Trata lo religioso con respeto: sin magia ni personajes sagrados y sin detalles del rito.`,
   communion: (name) =>
-    `Es un cuento para regalar a los invitados de la primera comunión de ${name}.\nLa historia habla de crecer, compartir y la familia, y termina con la celebración. Trata lo religioso con respeto y sin detalles de rituales ni enseñanzas doctrinales.`,
+    `Es un cuento para regalar a los invitados de la primera comunión de ${name}.\nLa historia habla de crecer, compartir, agradecer y la familia, y termina con la celebración. Trata lo religioso con respeto: sin magia ni personajes sagrados, sin detalles del rito y sin enseñanzas doctrinales.`,
   graduation: (name) =>
     `Es un cuento para regalar a los compañeros en el egreso o el fin de año escolar de ${name}.\nLa historia recorre lo vivido en el año (amigos, juegos, lo aprendido) y termina con el festejo y las ganas de lo que viene.`,
 };

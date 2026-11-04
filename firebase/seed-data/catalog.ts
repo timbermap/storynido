@@ -38,6 +38,22 @@ Es una historia de Navidad. En español, puede incluir también la carta a los R
 
 const IMAGE_PROMPT = `Children's picture book illustration: {{scene}}. Main character: {{character}}. Art style: {{style}}. Clear composition, warm light, no text in the image.`;
 
+/** Primera comunión: revisado con cuidado (Claude, 4 nov 2026). Respeto religioso sin doctrina. */
+const COMMUNION_PROMPT = `${TEXT_PROMPT}
+Es el cuento de la primera comunión del protagonista. Cuéntalo desde su vida: la preparación con la familia y el grupo de catequesis, los nervios, un regalo con historia de un abuelo, una abuela o los padrinos, la misa contada con sencillez y la celebración después. El centro es compartir, agradecer y la familia.
+Respeto religioso (obligatorio):
+- Lenguaje sencillo y correcto. En español: "recibir la comunión por primera vez", "la misa", "la iglesia", "el sacerdote", "la catequesis". En inglés: "First Holy Communion", "Mass", "church", "the priest", "religious class". En portugués: "primeira comunhão" o "Primeira Eucaristia", "a missa", "a igreja", "o padre", "a catequese".
+- Sin magia, milagros, objetos que brillan solos ni voces del cielo. Jesús, Dios, la Virgen o los santos nunca aparecen como personajes que hablan o actúan.
+- No expliques doctrina, no compares religiones y nunca sugieras que alguien vale menos por su fe o por no tenerla.
+- El momento de recibir la comunión ocupa una o dos frases, con calma y sin describir el rito. Nunca bromas sobre la misa, la hostia o el vino.
+- El desafío es pequeño y cotidiano (los nervios, una mancha en la ropa blanca, la vela que quedó en casa) y se resuelve con ayuda de la familia o de los amigos.`;
+
+const COMMUNION_IMAGE_PROMPT = `${IMAGE_PROMPT} Respectful First Communion scene: white communion clothes, candle, rosary, family and friends, church exterior or a calm church interior. No depiction of Jesus, God, the Virgin Mary, saints or angels; no halos, rays of light or supernatural effects; the priest only in the background if present; no close-up of the host and never a child drinking from a chalice.`;
+
+/** Graduación o egreso: el nombre de la ceremonia sigue al idioma y a la edad. */
+const GRADUATION_PROMPT = `${TEXT_PROMPT}
+Es el cuento de la graduación o el fin de año escolar del protagonista. Según la edad, es el egreso del jardín o del kínder, o el fin de la primaria; en inglés, preschool, kindergarten or elementary school graduation; en portugués, a formatura. Puede haber toga y birrete o ropa de fiesta, según la ceremonia. La maestra o el maestro aparece con cariño. Despedirse da un poco de pena y está bien sentirlo; el final mira con ganas hacia lo que viene. Nunca nombres compañeros reales.`;
+
 /** Todas las historias de ejemplo admiten todas las opciones editoriales. */
 const EDITORIAL_OPTIONS = {
   lengths: [...BOOK_LENGTHS],
@@ -347,6 +363,8 @@ export const STORY_CAST: Record<string, string> = {
   'las-tardes-con-los-abuelos': 'Martina',
   'secreto-del-fondo-del-mar': 'Sofi',
   'unicornio-del-arcoiris': 'Sofi',
+  'mi-primera-comunion': 'Martina',
+  'mi-graduacion': 'Benja',
   'el-misterio-del-faro': 'Alex',
   'un-lunes-al-reves': 'Alex',
 };
@@ -379,6 +397,8 @@ export const NEW_COVER_SLUGS: string[] = [
   'el-misterio-del-faro',
   'el-cumpleanos-mas-magico',
   'unicornio-del-arcoiris',
+  'mi-primera-comunion',
+  'mi-graduacion',
   'las-letras-que-bailan',
   'el-jardin-de-las-emociones',
   'un-pasito-mas',
@@ -470,9 +490,9 @@ const BABY_BASE = {
 
 /**
  * Historias nuevas cuya portada todavía no se generó (`generate-brand-images.ts`): no se siembran
- * hasta tenerla, para no publicar una portada de otro chico. Hoy no hay ninguna pendiente.
+ * hasta tenerla, para no publicar una portada de otro chico.
  */
-export const PENDING_COVER_SLUGS: readonly string[] = [];
+export const PENDING_COVER_SLUGS: readonly string[] = ['mi-primera-comunion', 'mi-graduacion'];
 
 const DRAFT_STORIES: SeedStory[] = [
   {
@@ -633,6 +653,68 @@ const DRAFT_STORIES: SeedStory[] = [
       pt: 'O unicórnio chegou à festa com o arco-íris desbotado. «Faltam as cores!», disse [Nome], e todos correram para buscá-las.',
     },
     coverImage: '/samples/unicornio-del-arcoiris.webp',
+  },
+  {
+    // Ocasión de Celebraciones: el recuerdo de la primera comunión para cada invitado.
+    ...DRAFT_BASE,
+    slug: 'mi-primera-comunion',
+    order: 47,
+    ageMin: 7,
+    ageMax: 10,
+    channels: ['events'],
+    palette: 'bedtime',
+    collectionIds: ['primera-comunion'],
+    suggestedLessons: ['compartir'],
+    tags: ['primera comunión', 'familia', 'fe', 'celebración'],
+    title: {
+      es: 'La primera comunión de [Nombre]',
+      en: "[Name]'s First Holy Communion",
+      pt: 'A primeira comunhão de [Nome]',
+    },
+    summary: {
+      es: 'Faltan tres días para su primera comunión y [Nombre] tiene una misión: preparar con su familia y sus amigos de catequesis un día para compartir. Un recuerdo con su personaje para cada invitado.',
+      en: 'Three days before First Holy Communion, [Name] has a mission: to get ready, with family and friends from religious class, for a day of sharing. A keepsake starring the child for every guest.',
+      pt: 'Faltam três dias para a primeira comunhão e [Nome] tem uma missão: preparar, com a família e os amigos da catequese, um dia para partilhar. Uma lembrança com o seu personagem para cada convidado.',
+    },
+    excerpt: {
+      es: 'La abuela abrió una cajita con cuidado. Adentro estaba el rosario de su propia primera comunión. —Quiero que ahora lo tengas tú —le dijo a [Nombre].',
+      en: 'Grandma opened a little box with care. Inside was the rosary from her own First Communion. "I want you to have it now," she told [Name].',
+      pt: 'A avó abriu uma caixinha com cuidado. Dentro estava o terço da sua própria primeira comunhão. — Quero que agora ele fique com você — disse para [Nome].',
+    },
+    textPromptTemplate: COMMUNION_PROMPT,
+    imagePromptTemplate: COMMUNION_IMAGE_PROMPT,
+    coverImage: '/samples/mi-primera-comunion.webp',
+  },
+  {
+    // Ocasión de Celebraciones: el egreso o fin de año, un librito para cada compañero.
+    ...DRAFT_BASE,
+    slug: 'mi-graduacion',
+    order: 48,
+    ageMin: 4,
+    ageMax: 12,
+    channels: ['events'],
+    palette: 'celebration',
+    collectionIds: ['graduacion'],
+    suggestedLessons: ['amistad'],
+    tags: ['graduación', 'egreso', 'escuela', 'amigos', 'fin de año'],
+    title: {
+      es: 'La graduación de [Nombre]',
+      en: "[Name]'s Graduation Day",
+      pt: 'A formatura de [Nome]',
+    },
+    summary: {
+      es: 'Último día de clases: [Nombre] y sus compañeros tienen que encontrar los recuerdos del año escondidos por toda la escuela antes de la ceremonia. Un librito con su personaje para cada compañero de la clase.',
+      en: "Last day of school: [Name] and the class must find the year's memories hidden all over the school before the ceremony. A little book starring the child for every classmate.",
+      pt: 'Último dia de aula: [Nome] e os colegas precisam encontrar as lembranças do ano escondidas pela escola antes da cerimônia. Um livrinho com o seu personagem para cada colega da turma.',
+    },
+    excerpt: {
+      es: 'En el pizarrón había un mensaje misterioso: «Antes del diploma, encuentren los cinco tesoros del año». [Nombre] miró a sus amigos. ¡La última aventura de la clase acababa de empezar!',
+      en: 'On the board there was a mysterious message: "Before the diplomas, find the five treasures of the year." [Name] looked at the friends. The class\'s last adventure had just begun!',
+      pt: 'No quadro havia uma mensagem misteriosa: «Antes do diploma, encontrem os cinco tesouros do ano». [Nome] olhou para os amigos. A última aventura da turma tinha acabado de começar!',
+    },
+    textPromptTemplate: GRADUATION_PROMPT,
+    imagePromptTemplate: IMAGE_PROMPT,
+    coverImage: '/samples/mi-graduacion.webp',
   },
   {
     ...BABY_BASE,

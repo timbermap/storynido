@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { localizedSchema, timestampsSchema } from './common';
+import { EVENT_TYPES } from './events';
 
 /** Líneas comerciales (docs/estrategia/LINEAS-COMERCIALES.md §2). */
 export const CHANNELS = ['families', 'events', 'professionals'] as const;
@@ -32,6 +33,12 @@ export const collectionSchema = timestampsSchema.extend({
   description: localizedSchema(z.string().min(1)),
   /** Temas u objetivos generales que cubre (en Profesionales, se eligen al crear). */
   topics: z.array(localizedSchema(z.string().min(1))).max(12),
+  /**
+   * Celebraciones: la ocasión de la colección (primera comunión, graduación…). Su tarjeta abre el
+   * creador con esa ocasión elegida. Sin ella, es una temática de cumpleaños (el admin la vacía
+   * con null).
+   */
+  eventType: z.enum(EVENT_TYPES).nullish(),
 });
 
 export type Collection = z.infer<typeof collectionSchema>;
