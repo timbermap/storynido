@@ -220,8 +220,17 @@ export function LandingCollections({
   line,
   start,
   tone = 'cream',
+  continued = false,
+  followed = false,
 }: {
   tone?: SectionTone;
+  /**
+   * Sigue a otra lista de colecciones en la misma página: sin espacio arriba y con el título del
+   * tamaño de un subtítulo de sección.
+   */
+  continued?: boolean;
+  /** Le sigue otra lista de colecciones (`continued`): menos espacio abajo. */
+  followed?: boolean;
   /** Ancla para llegar desde un botón del hero ("Ver ejemplos"). */
   id?: string;
   /** Sin título, la sección no repite encabezado (catálogos que ya tienen su H1). */
@@ -252,11 +261,21 @@ export function LandingCollections({
   if (collections.length === 0) return null;
   return (
     <section id={id} className={cn('scroll-mt-28', BAND[tone])}>
-      <div className={cn('container-page', title ? 'py-20 lg:py-24' : 'pt-10 pb-20 lg:pb-24')}>
+      <div
+        className={cn(
+          'container-page',
+          title && !continued && 'pt-20 lg:pt-24',
+          !title && 'pt-10',
+          continued && 'pt-0',
+          followed ? 'pb-8 lg:pb-10' : 'pb-20 lg:pb-24',
+        )}
+      >
         {title && (
           <h2
             className={cn(
-              'text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium',
+              continued
+                ? 'text-2xl leading-tight font-medium lg:text-3xl'
+                : 'text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium',
               headingTone(tone),
             )}
           >
@@ -270,7 +289,7 @@ export function LandingCollections({
           className={cn(
             '-mx-4 flex snap-x snap-mandatory items-start gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0',
             // Sin encabezado propio, el espacio de arriba ya lo da el padding de la sección.
-            title && 'mt-10',
+            title && (continued ? 'mt-5' : 'mt-10'),
           )}
         >
           {collections.map((collection) => {
@@ -338,7 +357,8 @@ export function LandingCollections({
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
                     <ul
                       className={cn(
-                        'grid gap-3 lg:w-[40%] lg:shrink-0',
+                        'grid gap-3 lg:shrink-0',
+                        own.length === 2 ? 'lg:w-1/2' : 'lg:w-[40%]',
                         own.length === 2 ? 'max-w-[18rem] grid-cols-2' : 'max-w-[11rem]',
                         'lg:max-w-none',
                       )}

@@ -110,6 +110,12 @@ const cover = (
   prompt: `${style}\nPicture-book cover illustration, portrait 3:4. Leave the top third as a plain flat area of ${BG[color]} with no elements (space for the title). ${scene}\nThe character fills 40-60% of the cover, looking at the viewer.${generic ? ' The character is generic, resembling nobody in particular.' : ''}\n${BLACKLIST}`,
 });
 
+/** Portada con el tercio superior como fondo continuo y suave (sin franja lisa de borde recto). */
+const softCover = (file: string, color: string, scene: string): Job => ({
+  ...cover(file, GOUACHE, color, scene),
+  prompt: `${GOUACHE}\nPicture-book cover illustration, portrait 3:4. The top third is a calm, continuous soft ${BG[color]} background painted in the same gouache brush texture, with no objects in it (space for the title); it blends naturally into the scene below, with no hard edge, no flat band, no frame and no horizontal dividing line. ${scene}\nThe character fills 40-60% of the cover, looking at the viewer.\n${BLACKLIST}`,
+});
+
 const PHOTO = (body: string) =>
   `Candid real photograph, natural light, fine film grain, honest imperfect framing, off-center. ${body} No glow, no studio-perfect lighting, no text overlays.`;
 
@@ -530,6 +536,26 @@ const JOBS: Job[] = [
     ),
     prompt: `${GOUACHE}\nPicture-book cover illustration, portrait 3:4. The top third is a calm, continuous soft pale-mint sky painted in the same gouache brush texture, with no objects in it (space for the title); it blends naturally into the scene below, with no hard edge, no flat band, no frame and no horizontal dividing line. Benja, 6 (short black coily hair, warm dark-brown skin, red sneakers) wears a tiny navy graduation gown and cap and holds a rolled diploma tied with a coral ribbon, beaming. Around him in a simple school patio, two classmates in small gowns cheer, and a few flat balloons float in the lower part of the sky. Blank diploma with no writing.\nThe character fills 40-60% of the cover, looking at the viewer.\n${BLACKLIST}`,
   },
+  softCover(
+    'el-bosque-encantado',
+    'mint',
+    `${at('martina', 6)} wears a pointy purple wizard hat that is a little too big and holds a simple wooden wand, smiling, in a friendly enchanted forest with rounded trees and mushrooms; two tiny friendly fairies with simple wings flutter nearby. Daylight, no glow, no sparkles, nothing dark or scary.`,
+  ),
+  softCover(
+    'el-tesoro-de-la-isla',
+    'mint',
+    `${at('tomas', 6)} as a friendly pirate in a simple pirate hat and striped shirt, holding an unrolled treasure map with a red X, standing on a sandy beach of a small island with a palm tree; a small wooden ship with a plain sail waits in the water behind him. No weapons, no swords, no skulls.`,
+  ),
+  softCover(
+    'mi-primer-anito',
+    'cream',
+    `Lola, 1 (light-brown hair in two tiny pigtails, fair skin, yellow overalls), a one-year-old toddler sitting in a high chair, delighted, in front of a small round cake with a single candle; a few flat balloons and her smiling family (mother, father, grandmother) gathered around. Toddler proportions.`,
+  ),
+  softCover(
+    'mi-bautizo',
+    'cream',
+    `Lola as a baby (light-brown hair, fair skin) in a simple white christening gown, held in her mother's arms next to her father, with her godmother and godfather beside them, smiling, outside a simple small church with a plain wooden door. Warm natural daylight. No religious figures of any kind, no Jesus, no Virgin Mary, no saints, no angels, no halos, no rays of light, no glow, no water.`,
+  ),
   // ---- Profesionales (Minimalismo gráfico, chico genérico) -------------------------------------
   cover(
     'las-letras-que-bailan',

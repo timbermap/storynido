@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { avatarKey, avatarToSheet, hasMemories, type Avatar } from '../models/character';
 import { storyGoals, validGoal } from '../models/channels';
+import { EMPTY_BIRTHDAY } from '../models/events';
 import { describeCharacterSheet } from './ai';
 import {
   castNote,
@@ -157,6 +158,21 @@ describe('reglas narrativas y dirección de arte', () => {
     expect(narrativeRules({ childName: 'Luci', goal: 'dentista' })).toContain(
       'Nunca prometas resultados clínicos',
     );
+  });
+
+  it('el primer añito y el bautizo no son una misión con desafíos', () => {
+    const party = (type: 'birthday' | 'baptism', turningAge: number | null) =>
+      narrativeRules({
+        childName: 'Lola',
+        goal: null,
+        event: { ...EMPTY_BIRTHDAY, type, turningAge },
+      });
+    expect(party('birthday', 5)).toContain('misión festiva');
+    expect(party('birthday', null)).toContain('misión festiva');
+    for (const rules of [party('birthday', 1), party('baptism', null)]) {
+      expect(rules).not.toContain('misión festiva');
+      expect(rules).toContain('Sin misión ni desafíos');
+    }
   });
 
   it('la dirección de arte va al final y es opcional', () => {

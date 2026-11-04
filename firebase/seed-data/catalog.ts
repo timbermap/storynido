@@ -54,6 +54,30 @@ const COMMUNION_IMAGE_PROMPT = `${IMAGE_PROMPT} Respectful First Communion scene
 const GRADUATION_PROMPT = `${TEXT_PROMPT}
 Es el cuento de la graduación o el fin de año escolar del protagonista. Según la edad, es el egreso del jardín o del kínder, o el fin de la primaria; en inglés, preschool, kindergarten or elementary school graduation; en portugués, a formatura. Puede haber toga y birrete o ropa de fiesta, según la ceremonia. La maestra o el maestro aparece con cariño. Despedirse da un poco de pena y está bien sentirlo; el final mira con ganas hacia lo que viene. Nunca nombres compañeros reales.`;
 
+/** Magia de cuento para la fiesta: alegre y sin nada con derechos de autor. */
+const MAGIC_PARTY_PROMPT = `${TEXT_PROMPT}
+Magia de cuento, alegre y nunca oscura: brujitas y magos buenos y hechizos de amistad. Nada de maldiciones, calaveras ni miedo, y ningún personaje ni escuela de magia con derechos de autor.`;
+
+/** Piratas amables: el tesoro se encuentra con ingenio y se comparte. */
+const PIRATE_PARTY_PROMPT = `${TEXT_PROMPT}
+Piratas amables: nada de armas, peleas, tablones ni robos. El tesoro se encuentra con ingenio y se comparte con todos.`;
+
+/** Primer añito: un bebé que todavía no habla, rima y repetición, sin desafíos. */
+const FIRST_BIRTHDAY_PROMPT = `${TEXT_PROMPT}
+Es el primer cumpleaños: el protagonista es un bebé que todavía no habla. Frases muy cortas, rima y repetición para leer en voz alta; los adultos cuentan y el bebé descubre. Sin desafíos ni misiones: la última página es la vela y el abrazo de la familia.`;
+
+/** Bautizo o presentación: el mismo respeto religioso que la primera comunión. */
+const BAPTISM_PROMPT = `${TEXT_PROMPT}
+Es el cuento del bautizo (o la presentación) del protagonista, un bebé o un niño pequeño. Cuéntalo desde la familia: la preparación, los padrinos, la ropa blanca, la iglesia contada con sencillez y la fiesta. El centro es la bienvenida y el cariño.
+Respeto religioso (obligatorio):
+- Lenguaje sencillo y correcto. En español: "el bautizo" o "el bautismo", "la iglesia", "el sacerdote", "los padrinos". En inglés: "baptism" o "christening", "church", "the priest", "godparents". En portugués: "o batizado", "a igreja", "o padre", "os padrinhos".
+- Sin magia ni milagros. Jesús, Dios, la Virgen, los ángeles o los santos nunca aparecen como personajes.
+- No expliques doctrina ni compares religiones.
+- El rito ocupa una o dos frases, sin describirlo.
+- Frases cortas y repetición para leer en voz alta.`;
+
+const BAPTISM_IMAGE_PROMPT = `${IMAGE_PROMPT} Respectful baptism scene: baby or small child in white clothes, parents and godparents, a candle, church exterior or a calm church interior. No depiction of Jesus, God, the Virgin Mary, saints or angels; no halos, rays of light or supernatural effects; the priest only in the background if present; no close-up of water being poured.`;
+
 /** Todas las historias de ejemplo admiten todas las opciones editoriales. */
 const EDITORIAL_OPTIONS = {
   lengths: [...BOOK_LENGTHS],
@@ -378,6 +402,10 @@ export const STORY_CAST: Record<string, string> = {
   'unicornio-del-arcoiris': 'Sofi',
   'mi-primera-comunion': 'Martina',
   'mi-graduacion': 'Benja',
+  'el-bosque-encantado': 'Martina',
+  'el-tesoro-de-la-isla': 'Tomás',
+  'mi-primer-anito': 'Lola',
+  'mi-bautizo': 'Lola',
   'el-misterio-del-faro': 'Alex',
   'un-lunes-al-reves': 'Alex',
 };
@@ -412,6 +440,10 @@ export const NEW_COVER_SLUGS: string[] = [
   'unicornio-del-arcoiris',
   'mi-primera-comunion',
   'mi-graduacion',
+  'el-bosque-encantado',
+  'el-tesoro-de-la-isla',
+  'mi-primer-anito',
+  'mi-bautizo',
   'las-letras-que-bailan',
   'el-jardin-de-las-emociones',
   'un-pasito-mas',
@@ -638,7 +670,7 @@ const DRAFT_STORIES: SeedStory[] = [
     ageMax: 5,
     channels: ['events'],
     palette: 'celebration',
-    collectionIds: ['cumple-fantasia'],
+    collectionIds: ['cumple-unicornios'],
     suggestedLessons: ['amistad'],
     tags: ['unicornios', 'arcoíris', 'fantasía', 'cumpleaños'],
     title: {
@@ -719,6 +751,127 @@ const DRAFT_STORIES: SeedStory[] = [
     textPromptTemplate: GRADUATION_PROMPT,
     imagePromptTemplate: IMAGE_PROMPT,
     coverImage: '/samples/mi-graduacion.webp',
+  },
+  {
+    // Celebraciones, temática de magia: hechizos de amistad, nada oscuro.
+    ...DRAFT_BASE,
+    slug: 'el-bosque-encantado',
+    order: 80,
+    ageMin: 4,
+    ageMax: 8,
+    channels: ['events'],
+    palette: 'magic',
+    collectionIds: ['cumple-magia'],
+    suggestedLessons: ['amistad'],
+    tags: ['magia', 'hadas', 'bosque', 'cumpleaños'],
+    title: {
+      es: '[Nombre] y el bosque encantado',
+      en: '[Name] and the Enchanted Forest',
+      pt: '[Nome] e a floresta encantada',
+    },
+    summary: {
+      es: 'El día de su cumpleaños, los árboles del bosque se quedan dormidos y solo [Nombre] puede despertarlos con tres hechizos de amistad. Una fiesta de magos y hadas para regalar a cada invitado.',
+      en: 'On the birthday, the forest trees fall asleep and only [Name] can wake them with three friendship spells. A party of wizards and fairies to give to every guest.',
+      pt: 'No dia do aniversário, as árvores da floresta adormecem e só [Nome] pode acordá-las com três feitiços de amizade. Uma festa de magos e fadas para presentear cada convidado.',
+    },
+    excerpt: {
+      es: 'El sombrero puntiagudo le quedaba un poco grande, pero la varita brillaba justo como tenía que brillar. —Primer hechizo —susurró [Nombre]—: ¡que nadie se quede solo en la fiesta!',
+      en: 'The pointy hat was a little big, but the wand sparkled just as it should. "First spell," whispered [Name], "nobody stays alone at the party!"',
+      pt: 'O chapéu pontudo ficava um pouco grande, mas a varinha brilhava do jeito certo. — Primeiro feitiço — sussurrou [Nome] —: que ninguém fique sozinho na festa!',
+    },
+    textPromptTemplate: MAGIC_PARTY_PROMPT,
+    coverImage: '/samples/el-bosque-encantado.webp',
+  },
+  {
+    // Celebraciones, temática pirata: sin armas ni robos, el tesoro se comparte.
+    ...DRAFT_BASE,
+    slug: 'el-tesoro-de-la-isla',
+    order: 81,
+    ageMin: 4,
+    ageMax: 8,
+    channels: ['events'],
+    palette: 'adventure',
+    collectionIds: ['cumple-piratas'],
+    suggestedLessons: ['compartir'],
+    tags: ['piratas', 'tesoro', 'islas', 'cumpleaños'],
+    title: {
+      es: '[Nombre] y el tesoro de la isla',
+      en: '[Name] and the Island Treasure',
+      pt: '[Nome] e o tesouro da ilha',
+    },
+    summary: {
+      es: 'Un mapa llega en una botella el día de su cumpleaños, y la tripulación de [Nombre] zarpa hacia una isla con tres pistas y un cofre escondido. Una fiesta pirata para regalar a cada invitado.',
+      en: "A map arrives in a bottle on the birthday, and [Name]'s crew sets sail for an island with three clues and a hidden chest. A pirate party to give to every guest.",
+      pt: 'Um mapa chega numa garrafa no dia do aniversário, e a tripulação de [Nome] zarpa rumo a uma ilha com três pistas e um baú escondido. Uma festa pirata para presentear cada convidado.',
+    },
+    excerpt: {
+      es: 'La botella tenía un papel enrollado con una X roja. —¡Tenemos un mapa! —gritó la tripulación. Y el barco de [Nombre] levó anclas.',
+      en: 'Inside the bottle was a rolled-up paper with a red X. "We have a map!" the crew shouted. And [Name]\'s ship raised anchor.',
+      pt: 'Dentro da garrafa havia um papel enrolado com um X vermelho. — Temos um mapa! — gritou a tripulação. E o navio de [Nome] levantou âncora.',
+    },
+    textPromptTemplate: PIRATE_PARTY_PROMPT,
+    coverImage: '/samples/el-tesoro-de-la-isla.webp',
+  },
+  {
+    // Celebraciones, primer añito: para leerle al bebé, con rima y sin desafíos.
+    ...BABY_BASE,
+    slug: 'mi-primer-anito',
+    order: 82,
+    ageMin: 0,
+    ageMax: 2,
+    channels: ['events'],
+    palette: 'celebration',
+    collectionIds: ['cumple-primer-anito'],
+    suggestedLessons: [],
+    tags: ['primer cumpleaños', 'bebés', 'familia', 'cumpleaños'],
+    title: {
+      es: 'El primer añito de [Nombre]',
+      en: "[Name]'s First Birthday",
+      pt: 'O primeiro aninho de [Nome]',
+    },
+    summary: {
+      es: 'Un año de primeras veces: la primera sonrisa, los primeros pasitos y la primera vela. Un cuento corto, con rima y repetición, para leerle a [Nombre] y regalar a la familia.',
+      en: 'A year of firsts: the first smile, the first little steps and the first candle. A short rhyming story to read to [Name] and give to the family.',
+      pt: 'Um ano de primeiras vezes: o primeiro sorriso, os primeiros passinhos e a primeira vela. Uma história curta, com rima e repetição, para ler para [Nome] e presentear a família.',
+    },
+    excerpt: {
+      es: 'Un añito, un añito, ¿qué aprendió [Nombre]? ¡Aplaudir con las manitos y reír, reír, reír!',
+      en: 'One year old, one year old, what did [Name] learn? To clap those little hands and laugh, laugh, laugh!',
+      pt: 'Um aninho, um aninho, o que [Nome] aprendeu? Bater as mãozinhas e rir, rir, rir!',
+    },
+    textPromptTemplate: FIRST_BIRTHDAY_PROMPT,
+    coverImage: '/samples/mi-primer-anito.webp',
+  },
+  {
+    // Celebraciones, bautizo o presentación: el mismo respeto religioso que la comunión.
+    ...BABY_BASE,
+    slug: 'mi-bautizo',
+    order: 83,
+    ageMin: 0,
+    ageMax: 3,
+    channels: ['events'],
+    palette: 'bedtime',
+    collectionIds: ['bautizo'],
+    suggestedLessons: [],
+    tags: ['bautizo', 'familia', 'padrinos', 'celebración'],
+    title: {
+      es: 'El bautizo de [Nombre]',
+      en: "[Name]'s Baptism Day",
+      pt: 'O batizado de [Nome]',
+    },
+    summary: {
+      es: 'Toda la familia se prepara para un día de bienvenida: la ropa blanca, los padrinos y la fiesta después. Un cuento corto para leerle a [Nombre] y regalar a cada invitado.',
+      en: 'The whole family gets ready for a day of welcome: the white clothes, the godparents and the party afterwards. A short story to read to [Name] and give to every guest.',
+      pt: 'Toda a família se prepara para um dia de boas-vindas: a roupa branca, os padrinhos e a festa depois. Uma história curta para ler para [Nome] e presentear cada convidado.',
+    },
+    excerpt: {
+      es: 'La madrina llegó temprano con una cajita blanca. —Es para ti, [Nombre] —dijo, y todos sonrieron—. Hoy es tu día.',
+      en: 'The godmother arrived early with a little white box. "This is for you, [Name]," she said, and everyone smiled. "Today is your day."',
+      pt: 'A madrinha chegou cedo com uma caixinha branca. — É para você, [Nome] — disse, e todos sorriram. — Hoje é o seu dia.',
+    },
+    textPromptTemplate: BAPTISM_PROMPT,
+    imagePromptTemplate: BAPTISM_IMAGE_PROMPT,
+    coverImage: '/samples/mi-bautizo.webp',
   },
   {
     ...BABY_BASE,

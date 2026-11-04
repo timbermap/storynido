@@ -193,7 +193,18 @@ export function narrativeRules(input: Pick<StoryPromptInput, 'childName' | 'even
     '- El final cierra con calidez y deja ganas de releerlo.',
     '- Cada objeto o lugar importante se llama siempre igual y es el mismo en todas las páginas: una sola metáfora central, no varias.',
   ];
-  if (input.event) {
+  // Un primer añito o un bautizo es de un bebé: sin misión ni desafíos, la celebración es el cierre.
+  const baby =
+    input.event &&
+    (input.event.type === 'baptism' ||
+      (input.event.type === 'birthday' &&
+        input.event.turningAge !== null &&
+        input.event.turningAge <= 1));
+  if (baby) {
+    rules.push(
+      '- Sin misión ni desafíos: una secuencia tierna y corta que termina en la celebración con la familia.',
+    );
+  } else if (input.event) {
     rules.push(
       '- Es una misión festiva con 2 o 3 mini desafíos; la celebración es la recompensa, no una lista de saludos.',
     );

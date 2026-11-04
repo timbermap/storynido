@@ -47,6 +47,7 @@ export default async function EventsCatalogPage({ params }: Props) {
       </div>
       <LandingCollections
         collections={birthdays}
+        followed={occasions.length > 0}
         stories={stories}
         createLabel={t('viewStory')}
         viewLabel={t('viewStoryLink')}
@@ -56,6 +57,7 @@ export default async function EventsCatalogPage({ params }: Props) {
       {/* Las ocasiones que no son cumpleaños (primera comunión, graduación), con su subtítulo. */}
       <LandingCollections
         title={t('otherCelebrations')}
+        continued
         collections={occasions}
         stories={stories}
         createLabel={t('viewStory')}
