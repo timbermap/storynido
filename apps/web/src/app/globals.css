@@ -181,3 +181,20 @@
     @apply sr-only rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50;
   }
 }
+
+/*
+ * Menús desplegables: sin la flecha del navegador (quedaba pegada al borde redondeado) y con una
+ * propia, apagada y con aire a la derecha. Fuera de las capas para ganarle al padding de las
+ * utilidades (px-3, etc.) en todos los <select> de una vez.
+ */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555c6e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.125rem;
+  padding-right: 2.75rem;
+}
+select:not([multiple]):not([size]):disabled {
+  opacity: 0.6;
+}
