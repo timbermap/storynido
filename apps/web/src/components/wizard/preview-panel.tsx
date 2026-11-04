@@ -339,9 +339,12 @@ export function PreviewPanel({
                 )}
                 <h2 className="text-xl font-medium">{t('differencesTitle')}</h2>
               </div>
-              <p className="rounded-full border px-3 py-1 text-sm font-bold">
-                {t('regenerationsLeft', { count: regenerationsLeft })}
-              </p>
+              {/* Sin contador visible: solo el aviso del último ajuste o de que ya no quedan. */}
+              {regenerationsLeft <= 1 && (
+                <p className="rounded-full border px-3 py-1 text-sm font-bold">
+                  {regenerationsLeft === 1 ? t('lastAdjustment') : t('noAdjustmentsLeft')}
+                </p>
+              )}
             </div>
             <ul className="mt-4 grid gap-4 font-sans text-sm leading-snug md:grid-cols-3 md:gap-6">
               {[

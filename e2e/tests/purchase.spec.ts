@@ -83,8 +83,13 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await expect(body(page)).toContainText('Así vamos a dibujar a Martina', { timeout: 120_000 });
 
   // Corrección guiada: primero qué no se parece y solo esos rasgos.
-  await page.getByRole('button', { name: 'No se parece: corregir' }).click();
+  await page.getByRole('button', { name: 'Ajustar el parecido' }).click();
   const save = page.getByRole('button', { name: 'Guardar y volver a dibujar' });
+  await expect(save).toBeDisabled();
+  // «Ajustar el parecido»: alcanza con una nota corta (por ejemplo, la edad).
+  await page.locator('#character-note').fill('que se vea un poco más chica');
+  await expect(save).toBeEnabled();
+  await page.locator('#character-note').fill('');
   await expect(save).toBeDisabled();
   await expect(page.getByRole('group', { name: 'Color de pelo' })).toHaveCount(0);
   await page.getByLabel('El pelo').check();
@@ -106,7 +111,7 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   );
   const before = await page.locator('[role=group] img').first().getAttribute('src');
   await page.getByRole('button', { name: 'Probar otra ilustración' }).first().click();
-  await expect(body(page)).toContainText('Ya usaste la regeneración gratis', { timeout: 120_000 });
+  await expect(body(page)).toContainText('Ya usaste los ajustes incluidos', { timeout: 120_000 });
   expect(await page.locator('[role=group] img').first().getAttribute('src')).not.toBe(before);
 
   // --- Checkout: tapa blanda, dirección, cupón y pago simulado ---

@@ -56,6 +56,8 @@ export const API_ERROR_CODES = [
   'unavailable_in_mode',
   /** Se alcanzó un límite (regeneraciones, vistas previas por día). */
   'limit_reached',
+  /** Se alcanzó el tope semanal de vistas previas y ajustes. */
+  'limit_reached_week',
   /** La IA no pudo generar (proveedor caído, control de calidad o moderación fallida). */
   'ai_unavailable',
   /** Se agotó el presupuesto diario de IA: vuelve a haber generación al día siguiente (UTC). */
@@ -896,9 +898,14 @@ export const apiRoutes = {
     path: '/v1/books/:bookId/preview/character',
     access: 'user',
     summary:
-      'Corrige los rasgos del personaje y los que no pueden cambiar; vuelve a dibujar la lámina (cuenta como regeneración)',
+      'Ajusta el parecido del personaje (rasgos, los que no pueden cambiar y una nota corta); vuelve a dibujar la lámina (cuenta como ajuste del libro y para los topes por día y por semana)',
     params: bookParamsSchema,
-    body: z.object({ traits: characterTraitsSchema, mustKeep: mustKeepSchema }),
+    body: z.object({
+      traits: characterTraitsSchema,
+      mustKeep: mustKeepSchema,
+      /** «Ajustar el parecido»: qué corregir, en pocas palabras (se modera; va al prompt). */
+      note: z.string().trim().max(120).nullable().default(null),
+    }),
     response: publicPreviewSchema,
   },
   previewFeedback: {

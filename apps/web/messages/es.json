@@ -944,14 +944,15 @@
       "continueSoon": "Muy pronto podrás elegir el formato y comprar. Tu muestra queda guardada.",
       "failedTitle": "No pudimos crear la muestra",
       "errors": {
-        "limit_reached": "Llegaste al límite de muestras o regeneraciones por hoy. Podrás crear otra mañana.",
+        "limit_reached": "Ya probaste varias versiones hoy. Guardamos todo y mañana sigues.",
         "photo_unreadable": "No pudimos leer esta foto. Prueba con otra (de frente, bien iluminada, solo el rostro) o elige los rasgos del personaje. No cuenta para tu límite de hoy.",
         "ai_unavailable": "No pudimos generar las ilustraciones en este momento. Intenta de nuevo en unos minutos; tu borrador queda guardado.",
         "ai_budget_exhausted": "Alcanzamos el límite de generación por hoy. Vuelve a intentarlo mañana; tu borrador queda guardado.",
         "validation_failed": "Ese texto no es apto para un cuento infantil. Cámbialo e intenta de nuevo.",
         "bad_request": "Revisa que estén completos el protagonista, la foto, la historia y el estilo.",
         "generic": "Algo salió mal. Intenta de nuevo en unos minutos.",
-        "account_required": "Crea tu cuenta gratis para ver la portada y las páginas ilustradas."
+        "account_required": "Crea tu cuenta gratis para ver la portada y las páginas ilustradas.",
+        "limit_reached_week": "Ya probaste varias versiones esta semana. Guardamos todo y en unos días sigues."
       },
       "saveStoryTitle": "Guarda tu cuento",
       "saveStoryText": "Crea tu cuenta gratis para no perder esta muestra y retomarla desde cualquier dispositivo.",
@@ -960,7 +961,7 @@
       "characterAlt": "Lámina del personaje: {name} de cuerpo entero",
       "approve": "Sí, es así: ver su portada y 2 páginas gratis",
       "approveNote": "Después ilustramos la portada y las primeras páginas.",
-      "correct": "No se parece: corregir",
+      "correct": "Ajustar el parecido",
       "saveTraits": "Guardar y volver a dibujar",
       "correctNote": "Volver a dibujar usa tu regeneración gratis.",
       "mustKeepLegend": "Tiene que mantenerse igual en todo el libro",
@@ -978,7 +979,7 @@
       "illustrating": "Ilustrando la portada y las primeras páginas…",
       "approvedBadge": "Personaje aprobado",
       "continueAfterApproval": "Elige el formato cuando apruebes al personaje y la muestra esté al día.",
-      "whatsOff": "¿Qué no se parece?",
+      "whatsOff": "¿Qué ajustamos?",
       "whatsOffHint": "Marca lo que hay que corregir y te mostramos solo eso.",
       "aspects": {
         "hair": "El pelo",
@@ -1002,7 +1003,11 @@
       "proPrice": "Cuento digital: {price}",
       "proVolume": "Cuantos más cuentos haces, menos pagas por cada uno. Sin suscripción.",
       "proNotice": "Es material educativo y de acompañamiento: no es clínico ni reemplaza tu criterio profesional.",
-      "proDifferencesEdit": "Puedes editar el texto de cada página y volver a cambiar el cuento base o la foto."
+      "proDifferencesEdit": "Puedes editar el texto de cada página y volver a cambiar el cuento base o la foto.",
+      "adjustNote": "¿Algo más? (opcional)",
+      "adjustNotePlaceholder": "Por ejemplo: que se vea un poco más chico",
+      "lastAdjustment": "Este es el último ajuste incluido.",
+      "noAdjustmentsLeft": "Ya usaste los ajustes incluidos: puedes aprobarlo o crear una vista previa nueva."
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",

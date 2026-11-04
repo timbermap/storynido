@@ -465,6 +465,44 @@ describe('vista previa', () => {
     expect(second.json<{ error: { code: string } }>().error.code).toBe('limit_reached');
   });
 
+  it('respeta el tope semanal con un aviso propio', async () => {
+    await setAiConfig({ maxPreviewsPerUserPerDay: 5, maxPreviewsPerUserPerWeek: 1 });
+    await seedBook(providers, 'book-1');
+    await seedBook(providers, 'book-2');
+    expect((await generate('book-1')).statusCode).toBe(200);
+    const second = await generate('book-2');
+    expect(second.statusCode).toBe(429);
+    expect(second.json<{ error: { code: string } }>().error.code).toBe('limit_reached_week');
+  });
+
+  it('ajustar el parecido cuenta para el tope del día y manda la nota al dibujo', async () => {
+    await setAiConfig({ maxPreviewsPerUserPerDay: 2, maxRegenerationsPerBook: 3 });
+    await seedBook(providers, 'book-1');
+    await seedBook(providers, 'book-2');
+    const first = (await generate('book-1')).json<PublicPreview>();
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    const adjust = () =>
+      app.inject({
+        method: 'PUT',
+        url: '/v1/books/book-1/preview/character',
+        headers: auth(TOKEN),
+        payload: {
+          traits: first.preview?.character?.traits,
+          mustKeep: [],
+          note: 'que se vea más chico',
+        },
+      });
+    // La muestra (1) más un ajuste (2) llegan al tope del día.
+    expect((await adjust()).statusCode).toBe(200);
+    expect(JSON.stringify(paint.mock.calls.at(-1))).toContain('que se vea más chico');
+    paint.mockRestore();
+    const again = await adjust();
+    expect(again.statusCode).toBe(429);
+    expect(again.json<{ error: { code: string } }>().error.code).toBe('limit_reached');
+    // Y una muestra nueva tampoco entra hoy.
+    expect((await generate('book-2')).statusCode).toBe(429);
+  });
+
   it('avisa cuántas muestras gratis le quedan hoy, antes de bloquear', async () => {
     await setAiConfig({ maxPreviewsPerUserPerDay: 2 });
     await seedBook(providers, 'book-1');

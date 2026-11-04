@@ -71,6 +71,7 @@ export function registerPreviewRoutes(app: FastifyInstance, previews: PreviewSer
       (request.params as ParamsOf<'updateCharacter'>).bookId,
       body.traits,
       body.mustKeep,
+      body.note,
     );
   });
 
