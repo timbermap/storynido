@@ -665,7 +665,24 @@
           "photos": "Photos deleted after 30 days",
           "reorder": "You can reorder any book"
         }
-      }
+      },
+      "newWithTitle": "What shall we create with {name}?",
+      "newWith": {
+        "families": {
+          "title": "A story",
+          "text": "A new adventure with {name}, using what we already know about their character."
+        },
+        "events": {
+          "title": "Their birthday",
+          "text": "Invitation, decorations and a story for every guest, starring {name}."
+        },
+        "professionals": {
+          "title": "A story for your project",
+          "text": "With their alias and character, to work on a goal."
+        }
+      },
+      "profileRedraw": "Update their drawing",
+      "profileRedrawNote": "We start a new story with their photos: when you create the preview you see their new drawing and approve it. Each new drawing uses one AI generation."
     },
     "myStoriesLink": "Your stories and orders are in My stories →"
   },

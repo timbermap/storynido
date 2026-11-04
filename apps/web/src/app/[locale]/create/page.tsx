@@ -20,18 +20,23 @@ interface Props {
     tema?: string;
     ocasion?: string;
     tipo?: string;
+    personaje?: string;
   }>;
 }
 
 const slug = (value: string | undefined) =>
   value && /^[a-z0-9-]{1,80}$/.test(value) ? value : null;
 
+/** Id de un personaje guardado (documento de Firestore): se preselecciona en el creador. */
+const characterId = (value: string | undefined) =>
+  value && /^[A-Za-z0-9_-]{1,64}$/.test(value) ? value : null;
+
 /** La ocasión que manda la tarjeta de Celebraciones (`?ocasion=`): cualquier otro valor se ignora. */
 const occasion = (value: string | undefined): EventType | null =>
   EVENT_TYPES.find((type) => type === value) ?? null;
 
 export default async function CreatePage({ params, searchParams }: Props) {
-  const { story, lesson, line, tema, ocasion, tipo } = await searchParams;
+  const { story, lesson, line, tema, ocasion, tipo, personaje } = await searchParams;
   const theme = tema?.trim().slice(0, EVENT_LIMITS.themeMaxLength) ?? null;
   const locale = (await params).locale as Locale;
   // El creador arranca acá mismo (borrador en memoria): necesita el catálogo.
@@ -47,6 +52,8 @@ export default async function CreatePage({ params, searchParams }: Props) {
       eventTheme={theme === '' ? null : theme}
       // Celebraciones: la ocasión de la tarjeta (primera comunión, graduación…).
       eventType={occasion(ocasion)}
+      // «Crear otro cuento con…»: el personaje llega elegido y el cuento es nuevo.
+      reuseCharacterId={characterId(personaje)}
       channel={parseChannel(line)}
       // Destacado «Para colorear» (Brasil): el libro arranca como libro para colorear.
       contentType={tipo === 'coloring' ? 'coloring' : null}

@@ -182,7 +182,9 @@ describe('borrado de datos a pedido', () => {
       'preview.title': 'Martina y la luna',
       'preview.character': { imagePath: 'x', previewImagePath: 'previews/ana/b1/character.webp' },
     });
-    await db.doc('photos/p1').update({ expiresAt: new Date('2026-12-01T00:00:00Z') });
+    await db
+      .doc('photos/p1')
+      .update({ status: 'valid', expiresAt: new Date('2099-12-01T00:00:00Z') });
 
     const profile = await app.inject({
       method: 'GET',
@@ -194,13 +196,15 @@ describe('borrado de datos a pedido', () => {
       characterImageUrl: string | null;
       photos: number;
       photosExpireAt: string | null;
+      validPhotos: number;
       photoUrls: string[];
       books: { id: string; title: string | null; status: string }[];
     }>();
     expect(body.characterImageUrl).toEqual(expect.any(String));
     expect(body.photos).toBe(1);
     expect(body.photoUrls).toHaveLength(1);
-    expect(body.photosExpireAt).toBe('2026-12-01T00:00:00.000Z');
+    expect(body.photosExpireAt).toBe('2099-12-01T00:00:00.000Z');
+    expect(body.validPhotos).toBe(1);
     expect(body.books.map((book) => book.id).sort()).toEqual(['b1', 'b2']);
     expect(body.books.find((book) => book.id === 'b1')?.title).toBe('Martina y la luna');
 

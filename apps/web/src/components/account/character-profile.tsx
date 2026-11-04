@@ -18,7 +18,6 @@ import {
 } from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { isOrderDone } from '@/lib/order-state';
-import { REUSE_CHARACTER_KEY } from '@/lib/reuse-character';
 
 type Profile = Awaited<ReturnType<typeof loadProfile>>;
 
@@ -147,7 +146,9 @@ export function CharacterProfile({ childId }: { childId: string }) {
     try {
       await api('deleteChildPhotos', { params: { childId } });
       setProfile((current) =>
-        current ? { ...current, photos: 0, photosExpireAt: null, photoUrls: [] } : current,
+        current
+          ? { ...current, photos: 0, validPhotos: 0, photosExpireAt: null, photoUrls: [] }
+          : current,
       );
       setMessage({ text: t('profilePhotoDeleted', { name }), error: false });
     } catch (caught) {
@@ -161,13 +162,17 @@ export function CharacterProfile({ childId }: { childId: string }) {
     }
   }
 
+  /** «Crear un cuento con…»: se elige qué crear, con el personaje ya elegido. */
   function createWith() {
-    try {
-      sessionStorage.setItem(REUSE_CHARACTER_KEY, childId);
-    } catch {
-      // Sin almacenamiento, el cuento se crea igual y el personaje se elige en el primer paso.
-    }
-    router.push({ pathname: '/create', query: { line: 'families' } });
+    router.push({ pathname: '/new', query: { personaje: childId } });
+  }
+
+  /**
+   * «Actualizar su dibujo»: un cuento nuevo de Familias con sus fotos vigentes. El dibujo nuevo se
+   * genera y se aprueba en la muestra (el mismo proceso de siempre); el perfil muestra el último.
+   */
+  function redraw() {
+    router.push({ pathname: '/create', query: { line: 'families', personaje: childId } });
   }
 
   type ProfileBook = Profile['books'][number];
@@ -227,6 +232,14 @@ export function CharacterProfile({ childId }: { childId: string }) {
             {t('profileCreate', { name })}
           </Button>
           <p className="text-sm text-muted-foreground">{t('profileCreateNote')}</p>
+          {profile.validPhotos > 0 && (
+            <div className="grid gap-1.5">
+              <Button type="button" variant="outline" onClick={redraw} className="w-fit">
+                {t('profileRedraw')}
+              </Button>
+              <p className="text-sm text-muted-foreground">{t('profileRedrawNote')}</p>
+            </div>
+          )}
         </div>
       </header>
 

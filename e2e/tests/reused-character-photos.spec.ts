@@ -16,6 +16,8 @@ async function newStoryWithMartina(page: Page) {
   await heading(page, 'Cuéntanos sobre el protagonista');
   await page.locator('label', { hasText: 'Martina' }).first().click();
   await expect(page.locator('#child-name')).toHaveValue('Martina');
+  // Elegido como personaje guardado: trae su aspecto (sus fotos).
+  await expect(page.locator('body')).toContainText('Usamos su aspecto del último cuento');
   await next(page);
   await heading(page, 'Sube de 1 a 3 fotos');
 }

@@ -665,7 +665,24 @@
           "photos": "Fotos apagadas após 30 dias",
           "reorder": "Você pode pedir qualquer livro de novo"
         }
-      }
+      },
+      "newWithTitle": "O que vamos criar com {name}?",
+      "newWith": {
+        "families": {
+          "title": "Uma história",
+          "text": "Uma nova aventura com {name}, com o que já sabemos do personagem."
+        },
+        "events": {
+          "title": "O aniversário",
+          "text": "Convite, decoração e uma história para cada convidado, com {name} como protagonista."
+        },
+        "professionals": {
+          "title": "Uma história do seu projeto",
+          "text": "Com o apelido e o personagem, para trabalhar um objetivo."
+        }
+      },
+      "profileRedraw": "Atualizar o desenho",
+      "profileRedrawNote": "Começamos uma história nova com as fotos: ao criar a prévia você vê o desenho novo e o aprova. Cada desenho novo usa uma geração de IA."
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },
