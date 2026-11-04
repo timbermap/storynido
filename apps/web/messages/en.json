@@ -1373,7 +1373,10 @@
       "length": "Length",
       "notice": "This is educational, supportive material: it isn’t clinical and doesn’t replace your professional judgment."
     },
-    "subStepCount": "({current} of {total})"
+    "subStepCount": "({current} of {total})",
+    "chosenTitle": "You're creating",
+    "chosenChange": "Change",
+    "chosenLesson": "Lesson: {name}"
   },
   "Landing": {
     "events": {

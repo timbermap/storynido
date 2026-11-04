@@ -11,6 +11,7 @@ import { updateBook } from '@/lib/firebase/drafts';
 import { titleForChild } from '@/lib/story-title';
 
 import { BookOptions, type BookChoice } from './book-options';
+import { ChosenSummary } from './chosen-summary';
 import { OptionCard } from './option-card';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
@@ -46,6 +47,9 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
         }),
   }));
   const story = data.stories.find((item) => item.slug === selected);
+  // Viene con la historia elegida (desde el catálogo): resumen y «Cambiar», no toda la grilla.
+  const tWizard = useTranslations('Wizard');
+  const [expanded, setExpanded] = useState(!data.book.storyId);
 
   const fits = (min: number, max: number) => age !== undefined && min <= age && age <= max;
   // Solo las historias de la línea del libro, no las de otra línea que también la incluyen.
@@ -86,46 +90,57 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
       error={error}
       onNext={() => void next()}
     >
-      <fieldset>
-        <legend className="sr-only">{t('title')}</legend>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {ordered.map((story) => (
-            <OptionCard
-              key={story.slug}
-              name="story"
-              value={story.slug}
-              checked={selected === story.slug}
-              onSelect={(value) => {
-                setSelected(value);
-                setError(null);
-              }}
-            >
-              <div className="aspect-[3/4] w-full overflow-hidden">
-                <StoryCover story={story} sizes="(min-width: 768px) 20vw, 45vw" />
-              </div>
-              <span className="grid gap-1.5 p-3">
-                <span className="font-display text-lg leading-snug font-semibold">
-                  {titleForChild(story, data.child?.name, locale)}
-                </span>
-                <span className="text-xs font-bold text-muted-foreground">
-                  {tStories('agesFor', { min: story.ageMin, max: story.ageMax })}
-                </span>
-                {lesson && forLesson(story) ? (
-                  <span className="w-fit rounded-full bg-mint px-2 py-0.5 text-xs font-semibold text-success">
-                    {t('idealFor', { name: lesson.name })}
+      {!expanded && story ? (
+        <ChosenSummary
+          story={story}
+          title={titleForChild(story, data.child?.name, locale)}
+          detail={lesson ? tWizard('chosenLesson', { name: lesson.name }) : null}
+          onChange={() => {
+            setExpanded(true);
+          }}
+        />
+      ) : (
+        <fieldset>
+          <legend className="sr-only">{t('title')}</legend>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {ordered.map((story) => (
+              <OptionCard
+                key={story.slug}
+                name="story"
+                value={story.slug}
+                checked={selected === story.slug}
+                onSelect={(value) => {
+                  setSelected(value);
+                  setError(null);
+                }}
+              >
+                <div className="aspect-[3/4] w-full overflow-hidden">
+                  <StoryCover story={story} sizes="(min-width: 768px) 20vw, 45vw" />
+                </div>
+                <span className="grid gap-1.5 p-3">
+                  <span className="font-display text-lg leading-snug font-semibold">
+                    {titleForChild(story, data.child?.name, locale)}
                   </span>
-                ) : (
-                  fits(story.ageMin, story.ageMax) && (
+                  <span className="text-xs font-bold text-muted-foreground">
+                    {tStories('agesFor', { min: story.ageMin, max: story.ageMax })}
+                  </span>
+                  {lesson && forLesson(story) ? (
                     <span className="w-fit rounded-full bg-mint px-2 py-0.5 text-xs font-semibold text-success">
-                      {t('recommended')}
+                      {t('idealFor', { name: lesson.name })}
                     </span>
-                  )
-                )}
-              </span>
-            </OptionCard>
-          ))}
-        </div>
-      </fieldset>
+                  ) : (
+                    fits(story.ageMin, story.ageMax) && (
+                      <span className="w-fit rounded-full bg-mint px-2 py-0.5 text-xs font-semibold text-success">
+                        {t('recommended')}
+                      </span>
+                    )
+                  )}
+                </span>
+              </OptionCard>
+            ))}
+          </div>
+        </fieldset>
+      )}
 
       <fieldset className="mt-8">
         <legend className="font-display text-xl font-semibold">{t('languageTitle')}</legend>

@@ -10,6 +10,7 @@ import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
 import { titleForChild } from '@/lib/story-title';
 
+import { ChosenSummary } from './chosen-summary';
 import { OptionCard } from './option-card';
 import { miniBookOptions, styleForStory } from './party';
 import { baseStories, collectionOfDraft } from './pro';
@@ -38,6 +39,13 @@ export function StepFocus({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [storyId, setStoryId] = useState(collection ? (book.storyId ?? null) : null);
   const [error, setError] = useState<string | null>(null);
   const stories = collection ? baseStories(data.stories, collection.slug, age) : [];
+  // Viene con el cuento base (y la enseñanza) elegidos desde las plantillas: resumen y «Cambiar».
+  const tWizard = useTranslations('Wizard');
+  const preselected = Boolean(
+    book.storyId && collection && stories.some((item) => item.slug === book.storyId),
+  );
+  const [expanded, setExpanded] = useState(!preselected);
+  const lesson = data.lessons.find((item) => book.lessonIds.includes(item.slug));
   const fits = (min: number, max: number) => age !== undefined && min <= age && age <= max;
 
   async function next() {
@@ -46,7 +54,8 @@ export function StepFocus({ nav, data }: { nav: StepNav; data: WizardData }) {
       setError(t('requiredCollection'));
       return;
     }
-    if (!goal) {
+    // Con el cuento ya elegido, el objetivo es opcional (se puede sumar desde «Cambiar»).
+    if (!goal && expanded) {
       setError(t('requiredGoal'));
       return;
     }
@@ -85,98 +94,113 @@ export function StepFocus({ nav, data }: { nav: StepNav; data: WizardData }) {
       error={error}
       onNext={() => void next()}
     >
-      <div className="grid gap-8">
-        <fieldset>
-          <legend className="mb-3 font-display text-xl font-semibold">{t('collection')}</legend>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {data.collections.map((item) => (
-              <OptionCard
-                key={item.slug}
-                name="pro-collection"
-                value={item.slug}
-                checked={collectionSlug === item.slug}
-                onSelect={(value) => {
-                  if (value === collectionSlug) return;
-                  setCollectionSlug(value);
-                  setGoal(null);
-                  setStoryId(null);
-                  setError(null);
-                }}
-              >
-                <span className="grid gap-1 p-4 pr-12">
-                  <span className="font-display text-lg leading-snug font-semibold">
-                    {item.name}
-                  </span>
-                  <span className="text-sm leading-snug text-muted-foreground">
-                    {item.description}
-                  </span>
-                </span>
-              </OptionCard>
-            ))}
-          </div>
-        </fieldset>
-
-        {collection && (
+      {!expanded && draftStory ? (
+        <ChosenSummary
+          story={draftStory}
+          title={titleForChild(draftStory, child?.name, locale)}
+          detail={
+            lesson
+              ? tWizard('chosenLesson', { name: lesson.name })
+              : (goal ?? collection?.name ?? null)
+          }
+          onChange={() => {
+            setExpanded(true);
+          }}
+        />
+      ) : (
+        <div className="grid gap-8">
           <fieldset>
-            <legend className="font-display text-xl font-semibold">{t('goal')}</legend>
-            <p className="mt-1 mb-3 text-sm text-muted-foreground">{t('goalHint')}</p>
-            <div className="flex flex-wrap gap-2">
-              {collection.topics.map((topic) => (
-                <label key={topic} className={chipClass}>
-                  <input
-                    type="radio"
-                    name="pro-goal"
-                    className="sr-only"
-                    checked={goal === topic}
-                    onChange={() => {
-                      setGoal(topic);
-                      setError(null);
-                    }}
-                  />
-                  {topic}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        )}
-
-        {collection && (
-          <fieldset>
-            <legend className="mb-3 font-display text-xl font-semibold">{t('story')}</legend>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {stories.map((story) => (
+            <legend className="mb-3 font-display text-xl font-semibold">{t('collection')}</legend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {data.collections.map((item) => (
                 <OptionCard
-                  key={story.slug}
-                  name="pro-story"
-                  value={story.slug}
-                  checked={storyId === story.slug}
+                  key={item.slug}
+                  name="pro-collection"
+                  value={item.slug}
+                  checked={collectionSlug === item.slug}
                   onSelect={(value) => {
-                    setStoryId(value);
+                    if (value === collectionSlug) return;
+                    setCollectionSlug(value);
+                    setGoal(null);
+                    setStoryId(null);
                     setError(null);
                   }}
                 >
-                  <div className="aspect-[3/4] w-full overflow-hidden">
-                    <StoryCover story={story} sizes="(min-width: 768px) 20vw, 45vw" />
-                  </div>
-                  <span className="grid gap-1.5 p-3">
+                  <span className="grid gap-1 p-4 pr-12">
                     <span className="font-display text-lg leading-snug font-semibold">
-                      {titleForChild(story, child?.name, locale)}
+                      {item.name}
                     </span>
-                    <span className="text-xs font-bold text-muted-foreground">
-                      {tStories('agesFor', { min: story.ageMin, max: story.ageMax })}
+                    <span className="text-sm leading-snug text-muted-foreground">
+                      {item.description}
                     </span>
-                    {fits(story.ageMin, story.ageMax) && (
-                      <span className="w-fit rounded-full bg-mint px-2 py-0.5 text-xs font-semibold text-success">
-                        {t('recommended')}
-                      </span>
-                    )}
                   </span>
                 </OptionCard>
               ))}
             </div>
           </fieldset>
-        )}
-      </div>
+
+          {collection && (
+            <fieldset>
+              <legend className="font-display text-xl font-semibold">{t('goal')}</legend>
+              <p className="mt-1 mb-3 text-sm text-muted-foreground">{t('goalHint')}</p>
+              <div className="flex flex-wrap gap-2">
+                {collection.topics.map((topic) => (
+                  <label key={topic} className={chipClass}>
+                    <input
+                      type="radio"
+                      name="pro-goal"
+                      className="sr-only"
+                      checked={goal === topic}
+                      onChange={() => {
+                        setGoal(topic);
+                        setError(null);
+                      }}
+                    />
+                    {topic}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+
+          {collection && (
+            <fieldset>
+              <legend className="mb-3 font-display text-xl font-semibold">{t('story')}</legend>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                {stories.map((story) => (
+                  <OptionCard
+                    key={story.slug}
+                    name="pro-story"
+                    value={story.slug}
+                    checked={storyId === story.slug}
+                    onSelect={(value) => {
+                      setStoryId(value);
+                      setError(null);
+                    }}
+                  >
+                    <div className="aspect-[3/4] w-full overflow-hidden">
+                      <StoryCover story={story} sizes="(min-width: 768px) 20vw, 45vw" />
+                    </div>
+                    <span className="grid gap-1.5 p-3">
+                      <span className="font-display text-lg leading-snug font-semibold">
+                        {titleForChild(story, child?.name, locale)}
+                      </span>
+                      <span className="text-xs font-bold text-muted-foreground">
+                        {tStories('agesFor', { min: story.ageMin, max: story.ageMax })}
+                      </span>
+                      {fits(story.ageMin, story.ageMax) && (
+                        <span className="w-fit rounded-full bg-mint px-2 py-0.5 text-xs font-semibold text-success">
+                          {t('recommended')}
+                        </span>
+                      )}
+                    </span>
+                  </OptionCard>
+                ))}
+              </div>
+            </fieldset>
+          )}
+        </div>
+      )}
     </WizardShell>
   );
 }

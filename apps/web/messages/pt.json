@@ -1373,7 +1373,10 @@
       "length": "Extensão",
       "notice": "É material educativo e de acompanhamento: não é clínico nem substitui o seu critério profissional."
     },
-    "subStepCount": "({current} de {total})"
+    "subStepCount": "({current} de {total})",
+    "chosenTitle": "Você vai criar",
+    "chosenChange": "Trocar",
+    "chosenLesson": "Ensinamento: {name}"
   },
   "Landing": {
     "events": {
