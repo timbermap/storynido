@@ -1,14 +1,15 @@
 'use client';
 
-import { ApiError, CHILD_LIMITS } from '@storynido/shared';
-import { Loader2, Trash2 } from 'lucide-react';
+import { ApiError, CHILD_LIMITS, PHOTO_RULES, type Locale } from '@storynido/shared';
+import { ImagePlus, Loader2, Trash2, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { acceptedPhotos, uploadChildPhoto } from '@/lib/child-photos';
 import {
   getChildDetails,
   subscribeOrders,
@@ -18,6 +19,8 @@ import {
 } from '@/lib/firebase/account';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { isOrderDone } from '@/lib/order-state';
+
+import { LikesInput, withPendingLike } from '@/components/wizard/likes-input';
 
 import { CharacterDrawing } from './character-drawing';
 
@@ -36,13 +39,20 @@ const PRONOUNS = ['she', 'he', 'they'] as const;
  */
 export function CharacterProfile({ childId }: { childId: string }) {
   const t = useTranslations('Account.myStories');
+  const tPhotos = useTranslations('Wizard.photos');
+  const locale = useLocale() as Locale;
   const date = new Intl.DateTimeFormat(useLocale(), { dateStyle: 'long' });
   const router = useRouter();
   const { user, signedIn, loading } = useAuth();
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [details, setDetails] = useState<ChildDetails | null | undefined>(undefined);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [likes, setLikes] = useState('');
+  const [likes, setLikes] = useState<string[]>([]);
+  const [like, setLike] = useState('');
+  // Fotos desde el perfil (sin cuento): consentimiento y subida.
+  const [photoConsent, setPhotoConsent] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const photoInput = useRef<HTMLInputElement>(null);
   const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -59,7 +69,7 @@ export function CharacterProfile({ childId }: { childId: string }) {
       .then((db) => getChildDetails(db, childId))
       .then((found) => {
         setDetails(found);
-        setLikes(found?.likes.join(', ') ?? '');
+        setLikes(found?.likes ?? []);
       })
       .catch(() => {
         setFailed(true);
@@ -114,15 +124,45 @@ export function CharacterProfile({ childId }: { childId: string }) {
 
   const name = details.name;
 
+  const photoSlots = Math.max(0, PHOTO_RULES.maxPhotosPerBook - profile.photos);
+
+  async function reloadProfile() {
+    setProfile(await loadProfile(childId));
+  }
+
+  async function addPhotos(chosen: File[]) {
+    if (chosen.length === 0) return;
+    setUploading(true);
+    setMessage(null);
+    try {
+      for (const photo of chosen) await uploadChildPhoto(childId, photo, locale);
+      await reloadProfile();
+    } catch {
+      setMessage({ text: t('profilePhotoUploadError'), error: true });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function removePhoto(photoId: string) {
+    setUploading(true);
+    setMessage(null);
+    try {
+      await api('deletePhoto', { params: { photoId } });
+      await reloadProfile();
+    } catch {
+      setMessage({ text: t('profilePhotoError'), error: true });
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function save() {
     if (!details || details.name.trim() === '') return;
     setSaving(true);
     setMessage(null);
-    const list = likes
-      .split(',')
-      .map((like) => like.trim().slice(0, CHILD_LIMITS.likeMaxLength))
-      .filter(Boolean)
-      .slice(0, CHILD_LIMITS.maxLikes);
+    // Lo que quedó escrito sin agregar también se guarda.
+    const list = withPendingLike(likes, like);
     const next: ChildDetails = {
       ...details,
       name: details.name.trim().slice(0, CHILD_LIMITS.nameMaxLength),
@@ -133,7 +173,8 @@ export function CharacterProfile({ childId }: { childId: string }) {
     try {
       await updateChildDetails(await getFirebaseDb(), childId, next);
       setDetails(next);
-      setLikes(list.join(', '));
+      setLikes(list);
+      setLike('');
       setMessage({ text: t('profileSaved', { name: next.name }), error: false });
     } catch {
       setMessage({ text: t('profileSaveError'), error: true });
@@ -311,20 +352,17 @@ export function CharacterProfile({ childId }: { childId: string }) {
             ))}
           </div>
         </fieldset>
-        <label className="grid gap-1 text-sm">
-          <span className="font-semibold">{t('profileLikes')}</span>
-          <input
-            value={likes}
-            onChange={(event) => {
-              setLikes(event.target.value);
-            }}
-            className={field}
-            aria-describedby="likes-hint"
-          />
-          <span id="likes-hint" className="text-xs text-muted-foreground">
-            {t('profileLikesHint')}
-          </span>
-        </label>
+        <LikesInput
+          id="profile-likes"
+          label={t('profileLikes')}
+          hint={t('profileLikesHint')}
+          likes={likes}
+          onLikes={setLikes}
+          like={like}
+          onLike={setLike}
+          labelClassName="text-sm font-semibold"
+          inputClassName={field}
+        />
         <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
           <label className="grid gap-1 text-sm">
             <span className="font-semibold">{t('profilePet')}</span>
@@ -371,16 +409,72 @@ export function CharacterProfile({ childId }: { childId: string }) {
         {profile.photoUrls.length > 0 && (
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">
             {profile.photoUrls.map((url, index) => (
-              <li key={url} className="aspect-[3/4] overflow-hidden rounded-xl border">
+              <li key={url} className="relative aspect-[3/4] overflow-hidden rounded-xl border">
                 {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min. */}
                 <img
                   src={url}
                   alt={t('profilePhotoAlt', { name, index: index + 1 })}
                   className="size-full object-cover"
                 />
+                {profile.photoIds[index] && (
+                  <button
+                    type="button"
+                    disabled={uploading}
+                    className="absolute top-1.5 right-1.5 grid size-8 place-items-center rounded-full bg-card/90 text-foreground shadow hover:bg-card"
+                    aria-label={t('profilePhotoRemove', { index: index + 1 })}
+                    onClick={() => void removePhoto(profile.photoIds[index] ?? '')}
+                  >
+                    <X className="size-4" aria-hidden="true" />
+                  </button>
+                )}
               </li>
             ))}
           </ul>
+        )}
+        {/* Subir fotos desde el perfil (sin cuento), para crear o actualizar su dibujo. */}
+        {photoSlots > 0 && (
+          <div className="grid gap-3">
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1 size-5 shrink-0 accent-[var(--primary)]"
+                checked={photoConsent}
+                onChange={(event) => {
+                  setPhotoConsent(event.target.checked);
+                }}
+              />
+              <span>{tPhotos('consentText')}</span>
+            </label>
+            <input
+              ref={photoInput}
+              id="profile-photo"
+              type="file"
+              multiple
+              accept={PHOTO_RULES.allowedTypes.join(',')}
+              className="sr-only"
+              tabIndex={-1}
+              disabled={!photoConsent || uploading}
+              onChange={(event) => {
+                const chosen = acceptedPhotos(event.target.files).slice(0, photoSlots);
+                event.target.value = '';
+                void addPhotos(chosen);
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-fit"
+              disabled={!photoConsent || uploading}
+              onClick={() => photoInput.current?.click()}
+            >
+              {uploading ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <ImagePlus aria-hidden="true" />
+              )}
+              {profile.photos > 0 ? t('profilePhotoAddAnother') : tPhotos('choose')}
+            </Button>
+          </div>
         )}
         <p className="text-sm text-muted-foreground">{t('profilePhotoKeep')}</p>
         {profile.photos > 0 &&

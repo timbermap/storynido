@@ -198,11 +198,13 @@ describe('borrado de datos a pedido', () => {
       photosExpireAt: string | null;
       validPhotos: number;
       photoUrls: string[];
+      photoIds: string[];
       books: { id: string; title: string | null; status: string }[];
     }>();
     expect(body.characterImageUrl).toEqual(expect.any(String));
     expect(body.photos).toBe(1);
     expect(body.photoUrls).toHaveLength(1);
+    expect(body.photoIds).toEqual(['p1']);
     expect(body.photosExpireAt).toBe('2099-12-01T00:00:00.000Z');
     expect(body.validPhotos).toBe(1);
     expect(body.books.map((book) => book.id).sort()).toEqual(['b1', 'b2']);
