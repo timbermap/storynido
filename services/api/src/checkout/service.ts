@@ -270,7 +270,11 @@ export class CheckoutService {
     return {
       snapshot: result.snapshot,
       couponError: result.couponError,
-      availableFormats: await this.availableFormats(body.country, loaded.pages),
+      // Recompra de un libro creado en digital: no se imprime (ilustraciones de pantalla).
+      availableFormats:
+        source && !source.printable
+          ? (['digital'] as BookFormat[])
+          : await this.availableFormats(body.country, loaded.pages),
     };
   }
 
@@ -836,7 +840,8 @@ export class CheckoutService {
     }
     const sourceItems = (source.items ?? []) as { format: BookFormat }[];
     // Las ilustraciones de un libro digital son de pantalla (1K): no alcanzan para imprimir.
-    if (format !== 'digital' && sourceItems.every((item) => item.format === 'digital')) {
+    const printable = sourceItems.some((item) => item.format !== 'digital');
+    if (format !== 'digital' && !printable) {
       throw new AppError(
         409,
         'print_unavailable',
@@ -849,7 +854,7 @@ export class CheckoutService {
     const digital = layout?.output?.files?.find((file) => file.format === 'digital');
     const bookId = String(source.bookId);
     const book = (await this.db.collection(COLLECTIONS.books).doc(bookId).get()).data() ?? {};
-    return { source, book, bookId, pages: digital ? digital.pages - 2 : 0 };
+    return { source, book, bookId, pages: digital ? digital.pages - 2 : 0, printable };
   }
 
   private checkAddress(body: CheckoutBody) {

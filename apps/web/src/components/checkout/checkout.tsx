@@ -119,6 +119,8 @@ export function Checkout({
     'digital';
   const format = available && !available.includes(chosenFormat) ? fallback : chosenFormat;
   const [error, setError] = useState<string | null>(null);
+  // Recompra de un libro creado en digital pedido en papel: no se imprime, queda el ebook.
+  const [printNote, setPrintNote] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
   // Pago iniciado: la primera vez que hay precio para este libro (una sola vez, sin pasos nuevos).
   const quotedTotal = quote?.snapshot.totalMinor;
@@ -206,8 +208,14 @@ export function Checkout({
             setError(null);
           })
           .catch((caught: unknown) => {
-            if (!cancelled)
-              setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
+            if (cancelled) return;
+            // Sin esto el resumen quedaba en «Calculando el precio…» para siempre.
+            if (reorderOf && caught instanceof ApiError && caught.code === 'print_unavailable') {
+              setPrintNote(caught.message);
+              setFormat('digital');
+              return;
+            }
+            setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
           });
       },
       addressKey ? 600 : 0,
@@ -539,6 +547,14 @@ export function Checkout({
           <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             {t('calculating')}
+          </p>
+        )}
+        {printNote && (
+          <p
+            role="status"
+            className="rounded-xl bg-peach/60 px-4 py-3 text-sm font-semibold text-navy"
+          >
+            {printNote}
           </p>
         )}
         {error && (
