@@ -555,8 +555,6 @@
       "library": {
         "summary": "{books, plural, one {# livro} other {# livros}} · {characters, plural, one {# personagem} other {# personagens}}",
         "nextLabel": "O próximo passo",
-        "orderLabel": "Seu pedido",
-        "eta": "Chega entre {from} e {to}.",
         "next": {
           "preview": {
             "title": "A prévia de {name} está pronta",
@@ -581,18 +579,6 @@
             "titleNoName": "Estamos desenhando seu personagem",
             "sub": "Leva alguns minutos. Pode fechar esta tela: avisamos por e-mail.",
             "cta": "Ver o andamento"
-          },
-          "preparing": {
-            "title": "Estamos preparando o livro de {name}",
-            "titleNoName": "Estamos preparando seu livro",
-            "sub": "Avisamos por e-mail a cada etapa.",
-            "cta": "Ver o pedido"
-          },
-          "shipped": {
-            "title": "O livro de {name} está a caminho",
-            "titleNoName": "Seu livro está a caminho",
-            "sub": "Você pode acompanhar o envio pelo seu pedido.",
-            "cta": "Acompanhar o envio"
           }
         },
         "status": {

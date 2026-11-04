@@ -555,8 +555,6 @@
       "library": {
         "summary": "{books, plural, one {# book} other {# books}} · {characters, plural, one {# character} other {# characters}}",
         "nextLabel": "Up next",
-        "orderLabel": "Your order",
-        "eta": "Arrives between {from} and {to}.",
         "next": {
           "preview": {
             "title": "{name}’s preview is ready",
@@ -581,18 +579,6 @@
             "titleNoName": "We’re drawing your character",
             "sub": "It takes a few minutes. You can close this screen: we’ll email you.",
             "cta": "See the progress"
-          },
-          "preparing": {
-            "title": "We’re preparing {name}’s book",
-            "titleNoName": "We’re preparing your book",
-            "sub": "We’ll email you at every step.",
-            "cta": "View the order"
-          },
-          "shipped": {
-            "title": "{name}’s book is on its way",
-            "titleNoName": "Your book is on its way",
-            "sub": "You can track the shipment from your order.",
-            "cta": "Track the shipment"
           }
         },
         "status": {

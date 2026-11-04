@@ -14,7 +14,7 @@ import { getFirebaseDb } from '@/lib/firebase/client';
 import { readDraftState } from '@/lib/firebase/drafts';
 import { loadLibraryData, type LibraryData } from '@/lib/firebase/library-data';
 import type { HomeChannel } from '@/lib/home-state';
-import { linesUsed, nextUpPlacement, orderShelf, pickNextUp } from '@/lib/library';
+import { linesUsed, orderShelf, pickNextUp } from '@/lib/library';
 import { defaultMyStoriesTab, parseMyStoriesTab, type MyStoriesTab } from '@/lib/my-stories-tabs';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +49,7 @@ const EMPTY: LibraryData = { books: [], orders: [], children: [] };
 
 /**
  * Mis cuentos: saludo, «Lo próximo» (lo que pide una acción, con el único botón durazno), las
- * solapas (un pedido en curso va debajo de ellas) con su contador, el filtro por línea (solo si la cuenta usó más de una), las ideas para
+ * solapas con su contador, el filtro por línea (solo si la cuenta usó más de una), las ideas para
  * el personaje más reciente y la línea de confianza.
  */
 export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: LineCopy }) {
@@ -134,7 +134,7 @@ export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: L
       books,
       inProgress: shelved.filter((order) => orderShelf(order) === 'inProgress'),
       done: shelved.filter((order) => orderShelf(order) === 'done'),
-      next: pickNextUp(data.books, data.orders),
+      next: pickNextUp(data.books),
       total: new Set([
         ...data.books.map((book) => book.id),
         ...data.orders.filter((order) => orderShelf(order) !== null).map((order) => order.bookId),
@@ -186,9 +186,7 @@ export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: L
         </p>
       )}
 
-      {view.next && nextUpPlacement(view.next) === 'top' && (
-        <NextUp next={view.next} lines={lines} stories={stories} />
-      )}
+      {view.next && <NextUp next={view.next} lines={lines} stories={stories} />}
 
       {empty && <Welcome />}
 
@@ -313,11 +311,6 @@ export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: L
             )}
           </div>
         </section>
-      )}
-
-      {/* Un pedido en curso no pide nada: va debajo de las solapas, sigue con el botón durazno. */}
-      {view.next && nextUpPlacement(view.next) === 'below' && (
-        <NextUp next={view.next} lines={lines} stories={stories} placement="below" />
       )}
 
       {child && !onlyPro && (
