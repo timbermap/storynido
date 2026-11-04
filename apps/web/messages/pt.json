@@ -720,7 +720,8 @@
         "save": "Salvar personagem",
         "saveNote": "Nenhuma história é criada e nenhuma geração de IA é usada.",
         "error": "Não conseguimos salvar. Tente de novo.",
-        "pronouns": "Pronome (opcional)"
+        "pronouns": "Pronome (opcional)",
+        "photoChange": "Escolher outra foto"
       }
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"

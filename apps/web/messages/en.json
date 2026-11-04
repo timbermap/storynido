@@ -720,7 +720,8 @@
         "save": "Save character",
         "saveNote": "No story is created and no AI generation is used.",
         "error": "We could not save it. Please try again.",
-        "pronouns": "Pronouns (optional)"
+        "pronouns": "Pronouns (optional)",
+        "photoChange": "Choose another photo"
       }
     },
     "myStoriesLink": "Your stories and orders are in My stories →"

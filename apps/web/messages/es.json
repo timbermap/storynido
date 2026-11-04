@@ -720,7 +720,8 @@
         "save": "Guardar personaje",
         "saveNote": "No se crea ningún cuento ni se usa ninguna generación de IA.",
         "error": "No pudimos guardarlo. Intenta de nuevo.",
-        "pronouns": "Pronombre (opcional)"
+        "pronouns": "Pronombre (opcional)",
+        "photoChange": "Elegir otra foto"
       }
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"

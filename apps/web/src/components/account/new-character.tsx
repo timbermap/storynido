@@ -9,9 +9,9 @@ import {
   type Locale,
 } from '@storynido/shared';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { Loader2 } from 'lucide-react';
+import { ImagePlus, Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,7 @@ export function NewCharacter() {
   const [mode, setMode] = useState<'photo' | 'avatar'>('photo');
   const [consent, setConsent] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const photoInput = useRef<HTMLInputElement>(null);
   const [traits, setTraits] = useState<TraitDraft>({ glasses: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -251,19 +252,39 @@ export function NewCharacter() {
                 </Link>
               </span>
             </label>
-            <label htmlFor="new-child-photo" className="font-semibold">
-              {t('photo')}
-            </label>
+            <p className="font-semibold">{t('photo')}</p>
+            {/* Botón propio (como en el paso de fotos): el del navegador dice «Choose File». */}
             <input
+              ref={photoInput}
               id="new-child-photo"
               type="file"
               accept={PHOTO_RULES.allowedTypes.join(',')}
+              className="sr-only"
+              tabIndex={-1}
               disabled={!consent}
               onChange={(event) => {
                 setFile(event.target.files?.[0] ?? null);
               }}
             />
-            <p className="text-sm text-muted-foreground">{t('photoNote')}</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!consent}
+                onClick={() => photoInput.current?.click()}
+              >
+                <ImagePlus aria-hidden="true" />
+                {file ? t('photoChange') : tPhotos('choose')}
+              </Button>
+              {file && (
+                <span className="min-w-0 truncate text-sm font-semibold" aria-live="polite">
+                  {file.name}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {tPhotos('formats')}. {t('photoNote')}
+            </p>
           </div>
         ) : (
           <TraitPicker idPrefix="new-child" value={traits} onChange={setTraits} />
