@@ -88,7 +88,8 @@ const production = cloudProject === 'storynido-prod';
 const refreshCatalog = process.argv.includes('--refresh-catalog');
 /**
  * En la nube, `--refresh-print` reescribe la matriz de imprentas (printOptions) con los países
- * verificados del seed y borra las opciones que ya no existen. Pisa lo editado en el admin.
+ * verificados del seed y borra las opciones que ya no existen. Lo editado en el admin (lleva
+ * `updatedBy`) no se pisa ni se borra.
  */
 const refreshPrint = process.argv.includes('--refresh-print');
 /**
@@ -170,15 +171,20 @@ const mockPages = (format: PrintFormat) =>
       : { min: format === 'hardcover' ? 20 : 12, max: 120, multipleOf: 2 };
 
 const writes: { ref: DocumentReference; data: object }[] = [];
+const deletes: DocumentReference[] = [];
 /** En la nube solo se crean los documentos que faltan; en los emuladores se reescriben. */
 const batch = {
   set(ref: DocumentReference, data: object) {
     writes.push({ ref, data });
   },
   delete(ref: DocumentReference) {
-    if (!cloud || (refreshPrint && ref.parent.id === COLLECTIONS.printOptions)) void ref.delete();
+    if (!cloud || (refreshPrint && ref.parent.id === COLLECTIONS.printOptions)) deletes.push(ref);
   },
 };
+
+/** Una opción de imprenta que alguien editó en el admin: el refresco no la toca. */
+const editedInAdmin = (snapshot: { exists: boolean; get(field: string): unknown } | undefined) =>
+  Boolean(snapshot?.exists && snapshot.get('updatedBy'));
 
 for (const code of CONFIGURED_COUNTRIES) {
   const defaults = countryDefaults(code);
@@ -732,12 +738,16 @@ if (cloud && refreshPrint) {
 
 let created = 0;
 const existing = cloud ? await db.getAll(...writes.map((write) => write.ref)) : [];
+const deleted = cloud && deletes.length ? await db.getAll(...deletes) : [];
+await Promise.all(
+  deletes.filter((_, index) => !editedInAdmin(deleted[index])).map((ref) => ref.delete()),
+);
 const commit = db.batch();
 writes.forEach((write, index) => {
   const collection = write.ref.parent.id;
   const refreshable =
     (refreshCatalog && CATALOG_COLLECTIONS.has(collection)) ||
-    (refreshPrint && collection === COLLECTIONS.printOptions) ||
+    (refreshPrint && collection === COLLECTIONS.printOptions && !editedInAdmin(existing[index])) ||
     (collection === COLLECTIONS.content &&
       refreshContent.has((write.data as { key?: string }).key ?? ''));
   if (cloud && existing[index]?.exists && !refreshable) return;

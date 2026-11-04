@@ -20,7 +20,6 @@ import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
 import { formatPrice } from '@/lib/format';
 import { Link } from '@/i18n/navigation';
-import { lowestPrice } from '@/lib/offer';
 import { getCollections, getEventPricing, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
@@ -67,7 +66,12 @@ export default async function EventsPage({ params }: Props) {
     : 0;
   const percent = pricing?.bundlePercent ?? 0;
   const partyMinor = fullMinor - Math.round((fullMinor * percent) / 100);
-  const bookFrom = lowestPrice(offer, locale, display.country);
+  // «El libro del cumpleañero» es en tapa dura: su «desde» es el de la tapa dura (sin envío), no
+  // el del ebook más corto. Si en el país no se imprime tapa dura, no se muestra precio.
+  const hardcover = offer?.formats.find((option) => option.format === 'hardcover');
+  const bookFrom = hardcover
+    ? formatPrice(hardcover.amountMinor, offer?.currency ?? 'USD', locale, display.country)
+    : null;
   // La historia que ilustra el kit del hero (la del cumpleaños; si no está, la primera).
   const heroStory =
     stories.find((story) => story.slug === 'el-cumpleanos-mas-magico') ?? stories[0];

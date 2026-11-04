@@ -24,6 +24,7 @@ import { KIT_PIECES, eventPricingSchema, kitSelectionSchema } from '../models/ki
 import { accountTypeSchema, proProfileSchema } from '../models/users';
 import { pipelineStepSchema } from '../models/pipeline';
 import { QUOTE_ERRORS, priceSnapshotSchema } from '../models/pricing';
+import { priceTableRowSchema } from '../models/price-table';
 import { PHOTO_STATUSES } from '../models/users';
 import { orderStatusSchema } from '../order-status';
 import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
@@ -955,6 +956,17 @@ export const apiRoutes = {
     params: z.object({ kind: adminConfigKindSchema, id: adminDocIdSchema }),
     body: z.record(z.string(), z.unknown()),
     response: z.object({ id: z.string(), data: z.record(z.string(), z.unknown()) }),
+  },
+  adminPriceTable: {
+    method: 'GET',
+    path: '/v1/admin/price-table',
+    access: 'admin',
+    summary:
+      'Precio final por país, formato y extensión: costo de IA, margen, imprenta y precio (como el checkout)',
+    response: z.object({
+      rows: z.array(priceTableRowSchema),
+      activePrinters: z.array(z.string()),
+    }),
   },
   adminMetrics: {
     method: 'GET',

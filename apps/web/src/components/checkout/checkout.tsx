@@ -257,6 +257,13 @@ export function Checkout({
   }
 
   const field = 'h-11 w-full rounded-xl border bg-card px-3';
+  // Las tarjetas dicen «desde»: el ebook cuesta según la extensión del libro (el más corto, como
+  // en las landings) y el impreso suma el envío. El precio exacto es el del resumen.
+  const lengthMinors = offer.lengthPrices.map((item) => item.amountMinor);
+  const fromMinor = (option: Offer['formats'][number]) =>
+    option.format === 'digital' && lengthMinors.length > 0
+      ? Math.min(...lengthMinors)
+      : option.amountMinor;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -301,16 +308,9 @@ export function Checkout({
                           {t(`formats.${option.format}.text`)}
                         </span>
                         <span className="mt-auto pt-2 font-semibold tabular-nums">
-                          {option.estimated
-                            ? t('fromPrice', {
-                                price: formatPrice(
-                                  option.amountMinor,
-                                  offer.currency,
-                                  locale,
-                                  country,
-                                ),
-                              })
-                            : formatPrice(option.amountMinor, offer.currency, locale, country)}
+                          {t('fromPrice', {
+                            price: formatPrice(fromMinor(option), offer.currency, locale, country),
+                          })}
                         </span>
                       </label>
                     ))}
