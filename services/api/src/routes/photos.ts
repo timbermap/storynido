@@ -38,6 +38,7 @@ export function registerPhotoRoutes(app: FastifyInstance, photos: PhotoService):
     return photos.createUpload({
       uid: uid(request),
       bookId: body.bookId,
+      childId: body.childId,
       consentId: body.consentId,
       contentType: body.contentType,
     });

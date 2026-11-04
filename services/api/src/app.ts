@@ -71,7 +71,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   registerAdminOrderRoutes(app);
   registerAdminPeopleRoutes(app);
   registerAdminOpsRoutes(app);
-  registerAccountRoutes(app, deps.accounts);
+  registerAccountRoutes(app, deps.accounts, deps.previews);
   registerOrderRoutes(app);
   registerCheckoutRoutes(app, deps.checkout);
   registerFulfillmentRoutes(app, deps.fulfillment);

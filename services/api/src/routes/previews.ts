@@ -75,6 +75,38 @@ export function registerPreviewRoutes(app: FastifyInstance, previews: PreviewSer
     );
   });
 
+  // Dibujo del personaje en su perfil (sin cuento).
+  addRoute(app, apiRoutes.generateChildDrawing, { appCheck: true }, async (request) => {
+    const body = request.body as BodyOf<'generateChildDrawing'>;
+    return previews.generateChildDrawing(
+      uid(request),
+      (request.params as ParamsOf<'generateChildDrawing'>).childId,
+      body,
+    );
+  });
+
+  addRoute(app, apiRoutes.acceptChildDrawing, {}, async (request) =>
+    previews.acceptChildDrawing(
+      uid(request),
+      (request.params as ParamsOf<'acceptChildDrawing'>).childId,
+    ),
+  );
+
+  addRoute(app, apiRoutes.discardChildDrawing, {}, async (request) =>
+    previews.discardChildDrawing(
+      uid(request),
+      (request.params as ParamsOf<'discardChildDrawing'>).childId,
+    ),
+  );
+
+  addRoute(app, apiRoutes.setChildAvatar, {}, async (request) =>
+    previews.setChildAvatar(
+      uid(request),
+      (request.params as ParamsOf<'setChildAvatar'>).childId,
+      (request.body as BodyOf<'setChildAvatar'>).avatar,
+    ),
+  );
+
   addRoute(app, apiRoutes.regeneratePreviewIllustration, { appCheck: true }, async (request) => {
     const params = request.params as ParamsOf<'regeneratePreviewIllustration'>;
     return previews.regenerate(uid(request), params.bookId, params.target, request.ip);

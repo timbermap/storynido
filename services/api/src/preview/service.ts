@@ -689,6 +689,20 @@ export class PreviewService {
       style: style.slug,
     });
 
+    // El dibujo que el adulto aprobó en el perfil del personaje es la referencia de sus cuentos.
+    const approvedDrawing = (child.drawing as StoredDrawing | undefined)?.imagePath;
+    const drawingReference: ImageData[] = approvedDrawing
+      ? [
+          {
+            bytes: await this.providers
+              .storage()
+              .download({ bucket: 'assets', path: approvedDrawing })
+              .catch(() => new Uint8Array()),
+            mimeType: 'image/webp',
+          },
+        ].filter((image) => image.bytes.length > 0)
+      : [];
+
     // Etapa 1: solo la lámina del personaje (1 imagen). La portada y las páginas se ilustran
     // cuando el adulto aprueba al personaje: si no se parece, no se gastan más imágenes.
     const character = await this.illustration(ai, track, limits, {
@@ -701,7 +715,7 @@ export class PreviewService {
       }),
       stylePrompt: style.promptModifier,
       character: { description: characterDescription, photo },
-      references: [],
+      references: drawingReference,
       aspectRatio: '3:4',
       seed: 0,
     });
@@ -1180,6 +1194,225 @@ export class PreviewService {
     return this.get(uid, bookId);
   }
 
+  // --------------------------------------------- dibujo del personaje (perfil, sin cuento)
+
+  private async ownedChild(uid: string, childId: string) {
+    const ref = this.db.collection(COLLECTIONS.children).doc(childId);
+    const child = (await ref.get()).data();
+    if (child?.ownerUid !== uid) throw notFound();
+    return { ref, child };
+  }
+
+  /** La foto vigente más reciente del personaje (de cualquier cuento o subida en su perfil). */
+  private async latestChildPhoto(uid: string, childId: string) {
+    const snapshot = await this.db
+      .collection(COLLECTIONS.photos)
+      .where('ownerUid', '==', uid)
+      .where('childId', '==', childId)
+      .get();
+    const now = Date.now();
+    const time = (value: unknown) => toDate(value)?.getTime() ?? 0;
+    return (
+      snapshot.docs
+        .filter(
+          (doc) =>
+            doc.get('status') === 'valid' &&
+            typeof doc.get('processedPath') === 'string' &&
+            (toDate(doc.get('expiresAt'))?.getTime() ?? Infinity) > now,
+        )
+        .sort((a, b) => time(b.get('createdAt')) - time(a.get('createdAt')))[0] ?? null
+    );
+  }
+
+  /** Estado del dibujo del personaje: el actual, uno nuevo por aprobar y si se puede crear. */
+  async childDrawing(uid: string, childId: string) {
+    const { child } = await this.ownedChild(uid, childId);
+    const storage = this.providers.storage();
+    const url = async (path: unknown) =>
+      typeof path === 'string'
+        ? (await storage.signedDownloadUrl({ bucket: 'assets', path }, IMAGE_URL_SECONDS)).url
+        : null;
+    const drawing = child.drawing as StoredDrawing | undefined;
+    const candidate = child.drawingCandidate as StoredDrawing | undefined;
+    const last = candidate ?? drawing;
+    return {
+      imageUrl: await url(drawing?.previewImagePath),
+      candidateUrl: await url(candidate?.previewImagePath),
+      traits: last?.traits ?? null,
+      mustKeep: last?.mustKeep ?? [],
+      canDraw: Boolean(child.avatar) || (await this.latestChildPhoto(uid, childId)) !== null,
+    };
+  }
+
+  async setChildAvatar(uid: string, childId: string, avatar: Avatar) {
+    const { ref } = await this.ownedChild(uid, childId);
+    await ref.update({ avatar, updatedAt: new Date() });
+    return { saved: true as const };
+  }
+
+  /**
+   * «Crear su dibujo» / «Actualizar su dibujo»: una lámina nueva con sus fotos vigentes (o sus
+   * rasgos), con el mismo proceso que la muestra. Queda por aprobar; cuenta para los topes.
+   */
+  async generateChildDrawing(
+    uid: string,
+    childId: string,
+    input: { traits: CharacterTraits | null; mustKeep: MustKeepTrait[]; note: string | null },
+  ) {
+    const limits = await this.budget.limits();
+    await this.budget.ensureAvailable(limits);
+    const { ref, child } = await this.ownedChild(uid, childId);
+    const ai = this.providers.ai();
+    const track = async <T extends { usage?: GeneratedImage['usage'] }>(
+      kind: UsageContext['kind'],
+      result: T,
+    ): Promise<T> => {
+      if (result.usage) {
+        await this.budget.record(result.usage, { kind, ownerUid: uid, bookId: null }, limits);
+      }
+      return result;
+    };
+    const freeText = [input.traits?.distinctive, input.note].filter(Boolean).join('\n');
+    if (freeText) {
+      const verdict = await track('moderation', await ai.text.moderateText(freeText));
+      if (!verdict.allowed) {
+        throw new AppError(
+          422,
+          'validation_failed',
+          'Ese texto no se puede usar. Cámbialo e intenta de nuevo.',
+        );
+      }
+    }
+    const photoDoc = await this.latestChildPhoto(uid, childId);
+    const avatar = child.avatar as Avatar | undefined;
+    if (!photoDoc && !avatar) {
+      throw new AppError(
+        409,
+        'bad_request',
+        'Sube una foto o elige sus rasgos para crear su dibujo.',
+      );
+    }
+    await this.reserveUserQuota(uid, limits);
+    try {
+      const age = Number(child.age);
+      let photo: ImageData | null = null;
+      let sheet: CharacterSheet;
+      let base: CharacterTraits;
+      if (photoDoc) {
+        const read = await this.characterFor(uid, photoDoc.id, ai, track);
+        photo = read.photo;
+        sheet = read.sheet;
+        base = { ...read.traits, distinctive: null };
+      } else if (avatar) {
+        sheet = avatarToSheet(avatar, age);
+        base = { ...avatar, distinctive: null };
+      } else {
+        throw new AppError(409, 'bad_request', 'Sube una foto o elige sus rasgos.');
+      }
+      const previous = (child.drawingCandidate ?? child.drawing) as StoredDrawing | undefined;
+      const traits = input.traits ?? previous?.traits ?? base;
+      const mustKeep = [
+        ...new Set([...(previous?.mustKeep ?? defaultMustKeep(traits)), ...input.mustKeep]),
+      ];
+      const description = `${describeCharacter(String(child.name), sheet, traits, mustKeep)}${
+        input.note ? `\nCorrection requested by the parent (apply it): ${input.note}` : ''
+      }`;
+      const styles = await this.catalog.styles();
+      const style = styles.find((item) => item.slug === 'gouache-editorial') ?? styles[0];
+      if (!style) throw new AppError(503, 'ai_unavailable', 'No pudimos dibujarlo ahora.');
+      const { image } = await this.illustration(ai, track, limits, {
+        prompt: buildIllustrationPrompt({
+          template: CHARACTER_DRAWING_TEMPLATE,
+          scene: CHARACTER_REFERENCE_SCENE,
+          character: description,
+          style: style.promptModifier,
+        }),
+        stylePrompt: style.promptModifier,
+        character: { description, photo },
+        references: [],
+        aspectRatio: '3:4',
+        seed: Date.now() % 100_000,
+      });
+      const paths = await this.store(
+        `characters/${uid}/${childId}/drawing-${Date.now().toString(36)}`,
+        image,
+      );
+      const stale = child.drawingCandidate as StoredDrawing | undefined;
+      await ref.update({
+        drawingCandidate: {
+          imagePath: paths.clean,
+          previewImagePath: paths.preview,
+          traits,
+          mustKeep,
+          createdAt: new Date(),
+        },
+        updatedAt: new Date(),
+      });
+      await this.deleteDrawing(stale);
+    } catch (error) {
+      await this.refundUserQuota(uid);
+      await this.auditAiError('character_drawing', childId, error);
+      throw error instanceof AppError ? error : generationFailed(error);
+    }
+    return this.childDrawing(uid, childId);
+  }
+
+  /** «Usar este dibujo»: pasa a ser el del personaje y la referencia de sus próximos cuentos. */
+  async acceptChildDrawing(uid: string, childId: string) {
+    const { ref, child } = await this.ownedChild(uid, childId);
+    const candidate = child.drawingCandidate as StoredDrawing | undefined;
+    if (!candidate) throw new AppError(409, 'bad_request', 'No hay un dibujo nuevo para usar.');
+    await ref.update({
+      drawing: { ...candidate, approvedAt: new Date() },
+      drawingCandidate: FieldValue.delete(),
+      updatedAt: new Date(),
+    });
+    await this.deleteDrawing(child.drawing as StoredDrawing | undefined);
+    return this.childDrawing(uid, childId);
+  }
+
+  /** «Quedarme con el anterior»: el dibujo nuevo se borra. */
+  async discardChildDrawing(uid: string, childId: string) {
+    const { ref, child } = await this.ownedChild(uid, childId);
+    await ref.update({ drawingCandidate: FieldValue.delete(), updatedAt: new Date() });
+    await this.deleteDrawing(child.drawingCandidate as StoredDrawing | undefined);
+    return this.childDrawing(uid, childId);
+  }
+
+  private async deleteDrawing(drawing: StoredDrawing | undefined) {
+    const storage = this.providers.storage();
+    await Promise.all(
+      [drawing?.imagePath, drawing?.previewImagePath]
+        .filter((path): path is string => typeof path === 'string')
+        .map((path) => storage.delete({ bucket: 'assets', path })),
+    );
+  }
+
+  /** Reserva un lugar en los topes del usuario por día y por semana (dibujo sin cuento). */
+  private async reserveUserQuota(uid: string, limits: AiLimits) {
+    const quotas = this.db.collection(COLLECTIONS.previewQuota);
+    const dayQuota = quotas.doc(`${uid}_${utcDay()}`);
+    const weekQuota = quotas.doc(`${uid}_${utcIsoWeek()}`);
+    await this.db.runTransaction(async (tx) => {
+      const [daySnap, weekSnap] = await Promise.all([tx.get(dayQuota), tx.get(weekQuota)]);
+      const usedToday = Number(daySnap.get('count') ?? 0);
+      const usedThisWeek = Number(weekSnap.get('count') ?? 0);
+      if (usedToday >= limits.maxPreviewsPerUserPerDay) throw dailyLimit();
+      if (usedThisWeek >= limits.maxPreviewsPerUserPerWeek) throw weeklyLimit();
+      const day = 24 * 60 * 60 * 1000;
+      tx.set(
+        dayQuota,
+        { count: usedToday + 1, expiresAt: new Date(Date.now() + 2 * day) },
+        { merge: true },
+      );
+      tx.set(
+        weekQuota,
+        { count: usedThisWeek + 1, expiresAt: new Date(Date.now() + 8 * day) },
+        { merge: true },
+      );
+    });
+  }
+
   /** Reserva una regeneración antes de gastar (evita carreras con dos clics). */
   private async reserveRegeneration(ref: DocumentReference, limits: AiLimits) {
     await this.db.runTransaction(async (tx) => {
@@ -1504,3 +1737,14 @@ function weeklyLimit() {
     'Ya probaste varias versiones esta semana. Guardamos todo y en unos días sigues.',
   );
 }
+
+/** Dibujo del personaje guardado en su perfil. */
+interface StoredDrawing {
+  imagePath?: string;
+  previewImagePath?: string;
+  traits?: CharacterTraits;
+  mustKeep?: MustKeepTrait[];
+}
+
+/** Plantilla de la lámina del perfil (sin cuento): la misma estructura que la de las historias. */
+const CHARACTER_DRAWING_TEMPLATE = `Children's picture book illustration: {{scene}}. Main character: {{character}}. Art style: {{style}}. Clear composition, warm light, no text in the image.`;

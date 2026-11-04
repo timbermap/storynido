@@ -89,6 +89,13 @@ export class AccountService {
       await this.db.recursiveDelete(doc.ref);
       deletedBooks += 1;
     }
+    // Su dibujo del perfil (el actual y uno nuevo sin aprobar).
+    for (const key of ['drawing', 'drawingCandidate'] as const) {
+      const drawing = child[key] as { imagePath?: unknown; previewImagePath?: unknown } | undefined;
+      for (const path of [drawing?.imagePath, drawing?.previewImagePath]) {
+        if (typeof path === 'string') await storage.delete({ bucket: 'assets', path });
+      }
+    }
     await childRef.delete();
 
     await this.audit(user, 'privacy.delete_child', childId, {

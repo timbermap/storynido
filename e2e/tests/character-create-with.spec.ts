@@ -46,18 +46,11 @@ test('crear otro cuento con un personaje: se elige qué crear y su dibujo se pue
   await heading(page, '¿Quién es el protagonista de la fiesta?');
   await expect(page.locator('#child-name')).toHaveValue('Martina');
 
-  // En su perfil, con fotos vigentes, se puede actualizar el dibujo: un cuento nuevo con ella.
+  // En su perfil, con fotos vigentes, se crea su dibujo ahí mismo (sin empezar un cuento).
   await charactersTab(page);
   await page.getByRole('link', { name: 'Ver perfil' }).first().click();
   await heading(page, 'Martina');
-  await page.getByRole('button', { name: 'Actualizar su dibujo' }).click();
-  await heading(page, 'Cuéntanos sobre el protagonista');
-  await expect(page.locator('#child-name')).toHaveValue('Martina');
-  // Elegido como personaje guardado (no solo con el nombre escrito): trae su aspecto.
-  await expect(page.locator('body')).toContainText('Usamos su aspecto del último cuento');
-  await next(page);
-  await heading(page, 'Sube de 1 a 3 fotos');
-  await expect(
-    page.locator('fieldset', { hasText: 'Fotos de Martina de su último cuento' }),
-  ).toBeVisible();
+  await page.getByRole('button', { name: 'Crear su dibujo' }).click();
+  await expect(page.getByText('El nuevo', { exact: true })).toBeVisible({ timeout: 60_000 });
+  await expect(page).toHaveURL(/personajes\//);
 });

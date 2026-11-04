@@ -31,6 +31,8 @@ export function useCreateWith() {
 interface Portrait {
   imageUrl: string | null;
   stories: number;
+  /** Tiene fotos vigentes o rasgos: se le puede crear el dibujo. */
+  canDraw: boolean;
 }
 
 /** Un personaje: su dibujo aprobado, edad, cuántos cuentos tiene y lo que le gusta. */
@@ -55,11 +57,15 @@ function CharacterCard({
     void api('getChildProfile', { params: { childId: child.id } })
       .then((profile) => {
         if (!cancelled) {
-          setPortrait({ imageUrl: profile.characterImageUrl, stories: profile.books.length });
+          setPortrait({
+            imageUrl: profile.characterImageUrl,
+            stories: profile.books.length,
+            canDraw: profile.drawing.canDraw,
+          });
         }
       })
       .catch(() => {
-        if (!cancelled) setPortrait({ imageUrl: null, stories: -1 });
+        if (!cancelled) setPortrait({ imageUrl: null, stories: -1, canDraw: false });
       });
     return () => {
       cancelled = true;
@@ -143,6 +149,15 @@ function CharacterCard({
           >
             {tLib('createWith', { name: child.name })}
           </Button>
+          {portrait && !portrait.imageUrl && portrait.canDraw && (
+            // Sin dibujo todavía: se crea en su perfil (fotos vigentes o rasgos).
+            <Link
+              href={{ ...profileHref, hash: 'dibujo' }}
+              className={buttonVariants({ size: 'sm', variant: 'ghost' })}
+            >
+              {t('drawing.create')}
+            </Link>
+          )}
           <Link href={profileHref} className={buttonVariants({ size: 'sm', variant: 'ghost' })}>
             {t('profileOpen')}
           </Link>
@@ -224,7 +239,7 @@ export function CharactersPanel({
         ))}
         <li>
           <Link
-            href={{ pathname: '/create', query: { line: 'families' } }}
+            href="/my-stories/characters/new"
             className="grid h-full min-h-44 place-items-center content-center gap-2 rounded-2xl border-2 border-dashed border-navy/25 p-6 text-center transition-colors hover:border-navy hover:bg-card"
           >
             <span className="grid size-12 place-items-center rounded-full bg-muted">
