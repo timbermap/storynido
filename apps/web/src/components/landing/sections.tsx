@@ -1,7 +1,7 @@
 import { ArrowRight, Check, Clock, Gift } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-import type { Channel, PublicStory } from '@storynido/shared';
+import type { Channel, EventType, PublicStory } from '@storynido/shared';
 
 import { FaqList, type FaqItem } from '@/components/home/faq-list';
 import { buttonVariants } from '@/components/ui/button';
@@ -226,7 +226,14 @@ export function LandingCollections({
   /** Sin título, la sección no repite encabezado (catálogos que ya tienen su H1). */
   title?: string;
   subtitle?: string;
-  collections: { slug: string; name: string; description: string; topics: string[] }[];
+  collections: {
+    slug: string;
+    name: string;
+    description: string;
+    topics: string[];
+    /** Celebraciones: la ocasión de la colección (la tarjeta abre el creador con ella). */
+    eventType?: EventType | null;
+  }[];
   /** Historias de la línea: cada tema muestra las suyas, con enlace para empezar con ella. */
   stories?: PublicStory[];
   /** Texto del enlace accesible de cada tapa ("Ver la historia"). */
@@ -296,7 +303,13 @@ export function LandingCollections({
                       pathname: '/create',
                       query:
                         start.mode === 'theme'
-                          ? { line, tema: collection.name }
+                          ? {
+                              line,
+                              // La temática trae la historia; la ocasión (comunión, graduación…)
+                              // llega ya elegida al creador.
+                              tema: collection.name,
+                              ...(collection.eventType ? { ocasion: collection.eventType } : {}),
+                            }
                           : { line, story: own[0]?.slug ?? '' },
                     }}
                     data-track="collection_start"

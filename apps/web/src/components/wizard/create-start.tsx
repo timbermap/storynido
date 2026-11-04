@@ -3,7 +3,13 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useEffectEvent, useState } from 'react';
 
-import { EMPTY_BIRTHDAY, type Channel, type ContentType, type Locale } from '@storynido/shared';
+import {
+  EMPTY_BIRTHDAY,
+  type Channel,
+  type ContentType,
+  type EventType,
+  type Locale,
+} from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -52,6 +58,7 @@ export function CreateStart({
   proGate,
   catalog,
   eventTheme = null,
+  eventType = null,
   contentType = null,
 }: {
   storyId: string | null;
@@ -63,6 +70,8 @@ export function CreateStart({
   catalog: WizardCatalog;
   /** Celebraciones: temática que viene de la tarjeta de un tema en la landing. */
   eventTheme?: string | null;
+  /** Celebraciones: la ocasión que viene de la tarjeta (sin ella, cumpleaños). */
+  eventType?: EventType | null;
   /** Tipo de contenido que viene de un destacado (por ejemplo, «Para colorear»). */
   contentType?: ContentType | null;
 }) {
@@ -106,7 +115,7 @@ export function CreateStart({
       return;
     }
     if (line !== channel) setChannel(line);
-    if (storyId || lessonId || eventTheme || contentType) {
+    if (storyId || lessonId || eventTheme || eventType || contentType) {
       // Con una historia (o temática) elegida: si hay un intento vacío de esta línea, se reutiliza (así entrar
       // varias veces desde las fichas no deja borradores vacíos sueltos).
       const reusable = all.find((draft) => draft.channel === line && isEmptyDraft(draft));
@@ -120,8 +129,14 @@ export function CreateStart({
         ...(storyId ? { storyId } : {}),
         ...(lessonId ? { lessonIds: [lessonId] } : {}),
         ...(contentType ? { contentType } : {}),
-        ...(eventTheme && line === 'events'
-          ? { event: { ...EMPTY_BIRTHDAY, theme: eventTheme } }
+        ...((eventTheme || eventType) && line === 'events'
+          ? {
+              event: {
+                ...EMPTY_BIRTHDAY,
+                ...(eventType ? { type: eventType } : {}),
+                theme: eventTheme,
+              },
+            }
           : {}),
       });
       router.replace({ pathname: '/create/[bookId]', params: { bookId: reusable.id } });
@@ -173,7 +188,15 @@ export function CreateStart({
     return (
       <Wizard
         bookId={null}
-        preset={{ language: locale, storyId, lessonId, channel, eventTheme, contentType }}
+        preset={{
+          language: locale,
+          storyId,
+          lessonId,
+          channel,
+          eventTheme,
+          eventType,
+          contentType,
+        }}
         catalog={catalog}
       />
     );

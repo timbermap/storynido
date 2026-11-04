@@ -1,6 +1,6 @@
 'use client';
 
-import { CHANNELS } from '@storynido/shared';
+import { CHANNELS, EVENT_TYPES } from '@storynido/shared';
 
 import { ConfigEditor } from '@/components/config/config-editor';
 import { yesNo } from '@/lib/format';
@@ -26,6 +26,14 @@ export default function CollectionsPage() {
         { kind: 'boolean', path: 'active', label: 'Activa' },
         { kind: 'select', path: 'channel', label: 'Línea', options: CHANNELS },
         { kind: 'number', path: 'order', label: 'Orden' },
+        {
+          kind: 'select',
+          path: 'eventType',
+          label: 'Ocasión (Celebraciones)',
+          options: EVENT_TYPES,
+          nullable: true,
+          hint: 'Solo para colecciones de una ocasión (primera comunión, graduación): su tarjeta abre el creador con esa ocasión. Vacío para las temáticas de cumpleaños.',
+        },
         { kind: 'localized', path: 'name', label: 'Nombre' },
         { kind: 'localized', path: 'description', label: 'Descripción', multiline: true },
         {

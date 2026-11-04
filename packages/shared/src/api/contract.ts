@@ -10,6 +10,7 @@ import { BOOK_FORMATS, bookFormatSchema } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
 import { characterTraitsSchema, mustKeepSchema } from '../models/character';
 import { channelSchema, personalizationSchema } from '../models/channels';
+import { EVENT_TYPES } from '../models/events';
 import { CONTENT_KEYS, SITE_MODES, aiConfigSchema } from '../models/config';
 import {
   bookLengthSchema,
@@ -530,6 +531,8 @@ export const publicCollectionSchema = z.object({
   name: z.string(),
   description: z.string(),
   topics: z.array(z.string()),
+  /** Celebraciones: la ocasión de la colección, si no es una temática de cumpleaños. */
+  eventType: z.enum(EVENT_TYPES).optional(),
 });
 
 export type PublicCollection = z.infer<typeof publicCollectionSchema>;
