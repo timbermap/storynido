@@ -135,7 +135,6 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
       t('Caballeros', 'Knights', 'Cavaleiros'),
       t('Dragones', 'Dragons', 'Dragões'),
       t('Castillos', 'Castles', 'Castelos'),
-      t('Unicornios', 'Unicorns', 'Unicórnios'),
     ],
   },
   {
@@ -173,6 +172,82 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
       t('Carreras', 'Racing', 'Corridas'),
     ],
   },
+  {
+    slug: 'cumple-unicornios',
+    active: true,
+    order: 16,
+    channel: 'events',
+    name: t('Unicornios y arcoíris', 'Unicorns and rainbows', 'Unicórnios e arco-íris'),
+    description: t(
+      'Colores, brillos y un unicornio amigo: una fiesta llena de magia.',
+      'Colors, sparkle and a unicorn friend: a party full of magic.',
+      'Cores, brilho e um unicórnio amigo: uma festa cheia de magia.',
+    ),
+    topics: [
+      t('Unicornios', 'Unicorns', 'Unicórnios'),
+      t('Arcoíris', 'Rainbows', 'Arco-íris'),
+      t('Nubes y estrellas', 'Clouds and stars', 'Nuvens e estrelas'),
+    ],
+  },
+  {
+    slug: 'cumple-magia',
+    active: true,
+    order: 17,
+    channel: 'events',
+    name: t(
+      'Magia y bosque encantado',
+      'Magic and the enchanted forest',
+      'Magia e floresta encantada',
+    ),
+    description: t(
+      'Magos, hadas y duendes en un bosque donde todo puede pasar.',
+      'Wizards, fairies and elves in a forest where anything can happen.',
+      'Magos, fadas e duendes numa floresta onde tudo pode acontecer.',
+    ),
+    topics: [
+      t('Magos y magas', 'Wizards', 'Magos e magas'),
+      t('Brujitas buenas', 'Friendly witches', 'Bruxinhas do bem'),
+      t('Hadas', 'Fairies', 'Fadas'),
+      t('Duendes', 'Elves', 'Duendes'),
+    ],
+  },
+  {
+    slug: 'cumple-piratas',
+    active: true,
+    order: 18,
+    channel: 'events',
+    name: t('Piratas y tesoros', 'Pirates and treasure', 'Piratas e tesouros'),
+    description: t(
+      'Un barco, un mapa y un cofre por encontrar: una fiesta de aventura en alta mar.',
+      'A ship, a map and a chest to find: an adventure party on the high seas.',
+      'Um navio, um mapa e um baú para encontrar: uma festa de aventura em alto-mar.',
+    ),
+    topics: [
+      t('Piratas', 'Pirates', 'Piratas'),
+      t('Mapa del tesoro', 'Treasure map', 'Mapa do tesouro'),
+      t('Islas', 'Islands', 'Ilhas'),
+      t('Sirenas', 'Mermaids', 'Sereias'),
+    ],
+  },
+  {
+    slug: 'cumple-primer-anito',
+    active: true,
+    order: 19,
+    channel: 'events',
+    name: t('Mi primer añito', 'My first birthday', 'Meu primeiro aninho'),
+    description: t(
+      'Para festejar el primer año del bebé, con un cuento corto para leerle en voz alta.',
+      "To celebrate baby's first year, with a short story to read aloud.",
+      'Para comemorar o primeiro ano do bebê, com uma história curta para ler em voz alta.',
+    ),
+    topics: [
+      t('Granja', 'Farm', 'Fazendinha'),
+      t('Safari', 'Safari', 'Safári'),
+      t('Arcoíris', 'Rainbow', 'Arco-íris'),
+      t('Globos', 'Balloons', 'Balões'),
+    ],
+    eventType: 'birthday',
+  },
   // Ocasiones (no son temáticas de cumpleaños): la tarjeta abre el creador con la ocasión.
   {
     slug: 'primera-comunion',
@@ -209,6 +284,24 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
       t('Fin de año', 'End of the school year', 'Fim de ano'),
     ],
     eventType: 'graduation',
+  },
+  {
+    slug: 'bautizo',
+    active: true,
+    order: 32,
+    channel: 'events',
+    name: t('Mi bautizo', 'My Baptism', 'Meu batizado'),
+    description: t(
+      'Un recuerdo para cada invitado del bautizo o la presentación, con tu bebé o tu hijo como protagonista.',
+      'A keepsake for every guest at the baptism or presentation, starring your baby or child.',
+      'Uma lembrança para cada convidado do batizado, com seu bebê ou sua criança como protagonista.',
+    ),
+    topics: [
+      t('Bautizo', 'Baptism', 'Batizado'),
+      t('Presentación de los 3 años', 'Presentation at age three', 'Apresentação na igreja'),
+      t('Padrinos', 'Godparents', 'Padrinhos'),
+    ],
+    eventType: 'baptism',
   },
   // --- Profesionales --------------------------------------------------------
   {
