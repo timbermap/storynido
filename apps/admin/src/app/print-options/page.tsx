@@ -1,9 +1,19 @@
 'use client';
 
-import { ANY_COUNTRY, COUNTRY_CODES, PRINT_FORMATS } from '@storynido/shared';
+import {
+  ANY_COUNTRY,
+  COUNTRY_CODES,
+  PRINT_FORMATS,
+  PRINT_PRODUCT_SPECS,
+  type PrintFormat,
+} from '@storynido/shared';
 
 import { ConfigEditor } from '@/components/config/config-editor';
 import { money, yesNo } from '@/lib/format';
+
+/** Ficha del producto (tamaño, encuadernación, papel) según la imprenta y el formato. */
+const specOf = (data: Record<string, unknown>) =>
+  PRINT_PRODUCT_SPECS[String(data.provider)]?.[data.format as PrintFormat];
 
 /**
  * Matriz de imprentas (`printOptions`): lo que cobra cada imprenta por imprimir, por país y
@@ -29,6 +39,15 @@ export default function PrintOptionsPage() {
         etaDaysMax: 10,
         productionCostUsdMinor: 0,
       })}
+      extra={(data) => {
+        const spec = specOf(data);
+        return spec ? (
+          <p className="text-sm text-muted-foreground">
+            <strong>Producto:</strong> {spec.size} · {spec.binding} · {spec.paper} · Páginas que
+            acepta: {spec.pages}.
+          </p>
+        ) : null;
+      }}
       fields={[
         {
           kind: 'select',
@@ -67,6 +86,27 @@ export default function PrintOptionsPage() {
         { label: 'País', render: (data) => String(data.country) },
         { label: 'Formato', render: (data) => String(data.format) },
         { label: 'Imprenta', render: (data) => String(data.provider) },
+        {
+          label: 'Producto',
+          render: (data) => {
+            const spec = specOf(data);
+            return spec ? (
+              <span className="grid text-xs">
+                <span>{spec.size}</span>
+                <span className="text-muted-foreground">{spec.binding}</span>
+              </span>
+            ) : (
+              '—'
+            );
+          },
+        },
+        {
+          label: 'Páginas',
+          render: (data) => {
+            const pages = data.pages as { min?: number; max?: number; multipleOf?: number };
+            return `${String(pages.min)}–${String(pages.max)}${pages.multipleOf && pages.multipleOf > 2 ? ` (×${String(pages.multipleOf)})` : ''}`;
+          },
+        },
         { label: 'Costo', render: (data) => money(data.productionCostUsdMinor, 'USD') },
         {
           label: 'Plazo',
