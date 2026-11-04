@@ -74,7 +74,14 @@
     "accountShort": "Cuenta",
     "createTitle": "¿Qué quieres crear?",
     "close": "Cerrar",
-    "catalogLines": "Catálogos por línea"
+    "catalogLines": "Catálogos por línea",
+    "exitTitle": "¿Salir del creador?",
+    "exitText": "Tu cuento queda guardado tal como está; lo retomas cuando quieras.",
+    "discard": "Descartar este cuento",
+    "discardConfirm": "¿Descartar este cuento? Se borran el borrador y las fotos que subiste en él. No se puede deshacer.",
+    "discardYes": "Sí, descartar",
+    "discardError": "No pudimos descartarlo. Intenta de nuevo.",
+    "cancel": "Cancelar"
   },
   "Switchers": {
     "language": "Idioma",
@@ -1334,7 +1341,8 @@
       "subtitle": "Extensión, cantidad de texto y nivel de lectura se ajustan por separado.",
       "length": "Extensión",
       "notice": "Es material educativo y de acompañamiento: no es clínico ni reemplaza tu criterio profesional."
-    }
+    },
+    "subStepCount": "({current} de {total})"
   },
   "Landing": {
     "events": {

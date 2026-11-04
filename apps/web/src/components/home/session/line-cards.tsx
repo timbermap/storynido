@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { LINE_IMAGES, LineChip, cardClass, type LineCopy } from './parts';
 
 /**
- * «Crear algo nuevo»: las tres líneas. Sin nada pendiente, la primera (la que manda) lleva el borde
+ * «Crear algo nuevo»: las tres líneas. Sin nada pendiente, la que manda lleva el borde
  * y el botón durazno, y las otras solo un enlace. Con algo pendiente o en modo Pro, las tres van
  * compactas (foto, título y enlace), sin botón.
  */
@@ -23,7 +23,7 @@ export function LineCards({
   birthday,
   onFamilies,
 }: {
-  /** Las tres líneas, la que manda primero. */
+  /** Las tres líneas, siempre en el mismo orden: Familias, Celebraciones y Profesionales. */
   order: HomeChannel[];
   /** La línea destacada (null: las tres compactas). */
   lead: HomeChannel | null;

@@ -4,7 +4,6 @@ import {
   buildHomeRows,
   HOME_ROWS,
   ordersWithCover,
-  orderLines,
   parseRemembered,
   pickHomeLine,
   type HomeBook,
@@ -235,13 +234,6 @@ describe('mixtos', () => {
       { proProfile: true, remembered: 'professionals' },
     );
     expect(view).toMatchObject({ line: 'events', pro: false, next: { book: { id: 'e' } } });
-  });
-});
-
-describe('orderLines', () => {
-  it('la línea que manda va primero; las otras en su orden', () => {
-    expect(orderLines('events')).toEqual(['events', 'families', 'professionals']);
-    expect(orderLines('families')).toEqual(['families', 'events', 'professionals']);
   });
 });
 

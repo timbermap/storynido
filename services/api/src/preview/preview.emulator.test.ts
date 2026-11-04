@@ -357,6 +357,28 @@ describe('vista previa', () => {
       await providers.storage().exists({ bucket: 'assets', path: preview.cover.imagePath }),
     ).toBe(false);
     await db.doc('orders/o-1').delete();
+    // Su foto propia también se borra (archivo y datos).
+    expect((await db.doc('photos/book-1-photo').get()).exists).toBe(false);
+    expect(
+      await providers
+        .storage()
+        .exists({ bucket: 'photos', path: `${UID}/book-1/photo-1/portrait.jpg` }),
+    ).toBe(false);
+  });
+
+  it('descartar un borrador no borra la foto que otro cuento sigue usando (personaje reutilizado)', async () => {
+    await seedBook(providers, 'book-1');
+    await seedBook(providers, 'book-2');
+    // book-2 reutilizó al personaje: usa la foto subida en book-1.
+    await db.doc('books/book-2').update({ photoIds: ['book-1-photo'] });
+    const del = await app.inject({
+      method: 'DELETE',
+      url: '/v1/books/book-1',
+      headers: auth(TOKEN),
+    });
+    expect(del.statusCode).toBe(200);
+    expect((await db.doc('books/book-1').get()).exists).toBe(false);
+    expect((await db.doc('photos/book-1-photo').get()).exists).toBe(true);
   });
 
   it('con una sesión anónima no se genera la muestra: crear pide cuenta', async () => {
