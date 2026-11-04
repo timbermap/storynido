@@ -20,6 +20,7 @@ import {
   Globe,
   History,
   Power,
+  Printer,
   Sparkles,
   Tag,
   Ticket,
@@ -52,6 +53,7 @@ export interface NavItem {
     | '/site'
     | '/countries'
     | '/prices'
+    | '/print-options'
     | '/coupons'
     | '/promotions'
     | '/event-pricing'
@@ -131,6 +133,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: 'Precios y márgenes',
     keywords: 'productos formatos extensión pro margen costo',
     icon: Tag,
+  },
+  {
+    href: '/print-options',
+    area: 'Administración',
+    label: 'Imprentas',
+    keywords: 'costo producción imprenta gelato lulu cloudprinter plazo matriz',
+    icon: Printer,
   },
   {
     href: '/coupons',

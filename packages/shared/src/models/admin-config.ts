@@ -1,13 +1,14 @@
 import { z } from 'zod';
 
 import { aiModelSchema } from './ai-models';
-import { illustrationStyleSchema, lessonSchema, storySchema } from './catalog';
+import { illustrationStyleSchema, lessonSchema, productSchema, storySchema } from './catalog';
 import { collectionSchema } from './channels';
 import { COLLECTIONS } from './collections';
 import { countrySchema, couponSchema, promotionSchema } from './commerce';
 import { contentDocId, contentSchema } from './config';
 import { editorialConfigSchema } from './editorial';
 import { eventPricingSchema } from './kit';
+import { printOptionId, printOptionSchema } from './print';
 import { proDiscountConfigSchema } from './pricing';
 import { productPricingSchema } from './product-pricing';
 
@@ -48,6 +49,33 @@ export const ADMIN_CONFIG = {
       }),
     /** Las promociones no tienen clave natural: el id lo elige el admin (slug). */
     docId: null,
+  },
+  /** Páginas de referencia de cada formato: el precio de la tarjeta del checkout sale de acá. */
+  products: {
+    collection: COLLECTIONS.products,
+    createdAt: true,
+    input: productSchema.omit({ createdAt: true, updatedAt: true }),
+    docId: (data: { format: string }) => data.format,
+  },
+  /**
+   * Matriz de imprentas: costo de producción, plazo y si imprime, por país, formato e imprenta.
+   * `updatedBy` marca lo editado a mano: `seed:cloud --refresh-print` ya no lo pisa.
+   */
+  printOptions: {
+    collection: COLLECTIONS.printOptions,
+    updatedBy: true,
+    input: printOptionSchema
+      .omit({ updatedAt: true })
+      .refine((data) => data.etaDaysMax >= data.etaDaysMin, {
+        message: 'El plazo máximo es menor que el mínimo',
+        path: ['etaDaysMax'],
+      })
+      .refine((data) => data.pages.max >= data.pages.min, {
+        message: 'El máximo de páginas es menor que el mínimo',
+        path: ['pages', 'max'],
+      }),
+    docId: (data: { country: string; format: string; provider: string }) =>
+      printOptionId(data.country, data.format, data.provider),
   },
   eventPricing: {
     collection: COLLECTIONS.eventPricing,
@@ -132,8 +160,11 @@ export type AdminConfigInput<K extends AdminConfigKind> = z.input<
   (typeof ADMIN_CONFIG)[K]['input']
 >;
 
-/** Id de documento válido (slug; con puntos para los nombres de modelos como gemini-3.5-flash). */
-export const adminDocIdSchema = z.string().regex(/^[A-Za-z0-9._-]{1,80}$/);
+/**
+ * Id de documento válido (slug; con puntos para los nombres de modelos como gemini-3.5-flash y
+ * `*` para las imprentas que envían a cualquier país, como `*_booklet_mock`).
+ */
+export const adminDocIdSchema = z.string().regex(/^[A-Za-z0-9._*-]{1,80}$/);
 
 /** El id del documento tiene que coincidir con su clave natural (o ser un slug válido). */
 export function expectedDocId(kind: AdminConfigKind, data: unknown): string | null {

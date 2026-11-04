@@ -14,6 +14,8 @@ const ENTITIES = [
   ['aiConfig', 'IA'],
   ['countries', 'Países'],
   ['productPricing', 'Precios y márgenes'],
+  ['products', 'Páginas de referencia'],
+  ['printOptions', 'Imprentas'],
   ['coupons', 'Cupones'],
   ['promotions', 'Promociones'],
   ['eventPricing', 'Eventos'],

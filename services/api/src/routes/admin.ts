@@ -4,11 +4,15 @@ import {
   COLLECTIONS,
   GLOBAL_DOC_ID,
   apiRoutes,
+  buildPriceTable,
   expectedDocId,
+  utcDay,
   normalizeFirestoreData,
   sumMetrics,
   type AdminAuditEntry,
   type AdminConfigKind,
+  type CountryCode,
+  type PrintOption,
   type SiteConfig,
 } from '@storynido/shared';
 import type { FastifyInstance } from 'fastify';
@@ -133,6 +137,38 @@ export function registerAdminRoutes(app: FastifyInstance, db: Firestore): void {
       (batch) => batch.set(ref, data),
     );
     return { id, data };
+  });
+
+  // Precio final por país, formato y extensión, con lo mismo que lee el checkout (catálogo con
+  // cache de un minuto) y las imprentas activas en este ambiente.
+  addRoute(app, apiRoutes.adminPriceTable, {}, async () => {
+    const { catalog, providers, metrics } = app.deps;
+    const activePrinters = providers.printers().map((printer) => printer.id);
+    const [countries, pricing, editorial, proDiscounts, fx] = await Promise.all([
+      catalog.configuredCountries(),
+      catalog.productPricing(),
+      catalog.editorial(),
+      catalog.proDiscounts(),
+      metrics.fx(utcDay()),
+    ]);
+    const options = new Map<CountryCode, PrintOption[]>(
+      await Promise.all(
+        countries.map(
+          async (country) => [country.code, await catalog.printOptions(country.code)] as const,
+        ),
+      ),
+    );
+    const rows = buildPriceTable({
+      countries,
+      pricing,
+      editorial,
+      printOptions: (code) => options.get(code) ?? [],
+      activePrinters,
+      proDiscounts,
+      fx,
+      now: new Date(),
+    });
+    return { rows, activePrinters };
   });
 
   // Dashboard: días cerrados precalculados (metricsDaily) y hoy en vivo.

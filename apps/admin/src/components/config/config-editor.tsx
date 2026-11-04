@@ -38,6 +38,8 @@ export interface ConfigEditorProps {
   single?: { id: string; defaults: Data };
   /** Algo más debajo del formulario (por ejemplo, probar el prompt con datos de ejemplo). */
   extra?: (data: Data) => ReactNode;
+  /** Un segundo editor en la misma página: título de sección (h2). */
+  section?: boolean;
 }
 
 /** Tabla + formulario para un tipo de configuración. La API valida y audita cada cambio. */
@@ -51,6 +53,7 @@ export function ConfigEditor({
   idFrom,
   single,
   extra,
+  section = false,
 }: ConfigEditorProps) {
   const load = useCallback(() => api('adminConfigList', { params: { kind } }), [kind]);
   const { data, error, reload } = useApi(load);
@@ -156,6 +159,7 @@ export function ConfigEditor({
       <PageHeader
         title={title}
         text={text}
+        level={section ? 2 : 1}
         actions={
           !single && (
             <Button

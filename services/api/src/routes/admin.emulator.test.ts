@@ -2,6 +2,7 @@ import { COLLECTIONS, utcDay } from '@storynido/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { FirestoreCatalog } from '../catalog';
 import { initFirebaseAdmin } from '../firebase';
 import { auth, createTestApp } from '../test-helpers';
 
@@ -35,6 +36,8 @@ describe('admin: interruptor del sitio y auditoría', () => {
       COLLECTIONS.fxRates,
       COLLECTIONS.aiUsage,
       COLLECTIONS.aiBudget,
+      COLLECTIONS.printOptions,
+      COLLECTIONS.countries,
     ]) {
       await db.recursiveDelete(db.collection(name));
     }
@@ -150,6 +153,81 @@ describe('admin: interruptor del sitio y auditoría', () => {
     expect(list.json()).toMatchObject({
       items: [{ id: 'digital', data: { creationMargin: { percent: 60 } } }],
     });
+  });
+
+  it('imprentas: se editan con id país_formato_imprenta, quedan auditadas y la tabla de precios las usa', async () => {
+    const option = {
+      country: 'UY',
+      format: 'softcover',
+      provider: 'mock',
+      sku: 'mock-softcover',
+      enabled: true,
+      qaSamplePassed: true,
+      pages: { min: 24, max: 200, multipleOf: 2 },
+      maxQuantity: 100,
+      etaDaysMin: 5,
+      etaDaysMax: 10,
+      productionCostUsdMinor: 2000,
+    };
+    const wrong = await save('printOptions', 'UY_softcover_otra', option);
+    expect(wrong.json()).toMatchObject({
+      error: { message: 'El id tiene que ser "UY_softcover_mock".' },
+    });
+    expect(
+      (await save('printOptions', 'UY_softcover_mock', { ...option, etaDaysMax: 2 })).statusCode,
+    ).toBe(400);
+    expect((await save('printOptions', 'UY_softcover_mock', option)).statusCode).toBe(200);
+    // Queda marcada como editada a mano: seed:cloud --refresh-print no la pisa.
+    expect((await db.doc('printOptions/UY_softcover_mock').get()).get('updatedBy')).toBe(
+      'admin@storynido.test',
+    );
+    const log = await app.inject({
+      method: 'GET',
+      url: '/v1/admin/audit-log?entity=printOptions',
+      headers: auth(ADMIN),
+    });
+    expect(log.json<{ entries: { action: string }[] }>().entries[0]?.action).toBe(
+      'printOptions.create',
+    );
+
+    await db.doc('countries/UY').set({
+      code: 'UY',
+      active: true,
+      formats: { digital: true, softcover: true, hardcover: true, booklet: true },
+      currency: 'USD',
+      defaultLocale: 'es',
+      taxBasisPoints: 0,
+      taxIncludedInPrice: true,
+      shipping: { costMinor: 0, etaDaysMin: 5, etaDaysMax: 10 },
+      updatedAt: new Date(),
+    });
+    // La tabla lee el catálogo de Firestore, como el checkout (acá sin cache).
+    const live = (
+      await createTestApp({ catalog: new FirestoreCatalog(db, 0) }, { ADMIN_MFA_REQUIRED: 'true' })
+    ).app;
+    const table = await live.inject({
+      method: 'GET',
+      url: '/v1/admin/price-table',
+      headers: auth(ADMIN),
+    });
+    await live.close();
+    expect(table.statusCode).toBe(200);
+    const row = table
+      .json<{ rows: { country: string; length: string; format: string }[] }>()
+      .rows.find(
+        (item) => item.country === 'UY' && item.length === 'classic' && item.format === 'softcover',
+      );
+    // 28 págs: IA 4,20 + 17 de creación + imprenta 20 + margen (30 % = 6, mínimo 8) = 49,20 → 49,99.
+    expect(row).toMatchObject({
+      provider: 'mock',
+      productionCostUsdMinor: 2000,
+      printMarginUsdMinor: 800,
+      priceMinor: 4999,
+      blocked: null,
+    });
+    expect((await app.inject({ method: 'GET', url: '/v1/admin/price-table' })).statusCode).toBe(
+      401,
+    );
   });
 
   it('cupones: fechas desde texto ISO y el contador de usos no lo pisa el admin', async () => {

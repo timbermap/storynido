@@ -50,6 +50,77 @@ export const LULU_PRODUCTS: Record<PhotobookFormat, string> = {
   hardcover: '0850X1100FCSTDCW080CW444GXX',
 };
 
+/** Ficha de un producto de imprenta: lo que dice su SKU, para leerlo sin decodificarlo. */
+export interface PrintProductSpec {
+  /** Tamaño al corte. */
+  size: string;
+  binding: string;
+  paper: string;
+  /** Páginas que acepta la imprenta (interior; en el grapado, con tapas). */
+  pages: string;
+}
+
+/**
+ * Fichas de los productos que usamos (cotizados el 2026-10-30). El costo, el plazo y si imprime
+ * viven en `printOptions` (editables en el admin); esto es el producto en sí.
+ */
+export const PRINT_PRODUCT_SPECS: Record<string, Partial<Record<PrintFormat, PrintProductSpec>>> = {
+  gelato: {
+    softcover: {
+      size: '21 × 28 cm (8,3 × 11 in)',
+      binding: 'Tapa blanda, encolada (lomo)',
+      paper: 'Interior 170 g estucado seda, color 4/4; tapa 250 g con laminado mate',
+      pages: '28 a 200',
+    },
+    hardcover: {
+      size: '21 × 28 cm (8,3 × 11 in)',
+      binding: 'Tapa dura, encolada (lomo)',
+      paper: 'Interior 170 g estucado seda, color 4/4; tapa 130 g sobre cartón, laminado mate',
+      pages: '28 a 200',
+    },
+    booklet: {
+      size: 'A5: 14,8 × 21 cm (5,8 × 8,3 in)',
+      binding: 'Grapado (abrochado al lomo)',
+      paper: 'Interior 115 g estucado seda, color 4/4; tapa 250 g',
+      pages: '8 a 24 con tapas, múltiplo de 4',
+    },
+    card: {
+      size: '5R: 12,7 × 17,8 cm (5 × 7 in)',
+      binding: 'Tarjeta suelta',
+      paper: '350 g estucado seda, color de los dos lados (EE. UU.: 130 lb)',
+      pages: '1',
+    },
+  },
+  cloudprinter: {
+    softcover: {
+      size: 'US Letter: 21,6 × 27,9 cm (8,5 × 11 in)',
+      binding: 'Tapa blanda, encolada (lomo)',
+      paper: 'Interior 200 g estucado mate, color',
+      pages: '24 a 200',
+    },
+    hardcover: {
+      size: 'US Letter: 21,6 × 27,9 cm (8,5 × 11 in)',
+      binding: 'Tapa dura (casewrap)',
+      paper: 'Interior 200 g estucado mate, color',
+      pages: '24 a 200',
+    },
+  },
+  lulu: {
+    softcover: {
+      size: 'US Letter: 21,6 × 27,9 cm (8,5 × 11 in)',
+      binding: 'Tapa blanda, encolada (perfect bound)',
+      paper: 'Interior 80 lb estucado blanco, color estándar; tapa brillante',
+      pages: '32 a 800 (rellena hasta 32)',
+    },
+    hardcover: {
+      size: 'US Letter: 21,6 × 27,9 cm (8,5 × 11 in)',
+      binding: 'Tapa dura (casewrap)',
+      paper: 'Interior 80 lb estucado blanco, color estándar; tapa brillante',
+      pages: '24 a 800 (rellena hasta 24)',
+    },
+  },
+};
+
 /**
  * printOptions/{país}_{formato}_{imprenta}: matriz de impresión. Puede haber varias imprentas por
  * país y formato; cada una imprime solo si está habilitada Y pasó la muestra física

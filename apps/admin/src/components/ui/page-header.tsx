@@ -4,15 +4,23 @@ export function PageHeader({
   title,
   text,
   actions,
+  level = 1,
 }: {
   title: string;
   text?: string;
   actions?: ReactNode;
+  /** 2: un bloque más de la misma página (debajo del título principal). */
+  level?: 1 | 2;
 }) {
+  const Heading = level === 1 ? 'h1' : 'h2';
   return (
-    <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <header
+      className={`mb-6 flex flex-wrap items-end justify-between gap-3 ${level === 2 ? 'mt-10' : ''}`}
+    >
       <div>
-        <h1 className="text-2xl font-semibold">{title}</h1>
+        <Heading className={level === 1 ? 'text-2xl font-semibold' : 'text-xl font-semibold'}>
+          {title}
+        </Heading>
         {text && <p className="mt-1 text-sm text-muted-foreground">{text}</p>}
       </div>
       {actions}
