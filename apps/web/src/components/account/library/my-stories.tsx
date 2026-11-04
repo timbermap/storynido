@@ -13,7 +13,8 @@ import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { readDraftState } from '@/lib/firebase/drafts';
 import { loadLibraryData, type LibraryData } from '@/lib/firebase/library-data';
-import type { HomeChannel } from '@/lib/home-state';
+import { AUDIENCE_TONES } from '@/lib/audience-tones';
+import { HOME_CHANNELS, type HomeChannel } from '@/lib/home-state';
 import { linesUsed, orderShelf, pickNextUp } from '@/lib/library';
 import { defaultMyStoriesTab, parseMyStoriesTab, type MyStoriesTab } from '@/lib/my-stories-tabs';
 import { cn } from '@/lib/utils';
@@ -123,24 +124,18 @@ export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: L
 
   const view = useMemo(() => {
     if (!data) return null;
-    const used = linesUsed(data.books, data.orders);
-    const active = line !== 'all' && used.includes(line) ? line : 'all';
-    const inLine = (item: { channel: HomeChannel }) => active === 'all' || item.channel === active;
-    const books = data.books.filter(inLine);
-    const shelved = data.orders.filter(inLine);
     return {
-      used,
-      active,
-      books,
-      inProgress: shelved.filter((order) => orderShelf(order) === 'inProgress'),
-      done: shelved.filter((order) => orderShelf(order) === 'done'),
+      used: linesUsed(data.books, data.orders),
+      books: data.books,
+      inProgress: data.orders.filter((order) => orderShelf(order) === 'inProgress'),
+      done: data.orders.filter((order) => orderShelf(order) === 'done'),
       next: pickNextUp(data.books),
       total: new Set([
         ...data.books.map((book) => book.id),
         ...data.orders.filter((order) => orderShelf(order) !== null).map((order) => order.bookId),
       ]).size,
     };
-  }, [data, line]);
+  }, [data]);
 
   if (loading || !user || !signedIn || !data || !view) return <MyStoriesSkeleton />;
 
@@ -155,6 +150,23 @@ export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: L
     { key: 'terminados', label: t('tabDone'), count: view.done.length },
     { key: 'personajes', label: t('tabCharacters'), count: data.children.length },
   ];
+  // Filtro por línea: solo si la solapa abierta tiene cuentos de 2 o más líneas (nunca en una vacía).
+  const tabItems: readonly { channel: HomeChannel }[] =
+    tab === 'en-creacion'
+      ? view.books
+      : tab === 'en-curso'
+        ? view.inProgress
+        : tab === 'terminados'
+          ? view.done
+          : [];
+  const tabLines = HOME_CHANNELS.filter((item) => tabItems.some((x) => x.channel === item));
+  const active = line !== 'all' && tabLines.includes(line) ? line : 'all';
+  const inLine = (item: { channel: HomeChannel }) => active === 'all' || item.channel === active;
+  const shown = {
+    books: view.books.filter(inLine),
+    inProgress: view.inProgress.filter(inLine),
+    done: view.done.filter(inLine),
+  };
   const selectTab = (key: MyStoriesTab) => {
     router.replace({ pathname: '/my-stories', query: { estado: key } }, { scroll: false });
   };
@@ -225,23 +237,30 @@ export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: L
             ))}
           </div>
 
-          {view.used.length > 1 && tab !== 'personajes' && (
-            <div role="group" aria-label={t('filter')} className="flex flex-wrap gap-2">
-              {(['all', ...view.used] as const).map((key) => (
+          {tabLines.length > 1 && (
+            <div role="group" aria-label={t('filter')} className="flex flex-wrap gap-1.5">
+              {(['all', ...tabLines] as const).map((key) => (
                 <button
                   key={key}
                   type="button"
-                  aria-pressed={view.active === key}
+                  aria-pressed={active === key}
                   onClick={() => {
                     setLine(key);
                   }}
+                  // Filtro, no botón: chico, sin borde fuerte; la línea con su puntito de color.
                   className={cn(
-                    'min-h-10 rounded-full border px-4 text-sm font-bold transition-colors',
-                    view.active === key
-                      ? 'border-navy bg-navy text-white'
-                      : 'border-navy/20 bg-card text-foreground hover:border-navy',
+                    'inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold transition-colors',
+                    active === key
+                      ? 'bg-secondary text-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                   )}
                 >
+                  {key !== 'all' && (
+                    <span
+                      aria-hidden="true"
+                      className={cn('size-2 rounded-full', AUDIENCE_TONES[key].dot)}
+                    />
+                  )}
                   {key === 'all' ? tLib('filterAll') : lines[key].chip}
                 </button>
               ))}
@@ -255,11 +274,11 @@ export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: L
             className="grid gap-4"
           >
             {tab === 'en-creacion' &&
-              (view.books.length === 0 ? (
-                <EmptyState kind="creating" child={child} />
+              (shown.books.length === 0 ? (
+                <EmptyState kind="creating" child={child} hasIdeas={Boolean(child) && !onlyPro} />
               ) : (
                 <ul className="grid gap-3">
-                  {view.books.map((book) => (
+                  {shown.books.map((book) => (
                     <DraftCard
                       key={book.id}
                       book={book}
@@ -277,11 +296,11 @@ export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: L
                 </ul>
               ))}
             {tab === 'en-curso' &&
-              (view.inProgress.length === 0 ? (
+              (shown.inProgress.length === 0 ? (
                 <EmptyState kind="inProgress" child={null} />
               ) : (
                 <ul className="grid gap-3">
-                  {view.inProgress.map((order) => (
+                  {shown.inProgress.map((order) => (
                     <OrderCard
                       key={order.id}
                       order={order}
@@ -292,11 +311,11 @@ export function MyStories({ stories, lines }: { stories: PublicStory[]; lines: L
                 </ul>
               ))}
             {tab === 'terminados' &&
-              (view.done.length === 0 ? (
+              (shown.done.length === 0 ? (
                 <EmptyState kind="done" child={null} />
               ) : (
                 <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-                  {view.done.map((order) => (
+                  {shown.done.map((order) => (
                     <ShelfItem
                       key={order.id}
                       order={order}
