@@ -19,6 +19,8 @@ import {
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { isOrderDone } from '@/lib/order-state';
 
+import { CharacterDrawing } from './character-drawing';
+
 type Profile = Awaited<ReturnType<typeof loadProfile>>;
 
 const loadProfile = (childId: string) => api('getChildProfile', { params: { childId } });
@@ -167,14 +169,6 @@ export function CharacterProfile({ childId }: { childId: string }) {
     router.push({ pathname: '/new', query: { personaje: childId } });
   }
 
-  /**
-   * «Actualizar su dibujo»: un cuento nuevo de Familias con sus fotos vigentes. El dibujo nuevo se
-   * genera y se aprueba en la muestra (el mismo proceso de siempre); el perfil muestra el último.
-   */
-  function redraw() {
-    router.push({ pathname: '/create', query: { line: 'families', personaje: childId } });
-  }
-
   type ProfileBook = Profile['books'][number];
   // El pedido más reciente de cada libro (los pagos que no se completaron no cuentan).
   const orderOf = (book: ProfileBook) =>
@@ -232,16 +226,25 @@ export function CharacterProfile({ childId }: { childId: string }) {
             {t('profileCreate', { name })}
           </Button>
           <p className="text-sm text-muted-foreground">{t('profileCreateNote')}</p>
-          {profile.validPhotos > 0 && (
-            <div className="grid gap-1.5">
-              <Button type="button" variant="outline" onClick={redraw} className="w-fit">
-                {t('profileRedraw')}
-              </Button>
-              <p className="text-sm text-muted-foreground">{t('profileRedrawNote')}</p>
-            </div>
-          )}
         </div>
       </header>
+
+      {/* Su dibujo: crearlo o actualizarlo con sus fotos vigentes (o sus rasgos), sin cuento. */}
+      <div id="dibujo" className="scroll-mt-28">
+        <CharacterDrawing
+          childId={childId}
+          name={name}
+          currentUrl={profile.characterImageUrl}
+          drawing={profile.drawing}
+          onChange={({ imageUrl, drawing }) => {
+            setProfile((current) =>
+              current
+                ? { ...current, characterImageUrl: imageUrl ?? current.characterImageUrl, drawing }
+                : current,
+            );
+          }}
+        />
+      </div>
 
       {message && (
         <p

@@ -99,7 +99,8 @@ export const PHOTO_STATUSES = ['pending_upload', 'valid', 'rejected'] as const;
 /** photos/{photoId}: metadatos; el archivo vive en el bucket de fotos. Solo servidor. */
 export const photoSchema = timestampsSchema.extend({
   ownerUid: uidSchema,
-  bookId: z.string().min(1),
+  /** null: subida desde el perfil del personaje, sin un cuento (para crear o actualizar su dibujo). */
+  bookId: z.string().min(1).nullable(),
   childId: z.string().min(1),
   contentType: z.string(),
   storagePath: z.string().min(1),

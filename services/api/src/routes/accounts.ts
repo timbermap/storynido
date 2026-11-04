@@ -3,12 +3,17 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { z } from 'zod';
 
 import type { AccountService } from '../accounts/service';
+import type { PreviewService } from '../preview/service';
 import { AppError } from '../errors';
 import { addRoute } from '../plugins/route';
 
 type MergeBody = z.output<(typeof apiRoutes)['mergeAnonymous']['body']>;
 
-export function registerAccountRoutes(app: FastifyInstance, accounts: AccountService): void {
+export function registerAccountRoutes(
+  app: FastifyInstance,
+  accounts: AccountService,
+  previews: PreviewService,
+): void {
   addRoute(app, apiRoutes.mergeAnonymous, { appCheck: true }, async (request) => {
     // requireAccess('user') garantiza la sesión.
     if (!request.user) throw new Error('Ruta protegida sin usuario');
@@ -24,9 +29,16 @@ export function registerAccountRoutes(app: FastifyInstance, accounts: AccountSer
     return accounts.deleteChild(user, (request.params as { childId: string }).childId);
   });
 
-  addRoute(app, apiRoutes.getChildProfile, {}, (request) => {
+  addRoute(app, apiRoutes.getChildProfile, {}, async (request) => {
     const user = signedIn(request);
-    return accounts.childProfile(user.uid, (request.params as { childId: string }).childId);
+    const { childId } = request.params as { childId: string };
+    const [profile, drawing] = await Promise.all([
+      accounts.childProfile(user.uid, childId),
+      previews.childDrawing(user.uid, childId),
+    ]);
+    const { imageUrl, ...rest } = drawing;
+    // El dibujo aprobado en su perfil manda; si no hay, la lámina de su último cuento.
+    return { ...profile, characterImageUrl: imageUrl ?? profile.characterImageUrl, drawing: rest };
   });
 
   addRoute(app, apiRoutes.deleteChildPhotos, {}, (request) => {

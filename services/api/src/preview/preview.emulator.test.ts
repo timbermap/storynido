@@ -503,6 +503,72 @@ describe('vista previa', () => {
     expect((await generate('book-2')).statusCode).toBe(429);
   });
 
+  it('dibujo del personaje en su perfil: nuevo, usarlo, ajustar y descartar; cuenta para el tope', async () => {
+    await setAiConfig({ maxPreviewsPerUserPerDay: 3 });
+    await seedBook(providers, 'book-1');
+    const call = (method: 'POST' | 'DELETE', path: string, payload?: object) =>
+      app.inject({
+        method,
+        url: `/v1/me/children/book-1-child/drawing${path}`,
+        headers: auth(TOKEN),
+        ...(payload ? { payload } : {}),
+      });
+    interface Drawing {
+      imageUrl: string | null;
+      candidateUrl: string | null;
+      canDraw: boolean;
+    }
+    const first = await call('POST', '', {});
+    expect(first.statusCode).toBe(200);
+    expect(first.json<Drawing>()).toMatchObject({ imageUrl: null, canDraw: true });
+    expect(first.json<Drawing>().candidateUrl).toEqual(expect.any(String));
+    // «Usar este dibujo»: pasa a ser el del personaje.
+    const used = (await call('POST', '/accept')).json<Drawing>();
+    expect(used.imageUrl).toEqual(expect.any(String));
+    expect(used.candidateUrl).toBeNull();
+    expect((await db.doc('children/book-1-child').get()).get('drawing.imagePath')).toEqual(
+      expect.any(String),
+    );
+    // «Ajustar el parecido» con una nota; «Quedarme con el anterior» lo descarta.
+    const adjusted = await call('POST', '', { note: 'que se vea más chica' });
+    expect(adjusted.statusCode).toBe(200);
+    const kept = (await call('DELETE', '/candidate')).json<Drawing>();
+    expect(kept.candidateUrl).toBeNull();
+    expect(kept.imageUrl).toEqual(expect.any(String));
+    // Dos dibujos usaron el tope del día (3): el tercero entra, el cuarto no.
+    expect((await call('POST', '', {})).statusCode).toBe(200);
+    const blocked = await call('POST', '', {});
+    expect(blocked.statusCode).toBe(429);
+    expect(blocked.json<{ error: { code: string } }>().error.code).toBe('limit_reached');
+    // Otro usuario no lo ve.
+    const other = await app.inject({
+      method: 'POST',
+      url: '/v1/me/children/book-1-child/drawing',
+      headers: auth('token-otro'),
+      payload: {},
+    });
+    expect(other.statusCode).toBe(404);
+  });
+
+  it('el dibujo aprobado del perfil es la referencia de la lámina de su próximo cuento', async () => {
+    await seedBook(providers, 'book-1');
+    await app.inject({
+      method: 'POST',
+      url: '/v1/me/children/book-1-child/drawing',
+      headers: auth(TOKEN),
+      payload: {},
+    });
+    await app.inject({
+      method: 'POST',
+      url: '/v1/me/children/book-1-child/drawing/accept',
+      headers: auth(TOKEN),
+    });
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    expect((await generate('book-1')).statusCode).toBe(200);
+    expect(paint.mock.calls[0]?.[0].references).toHaveLength(1);
+    paint.mockRestore();
+  });
+
   it('avisa cuántas muestras gratis le quedan hoy, antes de bloquear', async () => {
     await setAiConfig({ maxPreviewsPerUserPerDay: 2 });
     await seedBook(providers, 'book-1');

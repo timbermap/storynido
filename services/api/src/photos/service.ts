@@ -70,21 +70,18 @@ export class PhotoService {
 
   async createUpload(input: {
     uid: string;
-    bookId: string;
+    bookId?: string;
+    /** Sin cuento: la foto es solo para el personaje (su dibujo en el perfil). */
+    childId?: string;
     consentId: string;
     contentType: string;
   }): Promise<{
     photoId: string;
     upload: { url: string; headers: Record<string, string>; expiresAt: string };
   }> {
-    const book = (await this.db.collection(COLLECTIONS.books).doc(input.bookId).get()).data();
-    if (book?.ownerUid !== input.uid) throw notFound();
-    if (!EDITABLE_BOOK_STATUSES.has(String(book.status))) {
-      throw new AppError(409, 'bad_request', 'Este libro ya no se puede editar.');
-    }
-    if (typeof book.childId !== 'string') {
-      throw new AppError(409, 'bad_request', 'Completa primero los datos del protagonista.');
-    }
+    const target = input.bookId
+      ? await this.bookTarget(input.uid, input.bookId)
+      : await this.childTarget(input.uid, input.childId ?? '');
 
     const consent = (
       await this.db.collection(COLLECTIONS.consents).doc(input.consentId).get()
@@ -99,7 +96,7 @@ export class PhotoService {
     // Libros de Profesionales: la foto es de un chico que no es propio; hace falta la
     // declaración de que tienen la autorización de su madre, padre o tutor. Un profesional que
     // hace un cuento de Familia para su propio hijo no la necesita (va por la línea del libro).
-    if (book.channel === 'professionals') {
+    if (target.channel === 'professionals') {
       const guardian = await this.db
         .collection(COLLECTIONS.consents)
         .where('ownerUid', '==', input.uid)
@@ -119,14 +116,17 @@ export class PhotoService {
     const existing = await this.db
       .collection(COLLECTIONS.photos)
       .where('ownerUid', '==', input.uid)
-      .where('bookId', '==', input.bookId)
+      .where(target.bookId ? 'bookId' : 'childId', '==', target.bookId ?? target.childId)
       .get();
-    const active = existing.docs.filter((doc) => doc.get('status') !== 'rejected');
+    const active = existing.docs.filter(
+      (doc) =>
+        doc.get('status') !== 'rejected' && (target.bookId !== null || doc.get('bookId') === null),
+    );
     // Las fotos de un personaje reutilizado (de su cuento anterior) también cuentan para el límite.
     const own = new Set(existing.docs.map((doc) => doc.id));
     const reused = await this.reusedPhotos(
       input.uid,
-      ((book.photoIds as string[] | undefined) ?? []).filter((id) => !own.has(id)),
+      target.photoIds.filter((id) => !own.has(id)),
     );
     if (active.length + reused.length >= PHOTO_RULES.maxPhotosPerBook) {
       throw new AppError(
@@ -140,10 +140,10 @@ export class PhotoService {
     const now = new Date();
     const photo: Photo = {
       ownerUid: input.uid,
-      bookId: input.bookId,
-      childId: book.childId,
+      bookId: target.bookId,
+      childId: target.childId,
       contentType: input.contentType,
-      storagePath: `${input.uid}/${input.bookId}/${ref.id}/original`,
+      storagePath: `${input.uid}/${target.bookId ?? `child-${target.childId}`}/${ref.id}/original`,
       processedPath: null,
       status: 'pending_upload',
       rejectionReasons: [],
@@ -168,6 +168,39 @@ export class PhotoService {
         headers: signed.headers,
         expiresAt: signed.expiresAt.toISOString(),
       },
+    };
+  }
+
+  /** Subida para un cuento: el libro tiene que ser propio, editable y con protagonista. */
+  private async bookTarget(uid: string, bookId: string) {
+    const book = (await this.db.collection(COLLECTIONS.books).doc(bookId).get()).data();
+    if (book?.ownerUid !== uid) throw notFound();
+    if (!EDITABLE_BOOK_STATUSES.has(String(book.status))) {
+      throw new AppError(409, 'bad_request', 'Este libro ya no se puede editar.');
+    }
+    if (typeof book.childId !== 'string') {
+      throw new AppError(409, 'bad_request', 'Completa primero los datos del protagonista.');
+    }
+    return {
+      bookId: bookId as string | null,
+      childId: book.childId,
+      channel: String(book.channel ?? 'families'),
+      photoIds: (book.photoIds as string[] | undefined) ?? [],
+    };
+  }
+
+  /** Subida solo para el personaje (su dibujo en el perfil): el personaje tiene que ser propio. */
+  private async childTarget(uid: string, childId: string) {
+    const child = childId
+      ? (await this.db.collection(COLLECTIONS.children).doc(childId).get()).data()
+      : undefined;
+    if (child?.ownerUid !== uid) throw notFound();
+    return {
+      bookId: null as string | null,
+      childId,
+      // Un personaje con alias es de Profesionales: pide la autorización del tutor.
+      channel: child.alias ? 'professionals' : 'families',
+      photoIds: [] as string[],
     };
   }
 
@@ -253,10 +286,12 @@ export class PhotoService {
     } else {
       const batch = this.db.batch();
       batch.set(ref, updated);
-      batch.update(this.db.collection(COLLECTIONS.books).doc(photo.bookId), {
-        photoIds: FieldValue.arrayUnion(photoId),
-        updatedAt: new Date(),
-      });
+      if (photo.bookId) {
+        batch.update(this.db.collection(COLLECTIONS.books).doc(photo.bookId), {
+          photoIds: FieldValue.arrayUnion(photoId),
+          updatedAt: new Date(),
+        });
+      }
       await batch.commit();
     }
     return this.toPublic(photoId, updated);
@@ -338,10 +373,12 @@ export class PhotoService {
     if (photo.processedPath) await storage.delete({ bucket: 'photos', path: photo.processedPath });
     const batch = this.db.batch();
     batch.delete(ref);
-    batch.update(this.db.collection(COLLECTIONS.books).doc(photo.bookId), {
-      photoIds: FieldValue.arrayRemove(photoId),
-      updatedAt: new Date(),
-    });
+    if (photo.bookId) {
+      batch.update(this.db.collection(COLLECTIONS.books).doc(photo.bookId), {
+        photoIds: FieldValue.arrayRemove(photoId),
+        updatedAt: new Date(),
+      });
+    }
     await batch.commit();
   }
 }

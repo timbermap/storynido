@@ -8,7 +8,7 @@ import { localeSchema } from '../i18n';
 import { CARD_COPIES, CARD_PIECES } from '../models/print';
 import { BOOK_FORMATS, bookFormatSchema } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
-import { characterTraitsSchema, mustKeepSchema } from '../models/character';
+import { avatarSchema, characterTraitsSchema, mustKeepSchema } from '../models/character';
 import { channelSchema, personalizationSchema } from '../models/channels';
 import { EVENT_TYPES } from '../models/events';
 import { CONTENT_KEYS, SITE_MODES, aiConfigSchema } from '../models/config';
@@ -634,7 +634,7 @@ const localeQuerySchema = z.object({ locale: localeSchema });
 
 export const publicPhotoSchema = z.object({
   id: z.string(),
-  bookId: z.string(),
+  bookId: z.string().nullable(),
   status: z.enum(PHOTO_STATUSES),
   rejectionReasons: z.array(photoRejectionReasonSchema),
   /** URL firmada de corta duración de la versión procesada (solo fotos válidas). */
@@ -643,6 +643,24 @@ export const publicPhotoSchema = z.object({
 });
 
 export type PublicPhoto = z.infer<typeof publicPhotoSchema>;
+
+/** El dibujo de un personaje en su perfil: uno nuevo por aprobar y lo que se puede ajustar. */
+export const characterDrawingSchema = z.object({
+  /** Dibujo nuevo, todavía sin aprobar (URL firmada, 30 min). */
+  candidateUrl: z.string().nullable(),
+  /** Rasgos del último dibujo (para «Ajustar el parecido»). */
+  traits: characterTraitsSchema.nullable(),
+  mustKeep: mustKeepSchema,
+  /** Tiene fotos vigentes o rasgos elegidos: se le puede crear o actualizar el dibujo. */
+  canDraw: z.boolean(),
+});
+
+export type CharacterDrawing = z.infer<typeof characterDrawingSchema>;
+
+export const characterDrawingResponseSchema = characterDrawingSchema.extend({
+  /** El dibujo actual del personaje (URL firmada, 30 min). */
+  imageUrl: z.string().nullable(),
+});
 
 export const signedUploadSchema = z.object({
   url: z.string(),
@@ -810,12 +828,19 @@ export const apiRoutes = {
     path: '/v1/photos',
     access: 'user',
     summary: 'Prepara la subida de una foto y devuelve una URL firmada de corta duración',
-    body: z.object({
-      bookId: z.string().min(1),
-      consentId: z.string().min(1),
-      contentType: z.enum(PHOTO_RULES.allowedTypes),
-      sizeBytes: z.number().int().positive().max(PHOTO_RULES.maxBytes),
-    }),
+    body: z
+      .object({
+        /** La foto es para un cuento… */
+        bookId: z.string().min(1).optional(),
+        /** …o solo para el personaje (su dibujo en el perfil, sin cuento). */
+        childId: z.string().min(1).optional(),
+        consentId: z.string().min(1),
+        contentType: z.enum(PHOTO_RULES.allowedTypes),
+        sizeBytes: z.number().int().positive().max(PHOTO_RULES.maxBytes),
+      })
+      .refine((body) => Boolean(body.bookId) !== Boolean(body.childId), {
+        message: 'Indica el cuento o el personaje.',
+      }),
     response: z.object({ photoId: z.string(), upload: signedUploadSchema }),
   },
   processPhoto: {
@@ -1352,6 +1377,13 @@ export const apiRoutes = {
       validPhotos: z.number().int().default(0),
       /** Las fotos vigentes, para que la persona vea qué subió (URL firmada, 30 min). */
       photoUrls: z.array(z.string()),
+      /** Su dibujo: el actual, uno nuevo por aprobar y si se puede crear (fotos vigentes o rasgos). */
+      drawing: characterDrawingSchema.default({
+        candidateUrl: null,
+        traits: null,
+        mustKeep: [],
+        canDraw: false,
+      }),
       books: z.array(
         z.object({
           id: z.string(),
@@ -1361,6 +1393,47 @@ export const apiRoutes = {
         }),
       ),
     }),
+  },
+  generateChildDrawing: {
+    method: 'POST',
+    path: '/v1/me/children/:childId/drawing',
+    access: 'user',
+    summary:
+      'Dibuja una versión nueva del personaje (con sus fotos vigentes o sus rasgos), para aprobar o descartar; cuenta para los topes por día y semana',
+    params: z.object({ childId: z.string().min(1) }),
+    body: z.object({
+      /** «Ajustar el parecido»: rasgos corregidos, los que no pueden cambiar y una nota corta. */
+      traits: characterTraitsSchema.nullable().default(null),
+      mustKeep: mustKeepSchema.default([]),
+      note: z.string().trim().max(120).nullable().default(null),
+    }),
+    response: characterDrawingResponseSchema,
+  },
+  acceptChildDrawing: {
+    method: 'POST',
+    path: '/v1/me/children/:childId/drawing/accept',
+    access: 'user',
+    summary:
+      'Usa el dibujo nuevo: pasa a ser el del personaje y la referencia de sus próximos cuentos (los libros ya hechos no cambian)',
+    params: z.object({ childId: z.string().min(1) }),
+    response: characterDrawingResponseSchema,
+  },
+  discardChildDrawing: {
+    method: 'DELETE',
+    path: '/v1/me/children/:childId/drawing/candidate',
+    access: 'user',
+    summary: 'Se queda con el dibujo anterior: borra el nuevo',
+    params: z.object({ childId: z.string().min(1) }),
+    response: characterDrawingResponseSchema,
+  },
+  setChildAvatar: {
+    method: 'PUT',
+    path: '/v1/me/children/:childId/avatar',
+    access: 'user',
+    summary: 'Rasgos de un personaje sin foto (para crear su dibujo sin subir fotos)',
+    params: z.object({ childId: z.string().min(1) }),
+    body: z.object({ avatar: avatarSchema }),
+    response: z.object({ saved: z.literal(true) }),
   },
   deleteChildPhotos: {
     method: 'DELETE',

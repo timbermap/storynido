@@ -682,7 +682,38 @@
         }
       },
       "profileRedraw": "Actualizar su dibujo",
-      "profileRedrawNote": "Empezamos un cuento nuevo con sus fotos: al crear la muestra ves su dibujo nuevo y lo apruebas. Cada dibujo nuevo usa una generación de IA."
+      "profileRedrawNote": "Empezamos un cuento nuevo con sus fotos: al crear la muestra ves su dibujo nuevo y lo apruebas. Cada dibujo nuevo usa una generación de IA.",
+      "drawing": {
+        "createTitle": "Su dibujo",
+        "updateTitle": "Su dibujo",
+        "create": "Crear su dibujo",
+        "update": "Actualizar su dibujo",
+        "note": "Lo dibujamos con sus fotos vigentes (o sus rasgos). Cada dibujo nuevo usa una generación de IA.",
+        "drawing": "Dibujando a {name}…",
+        "current": "El de ahora",
+        "new": "El nuevo",
+        "noCurrent": "Todavía no tiene dibujo",
+        "currentAlt": "El dibujo actual de {name}",
+        "newAlt": "El dibujo nuevo de {name}",
+        "use": "Usar este dibujo",
+        "keep": "Quedarme con el anterior",
+        "redrawAdjusted": "Volver a dibujarlo",
+        "error": "No pudimos dibujarlo ahora. Intenta de nuevo en un rato."
+      },
+      "newCharacter": {
+        "back": "Volver a Personajes",
+        "title": "Agregar a otro chico",
+        "text": "Guarda sus datos y su foto (o sus rasgos). Después creas su dibujo o un cuento con él cuando quieras.",
+        "likesPlaceholder": "Por ejemplo: dinosaurios, pintar, el mar",
+        "looks": "¿Cómo lo dibujamos?",
+        "withPhoto": "Con su foto",
+        "withoutPhoto": "Sin foto, con sus rasgos",
+        "photo": "Su foto",
+        "photoNote": "Cara de frente y bien visible. Se borra a los 30 días; puedes borrarla antes.",
+        "save": "Guardar personaje",
+        "saveNote": "No se crea ningún cuento ni se usa ninguna generación de IA.",
+        "error": "No pudimos guardarlo. Intenta de nuevo."
+      }
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },

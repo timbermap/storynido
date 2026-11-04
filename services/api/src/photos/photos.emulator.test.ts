@@ -311,6 +311,50 @@ describe('fotos del protagonista', () => {
     expect(foreign.json<{ photos: unknown[] }>().photos).toEqual([]);
   });
 
+  it('una foto solo para el personaje (sin cuento) se valida y no toca ningún libro', async () => {
+    await db.doc('children/solo').set({ ownerUid: 'ana', name: 'Lu', age: 4 });
+    const consentId = await consent(app, 'token-ana');
+    const created = await app.inject({
+      method: 'POST',
+      url: '/v1/photos',
+      headers: auth('token-ana'),
+      payload: { childId: 'solo', consentId, contentType: 'image/jpeg', sizeBytes: 1000 },
+    });
+    expect(created.statusCode).toBe(200);
+    const { photoId, upload: signed } = created.json<{
+      photoId: string;
+      upload: { url: string };
+    }>();
+    const url = new URL(signed.url);
+    const body = await jpeg();
+    await app.inject({
+      method: 'PUT',
+      url: url.pathname + url.search,
+      headers: { 'content-type': 'image/jpeg' },
+      payload: body,
+    });
+    const processed = await app.inject({
+      method: 'POST',
+      url: `/v1/photos/${photoId}/process`,
+      headers: auth('token-ana'),
+    });
+    expect(processed.json()).toMatchObject({ id: photoId, status: 'valid', bookId: null });
+    expect((await db.doc(`photos/${photoId}`).get()).get('childId')).toBe('solo');
+    // Un personaje ajeno no acepta fotos; tampoco sin cuento ni personaje.
+    for (const payload of [
+      { childId: 'solo', consentId, contentType: 'image/jpeg', sizeBytes: 1000 },
+      { consentId, contentType: 'image/jpeg', sizeBytes: 1000 },
+    ]) {
+      const denied = await app.inject({
+        method: 'POST',
+        url: '/v1/photos',
+        headers: auth('token-bob'),
+        payload,
+      });
+      expect([400, 403, 404]).toContain(denied.statusCode);
+    }
+  });
+
   it('un archivo que no es una imagen se rechaza y se borra', async () => {
     await seedDraft('ana', 'b1');
     const { photoId, processed } = await upload(

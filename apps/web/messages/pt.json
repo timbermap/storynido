@@ -682,7 +682,38 @@
         }
       },
       "profileRedraw": "Atualizar o desenho",
-      "profileRedrawNote": "Começamos uma história nova com as fotos: ao criar a prévia você vê o desenho novo e o aprova. Cada desenho novo usa uma geração de IA."
+      "profileRedrawNote": "Começamos uma história nova com as fotos: ao criar a prévia você vê o desenho novo e o aprova. Cada desenho novo usa uma geração de IA.",
+      "drawing": {
+        "createTitle": "O desenho",
+        "updateTitle": "O desenho",
+        "create": "Criar o desenho",
+        "update": "Atualizar o desenho",
+        "note": "Desenhamos com as fotos vigentes (ou os traços). Cada desenho novo usa uma geração de IA.",
+        "drawing": "Desenhando {name}…",
+        "current": "O atual",
+        "new": "O novo",
+        "noCurrent": "Ainda não tem desenho",
+        "currentAlt": "O desenho atual de {name}",
+        "newAlt": "O desenho novo de {name}",
+        "use": "Usar este desenho",
+        "keep": "Ficar com o anterior",
+        "redrawAdjusted": "Desenhar de novo",
+        "error": "Não conseguimos desenhar agora. Tente de novo daqui a pouco."
+      },
+      "newCharacter": {
+        "back": "Voltar para Personagens",
+        "title": "Adicionar outra criança",
+        "text": "Salve os dados e a foto (ou os traços). Depois você cria o desenho ou uma história quando quiser.",
+        "likesPlaceholder": "Por exemplo: dinossauros, pintar, o mar",
+        "looks": "Como vamos desenhar?",
+        "withPhoto": "Com a foto",
+        "withoutPhoto": "Sem foto, com os traços",
+        "photo": "A foto",
+        "photoNote": "Rosto de frente e bem visível. É apagada após 30 dias; você pode apagá-la antes.",
+        "save": "Salvar personagem",
+        "saveNote": "Nenhuma história é criada e nenhuma geração de IA é usada.",
+        "error": "Não conseguimos salvar. Tente de novo."
+      }
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },
