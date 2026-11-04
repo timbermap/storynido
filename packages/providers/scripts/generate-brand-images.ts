@@ -520,12 +520,16 @@ const JOBS: Job[] = [
     'cream',
     `Martina, 8 (straight dark-brown bob with bangs, freckles, olive skin) wears a simple white First Communion dress and holds a small white candle and a simple rosary in her hands, smiling calmly. Behind her, a simple small church exterior with a plain wooden door, and her family (a grandmother, her parents) standing close by. Warm natural daylight. No religious figures of any kind, no Jesus, no Virgin Mary, no saints, no angels, no halos, no rays of light, no glow, no host, no chalice.`,
   ),
-  cover(
-    'mi-graduacion',
-    GOUACHE,
-    'mint',
-    `Benja, 6 (short black coily hair, warm dark-brown skin, red sneakers) wears a tiny navy graduation gown and cap and holds a rolled diploma tied with a coral ribbon, beaming. Around him in a simple school patio, two classmates in small gowns cheer, and a few flat balloons float. Blank diploma with no writing.`,
-  ),
+  // Sin franja lisa arriba: cielo suave y continuo que se funde con la escena (revisión de portada).
+  {
+    ...cover(
+      'mi-graduacion',
+      GOUACHE,
+      'mint',
+      `Benja, 6 (short black coily hair, warm dark-brown skin, red sneakers) wears a tiny navy graduation gown and cap and holds a rolled diploma tied with a coral ribbon, beaming. Around him in a simple school patio, two classmates in small gowns cheer, and a few flat balloons float. Blank diploma with no writing.`,
+    ),
+    prompt: `${GOUACHE}\nPicture-book cover illustration, portrait 3:4. The top third is a calm, continuous soft pale-mint sky painted in the same gouache brush texture, with no objects in it (space for the title); it blends naturally into the scene below, with no hard edge, no flat band, no frame and no horizontal dividing line. Benja, 6 (short black coily hair, warm dark-brown skin, red sneakers) wears a tiny navy graduation gown and cap and holds a rolled diploma tied with a coral ribbon, beaming. Around him in a simple school patio, two classmates in small gowns cheer, and a few flat balloons float in the lower part of the sky. Blank diploma with no writing.\nThe character fills 40-60% of the cover, looking at the viewer.\n${BLACKLIST}`,
+  },
   // ---- Profesionales (Minimalismo gráfico, chico genérico) -------------------------------------
   cover(
     'las-letras-que-bailan',
