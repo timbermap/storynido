@@ -184,11 +184,6 @@ export function pickHomeLine(
   return view('families', 'default', null);
 }
 
-/** Las tres líneas para «Crear algo nuevo», con la que manda primero. */
-export function orderLines(line: HomeChannel): HomeChannel[] {
-  return [line, ...HOME_CHANNELS.filter((other) => other !== line)];
-}
-
 /** Filas visibles de «Tus proyectos» en la home; el resto queda en Mis cuentos. */
 export const HOME_ROWS = 4;
 

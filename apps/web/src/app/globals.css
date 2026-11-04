@@ -110,6 +110,25 @@
   body {
     @apply bg-background font-serif text-foreground antialiased;
   }
+  /* Manito siempre en lo que se puede tocar (Tailwind v4 deja los botones con la flecha). */
+  a[href],
+  button,
+  [role='button'],
+  [role='tab'],
+  [role='link'],
+  summary,
+  select,
+  input[type='checkbox'],
+  input[type='radio'],
+  label:has(input[type='checkbox']),
+  label:has(input[type='radio']) {
+    cursor: pointer;
+  }
+  :disabled,
+  [aria-disabled='true'],
+  label:has(input:disabled) {
+    cursor: not-allowed;
+  }
   h1,
   h2,
   h3,
