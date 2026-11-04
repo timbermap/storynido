@@ -152,10 +152,16 @@ export class AccountService {
           : [];
       }),
     );
+    const now = Date.now();
+    const validPhotos = photos.docs.filter((doc) => {
+      const expires = (doc.get('expiresAt') as { toDate(): Date } | undefined)?.toDate().getTime();
+      return doc.get('status') === 'valid' && (expires === undefined || expires > now);
+    }).length;
     const withCharacter = sorted.find((book) => book.preview?.character?.previewImagePath);
     return {
       characterImageUrl: await url(withCharacter?.preview?.character?.previewImagePath),
       photos: photos.size,
+      validPhotos,
       photosExpireAt: expiries.length > 0 ? new Date(Math.min(...expiries)).toISOString() : null,
       photoUrls,
       books: await Promise.all(

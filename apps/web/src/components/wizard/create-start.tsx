@@ -18,6 +18,7 @@ import { getFirebaseDb } from '@/lib/firebase/client';
 import type { WizardCatalog } from '@/lib/server/wizard-catalog';
 import { isEmptyDraft, listDrafts, updateBook, type DraftSummary } from '@/lib/firebase/drafts';
 import { clearStepDrafts } from '@/lib/use-step-draft';
+import { saveReuseCharacter } from '@/lib/reuse-character';
 
 import { CHANNEL_STORAGE_KEY } from '@/components/landing/remember-channel';
 import { ProActivationCard } from '@/components/pro/pro-activation';
@@ -61,6 +62,7 @@ export function CreateStart({
   eventTheme = null,
   eventType = null,
   contentType = null,
+  reuseCharacterId = null,
 }: {
   storyId: string | null;
   lessonId: string | null;
@@ -75,6 +77,8 @@ export function CreateStart({
   eventType?: EventType | null;
   /** Tipo de contenido que viene de un destacado (por ejemplo, «Para colorear»). */
   contentType?: ContentType | null;
+  /** Personaje guardado que el primer paso preselecciona («Crear otro cuento con…»). */
+  reuseCharacterId?: string | null;
 }) {
   const t = useTranslations('Wizard');
   const locale = useLocale() as Locale;
@@ -109,6 +113,11 @@ export function CreateStart({
       ? eventPresetFor(catalog.eventThemes, catalog.stories, storyId, eventTheme, eventType)
       : { theme: null, type: null };
 
+  useEffect(() => {
+    // El primer paso lo toma de acá (y lo borra) al cargar los personajes guardados.
+    if (reuseCharacterId) saveReuseCharacter(reuseCharacterId);
+  }, [reuseCharacterId]);
+
   const onUser = useEffectEvent(async () => {
     if (!user || !signedIn || !proReady) return;
     const db = await getFirebaseDb();
@@ -122,7 +131,7 @@ export function CreateStart({
       return;
     }
     if (line !== channel) setChannel(line);
-    if (storyId || lessonId || eventTheme || eventType || contentType) {
+    if (storyId || lessonId || eventTheme || eventType || contentType || reuseCharacterId) {
       // Con una historia (o temática) elegida: si hay un intento vacío de esta línea, se reutiliza (así entrar
       // varias veces desde las fichas no deja borradores vacíos sueltos).
       const reusable = all.find((draft) => draft.channel === line && isEmptyDraft(draft));

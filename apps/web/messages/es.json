@@ -665,7 +665,24 @@
           "photos": "Fotos borradas a los 30 días",
           "reorder": "Puedes volver a pedir cualquier libro"
         }
-      }
+      },
+      "newWithTitle": "¿Qué creamos con {name}?",
+      "newWith": {
+        "families": {
+          "title": "Un cuento",
+          "text": "Una aventura nueva con {name}, con lo que ya sabemos de su personaje."
+        },
+        "events": {
+          "title": "Su cumpleaños",
+          "text": "Invitación, decoración y un cuento para cada invitado, con {name} de protagonista."
+        },
+        "professionals": {
+          "title": "Un cuento de tu proyecto",
+          "text": "Con su alias y su personaje, para trabajar un objetivo."
+        }
+      },
+      "profileRedraw": "Actualizar su dibujo",
+      "profileRedrawNote": "Empezamos un cuento nuevo con sus fotos: al crear la muestra ves su dibujo nuevo y lo apruebas. Cada dibujo nuevo usa una generación de IA."
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"
   },

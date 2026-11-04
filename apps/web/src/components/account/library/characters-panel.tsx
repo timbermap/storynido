@@ -17,7 +17,12 @@ import { clearStepDrafts } from '@/lib/use-step-draft';
 /** «Crear otro cuento con…»: el mismo destino que el botón del perfil (Familias, con sus datos). */
 export function useCreateWith() {
   const router = useRouter();
-  return (childId: string, line: 'families' | 'events' = 'families') => {
+  return (childId: string, line?: 'families' | 'events') => {
+    // Sin línea («Crear otro cuento con…»): se elige qué crear, con el personaje ya elegido.
+    if (!line) {
+      router.push({ pathname: '/new', query: { personaje: childId } });
+      return;
+    }
     saveReuseCharacter(childId);
     router.push({ pathname: '/create', query: { line } });
   };
