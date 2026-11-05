@@ -270,14 +270,10 @@ export class CheckoutService {
     return {
       snapshot: result.snapshot,
       couponError: result.couponError,
-      // Otra copia de un libro ya comprado: solo impresa (el PDF ya lo tiene). El kit de
-      // Eventos sigue siendo digital.
-      availableFormats:
-        source && body.kit
-          ? (['digital'] as BookFormat[])
-          : (await this.availableFormats(body.country, loaded.pages)).filter(
-              (format) => !source || format !== 'digital',
-            ),
+      // Otra copia de un libro ya comprado: solo impresa (el PDF ya lo tiene).
+      availableFormats: (await this.availableFormats(body.country, loaded.pages)).filter(
+        (format) => !source || format !== 'digital',
+      ),
     };
   }
 
@@ -835,8 +831,8 @@ export class CheckoutService {
 
   /**
    * Pedido original de una recompra: propio y terminado. Un libro se vuelve a pedir solo impreso
-   * (el PDF ya lo tiene y se descarga gratis) y solo si se creó para imprimir; el kit de Eventos
-   * (más copias digitales) no tiene esas reglas.
+   * (el PDF ya lo tiene y se descarga gratis) y solo si se creó para imprimir. El kit de Eventos no
+   * se vuelve a pedir: ya tiene todos los archivos y las copias que imprima no cambian el precio.
    */
   private async reorderSource(
     uid: string,
@@ -851,17 +847,24 @@ export class CheckoutService {
     if (!generated.includes(String(source.status)) || !source.snapshot) {
       throw new AppError(409, 'bad_request', 'Ese libro todavía no está terminado.');
     }
+    if (kit || source.kit) {
+      throw new AppError(
+        409,
+        'bad_request',
+        'El kit ya tiene todos sus archivos: descárgalo desde Mis cuentos e imprime las copias que necesites.',
+      );
+    }
     const sourceItems = (source.items ?? []) as { format: BookFormat }[];
     // Las ilustraciones de un libro digital son de pantalla (1K): no alcanzan para imprimir.
     const printable = sourceItems.some((item) => item.format !== 'digital');
-    if (!kit && !printable) {
+    if (!printable) {
       throw new AppError(
         409,
         'print_unavailable',
         'Este libro se creó en digital y no se puede imprimir.',
       );
     }
-    if (!kit && format === 'digital') {
+    if (format === 'digital') {
       throw new AppError(
         400,
         'bad_request',

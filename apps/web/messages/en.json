@@ -1893,7 +1893,6 @@
       "piecesTitle": "Kit pieces",
       "piecesNote": "All with the same hero and the same design.",
       "design": "Design:",
-      "includedAgain": "Same design (not charged again)",
       "free": "Included in the design",
       "pieces": {
         "mini_book": {
@@ -1925,14 +1924,12 @@
           "text": "WhatsApp invitation (image)"
         }
       },
-      "copies": "How many guests?",
-      "copiesNote": "It’s the number of copies the license allows. It doesn’t change the price.",
       "invitationTitle": "Invitation details",
       "time": "Time",
       "place": "Place",
       "invitationNote": "The date comes from the celebration details. The time and place go on the invitation, so they are required.",
       "invitationRequired": "Add the time and place to pay: they go on the invitation.",
-      "license": "The license allows {copies} copies of each piece for the celebration.",
+      "license": "Print as many copies as you need for the celebration, at home or at a print shop.",
       "printGuide": {
         "title": "How to print your kit",
         "tip1": "Paper: A4 or Letter, whichever you chose. For the invitation and the thank-you card, 200 to 250 gsm card stock works best.",
@@ -1941,7 +1938,6 @@
         "tip4": "The WhatsApp invitation is a PNG image: save it to your phone and send it as a photo."
       },
       "downloadAll": "Download everything (ZIP)",
-      "moreCopies": "Order more copies",
       "ready": "Your kit is ready!",
       "digitalOnly": "The kit is digital: you get print-ready PDFs to print at home or at the print shop you prefer. Printed cards are ordered afterwards, from the finished order.",
       "printCards": {

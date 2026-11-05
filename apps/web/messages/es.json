@@ -1893,7 +1893,6 @@
       "piecesTitle": "Piezas del kit",
       "piecesNote": "Todas con el mismo protagonista y el mismo diseño.",
       "design": "Diseño:",
-      "includedAgain": "Mismo diseño (no se cobra otra vez)",
       "free": "Incluida en el diseño",
       "pieces": {
         "mini_book": {
@@ -1925,14 +1924,12 @@
           "text": "Invitación para WhatsApp (imagen)"
         }
       },
-      "copies": "¿Cuántos invitados?",
-      "copiesNote": "Es la cantidad de copias que autoriza la licencia. No cambia el precio.",
       "invitationTitle": "Datos de la invitación",
       "time": "Hora",
       "place": "Lugar",
       "invitationNote": "La fecha sale de los datos de la celebración. La hora y el lugar van en la invitación, por eso son obligatorios.",
       "invitationRequired": "Completa la hora y el lugar para pagar: van en la invitación.",
-      "license": "La licencia autoriza {copies} copias de cada pieza para la celebración.",
+      "license": "Imprime las copias que necesites para la celebración, en casa o en una imprenta.",
       "printGuide": {
         "title": "Cómo imprimir tu kit",
         "tip1": "Papel: A4 o Carta, el que elegiste. Para la invitación y el agradecimiento, mejor cartulina de 200 a 250 g.",
@@ -1941,7 +1938,6 @@
         "tip4": "La imagen de la invitación para WhatsApp es un PNG: guárdala en el celular y envíala como foto."
       },
       "downloadAll": "Descargar todo (ZIP)",
-      "moreCopies": "Pedir más copias",
       "ready": "¡Tu kit está listo!",
       "digitalOnly": "El kit es digital: te llega en PDF listo para imprimir en casa o en la imprenta que prefieras. Las tarjetas impresas se piden después, desde el pedido terminado.",
       "printCards": {

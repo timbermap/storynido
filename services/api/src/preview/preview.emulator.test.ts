@@ -1628,13 +1628,13 @@ describe('checkout y pagos (fase 11)', () => {
     expect((order?.priceSnapshot as PriceSnapshot).totalMinor).toBe(30800);
   });
 
-  it('kit: "pedir más copias" cobra solo las licencias; los impresos se piden por cotización', async () => {
+  it('kit: no se vuelve a pedir (ya tiene sus archivos); los impresos se piden por cotización', async () => {
     await approvedBook();
     await db.doc('books/book-1').update({ channel: 'events' });
     const kit = {
       pieces: [
-        { piece: 'mini_book', copies: 20 },
-        { piece: 'invitation', copies: 20 },
+        { piece: 'mini_book', copies: 1 },
+        { piece: 'invitation', copies: 1 },
       ],
       invitation: null,
     };
@@ -1643,29 +1643,28 @@ describe('checkout y pagos (fase 11)', () => {
       status: 'ready',
       snapshot: { title: 'El cumple de Martina', hash: 'h' },
     });
-    const more = { ...kit, pieces: kit.pieces.map((item) => ({ ...item, copies: 40 })) };
     const quoted = await post('/v1/checkout/quote', {
       bookId: 'book-1',
       format: 'digital',
       country: 'MX',
-      kit: more,
+      kit,
       sourceOrderId: orderId,
     });
-    const snapshot = quoted.json<{ snapshot: PriceSnapshot }>().snapshot;
-    expect(snapshot.components.map((item) => item.code)).toEqual(['piece']);
-    expect(snapshot.totalMinor).toBe(6900);
+    expect(quoted.statusCode).toBe(409);
     const again = await post(`/v1/orders/${orderId}/reorder`, {
       format: 'digital',
       country: 'MX',
-      kit: more,
+      kit,
     });
-    expect(again.statusCode).toBe(200);
-    const copy = (await db.doc(`orders/${again.json<{ orderId: string }>().orderId}`).get()).data();
-    expect(copy?.sourceOrderId).toBe(orderId);
-    expect(copy?.items).toEqual([
-      { piece: 'mini_book', format: 'digital', quantity: 40 },
-      { piece: 'invitation', format: 'digital', quantity: 40 },
-    ]);
+    expect(again.statusCode).toBe(409);
+    // Tampoco como «otra copia impresa» del librito.
+    const printed = await post(`/v1/orders/${orderId}/reorder`, {
+      format: 'softcover',
+      country: 'MX',
+      kit: null,
+      shippingAddress: ADDRESS,
+    });
+    expect(printed.statusCode).toBe(409);
 
     const request = await post('/v1/events/print-quote', {
       bookId: 'book-1',
