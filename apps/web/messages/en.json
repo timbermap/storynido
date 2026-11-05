@@ -877,7 +877,7 @@
       "reuseNoLook": "Their details are filled in; you choose the look in the character step."
     },
     "photos": {
-      "reusedTitle": "{name}'s photos from the last story",
+      "reusedTitle": "Photos of {name} we already have",
       "reusedText": "We already have them: no need to upload them again.",
       "reusedKeep": "Use these photos",
       "reusedChange": "Choose others",
@@ -1083,7 +1083,7 @@
     "character": {
       "modeLegend": "How should we create the main character?",
       "photo": "With their photo",
-      "photoText": "Looks more like the child. The photo is private and only used to create their story.",
+      "photoText": "Looks more like the child. The photo is private and only used to create their character and stories.",
       "avatar": "Without a photo",
       "avatarText": "You choose their features: skin, hair, eyes and glasses.",
       "avatarTitle": "Choose how they look",
@@ -1392,7 +1392,17 @@
     "subStepCount": "({current} of {total})",
     "chosenTitle": "You're creating",
     "chosenChange": "Change",
-    "chosenLesson": "Lesson: {name}"
+    "chosenLesson": "Lesson: {name}",
+    "drawing": {
+      "title": "This is {name}",
+      "subtitle": "Their drawing is already approved: we'll use it in this story.",
+      "alt": "{name}'s drawing",
+      "using": "We're using {name}'s drawing",
+      "text": "You approved it on their profile. The story is illustrated with this drawing, without using another generation.",
+      "change": "Change",
+      "otherPhotos": "Use other photos",
+      "traits": "No photo, with their traits"
+    }
   },
   "Landing": {
     "events": {

@@ -591,6 +591,34 @@ describe('vista previa', () => {
     paint.mockRestore();
   });
 
+  it('«Usamos el dibujo de…»: la lámina del cuento es ese dibujo, sin generar otra imagen', async () => {
+    await seedBook(providers, 'book-1');
+    await app.inject({
+      method: 'POST',
+      url: '/v1/me/children/book-1-child/drawing',
+      headers: auth(TOKEN),
+      payload: {},
+    });
+    await app.inject({
+      method: 'POST',
+      url: '/v1/me/children/book-1-child/drawing/accept',
+      headers: auth(TOKEN),
+    });
+    await db.doc('books/book-1').update({ useDrawing: true });
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    const response = await generate('book-1');
+    expect(response.statusCode).toBe(200);
+    expect(paint).not.toHaveBeenCalled();
+    const preview = (await db.doc('books/book-1').get()).get('preview') as {
+      stage: string;
+      character: { imagePath: string };
+    };
+    // Copiada al libro: si después se actualiza el dibujo del perfil, el cuento no cambia.
+    expect(preview.character.imagePath).toMatch(/^previews\/.+\/book-1\/character-/);
+    expect(preview.stage).toBe('character');
+    paint.mockRestore();
+  });
+
   it('avisa cuántas muestras gratis le quedan hoy, antes de bloquear', async () => {
     await setAiConfig({ maxPreviewsPerUserPerDay: 2 });
     await seedBook(providers, 'book-1');

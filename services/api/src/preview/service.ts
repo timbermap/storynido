@@ -89,6 +89,8 @@ interface BookData {
   /** Los borradores anteriores al modo sin foto no tienen estos campos. */
   characterMode?: 'photo' | 'avatar';
   avatar?: Avatar | null;
+  /** Usar el dibujo aprobado del perfil como lámina (sin generar otra). */
+  useDrawing?: boolean;
   memories?: Memories | null;
   /** Eventos (fase 12b). */
   event?: BookEvent | null;
@@ -690,39 +692,48 @@ export class PreviewService {
     });
 
     // El dibujo que el adulto aprobó en el perfil del personaje es la referencia de sus cuentos.
-    const approvedDrawing = (child.drawing as StoredDrawing | undefined)?.imagePath;
-    const drawingReference: ImageData[] = approvedDrawing
-      ? [
-          {
-            bytes: await this.providers
-              .storage()
-              .download({ bucket: 'assets', path: approvedDrawing })
-              .catch(() => new Uint8Array()),
-            mimeType: 'image/webp',
-          },
-        ].filter((image) => image.bytes.length > 0)
-      : [];
+    const savedDrawing = child.drawing as StoredDrawing | undefined;
+    const approvedDrawing = savedDrawing?.imagePath;
+    const drawingBytes = approvedDrawing
+      ? await this.providers
+          .storage()
+          .download({ bucket: 'assets', path: approvedDrawing })
+          .catch(() => new Uint8Array())
+      : new Uint8Array();
+    const characterBase = `previews/${uid}/${bookId}/character-${Date.now().toString(36)}`;
 
-    // Etapa 1: solo la lámina del personaje (1 imagen). La portada y las páginas se ilustran
-    // cuando el adulto aprueba al personaje: si no se parece, no se gastan más imágenes.
-    const character = await this.illustration(ai, track, limits, {
-      prompt: buildIllustrationPrompt({
-        template: story.imagePromptTemplate,
-        scene: CHARACTER_REFERENCE_SCENE,
-        character: characterDescription,
-        style: style.promptModifier,
-        direction,
-      }),
-      stylePrompt: style.promptModifier,
-      character: { description: characterDescription, photo },
-      references: drawingReference,
-      aspectRatio: '3:4',
-      seed: 0,
-    });
-    const characterPaths = await this.store(
-      `previews/${uid}/${bookId}/character-${Date.now().toString(36)}`,
-      character.image,
-    );
+    let characterPaths: { clean: string; preview: string };
+    let sheetTraits = traits;
+    let sheetMustKeep = mustKeep;
+    if (book.useDrawing === true && drawingBytes.length > 0) {
+      // «Usamos el dibujo de…»: la lámina es ese dibujo (copiado al libro, por si después se
+      // actualiza en el perfil). No se genera otra imagen ni se gasta una generación.
+      characterPaths = await this.store(characterBase, {
+        bytes: drawingBytes,
+        mimeType: 'image/webp',
+      });
+      sheetTraits = savedDrawing?.traits ?? traits;
+      sheetMustKeep = savedDrawing?.mustKeep ?? mustKeep;
+    } else {
+      // Etapa 1: solo la lámina del personaje (1 imagen). La portada y las páginas se ilustran
+      // cuando el adulto aprueba al personaje: si no se parece, no se gastan más imágenes.
+      const character = await this.illustration(ai, track, limits, {
+        prompt: buildIllustrationPrompt({
+          template: story.imagePromptTemplate,
+          scene: CHARACTER_REFERENCE_SCENE,
+          character: characterDescription,
+          style: style.promptModifier,
+          direction,
+        }),
+        stylePrompt: style.promptModifier,
+        character: { description: characterDescription, photo },
+        references:
+          drawingBytes.length > 0 ? [{ bytes: drawingBytes, mimeType: 'image/webp' }] : [],
+        aspectRatio: '3:4',
+        seed: 0,
+      });
+      characterPaths = await this.store(characterBase, character.image);
+    }
 
     return {
       title: pages.title,
@@ -731,8 +742,8 @@ export class PreviewService {
       character: {
         imagePath: characterPaths.clean,
         previewImagePath: characterPaths.preview,
-        traits,
-        mustKeep,
+        traits: sheetTraits,
+        mustKeep: sheetMustKeep,
         approvedAt: null,
       },
       characterImagePath: characterPaths.clean,
@@ -1705,7 +1716,8 @@ function confirmedTraits(
 /** Con qué personaje se generó: la foto o los rasgos elegidos, más los rasgos confirmados. */
 function characterKey(book: BookData): string {
   const confirmed = confirmedTraits(book);
-  const base = characterBase(book);
+  // Con el dibujo del perfil la lámina es otra: cambiarlo deja la muestra desactualizada.
+  const base = `${book.useDrawing === true ? 'drawing:' : ''}${characterBase(book)}`;
   return confirmed ? `${base}#${traitsKey(confirmed.traits, confirmed.mustKeep)}` : base;
 }
 

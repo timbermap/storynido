@@ -2,6 +2,7 @@ import {
   COLLECTIONS,
   DEFAULT_EDITORIAL_CONFIG,
   EMPTY_BIRTHDAY,
+  type Avatar,
   type Book,
   type Channel,
   type Child,
@@ -41,6 +42,7 @@ export type BookEdits = Partial<
     | 'photoIds'
     | 'characterMode'
     | 'avatar'
+    | 'useDrawing'
     | 'memories'
     | 'event'
     | 'goal'
@@ -384,8 +386,20 @@ export async function saveChild(
 export interface SavedCharacter {
   id: string;
   fields: ChildFields;
-  /** Cómo se lo dibujó en su último libro: rasgos elegidos o sus fotos (si siguen vigentes). */
-  look: Pick<Book, 'characterMode' | 'avatar' | 'photoIds'> | null;
+  /**
+   * Cómo se lo dibuja: con su dibujo aprobado en el perfil (si tiene), sus fotos vigentes (del
+   * último cuento o subidas desde su perfil) o sus rasgos.
+   */
+  look: Pick<Book, 'characterMode' | 'avatar' | 'photoIds' | 'useDrawing'> | null;
+}
+
+/** Los rasgos del dibujo aprobado como rasgos del modo sin foto (si están todos). */
+function avatarFrom(traits: Partial<Avatar> | null | undefined): Avatar | null {
+  if (!traits) return null;
+  const { skinTone, hairColor, hairLength, hairType, eyeColor, glasses } = traits;
+  return skinTone && hairColor && hairLength && hairType && eyeColor
+    ? { skinTone, hairColor, hairLength, hairType, eyeColor, glasses: glasses ?? false }
+    : null;
 }
 
 /** Protagonistas del usuario con su aspecto más reciente. */
@@ -417,24 +431,51 @@ export async function listSavedCharacters(db: Firestore, uid: string): Promise<S
   return Promise.all(
     [...seen.values()].map(async (child) => {
       const book = latest.get(child.id);
-      // Las fotos se borran a los 30 días: solo se reutilizan las que siguen válidas.
-      const photoIds = book?.photoIds.length
-        ? (
-            await Promise.all(
-              book.photoIds.map(async (id) => {
-                const photo = await getDoc(doc(db, COLLECTIONS.photos, id)).catch(() => null);
-                return photo?.get('status') === 'valid' ? id : null;
-              }),
-            )
-          ).filter((id): id is string => id !== null)
-        : [];
-      const avatar = book?.avatar ?? null;
-      const look: SavedCharacter['look'] =
+      const stillValid = async (ids: string[]) =>
+        (
+          await Promise.all(
+            ids.map(async (id) => {
+              const photo = await getDoc(doc(db, COLLECTIONS.photos, id)).catch(() => null);
+              return photo?.get('status') === 'valid' ? id : null;
+            }),
+          )
+        ).filter((id): id is string => id !== null);
+      // Las fotos se borran a los 30 días: solo se reutilizan las que siguen válidas. Primero las
+      // de su último cuento; si no hay, las que se subieron desde su perfil (sin cuento).
+      let photoIds = book?.photoIds.length ? await stillValid(book.photoIds) : [];
+      if (photoIds.length === 0) {
+        const fromProfile = await getDocs(
+          query(
+            collection(db, COLLECTIONS.photos),
+            where('ownerUid', '==', uid),
+            where('childId', '==', child.id),
+          ),
+        ).catch(() => null);
+        photoIds = (fromProfile?.docs ?? [])
+          .filter((photo) => photo.get('status') === 'valid')
+          .map((photo) => photo.id)
+          .slice(0, 3);
+      }
+      const drawing = child.get('drawing') as
+        { imagePath?: string; traits?: Partial<Avatar> | null } | undefined;
+      const hasDrawing = typeof drawing?.imagePath === 'string';
+      const avatar =
+        (book?.characterMode === 'avatar' ? book.avatar : null) ??
+        (child.get('avatar') as Avatar | null | undefined) ??
+        null;
+      const base: SavedCharacter['look'] =
         book?.characterMode === 'avatar' && avatar
           ? { characterMode: 'avatar', avatar, photoIds: [] }
           : photoIds.length > 0
             ? { characterMode: 'photo', avatar: null, photoIds }
-            : null;
+            : avatar
+              ? { characterMode: 'avatar', avatar, photoIds: [] }
+              : hasDrawing && avatarFrom(drawing.traits)
+                ? { characterMode: 'avatar', avatar: avatarFrom(drawing.traits), photoIds: [] }
+                : null;
+      // Con dibujo aprobado, el cuento usa ese dibujo como lámina (sin generar otra).
+      const look: SavedCharacter['look'] =
+        base && hasDrawing ? { ...base, useDrawing: true } : base;
       return {
         id: child.id,
         fields: {

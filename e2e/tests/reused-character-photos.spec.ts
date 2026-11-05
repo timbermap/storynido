@@ -8,7 +8,7 @@ const heading = (page: Page, text: string) =>
   expect(page.locator('h1').first()).toContainText(text, { timeout: 30_000 });
 const next = (page: Page) => page.getByRole('button', { name: 'Siguiente' }).click();
 const reusedBlock = (page: Page) =>
-  page.locator('fieldset', { hasText: 'Fotos de Martina de su último cuento' });
+  page.locator('fieldset', { hasText: 'Fotos de Martina que ya tenemos' });
 
 /** Un cuento nuevo con el personaje guardado «Martina» hasta el paso de fotos. */
 async function newStoryWithMartina(page: Page) {

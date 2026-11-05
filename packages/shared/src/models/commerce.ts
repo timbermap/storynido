@@ -247,6 +247,11 @@ export const bookSchema = timestampsSchema
     characterMode: characterModeSchema.default('photo'),
     /** Rasgos del modo sin foto. */
     avatar: avatarSchema.nullable().default(null),
+    /**
+     * Personaje con dibujo aprobado en su perfil: la lámina del cuento es ese dibujo (no se
+     * genera otra). Sus fotos o rasgos siguen describiéndolo para las ilustraciones.
+     */
+    useDrawing: z.boolean().optional(),
     /** Recuerdos guiados (opcionales), moderados antes de usarse. */
     memories: memoriesSchema.nullable().default(null),
     /**

@@ -877,7 +877,7 @@
       "reuseNoLook": "Sus datos ya están; el aspecto lo eliges en el paso del personaje."
     },
     "photos": {
-      "reusedTitle": "Fotos de {name} de su último cuento",
+      "reusedTitle": "Fotos de {name} que ya tenemos",
       "reusedText": "Ya las tenemos: no hace falta subirlas de nuevo.",
       "reusedKeep": "Usar estas fotos",
       "reusedChange": "Elegir otras",
@@ -1083,7 +1083,7 @@
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
       "photo": "Con su foto",
-      "photoText": "Se parece más al niño. La foto es privada y solo se usa para crear su cuento.",
+      "photoText": "Se parece más al niño. La foto es privada y solo se usa para crear su personaje y sus cuentos.",
       "avatar": "Sin foto",
       "avatarText": "Eliges sus rasgos: piel, pelo, ojos y anteojos.",
       "avatarTitle": "Elige cómo se ve",
@@ -1392,7 +1392,17 @@
     "subStepCount": "({current} de {total})",
     "chosenTitle": "Vas a crear",
     "chosenChange": "Cambiar",
-    "chosenLesson": "Enseñanza: {name}"
+    "chosenLesson": "Enseñanza: {name}",
+    "drawing": {
+      "title": "Así se ve {name}",
+      "subtitle": "Su dibujo ya está aprobado: lo usamos en este cuento.",
+      "alt": "El dibujo de {name}",
+      "using": "Usamos el dibujo de {name}",
+      "text": "Lo aprobaste en su perfil. El cuento se ilustra con este dibujo, sin usar otra generación.",
+      "change": "Cambiar",
+      "otherPhotos": "Usar otras fotos",
+      "traits": "Sin foto, con sus rasgos"
+    }
   },
   "Landing": {
     "events": {
