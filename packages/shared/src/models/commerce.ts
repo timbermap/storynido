@@ -203,6 +203,11 @@ export const bookPreviewSchema = z.object({
   /** Páginas de actividades y rango de palabras con que se escribió (los usa el pipeline). */
   activityPages: z.number().int().nonnegative().optional(),
   words: z.object({ min: z.number().int(), max: z.number().int() }).optional(),
+  /**
+   * Armado por edad (page-layout.ts): con `facing`, cada escena es página de texto + ilustración.
+   * Ausente en las muestras anteriores (siguen con el panel sobre la ilustración).
+   */
+  pageLayout: z.object({ facing: z.boolean(), age: z.number() }).nullable().optional(),
   /** Plan del planificador editorial: qué se ve y qué no en cada página (fase 09). */
   plan: z
     .object({

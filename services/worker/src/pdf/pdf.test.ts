@@ -11,6 +11,7 @@ import { INVITATION_IMAGE_SIZE, invitationImageHtml } from './kit';
 import { FORMAT_SPECS, pageSizeMm, printablePages } from './spec';
 import {
   DENSITY_LAYOUT,
+  CALM_ALPHA,
   INK,
   MINI_PANEL_ALPHA,
   PANEL_ALPHA,
@@ -27,6 +28,7 @@ describe('reglas de maquetación', () => {
     expect(contrastRatio(INK, PAPER)).toBeGreaterThan(12);
     expect(contrastRatio(INK, blend(PAPER, PANEL_ALPHA))).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(INK, blend(PAPER, MINI_PANEL_ALPHA))).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(INK, blend(PAPER, CALM_ALPHA))).toBeGreaterThanOrEqual(4.5);
   });
 
   it('el panel de texto nunca tapa más de la mitad de la ilustración', () => {
@@ -200,6 +202,62 @@ describe.skipIf(!chromePath())('PDF', () => {
     expect(fontPt(mini)).toBeGreaterThan(fontPt(regular));
     expect(regular).not.toContain('title brand');
   });
+
+  it('armado por edad: enfrentadas (texto + ilustración), papel fundido y zona calma', () => {
+    const spec = FORMAT_SPECS.softcover;
+    const words = (count: number) => Array.from({ length: count }, () => 'palabra').join(' ');
+    const facing = interiorPages(
+      book({
+        pages: [0, 1].map(() => ({
+          text: words(110),
+          image,
+          layout: { kind: 'facing', side: 'top' } as const,
+        })),
+      }),
+      spec,
+    );
+    // Dedicatoria + 2 escenas × 2 páginas + 2 actividades + fin: cada escena ocupa dos páginas.
+    expect(facing).toHaveLength(8);
+    expect(facing[1]).toContain('data-label="página 1 (texto)"');
+    expect(facing[1]).toContain('class="detail"');
+    expect(facing[2]).toContain('data-label="página 1 (ilustración)"');
+    expect(facing[2]).not.toContain('class="panel');
+    const vignette = interiorPages(
+      book({ pages: [{ text: words(60), image, layout: { kind: 'vignette', side: 'bottom' } }] }),
+      spec,
+    ).join('');
+    expect(vignette).toContain('class="art vignette bottom"');
+    expect(vignette).toContain('class="panel vignette bottom"');
+    const calm = interiorPages(
+      book({ pages: [{ text: words(20), image, layout: { kind: 'calm', side: 'top' } }] }),
+      spec,
+    ).join('');
+    expect(calm).toContain('class="panel calm top"');
+    // Sin armado (pedidos anteriores): el panel de siempre.
+    expect(interiorPages(book(), spec).join('')).toContain('class="panel bottom"');
+  });
+
+  it('armado por edad: 120 palabras enfrentadas y 60 sobre el papel fundido entran sin desbordar', async () => {
+    const spec = FORMAT_SPECS.digital;
+    const words = (count: number) =>
+      Array.from({ length: count }, (_, index) =>
+        index % 9 === 8 ? 'aventura.' : 'aventura',
+      ).join(' ');
+    const layout = book({
+      density: 'rich',
+      readingLevel: 'advanced',
+      pages: [
+        { text: words(120), image, layout: { kind: 'facing', side: 'top' } },
+        { text: words(60), image, layout: { kind: 'vignette', side: 'bottom' } },
+        { text: words(30), image, layout: { kind: 'calm', side: 'top' } },
+      ],
+    });
+    const result = await renderPdf(browser, digitalHtml(layout, spec), pageSizeMm(spec), {
+      bleedMm: 0,
+      title: layout.title,
+    });
+    expect(result.overflow).toEqual([]);
+  }, 30_000);
 
   it('mínimo de la imprenta: páginas para dibujar antes del cierre', () => {
     const spec = FORMAT_SPECS.softcover;

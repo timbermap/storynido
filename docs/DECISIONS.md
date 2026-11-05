@@ -2481,3 +2481,14 @@ Un libro creado en digital tiene ilustraciones de pantalla y no se imprime (DECI
 - **Pedido del kit:** sin «Pedir más copias» (cobraba el kit otra vez y la cantidad de copias no cambia el precio). «Imprimir tarjetas» queda detrás de `NEXT_PUBLIC_KIT_PRINT_CARDS` (apagado) hasta tener la muestra física. El pie de cada hoja dice para qué fiesta es («Para el cumple de Sofi · storynido.com»), sin cantidad de copias.
 - **Actividades:** la sopa de letras usa sustantivos del cuento (lo que sigue a un artículo y los nombres propios), conserva la Ñ y la Ç y no elige adverbios ni verbos largos. Desde 9 años, en lugar de «llegar a la torta» y «dibuja tu torta»: un laberinto más grande con el nombre del cuento y «palabras revueltas».
 - **QR:** el de la contratapa apunta siempre a storynido.com, también en staging.
+
+## 232 — Armado de página por edad
+
+Lo que se ve en la muestra es lo que se imprime. Una sola regla (`pageLayout`, en `packages/shared/src/models/page-layout.ts`) decide el armado de cada página para el PDF, el visor de la muestra y el prompt de la ilustración:
+
+- **Hasta 6 años:** el texto va directo en la zona calma de la ilustración, con un halo de papel (sin caja).
+- **7 y 8 años, y cualquier página de más de 45 palabras hasta 8 años:** la ilustración ocupa el 70 % de arriba (o de abajo) y se funde suavemente en el papel crema, y el texto va centrado en ese tercio, sin taparla. El prompt pide ese tercio como papel crema, con bordes suaves y nada importante ahí.
+- **Desde 9 años (y adultos):** página de texto con un detalle circular de la ilustración y, enfrente, la ilustración entera. Cada escena ocupa dos páginas, así que con las mismas páginas el libro tiene la mitad de escenas e ilustraciones: la imprenta y el precio no cambian, y el costo de IA baja.
+- **Colorear** y los pedidos congelados antes de esto conservan el panel sobre la ilustración (la muestra guarda `pageLayout`; sin él, el armado de siempre).
+
+Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configuración, no números sueltos en el código. La cantidad de palabras por edad la define otra decisión (texto por edad); este armado no la cambia.

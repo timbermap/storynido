@@ -2,6 +2,7 @@ import {
   letterJitter,
   splitCoverTitle,
   type ActivitySpec,
+  type PageLayout,
   type PrintFileSpec,
 } from '@storynido/shared';
 
@@ -24,8 +25,16 @@ export interface LayoutBook {
   readingLevel: 'beginner' | 'developing' | 'advanced';
   /** Portada: data URI de la ilustración. */
   cover: string;
-  /** `placement`: dónde va el texto (la región más calma de la ilustración). */
-  pages: { text: string; image: string; placement?: TextPlacement }[];
+  /**
+   * `placement`: dónde va el panel (la región más calma de la ilustración). `layout`: el armado por
+   * edad (page-layout.ts); sin él, el panel sobre la ilustración de siempre.
+   */
+  pages: {
+    text: string;
+    image: string;
+    placement?: TextPlacement;
+    layout?: PageLayout | null;
+  }[];
   activities: ActivitySpec[];
   /** Contratapa: sinopsis breve y un QR (SVG) a StoryNido. */
   synopsis?: string | null;
@@ -45,6 +54,10 @@ export interface LayoutBook {
 export const INK = '#342a40';
 export const PAPER = '#fffaf3';
 export const PANEL_ALPHA = 0.94;
+/** Texto en la zona calma (hasta 6 años): un halo de papel, sin caja; AA sobre negro (tests). */
+export const CALM_ALPHA = 0.82;
+/** Alto de la ilustración en las páginas que se funden en el papel (el resto es para el texto). */
+export const VIGNETTE_ART_PCT = 70;
 /** Panel del mini cuento: más liviano, sigue con contraste AA sobre negro (tests). */
 export const MINI_PANEL_ALPHA = 0.86;
 /** El mini cuento tiene poco texto por página (≤ 60 palabras): la letra va más grande. */
@@ -174,7 +187,20 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .match span.right::after { display: none; }
 .lines { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
 .lines div { border-bottom: 0.4mm solid #b9a7c4; height: 14mm; }
-.bank { font-size: 13pt; color: #69616c; }`;
+.bank { font-size: 13pt; color: #69616c; }
+.panel.calm { background: rgba(255,250,243,${String(CALM_ALPHA)}); box-shadow: 0 0 9mm 7mm rgba(255,250,243,${String(CALM_ALPHA)}); border-radius: 14mm; }
+.panel.calm.top { left: ${String(inset + 4)}mm; right: ${String(inset + 4)}mm; top: ${String(inset + 4)}mm; }
+.panel.calm.bottom { left: ${String(inset + 4)}mm; right: ${String(inset + 4)}mm; bottom: ${String(inset + 4)}mm; }
+.art.vignette { height: ${String(VIGNETTE_ART_PCT)}%; }
+.art.vignette.bottom { top: 0; bottom: auto; object-position: 50% 0%; -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%); mask-image: linear-gradient(to bottom, #000 70%, transparent 100%); }
+.art.vignette.top { top: auto; bottom: 0; object-position: 50% 100%; -webkit-mask-image: linear-gradient(to top, #000 70%, transparent 100%); mask-image: linear-gradient(to top, #000 70%, transparent 100%); }
+.band { position: absolute; left: ${String(inset)}mm; right: ${String(inset)}mm; height: ${String(100 - VIGNETTE_ART_PCT + 2)}%; display: flex; flex-direction: column; justify-content: center; }
+.band.top { top: 0; padding-top: ${String(inset)}mm; }
+.band.bottom { bottom: 0; padding-bottom: ${String(inset)}mm; }
+.panel.vignette, .panel.facing { position: static; background: none; border-radius: 0; padding: 0 4mm; }
+.facing-wrap { position: absolute; inset: ${String(inset + 6)}mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9mm; }
+.facing-wrap .panel { width: 100%; }
+.detail { width: 34mm; height: 34mm; flex: none; border-radius: 50%; object-fit: cover; object-position: 50% 35%; box-shadow: 0 0 0 1.2mm ${PAPER}, 0 0 0 1.6mm #d8c9b8; }`;
 }
 
 /**
@@ -201,26 +227,75 @@ document.fonts.ready.then(() => {
 });
 </script>`;
 
+/** Alto de la página de texto enfrentada que no es para el texto: el detalle y el espacio. */
+const FACING_RESERVED_MM = 34 + 9;
+
 function storyPage(
   book: LayoutBook,
   spec: FormatSpec,
   page: LayoutBook['pages'][number],
   number: number,
-) {
+): string[] {
   const coloring = book.contentType === 'coloring';
   const layout = DENSITY_LAYOUT[coloring ? 'visual' : book.density];
   const scale = LEVEL_SCALE[book.readingLevel] * (book.mini ? MINI_TEXT_SCALE : 1);
   const height = pageSizeMm(spec).height;
+  const trimHeight = trimOf(spec).height;
+  const fit = (maxMm: number, fontPt: number, minPt: number) =>
+    `data-max-mm="${maxMm.toFixed(1)}" data-font-pt="${(fontPt * scale).toFixed(2)}" data-min-pt="${(minPt * scale).toFixed(2)}"`;
+  const story = `<div class="story">${paragraphs(page.text)}</div>`;
+  const kind = coloring ? 'overlay' : (page.layout?.kind ?? 'overlay');
+  const side = page.layout?.side ?? 'bottom';
+
+  if (kind === 'facing') {
+    // Página de texto (izquierda) con un detalle de la ilustración, y la ilustración entera enfrente.
+    const inset = spec.bleedMm + spec.safeMm;
+    const maxMm = trimHeight - 2 * (inset + 6) - FACING_RESERVED_MM;
+    return [
+      `<section class="page" data-label="página ${String(number)} (texto)" style="height:${String(height)}mm">
+  <div class="facing-wrap"><img class="detail" src="${page.image}" alt="">
+  <div class="panel facing" ${fit(maxMm, Math.max(layout.fontPt, 15), layout.minPt)}>${story}</div></div>
+</section>`,
+      `<section class="page" data-label="página ${String(number)} (ilustración)" style="height:${String(height)}mm">
+  <img class="art" src="${page.image}" alt="">
+</section>`,
+    ];
+  }
+
+  if (kind === 'vignette' || kind === 'calm') {
+    // Hasta 6 años: el texto en la zona calma. Si no, la ilustración se funde en el papel y el texto
+    // va en ese tercio, sin taparla.
+    const inset = spec.bleedMm + spec.safeMm;
+    if (kind === 'vignette') {
+      // El texto, centrado en el tercio de papel donde se funde la ilustración.
+      const maxMm = (trimHeight * (100 - VIGNETTE_ART_PCT + 2)) / 100 - inset - 2;
+      return [
+        `<section class="page" data-label="página ${String(number)}" style="height:${String(height)}mm">
+  <img class="art vignette ${side}" src="${page.image}" alt="">
+  <div class="band ${side}"><div class="panel vignette ${side}" ${fit(maxMm, layout.fontPt, layout.minPt)}>${story}</div></div>
+</section>`,
+      ];
+    }
+    return [
+      `<section class="page" data-label="página ${String(number)}" style="height:${String(height)}mm">
+  <img class="art" src="${page.image}" alt="">
+  <div class="panel calm ${side}" ${fit((trimHeight * 30) / 100, layout.fontPt, layout.minPt)}>${story}</div>
+</section>`,
+    ];
+  }
+
   const placement = coloring ? 'top' : (page.placement ?? 'bottom');
   // En una esquina el panel es más angosto: puede crecer más en alto.
   const pct = placement.includes('-') ? Math.min(layout.panelPct * 1.6, 55) : layout.panelPct;
-  const maxMm = ((trimOf(spec).height * pct) / 100).toFixed(1);
-  return `<section class="page${coloring ? ' coloring' : ''}" data-label="página ${String(number)}" style="height:${String(height)}mm">
+  const maxMm = (trimHeight * pct) / 100;
+  return [
+    `<section class="page${coloring ? ' coloring' : ''}" data-label="página ${String(number)}" style="height:${String(height)}mm">
   <img class="art" src="${page.image}" alt="">
-  <div class="panel ${placement}${book.mini ? ' mini' : ''}" data-max-mm="${maxMm}" data-font-pt="${(layout.fontPt * scale).toFixed(2)}" data-min-pt="${(layout.minPt * scale).toFixed(2)}">
-    <div class="story">${paragraphs(page.text)}</div>
+  <div class="panel ${placement}${book.mini ? ' mini' : ''}" ${fit(maxMm, layout.fontPt, layout.minPt)}>
+    ${story}
   </div>
-</section>`;
+</section>`,
+  ];
 }
 
 function activityPage(book: LayoutBook, activity: ActivitySpec, index: number): string {
@@ -320,7 +395,7 @@ export function interiorPages(book: LayoutBook, spec: FormatSpec): string[] {
   const dedication = book.dedication ?? text(book, 'dedicationFor');
   return [
     `<section class="page" data-label="dedicatoria"><div class="center"><p style="font-family:'Fraunces',serif;font-style:italic;font-size:20pt;line-height:1.5;max-width:130mm">${escapeHtml(dedication)}</p></div></section>`,
-    ...book.pages.map((page, index) => storyPage(book, spec, page, index + 1)),
+    ...book.pages.flatMap((page, index) => storyPage(book, spec, page, index + 1)),
     ...book.activities.map((activity, index) => activityPage(book, activity, index)),
     ...Array.from({ length: book.fillerPages ?? 0 }, () => drawingPage(book)),
     `<section class="page" data-label="fin"><div class="center" style="gap:6mm"><p style="font-family:'Fraunces',serif;font-weight:600;font-size:40pt">${escapeHtml(text(book, 'end'))}</p><p style="font-size:11pt;color:#69616c">${escapeHtml(text(book, 'madeFor'))}</p>${book.educationalNotice ? `<p class="notice" style="margin-top:10mm;max-width:130mm;font-size:9pt;line-height:1.4;color:#69616c">${escapeHtml(text(book, 'notice'))}</p>` : ''}<p class="credits" style="margin-top:${book.educationalNotice ? '4mm' : '10mm'};max-width:130mm;font-size:8pt;line-height:1.4;color:#69616c">${escapeHtml(text(book, 'credits', { year: new Date().getFullYear() }))}</p></div></section>`,
