@@ -72,7 +72,7 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
   await page.goto('/es/ingresar');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   const email = uniqueEmail('tema');
-  await page.locator('#email').fill(email);
+  await page.locator('#email:visible').fill(email);
   await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
   await expect(page.locator('body')).toContainText('Revisa tu correo');
   await page.goto(await magicLink(email));
@@ -122,7 +122,7 @@ test('con sesión, el navbar es el de la app: sin las páginas que venden y con 
     page.locator('header').getByRole('link', { name: 'Celebraciones', exact: true }),
   ).toBeVisible();
   const email = uniqueEmail('navbar');
-  await page.locator('#email').fill(email);
+  await page.locator('#email:visible').fill(email);
   await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
   await expect(page.locator('body')).toContainText('Revisa tu correo');
   await page.goto(await magicLink(email));

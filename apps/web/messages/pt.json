@@ -869,7 +869,7 @@
       "reuseNoLook": "Os dados já estão; a aparência você escolhe na etapa do personagem."
     },
     "photos": {
-      "reusedTitle": "Fotos de {name} da última história",
+      "reusedTitle": "Fotos de {name} que já temos",
       "reusedText": "Já temos essas fotos: não precisa enviá-las de novo.",
       "reusedKeep": "Usar estas fotos",
       "reusedChange": "Escolher outras",
@@ -1075,7 +1075,7 @@
     "character": {
       "modeLegend": "Como criamos o protagonista?",
       "photo": "Com a foto",
-      "photoText": "Fica mais parecido com a criança. A foto é privada e só é usada para criar a história.",
+      "photoText": "Fica mais parecido com a criança. A foto é privada e só é usada para criar o personagem e as histórias.",
       "avatar": "Sem foto",
       "avatarText": "Você escolhe as características: pele, cabelo, olhos e óculos.",
       "avatarTitle": "Escolha como ele é",
@@ -1384,7 +1384,17 @@
     "subStepCount": "({current} de {total})",
     "chosenTitle": "Você vai criar",
     "chosenChange": "Trocar",
-    "chosenLesson": "Ensinamento: {name}"
+    "chosenLesson": "Ensinamento: {name}",
+    "drawing": {
+      "title": "Assim é {name}",
+      "subtitle": "O desenho já está aprovado: usamos neste livro.",
+      "alt": "O desenho de {name}",
+      "using": "Usamos o desenho de {name}",
+      "text": "Você aprovou no perfil. O livro é ilustrado com este desenho, sem usar outra geração.",
+      "change": "Mudar",
+      "otherPhotos": "Usar outras fotos",
+      "traits": "Sem foto, com as características"
+    }
   },
   "Landing": {
     "events": {

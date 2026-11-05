@@ -312,6 +312,9 @@ describe('books', () => {
       updateDoc(ref, { characterMode: 'avatar', avatar, updatedAt: serverTimestamp() }),
     );
     await assertFails(updateDoc(ref, { characterMode: 'robot', updatedAt: serverTimestamp() }));
+    // «Usamos el dibujo de…»: solo un sí o un no.
+    await assertSucceeds(updateDoc(ref, { useDrawing: true, updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { useDrawing: 'sí', updatedAt: serverTimestamp() }));
     await assertFails(
       updateDoc(ref, { avatar: { ...avatar, skinTone: 'verde' }, updatedAt: serverTimestamp() }),
     );

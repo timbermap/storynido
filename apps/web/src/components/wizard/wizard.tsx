@@ -32,6 +32,7 @@ import { StepParty } from './step-party';
 import { StepAvatar } from './step-avatar';
 import { StepLesson } from './step-lesson';
 import { StepMemories } from './step-memories';
+import { StepDrawing } from './step-drawing';
 import { StepPhotos } from './step-photos';
 import { StepReview } from './step-review';
 import { StepStory } from './step-story';
@@ -254,7 +255,10 @@ export function Wizard({
     case 'child':
       return <StepChild key="child" nav={nav} data={data} />;
     case 'photos':
-      return book.characterMode === 'avatar' ? (
+      // Con su dibujo aprobado en el perfil: se usa ese (sin fotos ni rasgos que elegir).
+      return book.useDrawing === true && book.childId ? (
+        <StepDrawing key="drawing" nav={nav} data={data} />
+      ) : book.characterMode === 'avatar' ? (
         <StepAvatar key="avatar" nav={nav} data={data} />
       ) : (
         <StepPhotos key="photos" nav={nav} data={data} />
