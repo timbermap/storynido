@@ -1107,7 +1107,24 @@
       "waitEstimate": "{minutes, plural, one {It’s usually ready in about a minute.} other {It’s usually ready in about # minutes.}}",
       "waitLate": "It’s taking a little longer than usual. We’re still on it and will email you when it’s ready.",
       "readyTab": "{name}’s sample is ready!",
-      "drawingStatus": "We used {name}'s drawing · Doesn't look right? <link>Adjust the likeness</link>"
+      "drawingStatus": "We used {name}'s drawing · Doesn't look right? <link>Adjust the likeness</link>",
+      "eventWait": {
+        "titleKit": "Designing {name}'s kit…",
+        "titleInvitation": "Designing {name}'s invitation…",
+        "textDrawing": "We use their usual drawing. We put together the invitation and the keepsake story with the {theme} theme.",
+        "steps": {
+          "write": "We write the keepsake story",
+          "illustrate": "We illustrate the cover (it goes on the invitation) and 2 pages",
+          "order": "If you like it, you order it and we prepare the whole kit"
+        },
+        "steps4": {
+          "character": "We draw {name} (a few minutes)",
+          "review": "You check the likeness and confirm",
+          "illustrate": "We illustrate the cover (it goes on the invitation) and 2 pages",
+          "order": "If you like it, you order it and we prepare the whole kit"
+        }
+      },
+      "eventDifferencesPages": "The keepsake story has {total} pages; here you see the cover and the first {shown}."
     },
     "character": {
       "modeLegend": "How should we create the main character?",
@@ -1337,7 +1354,10 @@
       "date": "Date",
       "dateHint": "It goes on the invitation and helps us tell you the printing deadlines.",
       "place": "Place",
-      "placePlaceholder": "E.g.: Rainbow Hall or At home"
+      "placePlaceholder": "E.g.: Rainbow Hall or At home",
+      "startTime": "Time (optional)",
+      "endTime": "Until (optional)",
+      "timeHint": "It goes on the invitation."
     },
     "kit": {
       "title": "What would you like?",

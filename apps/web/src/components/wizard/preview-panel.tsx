@@ -194,10 +194,16 @@ export function PreviewPanel({
           tabIndex={-1}
           className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-medium outline-none"
         >
-          {t('drawingWait.title', { name: childName })}
+          {isEvent
+            ? book.event?.offer === 'invitation'
+              ? t('eventWait.titleInvitation', { name: childName })
+              : t('eventWait.titleKit', { name: childName })
+            : t('drawingWait.title', { name: childName })}
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-          {t('drawingWait.text')}
+          {isEvent
+            ? t('eventWait.textDrawing', { theme: book.event?.theme ?? '' })
+            : t('drawingWait.text')}
         </p>
         <WaitEstimate kind="withDrawing" startedAt={book.previewStartedAt} />
         <ol className="mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm sm:grid-cols-3">
@@ -212,7 +218,7 @@ export function PreviewPanel({
               }
             >
               <span className="block text-xs font-bold tracking-wide uppercase">{index + 1}</span>
-              {t(`drawingWait.steps.${step}`)}
+              {isEvent ? t(`eventWait.steps.${step}`) : t(`drawingWait.steps.${step}`)}
             </li>
           ))}
         </ol>
@@ -264,7 +270,9 @@ export function PreviewPanel({
               }
             >
               <span className="block text-xs font-bold tracking-wide uppercase">{index + 1}</span>
-              {t(`waitSteps.${step}`, { name: childName })}
+              {isEvent
+                ? t(`eventWait.steps4.${step}`, { name: childName })
+                : t(`waitSteps.${step}`, { name: childName })}
             </li>
           ))}
         </ol>
@@ -543,7 +551,7 @@ export function PreviewPanel({
               {[
                 {
                   icon: BookOpen,
-                  text: t('differencesPages', {
+                  text: t(isEvent ? 'eventDifferencesPages' : 'differencesPages', {
                     total: data.totalPages,
                     shown: data.pages.filter((page) => page.imageUrl).length,
                   }),

@@ -54,6 +54,10 @@ test('Celebraciones: de la temática de la landing a la muestra y el pago del ki
   await expect(page.locator('label', { hasText: 'Campeones' }).locator('input')).toBeChecked();
   await page.locator('#event-date').fill('2026-12-12');
   await page.locator('#event-place').fill('Parque Lezama');
+  // La hora va en la invitación (opcional), con la de fin.
+  await expect(page.getByText('Va en la invitación.')).toBeVisible();
+  await page.locator('#event-start').fill('16:30');
+  await page.locator('#event-end').fill('19:30');
   await expectAccessible(page);
   await expectNoHorizontalScroll(page);
   await shot(page, '2-aventura', isMobile);
@@ -85,6 +89,9 @@ test('Celebraciones: de la temática de la landing a la muestra y el pago del ki
   await expect(page.locator('body')).toContainText('¡Tomi cumple 7!');
   await expect(page.locator('body')).toContainText('Me encantaría que vengas a mi cumple');
   await expect(page.locator('body')).toContainText('El cuento de recuerdo');
+  await expect(page.locator('body')).toContainText('de 16:30 a 19:30 h');
+  // En un kit no se habla de «el libro completo», sino del cuento de recuerdo.
+  await expect(page.locator('body')).not.toContainText('El libro completo tiene');
 
   // El libro del cumpleañero se ofrece acá y se paga aparte: «Ahora no» viene marcado.
   await expect(page.locator('label', { hasText: 'Ahora no' }).locator('input')).toBeChecked();
@@ -98,6 +105,7 @@ test('Celebraciones: de la temática de la landing a la muestra y el pago del ki
   // Al pago llega todo lo elegido; el lugar ya está cargado y el kit, marcado.
   await page.getByRole('link', { name: 'Aprobar y pagar' }).click();
   await expect(page.locator('#kit-place')).toHaveValue('Parque Lezama', { timeout: 30_000 });
+  await expect(page.locator('#kit-time')).toHaveValue('de 16:30 a 19:30 h');
   await expect(page.locator('label', { hasText: 'Stickers' }).locator('input')).toBeChecked();
 });
 

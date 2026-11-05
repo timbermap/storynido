@@ -6,6 +6,7 @@ import { encodeIllustration, type ProviderRegistry } from '@storynido/providers'
 import QRCode from 'qrcode';
 import sharp from 'sharp';
 import {
+  formatEventTime,
   ANY_COUNTRY,
   COLLECTIONS,
   GLOBAL_DOC_ID,
@@ -1235,7 +1236,13 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           tone: kit.event?.tone,
           turningAge: kit.event?.type === 'birthday' ? (kit.event.turningAge ?? null) : null,
           eventDate: kit.event?.date ?? null,
-          invitation: kit.invitation,
+          // La hora de «La fiesta» si en el pago no se escribió otra (sin hora, no hay rótulo vacío).
+          invitation: {
+            time:
+              kit.invitation?.time ??
+              formatEventTime(snapshot.language as Lang, kit.event?.startTime, kit.event?.endTime),
+            place: kit.invitation?.place ?? kit.event?.place ?? null,
+          },
           cover: kitCover,
           paper: kit.paper,
           guests: kit.guests,

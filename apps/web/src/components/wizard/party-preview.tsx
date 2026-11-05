@@ -7,6 +7,7 @@ import { useState } from 'react';
 import {
   BIRTHDAY_BOOK_CHOICES,
   EMPTY_BIRTHDAY,
+  formatEventTime,
   invitationCopy,
   type BirthdayBookChoice,
   type Locale,
@@ -61,6 +62,11 @@ export function InvitationPreview({
         </p>
         <p className="font-semibold">{copy.invite}</p>
         {date && <p className="text-sm">{date}</p>}
+        {formatEventTime(book.language, event?.startTime, event?.endTime) && (
+          <p className="text-sm">
+            {formatEventTime(book.language, event?.startTime, event?.endTime)}
+          </p>
+        )}
         {event?.place && <p className="text-sm">{event.place}</p>}
         <p className="mt-1 text-sm font-semibold">{copy.waiting}</p>
       </figcaption>

@@ -3,7 +3,13 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { EVENT_LIMITS, EVENT_TYPES, turningAgeFor, type EventType } from '@storynido/shared';
+import {
+  EVENT_LIMITS,
+  EVENT_TIME,
+  EVENT_TYPES,
+  turningAgeFor,
+  type EventType,
+} from '@storynido/shared';
 
 import { StoryCover } from '@/components/stories/story-cover';
 import { getFirebaseDb } from '@/lib/firebase/client';
@@ -31,16 +37,20 @@ export function StepParty({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [occasion, setOccasion] = useState<EventType>(book.event?.type ?? 'birthday');
   const [date, setDate] = useState(book.event?.date ?? '');
   const [place, setPlace] = useState(book.event?.place ?? '');
+  const [startTime, setStartTime] = useState(book.event?.startTime ?? '');
+  const [endTime, setEndTime] = useState(book.event?.endTime ?? '');
   const [error, setError] = useState<string | null>(null);
   const clearDraft = useStepDraft(
     book.id,
     'party',
-    { themeSlug, occasion, date, place },
+    { themeSlug, occasion, date, place, startTime, endTime },
     (saved) => {
       setThemeSlug(saved.themeSlug);
       setOccasion(saved.occasion);
       setDate(saved.date);
       setPlace(saved.place);
+      setStartTime(saved.startTime);
+      setEndTime(saved.endTime);
     },
   );
 
@@ -72,6 +82,9 @@ export function StepParty({ nav, data }: { nav: StepNav; data: WizardData }) {
           turningAge: age === undefined ? null : turningAgeFor(occasion, age),
           theme: theme.name.slice(0, EVENT_LIMITS.themeMaxLength),
           place: place.trim() ? place.trim().slice(0, EVENT_LIMITS.placeMaxLength) : null,
+          startTime: EVENT_TIME.test(startTime) ? startTime : null,
+          // Sin hora de inicio, la de fin no tiene sentido sola.
+          endTime: EVENT_TIME.test(startTime) && EVENT_TIME.test(endTime) ? endTime : null,
           tone: book.event?.tone ?? 'fun',
           offer: book.event?.offer ?? 'full_kit',
           bookChoice: book.event?.bookChoice ?? 'none',
@@ -167,6 +180,41 @@ export function StepParty({ nav, data }: { nav: StepNav; data: WizardData }) {
           <p id="event-date-hint" className="text-sm text-muted-foreground">
             {t('dateHint')}
           </p>
+        </div>
+        <div className="grid content-start gap-2">
+          <label htmlFor="event-start" className={labelClass}>
+            {t('startTime')}
+          </label>
+          <input
+            id="event-start"
+            type="time"
+            lang={locale}
+            className={inputClass}
+            value={startTime}
+            aria-describedby="event-time-hint"
+            onChange={(event) => {
+              setStartTime(event.target.value);
+            }}
+          />
+          <p id="event-time-hint" className="text-sm text-muted-foreground">
+            {t('timeHint')}
+          </p>
+        </div>
+        <div className="grid content-start gap-2">
+          <label htmlFor="event-end" className={labelClass}>
+            {t('endTime')}
+          </label>
+          <input
+            id="event-end"
+            type="time"
+            lang={locale}
+            className={inputClass}
+            value={endTime}
+            disabled={!startTime}
+            onChange={(event) => {
+              setEndTime(event.target.value);
+            }}
+          />
         </div>
         <div className="grid content-start gap-2 sm:col-span-2">
           <label htmlFor="event-place" className={labelClass}>

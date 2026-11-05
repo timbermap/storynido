@@ -10,6 +10,30 @@ export type EventType = (typeof EVENT_TYPES)[number];
 
 export const EVENT_LIMITS = { themeMaxLength: 60, maxTurningAge: 15, placeMaxLength: 80 } as const;
 
+/** Hora de la fiesta: HH:MM de 24 horas (lo que da un <input type="time">). */
+export const EVENT_TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * La hora de la invitación con el formato de cada idioma: «16:30 h» o «de 16:30 a 19:30 h» en
+ * español, «16:30» o «das 16:30 às 19:30» en portugués, «4:30 PM» o «4:30 PM – 7:30 PM» en inglés.
+ * Sin hora, null (la invitación no muestra el rótulo vacío).
+ */
+export function formatEventTime(
+  language: 'es' | 'en' | 'pt',
+  start: string | null | undefined,
+  end?: string | null,
+): string | null {
+  if (!start || !EVENT_TIME.test(start)) return null;
+  const until = end && EVENT_TIME.test(end) ? end : null;
+  const english = (time: string) => {
+    const [h = 0, m = 0] = time.split(':').map(Number);
+    return `${String(h % 12 || 12)}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
+  };
+  if (language === 'en') return until ? `${english(start)} – ${english(until)}` : english(start);
+  if (language === 'pt') return until ? `das ${start} às ${until}` : start;
+  return until ? `de ${start} a ${until} h` : `${start} h`;
+}
+
 /** Tono de la invitación. `fun` es el texto de siempre: los borradores anteriores quedan iguales. */
 export const INVITATION_TONES = ['fun', 'sweet', 'adventurous'] as const;
 export type InvitationTone = (typeof INVITATION_TONES)[number];
@@ -225,6 +249,10 @@ export const bookEventSchema = z.object({
   theme: z.string().trim().max(EVENT_LIMITS.themeMaxLength).nullable(),
   /** Lugar de la fiesta: va en la invitación (se puede cambiar en el pago). */
   place: z.string().trim().max(EVENT_LIMITS.placeMaxLength).nullable().default(null),
+  /** Hora de la fiesta (HH:MM, opcional): va en la invitación. Los borradores anteriores no la tienen. */
+  startTime: z.string().regex(EVENT_TIME).nullable().optional(),
+  /** Hora de fin (HH:MM, opcional): «de 16:30 a 19:30». */
+  endTime: z.string().regex(EVENT_TIME).nullable().optional(),
   tone: z.enum(INVITATION_TONES).default('fun'),
   /** Los borradores anteriores no lo tienen: el kit completo es lo que promete la landing. */
   offer: z.enum(KIT_OFFERS).default('full_kit'),

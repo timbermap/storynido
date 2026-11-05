@@ -1107,7 +1107,24 @@
       "waitEstimate": "{minutes, plural, one {Suele estar en un minuto.} other {Suele estar en unos # minutos.}}",
       "waitLate": "Está tardando un poco más de lo normal. Seguimos, y te escribimos cuando esté.",
       "readyTab": "¡Lista la muestra de {name}!",
-      "drawingStatus": "Usamos el dibujo de {name} · ¿No se parece? <link>Ajustar el parecido</link>"
+      "drawingStatus": "Usamos el dibujo de {name} · ¿No se parece? <link>Ajustar el parecido</link>",
+      "eventWait": {
+        "titleKit": "Diseñamos el kit de {name}…",
+        "titleInvitation": "Diseñamos la invitación de {name}…",
+        "textDrawing": "Usamos su dibujo de siempre. Armamos la invitación y el cuento de recuerdo con la temática {theme}.",
+        "steps": {
+          "write": "Escribimos el cuento de recuerdo",
+          "illustrate": "Ilustramos la portada (va en la invitación) y 2 páginas",
+          "order": "Si te gusta, lo pides y preparamos todo el kit"
+        },
+        "steps4": {
+          "character": "Dibujamos a {name} (unos minutos)",
+          "review": "Tú revisas y confirmas el parecido",
+          "illustrate": "Ilustramos la portada (va en la invitación) y 2 páginas",
+          "order": "Si te gusta, lo pides y preparamos todo el kit"
+        }
+      },
+      "eventDifferencesPages": "El cuento de recuerdo tiene {total} páginas; aquí ves la portada y las primeras {shown}."
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
@@ -1337,7 +1354,10 @@
       "date": "Fecha",
       "dateHint": "Va en la invitación y nos sirve para avisarte los plazos de impresión.",
       "place": "Lugar",
-      "placePlaceholder": "Ej.: Salón Arcoíris o En casa"
+      "placePlaceholder": "Ej.: Salón Arcoíris o En casa",
+      "startTime": "Hora (opcional)",
+      "endTime": "Hasta (opcional)",
+      "timeHint": "Va en la invitación."
     },
     "kit": {
       "title": "¿Qué llevas?",
