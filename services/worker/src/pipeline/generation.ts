@@ -63,7 +63,7 @@ import {
 } from '../pdf/kit';
 import { storyWords } from '../pdf/puzzles';
 import { launchBrowser, renderPdf, renderPng } from '../pdf/render';
-import { textPlacements } from '../pdf/placement';
+import { textPlacements, type CalmSide, type PlacementPage } from '../pdf/placement';
 import { FORMAT_SPECS, pageSizeMm, printablePages, type FormatSpec } from '../pdf/spec';
 import {
   DENSITY_LAYOUT,
@@ -203,6 +203,15 @@ export function mustKeepLabels(traits: CharacterTraits, mustKeep: readonly MustK
   });
 }
 
+/**
+ * Lado que la escena pide dejar calmo para el texto: arriba en las páginas impares del plan, abajo en
+ * las pares. La maquetación prefiere ese mismo lado (antes lo ignoraba y a veces tapaba caras).
+ */
+export function calmSideOf(scene: ScenePlan | null | undefined): CalmSide | null {
+  if (!scene) return null;
+  return scene.pageIndex % 2 === 1 ? 'top' : 'bottom';
+}
+
 /** Escena de una página con lo que el plan pide ver y evitar. */
 function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: string): string {
   const visible = scene?.mustBeVisible.length
@@ -214,7 +223,7 @@ function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: s
     : '';
   // Espacio calmo para el texto: se alterna arriba y abajo para que las páginas no sean iguales.
   const calm =
-    scene && scene.pageIndex % 2 === 1
+    calmSideOf(scene) === 'top'
       ? ' Keep the top third of the image calm and simple (sky, wall or soft background) for the text, with no faces there.'
       : ' Keep the bottom third of the image calm and simple (floor, grass or soft background) for the text, with no faces there.';
   return `${prompt}${visible}${hidden}${fix}${scene ? calm : ''} No text, letters or words anywhere in the image.`;
@@ -361,6 +370,44 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
   async function copy(from: string, to: string): Promise<void> {
     const bytes = await storage().download({ bucket: ASSETS, path: from });
     await storage().upload({ bucket: ASSETS, path: to }, bytes, WEBP);
+  }
+
+  /**
+   * Lo que la maquetación necesita de cada página para ubicar el texto: palabras, el lado calmo que
+   * pidió el prompt y las caras detectadas (Cloud Vision; con el analizador simulado, que inventa
+   * una cara centrada, o si la detección falla, solo el lado pedido).
+   */
+  async function placementPages(
+    snapshot: BookSnapshot,
+    images: readonly Uint8Array[],
+  ): Promise<PlacementPage[]> {
+    const analyzer = providers.photoAnalyzer();
+    const faces = new Map<number, PlacementPage['faces']>();
+    if (analyzer.id !== 'mock') {
+      await pool([...images.keys()], 4, async (index) => {
+        try {
+          const analysis = await analyzer.analyze(images[index] ?? new Uint8Array());
+          if (!analysis.width || !analysis.height) return;
+          faces.set(
+            index,
+            analysis.faces.map((face) => ({
+              left: face.left / analysis.width,
+              top: face.top / analysis.height,
+              width: face.width / analysis.width,
+              height: face.height / analysis.height,
+            })),
+          );
+        } catch (error) {
+          log.warn({ err: error, page: index + 1 }, 'No se pudieron detectar caras para el texto.');
+        }
+      });
+    }
+    return images.map((image, index) => ({
+      image,
+      words: countWords(snapshot.pages[index]?.text ?? ''),
+      calmSide: calmSideOf(snapshot.scenes?.[index]),
+      faces: faces.get(index) ?? [],
+    }));
   }
 
   async function load(path: string): Promise<ImageData> {
@@ -951,14 +998,10 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       ),
     );
 
-    // Dónde va el texto de cada página: la región más calma de su ilustración.
-    const placements = await textPlacements(
-      sources.slice(1).map((image, index) => ({
-        image,
-        words: countWords(snapshot.pages[index]?.text ?? ''),
-      })),
-      { allowCorners: snapshot.textDensity !== 'rich' },
-    );
+    // Dónde va el texto de cada página: la región más calma, del lado pedido y sin tapar caras.
+    const placements = await textPlacements(await placementPages(snapshot, sources.slice(1)), {
+      allowCorners: snapshot.textDensity !== 'rich',
+    });
     const qr = {
       svg: await QRCode.toString(`https://${deps.brandDomain ?? 'storynido.com'}`, {
         type: 'svg',
@@ -1540,13 +1583,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           .toBuffer();
       }),
     );
-    const placements = await textPlacements(
-      sources.slice(1).map((image, index) => ({
-        image,
-        words: countWords(snapshot.pages[index]?.text ?? ''),
-      })),
-      { allowCorners: snapshot.textDensity !== 'rich' },
-    );
+    const placements = await textPlacements(await placementPages(snapshot, sources.slice(1)), {
+      allowCorners: snapshot.textDensity !== 'rich',
+    });
     const spec: FormatSpec = FORMAT_SPECS.digital;
     const size = pageSizeMm(spec);
     const prepared = await Promise.all(
