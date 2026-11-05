@@ -1,17 +1,17 @@
 'use client';
 
 import { ApiError, CHILD_LIMITS, PHOTO_RULES, type Locale } from '@storynido/shared';
-import { ImagePlus, Loader2, Trash2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
-import { acceptedPhotos, uploadChildPhotos } from '@/lib/child-photos';
+import { uploadChildPhotos } from '@/lib/child-photos';
 import {
   getChildDetails,
   subscribeOrders,
@@ -25,6 +25,7 @@ import { isOrderDone } from '@/lib/order-state';
 import { LikesInput, withPendingLike } from '@/components/wizard/likes-input';
 
 import { CharacterDrawing } from './character-drawing';
+import { PhotoTiles, SmallDialog } from './photo-tiles';
 
 type Profile = Awaited<ReturnType<typeof loadProfile>>;
 
@@ -62,7 +63,6 @@ export function CharacterProfile({ childId }: { childId: string }) {
   // Fotos desde el perfil (sin cuento): consentimiento y subida.
   const [photoConsent, setPhotoConsent] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const photoInput = useRef<HTMLInputElement>(null);
   const [drawingBusy, setDrawingBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -335,9 +335,27 @@ export function CharacterProfile({ childId }: { childId: string }) {
         className="grid scroll-mt-28 gap-3 rounded-2xl border bg-card p-5"
       >
         <h2 id="photo-title" className="text-xl font-medium">
-          {t('profilePhotoTitle')}
+          {t('profilePhotoTitle', { count: profile.photos })}
         </h2>
-        <p>
+        <PhotoTiles
+          inputId="profile-photo"
+          tiles={profile.photoUrls.map((url, index) => ({
+            key: profile.photoIds[index] ?? url,
+            url,
+            alt: t('profilePhotoAlt', { name, index: index + 1 }),
+            removeLabel: t('profilePhotoRemove', { index: index + 1 }),
+          }))}
+          slots={photoSlots}
+          busy={uploading || busy}
+          consented={photoConsent}
+          onConsent={() => {
+            setPhotoConsent(true);
+          }}
+          onFiles={(chosen) => void addPhotos(chosen)}
+          onRemove={(index) => void removePhoto(profile.photoIds[index] ?? '')}
+          confirmRemove={t('profilePhotoConfirmOne')}
+        />
+        <p className="text-sm text-muted-foreground">
           {profile.photos > 0 && profile.photosExpireAt
             ? t('profilePhotoSome', {
                 count: profile.photos,
@@ -345,92 +363,30 @@ export function CharacterProfile({ childId }: { childId: string }) {
               })
             : t('profilePhotoNone')}
         </p>
-        {profile.photoUrls.length > 0 && (
-          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {profile.photoUrls.map((url, index) => (
-              <li key={url} className="relative aspect-[3/4] overflow-hidden rounded-xl border">
-                {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min. */}
-                <img
-                  src={url}
-                  alt={t('profilePhotoAlt', { name, index: index + 1 })}
-                  className="size-full object-cover"
-                />
-                {profile.photoIds[index] && (
-                  <button
-                    type="button"
-                    disabled={uploading}
-                    className="absolute top-1.5 right-1.5 grid size-8 place-items-center rounded-full bg-card/90 text-foreground shadow hover:bg-card"
-                    aria-label={t('profilePhotoRemove', { index: index + 1 })}
-                    onClick={() => void removePhoto(profile.photoIds[index] ?? '')}
-                  >
-                    <X className="size-4" aria-hidden="true" />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
+        {profile.photos > 1 && (
+          <button
+            type="button"
+            className="w-fit text-sm font-semibold text-primary underline-offset-4 hover:underline"
+            onClick={() => {
+              setConfirming(true);
+            }}
+          >
+            {t('profilePhotoDeleteAll')}
+          </button>
         )}
-        {/* Subir fotos desde el perfil (sin cuento), para crear o actualizar su dibujo. */}
-        {photoSlots > 0 && (
-          <div className="grid gap-3">
-            <label className="flex items-start gap-3 text-sm">
-              <input
-                type="checkbox"
-                className="mt-1 size-5 shrink-0 accent-[var(--primary)]"
-                checked={photoConsent}
-                onChange={(event) => {
-                  setPhotoConsent(event.target.checked);
-                }}
-              />
-              <span>{tPhotos('consentText')}</span>
-            </label>
-            <input
-              ref={photoInput}
-              id="profile-photo"
-              type="file"
-              multiple
-              accept={PHOTO_RULES.allowedTypes.join(',')}
-              className="sr-only"
-              tabIndex={-1}
-              disabled={!photoConsent || uploading}
-              onChange={(event) => {
-                const chosen = acceptedPhotos(event.target.files).slice(0, photoSlots);
-                event.target.value = '';
-                void addPhotos(chosen);
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="w-fit"
-              disabled={!photoConsent || uploading}
-              onClick={() => photoInput.current?.click()}
-            >
-              {uploading ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <ImagePlus aria-hidden="true" />
-              )}
-              {profile.photos > 0 ? t('profilePhotoAddAnother') : tPhotos('choose')}
-            </Button>
-          </div>
-        )}
-        <p className="text-sm text-muted-foreground">{t('profilePhotoKeep')}</p>
-        {profile.photos > 0 &&
-          (confirming ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm">{t('profilePhotoConfirm', { name })}</span>
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={busy}
-                onClick={() => void deletePhotos()}
-              >
+        {confirming && (
+          <SmallDialog
+            title={t('profilePhotoConfirm', { name })}
+            onClose={() => {
+              setConfirming(false);
+            }}
+          >
+            <div className="flex flex-wrap gap-2">
+              <Button variant="destructive" disabled={busy} onClick={() => void deletePhotos()}>
                 {busy && <Loader2 className="animate-spin" aria-hidden="true" />}
-                {t('profilePhotoDelete')}
+                {t('profilePhotoDeleteAll')}
               </Button>
               <Button
-                size="sm"
                 variant="ghost"
                 disabled={busy}
                 onClick={() => {
@@ -440,19 +396,8 @@ export function CharacterProfile({ childId }: { childId: string }) {
                 {t('profileCancel')}
               </Button>
             </div>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-fit"
-              onClick={() => {
-                setConfirming(true);
-              }}
-            >
-              <Trash2 aria-hidden="true" />
-              {t('profilePhotoDelete')}
-            </Button>
-          ))}
+          </SmallDialog>
+        )}
       </section>
 
       {message && (

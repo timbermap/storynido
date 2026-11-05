@@ -186,3 +186,18 @@ export function testPhoto(): string {
   writeFileSync(file, png);
   return file;
 }
+
+/**
+ * Agrega una foto desde la baldosa «Agregar foto» (perfil y «Agregar a otro chico»): la primera vez
+ * pide el consentimiento en un diálogo y «Aceptar y elegir foto» abre el selector.
+ */
+export async function addPhotoFromTile(page: Page, { consent }: { consent: boolean }) {
+  const chooser = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: 'Agregar foto' }).click();
+  if (consent) {
+    const dialog = page.getByRole('dialog', { name: 'Antes de subir su foto' });
+    await expect(dialog).toContainText('Soy el padre, la madre o el tutor legal');
+    await dialog.getByRole('button', { name: 'Aceptar y elegir foto' }).click();
+  }
+  await (await chooser).setFiles(testPhoto());
+}
