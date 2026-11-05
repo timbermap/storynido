@@ -11,7 +11,9 @@ import { characterTraitsSchema, mustKeepSchema } from './character';
 import { channelSchema } from './channels';
 import { orderPipelineSchema } from './pipeline';
 import { priceSnapshotSchema } from './pricing';
+import { STORY_STRUCTURES } from '../providers/ai';
 import {
+  ageBandSchema,
   bookLengthSchema,
   contentTypeSchema,
   readingLevelSchema,
@@ -202,7 +204,15 @@ export const bookPreviewSchema = z.object({
   artDirection: z.string().nullable().optional(),
   /** Páginas de actividades y rango de palabras con que se escribió (los usa el pipeline). */
   activityPages: z.number().int().nonnegative().optional(),
-  words: z.object({ min: z.number().int(), max: z.number().int() }).optional(),
+  words: z
+    .object({ min: z.number().int(), max: z.number().int(), cap: z.number().int().optional() })
+    .optional(),
+  /**
+   * Franja de edad del lector y del texto (tipografía por edad). Faltan en las muestras anteriores:
+   * esos libros se arman como siempre.
+   */
+  ageBand: ageBandSchema.optional(),
+  textBand: ageBandSchema.optional(),
   /**
    * Armado por edad (page-layout.ts): con `facing`, cada escena es página de texto + ilustración.
    * Ausente en las muestras anteriores (siguen con el panel sobre la ilustración).
@@ -213,6 +223,8 @@ export const bookPreviewSchema = z.object({
     .object({
       theme: z.string(),
       arc: z.string(),
+      structure: z.enum(STORY_STRUCTURES).nullable().optional(),
+      refrain: z.string().nullable().optional(),
       companion: z.object({ name: z.string(), look: z.string() }).nullable().optional(),
       scenes: z.array(
         z.object({
@@ -224,6 +236,7 @@ export const bookPreviewSchema = z.object({
           continuityFacts: z.array(z.string()),
           wordBudget: z.number().int(),
           personalDetail: z.string().nullable(),
+          wordless: z.boolean().optional(),
         }),
       ),
     })

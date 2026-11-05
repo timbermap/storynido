@@ -10,10 +10,12 @@ import {
   buildStoryPrompt,
   coverScene,
   describeCharacter,
+  languageName,
   lessonsBlock,
   narrativeRules,
   renderTemplate,
   samplePrompts,
+  spanishVoiceFor,
 } from './prompts';
 
 const base = {
@@ -236,5 +238,67 @@ describe('castNote', () => {
     expect(castNote(undefined)).toBe('');
     expect(castNote([])).toBe('');
     expect(castNote([{ role: ' ', gender: 'male', look: 'x' }])).toBe('');
+  });
+});
+
+describe('español según el país', () => {
+  it('«vos» en Argentina y Uruguay; «tú» en el resto o sin país', () => {
+    expect(spanishVoiceFor('AR')).toBe('vos');
+    expect(spanishVoiceFor('uy')).toBe('vos');
+    expect(spanishVoiceFor('MX')).toBe('tu');
+    expect(spanishVoiceFor(null)).toBe('tu');
+    expect(buildStoryPrompt({ ...base, spanishVoice: 'vos' })).toContain('usa "vos"');
+    expect(buildStoryPrompt({ ...base, spanishVoice: 'vos' })).not.toContain('nunca "vos"');
+    expect(buildStoryPrompt(base)).toContain('usa "tú", nunca "vos"');
+    // En inglés y portugués no cambia nada.
+    expect(languageName('en', 'vos')).toBe('English');
+  });
+});
+
+describe('forma del cuento para menores de 7', () => {
+  it('estructura, estribillo, onomatopeyas, humor concreto, giro final y primera persona', () => {
+    const rules = narrativeRules({ childName: 'Martina', age: 4 });
+    expect(rules).toContain('Elige UNA estructura');
+    expect(rules).toContain('cuartetas');
+    expect(rules).toContain('al menos 3 veces');
+    expect(rules).toContain('onomatopeyas');
+    expect(rules).toContain('«mágico»');
+    expect(rules).toContain('nunca describe lo que muestra el dibujo');
+    expect(rules).toContain('giro o una sorpresa');
+    expect(rules).toContain('primera persona');
+    expect(rules).toContain('SIN TEXTO');
+    // Los bebés no tienen páginas sin texto pedidas; de 7 en adelante, ninguna regla de forma.
+    expect(narrativeRules({ childName: 'Martina', age: 2 })).not.toContain('SIN TEXTO');
+    expect(narrativeRules({ childName: 'Martina', age: 7 })).not.toContain('Elige UNA estructura');
+  });
+
+  it('el plan lleva la estructura, el estribillo y las páginas sin texto al redactor', () => {
+    const prompt = buildStoryPrompt({
+      ...base,
+      age: 4,
+      wordsPerPage: { min: 10, max: 25, cap: 30 },
+      plan: {
+        theme: 'Volar',
+        arc: 'Quiere volar y lo logra',
+        structure: 'cumulative',
+        refrain: '¡Arriba, Martina!',
+        scenes: [0, 1, 2].map((pageIndex) => ({
+          pageIndex,
+          sceneGoal: `Escena ${String(pageIndex + 1)}`,
+          emotionalBeat: 'alegría',
+          mustBeVisible: [],
+          notVisible: [],
+          continuityFacts: [],
+          wordBudget: 15,
+          personalDetail: null,
+          wordless: pageIndex === 1,
+        })),
+      },
+    });
+    expect(prompt).toContain('patrón acumulativo');
+    expect(prompt).toContain('«¡Arriba, Martina!»');
+    expect(prompt).toContain('Página 2: Escena 2 (alegría) · SIN TEXTO');
+    expect(prompt).not.toContain('Página 1: Escena 1 (alegría) · SIN TEXTO');
+    expect(prompt).toContain('nunca más de 30');
   });
 });

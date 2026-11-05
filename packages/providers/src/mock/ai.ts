@@ -13,6 +13,8 @@ import type {
   ModerationResult,
   PageReview,
   PageReviewRequest,
+  PageRewrite,
+  PageRewriteRequest,
   StoryPlan,
   StoryRequest,
   StoryReview,
@@ -98,6 +100,15 @@ export class MockAITextProvider implements AITextProvider {
     });
   }
 
+  /** Recorta la página al máximo de palabras (sin IA): alcanza para probar la reescritura. */
+  rewritePage(request: PageRewriteRequest): Promise<PageRewrite> {
+    const words = request.text.trim().split(/\s+/u);
+    return Promise.resolve({
+      text: words.slice(0, request.words.max).join(' '),
+      usage: usage('mock-text'),
+    });
+  }
+
   moderateText(text: string): Promise<ModerationResult> {
     return Promise.resolve(moderate(text));
   }
@@ -109,6 +120,9 @@ export class MockAITextProvider implements AITextProvider {
     return Promise.resolve({
       theme: request.storyTitle,
       arc: `${request.childName} quiere algo, encuentra una dificultad, decide y lo logra.`,
+      // Menores de 7: una estructura y un estribillo (como el planificador real).
+      structure: request.age < 7 ? 'refrain' : null,
+      refrain: request.age < 7 ? `¡Vamos, ${request.childName}!` : null,
       // Con mascota, el acompañante que se repite (para probar su lámina sin IA real).
       companion: request.petName
         ? { name: request.petName, look: 'a small friendly golden dog with a red collar' }
@@ -122,6 +136,7 @@ export class MockAITextProvider implements AITextProvider {
         continuityFacts: [],
         wordBudget: budget,
         personalDetail: pageIndex === 0 ? (request.likes[0] ?? null) : null,
+        wordless: false,
       })),
       usage: usage('mock-text'),
     });

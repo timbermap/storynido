@@ -1249,15 +1249,15 @@
       "densities": {
         "visual": {
           "name": "Very visual",
-          "text": "Few words, lots of illustration."
+          "text": "One step less text than usual for their age."
         },
         "balanced": {
           "name": "Balanced",
-          "text": "For reading together."
+          "text": "Just the right amount of text for their age."
         },
         "rich": {
           "name": "More reading",
-          "text": "For kids who already read on their own."
+          "text": "One step more text than usual for their age."
         }
       },
       "levels": {
@@ -1307,7 +1307,7 @@
         },
         "read_alone": {
           "name": "I read it myself",
-          "text": "Short sentences and one illustration per page, so they can read it on their own."
+          "text": "Short sentences and less text per page, to read without help."
         },
         "longer_story": {
           "name": "Longer story",
@@ -1721,7 +1721,8 @@
     "thumbnails": "Book pages",
     "noDedication": "Your dedication goes here",
     "example": "Example",
-    "exampleLabel": "Style example · in your book, {name} will be the hero"
+    "exampleLabel": "Style example · in your book, {name} will be the hero",
+    "wordless": "Wordless page: the illustration tells this moment."
   },
   "Checkout": {
     "shippingEstimate": "Estimated shipping to your country: about {price}, for a total of about {total}. Arrives in {min} to {max} business days. Confirmed with your address.",

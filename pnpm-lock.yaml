@@ -376,12 +376,18 @@ importers:
       '@fontsource/amatic-sc':
         specifier: 5.2.5
         version: 5.2.5
+      '@fontsource/andika':
+        specifier: 5.2.8
+        version: 5.2.8
       '@fontsource/fraunces':
         specifier: 5.3.0
         version: 5.3.0
       '@fontsource/nunito-sans':
         specifier: 5.3.0
         version: 5.3.0
+      '@fontsource/quicksand':
+        specifier: 5.2.10
+        version: 5.2.10
       '@google-cloud/storage':
         specifier: 8.4.0
         version: 8.4.0(supports-color@7.2.0)
@@ -1075,11 +1081,17 @@ packages:
   '@fontsource/amatic-sc@5.2.5':
     resolution: {integrity: sha512-sMxNRBKHSMrcW+TgED1KVtShy6i6VzuAcxEcJ/igrjtCp3tgTeck4Hb4nbasIdo+LlPx3H8j6OhE6pyQ/MfHmA==}
 
+  '@fontsource/andika@5.2.8':
+    resolution: {integrity: sha512-OUSTZ5E9fKiluTFhTvRrvBcIQ3K5ahmWdZvI0b5HgLYaskNXe8nnbwex1S48Q2JL6WBBjTWRq2wf8s/ivbKQVg==}
+
   '@fontsource/fraunces@5.3.0':
     resolution: {integrity: sha512-LEHTOBiZufQzAvnAe2rZ8ZknbDS28Q9kzwb0L+gZJEmjLGr8hhZ/5NuHXwDuHBWhVXYoiGGXmrb0H6Ko/RrHTg==}
 
   '@fontsource/nunito-sans@5.3.0':
     resolution: {integrity: sha512-CctNhebQ2YYJUwVMCAkHexQg7yedfz9s8JzaETALyc9QIQuDFRlNTWXux9H5PsNLgptPkrzRDomAdLJt1sDFpQ==}
+
+  '@fontsource/quicksand@5.2.10':
+    resolution: {integrity: sha512-rck0ccT6vJF9RnbSW2ON1grq5qFZvjVOGvYIUixATXF8mNh4KglD+8Sn8QpRgKQBSBJF5yOR3SBYBWPg/Y8YbQ==}
 
   '@formatjs/ecma402-abstract@2.3.6':
     resolution: {integrity: sha512-HJnTFeRM2kVFVr5gr5kH1XP6K0JcJtE7Lzvtr3FS/so5f1kpsqqqxy5JF+FRaO6H2qmcMfAUIox7AJteieRtVw==}
@@ -8726,9 +8738,13 @@ snapshots:
 
   '@fontsource/amatic-sc@5.2.5': {}
 
+  '@fontsource/andika@5.2.8': {}
+
   '@fontsource/fraunces@5.3.0': {}
 
   '@fontsource/nunito-sans@5.3.0': {}
+
+  '@fontsource/quicksand@5.2.10': {}
 
   '@formatjs/ecma402-abstract@2.3.6':
     dependencies:

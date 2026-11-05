@@ -20,6 +20,10 @@ import {
   type MustKeepTrait,
   type QaEvent,
   pagesOutOfRange,
+  pagesOverCap,
+  wordlessPages,
+  spanishVoiceFor,
+  storyTypography,
   type BookEvent,
   type BookLength,
   type ContentType,
@@ -310,6 +314,10 @@ export class PreviewService {
           })),
         ),
         totalPages: preview.interiorPages ?? preview.pages.length,
+        // Tipografía por edad, igual que el PDF (las muestras anteriores no la traen).
+        ...(preview.ageBand && preview.textBand
+          ? { typography: storyTypography(preview.ageBand, preview.textBand, book.language) }
+          : {}),
         stale: isStale(preview, book),
         generatedAt: (toDate(preview.generatedAt) ?? new Date()).toISOString(),
       },
@@ -530,7 +538,7 @@ export class PreviewService {
       return result;
     };
 
-    const [stories, styles, lessons, childSnap] = await Promise.all([
+    const [stories, styles, lessons, childSnap, userSnap, editorial] = await Promise.all([
       this.catalog.stories(),
       this.catalog.styles(),
       this.catalog.lessons(),
@@ -538,6 +546,8 @@ export class PreviewService {
         .collection(COLLECTIONS.children)
         .doc(book.childId ?? '-')
         .get(),
+      this.db.collection(COLLECTIONS.users).doc(uid).get(),
+      this.catalog.editorial(),
     ]);
     const story = stories.find((item) => item.slug === book.storyId);
     const choice = editorialChoice(book);
@@ -546,12 +556,23 @@ export class PreviewService {
       choice.contentType === 'coloring'
         ? styles.find((item) => item.contentTypes.includes('coloring'))
         : styles.find((item) => item.slug === book.styleId);
-    // Eventos: el mini cuento lleva un tope de palabras por página (Celebraciones, ola 1).
-    const plan = withEventWordCap(
-      editorialPlan(choice, await this.catalog.editorial(), story?.pageCount ?? 12),
-      Boolean(book.event),
-    );
     const child = childSnap.data();
+    // Edad que dice el cuento: la que cumple en un cumpleaños; si no, la del protagonista. Es la
+    // que elige la franja de texto, la tipografía y las reglas de forma.
+    const storyAge =
+      book.event?.type === 'birthday' && typeof book.event.turningAge === 'number'
+        ? book.event.turningAge
+        : Number(child?.age);
+    const readerAge = Number.isFinite(storyAge) ? storyAge : null;
+    // Eventos: el mini cuento no pasa del tope de la edad que celebra (Celebraciones, ola 1).
+    const plan = withEventWordCap(
+      editorialPlan(choice, editorial, story?.pageCount ?? 12, readerAge),
+      Boolean(book.event),
+      readerAge,
+      editorial,
+    );
+    // «vos» en Argentina y Uruguay; «tú» en el resto o si no se sabe el país.
+    const spanishVoice = spanishVoiceFor(userSnap.data()?.country as string | undefined);
     if (!story || !style || child?.ownerUid !== uid) {
       throw new AppError(
         409,
@@ -623,16 +644,12 @@ export class PreviewService {
       track,
     );
     const characterDescription = describeCharacter(String(child.name), sheet, traits, mustKeep);
-    // Edad que dice el cuento: la que cumple en un cumpleaños; si no, la del protagonista.
-    const storyAge =
-      event?.type === 'birthday' && typeof event.turningAge === 'number'
-        ? event.turningAge
-        : Number(child.age);
     // Nombres que tienen que aparecer tal cual: el del protagonista y el apodo de los recuerdos.
     const requiredNames = [String(child.name), memories?.nickname ?? ''].filter(Boolean);
 
-    // Armado por edad (page-layout.ts): se decide con la muestra y queda con ella.
-    const layout = bookLayout(Number(child.age), plan.contentType);
+    // Armado por edad (page-layout.ts): se decide con la muestra y queda con ella. Con la misma
+    // edad que la cantidad de texto y la letra (en un cumpleaños, la que cumple).
+    const layout = bookLayout(readerAge ?? Number(child.age), plan.contentType);
     const request = {
       language: book.language,
       childName: String(child.name),
@@ -650,6 +667,7 @@ export class PreviewService {
       pageCount: Math.max(scenesFor(plan.narrativePages, layout), PREVIEW_ILLUSTRATED_PAGES),
       wordsPerPage: plan.words,
       mustInclude: requiredNames.slice(1),
+      spanishVoice,
     };
     const promptInput = {
       ...request,
@@ -662,11 +680,20 @@ export class PreviewService {
     };
     // Planificador editorial (guía A): arco, escenas y qué se ve en cada página. El redactor lo
     // sigue y el pipeline lo usa para ilustrar y revisar cada página.
-    const { usage: planUsage, ...storyPlan } = await ai.text.planStory({
+    const { usage: planUsage, ...plannedStory } = await ai.text.planStory({
       ...request,
       prompt: buildStoryPrompt(promptInput),
     });
     await track('story', { usage: planUsage });
+    // Páginas sin texto (3 a 6 años, 1 o 2 en el clímax): se sanean y quedan en el plan.
+    const wordless = readerAge === null ? [] : wordlessPages(plannedStory.scenes, readerAge);
+    const storyPlan = {
+      ...plannedStory,
+      scenes: plannedStory.scenes.map((scene) => ({
+        ...scene,
+        wordless: wordless.includes(scene.pageIndex),
+      })),
+    };
     const prompt = buildStoryPrompt({ ...promptInput, plan: storyPlan });
 
     // Texto: cuento, revisión editorial y moderación (un reintento si no pasa).
@@ -680,15 +707,49 @@ export class PreviewService {
           );
           // Si el modelo solo cambió las tildes del nombre, se deja como lo escribió la persona.
           const fix = (text: string) => repairNameAccents(text, requiredNames);
-          return {
-            title: fix(draft.title),
-            pages: review.pages.map((page) => ({ ...page, text: fix(page.text) })),
-            approved: review.approved,
-          };
+          // Las páginas sin texto del plan quedan vacías aunque el modelo haya escrito algo.
+          const pages = review.pages.map((page, index) => ({
+            ...page,
+            text: wordless.includes(index) ? '' : fix(page.text),
+          }));
+          // Para los más chicos el exceso de texto es el defecto más visible: la página que pasa
+          // el tope de la edad se reescribe (una vez), no solo se avisa.
+          const over = pagesOverCap(pages, plan.words);
+          if (over.length > 0) {
+            await this.qaEvent(bookId, 'length_rewritten', { pages: over.length });
+            await Promise.all(
+              over.map(async (index) => {
+                const page = pages[index];
+                if (!page) return;
+                const rewrite = await track(
+                  'review',
+                  await ai.text.rewritePage({
+                    language: book.language,
+                    spanishVoice,
+                    childName: request.childName,
+                    age: readerAge ?? request.age,
+                    storyTitle: draft.title,
+                    pageIndex: index,
+                    previous: pages[index - 1]?.text ?? null,
+                    next: pages[index + 1]?.text ?? null,
+                    text: page.text,
+                    words: { min: plan.words.min, max: plan.words.max },
+                    mustInclude: requiredNames,
+                  }),
+                );
+                const text = fix(rewrite.text);
+                // Se queda con la reescritura solo si es más corta y no perdió texto del todo.
+                if (text && countWords(text) < countWords(page.text)) {
+                  pages[index] = { ...page, text };
+                }
+              }),
+            );
+          }
+          return { title: fix(draft.title), pages, approved: review.approved };
         };
         // Densidad y nombres exactos: si algo no cumple, 1 reescritura.
         const problems = (draft: { title: string; pages: { text: string }[] }) => ({
-          outOfRange: pagesOutOfRange(draft.pages, plan.words).length,
+          outOfRange: pagesOutOfRange(draft.pages, plan.words, wordless).length,
           names: nameIssues([draft.title, ...draft.pages.map((page) => page.text)], requiredNames)
             .length,
         });
@@ -810,6 +871,7 @@ export class PreviewService {
       activityPages: plan.activityPages,
       words: plan.words,
       pageLayout: layout,
+      ...(plan.ageBand && plan.textBand ? { ageBand: plan.ageBand, textBand: plan.textBand } : {}),
       plan: storyPlan,
       generatedAt: new Date(),
     };

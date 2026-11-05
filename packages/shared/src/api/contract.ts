@@ -24,6 +24,7 @@ import { addressSchema, bookStatusSchema } from '../models/commerce';
 import { KIT_PIECES, eventPricingSchema, kitSelectionSchema } from '../models/kit';
 import { accountTypeSchema, proProfileSchema } from '../models/users';
 import { pipelineStepSchema } from '../models/pipeline';
+import { STORY_FONTS } from '../models/typography';
 import { QUOTE_ERRORS, priceSnapshotSchema } from '../models/pricing';
 import { priceTableRowSchema } from '../models/price-table';
 import { PHOTO_STATUSES } from '../models/users';
@@ -493,6 +494,15 @@ export const publicPreviewSchema = z.object({
         }),
       ),
       totalPages: z.number().int(),
+      /** Letra del cuento según la edad (la misma del PDF); falta en las muestras anteriores. */
+      typography: z
+        .object({
+          font: z.enum(STORY_FONTS),
+          minPt: z.number(),
+          maxPt: z.number(),
+          uppercase: z.boolean(),
+        })
+        .optional(),
       /** El borrador cambió (historia, estilo, personaje u opciones) después de generarla. */
       stale: z.boolean(),
       generatedAt: z.string(),
