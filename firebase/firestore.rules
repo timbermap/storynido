@@ -180,7 +180,7 @@ service cloud.firestore {
     // INVITATION_TONES, KIT_OFFERS y BIRTHDAY_BOOK_CHOICES en packages/shared/src/models/events.ts).
     function validEvent(e) {
       return e == null || (e is map
-        && e.keys().hasOnly(['type', 'date', 'turningAge', 'theme', 'place', 'tone', 'offer', 'bookChoice'])
+        && e.keys().hasOnly(['type', 'date', 'turningAge', 'theme', 'place', 'startTime', 'endTime', 'tone', 'offer', 'bookChoice'])
         && e.type in ['birthday', 'baptism', 'communion', 'graduation']
         && (e.get('date', null) == null
           || (e.date is string && e.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
@@ -188,6 +188,10 @@ service cloud.firestore {
           || (e.turningAge is int && e.turningAge >= 1 && e.turningAge <= 15))
         && optString(e.get('theme', null), 60)
         && optString(e.get('place', null), 80)
+        && (e.get('startTime', null) == null
+          || (e.startTime is string && e.startTime.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')))
+        && (e.get('endTime', null) == null
+          || (e.endTime is string && e.endTime.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')))
         && e.get('tone', 'fun') in ['fun', 'sweet', 'adventurous']
         && e.get('offer', 'full_kit') in ['full_kit', 'invitation']
         && e.get('bookChoice', 'none') in ['none', 'digital', 'printed']);

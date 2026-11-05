@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { EVENT_TYPES, INVITATION_TONES, invitationCopy } from './events';
+import { EVENT_TYPES, INVITATION_TONES, formatEventTime, invitationCopy } from './events';
 
 describe('tono de la invitación por ocasión', () => {
   it('cada ocasión, idioma y tono tiene nombre y dos frases, y solo el cumpleaños dice cumple', () => {
@@ -29,5 +29,17 @@ describe('tono de la invitación por ocasión', () => {
       'Venha para a minha primeira comunhão!',
     );
     expect(invitationCopy('es', null, null).invite).toBe('¡Te invito a mi cumple!');
+  });
+});
+
+describe('hora de la fiesta en la invitación', () => {
+  it('formato de cada idioma, con hora de fin opcional; sin hora, nada', () => {
+    expect(formatEventTime('es', '16:30')).toBe('16:30 h');
+    expect(formatEventTime('es', '16:30', '19:30')).toBe('de 16:30 a 19:30 h');
+    expect(formatEventTime('pt', '16:30', '19:30')).toBe('das 16:30 às 19:30');
+    expect(formatEventTime('en', '16:30')).toBe('4:30 PM');
+    expect(formatEventTime('en', '09:05', '12:00')).toBe('9:05 AM – 12:00 PM');
+    expect(formatEventTime('es', null, '19:30')).toBeNull();
+    expect(formatEventTime('es', '25:00')).toBeNull();
   });
 });

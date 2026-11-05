@@ -78,6 +78,24 @@ describe('tono de la invitación', () => {
   });
 });
 
+describe('hora de la invitación', () => {
+  it('con hora, va con su rótulo; sin hora, el rótulo no aparece vacío', () => {
+    const withTime = kitPieceDocument(
+      { ...book('birthday'), invitation: { time: 'de 16:30 a 19:30 h', place: 'Parque Lezama' } },
+      'invitation',
+      20,
+    ).html;
+    expect(withTime).toContain('<b>Hora</b>de 16:30 a 19:30 h');
+    const without = kitPieceDocument(
+      { ...book('birthday'), invitation: { time: null, place: 'Parque Lezama' } },
+      'invitation',
+      20,
+    ).html;
+    expect(without).not.toContain('<b>Hora</b>');
+    expect(without).toContain('<b>Dónde</b>Parque Lezama');
+  });
+});
+
 describe('firma de la invitación', () => {
   it('lleva «Hecho con StoryNido» por defecto y se puede quitar', () => {
     expect(kitPieceDocument(book('birthday'), 'invitation', 20).html).toContain(

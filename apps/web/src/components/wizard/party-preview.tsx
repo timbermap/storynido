@@ -7,6 +7,7 @@ import { useState } from 'react';
 import {
   BIRTHDAY_BOOK_CHOICES,
   EMPTY_BIRTHDAY,
+  formatEventTime,
   invitationCopy,
   type BirthdayBookChoice,
   type Locale,
@@ -61,6 +62,11 @@ export function InvitationPreview({
         </p>
         <p className="font-semibold">{copy.invite}</p>
         {date && <p className="text-sm">{date}</p>}
+        {formatEventTime(book.language, event?.startTime, event?.endTime) && (
+          <p className="text-sm">
+            {formatEventTime(book.language, event?.startTime, event?.endTime)}
+          </p>
+        )}
         {event?.place && <p className="text-sm">{event.place}</p>}
         <p className="mt-1 text-sm font-semibold">{copy.waiting}</p>
       </figcaption>
@@ -76,10 +82,13 @@ export function BirthdayBookOffer({
   book,
   childName,
   prices,
+  familyPages,
 }: {
   book: WizardData['book'];
   childName: string;
   prices: PriceHint | null;
+  /** Páginas del libro de Familias (el cuento largo): no es el mini cuento del kit. */
+  familyPages: number;
 }) {
   const t = useTranslations('Wizard.partyPreview.book');
   const locale = useLocale() as Locale;
@@ -128,7 +137,7 @@ export function BirthdayBookOffer({
         <h2 id="birthday-book" className="text-xl font-medium">
           {t('title', { name: childName })}
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t('text')}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t('text', { pages: familyPages })}</p>
       </div>
       <fieldset>
         <legend className="sr-only">{t('title', { name: childName })}</legend>

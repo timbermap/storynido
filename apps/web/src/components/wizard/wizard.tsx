@@ -244,6 +244,7 @@ export function Wizard({
         childName={child?.name ?? ''}
         prices={catalog.prices}
         eventPrices={catalog.eventPrices}
+        familyBookPages={catalog.editorial.lengths[catalog.editorial.defaults.length].interiorPages}
         generating={generating}
         generateError={generateError}
         onRegenerateAll={() => void generatePreview()}

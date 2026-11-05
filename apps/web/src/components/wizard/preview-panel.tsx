@@ -31,6 +31,7 @@ import { trackConversion } from '@/lib/conversions';
 import { formatPrice } from '@/lib/format';
 
 import { CharacterReview } from './character-review';
+import { KitIncludes } from './kit-includes';
 import { BirthdayBookOffer, InvitationPreview } from './party-preview';
 import { cn } from '@/lib/utils';
 
@@ -68,6 +69,7 @@ export function PreviewPanel({
   childName,
   prices,
   eventPrices,
+  familyBookPages,
   generating,
   generateError,
   onRegenerateAll,
@@ -77,6 +79,8 @@ export function PreviewPanel({
   childName: string;
   prices: WizardData['prices'];
   eventPrices: WizardData['eventPrices'];
+  /** Páginas del libro de Familias (el upsell del kit habla del cuento largo, no del mini). */
+  familyBookPages: number;
   generating: boolean;
   generateError: string | null;
   onRegenerateAll: () => void;
@@ -194,10 +198,16 @@ export function PreviewPanel({
           tabIndex={-1}
           className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-medium outline-none"
         >
-          {t('drawingWait.title', { name: childName })}
+          {isEvent
+            ? book.event?.offer === 'invitation'
+              ? t('eventWait.titleInvitation', { name: childName })
+              : t('eventWait.titleKit', { name: childName })
+            : t('drawingWait.title', { name: childName })}
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-          {t('drawingWait.text')}
+          {isEvent
+            ? t('eventWait.textDrawing', { theme: book.event?.theme ?? '' })
+            : t('drawingWait.text')}
         </p>
         <WaitEstimate kind="withDrawing" startedAt={book.previewStartedAt} />
         <ol className="mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm sm:grid-cols-3">
@@ -212,7 +222,7 @@ export function PreviewPanel({
               }
             >
               <span className="block text-xs font-bold tracking-wide uppercase">{index + 1}</span>
-              {t(`drawingWait.steps.${step}`)}
+              {isEvent ? t(`eventWait.steps.${step}`) : t(`drawingWait.steps.${step}`)}
             </li>
           ))}
         </ol>
@@ -264,7 +274,9 @@ export function PreviewPanel({
               }
             >
               <span className="block text-xs font-bold tracking-wide uppercase">{index + 1}</span>
-              {t(`waitSteps.${step}`, { name: childName })}
+              {isEvent
+                ? t(`eventWait.steps4.${step}`, { name: childName })
+                : t(`waitSteps.${step}`, { name: childName })}
             </li>
           ))}
         </ol>
@@ -485,7 +497,18 @@ export function PreviewPanel({
             </section>
           )}
           <div className="grid gap-4 [&>*]:min-w-0">
-            {isEvent && <h2 className="text-xl font-medium">{tParty('keepsakeTitle')}</h2>}
+            {isEvent && (
+              <>
+                {/* Qué trae el kit, antes del mini cuento: así se entiende que es una de las piezas. */}
+                <KitIncludes offer={book.event?.offer ?? 'full_kit'} />
+                <div className="grid gap-0.5">
+                  <h2 className="text-xl font-medium">
+                    {tParty('keepsakeTitle', { pages: data.totalPages })}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">{tParty('keepsakeText')}</p>
+                </div>
+              </>
+            )}
             <BookViewer
               title={data.title}
               coverName={childName}
@@ -543,7 +566,7 @@ export function PreviewPanel({
               {[
                 {
                   icon: BookOpen,
-                  text: t('differencesPages', {
+                  text: t(isEvent ? 'eventDifferencesPages' : 'differencesPages', {
                     total: data.totalPages,
                     shown: data.pages.filter((page) => page.imageUrl).length,
                   }),
@@ -552,7 +575,7 @@ export function PreviewPanel({
                 {
                   icon: PencilLine,
                   text: isEvent
-                    ? tParty('differencesEdit')
+                    ? t('differencesEdit')
                     : isPro
                       ? t('proDifferencesEdit')
                       : t('differencesEdit'),
@@ -573,7 +596,12 @@ export function PreviewPanel({
 
       {isEvent && data?.stage === 'complete' && !data.stale && (
         <div className="mt-8">
-          <BirthdayBookOffer book={book} childName={childName} prices={prices} />
+          <BirthdayBookOffer
+            book={book}
+            childName={childName}
+            prices={prices}
+            familyPages={familyBookPages}
+          />
         </div>
       )}
 
@@ -604,7 +632,13 @@ export function PreviewPanel({
                   }}
                   className={cn(buttonVariants({ size: 'lg' }), 'h-14 px-10 text-lg')}
                 >
-                  {isEvent || isPro ? t('approveAndPay') : t('continue')}
+                  {isEvent
+                    ? book.event?.offer === 'invitation'
+                      ? t('continueInvitation')
+                      : t('continueKit')
+                    : isPro
+                      ? t('approveAndPay')
+                      : t('continue')}
                 </Link>
               ) : null}
               {data?.stage === 'complete' && !data.stale && isEvent && eventPrices && (

@@ -3,6 +3,7 @@
 import {
   ApiError,
   COLLECTIONS,
+  formatEventTime,
   KIT_LIMITS,
   KIT_PIECES,
   REQUIRED_KIT_PIECES,
@@ -105,6 +106,13 @@ export function KitCheckout({
         const event = book.get('event') as Partial<BookEvent> | null | undefined;
         setChosen(event?.offer ?? 'full_kit');
         if (event?.place) setPlace((current) => current || (event.place ?? ''));
+        // La hora que puso en «La fiesta», con el formato de la invitación (se puede cambiar).
+        const hour = formatEventTime(
+          (book.get('language') as 'es' | 'en' | 'pt' | undefined) ?? 'es',
+          event?.startTime,
+          event?.endTime,
+        );
+        if (hour) setTime((current) => current || hour.slice(0, KIT_LIMITS.timeMaxLength));
       })
       .catch(() => {
         if (!cancelled) setChosen('full_kit');

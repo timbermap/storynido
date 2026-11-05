@@ -1107,7 +1107,26 @@
       "waitEstimate": "{minutes, plural, one {Costuma ficar pronta em um minuto.} other {Costuma ficar pronta em uns # minutos.}}",
       "waitLate": "Está demorando um pouco mais do que o normal. Seguimos, e avisamos por e-mail quando estiver pronta.",
       "readyTab": "A amostra de {name} está pronta!",
-      "drawingStatus": "Usamos o desenho de {name} · Não ficou parecido? <link>Ajustar a semelhança</link>"
+      "drawingStatus": "Usamos o desenho de {name} · Não ficou parecido? <link>Ajustar a semelhança</link>",
+      "eventWait": {
+        "titleKit": "Criando o kit de {name}…",
+        "titleInvitation": "Criando o convite de {name}…",
+        "textDrawing": "Usamos o desenho de sempre. Montamos o convite e a história de lembrança com o tema {theme}.",
+        "steps": {
+          "write": "Escrevemos a história de lembrança",
+          "illustrate": "Ilustramos a capa (vai no convite) e 2 páginas",
+          "order": "Se gostar, você pede e preparamos o kit completo"
+        },
+        "steps4": {
+          "character": "Desenhamos {name} (alguns minutos)",
+          "review": "Você confere e confirma a semelhança",
+          "illustrate": "Ilustramos a capa (vai no convite) e 2 páginas",
+          "order": "Se gostar, você pede e preparamos o kit completo"
+        }
+      },
+      "eventDifferencesPages": "A mini história tem {total} páginas; aqui você vê a capa e as primeiras {shown}.",
+      "continueKit": "Quero este kit",
+      "continueInvitation": "Quero o convite"
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",
@@ -1337,7 +1356,10 @@
       "date": "Data",
       "dateHint": "Vai no convite e nos ajuda a avisar os prazos de impressão.",
       "place": "Local",
-      "placePlaceholder": "Ex.: Salão Arco-íris ou Em casa"
+      "placePlaceholder": "Ex.: Salão Arco-íris ou Em casa",
+      "startTime": "Horário (opcional)",
+      "endTime": "Até (opcional)",
+      "timeHint": "Vai no convite."
     },
     "kit": {
       "title": "O que você vai levar?",
@@ -1358,20 +1380,22 @@
       "dedicationPlaceholder": "Ex.: Obrigado por vir à minha festa. {name}",
       "dedicationHint": "Todos os convidados recebem a mesma história, aprovada por você.",
       "toneLegend": "Tom do convite",
-      "toneSample": "“{text}”"
+      "toneSample": "“{text}”",
+      "includesTitle": "O que vem no seu kit",
+      "includesInvitationTitle": "O que vem no seu convite"
     },
     "partyPreview": {
       "invitationTitle": "O seu convite",
-      "keepsakeTitle": "A história de lembrança",
+      "keepsakeTitle": "Mini história de lembrança · {pages} páginas",
       "turning": "{name} faz {age}!",
       "priceKit": "Kit digital completo: {price}",
       "priceInvitation": "Só o convite: {price}",
       "book": {
-        "title": "Quer dar também o livro de {name}?",
-        "text": "Um livro de Famílias com a história completa e o mesmo personagem. É comprado à parte, depois do kit.",
+        "title": "E um livro só para {name}?",
+        "text": "A história completa de Famílias, com enredo próprio e {pages} páginas, para guardar. Comprado à parte, depois do kit.",
         "none": "Agora não",
-        "digital": "Digital",
-        "printed": "Impresso",
+        "digital": "Livro digital",
+        "printed": "Livro impresso",
         "priceDigital": "a partir de {price}",
         "pricePrinted": "a partir de {price}",
         "afterKit": "Anotado. Depois de pagar o kit, você cria o livro a partir do seu pedido, com o mesmo personagem.",
@@ -1380,7 +1404,8 @@
         "copied": "Link copiado",
         "shareText": "Estamos preparando a festa de {name}. Se você quiser dar uma história em que seja protagonista, pode criar aqui:"
       },
-      "differencesEdit": "Você pode editar os textos e mudar de novo o tema ou a foto."
+      "differencesEdit": "Você pode editar os textos e mudar de novo o tema ou a foto.",
+      "keepsakeText": "A mesma história para cada convidado."
     },
     "focus": {
       "title": "O que você quer trabalhar?",

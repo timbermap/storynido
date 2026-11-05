@@ -312,6 +312,17 @@ describe('books', () => {
       updateDoc(ref, { characterMode: 'avatar', avatar, updatedAt: serverTimestamp() }),
     );
     await assertFails(updateDoc(ref, { characterMode: 'robot', updatedAt: serverTimestamp() }));
+    // Hora de la fiesta: HH:MM o nada.
+    const party = { type: 'birthday', date: null, turningAge: null, theme: null, place: null };
+    await assertSucceeds(
+      updateDoc(ref, {
+        event: { ...party, startTime: '16:30', endTime: '19:30' },
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(ref, { event: { ...party, startTime: 'a las 4' }, updatedAt: serverTimestamp() }),
+    );
     // «Usamos el dibujo de…»: solo un sí o un no.
     await assertSucceeds(updateDoc(ref, { useDrawing: true, updatedAt: serverTimestamp() }));
     await assertFails(updateDoc(ref, { useDrawing: 'sí', updatedAt: serverTimestamp() }));
