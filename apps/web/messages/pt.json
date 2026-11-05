@@ -83,6 +83,9 @@
     "discardError": "Não conseguimos descartar. Tente de novo.",
     "cancel": "Cancelar"
   },
+  "Loading": {
+    "text": "Carregando…"
+  },
   "Switchers": {
     "language": "Idioma",
     "suggestedCountries": "Sugeridos",

@@ -214,3 +214,21 @@ select:not([multiple]):not([size]):disabled {
     animation: none;
   }
 }
+
+/* Carga de una página: aparece a los 300 ms (una carga rápida no parpadea). */
+@keyframes page-loading-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.page-loading {
+  animation: page-loading-in 200ms ease-out 300ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-loading {
+    animation-duration: 1ms;
+  }
+}

@@ -83,6 +83,9 @@
     "discardError": "We could not discard it. Please try again.",
     "cancel": "Cancel"
   },
+  "Loading": {
+    "text": "Loading…"
+  },
   "Switchers": {
     "language": "Language",
     "suggestedCountries": "Suggested",
