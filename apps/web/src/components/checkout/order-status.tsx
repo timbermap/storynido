@@ -175,7 +175,9 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 {t('track')}
               </a>
             )}
-            {GENERATED_STATUSES.has(order.status) && !isCards && (
+            {/* Otra copia solo de un libro impreso (el PDF ya lo tiene) o más copias de un kit: un
+                ebook se creó con ilustraciones de pantalla y no se imprime. */}
+            {GENERATED_STATUSES.has(order.status) && !isCards && (print || isKit) && (
               <Link
                 href={{
                   pathname: '/checkout/[bookId]',

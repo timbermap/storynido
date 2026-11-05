@@ -605,8 +605,6 @@
         "downloadError": "We couldn’t prepare the download. Please try again.",
         "reorder": "Order again",
         "anotherCopy": "Order another copy",
-        "paperTitle": "Want it on paper?",
-        "paperCta": "Order it printed",
         "cards": "Printed cards",
         "createWith": "Create another story with {name}",
         "characters": {
@@ -1849,7 +1847,7 @@
         "delivered": "Delivered"
       }
     },
-    "reorderSubtitle": "You are ordering the same book again, exactly as it turned out: no need to create it again.",
+    "reorderSubtitle": "You're ordering another printed copy of the same book, exactly as it turned out.",
     "kit": {
       "title": "Your celebration kit",
       "subtitle": "One design, many copies: choose the pieces and how many guests. We hand them to you ready to print at home or at a print shop.",
@@ -1941,7 +1939,16 @@
     "copies": {
       "label": "Number of copies",
       "hint": "You pay for the creation once; each extra copy costs only its printing (great for party favors)."
-    }
+    },
+    "reorderDigitalOnly": {
+      "title": "This book was created as digital and cannot be printed",
+      "text": "Its illustrations are made for screens. The PDF is already yours: download it for free anytime from My stories."
+    },
+    "reorderNoPrint": {
+      "title": "We don't print in your country yet",
+      "text": "The PDF is already yours: download it for free anytime from My stories."
+    },
+    "reorderBack": "Back to My stories"
   },
   "Pro": {
     "activation": {

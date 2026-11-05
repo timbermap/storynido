@@ -257,7 +257,7 @@ export class CheckoutService {
    */
   async quote(uid: string, body: QuoteBody) {
     const source = body.sourceOrderId
-      ? await this.reorderSource(uid, body.sourceOrderId, body.format)
+      ? await this.reorderSource(uid, body.sourceOrderId, body.format, body.kit !== null)
       : null;
     const loaded = source ?? (await this.loadBook(uid, body));
     const routing =
@@ -270,11 +270,14 @@ export class CheckoutService {
     return {
       snapshot: result.snapshot,
       couponError: result.couponError,
-      // Recompra de un libro creado en digital: no se imprime (ilustraciones de pantalla).
+      // Otra copia de un libro ya comprado: solo impresa (el PDF ya lo tiene). El kit de
+      // Eventos sigue siendo digital.
       availableFormats:
-        source && !source.printable
+        source && body.kit
           ? (['digital'] as BookFormat[])
-          : await this.availableFormats(body.country, loaded.pages),
+          : (await this.availableFormats(body.country, loaded.pages)).filter(
+              (format) => !source || format !== 'digital',
+            ),
     };
   }
 
@@ -807,6 +810,7 @@ export class CheckoutService {
       user.uid,
       sourceOrderId,
       body.format,
+      body.kit !== null,
     );
     const full = { ...body, bookId };
     this.checkAddress(full);
@@ -829,8 +833,17 @@ export class CheckoutService {
     });
   }
 
-  /** Pedido original de una recompra: propio, terminado y con resolución para el formato. */
-  private async reorderSource(uid: string, sourceOrderId: string, format: BookFormat) {
+  /**
+   * Pedido original de una recompra: propio y terminado. Un libro se vuelve a pedir solo impreso
+   * (el PDF ya lo tiene y se descarga gratis) y solo si se creó para imprimir; el kit de Eventos
+   * (más copias digitales) no tiene esas reglas.
+   */
+  private async reorderSource(
+    uid: string,
+    sourceOrderId: string,
+    format: BookFormat,
+    kit: boolean,
+  ) {
     const sourceRef = this.db.collection(COLLECTIONS.orders).doc(sourceOrderId);
     const source = (await sourceRef.get()).data();
     if (source?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
@@ -841,11 +854,18 @@ export class CheckoutService {
     const sourceItems = (source.items ?? []) as { format: BookFormat }[];
     // Las ilustraciones de un libro digital son de pantalla (1K): no alcanzan para imprimir.
     const printable = sourceItems.some((item) => item.format !== 'digital');
-    if (format !== 'digital' && !printable) {
+    if (!kit && !printable) {
       throw new AppError(
         409,
         'print_unavailable',
-        'Este libro se creó en digital: para imprimirlo hace falta crearlo en alta resolución.',
+        'Este libro se creó en digital y no se puede imprimir.',
+      );
+    }
+    if (!kit && format === 'digital') {
+      throw new AppError(
+        400,
+        'bad_request',
+        'El PDF ya lo tienes: descárgalo gratis desde Mis cuentos. La copia nueva es impresa.',
       );
     }
     const layout = (
@@ -854,7 +874,7 @@ export class CheckoutService {
     const digital = layout?.output?.files?.find((file) => file.format === 'digital');
     const bookId = String(source.bookId);
     const book = (await this.db.collection(COLLECTIONS.books).doc(bookId).get()).data() ?? {};
-    return { source, book, bookId, pages: digital ? digital.pages - 2 : 0, printable };
+    return { source, book, bookId, pages: digital ? digital.pages - 2 : 0 };
   }
 
   private checkAddress(body: CheckoutBody) {

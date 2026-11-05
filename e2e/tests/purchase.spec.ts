@@ -179,17 +179,15 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   const shelf = page.locator('#panel-terminados > ul > li');
   await expect(shelf).toHaveCount(1, { timeout: 30_000 });
   await expect(shelf.first()).toContainText('Tapa');
+  // Otra copia: solo impresa (el PDF ya lo tiene), arranca en el formato que compró.
   await shelf.first().getByRole('link', { name: 'Pedir otra copia' }).click();
-  await expect(body(page)).toContainText('Pides de nuevo el mismo libro');
-  await page.locator('label', { hasText: 'Ebook' }).click();
-  await expect(page.locator('aside dl')).toContainText('Total');
-  await page.getByRole('button', { name: 'Pagar' }).click();
-  await expect(page).toHaveURL(/\/es\/pedido\//);
-  await page.getByRole('button', { name: 'Simular el pago' }).click();
-  await expect(body(page)).toContainText('¡Tu libro está listo!', { timeout: 120_000 });
+  await expect(body(page)).toContainText('Pides otra copia impresa del mismo libro');
+  await expect(page.locator('label', { hasText: 'Ebook' })).toHaveCount(0);
+  await expect(page.locator('input[name=format][value=softcover]')).toBeChecked();
+  await expect(page.locator('aside dl')).toContainText('Envío: se calcula con tu dirección');
 
   await page.goto('/es/mis-cuentos?estado=terminados');
-  await expect(shelf).toHaveCount(2, { timeout: 30_000 });
+  await expect(shelf).toHaveCount(1, { timeout: 30_000 });
   await expectNoHorizontalScroll(page);
   await page.goto('/es/cuenta');
   await page.locator('#children button', { hasText: 'Borrar datos' }).click();

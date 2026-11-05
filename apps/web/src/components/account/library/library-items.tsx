@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Loader2, Printer, RotateCcw, Trash2 } from 'lucide-react';
+import { Download, Loader2, RotateCcw, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState, type ReactNode } from 'react';
 
@@ -304,14 +304,14 @@ export function ShelfItem({
 
   const title = order.title ?? tOrders('finishedUntitled');
   const orderHref = { pathname: '/order/[orderId]', params: { orderId: order.id } } as const;
-  const reorder = (extra: Record<string, string> = {}) =>
-    ({
-      pathname: '/checkout/[bookId]',
-      params: { bookId: order.bookId },
-      query: { reorder: order.id, ...(info?.kit ? { kit: '1' } : {}), ...extra },
-    }) as const;
-  // Un ebook (no un kit) se puede pedir impreso: el checkout arranca en un formato impreso.
-  const ebook = !order.print && info !== null && !info.kit;
+  const reorder = {
+    pathname: '/checkout/[bookId]',
+    params: { bookId: order.bookId },
+    query: { reorder: order.id, ...(info?.kit ? { kit: '1' } : {}) },
+  } as const;
+  // Otra copia solo de un libro impreso (el PDF ya lo tiene) o más copias de un kit. Un ebook
+  // se creó con ilustraciones de pantalla: no se imprime, se ve y se descarga.
+  const canReorder = order.print || info?.kit === true;
 
   return (
     <li className="grid content-start gap-2">
@@ -351,9 +351,9 @@ export function ShelfItem({
             {t('download')}
           </button>
         )}
-        {!cards && (
+        {!cards && canReorder && (
           <Link
-            href={reorder()}
+            href={reorder}
             data-track={order.print ? 'pedir-copia' : 'pedir-de-nuevo'}
             className={ACTION}
           >
@@ -366,19 +366,6 @@ export function ShelfItem({
         <p role="alert" className="text-sm text-destructive">
           {t('downloadError')}
         </p>
-      )}
-      {ebook && (
-        <div className="grid gap-1 rounded-xl bg-muted p-3 text-sm">
-          <p className="font-bold">{t('paperTitle')}</p>
-          <Link
-            href={reorder({ formato: 'impreso' })}
-            data-track="pedir-impreso"
-            className={ACTION}
-          >
-            <Printer className="size-4" aria-hidden="true" />
-            {t('paperCta')}
-          </Link>
-        </div>
       )}
     </li>
   );

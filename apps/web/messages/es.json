@@ -605,8 +605,6 @@
         "downloadError": "No pudimos preparar la descarga. Intenta de nuevo.",
         "reorder": "Pedir de nuevo",
         "anotherCopy": "Pedir otra copia",
-        "paperTitle": "¿Lo quieren en papel?",
-        "paperCta": "Pedirlo impreso",
         "cards": "Tarjetas impresas",
         "createWith": "Crear otro cuento con {name}",
         "characters": {
@@ -1849,7 +1847,7 @@
         "delivered": "Entregado"
       }
     },
-    "reorderSubtitle": "Pides de nuevo el mismo libro, tal como quedó: no hace falta crearlo otra vez.",
+    "reorderSubtitle": "Pides otra copia impresa del mismo libro, tal como quedó.",
     "kit": {
       "title": "Tu kit para la celebración",
       "subtitle": "Un diseño, muchas copias: elige las piezas y cuántos invitados. Te las damos listas para imprimir en casa o en una imprenta.",
@@ -1941,7 +1939,16 @@
     "copies": {
       "label": "Cantidad de ejemplares",
       "hint": "Pagas la creación una sola vez; cada ejemplar extra cuesta solo su impresión (ideal para souvenirs)."
-    }
+    },
+    "reorderDigitalOnly": {
+      "title": "Este libro se creó en digital y no se puede imprimir",
+      "text": "Sus ilustraciones son para pantalla. El PDF ya es tuyo: lo descargas gratis cuando quieras desde Mis cuentos."
+    },
+    "reorderNoPrint": {
+      "title": "Todavía no imprimimos en tu país",
+      "text": "El PDF ya es tuyo: lo descargas gratis cuando quieras desde Mis cuentos."
+    },
+    "reorderBack": "Volver a Mis cuentos"
   },
   "Pro": {
     "activation": {
