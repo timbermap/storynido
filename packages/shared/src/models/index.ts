@@ -25,3 +25,4 @@ export * from './delivery';
 export * from './product-pricing';
 export * from './art-direction';
 export * from './price-table';
+export * from './page-layout';

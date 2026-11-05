@@ -46,6 +46,12 @@ import {
   type ScenePlan,
   catalogPrices,
   SAME_OUTFIT,
+  calmSideFor,
+  layoutSceneNote,
+  pageLayout,
+  pagesPerScene,
+  type BookLayout,
+  type PageLayout,
   withCurrentGuards,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
@@ -64,7 +70,12 @@ import {
 } from '../pdf/kit';
 import { storyWords } from '../pdf/puzzles';
 import { launchBrowser, renderPdf, renderPng } from '../pdf/render';
-import { textPlacements, type CalmSide, type PlacementPage } from '../pdf/placement';
+import {
+  textPlacements,
+  type CalmSide,
+  type PlacementPage,
+  type TextPlacement,
+} from '../pdf/placement';
 import { FORMAT_SPECS, pageSizeMm, printablePages, type FormatSpec } from '../pdf/spec';
 import {
   DENSITY_LAYOUT,
@@ -128,6 +139,8 @@ export interface BookSnapshot {
   companion?: { name: string; look: string; sheetPath: string } | null;
   /** Ilustraciones aprobadas en la vista previa, copiadas al pedido: índice -> ruta. */
   approved: Record<string, string>;
+  /** Armado por edad (page-layout.ts); ausente en los pedidos anteriores: panel de siempre. */
+  pageLayout?: BookLayout | null;
 }
 
 export interface QaLimits {
@@ -213,12 +226,47 @@ export function mustKeepLabels(traits: CharacterTraits, mustKeep: readonly MustK
  * las pares. La maquetación prefiere ese mismo lado (antes lo ignoraba y a veces tapaba caras).
  */
 export function calmSideOf(scene: ScenePlan | null | undefined): CalmSide | null {
-  if (!scene) return null;
-  return scene.pageIndex % 2 === 1 ? 'top' : 'bottom';
+  return scene ? calmSideFor(scene.pageIndex) : null;
 }
 
-/** Escena de una página con lo que el plan pide ver y evitar. */
-function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: string): string {
+/** Armado de la escena `index` (0 = primera) del libro congelado. */
+export function layoutOf(
+  snapshot: Pick<BookSnapshot, 'pageLayout' | 'pages' | 'scenes' | 'contentType'>,
+  index: number,
+): PageLayout {
+  return pageLayout({
+    layout: snapshot.pageLayout,
+    words: countWords(snapshot.pages[index]?.text ?? ''),
+    pageIndex: snapshot.scenes?.[index]?.pageIndex ?? snapshot.pages[index]?.index ?? index + 1,
+    contentType: snapshot.contentType,
+  });
+}
+
+/**
+ * Armado con el lado que eligió la maquetación (el pedido en el prompt, salvo que tape una cara).
+ * Sin armado por edad (pedidos anteriores) queda el panel de siempre: null.
+ */
+export function placedLayout(
+  snapshot: Pick<BookSnapshot, 'pageLayout' | 'pages' | 'scenes' | 'contentType'>,
+  index: number,
+  placement: TextPlacement | undefined,
+): PageLayout | null {
+  if (!snapshot.pageLayout) return null;
+  const layout = layoutOf(snapshot, index);
+  if (layout.kind !== 'calm' && layout.kind !== 'vignette') return layout;
+  return { ...layout, side: placement?.startsWith('top') ? 'top' : 'bottom' };
+}
+
+/**
+ * Escena de una página con lo que el plan pide ver y evitar. `layout`: el armado de la página
+ * (pide la zona calma, el tercio que se funde en el papel o la ilustración entera).
+ */
+function pageScene(
+  prompt: string,
+  scene: ScenePlan | null | undefined,
+  hint?: string,
+  layout?: PageLayout,
+): string {
   const visible = scene?.mustBeVisible.length
     ? ` Must be visible: ${scene.mustBeVisible.join(', ')}.`
     : '';
@@ -231,12 +279,12 @@ function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: s
   const fix = hint
     ? ` Make sure that: ${hint}. Draw exactly this scene, with the protagonist clearly visible.`
     : '';
-  // Espacio calmo para el texto: se alterna arriba y abajo para que las páginas no sean iguales.
-  const calm =
-    calmSideOf(scene) === 'top'
-      ? ' Keep the top third of the image calm and simple (sky, wall or soft background) for the text, with no faces there.'
-      : ' Keep the bottom third of the image calm and simple (floor, grass or soft background) for the text, with no faces there.';
-  return `${prompt}${visible}${hidden}${continuity}${outfit}${fix}${scene ? calm : ''} No text, letters or words anywhere in the image.`;
+  // Espacio para el texto según el armado: se alterna arriba y abajo para que las páginas no
+  // sean iguales (con páginas enfrentadas, la ilustración va entera).
+  const calm = scene
+    ? layoutSceneNote(layout ?? { kind: 'overlay', side: calmSideFor(scene.pageIndex) })
+    : '';
+  return `${prompt}${visible}${hidden}${continuity}${outfit}${fix}${calm} No text, letters or words anywhere in the image.`;
 }
 
 /** Texto que se suma a la escena en cada reintento (1: ninguno). */
@@ -440,7 +488,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const baseScene =
       index === 0
         ? pageScene(coverScene(snapshot.pages[0]?.illustrationPrompt, snapshot.title), null, hint)
-        : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint)}${castNote(snapshot.cast)}`;
+        : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint, layoutOf(snapshot, index - 1))}${castNote(snapshot.cast)}`;
     const reference = await load(snapshot.character.sheetPath);
     const companion = snapshot.companion ?? null;
     const references = companion ? [reference, await load(companion.sheetPath)] : [reference];
@@ -535,6 +583,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           activityPages?: number;
           artDirection?: string | null;
           companion?: { name: string; look: string; imagePath: string } | null;
+          pageLayout?: BookLayout | null;
         }
       | undefined;
     if (!book || preview?.stage !== 'complete' || !preview.character?.approvedAt) {
@@ -637,6 +686,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       imagePromptTemplate: String(story.imagePromptTemplate),
       stylePrompt: String(style.promptModifier),
       artDirection: preview.artDirection ?? null,
+      // Armado por edad: solo si la muestra lo trae (las anteriores conservan su huella).
+      ...(preview.pageLayout ? { pageLayout: preview.pageLayout } : {}),
       character: {
         description: describeCharacter(name, sheet, traits, mustKeep),
         // La ropa de la lámina también se revisa en cada página (salvo que el texto la cambie).
@@ -1014,7 +1065,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
 
     // Dónde va el texto de cada página: la región más calma, del lado pedido y sin tapar caras.
     const placements = await textPlacements(await placementPages(snapshot, sources.slice(1)), {
-      allowCorners: snapshot.textDensity !== 'rich',
+      // Con el armado por edad el texto va arriba o abajo (zona calma o papel fundido).
+      allowCorners: snapshot.textDensity !== 'rich' && !snapshot.pageLayout,
     });
     const qr = {
       svg: await QRCode.toString(`https://${PUBLIC_BRAND_DOMAIN}`, {
@@ -1055,7 +1107,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     try {
       for (const format of formats) {
         // Dedicatoria + páginas + actividades + fin (las tapas van aparte).
-        const expectedInterior = snapshot.pages.length + activities.length + 2;
+        // Con páginas enfrentadas, cada escena ocupa dos páginas (texto + ilustración).
+        const expectedInterior =
+          snapshot.pages.length * pagesPerScene(snapshot.pageLayout) + activities.length + 2;
         // La tapa y el empaquetado los define la imprenta elegida al pagar (si tiene los suyos).
         const fileSpec =
           format !== 'digital' && printer?.fileSpec
@@ -1118,6 +1172,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             text: page.text,
             image: prepared[index + 1]?.uri ?? '',
             placement: placements[index],
+            layout: placedLayout(snapshot, index, placements[index]),
           })),
           activities,
           synopsis: snapshot.synopsis ?? null,
@@ -1601,7 +1656,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       }),
     );
     const placements = await textPlacements(await placementPages(snapshot, sources.slice(1)), {
-      allowCorners: snapshot.textDensity !== 'rich',
+      // Con el armado por edad el texto va arriba o abajo (zona calma o papel fundido).
+      allowCorners: snapshot.textDensity !== 'rich' && !snapshot.pageLayout,
     });
     const spec: FormatSpec = FORMAT_SPECS.digital;
     const size = pageSizeMm(spec);
@@ -1641,6 +1697,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         text: page.text,
         image: prepared[index + 1] ?? '',
         placement: placements[index],
+        layout: placedLayout(snapshot, index, placements[index]),
       })),
       activities,
       synopsis: snapshot.synopsis ?? null,

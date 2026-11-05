@@ -6,7 +6,12 @@ import {
   COLLECTIONS,
   CHARACTER_REFERENCE_SCENE,
   ageMismatch,
+  bookLayout,
+  countWords,
   editorialPlan,
+  layoutSceneNote,
+  pageLayout,
+  scenesFor,
   withEventWordCap,
   nameIssues,
   repairNameAccents,
@@ -295,6 +300,13 @@ export class PreviewService {
             index: page.index,
             text: page.text,
             imageUrl: page.previewImagePath ? await url(page.previewImagePath) : null,
+            // Cómo se arma en el libro: el visor la muestra igual que el PDF.
+            layout: pageLayout({
+              layout: preview.pageLayout ?? null,
+              words: countWords(page.text),
+              pageIndex: page.index,
+              contentType: book.contentType ?? 'story',
+            }),
           })),
         ),
         totalPages: preview.interiorPages ?? preview.pages.length,
@@ -619,6 +631,8 @@ export class PreviewService {
     // Nombres que tienen que aparecer tal cual: el del protagonista y el apodo de los recuerdos.
     const requiredNames = [String(child.name), memories?.nickname ?? ''].filter(Boolean);
 
+    // Armado por edad (page-layout.ts): se decide con la muestra y queda con ella.
+    const layout = bookLayout(Number(child.age), plan.contentType);
     const request = {
       language: book.language,
       childName: String(child.name),
@@ -631,8 +645,9 @@ export class PreviewService {
       // El nombre del niño en el título del catálogo ("[Nombre] y el valle…"), no la marca.
       storyTitle: withChildName(story.title[book.language], String(child.name)),
       lessons: lessonPrompts,
-      // Libro de actividades: la historia breve que les da contexto.
-      pageCount: Math.max(plan.narrativePages, PREVIEW_ILLUSTRATED_PAGES),
+      // Libro de actividades: la historia breve que les da contexto. Con páginas enfrentadas
+      // (9 años en adelante), cada escena ocupa dos páginas: la mitad de escenas.
+      pageCount: Math.max(scenesFor(plan.narrativePages, layout), PREVIEW_ILLUSTRATED_PAGES),
       wordsPerPage: plan.words,
       mustInclude: requiredNames.slice(1),
     };
@@ -794,6 +809,7 @@ export class PreviewService {
       artDirection: direction,
       activityPages: plan.activityPages,
       words: plan.words,
+      pageLayout: layout,
       plan: storyPlan,
       generatedAt: new Date(),
     };
@@ -1075,9 +1091,20 @@ export class PreviewService {
       // Todas usan la lámina aprobada como referencia, así que se generan en paralelo.
       const [cover, ...illustrated] = await Promise.all([
         illustrate(coverScene(preview.pages[0]?.illustrationPrompt, preview.title), 1),
-        ...preview.pages
-          .slice(0, PREVIEW_ILLUSTRATED_PAGES)
-          .map((page) => illustrate(page.illustrationPrompt, page.index + 2)),
+        ...preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map((page) =>
+          illustrate(
+            // El espacio para el texto según el armado (zona calma, papel fundido o entera).
+            `${page.illustrationPrompt}${layoutSceneNote(
+              pageLayout({
+                layout: preview.pageLayout ?? null,
+                words: countWords(page.text),
+                pageIndex: page.index,
+                contentType: book.contentType ?? 'story',
+              }),
+            )}`,
+            page.index + 2,
+          ),
+        ),
       ]);
 
       const folder = `previews/${uid}/${bookId}`;

@@ -53,6 +53,7 @@ function viewerPages(preview: PreviewData): ViewerPage[] {
       imageUrl: page.imageUrl,
       text: page.text,
       number: page.index + 1,
+      layout: page.layout,
     })),
     { key: 'end', kind: 'end', imageUrl: null, text: null },
   ];
