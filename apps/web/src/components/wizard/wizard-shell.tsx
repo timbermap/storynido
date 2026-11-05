@@ -209,7 +209,8 @@ export function WizardShell({
                   disabled={!reachable}
                   aria-current={active ? 'step' : undefined}
                   onClick={() => {
-                    onJump(first);
+                    // Ya en ese paso: nada que hacer.
+                    if (first !== current) onJump(first);
                   }}
                   className={cn(
                     'rounded-full px-3 py-1 transition disabled:cursor-not-allowed',
@@ -247,7 +248,8 @@ export function WizardShell({
 
       <div className="mt-6 flex items-center justify-between gap-3">
         {onBack ? (
-          <Button variant="ghost" onClick={onBack}>
+          // Secundario pero a la vista (con borde), a la izquierda de «Siguiente».
+          <Button size="lg" variant="outline" onClick={onBack}>
             <ArrowLeft aria-hidden="true" />
             {t('back')}
           </Button>

@@ -2,12 +2,13 @@
 
 import { Loader2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { isCreatorDraftEmpty, registerCreatorExit } from '@/lib/creator-exit';
 import { clearStepDrafts } from '@/lib/use-step-draft';
 import { cn } from '@/lib/utils';
 
@@ -42,6 +43,19 @@ export function ExitCreator({ bookId }: { bookId: string }) {
     };
   }, [open, busy]);
 
+  // Abre el diálogo; un borrador sin nada escrito sale directo (no hay nada que guardar ni perder).
+  const requestExit = useCallback(() => {
+    if (isCreatorDraftEmpty(bookId)) {
+      router.push('/my-stories');
+      return;
+    }
+    setOpen(true);
+    setConfirming(false);
+    setFailed(false);
+  }, [bookId, router]);
+  // El «atrás» del navegador en el primer paso pide salir igual que la X.
+  useEffect(() => registerCreatorExit(requestExit), [requestExit]);
+
   const close = () => {
     if (!busy) setOpen(false);
   };
@@ -63,11 +77,7 @@ export function ExitCreator({ bookId }: { bookId: string }) {
     <>
       <button
         type="button"
-        onClick={() => {
-          setOpen(true);
-          setConfirming(false);
-          setFailed(false);
-        }}
+        onClick={requestExit}
         className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-foreground/80 hover:text-primary"
       >
         {/* Una X (salir del creador), no una flecha: «Volver» al paso anterior está abajo. */}
