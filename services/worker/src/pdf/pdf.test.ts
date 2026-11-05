@@ -189,16 +189,15 @@ describe.skipIf(!chromePath())('PDF', () => {
     expect(html.match(/class="cover-name"/g)).toHaveLength(1);
   });
 
-  it('mini cuento: tapa en Fraunces, letra más grande y panel más liviano', () => {
+  it('mini cuento: la tapa con la letra a mano de la muestra, letra más grande y panel más liviano', () => {
     const regular = digitalHtml(book(), FORMAT_SPECS.digital);
     const mini = digitalHtml(book({ mini: true }), FORMAT_SPECS.digital);
-    expect(mini).toContain('<h1 class="title brand"');
-    expect(mini).toContain('<span class="cover-name" style="font-size:52pt">Martín</span>');
-    expect(mini).not.toContain('class="l"');
+    // La misma tapa que se vio en la muestra antes de pagar.
+    expect(mini).toContain('<span class="l"');
+    expect(mini).not.toContain('title brand');
     expect(mini).toContain('class="panel bottom mini"');
     const fontPt = (html: string) => Number(/data-font-pt="([\d.]+)"/.exec(html)?.[1]);
     expect(fontPt(mini)).toBeGreaterThan(fontPt(regular));
-    expect(regular).not.toContain('title brand');
   });
 
   it('mínimo de la imprenta: páginas para dibujar antes del cierre', () => {
