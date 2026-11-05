@@ -43,6 +43,36 @@ const jsonReply = (
 });
 
 describe('Vertex AI', () => {
+  it('estricto por defecto; describir una foto bloquea solo lo alto y no asume que es un chico', async () => {
+    const calls: {
+      safetySettings?: { threshold: string }[];
+      contents: { parts: { text?: string }[] }[];
+    }[] = [];
+    const client = clientWith(() => jsonReply({ ok: true }), calls);
+    await client.generate('gemini-3.5-flash', [{ text: 'hola' }], {});
+    expect(
+      calls[0]?.safetySettings?.every((item) => item.threshold === 'BLOCK_LOW_AND_ABOVE'),
+    ).toBe(true);
+
+    const blockedClient = clientWith(
+      () => ({ json: { promptFeedback: { blockReason: 'SAFETY' }, candidates: [] } }),
+      calls,
+    );
+    await expect(
+      new VertexTextProvider(blockedClient).describeCharacter({
+        bytes: new Uint8Array([1]),
+        mimeType: 'image/jpeg',
+      }),
+    ).rejects.toThrow(/bloqueado por seguridad \(blockReason=SAFETY\)/);
+    const describe = calls[1];
+    expect(describe?.safetySettings?.every((item) => item.threshold === 'BLOCK_ONLY_HIGH')).toBe(
+      true,
+    );
+    const prompt = describe?.contents[0]?.parts.map((part) => part.text ?? '').join('') ?? '';
+    expect(prompt).toContain('main person in this photo');
+    expect(prompt).toContain('Do not guess identity, ethnicity, name or location');
+  });
+
   it('calcula el costo con la tabla de precios y usa el peor caso para modelos desconocidos', () => {
     // 1.000 tokens de entrada a 0,5 + 500 de salida a 3 USD por millón = 2.000 micro dólares.
     expect(

@@ -445,6 +445,30 @@ describe('fotos rechazadas por el análisis', () => {
     }
   });
 
+  it('si la IA no puede leer el recorte, prueba una vez con la foto completa', async () => {
+    const registry = registryWith();
+    const describe = vi
+      .spyOn(registry.ai().text, 'describeCharacter')
+      .mockRejectedValueOnce(
+        new ProviderError('vertex', 'ficha del personaje: bloqueado por seguridad', true),
+      );
+    const { app } = await appWith(registry);
+    try {
+      await seedDraft('ana', 'b9');
+      const { processed } = await upload(
+        app,
+        'token-ana',
+        'b9',
+        await consent(app, 'token-ana'),
+        await jpeg(),
+      );
+      expect(processed.json()).toMatchObject({ status: 'valid' });
+      expect(describe).toHaveBeenCalledTimes(2);
+    } finally {
+      await app.close();
+    }
+  });
+
   it('la IA no puede leer la foto: se rechaza al subir, se borra y se pide otra', async () => {
     const registry = registryWith();
     vi.spyOn(registry.ai().text, 'describeCharacter').mockRejectedValue(

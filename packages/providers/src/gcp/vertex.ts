@@ -92,11 +92,18 @@ const SAFETY_CATEGORIES = [
   'HARM_CATEGORY_DANGEROUS_CONTENT',
 ] as const;
 
-/** Estricto por defecto (cuentos, moderación, ilustraciones). */
-const SAFETY_SETTINGS = SAFETY_CATEGORIES.map((category) => ({
-  category,
-  threshold: 'BLOCK_LOW_AND_ABOVE',
-}));
+export type SafetyLevel = 'strict' | 'onlyHigh';
+
+/**
+ * Estricto por defecto (cuentos, moderación, ilustraciones). Para solo describir una foto ya
+ * revisada por Cloud Vision alcanza con bloquear lo alto: con el estricto, selfies comunes salían
+ * «bloqueadas por seguridad». Los bloqueos fijos de Google (PROHIBITED_CONTENT, menores) siguen.
+ */
+export const safetySettings = (level: SafetyLevel = 'strict') =>
+  SAFETY_CATEGORIES.map((category) => ({
+    category,
+    threshold: level === 'onlyHigh' ? 'BLOCK_ONLY_HIGH' : 'BLOCK_LOW_AND_ABOVE',
+  }));
 
 export interface VertexOptions {
   projectId: string;
@@ -134,6 +141,7 @@ export class VertexClient {
     model: string,
     parts: Part[],
     generationConfig: Record<string, unknown>,
+    options: { safety?: SafetyLevel } = {},
   ): Promise<{ response: GenerateContentResponse; usage: AiUsage }> {
     const location = this.options.location ?? 'global';
     const host =
@@ -142,7 +150,7 @@ export class VertexClient {
     const body = JSON.stringify({
       contents: [{ role: 'user', parts }],
       generationConfig,
-      safetySettings: SAFETY_SETTINGS,
+      safetySettings: safetySettings(options.safety),
     });
     const doFetch = this.options.fetch ?? fetch;
 
@@ -463,12 +471,14 @@ export class VertexTextProvider implements AITextProvider {
       [
         imagePart(photo),
         {
-          text: `Describe only the visible physical traits of the child in this photo so an illustrator can draw them consistently.
+          text: `Describe only the visible physical traits of the main person in this photo (a child or an adult: the character can be anyone in the family) so an illustrator can draw them consistently.
 Use short English phrases. Do not guess identity, ethnicity, name or location. Hair: color, length and texture.
 Distinctive features only if clearly visible (glasses, freckles, dimples, missing teeth...).`,
         },
       ],
       { temperature: 0.2, responseMimeType: 'application/json', responseSchema: CHARACTER_SCHEMA },
+      // Solo describe una foto (ya revisada por Cloud Vision): bloquea solo lo alto.
+      { safety: 'onlyHigh' },
     );
     const raw = parseJson(response, 'ficha del personaje') as CharacterSheetResult['sheet'] & {
       skinToneCategory: Avatar['skinTone'];
