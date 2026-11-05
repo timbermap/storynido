@@ -467,7 +467,10 @@ function stickers(book: KitBook, copies: number) {
   };
 }
 
-/** Etiquetas para la bolsita de souvenirs (63×89 mm), con el agujero marcado. */
+/**
+ * Etiquetas para la bolsita de souvenirs (63×89 mm). El agujero va en una franja crema arriba, fuera
+ * de la ilustración (antes caía sobre la cabeza del personaje), y la imagen se encuadra en la cara.
+ */
 function favorTags(book: KitBook, copies: number) {
   const paper = PAPER_MM[book.paper];
   const tag = { width: 63, height: 89 };
@@ -489,15 +492,16 @@ function favorTags(book: KitBook, copies: number) {
         const left = gapX + (index % columns) * (tag.width + gapX);
         const top = gapY + Math.floor(index / columns) * (tag.height + gapY);
         const heading = guest === null ? t(book, 'tag') : t(book, 'tagFor', { guest });
-        return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><span class="hole"></span><img src="${artAt(book, index + 1)}" alt=""><p class="display">${heading}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
+        return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><div class="strip"><span class="hole"></span></div><img src="${artAt(book, index + 1)}" alt=""><p class="display">${heading}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
       })
       .join('');
     return `<section class="page" data-label="etiquetas">${items}<p class="license">${t(book, 'license', { copies })} · ${t(book, 'cut')}</p></section>`;
   });
   const css = `
 .tag { position: absolute; width: ${String(tag.width)}mm; height: ${String(tag.height)}mm; border: 0.3mm dashed #b9acbf; border-radius: 4mm; overflow: hidden; background: ${PAPER}; text-align: center; }
-.tag .hole { position: absolute; top: 4mm; left: 50%; width: 5mm; height: 5mm; margin-left: -2.5mm; border-radius: 50%; border: 0.3mm solid #b9acbf; background: #fff; z-index: 1; }
-.tag img { display: block; width: 100%; height: 50mm; object-fit: cover; object-position: 50% 60%; }
+.tag .strip { display: flex; align-items: center; justify-content: center; height: 10mm; background: ${PAPER}; }
+.tag .hole { width: 5mm; height: 5mm; border-radius: 50%; border: 0.3mm solid #b9acbf; background: #fff; }
+.tag img { display: block; width: 100%; height: 46mm; object-fit: cover; object-position: 50% 25%; }
 .tag p { margin: 3mm 3mm 1mm; font-size: 12pt; }
 .tag small { font-size: 8.5pt; font-weight: 700; color: ${LAVENDER}; }`;
   return { css, pages };

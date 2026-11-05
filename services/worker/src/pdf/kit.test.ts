@@ -219,3 +219,11 @@ describe('datos de la familia', () => {
     expect(html).toContain('AAAA');
   });
 });
+
+describe('etiquetas de la bolsita', () => {
+  it('el agujero va en una franja propia, fuera de la ilustración', () => {
+    const html = kitPieceDocument(book('birthday'), 'favor_tags', 20).html;
+    expect(html).toContain('<div class="strip"><span class="hole"></span></div><img');
+    expect(html).toContain('object-position: 50% 25%');
+  });
+});
