@@ -1,4 +1,5 @@
 import type { Browser } from 'playwright-core';
+import { letterJitter } from '@storynido/shared';
 import sharp from 'sharp';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -172,6 +173,18 @@ describe.skipIf(!chromePath())('PDF', () => {
     expect(last({ educationalNotice: true, language: 'en' })).toContain(
       'professional or clinical intervention',
     );
+  });
+
+  it('portada con letra a mano: el nombre grande, cada letra con el mismo giro que la web', () => {
+    const html = digitalHtml(book(), FORMAT_SPECS.digital);
+    expect(html).toContain("font-family:'Amatic SC'");
+    expect(html).toContain('<span class="cover-small">La gran aventura de</span>');
+    const [first] = letterJitter('Martín');
+    expect(html).toContain(
+      `<span class="l" style="transform:translateY(${String(first?.shift)}em) rotate(${String(first?.rotate)}deg)">M</span>`,
+    );
+    // El nombre no se repite debajo del título (antes salía dos veces).
+    expect(html.match(/class="cover-name"/g)).toHaveLength(1);
   });
 
   it('mínimo de la imprenta: páginas para dibujar antes del cierre', () => {

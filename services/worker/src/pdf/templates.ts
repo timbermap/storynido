@@ -1,4 +1,9 @@
-import type { ActivitySpec, PrintFileSpec } from '@storynido/shared';
+import {
+  letterJitter,
+  splitCoverTitle,
+  type ActivitySpec,
+  type PrintFileSpec,
+} from '@storynido/shared';
 
 import { fontFaces } from './fonts';
 import { mazeSvg } from './maze';
@@ -130,7 +135,9 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .panel.top-right { right: ${String(inset)}mm; top: ${String(inset)}mm; width: 60%; }
 .panel.bottom-left { left: ${String(inset)}mm; bottom: ${String(inset)}mm; width: 60%; }
 .panel.bottom-right { right: ${String(inset)}mm; bottom: ${String(inset)}mm; width: 60%; }
-.cover-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 50pt; line-height: 1; color: #79518c; margin-top: 3mm; letter-spacing: -0.02em; }
+.cover-small { display: block; font-family: 'Amatic SC', 'Fraunces', serif; font-weight: 700; font-size: 34pt; line-height: 1; }
+.cover-name { display: block; font-family: 'Amatic SC', 'Fraunces', serif; font-weight: 700; line-height: 0.95; text-transform: uppercase; margin: 1mm 0; }
+.cover-name .l { display: inline-block; white-space: pre; }
 .back { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; gap: 6mm; }
 .back .synopsis { font-family: 'Fraunces', serif; font-size: 15pt; line-height: 1.5; max-width: 140mm; }
 .back .qr { display: flex; align-items: center; gap: 4mm; font-size: 9.5pt; color: #69616c; }
@@ -140,7 +147,7 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .story p + p { margin-top: 0.6em; }
 .center { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .title-band { position: absolute; left: 0; right: 0; top: 0; padding: ${String(inset)}mm ${String(inset)}mm 22mm; background: linear-gradient(to bottom, rgba(255,250,243,0.96) 55%, rgba(255,250,243,0)); text-align: center; }
-.title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 40pt; line-height: 1.05; letter-spacing: -0.025em; }
+.title { font-family: 'Amatic SC', 'Fraunces', serif; font-weight: 700; font-size: 40pt; line-height: 1; margin: 0; color: ${INK}; }
 .coloring .art { object-fit: contain; background: #fff; }
 .activity { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; gap: 6mm; }
 .activity .kicker { font-size: 10pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #79518c; }
@@ -244,10 +251,25 @@ function activityPage(book: LayoutBook, activity: ActivitySpec, index: number): 
 
 /** Tapa: el título siempre con el nombre del protagonista, bien grande (una tapa vendible). */
 function coverFront(book: LayoutBook, spec: FormatSpec): string {
-  const hasName = book.title.toLocaleLowerCase().includes(book.childName.toLocaleLowerCase());
-  const name = hasName ? '' : `<p class="cover-name">${escapeHtml(book.childName)}</p>`;
+  // Letra a mano (Amatic SC), igual que en la web: lo de antes del nombre, el nombre grande con
+  // cada letra levemente girada (misma semilla que la muestra) y lo de después. Solo el giro: el
+  // filtro de crayón de la web rasterizaría el texto en la imprenta.
+  const parts = splitCoverTitle(book.title, book.childName);
+  const name = parts.name || book.childName;
+  const before = parts.name ? parts.before : book.title;
+  const after = parts.name ? parts.after : '';
+  // Amatic es angosta: el nombre va grande y baja con los nombres largos para que entre.
+  const nameSize = Math.min(78, Math.round(560 / Math.max(Array.from(name).length, 4)));
+  const letters = letterJitter(name)
+    .map(
+      (letter) =>
+        `<span class="l" style="transform:translateY(${String(letter.shift)}em) rotate(${String(letter.rotate)}deg)">${escapeHtml(letter.char)}</span>`,
+    )
+    .join('');
+  const small = (text: string) =>
+    text ? `<span class="cover-small">${escapeHtml(text)}</span>` : '';
   return `<img class="art" src="${book.cover}" alt="">
-  <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title">${escapeHtml(book.title)}</h1>${name}</div>`;
+  <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title" aria-label="${escapeHtml(book.title)}">${small(before)}<span class="cover-name" style="font-size:${String(nameSize)}pt">${letters}</span>${small(after)}</h1></div>`;
 }
 
 /**
@@ -338,7 +360,7 @@ export function printCoverHtml(
     `<section class="page" data-label="tapas" style="width:${String(width)}mm;height:${String(height)}mm">
   <div style="position:absolute;left:0;top:0;bottom:0;width:${String(left)}mm">${backCover(book, barcodeZone)}</div>
   <div style="position:absolute;left:${String(left)}mm;top:0;bottom:0;width:${String(spine)}mm;background:#79518c;display:flex;align-items:center;justify-content:center">
-    <p style="transform:rotate(90deg);white-space:nowrap;color:#fff;font-family:'Fraunces',serif;font-size:${String(Math.min(10, spine * 1.6))}pt">${escapeHtml(book.title)}</p>
+    <p style="transform:rotate(90deg);white-space:nowrap;color:#fff;font-family:'Amatic SC','Fraunces',serif;font-weight:700;font-size:${String(Math.min(13, spine * 2))}pt">${escapeHtml(book.title)}</p>
   </div>
   <div style="position:absolute;left:${String(left + spine)}mm;top:0;bottom:0;right:0;overflow:hidden">${coverFront(book, coverSpec)}</div>
 </section>`,

@@ -90,8 +90,8 @@
   --font-sans: var(--font-ui), ui-rounded, system-ui, sans-serif;
   --font-display: var(--font-ui), ui-rounded, system-ui, sans-serif;
   --font-serif: var(--font-content), ui-serif, Georgia, serif;
-  /* Títulos sobre las portadas: Fraunces, la misma del libro impreso. */
-  --font-cover: var(--font-cover-face), ui-serif, Georgia, serif;
+  /* Títulos sobre las portadas: Amatic SC (letra a mano), la misma del libro impreso. */
+  --font-cover: var(--font-cover-face), 'Comic Sans MS', cursive;
   --font-script: var(--font-script-face), 'Comic Sans MS', cursive;
   /* Quicksand se ve liviana en "medium": un punto más de peso. */
   --font-weight-medium: 600;

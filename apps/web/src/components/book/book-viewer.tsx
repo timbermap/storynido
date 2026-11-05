@@ -4,6 +4,9 @@ import { ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
+import { splitCoverTitle } from '@storynido/shared';
+
+import { CoverTitle } from '@/components/stories/story-cover';
 import { cn } from '@/lib/utils';
 
 export interface ViewerPage {
@@ -35,6 +38,7 @@ export interface ViewerExamples {
  */
 export function BookViewer({
   title,
+  coverName,
   pages,
   imageAlt,
   lockedLabel,
@@ -44,6 +48,8 @@ export function BookViewer({
   examples,
 }: {
   title: string;
+  /** Nombre del protagonista: en la portada va grande, con letra a mano. */
+  coverName?: string;
   pages: ViewerPage[];
   imageAlt: (page: ViewerPage) => string;
   /** Texto del lugar de una ilustración pendiente. */
@@ -121,6 +127,7 @@ export function BookViewer({
         <PageSpread
           page={current}
           title={title}
+          coverName={coverName}
           alt={imageAlt(current)}
           lockedLabel={lockedLabel}
           badge={badge}
@@ -254,6 +261,7 @@ function Illustration({
 function PageSpread({
   page,
   title,
+  coverName,
   alt,
   lockedLabel,
   badge,
@@ -263,6 +271,7 @@ function PageSpread({
 }: {
   page: ViewerPage;
   title: string;
+  coverName?: string;
   alt: string;
   lockedLabel: string;
   badge?: string;
@@ -275,7 +284,7 @@ function PageSpread({
 
   if (page.kind === 'cover') {
     return (
-      <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl shadow-[0_17px_45px_rgb(80_52_84/0.18)]">
+      <div className="[container-type:inline-size] relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl shadow-[0_17px_45px_rgb(80_52_84/0.18)]">
         <Illustration
           key={page.key}
           src={page.imageUrl}
@@ -283,9 +292,14 @@ function PageSpread({
           lockedLabel={lockedLabel}
           example={exampleFor(page, examples)}
         />
-        {/* El título va en la capa tipográfica, nunca dentro de la ilustración. */}
-        <h3 className="absolute inset-x-0 top-0 bg-gradient-to-b from-[#fffaf5]/95 to-transparent px-6 pt-6 pb-10 text-center font-display text-2xl leading-tight font-medium sm:text-3xl">
-          {title}
+        {/* El título va en la capa tipográfica, nunca dentro de la ilustración: la misma letra a mano
+            que el catálogo y el libro impreso, con una veladura suave para que se lea. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-[38%] bg-gradient-to-b from-[#fffaf5]/90 via-[#fffaf5]/60 to-transparent"
+        />
+        <h3 className="contents">
+          <CoverTitle {...splitCoverTitle(title, coverName ?? '')} />
         </h3>
         {badge && <Badge>{badge}</Badge>}
       </div>
