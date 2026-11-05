@@ -18,6 +18,10 @@ export const uniqueEmail = (prefix: string) =>
 export async function expectAccessible(page: Page) {
   // Tras navegar, el <title> puede llegar un instante después del contenido (metadata en streaming).
   await expect(page).toHaveTitle(/.+/);
+  // Las transiciones (por ejemplo, el fundido al cambiar de paso) terminan antes de medir el contraste.
+  await page.evaluate(() =>
+    Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => null))),
+  );
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
