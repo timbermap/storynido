@@ -1,6 +1,12 @@
 'use client';
 
-import { PREVIEW_PAGE_TEXT_MAX, type Locale, type PublicPreview } from '@storynido/shared';
+import {
+  PREVIEW_PAGE_TEXT_MAX,
+  PREVIEW_WAIT_MINUTES,
+  type Locale,
+  type PreviewWaitKind,
+  type PublicPreview,
+} from '@storynido/shared';
 import {
   AlertTriangle,
   BookOpen,
@@ -96,6 +102,26 @@ export function PreviewPanel({
 
   const isGenerating = generating || book.status === 'preview_generating';
 
+  // Si termina con la pestaña en segundo plano, el título lo avisa (y vuelve al volver).
+  const wasGenerating = useRef(isGenerating);
+  useEffect(() => {
+    const finished = wasGenerating.current && !isGenerating;
+    wasGenerating.current = isGenerating;
+    if (!finished || !document.hidden) return;
+    const original = document.title;
+    document.title = t('readyTab', { name: childName });
+    const restore = () => {
+      if (!document.hidden) {
+        document.title = original;
+        document.removeEventListener('visibilitychange', restore);
+      }
+    };
+    document.addEventListener('visibilitychange', restore);
+    return () => {
+      document.removeEventListener('visibilitychange', restore);
+    };
+  }, [isGenerating, t, childName]);
+
   // Se recarga al terminar una generación (el estado llega en vivo desde Firestore).
   useEffect(() => {
     if (isGenerating) return;
@@ -159,7 +185,7 @@ export function PreviewPanel({
             )}
           </div>
           <Loader2
-            className="absolute -right-3 -bottom-3 size-8 animate-spin rounded-full bg-background p-1 text-primary"
+            className="absolute -right-3 -bottom-3 size-8 animate-spin rounded-full bg-background p-1 text-primary motion-reduce:animate-none"
             aria-hidden="true"
           />
         </div>
@@ -173,6 +199,7 @@ export function PreviewPanel({
         <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
           {t('drawingWait.text')}
         </p>
+        <WaitEstimate kind="withDrawing" startedAt={book.previewStartedAt} />
         <ol className="mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm sm:grid-cols-3">
           {steps.map((step, index) => (
             <li
@@ -207,7 +234,10 @@ export function PreviewPanel({
     const active = illustrating ? 2 : 0;
     return (
       <div className="container-page max-w-3xl py-16 text-center" role="status" aria-live="polite">
-        <Loader2 className="mx-auto size-10 animate-spin text-primary" aria-hidden="true" />
+        <Loader2
+          className="mx-auto size-10 animate-spin text-primary motion-reduce:animate-none"
+          aria-hidden="true"
+        />
         <h1
           ref={headingRef}
           tabIndex={-1}
@@ -218,6 +248,10 @@ export function PreviewPanel({
         <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
           {illustrating ? t('illustratingText') : t('generatingText', { name: childName })}
         </p>
+        <WaitEstimate
+          kind={illustrating ? 'illustrate' : 'character'}
+          startedAt={book.previewStartedAt}
+        />
         <ol className="mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm sm:grid-cols-4">
           {steps.map((step, index) => (
             <li
@@ -631,4 +665,40 @@ export function PreviewPanel({
       )}
     </div>
   );
+}
+
+/**
+ * «Suele estar en unos N minutos», con los tiempos reales (PREVIEW_WAIT_MINUTES). Si pasa del
+ * estimado, lo dice con calma; nada de cuenta regresiva ni barra inventada.
+ */
+function WaitEstimate({ kind, startedAt }: { kind: PreviewWaitKind; startedAt: unknown }) {
+  const t = useTranslations('Wizard.preview');
+  const minutes = PREVIEW_WAIT_MINUTES[kind];
+  const [mountedAt] = useState(() => Date.now());
+  const since = millisOf(startedAt) ?? mountedAt;
+  const [late, setLate] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      setLate(Date.now() - since > minutes * 60_000);
+    };
+    check();
+    const timer = window.setInterval(check, 15_000);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [since, minutes]);
+  return (
+    <p className="mx-auto mt-2 max-w-xl text-sm font-semibold text-muted-foreground">
+      {late ? t('waitLate') : t('waitEstimate', { minutes })}
+    </p>
+  );
+}
+
+/** Fecha de Firestore (Timestamp), Date o nada → milisegundos. */
+function millisOf(value: unknown): number | null {
+  if (value instanceof Date) return value.getTime();
+  if (value && typeof value === 'object' && 'toMillis' in value) {
+    return (value as { toMillis: () => number }).toMillis();
+  }
+  return null;
 }

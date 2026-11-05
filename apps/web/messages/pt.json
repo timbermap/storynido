@@ -1089,7 +1089,10 @@
           "order": "Se gostar, você pede e fazemos o livro completo"
         }
       },
-      "drawingUsed": "Usamos o desenho de {name} do perfil. Não ficou parecido? <link>Ajuste a semelhança no perfil</link>."
+      "drawingUsed": "Usamos o desenho de {name} do perfil. Não ficou parecido? <link>Ajuste a semelhança no perfil</link>.",
+      "waitEstimate": "{minutes, plural, one {Costuma ficar pronta em um minuto.} other {Costuma ficar pronta em uns # minutos.}}",
+      "waitLate": "Está demorando um pouco mais do que o normal. Seguimos, e avisamos por e-mail quando estiver pronta.",
+      "readyTab": "A amostra de {name} está pronta!"
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",
