@@ -1,5 +1,5 @@
 import {
-  INVITATION_TONE_COPY,
+  invitationCopy,
   type EventType,
   type InvitationTone,
   type KitPiece,
@@ -70,13 +70,11 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     solutions: 'Soluciones para los adultos',
     solSearch: 'Sopa de letras',
     solSecret: 'Mensaje secreto',
-    invite: '¡Te invito a mi cumple!',
     turning: '¡{name} cumple {age}!',
     birthday: '¡Es el cumple de {name}!',
     when: 'Cuándo',
     time: 'Hora',
     where: 'Dónde',
-    waiting: '¡Te esperamos!',
     thanks: '¡Gracias por venir a mi cumple!',
     love: 'Con cariño, {name}',
     tag: '¡Gracias por venir!',
@@ -106,13 +104,11 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     solutions: 'Answers for the grown-ups',
     solSearch: 'Word search',
     solSecret: 'Secret message',
-    invite: 'You’re invited to my party!',
     turning: '{name} is turning {age}!',
     birthday: 'It’s {name}’s birthday!',
     when: 'When',
     time: 'Time',
     where: 'Where',
-    waiting: 'See you there!',
     thanks: 'Thank you for coming to my party!',
     love: 'Love, {name}',
     tag: 'Thanks for coming!',
@@ -142,13 +138,11 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     solutions: 'Respostas para os adultos',
     solSearch: 'Caça-palavras',
     solSecret: 'Mensagem secreta',
-    invite: 'Venha para o meu aniversário!',
     turning: '{name} vai fazer {age}!',
     birthday: 'É o aniversário de {name}!',
     when: 'Quando',
     time: 'Hora',
     where: 'Onde',
-    waiting: 'Esperamos você!',
     thanks: 'Obrigado por vir ao meu aniversário!',
     love: 'Com carinho, {name}',
     tag: 'Obrigado por vir!',
@@ -173,7 +167,6 @@ const OCCASION_STRINGS: Record<
 > = {
   baptism: {
     es: {
-      invite: '¡Te invito a mi bautismo!',
       birthday: '¡El bautismo de {name}!',
       thanks: '¡Gracias por acompañarme en mi bautismo!',
       tag: '¡Gracias por acompañarnos!',
@@ -185,7 +178,6 @@ const OCCASION_STRINGS: Record<
       license: 'Licencia StoryNido: {copies} copias para el bautismo de {name}.',
     },
     en: {
-      invite: 'You’re invited to my baptism!',
       birthday: '{name}’s baptism!',
       thanks: 'Thank you for joining me on my baptism day!',
       tag: 'Thanks for joining us!',
@@ -197,7 +189,6 @@ const OCCASION_STRINGS: Record<
       license: 'StoryNido license: {copies} copies for {name}’s baptism.',
     },
     pt: {
-      invite: 'Venha para o meu batizado!',
       birthday: 'O batizado de {name}!',
       thanks: 'Obrigado por me acompanhar no meu batizado!',
       tag: 'Obrigado por nos acompanhar!',
@@ -211,7 +202,6 @@ const OCCASION_STRINGS: Record<
   },
   communion: {
     es: {
-      invite: '¡Te invito a mi primera comunión!',
       birthday: '¡La primera comunión de {name}!',
       thanks: '¡Gracias por acompañarme en mi primera comunión!',
       tag: '¡Gracias por acompañarnos!',
@@ -223,7 +213,6 @@ const OCCASION_STRINGS: Record<
       license: 'Licencia StoryNido: {copies} copias para la primera comunión de {name}.',
     },
     en: {
-      invite: 'You’re invited to my First Communion!',
       birthday: '{name}’s First Communion!',
       thanks: 'Thank you for joining me on my First Communion!',
       tag: 'Thanks for joining us!',
@@ -235,7 +224,6 @@ const OCCASION_STRINGS: Record<
       license: 'StoryNido license: {copies} copies for {name}’s First Communion.',
     },
     pt: {
-      invite: 'Venha para a minha primeira comunhão!',
       birthday: 'A primeira comunhão de {name}!',
       thanks: 'Obrigado por me acompanhar na minha primeira comunhão!',
       tag: 'Obrigado por nos acompanhar!',
@@ -249,7 +237,6 @@ const OCCASION_STRINGS: Record<
   },
   graduation: {
     es: {
-      invite: '¡Te invito a festejar mi egreso!',
       birthday: '¡Felicitaciones, {name}!',
       thanks: '¡Gracias por festejar conmigo!',
       tag: '¡Gracias por este año!',
@@ -261,7 +248,6 @@ const OCCASION_STRINGS: Record<
       license: 'Licencia StoryNido: {copies} copias para el egreso de {name}.',
     },
     en: {
-      invite: 'Come celebrate my graduation!',
       birthday: 'Congratulations, {name}!',
       thanks: 'Thank you for celebrating with me!',
       tag: 'Thanks for a great year!',
@@ -273,7 +259,6 @@ const OCCASION_STRINGS: Record<
       license: 'StoryNido license: {copies} copies for {name}’s graduation.',
     },
     pt: {
-      invite: 'Venha comemorar a minha formatura!',
       birthday: 'Parabéns, {name}!',
       thanks: 'Obrigado por comemorar comigo!',
       tag: 'Obrigado por este ano!',
@@ -338,9 +323,10 @@ const escapeHtml = (value: string) =>
 
 function t(book: KitBook, key: string, extra: Record<string, string | number> = {}) {
   const occasion = book.occasion === 'birthday' ? undefined : OCCASION_STRINGS[book.occasion];
+  // Las dos frases de la invitación dependen de la ocasión y del tono (las mismas de la muestra).
   const toned =
-    book.occasion === 'birthday' && book.tone && (key === 'invite' || key === 'waiting')
-      ? INVITATION_TONE_COPY[book.language][book.tone][key]
+    key === 'invite' || key === 'waiting'
+      ? invitationCopy(book.language, book.occasion, book.tone)[key]
       : undefined;
   let value = toned ?? occasion?.[book.language][key] ?? STRINGS[book.language][key] ?? key;
   for (const [name, replacement] of Object.entries({

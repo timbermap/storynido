@@ -55,13 +55,26 @@ describe('tono de la invitación', () => {
     expect(sweet).toContain('Te esperamos con cariño');
   });
 
-  it('las demás ocasiones conservan sus propios textos', () => {
-    const html = kitPieceDocument(
-      { ...book('baptism'), tone: 'adventurous' },
-      'invitation',
-      20,
-    ).html;
-    expect(html).toContain('¡Te invito a mi bautismo!');
+  it('el tono es por ocasión: bautismo, comunión y egreso tienen sus frases', () => {
+    const doc = (type: Parameters<typeof book>[0], tone: 'fun' | 'sweet' | 'adventurous') =>
+      kitPieceDocument({ ...book(type), tone }, 'invitation', 20).html;
+    // Sin cambio para los borradores anteriores: con «fun», el texto de siempre de cada ocasión.
+    expect(doc('baptism', 'fun')).toContain('¡Te invito a mi bautismo!');
+    const sweet = doc('baptism', 'sweet');
+    expect(sweet).toContain('Me encantaría que me acompañes en mi bautismo');
+    expect(sweet).toContain('Te esperamos con cariño');
+    const heartfelt = doc('communion', 'adventurous');
+    expect(heartfelt).toContain('Un día muy especial: acompáñame en mi primera comunión');
+    expect(heartfelt).toContain('Será un día para recordar');
+    expect(heartfelt.toLowerCase()).not.toContain('aventura');
+    expect(doc('graduation', 'adventurous')).toContain(
+      '¡Empieza una nueva aventura: festejemos mi egreso!',
+    );
+    for (const type of ['baptism', 'communion', 'graduation'] as const) {
+      for (const tone of ['fun', 'sweet', 'adventurous'] as const) {
+        expect(doc(type, tone).toLowerCase()).not.toContain('cumple');
+      }
+    }
   });
 });
 

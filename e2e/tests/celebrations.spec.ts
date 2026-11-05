@@ -128,6 +128,13 @@ test('Celebraciones: solo la invitación llega así al pago', async ({ page, isM
   await next(page);
 
   await heading(page, '¿Qué llevas?');
+  // El tono de la invitación habla del bautismo (no del cumple) y se llama Alegre, Tierno, Emotivo.
+  const tones = page.locator('fieldset', { hasText: 'Tono de la invitación' });
+  await expect(tones).toContainText('«¡Te invito a mi bautismo!»');
+  await expect(tones).toContainText('Emotivo');
+  await expect(tones).toContainText('Un día muy especial: acompáñame en mi bautismo');
+  await expect(tones).not.toContainText(/cumple|Aventurero/);
+  await shot(page, '4-tono-bautismo', isMobile);
   await page.locator('label', { hasText: 'Solo la invitación' }).click();
   await expect(page.locator('#kit-dedication')).toHaveCount(0);
   await page.getByRole('button', { name: 'Continuar a mi muestra' }).click();

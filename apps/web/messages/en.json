@@ -1340,30 +1340,12 @@
       "dedicationPlaceholder": "E.g.: Thanks for coming to my party. {name}",
       "dedicationHint": "Every guest gets the same story, approved by you.",
       "toneLegend": "Invitation tone",
-      "tones": {
-        "fun": {
-          "name": "Fun",
-          "sample": "“You’re invited to my party!”"
-        },
-        "sweet": {
-          "name": "Sweet",
-          "sample": "“I’d love you to come to my party”"
-        },
-        "adventurous": {
-          "name": "Adventurous",
-          "sample": "“Join the adventure at my party!”"
-        }
-      }
+      "toneSample": "“{text}”"
     },
     "partyPreview": {
       "invitationTitle": "Your invitation",
       "keepsakeTitle": "The keepsake story",
       "turning": "{name} is turning {age}!",
-      "occasion": {
-        "baptism": "You’re invited to my baptism!",
-        "communion": "You’re invited to my First Communion!",
-        "graduation": "Come celebrate my graduation!"
-      },
       "priceKit": "Full digital kit: {price}",
       "priceInvitation": "Just the invitation: {price}",
       "book": {

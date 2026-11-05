@@ -8,6 +8,7 @@ import {
   CHILD_LIMITS,
   EMPTY_BIRTHDAY,
   INVITATION_TONES,
+  invitationCopy,
   type InvitationTone,
   type KitOffer,
   type Locale,
@@ -152,9 +153,13 @@ export function StepKit({ nav, data }: { nav: StepNav; data: WizardData }) {
                 }}
               >
                 <span className="grid gap-1 p-4">
-                  <span className="font-semibold">{t(`tones.${value}.name`)}</span>
+                  <span className="font-semibold">
+                    {invitationCopy(book.language, book.event?.type, value).name}
+                  </span>
                   <span className="pr-6 text-sm text-muted-foreground">
-                    {t(`tones.${value}.sample`)}
+                    {t('toneSample', {
+                      text: invitationCopy(book.language, book.event?.type, value).invite,
+                    })}
                   </span>
                 </span>
               </OptionCard>
