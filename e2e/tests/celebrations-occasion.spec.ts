@@ -16,18 +16,24 @@ async function cardHref(page: Page) {
   return link.getAttribute('href');
 }
 
-async function toParty(page: Page) {
+/** `again`: Martu ya está guardada, así que se la reconoce por el nombre y se usan sus rasgos. */
+async function toParty(page: Page, again = false) {
   await heading(page, '¿Quién es el protagonista de la fiesta?');
   // Ni la palabra «cumple»: en una comunión se pide la edad a secas.
   await expect(page.locator('label[for="child-age"]')).toHaveText('Edad');
   await page.locator('#child-name').fill('Martu');
   await page.locator('#child-age').selectOption('8');
+  if (again) await expect(page.getByText('Ya tienes a Martu guardado')).toBeVisible();
   await next(page);
-  await heading(page, 'Sube de 1 a 3 fotos');
-  await page.locator('label', { hasText: 'Sin foto' }).click();
+  if (!again) {
+    await heading(page, 'Sube de 1 a 3 fotos');
+    await page.locator('label', { hasText: 'Sin foto' }).click();
+  }
   await heading(page, 'Elige cómo se ve');
-  for (const label of ['Morena', 'Negro', 'Corto', 'Rizado', 'Verdes']) {
-    await page.locator('label', { hasText: label }).first().click();
+  if (!again) {
+    for (const label of ['Morena', 'Negro', 'Corto', 'Rizado', 'Verdes']) {
+      await page.locator('label', { hasText: label }).first().click();
+    }
   }
   await next(page);
   await heading(page, 'La fiesta');
@@ -59,11 +65,11 @@ test('Celebraciones: la tarjeta de una ocasión abre el creador con esa ocasión
   const create = page.locator('main a[href*="crear"]').first();
   await expect(create).toHaveAttribute('href', /story=mi-primera-comunion/, { timeout: 15_000 });
   await create.click();
-  await toParty(page);
+  await toParty(page, true);
 
   // Con un borrador de cumpleaños empezado, la tarjeta igual llega con la comunión.
   await page.goto('/es/crear?line=events&tema=Campeones');
   await heading(page, '¿Quién es el protagonista de la fiesta?');
   await page.goto(href ?? '');
-  await toParty(page);
+  await toParty(page, true);
 });
