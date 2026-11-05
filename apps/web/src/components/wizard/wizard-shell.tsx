@@ -90,13 +90,16 @@ export function WizardShell({
   // Dónde se cambia lo elegido: Profesionales elige su cuento base junto con el objetivo.
   const choiceStep = flow.includes('story') ? 'story' : flow.includes('focus') ? 'focus' : null;
 
-  // Al cambiar de paso, el foco va al título (lectores de pantalla y teclado).
+  // Al cambiar de paso, el foco va al título (lectores de pantalla y teclado), sin desplazar:
+  // el paso nuevo ya aparece arriba.
   useEffect(() => {
-    headingRef.current?.focus();
+    headingRef.current?.focus({ preventScroll: true });
   }, [current]);
+  const saving = saveState === 'saving';
 
   return (
-    <div className="container-page max-w-3xl py-10">
+    // Cada paso aparece con un fundido corto (sin animación si se pidió menos movimiento).
+    <div className="wizard-step-in container-page max-w-3xl py-10">
       {line && (
         // Qué se está creando, siempre a la vista (cuento, kit o proyecto profesional).
         <p className="mb-4 flex flex-wrap items-center gap-2">
@@ -251,7 +254,13 @@ export function WizardShell({
           <span />
         )}
         {onNext && (
-          <Button size="lg" onClick={onNext} disabled={nextDisabled}>
+          <Button
+            size="lg"
+            onClick={onNext}
+            disabled={saving ? true : nextDisabled}
+            aria-busy={saving || undefined}
+          >
+            {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
             {nextLabel ?? t('next')}
           </Button>
         )}

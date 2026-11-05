@@ -120,7 +120,8 @@ export function Wizard({
     setView('preview');
     setGenerating(true);
     setGenerateError(null);
-    window.scrollTo({ top: 0 });
+    // Sin el viaje animado (el html tiene scroll suave para las anclas de la landing).
+    window.scrollTo({ top: 0, behavior: 'instant' });
     try {
       await api('generatePreview', { params: { bookId } });
     } catch (error) {
@@ -178,10 +179,13 @@ export function Wizard({
         index > 0
           ? () => {
               setCurrent(flow[index - 1] ?? 'child');
+              window.scrollTo({ top: 0, behavior: 'instant' });
             }
           : undefined,
       onJump: (target) => {
-        if (flow.indexOf(target) <= reached) setCurrent(target);
+        if (flow.indexOf(target) > reached) return;
+        setCurrent(target);
+        window.scrollTo({ top: 0, behavior: 'instant' });
       },
       goNext: async () => {
         const next = flow[Math.min(index + 1, flow.length - 1)] ?? 'review';
@@ -200,7 +204,8 @@ export function Wizard({
           return;
         }
         setCurrent(next);
-        window.scrollTo({ top: 0 });
+        // Sin el viaje animado (el html tiene scroll suave para las anclas de la landing).
+        window.scrollTo({ top: 0, behavior: 'instant' });
       },
     }),
     [
@@ -245,7 +250,8 @@ export function Wizard({
         onEditChoices={() => {
           setView('steps');
           setCurrent('review');
-          window.scrollTo({ top: 0 });
+          // Sin el viaje animado (el html tiene scroll suave para las anclas de la landing).
+          window.scrollTo({ top: 0, behavior: 'instant' });
         }}
       />
     );

@@ -198,3 +198,19 @@ select:not([multiple]):not([size]) {
 select:not([multiple]):not([size]):disabled {
   opacity: 0.6;
 }
+
+/* Creador: el paso nuevo aparece arriba con un fundido corto, sin el viaje del scroll. */
+@keyframes wizard-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.wizard-step-in {
+  animation: wizard-step-in 180ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wizard-step-in {
+    animation: none;
+  }
+}
