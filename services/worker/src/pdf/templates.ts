@@ -247,6 +247,15 @@ function storyPage(
   const kind = coloring ? 'overlay' : (page.layout?.kind ?? 'overlay');
   const side = page.layout?.side ?? 'bottom';
 
+  // Página sin texto (las más chicas pueden tener alguna): solo la ilustración, sin panel.
+  if (page.layout && !coloring && kind !== 'facing' && page.text.trim() === '') {
+    return [
+      `<section class="page" data-label="página ${String(number)}" style="height:${String(height)}mm">
+  <img class="art" src="${page.image}" alt="">
+</section>`,
+    ];
+  }
+
   if (kind === 'facing') {
     // Página de texto (izquierda) con un detalle de la ilustración, y la ilustración entera enfrente.
     const inset = spec.bleedMm + spec.safeMm;

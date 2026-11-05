@@ -233,6 +233,12 @@ describe.skipIf(!chromePath())('PDF', () => {
       spec,
     ).join('');
     expect(calm).toContain('class="panel calm top"');
+    // Una página sin texto (3 a 6 años): solo la ilustración.
+    const textless = interiorPages(
+      book({ pages: [{ text: '', image, layout: { kind: 'calm', side: 'top' } }] }),
+      spec,
+    );
+    expect(textless[1]).not.toContain('class="panel');
     // Sin armado (pedidos anteriores): el panel de siempre.
     expect(interiorPages(book(), spec).join('')).toContain('class="panel bottom"');
   });

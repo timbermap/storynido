@@ -365,14 +365,15 @@ function PageSpread({
   }
 
   // Una sola página, igual que en el PDF: texto en la zona calma, sobre el papel donde se funde la
-  // ilustración o en el panel de siempre.
+  // ilustración o en el panel de siempre. Sin texto: solo la ilustración.
   const top = layout.side === 'top';
+  const hasText = Boolean(page.text?.trim());
   return (
     <div className="[container-type:inline-size] relative mx-auto aspect-[3/4] w-full max-w-md overflow-hidden rounded-xl bg-[#fffaf3] shadow-[0_17px_45px_rgb(80_52_84/0.18)]">
       <div
         className={cn(
           'absolute inset-x-0',
-          layout.kind === 'vignette'
+          layout.kind === 'vignette' && hasText
             ? cn(
                 'h-[70%]',
                 top
@@ -384,17 +385,19 @@ function PageSpread({
       >
         {illustration}
       </div>
-      <div
-        className={cn(
-          'absolute inset-x-[6%]',
-          top ? 'top-[5%]' : 'bottom-[5%]',
-          layout.kind === 'overlay' && 'rounded-2xl bg-[#fffaf3]/95 px-[5%] py-[4%]',
-          layout.kind === 'calm' &&
-            'rounded-[2rem] bg-[#fffaf3]/80 px-[4%] py-[3%] shadow-[0_0_24px_18px_rgb(255_250_243/0.8)]',
-        )}
-      >
-        {text}
-      </div>
+      {hasText && (
+        <div
+          className={cn(
+            'absolute inset-x-[6%]',
+            top ? 'top-[5%]' : 'bottom-[5%]',
+            layout.kind === 'overlay' && 'rounded-2xl bg-[#fffaf3]/95 px-[5%] py-[4%]',
+            layout.kind === 'calm' &&
+              'rounded-[2rem] bg-[#fffaf3]/80 px-[4%] py-[3%] shadow-[0_0_24px_18px_rgb(255_250_243/0.8)]',
+          )}
+        >
+          {text}
+        </div>
+      )}
       {/* El rótulo va del lado opuesto al texto. */}
       {badge && (
         <div className={cn(!top && '[&>span]:top-3 [&>span]:bottom-auto')}>
