@@ -21,7 +21,11 @@ describe('formatos de lectura por edad', () => {
 
   it('los bebés no ven libros largos ni los de 9 a 12 libros de bebé', () => {
     expect(readingFormatsFor(1).map((format) => format.length)).toEqual(['short']);
-    expect(readingFormatsFor(10).map((format) => format.key)).toEqual(['long_illustrated']);
+    expect(readingFormatsFor(10).map((format) => format.key)).toEqual([
+      'long_illustrated',
+      'short_story',
+      'illustrated_story',
+    ]);
   });
 
   it('lo sugerido es el formato recomendado de la edad', () => {

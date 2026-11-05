@@ -36,19 +36,11 @@ type Pricing = NonNullable<Awaited<ReturnType<typeof api<'catalogEventPricing'>>
 const field = 'h-11 w-full rounded-xl border bg-card px-3';
 
 /**
- * Checkout de Eventos: un diseño y las piezas del kit para imprimir (con la licencia de
- * copias). El precio lo calcula la API. El impreso de las piezas se pide por cotización.
+ * Checkout de Eventos: un diseño y las piezas del kit para imprimir en casa o en una imprenta
+ * local. El precio lo calcula la API. El impreso de las piezas se pide por cotización. El kit no
+ * se vuelve a pedir: ya tiene todos los archivos y las copias que imprima no cambian el precio.
  */
-export function KitCheckout({
-  bookId,
-  country,
-  reorderOf = null,
-}: {
-  bookId: string;
-  country: CountryCode;
-  /** "Pedir más copias" del mismo diseño (no se cobra el diseño otra vez). */
-  reorderOf?: string | null;
-}) {
+export function KitCheckout({ bookId, country }: { bookId: string; country: CountryCode }) {
   const t = useTranslations('Checkout');
   const tKit = useTranslations('Checkout.kit');
   const locale = useLocale() as Locale;
@@ -56,7 +48,6 @@ export function KitCheckout({
   const { choice } = useConsent();
   const [pricing, setPricing] = useState<Pricing | null | undefined>(undefined);
   const [pieces, setPieces] = useState<Set<KitPiece>>(new Set(['mini_book', 'invitation']));
-  const [copies, setCopies] = useState(20);
   const [time, setTime] = useState('');
   const [place, setPlace] = useState('');
   const [guestsText, setGuestsText] = useState('');
@@ -75,17 +66,7 @@ export function KitCheckout({
     let cancelled = false;
     api('catalogEventPricing', { query: { country } })
       .then((result) => {
-        if (cancelled) return;
-        setPricing(result.pricing);
-        // Solo las piezas que se venden en el país.
-        if (result.pricing && reorderOf) {
-          const sold = result.pricing.pieces;
-          // En una recompra se conserva lo que ya estaba.
-          setPieces(
-            (current) =>
-              new Set([...current].filter((piece) => piece === 'mini_book' || piece in sold)),
-          );
-        }
+        if (!cancelled) setPricing(result.pricing);
       })
       .catch(() => {
         if (!cancelled) setPricing(null);
@@ -93,11 +74,11 @@ export function KitCheckout({
     return () => {
       cancelled = true;
     };
-  }, [country, reorderOf]);
+  }, [country]);
 
   // Lo elegido en el creador (kit completo o solo invitación, lugar) llega marcado y se puede cambiar.
   useEffect(() => {
-    if (!signedIn || reorderOf) return;
+    if (!signedIn) return;
     let cancelled = false;
     void getFirebaseDb()
       .then((db) => getDoc(doc(db, COLLECTIONS.books, bookId)))
@@ -120,14 +101,14 @@ export function KitCheckout({
     return () => {
       cancelled = true;
     };
-  }, [bookId, reorderOf, signedIn]);
+  }, [bookId, signedIn]);
 
   const soldKey = pricing ? Object.keys(pricing.pieces).join() : null;
   useEffect(() => {
-    if (reorderOf || !chosen || soldKey === null) return;
+    if (!chosen || soldKey === null) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPieces(new Set(piecesForOffer(chosen, soldKey.split(','))));
-  }, [chosen, soldKey, reorderOf]);
+  }, [chosen, soldKey]);
 
   // Un nombre por línea; sin lista, las etiquetas salen genéricas.
   const guests = guestsText
@@ -138,9 +119,10 @@ export function KitCheckout({
   const kit = {
     guests: pieces.has('favor_tags') ? guests : [],
     signature,
+    // Las copias ya no se eligen (no cambian el precio ni salen impresas): una por pieza.
     pieces: KIT_PIECES.filter((piece) => pieces.has(piece)).map((piece) => ({
       piece,
-      copies: Math.min(Math.max(1, copies || 1), KIT_LIMITS.maxCopies),
+      copies: 1,
     })),
     invitation: pieces.has('invitation')
       ? { time: time.trim() || null, place: place.trim() || null }
@@ -160,7 +142,6 @@ export function KitCheckout({
         country,
         quantity: 1,
         couponCode: coupon,
-        sourceOrderId: reorderOf,
         kit: JSON.parse(kitKey) as typeof kit,
       },
     })
@@ -176,7 +157,7 @@ export function KitCheckout({
       cancelled = true;
     };
     // `kit` se compara por su contenido (kitKey).
-  }, [bookId, country, coupon, reorderOf, kitKey, signedIn, pricing, t]);
+  }, [bookId, country, coupon, kitKey, signedIn, pricing, t]);
 
   async function pay() {
     setPaying(true);
@@ -192,9 +173,7 @@ export function KitCheckout({
         analyticsConsent: choice?.analytics ?? false,
         kit,
       };
-      const { checkoutUrl } = reorderOf
-        ? await api('reorder', { params: { orderId: reorderOf }, body })
-        : await api('createCheckout', { body: { ...body, bookId } });
+      const { checkoutUrl } = await api('createCheckout', { body: { ...body, bookId } });
       window.location.assign(checkoutUrl);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
@@ -235,7 +214,7 @@ export function KitCheckout({
         <fieldset>
           <legend className="text-lg font-semibold">{tKit('piecesTitle')}</legend>
           <p className="mt-1 text-sm text-muted-foreground">{tKit('piecesNote')}</p>
-          {!reorderOf && pricing && chosen !== 'invitation' && (
+          {pricing && chosen !== 'invitation' && (
             <p className="mt-3 rounded-xl bg-mint px-4 py-3 text-sm font-semibold text-success">
               {tKit('fullKit', { price: money(fullKitMinor) })}
             </p>
@@ -274,9 +253,7 @@ export function KitCheckout({
                     </span>
                     <span className="text-sm font-semibold tabular-nums">
                       {required
-                        ? reorderOf
-                          ? tKit('includedAgain')
-                          : `${tKit('design')} ${pricing ? money(pricing.designMinor) : ''}`
+                        ? `${tKit('design')} ${pricing ? money(pricing.designMinor) : ''}`
                         : price === 0
                           ? tKit('free')
                           : price !== undefined && price !== null
@@ -289,22 +266,6 @@ export function KitCheckout({
             })}
           </div>
         </fieldset>
-
-        <label className="grid max-w-xs gap-1.5 text-sm">
-          <span className="font-semibold">{tKit('copies')}</span>
-          <input
-            id="kit-copies"
-            type="number"
-            min={1}
-            max={KIT_LIMITS.maxCopies}
-            value={copies}
-            onChange={(event) => {
-              setCopies(Number(event.target.value));
-            }}
-            className={field}
-          />
-          <span className="text-muted-foreground">{tKit('copiesNote')}</span>
-        </label>
 
         {pieces.has('invitation') && (
           <fieldset className="grid gap-3">
@@ -417,9 +378,7 @@ export function KitCheckout({
             {t('calculating')}
           </p>
         )}
-        <p className="text-xs text-muted-foreground">
-          {tKit('license', { copies: kit.pieces[0]?.copies ?? copies })}
-        </p>
+        <p className="text-xs text-muted-foreground">{tKit('license')}</p>
         {error && (
           <p role="alert" className="text-sm font-semibold text-destructive">
             {error}

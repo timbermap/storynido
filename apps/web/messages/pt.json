@@ -1312,6 +1312,14 @@
         "long_illustrated": {
           "name": "História ilustrada longa",
           "text": "Mais texto em cada página e uma trama com reviravoltas."
+        },
+        "short_story": {
+          "name": "História curta",
+          "text": "Uma história breve, com um pouco de texto em cada página."
+        },
+        "illustrated_story": {
+          "name": "História ilustrada",
+          "text": "Uma história clássica: texto e ilustração em equilíbrio em cada página."
         }
       }
     },
@@ -1885,7 +1893,6 @@
       "piecesTitle": "Peças do kit",
       "piecesNote": "Todas com o mesmo protagonista e o mesmo design.",
       "design": "Design:",
-      "includedAgain": "Mesmo design (não é cobrado de novo)",
       "free": "Incluída no design",
       "pieces": {
         "mini_book": {
@@ -1917,14 +1924,12 @@
           "text": "Convite para WhatsApp (imagem)"
         }
       },
-      "copies": "Quantos convidados?",
-      "copiesNote": "É a quantidade de cópias que a licença autoriza. Não muda o preço.",
       "invitationTitle": "Dados do convite",
       "time": "Hora",
       "place": "Local",
       "invitationNote": "A data vem dos dados da celebração. O horário e o local vão no convite, por isso são obrigatórios.",
       "invitationRequired": "Preencha o horário e o local para pagar: eles vão no convite.",
-      "license": "A licença autoriza {copies} cópias de cada peça para a celebração.",
+      "license": "Imprima quantas cópias precisar para a celebração, em casa ou numa gráfica.",
       "printGuide": {
         "title": "Como imprimir o seu kit",
         "tip1": "Papel: A4 ou Carta, o que você escolheu. Para o convite e o agradecimento, cartolina de 200 a 250 g é o ideal.",
@@ -1933,7 +1938,6 @@
         "tip4": "A imagem do convite para WhatsApp é um PNG: salve no celular e envie como foto."
       },
       "downloadAll": "Baixar tudo (ZIP)",
-      "moreCopies": "Pedir mais cópias",
       "ready": "Seu kit está pronto!",
       "digitalOnly": "O kit é digital: chega em PDF pronto para imprimir em casa ou na gráfica que preferir. Os cartões impressos são pedidos depois, a partir do pedido concluído.",
       "printCards": {

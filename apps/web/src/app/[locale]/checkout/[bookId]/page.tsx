@@ -28,12 +28,12 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
   return (
     <section className="container-page max-w-5xl py-10 lg:py-14">
       <h1 className="text-[clamp(2rem,4vw,3rem)] leading-tight font-medium">
-        {cards ? t('kit.printCards.title') : kit ? t('kit.title') : t('title')}
+        {cards ? t('kit.printCards.title') : kit && !reorder ? t('kit.title') : t('title')}
       </h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">
         {cards
           ? t('kit.printCards.subtitle')
-          : kit
+          : kit && !reorder
             ? t('kit.subtitle')
             : reorder
               ? t('reorderSubtitle')
@@ -42,8 +42,8 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
       <div className="mt-8">
         {cards ? (
           <CardsCheckout sourceOrderId={cards} country={display.country} />
-        ) : kit ? (
-          <KitCheckout bookId={bookId} country={display.country} reorderOf={reorder ?? null} />
+        ) : kit && !reorder ? (
+          <KitCheckout bookId={bookId} country={display.country} />
         ) : offer?.available ? (
           <Checkout
             bookId={bookId}
