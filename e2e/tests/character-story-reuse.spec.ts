@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { signInAtGate, testPhoto, uniqueEmail } from './helpers';
+import { addPhotoFromTile, signInAtGate, uniqueEmail } from './helpers';
 
 test.skip(({ isMobile }) => isMobile, 'Alcanza con escritorio.');
 
@@ -66,8 +66,7 @@ test('personaje con fotos subidas desde su perfil (sin dibujo): el cuento ofrece
 
   await page.goto('/es/mis-cuentos/personajes/nuevo');
   await page.locator('#new-child-name').fill('Teo');
-  await page.locator('input[type=checkbox]').first().check();
-  await page.locator('#new-child-photo').setInputFiles(testPhoto());
+  await addPhotoFromTile(page, { consent: true });
   await page.getByRole('button', { name: 'Guardar personaje' }).click();
   await heading(page, 'Teo');
   await expect(page.getByRole('img', { name: 'Foto 1 de Teo' })).toBeVisible({ timeout: 60_000 });
