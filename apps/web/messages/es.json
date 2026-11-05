@@ -673,16 +673,16 @@
       "newWithTitle": "¿Qué creamos con {name}?",
       "newWith": {
         "families": {
-          "title": "Un cuento",
-          "text": "Una aventura nueva con {name}, con lo que ya sabemos de su personaje."
+          "title": "Un cuento con {name}",
+          "text": "Una aventura nueva, con lo que ya sabemos de su personaje."
         },
         "events": {
-          "title": "Su cumpleaños",
-          "text": "Invitación, decoración y un cuento para cada invitado, con {name} de protagonista."
+          "title": "Su celebración",
+          "text": "Cumpleaños, comunión o bautizo: invitación, decoración y un cuento para cada invitado, con {name} de protagonista."
         },
         "professionals": {
-          "title": "Un cuento de tu proyecto",
-          "text": "Con su alias y su personaje, para trabajar un objetivo."
+          "title": "Un cuento con un objetivo",
+          "text": "Para docentes y terapeutas: un cuento que trabaja una enseñanza, con {name}."
         }
       },
       "profileRedraw": "Actualizar su dibujo",

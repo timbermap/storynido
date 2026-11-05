@@ -8,11 +8,11 @@ const heading = (page: Page, text: string) =>
   expect(page.locator('h1').first()).toContainText(text, { timeout: 30_000 });
 const next = (page: Page) => page.getByRole('button', { name: 'Siguiente' }).click();
 
-/** Desde el perfil: «Crear un cuento con…» → «Un cuento» → el personaje ya elegido → Siguiente. */
+/** Desde el perfil: «Crear un cuento con…» → Familias → el personaje ya elegido → Siguiente. */
 async function storyFromProfile(page: Page, name: string) {
   await page.getByRole('button', { name: `Crear un cuento con ${name}` }).click();
   await heading(page, `¿Qué creamos con ${name}?`);
-  await page.getByRole('link', { name: /Un cuento/ }).click();
+  await page.locator('main a[data-track-line="families"]').click();
   await heading(page, 'Cuéntanos sobre el protagonista');
   await expect(page.locator('#child-name')).toHaveValue(name);
   await next(page);
@@ -79,4 +79,33 @@ test('personaje con fotos subidas desde su perfil (sin dibujo): el cuento ofrece
   await expect(page.getByRole('radio', { name: 'Usar estas fotos' })).toBeChecked();
   await next(page);
   await heading(page, 'Elige la aventura');
+});
+
+test('con un personaje de Familias se puede crear en Profesionales: activa la cuenta y sigue con él', async ({
+  page,
+}) => {
+  test.slow();
+  await page.goto('/es/crear?line=families');
+  await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await signInAtGate(page, uniqueEmail('a-pro'));
+
+  await page.goto('/es/mis-cuentos/personajes/nuevo');
+  await page.locator('#new-child-name').fill('Nico');
+  await page.locator('label', { hasText: 'Sin foto, con sus rasgos' }).click();
+  for (const label of ['Morena', 'Negro', 'Corto', 'Rizado', 'Verdes']) {
+    await page.locator('label', { hasText: label }).first().click();
+  }
+  await page.getByRole('button', { name: 'Guardar personaje' }).click();
+  await heading(page, 'Nico');
+  await page.getByRole('button', { name: 'Crear un cuento con Nico' }).click();
+  await heading(page, '¿Qué creamos con Nico?');
+  await page.locator('main a[data-track-line="professionals"]').click();
+  // Cuenta de familia: primero se activa la cuenta Pro, y el personaje sigue elegido.
+  await page.locator('main select').first().selectOption('teacher', { timeout: 30_000 });
+  await page.getByRole('button', { name: 'Guardar y continuar' }).click();
+  await heading(page, '¿Para quién es el cuento?');
+  // Sin alias propio: se precarga con su nombre (se puede cambiar).
+  await expect(page.locator('#child-alias')).toHaveValue('Nico');
+  await next(page);
+  await expect(page.locator('body')).not.toContainText('Escribe un alias para continuar.');
 });

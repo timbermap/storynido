@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
+import { homeLineCopy } from '@/components/home/session/line-copy';
 import { NewChoice, NewChoiceWithCharacter } from '@/components/wizard/new-choice';
 
 export async function generateMetadata({
@@ -29,16 +30,18 @@ export default async function NewPage({
 }) {
   const t = await getTranslations('Account.myStories');
   const character = characterId((await searchParams).personaje);
+  if (character) {
+    // Mismo diseño que la home con sesión: las tres líneas con su foto, a lo ancho.
+    return (
+      <section className="container-page grid gap-6 pt-6 pb-14 font-sans lg:pt-10">
+        <NewChoiceWithCharacter characterId={character} lines={await homeLineCopy()} />
+      </section>
+    );
+  }
   return (
     <section className="container-page grid max-w-3xl gap-6 py-14">
-      {character ? (
-        <NewChoiceWithCharacter characterId={character} />
-      ) : (
-        <>
-          <h1 className="text-3xl font-medium sm:text-4xl">{t('newTitle')}</h1>
-          <NewChoice />
-        </>
-      )}
+      <h1 className="text-3xl font-medium sm:text-4xl">{t('newTitle')}</h1>
+      <NewChoice />
     </section>
   );
 }
