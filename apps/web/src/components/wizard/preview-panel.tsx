@@ -529,83 +529,85 @@ export function PreviewPanel({
       )}
 
       {/* Mientras falta confirmar al personaje, el único paso es el botón de arriba: sin barra. */}
-      {!(data?.stage === 'character' && data.character && !data.character.approved) && (
-        <div className="mt-12 flex flex-col gap-3 border-t pt-8 sm:flex-row sm:items-center">
-          <Button variant="outline" onClick={onEditChoices}>
-            {t('editChoices')}
-          </Button>
-          <div className="sm:ml-auto sm:text-right">
-            {data?.stage === 'complete' && !data.stale ? (
-              <Link
-                href={{
-                  pathname: '/checkout/[bookId]',
-                  params: { bookId: book.id },
-                  // Eventos: el kit de cumpleaños (un diseño, muchas copias).
-                  query: book.channel === 'events' ? { kit: '1' } : {},
-                }}
-                className={cn(buttonVariants({ size: 'lg' }), 'h-14 px-10 text-lg')}
-              >
-                {isEvent || isPro ? t('approveAndPay') : t('continue')}
-              </Link>
-            ) : null}
-            {data?.stage === 'complete' && !data.stale && isEvent && eventPrices && (
-              <p className="mt-2 text-sm text-muted-foreground tabular-nums">
-                {book.event?.offer === 'invitation'
-                  ? tParty('priceInvitation', {
-                      price: formatPrice(
-                        eventPrices.invitationMinor,
-                        eventPrices.currency,
-                        locale,
-                        eventPrices.country,
-                      ),
-                    })
-                  : tParty('priceKit', {
-                      price: formatPrice(
-                        eventPrices.fullKitMinor,
-                        eventPrices.currency,
-                        locale,
-                        eventPrices.country,
-                      ),
-                    })}
-              </p>
-            )}
-            {data?.stage === 'complete' && !data.stale && isPro && proMinor !== undefined && (
-              <div className="mt-2 grid gap-0.5 text-sm text-muted-foreground tabular-nums">
-                <p>{t('proPrice', { price: money(proMinor) })}</p>
-                <p>{t('proVolume')}</p>
-              </div>
-            )}
-            {data?.stage === 'complete' && !data.stale && !isEvent && !isPro && prices && (
-              // Qué cuesta antes de entrar al pago (formato y envío se eligen ahí).
-              <p className="mt-2 text-sm text-muted-foreground tabular-nums">
-                {[
-                  prices.digitalMinor != null &&
-                    tBook('priceDigital', { price: money(prices.digitalMinor) }),
-                  prices.printedFromMinor != null &&
-                    tBook('pricePrinted', { price: money(prices.printedFromMinor) }),
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-            )}
-            {data?.stage === 'complete' && !data.stale ? null : (
-              <>
-                <Button
-                  size="lg"
-                  disabled
-                  aria-describedby="continue-soon"
-                  className="h-14 px-10 text-lg"
+      {/* Con el error a la vista, su tarjeta ya ofrece «Cambiar mis elecciones»: sin barra repetida. */}
+      {!(failure && !data) &&
+        !(data?.stage === 'character' && data.character && !data.character.approved) && (
+          <div className="mt-12 flex flex-col gap-3 border-t pt-8 sm:flex-row sm:items-center">
+            <Button variant="outline" onClick={onEditChoices}>
+              {t('editChoices')}
+            </Button>
+            <div className="sm:ml-auto sm:text-right">
+              {data?.stage === 'complete' && !data.stale ? (
+                <Link
+                  href={{
+                    pathname: '/checkout/[bookId]',
+                    params: { bookId: book.id },
+                    // Eventos: el kit de cumpleaños (un diseño, muchas copias).
+                    query: book.channel === 'events' ? { kit: '1' } : {},
+                  }}
+                  className={cn(buttonVariants({ size: 'lg' }), 'h-14 px-10 text-lg')}
                 >
-                  {t('continue')}
-                </Button>
-                <p id="continue-soon" className="mt-2 max-w-sm text-sm text-muted-foreground">
-                  {t('continueAfterApproval')}
+                  {isEvent || isPro ? t('approveAndPay') : t('continue')}
+                </Link>
+              ) : null}
+              {data?.stage === 'complete' && !data.stale && isEvent && eventPrices && (
+                <p className="mt-2 text-sm text-muted-foreground tabular-nums">
+                  {book.event?.offer === 'invitation'
+                    ? tParty('priceInvitation', {
+                        price: formatPrice(
+                          eventPrices.invitationMinor,
+                          eventPrices.currency,
+                          locale,
+                          eventPrices.country,
+                        ),
+                      })
+                    : tParty('priceKit', {
+                        price: formatPrice(
+                          eventPrices.fullKitMinor,
+                          eventPrices.currency,
+                          locale,
+                          eventPrices.country,
+                        ),
+                      })}
                 </p>
-              </>
-            )}
+              )}
+              {data?.stage === 'complete' && !data.stale && isPro && proMinor !== undefined && (
+                <div className="mt-2 grid gap-0.5 text-sm text-muted-foreground tabular-nums">
+                  <p>{t('proPrice', { price: money(proMinor) })}</p>
+                  <p>{t('proVolume')}</p>
+                </div>
+              )}
+              {data?.stage === 'complete' && !data.stale && !isEvent && !isPro && prices && (
+                // Qué cuesta antes de entrar al pago (formato y envío se eligen ahí).
+                <p className="mt-2 text-sm text-muted-foreground tabular-nums">
+                  {[
+                    prices.digitalMinor != null &&
+                      tBook('priceDigital', { price: money(prices.digitalMinor) }),
+                    prices.printedFromMinor != null &&
+                      tBook('pricePrinted', { price: money(prices.printedFromMinor) }),
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              )}
+              {data?.stage === 'complete' && !data.stale ? null : (
+                <>
+                  <Button
+                    size="lg"
+                    disabled
+                    aria-describedby="continue-soon"
+                    className="h-14 px-10 text-lg"
+                  >
+                    {t('continue')}
+                  </Button>
+                  <p id="continue-soon" className="mt-2 max-w-sm text-sm text-muted-foreground">
+                    {t('continueAfterApproval')}
+                  </p>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {data?.stage === 'complete' && isPro && (
         <p className="mt-6 rounded-xl bg-secondary p-4 text-sm">{t('proNotice')}</p>

@@ -94,6 +94,16 @@ const SAFETY_CATEGORIES = [
 
 export type SafetyLevel = 'strict' | 'onlyHigh';
 
+/** Límite por llamada a Vertex (las imágenes y lo corto). */
+const DEFAULT_TIMEOUT_MS = 120_000;
+/**
+ * Planificar, escribir o revisar un cuento largo («epic») puede pasar los 2 minutos (en staging,
+ * la etapa 1 de las «epic» tardó hasta ~150 s en total).
+ */
+export const LONG_TEXT_TIMEOUT_MS = 150_000;
+/** Tope total de cada llamada larga de texto, con su reintento por tiempo incluido. */
+export const LONG_TEXT_BUDGET_MS = 210_000;
+
 /**
  * Estricto por defecto (cuentos, moderación, ilustraciones). Para solo describir una foto ya
  * revisada por Cloud Vision alcanza con bloquear lo alto: con el estricto, selfies comunes salían
@@ -141,7 +151,15 @@ export class VertexClient {
     model: string,
     parts: Part[],
     generationConfig: Record<string, unknown>,
-    options: { safety?: SafetyLevel } = {},
+    options: {
+      safety?: SafetyLevel;
+      timeoutMs?: number;
+      /**
+       * Tope total de la llamada: si el primer intento se corta por tiempo, se reintenta una vez
+       * con lo que quede (al menos 45 s). Sin tope, un corte por tiempo no se reintenta.
+       */
+      budgetMs?: number;
+    } = {},
   ): Promise<{ response: GenerateContentResponse; usage: AiUsage }> {
     const location = this.options.location ?? 'global';
     const host =
@@ -153,18 +171,34 @@ export class VertexClient {
       safetySettings: safetySettings(options.safety),
     });
     const doFetch = this.options.fetch ?? fetch;
+    const startedAt = Date.now();
+    let timedOut = false;
 
     for (let attempt = 1; ; attempt += 1) {
-      const res = await doFetch(url, {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${await this.token()}`,
-          'content-type': 'application/json',
-          'x-goog-user-project': this.options.projectId,
-        },
-        body,
-        signal: AbortSignal.timeout(120_000),
-      });
+      const remaining = options.budgetMs ? options.budgetMs - (Date.now() - startedAt) : Infinity;
+      const limit = Math.min(options.timeoutMs ?? DEFAULT_TIMEOUT_MS, remaining);
+      let res: Response;
+      try {
+        res = await doFetch(url, {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${await this.token()}`,
+            'content-type': 'application/json',
+            'x-goog-user-project': this.options.projectId,
+          },
+          body,
+          signal: AbortSignal.timeout(limit),
+        });
+      } catch (error) {
+        const isTimeout = error instanceof Error && error.name === 'TimeoutError';
+        const left = options.budgetMs ? options.budgetMs - (Date.now() - startedAt) : 0;
+        if (isTimeout && !timedOut && left >= 45_000) {
+          // Una sola vez: a veces el modelo se demora en un intento y el siguiente sale bien.
+          timedOut = true;
+          continue;
+        }
+        throw error;
+      }
       if (res.ok) {
         const response = (await res.json()) as GenerateContentResponse;
         return {
@@ -510,11 +544,12 @@ Distinctive features only if clearly visible (glasses, freckles, dimples, missin
   }
 
   async generateStory(request: StoryRequest): Promise<GeneratedStory> {
-    const { response, usage } = await this.client.generate(this.model, [{ text: request.prompt }], {
-      temperature: 0.9,
-      responseMimeType: 'application/json',
-      responseSchema: STORY_SCHEMA,
-    });
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [{ text: request.prompt }],
+      { temperature: 0.9, responseMimeType: 'application/json', responseSchema: STORY_SCHEMA },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
+    );
     const story = parseJson(response, 'cuento') as {
       title: string;
       pages: Omit<StoryPage, 'index'>[];
@@ -547,6 +582,7 @@ ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrat
         },
       ],
       { temperature: 0.2, responseMimeType: 'application/json', responseSchema: REVIEW_SCHEMA },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
     );
     const review = parseJson(response, 'revisión') as {
       approved: boolean;
@@ -595,6 +631,7 @@ ${request.prompt}`,
         },
       ],
       { temperature: 0.7, responseMimeType: 'application/json', responseSchema: PLAN_SCHEMA },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
     );
     const plan = parseJson(response, 'plan') as Omit<StoryPlan, 'usage' | 'scenes'> & {
       scenes: (Omit<StoryPlan['scenes'][number], 'pageIndex' | 'personalDetail'> & {

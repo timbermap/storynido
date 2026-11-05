@@ -447,6 +447,7 @@ export class PreviewService {
         'Inicia sesión para crear la vista previa. Así guardamos tu borrador y protegemos las fotos.',
       );
     }
+    const startedAt = Date.now();
     const limits = await this.budget.limits();
     await this.budget.ensureAvailable(limits);
     const ref = this.bookRef(bookId);
@@ -465,7 +466,9 @@ export class PreviewService {
       this.log.info({ bookId }, 'preview ready');
       // Con su dibujo de siempre no hay nada que aprobar: se ilustran ya la portada y las páginas
       // (no cuenta como regeneración). Si eso falla, queda la lámina para aprobar a mano.
-      if (preview.character?.fromDrawing) {
+      // Solo si queda tiempo dentro del request (Cloud Run corta a los 300 s): si el texto tardó
+      // mucho, la portada y las páginas se ilustran con el botón de siempre.
+      if (preview.character?.fromDrawing && Date.now() - startedAt < AUTO_APPROVE_WITHIN_MS) {
         try {
           return await this.approveCharacter(uid, bookId, anonymous);
         } catch (error) {
@@ -1764,6 +1767,9 @@ function weeklyLimit() {
 }
 
 /** Dibujo del personaje guardado en su perfil. */
+/** Hasta cuándo la muestra con su dibujo sigue sola a ilustrar (las ilustraciones tardan ~70 s). */
+const AUTO_APPROVE_WITHIN_MS = 150_000;
+
 interface StoredDrawing {
   imagePath?: string;
   previewImagePath?: string;

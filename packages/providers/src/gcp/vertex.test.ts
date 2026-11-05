@@ -43,6 +43,42 @@ const jsonReply = (
 });
 
 describe('Vertex AI', () => {
+  it('un corte por tiempo se reintenta una vez solo si queda tope', async () => {
+    let calls = 0;
+    const slowThenOk = ((_url: string | URL | Request, init?: RequestInit) => {
+      calls += 1;
+      if (calls === 1) {
+        return new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            reject(init.signal?.reason as Error);
+          });
+        });
+      }
+      return Promise.resolve(new Response(JSON.stringify(jsonReply({ ok: true }).json)));
+    }) as typeof fetch;
+    const client = new VertexClient({
+      projectId: 'test-project',
+      models: () => ({ text: 'gemini-3.5-flash', image: 'gemini-3.1-flash-image' }),
+      getAccessToken: () => Promise.resolve('test-token'),
+      fetch: slowThenOk,
+    });
+    // Sin tope total: el corte no se reintenta.
+    await expect(
+      client.generate('gemini-3.5-flash', [{ text: 'hola' }], {}, { timeoutMs: 20 }),
+    ).rejects.toMatchObject({ name: 'TimeoutError' });
+    calls = 0;
+    // Con tope y lugar para otro intento: se reintenta una vez y sale bien.
+    await expect(
+      client.generate(
+        'gemini-3.5-flash',
+        [{ text: 'hola' }],
+        {},
+        { timeoutMs: 20, budgetMs: 60_000 },
+      ),
+    ).resolves.toMatchObject({ usage: { provider: 'vertex' } });
+    expect(calls).toBe(2);
+  });
+
   it('estricto por defecto; describir una foto bloquea solo lo alto y no asume que es un chico', async () => {
     const calls: {
       safetySettings?: { threshold: string }[];
