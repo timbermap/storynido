@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, CloudOff, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, CloudOff, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, type ReactNode } from 'react';
 
@@ -248,6 +248,7 @@ export function WizardShell({
       <div className="mt-6 flex items-center justify-between gap-3">
         {onBack ? (
           <Button variant="ghost" onClick={onBack}>
+            <ArrowLeft aria-hidden="true" />
             {t('back')}
           </Button>
         ) : (
