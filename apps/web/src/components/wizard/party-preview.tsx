@@ -7,7 +7,7 @@ import { useState } from 'react';
 import {
   BIRTHDAY_BOOK_CHOICES,
   EMPTY_BIRTHDAY,
-  INVITATION_TONE_COPY,
+  invitationCopy,
   type BirthdayBookChoice,
   type Locale,
 } from '@storynido/shared';
@@ -37,7 +37,7 @@ export function InvitationPreview({
   const t = useTranslations('Wizard.partyPreview');
   const locale = useLocale() as Locale;
   const event = book.event;
-  const copy = INVITATION_TONE_COPY[book.language][event?.tone ?? 'fun'];
+  const copy = invitationCopy(book.language, event?.type, event?.tone);
   const date = event?.date
     ? new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(
         new Date(`${event.date}T00:00:00Z`),
@@ -59,12 +59,10 @@ export function InvitationPreview({
             ? t('turning', { name: childName, age: event.turningAge })
             : childName}
         </p>
-        <p className="font-semibold">
-          {event?.type === 'birthday' ? copy.invite : t(`occasion.${event?.type ?? 'baptism'}`)}
-        </p>
+        <p className="font-semibold">{copy.invite}</p>
         {date && <p className="text-sm">{date}</p>}
         {event?.place && <p className="text-sm">{event.place}</p>}
-        {event?.type === 'birthday' && <p className="mt-1 text-sm font-semibold">{copy.waiting}</p>}
+        <p className="mt-1 text-sm font-semibold">{copy.waiting}</p>
       </figcaption>
     </figure>
   );

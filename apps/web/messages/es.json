@@ -1340,30 +1340,12 @@
       "dedicationPlaceholder": "Ej.: Gracias por venir a mi fiesta. {name}",
       "dedicationHint": "Todos los invitados reciben el mismo cuento, aprobado por ti.",
       "toneLegend": "Tono de la invitación",
-      "tones": {
-        "fun": {
-          "name": "Divertido",
-          "sample": "«¡Te invito a mi cumple!»"
-        },
-        "sweet": {
-          "name": "Tierno",
-          "sample": "«Me encantaría que vengas a mi cumple»"
-        },
-        "adventurous": {
-          "name": "Aventurero",
-          "sample": "«¡Súmate a la aventura de mi cumple!»"
-        }
-      }
+      "toneSample": "«{text}»"
     },
     "partyPreview": {
       "invitationTitle": "Tu invitación",
       "keepsakeTitle": "El cuento de recuerdo",
       "turning": "¡{name} cumple {age}!",
-      "occasion": {
-        "baptism": "¡Te invito a mi bautismo!",
-        "communion": "¡Te invito a mi primera comunión!",
-        "graduation": "¡Te invito a festejar mi egreso!"
-      },
       "priceKit": "Kit digital completo: {price}",
       "priceInvitation": "Solo la invitación: {price}",
       "book": {

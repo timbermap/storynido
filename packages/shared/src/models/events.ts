@@ -25,42 +25,179 @@ export type KitOffer = (typeof KIT_OFFERS)[number];
 export const BIRTHDAY_BOOK_CHOICES = ['none', 'digital', 'printed'] as const;
 export type BirthdayBookChoice = (typeof BIRTHDAY_BOOK_CHOICES)[number];
 
+type ToneCopy = { name: string; invite: string; waiting: string };
+type OccasionTones = Record<InvitationTone, ToneCopy>;
+
+/** Bautismo y comunión: alegre, tierno y emotivo (sin «aventura» en una celebración religiosa). */
+const religious = (
+  lang: 'es' | 'en' | 'pt',
+  what: string,
+  /** Portugués: «o meu batizado» / «a minha primeira comunhão» y «no meu…» / «na minha…». */
+  pt: { mine: string; inMine: string } = { mine: `o meu ${what}`, inMine: `no meu ${what}` },
+): OccasionTones =>
+  ({
+    es: {
+      fun: { name: 'Alegre', invite: `¡Te invito a mi ${what}!`, waiting: '¡Te esperamos!' },
+      sweet: {
+        name: 'Tierno',
+        invite: `Me encantaría que me acompañes en mi ${what}`,
+        waiting: 'Te esperamos con cariño',
+      },
+      adventurous: {
+        name: 'Emotivo',
+        invite: `Un día muy especial: acompáñame en mi ${what}`,
+        waiting: 'Será un día para recordar',
+      },
+    },
+    en: {
+      fun: { name: 'Joyful', invite: `You’re invited to my ${what}!`, waiting: 'See you there!' },
+      sweet: {
+        name: 'Sweet',
+        invite: `I’d love you to join me for my ${what}`,
+        waiting: 'We can’t wait to see you',
+      },
+      adventurous: {
+        name: 'Heartfelt',
+        invite: `A very special day: join me for my ${what}`,
+        waiting: 'A day to remember',
+      },
+    },
+    pt: {
+      fun: { name: 'Alegre', invite: `Venha para ${pt.mine}!`, waiting: 'Esperamos você!' },
+      sweet: {
+        name: 'Carinhoso',
+        invite: `Eu adoraria que você me acompanhasse ${pt.inMine}`,
+        waiting: 'Esperamos você com carinho',
+      },
+      adventurous: {
+        name: 'Emocionante',
+        invite: `Um dia muito especial: venha comigo ${pt.inMine}`,
+        waiting: 'Vai ser um dia inesquecível',
+      },
+    },
+  })[lang];
+
 /**
- * Textos de la invitación según el tono, en un solo lugar: la muestra del creador y el PDF final
- * dicen lo mismo. Solo cambian las dos frases de cumpleaños; cada ocasión conserva las suyas.
+ * Textos de la invitación según la ocasión y el tono, en un solo lugar: la muestra del creador y
+ * el PDF final dicen lo mismo. Los ids de tono no cambian (fun, sweet, adventurous): con `fun`,
+ * los borradores anteriores de cada ocasión quedan con su texto de siempre.
  */
-export const INVITATION_TONE_COPY: Record<
-  'es' | 'en' | 'pt',
-  Record<InvitationTone, { invite: string; waiting: string }>
-> = {
+export const INVITATION_TONE_COPY: Record<'es' | 'en' | 'pt', Record<EventType, OccasionTones>> = {
   es: {
-    fun: { invite: '¡Te invito a mi cumple!', waiting: '¡Te esperamos!' },
-    sweet: { invite: 'Me encantaría que vengas a mi cumple', waiting: 'Te esperamos con cariño' },
-    adventurous: {
-      invite: '¡Súmate a la aventura de mi cumple!',
-      waiting: '¡La aventura empieza contigo!',
+    birthday: {
+      fun: { name: 'Divertido', invite: '¡Te invito a mi cumple!', waiting: '¡Te esperamos!' },
+      sweet: {
+        name: 'Tierno',
+        invite: 'Me encantaría que vengas a mi cumple',
+        waiting: 'Te esperamos con cariño',
+      },
+      adventurous: {
+        name: 'Aventurero',
+        invite: '¡Súmate a la aventura de mi cumple!',
+        waiting: '¡La aventura empieza contigo!',
+      },
+    },
+    baptism: religious('es', 'bautismo'),
+    communion: religious('es', 'primera comunión'),
+    graduation: {
+      fun: {
+        name: 'Divertido',
+        invite: '¡Te invito a festejar mi egreso!',
+        waiting: '¡Te esperamos!',
+      },
+      sweet: {
+        name: 'Tierno',
+        invite: 'Me encantaría que festejes conmigo mi egreso',
+        waiting: 'Te esperamos con cariño',
+      },
+      adventurous: {
+        name: 'Aventurero',
+        invite: '¡Empieza una nueva aventura: festejemos mi egreso!',
+        waiting: '¡La aventura empieza contigo!',
+      },
     },
   },
   en: {
-    fun: { invite: 'You’re invited to my party!', waiting: 'See you there!' },
-    sweet: { invite: 'I’d love you to come to my party', waiting: 'We can’t wait to see you' },
-    adventurous: {
-      invite: 'Join the adventure at my party!',
-      waiting: 'The adventure starts with you!',
+    birthday: {
+      fun: { name: 'Fun', invite: 'You’re invited to my party!', waiting: 'See you there!' },
+      sweet: {
+        name: 'Sweet',
+        invite: 'I’d love you to come to my party',
+        waiting: 'We can’t wait to see you',
+      },
+      adventurous: {
+        name: 'Adventurous',
+        invite: 'Join the adventure at my party!',
+        waiting: 'The adventure starts with you!',
+      },
+    },
+    baptism: religious('en', 'baptism'),
+    communion: religious('en', 'First Communion'),
+    graduation: {
+      fun: { name: 'Fun', invite: 'Come celebrate my graduation!', waiting: 'See you there!' },
+      sweet: {
+        name: 'Sweet',
+        invite: 'I’d love you to celebrate my graduation with me',
+        waiting: 'We can’t wait to see you',
+      },
+      adventurous: {
+        name: 'Adventurous',
+        invite: 'A new adventure begins: let’s celebrate my graduation!',
+        waiting: 'The adventure starts with you!',
+      },
     },
   },
   pt: {
-    fun: { invite: 'Venha para o meu aniversário!', waiting: 'Esperamos você!' },
-    sweet: {
-      invite: 'Eu adoraria ter você no meu aniversário',
-      waiting: 'Esperamos você com carinho',
+    birthday: {
+      fun: {
+        name: 'Divertido',
+        invite: 'Venha para o meu aniversário!',
+        waiting: 'Esperamos você!',
+      },
+      sweet: {
+        name: 'Carinhoso',
+        invite: 'Eu adoraria ter você no meu aniversário',
+        waiting: 'Esperamos você com carinho',
+      },
+      adventurous: {
+        name: 'Aventureiro',
+        invite: 'Entre na aventura do meu aniversário!',
+        waiting: 'A aventura começa com você!',
+      },
     },
-    adventurous: {
-      invite: 'Entre na aventura do meu aniversário!',
-      waiting: 'A aventura começa com você!',
+    baptism: religious('pt', 'batizado'),
+    communion: religious('pt', 'primeira comunhão', {
+      mine: 'a minha primeira comunhão',
+      inMine: 'na minha primeira comunhão',
+    }),
+    graduation: {
+      fun: {
+        name: 'Divertido',
+        invite: 'Venha comemorar a minha formatura!',
+        waiting: 'Esperamos você!',
+      },
+      sweet: {
+        name: 'Carinhoso',
+        invite: 'Eu adoraria que você comemorasse a minha formatura comigo',
+        waiting: 'Esperamos você com carinho',
+      },
+      adventurous: {
+        name: 'Aventureiro',
+        invite: 'Uma nova aventura começa: vamos comemorar a minha formatura!',
+        waiting: 'A aventura começa com você!',
+      },
     },
   },
 };
+
+/** Nombre y frases del tono para esa ocasión (sin ocasión: cumpleaños). */
+export function invitationCopy(
+  language: 'es' | 'en' | 'pt',
+  type: EventType | null | undefined,
+  tone: InvitationTone | null | undefined,
+): ToneCopy {
+  return INVITATION_TONE_COPY[language][type ?? 'birthday'][tone ?? 'fun'];
+}
 
 /** La edad que cumple: solo en un cumpleaños y dentro del rango que admite el evento. */
 export function turningAgeFor(type: EventType, age: number): number | null {

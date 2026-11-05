@@ -1340,30 +1340,12 @@
       "dedicationPlaceholder": "Ex.: Obrigado por vir à minha festa. {name}",
       "dedicationHint": "Todos os convidados recebem a mesma história, aprovada por você.",
       "toneLegend": "Tom do convite",
-      "tones": {
-        "fun": {
-          "name": "Divertido",
-          "sample": "“Venha para o meu aniversário!”"
-        },
-        "sweet": {
-          "name": "Carinhoso",
-          "sample": "“Eu adoraria ter você no meu aniversário”"
-        },
-        "adventurous": {
-          "name": "Aventureiro",
-          "sample": "“Entre na aventura do meu aniversário!”"
-        }
-      }
+      "toneSample": "“{text}”"
     },
     "partyPreview": {
       "invitationTitle": "O seu convite",
       "keepsakeTitle": "A história de lembrança",
       "turning": "{name} faz {age}!",
-      "occasion": {
-        "baptism": "Venha para o meu batizado!",
-        "communion": "Venha para a minha primeira comunhão!",
-        "graduation": "Venha comemorar a minha formatura!"
-      },
       "priceKit": "Kit digital completo: {price}",
       "priceInvitation": "Só o convite: {price}",
       "book": {
