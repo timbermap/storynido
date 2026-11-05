@@ -262,7 +262,10 @@ export class PhotoService {
         );
         await storage.upload({ bucket: 'photos', path: processedPath }, portrait, 'image/jpeg');
         // Si la IA no puede leer la foto, se avisa ahora (y no recién al crear la muestra).
-        const read = await this.readCharacter(photo, portrait);
+        // Si con el recorte la IA no la puede leer, se prueba una vez con la foto completa.
+        let read = await this.readCharacter(photoId, photo, portrait);
+        if (read === 'unreadable')
+          read = await this.readCharacter(photoId, photo, normalized.bytes);
         if (read === 'unreadable') reasons = ['unreadable'];
         else if (read) extra = read;
       }
@@ -303,6 +306,7 @@ export class PhotoService {
    * null si no se pudo saber (IA caída, presupuesto agotado): en ese caso no se rechaza la foto.
    */
   private async readCharacter(
+    photoId: string,
     photo: Photo,
     portrait: Uint8Array,
   ): Promise<'unreadable' | Record<string, unknown> | null> {
@@ -320,6 +324,11 @@ export class PhotoService {
       return { characterSheet: result.sheet, characterTraits: result.traits };
     } catch (error) {
       if (error instanceof ProviderError && error.message.includes('bloqueado por seguridad')) {
+        // Solo códigos del bloqueo (motivo, categorías), nada del contenido: para diagnosticar.
+        this.log.warn(
+          { photoId, reason: error.message },
+          'photo unreadable: AI blocked the character description',
+        );
         return 'unreadable';
       }
       this.log.warn({ err: error }, 'could not read character from photo at upload');
