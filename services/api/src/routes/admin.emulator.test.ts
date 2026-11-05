@@ -4,7 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { FirestoreCatalog } from '../catalog';
 import { initFirebaseAdmin } from '../firebase';
-import { auth, createTestApp } from '../test-helpers';
+import { TEST_FX, auth, createTestApp } from '../test-helpers';
 
 const db = getFirestore(initFirebaseAdmin('demo-storynido-test'));
 const ADMIN = 'token-admin:admin:mfa';
@@ -364,6 +364,9 @@ describe('admin: interruptor del sitio y auditoría', () => {
     await order('o2', yesterday, 'refunded', 40000);
     await order('o3', today, 'delivered', 20000);
     await db.doc(`aiBudget/${yesterday}`).set({ spentUsdMicros: 2_000_000 });
+    // La cotización de ayer, guardada: si no, el día cerrado toma «la última conocida», que solo
+    // existe si la de hoy (que se pide en paralelo) ya se guardó; si no, MXN valía 0 (test flaky).
+    await db.doc(`${COLLECTIONS.fxRates}/${yesterday}`).set({ ...TEST_FX, date: yesterday });
     for (const [book, orderId, cost] of [
       ['b1', null, 300_000],
       ['b2', null, 500_000],

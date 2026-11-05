@@ -6,6 +6,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { api } from '@/lib/api';
+import {
+  isCreatorDraftEmpty,
+  requestCreatorExit,
+  setCreatorDraftStarted,
+} from '@/lib/creator-exit';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { titleForChild } from '@/lib/story-title';
 import type { WizardCatalog } from '@/lib/server/wizard-catalog';
@@ -41,6 +46,9 @@ import { WIZARD_STEPS, flowFor, reachedIndex, type SaveState, type WizardStep } 
 import type { StepNav, WizardData } from './types';
 
 type Catalog = WizardCatalog;
+
+/** Marca de la entrada de historial que pone el creador para atrapar el «atrás» del navegador. */
+const HISTORY_GUARD = 'storynidoCreatorGuard';
 
 /**
  * Creador del libro: borrador en Firestore, guardado en cada paso, se retoma donde quedó. Sin
@@ -155,6 +163,52 @@ export function Wizard({
     createdId.current = await createDraft(await getFirebaseDb(), user.uid, preset);
     return createdId.current;
   }, [savedId, user, preset]);
+
+  // El borrador ya tiene algo (para salir sin preguntar si no): lo lee el botón de salir.
+  const started = book ? reached > 0 || book.childId !== null || book.photoIds.length > 0 : true;
+  useEffect(() => {
+    if (savedId) setCreatorDraftStarted(savedId, started);
+  }, [savedId, started]);
+
+  // «Atrás» del navegador (o del celular): vuelve al paso anterior en vez de salir del creador.
+  // Una entrada de historial «guarda» (misma URL) queda arriba; al volver a la de abajo se
+  // retrocede un paso y se repone la guarda. En el primer paso abre el diálogo de salida si hay
+  // algo que guardar; si no (o en la muestra), sale como siempre.
+  const browserBack = useRef<() => boolean>(() => false);
+  useEffect(() => {
+    browserBack.current = () => {
+      if (view !== 'steps') return false;
+      if (index > 0) {
+        setCurrent(flow[index - 1] ?? 'child');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        return true;
+      }
+      return savedId !== null && !isCreatorDraftEmpty(savedId) && requestCreatorExit();
+    };
+  });
+  useEffect(() => {
+    const pushGuard = () => {
+      window.history.pushState({ [HISTORY_GUARD]: true }, '', window.location.href);
+    };
+    const isGuard = (state: unknown) =>
+      typeof state === 'object' && state !== null && HISTORY_GUARD in state;
+    if (!isGuard(window.history.state)) pushGuard();
+    let leaving = false;
+    const onPopState = (event: PopStateEvent) => {
+      // Hacia adelante (de vuelta a la guarda) o ya saliendo: nada que hacer.
+      if (leaving || isGuard(event.state)) return;
+      if (browserBack.current()) {
+        pushGuard();
+      } else {
+        leaving = true;
+        window.history.back();
+      }
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
 
   const nav = useMemo<StepNav>(
     () => ({
