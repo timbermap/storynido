@@ -313,6 +313,9 @@ export function PreviewPanel({
     }
   }
 
+  // Muestra lista para pedir: el botón va en la barra fija de abajo.
+  const ready = data?.stage === 'complete' && !data.stale;
+
   const canRegenerate =
     data?.stage === 'complete' && regenerationsLeft > 0 && busy === null && !data.stale;
 
@@ -355,6 +358,12 @@ export function PreviewPanel({
             )}
             {busy === target ? t('regenerating') : t('regenerate')}
           </Button>
+        )}
+        {illustrated && (
+          // Cuántos cambios de ilustración quedan, junto al botón que los usa.
+          <span className="self-center text-xs text-muted-foreground">
+            {t('adjustmentsLeft', { count: regenerationsLeft })}
+          </span>
         )}
       </div>
     );
@@ -422,16 +431,19 @@ export function PreviewPanel({
 
       {data?.stage === 'complete' && (
         <div className="mt-8 grid gap-6 [&>*]:min-w-0">
-          {data.character?.fromDrawing && book.childId && (
-            // Su dibujo de siempre: si no se parece, se ajusta en su perfil (y vale para los próximos).
-            <p className="text-sm text-muted-foreground">
-              {t.rich('drawingUsed', {
+          {/* Una sola línea de estado: con qué personaje se dibujó y cómo ajustarlo. */}
+          {data.character?.fromDrawing && book.childId ? (
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <CheckCircle2 className="size-4 text-success" aria-hidden="true" />
+              {t.rich('drawingStatus', {
                 name: childName,
                 link: (chunks) => (
                   <Link
                     href={{
                       pathname: '/my-stories/characters/[childId]',
                       params: { childId: book.childId ?? '' },
+                      // Al terminar el ajuste, vuelve a esta muestra (no se pierde la compra).
+                      query: { volver: book.id },
                     }}
                     className="font-semibold text-primary underline"
                   >
@@ -440,6 +452,13 @@ export function PreviewPanel({
                 ),
               })}
             </p>
+          ) : (
+            data.character?.approved && (
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="size-4 text-success" aria-hidden="true" />
+                {t('approvedBadge')}
+              </p>
+            )
           )}
           {isEvent && (
             // Primero lo que se manda a los invitados: es lo que decide la compra.
@@ -456,52 +475,6 @@ export function PreviewPanel({
               </div>
             </section>
           )}
-          <aside className="rounded-2xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
-            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-              <div className="flex flex-wrap items-center gap-3">
-                {data.character?.approved && (
-                  <p className="inline-flex items-center gap-1.5 rounded-full bg-mint px-3 py-1 text-sm font-bold text-success">
-                    <CheckCircle2 className="size-4" aria-hidden="true" />
-                    {t('approvedBadge')}
-                  </p>
-                )}
-                <h2 className="text-xl font-medium">{t('differencesTitle')}</h2>
-              </div>
-              {/* Sin contador visible: solo el aviso del último ajuste o de que ya no quedan. */}
-              {regenerationsLeft <= 1 && (
-                <p className="rounded-full border px-3 py-1 text-sm font-bold">
-                  {regenerationsLeft === 1 ? t('lastAdjustment') : t('noAdjustmentsLeft')}
-                </p>
-              )}
-            </div>
-            <ul className="mt-4 grid gap-4 font-sans text-sm leading-snug md:grid-cols-3 md:gap-6">
-              {[
-                {
-                  icon: BookOpen,
-                  text: t('differencesPages', {
-                    total: data.totalPages,
-                    shown: data.pages.filter((page) => page.imageUrl).length,
-                  }),
-                },
-                { icon: Droplets, text: t('differencesWatermark') },
-                {
-                  icon: PencilLine,
-                  text: isEvent
-                    ? tParty('differencesEdit')
-                    : isPro
-                      ? t('proDifferencesEdit')
-                      : t('differencesEdit'),
-                },
-              ].map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-start gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-peach text-navy">
-                    <Icon className="size-[18px]" aria-hidden="true" />
-                  </span>
-                  <span className="pt-1.5 text-foreground/80">{text}</span>
-                </li>
-              ))}
-            </ul>
-          </aside>
           <div className="grid gap-4 [&>*]:min-w-0">
             {isEvent && <h2 className="text-xl font-medium">{tParty('keepsakeTitle')}</h2>}
             <BookViewer
@@ -552,6 +525,38 @@ export function PreviewPanel({
                 </div>
               </div>
             )}
+            {/* Qué cambia en el libro final: compacto, debajo del libro (lo principal es el libro). */}
+            <ul
+              aria-label={t('differencesTitle')}
+              className="grid gap-2 font-sans text-sm leading-snug text-foreground/80 sm:grid-cols-3 sm:gap-4"
+            >
+              {[
+                {
+                  icon: BookOpen,
+                  text: t('differencesPages', {
+                    total: data.totalPages,
+                    shown: data.pages.filter((page) => page.imageUrl).length,
+                  }),
+                },
+                { icon: Droplets, text: t('differencesWatermark') },
+                {
+                  icon: PencilLine,
+                  text: isEvent
+                    ? tParty('differencesEdit')
+                    : isPro
+                      ? t('proDifferencesEdit')
+                      : t('differencesEdit'),
+                },
+              ].map(({ icon: Icon, text }) => (
+                <li key={text} className="flex items-start gap-2">
+                  <Icon
+                    className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <span>{text}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
@@ -570,7 +575,15 @@ export function PreviewPanel({
             <Button variant="outline" onClick={onEditChoices}>
               {t('editChoices')}
             </Button>
-            <div className="sm:ml-auto sm:text-right">
+            <div
+              className={
+                ready
+                  ? // «Quiero este libro» siempre a la vista: barra fija abajo, con el precio al lado
+                    // (en el creador no está la barra de navegación del móvil).
+                    'fixed inset-x-0 bottom-0 z-30 flex flex-row-reverse items-center justify-between gap-3 border-t bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md sm:px-[max(1.5rem,calc((100vw-64rem)/2))] [&_p]:mt-0 [&_p]:text-left [&>a]:h-12 [&>a]:shrink-0 [&>a]:px-6 [&>a]:text-base sm:[&>a]:h-14 sm:[&>a]:px-10 sm:[&>a]:text-lg'
+                  : 'sm:ml-auto sm:text-right'
+              }
+            >
               {data?.stage === 'complete' && !data.stale ? (
                 <Link
                   href={{
@@ -646,6 +659,8 @@ export function PreviewPanel({
       {data?.stage === 'complete' && isPro && (
         <p className="mt-6 rounded-xl bg-secondary p-4 text-sm">{t('proNotice')}</p>
       )}
+      {/* Lugar para la barra fija: no tapa el final de la página. */}
+      {ready && <div aria-hidden="true" className="h-28" />}
 
       {data?.stage === 'complete' && <PreviewFeedback bookId={book.id} />}
 

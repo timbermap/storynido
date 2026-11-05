@@ -75,7 +75,12 @@ export function CharacterProfile({ childId }: { childId: string }) {
   }, [loading, signedIn, router]);
 
   // Viene de «Agregar a otro chico» con fotos que no sirvieron: se avisa con sus motivos.
-  const rejectedFromForm = useSearchParams().get('rechazadas');
+  const searchParams = useSearchParams();
+  const rejectedFromForm = searchParams.get('rechazadas');
+  // Viene de «Ajustar el parecido» en una muestra: al terminar, se vuelve a esa muestra.
+  const returnTo = /^[A-Za-z0-9_-]{1,64}$/.test(searchParams.get('volver') ?? '')
+    ? searchParams.get('volver')
+    : null;
   useEffect(() => {
     if (!rejectedFromForm) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -261,12 +266,21 @@ export function CharacterProfile({ childId }: { childId: string }) {
 
   return (
     <section className="container-page grid max-w-3xl gap-8 py-12">
-      <Link
-        href="/my-stories"
-        className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
-      >
-        {t('profileBack')}
-      </Link>
+      {returnTo ? (
+        <Link
+          href={{ pathname: '/create/[bookId]', params: { bookId: returnTo } }}
+          className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          {t('profileBackToSample')}
+        </Link>
+      ) : (
+        <Link
+          href="/my-stories"
+          className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          {t('profileBack')}
+        </Link>
+      )}
 
       <header className="grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-4 gap-y-5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-x-8">
         <div
