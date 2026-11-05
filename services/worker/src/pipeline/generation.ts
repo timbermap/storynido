@@ -150,6 +150,12 @@ export const DEFAULT_QA_LIMITS: QaLimits = {
   concurrency: 4,
 };
 
+/**
+ * Dominio del QR de la contratapa: siempre el público de la marca. El libro se queda con la familia
+ * (y se imprime): un QR a staging.storynido.com dejaba de servir.
+ */
+export const PUBLIC_BRAND_DOMAIN = 'storynido.com';
+
 const ASSETS = 'assets' as const;
 const WEBP = 'image/webp';
 
@@ -160,8 +166,6 @@ interface Deps {
   qa?: Partial<QaLimits>;
   /** Solo en local y en tests: permite los proveedores simulados. */
   allowSimulated?: boolean;
-  /** Dominio de la marca para el QR de la contratapa. */
-  brandDomain?: string;
 }
 
 /** Un PDF maquetado y validado (lo usa la entrega). */
@@ -1013,12 +1017,12 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       allowCorners: snapshot.textDensity !== 'rich',
     });
     const qr = {
-      svg: await QRCode.toString(`https://${deps.brandDomain ?? 'storynido.com'}`, {
+      svg: await QRCode.toString(`https://${PUBLIC_BRAND_DOMAIN}`, {
         type: 'svg',
         margin: 0,
         color: { dark: '#342a40', light: '#0000' },
       }),
-      label: deps.brandDomain ?? 'storynido.com',
+      label: PUBLIC_BRAND_DOMAIN,
     };
 
     const formats: BookFormat[] = [
@@ -1644,12 +1648,12 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       fillerPages: 0,
       mini: Boolean(await kitOf(ctx.order.id)),
       qr: {
-        svg: await QRCode.toString(`https://${deps.brandDomain ?? 'storynido.com'}`, {
+        svg: await QRCode.toString(`https://${PUBLIC_BRAND_DOMAIN}`, {
           type: 'svg',
           margin: 0,
           color: { dark: '#342a40', light: '#0000' },
         }),
-        label: deps.brandDomain ?? 'storynido.com',
+        label: PUBLIC_BRAND_DOMAIN,
       },
     };
     const browser = await launchBrowser();

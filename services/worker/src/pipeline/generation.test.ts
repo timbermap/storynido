@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { calmSideOf } from './generation';
+import { PUBLIC_BRAND_DOMAIN, calmSideOf } from './generation';
 
 const scene = (pageIndex: number) => ({
   pageIndex,
@@ -18,5 +18,11 @@ describe('lado calmo para el texto', () => {
     expect(calmSideOf(scene(1))).toBe('top');
     expect(calmSideOf(scene(2))).toBe('bottom');
     expect(calmSideOf(null)).toBeNull();
+  });
+});
+
+describe('QR de la contratapa', () => {
+  it('apunta siempre al dominio público, también desde staging', () => {
+    expect(PUBLIC_BRAND_DOMAIN).toBe('storynido.com');
   });
 });
