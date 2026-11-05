@@ -96,7 +96,7 @@ const STYLE_MEDIUM: Record<string, string> = {
  * su acabado, pero no sus tics (sonrisas calcadas, brillos).
  */
 const HUMAN_CRAFT =
-  "Human craft: every face is unique and resembles the reference photo (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions and palette identical across pages. Clothing: the same outfit through one continuous scene or day, and change it only when the activity, place or weather calls for it, always dressing the character appropriately for what is happening (playing football or any sport: matching sportswear such as shorts or sports leggings, a sports shirt and sports shoes; swimming: swimwear; bedtime: pyjamas; cold or snow: coat, hat and boots; a party or formal event: party clothes). Never long trousers or jeans for sports in summer, never winter clothes on a beach.";
+  "Human craft: every face is unique and resembles the reference photo (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions and palette identical across pages. Clothing: the main character wears exactly the outfit of the reference sheet on every page, and changes it only when the page text explicitly says so or the action is impossible in it (swimming: swimwear; bedtime: pyjamas; snow: a coat over the same outfit). Never winter clothes on a beach. Recurring objects (a lantern, a backpack, a pet's collar) keep the same shape, size and color on every page, and sports or hobby gear is drawn precisely as named (for example, a squash racket has a small round head and a long thin throat, not a tennis racket).";
 const DEFAULT_MEDIUM =
   'hand-painted digital gouache with subtle watercolor diffusion and natural paper texture';
 
@@ -141,7 +141,7 @@ export function artDirection(input: {
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     ONE_PROTAGONIST,
     TEXT_ZONE,
-    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, a second copy, twin or look-alike of the main character anywhere in the image, any text, title, letters or signs in the image, clothing that does not suit the activity, place or weather, clothing that changes for no reason between consecutive scenes, and any change of style between pages.`,
+    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, a second copy, twin or look-alike of the main character anywhere in the image, any text, title, letters or signs in the image, clothing that changes between pages when the text does not say so, winter clothes on a beach, and any change of style between pages.`,
   ]
     .filter(Boolean)
     .join(' ');

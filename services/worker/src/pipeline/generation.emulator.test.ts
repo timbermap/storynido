@@ -306,7 +306,12 @@ describe('generación del libro (fase 09)', () => {
     const snapshot = done.snapshot as BookSnapshot;
     expect(snapshot.hash).toMatch(/^[0-9a-f]{64}$/);
     expect(snapshot.pages.map((page) => page.text)).toEqual(PAGES);
-    expect(snapshot.character.mustKeep).toEqual(['hair: short curly black', 'glasses: present']);
+    // La ropa de la lámina también se revisa en cada página (Celebraciones, ola 1).
+    expect(snapshot.character.mustKeep).toEqual([
+      'hair: short curly black',
+      'glasses: present',
+      'outfit: a comfortable colorful t-shirt (unless the page text says the character changes clothes)',
+    ]);
     expect(Object.keys(snapshot.approved).sort()).toEqual(['0', '1', '2']);
 
     // Portada + 2 páginas aprobadas se copian; solo se pintan las páginas 3 y 4.

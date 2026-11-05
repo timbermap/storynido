@@ -45,6 +45,7 @@ import {
   type CastMember,
   type ScenePlan,
   catalogPrices,
+  SAME_OUTFIT,
   withCurrentGuards,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
@@ -218,6 +219,11 @@ function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: s
     ? ` Must be visible: ${scene.mustBeVisible.join(', ')}.`
     : '';
   const hidden = scene?.notVisible.length ? ` Do not show: ${scene.notVisible.join(', ')}.` : '';
+  // Lo que no cambia entre páginas (objetos que se repiten, lugar) va en todas, con las mismas palabras.
+  const continuity = scene?.continuityFacts.length
+    ? ` Keep consistent with the other pages, drawn exactly the same way: ${scene.continuityFacts.join('; ')}.`
+    : '';
+  const outfit = scene ? ` The main character wears ${SAME_OUTFIT}.` : '';
   const fix = hint
     ? ` Make sure that: ${hint}. Draw exactly this scene, with the protagonist clearly visible.`
     : '';
@@ -226,7 +232,7 @@ function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: s
     calmSideOf(scene) === 'top'
       ? ' Keep the top third of the image calm and simple (sky, wall or soft background) for the text, with no faces there.'
       : ' Keep the bottom third of the image calm and simple (floor, grass or soft background) for the text, with no faces there.';
-  return `${prompt}${visible}${hidden}${fix}${scene ? calm : ''} No text, letters or words anywhere in the image.`;
+  return `${prompt}${visible}${hidden}${continuity}${outfit}${fix}${scene ? calm : ''} No text, letters or words anywhere in the image.`;
 }
 
 /** Texto que se suma a la escena en cada reintento (1: ninguno). */
@@ -629,7 +635,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       artDirection: preview.artDirection ?? null,
       character: {
         description: describeCharacter(name, sheet, traits, mustKeep),
-        mustKeep: mustKeepLabels(traits, mustKeep),
+        // La ropa de la lámina también se revisa en cada página (salvo que el texto la cambie).
+        mustKeep: [
+          ...mustKeepLabels(traits, mustKeep),
+          `outfit: ${sheet.clothing} (unless the page text says the character changes clothes)`,
+        ],
         sheetPath,
       },
       companion,

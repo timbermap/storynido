@@ -249,6 +249,13 @@ export function buildIllustrationPrompt(input: IllustrationPromptInput): string 
 export const CHARACTER_REFERENCE_SCENE =
   'Character reference sheet: the main character alone, full body, standing in a front three-quarter view with a friendly neutral pose, on a plain flat warm cream background. No scenery, no props, no other characters.';
 
+/**
+ * La ropa no cambia entre páginas (Celebraciones, ola 1: el personaje pasaba de remera y jean a un
+ * traje espacial, short y mameluco). Solo si el texto lo dice o la acción lo exige.
+ */
+export const SAME_OUTFIT =
+  'the same outfit as in the reference sheet on every page, unless the page text explicitly says the character changes clothes or the action is impossible in it, such as swimming or sleeping';
+
 /** Protagonista en una frase para los prompts de imagen, con los rasgos que no pueden cambiar. */
 export function describeCharacter(
   name: string,
@@ -259,7 +266,7 @@ export function describeCharacter(
   const extras = sheet.distinctiveFeatures.length
     ? `; also: ${sheet.distinctiveFeatures.join(', ')}`
     : '';
-  return `${name}: child (${sheet.apparentAge}); ${describeTraits(traits, mustKeep)}; everyday outfit: ${sheet.clothing} (use it when it suits the scene; dress the character for the activity, place and weather)${extras}`;
+  return `${name}: child (${sheet.apparentAge}); ${describeTraits(traits, mustKeep)}; outfit: ${sheet.clothing} (${SAME_OUTFIT})${extras}`;
 }
 
 /**

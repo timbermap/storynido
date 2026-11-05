@@ -9,6 +9,7 @@ import {
   buildIllustrationPrompt,
   buildStoryPrompt,
   coverScene,
+  describeCharacter,
   lessonsBlock,
   narrativeRules,
   renderTemplate,
@@ -142,6 +143,18 @@ describe('modo sin foto', () => {
     expect(description).toContain('shoulder-length, curly, dark brown hair');
     expect(description).toContain('brown skin');
     expect(description).toContain('round glasses');
+  });
+
+  it('la ropa de la lámina se mantiene en todas las páginas', () => {
+    const sheet = { ...avatarToSheet(avatar, 6), clothing: 'white t-shirt and blue jeans' };
+    for (const description of [
+      describeCharacterSheet(sheet),
+      describeCharacter('Sofi', sheet, { ...avatar, distinctive: null }, ['hair']),
+    ]) {
+      expect(description).toContain('outfit: white t-shirt and blue jeans');
+      expect(description).toContain('same outfit as in the reference sheet on every page');
+      expect(description).not.toContain('dress the character for the activity');
+    }
   });
 
   it('la clave cambia si cambia un rasgo', () => {

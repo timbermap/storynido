@@ -94,7 +94,7 @@ export function describeCharacterSheet(sheet: CharacterSheet): string {
   const features = sheet.distinctiveFeatures.length
     ? `; distinctive features: ${sheet.distinctiveFeatures.join(', ')}`
     : '';
-  return `child (${sheet.apparentAge.replace(/^(a\s+)?child,?\s*/i, '')}); hair: ${sheet.hair}; eyes: ${sheet.eyes}; skin tone: ${sheet.skinTone}${features}; everyday outfit: ${sheet.clothing} (use it when it suits the scene; dress the character for the activity, place and weather)`;
+  return `child (${sheet.apparentAge.replace(/^(a\s+)?child,?\s*/i, '')}); hair: ${sheet.hair}; eyes: ${sheet.eyes}; skin tone: ${sheet.skinTone}${features}; outfit: ${sheet.clothing} (the same outfit as in the reference sheet on every page, unless the page text explicitly says the character changes clothes or the action is impossible in it, such as swimming or sleeping)`;
 }
 
 /** Referencia del protagonista para que se vea igual en todas las páginas. */
