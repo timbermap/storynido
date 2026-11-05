@@ -673,16 +673,16 @@
       "newWithTitle": "What shall we create with {name}?",
       "newWith": {
         "families": {
-          "title": "A story",
-          "text": "A new adventure with {name}, using what we already know about their character."
+          "title": "A story with {name}",
+          "text": "A new adventure, with what we already know about their character."
         },
         "events": {
-          "title": "Their birthday",
-          "text": "Invitation, decorations and a story for every guest, starring {name}."
+          "title": "Their celebration",
+          "text": "Birthday, communion or baptism: invitation, decorations and a story for each guest, starring {name}."
         },
         "professionals": {
-          "title": "A story for your project",
-          "text": "With their alias and character, to work on a goal."
+          "title": "A story with a goal",
+          "text": "For teachers and therapists: a story that works on a lesson, with {name}."
         }
       },
       "profileRedraw": "Update their drawing",
