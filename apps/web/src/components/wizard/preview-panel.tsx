@@ -316,6 +316,14 @@ export function PreviewPanel({
   // Muestra lista para pedir: el botón va en la barra fija de abajo.
   const ready = data?.stage === 'complete' && !data.stale;
 
+  // Solo si ya usó alguno: queda exactamente 1 → «el último»; ninguno → «ya los usaste».
+  const adjustmentNotice =
+    regenerationsLeft === 0
+      ? t('noAdjustmentsLeft')
+      : regenerationsLeft === 1 && book.regenerationsUsed > 0
+        ? t('lastAdjustment')
+        : null;
+
   const canRegenerate =
     data?.stage === 'complete' && regenerationsLeft > 0 && busy === null && !data.stale;
 
@@ -359,10 +367,11 @@ export function PreviewPanel({
             {busy === target ? t('regenerating') : t('regenerate')}
           </Button>
         )}
-        {illustrated && (
-          // Cuántos cambios de ilustración quedan, junto al botón que los usa.
-          <span className="self-center text-xs text-muted-foreground">
-            {t('adjustmentsLeft', { count: regenerationsLeft })}
+        {illustrated && adjustmentNotice && (
+          // Sin contador visible (decisión del 4/11): solo el aviso del último ajuste o de que ya no
+          // quedan, junto al botón que los usa.
+          <span className="self-center text-xs font-semibold text-muted-foreground">
+            {adjustmentNotice}
           </span>
         )}
       </div>

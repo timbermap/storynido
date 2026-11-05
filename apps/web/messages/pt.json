@@ -1107,8 +1107,7 @@
       "waitEstimate": "{minutes, plural, one {Costuma ficar pronta em um minuto.} other {Costuma ficar pronta em uns # minutos.}}",
       "waitLate": "Está demorando um pouco mais do que o normal. Seguimos, e avisamos por e-mail quando estiver pronta.",
       "readyTab": "A amostra de {name} está pronta!",
-      "drawingStatus": "Usamos o desenho de {name} · Não ficou parecido? <link>Ajustar a semelhança</link>",
-      "adjustmentsLeft": "{count, plural, =0 {Você já usou os ajustes incluídos} one {Resta # ajuste incluído} other {Restam # ajustes incluídos}}"
+      "drawingStatus": "Usamos o desenho de {name} · Não ficou parecido? <link>Ajustar a semelhança</link>"
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",

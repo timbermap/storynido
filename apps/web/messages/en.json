@@ -1107,8 +1107,7 @@
       "waitEstimate": "{minutes, plural, one {It’s usually ready in about a minute.} other {It’s usually ready in about # minutes.}}",
       "waitLate": "It’s taking a little longer than usual. We’re still on it and will email you when it’s ready.",
       "readyTab": "{name}’s sample is ready!",
-      "drawingStatus": "We used {name}'s drawing · Doesn't look right? <link>Adjust the likeness</link>",
-      "adjustmentsLeft": "{count, plural, =0 {You’ve used the included adjustments} one {# included adjustment left} other {# included adjustments left}}"
+      "drawingStatus": "We used {name}'s drawing · Doesn't look right? <link>Adjust the likeness</link>"
     },
     "character": {
       "modeLegend": "How should we create the main character?",
