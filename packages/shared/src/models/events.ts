@@ -25,7 +25,11 @@ export type KitOffer = (typeof KIT_OFFERS)[number];
 export const BIRTHDAY_BOOK_CHOICES = ['none', 'digital', 'printed'] as const;
 export type BirthdayBookChoice = (typeof BIRTHDAY_BOOK_CHOICES)[number];
 
-type ToneCopy = { name: string; invite: string; waiting: string };
+interface ToneCopy {
+  name: string;
+  invite: string;
+  waiting: string;
+}
 type OccasionTones = Record<InvitationTone, ToneCopy>;
 
 /** Bautismo y comunión: alegre, tierno y emotivo (sin «aventura» en una celebración religiosa). */
