@@ -3,12 +3,21 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { LOCALES, suggestedReading, type Locale, type PublicStory } from '@storynido/shared';
+import {
+  LOCALES,
+  STORY_GROUPS,
+  storyGroups,
+  suggestedReading,
+  type Locale,
+  type PublicStory,
+  type StoryGroup,
+} from '@storynido/shared';
 
 import { StoryCover } from '@/components/stories/story-cover';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
 import { titleForChild } from '@/lib/story-title';
+import { cn } from '@/lib/utils';
 
 import { BookOptions, type BookChoice } from './book-options';
 import { ChosenSummary } from './chosen-summary';
@@ -66,6 +75,28 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
       Number(fits(b.ageMin, b.ageMax)) - Number(fits(a.ageMin, a.ageMax)),
   );
 
+  // Filtros (UX, marketing y producto): edad (por defecto, la suya) y un tema a la vez, con
+  // los grupos de STORY_GROUPS. La historia elegida se ve siempre, primera.
+  const [ageOnly, setAgeOnly] = useState(age !== undefined);
+  const [group, setGroup] = useState<StoryGroup | null>(null);
+  const byAge = ordered.filter((item) => !ageOnly || fits(item.ageMin, item.ageMax));
+  const groups = STORY_GROUPS.map(({ key }) => ({
+    key,
+    count: byAge.filter((item) => storyGroups(item).includes(key)).length,
+  })).filter((item) => item.count > 0);
+  const matches = byAge.filter((item) => !group || storyGroups(item).includes(group));
+  const chosen = ordered.find((item) => item.slug === selected);
+  const visible = [
+    ...(chosen ? [chosen] : []),
+    ...matches.filter((item) => item.slug !== selected),
+  ];
+  const showFilters = ordered.length > 6;
+  const childName = data.child?.name ?? '';
+  function showAll() {
+    setAgeOnly(false);
+    setGroup(null);
+  }
+
   async function next() {
     if (!selected) {
       setError(t('required'));
@@ -100,10 +131,70 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
           }}
         />
       ) : (
-        <fieldset>
+        // min-w-0: un fieldset crece con su contenido; así la fila de chips se desplaza sola.
+        <fieldset className="min-w-0">
           <legend className="sr-only">{t('title')}</legend>
+          {showFilters && (
+            // Una fila de chips; en el móvil, con scroll horizontal (sin dropdowns ni buscador).
+            <div
+              role="group"
+              aria-label={t('filtersLabel')}
+              className="-mx-1 mb-5 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
+            >
+              {age !== undefined && (
+                <FilterChip
+                  track="age"
+                  active={ageOnly}
+                  count={ordered.filter((item) => fits(item.ageMin, item.ageMax)).length}
+                  onClick={() => {
+                    setAgeOnly(true);
+                  }}
+                >
+                  {childName
+                    ? t('filterAge', { name: childName, age })
+                    : t('filterAgeNoName', { age })}
+                </FilterChip>
+              )}
+              <FilterChip
+                track="all_ages"
+                active={!ageOnly}
+                count={ordered.length}
+                onClick={() => {
+                  setAgeOnly(false);
+                }}
+              >
+                {t('filterAllAges')}
+              </FilterChip>
+              <span aria-hidden="true" className="mx-1 w-px shrink-0 self-stretch bg-border" />
+              {groups.map(({ key, count }) => (
+                <FilterChip
+                  key={key}
+                  track={key}
+                  active={group === key}
+                  count={count}
+                  onClick={() => {
+                    setGroup((current) => (current === key ? null : key));
+                  }}
+                >
+                  {t(`groups.${key}`)}
+                </FilterChip>
+              ))}
+            </div>
+          )}
+          {matches.length === 0 && (
+            <p role="status" className="mb-4 text-sm text-muted-foreground">
+              {t('filterEmpty')}{' '}
+              <button
+                type="button"
+                className="font-semibold text-primary underline-offset-4 hover:underline"
+                onClick={showAll}
+              >
+                {t('filterShowAll')}
+              </button>
+            </p>
+          )}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            {ordered.map((story) => (
+            {visible.map((story) => (
               <OptionCard
                 key={story.slug}
                 name="story"
@@ -185,4 +276,45 @@ export function fitToStory(choice: BookChoice, story: PublicStory | undefined): 
     readingLevel: pick(choice.readingLevel, story.readingLevels),
     contentType: pick(choice.contentType, story.contentTypes),
   };
+}
+
+/** Píldora de filtro (como «Le encanta» del catálogo): un toque la activa, otro la quita. */
+function FilterChip({
+  active,
+  onClick,
+  count,
+  track,
+  children,
+}: {
+  track: string;
+  active: boolean;
+  onClick: () => void;
+  count: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      data-track="story_filter"
+      data-track-filter={track}
+      onClick={onClick}
+      className={cn(
+        'inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[0.8rem] font-semibold whitespace-nowrap transition',
+        active
+          ? 'border-secondary bg-secondary text-secondary-foreground'
+          : 'bg-card hover:border-foreground/30',
+      )}
+    >
+      {children}
+      <span
+        className={cn(
+          'text-xs font-medium tabular-nums',
+          active ? 'text-secondary-foreground/80' : 'text-muted-foreground',
+        )}
+      >
+        {count}
+      </span>
+    </button>
+  );
 }

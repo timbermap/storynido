@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-import { storySchema } from '@storynido/shared';
+import { storyGroups, storySchema } from '@storynido/shared';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -62,5 +62,13 @@ describe('catálogo de ejemplo', () => {
       expect(story.title.en).toMatch(/\[Name\]/);
       expect(story.title.pt).toMatch(/\[Nome\]/);
     }
+  });
+});
+
+describe('temas del filtro «Elige la aventura»', () => {
+  it('toda historia de Familias está en al menos un tema', () => {
+    const families = ALL.filter((story) => (story.channels[0] ?? 'families') === 'families');
+    const orphans = families.filter((story) => storyGroups(story).length === 0);
+    expect(orphans.map((story) => story.slug)).toEqual([]);
   });
 });
