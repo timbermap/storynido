@@ -12,6 +12,7 @@ import { FORMAT_SPECS, pageSizeMm, printablePages } from './spec';
 import {
   DENSITY_LAYOUT,
   INK,
+  MINI_PANEL_ALPHA,
   PANEL_ALPHA,
   PAPER,
   digitalHtml,
@@ -25,6 +26,7 @@ describe('reglas de maquetación', () => {
   it('el texto sobre el panel tiene contraste AA incluso sobre una ilustración negra', () => {
     expect(contrastRatio(INK, PAPER)).toBeGreaterThan(12);
     expect(contrastRatio(INK, blend(PAPER, PANEL_ALPHA))).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(INK, blend(PAPER, MINI_PANEL_ALPHA))).toBeGreaterThanOrEqual(4.5);
   });
 
   it('el panel de texto nunca tapa más de la mitad de la ilustración', () => {
@@ -185,6 +187,18 @@ describe.skipIf(!chromePath())('PDF', () => {
     );
     // El nombre no se repite debajo del título (antes salía dos veces).
     expect(html.match(/class="cover-name"/g)).toHaveLength(1);
+  });
+
+  it('mini cuento: tapa en Fraunces, letra más grande y panel más liviano', () => {
+    const regular = digitalHtml(book(), FORMAT_SPECS.digital);
+    const mini = digitalHtml(book({ mini: true }), FORMAT_SPECS.digital);
+    expect(mini).toContain('<h1 class="title brand"');
+    expect(mini).toContain('<span class="cover-name" style="font-size:52pt">Martín</span>');
+    expect(mini).not.toContain('class="l"');
+    expect(mini).toContain('class="panel bottom mini"');
+    const fontPt = (html: string) => Number(/data-font-pt="([\d.]+)"/.exec(html)?.[1]);
+    expect(fontPt(mini)).toBeGreaterThan(fontPt(regular));
+    expect(regular).not.toContain('title brand');
   });
 
   it('mínimo de la imprenta: páginas para dibujar antes del cierre', () => {

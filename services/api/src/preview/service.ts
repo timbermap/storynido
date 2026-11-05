@@ -6,6 +6,7 @@ import {
   COLLECTIONS,
   CHARACTER_REFERENCE_SCENE,
   editorialPlan,
+  withEventWordCap,
   nameIssues,
   repairNameAccents,
   traitsKey,
@@ -531,7 +532,11 @@ export class PreviewService {
       choice.contentType === 'coloring'
         ? styles.find((item) => item.contentTypes.includes('coloring'))
         : styles.find((item) => item.slug === book.styleId);
-    const plan = editorialPlan(choice, await this.catalog.editorial(), story?.pageCount ?? 12);
+    // Eventos: el mini cuento lleva un tope de palabras por página (Celebraciones, ola 1).
+    const plan = withEventWordCap(
+      editorialPlan(choice, await this.catalog.editorial(), story?.pageCount ?? 12),
+      Boolean(book.event),
+    );
     const child = childSnap.data();
     if (!story || !style || child?.ownerUid !== uid) {
       throw new AppError(

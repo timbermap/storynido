@@ -1111,6 +1111,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           educationalNotice: ctx.order.channel === 'professionals',
           fillerPages,
           qr,
+          // Celebraciones: el libro del kit es el mini cuento (tipografía y panel propios).
+          mini: Boolean(kit),
         };
         if (format === 'digital') {
           kitCover = layout.cover;
@@ -1629,6 +1631,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       synopsis: snapshot.synopsis ?? null,
       educationalNotice: ctx.order.channel === 'professionals',
       fillerPages: 0,
+      mini: Boolean(await kitOf(ctx.order.id)),
       qr: {
         svg: await QRCode.toString(`https://${deps.brandDomain ?? 'storynido.com'}`, {
           type: 'svg',
