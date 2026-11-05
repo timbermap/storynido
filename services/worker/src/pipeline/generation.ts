@@ -1303,10 +1303,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           guests: kit.guests,
           signature: kit.signature,
           pictures: kitPictures,
+          // 14: la sopa usa hasta 8 y, desde 9 años, las palabras revueltas usan las siguientes.
           storyWords: storyWords(
             snapshot.pages.map((page) => page.text),
             snapshot.childName,
-            8,
+            14,
             14,
           ),
         };

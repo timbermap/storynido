@@ -236,3 +236,27 @@ describe('stickers', () => {
     expect(html).toMatch(/\.sticker p \{[^}]*height: 25%/);
   });
 });
+
+describe('actividades desde 9 años', () => {
+  const big: KitBook = {
+    ...book('birthday'),
+    turningAge: 12,
+    title: 'Sofi y el faro del squash',
+    storyWords: ['SOFI', 'RAQUETA', 'CANCHA', 'FARO', 'MONTAÑA', 'PELOTA', 'LINTERNA', 'TORNEO'],
+  };
+
+  it('sin torta: laberinto difícil con el nombre del cuento y palabras revueltas', () => {
+    const html = kitPieceDocument(big, 'activities', 20).html;
+    expect(html).not.toContain('llegar a la torta');
+    expect(html).not.toContain('Dibuja tu torta');
+    expect(html).toContain('El gran laberinto de «Sofi y el faro del squash»');
+    expect(html).toContain('Palabras revueltas del cuento');
+    expect(html).toContain('MONTAÑA');
+  });
+
+  it('a los 6 sigue la torta', () => {
+    const html = kitPieceDocument(book('birthday'), 'activities', 20).html;
+    expect(html).toContain('Ayuda a Sofi a llegar a la torta');
+    expect(html).toContain('Dibuja tu torta de cumpleaños');
+  });
+});

@@ -8,7 +8,7 @@ import {
 
 import { fontFaces } from './fonts';
 import { mazeSvg } from './maze';
-import { dotsSvg, plain, secretMessage, wordSearch, wordSearchSvg } from './puzzles';
+import { dotsSvg, plain, scrambleWords, secretMessage, wordSearch, wordSearchSvg } from './puzzles';
 
 /**
  * Piezas del kit de Eventos (fase 12b): cumpleaños y otras ocasiones. Se arman con la portada y las ilustraciones del
@@ -36,7 +36,7 @@ export interface KitBook {
   paper: PaperSize;
   /** Invitados: con nombres, las etiquetas de la bolsita salen una por invitado («Para Juana»). */
   guests?: readonly string[];
-  /** Palabras del cuento para la sopa de letras (ya en mayúsculas y sin tildes). */
+  /** Palabras del cuento para la sopa de letras (en mayúsculas, sin tildes, con Ñ y Ç). */
   storyWords?: readonly string[];
   /** Otras ilustraciones del cuento (data URI) para variar stickers y etiquetas; la portada va primero. */
   pictures?: readonly string[];
@@ -89,6 +89,12 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     match: 'Une cada palabra con su dibujo',
     words: 'torta · globo · regalo · vela',
     license: 'Para el cumple de {name} · storynido.com',
+    mazeBig: 'El gran laberinto de «{title}»',
+    mazeBigHint:
+      'Un solo camino lleva del principio al final del cuento. ¿Lo encuentras sin levantar el lápiz?',
+    scramble: 'Palabras revueltas del cuento',
+    scrambleHint: 'Ordena las letras: todas son palabras de la historia.',
+    solScramble: 'Palabras revueltas',
     cut: 'Recortar por las marcas',
   },
   en: {
@@ -123,6 +129,12 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     match: 'Match each word with its picture',
     words: 'cake · balloon · gift · candle',
     license: 'For {name}’s birthday · storynido.com',
+    mazeBig: 'The great “{title}” maze',
+    mazeBigHint:
+      'Only one path leads from the start to the end of the story. Can you find it without lifting your pencil?',
+    scramble: 'Story word scramble',
+    scrambleHint: 'Unscramble the letters: every word comes from the story.',
+    solScramble: 'Word scramble',
     cut: 'Cut along the marks',
   },
   pt: {
@@ -157,6 +169,12 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     match: 'Ligue cada palavra ao desenho',
     words: 'bolo · balão · presente · vela',
     license: 'Para o aniversário de {name} · storynido.com',
+    mazeBig: 'O grande labirinto de «{title}»',
+    mazeBigHint:
+      'Só um caminho leva do começo ao fim da história. Você consegue achar sem levantar o lápis?',
+    scramble: 'Palavras embaralhadas da história',
+    scrambleHint: 'Desembaralhe as letras: todas são palavras da história.',
+    solScramble: 'Palavras embaralhadas',
     cut: 'Recortar pelas marcas',
   },
 };
@@ -332,6 +350,7 @@ function t(book: KitBook, key: string, extra: Record<string, string | number> = 
   let value = toned ?? occasion?.[book.language][key] ?? STRINGS[book.language][key] ?? key;
   for (const [name, replacement] of Object.entries({
     name: book.childName,
+    title: book.title,
     age: book.turningAge ?? '',
     ...extra,
   })) {
@@ -538,14 +557,23 @@ function activities(book: KitBook, copies: number) {
 .activity .cipher .word { display: flex; gap: 2mm; }
 .activity .cipher .letter { display: flex; flex-direction: column; align-items: center; width: 10mm; font-size: 13pt; font-weight: 700; }
 .activity .cipher .letter i { display: block; width: 100%; height: 9mm; border-bottom: 0.4mm solid ${INK}; }
-.activity .solved { font-size: 14pt; font-weight: 700; letter-spacing: 0.1em; color: ${INK}; }`;
+.activity .solved { font-size: 14pt; font-weight: 700; letter-spacing: 0.1em; color: ${INK}; }
+.activity .scramble { display: grid; gap: 9mm; padding-left: 8mm; font-size: 14pt; }
+.activity .scramble li { display: flex; align-items: flex-end; gap: 8mm; }
+.activity .scramble b { letter-spacing: 0.3em; min-width: 60mm; }
+.activity .scramble i { flex: 1; border-bottom: 0.4mm solid ${INK}; height: 8mm; }`;
   const maze =
     level === 'little'
       ? mazeSvg(8, 10, seed)
       : level === 'middle'
         ? mazeSvg(15, 19, seed)
-        : mazeSvg(20, 26, seed);
-  const pages: string[] = [page(t(book, 'maze'), maze, 1)];
+        : mazeSvg(24, 31, seed);
+  // Desde 9 años, nada de «llegar a la torta»: un laberinto más difícil con el nombre del cuento.
+  const pages: string[] = [
+    level === 'big'
+      ? page(t(book, 'mazeBig'), `<p class="hint">${t(book, 'mazeBigHint')}</p>${maze}`, 1)
+      : page(t(book, 'maze'), maze, 1),
+  ];
   if (level === 'little') {
     pages.push(
       page(t(book, 'dots'), `<p class="hint">${t(book, 'dotsHint')}</p>${dotsSvg()}`, 2),
@@ -556,6 +584,18 @@ function activities(book: KitBook, copies: number) {
   const hard = level === 'big';
   const words = storyWordsOf(book, hard ? 8 : 6, hard ? 14 : 11);
   const puzzle = wordSearch(words, hard ? 15 : 12, seed + 3, hard);
+  // Desde 9 años, «palabras revueltas» en lugar de «dibuja tu torta» (sin el nombre del protagonista).
+  // Primero las palabras que no están en la sopa de letras.
+  const pool = storyWordsOf(book, 14, 12).filter((word) => word !== plain(book.childName));
+  const scrambled = hard
+    ? scrambleWords(
+        [
+          ...pool.filter((word) => !puzzle.words.includes(word)),
+          ...pool.filter((word) => puzzle.words.includes(word)),
+        ].slice(0, 6),
+        seed + 17,
+      )
+    : [];
   const searchBody = `<p class="hint">${t(book, 'searchHint', { directions: t(book, hard ? 'searchHard' : 'searchEasy') })}</p><div class="words">${puzzle.words.map(escapeHtml).join('<span>·</span>')}</div>${wordSearchSvg(puzzle, false)}`;
   pages.push(page(t(book, 'search'), searchBody, 2));
   const message = `${t(book, book.occasion === 'birthday' ? 'secretMsg' : 'secretMsgOther')} ${book.childName}`;
@@ -567,12 +607,24 @@ function activities(book: KitBook, copies: number) {
     )
     .join('')}</div>`;
   const keyTable = `<div class="key">${secret.key.map((entry) => `<span>${entry.letter}<small>${String(entry.number)}</small></span>`).join('')}</div>`;
+  const scramblePage = `<p class="hint">${t(book, 'scrambleHint')}</p><ol class="scramble">${scrambled
+    .map(({ mixed }) => `<li><b>${escapeHtml(mixed)}</b><i></i></li>`)
+    .join('')}</ol>`;
+  const scrambleSolution = scrambled.length
+    ? `<p class="hint">${t(book, 'solScramble')}</p><p class="solved">${scrambled.map(({ word }) => escapeHtml(word)).join(' · ')}</p>`
+    : '';
   pages.push(
     page(t(book, 'secret'), `<p class="hint">${t(book, 'secretHint')}</p>${keyTable}${cipher}`, 3),
-    page(t(book, 'draw'), `<p class="hint">${t(book, 'drawHint')}</p><div class="box"></div>`, 4),
+    scrambled.length
+      ? page(t(book, 'scramble'), scramblePage, 4)
+      : page(
+          t(book, 'draw'),
+          `<p class="hint">${t(book, 'drawHint')}</p><div class="box"></div>`,
+          4,
+        ),
     page(
       t(book, 'solutions'),
-      `<p class="hint">${t(book, 'solSearch')}</p>${wordSearchSvg(puzzle, true)}<p class="hint">${t(book, 'solSecret')}</p><p class="solved">${escapeHtml(plain(message).length > 0 ? message.replace(/[^\p{L} ]/gu, '') : message)}</p>`,
+      `<p class="hint">${t(book, 'solSearch')}</p>${wordSearchSvg(puzzle, true)}<p class="hint">${t(book, 'solSecret')}</p><p class="solved">${escapeHtml(plain(message).length > 0 ? message.replace(/[^\p{L} ]/gu, '') : message)}</p>${scrambleSolution}`,
       5,
     ),
   );
