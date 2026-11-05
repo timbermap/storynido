@@ -736,7 +736,8 @@
         "remove": "Apagar"
       },
       "profilePhotoDeleteAll": "Apagar todas",
-      "profilePhotoConfirmOne": "Apagar esta foto? Não dá para desfazer."
+      "profilePhotoConfirmOne": "Apagar esta foto? Não dá para desfazer.",
+      "profileBackToSample": "Voltar à amostra"
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
   },
@@ -1020,7 +1021,7 @@
       "differencesTitle": "O que muda no livro final",
       "differencesPages": "O livro completo tem {total} páginas; aqui você vê a capa e as primeiras {shown} ilustradas.",
       "differencesWatermark": "A marca d’água da StoryNido só aparece nesta amostra.",
-      "differencesEdit": "Você pode editar os textos e mudar de novo a história, o estilo ou a foto.",
+      "differencesEdit": "Você pode editar os textos de cada página antes de pedir.",
       "staleTitle": "Você mudou suas escolhas",
       "staleText": "Esta amostra corresponde à versão anterior. Crie de novo para ver as mudanças.",
       "regenerateAll": "Criar a amostra de novo",
@@ -1103,10 +1104,10 @@
           "order": "Se gostar, você pede e fazemos o livro completo"
         }
       },
-      "drawingUsed": "Usamos o desenho de {name} do perfil. Não ficou parecido? <link>Ajuste a semelhança no perfil</link>.",
       "waitEstimate": "{minutes, plural, one {Costuma ficar pronta em um minuto.} other {Costuma ficar pronta em uns # minutos.}}",
       "waitLate": "Está demorando um pouco mais do que o normal. Seguimos, e avisamos por e-mail quando estiver pronta.",
-      "readyTab": "A amostra de {name} está pronta!"
+      "readyTab": "A amostra de {name} está pronta!",
+      "drawingStatus": "Usamos o desenho de {name} · Não ficou parecido? <link>Ajustar a semelhança</link>"
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",

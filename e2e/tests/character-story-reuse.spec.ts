@@ -69,16 +69,29 @@ test('personaje con dibujo aprobado: el cuento usa ese dibujo, sin fotos ni rasg
   });
   await page.getByRole('button', { name: 'Crear la vista previa gratis' }).click();
   await expect(page.getByText('Suele estar en unos 4 minutos.')).toBeVisible();
-  await expect(page.locator('body')).toContainText('Usamos el dibujo de Lu de su perfil', {
+  await expect(page.locator('body')).toContainText('Usamos el dibujo de Lu', {
     timeout: 120_000,
   });
   await expect(page.locator('body')).not.toContainText('Así vamos a dibujar a Lu');
   await expect(page.getByRole('button', { name: 'Sí, es así' })).toHaveCount(0);
-  await expect(page.getByRole('link', { name: 'Ajusta el parecido en su perfil' })).toBeVisible();
+  // La muestra lista: sin la pastilla del «último ajuste», el libro arriba y «Quiero este libro»
+  // siempre a la vista en la barra de abajo.
+  await expect(page.getByText('Este es el último ajuste incluido.')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Quiero este libro' })).toBeInViewport();
+  await expect(
+    page.getByText('Puedes editar los textos de cada página antes de pedirlo.'),
+  ).toBeVisible();
+  const sample = page.url();
+
+  // «Ajustar el parecido» lleva a su perfil y desde ahí se vuelve a la muestra.
+  await page.getByRole('link', { name: 'Ajustar el parecido' }).click();
+  await heading(page, 'Lu');
+  await page.getByRole('link', { name: 'Volver a la muestra' }).click();
+  await expect(page).toHaveURL(sample);
+  await page.getByRole('link', { name: 'Ajustar el parecido' }).click();
+  await heading(page, 'Lu');
 
   // Otro cuento: «Cambiar» → sin foto, con sus rasgos: vuelve al paso de siempre.
-  await page.getByRole('link', { name: 'Ajusta el parecido en su perfil' }).click();
-  await heading(page, 'Lu');
   await storyFromProfile(page, 'Lu');
   await heading(page, 'Así se ve Lu');
   await page.getByRole('button', { name: 'Cambiar' }).click();
