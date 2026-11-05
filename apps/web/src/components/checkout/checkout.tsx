@@ -22,10 +22,12 @@ import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useConsent } from '@/components/consent/consent-provider';
 import { useProStatus } from '@/components/pro/use-pro-status';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { CountryOptions } from '@/components/country-options';
 import { formatPrice } from '@/lib/format';
+import { reorderStart } from '@/lib/reorder';
 import { cn } from '@/lib/utils';
 import { CheckoutBook } from './checkout-book';
 
@@ -74,15 +76,15 @@ export function Checkout({
   offer,
   country,
   reorderOf = null,
-  preferPrint = false,
 }: {
   bookId: string;
   offer: Offer;
   country: CountryCode;
-  /** Recompra: el pedido cuyo libro ya generado se vuelve a pedir (sin IA). */
+  /**
+   * Otra copia: el pedido cuyo libro ya generado se vuelve a pedir (sin IA). Solo impresa: el PDF
+   * ya lo tiene y se descarga gratis desde Mis cuentos.
+   */
   reorderOf?: string | null;
-  /** «Pedirlo impreso» desde Mis cuentos: arranca con el primer formato impreso. */
-  preferPrint?: boolean;
 }) {
   const t = useTranslations('Checkout');
   const locale = useLocale() as Locale;
@@ -94,11 +96,17 @@ export function Checkout({
     t.has(`address.stateByCountry.${code}`)
       ? t(`address.stateByCountry.${code}`)
       : t('address.stateOther');
+  // Impresos del país, del más barato al más caro (la otra copia arranca en el que compró).
+  const printOptions = offer.formats
+    .filter((option) => option.format !== 'digital')
+    .sort((a, b) => a.amountMinor - b.amountMinor);
   const [chosenFormat, setFormat] = useState<BookFormat>(
-    (preferPrint ? offer.formats.find((option) => option.format !== 'digital') : undefined)
-      ?.format ??
-      offer.formats[0]?.format ??
-      'digital',
+    (reorderOf ? printOptions[0]?.format : offer.formats[0]?.format) ?? 'digital',
+  );
+  // Otra copia: el pedido original dice qué formato compró y si el libro se puede imprimir
+  // (uno creado en digital tiene ilustraciones de pantalla). Hasta saberlo no se cotiza.
+  const [source, setSource] = useState<'loading' | 'ready' | 'digital_only'>(
+    reorderOf ? 'loading' : 'ready',
   );
   const [address, setAddress] = useState<AddressDraft>(EMPTY_ADDRESS);
   const [gift, setGift] = useState({ isGift: false, message: '' });
@@ -111,16 +119,18 @@ export function Checkout({
   } | null>(null);
   // Solo los formatos que este libro admite (un cuento corto no se imprime como fotolibro).
   const available = quote?.availableFormats;
-  const formats = offer.formats.filter((option) => !available || available.includes(option.format));
-  // Si el formato elegido no lo admite este libro, vuelve al digital (o al primer impreso que
-  // admita, si se llegó por «Pedirlo impreso»).
-  const fallback =
-    (preferPrint ? formats.find((option) => option.format !== 'digital')?.format : undefined) ??
-    'digital';
+  const formats = offer.formats.filter(
+    (option) =>
+      (!reorderOf || option.format !== 'digital') &&
+      (!available || available.includes(option.format)),
+  );
+  // Si el formato elegido no lo admite este libro, vuelve al digital (en otra copia, al impreso
+  // más barato que admita).
+  const fallback = reorderOf
+    ? ([...formats].sort((a, b) => a.amountMinor - b.amountMinor)[0]?.format ?? chosenFormat)
+    : 'digital';
   const format = available && !available.includes(chosenFormat) ? fallback : chosenFormat;
   const [error, setError] = useState<string | null>(null);
-  // Recompra de un libro creado en digital pedido en papel: no se imprime, queda el ebook.
-  const [printNote, setPrintNote] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
   // Pago iniciado: la primera vez que hay precio para este libro (una sola vez, sin pasos nuevos).
   const quotedTotal = quote?.snapshot.totalMinor;
@@ -184,10 +194,33 @@ export function Checkout({
     };
   }, [format, shipTo]);
 
+  useEffect(() => {
+    if (!reorderOf || !signedIn) return;
+    let cancelled = false;
+    void api('order', { params: { orderId: reorderOf } })
+      .then((order) => {
+        if (cancelled) return;
+        const start = reorderStart(order.items, offer.formats);
+        if (start.kind === 'digital_only') {
+          setSource('digital_only');
+          return;
+        }
+        if (start.kind === 'print') setFormat(start.format);
+        setSource('ready');
+      })
+      .catch(() => {
+        // Sin el pedido se cotiza igual: la API decide si se puede imprimir.
+        if (!cancelled) setSource('ready');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [reorderOf, signedIn, offer]);
+
   // El resumen se recalcula en el servidor cada vez que cambia el formato, el cupón o la
   // dirección (con una pausa, para no cotizar con cada tecla).
   useEffect(() => {
-    if (!signedIn) return;
+    if (!signedIn || source !== 'ready') return;
     let cancelled = false;
     const timer = setTimeout(
       () => {
@@ -209,10 +242,9 @@ export function Checkout({
           })
           .catch((caught: unknown) => {
             if (cancelled) return;
-            // Sin esto el resumen quedaba en «Calculando el precio…» para siempre.
+            // Un libro creado en digital no se reimprime (el resumen no queda «Calculando…»).
             if (reorderOf && caught instanceof ApiError && caught.code === 'print_unavailable') {
-              setPrintNote(caught.message);
-              setFormat('digital');
+              setSource('digital_only');
               return;
             }
             setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
@@ -224,7 +256,7 @@ export function Checkout({
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [bookId, format, quantity, orderCountry, coupon, reorderOf, signedIn, addressKey, t]);
+  }, [bookId, format, quantity, orderCountry, coupon, reorderOf, signedIn, source, addressKey, t]);
 
   async function pay() {
     setPaying(true);
@@ -260,6 +292,24 @@ export function Checkout({
         <div className="mt-4">
           <SignInPanel />
         </div>
+      </div>
+    );
+  }
+
+  // Otra copia que no se puede imprimir (creado en digital, o sin imprenta en el país): no se
+  // paga nada; el PDF se descarga gratis desde Mis cuentos.
+  if (reorderOf && (source === 'digital_only' || printOptions.length === 0)) {
+    const key = source === 'digital_only' ? 'reorderDigitalOnly' : 'reorderNoPrint';
+    return (
+      <div role="status" className="mx-auto max-w-md rounded-2xl border bg-card p-6">
+        <p className="font-semibold">{t(`${key}.title`)}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t(`${key}.text`)}</p>
+        <Link
+          href={{ pathname: '/my-stories', query: { estado: 'terminados' } }}
+          className={cn(buttonVariants({ variant: 'outline' }), 'mt-4')}
+        >
+          {t('reorderBack')}
+        </Link>
       </div>
     );
   }
@@ -547,14 +597,6 @@ export function Checkout({
           <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             {t('calculating')}
-          </p>
-        )}
-        {printNote && (
-          <p
-            role="status"
-            className="rounded-xl bg-peach/60 px-4 py-3 text-sm font-semibold text-navy"
-          >
-            {printNote}
           </p>
         )}
         {error && (

@@ -1370,7 +1370,7 @@ describe('checkout y pagos (fase 11)', () => {
     expect(twice.statusCode).toBe(409);
   });
 
-  it('recompra con un clic: mismo libro, sin muestra nueva; un digital no pasa a impreso', async () => {
+  it('otra copia: mismo libro sin muestra nueva, solo impresa; un libro creado en digital no se reimprime', async () => {
     await approvedBook();
     const { orderId } = (await checkout()).json<{ orderId: string }>();
     await webhook(completed(orderId, 1799, 'evt_src'));
@@ -1383,48 +1383,75 @@ describe('checkout y pagos (fase 11)', () => {
     await db.doc(`orders/${orderId}/steps/layout_pdf`).set({
       output: { files: [{ format: 'digital', kind: 'book', pages: 20 }] },
     });
-
-    // La cotización de la recompra no pide una vista previa vigente.
     await db.doc(`books/book-1`).update({ status: 'ordered' });
-    const quoted = await post('/v1/checkout/quote', {
-      bookId: 'book-1',
+    const quote = (format: string) =>
+      post('/v1/checkout/quote', {
+        bookId: 'book-1',
+        format,
+        country: 'MX',
+        sourceOrderId: orderId,
+      });
+
+    // Creado en digital (ilustraciones de pantalla): ni en papel ni otro PDF.
+    for (const format of ['digital', 'hardcover']) {
+      const refused = await quote(format);
+      expect(refused.statusCode).toBe(409);
+      expect(refused.json<{ error: { code: string; message: string } }>().error).toMatchObject({
+        code: 'print_unavailable',
+        message: 'Este libro se creó en digital y no se puede imprimir.',
+      });
+    }
+    const digitalAgain = await post(`/v1/orders/${orderId}/reorder`, {
       format: 'digital',
       country: 'MX',
-      sourceOrderId: orderId,
     });
+    expect(digitalAgain.json<{ error: { code: string } }>().error.code).toBe('print_unavailable');
+
+    // Creado para imprimir: la otra copia es impresa (el PDF ya lo tiene y se descarga gratis).
+    await db.doc(`orders/${orderId}`).update({ items: [{ format: 'hardcover', quantity: 1 }] });
+    const quoted = await quote('hardcover');
     expect(quoted.statusCode).toBe(200);
     expect(quoted.json<{ snapshot: { totalMinor: number } }>().snapshot.totalMinor).toBeGreaterThan(
       0,
     );
-    // Un libro creado en digital no ofrece impresos (el checkout no queda trabado).
-    expect(quoted.json<{ availableFormats: string[] }>().availableFormats).toEqual(['digital']);
+    expect(quoted.json<{ availableFormats: string[] }>().availableFormats).toEqual(['hardcover']);
+    const pdf = await quote('digital');
+    expect(pdf.statusCode).toBe(400);
+    expect(pdf.json<{ error: { message: string } }>().error.message).toContain(
+      'El PDF ya lo tienes',
+    );
+    expect(
+      (await post(`/v1/orders/${orderId}/reorder`, { format: 'digital', country: 'MX' }))
+        .statusCode,
+    ).toBe(400);
 
-    const toPrint = await post(`/v1/orders/${orderId}/reorder`, {
+    const again = await post(`/v1/orders/${orderId}/reorder`, {
       format: 'hardcover',
       country: 'MX',
       shippingAddress: ADDRESS,
-    });
-    expect(toPrint.json<{ error: { code: string } }>().error.code).toBe('print_unavailable');
-
-    const again = await post(`/v1/orders/${orderId}/reorder`, {
-      format: 'digital',
-      country: 'MX',
       gift: { isGift: true, message: 'Para la prima' },
     });
     expect(again.statusCode).toBe(200);
     const created = (
       await db.doc(`orders/${again.json<{ orderId: string }>().orderId}`).get()
     ).data() as
-      | { sourceOrderId: string; status: string; snapshot: { title: string }; bookTitle: string }
+      | {
+          sourceOrderId: string;
+          status: string;
+          snapshot: { title: string };
+          bookTitle: string;
+          items: { format: string }[];
+        }
       | undefined;
     expect(created?.sourceOrderId).toBe(orderId);
     expect(created?.status).toBe('pending_payment');
+    expect(created?.items[0]?.format).toBe('hardcover');
     expect(created?.snapshot.title).toBe('La aventura de Martina');
     expect(created?.bookTitle).toBe('La aventura de Martina');
 
     const notMine = await post(
       `/v1/orders/${orderId}/reorder`,
-      { format: 'digital', country: 'MX' },
+      { format: 'hardcover', country: 'MX', shippingAddress: ADDRESS },
       'token-luis',
     );
     expect(notMine.statusCode).toBe(404);

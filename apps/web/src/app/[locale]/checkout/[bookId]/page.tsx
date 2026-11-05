@@ -10,12 +10,12 @@ import { getDisplayCountry } from '@/lib/server/request-context';
 
 interface Props {
   params: Promise<{ locale: string; bookId: string }>;
-  searchParams: Promise<{ reorder?: string; kit?: string; cards?: string; formato?: string }>;
+  searchParams: Promise<{ reorder?: string; kit?: string; cards?: string }>;
 }
 
 /** Pago del libro: los formatos y precios del país salen del catálogo; el total, de la API. */
 export default async function CheckoutPage({ params, searchParams }: Props) {
-  const [{ locale: rawLocale, bookId }, { reorder, kit, cards, formato }] = await Promise.all([
+  const [{ locale: rawLocale, bookId }, { reorder, kit, cards }] = await Promise.all([
     params,
     searchParams,
   ]);
@@ -50,7 +50,6 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
             offer={offer}
             country={display.country}
             reorderOf={reorder ?? null}
-            preferPrint={formato === 'impreso'}
           />
         ) : (
           <p className="rounded-2xl border bg-card p-6">{t('unavailable')}</p>
