@@ -84,6 +84,9 @@
     "cancel": "Cancel",
     "keepCreating": "Keep creating"
   },
+  "Loading": {
+    "text": "Loading…"
+  },
   "Switchers": {
     "language": "Language",
     "suggestedCountries": "Suggested",

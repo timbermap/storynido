@@ -214,3 +214,21 @@ select:not([multiple]):not([size]):disabled {
     animation: none;
   }
 }
+
+/* Ruedita de carga: entra con un fundido corto (ya aparece después de 300 ms). */
+@keyframes page-loading-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.page-loading {
+  animation: page-loading-in 150ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-loading {
+    animation-duration: 1ms;
+  }
+}

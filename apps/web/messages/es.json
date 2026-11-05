@@ -84,6 +84,9 @@
     "cancel": "Cancelar",
     "keepCreating": "Seguir creando"
   },
+  "Loading": {
+    "text": "Cargando…"
+  },
   "Switchers": {
     "language": "Idioma",
     "suggestedCountries": "Sugeridos",
