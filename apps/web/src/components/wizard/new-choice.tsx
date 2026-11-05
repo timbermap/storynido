@@ -8,12 +8,15 @@ import { COLLECTIONS, type Channel } from '@storynido/shared';
 import { doc, getDoc } from 'firebase/firestore';
 
 import { useAuth } from '@/components/auth/auth-provider';
-import { useProStatus } from '@/components/pro/use-pro-status';
 import { getFirebaseDb } from '@/lib/firebase/client';
 
+import { LineCards } from '@/components/home/session/line-cards';
+import { useProStatus } from '@/components/pro/use-pro-status';
+import type { LineCopy } from '@/components/home/session/parts';
 import { LINE_TONE } from '@/components/wizard/drafts-list';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
+import { HOME_CHANNELS, type HomeChannel } from '@/lib/home-state';
 import { cn } from '@/lib/utils';
 
 const OPTIONS: { line: Channel; icon: typeof BookHeart }[] = [
@@ -76,50 +79,50 @@ function useCharacter(characterId: string) {
 }
 
 /**
- * «Crear otro cuento con…»: qué se puede hacer con ese personaje. Un chico de Familias puede tener
- * un cuento o su cumpleaños; uno creado en Profesionales (con alias y avatar) sigue en su proyecto,
- * si la cuenta profesional está activa. El personaje llega elegido al creador.
+ * «Crear otro cuento con…»: las tres líneas, con el mismo diseño de la home con sesión (foto,
+ * píldora, título y frase). Se destaca Familias. Un alumno de Profesionales (con alias, en una
+ * cuenta Pro) solo ve Profesionales. El personaje llega elegido al creador.
  */
-export function NewChoiceWithCharacter({ characterId }: { characterId: string }) {
+export function NewChoiceWithCharacter({
+  characterId,
+  lines,
+}: {
+  characterId: string;
+  lines: LineCopy;
+}) {
   const t = useTranslations('Account.myStories');
   const character = useCharacter(characterId);
-  const { status: pro } = useProStatus();
-  const professional = Boolean(character?.alias) && pro?.accountType === 'professional';
-  const lines: Channel[] = professional ? ['professionals'] : ['families', 'events'];
   const name = character?.alias ?? character?.name ?? '';
+  const { status: pro } = useProStatus();
+  // Un alumno de Profesionales (con alias) en una cuenta Pro sigue en su proyecto: no se mezcla
+  // con fiestas familiares. Un personaje de Familias puede ir a cualquiera de las tres líneas.
+  const proStudent = Boolean(character?.alias) && pro?.accountType === 'professional';
+  const order: HomeChannel[] = proStudent ? ['professionals'] : [...HOME_CHANNELS];
+  const lead: HomeChannel = proStudent ? 'professionals' : 'families';
   return (
     <>
-      <h1 className="text-3xl font-medium sm:text-4xl">
+      <h1 className="text-[clamp(1.8rem,4vw,2.6rem)] leading-[1.1] font-bold text-balance">
         {name ? t('newWithTitle', { name }) : t('newTitle')}
       </h1>
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {lines.map((line) => {
-          const Icon = OPTIONS.find((option) => option.line === line)?.icon ?? BookHeart;
-          return (
-            <li key={line}>
-              <Link
-                href={{ pathname: '/create', query: { line, personaje: characterId } }}
-                data-track="new_choice"
-                data-track-line={line}
-                className="flex h-full flex-col gap-2 rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] transition hover:border-primary/40"
-              >
-                <span
-                  className={cn('grid size-10 place-items-center rounded-full', LINE_TONE[line])}
-                >
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <span className="font-semibold">{t(`newWith.${line}.title`)}</span>
-                <span className="text-sm text-muted-foreground">
-                  {t(`newWith.${line}.text`, { name })}
-                </span>
-                <span className="mt-auto pt-3">
-                  <span className={buttonVariants({ className: 'w-full' })}>{t('start')}</span>
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      <LineCards
+        order={order}
+        lead={lead}
+        heading={null}
+        birthday={false}
+        query={{ personaje: characterId }}
+        leadCta={t('start')}
+        titles={Object.fromEntries(
+          order.map((line) => [line, t(`newWith.${line}.title`, { name })]),
+        )}
+        lines={
+          Object.fromEntries(
+            order.map((line) => [
+              line,
+              { chip: lines[line].chip, text: t(`newWith.${line}.text`, { name }) },
+            ]),
+          ) as LineCopy
+        }
+      />
     </>
   );
 }

@@ -22,6 +22,10 @@ export function LineCards({
   lines,
   birthday,
   onFamilies,
+  query,
+  titles,
+  heading,
+  leadCta,
 }: {
   /** Las tres líneas, siempre en el mismo orden: Familias, Celebraciones y Profesionales. */
   order: HomeChannel[];
@@ -32,24 +36,34 @@ export function LineCards({
   birthday: boolean;
   /** Al tocar Familias (por ejemplo, para reutilizar el personaje del último pedido). */
   onFamilies?: () => void;
+  /** Más parámetros para el creador (por ejemplo, el personaje ya elegido). */
+  query?: Record<string, string>;
+  /** Títulos propios por línea (por ejemplo, «¿Qué creamos con…?»). */
+  titles?: Partial<Record<HomeChannel, string>>;
+  /** Encabezado de la sección; null si la página ya tiene el suyo. */
+  heading?: string | null;
+  /** Texto propio del botón de la destacada (sin la letra chica). */
+  leadCta?: string;
 }) {
   const t = useTranslations('HomeSession.create');
   const compact = lead === null;
   return (
-    <section aria-labelledby="home-create" className="grid gap-4">
-      <h2 id="home-create" className="text-[1.45rem] font-bold">
-        {t('title')}
-      </h2>
+    <section aria-labelledby={heading === null ? undefined : 'home-create'} className="grid gap-4">
+      {heading === null ? null : (
+        <h2 id="home-create" className="text-[1.45rem] font-bold">
+          {heading ?? t('title')}
+        </h2>
+      )}
       <ul className={cn('grid gap-3 lg:grid-cols-3 lg:gap-4', compact && 'sm:grid-cols-3')}>
         {order.map((line) => {
           const isLead = line === lead;
           const swap = line === 'families' && birthday;
-          const title = swap ? t('birthday.title') : t(`${line}.title`);
+          const title = titles?.[line] ?? (swap ? t('birthday.title') : t(`${line}.title`));
           const link = swap ? t('birthday.link') : t(`${line}.link`);
           return (
             <li key={line} className="min-w-0">
               <Link
-                href={{ pathname: '/create', query: { line } }}
+                href={{ pathname: '/create', query: { line, ...query } }}
                 onClick={line === 'families' ? onFamilies : undefined}
                 data-track="home_line_click"
                 data-track-line={line}
@@ -110,11 +124,13 @@ export function LineCards({
                             'max-w-full px-5 text-center whitespace-normal',
                           )}
                         >
-                          {t(`${line}.cta`)}
+                          {leadCta ?? t(`${line}.cta`)}
                         </span>
-                        <span className="text-[0.82rem] text-muted-foreground">
-                          {t(`${line}.fine`)}
-                        </span>
+                        {!leadCta && (
+                          <span className="text-[0.82rem] text-muted-foreground">
+                            {t(`${line}.fine`)}
+                          </span>
+                        )}
                       </>
                     ) : (
                       <span className="inline-flex min-h-11 w-fit items-center gap-1.5 border-b-2 border-foreground/20 px-0.5 font-bold transition-colors group-hover:border-primary group-hover:text-primary">

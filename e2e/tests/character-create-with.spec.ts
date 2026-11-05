@@ -39,9 +39,14 @@ test('crear otro cuento con un personaje: se elige qué crear y su dibujo se pue
   await page.getByRole('button', { name: 'Crear otro cuento con Martina' }).click();
   await expect(page).toHaveURL(/\/es\/nuevo\?personaje=/);
   await heading(page, '¿Qué creamos con Martina?');
-  await expect(page.getByRole('link', { name: /Un cuento/ })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Profesional|proyecto/ })).toHaveCount(0);
-  await page.getByRole('link', { name: /Su cumpleaños/ }).click();
+  // Las tres líneas, como en la home con sesión; Familias destacada con «Comenzar».
+  const card = (line: string) => page.locator(`main a[data-track-line="${line}"]`);
+  await expect(card('families')).toContainText('Un cuento con Martina');
+  await expect(card('families')).toContainText('Comenzar');
+  await expect(card('events')).toContainText('Su celebración');
+  await expect(card('professionals')).toContainText('Un cuento con un objetivo');
+  await expect(card('professionals')).toHaveAttribute('href', /line=professionals.*personaje=/);
+  await card('events').click();
   // Celebraciones, con Martina ya elegida.
   await heading(page, '¿Quién es el protagonista de la fiesta?');
   await expect(page.locator('#child-name')).toHaveValue('Martina');
