@@ -873,7 +873,9 @@
       "reuseTitle": "¿Para quién es este cuento?",
       "reuseNew": "Alguien nuevo",
       "reuseLook": "Usamos su aspecto del último cuento; igual lo ves y lo apruebas en la muestra.",
-      "reuseNoLook": "Sus datos ya están; el aspecto lo eliges en el paso del personaje."
+      "reuseNoLook": "Sus datos ya están; el aspecto lo eliges en el paso del personaje.",
+      "reuseTyped": "Ya tienes a {name} guardado, con su dibujo o sus fotos.",
+      "reuseTypedUse": "Usar su personaje"
     },
     "photos": {
       "reusedTitle": "Fotos de {name} que ya tenemos",

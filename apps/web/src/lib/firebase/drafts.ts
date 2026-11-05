@@ -420,13 +420,15 @@ export async function listSavedCharacters(db: Firestore, uid: string): Promise<S
     if (!current || time(book.updatedAt) > time(current.updatedAt)) latest.set(book.childId, book);
   }
   // Perfiles repetidos (mismo nombre y edad, de borradores que no reutilizaron al personaje): se
-  // muestra uno solo, el que tiene foto o rasgos y, si no, el del libro más reciente.
+  // muestra uno solo, el más completo: con dibujo aprobado, después con rasgos y, si no, el que
+  // tiene un cuento. Así un duplicado vacío nunca tapa al personaje con su dibujo.
   const seen = new Map<string, (typeof children.docs)[number]>();
+  const rank = (child: (typeof children.docs)[number]) =>
+    (child.get('drawing') ? 4 : 0) + (child.get('avatar') ? 2 : 0) + (latest.get(child.id) ? 1 : 0);
   for (const child of children.docs) {
     const key = `${String(child.get('name')).trim().toLowerCase()}|${String(child.get('age'))}`;
     const kept = seen.get(key);
-    const rank = (id: string) => (latest.get(id) ? 1 : 0);
-    if (!kept || rank(child.id) > rank(kept.id)) seen.set(key, child);
+    if (!kept || rank(child) > rank(kept)) seen.set(key, child);
   }
   return Promise.all(
     [...seen.values()].map(async (child) => {
