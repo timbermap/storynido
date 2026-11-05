@@ -88,14 +88,22 @@ test('Celebraciones: de la temática de la landing a la muestra y el pago del ki
   });
   await expect(page.locator('body')).toContainText('¡Tomi cumple 7!');
   await expect(page.locator('body')).toContainText('Me encantaría que vengas a mi cumple');
-  await expect(page.locator('body')).toContainText('El cuento de recuerdo');
+  // Qué trae el kit y que el visor es el mini cuento (no el libro de Familias).
+  await expect(page.getByRole('heading', { name: 'Qué trae tu kit' })).toBeVisible();
+  await expect(page.locator('body')).toContainText(
+    'Decoración: etiquetas, stickers y agradecimiento',
+  );
+  await expect(page.locator('body')).toContainText('Mini cuento de recuerdo ·');
+  await expect(page.locator('body')).toContainText('El mismo cuento para cada invitado.');
+  await expect(page.getByRole('heading', { name: '¿Y un libro solo para Tomi?' })).toBeVisible();
+  await expect(page.locator('body')).toContainText('El cuento largo de Familias');
   await expect(page.locator('body')).toContainText('de 16:30 a 19:30 h');
   // En un kit no se habla de «el libro completo», sino del cuento de recuerdo.
   await expect(page.locator('body')).not.toContainText('El libro completo tiene');
 
   // El libro del cumpleañero se ofrece acá y se paga aparte: «Ahora no» viene marcado.
   await expect(page.locator('label', { hasText: 'Ahora no' }).locator('input')).toBeChecked();
-  await page.locator('label', { hasText: 'Impreso' }).click();
+  await page.locator('label', { hasText: 'Libro impreso' }).click();
   await expect(page.locator('body')).toContainText('desde tu pedido creas su libro');
   await expect(page.getByRole('button', { name: 'Enviarles el enlace' })).toBeVisible();
   await expectAccessible(page);
@@ -103,7 +111,7 @@ test('Celebraciones: de la temática de la landing a la muestra y el pago del ki
   await shot(page, '4-vista-previa', isMobile);
 
   // Al pago llega todo lo elegido; el lugar ya está cargado y el kit, marcado.
-  await page.getByRole('link', { name: 'Aprobar y pagar' }).click();
+  await page.getByRole('link', { name: 'Quiero este kit' }).click();
   await expect(page.locator('#kit-place')).toHaveValue('Parque Lezama', { timeout: 30_000 });
   await expect(page.locator('#kit-time')).toHaveValue('de 16:30 a 19:30 h');
   await expect(page.locator('label', { hasText: 'Stickers' }).locator('input')).toBeChecked();
@@ -149,11 +157,14 @@ test('Celebraciones: solo la invitación llega así al pago', async ({ page, isM
   await heading(page, '¡Todo listo para la vista previa!');
   await page.getByRole('button', { name: 'Crear la vista previa gratis' }).click();
   await page.getByRole('button', { name: /Sí, es así/ }).click({ timeout: 120_000 });
-  await expect(page.getByRole('link', { name: 'Aprobar y pagar' })).toBeVisible({
+  await expect(page.getByRole('link', { name: 'Quiero la invitación' })).toBeVisible({
     timeout: 120_000,
   });
   await expect(page.locator('body')).toContainText('Solo la invitación');
-  await page.getByRole('link', { name: 'Aprobar y pagar' }).click();
+  // Solo la invitación: lo que trae es eso, sin stickers ni actividades.
+  await expect(page.getByRole('heading', { name: 'Qué trae tu invitación' })).toBeVisible();
+  await expect(page.locator('body')).not.toContainText('Actividades para imprimir');
+  await page.getByRole('link', { name: 'Quiero la invitación' }).click();
   await expect(
     page.locator('label', { hasText: 'Invitación' }).first().locator('input'),
   ).toBeChecked({

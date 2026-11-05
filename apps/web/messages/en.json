@@ -1124,7 +1124,9 @@
           "order": "If you like it, you order it and we prepare the whole kit"
         }
       },
-      "eventDifferencesPages": "The keepsake story has {total} pages; here you see the cover and the first {shown}."
+      "eventDifferencesPages": "The mini story has {total} pages; here you see the cover and the first {shown}.",
+      "continueKit": "I want this kit",
+      "continueInvitation": "I want the invitation"
     },
     "character": {
       "modeLegend": "How should we create the main character?",
@@ -1378,20 +1380,22 @@
       "dedicationPlaceholder": "E.g.: Thanks for coming to my party. {name}",
       "dedicationHint": "Every guest gets the same story, approved by you.",
       "toneLegend": "Invitation tone",
-      "toneSample": "“{text}”"
+      "toneSample": "“{text}”",
+      "includesTitle": "What your kit includes",
+      "includesInvitationTitle": "What your invitation includes"
     },
     "partyPreview": {
       "invitationTitle": "Your invitation",
-      "keepsakeTitle": "The keepsake story",
+      "keepsakeTitle": "Mini keepsake story · {pages} pages",
       "turning": "{name} is turning {age}!",
       "priceKit": "Full digital kit: {price}",
       "priceInvitation": "Just the invitation: {price}",
       "book": {
-        "title": "Would you also like to give {name} their own book?",
-        "text": "A Families book with the full story and the same character. It’s bought separately, after the kit.",
+        "title": "And a book just for {name}?",
+        "text": "The full Families story, with its own plot and {pages} pages, for them to keep. Bought separately, after the kit.",
         "none": "Not now",
-        "digital": "Digital",
-        "printed": "Printed",
+        "digital": "Digital book",
+        "printed": "Printed book",
         "priceDigital": "from {price}",
         "pricePrinted": "from {price}",
         "afterKit": "Noted. After paying for the kit, you can create the book from your order with the same character.",
@@ -1400,7 +1404,8 @@
         "copied": "Link copied",
         "shareText": "We’re getting {name}’s party ready. If you’d like to give a story that stars them, you can create it here:"
       },
-      "differencesEdit": "You can edit the text and change the theme or the photo again."
+      "differencesEdit": "You can edit the text and change the theme or the photo again.",
+      "keepsakeText": "The same story for every guest."
     },
     "focus": {
       "title": "What do you want to work on?",

@@ -1124,7 +1124,9 @@
           "order": "Si te gusta, lo pides y preparamos todo el kit"
         }
       },
-      "eventDifferencesPages": "El cuento de recuerdo tiene {total} páginas; aquí ves la portada y las primeras {shown}."
+      "eventDifferencesPages": "El mini cuento tiene {total} páginas; aquí ves la portada y las primeras {shown}.",
+      "continueKit": "Quiero este kit",
+      "continueInvitation": "Quiero la invitación"
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",
@@ -1378,20 +1380,22 @@
       "dedicationPlaceholder": "Ej.: Gracias por venir a mi fiesta. {name}",
       "dedicationHint": "Todos los invitados reciben el mismo cuento, aprobado por ti.",
       "toneLegend": "Tono de la invitación",
-      "toneSample": "«{text}»"
+      "toneSample": "«{text}»",
+      "includesTitle": "Qué trae tu kit",
+      "includesInvitationTitle": "Qué trae tu invitación"
     },
     "partyPreview": {
       "invitationTitle": "Tu invitación",
-      "keepsakeTitle": "El cuento de recuerdo",
+      "keepsakeTitle": "Mini cuento de recuerdo · {pages} páginas",
       "turning": "¡{name} cumple {age}!",
       "priceKit": "Kit digital completo: {price}",
       "priceInvitation": "Solo la invitación: {price}",
       "book": {
-        "title": "¿Le regalas también su libro a {name}?",
-        "text": "Un libro de Familias con su historia completa, con el mismo personaje. Se compra aparte, después del kit.",
+        "title": "¿Y un libro solo para {name}?",
+        "text": "El cuento largo de Familias, con su propia historia y {pages} páginas, para que lo guarde. Se compra aparte, después del kit.",
         "none": "Ahora no",
-        "digital": "Digital",
-        "printed": "Impreso",
+        "digital": "Libro digital",
+        "printed": "Libro impreso",
         "priceDigital": "desde {price}",
         "pricePrinted": "desde {price}",
         "afterKit": "Anotado. Después de pagar el kit, desde tu pedido creas su libro con el mismo personaje.",
@@ -1400,7 +1404,8 @@
         "copied": "Enlace copiado",
         "shareText": "Estamos preparando la fiesta de {name}. Si quieres regalarle un cuento donde sea protagonista, puedes crearlo aquí:"
       },
-      "differencesEdit": "Puedes editar los textos y volver a cambiar la temática o la foto."
+      "differencesEdit": "Puedes editar los textos y volver a cambiar la temática o la foto.",
+      "keepsakeText": "El mismo cuento para cada invitado."
     },
     "focus": {
       "title": "¿Qué quieres trabajar?",

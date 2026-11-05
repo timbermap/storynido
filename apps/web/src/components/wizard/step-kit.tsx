@@ -19,12 +19,11 @@ import { updateBook } from '@/lib/firebase/drafts';
 import { formatPrice } from '@/lib/format';
 import { useStepDraft } from '@/lib/use-step-draft';
 
+import { KIT_INCLUDES } from './kit-includes';
 import { OptionCard } from './option-card';
 import { inputClass, labelClass } from './step-child';
 import type { StepNav, WizardData } from './types';
 import { WizardShell } from './wizard-shell';
-
-const KIT_INCLUDES = ['invitation', 'decoration', 'keepsake', 'activities'] as const;
 
 /** Celebraciones, etapa Ajustes: kit completo o solo invitación, dedicatoria y tono. */
 export function StepKit({ nav, data }: { nav: StepNav; data: WizardData }) {

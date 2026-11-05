@@ -31,6 +31,7 @@ import { trackConversion } from '@/lib/conversions';
 import { formatPrice } from '@/lib/format';
 
 import { CharacterReview } from './character-review';
+import { KitIncludes } from './kit-includes';
 import { BirthdayBookOffer, InvitationPreview } from './party-preview';
 import { cn } from '@/lib/utils';
 
@@ -68,6 +69,7 @@ export function PreviewPanel({
   childName,
   prices,
   eventPrices,
+  familyBookPages,
   generating,
   generateError,
   onRegenerateAll,
@@ -77,6 +79,8 @@ export function PreviewPanel({
   childName: string;
   prices: WizardData['prices'];
   eventPrices: WizardData['eventPrices'];
+  /** Páginas del libro de Familias (el upsell del kit habla del cuento largo, no del mini). */
+  familyBookPages: number;
   generating: boolean;
   generateError: string | null;
   onRegenerateAll: () => void;
@@ -493,7 +497,18 @@ export function PreviewPanel({
             </section>
           )}
           <div className="grid gap-4 [&>*]:min-w-0">
-            {isEvent && <h2 className="text-xl font-medium">{tParty('keepsakeTitle')}</h2>}
+            {isEvent && (
+              <>
+                {/* Qué trae el kit, antes del mini cuento: así se entiende que es una de las piezas. */}
+                <KitIncludes offer={book.event?.offer ?? 'full_kit'} />
+                <div className="grid gap-0.5">
+                  <h2 className="text-xl font-medium">
+                    {tParty('keepsakeTitle', { pages: data.totalPages })}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">{tParty('keepsakeText')}</p>
+                </div>
+              </>
+            )}
             <BookViewer
               title={data.title}
               coverName={childName}
@@ -560,7 +575,7 @@ export function PreviewPanel({
                 {
                   icon: PencilLine,
                   text: isEvent
-                    ? tParty('differencesEdit')
+                    ? t('differencesEdit')
                     : isPro
                       ? t('proDifferencesEdit')
                       : t('differencesEdit'),
@@ -581,7 +596,12 @@ export function PreviewPanel({
 
       {isEvent && data?.stage === 'complete' && !data.stale && (
         <div className="mt-8">
-          <BirthdayBookOffer book={book} childName={childName} prices={prices} />
+          <BirthdayBookOffer
+            book={book}
+            childName={childName}
+            prices={prices}
+            familyPages={familyBookPages}
+          />
         </div>
       )}
 
@@ -612,7 +632,13 @@ export function PreviewPanel({
                   }}
                   className={cn(buttonVariants({ size: 'lg' }), 'h-14 px-10 text-lg')}
                 >
-                  {isEvent || isPro ? t('approveAndPay') : t('continue')}
+                  {isEvent
+                    ? book.event?.offer === 'invitation'
+                      ? t('continueInvitation')
+                      : t('continueKit')
+                    : isPro
+                      ? t('approveAndPay')
+                      : t('continue')}
                 </Link>
               ) : null}
               {data?.stage === 'complete' && !data.stale && isEvent && eventPrices && (
