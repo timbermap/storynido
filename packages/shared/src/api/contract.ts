@@ -479,7 +479,18 @@ export const publicPreviewSchema = z.object({
       dedication: z.string().nullable(),
       /** Todas las páginas del cuento; solo las primeras tienen ilustración en la muestra. */
       pages: z.array(
-        z.object({ index: z.number().int(), text: z.string(), imageUrl: z.string().nullable() }),
+        z.object({
+          index: z.number().int(),
+          text: z.string(),
+          imageUrl: z.string().nullable(),
+          /** Armado de la página en el libro (page-layout.ts): el visor la muestra igual. */
+          layout: z
+            .object({
+              kind: z.enum(['facing', 'calm', 'vignette', 'overlay']),
+              side: z.enum(['top', 'bottom']),
+            })
+            .optional(),
+        }),
       ),
       totalPages: z.number().int(),
       /** El borrador cambió (historia, estilo, personaje u opciones) después de generarla. */

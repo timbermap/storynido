@@ -17,6 +17,8 @@ export interface ViewerPage {
   text: string | null;
   /** Número de página del cuento (solo kind = story). */
   number?: number;
+  /** Armado en el libro (page-layout.ts): la página se ve igual que en el PDF. */
+  layout?: { kind: 'facing' | 'calm' | 'vignette' | 'overlay'; side: 'top' | 'bottom' };
 }
 
 /**
@@ -316,23 +318,89 @@ function PageSpread({
     );
   }
 
+  const illustration = (
+    <Illustration
+      key={page.key}
+      src={page.imageUrl}
+      alt={alt}
+      lockedLabel={lockedLabel}
+      example={exampleFor(page, examples)}
+    />
+  );
+  const text = (
+    <p className="font-display text-[clamp(0.8rem,3.9cqw,1.15rem)] leading-relaxed whitespace-pre-line">
+      {page.text}
+    </p>
+  );
+  const layout = page.layout;
+
+  // Páginas enfrentadas (como el libro abierto): el texto a la izquierda, con un detalle de la
+  // ilustración arriba, y la ilustración entera a la derecha.
+  if (!layout || layout.kind === 'facing') {
+    return (
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className={cn(paper, '[container-type:inline-size] gap-5 md:order-1')}>
+          {layout && (
+            <div
+              aria-hidden="true"
+              className="mx-auto size-24 shrink-0 overflow-hidden rounded-full shadow-[0_0_0_4px_#fffaf5,0_0_0_5px_#d8c9b8] [&_img]:object-[50%_35%]"
+            >
+              {illustration}
+            </div>
+          )}
+          {layout ? (
+            text
+          ) : (
+            <p className="font-display text-lg leading-relaxed whitespace-pre-line sm:text-xl">
+              {page.text}
+            </p>
+          )}
+        </div>
+        <div className="relative aspect-[3/4] overflow-hidden rounded-xl md:order-2">
+          {illustration}
+          {badge && <Badge>{badge}</Badge>}
+        </div>
+      </div>
+    );
+  }
+
+  // Una sola página, igual que en el PDF: texto en la zona calma, sobre el papel donde se funde la
+  // ilustración o en el panel de siempre.
+  const top = layout.side === 'top';
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
-        <Illustration
-          key={page.key}
-          src={page.imageUrl}
-          alt={alt}
-          lockedLabel={lockedLabel}
-          example={exampleFor(page, examples)}
-        />
-        {badge && <Badge>{badge}</Badge>}
+    <div className="[container-type:inline-size] relative mx-auto aspect-[3/4] w-full max-w-md overflow-hidden rounded-xl bg-[#fffaf3] shadow-[0_17px_45px_rgb(80_52_84/0.18)]">
+      <div
+        className={cn(
+          'absolute inset-x-0',
+          layout.kind === 'vignette'
+            ? cn(
+                'h-[70%]',
+                top
+                  ? 'bottom-0 [mask-image:linear-gradient(to_top,#000_70%,transparent)] [&_img]:object-bottom'
+                  : 'top-0 [mask-image:linear-gradient(to_bottom,#000_70%,transparent)] [&_img]:object-top',
+              )
+            : 'inset-y-0',
+        )}
+      >
+        {illustration}
       </div>
-      <div className={paper}>
-        <p className="font-display text-lg leading-relaxed whitespace-pre-line sm:text-xl">
-          {page.text}
-        </p>
+      <div
+        className={cn(
+          'absolute inset-x-[6%]',
+          top ? 'top-[5%]' : 'bottom-[5%]',
+          layout.kind === 'overlay' && 'rounded-2xl bg-[#fffaf3]/95 px-[5%] py-[4%]',
+          layout.kind === 'calm' &&
+            'rounded-[2rem] bg-[#fffaf3]/80 px-[4%] py-[3%] shadow-[0_0_24px_18px_rgb(255_250_243/0.8)]',
+        )}
+      >
+        {text}
       </div>
+      {/* El rótulo va del lado opuesto al texto. */}
+      {badge && (
+        <div className={cn(!top && '[&>span]:top-3 [&>span]:bottom-auto')}>
+          <Badge>{badge}</Badge>
+        </div>
+      )}
     </div>
   );
 }
