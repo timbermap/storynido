@@ -488,6 +488,7 @@ export function PreviewPanel({
             {isEvent && <h2 className="text-xl font-medium">{tParty('keepsakeTitle')}</h2>}
             <BookViewer
               title={data.title}
+              coverName={childName}
               pages={viewerPages(data)}
               imageAlt={(page) =>
                 page.kind === 'cover'

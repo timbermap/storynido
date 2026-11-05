@@ -1,4 +1,4 @@
-import { Caveat, Fraunces, Lora, Quicksand } from 'next/font/google';
+import { Amatic_SC, Caveat, Lora, Quicksand } from 'next/font/google';
 
 /**
  * Tipografías de la marca v3 (docs/BRAND.md): Quicksand para títulos, botones y navegación;
@@ -26,11 +26,12 @@ export const fontScript = Caveat({
 });
 
 /**
- * Títulos sobre las portadas: Fraunces, la misma del libro impreso y del PDF (más de libro y
- * menos de interfaz que Quicksand). Solo se usa en las portadas.
+ * Títulos sobre las portadas: Amatic SC, letra a mano como en los libros ilustrados (elegida por
+ * Sebas el 05/11). La misma del libro impreso y del PDF. Solo se usa en las portadas.
  */
-export const fontCover = Fraunces({
-  subsets: ['latin'],
+export const fontCover = Amatic_SC({
+  weight: '700',
+  subsets: ['latin', 'latin-ext'],
   variable: '--font-cover-face',
   display: 'swap',
 });
