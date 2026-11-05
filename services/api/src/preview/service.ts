@@ -282,6 +282,7 @@ export class PreviewService {
               traits: preview.character.traits,
               mustKeep: preview.character.mustKeep,
               approved: preview.character.approvedAt !== null,
+              fromDrawing: preview.character.fromDrawing === true,
             }
           : null,
         dedication: book.dedication ?? null,
@@ -462,6 +463,15 @@ export class PreviewService {
         updatedAt: new Date(),
       });
       this.log.info({ bookId }, 'preview ready');
+      // Con su dibujo de siempre no hay nada que aprobar: se ilustran ya la portada y las páginas
+      // (no cuenta como regeneración). Si eso falla, queda la lámina para aprobar a mano.
+      if (preview.character?.fromDrawing) {
+        try {
+          return await this.approveCharacter(uid, bookId, anonymous);
+        } catch (error) {
+          this.log.warn({ err: error, bookId }, 'auto-approve of drawing failed');
+        }
+      }
     } catch (error) {
       const appError = error instanceof AppError ? error : generationFailed();
       this.log.error({ err: error, bookId }, 'preview failed');
@@ -703,6 +713,7 @@ export class PreviewService {
     const characterBase = `previews/${uid}/${bookId}/character-${Date.now().toString(36)}`;
 
     let characterPaths: { clean: string; preview: string };
+    let fromDrawing = false;
     let sheetTraits = traits;
     let sheetMustKeep = mustKeep;
     if (book.useDrawing === true && drawingBytes.length > 0) {
@@ -712,6 +723,7 @@ export class PreviewService {
         bytes: drawingBytes,
         mimeType: 'image/webp',
       });
+      fromDrawing = true;
       sheetTraits = savedDrawing?.traits ?? traits;
       sheetMustKeep = savedDrawing?.mustKeep ?? mustKeep;
     } else {
@@ -745,6 +757,7 @@ export class PreviewService {
         traits: sheetTraits,
         mustKeep: sheetMustKeep,
         approvedAt: null,
+        ...(fromDrawing ? { fromDrawing: true } : {}),
       },
       characterImagePath: characterPaths.clean,
       pages: pages.pages.map((page) => ({

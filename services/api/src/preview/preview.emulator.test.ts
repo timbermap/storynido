@@ -591,7 +591,7 @@ describe('vista previa', () => {
     paint.mockRestore();
   });
 
-  it('«Usamos el dibujo de…»: la lámina del cuento es ese dibujo, sin generar otra imagen', async () => {
+  it('«Usamos el dibujo de…»: la lámina es ese dibujo, queda aprobada y se ilustra directo', async () => {
     await seedBook(providers, 'book-1');
     await app.inject({
       method: 'POST',
@@ -608,14 +608,26 @@ describe('vista previa', () => {
     const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
     const response = await generate('book-1');
     expect(response.statusCode).toBe(200);
-    expect(paint).not.toHaveBeenCalled();
-    const preview = (await db.doc('books/book-1').get()).get('preview') as {
-      stage: string;
-      character: { imagePath: string };
+    // Sin lámina nueva: solo la portada y las páginas de la muestra, en 2K.
+    expect(paint.mock.calls.map(([request]) => request.resolution)).toEqual(['2K', '2K', '2K']);
+    const book = (await db.doc('books/book-1').get()).data() as {
+      status: string;
+      regenerationsUsed: number;
+      preview: {
+        stage: string;
+        character: { imagePath: string; approvedAt: unknown; fromDrawing?: boolean };
+      };
     };
     // Copiada al libro: si después se actualiza el dibujo del perfil, el cuento no cambia.
-    expect(preview.character.imagePath).toMatch(/^previews\/.+\/book-1\/character-/);
-    expect(preview.stage).toBe('character');
+    expect(book.preview.character.imagePath).toMatch(/^previews\/.+\/book-1\/character-/);
+    expect(book.preview.character.fromDrawing).toBe(true);
+    expect(book.preview.character.approvedAt).not.toBeNull();
+    expect(book.preview.stage).toBe('complete');
+    expect(book.status).toBe('preview_ready');
+    expect(book.regenerationsUsed).toBe(0);
+    expect(response.json()).toMatchObject({
+      preview: { stage: 'complete', character: { approved: true, fromDrawing: true } },
+    });
     paint.mockRestore();
   });
 

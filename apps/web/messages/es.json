@@ -1078,7 +1078,18 @@
       "adjustNote": "¿Algo más? (opcional)",
       "adjustNotePlaceholder": "Por ejemplo: que se vea un poco más chico",
       "lastAdjustment": "Este es el último ajuste incluido.",
-      "noAdjustmentsLeft": "Ya usaste los ajustes incluidos: puedes aprobarlo o crear una vista previa nueva."
+      "noAdjustmentsLeft": "Ya usaste los ajustes incluidos: puedes aprobarlo o crear una vista previa nueva.",
+      "drawingWait": {
+        "alt": "El dibujo de {name}",
+        "title": "Escribimos el cuento de {name}…",
+        "text": "Usamos su dibujo de siempre. Escribimos la historia e ilustramos la portada y las primeras páginas.",
+        "steps": {
+          "write": "Escribimos la historia",
+          "illustrate": "Ilustramos la portada y 2 páginas",
+          "order": "Si te gusta, lo pides y hacemos el libro completo"
+        }
+      },
+      "drawingUsed": "Usamos el dibujo de {name} de su perfil. ¿No se parece? <link>Ajusta el parecido en su perfil</link>."
     },
     "character": {
       "modeLegend": "¿Cómo creamos al protagonista?",

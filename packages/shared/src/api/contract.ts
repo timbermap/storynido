@@ -466,6 +466,8 @@ export const publicPreviewSchema = z.object({
           traits: characterTraitsSchema,
           mustKeep: mustKeepSchema,
           approved: z.boolean(),
+          /** Es su dibujo de siempre (del perfil): se puede ajustar desde ahí. */
+          fromDrawing: z.boolean().optional(),
         })
         .nullable(),
       /** Dedicatoria tal cual irá en el libro (página fija). */

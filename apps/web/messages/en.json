@@ -1078,7 +1078,18 @@
       "adjustNote": "Anything else? (optional)",
       "adjustNotePlaceholder": "For example: make them look a little younger",
       "lastAdjustment": "This is the last included adjustment.",
-      "noAdjustmentsLeft": "You have used the included adjustments: you can approve it or create a new preview."
+      "noAdjustmentsLeft": "You have used the included adjustments: you can approve it or create a new preview.",
+      "drawingWait": {
+        "alt": "{name}'s drawing",
+        "title": "Writing {name}'s story…",
+        "text": "We use their usual drawing. We write the story and illustrate the cover and the first pages.",
+        "steps": {
+          "write": "We write the story",
+          "illustrate": "We illustrate the cover and 2 pages",
+          "order": "If you like it, you order it and we make the full book"
+        }
+      },
+      "drawingUsed": "We used {name}'s drawing from their profile. Doesn't look right? <link>Adjust the likeness on their profile</link>."
     },
     "character": {
       "modeLegend": "How should we create the main character?",
