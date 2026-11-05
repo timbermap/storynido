@@ -30,7 +30,7 @@ test('Profesionales: del alias a la vista previa con texto editable y precio', a
   await page.goto('/es/ingresar');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   const email = uniqueEmail('pro');
-  await page.locator('#email').fill(email);
+  await page.locator('#email:visible').fill(email);
   await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
   await expect(page.locator('body')).toContainText('Revisa tu correo');
   await page.goto(await magicLink(email));

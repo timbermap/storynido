@@ -50,7 +50,7 @@ test('Profesionales: con el cuento base elegido, «Siguiente» sin volver a eleg
   await page.goto('/es/ingresar');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   const email = uniqueEmail('pro-elegido');
-  await page.locator('#email').fill(email);
+  await page.locator('#email:visible').fill(email);
   await page.getByRole('button', { name: 'Enviarme un enlace' }).click();
   await expect(page.locator('body')).toContainText('Revisa tu correo');
   await page.goto(await magicLink(email));

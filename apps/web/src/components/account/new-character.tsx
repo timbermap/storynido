@@ -8,9 +8,9 @@ import {
   type Locale,
 } from '@storynido/shared';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { ImagePlus, Loader2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -18,10 +18,11 @@ import { LikesInput, withPendingLike } from '@/components/wizard/likes-input';
 import { AVATAR_TRAITS, TraitPicker, type TraitDraft } from '@/components/wizard/trait-picker';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { acceptedPhotos, uploadChildPhotos } from '@/lib/child-photos';
+import { uploadChildPhotos } from '@/lib/child-photos';
 import { getFirebaseDb } from '@/lib/firebase/client';
-import { LEGAL_SLUGS } from '@/lib/legal';
 import { cn } from '@/lib/utils';
+
+import { PhotoTiles } from './photo-tiles';
 
 const field =
   'h-11 w-full rounded-xl border-[1.5px] border-[#b7bcc8] bg-card px-3 text-base focus:border-primary';
@@ -38,7 +39,6 @@ const AGES = Array.from(
 export function NewCharacter() {
   const t = useTranslations('Account.myStories.newCharacter');
   const tChild = useTranslations('Wizard.child');
-  const tPhotos = useTranslations('Wizard.photos');
   const locale = useLocale() as Locale;
   const router = useRouter();
   const { user, signedIn, loading } = useAuth();
@@ -50,7 +50,6 @@ export function NewCharacter() {
   const [mode, setMode] = useState<'photo' | 'avatar'>('photo');
   const [consent, setConsent] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
-  const photoInput = useRef<HTMLInputElement>(null);
   // Vista previa local de las fotos elegidas (no se suben hasta guardar).
   const [previews, setPreviews] = useState<string[]>([]);
   useEffect(() => {
@@ -227,90 +226,30 @@ export function NewCharacter() {
 
         {mode === 'photo' ? (
           <div className="grid gap-3">
-            <label className="flex items-start gap-3 text-sm">
-              <input
-                type="checkbox"
-                className="mt-1 size-5 shrink-0 accent-[var(--primary)]"
-                checked={consent}
-                onChange={(event) => {
-                  setConsent(event.target.checked);
-                }}
-              />
-              <span>
-                {tPhotos('consentText')}{' '}
-                <Link
-                  href={{
-                    pathname: '/legal/[document]',
-                    params: { document: LEGAL_SLUGS[locale].privacy },
-                  }}
-                  className="font-bold text-primary underline"
-                  target="_blank"
-                >
-                  {tPhotos('privacy')}
-                </Link>
-              </span>
-            </label>
             <p className="font-semibold">{t('photos')}</p>
-            {/* Botón propio (como en el paso de fotos): el del navegador dice «Choose File». */}
-            <input
-              ref={photoInput}
-              id="new-child-photo"
-              type="file"
-              multiple
-              accept={PHOTO_RULES.allowedTypes.join(',')}
-              className="sr-only"
-              tabIndex={-1}
-              disabled={!consent || slotsLeft <= 0}
-              onChange={(event) => {
-                const chosen = acceptedPhotos(event.target.files);
-                event.target.value = '';
+            <PhotoTiles
+              inputId="new-child-photo"
+              tiles={files.map((item, index) => ({
+                key: `${item.name}-${String(index)}`,
+                url: previews[index],
+                alt: t('photoPreview', { number: index + 1 }),
+                removeLabel: t('photoRemove', { number: index + 1 }),
+              }))}
+              slots={slotsLeft}
+              consented={consent}
+              onConsent={() => {
+                setConsent(true);
+              }}
+              onFiles={(chosen) => {
                 setFiles((current) =>
                   [...current, ...chosen].slice(0, PHOTO_RULES.maxPhotosPerBook),
                 );
               }}
+              onRemove={(index) => {
+                setFiles((current) => current.filter((_, i) => i !== index));
+              }}
             />
-            {files.length > 0 && (
-              <ul className="grid grid-cols-3 gap-3 sm:max-w-md" aria-live="polite">
-                {files.map((item, index) => (
-                  <li
-                    key={`${item.name}-${String(index)}`}
-                    className="relative overflow-hidden rounded-xl border bg-muted"
-                  >
-                    {previews[index] && (
-                      // eslint-disable-next-line @next/next/no-img-element -- URL local de la foto elegida.
-                      <img
-                        src={previews[index]}
-                        alt={t('photoPreview', { number: index + 1 })}
-                        className="aspect-square w-full object-cover"
-                      />
-                    )}
-                    <button
-                      type="button"
-                      className="absolute top-1.5 right-1.5 grid size-8 place-items-center rounded-full bg-card/90 text-foreground shadow hover:bg-card"
-                      aria-label={t('photoRemove', { number: index + 1 })}
-                      onClick={() => {
-                        setFiles((current) => current.filter((_, i) => i !== index));
-                      }}
-                    >
-                      <X className="size-4" aria-hidden="true" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              className="w-fit"
-              disabled={!consent || slotsLeft <= 0}
-              onClick={() => photoInput.current?.click()}
-            >
-              <ImagePlus aria-hidden="true" />
-              {tPhotos('choose')}
-            </Button>
-            <p className="text-sm text-muted-foreground">
-              {slotsLeft <= 0 ? tPhotos('limit') : tPhotos('formats')}. {t('photoNote')}
-            </p>
+            <p className="text-sm text-muted-foreground">{t('photoNote')}</p>
           </div>
         ) : (
           <TraitPicker idPrefix="new-child" value={traits} onChange={setTraits} />

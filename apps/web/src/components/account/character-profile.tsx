@@ -1,16 +1,17 @@
 'use client';
 
 import { ApiError, CHILD_LIMITS, PHOTO_RULES, type Locale } from '@storynido/shared';
-import { ImagePlus, Loader2, Trash2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
-import { acceptedPhotos, uploadChildPhotos } from '@/lib/child-photos';
+import { uploadChildPhotos } from '@/lib/child-photos';
 import {
   getChildDetails,
   subscribeOrders,
@@ -24,6 +25,7 @@ import { isOrderDone } from '@/lib/order-state';
 import { LikesInput, withPendingLike } from '@/components/wizard/likes-input';
 
 import { CharacterDrawing } from './character-drawing';
+import { PhotoTiles, SmallDialog } from './photo-tiles';
 
 type Profile = Awaited<ReturnType<typeof loadProfile>>;
 
@@ -61,9 +63,7 @@ export function CharacterProfile({ childId }: { childId: string }) {
   // Fotos desde el perfil (sin cuento): consentimiento y subida.
   const [photoConsent, setPhotoConsent] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const photoInput = useRef<HTMLInputElement>(null);
-  // «Crear su dibujo» desde el recuadro del retrato: lo pide el panel del dibujo.
-  const [drawSignal, setDrawSignal] = useState(0);
+  const [drawingBusy, setDrawingBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -145,8 +145,8 @@ export function CharacterProfile({ childId }: { childId: string }) {
   const name = details.name;
 
   const photoSlots = Math.max(0, PHOTO_RULES.maxPhotosPerBook - profile.photos);
-  // El botón del recuadro aparece solo con una foto válida cargada (con rasgos se crea desde «Su dibujo»).
-  const withPhoto = profile.photos > 0 && profile.drawing.canDraw;
+  // Mientras hay un dibujo nuevo para elegir, el retrato lo muestra (el de ahora queda chico al lado).
+  const portraitUrl = profile.drawing.candidateUrl ?? profile.characterImageUrl;
 
   async function reloadProfile() {
     setProfile(await loadProfile(childId));
@@ -268,60 +268,137 @@ export function CharacterProfile({ childId }: { childId: string }) {
         {t('profileBack')}
       </Link>
 
-      <header className="grid items-center gap-6 sm:grid-cols-[12rem_minmax(0,1fr)]">
-        <div className="aspect-[3/4] overflow-hidden rounded-2xl border bg-card">
-          {profile.characterImageUrl ? (
+      <header className="grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-4 gap-y-5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-x-8">
+        <div
+          className={cn(
+            'relative aspect-[3/4] overflow-hidden rounded-2xl bg-card sm:row-span-2 sm:self-start',
+            profile.drawing.candidateUrl ? 'border-2 border-navy' : 'border',
+          )}
+        >
+          {portraitUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min.
             <img
-              src={profile.characterImageUrl}
-              alt={t('profileImageAlt', { name })}
+              src={portraitUrl}
+              alt={
+                profile.drawing.candidateUrl
+                  ? t('drawing.newAlt', { name })
+                  : t('profileImageAlt', { name })
+              }
               className="size-full object-cover"
             />
           ) : (
-            <div className="grid size-full place-content-center justify-items-center gap-3 p-4 text-center text-sm text-muted-foreground">
-              <p>{withPhoto ? t('profileNoDrawing') : t('profileNoDrawingNoPhoto')}</p>
-              {withPhoto && !profile.drawing.candidateUrl && (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => {
-                    setDrawSignal((count) => count + 1);
-                    document.getElementById('dibujo')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  {t('drawing.create')}
-                </Button>
+            <p className="grid size-full place-items-center p-3 text-center text-sm text-muted-foreground">
+              {drawingBusy ? (
+                <Loader2 className="size-6 animate-spin" aria-hidden="true" />
+              ) : (
+                t('profileNoDrawing')
               )}
-            </div>
+            </p>
+          )}
+          {profile.drawing.candidateUrl && (
+            <span className="absolute top-2 left-2 rounded-full bg-navy px-2.5 py-0.5 text-xs font-bold text-white">
+              {t('drawing.new')}
+            </span>
           )}
         </div>
-        <div className="grid gap-3">
+        <div className="grid gap-1 sm:self-end">
           <h1 className="text-3xl font-medium sm:text-4xl">{name}</h1>
           <p className="text-muted-foreground">{t('charactersAge', { age: details.age })}</p>
-          <Button type="button" onClick={createWith} className="w-fit">
-            {t('profileCreate', { name })}
-          </Button>
-          <p className="text-sm text-muted-foreground">{t('profileCreateNote')}</p>
+        </div>
+        {/* Una sola acción principal según el estado del dibujo (crear, elegir o crear un cuento). */}
+        <div className="col-span-2 self-start sm:col-span-1 sm:col-start-2">
+          <CharacterDrawing
+            childId={childId}
+            name={name}
+            currentUrl={profile.characterImageUrl}
+            drawing={profile.drawing}
+            onCreateStory={createWith}
+            onBusyChange={setDrawingBusy}
+            onChange={({ imageUrl, drawing }) => {
+              setProfile((current) =>
+                current
+                  ? {
+                      ...current,
+                      characterImageUrl: imageUrl ?? current.characterImageUrl,
+                      drawing,
+                    }
+                  : current,
+              );
+            }}
+          />
         </div>
       </header>
 
-      {/* Su dibujo: crearlo o actualizarlo con sus fotos vigentes (o sus rasgos), sin cuento. */}
-      <div id="dibujo" className="scroll-mt-28">
-        <CharacterDrawing
-          childId={childId}
-          name={name}
-          currentUrl={profile.characterImageUrl}
-          drawing={profile.drawing}
-          startSignal={drawSignal}
-          onChange={({ imageUrl, drawing }) => {
-            setProfile((current) =>
-              current
-                ? { ...current, characterImageUrl: imageUrl ?? current.characterImageUrl, drawing }
-                : current,
-            );
+      <section
+        id="su-foto"
+        aria-labelledby="photo-title"
+        className="grid scroll-mt-28 gap-3 rounded-2xl border bg-card p-5"
+      >
+        <h2 id="photo-title" className="text-xl font-medium">
+          {t('profilePhotoTitle', { count: profile.photos })}
+        </h2>
+        <PhotoTiles
+          inputId="profile-photo"
+          tiles={profile.photoUrls.map((url, index) => ({
+            key: profile.photoIds[index] ?? url,
+            url,
+            alt: t('profilePhotoAlt', { name, index: index + 1 }),
+            removeLabel: t('profilePhotoRemove', { index: index + 1 }),
+          }))}
+          slots={photoSlots}
+          busy={uploading || busy}
+          consented={photoConsent}
+          onConsent={() => {
+            setPhotoConsent(true);
           }}
+          onFiles={(chosen) => void addPhotos(chosen)}
+          onRemove={(index) => void removePhoto(profile.photoIds[index] ?? '')}
+          confirmRemove={t('profilePhotoConfirmOne')}
         />
-      </div>
+        <p className="text-sm text-muted-foreground">
+          {profile.photos > 0 && profile.photosExpireAt
+            ? t('profilePhotoSome', {
+                count: profile.photos,
+                date: date.format(new Date(profile.photosExpireAt)),
+              })
+            : t('profilePhotoNone')}
+        </p>
+        {profile.photos > 1 && (
+          <button
+            type="button"
+            className="w-fit text-sm font-semibold text-primary underline-offset-4 hover:underline"
+            onClick={() => {
+              setConfirming(true);
+            }}
+          >
+            {t('profilePhotoDeleteAll')}
+          </button>
+        )}
+        {confirming && (
+          <SmallDialog
+            title={t('profilePhotoConfirm', { name })}
+            onClose={() => {
+              setConfirming(false);
+            }}
+          >
+            <div className="flex flex-wrap gap-2">
+              <Button variant="destructive" disabled={busy} onClick={() => void deletePhotos()}>
+                {busy && <Loader2 className="animate-spin" aria-hidden="true" />}
+                {t('profilePhotoDeleteAll')}
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={() => {
+                  setConfirming(false);
+                }}
+              >
+                {t('profileCancel')}
+              </Button>
+            </div>
+          </SmallDialog>
+        )}
+      </section>
 
       {message && (
         <p
@@ -429,128 +506,6 @@ export function CharacterProfile({ childId }: { childId: string }) {
           {t('profileSave')}
         </Button>
       </form>
-
-      <section aria-labelledby="photo-title" className="grid gap-3 rounded-2xl border bg-card p-5">
-        <h2 id="photo-title" className="text-xl font-medium">
-          {t('profilePhotoTitle')}
-        </h2>
-        <p>
-          {profile.photos > 0 && profile.photosExpireAt
-            ? t('profilePhotoSome', {
-                count: profile.photos,
-                date: date.format(new Date(profile.photosExpireAt)),
-              })
-            : t('profilePhotoNone')}
-        </p>
-        {profile.photoUrls.length > 0 && (
-          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {profile.photoUrls.map((url, index) => (
-              <li key={url} className="relative aspect-[3/4] overflow-hidden rounded-xl border">
-                {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min. */}
-                <img
-                  src={url}
-                  alt={t('profilePhotoAlt', { name, index: index + 1 })}
-                  className="size-full object-cover"
-                />
-                {profile.photoIds[index] && (
-                  <button
-                    type="button"
-                    disabled={uploading}
-                    className="absolute top-1.5 right-1.5 grid size-8 place-items-center rounded-full bg-card/90 text-foreground shadow hover:bg-card"
-                    aria-label={t('profilePhotoRemove', { index: index + 1 })}
-                    onClick={() => void removePhoto(profile.photoIds[index] ?? '')}
-                  >
-                    <X className="size-4" aria-hidden="true" />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-        {/* Subir fotos desde el perfil (sin cuento), para crear o actualizar su dibujo. */}
-        {photoSlots > 0 && (
-          <div className="grid gap-3">
-            <label className="flex items-start gap-3 text-sm">
-              <input
-                type="checkbox"
-                className="mt-1 size-5 shrink-0 accent-[var(--primary)]"
-                checked={photoConsent}
-                onChange={(event) => {
-                  setPhotoConsent(event.target.checked);
-                }}
-              />
-              <span>{tPhotos('consentText')}</span>
-            </label>
-            <input
-              ref={photoInput}
-              id="profile-photo"
-              type="file"
-              multiple
-              accept={PHOTO_RULES.allowedTypes.join(',')}
-              className="sr-only"
-              tabIndex={-1}
-              disabled={!photoConsent || uploading}
-              onChange={(event) => {
-                const chosen = acceptedPhotos(event.target.files).slice(0, photoSlots);
-                event.target.value = '';
-                void addPhotos(chosen);
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="w-fit"
-              disabled={!photoConsent || uploading}
-              onClick={() => photoInput.current?.click()}
-            >
-              {uploading ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <ImagePlus aria-hidden="true" />
-              )}
-              {profile.photos > 0 ? t('profilePhotoAddAnother') : tPhotos('choose')}
-            </Button>
-          </div>
-        )}
-        <p className="text-sm text-muted-foreground">{t('profilePhotoKeep')}</p>
-        {profile.photos > 0 &&
-          (confirming ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm">{t('profilePhotoConfirm', { name })}</span>
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={busy}
-                onClick={() => void deletePhotos()}
-              >
-                {busy && <Loader2 className="animate-spin" aria-hidden="true" />}
-                {t('profilePhotoDelete')}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                disabled={busy}
-                onClick={() => {
-                  setConfirming(false);
-                }}
-              >
-                {t('profileCancel')}
-              </Button>
-            </div>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-fit"
-              onClick={() => {
-                setConfirming(true);
-              }}
-            >
-              <Trash2 aria-hidden="true" />
-              {t('profilePhotoDelete')}
-            </Button>
-          ))}
-      </section>
 
       <section aria-labelledby="books-title" className="grid gap-3">
         <h2 id="books-title" className="text-xl font-medium">
