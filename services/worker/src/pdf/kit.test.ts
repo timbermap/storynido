@@ -227,3 +227,11 @@ describe('etiquetas de la bolsita', () => {
     expect(html).toContain('object-position: 50% 25%');
   });
 });
+
+describe('stickers', () => {
+  it('encuadra la cara y la franja del nombre ocupa el cuarto de abajo', () => {
+    const html = kitPieceDocument(book('birthday'), 'stickers', 20).html;
+    expect(html).toMatch(/\.sticker img \{[^}]*object-position: 50% 25%/);
+    expect(html).toMatch(/\.sticker p \{[^}]*height: 25%/);
+  });
+});

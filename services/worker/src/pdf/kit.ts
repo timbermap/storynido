@@ -434,13 +434,16 @@ function thankYou(book: KitBook, copies: number, print = false) {
   );
 }
 
-/** Hoja de stickers redondos de 2" (50 mm), con el contorno de corte marcado. */
 /** Ilustración de la pieza número `index`: la portada y las demás del cuento, en rotación. */
 function artAt(book: KitBook, index: number): string {
   const all = [book.cover, ...(book.pictures ?? [])];
   return all[index % all.length] ?? book.cover;
 }
 
+/**
+ * Hoja de stickers redondos de 2" (50 mm), con el contorno de corte marcado. La imagen se encuadra en
+ * la cara y la franja del nombre ocupa solo el cuarto de abajo (antes tapaba ~40 % y cortaba cabezas).
+ */
 function stickers(book: KitBook, copies: number) {
   const paper = PAPER_MM[book.paper];
   const size = 50;
@@ -455,10 +458,10 @@ function stickers(book: KitBook, copies: number) {
   }).join('');
   const css = `
 .sticker { position: absolute; width: ${String(size)}mm; height: ${String(size)}mm; border-radius: 50%; overflow: hidden; border: 0.3mm dashed #b9acbf; }
-.sticker img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; }
-.sticker p { position: absolute; left: 0; right: 0; bottom: 0; padding: 2mm 0 4mm; background: rgba(255,250,243,0.92); text-align: center; line-height: 1.1; }
-.sticker p span { display: block; font-size: 12pt; }
-.sticker p small { font-size: 8pt; font-weight: 700; color: ${LAVENDER}; }`;
+.sticker img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; }
+.sticker p { position: absolute; left: 0; right: 0; bottom: 0; height: 25%; padding: 1.2mm 0 0; background: rgba(255,250,243,0.94); text-align: center; line-height: 1.05; }
+.sticker p span { display: block; font-size: 10.5pt; }
+.sticker p small { font-size: 7pt; font-weight: 700; color: ${LAVENDER}; }`;
   return {
     css,
     pages: [
