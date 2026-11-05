@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link, useRouter } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { acceptedPhotos, uploadChildPhotos } from '@/lib/child-photos';
 import {
@@ -62,8 +63,7 @@ export function CharacterProfile({ childId }: { childId: string }) {
   const [photoConsent, setPhotoConsent] = useState(false);
   const [uploading, setUploading] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
-  // «Crear su dibujo» desde el recuadro del retrato: lo pide el panel del dibujo.
-  const [drawSignal, setDrawSignal] = useState(0);
+  const [drawingBusy, setDrawingBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -145,8 +145,8 @@ export function CharacterProfile({ childId }: { childId: string }) {
   const name = details.name;
 
   const photoSlots = Math.max(0, PHOTO_RULES.maxPhotosPerBook - profile.photos);
-  // El botón del recuadro aparece solo con una foto válida cargada (con rasgos se crea desde «Su dibujo»).
-  const withPhoto = profile.photos > 0 && profile.drawing.canDraw;
+  // Mientras hay un dibujo nuevo para elegir, el retrato lo muestra (el de ahora queda chico al lado).
+  const portraitUrl = profile.drawing.candidateUrl ?? profile.characterImageUrl;
 
   async function reloadProfile() {
     setProfile(await loadProfile(childId));
@@ -268,169 +268,72 @@ export function CharacterProfile({ childId }: { childId: string }) {
         {t('profileBack')}
       </Link>
 
-      <header className="grid items-center gap-6 sm:grid-cols-[12rem_minmax(0,1fr)]">
-        <div className="aspect-[3/4] overflow-hidden rounded-2xl border bg-card">
-          {profile.characterImageUrl ? (
+      <header className="grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-4 gap-y-5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-x-8">
+        <div
+          className={cn(
+            'relative aspect-[3/4] overflow-hidden rounded-2xl bg-card sm:row-span-2 sm:self-start',
+            profile.drawing.candidateUrl ? 'border-2 border-navy' : 'border',
+          )}
+        >
+          {portraitUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min.
             <img
-              src={profile.characterImageUrl}
-              alt={t('profileImageAlt', { name })}
+              src={portraitUrl}
+              alt={
+                profile.drawing.candidateUrl
+                  ? t('drawing.newAlt', { name })
+                  : t('profileImageAlt', { name })
+              }
               className="size-full object-cover"
             />
           ) : (
-            <div className="grid size-full place-content-center justify-items-center gap-3 p-4 text-center text-sm text-muted-foreground">
-              <p>{withPhoto ? t('profileNoDrawing') : t('profileNoDrawingNoPhoto')}</p>
-              {withPhoto && !profile.drawing.candidateUrl && (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => {
-                    setDrawSignal((count) => count + 1);
-                    document.getElementById('dibujo')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  {t('drawing.create')}
-                </Button>
+            <p className="grid size-full place-items-center p-3 text-center text-sm text-muted-foreground">
+              {drawingBusy ? (
+                <Loader2 className="size-6 animate-spin" aria-hidden="true" />
+              ) : (
+                t('profileNoDrawing')
               )}
-            </div>
+            </p>
+          )}
+          {profile.drawing.candidateUrl && (
+            <span className="absolute top-2 left-2 rounded-full bg-navy px-2.5 py-0.5 text-xs font-bold text-white">
+              {t('drawing.new')}
+            </span>
           )}
         </div>
-        <div className="grid gap-3">
+        <div className="grid gap-1 sm:self-end">
           <h1 className="text-3xl font-medium sm:text-4xl">{name}</h1>
           <p className="text-muted-foreground">{t('charactersAge', { age: details.age })}</p>
-          <Button type="button" onClick={createWith} className="w-fit">
-            {t('profileCreate', { name })}
-          </Button>
-          <p className="text-sm text-muted-foreground">{t('profileCreateNote')}</p>
+        </div>
+        {/* Una sola acción principal según el estado del dibujo (crear, elegir o crear un cuento). */}
+        <div className="col-span-2 self-start sm:col-span-1 sm:col-start-2">
+          <CharacterDrawing
+            childId={childId}
+            name={name}
+            currentUrl={profile.characterImageUrl}
+            drawing={profile.drawing}
+            onCreateStory={createWith}
+            onBusyChange={setDrawingBusy}
+            onChange={({ imageUrl, drawing }) => {
+              setProfile((current) =>
+                current
+                  ? {
+                      ...current,
+                      characterImageUrl: imageUrl ?? current.characterImageUrl,
+                      drawing,
+                    }
+                  : current,
+              );
+            }}
+          />
         </div>
       </header>
 
-      {/* Su dibujo: crearlo o actualizarlo con sus fotos vigentes (o sus rasgos), sin cuento. */}
-      <div id="dibujo" className="scroll-mt-28">
-        <CharacterDrawing
-          childId={childId}
-          name={name}
-          currentUrl={profile.characterImageUrl}
-          drawing={profile.drawing}
-          startSignal={drawSignal}
-          onChange={({ imageUrl, drawing }) => {
-            setProfile((current) =>
-              current
-                ? { ...current, characterImageUrl: imageUrl ?? current.characterImageUrl, drawing }
-                : current,
-            );
-          }}
-        />
-      </div>
-
-      {message && (
-        <p
-          role={message.error ? 'alert' : 'status'}
-          className={message.error ? 'font-semibold text-destructive' : 'font-semibold'}
-        >
-          {message.text}
-        </p>
-      )}
-
-      <form
-        className="grid gap-4 rounded-2xl border bg-card p-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void save();
-        }}
+      <section
+        id="su-foto"
+        aria-labelledby="photo-title"
+        className="grid scroll-mt-28 gap-3 rounded-2xl border bg-card p-5"
       >
-        <h2 className="text-xl font-medium">{t('profileDataTitle')}</h2>
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_8rem]">
-          <label className="grid gap-1 text-sm">
-            <span className="font-semibold">{t('characterName')}</span>
-            <input
-              value={details.name}
-              maxLength={CHILD_LIMITS.nameMaxLength}
-              required
-              onChange={(event) => {
-                setDetails({ ...details, name: event.target.value });
-              }}
-              className={field}
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="font-semibold">{t('characterAge')}</span>
-            <select
-              value={details.age}
-              onChange={(event) => {
-                setDetails({ ...details, age: Number(event.target.value) });
-              }}
-              className={field}
-            >
-              {Array.from({ length: CHILD_LIMITS.maxAge + 1 }, (_, age) => (
-                <option key={age} value={age}>
-                  {age}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <fieldset className="grid gap-2 text-sm">
-          <legend className="mb-1 font-semibold">{t('profilePronouns')}</legend>
-          <div className="flex flex-wrap gap-4">
-            {PRONOUNS.map((value) => (
-              <label key={value} className="flex min-h-11 items-center gap-2">
-                <input
-                  type="radio"
-                  name="pronouns"
-                  checked={(details.pronouns ?? 'they') === value}
-                  onChange={() => {
-                    setDetails({ ...details, pronouns: value });
-                  }}
-                />
-                {t(value === 'she' ? 'profileShe' : value === 'he' ? 'profileHe' : 'profileThey')}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <LikesInput
-          id="profile-likes"
-          label={t('profileLikes')}
-          hint={t('profileLikesHint')}
-          likes={likes}
-          onLikes={setLikes}
-          like={like}
-          onLike={setLike}
-          labelClassName="text-sm font-semibold"
-          inputClassName={field}
-        />
-        <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
-          <label className="grid gap-1 text-sm">
-            <span className="font-semibold">{t('profilePet')}</span>
-            <input
-              value={details.petName ?? ''}
-              maxLength={CHILD_LIMITS.nameMaxLength}
-              onChange={(event) => {
-                setDetails({ ...details, petName: event.target.value });
-              }}
-              className={field}
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="font-semibold">{t('profileFriend')}</span>
-            <input
-              value={details.bestFriendName ?? ''}
-              maxLength={CHILD_LIMITS.nameMaxLength}
-              onChange={(event) => {
-                setDetails({ ...details, bestFriendName: event.target.value });
-              }}
-              className={field}
-            />
-          </label>
-        </div>
-        <p className="text-xs text-muted-foreground">{t('characterEditNote')}</p>
-        <Button type="submit" disabled={saving} className="w-fit">
-          {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
-          {t('profileSave')}
-        </Button>
-      </form>
-
-      <section aria-labelledby="photo-title" className="grid gap-3 rounded-2xl border bg-card p-5">
         <h2 id="photo-title" className="text-xl font-medium">
           {t('profilePhotoTitle')}
         </h2>
@@ -551,6 +454,113 @@ export function CharacterProfile({ childId }: { childId: string }) {
             </Button>
           ))}
       </section>
+
+      {message && (
+        <p
+          role={message.error ? 'alert' : 'status'}
+          className={message.error ? 'font-semibold text-destructive' : 'font-semibold'}
+        >
+          {message.text}
+        </p>
+      )}
+
+      <form
+        className="grid gap-4 rounded-2xl border bg-card p-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void save();
+        }}
+      >
+        <h2 className="text-xl font-medium">{t('profileDataTitle')}</h2>
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_8rem]">
+          <label className="grid gap-1 text-sm">
+            <span className="font-semibold">{t('characterName')}</span>
+            <input
+              value={details.name}
+              maxLength={CHILD_LIMITS.nameMaxLength}
+              required
+              onChange={(event) => {
+                setDetails({ ...details, name: event.target.value });
+              }}
+              className={field}
+            />
+          </label>
+          <label className="grid gap-1 text-sm">
+            <span className="font-semibold">{t('characterAge')}</span>
+            <select
+              value={details.age}
+              onChange={(event) => {
+                setDetails({ ...details, age: Number(event.target.value) });
+              }}
+              className={field}
+            >
+              {Array.from({ length: CHILD_LIMITS.maxAge + 1 }, (_, age) => (
+                <option key={age} value={age}>
+                  {age}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <fieldset className="grid gap-2 text-sm">
+          <legend className="mb-1 font-semibold">{t('profilePronouns')}</legend>
+          <div className="flex flex-wrap gap-4">
+            {PRONOUNS.map((value) => (
+              <label key={value} className="flex min-h-11 items-center gap-2">
+                <input
+                  type="radio"
+                  name="pronouns"
+                  checked={(details.pronouns ?? 'they') === value}
+                  onChange={() => {
+                    setDetails({ ...details, pronouns: value });
+                  }}
+                />
+                {t(value === 'she' ? 'profileShe' : value === 'he' ? 'profileHe' : 'profileThey')}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <LikesInput
+          id="profile-likes"
+          label={t('profileLikes')}
+          hint={t('profileLikesHint')}
+          likes={likes}
+          onLikes={setLikes}
+          like={like}
+          onLike={setLike}
+          labelClassName="text-sm font-semibold"
+          inputClassName={field}
+        />
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
+          <label className="grid gap-1 text-sm">
+            <span className="font-semibold">{t('profilePet')}</span>
+            <input
+              value={details.petName ?? ''}
+              maxLength={CHILD_LIMITS.nameMaxLength}
+              onChange={(event) => {
+                setDetails({ ...details, petName: event.target.value });
+              }}
+              className={field}
+            />
+          </label>
+          <label className="grid gap-1 text-sm">
+            <span className="font-semibold">{t('profileFriend')}</span>
+            <input
+              value={details.bestFriendName ?? ''}
+              maxLength={CHILD_LIMITS.nameMaxLength}
+              onChange={(event) => {
+                setDetails({ ...details, bestFriendName: event.target.value });
+              }}
+              className={field}
+            />
+          </label>
+        </div>
+        <p className="text-xs text-muted-foreground">{t('characterEditNote')}</p>
+        <Button type="submit" disabled={saving} className="w-fit">
+          {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {t('profileSave')}
+        </Button>
+      </form>
 
       <section aria-labelledby="books-title" className="grid gap-3">
         <h2 id="books-title" className="text-xl font-medium">

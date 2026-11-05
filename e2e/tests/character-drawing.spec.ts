@@ -38,18 +38,23 @@ test('agregar a un chico sin cuento y crear, usar, ajustar y descartar su dibujo
   // Ningún cuento nuevo.
   await expect(page.locator('body')).not.toContainText('Borrador');
 
-  // Sin dibujo ni foto: el recuadro del retrato invita a subir una foto (el botón queda en «Su dibujo»).
-  await expect(page.locator('body')).toContainText('Sube una foto más abajo para crearlo.');
+  // Sin dibujo y con rasgos: la acción principal de la cabecera es crearlo; el cuento, secundario.
+  await expect(page.locator('body')).toContainText('Todavía no tiene dibujo');
   await expect(page.getByRole('button', { name: 'Crear su dibujo' })).toHaveCount(1);
-  // Crear su dibujo → el de ahora (ninguno) y el nuevo, lado a lado → usarlo.
-  await page.getByRole('button', { name: 'Crear su dibujo' }).first().click();
+  await expect(page.getByRole('button', { name: 'Crear un cuento con Lu' })).toBeVisible();
+  // El primer dibujo se ve en el retrato, sin un «de ahora» vacío al lado.
+  await page.getByRole('button', { name: 'Crear su dibujo' }).click();
   await expect(page.getByText('El nuevo', { exact: true })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText('El de ahora', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Descartar' })).toBeVisible();
   await page.getByRole('button', { name: 'Usar este dibujo' }).click();
   await expect(page.getByRole('img', { name: 'Lu', exact: false }).first()).toBeVisible();
 
   // Actualizarlo y ajustar el parecido con una nota; quedarse con el anterior.
   await page.getByRole('button', { name: 'Actualizar su dibujo' }).click();
   await expect(page.getByText('El nuevo', { exact: true })).toBeVisible({ timeout: 60_000 });
+  // Con dibujo, el nuevo se compara con el de ahora (chico, al lado de las acciones).
+  await expect(page.getByText('El de ahora', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Ajustar el parecido' }).click();
   await page.locator('#drawing-note').fill('que se vea un poco más chica');
   await page.getByRole('button', { name: 'Volver a dibujarlo' }).click();
@@ -89,8 +94,8 @@ test('agregar a un chico sin cuento y crear, usar, ajustar y descartar su dibujo
   // La miniatura carga de verdad (antes una foto rechazada o pendiente quedaba rota).
   await expectThumbnailLoaded(page, 'Foto 1 de Teo');
   // Con la foto cargada, el recuadro del retrato ofrece crear el dibujo ahí mismo.
-  await expect(page.locator('body')).toContainText('Todavía no tiene dibujo.');
-  await expect(page.getByRole('button', { name: 'Crear su dibujo' })).toHaveCount(2);
+  await expect(page.locator('body')).toContainText('Todavía no tiene dibujo');
+  await expect(page.getByRole('button', { name: 'Crear su dibujo' })).toHaveCount(1);
   await expect(page.locator('body')).not.toContainText('No pudimos subir la foto');
   await expect(page.getByRole('button', { name: 'Crear su dibujo' }).first()).toBeVisible();
 });

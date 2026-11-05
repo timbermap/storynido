@@ -8,7 +8,7 @@ import {
 } from '@storynido/shared';
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
@@ -22,27 +22,31 @@ const KNOWN_ERRORS = [
 ];
 
 /**
- * El dibujo del personaje en su perfil: crearlo o actualizarlo con sus fotos vigentes (o sus
- * rasgos), ver el actual y el nuevo lado a lado y elegir. Cada dibujo nuevo usa una generación.
+ * Las acciones de la cabecera del perfil, según el estado del dibujo: crearlo (con sus fotos
+ * vigentes o sus rasgos), elegir el nuevo (que se ve en el retrato) o crear un cuento. Una sola
+ * acción principal por estado. Cada dibujo nuevo usa una generación.
  */
 export function CharacterDrawing({
   childId,
   name,
   currentUrl,
   drawing,
-  startSignal = 0,
+  onCreateStory,
+  onBusyChange,
   onChange,
 }: {
   childId: string;
   name: string;
   currentUrl: string | null;
   drawing: Drawing;
-  /** Cada vez que sube, se pide un dibujo nuevo (el botón del recuadro del retrato). */
-  startSignal?: number;
+  onCreateStory: () => void;
+  /** Para que el retrato muestre que se está dibujando. */
+  onBusyChange: (drawing: boolean) => void;
   onChange: (next: { imageUrl: string | null; drawing: Drawing }) => void;
 }) {
   const t = useTranslations('Account.myStories.drawing');
   const tPreview = useTranslations('Wizard.preview');
+  const tProfile = useTranslations('Account.myStories');
   const [busy, setBusy] = useState<'draw' | 'accept' | 'discard' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adjusting, setAdjusting] = useState(false);
@@ -51,6 +55,7 @@ export function CharacterDrawing({
 
   async function run(kind: 'draw' | 'accept' | 'discard', call: () => ReturnType<typeof draw>) {
     setBusy(kind);
+    if (kind === 'draw') onBusyChange(true);
     setError(null);
     try {
       const { imageUrl, ...next } = await call();
@@ -66,31 +71,32 @@ export function CharacterDrawing({
       );
     } finally {
       setBusy(null);
+      onBusyChange(false);
     }
   }
 
   const draw = (body: { mustKeep?: MustKeepTrait[]; note?: string | null } = {}) =>
     api('generateChildDrawing', { params: { childId }, body });
 
-  const requested = useRef(startSignal);
-  useEffect(() => {
-    if (startSignal === requested.current) return;
-    requested.current = startSignal;
-    void run('draw', () => draw());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startSignal]);
-
-  if (!drawing.canDraw && !drawing.candidateUrl) return null;
+  const drawButton = (label: string, variant: 'default' | 'outline' | 'link') => (
+    <Button
+      variant={variant}
+      className={variant === 'link' ? 'h-auto w-fit px-0' : 'w-fit'}
+      disabled={busy !== null}
+      onClick={() => void run('draw', () => draw())}
+    >
+      {busy === 'draw' && <Loader2 className="animate-spin" aria-hidden="true" />}
+      {label}
+    </Button>
+  );
+  const storyButton = (variant: 'default' | 'outline') => (
+    <Button variant={variant} className="w-fit" disabled={busy !== null} onClick={onCreateStory}>
+      {tProfile('profileCreate', { name })}
+    </Button>
+  );
 
   return (
-    <section
-      aria-labelledby="character-drawing"
-      className="grid gap-4 rounded-2xl border bg-card p-5"
-    >
-      <h2 id="character-drawing" className="text-xl font-medium">
-        {currentUrl ? t('updateTitle', { name }) : t('createTitle', { name })}
-      </h2>
-
+    <div className="grid gap-4">
       {busy === 'draw' && (
         <p role="status" className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -99,37 +105,22 @@ export function CharacterDrawing({
       )}
 
       {drawing.candidateUrl ? (
-        <>
-          <div className="grid grid-cols-2 gap-4 sm:max-w-md">
-            <figure className="grid gap-1.5">
-              <div className="aspect-[3/4] overflow-hidden rounded-xl border bg-muted">
-                {currentUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min.
-                  <img
-                    src={currentUrl}
-                    alt={t('currentAlt', { name })}
-                    className="size-full object-cover"
-                  />
-                ) : (
-                  <p className="grid size-full place-items-center p-3 text-center text-sm text-muted-foreground">
-                    {t('noCurrent')}
-                  </p>
-                )}
-              </div>
-              <figcaption className="text-sm font-semibold">{t('current')}</figcaption>
-            </figure>
-            <figure className="grid gap-1.5">
-              <div className="aspect-[3/4] overflow-hidden rounded-xl border-2 border-navy bg-muted">
+        // Hay un dibujo nuevo (en el retrato): elegir. Si ya tenía uno, se ve chico para comparar.
+        <div className="grid gap-3">
+          <p className="font-semibold">{currentUrl ? t('choose', { name }) : t('chooseFirst')}</p>
+          {currentUrl && (
+            <figure className="flex items-center gap-3">
+              <div className="aspect-[3/4] w-16 overflow-hidden rounded-lg border bg-muted">
                 {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min. */}
                 <img
-                  src={drawing.candidateUrl}
-                  alt={t('newAlt', { name })}
+                  src={currentUrl}
+                  alt={t('currentAlt', { name })}
                   className="size-full object-cover"
                 />
               </div>
-              <figcaption className="text-sm font-semibold">{t('new')}</figcaption>
+              <figcaption className="text-sm text-muted-foreground">{t('current')}</figcaption>
             </figure>
-          </div>
+          )}
           <div className="flex flex-wrap gap-2">
             <Button
               disabled={busy !== null}
@@ -147,7 +138,7 @@ export function CharacterDrawing({
                 void run('discard', () => api('discardChildDrawing', { params: { childId } }))
               }
             >
-              {t('keep')}
+              {currentUrl ? t('keep') : t('discard')}
             </Button>
             <Button
               variant="ghost"
@@ -159,17 +150,36 @@ export function CharacterDrawing({
               {tPreview('correct')}
             </Button>
           </div>
-        </>
-      ) : (
-        <div className="grid gap-1.5">
-          <Button
-            className="w-fit"
-            disabled={busy !== null}
-            onClick={() => void run('draw', () => draw())}
-          >
-            {currentUrl ? t('update') : t('create')}
-          </Button>
+        </div>
+      ) : currentUrl ? (
+        // Con dibujo: lo principal es crear un cuento; actualizarlo queda como link.
+        <div className="grid gap-2">
+          {storyButton('default')}
+          <p className="text-sm text-muted-foreground">{tProfile('profileCreateNote')}</p>
+          {drawing.canDraw && drawButton(t('update'), 'link')}
+        </div>
+      ) : drawing.canDraw ? (
+        // Sin dibujo, con foto o rasgos: lo principal es crearlo; el cuento queda secundario.
+        <div className="grid gap-2">
+          <div className="flex flex-wrap gap-2">
+            {drawButton(t('create'), 'default')}
+            {storyButton('outline')}
+          </div>
           <p className="text-sm text-muted-foreground">{t('note')}</p>
+        </div>
+      ) : (
+        // Sin dibujo ni foto: crear un cuento, o subir una foto para dibujarlo antes.
+        <div className="grid gap-2">
+          {storyButton('default')}
+          <p className="text-sm text-muted-foreground">
+            {t.rich('needsPhoto', {
+              link: (chunks) => (
+                <a href="#su-foto" className="font-semibold text-primary underline">
+                  {chunks}
+                </a>
+              ),
+            })}
+          </p>
         </div>
       )}
 
@@ -239,6 +249,6 @@ export function CharacterDrawing({
           {error}
         </p>
       )}
-    </section>
+    </div>
   );
 }

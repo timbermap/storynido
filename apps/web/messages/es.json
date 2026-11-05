@@ -690,21 +690,22 @@
       "profileRedraw": "Actualizar su dibujo",
       "profileRedrawNote": "Empezamos un cuento nuevo con sus fotos: al crear la muestra ves su dibujo nuevo y lo apruebas. Cada dibujo nuevo usa una generación de IA.",
       "drawing": {
-        "createTitle": "Su dibujo",
-        "updateTitle": "Su dibujo",
         "create": "Crear su dibujo",
         "update": "Actualizar su dibujo",
-        "note": "Lo dibujamos con sus fotos vigentes (o sus rasgos). Cada dibujo nuevo usa una generación de IA.",
+        "note": "Lo dibujamos con sus fotos o sus rasgos. Cada dibujo nuevo usa una generación de IA.",
         "drawing": "Dibujando a {name}…",
         "current": "El de ahora",
         "new": "El nuevo",
-        "noCurrent": "Todavía no tiene dibujo",
         "currentAlt": "El dibujo actual de {name}",
         "newAlt": "El dibujo nuevo de {name}",
         "use": "Usar este dibujo",
         "keep": "Quedarme con el anterior",
         "redrawAdjusted": "Volver a dibujarlo",
-        "error": "No pudimos dibujarlo ahora. Intenta de nuevo en un rato."
+        "error": "No pudimos dibujarlo ahora. Intenta de nuevo en un rato.",
+        "choose": "¿Te gusta el nuevo dibujo de {name}?",
+        "chooseFirst": "¿Te gusta su dibujo?",
+        "discard": "Descartar",
+        "needsPhoto": "Para crear su dibujo ahora, <link>sube una foto</link>."
       },
       "newCharacter": {
         "back": "Volver a Personajes",
@@ -726,8 +727,7 @@
       "profilePhotoAddAnother": "Agregar otra",
       "profilePhotoRemove": "Quitar la foto {index}",
       "profilePhotoUploadError": "No pudimos subir la foto. Prueba con otra.",
-      "profileNoDrawing": "Todavía no tiene dibujo.",
-      "profileNoDrawingNoPhoto": "Todavía no tiene dibujo. Sube una foto más abajo para crearlo.",
+      "profileNoDrawing": "Todavía no tiene dibujo",
       "profilePhotoRejected": "Esta foto no sirve."
     },
     "myStoriesLink": "Tus cuentos y pedidos están en Mis cuentos →"

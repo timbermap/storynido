@@ -690,21 +690,22 @@
       "profileRedraw": "Update their drawing",
       "profileRedrawNote": "We start a new story with their photos: when you create the preview you see their new drawing and approve it. Each new drawing uses one AI generation.",
       "drawing": {
-        "createTitle": "Their drawing",
-        "updateTitle": "Their drawing",
         "create": "Create their drawing",
         "update": "Update their drawing",
-        "note": "We draw them from their current photos (or their traits). Each new drawing uses one AI generation.",
+        "note": "We draw it from their photos or traits. Each new drawing uses one AI generation.",
         "drawing": "Drawing {name}…",
         "current": "Current",
         "new": "New",
-        "noCurrent": "No drawing yet",
         "currentAlt": "{name}'s current drawing",
         "newAlt": "{name}'s new drawing",
         "use": "Use this drawing",
         "keep": "Keep the previous one",
         "redrawAdjusted": "Draw it again",
-        "error": "We could not draw it right now. Please try again in a while."
+        "error": "We could not draw it right now. Please try again in a while.",
+        "choose": "Do you like the new drawing of {name}?",
+        "chooseFirst": "Do you like the drawing?",
+        "discard": "Discard",
+        "needsPhoto": "To create the drawing now, <link>upload a photo</link>."
       },
       "newCharacter": {
         "back": "Back to Characters",
@@ -726,8 +727,7 @@
       "profilePhotoAddAnother": "Add another",
       "profilePhotoRemove": "Remove photo {index}",
       "profilePhotoUploadError": "We could not upload the photo. Try another one.",
-      "profileNoDrawing": "No drawing yet.",
-      "profileNoDrawingNoPhoto": "No drawing yet. Upload a photo below to create it.",
+      "profileNoDrawing": "No drawing yet",
       "profilePhotoRejected": "This photo won't work."
     },
     "myStoriesLink": "Your stories and orders are in My stories →"

@@ -690,21 +690,22 @@
       "profileRedraw": "Atualizar o desenho",
       "profileRedrawNote": "Começamos uma história nova com as fotos: ao criar a prévia você vê o desenho novo e o aprova. Cada desenho novo usa uma geração de IA.",
       "drawing": {
-        "createTitle": "O desenho",
-        "updateTitle": "O desenho",
         "create": "Criar o desenho",
         "update": "Atualizar o desenho",
-        "note": "Desenhamos com as fotos vigentes (ou os traços). Cada desenho novo usa uma geração de IA.",
+        "note": "Desenhamos com as fotos ou as características. Cada desenho novo usa uma geração de IA.",
         "drawing": "Desenhando {name}…",
         "current": "O atual",
         "new": "O novo",
-        "noCurrent": "Ainda não tem desenho",
         "currentAlt": "O desenho atual de {name}",
         "newAlt": "O desenho novo de {name}",
         "use": "Usar este desenho",
         "keep": "Ficar com o anterior",
         "redrawAdjusted": "Desenhar de novo",
-        "error": "Não conseguimos desenhar agora. Tente de novo daqui a pouco."
+        "error": "Não conseguimos desenhar agora. Tente de novo daqui a pouco.",
+        "choose": "Gostou do novo desenho de {name}?",
+        "chooseFirst": "Gostou do desenho?",
+        "discard": "Descartar",
+        "needsPhoto": "Para criar o desenho agora, <link>envie uma foto</link>."
       },
       "newCharacter": {
         "back": "Voltar para Personagens",
@@ -726,8 +727,7 @@
       "profilePhotoAddAnother": "Adicionar outra",
       "profilePhotoRemove": "Remover a foto {index}",
       "profilePhotoUploadError": "Não conseguimos enviar a foto. Tente outra.",
-      "profileNoDrawing": "Ainda não tem desenho.",
-      "profileNoDrawingNoPhoto": "Ainda não tem desenho. Envie uma foto abaixo para criá-lo.",
+      "profileNoDrawing": "Ainda não tem desenho",
       "profilePhotoRejected": "Esta foto não serve."
     },
     "myStoriesLink": "Suas histórias e pedidos estão em Minhas histórias →"
