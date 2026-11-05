@@ -117,6 +117,22 @@ export function PreviewPanel({
     headingRef.current?.focus();
   }, [isGenerating]);
 
+  // Cuento con su dibujo de siempre (del perfil): la espera lo muestra y no pide aprobarlo.
+  const withDrawing = book.useDrawing === true && Boolean(book.childId);
+  const [drawingUrl, setDrawingUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!withDrawing || !book.childId || !isGenerating) return;
+    let cancelled = false;
+    api('getChildProfile', { params: { childId: book.childId } })
+      .then((profile) => {
+        if (!cancelled) setDrawingUrl(profile.characterImageUrl);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [withDrawing, book.childId, isGenerating]);
+
   const data = preview?.preview ?? null;
   // Vista previa lista: se cuenta una vez por libro (solo la línea, nada del niño).
   const previewDone = data?.stage === 'complete';
@@ -124,6 +140,65 @@ export function PreviewPanel({
     if (previewDone)
       trackConversion(`preview:${book.id}`, { name: 'preview_created', line: book.channel });
   }, [previewDone, book.id, book.channel]);
+
+  if (isGenerating && withDrawing) {
+    // Con su dibujo de siempre: no se dibuja ni se aprueba de nuevo, se escribe y se ilustra.
+    const steps = ['write', 'illustrate', 'order'] as const;
+    const active = data?.stage === 'character' ? 1 : 0;
+    return (
+      <div className="container-page max-w-3xl py-16 text-center" role="status" aria-live="polite">
+        <div className="relative mx-auto w-24">
+          <div className="aspect-[3/4] overflow-hidden rounded-2xl border bg-card">
+            {drawingUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min.
+              <img
+                src={drawingUrl}
+                alt={t('drawingWait.alt', { name: childName })}
+                className="size-full object-cover"
+              />
+            )}
+          </div>
+          <Loader2
+            className="absolute -right-3 -bottom-3 size-8 animate-spin rounded-full bg-background p-1 text-primary"
+            aria-hidden="true"
+          />
+        </div>
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-medium outline-none"
+        >
+          {t('drawingWait.title', { name: childName })}
+        </h1>
+        <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
+          {t('drawingWait.text')}
+        </p>
+        <ol className="mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm sm:grid-cols-3">
+          {steps.map((step, index) => (
+            <li
+              key={step}
+              aria-current={index === active ? 'step' : undefined}
+              className={
+                index === active
+                  ? 'rounded-xl border-2 border-primary bg-card p-3 font-semibold'
+                  : 'rounded-xl border bg-card/60 p-3 text-muted-foreground'
+              }
+            >
+              <span className="block text-xs font-bold tracking-wide uppercase">{index + 1}</span>
+              {t(`drawingWait.steps.${step}`)}
+            </li>
+          ))}
+        </ol>
+        <div className="mx-auto mt-8 grid max-w-xl justify-items-center gap-2 rounded-2xl border bg-card p-5">
+          <p className="font-semibold">{t('leaveTitle')}</p>
+          <p className="text-sm text-muted-foreground">{t('leaveText')}</p>
+          <Link href="/my-stories" className={buttonVariants({ variant: 'outline' })}>
+            {t('leaveButton')}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (isGenerating) {
     // Si ya había un personaje en revisión, lo que se está generando son las ilustraciones.
@@ -313,6 +388,25 @@ export function PreviewPanel({
 
       {data?.stage === 'complete' && (
         <div className="mt-8 grid gap-6 [&>*]:min-w-0">
+          {data.character?.fromDrawing && book.childId && (
+            // Su dibujo de siempre: si no se parece, se ajusta en su perfil (y vale para los próximos).
+            <p className="text-sm text-muted-foreground">
+              {t.rich('drawingUsed', {
+                name: childName,
+                link: (chunks) => (
+                  <Link
+                    href={{
+                      pathname: '/my-stories/characters/[childId]',
+                      params: { childId: book.childId ?? '' },
+                    }}
+                    className="font-semibold text-primary underline"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </p>
+          )}
           {isEvent && (
             // Primero lo que se manda a los invitados: es lo que decide la compra.
             <section aria-labelledby="party-invitation" className="grid gap-3">

@@ -48,8 +48,30 @@ test('personaje con dibujo aprobado: el cuento usa ese dibujo, sin fotos ni rasg
   await next(page);
   await heading(page, 'Elige la aventura');
 
-  // «Cambiar» → sin foto, con sus rasgos: vuelve al paso de siempre.
-  await page.getByRole('button', { name: 'Atrás' }).click();
+  // Hasta la muestra: con su dibujo de siempre no se vuelve a dibujar ni a aprobar.
+  await page.locator('label', { hasText: 'La gran aventura espacial' }).click();
+  await next(page);
+  await heading(page, '¿Qué quieres que aprenda?');
+  await page.locator('label', { hasText: 'Compartir' }).click();
+  await next(page);
+  await heading(page, 'Hazlo realmente suyo');
+  await next(page);
+  await heading(page, 'Elige el estilo de ilustración');
+  await page.locator('label', { hasText: 'Acuarela' }).click();
+  await next(page);
+  await heading(page, '¡Todo listo para la vista previa!');
+  await page.getByRole('button', { name: 'Crear la vista previa gratis' }).click();
+  await expect(page.locator('body')).toContainText('Usamos el dibujo de Lu de su perfil', {
+    timeout: 120_000,
+  });
+  await expect(page.locator('body')).not.toContainText('Así vamos a dibujar a Lu');
+  await expect(page.getByRole('button', { name: 'Sí, es así' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Ajusta el parecido en su perfil' })).toBeVisible();
+
+  // Otro cuento: «Cambiar» → sin foto, con sus rasgos: vuelve al paso de siempre.
+  await page.getByRole('link', { name: 'Ajusta el parecido en su perfil' }).click();
+  await heading(page, 'Lu');
+  await storyFromProfile(page, 'Lu');
   await heading(page, 'Así se ve Lu');
   await page.getByRole('button', { name: 'Cambiar' }).click();
   await page.getByRole('button', { name: 'Sin foto, con sus rasgos' }).click();

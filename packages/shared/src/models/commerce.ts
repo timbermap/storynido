@@ -175,6 +175,8 @@ export const bookPreviewSchema = z.object({
       traits: characterTraitsSchema,
       mustKeep: mustKeepSchema,
       approvedAt: z.date().nullable(),
+      /** La lámina es el dibujo aprobado en el perfil (copiado): no se vuelve a aprobar. */
+      fromDrawing: z.boolean().optional(),
     })
     .optional(),
   /** Lámina del acompañante (abuela, mascota): segunda referencia de cada ilustración. */
