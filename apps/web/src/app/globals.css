@@ -215,7 +215,7 @@ select:not([multiple]):not([size]):disabled {
   }
 }
 
-/* Carga de una página: aparece a los 300 ms (una carga rápida no parpadea). */
+/* Ruedita de carga: entra con un fundido corto (ya aparece después de 300 ms). */
 @keyframes page-loading-in {
   from {
     opacity: 0;
@@ -225,7 +225,7 @@ select:not([multiple]):not([size]):disabled {
   }
 }
 .page-loading {
-  animation: page-loading-in 200ms ease-out 300ms both;
+  animation: page-loading-in 150ms ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
   .page-loading {

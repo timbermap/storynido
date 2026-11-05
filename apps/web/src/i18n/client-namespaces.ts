@@ -4,6 +4,7 @@
  */
 export const CLIENT_NAMESPACES = [
   'Nav',
+  'Loading',
   'Checkout',
   'Switchers',
   'Footer',

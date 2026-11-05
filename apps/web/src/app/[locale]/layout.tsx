@@ -12,6 +12,7 @@ import { ConsentBanner } from '@/components/consent/consent-banner';
 import { Maintenance, PreviewOnlyBanner } from '@/components/layout/maintenance';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { HeaderSwitch } from '@/components/layout/focus-header';
+import { NavigationSpinner } from '@/components/layout/navigation-spinner';
 import { AppHeader } from '@/components/layout/app-header';
 import { AppTabBar } from '@/components/layout/app-tab-bar';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -115,6 +116,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 {customer ? <AppTabBar /> : <StickyCta />}
               </>
             )}
+            <NavigationSpinner />
             <ConsentBanner />
             <Analytics />
             <ClientErrorReporter />
