@@ -5,6 +5,7 @@ import {
   withChildName,
   COLLECTIONS,
   CHARACTER_REFERENCE_SCENE,
+  ageMismatch,
   editorialPlan,
   withEventWordCap,
   nameIssues,
@@ -284,6 +285,7 @@ export class PreviewService {
               mustKeep: preview.character.mustKeep,
               approved: preview.character.approvedAt !== null,
               fromDrawing: preview.character.fromDrawing === true,
+              ageMismatch: preview.character.ageMismatch ?? null,
             }
           : null,
         dedication: book.dedication ?? null,
@@ -609,6 +611,11 @@ export class PreviewService {
       track,
     );
     const characterDescription = describeCharacter(String(child.name), sheet, traits, mustKeep);
+    // Edad que dice el cuento: la que cumple en un cumpleaños; si no, la del protagonista.
+    const storyAge =
+      event?.type === 'birthday' && typeof event.turningAge === 'number'
+        ? event.turningAge
+        : Number(child.age);
     // Nombres que tienen que aparecer tal cual: el del protagonista y el apodo de los recuerdos.
     const requiredNames = [String(child.name), memories?.nickname ?? ''].filter(Boolean);
 
@@ -766,6 +773,10 @@ export class PreviewService {
         mustKeep: sheetMustKeep,
         approvedAt: null,
         ...(fromDrawing ? { fromDrawing: true } : {}),
+        // La foto parece de otra edad que la del cuento (p. ej. un adulto que «cumple 12»).
+        ...(photo && ageMismatch(sheet.apparentAge, storyAge)
+          ? { ageMismatch: { apparent: sheet.apparentAge, entered: storyAge } }
+          : {}),
       },
       characterImagePath: characterPaths.clean,
       pages: pages.pages.map((page) => ({
@@ -1202,6 +1213,8 @@ export class PreviewService {
           traits,
           mustKeep,
           approvedAt: null,
+          // Corregir rasgos no cambia la foto: el aviso de edad sigue.
+          ...(preview.character?.ageMismatch ? { ageMismatch: preview.character.ageMismatch } : {}),
         },
         'preview.characterImagePath': paths.clean,
         'preview.pages': preview.pages.map((page) => ({

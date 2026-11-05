@@ -468,6 +468,11 @@ export const publicPreviewSchema = z.object({
           approved: z.boolean(),
           /** Es su dibujo de siempre (del perfil): se puede ajustar desde ahí. */
           fromDrawing: z.boolean().optional(),
+          /** La foto parece de otra edad que la del cuento (aviso antes de pagar). */
+          ageMismatch: z
+            .object({ apparent: z.string(), entered: z.number() })
+            .nullable()
+            .optional(),
         })
         .nullable(),
       /** Dedicatoria tal cual irá en el libro (página fija). */

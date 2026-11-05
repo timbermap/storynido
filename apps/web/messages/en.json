@@ -1024,6 +1024,8 @@
       "differencesEdit": "You can edit the text on each page before ordering.",
       "staleTitle": "You changed your choices",
       "staleText": "This sample matches the previous version. Create it again to see your changes.",
+      "ageMismatchTitle": "The photo looks like a different age",
+      "ageMismatchText": "In the story, {name} is {age}, but the photo looks like someone of a different age. If that’s right, go ahead; if not, check the age or change the photo before you pay.",
       "regenerateAll": "Create the sample again",
       "editChoices": "Change my choices",
       "continue": "I want this book",

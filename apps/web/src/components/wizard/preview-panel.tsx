@@ -431,6 +431,18 @@ export function PreviewPanel({
         </div>
       )}
 
+      {data?.character?.ageMismatch && (
+        <div role="status" className="mt-6 rounded-xl border bg-butter/60 p-5">
+          <p className="flex items-center gap-2 font-bold">
+            <AlertTriangle className="size-5 shrink-0" aria-hidden="true" />
+            {t('ageMismatchTitle')}
+          </p>
+          <p className="mt-1 text-muted-foreground">
+            {t('ageMismatchText', { name: childName, age: data.character.ageMismatch.entered })}
+          </p>
+        </div>
+      )}
+
       {error && (
         <p role="alert" className="mt-6 font-semibold text-destructive">
           {t(`errors.${error}`)}
