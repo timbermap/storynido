@@ -1312,6 +1312,14 @@
         "long_illustrated": {
           "name": "História ilustrada longa",
           "text": "Mais texto em cada página e uma trama com reviravoltas."
+        },
+        "short_story": {
+          "name": "História curta",
+          "text": "Uma história breve, com um pouco de texto em cada página."
+        },
+        "illustrated_story": {
+          "name": "História ilustrada",
+          "text": "Uma história clássica: texto e ilustração em equilíbrio em cada página."
         }
       }
     },

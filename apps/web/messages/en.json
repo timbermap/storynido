@@ -1312,6 +1312,14 @@
         "long_illustrated": {
           "name": "Long illustrated story",
           "text": "More text on every page and a plot with twists."
+        },
+        "short_story": {
+          "name": "Short story",
+          "text": "A brief story, with a little text on each page."
+        },
+        "illustrated_story": {
+          "name": "Illustrated story",
+          "text": "A classic picture book: text and illustration in balance on every page."
         }
       }
     },

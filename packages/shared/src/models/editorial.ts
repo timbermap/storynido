@@ -224,6 +224,25 @@ export const READING_FORMATS = [
     readingLevel: 'advanced',
     recommended: true,
   },
+  // Desde 9 años también hay formatos más cortos (antes el largo era el único).
+  {
+    key: 'short_story',
+    minAge: 9,
+    maxAge: 99,
+    length: 'short',
+    textDensity: 'balanced',
+    readingLevel: 'advanced',
+    recommended: false,
+  },
+  {
+    key: 'illustrated_story',
+    minAge: 9,
+    maxAge: 99,
+    length: 'classic',
+    textDensity: 'balanced',
+    readingLevel: 'advanced',
+    recommended: false,
+  },
 ] as const satisfies readonly {
   key: string;
   minAge: number;
