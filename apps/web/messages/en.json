@@ -1103,7 +1103,10 @@
           "order": "If you like it, you order it and we make the full book"
         }
       },
-      "drawingUsed": "We used {name}'s drawing from their profile. Doesn't look right? <link>Adjust the likeness on their profile</link>."
+      "drawingUsed": "We used {name}'s drawing from their profile. Doesn't look right? <link>Adjust the likeness on their profile</link>.",
+      "waitEstimate": "{minutes, plural, one {It’s usually ready in about a minute.} other {It’s usually ready in about # minutes.}}",
+      "waitLate": "It’s taking a little longer than usual. We’re still on it and will email you when it’s ready.",
+      "readyTab": "{name}’s sample is ready!"
     },
     "character": {
       "modeLegend": "How should we create the main character?",
