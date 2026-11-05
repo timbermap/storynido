@@ -927,7 +927,21 @@
       "required": "Choose an adventure to continue.",
       "idealFor": "Ideal for {name}",
       "languageTitle": "Story language",
-      "languageHint": "The story is written in this language, even if you use the site in another."
+      "languageHint": "The story is written in this language, even if you use the site in another.",
+      "filtersLabel": "Filter the adventures",
+      "filterAge": "For {name} (age {age})",
+      "filterAgeNoName": "For age {age}",
+      "filterAllAges": "All ages",
+      "filterEmpty": "No adventures match these filters.",
+      "filterShowAll": "See all",
+      "groups": {
+        "adventure": "Adventure",
+        "animals": "Animals and nature",
+        "magic": "Fantasy and magic",
+        "sports": "Sports",
+        "moments": "Big moments",
+        "gift": "To give as a gift"
+      }
     },
     "lesson": {
       "title": "What do you want them to learn?",

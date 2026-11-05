@@ -927,7 +927,21 @@
       "required": "Elige una aventura para continuar.",
       "idealFor": "Ideal para {name}",
       "languageTitle": "Idioma del cuento",
-      "languageHint": "El cuento se escribe en este idioma, aunque uses el sitio en otro."
+      "languageHint": "El cuento se escribe en este idioma, aunque uses el sitio en otro.",
+      "filtersLabel": "Filtrar las aventuras",
+      "filterAge": "Para {name} ({age} años)",
+      "filterAgeNoName": "Para {age} años",
+      "filterAllAges": "Todas las edades",
+      "filterEmpty": "No hay aventuras con estos filtros.",
+      "filterShowAll": "Ver todas",
+      "groups": {
+        "adventure": "Aventura",
+        "animals": "Animales y naturaleza",
+        "magic": "Fantasía y magia",
+        "sports": "Deportes",
+        "moments": "Grandes momentos",
+        "gift": "Para regalar"
+      }
     },
     "lesson": {
       "title": "¿Qué quieres que aprenda?",
