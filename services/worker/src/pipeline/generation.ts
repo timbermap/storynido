@@ -45,6 +45,7 @@ import {
   type CastMember,
   type ScenePlan,
   catalogPrices,
+  SAME_OUTFIT,
   withCurrentGuards,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
@@ -63,7 +64,7 @@ import {
 } from '../pdf/kit';
 import { storyWords } from '../pdf/puzzles';
 import { launchBrowser, renderPdf, renderPng } from '../pdf/render';
-import { textPlacements } from '../pdf/placement';
+import { textPlacements, type CalmSide, type PlacementPage } from '../pdf/placement';
 import { FORMAT_SPECS, pageSizeMm, printablePages, type FormatSpec } from '../pdf/spec';
 import {
   DENSITY_LAYOUT,
@@ -149,6 +150,12 @@ export const DEFAULT_QA_LIMITS: QaLimits = {
   concurrency: 4,
 };
 
+/**
+ * Dominio del QR de la contratapa: siempre el público de la marca. El libro se queda con la familia
+ * (y se imprime): un QR a staging.storynido.com dejaba de servir.
+ */
+export const PUBLIC_BRAND_DOMAIN = 'storynido.com';
+
 const ASSETS = 'assets' as const;
 const WEBP = 'image/webp';
 
@@ -159,8 +166,6 @@ interface Deps {
   qa?: Partial<QaLimits>;
   /** Solo en local y en tests: permite los proveedores simulados. */
   allowSimulated?: boolean;
-  /** Dominio de la marca para el QR de la contratapa. */
-  brandDomain?: string;
 }
 
 /** Un PDF maquetado y validado (lo usa la entrega). */
@@ -203,21 +208,35 @@ export function mustKeepLabels(traits: CharacterTraits, mustKeep: readonly MustK
   });
 }
 
+/**
+ * Lado que la escena pide dejar calmo para el texto: arriba en las páginas impares del plan, abajo en
+ * las pares. La maquetación prefiere ese mismo lado (antes lo ignoraba y a veces tapaba caras).
+ */
+export function calmSideOf(scene: ScenePlan | null | undefined): CalmSide | null {
+  if (!scene) return null;
+  return scene.pageIndex % 2 === 1 ? 'top' : 'bottom';
+}
+
 /** Escena de una página con lo que el plan pide ver y evitar. */
 function pageScene(prompt: string, scene: ScenePlan | null | undefined, hint?: string): string {
   const visible = scene?.mustBeVisible.length
     ? ` Must be visible: ${scene.mustBeVisible.join(', ')}.`
     : '';
   const hidden = scene?.notVisible.length ? ` Do not show: ${scene.notVisible.join(', ')}.` : '';
+  // Lo que no cambia entre páginas (objetos que se repiten, lugar) va en todas, con las mismas palabras.
+  const continuity = scene?.continuityFacts.length
+    ? ` Keep consistent with the other pages, drawn exactly the same way: ${scene.continuityFacts.join('; ')}.`
+    : '';
+  const outfit = scene ? ` The main character wears ${SAME_OUTFIT}.` : '';
   const fix = hint
     ? ` Make sure that: ${hint}. Draw exactly this scene, with the protagonist clearly visible.`
     : '';
   // Espacio calmo para el texto: se alterna arriba y abajo para que las páginas no sean iguales.
   const calm =
-    scene && scene.pageIndex % 2 === 1
+    calmSideOf(scene) === 'top'
       ? ' Keep the top third of the image calm and simple (sky, wall or soft background) for the text, with no faces there.'
       : ' Keep the bottom third of the image calm and simple (floor, grass or soft background) for the text, with no faces there.';
-  return `${prompt}${visible}${hidden}${fix}${scene ? calm : ''} No text, letters or words anywhere in the image.`;
+  return `${prompt}${visible}${hidden}${continuity}${outfit}${fix}${scene ? calm : ''} No text, letters or words anywhere in the image.`;
 }
 
 /** Texto que se suma a la escena en cada reintento (1: ninguno). */
@@ -361,6 +380,44 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
   async function copy(from: string, to: string): Promise<void> {
     const bytes = await storage().download({ bucket: ASSETS, path: from });
     await storage().upload({ bucket: ASSETS, path: to }, bytes, WEBP);
+  }
+
+  /**
+   * Lo que la maquetación necesita de cada página para ubicar el texto: palabras, el lado calmo que
+   * pidió el prompt y las caras detectadas (Cloud Vision; con el analizador simulado, que inventa
+   * una cara centrada, o si la detección falla, solo el lado pedido).
+   */
+  async function placementPages(
+    snapshot: BookSnapshot,
+    images: readonly Uint8Array[],
+  ): Promise<PlacementPage[]> {
+    const analyzer = providers.photoAnalyzer();
+    const faces = new Map<number, PlacementPage['faces']>();
+    if (analyzer.id !== 'mock') {
+      await pool([...images.keys()], 4, async (index) => {
+        try {
+          const analysis = await analyzer.analyze(images[index] ?? new Uint8Array());
+          if (!analysis.width || !analysis.height) return;
+          faces.set(
+            index,
+            analysis.faces.map((face) => ({
+              left: face.left / analysis.width,
+              top: face.top / analysis.height,
+              width: face.width / analysis.width,
+              height: face.height / analysis.height,
+            })),
+          );
+        } catch (error) {
+          log.warn({ err: error, page: index + 1 }, 'No se pudieron detectar caras para el texto.');
+        }
+      });
+    }
+    return images.map((image, index) => ({
+      image,
+      words: countWords(snapshot.pages[index]?.text ?? ''),
+      calmSide: calmSideOf(snapshot.scenes?.[index]),
+      faces: faces.get(index) ?? [],
+    }));
   }
 
   async function load(path: string): Promise<ImageData> {
@@ -582,7 +639,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       artDirection: preview.artDirection ?? null,
       character: {
         description: describeCharacter(name, sheet, traits, mustKeep),
-        mustKeep: mustKeepLabels(traits, mustKeep),
+        // La ropa de la lámina también se revisa en cada página (salvo que el texto la cambie).
+        mustKeep: [
+          ...mustKeepLabels(traits, mustKeep),
+          `outfit: ${sheet.clothing} (unless the page text says the character changes clothes)`,
+        ],
         sheetPath,
       },
       companion,
@@ -951,21 +1012,17 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       ),
     );
 
-    // Dónde va el texto de cada página: la región más calma de su ilustración.
-    const placements = await textPlacements(
-      sources.slice(1).map((image, index) => ({
-        image,
-        words: countWords(snapshot.pages[index]?.text ?? ''),
-      })),
-      { allowCorners: snapshot.textDensity !== 'rich' },
-    );
+    // Dónde va el texto de cada página: la región más calma, del lado pedido y sin tapar caras.
+    const placements = await textPlacements(await placementPages(snapshot, sources.slice(1)), {
+      allowCorners: snapshot.textDensity !== 'rich',
+    });
     const qr = {
-      svg: await QRCode.toString(`https://${deps.brandDomain ?? 'storynido.com'}`, {
+      svg: await QRCode.toString(`https://${PUBLIC_BRAND_DOMAIN}`, {
         type: 'svg',
         margin: 0,
         color: { dark: '#342a40', light: '#0000' },
       }),
-      label: deps.brandDomain ?? 'storynido.com',
+      label: PUBLIC_BRAND_DOMAIN,
     };
 
     const formats: BookFormat[] = [
@@ -1068,6 +1125,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           educationalNotice: ctx.order.channel === 'professionals',
           fillerPages,
           qr,
+          // Celebraciones: el libro del kit es el mini cuento (tipografía y panel propios).
+          mini: Boolean(kit),
         };
         if (format === 'digital') {
           kitCover = layout.cover;
@@ -1248,10 +1307,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           guests: kit.guests,
           signature: kit.signature,
           pictures: kitPictures,
+          // 14: la sopa usa hasta 8 y, desde 9 años, las palabras revueltas usan las siguientes.
           storyWords: storyWords(
             snapshot.pages.map((page) => page.text),
             snapshot.childName,
-            8,
+            14,
             14,
           ),
         };
@@ -1540,13 +1600,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           .toBuffer();
       }),
     );
-    const placements = await textPlacements(
-      sources.slice(1).map((image, index) => ({
-        image,
-        words: countWords(snapshot.pages[index]?.text ?? ''),
-      })),
-      { allowCorners: snapshot.textDensity !== 'rich' },
-    );
+    const placements = await textPlacements(await placementPages(snapshot, sources.slice(1)), {
+      allowCorners: snapshot.textDensity !== 'rich',
+    });
     const spec: FormatSpec = FORMAT_SPECS.digital;
     const size = pageSizeMm(spec);
     const prepared = await Promise.all(
@@ -1590,13 +1646,14 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       synopsis: snapshot.synopsis ?? null,
       educationalNotice: ctx.order.channel === 'professionals',
       fillerPages: 0,
+      mini: Boolean(await kitOf(ctx.order.id)),
       qr: {
-        svg: await QRCode.toString(`https://${deps.brandDomain ?? 'storynido.com'}`, {
+        svg: await QRCode.toString(`https://${PUBLIC_BRAND_DOMAIN}`, {
           type: 'svg',
           margin: 0,
           color: { dark: '#342a40', light: '#0000' },
         }),
-        label: deps.brandDomain ?? 'storynido.com',
+        label: PUBLIC_BRAND_DOMAIN,
       },
     };
     const browser = await launchBrowser();

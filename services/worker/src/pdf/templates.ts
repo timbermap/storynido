@@ -34,12 +34,21 @@ export interface LayoutBook {
   /** Páginas para dibujar antes del cierre (completan el mínimo de la imprenta). */
   fillerPages?: number;
   qr?: { svg: string; label: string } | null;
+  /**
+   * Mini cuento del kit de Celebraciones: título de tapa en Fraunces (la letra de la marca, como el
+   * resto del libro), texto más grande y un panel más liviano.
+   */
+  mini?: boolean;
 }
 
 /** Colores de texto y panel: el contraste se verifica en los tests (≥ 4,5:1 en el peor caso). */
 export const INK = '#342a40';
 export const PAPER = '#fffaf3';
 export const PANEL_ALPHA = 0.94;
+/** Panel del mini cuento: más liviano, sigue con contraste AA sobre negro (tests). */
+export const MINI_PANEL_ALPHA = 0.86;
+/** El mini cuento tiene poco texto por página (≤ 60 palabras): la letra va más grande. */
+export const MINI_TEXT_SCALE = 1.18;
 
 /** Composición por densidad: alto máximo del panel de texto y tamaños de letra (pt). */
 export const DENSITY_LAYOUT: Record<Density, { panelPct: number; fontPt: number; minPt: number }> =
@@ -138,6 +147,9 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .cover-small { display: block; font-family: 'Amatic SC', 'Fraunces', serif; font-weight: 700; font-size: 34pt; line-height: 1; }
 .cover-name { display: block; font-family: 'Amatic SC', 'Fraunces', serif; font-weight: 700; line-height: 0.95; text-transform: uppercase; margin: 1mm 0; }
 .cover-name .l { display: inline-block; white-space: pre; }
+.title.brand, .title.brand .cover-small, .title.brand .cover-name { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.02em; text-transform: none; }
+.title.brand .cover-small { font-size: 22pt; line-height: 1.1; }
+.panel.mini { background: rgba(255,250,243,${String(MINI_PANEL_ALPHA)}); border-radius: 5mm; padding: 5mm 7mm; box-shadow: 0 0.6mm 3mm rgba(52,42,64,0.10); }
 .back { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; gap: 6mm; }
 .back .synopsis { font-family: 'Fraunces', serif; font-size: 15pt; line-height: 1.5; max-width: 140mm; }
 .back .qr { display: flex; align-items: center; gap: 4mm; font-size: 9.5pt; color: #69616c; }
@@ -197,7 +209,7 @@ function storyPage(
 ) {
   const coloring = book.contentType === 'coloring';
   const layout = DENSITY_LAYOUT[coloring ? 'visual' : book.density];
-  const scale = LEVEL_SCALE[book.readingLevel];
+  const scale = LEVEL_SCALE[book.readingLevel] * (book.mini ? MINI_TEXT_SCALE : 1);
   const height = pageSizeMm(spec).height;
   const placement = coloring ? 'top' : (page.placement ?? 'bottom');
   // En una esquina el panel es más angosto: puede crecer más en alto.
@@ -205,7 +217,7 @@ function storyPage(
   const maxMm = ((trimOf(spec).height * pct) / 100).toFixed(1);
   return `<section class="page${coloring ? ' coloring' : ''}" data-label="página ${String(number)}" style="height:${String(height)}mm">
   <img class="art" src="${page.image}" alt="">
-  <div class="panel ${placement}" data-max-mm="${maxMm}" data-font-pt="${(layout.fontPt * scale).toFixed(2)}" data-min-pt="${(layout.minPt * scale).toFixed(2)}">
+  <div class="panel ${placement}${book.mini ? ' mini' : ''}" data-max-mm="${maxMm}" data-font-pt="${(layout.fontPt * scale).toFixed(2)}" data-min-pt="${(layout.minPt * scale).toFixed(2)}">
     <div class="story">${paragraphs(page.text)}</div>
   </div>
 </section>`;
@@ -268,6 +280,12 @@ function coverFront(book: LayoutBook, spec: FormatSpec): string {
     .join('');
   const small = (text: string) =>
     text ? `<span class="cover-small">${escapeHtml(text)}</span>` : '';
+  if (book.mini) {
+    // Mini cuento: Fraunces, sin el giro de letras (es la letra de la marca, no la de a mano).
+    const brandSize = Math.min(52, Math.round(380 / Math.max(Array.from(name).length, 4)));
+    return `<img class="art" src="${book.cover}" alt="">
+  <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title brand" aria-label="${escapeHtml(book.title)}">${small(before)}<span class="cover-name" style="font-size:${String(brandSize)}pt">${escapeHtml(name)}</span>${small(after)}</h1></div>`;
+  }
   return `<img class="art" src="${book.cover}" alt="">
   <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title" aria-label="${escapeHtml(book.title)}">${small(before)}<span class="cover-name" style="font-size:${String(nameSize)}pt">${letters}</span>${small(after)}</h1></div>`;
 }

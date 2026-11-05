@@ -12,35 +12,82 @@ const STOPWORDS = new Set(
     'PARA PERO COMO CUANDO DONDE AQUEL AQUELLA AQUELLOS ESTA ESTE ESTOS ESTAS ESTABA ESTABAN TODO TODOS TODAS TENIA ' +
     'TENIAN SOBRE ENTRE HASTA DESDE TAMBIEN PORQUE AHORA ENTONCES DESPUES ANTES SIEMPRE NUNCA CADA MUCHO MUCHA MUCHOS ' +
     'MUCHAS ALGO ALGUN ALGUNA PUEDE PUEDEN HABIA SEGUN SIDO FUERON ELLOS ELLAS NOSOTROS QUIERO QUIERES SOLO SOLA ' +
+    'OTRO OTRA OTROS OTRAS MISMO MISMA PRIMER PRIMERA ULTIMO ULTIMA GRAN GRANDE GRANDES PEQUEÑO PEQUEÑA NUEVO NUEVA ' +
+    'MEJOR VEZ VECES DIA RATO FORMA MANERA COSA COSAS LADO ' +
     'WITH THAT THIS THEY THEIR THERE WHEN WHERE WHICH WOULD COULD ABOUT AFTER BEFORE EVERY FROM HAVE HAD WERE WHAT ' +
-    'COM PARA MAIS ESSE ESSA ESTE ESTA TODOS TODAS QUANDO ONDE ENTAO DEPOIS ANTES SEMPRE NUNCA CADA MUITO MUITA'
+    'OTHER SAME FIRST LAST LITTLE GREAT BIG NEW BEST TIME TIMES WAY THING THINGS SIDE ' +
+    'COM PARA MAIS ESSE ESSA ESTE ESTA TODOS TODAS QUANDO ONDE ENTAO DEPOIS ANTES SEMPRE NUNCA CADA MUITO MUITA ' +
+    'OUTRO OUTRA MESMO MESMA PRIMEIRO PRIMEIRA ULTIMO GRANDE NOVO NOVA MELHOR VEZ COISA'
   ).split(' '),
 );
 
-/** Mayúsculas sin tildes (la Ñ se conserva fuera: se reemplaza por N para que sea una letra más). */
+/** Determinantes: la palabra que sigue suele ser un sustantivo (objeto, lugar, pasatiempo). */
+const DETERMINERS = new Set(
+  (
+    'el la los las un una unos unas su sus mi mis tu tus del al ' +
+    'the a an his her their my your our ' +
+    'o os as um uma uns umas seu sua seus suas do da dos das no na nos nas ao meu minha'
+  ).split(' '),
+);
+
+/** Terminaciones de adverbios y verbos conjugados: no son sustantivos. */
+const NOT_NOUN = /(MENTE|ANDO|IENDO|ABAN|ARON|IERON|ABA|IAN|ING|ED|LY)$/;
+
+/**
+ * Mayúsculas sin tildes ni signos, como se escribe una sopa de letras. La Ñ y la Ç son letras
+ * propias: se conservan (antes ACOMPAÑARÍAN salía ACOMPANARIAN).
+ */
 export function plain(word: string): string {
-  return word
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toUpperCase()
-    .replace(/[^A-Z]/g, '');
+  return Array.from(word.toUpperCase())
+    .map((char) =>
+      char === 'Ñ' || char === 'Ç'
+        ? char
+        : char
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^A-Z]/g, ''),
+    )
+    .join('');
 }
 
-/** Las palabras más largas y distintas del cuento (más el nombre del protagonista, si entra). */
+/**
+ * Palabras del cuento para la sopa de letras: sustantivos (lo que sigue a «el», «la», «un»... y los
+ * nombres propios en mitad de una frase), los que más se repiten primero; más el nombre del
+ * protagonista, si entra. Antes se elegían por largo y salían COMPLETAMENTE o PROFUNDAMENTE.
+ */
 export function storyWords(texts: readonly string[], name: string, count: number, max: number) {
-  const seen = new Map<string, number>();
+  const own = plain(name);
+  const seen = new Map<string, { nouns: number; total: number }>();
   for (const text of texts) {
-    for (const raw of text.split(/[^\p{L}]+/u)) {
+    const tokens = text.split(/(\s+)/u);
+    let previous = '';
+    let sentenceStart = true;
+    for (const token of tokens) {
+      if (/^\s+$/u.test(token)) continue;
+      const raw = token.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '');
       const word = plain(raw);
-      if (word.length < 5 || word.length > max || STOPWORDS.has(word)) continue;
-      seen.set(word, (seen.get(word) ?? 0) + 1);
+      const proper = !sentenceStart && /^\p{Lu}/u.test(raw);
+      const afterDeterminer = DETERMINERS.has(previous);
+      if (word.length >= 4 && word.length <= max && !STOPWORDS.has(word) && word !== own) {
+        const entry = seen.get(word) ?? { nouns: 0, total: 0 };
+        entry.total += 1;
+        if ((afterDeterminer || proper) && !NOT_NOUN.test(word)) entry.nouns += 1;
+        seen.set(word, entry);
+      }
+      previous = raw.toLowerCase();
+      sentenceStart = /[.!?¡¿:;«»"—]$/u.test(token) || raw === '';
     }
   }
   const ranked = [...seen.entries()]
-    // Palabras más largas primero; a igual largo, las que más se repiten.
-    .sort((a, b) => b[0].length - a[0].length || b[1] - a[1] || a[0].localeCompare(b[0]))
+    .filter(([, entry]) => entry.nouns > 0)
+    // Los sustantivos más repetidos primero; a igual cantidad, los más largos.
+    .sort(
+      (a, b) =>
+        b[1].nouns + b[1].total - (a[1].nouns + a[1].total) ||
+        b[0].length - a[0].length ||
+        a[0].localeCompare(b[0]),
+    )
     .map(([word]) => word);
-  const own = plain(name);
   const picked = own.length >= 3 && own.length <= max ? [own] : [];
   for (const word of ranked) {
     if (picked.length >= count) break;
@@ -108,8 +155,11 @@ export function wordSearch(
     }
     if (done) placed.push(word);
   }
+  // Si alguna palabra lleva Ñ o Ç, el relleno también las usa (si no, se notarían a simple vista).
+  const extra = ['Ñ', 'Ç'].filter((letter) => placed.some((word) => word.includes(letter)));
+  const letters = [...Array.from(ALPHABET), ...extra];
   const filled = grid.map((line) =>
-    line.map((cell) => cell ?? ALPHABET[Math.floor(next() * ALPHABET.length)] ?? 'A'),
+    line.map((cell) => cell ?? letters[Math.floor(next() * letters.length)] ?? 'A'),
   );
   return { size, grid: filled, words: placed, solution };
 }
@@ -141,20 +191,25 @@ export function wordSearchSvg(puzzle: WordSearch, showSolution: boolean): string
 /** Mensaje secreto: cada letra es un número (la tabla va en la hoja). La clave se baraja con la semilla. */
 export function secretMessage(message: string, seed: number) {
   const next = random(seed);
-  const numbers = Array.from({ length: 26 }, (_, index) => index + 1);
+  // La Ñ (o la Ç) del nombre es una letra más de la tabla.
+  const alphabet = [
+    ...Array.from(ALPHABET),
+    ...['Ñ', 'Ç'].filter((letter) => plain(message).includes(letter)),
+  ];
+  const numbers = Array.from({ length: alphabet.length }, (_, index) => index + 1);
   for (let index = numbers.length - 1; index > 0; index -= 1) {
     const swap = Math.floor(next() * (index + 1));
     const held = numbers[index] ?? 0;
     numbers[index] = numbers[swap] ?? 0;
     numbers[swap] = held;
   }
-  const code = new Map(Array.from(ALPHABET).map((letter, index) => [letter, numbers[index] ?? 0]));
+  const code = new Map(alphabet.map((letter, index) => [letter, numbers[index] ?? 0]));
   const words = message
     .split(' ')
     .map((word) => Array.from(plain(word)).map((letter) => code.get(letter) ?? 0));
   // La tabla, en orden alfabético, solo con las letras que el mensaje usa y unas pocas más.
   const used = new Set(Array.from(plain(message)));
-  const key = Array.from(ALPHABET).filter((letter) => used.has(letter) || next() < 0.35);
+  const key = alphabet.filter((letter) => used.has(letter) || next() < 0.35);
   return { words, key: key.map((letter) => ({ letter, number: code.get(letter) ?? 0 })) };
 }
 
@@ -173,4 +228,28 @@ export function dotsSvg(): string {
     )
     .join('');
   return `<svg viewBox="0 0 100 104" xmlns="http://www.w3.org/2000/svg">${dots}</svg>`;
+}
+
+/**
+ * Palabras revueltas (desde 9 años): cada palabra con sus letras mezcladas, nunca igual a la
+ * original. Determinístico con la semilla.
+ */
+export function scrambleWords(words: readonly string[], seed: number) {
+  const next = random(seed);
+  return words.map((word) => {
+    const letters = Array.from(word);
+    let mixed = word;
+    for (let attempt = 0; attempt < 10 && (mixed === word || letters.length < 2); attempt += 1) {
+      for (let index = letters.length - 1; index > 0; index -= 1) {
+        const swap = Math.floor(next() * (index + 1));
+        const held = letters[index] ?? '';
+        letters[index] = letters[swap] ?? '';
+        letters[swap] = held;
+      }
+      mixed = letters.join('');
+    }
+    // Si la mezcla no la cambió (pocas letras distintas), se rota una letra.
+    if (mixed === word) mixed = `${word.slice(1)}${word.charAt(0)}`;
+    return { word, mixed };
+  });
 }

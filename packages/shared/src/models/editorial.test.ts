@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { READING_FORMATS, readingFormatsFor, suggestedReading } from './editorial';
+import {
+  READING_FORMATS,
+  readingFormatsFor,
+  suggestedReading,
+  withEventWordCap,
+} from './editorial';
 
 describe('formatos de lectura por edad', () => {
   it('cada edad de 0 en adelante tiene formatos y uno solo recomendado primero', () => {
@@ -28,5 +33,17 @@ describe('formatos de lectura por edad', () => {
     expect(suggestedReading(7).length).toBe('epic');
     expect(suggestedReading(11).textDensity).toBe('rich');
     expect(READING_FORMATS.length).toBeGreaterThan(0);
+  });
+});
+
+describe('tope de palabras del mini cuento', () => {
+  it('eventos: no más de 60 palabras por página y un rango válido', () => {
+    const rich = { words: { min: 70, max: 120 } };
+    expect(withEventWordCap(rich, true).words).toEqual({ min: 36, max: 60 });
+    expect(withEventWordCap({ words: { min: 5, max: 20 } }, true).words).toEqual({
+      min: 5,
+      max: 20,
+    });
+    expect(withEventWordCap(rich, false)).toBe(rich);
   });
 });

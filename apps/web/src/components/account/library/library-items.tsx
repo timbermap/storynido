@@ -307,11 +307,12 @@ export function ShelfItem({
   const reorder = {
     pathname: '/checkout/[bookId]',
     params: { bookId: order.bookId },
-    query: { reorder: order.id, ...(info?.kit ? { kit: '1' } : {}) },
+    query: { reorder: order.id },
   } as const;
-  // Otra copia solo de un libro impreso (el PDF ya lo tiene) o más copias de un kit. Un ebook
-  // se creó con ilustraciones de pantalla: no se imprime, se ve y se descarga.
-  const canReorder = order.print || info?.kit === true;
+  // Otra copia solo de un libro impreso (el PDF ya lo tiene). Un ebook se creó con ilustraciones
+  // de pantalla: no se imprime, se ve y se descarga. El kit tampoco se vuelve a pedir (las copias
+  // de la licencia no cambian el precio).
+  const canReorder = order.print && info?.kit !== true;
 
   return (
     <li className="grid content-start gap-2">

@@ -1024,6 +1024,8 @@
       "differencesEdit": "Você pode editar os textos de cada página antes de pedir.",
       "staleTitle": "Você mudou suas escolhas",
       "staleText": "Esta amostra corresponde à versão anterior. Crie de novo para ver as mudanças.",
+      "ageMismatchTitle": "A foto parece de outra idade",
+      "ageMismatchText": "Na história, {name} tem {age} anos, mas a foto parece de alguém de outra idade. Se estiver certo, siga em frente; se não, confira a idade ou troque a foto antes de pagar.",
       "regenerateAll": "Criar a amostra de novo",
       "editChoices": "Mudar minhas escolhas",
       "continue": "Quero este livro",

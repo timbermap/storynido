@@ -59,6 +59,44 @@ export function avatarToSheet(avatar: Avatar, age: number): CharacterSheet {
   };
 }
 
+/**
+ * Edad aparente en años a partir de la ficha de la foto (texto libre en inglés: «about 6 years
+ * old», «adult in their 30s», «toddler»). Un número aproximado; null si no se puede leer.
+ */
+export function apparentAgeYears(text: string): number | null {
+  const value = text.toLowerCase();
+  const numbers = [...value.matchAll(/(\d{1,2})\s*(s\b|'s\b)?/g)].map((match) =>
+    // «30s» es entre 30 y 39: se toma el medio.
+    match[2] ? Number(match[1]) + 5 : Number(match[1]),
+  );
+  if (numbers.length > 0) {
+    const months = value.includes('month');
+    const years = numbers.reduce((sum, item) => sum + item, 0) / numbers.length;
+    return months ? years / 12 : years;
+  }
+  if (/\b(elderly|senior|grandparent|old (wo)?man)\b/.test(value)) return 70;
+  if (/\b(adult|grown|man|woman|middle-aged)\b/.test(value)) return 35;
+  if (/\b(teen|teenager|adolescent)\b/.test(value)) return 15;
+  if (/\b(baby|infant)\b/.test(value)) return 1;
+  if (/\btoddler\b/.test(value)) return 2;
+  if (/\b(preschool|young child)\b/.test(value)) return 4;
+  return null;
+}
+
+/**
+ * La foto y la edad del cuento no coinciden (por ejemplo, la foto de un adulto en un cuento que
+ * dice «cumple 12»): se avisa en la muestra antes de pagar, sin bloquear (el personaje puede ser
+ * cualquiera de la familia). Un adulto en un cuento de niño, o 8 años o más de diferencia (20 entre adultos).
+ */
+export function ageMismatch(apparentAge: string, enteredAge: number): boolean {
+  const years = apparentAgeYears(apparentAge);
+  if (years === null) return false;
+  if (years >= 18 && enteredAge < 16) return true;
+  if (years < 13 && enteredAge >= 25) return true;
+  // Entre adultos la foto dice poco de la edad exacta: solo diferencias grandes.
+  return Math.abs(years - enteredAge) >= (years >= 18 && enteredAge >= 18 ? 20 : 8);
+}
+
 /** Clave estable de los rasgos, para saber si la muestra quedó desactualizada. */
 export function avatarKey(avatar: Avatar): string {
   return `avatar:${(Object.keys(AVATAR_OPTIONS) as AvatarTrait[]).map((key) => avatar[key]).join('|')}|${String(avatar.glasses)}`;

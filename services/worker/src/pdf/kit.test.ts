@@ -33,7 +33,8 @@ describe('kit por ocasión', () => {
       kitPieceDocument(book('baptism'), 'activities', 20).html,
     ].join('');
     expect(html).toContain('¡Te invito a mi bautismo!');
-    expect(html).toContain('para el bautismo de Sofi');
+    expect(html).toContain('Para el bautismo de Sofi · storynido.com');
+    expect(html).not.toContain('copias');
     expect(html.toLowerCase()).not.toContain('cumple');
     expect(html).not.toContain('torta de cumpleaños');
   });
@@ -134,7 +135,7 @@ describe('etiquetas por invitado', () => {
     const doc = kitPieceDocument(book('birthday'), 'favor_tags', 20);
     expect(doc.pages).toBe(1);
     expect(doc.html).toContain('¡Gracias por venir!');
-    expect(doc.html).not.toContain('Para ');
+    expect(doc.html).not.toContain('<p class="display">Para ');
   });
 
   it('con lista, una etiqueta por invitado (9 por hoja) y el nombre escapado', () => {
@@ -217,5 +218,45 @@ describe('datos de la familia', () => {
     const html = kitPieceDocument(input, 'stickers', 20).html;
     expect(html).toContain('BBBB');
     expect(html).toContain('AAAA');
+  });
+});
+
+describe('etiquetas de la bolsita', () => {
+  it('el agujero va en una franja propia, fuera de la ilustración', () => {
+    const html = kitPieceDocument(book('birthday'), 'favor_tags', 20).html;
+    expect(html).toContain('<div class="strip"><span class="hole"></span></div><img');
+    expect(html).toContain('object-position: 50% 25%');
+  });
+});
+
+describe('stickers', () => {
+  it('encuadra la cara y la franja del nombre ocupa el cuarto de abajo', () => {
+    const html = kitPieceDocument(book('birthday'), 'stickers', 20).html;
+    expect(html).toMatch(/\.sticker img \{[^}]*object-position: 50% 25%/);
+    expect(html).toMatch(/\.sticker p \{[^}]*height: 25%/);
+  });
+});
+
+describe('actividades desde 9 años', () => {
+  const big: KitBook = {
+    ...book('birthday'),
+    turningAge: 12,
+    title: 'Sofi y el faro del squash',
+    storyWords: ['SOFI', 'RAQUETA', 'CANCHA', 'FARO', 'MONTAÑA', 'PELOTA', 'LINTERNA', 'TORNEO'],
+  };
+
+  it('sin torta: laberinto difícil con el nombre del cuento y palabras revueltas', () => {
+    const html = kitPieceDocument(big, 'activities', 20).html;
+    expect(html).not.toContain('llegar a la torta');
+    expect(html).not.toContain('Dibuja tu torta');
+    expect(html).toContain('El gran laberinto de «Sofi y el faro del squash»');
+    expect(html).toContain('Palabras revueltas del cuento');
+    expect(html).toContain('MONTAÑA');
+  });
+
+  it('a los 6 sigue la torta', () => {
+    const html = kitPieceDocument(book('birthday'), 'activities', 20).html;
+    expect(html).toContain('Ayuda a Sofi a llegar a la torta');
+    expect(html).toContain('Dibuja tu torta de cumpleaños');
   });
 });

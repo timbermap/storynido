@@ -8,12 +8,13 @@ import {
 
 import { fontFaces } from './fonts';
 import { mazeSvg } from './maze';
-import { dotsSvg, plain, secretMessage, wordSearch, wordSearchSvg } from './puzzles';
+import { dotsSvg, plain, scrambleWords, secretMessage, wordSearch, wordSearchSvg } from './puzzles';
 
 /**
  * Piezas del kit de Eventos (fase 12b): cumpleaños y otras ocasiones. Se arman con la portada y las ilustraciones del
  * librito ya aprobado: ninguna pieza vuelve a usar IA. Se imprimen en casa o en una imprenta
- * local: tamaño real, marcas de corte y la licencia de copias en cada hoja.
+ * local: tamaño real, marcas de corte y, al pie de cada hoja, para qué fiesta es (sin cantidad de copias:
+ * no cambia el precio).
  */
 
 export type KitLang = 'es' | 'en' | 'pt';
@@ -35,7 +36,7 @@ export interface KitBook {
   paper: PaperSize;
   /** Invitados: con nombres, las etiquetas de la bolsita salen una por invitado («Para Juana»). */
   guests?: readonly string[];
-  /** Palabras del cuento para la sopa de letras (ya en mayúsculas y sin tildes). */
+  /** Palabras del cuento para la sopa de letras (en mayúsculas, sin tildes, con Ñ y Ç). */
   storyWords?: readonly string[];
   /** Otras ilustraciones del cuento (data URI) para variar stickers y etiquetas; la portada va primero. */
   pictures?: readonly string[];
@@ -87,7 +88,13 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     drawHint: '¿Cuántas velas tiene? ¿De qué sabor es?',
     match: 'Une cada palabra con su dibujo',
     words: 'torta · globo · regalo · vela',
-    license: 'Licencia StoryNido: {copies} copias para el cumpleaños de {name}.',
+    license: 'Para el cumple de {name} · storynido.com',
+    mazeBig: 'El gran laberinto de «{title}»',
+    mazeBigHint:
+      'Un solo camino lleva del principio al final del cuento. ¿Lo encuentras sin levantar el lápiz?',
+    scramble: 'Palabras revueltas del cuento',
+    scrambleHint: 'Ordena las letras: todas son palabras de la historia.',
+    solScramble: 'Palabras revueltas',
     cut: 'Recortar por las marcas',
   },
   en: {
@@ -121,7 +128,13 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     drawHint: 'How many candles? What flavor?',
     match: 'Match each word with its picture',
     words: 'cake · balloon · gift · candle',
-    license: 'StoryNido license: {copies} copies for {name}’s birthday.',
+    license: 'For {name}’s birthday · storynido.com',
+    mazeBig: 'The great “{title}” maze',
+    mazeBigHint:
+      'Only one path leads from the start to the end of the story. Can you find it without lifting your pencil?',
+    scramble: 'Story word scramble',
+    scrambleHint: 'Unscramble the letters: every word comes from the story.',
+    solScramble: 'Word scramble',
     cut: 'Cut along the marks',
   },
   pt: {
@@ -155,7 +168,13 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     drawHint: 'Quantas velas? De que sabor?',
     match: 'Ligue cada palavra ao desenho',
     words: 'bolo · balão · presente · vela',
-    license: 'Licença StoryNido: {copies} cópias para o aniversário de {name}.',
+    license: 'Para o aniversário de {name} · storynido.com',
+    mazeBig: 'O grande labirinto de «{title}»',
+    mazeBigHint:
+      'Só um caminho leva do começo ao fim da história. Você consegue achar sem levantar o lápis?',
+    scramble: 'Palavras embaralhadas da história',
+    scrambleHint: 'Desembaralhe as letras: todas são palavras da história.',
+    solScramble: 'Palavras embaralhadas',
     cut: 'Recortar pelas marcas',
   },
 };
@@ -175,7 +194,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Dibuja un recuerdo de este día',
       drawHint: '¿Quiénes estaban? ¿Qué te gustó más?',
       words: 'globo · regalo · flor · torta',
-      license: 'Licencia StoryNido: {copies} copias para el bautismo de {name}.',
+      license: 'Para el bautismo de {name} · storynido.com',
     },
     en: {
       birthday: '{name}’s baptism!',
@@ -186,7 +205,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Draw a memory of this day',
       drawHint: 'Who was there? What did you like best?',
       words: 'balloon · gift · flower · cake',
-      license: 'StoryNido license: {copies} copies for {name}’s baptism.',
+      license: 'For {name}’s baptism · storynido.com',
     },
     pt: {
       birthday: 'O batizado de {name}!',
@@ -197,7 +216,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Desenhe uma lembrança deste dia',
       drawHint: 'Quem estava lá? Do que você mais gostou?',
       words: 'balão · presente · flor · bolo',
-      license: 'Licença StoryNido: {copies} cópias para o batizado de {name}.',
+      license: 'Para o batizado de {name} · storynido.com',
     },
   },
   communion: {
@@ -210,7 +229,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Dibuja un recuerdo de este día',
       drawHint: '¿Quiénes estaban? ¿Qué te gustó más?',
       words: 'globo · regalo · flor · torta',
-      license: 'Licencia StoryNido: {copies} copias para la primera comunión de {name}.',
+      license: 'Para la primera comunión de {name} · storynido.com',
     },
     en: {
       birthday: '{name}’s First Communion!',
@@ -221,7 +240,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Draw a memory of this day',
       drawHint: 'Who was there? What did you like best?',
       words: 'balloon · gift · flower · cake',
-      license: 'StoryNido license: {copies} copies for {name}’s First Communion.',
+      license: 'For {name}’s First Communion · storynido.com',
     },
     pt: {
       birthday: 'A primeira comunhão de {name}!',
@@ -232,7 +251,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Desenhe uma lembrança deste dia',
       drawHint: 'Quem estava lá? Do que você mais gostou?',
       words: 'balão · presente · flor · bolo',
-      license: 'Licença StoryNido: {copies} cópias para a primeira comunhão de {name}.',
+      license: 'Para a primeira comunhão de {name} · storynido.com',
     },
   },
   graduation: {
@@ -245,7 +264,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Dibuja tu mejor recuerdo del año',
       drawHint: '¿Con quién jugabas? ¿Qué aprendiste?',
       words: 'diploma · mochila · lápiz · globo',
-      license: 'Licencia StoryNido: {copies} copias para el egreso de {name}.',
+      license: 'Para el egreso de {name} · storynido.com',
     },
     en: {
       birthday: 'Congratulations, {name}!',
@@ -256,7 +275,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Draw your best memory of the year',
       drawHint: 'Who did you play with? What did you learn?',
       words: 'diploma · backpack · pencil · balloon',
-      license: 'StoryNido license: {copies} copies for {name}’s graduation.',
+      license: 'For {name}’s graduation · storynido.com',
     },
     pt: {
       birthday: 'Parabéns, {name}!',
@@ -267,7 +286,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Desenhe sua melhor lembrança do ano',
       drawHint: 'Com quem você brincava? O que aprendeu?',
       words: 'diploma · mochila · lápis · balão',
-      license: 'Licença StoryNido: {copies} cópias para a formatura de {name}.',
+      license: 'Para a formatura de {name} · storynido.com',
     },
   },
 };
@@ -331,6 +350,7 @@ function t(book: KitBook, key: string, extra: Record<string, string | number> = 
   let value = toned ?? occasion?.[book.language][key] ?? STRINGS[book.language][key] ?? key;
   for (const [name, replacement] of Object.entries({
     name: book.childName,
+    title: book.title,
     age: book.turningAge ?? '',
     ...extra,
   })) {
@@ -355,7 +375,7 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .page { width: ${String(size.width)}mm; height: ${String(size.height)}mm; position: relative; overflow: hidden; break-after: page; background: #fff; }
 .page:last-child { break-after: auto; }
 .display { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; }
-.license { position: absolute; left: 0; right: 0; bottom: 6mm; text-align: center; font-size: 7.5pt; color: #8a8090; }
+.license { position: absolute; left: 0; right: 0; bottom: 6mm; text-align: center; font-size: 6.5pt; color: #b3aab8; letter-spacing: 0.02em; }
 ${css}
 </style></head><body>${pages.join('\n')}<script>document.fonts.ready.then(() => { window.__fitted = true; });</script></body></html>`;
 }
@@ -434,13 +454,16 @@ function thankYou(book: KitBook, copies: number, print = false) {
   );
 }
 
-/** Hoja de stickers redondos de 2" (50 mm), con el contorno de corte marcado. */
 /** Ilustración de la pieza número `index`: la portada y las demás del cuento, en rotación. */
 function artAt(book: KitBook, index: number): string {
   const all = [book.cover, ...(book.pictures ?? [])];
   return all[index % all.length] ?? book.cover;
 }
 
+/**
+ * Hoja de stickers redondos de 2" (50 mm), con el contorno de corte marcado. La imagen se encuadra en
+ * la cara y la franja del nombre ocupa solo el cuarto de abajo (antes tapaba ~40 % y cortaba cabezas).
+ */
 function stickers(book: KitBook, copies: number) {
   const paper = PAPER_MM[book.paper];
   const size = 50;
@@ -455,10 +478,10 @@ function stickers(book: KitBook, copies: number) {
   }).join('');
   const css = `
 .sticker { position: absolute; width: ${String(size)}mm; height: ${String(size)}mm; border-radius: 50%; overflow: hidden; border: 0.3mm dashed #b9acbf; }
-.sticker img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; }
-.sticker p { position: absolute; left: 0; right: 0; bottom: 0; padding: 2mm 0 4mm; background: rgba(255,250,243,0.92); text-align: center; line-height: 1.1; }
-.sticker p span { display: block; font-size: 12pt; }
-.sticker p small { font-size: 8pt; font-weight: 700; color: ${LAVENDER}; }`;
+.sticker img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; }
+.sticker p { position: absolute; left: 0; right: 0; bottom: 0; height: 25%; padding: 1.2mm 0 0; background: rgba(255,250,243,0.94); text-align: center; line-height: 1.05; }
+.sticker p span { display: block; font-size: 10.5pt; }
+.sticker p small { font-size: 7pt; font-weight: 700; color: ${LAVENDER}; }`;
   return {
     css,
     pages: [
@@ -467,7 +490,10 @@ function stickers(book: KitBook, copies: number) {
   };
 }
 
-/** Etiquetas para la bolsita de souvenirs (63×89 mm), con el agujero marcado. */
+/**
+ * Etiquetas para la bolsita de souvenirs (63×89 mm). El agujero va en una franja crema arriba, fuera
+ * de la ilustración (antes caía sobre la cabeza del personaje), y la imagen se encuadra en la cara.
+ */
 function favorTags(book: KitBook, copies: number) {
   const paper = PAPER_MM[book.paper];
   const tag = { width: 63, height: 89 };
@@ -489,15 +515,16 @@ function favorTags(book: KitBook, copies: number) {
         const left = gapX + (index % columns) * (tag.width + gapX);
         const top = gapY + Math.floor(index / columns) * (tag.height + gapY);
         const heading = guest === null ? t(book, 'tag') : t(book, 'tagFor', { guest });
-        return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><span class="hole"></span><img src="${artAt(book, index + 1)}" alt=""><p class="display">${heading}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
+        return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><div class="strip"><span class="hole"></span></div><img src="${artAt(book, index + 1)}" alt=""><p class="display">${heading}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
       })
       .join('');
     return `<section class="page" data-label="etiquetas">${items}<p class="license">${t(book, 'license', { copies })} · ${t(book, 'cut')}</p></section>`;
   });
   const css = `
 .tag { position: absolute; width: ${String(tag.width)}mm; height: ${String(tag.height)}mm; border: 0.3mm dashed #b9acbf; border-radius: 4mm; overflow: hidden; background: ${PAPER}; text-align: center; }
-.tag .hole { position: absolute; top: 4mm; left: 50%; width: 5mm; height: 5mm; margin-left: -2.5mm; border-radius: 50%; border: 0.3mm solid #b9acbf; background: #fff; z-index: 1; }
-.tag img { display: block; width: 100%; height: 50mm; object-fit: cover; object-position: 50% 60%; }
+.tag .strip { display: flex; align-items: center; justify-content: center; height: 10mm; background: ${PAPER}; }
+.tag .hole { width: 5mm; height: 5mm; border-radius: 50%; border: 0.3mm solid #b9acbf; background: #fff; }
+.tag img { display: block; width: 100%; height: 46mm; object-fit: cover; object-position: 50% 25%; }
 .tag p { margin: 3mm 3mm 1mm; font-size: 12pt; }
 .tag small { font-size: 8.5pt; font-weight: 700; color: ${LAVENDER}; }`;
   return { css, pages };
@@ -530,14 +557,23 @@ function activities(book: KitBook, copies: number) {
 .activity .cipher .word { display: flex; gap: 2mm; }
 .activity .cipher .letter { display: flex; flex-direction: column; align-items: center; width: 10mm; font-size: 13pt; font-weight: 700; }
 .activity .cipher .letter i { display: block; width: 100%; height: 9mm; border-bottom: 0.4mm solid ${INK}; }
-.activity .solved { font-size: 14pt; font-weight: 700; letter-spacing: 0.1em; color: ${INK}; }`;
+.activity .solved { font-size: 14pt; font-weight: 700; letter-spacing: 0.1em; color: ${INK}; }
+.activity .scramble { display: grid; gap: 9mm; padding-left: 8mm; font-size: 14pt; }
+.activity .scramble li { display: flex; align-items: flex-end; gap: 8mm; }
+.activity .scramble b { letter-spacing: 0.3em; min-width: 60mm; }
+.activity .scramble i { flex: 1; border-bottom: 0.4mm solid ${INK}; height: 8mm; }`;
   const maze =
     level === 'little'
       ? mazeSvg(8, 10, seed)
       : level === 'middle'
         ? mazeSvg(15, 19, seed)
-        : mazeSvg(20, 26, seed);
-  const pages: string[] = [page(t(book, 'maze'), maze, 1)];
+        : mazeSvg(24, 31, seed);
+  // Desde 9 años, nada de «llegar a la torta»: un laberinto más difícil con el nombre del cuento.
+  const pages: string[] = [
+    level === 'big'
+      ? page(t(book, 'mazeBig'), `<p class="hint">${t(book, 'mazeBigHint')}</p>${maze}`, 1)
+      : page(t(book, 'maze'), maze, 1),
+  ];
   if (level === 'little') {
     pages.push(
       page(t(book, 'dots'), `<p class="hint">${t(book, 'dotsHint')}</p>${dotsSvg()}`, 2),
@@ -548,6 +584,18 @@ function activities(book: KitBook, copies: number) {
   const hard = level === 'big';
   const words = storyWordsOf(book, hard ? 8 : 6, hard ? 14 : 11);
   const puzzle = wordSearch(words, hard ? 15 : 12, seed + 3, hard);
+  // Desde 9 años, «palabras revueltas» en lugar de «dibuja tu torta» (sin el nombre del protagonista).
+  // Primero las palabras que no están en la sopa de letras.
+  const pool = storyWordsOf(book, 14, 12).filter((word) => word !== plain(book.childName));
+  const scrambled = hard
+    ? scrambleWords(
+        [
+          ...pool.filter((word) => !puzzle.words.includes(word)),
+          ...pool.filter((word) => puzzle.words.includes(word)),
+        ].slice(0, 6),
+        seed + 17,
+      )
+    : [];
   const searchBody = `<p class="hint">${t(book, 'searchHint', { directions: t(book, hard ? 'searchHard' : 'searchEasy') })}</p><div class="words">${puzzle.words.map(escapeHtml).join('<span>·</span>')}</div>${wordSearchSvg(puzzle, false)}`;
   pages.push(page(t(book, 'search'), searchBody, 2));
   const message = `${t(book, book.occasion === 'birthday' ? 'secretMsg' : 'secretMsgOther')} ${book.childName}`;
@@ -559,12 +607,24 @@ function activities(book: KitBook, copies: number) {
     )
     .join('')}</div>`;
   const keyTable = `<div class="key">${secret.key.map((entry) => `<span>${entry.letter}<small>${String(entry.number)}</small></span>`).join('')}</div>`;
+  const scramblePage = `<p class="hint">${t(book, 'scrambleHint')}</p><ol class="scramble">${scrambled
+    .map(({ mixed }) => `<li><b>${escapeHtml(mixed)}</b><i></i></li>`)
+    .join('')}</ol>`;
+  const scrambleSolution = scrambled.length
+    ? `<p class="hint">${t(book, 'solScramble')}</p><p class="solved">${scrambled.map(({ word }) => escapeHtml(word)).join(' · ')}</p>`
+    : '';
   pages.push(
     page(t(book, 'secret'), `<p class="hint">${t(book, 'secretHint')}</p>${keyTable}${cipher}`, 3),
-    page(t(book, 'draw'), `<p class="hint">${t(book, 'drawHint')}</p><div class="box"></div>`, 4),
+    scrambled.length
+      ? page(t(book, 'scramble'), scramblePage, 4)
+      : page(
+          t(book, 'draw'),
+          `<p class="hint">${t(book, 'drawHint')}</p><div class="box"></div>`,
+          4,
+        ),
     page(
       t(book, 'solutions'),
-      `<p class="hint">${t(book, 'solSearch')}</p>${wordSearchSvg(puzzle, true)}<p class="hint">${t(book, 'solSecret')}</p><p class="solved">${escapeHtml(plain(message).length > 0 ? message.replace(/[^\p{L} ]/gu, '') : message)}</p>`,
+      `<p class="hint">${t(book, 'solSearch')}</p>${wordSearchSvg(puzzle, true)}<p class="hint">${t(book, 'solSecret')}</p><p class="solved">${escapeHtml(plain(message).length > 0 ? message.replace(/[^\p{L} ]/gu, '') : message)}</p>${scrambleSolution}`,
       5,
     ),
   );

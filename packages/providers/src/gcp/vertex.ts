@@ -623,8 +623,10 @@ look in English (age, hair, clothes and colors). Take the gender from the brief 
 Recurring characters must be told apart at a glance, even in silhouette: every companion and cast member differs from the protagonist
 in hair color and style, skin tone or build, and has a signature outfit color the protagonist never wears; two characters never swap
 outfits. One central place or object that recurs (a shelter, a ship, a lantern) is described once in continuityFacts with a fixed
-look, is always called by the same name, and is drawn the same way in every scene; use a single central metaphor for the whole book,
-never several.
+look, is always called by the same name, and is drawn the same way in every scene; repeat that fixed look word for word in the
+continuityFacts of every scene where it appears. Use a single central metaphor for the whole book, never several. When a sport, hobby
+or tool appears, name it precisely in mustBeVisible with its distinctive look (for example "a squash racket: small round head, long
+thin throat", never just "a racket"). The protagonist keeps the same outfit in every scene unless the text says they change clothes.
 
 Brief:
 ${request.prompt}`,

@@ -307,6 +307,22 @@ export function editorialPlan(
   };
 }
 
+/** Tope de palabras por página del mini cuento de Celebraciones: un librito breve, para leer en la fiesta. */
+export const EVENT_MAX_WORDS_PER_PAGE = 60;
+
+/**
+ * Eventos: el mini cuento no pasa de ~60 palabras por página (con la densidad «rica» salían ~120 y
+ * el texto tapaba la ilustración). El mínimo baja para que el rango siga siendo válido.
+ */
+export function withEventWordCap<T extends { words: { min: number; max: number } }>(
+  plan: T,
+  isEvent: boolean,
+): T {
+  if (!isEvent) return plan;
+  const max = Math.min(plan.words.max, EVENT_MAX_WORDS_PER_PAGE);
+  return { ...plan, words: { min: Math.min(plan.words.min, Math.round(max * 0.6)), max } };
+}
+
 /** Palabras de un texto (para validar la densidad). */
 export function countWords(text: string): number {
   return text

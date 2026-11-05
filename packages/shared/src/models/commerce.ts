@@ -177,6 +177,8 @@ export const bookPreviewSchema = z.object({
       approvedAt: z.date().nullable(),
       /** La lámina es el dibujo aprobado en el perfil (copiado): no se vuelve a aprobar. */
       fromDrawing: z.boolean().optional(),
+      /** La foto parece de otra edad que la del cuento: se avisa antes de pagar (no bloquea). */
+      ageMismatch: z.object({ apparent: z.string(), entered: z.number() }).optional(),
     })
     .optional(),
   /** Lámina del acompañante (abuela, mascota): segunda referencia de cada ilustración. */
