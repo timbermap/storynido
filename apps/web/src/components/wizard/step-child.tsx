@@ -112,8 +112,25 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
     { value: null, label: t('they') },
   ];
 
+  // Escribió el nombre de un personaje que ya tiene (en vez de tocar su chip): se le ofrece usarlo,
+  // y con el mismo nombre y edad se usa solo, sin crear un duplicado vacío. «Alguien nuevo»
+  // tocado a propósito lo evita.
+  const [chosenNew, setChosenNew] = useState(false);
+  const typed = (isPro ? alias : name).trim().toLocaleLowerCase();
+  const sameName = reuse
+    ? undefined
+    : saved.find(
+        (character) =>
+          typed !== '' &&
+          (isPro && character.fields.alias ? character.fields.alias : character.fields.name)
+            .trim()
+            .toLocaleLowerCase() === typed,
+      );
+
   async function next() {
     if (!user) return;
+    // Mismo nombre y edad que uno guardado, sin «Alguien nuevo» elegido: es ese personaje.
+    const reuseNow = reuse ?? (sameName?.fields.age === age && !chosenNew ? sameName : null);
     if ((isPro ? alias : name).trim() === '') {
       setNameError(isPro ? t('pro.required') : t('required'));
       nameRef.current?.focus();
@@ -126,11 +143,14 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       const db = await getFirebaseDb();
       // Primer guardado real: si el borrador estaba en memoria, se crea ahora.
       const id = await nav.ensureBook();
-      const childId = await saveChild(db, user.uid, id, book.childId ?? reuse?.id ?? null, {
-        name: (isPro ? storyNameFor(alias, reuse?.fields ?? child) : name.trim()).slice(
-          0,
-          CHILD_LIMITS.nameMaxLength,
-        ),
+      const childId = await saveChild(db, user.uid, id, book.childId ?? reuseNow?.id ?? null, {
+        // Si se reconoció por el nombre escrito («lu»), queda el nombre guardado («Lu»).
+        name: (isPro
+          ? storyNameFor(alias, reuseNow?.fields ?? child)
+          : !reuse && reuseNow
+            ? reuseNow.fields.name
+            : name.trim()
+        ).slice(0, CHILD_LIMITS.nameMaxLength),
         age,
         pronouns,
         likes: pending,
@@ -141,7 +161,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
       await updateBook(db, id, {
         // Reutilizado: el libro queda con ese protagonista y su aspecto del último cuento
         // (rasgos o fotos vigentes); la lámina se vuelve a aprobar en la muestra.
-        ...(reuse ? { childId, ...(reuse.look ?? {}) } : {}),
+        ...(reuseNow ? { childId, ...(reuseNow.look ?? {}) } : {}),
         ...(isEvent
           ? {
               // La edad que se pide es la que cumple: no se pregunta dos veces.
@@ -190,6 +210,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
                       checked={active}
                       onChange={() => {
                         pick(character);
+                        setChosenNew(character === null);
                       }}
                     />
                     {character
@@ -249,6 +270,20 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
                   }}
                 >
                   {t('accentUse', { name: suggestAccent(name) ?? '' })}
+                </button>
+              </p>
+            )}
+            {sameName && !chosenNew && (
+              <p role="status" className="text-sm text-muted-foreground">
+                {t('reuseTyped', { name: sameName.fields.name })}{' '}
+                <button
+                  type="button"
+                  className="font-semibold text-primary hover:underline"
+                  onClick={() => {
+                    pick(sameName);
+                  }}
+                >
+                  {t('reuseTypedUse')}
                 </button>
               </p>
             )}

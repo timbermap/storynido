@@ -873,7 +873,9 @@
       "reuseTitle": "Para quem é esta história?",
       "reuseNew": "Alguém novo",
       "reuseLook": "Usamos a aparência da última história; você ainda vê e aprova na prévia.",
-      "reuseNoLook": "Os dados já estão; a aparência você escolhe na etapa do personagem."
+      "reuseNoLook": "Os dados já estão; a aparência você escolhe na etapa do personagem.",
+      "reuseTyped": "Você já tem {name} salvo, com o desenho ou as fotos.",
+      "reuseTypedUse": "Usar o personagem"
     },
     "photos": {
       "reusedTitle": "Fotos de {name} que já temos",

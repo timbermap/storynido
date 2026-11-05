@@ -152,3 +152,69 @@ test('con un personaje de Familias se puede crear en Profesionales: activa la cu
   await next(page);
   await expect(page.locator('body')).not.toContainText('Escribe un alias para continuar.');
 });
+
+/** Lu, con sus rasgos y su dibujo aprobado en el perfil (cuenta nueva). */
+async function luWithDrawing(page: Page, email: string) {
+  await page.goto('/es/crear?line=families');
+  await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await signInAtGate(page, uniqueEmail(email));
+  await page.goto('/es/mis-cuentos/personajes/nuevo');
+  await page.locator('#new-child-name').fill('Lu');
+  await page.locator('label', { hasText: 'Sin foto, con sus rasgos' }).click();
+  for (const label of ['Morena', 'Negro', 'Corto', 'Rizado', 'Verdes']) {
+    await page.locator('label', { hasText: label }).first().click();
+  }
+  await page.getByRole('button', { name: 'Guardar personaje' }).click();
+  await heading(page, 'Lu');
+  await page.getByRole('button', { name: 'Crear su dibujo' }).first().click();
+  await expect(page.getByText('El nuevo', { exact: true })).toBeVisible({ timeout: 60_000 });
+  await page.getByRole('button', { name: 'Usar este dibujo' }).click();
+  await expect(page.getByText('El nuevo', { exact: true })).toHaveCount(0);
+}
+
+test('Celebraciones con un personaje guardado: con su chip, usa su dibujo', async ({ page }) => {
+  test.slow();
+  await luWithDrawing(page, 'fiesta-chip');
+  await page.goto('/es/crear?line=events&tema=Campeones');
+  await heading(page, '¿Quién es el protagonista de la fiesta?');
+  await page.locator('label', { hasText: /^Lu$/ }).click();
+  await next(page);
+  await heading(page, 'Así se ve Lu');
+});
+
+test('Celebraciones: escribir el nombre de un personaje guardado lo ofrece y lo usa (sin duplicarlo)', async ({
+  page,
+}) => {
+  test.slow();
+  await luWithDrawing(page, 'fiesta-nombre');
+  await page.goto('/es/crear?line=events&tema=Campeones');
+  await heading(page, '¿Quién es el protagonista de la fiesta?');
+  await page.locator('#child-name').fill('lu');
+  await expect(page.getByText('Ya tienes a Lu guardado')).toBeVisible();
+  await next(page);
+  await heading(page, 'Así se ve Lu');
+});
+
+test('Celebraciones con un personaje con fotos del perfil: «Usar estas fotos», sin pedir otra', async ({
+  page,
+}) => {
+  test.slow();
+  await page.goto('/es/crear?line=families');
+  await page.getByRole('button', { name: 'Solo las necesarias' }).click();
+  await signInAtGate(page, uniqueEmail('fiesta-fotos'));
+
+  await page.goto('/es/mis-cuentos/personajes/nuevo');
+  await page.locator('#new-child-name').fill('Teo');
+  await addPhotoFromTile(page, { consent: true });
+  await page.getByRole('button', { name: 'Guardar personaje' }).click();
+  await heading(page, 'Teo');
+  await expect(page.getByRole('img', { name: 'Foto 1 de Teo' })).toBeVisible({ timeout: 60_000 });
+
+  await page.goto('/es/crear?line=events&tema=Campeones');
+  await heading(page, '¿Quién es el protagonista de la fiesta?');
+  await page.locator('label', { hasText: /^Teo$/ }).click();
+  await next(page);
+  await heading(page, 'Sube de 1 a 3 fotos');
+  await expect(page.locator('fieldset', { hasText: 'Fotos de Teo que ya tenemos' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Usar estas fotos' })).toBeChecked();
+});
