@@ -76,12 +76,13 @@
     "close": "Fechar",
     "catalogLines": "Catálogos por linha",
     "exitTitle": "Sair do criador?",
-    "exitText": "Sua história fica salva como está; você continua quando quiser.",
+    "exitText": "Sua história fica salva como está; você continua quando quiser em Minhas histórias.",
     "discard": "Descartar esta história",
     "discardConfirm": "Descartar esta história? O rascunho e as fotos que você enviou nele serão apagados. Não é possível desfazer.",
     "discardYes": "Sim, descartar",
     "discardError": "Não conseguimos descartar. Tente de novo.",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "keepCreating": "Continuar criando"
   },
   "Switchers": {
     "language": "Idioma",

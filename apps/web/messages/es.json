@@ -76,12 +76,13 @@
     "close": "Cerrar",
     "catalogLines": "Catálogos por línea",
     "exitTitle": "¿Salir del creador?",
-    "exitText": "Tu cuento queda guardado tal como está; lo retomas cuando quieras.",
+    "exitText": "Tu cuento queda guardado tal como está; lo retomas cuando quieras desde Mis cuentos.",
     "discard": "Descartar este cuento",
     "discardConfirm": "¿Descartar este cuento? Se borran el borrador y las fotos que subiste en él. No se puede deshacer.",
     "discardYes": "Sí, descartar",
     "discardError": "No pudimos descartarlo. Intenta de nuevo.",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "keepCreating": "Seguir creando"
   },
   "Switchers": {
     "language": "Idioma",

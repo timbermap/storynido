@@ -76,12 +76,13 @@
     "close": "Close",
     "catalogLines": "Catalogs by line",
     "exitTitle": "Leave the creator?",
-    "exitText": "Your story stays saved as it is; pick it up whenever you like.",
+    "exitText": "Your story stays saved as it is; pick it up from My stories whenever you like.",
     "discard": "Discard this story",
     "discardConfirm": "Discard this story? The draft and the photos you uploaded to it are deleted. This cannot be undone.",
     "discardYes": "Yes, discard",
     "discardError": "We could not discard it. Please try again.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "keepCreating": "Keep creating"
   },
   "Switchers": {
     "language": "Language",

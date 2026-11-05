@@ -32,6 +32,14 @@ test('home: orden fijo de líneas y manito; creador: etapa sin repetir y descart
   await page.getByRole('button', { name: 'Guardar y salir' }).click();
   const dialog = page.getByRole('dialog', { name: '¿Salir del creador?' });
   await expect(dialog).toBeVisible();
+  // En el centro de la pantalla (antes quedaba pegado al encabezado) y con «Seguir creando».
+  const box = await dialog.boundingBox();
+  const viewport = page.viewportSize();
+  if (box && viewport) expect(box.y).toBeGreaterThan(viewport.height * 0.15);
+  await dialog.getByRole('button', { name: 'Seguir creando' }).click();
+  await expect(dialog).toBeHidden();
+  await page.getByRole('button', { name: 'Guardar y salir' }).click();
+  await expect(dialog).toBeVisible();
   await dialog.getByRole('button', { name: 'Descartar este cuento' }).click();
   await page.getByRole('button', { name: 'Sí, descartar' }).click();
   await expect(page).toHaveURL(/\/es\/mis-cuentos/, { timeout: 30_000 });
