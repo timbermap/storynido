@@ -44,8 +44,8 @@ export interface LayoutBook {
   fillerPages?: number;
   qr?: { svg: string; label: string } | null;
   /**
-   * Mini cuento del kit de Celebraciones: título de tapa en Fraunces (la letra de la marca, como el
-   * resto del libro), texto más grande y un panel más liviano.
+   * Mini cuento del kit de Celebraciones: texto más grande y un panel más liviano. La tapa usa la
+   * misma letra a mano que la muestra y el catálogo (lo que se vio antes de pagar).
    */
   mini?: boolean;
 }
@@ -160,8 +160,6 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .cover-small { display: block; font-family: 'Amatic SC', 'Fraunces', serif; font-weight: 700; font-size: 34pt; line-height: 1; }
 .cover-name { display: block; font-family: 'Amatic SC', 'Fraunces', serif; font-weight: 700; line-height: 0.95; text-transform: uppercase; margin: 1mm 0; }
 .cover-name .l { display: inline-block; white-space: pre; }
-.title.brand, .title.brand .cover-small, .title.brand .cover-name { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.02em; text-transform: none; }
-.title.brand .cover-small { font-size: 22pt; line-height: 1.1; }
 .panel.mini { background: rgba(255,250,243,${String(MINI_PANEL_ALPHA)}); border-radius: 5mm; padding: 5mm 7mm; box-shadow: 0 0.6mm 3mm rgba(52,42,64,0.10); }
 .back { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; gap: 6mm; }
 .back .synopsis { font-family: 'Fraunces', serif; font-size: 15pt; line-height: 1.5; max-width: 140mm; }
@@ -171,7 +169,8 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .story { font-family: 'Fraunces', serif; font-weight: 500; line-height: 1.42; color: ${INK}; }
 .story p + p { margin-top: 0.6em; }
 .center { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.title-band { position: absolute; left: 0; right: 0; top: 0; padding: ${String(inset)}mm ${String(inset)}mm 22mm; background: linear-gradient(to bottom, rgba(255,250,243,0.96) 55%, rgba(255,250,243,0)); text-align: center; }
+.title-band { position: absolute; left: 0; right: 0; top: 0; padding: ${String(inset)}mm ${String(inset)}mm 14mm; background: linear-gradient(to bottom, rgba(255,250,243,0.97) 0%, rgba(255,250,243,0.95) 72%, rgba(255,250,243,0)); text-align: center; }
+.title-band .title { text-shadow: 0 0 0.5mm ${PAPER}, 0 0 1.4mm rgba(255,250,243,0.9); }
 .title { font-family: 'Amatic SC', 'Fraunces', serif; font-weight: 700; font-size: 40pt; line-height: 1; margin: 0; color: ${INK}; }
 .coloring .art { object-fit: contain; background: #fff; }
 .activity { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; gap: 6mm; }
@@ -364,12 +363,7 @@ function coverFront(book: LayoutBook, spec: FormatSpec): string {
     .join('');
   const small = (text: string) =>
     text ? `<span class="cover-small">${escapeHtml(text)}</span>` : '';
-  if (book.mini) {
-    // Mini cuento: Fraunces, sin el giro de letras (es la letra de la marca, no la de a mano).
-    const brandSize = Math.min(52, Math.round(380 / Math.max(Array.from(name).length, 4)));
-    return `<img class="art" src="${book.cover}" alt="">
-  <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title brand" aria-label="${escapeHtml(book.title)}">${small(before)}<span class="cover-name" style="font-size:${String(brandSize)}pt">${escapeHtml(name)}</span>${small(after)}</h1></div>`;
-  }
+
   return `<img class="art" src="${book.cover}" alt="">
   <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title" aria-label="${escapeHtml(book.title)}">${small(before)}<span class="cover-name" style="font-size:${String(nameSize)}pt">${letters}</span>${small(after)}</h1></div>`;
 }
