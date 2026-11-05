@@ -33,6 +33,8 @@ test('móvil, sin foto: rasgos elegidos, libro para colorear Mini y muestra a 39
   await expectAccessible(page);
   await next(page);
   await heading(page, 'Elige la aventura');
+  // Es de 3 a 5 años y Mía tiene 7: por defecto se ven las de su edad, así que se abren todas.
+  await page.getByRole('button', { name: /Todas las edades/ }).click();
   await page.locator('label', { hasText: 'El valle de los dinosaurios' }).click();
   await page.locator('label', { hasText: 'Para colorear' }).click();
   await page.locator('label', { hasText: 'Mini' }).click();
