@@ -13,7 +13,8 @@ import { dotsSvg, plain, secretMessage, wordSearch, wordSearchSvg } from './puzz
 /**
  * Piezas del kit de Eventos (fase 12b): cumpleaños y otras ocasiones. Se arman con la portada y las ilustraciones del
  * librito ya aprobado: ninguna pieza vuelve a usar IA. Se imprimen en casa o en una imprenta
- * local: tamaño real, marcas de corte y la licencia de copias en cada hoja.
+ * local: tamaño real, marcas de corte y, al pie de cada hoja, para qué fiesta es (sin cantidad de copias:
+ * no cambia el precio).
  */
 
 export type KitLang = 'es' | 'en' | 'pt';
@@ -87,7 +88,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     drawHint: '¿Cuántas velas tiene? ¿De qué sabor es?',
     match: 'Une cada palabra con su dibujo',
     words: 'torta · globo · regalo · vela',
-    license: 'Licencia StoryNido: {copies} copias para el cumpleaños de {name}.',
+    license: 'Para el cumple de {name} · storynido.com',
     cut: 'Recortar por las marcas',
   },
   en: {
@@ -121,7 +122,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     drawHint: 'How many candles? What flavor?',
     match: 'Match each word with its picture',
     words: 'cake · balloon · gift · candle',
-    license: 'StoryNido license: {copies} copies for {name}’s birthday.',
+    license: 'For {name}’s birthday · storynido.com',
     cut: 'Cut along the marks',
   },
   pt: {
@@ -155,7 +156,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     drawHint: 'Quantas velas? De que sabor?',
     match: 'Ligue cada palavra ao desenho',
     words: 'bolo · balão · presente · vela',
-    license: 'Licença StoryNido: {copies} cópias para o aniversário de {name}.',
+    license: 'Para o aniversário de {name} · storynido.com',
     cut: 'Recortar pelas marcas',
   },
 };
@@ -175,7 +176,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Dibuja un recuerdo de este día',
       drawHint: '¿Quiénes estaban? ¿Qué te gustó más?',
       words: 'globo · regalo · flor · torta',
-      license: 'Licencia StoryNido: {copies} copias para el bautismo de {name}.',
+      license: 'Para el bautismo de {name} · storynido.com',
     },
     en: {
       birthday: '{name}’s baptism!',
@@ -186,7 +187,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Draw a memory of this day',
       drawHint: 'Who was there? What did you like best?',
       words: 'balloon · gift · flower · cake',
-      license: 'StoryNido license: {copies} copies for {name}’s baptism.',
+      license: 'For {name}’s baptism · storynido.com',
     },
     pt: {
       birthday: 'O batizado de {name}!',
@@ -197,7 +198,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Desenhe uma lembrança deste dia',
       drawHint: 'Quem estava lá? Do que você mais gostou?',
       words: 'balão · presente · flor · bolo',
-      license: 'Licença StoryNido: {copies} cópias para o batizado de {name}.',
+      license: 'Para o batizado de {name} · storynido.com',
     },
   },
   communion: {
@@ -210,7 +211,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Dibuja un recuerdo de este día',
       drawHint: '¿Quiénes estaban? ¿Qué te gustó más?',
       words: 'globo · regalo · flor · torta',
-      license: 'Licencia StoryNido: {copies} copias para la primera comunión de {name}.',
+      license: 'Para la primera comunión de {name} · storynido.com',
     },
     en: {
       birthday: '{name}’s First Communion!',
@@ -221,7 +222,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Draw a memory of this day',
       drawHint: 'Who was there? What did you like best?',
       words: 'balloon · gift · flower · cake',
-      license: 'StoryNido license: {copies} copies for {name}’s First Communion.',
+      license: 'For {name}’s First Communion · storynido.com',
     },
     pt: {
       birthday: 'A primeira comunhão de {name}!',
@@ -232,7 +233,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Desenhe uma lembrança deste dia',
       drawHint: 'Quem estava lá? Do que você mais gostou?',
       words: 'balão · presente · flor · bolo',
-      license: 'Licença StoryNido: {copies} cópias para a primeira comunhão de {name}.',
+      license: 'Para a primeira comunhão de {name} · storynido.com',
     },
   },
   graduation: {
@@ -245,7 +246,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Dibuja tu mejor recuerdo del año',
       drawHint: '¿Con quién jugabas? ¿Qué aprendiste?',
       words: 'diploma · mochila · lápiz · globo',
-      license: 'Licencia StoryNido: {copies} copias para el egreso de {name}.',
+      license: 'Para el egreso de {name} · storynido.com',
     },
     en: {
       birthday: 'Congratulations, {name}!',
@@ -256,7 +257,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Draw your best memory of the year',
       drawHint: 'Who did you play with? What did you learn?',
       words: 'diploma · backpack · pencil · balloon',
-      license: 'StoryNido license: {copies} copies for {name}’s graduation.',
+      license: 'For {name}’s graduation · storynido.com',
     },
     pt: {
       birthday: 'Parabéns, {name}!',
@@ -267,7 +268,7 @@ const OCCASION_STRINGS: Record<
       draw: 'Desenhe sua melhor lembrança do ano',
       drawHint: 'Com quem você brincava? O que aprendeu?',
       words: 'diploma · mochila · lápis · balão',
-      license: 'Licença StoryNido: {copies} cópias para a formatura de {name}.',
+      license: 'Para a formatura de {name} · storynido.com',
     },
   },
 };
@@ -355,7 +356,7 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .page { width: ${String(size.width)}mm; height: ${String(size.height)}mm; position: relative; overflow: hidden; break-after: page; background: #fff; }
 .page:last-child { break-after: auto; }
 .display { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; }
-.license { position: absolute; left: 0; right: 0; bottom: 6mm; text-align: center; font-size: 7.5pt; color: #8a8090; }
+.license { position: absolute; left: 0; right: 0; bottom: 6mm; text-align: center; font-size: 6.5pt; color: #b3aab8; letter-spacing: 0.02em; }
 ${css}
 </style></head><body>${pages.join('\n')}<script>document.fonts.ready.then(() => { window.__fitted = true; });</script></body></html>`;
 }

@@ -29,6 +29,9 @@ import { trackConversion } from '@/lib/conversions';
 
 import { PriceSummary } from './price-summary';
 
+/** «Imprimir tarjetas» del kit: apagado por defecto (NEXT_PUBLIC_KIT_PRINT_CARDS=true lo prende). */
+const KIT_PRINT_CARDS = process.env.NEXT_PUBLIC_KIT_PRINT_CARDS === 'true';
+
 /** Estados en los que todavía no hay una compra pagada. */
 const UNPAID = new Set(['draft', 'preview_ready', 'pending_payment', 'cancelled', 'refunded']);
 
@@ -175,34 +178,39 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 {t('track')}
               </a>
             )}
-            {/* Otra copia solo de un libro impreso (el PDF ya lo tiene) o más copias de un kit: un
-                ebook se creó con ilustraciones de pantalla y no se imprime. */}
-            {GENERATED_STATUSES.has(order.status) && !isCards && (print || isKit) && (
+            {/* Otra copia solo de un libro impreso (el PDF ya lo tiene): un ebook se creó con
+                ilustraciones de pantalla y no se imprime. El kit no: la cantidad de copias de la
+                licencia no cambia el precio y volver a pedirlo cobraba el kit otra vez. */}
+            {GENERATED_STATUSES.has(order.status) && !isCards && !isKit && print && (
               <Link
                 href={{
                   pathname: '/checkout/[bookId]',
                   params: { bookId: order.bookId },
-                  query: isKit ? { reorder: order.orderId, kit: '1' } : { reorder: order.orderId },
+                  query: { reorder: order.orderId },
                 }}
                 className={buttonVariants({ variant: 'outline' })}
               >
                 <RotateCcw aria-hidden="true" />
-                {isKit ? tKit('moreCopies') : t('reorder')}
+                {t('reorder')}
               </Link>
             )}
-            {GENERATED_STATUSES.has(order.status) && isKit && cardPieces.length > 0 && (
-              <Link
-                href={{
-                  pathname: '/checkout/[bookId]',
-                  params: { bookId: order.bookId },
-                  query: { cards: order.orderId },
-                }}
-                className={buttonVariants({ variant: 'outline' })}
-              >
-                <Printer aria-hidden="true" />
-                {tKit('printCards.cta')}
-              </Link>
-            )}
+            {/* Tarjetas impresas: apagado hasta tener la muestra física (Celebraciones es digital). */}
+            {KIT_PRINT_CARDS &&
+              GENERATED_STATUSES.has(order.status) &&
+              isKit &&
+              cardPieces.length > 0 && (
+                <Link
+                  href={{
+                    pathname: '/checkout/[bookId]',
+                    params: { bookId: order.bookId },
+                    query: { cards: order.orderId },
+                  }}
+                  className={buttonVariants({ variant: 'outline' })}
+                >
+                  <Printer aria-hidden="true" />
+                  {tKit('printCards.cta')}
+                </Link>
+              )}
           </div>
         )}
         {/* Venta cruzada: el cuento completo del cumpleañero, en tapa dura (DECISIONS 150). */}

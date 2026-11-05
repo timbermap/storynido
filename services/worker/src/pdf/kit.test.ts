@@ -33,7 +33,8 @@ describe('kit por ocasión', () => {
       kitPieceDocument(book('baptism'), 'activities', 20).html,
     ].join('');
     expect(html).toContain('¡Te invito a mi bautismo!');
-    expect(html).toContain('para el bautismo de Sofi');
+    expect(html).toContain('Para el bautismo de Sofi · storynido.com');
+    expect(html).not.toContain('copias');
     expect(html.toLowerCase()).not.toContain('cumple');
     expect(html).not.toContain('torta de cumpleaños');
   });
@@ -134,7 +135,7 @@ describe('etiquetas por invitado', () => {
     const doc = kitPieceDocument(book('birthday'), 'favor_tags', 20);
     expect(doc.pages).toBe(1);
     expect(doc.html).toContain('¡Gracias por venir!');
-    expect(doc.html).not.toContain('Para ');
+    expect(doc.html).not.toContain('<p class="display">Para ');
   });
 
   it('con lista, una etiqueta por invitado (9 por hoja) y el nombre escapado', () => {
