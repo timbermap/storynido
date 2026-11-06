@@ -230,6 +230,9 @@ function OrderDetail({ id }: { id: string }) {
                     .join(', ')
                 : '—'}
             </Row>
+            <Row label="Dirección revisada">
+              {order.shipping ? (order.shipping.reviewed ? 'Sí, por el equipo' : 'No') : '—'}
+            </Row>
             <Row label="Mapa">
               {order.shipping?.mapUrl ? (
                 <a
@@ -247,6 +250,29 @@ function OrderDetail({ id }: { id: string }) {
               )}
             </Row>
           </dl>
+          {order.shipping &&
+            ADDRESS_EDITABLE.includes(order.status) &&
+            !order.shipping.reviewed &&
+            !editingAddress && (
+              <Button
+                variant="outline"
+                className="mt-3 mr-2"
+                disabled={busy}
+                onClick={() =>
+                  void act(
+                    '¿La dirección está bien así? Google no la va a volver a frenar en este pedido.',
+                    async () => {
+                      await api('adminConfirmShippingAddress', { params });
+                      return order.status === 'qa_failed'
+                        ? 'Dirección marcada como revisada. Ahora reintenta desde «deliver».'
+                        : 'Dirección marcada como revisada.';
+                    },
+                  )
+                }
+              >
+                Dirección revisada
+              </Button>
+            )}
           {order.shipping && ADDRESS_EDITABLE.includes(order.status) && !editingAddress && (
             <Button
               variant="outline"

@@ -7,6 +7,7 @@ import {
   createProviderRegistry,
   providerSettingsFromEnv,
   type MockEmailProvider,
+  type AddressValidator,
   type ProviderRegistry,
 } from '@storynido/providers';
 import { ProviderError, STEP_POLICIES, type PageReview, type PrintItem } from '@storynido/shared';
@@ -194,13 +195,13 @@ async function seedBook(
   });
 }
 
-function setup(providers: ProviderRegistry) {
+function setup(providers: ProviderRegistry, extra: { addressValidator?: AddressValidator } = {}) {
   const current = (): Pipeline => pipeline;
   const orchestrator = new LocalOrchestrator(current, log, 1);
   const dispatcher = new InlineDispatcher(current, log, 1);
   const pipeline = new Pipeline(
     db,
-    generationHandlers({ db, providers, log, allowSimulated: true }),
+    generationHandlers({ db, providers, log, allowSimulated: true, ...extra }),
     orchestrator,
     dispatcher,
     log,
@@ -486,6 +487,30 @@ describe('generación del libro (fase 09)', () => {
       ['softcover', 'interior', 12],
       ['softcover', 'cover', 1],
     ]);
+  });
+
+  it('Google no confirma la dirección: queda en revisión antes de la imprenta', async () => {
+    const fix: AddressValidator = {
+      validate: () =>
+        Promise.resolve({ status: 'fix', reasons: ['falta street_number'], location: null }),
+    };
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    const create = vi.spyOn(printer(providers, 'mock'), 'createOrder');
+    await setup(providers, { addressValidator: fix }).run();
+    const held = await order();
+    expect(held.status).toBe('qa_failed');
+    expect((held.pipeline as { failedStep: string }).failedStep).toBe('deliver');
+    expect((held.pipeline as { error: string }).error).toContain('falta street_number');
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('si Google no responde, no frena: va a la imprenta igual', async () => {
+    const providers = registry();
+    await seedBook(providers, {}, { format: 'softcover', pages: 10, previewWidth: 1800 });
+    const down: AddressValidator = { validate: () => Promise.reject(new Error('503')) };
+    await setup(providers, { addressValidator: down }).run();
+    expect((await order()).status).toBe('sent_to_print');
   });
 
   it('imprenta con especificación propia (como Gelato): un solo PDF con su tapa y guardas', async () => {

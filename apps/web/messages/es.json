@@ -1772,7 +1772,8 @@
         "CO": "Departamento",
         "PE": "Departamento",
         "UY": "Departamento",
-        "ES": "Provincia"
+        "ES": "Provincia",
+        "EC": "Provincia"
       },
       "stateOther": "Provincia, departamento o región",
       "line2Other": "Piso, depto. o barrio",
@@ -1785,6 +1786,7 @@
         "BR": "CPF de quien recibe",
         "CL": "RUT de quien recibe",
         "PE": "DNI o RUC de quien recibe",
+        "EC": "Cédula o RUC de quien recibe",
         "UY": "Cédula de quien recibe"
       },
       "taxIdHint": "La aduana lo pide para entregar el libro. Solo se usa para el envío.",

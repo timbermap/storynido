@@ -191,6 +191,8 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
       mapUrl: z.string().nullable().optional(),
       /** Quien compra movió el pin: la dirección escrita puede no coincidir con el punto. */
       pinMoved: z.boolean().optional(),
+      /** El equipo revisó la dirección: la validación de Google no la frena. */
+      reviewed: z.boolean().optional(),
     })
     .nullable(),
   payment: z.object({ provider: z.string(), paymentId: z.string().nullable() }),
@@ -1674,6 +1676,15 @@ export const apiRoutes = {
       phone: z.string().trim().max(30).optional(),
       taxId: z.string().trim().max(30).optional(),
     }),
+    response: pipelineRequestResponseSchema.pick({ accepted: true }),
+  },
+  adminConfirmShippingAddress: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/shipping-address/confirm',
+    access: 'admin',
+    summary:
+      'Marca la dirección como revisada por el equipo: la validación de Google ya no frena la entrega; queda en auditoría',
+    params: z.object({ orderId: z.string().min(1) }),
     response: pipelineRequestResponseSchema.pick({ accepted: true }),
   },
   adminPreviewBook: {

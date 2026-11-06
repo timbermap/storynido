@@ -2,7 +2,11 @@ import { createHash } from 'node:crypto';
 
 import { zipSync } from 'fflate';
 
-import { encodeIllustration, type ProviderRegistry } from '@storynido/providers';
+import {
+  encodeIllustration,
+  type AddressValidator,
+  type ProviderRegistry,
+} from '@storynido/providers';
 import QRCode from 'qrcode';
 import sharp from 'sharp';
 import {
@@ -179,6 +183,21 @@ interface Deps {
   qa?: Partial<QaLimits>;
   /** Solo en local y en tests: permite los proveedores simulados. */
   allowSimulated?: boolean;
+  /** Google Address Validation antes de la imprenta (sin él, no se valida). */
+  addressValidator?: AddressValidator;
+}
+
+/** Más lejos que esto entre el pin de quien compra y la dirección escrita, se revisa a mano. */
+const PIN_TOLERANCE_METERS = 300;
+
+function metersBetween(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
 }
 
 /** Un PDF maquetado y validado (lo usa la entrega). */
@@ -1482,6 +1501,31 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const address = order.shippingAddress as PrintAddress | null | undefined;
     if (!address)
       throw new HumanReviewError('print_address', 'El pedido impreso no tiene dirección.');
+    // Antes de pagar la impresión, Google revisa que la dirección exista y que el pin de quien
+    // compra esté cerca. Si el admin ya la revisó, va igual. Si Google no responde, no frena.
+    if (deps.addressValidator && order.shippingAddressReviewed !== true) {
+      try {
+        const verdict = await deps.addressValidator.validate(address);
+        const pin = (order.shippingAddress as { pin?: { lat: number; lng: number } | null }).pin;
+        const far = pin && verdict.location ? metersBetween(pin, verdict.location) : 0;
+        if (verdict.status === 'fix' || far > PIN_TOLERANCE_METERS) {
+          await qaEvent(ctx, 'address_review', {
+            status: verdict.status,
+            pinMeters: Math.round(far),
+          });
+          throw new HumanReviewError(
+            'address_review',
+            (verdict.status === 'fix'
+              ? `Google no confirma la dirección (${verdict.reasons.join(', ') || 'incompleta'}).`
+              : `El pin de quien compra está a ${String(Math.round(far))} m de la dirección escrita.`) +
+              ' Revisala o corregila en el admin y reintentá desde «deliver».',
+          );
+        }
+      } catch (error) {
+        if (error instanceof HumanReviewError) throw error;
+        log.warn({ err: error, orderId: ctx.order.id }, 'address validation failed; delivering');
+      }
+    }
 
     const items = [];
     // Imprenta para la que se maquetó (null: archivos genéricos, sirven a cualquiera sin specs).

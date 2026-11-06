@@ -49,6 +49,11 @@ describe('documento de quien recibe', () => {
     expect(addressProblems({ ...cl, taxId: '12.345.678-5' })).toEqual([]);
     const pe = { ...ar, country: 'PE' as const, postalCode: '15046' };
     expect(addressProblems({ ...pe, taxId: '12345678' })).toEqual([]);
+    const ec = { ...ar, country: 'EC' as const, postalCode: '170150' };
+    expect(addressProblems(ec)).toContain('taxId');
+    expect(addressProblems({ ...ec, taxId: '1710034065' })).toEqual([]);
+    expect(addressProblems({ ...ec, taxId: '1710034065001' })).toEqual([]);
+    expect(addressProblems({ ...ec, taxId: '1710034064' })).toContain('taxId');
   });
 
   it('rechaza un documento con el verificador mal o con otra forma', () => {

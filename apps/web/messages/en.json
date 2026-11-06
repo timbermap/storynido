@@ -1772,7 +1772,8 @@
         "CO": "Department",
         "PE": "Department",
         "UY": "Department",
-        "ES": "Province"
+        "ES": "Province",
+        "EC": "Province"
       },
       "stateOther": "Province, department or region",
       "line2Other": "Apartment, floor or neighborhood",
@@ -1785,6 +1786,7 @@
         "BR": "Recipient's CPF",
         "CL": "Recipient's RUT",
         "PE": "Recipient's DNI or RUC",
+        "EC": "Recipient's cédula or RUC",
         "UY": "Recipient's ID (cédula)"
       },
       "taxIdHint": "Customs requires it to deliver the book. It is only used for shipping.",
