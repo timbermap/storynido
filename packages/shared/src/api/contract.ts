@@ -187,6 +187,10 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
       country: z.string(),
       /** ¿Tiene teléfono? (la imprenta lo exige; el número no se muestra en la lista). */
       hasPhone: z.boolean().optional(),
+      /** Google Maps con el pin de quien compra o el lugar que eligió (null si la cargó a mano). */
+      mapUrl: z.string().nullable().optional(),
+      /** Quien compra movió el pin: la dirección escrita puede no coincidir con el punto. */
+      pinMoved: z.boolean().optional(),
     })
     .nullable(),
   payment: z.object({ provider: z.string(), paymentId: z.string().nullable() }),

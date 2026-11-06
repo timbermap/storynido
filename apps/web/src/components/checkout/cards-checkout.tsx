@@ -24,7 +24,7 @@ import { api } from '@/lib/api';
 
 import { PriceSummary } from './price-summary';
 
-type AddressDraft = Omit<Address, 'country' | 'taxId'>;
+type AddressDraft = Omit<Address, 'country' | 'taxId' | 'placeId' | 'pin'>;
 
 const EMPTY: AddressDraft = {
   name: '',

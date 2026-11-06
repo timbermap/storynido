@@ -230,6 +230,22 @@ function OrderDetail({ id }: { id: string }) {
                     .join(', ')
                 : '—'}
             </Row>
+            <Row label="Mapa">
+              {order.shipping?.mapUrl ? (
+                <a
+                  href={order.shipping.mapUrl}
+                  className="text-primary underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {order.shipping.pinMoved
+                    ? 'Ver el pin (lo movió quien compra)'
+                    : 'Ver en el mapa'}
+                </a>
+              ) : (
+                'Cargada a mano'
+              )}
+            </Row>
           </dl>
           {order.shipping && ADDRESS_EDITABLE.includes(order.status) && !editingAddress && (
             <Button

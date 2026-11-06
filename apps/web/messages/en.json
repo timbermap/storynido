@@ -1794,9 +1794,22 @@
         "postalCodeExample": "Check the postal code (for example, {example}).",
         "phone": "Check the phone number: include the area code, digits only.",
         "taxId": "Check the number: it does not match a valid ID.",
-        "state": "Check this field."
+        "state": "Check this field.",
+        "streetNumber": "Add the house or building number."
       },
-      "confirm": "I confirm the delivery address is correct."
+      "confirm": "I confirm the delivery address is correct.",
+      "confirmMap": "I confirm the address and the pin on the map are correct.",
+      "search": {
+        "label": "Search for the address",
+        "placeholder": "Street and number, for example 350 5th Ave",
+        "hint": "Pick your address from the list: we fill in the rest and show it on the map. If it doesn't appear, enter it by hand below.",
+        "poweredBy": "Suggestions by Google"
+      },
+      "map": {
+        "label": "Map of the delivery address",
+        "pin": "Delivery address",
+        "hint": "If the pin isn't at the right door, drag it there."
+      }
     },
     "giftTitle": "Gift",
     "isGift": "It’s a gift",

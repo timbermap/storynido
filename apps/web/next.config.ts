@@ -59,6 +59,7 @@ const nextConfig: NextConfig = {
             process.env.NODE_ENV !== 'production' ||
             process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === 'true',
           analytics: true,
+          maps: Boolean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY),
         }),
       },
     ]),

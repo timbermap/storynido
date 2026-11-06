@@ -324,6 +324,16 @@ export const addressSchema = z.object({
   phone: z.string().max(30).nullable(),
   /** Documento fiscal del destinatario (RFC, CUIT, CPF). Opcional: habilita a Lulu en México, Argentina y Brasil. */
   taxId: z.string().trim().max(30).nullable().default(null),
+  /** Lugar de Google que eligió quien compra en el autocompletado (se puede guardar sin límite). */
+  placeId: z.string().max(300).nullable().optional(),
+  /**
+   * Dónde dejó el pin quien compra, solo si lo movió (es un dato suyo, no de Google). La imprenta
+   * no lo recibe: sirve para revisar la dirección y para soporte si el envío vuelve.
+   */
+  pin: z
+    .object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) })
+    .nullable()
+    .optional(),
 });
 
 export type Address = z.infer<typeof addressSchema>;

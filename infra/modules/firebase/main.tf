@@ -94,6 +94,27 @@ resource "google_firebase_app_check_recaptcha_enterprise_config" "web" {
   token_ttl = "3600s"
 }
 
+# --- Google Maps en el checkout (autocompletado y mapa con pin, DECISIONS 234) ----------------
+# Clave de navegador: va en el HTML (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY), por eso se restringe a los
+# dominios de la web y solo a Maps JavaScript y Places.
+resource "google_apikeys_key" "maps_browser" {
+  project      = google_firebase_project.this.project
+  name         = "maps-browser-${var.environment}"
+  display_name = "StoryNido web (${var.environment}) · Google Maps del checkout"
+
+  restrictions {
+    browser_key_restrictions {
+      allowed_referrers = [for domain in var.app_check_domains : "https://${domain}/*"]
+    }
+    api_targets {
+      service = "maps-backend.googleapis.com"
+    }
+    api_targets {
+      service = "places.googleapis.com"
+    }
+  }
+}
+
 data "google_firebase_web_app_config" "web" {
   provider   = google-beta
   project    = google_firebase_project.this.project
@@ -126,6 +147,12 @@ output "admin_app_config" {
     messaging_sender_id = data.google_firebase_web_app_config.admin.messaging_sender_id
     app_id              = google_firebase_web_app.admin.app_id
   }
+}
+
+output "maps_browser_key" {
+  description = "Clave de navegador de Google Maps del checkout (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY)."
+  value       = google_apikeys_key.maps_browser.key_string
+  sensitive   = true
 }
 
 output "recaptcha_site_key" {

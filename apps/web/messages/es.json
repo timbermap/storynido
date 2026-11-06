@@ -1794,9 +1794,22 @@
         "postalCodeExample": "Revisa el código postal (por ejemplo, {example}).",
         "phone": "Revisa el teléfono: con código de área, solo números.",
         "taxId": "Revisa el número: no coincide con un documento válido.",
-        "state": "Revisa este dato."
+        "state": "Revisa este dato.",
+        "streetNumber": "Agrega el número de la puerta."
       },
-      "confirm": "Confirmo que el domicilio de entrega es correcto."
+      "confirm": "Confirmo que el domicilio de entrega es correcto.",
+      "confirmMap": "Confirmo que la dirección y el pin del mapa son correctos.",
+      "search": {
+        "label": "Buscar la dirección",
+        "placeholder": "Calle y número, por ejemplo San Martín 1234",
+        "hint": "Elige tu dirección de la lista: completamos el resto y la vemos en el mapa. Si no aparece, cárgala a mano abajo.",
+        "poweredBy": "Sugerencias de Google"
+      },
+      "map": {
+        "label": "Mapa de la dirección de entrega",
+        "pin": "Dirección de entrega",
+        "hint": "Si el pin no está en la puerta correcta, arrástralo hasta ahí."
+      }
     },
     "giftTitle": "Regalo",
     "isGift": "Es un regalo",
