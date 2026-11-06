@@ -350,6 +350,7 @@ const ADDRESS_RULES: Partial<Record<string, { postalCode: RegExp; state: RegExp 
   CL: { postalCode: /^\d{7}$/, state: /^.{2,}$/ },
   CO: { postalCode: /^\d{6}$/, state: /^.*$/ },
   PE: { postalCode: /^\d{5}$/, state: /^.*$/ },
+  EC: { postalCode: /^\d{6}$/, state: /^.*$/ },
   ES: { postalCode: /^\d{5}$/, state: /^.*$/ },
 };
 
@@ -366,16 +367,17 @@ export const POSTAL_CODE_EXAMPLES: Partial<Record<string, string>> = {
   CL: '7500000',
   CO: '110111',
   PE: '15046',
+  EC: '170150',
   ES: '28013',
 };
 
 /**
  * Países donde se pide el documento de quien recibe. La aduana lo exige para entregar envíos
  * del exterior (lista de Lulu: México RFC, Argentina CUIT o CUIL, Brasil CPF, Chile RUT, Perú
- * DNI o RUC); sin él, el paquete puede volver al origen. En Uruguay es opcional.
+ * DNI o RUC, Ecuador cédula o RUC); sin él, el paquete puede volver al origen. En Uruguay es opcional.
  */
-export const TAX_ID_COUNTRIES = ['MX', 'AR', 'BR', 'CL', 'PE', 'UY'] as const;
-export const TAX_ID_REQUIRED_COUNTRIES = ['MX', 'AR', 'BR', 'CL', 'PE'] as const;
+export const TAX_ID_COUNTRIES = ['MX', 'AR', 'BR', 'CL', 'PE', 'EC', 'UY'] as const;
+export const TAX_ID_REQUIRED_COUNTRIES = ['MX', 'AR', 'BR', 'CL', 'PE', 'EC'] as const;
 
 const digits = (value: string) => value.replace(/[\s.\-/]/g, '');
 
@@ -420,6 +422,21 @@ function validRut(value: string): boolean {
   return expected === dv;
 }
 
+/** Cédula de Ecuador: 10 dígitos, provincia 01 a 24 (o 30) y verificador módulo 10. */
+function validCedulaEc(value: string): boolean {
+  if (!/^\d{10}$/.test(value)) return false;
+  const province = Number(value.slice(0, 2));
+  if ((province < 1 || province > 24) && province !== 30) return false;
+  if (Number(value[2]) > 5) return false;
+  let sum = 0;
+  for (let index = 0; index < 9; index += 1) {
+    let product = Number(value[index]) * (index % 2 === 0 ? 2 : 1);
+    if (product > 9) product -= 9;
+    sum += product;
+  }
+  return (10 - (sum % 10)) % 10 === Number(value[9]);
+}
+
 /** Cómo se valida el documento en cada país (sin puntos, guiones ni espacios). */
 const TAX_ID_RULES: Partial<Record<string, (value: string) => boolean>> = {
   // RFC: 12 caracteres (empresas) o 13 (personas). Lulu no acepta la CURP.
@@ -429,6 +446,8 @@ const TAX_ID_RULES: Partial<Record<string, (value: string) => boolean>> = {
   CL: validRut,
   // DNI (8 dígitos) o RUC (11).
   PE: (value) => /^(\d{8}|\d{11})$/.test(value),
+  // Cédula (10 dígitos con verificador) o RUC (13: empresas y personas con actividad).
+  EC: (value) => validCedulaEc(value) || /^\d{13}$/.test(value),
   // Cédula: 6 a 8 dígitos.
   UY: (value) => /^\d{6,8}$/.test(value),
 };

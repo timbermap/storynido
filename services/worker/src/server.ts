@@ -2,6 +2,7 @@ import { EmailNotifier } from '@storynido/emails';
 import {
   aiModelSettingsFromEnv,
   CloudTraceSink,
+  GoogleAddressValidator,
   createProviderRegistry,
   luluOptionsFromEnv,
   simulatedProviders,
@@ -155,6 +156,10 @@ const pipeline = new Pipeline(
         providers,
         log: app.log,
         allowSimulated: env.APP_ENV === 'local' || env.APP_ENV === 'test',
+        // En la nube, con la cuenta de servicio del worker (sin clave de API).
+        ...(cloud && env.GCP_PROJECT_ID
+          ? { addressValidator: new GoogleAddressValidator({ projectId: env.GCP_PROJECT_ID }) }
+          : {}),
       }),
   cloud
     ? new CloudWorkflowsOrchestrator({ ...gcp, workflow: env.WORKFLOW_NAME })

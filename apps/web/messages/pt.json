@@ -1772,7 +1772,8 @@
         "CO": "Departamento",
         "PE": "Departamento",
         "UY": "Departamento",
-        "ES": "Província"
+        "ES": "Província",
+        "EC": "Província"
       },
       "stateOther": "Província, departamento ou região",
       "line2Other": "Apto., andar ou bairro",
@@ -1785,6 +1786,7 @@
         "BR": "CPF de quem recebe",
         "CL": "RUT de quem recebe",
         "PE": "DNI ou RUC de quem recebe",
+        "EC": "Cédula ou RUC de quem recebe",
         "UY": "Cédula de quem recebe"
       },
       "taxIdHint": "A alfândega exige para entregar o livro. Só é usado para o envio.",

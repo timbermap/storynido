@@ -314,6 +314,7 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
             country: String(address.country),
             hasPhone: typeof address.phone === 'string' && address.phone.trim().length > 0,
             ...mapLink(address),
+            reviewed: data.shippingAddressReviewed === true,
           }
         : null,
       payment: {
@@ -432,7 +433,40 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
         after: { changed },
       },
       (batch) => {
-        batch.update(orders.doc(orderId), { shippingAddress: next, updatedAt: new Date() });
+        // Una persona del equipo la revisó: la validación de Google ya no la frena.
+        batch.update(orders.doc(orderId), {
+          shippingAddress: next,
+          shippingAddressReviewed: true,
+          updatedAt: new Date(),
+        });
+      },
+    );
+    return { accepted: true as const };
+  });
+
+  // Google no confirmó la dirección, pero el equipo la revisó (con quien compra) y está bien.
+  addRoute(app, apiRoutes.adminConfirmShippingAddress, {}, async (request) => {
+    const { orderId } = request.params as { orderId: string };
+    const doc = await load(orderId);
+    const status = doc.get('status') as OrderStatus;
+    if (!ADDRESS_EDITABLE.includes(status) || !doc.get('shippingAddress')) {
+      throw new AppError(409, 'bad_request', `El pedido está en "${status}".`);
+    }
+    await auditedWrite(
+      db,
+      request.user,
+      {
+        action: 'order.confirm_shipping_address',
+        entity: COLLECTIONS.orders,
+        entityId: orderId,
+        before: { reviewed: doc.get('shippingAddressReviewed') === true },
+        after: { reviewed: true },
+      },
+      (batch) => {
+        batch.update(orders.doc(orderId), {
+          shippingAddressReviewed: true,
+          updatedAt: new Date(),
+        });
       },
     );
     return { accepted: true as const };

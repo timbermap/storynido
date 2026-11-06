@@ -15,6 +15,8 @@ export const QA_CODES = [
   'page_needs_reference',
   'snapshot_mismatch',
   'layout_blocked',
+  // Google no confirma la dirección o el pin está lejos: se frena antes de la imprenta.
+  'address_review',
   // Revisión manual (fase 15): un admin aprobó las ilustraciones tal como estaban.
   'human_approved',
   // El adulto editó el texto de una página de la muestra (métrica story_edit_rate).

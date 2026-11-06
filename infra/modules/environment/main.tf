@@ -8,6 +8,7 @@ locals {
   is_production = var.environment == "production"
 
   services = [
+    "addressvalidation.googleapis.com",
     "aiplatform.googleapis.com",
     "apikeys.googleapis.com",
     "artifactregistry.googleapis.com",
@@ -90,6 +91,8 @@ module "service_accounts" {
         "roles/cloudtasks.enqueuer",
         "roles/datastore.user",
         "roles/pubsub.publisher",
+        # Address Validation con OAuth factura al proyecto (X-Goog-User-Project): DECISIONS 235.
+        "roles/serviceusage.serviceUsageConsumer",
         "roles/workflows.invoker",
       ])
     }
