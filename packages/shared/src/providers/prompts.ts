@@ -7,6 +7,7 @@ import {
   type MustKeepTrait,
 } from '../models/character';
 import type { CastMember, CharacterSheet, LessonPrompt, StoryPlan } from './ai';
+import { DIALOGUE_MIN_AGE } from './story-checks';
 
 /** Variables que admiten las plantillas de stories (textPromptTemplate / imagePromptTemplate). */
 export type TemplateVariables = Readonly<Record<string, string | number | null | undefined>>;
@@ -136,7 +137,18 @@ ${input.plan.scenes
         scene.personalDetail ? ` · detalle personal: ${scene.personalDetail}` : ''
       }`,
   )
+  .join('\n')}${
+        input.plan.promises?.length
+          ? `
+Lo que se planta y se paga (respétalo: la pista o el objeto aparece antes y vuelve a servir después):
+${input.plan.promises
+  .map(
+    (promise) =>
+      `- «${promise.setup}»: se planta en la página ${String(promise.setupPage)} y se paga en la página ${String(promise.payoffPage)}.`,
+  )
   .join('\n')}`
+          : ''
+      }`
     : '';
   return `${body}${memoriesSection}${eventSection}${goalSection}${planSection}
 
@@ -185,7 +197,9 @@ const EVENT_STORY: Record<BookEvent['type'], (name: string, age: number | null) 
  * Reglas narrativas (AUDITORIA-PRODUCTO §4): lo que separa un cuento memorable de uno genérico.
  * Las de cada público salen del pedido: eventos traen la fiesta; profesionales, el objetivo.
  */
-export function narrativeRules(input: Pick<StoryPromptInput, 'childName' | 'event' | 'goal'>) {
+export function narrativeRules(
+  input: Pick<StoryPromptInput, 'childName' | 'event' | 'goal'> & { age?: number },
+) {
   const rules = [
     `- ${input.childName} decide y resuelve: no mira la aventura, la protagoniza.`,
     '- La primera página tiene un gancho que invita a dar vuelta la hoja.',
@@ -221,7 +235,39 @@ export function narrativeRules(input: Pick<StoryPromptInput, 'childName' | 'even
   } else {
     rules.push('- Emoción y vínculo, con un conflicto verdadero que se resuelve.');
   }
+  rules.push(...craftRules(input.childName, input.age, Boolean(baby)));
   return rules.join('\n');
+}
+
+/**
+ * Oficio del texto (arreglos del generador, PR B): lo que hace que un cuento se sienta escrito por
+ * una persona. Por edad cuando se sabe; sin edad, las que valen para todos.
+ */
+export function craftRules(childName: string, age: number | undefined, baby = false): string[] {
+  const rules = [
+    '- Muestra, no cuentes: en lugar de decir lo que siente un personaje («estaba triste»), muestra lo que hace, dice o nota su cuerpo.',
+    '- Todo lo que se plantea se paga: un misterio se resuelve con una pista plantada antes, y un objeto importante vuelve a servir más adelante.',
+    '- Cada detalle personal aparece donde cambia algo en la escena, nunca de relleno.',
+    '- La última página termina en una imagen o una frase que queda, nunca en una lección ni en una moraleja.',
+  ];
+  if (!baby) {
+    rules.push(
+      `- Como máximo dos intentos fallidos antes de lograrlo, y cada uno enseña algo distinto que ${childName} usa después.`,
+      `- Si hay un mentor o un adulto, ayuda o da una pista, pero la solución final la encuentra ${childName}.`,
+      '- Si el protagonista hace algo que un chico podría imitar y tiene riesgo (agua, altura, velocidad, fuego), usa el equipo de seguridad que corresponde y un adulto sabe dónde está.',
+    );
+  }
+  if (age !== undefined && age >= DIALOGUE_MIN_AGE) {
+    rules.push(
+      '- Hay diálogo (con raya) en al menos una de cada tres páginas, y cada personaje habla distinto (su forma de decir las cosas lo delata sin nombrarlo).',
+    );
+  }
+  if (age !== undefined && age >= 9) {
+    rules.push(
+      '- Oraciones de 20 palabras como máximo; nada de jerga técnica sin explicarla con palabras del lector.',
+    );
+  }
+  return rules;
 }
 
 export interface IllustrationPromptInput {

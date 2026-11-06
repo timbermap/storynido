@@ -11,6 +11,7 @@ import {
   coverScene,
   describeCharacter,
   lessonsBlock,
+  craftRules,
   narrativeRules,
   renderTemplate,
   samplePrompts,
@@ -236,5 +237,41 @@ describe('castNote', () => {
     expect(castNote(undefined)).toBe('');
     expect(castNote([])).toBe('');
     expect(castNote([{ role: ' ', gender: 'male', look: 'x' }])).toBe('');
+  });
+});
+
+describe('oficio del texto', () => {
+  it('reglas por edad: diálogo desde 6 años, oraciones cortas desde 9', () => {
+    const four = craftRules('Sofi', 4).join('\n');
+    expect(four).toContain('Muestra, no cuentes');
+    expect(four).toContain('nunca en una lección');
+    expect(four).toContain('la solución final la encuentra Sofi');
+    expect(four).not.toContain('diálogo');
+    const seven = craftRules('Sofi', 7).join('\n');
+    expect(seven).toContain('al menos una de cada tres páginas');
+    expect(seven).not.toContain('20 palabras');
+    expect(craftRules('Sofi', 10).join('\n')).toContain('20 palabras como máximo');
+    // Un bebé (bautismo, primer añito): sin intentos fallidos ni mentor.
+    expect(craftRules('Sofi', 1, true).join('\n')).not.toContain('intentos fallidos');
+  });
+
+  it('el prompt del cuento usa la edad y lista lo que se planta y se paga', () => {
+    const prompt = buildStoryPrompt({
+      ...base,
+      age: 8,
+      plan: {
+        theme: 't',
+        arc: 'a',
+        promises: [{ setup: 'una llave dorada', setupPage: 2, payoffPage: 10 }],
+        scenes: [],
+      },
+    });
+    expect(prompt).toContain('al menos una de cada tres páginas');
+    expect(prompt).toContain(
+      '«una llave dorada»: se planta en la página 2 y se paga en la página 10',
+    );
+    expect(narrativeRules({ childName: 'Sofi', event: null, goal: null })).not.toContain(
+      'una de cada tres',
+    );
   });
 });

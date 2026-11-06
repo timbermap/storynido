@@ -144,6 +144,77 @@ describe('Vertex AI', () => {
     });
   });
 
+  it('ortografía aparte a temperatura 0; si cambia las páginas, conserva el texto', async () => {
+    const story = {
+      title: 'Martina',
+      pages: [0, 1, 2, 3].map((index) => ({
+        index,
+        text: `Pagina ${String(index + 1)}`,
+        illustrationPrompt: `Scene ${String(index + 1)}`,
+      })),
+      usage: { provider: 'vertex', model: 'm', costUsdMicros: 0 },
+    };
+    const calls: { generationConfig: { temperature: number } }[] = [];
+    const fixed = await new VertexTextProvider(
+      clientWith(
+        () =>
+          jsonReply({
+            title: 'Martina',
+            pages: story.pages.map((page) => ({ text: page.text.replace('Pagina', 'Página') })),
+          }),
+        calls,
+      ),
+    ).proofreadStory(story, sampleStoryRequest);
+    expect(calls[0]?.generationConfig.temperature).toBe(0);
+    expect(fixed.pages[0]).toEqual({ index: 0, text: 'Página 1', illustrationPrompt: 'Scene 1' });
+    const short = await new VertexTextProvider(
+      clientWith(() => jsonReply({ title: 'Martina', pages: [{ text: 'x' }] })),
+    ).proofreadStory(story, sampleStoryRequest);
+    expect(short.pages).toEqual(story.pages);
+  });
+
+  it('la revisión editorial recibe los problemas concretos para reescribir', async () => {
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const story = {
+      title: 'Martina',
+      pages: [{ index: 0, text: 'a', illustrationPrompt: 'b' }],
+      usage: { provider: 'vertex', model: 'm', costUsdMicros: 0 },
+    };
+    await new VertexTextProvider(
+      clientWith(
+        () =>
+          jsonReply({
+            approved: true,
+            issues: [],
+            pages: [{ text: 'a', illustrationPrompt: 'b' }],
+          }),
+        calls,
+      ),
+    ).reviewStory(story, sampleStoryRequest, { issues: ['Moraleja explícita («la lección»)'] });
+    expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('- Moraleja explícita («la lección»)');
+  });
+
+  it('escenas desde el texto final: una por página o reintentable', async () => {
+    const pages = [0, 1].map((index) => ({
+      index,
+      text: `t${String(index)}`,
+      illustrationPrompt: 'p',
+    }));
+    const request = { childName: 'Martina', pages, scenes: null, recurring: ['Grandma Rosa'] };
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const ok = await new VertexTextProvider(
+      clientWith(() => jsonReply({ prompts: [' one ', 'two'] }), calls),
+    ).describeScenes(request);
+    expect(ok.prompts).toEqual(['one', 'two']);
+    expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('who is not');
+    expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('Grandma Rosa');
+    await expect(
+      new VertexTextProvider(clientWith(() => jsonReply({ prompts: ['one'] }))).describeScenes(
+        request,
+      ),
+    ).rejects.toMatchObject({ retryable: true });
+  });
+
   it('rechaza un cuento con otra cantidad de páginas (reintentable)', async () => {
     const provider = new VertexTextProvider(
       clientWith(() => jsonReply({ title: 'x', pages: [{ text: 'a', illustrationPrompt: 'b' }] })),

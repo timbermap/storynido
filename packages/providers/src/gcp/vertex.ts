@@ -15,6 +15,9 @@ import {
   type ModerationResult,
   type PageReview,
   type PageReviewRequest,
+  type ProofreadStory,
+  type SceneDescriptions,
+  type SceneRequest,
   type StoryPage,
   type StoryPlan,
   type StoryRequest,
@@ -320,6 +323,24 @@ const REVIEW_SCHEMA = {
   required: ['approved', 'issues', 'pages'],
 };
 
+const PROOFREAD_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    title: { type: 'STRING' },
+    pages: {
+      type: 'ARRAY',
+      items: { type: 'OBJECT', properties: { text: { type: 'STRING' } }, required: ['text'] },
+    },
+  },
+  required: ['title', 'pages'],
+};
+
+const SCENES_SCHEMA = {
+  type: 'OBJECT',
+  properties: { prompts: { type: 'ARRAY', items: { type: 'STRING' } } },
+  required: ['prompts'],
+};
+
 const PLAN_SCHEMA = {
   type: 'OBJECT',
   properties: {
@@ -341,6 +362,18 @@ const PLAN_SCHEMA = {
           look: { type: 'STRING' },
         },
         required: ['role', 'gender', 'look'],
+      },
+    },
+    promises: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          setup: { type: 'STRING' },
+          setupPage: { type: 'INTEGER' },
+          payoffPage: { type: 'INTEGER' },
+        },
+        required: ['setup', 'setupPage', 'payoffPage'],
       },
     },
     scenes: {
@@ -568,15 +601,26 @@ Distinctive features only if clearly visible (glasses, freckles, dimples, missin
     };
   }
 
-  async reviewStory(story: GeneratedStory, request: StoryRequest): Promise<StoryReview> {
+  async reviewStory(
+    story: GeneratedStory,
+    request: StoryRequest,
+    options: { issues?: readonly string[] } = {},
+  ): Promise<StoryReview> {
+    const issues = options.issues?.length
+      ? `
+These concrete problems were found by automatic checks: rewrite the pages involved to fix every one of them, keeping the plot,
+the names and the length of each page:
+${options.issues.map((issue) => `- ${issue}`).join('\n')}
+`
+      : '';
     const { response, usage } = await this.client.generate(
       this.model,
       [
         {
           text: `You are the editor of a personalized children's book. Review the story below written for ${request.childName} (${String(request.age)} years old).
 Fix spelling, grammar, consistency of names and details, and anything not suitable for young children. Keep the language, tone, length and page count.
-Keep the lessons subtle (no explicit moral). Set approved=false only if it cannot be fixed. List the issues you found.
-
+Keep the lessons subtle (no explicit moral). Show, don't tell. Set approved=false only if it cannot be fixed. List the issues you found.
+${issues}
 Story (JSON):
 ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrationPrompt }) => ({ text, illustrationPrompt })) })}`,
         },
@@ -595,6 +639,78 @@ ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrat
         ? review.pages.map((page, index) => ({ index, ...page }))
         : story.pages;
     return { approved: review.approved, issues: review.issues, pages, usage };
+  }
+
+  /** Pasada de ortografía aparte, a temperatura 0: solo corrige (nada de estilo ni de trama). */
+  async proofreadStory(story: GeneratedStory, request: StoryRequest): Promise<ProofreadStory> {
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [
+        {
+          text: `You are a proofreader. Correct ONLY spelling, accents, punctuation (including dialogue dashes) and agreement errors in this
+children's book, in its own language. Do not change words, style, plot, names or length; do not add or remove pages. Keep
+"${request.childName}" written exactly like that. Return the title and every page text (an empty page stays empty).
+
+Book (JSON):
+${JSON.stringify({ title: story.title, pages: story.pages.map(({ text }) => ({ text })) })}`,
+        },
+      ],
+      { temperature: 0, responseMimeType: 'application/json', responseSchema: PROOFREAD_SCHEMA },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
+    );
+    const fixed = parseJson(response, 'ortografía') as { title: string; pages: { text: string }[] };
+    // Si cambia la cantidad de páginas, se conserva el texto anterior.
+    const pages =
+      fixed.pages.length === story.pages.length
+        ? story.pages.map((page, index) => ({
+            ...page,
+            text: fixed.pages[index]?.text ?? page.text,
+          }))
+        : story.pages;
+    return { title: fixed.title.trim() || story.title, pages, usage };
+  }
+
+  /** La escena de cada página, escrita desde el texto final (quién está y quién no, lugar, hora). */
+  async describeScenes(request: SceneRequest): Promise<SceneDescriptions> {
+    const pages = request.pages.map((page, index) => {
+      const scene = request.scenes?.find((item) => item.pageIndex === index);
+      return {
+        page: index + 1,
+        text: page.text,
+        ...(scene
+          ? { mustBeVisible: scene.mustBeVisible, notVisible: scene.notVisible }
+          : { previousScene: page.illustrationPrompt }),
+      };
+    });
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [
+        {
+          text: `You write the illustration brief for each page of a children's picture book, from its FINAL text. For every page, in English,
+one or two sentences: who is in the picture and who is not (the protagonist ${request.childName}${
+            request.recurring.length
+              ? `; recurring characters: ${request.recurring.join(', ')}`
+              : ''
+          }), the place, the time of day, the key object, and ONE single moment of the page (never two actions in a row).
+Draw only what the text says or implies; follow mustBeVisible / notVisible when given. A page with empty text: the moment the
+plan describes, told by the picture alone. No text, letters or signs in the image. Exactly ${String(request.pages.length)} prompts, in order.
+
+Pages (JSON):
+${JSON.stringify(pages)}`,
+        },
+      ],
+      { temperature: 0.3, responseMimeType: 'application/json', responseSchema: SCENES_SCHEMA },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
+    );
+    const result = parseJson(response, 'escenas') as { prompts: string[] };
+    if (result.prompts.length !== request.pages.length) {
+      throw new ProviderError(
+        'vertex',
+        `Vinieron ${String(result.prompts.length)} escenas en vez de ${String(request.pages.length)}`,
+        true,
+      );
+    }
+    return { prompts: result.prompts.map((prompt) => prompt.trim()), usage };
   }
 
   async moderateText(text: string): Promise<ModerationResult> {
@@ -627,6 +743,11 @@ look, is always called by the same name, and is drawn the same way in every scen
 continuityFacts of every scene where it appears. Use a single central metaphor for the whole book, never several. When a sport, hobby
 or tool appears, name it precisely in mustBeVisible with its distinctive look (for example "a squash racket: small round head, long
 thin throat", never just "a racket"). The protagonist keeps the same outfit in every scene unless the text says they change clothes.
+promises: what the story sets up and later pays off (a mystery and the clue planted before it is solved, an important object that is
+used again later, a skill that is practiced and then saves the day), each with setupPage and payoffPage (1 = first page, setupPage
+before payoffPage). Everything that is set up is paid off. Up to 3; empty array if none. Write setup in the language of the brief.
+At most two failed attempts before the protagonist succeeds, each teaching something different; a mentor may help, but the
+protagonist finds the final solution.
 
 Brief:
 ${request.prompt}`,
@@ -650,6 +771,15 @@ ${request.prompt}`,
     return {
       theme: plan.theme,
       arc: plan.arc,
+      promises: (plan.promises ?? [])
+        .filter(
+          (promise) =>
+            promise.setup.trim() &&
+            promise.setupPage >= 1 &&
+            promise.setupPage < promise.payoffPage &&
+            promise.payoffPage <= request.pageCount,
+        )
+        .slice(0, 3),
       companion: plan.companion?.name && plan.companion.look ? plan.companion : null,
       cast: (plan.cast ?? []).filter((member) => member.role && member.look).slice(0, 4),
       scenes: plan.scenes.map((scene, pageIndex) => ({

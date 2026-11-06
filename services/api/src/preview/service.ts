@@ -15,6 +15,7 @@ import {
   withEventWordCap,
   nameIssues,
   repairNameAccents,
+  storyCraftIssues,
   traitsKey,
   type CharacterTraits,
   type MustKeepTrait,
@@ -672,14 +673,14 @@ export class PreviewService {
     // Texto: cuento, revisión editorial y moderación (un reintento si no pasa).
     const pages = await withModeratedRetry(
       async () => {
+        // Si el modelo solo cambió las tildes del nombre, se deja como lo escribió la persona.
+        const fix = (text: string) => repairNameAccents(text, requiredNames);
         const write = async () => {
           const draft = await track('story', await ai.text.generateStory({ ...request, prompt }));
           const review = await track(
             'review',
             await ai.text.reviewStory(draft, { ...request, prompt }),
           );
-          // Si el modelo solo cambió las tildes del nombre, se deja como lo escribió la persona.
-          const fix = (text: string) => repairNameAccents(text, requiredNames);
           return {
             title: fix(draft.title),
             pages: review.pages.map((page) => ({ ...page, text: fix(page.text) })),
@@ -692,9 +693,99 @@ export class PreviewService {
           names: nameIssues([draft.title, ...draft.pages.map((page) => page.text)], requiredNames)
             .length,
         });
+        type Draft = Awaited<ReturnType<typeof write>>;
+        const asStory = (draft: Draft) => ({
+          title: draft.title,
+          pages: draft.pages,
+          usage: { provider: 'none', model: 'none', costUsdMicros: 0 },
+        });
+        // Un cambio de la IA se acepta solo si no rompe los nombres ni empeora la densidad.
+        const safe = (before: Draft, after: Draft) => {
+          const found = problems(after);
+          return found.names === 0 && found.outOfRange <= problems(before).outOfRange;
+        };
+        // Oficio del texto (PR B): controles deterministas, ortografía aparte y escenas desde el
+        // texto final. Si la IA de un paso falla, se sigue con lo que había.
+        const polish = async (draft: Draft): Promise<Draft> => {
+          let current = draft;
+          const craft = storyCraftIssues({
+            pages: current.pages,
+            age: request.age,
+            language: request.language,
+            names: [
+              ...requiredNames,
+              request.petName ?? '',
+              request.bestFriendName ?? '',
+              storyPlan.companion?.name ?? '',
+            ],
+          });
+          if (craft.issues.length > 0) {
+            await this.qaEvent(bookId, 'story_craft', {
+              issues: craft.issues.length,
+              dialogue: craft.dialogue,
+              repeated: craft.repeated,
+              morals: craft.morals,
+            });
+            // Una sola pasada extra con la lista concreta de problemas.
+            const rewrite = await track(
+              'review',
+              await ai.text.reviewStory(
+                asStory(current),
+                { ...request, prompt },
+                { issues: craft.issues },
+              ),
+            );
+            const candidate = {
+              title: current.title,
+              pages: rewrite.pages.map((page) => ({ ...page, text: fix(page.text) })),
+              approved: current.approved && rewrite.approved,
+            };
+            if (safe(current, candidate)) current = candidate;
+          }
+          try {
+            const proof = await track(
+              'review',
+              await ai.text.proofreadStory(asStory(current), { ...request, prompt }),
+            );
+            const candidate = {
+              ...current,
+              title: fix(proof.title),
+              pages: proof.pages.map((page) => ({ ...page, text: fix(page.text) })),
+            };
+            if (safe(current, candidate)) current = candidate;
+          } catch (error) {
+            if (!(error instanceof ProviderError)) throw error;
+            this.log.warn({ err: error, bookId }, 'proofreading failed; keeping the reviewed text');
+          }
+          try {
+            const scenes = await track(
+              'story',
+              await ai.text.describeScenes({
+                childName: request.childName,
+                pages: current.pages,
+                scenes: storyPlan.scenes,
+                recurring: [
+                  ...(storyPlan.companion ? [storyPlan.companion.name] : []),
+                  ...(storyPlan.cast ?? []).map((member) => member.role),
+                ],
+              }),
+            );
+            current = {
+              ...current,
+              pages: current.pages.map((page, index) => {
+                const brief = scenes.prompts[index]?.trim() ?? '';
+                return { ...page, illustrationPrompt: brief || page.illustrationPrompt };
+              }),
+            };
+          } catch (error) {
+            if (!(error instanceof ProviderError)) throw error;
+            this.log.warn({ err: error, bookId }, 'scene briefs failed; keeping the writer ones');
+          }
+          return current;
+        };
         const first = await write();
         const found = problems(first);
-        if (found.outOfRange === 0 && found.names === 0) return first;
+        if (found.outOfRange === 0 && found.names === 0) return polish(first);
         if (found.outOfRange > 0) {
           await this.qaEvent(bookId, 'length_out_of_range', { pages: found.outOfRange });
         }
@@ -707,7 +798,7 @@ export class PreviewService {
             'No logramos escribir el nombre del protagonista tal cual lo escribiste. Intenta de nuevo en unos minutos.',
           );
         }
-        return second;
+        return polish(second);
       },
       async (result) => {
         if (!result.approved) return false;

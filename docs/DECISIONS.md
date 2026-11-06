@@ -2516,3 +2516,19 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Validación antes de la imprenta:** en el paso `deliver`, el worker llama a Google Address Validation con su cuenta de servicio (OAuth, sin clave; factura al proyecto con `X-Goog-User-Project`). Si Google dice que hay que corregirla (`possibleNextAction: FIX`) o el pin que movió quien compra está a más de 300 m de donde Google ubica la dirección escrita, el pedido queda en revisión (`address_review`) y no se paga la impresión. El admin la corrige ("Corregir dirección") o la marca como revisada ("Dirección revisada") y reintenta desde `deliver`; una dirección revisada ya no se frena. Si Google no responde, no frena. Uruguay y Perú no tienen datos en Address Validation: ahí manda la confirmación de quien compra con el mapa.
 - **Infra:** Terraform habilita `addressvalidation.googleapis.com` y suma `roles/serviceusage.serviceUsageConsumer` al worker.
 - **Costo:** USD 17 cada 1.000 después de 5.000 gratis por mes; una llamada por impreso.
+
+## 237 — Oficio del texto: reglas, promesas, controles y ortografía aparte
+
+- **Fecha:** 2026-11-06. Pedido por Sebas (arreglos del generador, PR B). Depende del tratamiento «vos»/«tú» del PR #55, que no se toca acá.
+- **Reglas del redactor** (`craftRules`, en `narrativeRules`): mostrar, no contar; todo lo que se plantea se paga (un misterio con su pista plantada antes, un objeto importante que vuelve a servir); como máximo dos intentos fallidos y cada uno enseña algo distinto; el mentor ayuda, pero la solución la encuentra el protagonista; si hace algo imitable y riesgoso, usa equipo de seguridad y un adulto sabe dónde está; la última página termina en una imagen o una frase, nunca en una lección; cada detalle personal aparece donde cambia algo. Por edad: desde 6 años, diálogo en al menos una de cada tres páginas, con una voz distinta por personaje; desde 9, oraciones de 20 palabras como máximo y sin jerga técnica sin explicar. En un bautismo o un primer añito no van los intentos fallidos ni el mentor.
+- **Promesas en el plan:** `promises` (qué se planta, en qué página y dónde se paga; hasta 3). El redactor las recibe en la lista del plan.
+- **Controles deterministas** (`story-checks.ts`, sin IA):
+  - Diálogo desde 6 años: raya, comillas o guion en al menos un tercio de las páginas con texto.
+  - Palabras con contenido repetidas: más de 2 veces en una página, o más de 4 en el libro. Sin contar las palabras vacías ni los nombres de los personajes. En los libros de más de 12 páginas el tope del libro es una cada tres páginas: el objeto central se llama siempre igual y en 26 páginas vuelve más de cuatro veces.
+  - Moralejas explícitas («aprendió que», «la lección», «perseverancia», «el verdadero valor»…).
+  
+  Si alguno falla, la revisión editorial recibe la lista concreta y reescribe una sola vez (`story_craft` en el control de calidad). La reescritura se acepta solo si no rompe los nombres ni empeora la densidad.
+- **Ortografía aparte:** después de la revisión, una pasada a temperatura 0 que solo corrige ortografía, tildes, puntuación y concordancia. Si cambia la cantidad de páginas o rompe un nombre, queda el texto anterior.
+- **Escenas desde el texto final:** con el texto ya corregido, se reescribe el `illustrationPrompt` de cada página: quién está y quién no, el lugar, la hora del día, el objeto clave y un solo momento.
+- Si la ortografía o las escenas fallan en la IA, la muestra sigue con lo que había (no se cae).
+- **Costo:** por muestra, 2 llamadas de texto más (ortografía y escenas) y 1 más solo si fallan los controles (reescritura). Con Gemini Flash son centavos por libro.

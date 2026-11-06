@@ -13,6 +13,9 @@ import type {
   ModerationResult,
   PageReview,
   PageReviewRequest,
+  ProofreadStory,
+  SceneDescriptions,
+  SceneRequest,
   StoryPlan,
   StoryRequest,
   StoryReview,
@@ -98,6 +101,19 @@ export class MockAITextProvider implements AITextProvider {
     });
   }
 
+  /** Ortografía simulada: deja el texto tal cual (los espacios ya los normaliza la revisión). */
+  proofreadStory(story: GeneratedStory): Promise<ProofreadStory> {
+    return Promise.resolve({ title: story.title, pages: story.pages, usage: usage('mock-text') });
+  }
+
+  /** Escenas simuladas: conserva las del redactor (deterministas para los tests). */
+  describeScenes(request: SceneRequest): Promise<SceneDescriptions> {
+    return Promise.resolve({
+      prompts: request.pages.map((page) => page.illustrationPrompt),
+      usage: usage('mock-text'),
+    });
+  }
+
   moderateText(text: string): Promise<ModerationResult> {
     return Promise.resolve(moderate(text));
   }
@@ -109,6 +125,11 @@ export class MockAITextProvider implements AITextProvider {
     return Promise.resolve({
       theme: request.storyTitle,
       arc: `${request.childName} quiere algo, encuentra una dificultad, decide y lo logra.`,
+      // Una promesa que se paga al final (para probar que llega al redactor sin IA real).
+      promises:
+        request.pageCount >= 3
+          ? [{ setup: 'una llave dorada', setupPage: 1, payoffPage: request.pageCount }]
+          : [],
       // Con mascota, el acompañante que se repite (para probar su lámina sin IA real).
       companion: request.petName
         ? { name: request.petName, look: 'a small friendly golden dog with a red collar' }
