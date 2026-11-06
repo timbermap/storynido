@@ -241,4 +241,52 @@ describe('admin: operación de pedidos', () => {
     expect(audit.docs).toHaveLength(1);
     expect(JSON.stringify(audit.docs[0]?.data())).not.toContain('5555');
   });
+
+  it('corrige la dirección antes de la imprenta, con el mismo país; queda auditado sin los datos', async () => {
+    await order('o1', {
+      status: 'ready',
+      shippingAddress: {
+        name: 'Ana',
+        line1: 'San Martín 1234',
+        line2: null,
+        city: 'Rosario',
+        state: null,
+        postalCode: 'S2000',
+        country: 'AR',
+        phone: '+54 11 5555 1234',
+        taxId: '20-12345678-6',
+      },
+    });
+    await order('o2', { status: 'sent_to_print', shippingAddress: { country: 'AR' } });
+    const fixed = {
+      name: 'Ana Pérez',
+      line1: 'Av. San Martín 1234',
+      line2: 'Piso 3',
+      city: 'Córdoba',
+      state: 'Córdoba',
+      postalCode: 'X5000',
+    };
+    expect((await post('/v1/admin/orders/o2/shipping-address', fixed)).statusCode).toBe(409);
+    expect(
+      (await post('/v1/admin/orders/o1/shipping-address', { ...fixed, postalCode: '12' }))
+        .statusCode,
+    ).toBe(400);
+    const ok = await post('/v1/admin/orders/o1/shipping-address', fixed);
+    expect(ok.statusCode).toBe(200);
+    const saved = (await db.collection(COLLECTIONS.orders).doc('o1').get()).get(
+      'shippingAddress',
+    ) as Record<string, unknown>;
+    expect(saved).toMatchObject({
+      ...fixed,
+      country: 'AR',
+      phone: '+54 11 5555 1234',
+      taxId: '20-12345678-6',
+    });
+    const audit = await db
+      .collection(COLLECTIONS.auditLog)
+      .where('action', '==', 'order.set_shipping_address')
+      .get();
+    expect(audit.docs).toHaveLength(1);
+    expect(JSON.stringify(audit.docs[0]?.data())).not.toContain('Córdoba');
+  });
 });
