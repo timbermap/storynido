@@ -10,6 +10,7 @@ import {
 import {
   AlertTriangle,
   BookOpen,
+  Check,
   CheckCircle2,
   Droplets,
   Loader2,
@@ -211,22 +212,12 @@ export function PreviewPanel({
             : t('drawingWait.text')}
         </p>
         <WaitEstimate kind="withDrawing" startedAt={book.previewStartedAt} />
-        <ol className="mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm sm:grid-cols-3">
-          {steps.map((step, index) => (
-            <li
-              key={step}
-              aria-current={index === active ? 'step' : undefined}
-              className={
-                index === active
-                  ? 'rounded-xl border-2 border-primary bg-card p-3 font-semibold'
-                  : 'rounded-xl border bg-card/60 p-3 text-muted-foreground'
-              }
-            >
-              <span className="block text-xs font-bold tracking-wide uppercase">{index + 1}</span>
-              {isEvent ? t(`eventWait.steps.${step}`) : t(`drawingWait.steps.${step}`)}
-            </li>
-          ))}
-        </ol>
+        <WaitSteps
+          active={active}
+          labels={steps.map((step) =>
+            isEvent ? t(`eventWait.steps.${step}`) : t(`drawingWait.steps.${step}`),
+          )}
+        />
         <div className="mx-auto mt-8 grid max-w-xl justify-items-center gap-2 rounded-2xl border bg-card p-5">
           <p className="font-semibold">{t('leaveTitle')}</p>
           <p className="text-sm text-muted-foreground">{t('leaveText')}</p>
@@ -263,24 +254,14 @@ export function PreviewPanel({
           kind={illustrating ? 'illustrate' : 'character'}
           startedAt={book.previewStartedAt}
         />
-        <ol className="mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm sm:grid-cols-4">
-          {steps.map((step, index) => (
-            <li
-              key={step}
-              aria-current={index === active ? 'step' : undefined}
-              className={
-                index === active
-                  ? 'rounded-xl border-2 border-primary bg-card p-3 font-semibold'
-                  : 'rounded-xl border bg-card/60 p-3 text-muted-foreground'
-              }
-            >
-              <span className="block text-xs font-bold tracking-wide uppercase">{index + 1}</span>
-              {isEvent
-                ? t(`eventWait.steps4.${step}`, { name: childName })
-                : t(`waitSteps.${step}`, { name: childName })}
-            </li>
-          ))}
-        </ol>
+        <WaitSteps
+          active={active}
+          labels={steps.map((step) =>
+            isEvent
+              ? t(`eventWait.steps4.${step}`, { name: childName })
+              : t(`waitSteps.${step}`, { name: childName }),
+          )}
+        />
         <div className="mx-auto mt-8 grid max-w-xl justify-items-center gap-2 rounded-2xl border bg-card p-5">
           <p className="font-semibold">{t('leaveTitle')}</p>
           <p className="text-sm text-muted-foreground">{t('leaveText')}</p>
@@ -773,4 +754,49 @@ function millisOf(value: unknown): number | null {
     return (value as { toMillis: () => number }).toMillis();
   }
   return null;
+}
+
+/**
+ * Pasos de la espera. Todas las tarjetas tienen el mismo borde, el mismo peso de letra y la
+ * misma altura (la fila se estira a la más alta), así el texto no salta ni se desalinea:
+ * el paso actual se marca solo con el color del borde y del número, y los anteriores con ✓.
+ */
+function WaitSteps({ labels, active }: { labels: string[]; active: number }) {
+  return (
+    <ol
+      className={cn(
+        'mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm',
+        labels.length === 4 ? 'sm:grid-cols-4' : 'sm:grid-cols-3',
+      )}
+    >
+      {labels.map((label, index) => {
+        const state = index < active ? 'done' : index === active ? 'current' : 'next';
+        return (
+          <li
+            key={index}
+            aria-current={state === 'current' ? 'step' : undefined}
+            className={cn(
+              'flex items-center gap-3 rounded-xl border-2 bg-card p-3 font-sans font-medium sm:flex-col sm:items-start sm:gap-2',
+              state === 'current'
+                ? 'border-primary text-foreground shadow-sm'
+                : 'border-border text-muted-foreground',
+            )}
+          >
+            <span
+              className={cn(
+                'grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold',
+                state === 'current' && 'bg-primary text-primary-foreground',
+                state === 'done' && 'bg-mint text-success',
+                state === 'next' && 'bg-muted text-muted-foreground',
+              )}
+              aria-hidden="true"
+            >
+              {state === 'done' ? <Check className="size-3.5" strokeWidth={3} /> : index + 1}
+            </span>
+            <span className="leading-snug text-balance">{label}</span>
+          </li>
+        );
+      })}
+    </ol>
+  );
 }
