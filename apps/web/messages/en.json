@@ -1083,10 +1083,10 @@
       "lockedNote": "What you fix stays the same on every page.",
       "illustratingText": "We are illustrating the cover and the first pages. It takes a couple of minutes.",
       "waitSteps": {
-        "character": "We draw {name} (a few minutes)",
+        "character": "We draw {name}",
         "review": "You review and confirm the likeness",
         "illustrate": "We illustrate the cover and 2 pages",
-        "order": "If you like it, you order and we make the full book"
+        "order": "If you like it, we make the full book"
       },
       "leaveText": "We keep working even if you leave. We’ll email you when the sample is ready. To pick it up again: My stories, “In progress”, Continue.",
       "leaveButton": "Back to My stories",
@@ -1107,7 +1107,7 @@
         "steps": {
           "write": "We write the story",
           "illustrate": "We illustrate the cover and 2 pages",
-          "order": "If you like it, you order it and we make the full book"
+          "order": "If you like it, we make the full book"
         }
       },
       "waitEstimate": "{minutes, plural, one {It’s usually ready in about a minute.} other {It’s usually ready in about # minutes.}}",
@@ -1120,14 +1120,14 @@
         "textDrawing": "We use their usual drawing. We put together the invitation and the keepsake story with the {theme} theme.",
         "steps": {
           "write": "We write the keepsake story",
-          "illustrate": "We illustrate the cover (it goes on the invitation) and 2 pages",
-          "order": "If you like it, you order it and we prepare the whole kit"
+          "illustrate": "We illustrate the invitation cover and 2 pages",
+          "order": "If you like it, we prepare the whole kit"
         },
         "steps4": {
-          "character": "We draw {name} (a few minutes)",
+          "character": "We draw {name}",
           "review": "You check the likeness and confirm",
-          "illustrate": "We illustrate the cover (it goes on the invitation) and 2 pages",
-          "order": "If you like it, you order it and we prepare the whole kit"
+          "illustrate": "We illustrate the invitation cover and 2 pages",
+          "order": "If you like it, we prepare the whole kit"
         }
       },
       "eventDifferencesPages": "The mini story has {total} pages; here you see the cover and the first {shown}.",
