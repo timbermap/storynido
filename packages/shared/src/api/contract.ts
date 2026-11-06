@@ -1659,6 +1659,19 @@ export const apiRoutes = {
     }),
     response: pipelineRequestResponseSchema.pick({ accepted: true }),
   },
+  adminSetShippingAddress: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/shipping-address',
+    access: 'admin',
+    summary:
+      'Corrige la dirección de entrega de un pedido que todavía no fue a la imprenta (mismo país; sin teléfono ni documento se conservan los de antes); queda en auditoría sin los datos',
+    params: z.object({ orderId: z.string().min(1) }),
+    body: addressSchema.omit({ country: true, phone: true, taxId: true }).extend({
+      phone: z.string().trim().max(30).optional(),
+      taxId: z.string().trim().max(30).optional(),
+    }),
+    response: pipelineRequestResponseSchema.pick({ accepted: true }),
+  },
   adminPreviewBook: {
     method: 'POST',
     path: '/v1/admin/orders/:orderId/preview-book',
