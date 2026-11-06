@@ -2492,3 +2492,11 @@ Lo que se ve en la muestra es lo que se imprime. Una sola regla (`pageLayout`, e
 - **Colorear** y los pedidos congelados antes de esto conservan el panel sobre la ilustración (la muestra guarda `pageLayout`; sin él, el armado de siempre).
 
 Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configuración, no números sueltos en el código. La cantidad de palabras por edad la define otra decisión (texto por edad); este armado no la cambia.
+
+## 233 — Dirección de envío: reglas por país y documento obligatorio donde la aduana lo pide
+
+- **Fecha:** 2026-11-06.
+- **Contexto:** la dirección era texto libre y solo México y EE. UU. tenían reglas. Lulu documenta que Argentina (CUIT o CUIL), Brasil (CPF), Chile (RUT), México (RFC, no CURP), Perú (RUC o DNI) y Ecuador piden el documento de quien recibe para cualquier envío del exterior; sin él, el paquete puede volver al origen. Gelato exige el CPF en Brasil (`federalTaxId`) y el estado en Brasil y Chile. Cloudprinter acepta el documento en `customer_identification`.
+- **Decisión:** reemplaza lo de la decisión 139 sobre el documento. Es obligatorio en México, Argentina, Brasil, Chile y Perú, opcional en Uruguay (cédula), y se valida con el dígito verificador (CUIT/CUIL, CPF, RUT) o el formato (RFC, DNI/RUC, cédula). Se manda a las tres imprentas. Código postal con formato por país (AR, UY, BR, CL, CO, PE, ES, además de MX y US) y estado obligatorio también en Brasil y Chile. El checkout muestra el motivo debajo del campo con un ejemplo de código postal del país.
+- **Alternativas:** dejarlo opcional (menos fricción, pero más envíos retenidos en la aduana) o pedirlo solo cuando gana Lulu (la aduana lo pide igual con cualquier imprenta).
+- **Pendiente:** autocompletado de Google con mapa y pin (decidido por Sebas el 5 de noviembre de 2026), en un cambio aparte.

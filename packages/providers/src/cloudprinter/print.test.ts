@@ -102,7 +102,7 @@ describe('Cloudprinter', () => {
           coverMd5: 'bbb',
         },
       ],
-      address,
+      address: { ...address, taxId: 'XAXX010101000' },
       email: 'ana@example.com',
       currency: 'USD' as const,
     };
@@ -126,6 +126,7 @@ describe('Cloudprinter', () => {
           lastname: 'María Pérez',
           zip: '06600',
           state: 'CDMX',
+          customer_identification: 'XAXX010101000',
         },
       ],
       items: [

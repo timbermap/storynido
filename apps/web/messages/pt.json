@@ -1780,11 +1780,22 @@
       "postalCode": "CEP",
       "phone": "Telefone",
       "taxId": {
-        "MX": "RFC ou CURP de quem recebe",
-        "AR": "CUIT, CUIL ou DNI de quem recebe",
-        "BR": "CPF de quem recebe"
+        "MX": "RFC de quem recebe",
+        "AR": "CUIT ou CUIL de quem recebe",
+        "BR": "CPF de quem recebe",
+        "CL": "RUT de quem recebe",
+        "PE": "DNI ou RUC de quem recebe",
+        "UY": "Cédula de quem recebe"
       },
-      "taxIdHint": "Opcional. Com este dado podemos usar uma gráfica mais econômica; só é usado para o envio e a alfândega.",
+      "taxIdHint": "A alfândega exige para entregar o livro. Só é usado para o envio.",
+      "taxIdHintOptional": "Opcional. Ajuda a alfândega a entregar o livro sem atrasos. Só é usado para o envio.",
+      "errors": {
+        "postalCode": "Confira o CEP ou código postal.",
+        "postalCodeExample": "Confira o código postal (por exemplo, {example}).",
+        "phone": "Confira o telefone: com DDD, só números.",
+        "taxId": "Confira o número: não corresponde a um documento válido.",
+        "state": "Confira este campo."
+      },
       "confirm": "Confirmo que o endereço de entrega está correto."
     },
     "giftTitle": "Presente",

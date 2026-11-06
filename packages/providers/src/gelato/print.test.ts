@@ -156,6 +156,23 @@ describe('Gelato', () => {
     });
   });
 
+  it('manda el CPF de quien recibe en Brasil, solo con dígitos', async () => {
+    const gelato = fakeGelato({
+      'orders:quote': () => ({ json: QUOTE }),
+    });
+    await printer(gelato.fetchImpl)
+      .quote(
+        [{ format: 'softcover', pageCount: 28, quantity: 1 }],
+        { ...address, country: 'BR', state: 'SP', taxId: '529.982.247-25' },
+        'USD',
+      )
+      .catch(() => null);
+    const quote = gelato.calls.find((call) => call.url.includes('orders:quote'));
+    expect(quote?.body).toMatchObject({
+      recipient: { country: 'BR', federalTaxId: '52998224725' },
+    });
+  });
+
   it('un rechazo (4xx) pasa a la siguiente imprenta; un 5xx se reintenta', async () => {
     const reject = fakeGelato({
       'orders:quote': () => ({ status: 400, json: { message: 'bad' } }),

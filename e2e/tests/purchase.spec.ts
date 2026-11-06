@@ -128,6 +128,7 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
     state: 'CDMX',
     postalCode: '06600',
     phone: '+52 55 1234 5678',
+    taxId: 'XAXX010101000',
   };
   for (const [key, value] of Object.entries(address))
     await page.locator(`#address-${key}`).fill(value);

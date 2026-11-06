@@ -1780,11 +1780,22 @@
       "postalCode": "Código postal",
       "phone": "Teléfono",
       "taxId": {
-        "MX": "RFC o CURP de quien recibe",
-        "AR": "CUIT, CUIL o DNI de quien recibe",
-        "BR": "CPF de quem recebe"
+        "MX": "RFC de quien recibe",
+        "AR": "CUIT o CUIL de quien recibe",
+        "BR": "CPF de quien recibe",
+        "CL": "RUT de quien recibe",
+        "PE": "DNI o RUC de quien recibe",
+        "UY": "Cédula de quien recibe"
       },
-      "taxIdHint": "Opcional. Con este dato podemos usar una imprenta más económica; solo se usa para el envío y la aduana.",
+      "taxIdHint": "La aduana lo pide para entregar el libro. Solo se usa para el envío.",
+      "taxIdHintOptional": "Opcional. Ayuda a que la aduana entregue el libro sin demoras. Solo se usa para el envío.",
+      "errors": {
+        "postalCode": "Revisa el código postal.",
+        "postalCodeExample": "Revisa el código postal (por ejemplo, {example}).",
+        "phone": "Revisa el teléfono: con código de área, solo números.",
+        "taxId": "Revisa el número: no coincide con un documento válido.",
+        "state": "Revisa este dato."
+      },
       "confirm": "Confirmo que el domicilio de entrega es correcto."
     },
     "giftTitle": "Regalo",
