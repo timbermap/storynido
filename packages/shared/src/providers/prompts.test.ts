@@ -14,6 +14,9 @@ import {
   narrativeRules,
   renderTemplate,
   samplePrompts,
+  bookBibleSummary,
+  mainCastMember,
+  sceneIncludes,
   sceneOutfit,
   varyShots,
   visualBibleCheck,
@@ -305,5 +308,48 @@ describe('biblia visual', () => {
       expect(shots[index] === shots[index - 1] && shots[index] === shots[index - 2]).toBe(false);
     }
     expect(shots[0]).toBe('wide');
+  });
+});
+
+describe('revisión del libro entero', () => {
+  const scene = (pageIndex: number, mustBeVisible: string[]) => ({
+    pageIndex,
+    sceneGoal: '',
+    emotionalBeat: '',
+    mustBeVisible,
+    notVisible: [],
+    continuityFacts: [],
+    wordBudget: 20,
+    personalDetail: null,
+  });
+  const teacher = { role: 'the teacher', gender: 'male' as const, look: 'tall, grey beard' };
+  const classmate = { role: 'a classmate', gender: 'female' as const, look: 'red braids' };
+
+  it('la persona del elenco que más se repite (dos escenas o más) tiene lámina', () => {
+    const scenes = [
+      scene(0, ['Sofi', 'the male teacher']),
+      scene(1, ['the male teacher at the board']),
+      scene(2, ['a classmate']),
+    ];
+    expect(sceneIncludes(scenes[0], 'the teacher')).toBe(true);
+    expect(sceneIncludes(scenes[2], 'the teacher')).toBe(false);
+    expect(mainCastMember({ cast: [classmate, teacher], scenes })).toEqual(teacher);
+    expect(mainCastMember({ cast: [classmate], scenes })).toBeNull();
+    expect(mainCastMember(null)).toBeNull();
+  });
+
+  it('resume la biblia visual y qué tiene cada página', () => {
+    const summary = bookBibleSummary({
+      cast: [teacher],
+      props: [{ name: 'the kite', look: 'orange arc kite' }],
+      scenes: [
+        { ...scene(0, ['Sofi']), props: ['the kite'], outfit: 'in the water' },
+        scene(1, []),
+      ],
+    });
+    expect(summary).toContain('Recurring the teacher (male): tall, grey beard');
+    expect(summary).toContain('Object the kite: orange arc kite');
+    expect(summary).toContain('Page 1: shows Sofi; objects the kite; outfit in the water');
+    expect(summary).toContain('Page 2: everyday outfit of the reference sheet');
   });
 });

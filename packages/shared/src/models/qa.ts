@@ -15,6 +15,8 @@ export const QA_CODES = [
   'page_needs_reference',
   'snapshot_mismatch',
   'layout_blocked',
+  // Revisión del libro entero: una página se apartaba de las demás (objeto, lugar, ropa, personaje).
+  'book_consistency',
   // Google no confirma la dirección o el pin está lejos: se frena antes de la imprenta.
   'address_review',
   // Revisión manual (fase 15): un admin aprobó las ilustraciones tal como estaban.

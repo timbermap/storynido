@@ -223,6 +223,31 @@ export interface PageReviewRequest {
   visualBible?: string;
 }
 
+/** Revisión del libro entero (miniaturas de todas las páginas contra la biblia visual). */
+export interface BookReviewRequest {
+  /** Miniatura de cada página ilustrada (0 = portada), reducida para que entre en una llamada. */
+  pages: readonly { pageIndex: number; image: ImageData }[];
+  /** Lámina aprobada del protagonista. */
+  reference: ImageData;
+  /** Descripción del protagonista con los rasgos que no pueden cambiar. */
+  character: string;
+  /** Biblia visual del libro y qué tiene cada página (personajes, objetos, lugar, ropa). */
+  bible: string;
+}
+
+export interface BookDeviation {
+  pageIndex: number;
+  /** Qué se aparta del resto del libro (en inglés, sin describir letras de la imagen). */
+  issue: string;
+  /** Cómo tendría que verse, para pedirlo en la reparación (en inglés). */
+  expected: string;
+}
+
+export interface BookReview {
+  deviations: BookDeviation[];
+  usage: AiUsage;
+}
+
 export interface ContinuityCheck {
   trait: string;
   expected: string;
@@ -280,6 +305,8 @@ export interface AITextProvider {
   planStory(request: StoryRequest): Promise<StoryPlan>;
   /** Revisión multimodal de una página ilustrada (guía D). */
   reviewPage(request: PageReviewRequest): Promise<PageReview>;
+  /** Revisión del libro entero: qué páginas se apartan de las demás (objetos, lugares, ropa). */
+  reviewBook(request: BookReviewRequest): Promise<BookReview>;
   /** Actividades a partir de plantillas aprobadas. */
   generateActivities(request: ActivityRequest): Promise<GeneratedActivities>;
   /** Extrae la ficha del personaje a partir de la foto procesada. */

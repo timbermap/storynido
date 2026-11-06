@@ -7,6 +7,9 @@ import {
   type AIImageProvider,
   type AITextProvider,
   type ActivityRequest,
+  type BookDeviation,
+  type BookReview,
+  type BookReviewRequest,
   type AiUsage,
   type CharacterSheetResult,
   type GeneratedActivities,
@@ -428,6 +431,25 @@ const PAGE_REVIEW_SCHEMA = {
   ],
 };
 
+const BOOK_REVIEW_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    deviations: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          pageIndex: { type: 'INTEGER' },
+          issue: { type: 'STRING' },
+          expected: { type: 'STRING' },
+        },
+        required: ['pageIndex', 'issue', 'expected'],
+      },
+    },
+  },
+  required: ['deviations'],
+};
+
 const ACTIVITIES_SCHEMA = {
   type: 'ARRAY',
   items: {
@@ -772,6 +794,48 @@ Page text: ${request.text ?? '(cover: no text)'}`,
       'pageIndex' | 'usage'
     >;
     return { ...review, pageIndex: request.pageIndex, usage };
+  }
+
+  /**
+   * Revisión del libro entero: las miniaturas de todas las páginas juntas, para ver lo que una
+   * revisión página por página no ve (la tabla que cambia de forma, la playa que es otra).
+   */
+  async reviewBook(request: BookReviewRequest): Promise<BookReview> {
+    const parts: Part[] = [
+      { text: 'Approved character reference sheet (the protagonist):' },
+      imagePart(request.reference),
+    ];
+    for (const page of request.pages) {
+      parts.push({ text: page.pageIndex === 0 ? 'Cover:' : `Page ${String(page.pageIndex)}:` });
+      parts.push(imagePart(page.image));
+    }
+    parts.push({
+      text: `You are the art director of a children's picture book. Above are small thumbnails of EVERY illustration of the book, in
+order. Compare them with each other and with the visual bible below and find the pages that deviate from the rest of the book:
+a recurring object drawn with a different shape, size or color (or a different kind of object), a recurring place that looks like
+another place, the protagonist in a different outfit when the bible does not say so, a recurring character with a different gender,
+age, hair or clothes, a character who should not be on that page, or the protagonist not looking like the reference sheet.
+Only report clear deviations that a reader would notice; ignore style variation, camera angle and small details. Never report letters or
+text. For each deviation: pageIndex (0 = cover, otherwise the page number), issue (short English), and expected (how it must look,
+in short English, to redraw that page). Empty array if the book is consistent.
+
+Protagonist: ${request.character}
+Visual bible:
+${request.bible || '(none)'}`,
+    });
+    const { response, usage } = await this.client.generate(this.model, parts, {
+      temperature: 0,
+      responseMimeType: 'application/json',
+      responseSchema: BOOK_REVIEW_SCHEMA,
+    });
+    const result = parseJson(response, 'revisión del libro') as { deviations: BookDeviation[] };
+    const known = new Set(request.pages.map((page) => page.pageIndex));
+    return {
+      deviations: result.deviations.filter(
+        (item) => known.has(item.pageIndex) && item.expected.trim(),
+      ),
+      usage,
+    };
   }
 
   /** Actividades a partir de plantillas aprobadas (fase 09; se dibujan en la fase 10). */

@@ -22,6 +22,7 @@ export const AI_CONFIG_DEFAULTS: Omit<AiConfig, 'updatedAt' | 'updatedBy'> = {
   maxPreviewsPerUserPerDay: 5,
   maxPreviewsPerUserPerWeek: 15,
   illustrationsRequireAccount: true,
+  reviewPreviews: false,
   dailyBudgetUsd: 5,
   budgetAlertPercent: 80,
 };

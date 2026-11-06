@@ -187,6 +187,11 @@ export const bookPreviewSchema = z.object({
     .object({ name: z.string(), look: z.string(), imagePath: z.string() })
     .nullable()
     .optional(),
+  /**
+   * Lámina de la persona del elenco que más se repite (el profe, una compañera): referencia de las
+   * escenas que la incluyen. Ausente en las muestras anteriores.
+   */
+  castSheet: z.object({ role: z.string(), imagePath: z.string() }).nullable().optional(),
   /** Lámina del personaje (referencia interna de cada ilustración; el cliente no la ve). */
   characterImagePath: z.string().nullable().optional(),
   pages: z.array(bookPageSchema),
@@ -215,6 +220,15 @@ export const bookPreviewSchema = z.object({
       theme: z.string(),
       arc: z.string(),
       companion: z.object({ name: z.string(), look: z.string() }).nullable().optional(),
+      cast: z
+        .array(
+          z.object({
+            role: z.string(),
+            gender: z.enum(['male', 'female', 'unspecified']),
+            look: z.string(),
+          }),
+        )
+        .optional(),
       scenes: z.array(
         z.object({
           pageIndex: z.number().int().nonnegative(),

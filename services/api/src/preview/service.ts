@@ -36,6 +36,10 @@ import {
   buildIllustrationPrompt,
   companionNote,
   companionReferenceScene,
+  castMemberSheet,
+  castSheetNote,
+  mainCastMember,
+  sceneIncludes,
   visualBibleCheck,
   coverScene,
   describeCharacter,
@@ -1079,31 +1083,62 @@ export class PreviewService {
             ).image,
           }
         : null;
+      // La persona del elenco que más se repite (el profe) tiene su lámina, como el acompañante.
+      // En la muestra se dibuja solo si aparece en las páginas que se ilustran ahora; si no, la
+      // dibuja el pedido (así no se gasta en muestras que no la necesitan).
+      const castMember = mainCastMember(preview.plan);
+      const sceneOf = (index: number) =>
+        preview.plan?.scenes.find((scene) => scene.pageIndex === index);
+      const withCast = (index: number) =>
+        castMember !== null && sceneIncludes(sceneOf(index), castMember.role);
+      const castImage =
+        castMember &&
+        preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).some((page) => withCast(page.index))
+          ? (
+              await this.illustration(ai, track, limits, {
+                prompt: buildIllustrationPrompt({
+                  template: story.imagePromptTemplate,
+                  scene: companionReferenceScene(castMemberSheet(castMember)),
+                  character: castMemberSheet(castMember).look,
+                  style: style.promptModifier,
+                  direction: preview.artDirection,
+                }),
+                stylePrompt: style.promptModifier,
+                character: { description: castMemberSheet(castMember).look, photo: null },
+                references: [lamina],
+                aspectRatio: '3:4',
+                seed: 0,
+              })
+            ).image
+          : null;
       const sceneCharacter = companion
         ? `${description}\n${companionNote(companion)}`
         : description;
-      const illustrate = (scene: string, seed: number) =>
+      const illustrate = (scene: string, seed: number, cast = false) =>
         this.illustration(ai, track, limits, {
           prompt: buildIllustrationPrompt({
             template: story.imagePromptTemplate,
-            scene,
+            scene: cast && castMember ? `${scene}${castSheetNote(castMember)}` : scene,
             character: sceneCharacter,
             style: style.promptModifier,
             direction: preview.artDirection,
           }),
           stylePrompt: style.promptModifier,
           character: { description, photo },
-          references: companion ? [lamina, companion.image] : [lamina],
+          references: [
+            lamina,
+            ...(companion ? [companion.image] : []),
+            ...(cast && castImage ? [castImage] : []),
+          ],
           aspectRatio: '3:4',
           // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
           resolution: '2K',
           seed,
         });
-      // Todas usan la lámina aprobada como referencia, así que se generan en paralelo.
-      const [cover, ...illustrated] = await Promise.all([
-        illustrate(coverScene(preview.pages[0]?.illustrationPrompt, preview.title), 1),
-        ...preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map((page) =>
-          illustrate(
+      const pageScenes = [
+        coverScene(preview.pages[0]?.illustrationPrompt, preview.title),
+        ...preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map(
+          (page) =>
             // Biblia visual (objetos, lugar, ropa especial y encuadre de la escena) y el espacio
             // para el texto según el armado (zona calma, papel fundido o entera).
             `${page.illustrationPrompt}${sceneVisuals(preview.plan, page.index)}${layoutSceneNote(
@@ -1114,10 +1149,68 @@ export class PreviewService {
                 contentType: book.contentType ?? 'story',
               }),
             )}`,
-            page.index + 2,
+        ),
+      ];
+      // Índice de cada imagen: 0 la portada, 1.. las páginas (como en el pedido).
+      const castOn = (image: number) =>
+        image > 0 && withCast(preview.pages[image - 1]?.index ?? -1);
+      // Todas usan la lámina aprobada como referencia, así que se generan en paralelo.
+      const drawn = await Promise.all(
+        pageScenes.map((scene, image) =>
+          illustrate(
+            scene,
+            image === 0 ? 1 : (preview.pages[image - 1]?.index ?? 0) + 2,
+            castOn(image),
           ),
         ),
-      ]);
+      );
+      // Revisión automática de la muestra (apagada por defecto, `reviewPreviews`): la misma de
+      // cada página del pedido y, si pide reparar el dibujo, una imagen nueva.
+      if (limits.reviewPreviews) {
+        await Promise.all(
+          drawn.map(async (result, image) => {
+            const page = image === 0 ? null : preview.pages[image - 1];
+            const scene = page ? (sceneOf(page.index) ?? null) : null;
+            let review: Awaited<ReturnType<AIProvider['text']['reviewPage']>>;
+            try {
+              review = await track(
+                'review',
+                await ai.text.reviewPage({
+                  pageIndex: image,
+                  text: page?.text ?? null,
+                  image: result.image,
+                  reference: lamina,
+                  character: description,
+                  mustKeep,
+                  scene,
+                  visualBible: scene ? visualBibleCheck(preview.plan, scene) : '',
+                }),
+              );
+            } catch (error) {
+              this.log.warn({ err: error, bookId, image }, 'preview page review failed');
+              return;
+            }
+            if (review.status !== 'repair' || review.repairTarget !== 'illustration_only') return;
+            const expected = review.continuityChecks
+              .filter((check) => check.expected !== check.observed)
+              .map((check) => `${check.trait} ${check.expected}`);
+            const hint = expected.length ? expected.join(', ') : 'the scene matches the page';
+            drawn[image] = await illustrate(
+              `${pageScenes[image] ?? ''} Make sure that: ${hint}.`,
+              100 + image,
+              castOn(image),
+            );
+            await this.qaEvent(bookId, 'page_repair', {
+              pageIndex: image,
+              attemptCount: 1,
+              finalStatus: 'repaired',
+              preview: true,
+            });
+          }),
+        );
+      }
+      const [cover, ...illustrated] = drawn;
+      if (!cover) throw new Error('Falta la portada de la muestra.');
 
       const folder = `previews/${uid}/${bookId}`;
       const version = Date.now().toString(36);
@@ -1125,6 +1218,7 @@ export class PreviewService {
       const companionPaths = companion
         ? await this.store(`${folder}/companion-${version}`, companion.image)
         : null;
+      const castPaths = castImage ? await this.store(`${folder}/cast-${version}`, castImage) : null;
       const pages = await Promise.all(
         preview.pages.map(async (page, index) => {
           const image = illustrated[index];
@@ -1144,6 +1238,8 @@ export class PreviewService {
           companion && companionPaths
             ? { name: companion.name, look: companion.look, imagePath: companionPaths.clean }
             : null,
+        'preview.castSheet':
+          castMember && castPaths ? { role: castMember.role, imagePath: castPaths.clean } : null,
         // Los rasgos aprobados sobreviven a una nueva muestra (mientras no cambie la foto o los rasgos).
         'preview.photoId': characterKey({
           ...book,

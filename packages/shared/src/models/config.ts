@@ -33,6 +33,12 @@ export const aiConfigSchema = z.object({
    * y deja el contacto. La etapa 1 (texto + personaje) sigue sin cuenta.
    */
   illustrationsRequireAccount: z.boolean(),
+  /**
+   * Revisión automática de las ilustraciones de la muestra (portada y primeras páginas) antes de
+   * mostrarlas, con una reparación si hace falta. Apagada: cuesta una revisión por imagen y, a
+   * veces, una imagen más, también en muestras que nunca se compran.
+   */
+  reviewPreviews: z.boolean().default(false),
   dailyBudgetUsd: z.number().nonnegative(),
   budgetAlertPercent: z.number().int().min(1).max(100),
   updatedAt: z.date(),
