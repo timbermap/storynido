@@ -29,3 +29,7 @@ env:
   - variable: NEXT_PUBLIC_RECAPTCHA_SITE_KEY
     value: 6Le1uwUuAAAAADmscEQRYAqjXioQsd3qm4HRMOuu
     availability: [BUILD, RUNTIME]
+  # Google Maps del checkout: clave de navegador restringida a los dominios de la web (DECISIONS 234).
+  - variable: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    secret: google-maps-browser-key
+    availability: [BUILD, RUNTIME]

@@ -33,6 +33,16 @@ describe('cabeceras de seguridad', () => {
     expect(dev).toContain('http://127.0.0.1:*');
   });
 
+  it('Google Maps solo con clave: scripts, imágenes, fuentes y workers del mapa', () => {
+    const base = { apiUrl: 'https://a.test', dev: false, analytics: false };
+    expect(contentSecurityPolicy(base)).not.toContain('maps.googleapis.com');
+    const csp = contentSecurityPolicy({ ...base, maps: true });
+    expect(csp).toMatch(/script-src [^;]*https:\/\/maps\.googleapis\.com/);
+    expect(csp).toMatch(/img-src [^;]*https:\/\/maps\.gstatic\.com/);
+    expect(csp).toMatch(/font-src [^;]*https:\/\/fonts\.gstatic\.com/);
+    expect(csp).toContain("worker-src 'self' blob:");
+  });
+
   it('HSTS, anti-iframe, nosniff y permisos del navegador cerrados', () => {
     const headers = Object.fromEntries(
       securityHeaders({ apiUrl: 'https://a.test', dev: false, analytics: false }).map((header) => [

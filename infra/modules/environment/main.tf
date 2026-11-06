@@ -9,6 +9,7 @@ locals {
 
   services = [
     "aiplatform.googleapis.com",
+    "apikeys.googleapis.com",
     "artifactregistry.googleapis.com",
     "billingbudgets.googleapis.com",
     "cloudbuild.googleapis.com",
@@ -26,8 +27,10 @@ locals {
     "iamcredentials.googleapis.com",
     "identitytoolkit.googleapis.com",
     "logging.googleapis.com",
+    "maps-backend.googleapis.com",
     "monitoring.googleapis.com",
     "observability.googleapis.com",
+    "places.googleapis.com",
     "pubsub.googleapis.com",
     "recaptchaenterprise.googleapis.com",
     "run.googleapis.com",

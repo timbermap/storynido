@@ -1794,9 +1794,22 @@
         "postalCodeExample": "Confira o código postal (por exemplo, {example}).",
         "phone": "Confira o telefone: com DDD, só números.",
         "taxId": "Confira o número: não corresponde a um documento válido.",
-        "state": "Confira este campo."
+        "state": "Confira este campo.",
+        "streetNumber": "Adicione o número."
       },
-      "confirm": "Confirmo que o endereço de entrega está correto."
+      "confirm": "Confirmo que o endereço de entrega está correto.",
+      "confirmMap": "Confirmo que o endereço e o pino do mapa estão corretos.",
+      "search": {
+        "label": "Buscar o endereço",
+        "placeholder": "Rua e número, por exemplo Av. Paulista 1578",
+        "hint": "Escolha seu endereço na lista: completamos o resto e mostramos no mapa. Se não aparecer, preencha abaixo.",
+        "poweredBy": "Sugestões do Google"
+      },
+      "map": {
+        "label": "Mapa do endereço de entrega",
+        "pin": "Endereço de entrega",
+        "hint": "Se o pino não estiver na porta certa, arraste até lá."
+      }
     },
     "giftTitle": "Presente",
     "isGift": "É um presente",

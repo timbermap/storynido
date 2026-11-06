@@ -29,6 +29,30 @@ const ADDRESS_EDITABLE: readonly OrderStatus[] = ['paid', 'generating', 'qa_fail
 
 const iso = (value: unknown) => (value instanceof Date ? value.toISOString() : null);
 
+/**
+ * Enlace a Google Maps de la dirección: el pin que movió quien compra, o el lugar que eligió en
+ * el autocompletado. Sin ninguno de los dos (carga manual), no hay enlace.
+ */
+function mapLink(address: Data): { mapUrl: string | null; pinMoved: boolean } {
+  const pin = address.pin as { lat?: unknown; lng?: unknown } | null | undefined;
+  if (pin && typeof pin.lat === 'number' && typeof pin.lng === 'number') {
+    return {
+      mapUrl: `https://www.google.com/maps/search/?api=1&query=${String(pin.lat)},${String(pin.lng)}`,
+      pinMoved: true,
+    };
+  }
+  if (typeof address.placeId === 'string' && address.placeId) {
+    const text = [address.line1, address.city, address.country].filter(Boolean).join(', ');
+    const query = new URLSearchParams({
+      api: '1',
+      query: text,
+      query_place_id: address.placeId,
+    });
+    return { mapUrl: `https://www.google.com/maps/search/?${query.toString()}`, pinMoved: false };
+  }
+  return { mapUrl: null, pinMoved: false };
+}
+
 /** Resumen de un pedido para las listas del panel (sin datos del niño). */
 export function toOrderSummary(
   doc: DocumentSnapshot,
@@ -289,6 +313,7 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
             postalCode: String(address.postalCode),
             country: String(address.country),
             hasPhone: typeof address.phone === 'string' && address.phone.trim().length > 0,
+            ...mapLink(address),
           }
         : null,
       payment: {
