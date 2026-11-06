@@ -68,7 +68,9 @@ function ageDirection(age: number): string {
   if (age <= 8) {
     return 'For ages 6-8: taller proportions (head about a fifth of the body), diagonal dynamic compositions, the child in motion, humor, comic-book touches such as motion lines and the occasional panel, and memorable secondary characters.';
   }
-  return 'For ages 9-12: graphic-novel language with firm ink and flat color, realistic proportions (head about a sixth of the body), cinematic framing, suspense and intrigue; nothing cute or babyish.';
+  // Sin técnica (antes «tinta firme y color plano»): peleaba con el estilo elegido. La técnica la
+  // define el estilo; la edad, las proporciones, el encuadre y el tono.
+  return 'For ages 9-12: realistic proportions (head about a sixth of the body), cinematic framing, suspense and intrigue; nothing cute or babyish.';
 }
 
 /**
@@ -97,6 +99,13 @@ const STYLE_MEDIUM: Record<string, string> = {
  */
 const HUMAN_CRAFT =
   "Human craft: every face is unique and resembles the reference photo (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions and palette identical across pages. Clothing: the main character wears exactly the outfit of the reference sheet on every page, and changes it only when the page text explicitly says so or the action is impossible in it (swimming: swimwear; bedtime: pyjamas; snow: a coat over the same outfit). Never winter clothes on a beach. Recurring objects (a lantern, a backpack, a pet's collar) keep the same shape, size and color on every page, and sports or hobby gear is drawn precisely as named (for example, a squash racket has a small round head and a long thin throat, not a tennis racket).";
+/**
+ * Ropa en deportes de agua o de riesgo (un cuento de kitesurf salió con jean y zapatillas en el
+ * agua). Va aparte de HUMAN_CRAFT para sumarla también a los libros congelados antes.
+ */
+export const SPORTS_GEAR =
+  'Water and risk sports: in the water the characters wear a wetsuit or swimwear, with an impact vest and a helmet when the sport calls for it, barefoot or in booties; never jeans, everyday clothes or shoes in the water. Bikes, skates and boards: helmet.';
+
 const DEFAULT_MEDIUM =
   'hand-painted digital gouache with subtle watercolor diffusion and natural paper texture';
 
@@ -137,6 +146,7 @@ export function artDirection(input: {
     color,
     ageDirection(input.age),
     HUMAN_CRAFT,
+    SPORTS_GEAR,
     threeD ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     ONE_PROTAGONIST,
@@ -154,6 +164,8 @@ export function artDirection(input: {
  */
 export function withCurrentGuards(direction: string | null | undefined): string | null {
   if (!direction) return null;
-  const missing = [ONE_PROTAGONIST, TEXT_ZONE].filter((rule) => !direction.includes(rule));
+  const missing = [ONE_PROTAGONIST, TEXT_ZONE, SPORTS_GEAR].filter(
+    (rule) => !direction.includes(rule),
+  );
   return missing.length > 0 ? `${direction} ${missing.join(' ')}` : direction;
 }

@@ -46,7 +46,16 @@ describe('dirección de arte de los libros', () => {
     const updated = withCurrentGuards(old) ?? '';
     expect(updated).toContain('appears exactly once');
     expect(updated).toContain('bottom third (or the top third)');
+    expect(updated).toContain('never jeans, everyday clothes or shoes in the water');
     expect(withCurrentGuards(updated)).toBe(updated);
     expect(withCurrentGuards(null)).toBeNull();
+  });
+
+  it('ropa de deportes de agua y, de 9 a 12, sin técnica que pelee con el estilo', () => {
+    const older = artDirection({ age: 11, channel: 'families', style: 'lapices-de-colores' });
+    expect(older).toContain('wetsuit or swimwear');
+    expect(older).toContain('cinematic framing');
+    expect(older).not.toContain('firm ink');
+    expect(older).not.toContain('flat color');
   });
 });

@@ -36,6 +36,7 @@ import {
   buildIllustrationPrompt,
   companionNote,
   companionReferenceScene,
+  visualBibleCheck,
   coverScene,
   describeCharacter,
   buildStoryPrompt,
@@ -156,6 +157,16 @@ async function withModeratedRetry<T>(
  * páginas con la foto y la ficha del personaje, modera todo y guarda dos versiones de cada
  * imagen (limpia, para el libro comprado; con marca de agua, la única que ve el cliente).
  */
+
+/** Lo que la biblia visual del plan fija para la escena `index` (vacío en planes anteriores). */
+function sceneVisuals(plan: BookPreview['plan'] | undefined, index: number): string {
+  const note = visualBibleCheck(
+    plan,
+    plan?.scenes.find((scene) => scene.pageIndex === index),
+  );
+  return note ? ` ${note}` : '';
+}
+
 export class PreviewService {
   private readonly budget: AiBudget;
 
@@ -1093,8 +1104,9 @@ export class PreviewService {
         illustrate(coverScene(preview.pages[0]?.illustrationPrompt, preview.title), 1),
         ...preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map((page) =>
           illustrate(
-            // El espacio para el texto según el armado (zona calma, papel fundido o entera).
-            `${page.illustrationPrompt}${layoutSceneNote(
+            // Biblia visual (objetos, lugar, ropa especial y encuadre de la escena) y el espacio
+            // para el texto según el armado (zona calma, papel fundido o entera).
+            `${page.illustrationPrompt}${sceneVisuals(preview.plan, page.index)}${layoutSceneNote(
               pageLayout({
                 layout: preview.pageLayout ?? null,
                 words: countWords(page.text),

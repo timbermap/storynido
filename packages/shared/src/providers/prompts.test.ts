@@ -14,6 +14,10 @@ import {
   narrativeRules,
   renderTemplate,
   samplePrompts,
+  sceneOutfit,
+  varyShots,
+  visualBibleCheck,
+  visualBibleNote,
 } from './prompts';
 
 const base = {
@@ -236,5 +240,70 @@ describe('castNote', () => {
     expect(castNote(undefined)).toBe('');
     expect(castNote([])).toBe('');
     expect(castNote([{ role: ' ', gender: 'male', look: 'x' }])).toBe('');
+  });
+});
+
+describe('biblia visual', () => {
+  const bible = {
+    props: [
+      {
+        name: 'the kite',
+        look: 'a small board with foot straps pulled by a large arc-shaped orange kite on long lines; NO sail, NO mast',
+      },
+      { name: 'the lantern', look: 'a small round brass lantern' },
+    ],
+    places: [
+      { name: 'the lighthouse', look: 'a white lighthouse with a red top on a rocky point' },
+    ],
+    outfits: [{ context: 'in the water', look: 'a blue wetsuit, an impact vest and a helmet' }],
+  };
+  const scene = {
+    pageIndex: 2,
+    sceneGoal: '',
+    emotionalBeat: '',
+    mustBeVisible: [],
+    notVisible: [],
+    continuityFacts: [],
+    wordBudget: 30,
+    personalDetail: null,
+  };
+
+  it('solo nombra lo que está en la escena, con su aspecto fijo', () => {
+    const note = visualBibleNote(bible, {
+      ...scene,
+      props: ['The Kite'],
+      place: 'the lighthouse',
+      shot: 'wide',
+    });
+    expect(note).toContain('NO sail, NO mast');
+    expect(note).not.toContain('lantern');
+    expect(note).toContain('white lighthouse with a red top');
+    expect(note).toContain('Camera: wide shot.');
+  });
+
+  it('un plan anterior (sin biblia) no suma nada', () => {
+    expect(visualBibleNote(undefined, scene)).toBe('');
+    expect(visualBibleNote({}, { ...scene, props: ['the kite'], place: 'x' })).toBe('');
+    expect(sceneOutfit(undefined, scene)).toBeNull();
+  });
+
+  it('ropa especial solo cuando la escena la pide', () => {
+    expect(sceneOutfit(bible, { ...scene, outfit: 'in the water' })).toContain('blue wetsuit');
+    expect(sceneOutfit(bible, { ...scene, outfit: null })).toBeNull();
+    expect(visualBibleCheck(bible, { ...scene, outfit: 'in the water' })).toContain(
+      'The main character wears a blue wetsuit',
+    );
+  });
+
+  it('nunca el mismo encuadre tres veces seguidas', () => {
+    const shots = varyShots(
+      (['wide', 'wide', 'wide', 'close-up', 'close-up', 'close-up'] as const).map((shot) => ({
+        shot,
+      })),
+    ).map((item) => item.shot);
+    for (let index = 2; index < shots.length; index += 1) {
+      expect(shots[index] === shots[index - 1] && shots[index] === shots[index - 2]).toBe(false);
+    }
+    expect(shots[0]).toBe('wide');
   });
 });
