@@ -3,7 +3,10 @@
 import {
   ApiError,
   CONFIGURED_COUNTRIES,
+  POSTAL_CODE_EXAMPLES,
+  STATE_REQUIRED_COUNTRIES,
   TAX_ID_COUNTRIES,
+  TAX_ID_REQUIRED_COUNTRIES,
   addressProblems,
   type Address,
   type BookFormat,
@@ -53,8 +56,11 @@ const EMPTY_ADDRESS: AddressDraft = {
   taxId: null,
 };
 
-/** Países donde la imprenta exige el estado en la dirección. */
-const STATE_REQUIRED: readonly string[] = ['MX', 'US'];
+const STATE_REQUIRED: readonly string[] = STATE_REQUIRED_COUNTRIES;
+const TAX_ID_REQUIRED: readonly string[] = TAX_ID_REQUIRED_COUNTRIES;
+
+/** Campos que, cargados con un valor que no cumple la regla del país, muestran el motivo. */
+const EXPLAINED: readonly (keyof AddressDraft)[] = ['postalCode', 'phone', 'taxId', 'state'];
 
 const ADDRESS_FIELDS: { key: keyof AddressDraft; optional?: boolean; autoComplete: string }[] = [
   { key: 'name', autoComplete: 'name' },
@@ -176,6 +182,7 @@ export function Checkout({
   // Con la dirección completa se cotiza con las imprentas (envío real).
   const addressKey =
     shippingAddress && addressComplete(shippingAddress) ? JSON.stringify(shippingAddress) : null;
+  const problems = shippingAddress ? addressProblems(shippingAddress) : [];
   const confirmed = addressKey !== null && confirmedKey === addressKey;
 
   useEffect(() => {
@@ -418,11 +425,17 @@ export function Checkout({
                 ({ key }) =>
                   key !== 'taxId' || (TAX_ID_COUNTRIES as readonly string[]).includes(shipTo),
               ).map(({ key, optional: alwaysOptional, autoComplete }) => {
-                // El estado solo es obligatorio donde las imprentas lo exigen (México y EE. UU.);
-                // en otros países se llama provincia, departamento o región, o no existe.
+                // El estado solo es obligatorio donde las imprentas lo exigen (México, EE. UU.,
+                // Brasil y Chile); en otros países se llama provincia o departamento, o no existe.
+                // El documento es obligatorio donde la aduana lo pide para entregar.
                 const optional =
-                  (alwaysOptional ?? false) ||
-                  (key === 'state' && !STATE_REQUIRED.includes(shipTo));
+                  key === 'taxId'
+                    ? !TAX_ID_REQUIRED.includes(shipTo)
+                    : (alwaysOptional ?? false) ||
+                      (key === 'state' && !STATE_REQUIRED.includes(shipTo));
+                const value = address[key] ?? '';
+                const invalid =
+                  EXPLAINED.includes(key) && value.trim() !== '' && problems.includes(key);
                 return (
                   <label
                     key={key}
@@ -449,16 +462,27 @@ export function Checkout({
                     <input
                       id={`address-${key}`}
                       autoComplete={autoComplete}
-                      value={address[key] ?? ''}
+                      value={value}
                       required={!optional}
+                      aria-invalid={invalid || undefined}
+                      aria-describedby={invalid ? `address-${key}-error` : undefined}
                       onChange={(event) => {
                         setAddress((current) => ({ ...current, [key]: event.target.value }));
                       }}
                       className={field}
                     />
-                    {key === 'taxId' && (
+                    {invalid && (
+                      <span id={`address-${key}-error`} className="text-xs text-destructive">
+                        {key === 'postalCode' && POSTAL_CODE_EXAMPLES[shipTo]
+                          ? t('address.errors.postalCodeExample', {
+                              example: POSTAL_CODE_EXAMPLES[shipTo],
+                            })
+                          : t(`address.errors.${key}`)}
+                      </span>
+                    )}
+                    {key === 'taxId' && !invalid && (
                       <span className="text-xs text-muted-foreground">
-                        {t('address.taxIdHint')}
+                        {t(optional ? 'address.taxIdHintOptional' : 'address.taxIdHint')}
                       </span>
                     )}
                   </label>

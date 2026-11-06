@@ -1780,11 +1780,22 @@
       "postalCode": "ZIP code",
       "phone": "Phone",
       "taxId": {
-        "MX": "RFC or CURP of the recipient",
-        "AR": "CUIT, CUIL or DNI of the recipient",
-        "BR": "CPF of the recipient"
+        "MX": "Recipient's RFC",
+        "AR": "Recipient's CUIT or CUIL",
+        "BR": "Recipient's CPF",
+        "CL": "Recipient's RUT",
+        "PE": "Recipient's DNI or RUC",
+        "UY": "Recipient's ID (cédula)"
       },
-      "taxIdHint": "Optional. With it we can use a cheaper printer; it is only used for shipping and customs.",
+      "taxIdHint": "Customs requires it to deliver the book. It is only used for shipping.",
+      "taxIdHintOptional": "Optional. It helps customs deliver the book without delays. It is only used for shipping.",
+      "errors": {
+        "postalCode": "Check the postal code.",
+        "postalCodeExample": "Check the postal code (for example, {example}).",
+        "phone": "Check the phone number: include the area code, digits only.",
+        "taxId": "Check the number: it does not match a valid ID.",
+        "state": "Check this field."
+      },
       "confirm": "I confirm the delivery address is correct."
     },
     "giftTitle": "Gift",

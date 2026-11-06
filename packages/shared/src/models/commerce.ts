@@ -329,28 +329,118 @@ export const addressSchema = z.object({
 export type Address = z.infer<typeof addressSchema>;
 
 /** Reglas de dirección por país (lo que piden las imprentas y los correos). */
-const ADDRESS_RULES: Partial<
-  Record<string, { postalCode: RegExp; state: RegExp; phone: boolean }>
-> = {
-  MX: { postalCode: /^\d{5}$/, state: /^.{2,}$/, phone: true },
-  US: { postalCode: /^\d{5}(-\d{4})?$/, state: /^[A-Z]{2}$/, phone: false },
+const ADDRESS_RULES: Partial<Record<string, { postalCode: RegExp; state: RegExp }>> = {
+  MX: { postalCode: /^\d{5}$/, state: /^.{2,}$/ },
+  US: { postalCode: /^\d{5}(-\d{4})?$/, state: /^[A-Z]{2}$/ },
+  // CPA (C1425ABC), solo letra y número (C1425) o el código viejo de 4 dígitos.
+  AR: { postalCode: /^([A-Z]\d{4}([A-Z]{3})?|\d{4})$/, state: /^.*$/ },
+  UY: { postalCode: /^\d{5}$/, state: /^.*$/ },
+  // Gelato exige el estado (o la región) en Brasil y Chile.
+  BR: { postalCode: /^\d{5}-?\d{3}$/, state: /^.{2,}$/ },
+  CL: { postalCode: /^\d{7}$/, state: /^.{2,}$/ },
+  CO: { postalCode: /^\d{6}$/, state: /^.*$/ },
+  PE: { postalCode: /^\d{5}$/, state: /^.*$/ },
+  ES: { postalCode: /^\d{5}$/, state: /^.*$/ },
 };
 
-/** Países donde Lulu pide el documento fiscal del destinatario (aduana). */
-export const TAX_ID_COUNTRIES = ['MX', 'AR', 'BR'] as const;
+/** Países donde la imprenta o el correo exigen el estado, la región o la provincia. */
+export const STATE_REQUIRED_COUNTRIES = ['MX', 'US', 'BR', 'CL'] as const;
+
+/** Un código postal de ejemplo por país, para el mensaje de error. */
+export const POSTAL_CODE_EXAMPLES: Partial<Record<string, string>> = {
+  MX: '06600',
+  US: '78701',
+  AR: 'C1425ABC',
+  UY: '11300',
+  BR: '01310-100',
+  CL: '7500000',
+  CO: '110111',
+  PE: '15046',
+  ES: '28013',
+};
+
+/**
+ * Países donde se pide el documento de quien recibe. La aduana lo exige para entregar envíos
+ * del exterior (lista de Lulu: México RFC, Argentina CUIT o CUIL, Brasil CPF, Chile RUT, Perú
+ * DNI o RUC); sin él, el paquete puede volver al origen. En Uruguay es opcional.
+ */
+export const TAX_ID_COUNTRIES = ['MX', 'AR', 'BR', 'CL', 'PE', 'UY'] as const;
+export const TAX_ID_REQUIRED_COUNTRIES = ['MX', 'AR', 'BR', 'CL', 'PE'] as const;
+
+const digits = (value: string) => value.replace(/[\s.\-/]/g, '');
+
+/** CUIT o CUIL: 11 dígitos con dígito verificador (módulo 11). */
+function validCuit(value: string): boolean {
+  if (!/^\d{11}$/.test(value)) return false;
+  const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+  const sum = weights.reduce((total, weight, index) => total + weight * Number(value[index]), 0);
+  const check = 11 - (sum % 11);
+  const expected = check === 11 ? 0 : check === 10 ? 9 : check;
+  return expected === Number(value[10]);
+}
+
+/** CPF: 11 dígitos con dos verificadores; un CNPJ (14 dígitos, empresas) se acepta tal cual. */
+function validCpf(value: string): boolean {
+  if (/^\d{14}$/.test(value)) return true;
+  if (!/^\d{11}$/.test(value) || /^(\d)\1{10}$/.test(value)) return false;
+  const check = (length: number) => {
+    let sum = 0;
+    for (let index = 0; index < length; index += 1) {
+      sum += Number(value[index]) * (length + 1 - index);
+    }
+    const rest = (sum * 10) % 11;
+    return rest === 10 ? 0 : rest;
+  };
+  return check(9) === Number(value[9]) && check(10) === Number(value[10]);
+}
+
+/** RUT: 7 u 8 dígitos y un verificador (0 a 9 o K, módulo 11). */
+function validRut(value: string): boolean {
+  const match = /^(\d{7,8})([\dK])$/.exec(value.toUpperCase());
+  if (!match) return false;
+  const [, body = '', dv] = match;
+  let sum = 0;
+  let factor = 2;
+  for (let index = body.length - 1; index >= 0; index -= 1) {
+    sum += Number(body[index]) * factor;
+    factor = factor === 7 ? 2 : factor + 1;
+  }
+  const rest = 11 - (sum % 11);
+  const expected = rest === 11 ? '0' : rest === 10 ? 'K' : String(rest);
+  return expected === dv;
+}
+
+/** Cómo se valida el documento en cada país (sin puntos, guiones ni espacios). */
+const TAX_ID_RULES: Partial<Record<string, (value: string) => boolean>> = {
+  // RFC: 12 caracteres (empresas) o 13 (personas). Lulu no acepta la CURP.
+  MX: (value) => /^[A-ZÑ&]{3,4}\d{6}[A-Z\d]{3}$/.test(value.toUpperCase()),
+  AR: validCuit,
+  BR: validCpf,
+  CL: validRut,
+  // DNI (8 dígitos) o RUC (11).
+  PE: (value) => /^(\d{8}|\d{11})$/.test(value),
+  // Cédula: 6 a 8 dígitos.
+  UY: (value) => /^\d{6,8}$/.test(value),
+};
 
 /** Campos de la dirección que no cumplen las reglas de su país (vacío si está bien). */
 export function addressProblems(address: Address): (keyof Address)[] {
   const problems: (keyof Address)[] = [];
-  // Opcional, pero si se carga tiene que parecerse a un RFC, CUIT o CPF.
-  if (address.taxId && !/^[A-Za-z0-9.\-/]{5,20}$/.test(address.taxId.trim())) {
+  const taxId = address.taxId?.trim() ?? '';
+  const taxRule = TAX_ID_RULES[address.country];
+  if (taxId) {
+    // Fuera de los países con regla propia, solo tiene que parecerse a un documento.
+    const valid = taxRule ? taxRule(digits(taxId)) : /^[A-Za-z0-9.\-/]{5,20}$/.test(taxId);
+    if (!valid) problems.push('taxId');
+  } else if ((TAX_ID_REQUIRED_COUNTRIES as readonly string[]).includes(address.country)) {
     problems.push('taxId');
   }
   // El teléfono lo pide la imprenta en todos los países (Cloudprinter rechaza el pedido sin él).
   if (!/^[+\d][\d\s()-]{6,}$/.test((address.phone ?? '').trim())) problems.push('phone');
   const rules = ADDRESS_RULES[address.country];
   if (!rules) return problems;
-  if (!rules.postalCode.test(address.postalCode.trim())) problems.push('postalCode');
+  const postalCode = address.postalCode.replace(/\s+/g, '').toUpperCase();
+  if (!rules.postalCode.test(postalCode)) problems.push('postalCode');
   if (!rules.state.test((address.state ?? '').trim().toUpperCase())) problems.push('state');
   return problems;
 }

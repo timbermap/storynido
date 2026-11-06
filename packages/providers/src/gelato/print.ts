@@ -140,6 +140,10 @@ export class GelatoPrintProvider implements PrintProvider {
       country: address.country,
       email,
       ...(address.phone ? { phone: address.phone } : {}),
+      // Gelato exige el CPF (o el CNPJ) de quien recibe en Brasil, solo con dígitos.
+      ...(address.country === 'BR' && address.taxId
+        ? { federalTaxId: address.taxId.replace(/\D/g, '') }
+        : {}),
     };
   }
 
