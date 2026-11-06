@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   BookOpen,
   CheckCircle2,
+  Clock,
   Droplets,
   Loader2,
   Pencil,
@@ -171,6 +172,29 @@ export function PreviewPanel({
     if (previewDone)
       trackConversion(`preview:${book.id}`, { name: 'preview_created', line: book.channel });
   }, [previewDone, book.id, book.channel]);
+
+  if (book.status === 'preview_queued') {
+    // Sin cupo de IA por ahora: la muestra espera en la fila, arranca sola y se avisa por correo.
+    // Nunca se le muestra un "límite" al cliente.
+    return (
+      <div className="container-page max-w-3xl py-16 text-center" role="status" aria-live="polite">
+        <Clock className="mx-auto size-12 text-primary" aria-hidden="true" />
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-medium outline-none"
+        >
+          {data?.stage === 'character'
+            ? t('queued.illustrationsTitle', { name: childName })
+            : t('queued.title', { name: childName })}
+        </h1>
+        <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">{t('queued.text')}</p>
+        <Link href="/my-stories" className={cn(buttonVariants({ variant: 'outline' }), 'mt-8')}>
+          {t('queued.back')}
+        </Link>
+      </div>
+    );
+  }
 
   if (isGenerating && withDrawing) {
     // Con su dibujo de siempre: no se dibuja ni se aprueba de nuevo, se escribe y se ilustra.

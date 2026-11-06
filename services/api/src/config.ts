@@ -64,6 +64,9 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   /** "worker": eventos directo al worker (local); "pubsub": tema de Pub/Sub (nube). */
   PIPELINE_EVENTS: z.enum(['worker', 'pubsub']).optional(),
   ORDER_EVENTS_TOPIC: z.string().default('order-events'),
+  /** Trabajos programados: cuenta de servicio de Cloud Scheduler y audiencia de su token OIDC. */
+  JOBS_INVOKER_EMAIL: z.email().optional(),
+  JOBS_AUDIENCE: z.string().default('storynido-api-jobs'),
   /** Conversiones del lado del servidor (opcionales; sin claves no se envían). */
   GA4_MEASUREMENT_ID: z.string().optional(),
   GA4_API_SECRET: z.string().optional(),

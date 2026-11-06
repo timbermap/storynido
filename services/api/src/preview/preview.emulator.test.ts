@@ -27,6 +27,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { InMemoryCatalog } from '../catalog';
 import { RecordingConversions } from '../checkout/conversions';
+import { AppError } from '../errors';
 import { RecordingPublisher } from '../orders/events';
 import { initFirebaseAdmin } from '../firebase';
 import { auth, createTestApp } from '../test-helpers';
@@ -186,6 +187,8 @@ describe('vista previa', () => {
         styles: [style, lineArt],
         lessons: [lesson],
       }),
+      // Cloud Scheduler: solo este token llama a la fila.
+      jobCaller: { verify: (token) => Promise.resolve(token === 'job-ok') },
     });
     app = created.app;
     providers = created.providers;
@@ -665,14 +668,92 @@ describe('vista previa', () => {
     expect(retry.statusCode).toBe(200);
   });
 
-  it('corta cuando se agotó el presupuesto diario, sin tocar el borrador', async () => {
-    await setAiConfig({ dailyBudgetUsd: 1 });
-    await db.doc(`aiBudget/${utcDay()}`).set({ spentUsdMicros: 1_000_000, calls: 10 });
-    await seedBook(providers, 'book-1');
-    const res = await generate('book-1');
-    expect(res.statusCode).toBe(503);
-    expect(res.json<{ error: { code: string } }>().error.code).toBe('ai_budget_exhausted');
-    expect((await db.doc('books/book-1').get()).get('status')).toBe('draft');
+  describe('fila sin presupuesto de IA', () => {
+    const runQueue = (token = 'job-ok') =>
+      app.inject({
+        method: 'POST',
+        url: '/jobs/preview-queue',
+        headers: { authorization: `Bearer ${token}` },
+      });
+    const exhaustBudget = async () => {
+      await setAiConfig({ dailyBudgetUsd: 1 });
+      await db.doc(`aiBudget/${utcDay()}`).set({ spentUsdMicros: 1_000_000, calls: 10 });
+    };
+    const book1 = async () => (await db.doc('books/book-1').get()).data();
+    const readyMails = () =>
+      (providers.email() as MockEmailProvider).sent.filter(
+        (message) => message.idempotencyKey === 'book:book-1:preview_ready',
+      );
+
+    it('sin presupuesto, la muestra queda en la fila en vez de mostrar un límite', async () => {
+      await exhaustBudget();
+      await seedBook(providers, 'book-1');
+      const res = await generate('book-1');
+      expect(res.statusCode).toBe(200);
+      expect(res.json<PublicPreview>().status).toBe('preview_queued');
+      expect((await book1())?.queuedStep).toBe('preview');
+      // Ya está pedida: un segundo clic no la vuelve a encolar.
+      expect((await generate('book-1')).statusCode).toBe(409);
+    });
+
+    it('el trabajo espera mientras no hay presupuesto y la crea (con correo) cuando vuelve', async () => {
+      await db.doc(`users/${UID}`).set({ email: `${UID}@storynido.test`, locale: 'es' });
+      // Los mails son idempotentes por libro: otros tests ya avisaron por "book-1".
+      const logged = await db.collection('emailLog').listDocuments();
+      await Promise.all(logged.map((doc) => doc.delete()));
+      const before = readyMails().length;
+      await exhaustBudget();
+      await seedBook(providers, 'book-1');
+      await generate('book-1');
+      expect((await runQueue()).json()).toEqual({ started: 0, waiting: 1 });
+      expect((await book1())?.status).toBe('preview_queued');
+
+      await setAiConfig({ dailyBudgetUsd: 5 });
+      expect((await runQueue()).json()).toEqual({ started: 1, waiting: 0 });
+      const book = await book1();
+      expect(book?.status).toBe('preview_ready');
+      expect((book?.preview as { stage?: string } | undefined)?.stage).toBe('character');
+      expect(readyMails().length).toBe(before + 1);
+      // Ya no queda nada en la fila.
+      expect((await runQueue()).json()).toEqual({ started: 0, waiting: 0 });
+    });
+
+    it('aprobar el personaje sin presupuesto deja las ilustraciones en la fila', async () => {
+      await seedBook(providers, 'book-1');
+      await generate('book-1');
+      await exhaustBudget();
+      const res = await approve('book-1');
+      expect(res.statusCode).toBe(200);
+      expect(res.json<PublicPreview>().status).toBe('preview_queued');
+      expect((await book1())?.queuedStep).toBe('illustrations');
+
+      await setAiConfig({ dailyBudgetUsd: 5 });
+      expect((await runQueue()).json()).toEqual({ started: 1, waiting: 0 });
+      const book = await book1();
+      expect(book?.status).toBe('preview_ready');
+      expect((book?.preview as { stage?: string } | undefined)?.stage).toBe('complete');
+    });
+
+    it('si el presupuesto se acaba a mitad de camino, vuelve a la fila', async () => {
+      await seedBook(providers, 'book-1');
+      const paint = vi
+        .spyOn(providers.ai().image, 'generateIllustration')
+        .mockRejectedValueOnce(
+          new AppError(503, 'ai_budget_exhausted', 'Hay mucha demanda en este momento.'),
+        );
+      const res = await generate('book-1');
+      paint.mockRestore();
+      expect(res.statusCode).toBe(200);
+      expect(res.json<PublicPreview>().status).toBe('preview_queued');
+      expect((await runQueue()).json()).toEqual({ started: 1, waiting: 0 });
+      expect((await book1())?.status).toBe('preview_ready');
+    });
+
+    it('la ruta de la fila solo acepta a Cloud Scheduler', async () => {
+      expect((await runQueue('otro')).statusCode).toBe(401);
+      const noToken = await app.inject({ method: 'POST', url: '/jobs/preview-queue' });
+      expect(noToken.statusCode).toBe(401);
+    });
   });
 
   it('si el mensaje propio no es apto, informa y vuelve a borrador', async () => {
