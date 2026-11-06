@@ -177,9 +177,9 @@ describe('Vertex AI', () => {
       ],
     };
     const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
-    const plan = await new VertexTextProvider(
-      clientWith(() => jsonReply(reply), calls as unknown[]),
-    ).planStory(sampleStoryRequest);
+    const plan = await new VertexTextProvider(clientWith(() => jsonReply(reply), calls)).planStory(
+      sampleStoryRequest,
+    );
     expect(plan.props).toHaveLength(4);
     expect(plan.scenes[0]).toMatchObject({
       props: ['the kite'],
@@ -214,7 +214,7 @@ describe('Vertex AI', () => {
             textInImage: false,
             repairTarget: 'none',
           }),
-        calls as unknown[],
+        calls,
       ),
     );
     const image = { bytes: new Uint8Array([1]), mimeType: 'image/webp' };
