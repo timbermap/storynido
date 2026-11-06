@@ -51,10 +51,10 @@ describe('Address Validation', () => {
     const validator = new GoogleAddressValidator({
       projectId: 'p',
       getAccessToken: () => Promise.resolve('t'),
-      fetchImpl: (() => {
+      fetchImpl: () => {
         calls += 1;
         return Promise.resolve(new Response('{}'));
-      }),
+      },
     });
     expect((await validator.validate({ ...address, country: 'UY' })).status).toBe('unsupported');
     expect(calls).toBe(0);
