@@ -1039,7 +1039,7 @@
         "limit_reached": "Você já testou várias versões hoje. Salvamos tudo e amanhã você continua.",
         "photo_unreadable": "Não conseguimos ler esta foto. Tente outra (de frente, bem iluminada, só o rosto) ou escolha os traços do personagem. Não conta para o seu limite de hoje.",
         "ai_unavailable": "Não conseguimos terminar a amostra agora. Tente de novo em alguns minutos; seu rascunho fica salvo.",
-        "ai_budget_exhausted": "Atingimos o limite de geração de hoje. Tente de novo amanhã; seu rascunho fica salvo.",
+        "ai_budget_exhausted": "Estamos com muita procura agora. Tente de novo daqui a pouco; seu rascunho fica salvo.",
         "validation_failed": "Esse texto não é adequado para uma história infantil. Mude e tente de novo.",
         "bad_request": "Confira se o protagonista, a foto, a história e o estilo estão completos.",
         "generic": "Algo deu errado. Tente de novo em alguns minutos.",
@@ -1132,7 +1132,13 @@
       },
       "eventDifferencesPages": "A mini história tem {total} páginas; aqui você vê a capa e as primeiras {shown}.",
       "continueKit": "Quero este kit",
-      "continueInvitation": "Quero o convite"
+      "continueInvitation": "Quero o convite",
+      "queued": {
+        "title": "Estamos preparando a prévia de {name}",
+        "text": "Muitas histórias estão sendo criadas agora. A sua já está a caminho: avisamos por e-mail assim que estiver pronta, então você pode fechar esta página.",
+        "illustrationsTitle": "Estamos ilustrando a história de {name}",
+        "back": "Ver minhas histórias"
+      }
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",
@@ -2058,6 +2064,7 @@
       "repeatNote": "“Repetir configuração” copia a história, a extensão, a densidade, o nível e o estilo para um novo rascunho, sem os dados nem as fotos da criança.",
       "status": {
         "draft": "Rascunho",
+        "preview_queued": "Preparando a prévia",
         "preview_generating": "Criando a amostra",
         "preview_ready": "Amostra pronta",
         "ordered": "Comprado"

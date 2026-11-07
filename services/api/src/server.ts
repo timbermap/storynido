@@ -24,6 +24,7 @@ import { CheckoutService } from './checkout/service';
 import { FulfillmentService } from './orders/fulfillment';
 import { ServerConversions } from './checkout/conversions';
 import { loadApiConfig } from './config';
+import { GoogleJobCallerVerifier } from './jobs-auth';
 import { PubSubPublisher, WorkerHttpPublisher } from './orders/events';
 import {
   FirebaseAppCheckVerifier,
@@ -184,6 +185,10 @@ const app = await buildApp({
     pro,
     metrics,
     spans,
+    // Cloud Scheduler (fila de muestras): solo si Terraform definió la cuenta invocadora.
+    jobCaller: config.env.JOBS_INVOKER_EMAIL
+      ? new GoogleJobCallerVerifier(config.env.JOBS_AUDIENCE, config.env.JOBS_INVOKER_EMAIL)
+      : undefined,
     db,
   },
 });

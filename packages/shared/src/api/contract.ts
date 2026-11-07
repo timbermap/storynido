@@ -458,7 +458,7 @@ export const previewTargetSchema = z.union([
 
 export const publicPreviewSchema = z.object({
   bookId: z.string(),
-  status: z.enum(['draft', 'preview_generating', 'preview_ready', 'ordered']),
+  status: z.enum(['draft', 'preview_queued', 'preview_generating', 'preview_ready', 'ordered']),
   /** Motivo del último intento fallido, si lo hubo. */
   error: z.string().nullable(),
   preview: z

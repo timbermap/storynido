@@ -1039,7 +1039,7 @@
         "limit_reached": "You've tried several versions today. We saved everything, so you can pick up tomorrow.",
         "photo_unreadable": "We couldn't read this photo. Try another one (facing the camera, well lit, just the face) or choose the character's traits instead. It doesn't count toward today's limit.",
         "ai_unavailable": "We couldn't finish the sample right now. Try again in a few minutes; your draft is saved.",
-        "ai_budget_exhausted": "We've reached today's generation limit. Please try again tomorrow; your draft is saved.",
+        "ai_budget_exhausted": "We're very busy right now. Please try again in a little while; your draft is saved.",
         "validation_failed": "That text isn't suitable for a children's story. Please change it and try again.",
         "bad_request": "Make sure the main character, photo, story and style are complete.",
         "generic": "Something went wrong. Please try again in a few minutes.",
@@ -1132,7 +1132,13 @@
       },
       "eventDifferencesPages": "The mini story has {total} pages; here you see the cover and the first {shown}.",
       "continueKit": "I want this kit",
-      "continueInvitation": "I want the invitation"
+      "continueInvitation": "I want the invitation",
+      "queued": {
+        "title": "We're preparing {name}'s preview",
+        "text": "Lots of stories are being created right now. Yours is on its way: we'll email you as soon as it's ready, so feel free to close this page.",
+        "illustrationsTitle": "We're illustrating {name}'s story",
+        "back": "See my stories"
+      }
     },
     "character": {
       "modeLegend": "How should we create the main character?",
@@ -2058,6 +2064,7 @@
       "repeatNote": "“Repeat settings” copies the story, length, density, level and style to a new draft, without the child's data or photos.",
       "status": {
         "draft": "Draft",
+        "preview_queued": "Preparing the preview",
         "preview_generating": "Creating preview",
         "preview_ready": "Preview ready",
         "ordered": "Purchased"

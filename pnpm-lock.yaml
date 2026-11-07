@@ -339,6 +339,9 @@ importers:
       firebase-admin:
         specifier: 14.5.0
         version: 14.5.0(@firebase/app-compat@0.5.20)(@firebase/app@0.16.4)(supports-color@7.2.0)
+      google-auth-library:
+        specifier: 11.3.1
+        version: 11.3.1(supports-color@7.2.0)
       openapi-types:
         specifier: 12.1.3
         version: 12.1.3

@@ -48,7 +48,8 @@ export function registerAuthentication(app: FastifyInstance): void {
 
   app.addHook('onRequest', async (request) => {
     const header = request.headers.authorization;
-    if (!header) return;
+    // Los trabajos programados traen un token OIDC de Google (no de Firebase): lo verifica la ruta.
+    if (!header || request.url.startsWith('/jobs/')) return;
     const match = BEARER.exec(header);
     if (!match?.[1]) throw unauthorized('Header Authorization inválido.');
     try {

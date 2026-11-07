@@ -64,7 +64,7 @@ import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type DocumentReference, type Firestore } from 'firebase-admin/firestore';
 
-import { AiBudget, type AiLimits, type UsageContext } from '../ai/budget';
+import { AiBudget, isBudgetExceeded, type AiLimits, type UsageContext } from '../ai/budget';
 import type { CatalogRepository } from '../catalog';
 import { AppError } from '../errors';
 
@@ -73,6 +73,14 @@ const IMAGE_URL_SECONDS = 30 * 60;
 const STALE_GENERATION_MS = 10 * 60 * 1000;
 /** Vistas previas por IP y día: varias personas pueden compartir una IP (casa, oficina). */
 const IP_QUOTA_MULTIPLIER = 3;
+/**
+ * Muestras de la fila que arranca cada pasada del trabajo programado. Van en paralelo y cada
+ * una tarda de 1 a 3 minutos: tienen que entrar en los 300 s del request de Cloud Run.
+ */
+const QUEUE_BATCH = 4;
+
+/** Lo que espera en la fila: crear la muestra (texto y lámina) o ilustrar portada y páginas. */
+type QueuedStep = 'preview' | 'illustrations';
 
 const notFound = () => new AppError(404, 'not_found', 'No encontramos ese borrador.');
 const generationFailed = (cause?: unknown) =>
@@ -124,6 +132,11 @@ interface BookData {
   regenerationsUsed: number;
   previewError?: string | null;
   previewStartedAt?: unknown;
+  /** Fila sin cupo de IA (status preview_queued). */
+  queuedAt?: unknown;
+  queuedStep?: QueuedStep | null;
+  /** Cupos que reservó la muestra (para devolverlos si falla, aunque haya esperado en la fila). */
+  previewQuotaDocs?: string[] | null;
 }
 
 function toDate(value: unknown): Date | null {
@@ -327,7 +340,17 @@ export class PreviewService {
   // ---------------------------------------------------------- generación
 
   /** Reserva el turno: cuotas del día y estado "generando" en una sola transacción. */
-  private async reserve(uid: string, ip: string, ref: DocumentReference, limits: AiLimits) {
+  /**
+   * Valida el borrador y reserva el cupo diario. `queue`: no hay presupuesto de IA en este
+   * momento, así que en vez de generar ya, la muestra queda en la fila (el cupo cuenta igual).
+   */
+  private async reserve(
+    uid: string,
+    ip: string,
+    ref: DocumentReference,
+    limits: AiLimits,
+    queue = false,
+  ) {
     const day = utcDay();
     const quotas = this.db.collection(COLLECTIONS.previewQuota);
     const userQuota = quotas.doc(`${uid}_${day}`);
@@ -358,6 +381,13 @@ export class PreviewService {
         (!startedAt || Date.now() - startedAt.getTime() > STALE_GENERATION_MS);
       if (book.status === 'preview_generating' && !stuck) {
         throw new AppError(409, 'bad_request', 'Ya estamos generando esta vista previa.');
+      }
+      if (book.status === 'preview_queued') {
+        throw new AppError(
+          409,
+          'bad_request',
+          'Ya estamos preparando esta vista previa. Te avisamos por correo cuando esté lista.',
+        );
       }
       if (!['draft', 'preview_ready', 'preview_generating'].includes(book.status)) {
         throw new AppError(409, 'bad_request', 'Este libro ya no se puede modificar.');
@@ -406,9 +436,11 @@ export class PreviewService {
         { merge: true },
       );
       tx.update(ref, {
-        status: 'preview_generating',
-        previewStartedAt: new Date(),
+        ...(queue
+          ? { status: 'preview_queued', queuedAt: new Date(), queuedStep: 'preview' }
+          : { status: 'preview_generating', previewStartedAt: new Date() }),
         previewError: null,
+        previewQuotaDocs: [userQuota.id, ipQuota.id, weekQuota.id],
         updatedAt: new Date(),
       });
     });
@@ -442,18 +474,18 @@ export class PreviewService {
     }
   }
 
-  /** Devuelve el cupo diario reservado (la muestra no se llegó a crear). */
-  private async refundQuota(uid: string, ip: string): Promise<void> {
-    const day = utcDay();
+  /**
+   * Devuelve el cupo reservado (la muestra no se llegó a crear). Usa los documentos que guardó
+   * la reserva: si la muestra esperó en la fila, el día de la reserva puede ser otro.
+   */
+  private async refundQuota(docs: readonly string[]): Promise<void> {
     const quotas = this.db.collection(COLLECTIONS.previewQuota);
     const back = { count: FieldValue.increment(-1) };
-    await Promise.all([
-      quotas.doc(`${uid}_${day}`).set(back, { merge: true }),
-      quotas.doc(`ip_${hashIp(ip)}_${day}`).set(back, { merge: true }),
-      quotas.doc(`${uid}_${utcIsoWeek()}`).set(back, { merge: true }),
-    ]).catch((error: unknown) => {
-      this.log.warn({ err: error }, 'could not refund preview quota');
-    });
+    await Promise.all(docs.map((id) => quotas.doc(id).set(back, { merge: true }))).catch(
+      (error: unknown) => {
+        this.log.warn({ err: error }, 'could not refund preview quota');
+      },
+    );
   }
 
   async generate(
@@ -472,11 +504,31 @@ export class PreviewService {
     }
     const startedAt = Date.now();
     const limits = await this.budget.limits();
-    await this.budget.ensureAvailable(limits);
     const ref = this.bookRef(bookId);
+    // Sin presupuesto de IA hoy: la muestra queda en la fila y la crea el trabajo programado
+    // apenas haya cupo (se avisa por correo). El cliente no ve ningún "límite".
+    if (!(await this.budget.available(limits))) {
+      await this.reserve(uid, ip, ref, limits, true);
+      this.log.warn({ bookId }, 'preview queued: AI budget exhausted');
+      return this.get(uid, bookId);
+    }
     await this.reserve(uid, ip, ref, limits);
+    return this.runPreview(uid, bookId, limits, { startedAt, notify: false });
+  }
 
-    const { book } = await this.ownedBook(uid, bookId);
+  /**
+   * Crea la muestra de un libro ya reservado (status preview_generating). Si el presupuesto se
+   * acaba a mitad de camino, vuelve a la fila en vez de fallar (el cupo sigue reservado).
+   */
+  private async runPreview(
+    uid: string,
+    bookId: string,
+    limits: AiLimits,
+    options: { startedAt: number; notify: boolean },
+  ): Promise<PublicPreview> {
+    const { startedAt } = options;
+    const anonymous = false;
+    const { ref, book } = await this.ownedBook(uid, bookId);
     try {
       const preview = await this.buildPreview(uid, bookId, book, limits);
       await ref.update({
@@ -498,13 +550,26 @@ export class PreviewService {
           this.log.warn({ err: error, bookId }, 'auto-approve of drawing failed');
         }
       }
+      // Desde la fila nadie está mirando la pantalla: el correo avisa que la muestra está lista.
+      if (options.notify) await this.notifyPreviewReady(uid, bookId);
     } catch (error) {
+      if (isBudgetExceeded(error)) {
+        this.log.warn({ bookId }, 'preview back to the queue: AI budget exhausted');
+        await ref.update({
+          status: 'preview_queued',
+          queuedAt: new Date(),
+          queuedStep: 'preview',
+          previewStartedAt: null,
+          updatedAt: new Date(),
+        });
+        return this.get(uid, bookId);
+      }
       const appError = error instanceof AppError ? error : generationFailed();
       this.log.error({ err: error, bookId }, 'preview failed');
       await this.auditAiError('preview', bookId, error);
       // Una muestra que falló no gasta el cupo diario de la persona.
       if (!(error instanceof AppError && error.code === 'limit_reached')) {
-        await this.refundQuota(uid, ip);
+        await this.refundQuota(book.previewQuotaDocs ?? []);
       }
       await ref.update({
         // Si había una vista previa anterior, sigue disponible.
@@ -1019,6 +1084,63 @@ export class PreviewService {
 
   /** Registro de control de calidad del libro (sin datos del niño). */
   /** "Tu muestra está lista" (una vez por libro), por si se fue de la página mientras tanto. */
+  /**
+   * Trabajo programado (cada 5 minutos): arranca las muestras que esperan en la fila, en orden
+   * de llegada, mientras haya presupuesto de IA. Cada una se toma con una transacción (dos
+   * pasadas simultáneas no generan dos veces) y, al terminar, el correo avisa que está lista.
+   */
+  async processQueue(max = QUEUE_BATCH): Promise<{ started: number; waiting: number }> {
+    const queued = await this.db
+      .collection(COLLECTIONS.books)
+      .where('status', '==', 'preview_queued')
+      .orderBy('queuedAt')
+      .limit(max)
+      .get();
+    if (queued.empty) return { started: 0, waiting: 0 };
+    const limits = await this.budget.limits();
+    if (!(await this.budget.available(limits, false))) {
+      this.log.info({ waiting: queued.size }, 'preview queue waiting for AI budget');
+      return { started: 0, waiting: queued.size };
+    }
+
+    const claimed: { bookId: string; book: BookData }[] = [];
+    for (const doc of queued.docs) {
+      const book = await this.db.runTransaction(async (tx) => {
+        const current = (await tx.get(doc.ref)).data() as BookData | undefined;
+        if (current?.status !== 'preview_queued') return null;
+        tx.update(doc.ref, {
+          status: 'preview_generating',
+          previewStartedAt: new Date(),
+          updatedAt: new Date(),
+        });
+        return current;
+      });
+      if (book) claimed.push({ bookId: doc.id, book });
+    }
+
+    const results = await Promise.allSettled(
+      claimed.map(({ bookId, book }) =>
+        book.queuedStep === 'illustrations'
+          ? this.illustrate(book.ownerUid, bookId, limits, false)
+          : this.runPreview(book.ownerUid, bookId, limits, {
+              startedAt: Date.now(),
+              notify: true,
+            }),
+      ),
+    );
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        // El libro ya volvió a su estado (con el error a la vista) y la falla quedó auditada.
+        this.log.error(
+          { err: result.reason, bookId: claimed[index]?.bookId },
+          'queued preview failed',
+        );
+      }
+    });
+    this.log.info({ started: claimed.length }, 'preview queue processed');
+    return { started: claimed.length, waiting: queued.size - claimed.length };
+  }
+
   private async notifyPreviewReady(uid: string, bookId: string) {
     if (!this.notifier) return;
     const book = (await this.bookRef(bookId).get()).data() ?? {};
@@ -1075,7 +1197,6 @@ export class PreviewService {
         'Crea tu cuenta gratis para ver la portada y las páginas ilustradas.',
       );
     }
-    await this.budget.ensureAvailable(limits);
     const { ref, book, preview } = await this.readyBook(uid, bookId);
     if ((preview.stage ?? 'complete') !== 'character' || !preview.character) {
       throw new AppError(409, 'bad_request', 'El personaje ya está aprobado.');
@@ -1085,15 +1206,47 @@ export class PreviewService {
     if (isStale(preview, book)) {
       throw new AppError(409, 'bad_request', 'Cambiaste tus elecciones: crea la muestra de nuevo.');
     }
+    // Sin presupuesto de IA hoy: las ilustraciones esperan en la fila (se avisa por correo).
+    const queue = !(await this.budget.available(limits));
     // Bloqueo: mientras se ilustra, el libro queda "generando" (la web lo sigue en vivo).
     await this.db.runTransaction(async (tx) => {
       const current = (await tx.get(ref)).data() as BookData | undefined;
       if (current?.status !== 'preview_ready') {
         throw new AppError(409, 'bad_request', 'Ya estamos ilustrando esta vista previa.');
       }
-      tx.update(ref, { status: 'preview_generating', previewStartedAt: new Date() });
+      tx.update(
+        ref,
+        queue
+          ? { status: 'preview_queued', queuedAt: new Date(), queuedStep: 'illustrations' }
+          : { status: 'preview_generating', previewStartedAt: new Date() },
+      );
     });
+    if (queue) {
+      this.log.warn({ bookId }, 'illustrations queued: AI budget exhausted');
+      return this.get(uid, bookId);
+    }
+    return this.illustrate(uid, bookId, limits, anonymous);
+  }
 
+  /**
+   * Ilustra la portada y las primeras páginas con la lámina aprobada (el libro ya está en
+   * preview_generating). Si el presupuesto se acaba a mitad de camino, vuelve a la fila.
+   */
+  private async illustrate(
+    uid: string,
+    bookId: string,
+    limits: AiLimits,
+    anonymous: boolean,
+  ): Promise<PublicPreview> {
+    const { ref, book } = await this.ownedBook(uid, bookId);
+    const preview = book.preview;
+    if (!preview?.character) {
+      await ref.update({
+        status: book.preview ? 'preview_ready' : 'draft',
+        previewStartedAt: null,
+      });
+      throw new AppError(409, 'bad_request', 'Primero genera la vista previa.');
+    }
     try {
       const { story, style, child } = await this.context(uid, book, preview);
       const ai = this.providers.ai();
@@ -1209,6 +1362,16 @@ export class PreviewService {
       await this.qaEvent(bookId, 'character_approved', { mustKeep: mustKeep.length });
       if (!anonymous) await this.notifyPreviewReady(uid, bookId);
     } catch (error) {
+      if (isBudgetExceeded(error)) {
+        this.log.warn({ bookId }, 'illustrations back to the queue: AI budget exhausted');
+        await ref.update({
+          status: 'preview_queued',
+          queuedAt: new Date(),
+          queuedStep: 'illustrations',
+          previewStartedAt: null,
+        });
+        return this.get(uid, bookId);
+      }
       await ref.update({ status: 'preview_ready', previewStartedAt: null });
       await this.auditAiError('preview', bookId, error);
       throw error instanceof AppError ? error : generationFailed(error);

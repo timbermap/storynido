@@ -117,7 +117,17 @@ export const promotionSchema = timestampsSchema.extend({
 
 export type Promotion = z.infer<typeof promotionSchema>;
 
-export const BOOK_STATUSES = ['draft', 'preview_generating', 'preview_ready', 'ordered'] as const;
+/**
+ * `preview_queued`: sin cupo de IA en este momento, la muestra (o sus ilustraciones) espera en la
+ * fila y la genera el trabajo programado apenas haya cupo (el cliente no ve ningún límite).
+ */
+export const BOOK_STATUSES = [
+  'draft',
+  'preview_queued',
+  'preview_generating',
+  'preview_ready',
+  'ordered',
+] as const;
 
 export const bookStatusSchema = z.enum(BOOK_STATUSES);
 
