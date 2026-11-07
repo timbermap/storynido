@@ -8,7 +8,10 @@ import {
   addressProblems,
   assertOrderTransition,
   canTransitionOrder,
+  bookFormatPrices,
   printCandidates,
+  referenceCurrency,
+  referencePrintCost,
   printPageCount,
   rankPrintQuotes,
   type cardsOrderBodySchema,
@@ -32,6 +35,7 @@ import {
   type PrintItem,
   type PrintRouting,
   type PrintCost,
+  type PrintOption,
   type FxRates,
   type Promotion,
   type PublicOrder,
@@ -213,6 +217,37 @@ const DOWNLOADABLE_STATUSES: readonly OrderStatus[] = [
 ];
 
 /** Se opina sobre lo recibido: el digital listo o el impreso entregado. */
+/**
+ * Costo del impreso para el precio (DECISIONS 236): la impresión siempre al costo de referencia
+ * del país (la imprenta habilitada más barata de la matriz), con o sin dirección, así el precio
+ * del libro no cambia con la dirección. Con la dirección, la imprenta elegida (`routing`) pone el
+ * envío y el plazo; sin ella, el envío queda pendiente. Null si ninguna imprenta puede.
+ */
+export function bookPrintCost(input: {
+  options: readonly PrintOption[];
+  activePrinters: readonly string[];
+  format: BookFormat;
+  pages: number;
+  quantity: number;
+  routing: PrintRouting | null;
+}): PrintCost | null {
+  const reference = referencePrintCost(
+    input.options,
+    input.format,
+    input.pages,
+    input.activePrinters,
+    input.quantity,
+  );
+  if (!reference) return null;
+  const { routing } = input;
+  return {
+    productionUsdMinor: reference.productionUsdMinor * input.quantity,
+    shippingUsdMinor: routing ? (routing.shippingCostUsdMinor ?? 0) : null,
+    etaDaysMin: routing?.etaDaysMin ?? reference.etaDaysMin,
+    etaDaysMax: routing?.etaDaysMax ?? reference.etaDaysMax,
+  };
+}
+
 export function reviewable(order: { status: OrderStatus; items: { format: BookFormat }[] }) {
   const digitalOnly = order.items.every((item) => item.format === 'digital');
   return order.status === 'delivered' || (order.status === 'ready' && digitalOnly);
@@ -267,14 +302,47 @@ export class CheckoutService {
         ? await this.routePrint(body, loaded.pages)
         : null;
     const result = await this.price(loaded.book, body, loaded.pages, source !== null, routing);
+    // Otra copia de un libro ya comprado: solo impresa (el PDF ya lo tiene).
+    const availableFormats = (await this.availableFormats(body.country, loaded.pages)).filter(
+      (format) => !source || format !== 'digital',
+    );
+    const [country, pricing, printOptions, fx, pro] = await Promise.all([
+      this.catalog.country(body.country),
+      this.catalog.productPricing(),
+      this.catalog.printOptions(body.country),
+      this.options.fx(),
+      this.professional(loaded.book),
+    ]);
     return {
       snapshot: result.snapshot,
       couponError: result.couponError,
-      // Otra copia de un libro ya comprado: solo impresa (el PDF ya lo tiene).
-      availableFormats: (await this.availableFormats(body.country, loaded.pages)).filter(
-        (format) => !source || format !== 'digital',
-      ),
+      availableFormats,
+      // Las tarjetas del checkout: el mismo cálculo que el renglón del libro en el resumen.
+      formatPrices: body.kit
+        ? []
+        : bookFormatPrices({
+            country,
+            pricing,
+            options: printOptions,
+            activeProviders: this.activePrinters(),
+            pages: loaded.pages,
+            professional: pro?.professional ?? false,
+            formats: availableFormats,
+          }),
+      // Referencia en la moneda del país del pedido (en un impreso, el de envío).
+      local: referenceCurrency(body.country, country, fx),
     };
+  }
+
+  private activePrinters(): string[] {
+    return this.providers.printers().map((printer) => printer.id);
+  }
+
+  /** Profesionales: lo decide la cuenta (servidor), nunca la petición. */
+  private professional(book: Record<string, unknown>) {
+    return this.pro && typeof book.ownerUid === 'string'
+      ? this.pro.context(book.ownerUid)
+      : Promise.resolve(null);
   }
 
   /** Formatos que este libro admite en el país: el digital y los impresos que alguna imprenta puede. */
@@ -320,8 +388,9 @@ export class CheckoutService {
   }
 
   /**
-   * Precio de un libro ya validado (DECISIONS 096): costo + margen del producto. El impreso usa
-   * la imprenta elegida para la dirección (`routing`) o, sin dirección, la estimación.
+   * Precio de un libro ya validado (DECISIONS 096 y 236): costo + margen del producto. El libro
+   * impreso se calcula siempre con la imprenta de referencia del país (la dirección no cambia su
+   * precio); la imprenta elegida para la dirección (`routing`) solo aporta el envío y el plazo.
    */
   private async price(
     book: Record<string, unknown>,
@@ -331,17 +400,7 @@ export class CheckoutService {
     routing: PrintRouting | null = null,
   ) {
     if (body.kit) return this.priceKit(book, body, body.kit, reorder);
-    const print: PrintCost | null =
-      body.format === 'digital'
-        ? null
-        : routing
-          ? {
-              productionUsdMinor: routing.productionCostUsdMinor ?? routing.totalCostUsdMinor,
-              shippingUsdMinor: routing.shippingCostUsdMinor ?? 0,
-              etaDaysMin: routing.etaDaysMin,
-              etaDaysMax: routing.etaDaysMax,
-            }
-          : await this.printEstimate(body, pages);
+    const print = body.format === 'digital' ? null : await this.printCost(body, pages, routing);
     // Nunca se manda a imprenta algo incompatible: alguna imprenta activa tiene que poder.
     if (body.format !== 'digital' && !print) throw printUnavailable();
     const [country, pricing, fx, coupon, promotions, pro] = await Promise.all([
@@ -350,10 +409,7 @@ export class CheckoutService {
       this.options.fx(),
       body.couponCode ? this.coupon(body.couponCode) : Promise.resolve(null),
       this.promotions(),
-      // Profesionales: lo decide la cuenta (servidor), nunca la petición.
-      this.pro && typeof book.ownerUid === 'string'
-        ? this.pro.context(book.ownerUid)
-        : Promise.resolve(null),
+      this.professional(book),
     ]);
     const result = quote({
       pro,
@@ -413,24 +469,36 @@ export class CheckoutService {
     return result;
   }
 
-  /**
-   * Impreso sin dirección: la imprenta habilitada más barata según la matriz (el envío queda
-   * pendiente hasta tener la dirección). Null si ninguna puede imprimir este libro.
-   */
-  private async printEstimate(body: PriceBody, pages: number): Promise<PrintCost | null> {
-    const options = await this.catalog.printOptions(body.country);
-    const candidates = await this.printCandidates(body, pages);
-    const usable = options.filter(
-      (option) => candidates.includes(option.provider) && option.format === body.format,
-    );
-    if (usable.length === 0) return null;
-    return {
-      productionUsdMinor:
-        Math.min(...usable.map((option) => option.productionCostUsdMinor)) * body.quantity,
-      shippingUsdMinor: null,
-      etaDaysMin: Math.min(...usable.map((option) => option.etaDaysMin)),
-      etaDaysMax: Math.max(...usable.map((option) => option.etaDaysMax)),
-    };
+  /** Impreso: costo de referencia + envío de la imprenta elegida (ver `bookPrintCost`). */
+  private async printCost(
+    body: PriceBody,
+    pages: number,
+    routing: PrintRouting | null,
+  ): Promise<PrintCost | null> {
+    const cost = bookPrintCost({
+      options: await this.catalog.printOptions(body.country),
+      activePrinters: this.activePrinters(),
+      format: body.format,
+      pages,
+      quantity: body.quantity,
+      routing,
+    });
+    if (cost && routing?.productionCostUsdMinor != null) {
+      if (routing.productionCostUsdMinor > cost.productionUsdMinor) {
+        // La diferencia la absorbe el margen (DECISIONS 236): queda en el log para revisar la matriz.
+        this.log.warn(
+          {
+            provider: routing.provider,
+            country: body.country,
+            format: body.format,
+            referenceUsdMinor: cost.productionUsdMinor,
+            quotedUsdMinor: routing.productionCostUsdMinor,
+          },
+          'print cost above reference',
+        );
+      }
+    }
+    return cost;
   }
 
   private async printCandidates(body: PriceBody, pages: number) {

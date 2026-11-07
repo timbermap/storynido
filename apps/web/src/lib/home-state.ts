@@ -5,6 +5,8 @@
  * la que entró la visita).
  */
 
+import type { BookLength } from '@storynido/shared';
+
 import type { ProjectSettings } from '@/lib/firebase/drafts';
 
 export type HomeChannel = 'families' | 'events' | 'professionals';
@@ -25,6 +27,8 @@ export interface HomeBook {
   totalPages: number | null;
   /** Celebraciones: temática de la fiesta (texto que escribió la persona). */
   eventTheme?: string | null;
+  /** Extensión del libro (para dar su precio exacto). */
+  length?: BookLength | null;
   /**
    * `draft`: faltan pasos; `generating`: se está dibujando; `character`: el personaje espera que
    * lo aprueben; `preview`: la portada y las primeras páginas (o el kit) están listas.

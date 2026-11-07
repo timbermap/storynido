@@ -104,6 +104,7 @@ export async function loadHomeData(db: Firestore, uid: string): Promise<HomeData
       characterUrl: preview?.character?.imageUrl ?? null,
       totalPages: preview?.totalPages ?? null,
       eventTheme: draft.eventTheme,
+      length: draft.length ?? null,
       stage,
       updatedAt: draft.updatedAt?.getTime() ?? 0,
     };

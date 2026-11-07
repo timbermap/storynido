@@ -29,6 +29,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { CountryOptions } from '@/components/country-options';
+import { countryName } from '@/lib/country-names';
 import { formatPrice } from '@/lib/format';
 import { reorderStart } from '@/lib/reorder';
 import { cn } from '@/lib/utils';
@@ -125,6 +126,8 @@ export function Checkout({
     snapshot: PriceSnapshot;
     couponError: string | null;
     availableFormats?: BookFormat[];
+    formatPrices: { format: BookFormat; amountMinor: number }[];
+    local: Offer['local'];
   } | null>(null);
   // Solo los formatos que este libro admite (un cuento corto no se imprime como fotolibro).
   const available = quote?.availableFormats;
@@ -352,13 +355,10 @@ export function Checkout({
   }
 
   const field = 'h-11 w-full rounded-xl border bg-card px-3';
-  // Las tarjetas dicen «desde»: el ebook cuesta según la extensión del libro (el más corto, como
-  // en las landings) y el impreso suma el envío. El precio exacto es el del resumen.
-  const lengthMinors = offer.lengthPrices.map((item) => item.amountMinor);
-  const fromMinor = (option: Offer['formats'][number]) =>
-    option.format === 'digital' && lengthMinors.length > 0
-      ? Math.min(...lengthMinors)
-      : option.amountMinor;
+  // Las tarjetas dicen el precio exacto de este libro en cada formato (lo calcula el servidor con
+  // sus páginas): el mismo número que el renglón del libro en el resumen. El impreso suma el envío.
+  const exactMinor = (format: BookFormat) =>
+    quote?.formatPrices.find((item) => item.format === format)?.amountMinor ?? null;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -402,10 +402,15 @@ export function Checkout({
                         <span className="text-sm text-muted-foreground">
                           {t(`formats.${option.format}.text`)}
                         </span>
-                        <span className="mt-auto pt-2 font-semibold tabular-nums">
-                          {t('fromPrice', {
-                            price: formatPrice(fromMinor(option), offer.currency, locale, country),
-                          })}
+                        <span className="mt-auto min-h-6 pt-2 font-semibold tabular-nums">
+                          {(() => {
+                            const minor = exactMinor(option.format);
+                            if (minor === null) return null;
+                            const price = formatPrice(minor, offer.currency, locale, orderCountry);
+                            return option.format === 'digital'
+                              ? price
+                              : t('pricePlusShipping', { price });
+                          })()}
                         </span>
                       </label>
                     ))}
@@ -650,16 +655,23 @@ export function Checkout({
         )}
         {quote ? (
           <>
-            <PriceSummary snapshot={quote.snapshot} country={country} local={offer.local} />
+            <PriceSummary
+              snapshot={quote.snapshot}
+              country={orderCountry}
+              local={quote.local}
+              format={format}
+              shipTo={print ? shipTo : null}
+            />
             {print && quote.snapshot.shipping.pending && estimate && (
               <p className="rounded-xl bg-peach/60 px-4 py-3 text-sm font-semibold text-navy">
                 {t('shippingEstimate', {
-                  price: formatPrice(estimate.shippingUsdMinor, 'USD', locale, country),
+                  country: countryName(shipTo, locale),
+                  price: formatPrice(estimate.shippingUsdMinor, 'USD', locale, orderCountry),
                   total: formatPrice(
                     quote.snapshot.totalMinor + estimate.shippingUsdMinor,
                     'USD',
                     locale,
-                    country,
+                    orderCountry,
                   ),
                   min: estimate.etaDaysMin,
                   max: estimate.etaDaysMax,
@@ -704,7 +716,9 @@ export function Checkout({
           )}
           {t('pay')}
         </Button>
-        <p className="text-xs text-muted-foreground">{t('payNote')}</p>
+        <p className="text-xs text-muted-foreground">
+          {t('pricesUsd')} {t('payNote')}
+        </p>
       </aside>
     </div>
   );

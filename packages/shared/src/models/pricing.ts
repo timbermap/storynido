@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { currencySchema, type Currency } from '../currency';
 import type { CountryConfig, Coupon, Promotion } from './commerce';
 import type { BookFormat } from './common';
+import { bookPriceMinor } from './book-price';
 import { kitPieceSchema, type EventPricing, type KitSelection } from './kit';
 import type { FxRates } from './metrics';
 import {
@@ -132,7 +133,7 @@ export interface QuoteInput {
   /** Páginas interiores del libro: el costo de IA depende de ellas. */
   pages: number;
   quantity: number;
-  /** Impreso: costo de la imprenta para esta dirección (o la estimación, sin dirección). */
+  /** Impreso: costo de referencia de la imprenta (matriz del país) y, con dirección, el envío. */
   print?: PrintCost | null;
   coupon: Coupon | null;
   /** Código que escribió el comprador (aunque no exista). */
@@ -193,19 +194,16 @@ export function quote(input: QuoteInput): QuoteResult {
   const quantity = Math.max(1, Math.floor(input.quantity));
   const productionUnit = print ? Math.round(print.productionUsdMinor / quantity) : 0;
   const usd = unitPriceUsdMinor(pricing, productionUnit, input.pages);
-  // La creación (IA + margen) se cobra una vez; cada ejemplar extra paga solo su impresión,
-  // al costo por volumen que cotizó la imprenta.
+  // La creación (IA + margen) se cobra una vez; cada ejemplar extra paga solo su impresión.
   const copyUsd = usd - unitPriceUsdMinor(pricing, 0, input.pages);
   // Perfil profesional: descuento base del producto (además del de recurrencia, que es de todos).
   const withBase = (value: number) =>
     input.pro?.professional ? Math.round((value * (100 - pricing.proPercentOff)) / 100) : value;
-  const price = (value: number) => {
-    const local = fromUsdMinor(withBase(value), CHARGE_CURRENCY, input.fx);
-    return local === null ? null : charmPrice(local, CHARGE_CURRENCY);
-  };
-  const unit = price(usd);
-  const copy = price(copyUsd);
-  if (unit === null || copy === null) return { ok: false, error: 'price_missing' };
+  // El libro: el mismo cálculo que la barra de la muestra y las tarjetas del checkout.
+  const unit = bookPriceMinor(pricing, productionUnit, input.pages, input.pro?.professional);
+  const copyLocal = fromUsdMinor(withBase(copyUsd), CHARGE_CURRENCY, input.fx);
+  const copy = copyLocal === null ? null : charmPrice(copyLocal, CHARGE_CURRENCY);
+  if (copy === null) return { ok: false, error: 'price_missing' };
 
   // El envío se cobra al costo, exacto (en dólares, sin redondear).
   const shippingMinor = print?.shippingUsdMinor ?? 0;

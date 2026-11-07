@@ -1,4 +1,4 @@
-import type { BookLength, CountryCode, Locale, Offer } from '@storynido/shared';
+import type { BookFormat, BookLength, CountryCode, Locale, Offer } from '@storynido/shared';
 
 import { formatPrice } from './format';
 
@@ -43,11 +43,46 @@ export function offerHighlights(
   const digitalFrom = offer.lengthPrices.length
     ? Math.min(...offer.lengthPrices.map((item) => item.amountMinor))
     : digital?.amountMinor;
+  // El impreso «desde»: el formato más barato en su extensión más corta (sin envío).
   const printed = offer.formats
     .filter((f) => f.format !== 'digital')
     .sort((a, b) => a.amountMinor - b.amountMinor)[0];
   return {
     digital: digitalFrom === undefined ? null : money(digitalFrom),
     printed: printed ? money(printed.amountMinor) : null,
+  };
+}
+
+/** Lo que la web necesita de la oferta para dar el precio de un libro ya elegido. */
+export type BookPriceSource = Pick<Offer, 'lengthPrices' | 'proLengthPrices' | 'printLengthPrices'>;
+
+/**
+ * Precio exacto de un libro de esa extensión (sin envío), el mismo que el checkout: el digital y
+ * el impreso más barato (`printedFormats` > 1: hay más de una tapa, el impreso va con «desde»).
+ * `professional`: cuentas profesionales, con su descuento base.
+ */
+export function bookPrices(
+  source: BookPriceSource,
+  length: BookLength,
+  professional = false,
+): {
+  digital: number | null;
+  printed: number | null;
+  printedFormats: BookFormat[];
+} {
+  const digital = (professional ? source.proLengthPrices : source.lengthPrices).find(
+    (item) => item.length === length,
+  );
+  const printed = source.printLengthPrices
+    .filter((item) => item.length === length)
+    .map((item) => ({
+      format: item.format,
+      amountMinor: professional ? item.proAmountMinor : item.amountMinor,
+    }))
+    .sort((a, b) => a.amountMinor - b.amountMinor);
+  return {
+    digital: digital?.amountMinor ?? null,
+    printed: printed[0]?.amountMinor ?? null,
+    printedFormats: printed.map((item) => item.format),
   };
 }

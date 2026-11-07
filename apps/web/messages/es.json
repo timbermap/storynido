@@ -1092,7 +1092,6 @@
       "leaveButton": "Volver a Mis cuentos",
       "leaveTitle": "Puedes cerrar esta pantalla",
       "approveAndPay": "Aprobar y pagar",
-      "proPrice": "Cuento digital: {price}",
       "proVolume": "Cuantos más cuentos haces, menos pagas por cada uno. Sin suscripción.",
       "proNotice": "Es material educativo y de acompañamiento: no es clínico ni reemplaza tu criterio profesional.",
       "proDifferencesEdit": "Puedes editar el texto de cada página y volver a cambiar el cuento base o la foto.",
@@ -1274,8 +1273,10 @@
           "text": "Vocabulario más rico y una trama con giros."
         }
       },
-      "priceDigital": "Ebook desde {price}",
-      "pricePrinted": "Impreso desde {price}",
+      "priceDigital": "Ebook: {price}",
+      "pricePrinted": "Impreso: {price} + envío",
+      "pricePrintedFrom": "Impreso desde {price} + envío",
+      "priceUsd": "Precios en dólares (USD)",
       "chipEbook": "Ebook",
       "chipPrint": "Libro físico",
       "chipBooklet": "Cuento grapado",
@@ -1724,7 +1725,7 @@
     "exampleLabel": "Ejemplo del estilo · en tu libro, el protagonista será {name}"
   },
   "Checkout": {
-    "shippingEstimate": "Envío estimado a tu país: unos {price}, para un total de unos {total}. Llega en {min} a {max} días hábiles. Se confirma con tu dirección.",
+    "shippingEstimate": "Envío estimado a {country}: unos {price}, para un total de unos {total}. Llega en {min} a {max} días hábiles. Se confirma con tu dirección.",
     "yourBook": "Tu libro",
     "yourBookText": "Así quedó el que aprobaste. Elige cómo recibirlo.",
     "title": "Tu libro",
@@ -1856,6 +1857,7 @@
       "bundle": "Descuento por kit completo {label}"
     },
     "shippingEta": "Envío (llega en {min} a {max} días hábiles)",
+    "shippingTo": "Envío a {country} (llega en {min} a {max} días hábiles)",
     "shippingDigital": "Entrega digital",
     "free": "Gratis",
     "taxIncluded": "IVA incluido ({rate} %)",
@@ -1863,6 +1865,7 @@
     "total": "Total",
     "pay": "Pagar",
     "payNote": "Pago seguro con nuestro procesador de pagos. Tu libro se crea apenas se confirma el pago.",
+    "pricesUsd": "Precios en dólares (USD).",
     "errors": {
       "generic": "Algo salió mal. Intenta de nuevo en unos minutos."
     },
@@ -1994,8 +1997,9 @@
       "guestsNote": "Uno por línea: cada etiqueta sale «Para …» con su nombre ({count} de {max}). Sin lista, las etiquetas salen con «¡Gracias por venir!».",
       "signature": "Incluir la firma «Hecho con StoryNido» en el dorso de la invitación"
     },
-    "fromPrice": "desde {price}",
+    "pricePlusShipping": "{price} + envío",
     "shippingPending": "Envío: se calcula con tu dirección",
+    "shippingToPending": "Envío a {country}: se calcula con tu dirección",
     "addressToQuote": "Completa la dirección para ver el envío y el total.",
     "importDuties": "Envío internacional: puede haber impuestos de importación que paga quien recibe el libro.",
     "localReference": "Referencia en tu moneda (se cobra en dólares)",
@@ -2208,7 +2212,7 @@
       "sub": "Ya ilustramos la portada y las primeras páginas.",
       "cta": "Ver el libro de {name}",
       "ctaNoName": "Ver mi libro",
-      "price": "Digital desde {price}"
+      "price": "Ebook: {price}"
     },
     "orderPreparing": {
       "title": "Estamos preparando el libro de {name}",

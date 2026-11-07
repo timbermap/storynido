@@ -41,7 +41,8 @@ export async function loadWizardCatalog(locale: Locale): Promise<WizardCatalog> 
       getEventPricing(display.country),
       getOffer(display.country, locale),
     ]);
-  // Precios a la vista mientras se elige (extensión y muestra); se cobra lo que diga el checkout.
+  // Precios a la vista mientras se elige: los «desde» y, por extensión, los exactos (los mismos
+  // del checkout).
   const printed = offer?.formats.filter((format) => format.format !== 'digital') ?? [];
   const prices: PriceHint | null = offer?.available
     ? {
@@ -50,9 +51,9 @@ export async function loadWizardCatalog(locale: Locale): Promise<WizardCatalog> 
         digitalMinor:
           offer.formats.find((format) => format.format === 'digital')?.amountMinor ?? null,
         printedFromMinor: printed.length ? Math.min(...printed.map((f) => f.amountMinor)) : null,
-        proByLength: Object.fromEntries(
-          offer.proLengthPrices.map((item) => [item.length, item.amountMinor]),
-        ),
+        lengthPrices: offer.lengthPrices,
+        proLengthPrices: offer.proLengthPrices,
+        printLengthPrices: offer.printLengthPrices,
       }
     : null;
   const eventPrices = eventPricing

@@ -239,7 +239,7 @@ describe('catálogo', () => {
       proLengthPrices: { length: string; amountMinor: number }[];
     }>();
     expect(offer.available).toBe(true);
-    // El «desde» de cada extensión, y el del perfil profesional (con su descuento base, siempre menor).
+    // El precio de cada extensión, y el del perfil profesional (con su descuento base, siempre menor).
     expect(offer.lengthPrices.map((item) => item.length)).toEqual([
       'mini',
       'short',
@@ -253,11 +253,12 @@ describe('catálogo', () => {
     // Todo en dólares (DECISIONS 097); el peso va solo como referencia.
     expect(offer.currency).toBe('USD');
     expect(offer.local).toEqual({ currency: 'MXN', rate: 20 });
-    // 24 páginas. Digital: 0,15 × 24 + 17 = 20,60 → 20,99.
-    // Tapa dura: 20,60 + imprenta 14 + 8 (mínimo de impresión) = 42,60 → 42,99.
+    // El «desde» de cada formato es su extensión más corta (mini, 12 páginas; la imprenta de
+    // prueba imprime desde 12). Digital: 0,15 × 12 + 17 = 18,80 → 18,99.
+    // Tapa dura: 18,80 + imprenta 14 + 8 (mínimo de impresión) = 40,80 → 40,99.
     expect(offer.formats).toEqual([
-      expect.objectContaining({ format: 'digital', amountMinor: 2099, estimated: false }),
-      expect.objectContaining({ format: 'hardcover', amountMinor: 4299, estimated: true }),
+      expect.objectContaining({ format: 'digital', amountMinor: 1899, estimated: false }),
+      expect.objectContaining({ format: 'hardcover', amountMinor: 4099, estimated: true }),
     ]);
     expect(offer.shipping).toEqual({ costMinor: 0, quoted: true, etaDaysMin: 6, etaDaysMax: 10 });
   });
@@ -269,7 +270,7 @@ describe('catálogo', () => {
       formats: { format: string; amountMinor: number }[];
     }>();
     expect(offer).toMatchObject({ available: true, currency: 'USD', local: null });
-    expect(offer.formats[0]).toMatchObject({ format: 'digital', amountMinor: 2099 });
+    expect(offer.formats[0]).toMatchObject({ format: 'digital', amountMinor: 1899 });
   });
 
   it('sin imprenta habilitada (o sin muestra aprobada) el impreso no se ofrece', () => {

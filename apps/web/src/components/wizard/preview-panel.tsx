@@ -24,12 +24,14 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { SignInPanel } from '@/components/auth/sign-in-panel';
+import { useProStatus } from '@/components/pro/use-pro-status';
 import { BookViewer, type ViewerPage } from '@/components/book/book-viewer';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { trackConversion } from '@/lib/conversions';
 import { formatPrice } from '@/lib/format';
+import { bookPrices } from '@/lib/offer';
 
 import { CharacterReview } from './character-review';
 import { KitIncludes } from './kit-includes';
@@ -94,7 +96,11 @@ export function PreviewPanel({
   const tParty = useTranslations('Wizard.partyPreview');
   const isEvent = book.channel === 'events';
   const isPro = book.channel === 'professionals';
-  const proMinor = isPro && book.length ? prices?.proByLength[book.length] : undefined;
+  // Profesionales: lo decide la cuenta (el checkout cobra su precio con el descuento base).
+  const { status: proStatus } = useProStatus();
+  const professional = proStatus?.accountType === 'professional';
+  // Precio exacto de este libro (su extensión), el mismo que las tarjetas y el resumen del pago.
+  const bookPrice = prices && book.length ? bookPrices(prices, book.length, professional) : null;
   const locale = useLocale() as Locale;
   const money = (minor: number) =>
     prices ? formatPrice(minor, prices.currency, locale, prices.country) : '';
@@ -656,24 +662,25 @@ export function PreviewPanel({
                       })}
                 </p>
               )}
-              {data?.stage === 'complete' && !data.stale && isPro && proMinor !== undefined && (
+              {data?.stage === 'complete' && !data.stale && !isEvent && bookPrice && (
+                // Qué cuesta este libro antes de entrar al pago (el envío se suma con la dirección).
                 <div className="mt-2 grid gap-0.5 text-sm text-muted-foreground tabular-nums">
-                  <p>{t('proPrice', { price: money(proMinor) })}</p>
-                  <p>{t('proVolume')}</p>
+                  <p>
+                    {[
+                      bookPrice.digital != null &&
+                        tBook('priceDigital', { price: money(bookPrice.digital) }),
+                      bookPrice.printed != null &&
+                        tBook(
+                          bookPrice.printedFormats.length > 1 ? 'pricePrintedFrom' : 'pricePrinted',
+                          { price: money(bookPrice.printed) },
+                        ),
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                  <p className="text-xs">{tBook('priceUsd')}</p>
+                  {professional && isPro && <p>{t('proVolume')}</p>}
                 </div>
-              )}
-              {data?.stage === 'complete' && !data.stale && !isEvent && !isPro && prices && (
-                // Qué cuesta antes de entrar al pago (formato y envío se eligen ahí).
-                <p className="mt-2 text-sm text-muted-foreground tabular-nums">
-                  {[
-                    prices.digitalMinor != null &&
-                      tBook('priceDigital', { price: money(prices.digitalMinor) }),
-                    prices.printedFromMinor != null &&
-                      tBook('pricePrinted', { price: money(prices.printedFromMinor) }),
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </p>
               )}
               {data?.stage === 'complete' && !data.stale ? null : (
                 <>

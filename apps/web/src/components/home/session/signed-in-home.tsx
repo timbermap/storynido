@@ -12,6 +12,7 @@ import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { hasProProfile, loadHomeData, type HomeData } from '@/lib/firebase/home-data';
 import { formatPrice } from '@/lib/format';
+import { bookPrices } from '@/lib/offer';
 import {
   buildHomeRows,
   HOME_CHANNELS,
@@ -125,12 +126,15 @@ export function SignedInHome({
 
   const fullName = previewData?.name !== undefined ? previewData.name : user?.displayName;
   const name = fullName?.trim() ? (fullName.trim().split(/\s+/)[0] ?? null) : null;
-  const digital = offer?.formats.find((format) => format.format === 'digital');
-  const digitalPrice = digital
-    ? formatPrice(digital.amountMinor, offer?.currency ?? 'USD', locale, country)
-    : null;
-
   const next = view.next;
+  // El libro ya está elegido: su precio exacto (el de su extensión), el mismo del pago.
+  const nextLength = next && next.kind !== 'order' ? next.book.length : null;
+  const digitalMinor = offer && nextLength ? bookPrices(offer, nextLength).digital : null;
+  const digitalPrice =
+    digitalMinor != null
+      ? formatPrice(digitalMinor, offer?.currency ?? 'USD', locale, country)
+      : null;
+
   const model = next ? nextFor(next, t, locale, digitalPrice) : null;
   // En modo Pro sin proyectos todavía no hay lista (ni su botón): la línea Pro se destaca abajo.
   const showList = rows.length > 0;

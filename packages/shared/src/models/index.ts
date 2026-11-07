@@ -7,6 +7,7 @@ export * from './common';
 export * from './editorial';
 export * from './pipeline';
 export * from './pricing';
+export * from './book-price';
 export * from './print';
 export * from './qa';
 export * from './config';

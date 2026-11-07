@@ -382,6 +382,18 @@ export const checkoutQuoteResponseSchema = z.object({
   couponError: z.enum(QUOTE_ERRORS).nullable(),
   /** Formatos que este libro admite (páginas y país): el pago no ofrece los demás. */
   availableFormats: z.array(bookFormatSchema).optional(),
+  /**
+   * Precio exacto del libro (sin envío) en cada formato que admite: lo que dicen las tarjetas
+   * del checkout, el mismo número que el renglón del libro en el resumen.
+   */
+  formatPrices: z
+    .array(z.object({ format: bookFormatSchema, amountMinor: z.number().int().nonnegative() }))
+    .default([]),
+  /** Moneda de referencia del país del pedido (el de envío, en un impreso). */
+  local: z
+    .object({ currency: currencySchema, rate: z.number().positive() })
+    .nullable()
+    .default(null),
 });
 
 /** Tarjetas impresas del kit (DECISIONS 140): un pedido aparte, de las piezas de un kit ya comprado. */
@@ -596,8 +608,9 @@ export const offerFormatSchema = z.object({
   format: z.enum(BOOK_FORMATS),
   name: z.string(),
   pageCount: z.number().int(),
+  /** El más barato del formato (su extensión más corta), sin envío: el «desde». */
   amountMinor: z.number().int().nonnegative(),
-  /** Impreso: precio estimado (la impresión exacta y el envío se cotizan con la dirección). */
+  /** Impreso: el envío se suma con la dirección. */
   estimated: z.boolean().default(false),
 });
 
@@ -617,8 +630,8 @@ export const offerSchema = z.object({
   }),
   formats: z.array(offerFormatSchema),
   /**
-   * Precio del libro digital según la extensión (más páginas, más IA): sirve para el «desde» de
-   * cada historia, que parte de su extensión más corta.
+   * Precio exacto del libro digital según la extensión (más páginas, más IA): el «desde» de
+   * cada historia parte de su extensión más corta.
    */
   lengthPrices: z
     .array(z.object({ length: bookLengthSchema, amountMinor: z.number().int() }))
@@ -626,6 +639,20 @@ export const offerSchema = z.object({
   /** Lo mismo con el descuento base del perfil profesional (lo que de verdad paga). */
   proLengthPrices: z
     .array(z.object({ length: bookLengthSchema, amountMinor: z.number().int() }))
+    .default([]),
+  /**
+   * Precio exacto del impreso (sin envío) por formato y extensión, con la imprenta de referencia
+   * del país. `proAmountMinor`: con el descuento base de las cuentas profesionales.
+   */
+  printLengthPrices: z
+    .array(
+      z.object({
+        format: z.enum(BOOK_FORMATS),
+        length: bookLengthSchema,
+        amountMinor: z.number().int(),
+        proAmountMinor: z.number().int(),
+      }),
+    )
     .default([]),
   /**
    * Moneda local del país, solo como referencia (todo se cobra en dólares; DECISIONS 097):

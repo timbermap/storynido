@@ -1,6 +1,5 @@
 import type {
   Book,
-  BookLength,
   Channel,
   ContentType,
   CountryCode,
@@ -12,6 +11,7 @@ import type {
 } from '@storynido/shared';
 
 import type { ChildFields } from '@/lib/firebase/drafts';
+import type { BookPriceSource } from '@/lib/offer';
 
 import type { SaveState, WizardStep } from './steps';
 
@@ -71,12 +71,13 @@ export interface EventPriceHint {
   invitationMinor: number;
 }
 
-/** Digital y el impreso más barato, en la moneda del país. */
-export interface PriceHint {
+/**
+ * Precios del país para el creador. `digitalMinor` y `printedFromMinor` son los «desde» (antes de
+ * elegir la extensión); con la extensión elegida, `bookPrices` da el precio exacto por extensión.
+ */
+export interface PriceHint extends BookPriceSource {
   currency: Offer['currency'];
   country: CountryCode;
   digitalMinor: number | null;
   printedFromMinor: number | null;
-  /** Digital con el descuento base del perfil profesional, por extensión. */
-  proByLength: Partial<Record<BookLength, number>>;
 }

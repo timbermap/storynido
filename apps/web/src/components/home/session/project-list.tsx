@@ -70,7 +70,9 @@ export function ProjectList({
     }
   }
 
-  const discount = pro ? (proStatus?.discount ?? null) : null;
+  // El aviso de descuento por recurrencia es solo para cuentas profesionales (DECISIONS 236).
+  const discount =
+    pro && proStatus?.accountType === 'professional' ? (proStatus.discount ?? null) : null;
   const shown = rows.slice(0, MAX_ROWS);
   const allHref = pro ? { pathname: '/my-stories' as const, hash: 'pro' } : '/my-stories';
 
