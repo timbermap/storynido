@@ -385,7 +385,10 @@ describe('generación del libro (fase 09)', () => {
     const snapshot = (await order()).snapshot as BookSnapshot;
     expect(snapshot.props?.[0]?.name).toBe('the kite');
     // Página 3 (escena 2): con la biblia; página 4: sin el barrilete ni la playa.
-    const [third, fourth] = generate.mock.calls.map((call) => call[0].prompt);
+    // Las páginas se dibujan en paralelo: cada llamada se busca por su escena, no por su orden.
+    const prompts = generate.mock.calls.map((call) => call[0].prompt);
+    const third = prompts.find((prompt) => prompt.startsWith('scene 3')) ?? '';
+    const fourth = prompts.find((prompt) => prompt.startsWith('scene 4')) ?? '';
     expect(third).toContain('arc-shaped orange kite on long lines; NO sail');
     expect(third).toContain('red lifeguard hut');
     expect(third).toContain('The main character wears a blue wetsuit and a helmet');
