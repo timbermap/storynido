@@ -100,7 +100,6 @@ export default async function ProfessionalsPage({ params }: Props) {
         collections={collections}
         stories={stories}
         createLabel={t('viewStory')}
-        viewLabel={t('viewStoryLink')}
         line="professionals"
         start={{ label: t('collectionStart'), mode: 'story' }}
       />

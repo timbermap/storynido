@@ -216,7 +216,6 @@ export function LandingCollections({
   collections,
   stories = [],
   createLabel,
-  viewLabel,
   line,
   start,
   tone = 'cream',
@@ -248,8 +247,6 @@ export function LandingCollections({
   stories?: PublicStory[];
   /** Texto del enlace accesible de cada tapa ("Ver la historia"). */
   createLabel?: string;
-  /** Enlace chico debajo de las tapas cuando la tarjeta tiene 1 o 2 historias ("Ver el cuento"). */
-  viewLabel?: string;
   /** Público de la landing: la ficha de la historia vuelve a ella y crea en su línea. */
   line?: Channel;
   /**
@@ -287,7 +284,7 @@ export function LandingCollections({
         )}
         <ul
           className={cn(
-            '-mx-4 flex snap-x snap-mandatory items-start gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0',
+            '-mx-4 flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0',
             // Sin encabezado propio, el espacio de arriba ya lo da el padding de la sección.
             title && (continued ? 'mt-5' : 'mt-10'),
           )}
@@ -340,89 +337,48 @@ export function LandingCollections({
                     data-track-line={line}
                     guest={startLabel}
                     member={startLabel}
-                    className="mt-5 inline-flex min-h-11 items-center gap-2 font-semibold text-primary underline-offset-4 hover:underline"
+                    className="mt-auto inline-flex min-h-11 items-center gap-2 self-start pt-5 font-semibold text-primary underline-offset-4 hover:underline"
                   />
                 )}
               </>
             );
-            // Con 1 o 2 historias la tapa va al costado (arriba en el celular) y no queda la
-            // tarjeta a medio llenar; con 3 o más, la grilla de tapas debajo del texto.
-            const side = own.length > 0 && own.length <= 2;
+            // Todas las tarjetas con el mismo orden y el mismo alto: arriba el estante de tapas
+            // (cada tapa del mismo tamaño, tenga el tema 1, 2 o 3 historias; con más, el estante se
+            // desliza de costado), después el texto y el botón siempre al pie.
             return (
               <li
                 key={collection.slug}
-                className="w-[85%] shrink-0 snap-start rounded-xl border bg-card p-6 shadow-[var(--shadow-card)] sm:w-[60%] lg:w-auto"
+                className="flex w-[85%] shrink-0 snap-start flex-col rounded-xl border bg-card p-6 shadow-[var(--shadow-card)] sm:w-[60%] lg:w-auto"
               >
-                {side ? (
-                  <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
-                    <ul
-                      className={cn(
-                        'grid gap-3 lg:shrink-0',
-                        own.length === 2 ? 'lg:w-1/2' : 'lg:w-[40%]',
-                        own.length === 2 ? 'max-w-[18rem] grid-cols-2' : 'max-w-[11rem]',
-                        'lg:max-w-none',
-                      )}
-                    >
-                      {own.map((story) => (
-                        <li key={story.slug} className="min-w-0">
-                          {/* La tapa también lleva a la ficha, sin competir con el botón: el
-                              enlace accesible es «Ver el cuento». */}
-                          <Link
-                            href={storyHref(story.slug)}
-                            tabIndex={-1}
-                            aria-hidden="true"
-                            className="group block"
-                          >
-                            <div className="aspect-[3/4] w-full overflow-hidden rounded-lg shadow-[var(--shadow-card)] transition group-hover:-translate-y-0.5">
-                              <StoryCover
-                                story={story}
-                                line={line}
-                                sizes="(min-width: 1024px) 14rem, 45vw"
-                              />
-                            </div>
-                          </Link>
-                          <Link
-                            href={storyHref(story.slug)}
-                            aria-label={
-                              createLabel ? `${createLabel}: ${story.title}` : story.title
-                            }
-                            className="mt-1.5 inline-flex min-h-8 items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-primary"
-                          >
-                            {viewLabel ?? story.title}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="min-w-0 flex-1">{text}</div>
-                  </div>
-                ) : (
-                  text
-                )}
-                {!side && own.length > 0 && (
-                  <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {own.length > 0 && (
+                  <ul
+                    className={cn(
+                      'mb-5 flex snap-x scroll-px-3 gap-2.5 rounded-lg bg-muted p-3 sm:scroll-px-4 sm:gap-3 sm:p-4',
+                      own.length > 3 ? 'overflow-x-auto' : 'justify-center',
+                    )}
+                  >
                     {own.map((story) => (
-                      <li key={story.slug} className="min-w-0">
+                      <li key={story.slug} className="w-[31%] max-w-[9.5rem] shrink-0 snap-start">
                         <Link
                           // La ficha de la historia: edades, fragmento, ejemplo para hojear y precios.
                           href={storyHref(story.slug)}
                           aria-label={createLabel ? `${createLabel}: ${story.title}` : story.title}
-                          className="group block"
+                          title={story.title}
+                          className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                         >
                           <div className="aspect-[3/4] w-full overflow-hidden rounded-lg shadow-[var(--shadow-card)] transition group-hover:-translate-y-0.5">
                             <StoryCover
                               story={story}
                               line={line}
-                              sizes="(min-width: 640px) 8rem, 40vw"
+                              sizes="(min-width: 1024px) 9.5rem, 25vw"
                             />
                           </div>
-                          <span className="mt-1.5 block text-xs leading-snug font-semibold group-hover:text-primary">
-                            {story.title}
-                          </span>
                         </Link>
                       </li>
                     ))}
                   </ul>
                 )}
+                <div className="flex min-w-0 flex-1 flex-col">{text}</div>
               </li>
             );
           })}

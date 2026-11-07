@@ -173,7 +173,6 @@ export default async function EventsPage({ params }: Props) {
         collections={collections}
         stories={stories}
         createLabel={t('viewStory')}
-        viewLabel={t('viewStoryLink')}
         line="events"
         start={{ label: t('collectionStart'), mode: 'theme' }}
       />

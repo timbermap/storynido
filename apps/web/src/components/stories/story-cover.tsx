@@ -119,13 +119,26 @@ export function CoverTitle({
     'absolute inset-x-0 top-0 grid h-[30%] gap-[0.6cqw] font-[family-name:var(--font-cover)] leading-[0.95] font-bold';
   const small = name ? 'text-[9cqw]' : 'text-[12cqw]';
   const full = `${lead}${name ?? ''}${suffix}`;
+  // Cuántas líneas chicas acompañan al nombre: cada una ocupa ~9,2cqw de la franja (30 % del alto
+  // de una tapa 3:4 = 40cqw). El nombre usa lo que queda, así nada se sale de la franja ni se pisa.
+  const extras = (before ? 1 : 0) + (after ? 1 : 0);
+  const room = BAND_CQW - extras * SMALL_LINE_CQW;
   // Amatic es angosta: el nombre va ~1,4 veces más grande, y baja con los nombres largos.
-  const nameSize = Math.min(22, 86 / (Math.max(full.length, 4) * 0.36));
+  const nameSize = Math.min(22, 86 / (Math.max(full.length, 4) * 0.36), room / NAME_LINE_EM);
   const crayon = { filter: `url(#${crayonId})` };
 
   if (layout === 'C' && name) {
-    // El nombre sigue un arco suave; el tamaño baja con el largo para que entre entero.
-    const size = Math.min(26, 90 / (Math.max(full.length, 4) * 0.36));
+    // El nombre sigue un arco suave; el tamaño baja con el largo para que entre entero. El SVG
+    // mide lo que ocupan las letras (mayúsculas, tildes y el giro de cada una) y no solo el arco:
+    // antes la caja era más baja que las letras y el nombre pisaba la línea de arriba o se cortaba
+    // contra el borde de la tapa ("MARTINA", "TOMÁS").
+    const size = Math.min(
+      26,
+      90 / (Math.max(full.length, 4) * 0.36),
+      (room / ARC_SCALE - ARC_RISE) / (ARC_ASCENT + ARC_DESCENT),
+    );
+    const top = ARC_PEAK - size * ARC_ASCENT;
+    const height = ARC_END - top + size * ARC_DESCENT;
     const letters = letterJitter(`${lead}${name}`);
     return (
       <p
@@ -137,8 +150,8 @@ export function CoverTitle({
         <span className="sr-only">{full}</span>
         <svg
           aria-hidden="true"
-          viewBox="0 -4 100 21"
-          className="-my-[1cqw] w-full overflow-visible"
+          viewBox={`0 ${String(round2(top))} 100 ${String(round2(height))}`}
+          className="w-full overflow-visible"
         >
           <path id={arcId} d="M4 13 Q50 1 96 13" fill="none" />
           <text
@@ -197,6 +210,22 @@ export function CoverTitle({
 }
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
+
+/** Alto útil de la franja del título, en cqw (30 % del alto de una tapa 3:4 = 40cqw, con margen). */
+const BAND_CQW = 37;
+/** Una línea chica (9cqw con interlineado 0,95) más el espacio entre líneas. */
+const SMALL_LINE_CQW = 9.2;
+/** Alto de la línea del nombre en em (interlineado 0,95 más el aire de las tildes y el giro). */
+const NAME_LINE_EM = 1.1;
+/** Arco del nombre (layout C), en unidades del SVG (100 de ancho): sube de y=13 a y=7 en el medio. */
+const ARC_END = 13;
+const ARC_PEAK = 7;
+const ARC_RISE = ARC_END - ARC_PEAK;
+/** Amatic SC: mayúsculas con tilde y giro llegan a ~0,95em sobre la base; la coma baja ~0,2em. */
+const ARC_ASCENT = 0.95;
+const ARC_DESCENT = 0.2;
+/** El SVG ocupa el ancho del texto (86cqw): una unidad del SVG mide 0,86cqw. */
+const ARC_SCALE = 0.86;
 
 /**
  * Portada de una historia (rediseño de imágenes, DECISIONS 157). Con el flag, la imagen trae el
