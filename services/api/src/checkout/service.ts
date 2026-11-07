@@ -157,10 +157,8 @@ export function bookPrintCost(input: {
   const quantity = Math.max(1, Math.floor(input.quantity));
   // El precio cambia solo si el costo se mueve más de 5 % respecto de la matriz.
   const stable = (provider: string, totalUsdMinor: number) =>
-    stablePrintCost(
-      Math.round(totalUsdMinor / quantity),
-      input.matrixFor?.(provider) ?? null,
-    ) * quantity;
+    stablePrintCost(Math.round(totalUsdMinor / quantity), input.matrixFor?.(provider) ?? null) *
+    quantity;
   if (routing) {
     return {
       productionUsdMinor: stable(

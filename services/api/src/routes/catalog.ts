@@ -384,7 +384,9 @@ export function registerCatalogRoutes(
             const estimate = await Promise.race([
               printEstimate(code, format, pages).catch(() => null),
               new Promise<null>((resolve) =>
-                setTimeout(() => { resolve(null); }, OFFER_ESTIMATE_WAIT_MS),
+                setTimeout(() => {
+                  resolve(null);
+                }, OFFER_ESTIMATE_WAIT_MS),
               ),
             ]);
             if (estimate) {

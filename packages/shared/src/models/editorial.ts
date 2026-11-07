@@ -400,8 +400,5 @@ export function generatedPages(
   // Libros anteriores a las extensiones: todas sus páginas son de la historia.
   if (!book.length) return Math.max(0, book.interiorPages);
   const available = book.interiorPages - config.lengths[book.length].fixedPages;
-  return Math.max(
-    book.contentType === 'activities' ? 0 : 2,
-    available - (book.activityPages ?? 0),
-  );
+  return Math.max(book.contentType === 'activities' ? 0 : 2, available - (book.activityPages ?? 0));
 }
