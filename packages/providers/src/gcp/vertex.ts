@@ -20,11 +20,15 @@ import {
   type ModerationResult,
   type PageReview,
   type PageReviewRequest,
+  type PageRewrite,
+  type PageRewriteRequest,
+  type SpanishVoice,
   type StoryPage,
   type StoryPlan,
   type VisualBibleItem,
   type StoryRequest,
   type StoryReview,
+  STORY_STRUCTURES,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
 
@@ -332,11 +336,38 @@ const BIBLE_ITEM = {
   required: ['name', 'look'],
 };
 
+const REWRITE_SCHEMA = {
+  type: 'OBJECT',
+  properties: { text: { type: 'STRING' } },
+  required: ['text'],
+};
+
+/** El tratamiento del español: la revisión y las reescrituras no lo cambian. */
+function voiceNote(language: string, voice: SpanishVoice | undefined): string {
+  if (language !== 'es') return '';
+  return voice === 'vos'
+    ? '\nUse Rioplatense Spanish voseo ("vos querés", "mirá", "tenés"); never "tú" or "vosotros".'
+    : '\nUse neutral Spanish with "tú" ("tú quieres", "mira"); never "vos".';
+}
+
+/** Forma del cuento para menores de 7 (docs «Cuentos que cuidan»): la elige el planificador. */
+function formPlanRules(age: number): string {
+  if (age >= 7) return 'structure and refrain: null.';
+  const wordless =
+    age >= 3
+      ? ' Mark wordless=true on 1 or 2 scenes at the climax (never the first or last page, never two in a row): the picture tells those pages alone, so their mustBeVisible must carry the whole moment. All other scenes wordless=false.'
+      : ' wordless=false on every scene.';
+  return `This reader is under 7: choose ONE structure for the whole book (${STORY_STRUCTURES.join(', ')}) and record it in structure;
+write in refrain a short phrase, easy to say aloud, that the text repeats at least 3 times (in the language of the brief).${wordless}`;
+}
+
 const PLAN_SCHEMA = {
   type: 'OBJECT',
   properties: {
     theme: { type: 'STRING' },
     arc: { type: 'STRING' },
+    structure: { type: 'STRING', nullable: true, enum: [...STORY_STRUCTURES] },
+    refrain: { type: 'STRING', nullable: true },
     companion: {
       type: 'OBJECT',
       nullable: true,
@@ -382,6 +413,7 @@ const PLAN_SCHEMA = {
           continuityFacts: { type: 'ARRAY', items: { type: 'STRING' } },
           wordBudget: { type: 'INTEGER' },
           personalDetail: { type: 'STRING', nullable: true },
+          wordless: { type: 'BOOLEAN' },
         },
         required: [
           'sceneGoal',
@@ -621,7 +653,8 @@ Distinctive features only if clearly visible (glasses, freckles, dimples, missin
         {
           text: `You are the editor of a personalized children's book. Review the story below written for ${request.childName} (${String(request.age)} years old).
 Fix spelling, grammar, consistency of names and details, and anything not suitable for young children. Keep the language, tone, length and page count.
-Keep the lessons subtle (no explicit moral). Set approved=false only if it cannot be fixed. List the issues you found.
+Keep the lessons subtle (no explicit moral). Set approved=false only if it cannot be fixed. List the issues you found.${voiceNote(request.language, request.spanishVoice)}
+Pages with an empty text are intentionally wordless (the picture tells it): keep them empty. Keep repeated refrains, rhymes and sound words.
 
 Story (JSON):
 ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrationPrompt }) => ({ text, illustrationPrompt })) })}`,
@@ -643,6 +676,27 @@ ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrat
     return { approved: review.approved, issues: review.issues, pages, usage };
   }
 
+  /** Una página que pasó el tope de palabras de la edad: la misma escena, más corta. */
+  async rewritePage(request: PageRewriteRequest): Promise<PageRewrite> {
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [
+        {
+          text: `You are the editor of a personalized picture book for ${request.childName} (${String(request.age)} years old), "${request.storyTitle}".
+Page ${String(request.pageIndex + 1)} is too long for the reader's age. Rewrite ONLY this page in ${String(request.words.min)}-${String(request.words.max)} words,
+in the same language, voice and tone, keeping the same scene, events, names and any refrain or rhyme.${voiceNote(request.language, request.spanishVoice)}
+${request.mustInclude.length ? `These names must appear exactly as written: ${request.mustInclude.join(', ')}.\n` : ''}Do not describe what the picture shows; keep what the character feels, says or decides.
+Previous page: ${request.previous ?? '(none: this is the first page)'}
+Next page: ${request.next ?? '(none: this is the last page)'}
+Page to rewrite: ${request.text}`,
+        },
+      ],
+      { temperature: 0.4, responseMimeType: 'application/json', responseSchema: REWRITE_SCHEMA },
+    );
+    const page = parseJson(response, 'reescritura') as { text: string };
+    return { text: page.text.trim(), usage };
+  }
+
   async moderateText(text: string): Promise<ModerationResult> {
     return moderate(this.client, [{ text: `${MODERATION_RULES}\n\nText:\n"""${text}"""` }]);
   }
@@ -658,7 +712,8 @@ Respect the child: never ridicule appearance, abilities, origin or emotions. Do 
 that were not provided. Before narrating, define beginning, motivation, an age-appropriate difficulty, the protagonist's own decisions,
 consequence and resolution. At least two personal details from the brief must change the action naturally (not just be mentioned).
 No two consecutive scenes may be nearly identical. Exactly ${String(request.pageCount)} scenes, one per narrative page.
-wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min)}-${String(request.wordsPerPage.max)} words` : 'as the brief says'}.
+wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min)}-${String(request.wordsPerPage.max)} words${request.wordsPerPage.cap ? `, never more than ${String(request.wordsPerPage.cap)}` : ''}` : 'as the brief says'}.
+${formPlanRules(request.age)}
 mustBeVisible / notVisible / continuityFacts in short English phrases for the illustrator. Write theme, arc, sceneGoal and emotionalBeat
 in the language of the brief. companion: the one secondary character (relative, friend or pet from the brief) who appears in two or
 more scenes, with a fixed look in English (age, hair, skin tone, clothes and colors; species and fur for a pet); null if none recurs.
@@ -717,9 +772,12 @@ ${request.prompt}`,
     // Cada escena solo nombra lo que está en la biblia (un nombre suelto no tiene aspecto fijo).
     const known = (list: { name: string }[], name: string) =>
       list.some((item) => item.name.trim().toLowerCase() === name.trim().toLowerCase());
+    const young = request.age < 7;
     return {
       theme: plan.theme,
       arc: plan.arc,
+      structure: young && plan.structure ? plan.structure : null,
+      refrain: young && plan.refrain?.trim() ? plan.refrain.trim() : null,
       companion: plan.companion?.name && plan.companion.look ? plan.companion : null,
       cast: (plan.cast ?? []).filter((member) => member.role && member.look).slice(0, 4),
       props,
@@ -730,6 +788,7 @@ ${request.prompt}`,
           ...scene,
           pageIndex,
           personalDetail: scene.personalDetail ?? null,
+          wordless: request.age >= 3 && young ? Boolean(scene.wordless) : false,
           props: (scene.props ?? []).filter((name) => known(props, name)),
           place: scene.place && known(places, scene.place) ? scene.place : null,
           outfit:
@@ -848,7 +907,7 @@ ${request.bible || '(none)'}`,
 (${String(request.age)} years old, reading level ${request.readingLevel}), based on the story "${request.storyTitle}".
 Use only these approved activity templates (kind and guidance), cycling through them; do not invent other kinds:
 ${request.templates.map((template) => `- ${template.kind}: ${template.guidance}`).join('\n')}
-${request.goal ? `General goal chosen by the professional (educational, never clinical): ${request.goal}\n` : ''}Write title, instructions and items in ${request.language === 'es' ? 'Spanish' : request.language === 'pt' ? 'Portuguese' : 'English'};
+${request.goal ? `General goal chosen by the professional (educational, never clinical): ${request.goal}\n` : ''}Write title, instructions and items in ${request.language === 'es' ? 'Spanish' : request.language === 'pt' ? 'Portuguese' : 'English'};${voiceNote(request.language, request.spanishVoice)}
 items are characters, objects or words from the story. illustrationPrompt (English, simple outline scene, no text in the image) only if the
 activity needs a picture, else null. No diagnoses, therapy language or cure promises.
 

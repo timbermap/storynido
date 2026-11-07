@@ -1,4 +1,4 @@
-import { Amatic_SC, Caveat, Lora, Quicksand } from 'next/font/google';
+import { Amatic_SC, Andika, Caveat, Fraunces, Lora, Quicksand } from 'next/font/google';
 
 /**
  * Tipografías de la marca v3 (docs/BRAND.md): Quicksand para títulos, botones y navegación;
@@ -33,5 +33,22 @@ export const fontCover = Amatic_SC({
   weight: '700',
   subsets: ['latin', 'latin-ext'],
   variable: '--font-cover-face',
+  display: 'swap',
+});
+
+/**
+ * Letra del cuento por edad en la vista previa, la misma que el PDF: Andika de 7 a 8 años y
+ * Fraunces de 9 en adelante (de 0 a 6 es Quicksand, la de la interfaz).
+ */
+export const fontStoryReader = Andika({
+  weight: '400',
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-story-reader',
+  display: 'swap',
+});
+
+export const fontStorySerif = Fraunces({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-story-serif',
   display: 'swap',
 });

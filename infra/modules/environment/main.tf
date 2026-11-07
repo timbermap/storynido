@@ -127,6 +127,8 @@ locals {
   sa      = module.service_accounts.emails
   member  = module.service_accounts.members
   sa_name = module.service_accounts.names
+  # Audiencia del token OIDC de Cloud Scheduler para las rutas /jobs de la API.
+  jobs_audience = "storynido-api-jobs"
 }
 
 # api y worker firman URLs de Storage con su propia identidad (signBlob).
@@ -365,6 +367,9 @@ module "api" {
     CORS_ORIGINS = join(",", var.cors_origins)
     # 2FA del admin (DECISIONS 082); se apaga solo mientras no haya Identity Platform.
     ADMIN_MFA_REQUIRED = tostring(var.admin_mfa_required)
+    # Rutas /jobs: solo Cloud Scheduler con un token OIDC de esta cuenta y esta audiencia.
+    JOBS_INVOKER_EMAIL = local.sa["sn-invoker"]
+    JOBS_AUDIENCE      = local.jobs_audience
   })
   secret_env = local.api_secret_env
 
@@ -501,6 +506,33 @@ resource "google_cloud_scheduler_job" "watchdog" {
 
   retry_config {
     retry_count = 1
+  }
+
+  depends_on = [module.apis]
+}
+
+# Fila de muestras sin cupo de IA: cada 5 minutos arranca las que esperan, si hay presupuesto.
+# La API es pública, así que la ruta verifica el token OIDC (cuenta sn-invoker y esta audiencia).
+resource "google_cloud_scheduler_job" "preview_queue" {
+  project          = var.project_id
+  region           = var.region
+  name             = "preview-queue"
+  description      = "Arranca las muestras que esperan en la fila cuando vuelve a haber presupuesto de IA."
+  schedule         = "*/5 * * * *"
+  time_zone        = "Etc/UTC"
+  attempt_deadline = "300s"
+
+  http_target {
+    http_method = "POST"
+    uri         = "${module.api.uri}/jobs/preview-queue"
+    oidc_token {
+      service_account_email = local.sa["sn-invoker"]
+      audience              = local.jobs_audience
+    }
+  }
+
+  retry_config {
+    retry_count = 0
   }
 
   depends_on = [module.apis]

@@ -23,10 +23,37 @@ export interface StoryRequest {
   /** Prompt ya armado con la plantilla de la historia (stories.textPromptTemplate). */
   prompt: string;
   pageCount: number;
-  /** Rango de palabras por página (densidad de texto). */
-  wordsPerPage?: { min: number; max: number };
+  /** Rango de palabras por página (densidad de texto) y tope duro de la franja de edad. */
+  wordsPerPage?: { min: number; max: number; cap?: number };
   /** Nombres que tienen que aparecer tal cual (protagonista y apodo). */
   mustInclude?: readonly string[];
+  /** Español: «vos» (Argentina y Uruguay) o «tú» (el resto). Lo respeta también la revisión. */
+  spanishVoice?: SpanishVoice;
+}
+
+/** Tratamiento en español: voseo rioplatense o tuteo neutro. */
+export type SpanishVoice = 'vos' | 'tu';
+
+/** Reescritura de una página que pasó el tope de palabras de la edad. */
+export interface PageRewriteRequest {
+  language: Locale;
+  spanishVoice?: SpanishVoice;
+  childName: string;
+  age: number;
+  storyTitle: string;
+  pageIndex: number;
+  /** El texto de la página anterior y de la siguiente, para que siga encadenando. */
+  previous: string | null;
+  next: string | null;
+  text: string;
+  words: { min: number; max: number };
+  /** Nombres que tienen que quedar tal cual. */
+  mustInclude: readonly string[];
+}
+
+export interface PageRewrite {
+  text: string;
+  usage: AiUsage;
 }
 
 /** Enseñanza que la IA teje en la trama sin sermonear. */
@@ -136,6 +163,8 @@ export interface ScenePlan {
   wordBudget: number;
   /** Qué detalle personal mueve la escena, si alguno. */
   personalDetail: string | null;
+  /** Página sin texto (3 a 6 años: 1 o 2 en el clímax); el dibujo cuenta solo. */
+  wordless?: boolean;
   /** Objetos de la biblia visual que aparecen en la escena (por nombre; ausente en planes anteriores). */
   props?: string[];
   /** Lugar de la biblia visual donde ocurre la escena (por nombre), o null. */
@@ -166,6 +195,16 @@ export interface OutfitPlan {
   context: string;
   look: string;
 }
+
+/** Estructuras que sostienen un cuento para menores de 7 (una sola para todo el libro). */
+export const STORY_STRUCTURES = [
+  'refrain',
+  'rhymed_quatrains',
+  'days_of_week',
+  'cumulative',
+  'question_answer',
+] as const;
+export type StoryStructure = (typeof STORY_STRUCTURES)[number];
 
 /** Personaje secundario que se repite (abuela, mascota): se dibuja igual en todo el libro. */
 export interface CompanionPlan {
@@ -198,6 +237,9 @@ export interface StoryPlan {
   outfits?: OutfitPlan[];
   /** Principio, motivación, dificultad, decisión del protagonista y resolución. */
   arc: string;
+  /** Menores de 7: la forma elegida para todo el libro y la frase que se repite. */
+  structure?: StoryStructure | null;
+  refrain?: string | null;
   scenes: ScenePlan[];
   usage: AiUsage;
 }
@@ -292,6 +334,7 @@ export interface ActivityRequest {
   count: number;
   /** Profesionales: objetivo general elegido (nunca un protocolo clínico). */
   goal: string | null;
+  spanishVoice?: SpanishVoice;
 }
 
 export interface GeneratedActivities {
@@ -313,6 +356,8 @@ export interface AITextProvider {
   describeCharacter(photo: ImageData): Promise<CharacterSheetResult>;
   generateStory(request: StoryRequest): Promise<GeneratedStory>;
   reviewStory(story: GeneratedStory, request: StoryRequest): Promise<StoryReview>;
+  /** Reescribe una página más corta (pasó el tope de palabras de la edad). */
+  rewritePage(request: PageRewriteRequest): Promise<PageRewrite>;
   moderateText(text: string): Promise<ModerationResult>;
 }
 
