@@ -15,7 +15,9 @@ import {
   SAMPLE_PRINT_ADDRESSES,
   generatedPages,
   matrixCostFor,
+  paymentFeePercent,
   stablePrintCost,
+  withPaymentFee,
   printPageCount,
   rankPrintQuotes,
   type cardsOrderBodySchema,
@@ -557,9 +559,11 @@ export class CheckoutService {
       format,
       format === 'booklet' ? 12 : 28,
     );
+    // Lo que se va a cobrar: el envío al costo más su parte de la comisión de cobro.
+    const fee = paymentFeePercent((await this.catalog.productPricing())[format]);
     return estimate
       ? {
-          shippingUsdMinor: estimate.shippingUsdMinor,
+          shippingUsdMinor: withPaymentFee(estimate.shippingUsdMinor, fee),
           etaDaysMin: estimate.etaDaysMin,
           etaDaysMax: estimate.etaDaysMax,
         }

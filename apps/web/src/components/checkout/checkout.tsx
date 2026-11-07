@@ -277,7 +277,13 @@ export function Checkout({
         })
           .then((result) => {
             if (cancelled) return;
-            setQuote({ ...result, format, country: orderCountry });
+            setQuote({
+              ...result,
+              formatPrices: result.formatPrices ?? [],
+              local: result.local ?? null,
+              format,
+              country: orderCountry,
+            });
             setError(null);
           })
           .catch((caught: unknown) => {

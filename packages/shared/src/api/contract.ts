@@ -389,12 +389,9 @@ export const checkoutQuoteResponseSchema = z.object({
    */
   formatPrices: z
     .array(z.object({ format: bookFormatSchema, amountMinor: z.number().int().nonnegative() }))
-    .default([]),
+    .optional(),
   /** Moneda de referencia del país del pedido (el de envío, en un impreso). */
-  local: z
-    .object({ currency: currencySchema, rate: z.number().positive() })
-    .nullable()
-    .default(null),
+  local: z.object({ currency: currencySchema, rate: z.number().positive() }).nullish(),
 });
 
 /** Tarjetas impresas del kit (DECISIONS 140): un pedido aparte, de las piezas de un kit ya comprado. */
