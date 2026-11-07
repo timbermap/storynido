@@ -38,8 +38,17 @@ const US: CountryConfig = {
 };
 
 const FX = { rates: { MXN: 18.5 }, source: 'test', date: '2026-11-01' };
+/**
+ * Estos casos prueban la mecánica (impuestos, envío, descuentos) con los márgenes anteriores: USD 17
+ * fijos de creación, 30 % con mínimo de USD 8 de impresión, sin comisión ni piso. La regla de
+ * DECISIONS 241 (comisión, piso, base + por página) tiene sus propios casos abajo.
+ */
 const pricing = (format: BookFormat = 'hardcover') => ({
   ...DEFAULT_PRODUCT_PRICING[format],
+  creationMargin: { mode: 'fixed' as const, fixedUsdMinor: 1700, percent: 0 },
+  printMargin: { mode: 'percent_min' as const, fixedUsdMinor: 800, percent: 30 },
+  paymentFeePercent: 0,
+  minNetMarginUsdMinor: 0,
   updatedAt: NOW,
 });
 // Tapa dura: USD 13,51 de impresión y 9,49 de envío a esa dirección.
@@ -179,7 +188,7 @@ describe('precio del pedido (servidor): costo + margen', () => {
     });
   });
 
-  it('un cupón fijo no deja el subtotal negativo (el envío se paga igual)', () => {
+  it('un cupón fijo nunca baja el libro de su costo (el envío se paga igual)', () => {
     const result = quote(
       input({
         coupon: coupon({ type: 'fixed', value: 999999, currency: 'USD' }),
@@ -187,8 +196,9 @@ describe('precio del pedido (servidor): costo + margen', () => {
       }),
     );
     if (!result.ok) throw new Error(result.error);
-    expect(result.snapshot.discount.minor).toBe(4299);
-    expect(result.snapshot.totalMinor).toBe(949);
+    // Costo: IA 4,20 + imprenta 13,51 = 17,71 (sin margen mínimo en estos casos).
+    expect(result.snapshot.discount.minor).toBe(4299 - 1771);
+    expect(result.snapshot.totalMinor).toBe(1771 + 949);
   });
 
   it('un cupón que no sirve se informa y se cobra sin él', () => {
@@ -464,5 +474,59 @@ describe('tarjetas impresas del kit', () => {
       ok: false,
       error: 'format_unavailable',
     });
+  });
+});
+
+describe('margen fijo, precio que sigue al costo (DECISIONS 241)', () => {
+  const current = (format: BookFormat) => ({ ...DEFAULT_PRODUCT_PRICING[format], updatedAt: NOW });
+  const ebook = (pages: number) =>
+    quote(
+      input({ country: US, format: 'digital', pricing: current('digital'), pages, print: null }),
+    );
+  const unit = (result: ReturnType<typeof quote>) =>
+    result.ok ? result.snapshot.components[0]?.unitMinor : null;
+
+  it('ebook por páginas generadas: 13,99 / 15,99 / 21,99 / 23,99', () => {
+    // mini 10, corto 14, clásico 26 y gran aventura 30 páginas con ilustración generada.
+    expect([10, 14, 26, 30].map((pages) => unit(ebook(pages)))).toEqual([1399, 1599, 2199, 2399]);
+  });
+
+  it('margen neto por producto: después de costos y comisión queda el margen fijo', () => {
+    const fee = 0.035;
+    // Ebook clásico: 21,99 − 3,5 % − IA 3,90 ≥ 8 + 0,35 × 26 = 17,10.
+    expect(2199 * (1 - fee) - 390).toBeGreaterThanOrEqual(1710);
+    // Tapa dura clásica con imprenta de USD 11,87: creación 21 + 11,87 + 10 (mínimo) = 42,87.
+    const hardcover = quote(
+      input({
+        pricing: current('hardcover'),
+        pages: 26,
+        print: { ...PRINT, productionUsdMinor: 1187 },
+      }),
+    );
+    expect(unit(hardcover)).toBe(4499);
+    expect(4499 * (1 - fee) - 390 - 1187).toBeGreaterThanOrEqual(1710 + 1000);
+  });
+
+  it('el envío se cobra al costo más su parte de la comisión', () => {
+    const result = quote(input({ pricing: current('hardcover'), pages: 26 }));
+    // 9,49 ÷ 0,965 = 9,834… → 9,84.
+    expect(result.ok && result.snapshot.shipping.minor).toBe(984);
+  });
+
+  it('ningún descuento perfora el margen neto mínimo', () => {
+    const result = quote(
+      input({
+        country: US,
+        format: 'digital',
+        pricing: current('digital'),
+        pages: 26,
+        print: null,
+        coupon: coupon({ value: 90 }),
+        couponCode: 'BIENVENIDA',
+      }),
+    );
+    if (!result.ok) throw new Error(result.error);
+    // Piso: (IA 3,90 + 8) ÷ 0,965 = 12,34. El cupón del 90 % queda en 21,99 − 12,34.
+    expect(result.snapshot.discount).toMatchObject({ reason: 'coupon', minor: 2199 - 1234 });
   });
 });

@@ -12,6 +12,10 @@ import {
   defaultCountryConfig,
   bookFormatPrices,
   bookPriceMinor,
+  CONTENT_TYPES,
+  editorialPlan,
+  matrixCostFor,
+  stablePrintCost,
   printCandidates,
   printPageCount,
   referenceCurrency,
@@ -137,33 +141,43 @@ export function buildOffer(input: {
     }
     return format === 'digital' || printable(format).length > 0;
   });
-  // Precio exacto de cada formato en cada extensión activa (sin envío).
+  // Precio exacto de cada formato en cada extensión y tipo de contenido activos (sin envío): la IA
+  // y el margen se cuentan por página con ilustración generada; la imprenta, por página impresa.
+  const contentTypes = CONTENT_TYPES.filter((type) => editorial.contentTypes[type].active);
   const byLength = BOOK_LENGTHS.filter((length) => editorial.lengths[length].active).flatMap(
-    (length) => {
-      const prices = (professional: boolean) =>
-        bookFormatPrices({
-          country,
-          pricing,
-          pages: editorial.lengths[length].interiorPages,
-          professional,
-          formats: offered,
-          productionUsdMinor: (format) =>
-            productionFor(format, editorial.lengths[length].interiorPages),
-        });
-      const pro = prices(true);
-      return prices(false).map((item) => ({
-        ...item,
-        length,
-        proAmountMinor:
-          pro.find((other) => other.format === item.format)?.amountMinor ?? item.amountMinor,
-      }));
-    },
+    (length) =>
+      contentTypes.flatMap((contentType) => {
+        const plan = editorialPlan(
+          { length, contentType, textDensity: 'balanced', readingLevel: 'developing' },
+          editorial,
+          editorial.lengths[length].interiorPages,
+        );
+        const prices = (professional: boolean) =>
+          bookFormatPrices({
+            country,
+            pricing,
+            pages: plan.narrativePages,
+            professional,
+            formats: offered,
+            productionUsdMinor: (format) => productionFor(format, plan.interiorPages),
+          });
+        const pro = prices(true);
+        return prices(false).map((item) => ({
+          ...item,
+          length,
+          contentType,
+          proAmountMinor:
+            pro.find((other) => other.format === item.format)?.amountMinor ?? item.amountMinor,
+        }));
+      }),
   );
   const formats = offered.flatMap((format) => {
     const product = products.find((p) => p.format === format);
     if (!product) return [];
-    // El «desde» del formato: su extensión más corta que se puede hacer (sin envío).
-    const lengths = byLength.filter((item) => item.format === format);
+    // El «desde» del formato: su extensión más corta que se puede hacer, en cuento (sin envío).
+    const lengths = byLength.filter(
+      (item) => item.format === format && item.contentType === 'story',
+    );
     const fallback = bookPriceMinor(
       pricing[format],
       format === 'digital'
@@ -200,16 +214,22 @@ export function buildOffer(input: {
       quoted: true,
     },
     formats,
-    lengthPrices: digital.map(({ length, amountMinor }) => ({ length, amountMinor })),
-    proLengthPrices: digital.map(({ length, proAmountMinor }) => ({
+    lengthPrices: digital.map(({ length, contentType, amountMinor }) => ({
       length,
+      contentType,
+      amountMinor,
+    })),
+    proLengthPrices: digital.map(({ length, contentType, proAmountMinor }) => ({
+      length,
+      contentType,
       amountMinor: proAmountMinor,
     })),
     printLengthPrices: byLength
       .filter((item) => item.format !== 'digital')
-      .map(({ format, length, amountMinor, proAmountMinor }) => ({
+      .map(({ format, length, contentType, amountMinor, proAmountMinor }) => ({
         format,
         length,
+        contentType,
         amountMinor,
         proAmountMinor,
       })),
@@ -234,7 +254,7 @@ export function registerCatalogRoutes(
     country: CountryCode,
     format: BookFormat,
     pages: number,
-  ) => Promise<{ productionUsdMinor: number } | null>,
+  ) => Promise<{ provider: string; productionUsdMinor: number } | null>,
 ): void {
   addRoute(app, apiRoutes.catalogStories, {}, async (request) => {
     const { locale, age, channel, collection } = query<'catalogStories'>(request);
@@ -367,7 +387,16 @@ export function registerCatalogRoutes(
                 setTimeout(() => { resolve(null); }, OFFER_ESTIMATE_WAIT_MS),
               ),
             ]);
-            if (estimate) costs.set(`${format}:${String(pages)}`, estimate.productionUsdMinor);
+            if (estimate) {
+              // La regla del 5 %: el mismo costo estable que usa el checkout.
+              costs.set(
+                `${format}:${String(pages)}`,
+                stablePrintCost(
+                  estimate.productionUsdMinor,
+                  matrixCostFor(printOptions, format, estimate.provider, code),
+                ),
+              );
+            }
           }),
       );
     }

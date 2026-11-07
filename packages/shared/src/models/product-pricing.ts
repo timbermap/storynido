@@ -5,11 +5,13 @@ import { bookFormatSchema, type BookFormat } from './common';
 import type { FxRates } from './metrics';
 
 /**
- * Precio por costo + dos márgenes (DECISIONS 096 y 098), todo en dólares:
- * - creación: el costo de IA (costo por página × páginas del libro) + margen de creación;
- * - impresión (solo impresos): lo que cobra la imprenta para esa dirección + margen de impresión.
- * El envío se cobra al costo. Cada margen se define como monto fijo, porcentaje del costo o
- * porcentaje con mínimo, por producto (digital, tapa blanda, tapa dura), desde el admin.
+ * Precio por costo + dos márgenes (DECISIONS 096, 098 y 241), todo en dólares:
+ * - creación: el costo de IA (costo por página × páginas con ilustración generada) + margen de
+ *   creación (base + monto por página generada);
+ * - impresión (solo impresos): lo que cobra la imprenta que se usa + margen de impresión.
+ * La comisión de cobro es un costo: el precio se calcula para que, después de ella, quede el
+ * margen. El envío se cobra al costo más su parte de la comisión. Cada margen se define desde el
+ * admin, por producto (digital, tapa blanda, tapa dura, grapado).
  */
 export const MARGIN_MODES = ['fixed', 'percent', 'percent_min'] as const;
 
@@ -23,6 +25,8 @@ export const marginSchema = z.object({
   fixedUsdMinor: z.number().int().min(0),
   /** Porcentaje del costo (modos `percent` y `percent_min`). */
   percent: z.number().min(0).max(1000),
+  /** Modo `fixed`: además, un monto por página con ilustración generada (centavos de USD). */
+  perPageUsdMinor: z.number().int().min(0).optional(),
 });
 
 export type Margin = z.infer<typeof marginSchema>;
@@ -30,7 +34,10 @@ export type Margin = z.infer<typeof marginSchema>;
 /** productPricing/{producto}: costos y márgenes de un producto (editable en el admin). */
 export const productPricingSchema = z.object({
   product: bookFormatSchema,
-  /** Costo de IA por página ilustrada, con regeneraciones y revisión (centavos de USD). */
+  /**
+   * Costo de IA por página con ilustración generada (no cuentan las fijas ni las de actividades
+   * que arma el sistema), con regeneraciones y revisión (centavos de USD).
+   */
   aiCostPerPageUsdMinor: z.number().int().min(0),
   /** Margen sobre el costo de creación (IA). */
   creationMargin: marginSchema,
@@ -38,6 +45,13 @@ export const productPricingSchema = z.object({
   printMargin: marginSchema,
   /** Profesionales: descuento base sobre el precio (aparte del de recurrencia). */
   proPercentOff: z.number().int().min(0).max(80).default(0),
+  /** Comisión de cobro (Stripe, Mercado Pago), en %: un costo más. Sin valor, 3,5 %. */
+  paymentFeePercent: z.number().min(0).max(20).optional(),
+  /**
+   * Margen neto mínimo por libro (después de costos y comisión): ningún descuento (cupón, pro,
+   * recurrencia) lo perfora. Sin valor, USD 8 en digital y USD 12 en impresos.
+   */
+  minNetMarginUsdMinor: z.number().int().min(0).optional(),
   /**
    * Costo de IA por página medido (DECISIONS 241): un job diario lo calcula con los libros pagados
    * de los últimos 30 días y, salvo que esté fijado a mano, lo copia a `aiCostPerPageUsdMinor`.
@@ -49,6 +63,8 @@ export const productPricingSchema = z.object({
       updatedAt: z.coerce.date(),
       /** El valor que había antes de copiarlo (null si no se copió: pocos libros o fijado a mano). */
       previousUsdMinor: z.number().int().nonnegative().nullable(),
+      /** Cuándo se copió por última vez (el precio cambia como mucho una vez por semana). */
+      appliedAt: z.coerce.date().nullish(),
     })
     .nullish(),
   /** Fijar a mano: el job diario no toca `aiCostPerPageUsdMinor`. */
@@ -60,55 +76,40 @@ export const productPricingSchema = z.object({
 export type ProductPricing = z.infer<typeof productPricingSchema>;
 
 /**
- * Valores de fábrica: USD 0,15 de IA por página, USD 17 de creación y, en impresos, 30 % de la
- * imprenta con un mínimo de USD 8. Digital clásico (28 páginas): 4,20 + 17 = 21,99.
+ * Valores de fábrica (DECISIONS 241): USD 0,15 de IA por página generada; creación = USD 8 + 0,35
+ * por página generada; impresión = 30 % de la imprenta con mínimo de USD 8 (USD 10 en tapa dura);
+ * comisión de cobro 3,5 %. Ebook clásico (26 páginas generadas): (3,90 + 8 + 9,10) ÷ 0,965 =
+ * 21,76 → 21,99.
  */
-const CREATION: Margin = { mode: 'fixed', fixedUsdMinor: 1700, percent: 0 };
+export const DEFAULT_PAYMENT_FEE_PERCENT = 3.5;
+const CREATION: Margin = { mode: 'fixed', fixedUsdMinor: 800, percent: 0, perPageUsdMinor: 35 };
 const PRINTING: Margin = { mode: 'percent_min', fixedUsdMinor: 800, percent: 30 };
 
+const product = (format: BookFormat, printMin = 800) => ({
+  product: format,
+  aiCostPerPageUsdMinor: 15,
+  creationMargin: CREATION,
+  printMargin: { ...PRINTING, fixedUsdMinor: printMin },
+  proPercentOff: 10,
+  paymentFeePercent: DEFAULT_PAYMENT_FEE_PERCENT,
+  minNetMarginUsdMinor: format === 'digital' ? 800 : 1200,
+  active: true,
+});
+
 export const DEFAULT_PRODUCT_PRICING: Record<BookFormat, Omit<ProductPricing, 'updatedAt'>> = {
-  digital: {
-    product: 'digital',
-    aiCostPerPageUsdMinor: 15,
-    creationMargin: CREATION,
-    printMargin: PRINTING,
-    proPercentOff: 10,
-    active: true,
-  },
-  softcover: {
-    product: 'softcover',
-    aiCostPerPageUsdMinor: 15,
-    creationMargin: CREATION,
-    printMargin: PRINTING,
-    proPercentOff: 10,
-    active: true,
-  },
-  hardcover: {
-    product: 'hardcover',
-    aiCostPerPageUsdMinor: 15,
-    creationMargin: CREATION,
-    printMargin: PRINTING,
-    proPercentOff: 10,
-    active: true,
-  },
-  // Cuento grapado (DECISIONS 138): mismo margen de impresión; el mínimo de USD 8 ya cubre
-  // su costo de producción (USD 9,62 a 12,68 en Gelato).
-  booklet: {
-    product: 'booklet',
-    aiCostPerPageUsdMinor: 15,
-    creationMargin: CREATION,
-    printMargin: PRINTING,
-    proPercentOff: 10,
-    active: true,
-  },
+  digital: product('digital'),
+  softcover: product('softcover'),
+  hardcover: product('hardcover', 1000),
+  // Cuento grapado (DECISIONS 138): el mínimo de USD 8 ya cubre su costo de producción.
+  booklet: product('booklet'),
 };
 
-/** Margen sobre un costo (en centavos de USD), según su modo. */
-export function marginUsdMinor(margin: Margin, costUsdMinor: number): number {
+/** Margen sobre un costo (en centavos de USD), según su modo. `pages`: páginas generadas. */
+export function marginUsdMinor(margin: Margin, costUsdMinor: number, pages = 0): number {
   const percent = Math.round((costUsdMinor * margin.percent) / 100);
   switch (margin.mode) {
     case 'fixed':
-      return margin.fixedUsdMinor;
+      return margin.fixedUsdMinor + (margin.perPageUsdMinor ?? 0) * Math.max(0, pages);
     case 'percent':
       return percent;
     case 'percent_min':
@@ -116,23 +117,43 @@ export function marginUsdMinor(margin: Margin, costUsdMinor: number): number {
   }
 }
 
+type Pricing = ProductPricing | Omit<ProductPricing, 'updatedAt'>;
+
+/** Costo de IA del libro: costo por página generada × páginas generadas. */
+export const aiCostUsdMinor = (pricing: Pricing, pages: number) =>
+  pricing.aiCostPerPageUsdMinor * Math.max(0, pages);
+
 /**
- * Precio unitario del libro en centavos de USD: creación (IA por páginas + margen) e impresión
- * (imprenta + margen, si es impreso). El envío va aparte y al costo.
+ * Costo + márgenes de un ejemplar, en centavos de USD, antes de la comisión de cobro: creación
+ * (IA por páginas generadas + margen) e impresión (imprenta + margen, si es impreso).
  */
 export function unitPriceUsdMinor(
-  pricing: ProductPricing | Omit<ProductPricing, 'updatedAt'>,
+  pricing: Pricing,
   productionCostUsdMinor: number,
   pages: number,
 ): number {
-  const ai = pricing.aiCostPerPageUsdMinor * Math.max(0, pages);
-  const creation = ai + marginUsdMinor(pricing.creationMargin, ai);
+  const ai = aiCostUsdMinor(pricing, pages);
+  const creation = ai + marginUsdMinor(pricing.creationMargin, ai, pages);
   const printing =
     pricing.product === 'digital' || productionCostUsdMinor <= 0
       ? 0
       : productionCostUsdMinor + marginUsdMinor(pricing.printMargin, productionCostUsdMinor);
   return creation + printing;
 }
+
+/** Comisión de cobro del producto, en %. */
+export const paymentFeePercent = (pricing: Pricing) =>
+  pricing.paymentFeePercent ?? DEFAULT_PAYMENT_FEE_PERCENT;
+
+/** Lo que hay que cobrar para que, después de la comisión, queden `usdMinor` (hacia arriba). */
+export function withPaymentFee(usdMinor: number, feePercent: number): number {
+  if (usdMinor <= 0) return 0;
+  return Math.ceil((usdMinor * 100) / (100 - feePercent));
+}
+
+/** Margen neto mínimo por libro (lo que ningún descuento perfora). */
+export const minNetMarginUsdMinor = (pricing: Pricing) =>
+  pricing.minNetMarginUsdMinor ?? (pricing.product === 'digital' ? 800 : 1200);
 
 /** Centavos de USD → unidad mínima de otra moneda (tipo de cambio: unidades por dólar). */
 export function fromUsdMinor(usdMinor: number, currency: Currency, fx: FxRates): number | null {

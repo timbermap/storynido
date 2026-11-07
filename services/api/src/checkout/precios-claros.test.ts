@@ -6,7 +6,6 @@ import {
   marginUsdMinor,
   quote,
   referencePrintCost,
-  unitPriceUsdMinor,
   type BookFormat,
   type CountryCode,
   type CountryConfig,
@@ -125,6 +124,9 @@ const cost = (code: 'AR' | 'MX', format: BookFormat, pages: number, routing: Pri
     quantity: 1,
   });
 
+/** Páginas con ilustración generada de un cuento (las 2 fijas no cuentan). */
+const generated = (interior: number) => interior - 2;
+
 /** El renglón del libro en el resumen, con o sin la cotización de la imprenta para la dirección. */
 function summary(
   code: 'AR' | 'MX',
@@ -139,7 +141,7 @@ function summary(
     pricing: productPricing[format],
     fx,
     format,
-    pages,
+    pages: generated(pages),
     quantity: 1,
     print: format === 'digital' ? null : cost(code, format, pages, routing),
     coupon: null,
@@ -166,7 +168,7 @@ const cards = (
   bookFormatPrices({
     country: countries[code],
     pricing,
-    pages,
+    pages: generated(pages),
     professional,
     productionUsdMinor: (format) => {
       const value = cost(code, format, pages, routing);
@@ -212,10 +214,15 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
           const bar =
             format === 'digital'
               ? (professional ? offer.proLengthPrices : offer.lengthPrices).find(
-                  (item) => item.length === 'classic',
+                  (item) => item.length === 'classic' && item.contentType === 'story',
                 )?.amountMinor
               : offer.printLengthPrices
-                  .filter((item) => item.length === 'classic' && item.format === format)
+                  .filter(
+                    (item) =>
+                      item.length === 'classic' &&
+                      item.contentType === 'story' &&
+                      item.format === format,
+                  )
                   .map((item) => (professional ? item.proAmountMinor : item.amountMinor))[0];
           const card = withoutAddress.find((item) => item.format === format)?.amountMinor;
           const line = summary(code, format, classic, null, professional);
@@ -234,34 +241,38 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
           const lineWithAddress = summary(code, format, classic, routed, professional);
           expect(lineWithAddress.components[0]?.totalMinor).toBe(cardWithAddress);
           expect(cardWithAddress).toBeGreaterThan(bar ?? 0);
-          expect(lineWithAddress.shipping).toMatchObject({ minor: 826, pending: false });
+          // Envío al costo más su parte de la comisión: 8,26 ÷ 0,965 → 8,56.
+          expect(lineWithAddress.shipping).toMatchObject({ minor: 856, pending: false });
         }
       });
     }
   }
 
-  it('si sube el costo de la imprenta o de la IA, sube el precio y el margen queda igual', () => {
-    const pages = classic;
-    // Margen de cada libro = precio − costo de IA − impresión (antes de redondear a ,99).
-    const margin = (production: number, perPage: number) => {
-      const product = { ...pricing.hardcover, aiCostPerPageUsdMinor: perPage };
-      const ai = perPage * pages;
-      return (
-        unitPriceUsdMinor(product, production, pages) -
-        ai -
-        production -
-        (marginUsdMinor(product.creationMargin, ai) +
-          marginUsdMinor(product.printMargin, production))
-      );
-    };
-    const base = summary('AR', 'hardcover', pages, routing(1187, 826));
-    const pricier = summary('AR', 'hardcover', pages, routing(1700, 826));
-    expect(pricier.components[0]?.totalMinor).toBeGreaterThan(base.components[0]?.totalMinor ?? 0);
-    // El margen sale de la regla del admin, no de lo que quede: con más costo es el mismo.
-    expect(margin(1187, 15)).toBe(0);
-    expect(margin(1700, 15)).toBe(0);
-    expect(marginUsdMinor(pricing.hardcover.printMargin, 1187)).toBe(800);
-    expect(marginUsdMinor(pricing.hardcover.printMargin, 1700)).toBe(800);
+  it('si sube el costo de la imprenta o de la IA, sube el precio y el margen neto queda igual', () => {
+    const fee = 0.035;
+    const pages = generated(classic);
+    // Margen neto = lo cobrado − comisión − IA − impresión. La regla del admin: creación 8 + 0,35
+    // por página generada; impresión 30 % con mínimo de 10 en tapa dura.
+    const net = (price: number, ai: number, production: number) =>
+      price * (1 - fee) - ai - production;
+    const rule = (ai: number, production: number, product = pricing.hardcover) =>
+      marginUsdMinor(product.creationMargin, ai, pages) +
+      (product.product === 'digital' ? 0 : marginUsdMinor(product.printMargin, production));
+
+    for (const production of [1187, 1700]) {
+      const line = summary('AR', 'hardcover', classic, routing(production, 826));
+      const price = line.components[0]?.totalMinor ?? 0;
+      const ai = 15 * pages;
+      // El margen neto es el de la regla (solo el redondeo a ,99 suma centavos).
+      expect(net(price, ai, production) - rule(ai, production)).toBeGreaterThanOrEqual(0);
+      expect(net(price, ai, production) - rule(ai, production)).toBeLessThan(100);
+      expect(rule(ai, production)).toBe(800 + 35 * 26 + 1000);
+    }
+    expect(
+      summary('AR', 'hardcover', classic, routing(1700, 826)).components[0]?.totalMinor,
+    ).toBeGreaterThan(
+      summary('AR', 'hardcover', classic, routing(1187, 826)).components[0]?.totalMinor ?? 0,
+    );
 
     const aiPricier = Object.fromEntries(
       Object.entries(pricing).map(([format, item]) => [
@@ -269,21 +280,34 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
         { ...item, aiCostPerPageUsdMinor: 20 },
       ]),
     ) as Record<BookFormat, ProductPricing>;
-    const digital = summary('AR', 'digital', pages, null);
-    const digitalPricier = summary('AR', 'digital', pages, null, false, aiPricier);
-    // 28 páginas × 5 centavos más de IA: 21,20 → 22,60 (22,99); el margen de creación (USD 17) no cambia.
+    const digital = summary('AR', 'digital', classic, null);
+    const digitalPricier = summary('AR', 'digital', classic, null, false, aiPricier);
+    // 26 páginas × 5 centavos más de IA: (3,90 + 17,10) ÷ 0,965 = 21,76 → 21,99 pasa a
+    // (5,20 + 17,10) ÷ 0,965 = 23,11 → 23,99. El margen de creación (17,10) no cambia.
     expect(digital.components[0]?.totalMinor).toBe(2199);
-    expect(digitalPricier.components[0]?.totalMinor).toBe(2299);
-    expect(marginUsdMinor(aiPricier.digital.creationMargin, 20 * pages)).toBe(1700);
+    expect(digitalPricier.components[0]?.totalMinor).toBe(2399);
+    expect(rule(20 * pages, 0, aiPricier.digital)).toBe(rule(15 * pages, 0, pricing.digital));
+  });
+
+  it('ebook por extensión: 13,99 / 15,99 / 21,99 / 23,99', () => {
+    const offer = offerFor('AR');
+    const story = (length: string) =>
+      offer.lengthPrices.find((item) => item.length === length && item.contentType === 'story')
+        ?.amountMinor;
+    expect(['mini', 'short', 'classic', 'epic'].map(story)).toEqual([1399, 1599, 2199, 2399]);
   });
 
   it('el «desde» del impreso es el formato más barato en su extensión más corta', () => {
     const offer = offerFor('AR');
     const printed = offer.formats.filter((item) => item.format !== 'digital');
-    const lowest = Math.min(...offer.printLengthPrices.map((item) => item.amountMinor));
+    const lowest = Math.min(
+      ...offer.printLengthPrices
+        .filter((item) => item.contentType === 'story')
+        .map((item) => item.amountMinor),
+    );
     expect(Math.min(...printed.map((item) => item.amountMinor))).toBe(lowest);
-    // Digital: la extensión más corta (mini, 12 páginas): 0,15 × 12 + 17 = 18,80 → 18,99.
-    expect(offer.formats.find((item) => item.format === 'digital')?.amountMinor).toBe(1899);
+    // Digital: el cuento más corto (mini, 10 páginas generadas): (1,50 + 11,50) ÷ 0,965 → 13,99.
+    expect(offer.formats.find((item) => item.format === 'digital')?.amountMinor).toBe(1399);
   });
 
   it('la moneda de referencia es la del país del pedido', () => {

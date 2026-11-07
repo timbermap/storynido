@@ -56,18 +56,20 @@ const row = (rows: ReturnType<typeof table>, length: string, format: string) =>
   rows.find((item) => item.length === length && item.format === format);
 
 describe('tabla «Precio final» del admin', () => {
-  it('digital por extensión: IA por páginas + margen, redondeado a ,99', () => {
+  it('digital por extensión: IA y margen por páginas generadas + comisión, redondeado a ,99', () => {
     const rows = table(['lulu', 'gelato']);
+    // Mini: 12 páginas, 10 con ilustración generada. (1,50 + 8 + 3,50) ÷ 0,965 = 13,48 → 13,99.
     expect(row(rows, 'mini', 'digital')).toMatchObject({
       pages: 12,
-      aiCostUsdMinor: 180,
-      creationMarginUsdMinor: 1700,
-      priceMinor: 1899,
+      generatedPages: 10,
+      aiCostUsdMinor: 150,
+      creationMarginUsdMinor: 1150,
+      priceMinor: 1399,
       blocked: null,
     });
     expect(row(rows, 'classic', 'digital')?.priceMinor).toBe(2199);
-    // Profesionales: 10 % antes de redondear.
-    expect(row(rows, 'mini', 'digital')?.proPriceMinor).toBe(1699);
+    // Profesionales: 10 % antes de redondear (13,48 → 12,13 → 12,99), sin bajar del piso.
+    expect(row(rows, 'mini', 'digital')?.proPriceMinor).toBe(1299);
   });
 
   it('impreso: la imprenta activa más barata + margen con mínimo de USD 8', () => {
@@ -76,15 +78,16 @@ describe('tabla «Precio final» del admin', () => {
       provider: 'lulu',
       productionCostUsdMinor: 559,
       printMarginUsdMinor: 800,
-      priceMinor: 3499,
+      // (3,90 + 17,10 + 5,59 + 8) ÷ 0,965 = 35,85 → 35,99.
+      priceMinor: 3599,
     });
     // Sin Lulu activa, gana Gelato.
     expect(row(table(['gelato']), 'classic', 'softcover')).toMatchObject({
       provider: 'gelato',
-      priceMinor: 3999,
+      priceMinor: 4099,
     });
     // El grapado cuenta las tapas: Mini 12 → 16 páginas de imprenta.
-    expect(row(rows, 'mini', 'booklet')).toMatchObject({ printPages: 16, priceMinor: 3699 });
+    expect(row(rows, 'mini', 'booklet')).toMatchObject({ printPages: 16, priceMinor: 3299 });
   });
 
   it('dice por qué una combinación no se vende', () => {

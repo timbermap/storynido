@@ -128,8 +128,11 @@ export function SignedInHome({
   const name = fullName?.trim() ? (fullName.trim().split(/\s+/)[0] ?? null) : null;
   const next = view.next;
   // El libro ya está elegido: su precio exacto (el de su extensión), el mismo del pago.
-  const nextLength = next && next.kind !== 'order' ? next.book.length : null;
-  const digitalMinor = offer && nextLength ? bookPrices(offer, nextLength).digital : null;
+  const nextBook = next && next.kind !== 'order' ? next.book : null;
+  const digitalMinor =
+    offer && nextBook?.length
+      ? bookPrices(offer, nextBook.length, false, nextBook.contentType ?? undefined).digital
+      : null;
   const digitalPrice =
     digitalMinor != null
       ? formatPrice(digitalMinor, offer?.currency ?? 'USD', locale, country)

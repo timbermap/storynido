@@ -235,30 +235,29 @@ describe('catálogo', () => {
       local: unknown;
       shipping: { costMinor: number; quoted: boolean; etaDaysMin: number; etaDaysMax: number };
       formats: { format: string; amountMinor: number; estimated: boolean }[];
-      lengthPrices: { length: string; amountMinor: number }[];
-      proLengthPrices: { length: string; amountMinor: number }[];
+      lengthPrices: { length: string; contentType?: string; amountMinor: number }[];
+      proLengthPrices: { length: string; contentType?: string; amountMinor: number }[];
     }>();
     expect(offer.available).toBe(true);
-    // El precio de cada extensión, y el del perfil profesional (con su descuento base, siempre menor).
-    expect(offer.lengthPrices.map((item) => item.length)).toEqual([
-      'mini',
-      'short',
-      'classic',
-      'epic',
-    ]);
-    expect(offer.proLengthPrices).toHaveLength(4);
-    for (const [index, item] of offer.proLengthPrices.entries()) {
-      expect(item.amountMinor).toBeLessThan(offer.lengthPrices[index]?.amountMinor ?? 0);
+    // El precio de cada extensión en cuento, y el del perfil profesional (con su descuento base,
+    // siempre menor).
+    const stories = offer.lengthPrices.filter((item) => item.contentType === 'story');
+    const proStories = offer.proLengthPrices.filter((item) => item.contentType === 'story');
+    expect(stories.map((item) => item.length)).toEqual(['mini', 'short', 'classic', 'epic']);
+    expect(proStories).toHaveLength(4);
+    for (const [index, item] of proStories.entries()) {
+      expect(item.amountMinor).toBeLessThan(stories[index]?.amountMinor ?? 0);
     }
     // Todo en dólares (DECISIONS 097); el peso va solo como referencia.
     expect(offer.currency).toBe('USD');
     expect(offer.local).toEqual({ currency: 'MXN', rate: 20 });
-    // El «desde» de cada formato es su extensión más corta (mini, 12 páginas; la imprenta de
-    // prueba imprime desde 12). Digital: 0,15 × 12 + 17 = 18,80 → 18,99.
-    // Tapa dura: 18,80 + imprenta 14 + 8 (mínimo de impresión) = 40,80 → 40,99.
+    // El «desde» de cada formato es su cuento más corto (mini: 12 páginas, 10 con ilustración
+    // generada; la imprenta de prueba imprime desde 12). Comisión de cobro 3,5 %.
+    // Digital: (IA 1,50 + creación 8 + 3,50) ÷ 0,965 = 13,48 → 13,99.
+    // Tapa dura: (13 + imprenta 14 + 10 de mínimo) ÷ 0,965 = 38,35 → 38,99.
     expect(offer.formats).toEqual([
-      expect.objectContaining({ format: 'digital', amountMinor: 1899, estimated: false }),
-      expect.objectContaining({ format: 'hardcover', amountMinor: 4099, estimated: true }),
+      expect.objectContaining({ format: 'digital', amountMinor: 1399, estimated: false }),
+      expect.objectContaining({ format: 'hardcover', amountMinor: 3899, estimated: true }),
     ]);
     expect(offer.shipping).toEqual({ costMinor: 0, quoted: true, etaDaysMin: 6, etaDaysMax: 10 });
   });
@@ -270,7 +269,7 @@ describe('catálogo', () => {
       formats: { format: string; amountMinor: number }[];
     }>();
     expect(offer).toMatchObject({ available: true, currency: 'USD', local: null });
-    expect(offer.formats[0]).toMatchObject({ format: 'digital', amountMinor: 1899 });
+    expect(offer.formats[0]).toMatchObject({ format: 'digital', amountMinor: 1399 });
   });
 
   it('sin imprenta habilitada (o sin muestra aprobada) el impreso no se ofrece', () => {

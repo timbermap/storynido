@@ -634,11 +634,24 @@ export const offerSchema = z.object({
    * cada historia parte de su extensión más corta.
    */
   lengthPrices: z
-    .array(z.object({ length: bookLengthSchema, amountMinor: z.number().int() }))
+    .array(
+      z.object({
+        length: bookLengthSchema,
+        /** Tipo de contenido (las actividades tienen menos páginas generadas). */
+        contentType: contentTypeSchema.optional(),
+        amountMinor: z.number().int(),
+      }),
+    )
     .default([]),
   /** Lo mismo con el descuento base del perfil profesional (lo que de verdad paga). */
   proLengthPrices: z
-    .array(z.object({ length: bookLengthSchema, amountMinor: z.number().int() }))
+    .array(
+      z.object({
+        length: bookLengthSchema,
+        contentType: contentTypeSchema.optional(),
+        amountMinor: z.number().int(),
+      }),
+    )
     .default([]),
   /**
    * Precio exacto del impreso (sin envío) por formato y extensión, con la imprenta de referencia
@@ -649,6 +662,7 @@ export const offerSchema = z.object({
       z.object({
         format: z.enum(BOOK_FORMATS),
         length: bookLengthSchema,
+        contentType: contentTypeSchema.optional(),
         amountMinor: z.number().int(),
         proAmountMinor: z.number().int(),
       }),

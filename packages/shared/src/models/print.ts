@@ -159,6 +159,9 @@ export const printOptionSchema = z.object({
       previousCostUsdMinor: z.number().int().nonnegative().nullable(),
       previousEtaDaysMin: z.number().int().nonnegative().nullable(),
       previousEtaDaysMax: z.number().int().nonnegative().nullable(),
+      /** Lo último que cotizó (aunque no haya movido el costo: la regla del 5 % y una vez por semana). */
+      quotedCostUsdMinor: z.number().int().nonnegative().nullish(),
+      quotedAt: z.coerce.date().nullish(),
       failedAt: z.coerce.date().nullable(),
       error: z.string().nullable(),
     })

@@ -3,14 +3,16 @@ import { z } from 'zod';
 import { currencySchema, type Currency } from '../currency';
 import type { CountryConfig, Coupon, Promotion } from './commerce';
 import type { BookFormat } from './common';
-import { bookPriceMinor } from './book-price';
+import { bookFloorMinor, bookPriceMinor } from './book-price';
 import { kitPieceSchema, type EventPricing, type KitSelection } from './kit';
 import type { FxRates } from './metrics';
 import {
   charmPrice,
   fromUsdMinor,
   marginUsdMinor,
+  paymentFeePercent,
   unitPriceUsdMinor,
+  withPaymentFee,
   type Margin,
   type ProductPricing,
 } from './product-pricing';
@@ -193,6 +195,7 @@ export function quote(input: QuoteInput): QuoteResult {
 
   const quantity = Math.max(1, Math.floor(input.quantity));
   const productionUnit = print ? Math.round(print.productionUsdMinor / quantity) : 0;
+  const fee = paymentFeePercent(pricing);
   const usd = unitPriceUsdMinor(pricing, productionUnit, input.pages);
   // La creación (IA + margen) se cobra una vez; cada ejemplar extra paga solo su impresión.
   const copyUsd = usd - unitPriceUsdMinor(pricing, 0, input.pages);
@@ -201,12 +204,18 @@ export function quote(input: QuoteInput): QuoteResult {
     input.pro?.professional ? Math.round((value * (100 - pricing.proPercentOff)) / 100) : value;
   // El libro: el mismo cálculo que la barra de la muestra y las tarjetas del checkout.
   const unit = bookPriceMinor(pricing, productionUnit, input.pages, input.pro?.professional);
-  const copyLocal = fromUsdMinor(withBase(copyUsd), CHARGE_CURRENCY, input.fx);
+  const copyLocal = fromUsdMinor(withBase(withPaymentFee(copyUsd, fee)), CHARGE_CURRENCY, input.fx);
   const copy = copyLocal === null ? null : charmPrice(copyLocal, CHARGE_CURRENCY);
   if (copy === null) return { ok: false, error: 'price_missing' };
 
-  // El envío se cobra al costo, exacto (en dólares, sin redondear).
-  const shippingMinor = print?.shippingUsdMinor ?? 0;
+  // El envío se cobra al costo más su parte de la comisión de cobro (en dólares, sin redondear).
+  const shippingMinor = withPaymentFee(print?.shippingUsdMinor ?? 0, fee);
+  // Ningún descuento perfora el margen neto mínimo: el libro no baja de su piso y los ejemplares
+  // extra, de su costo (con la comisión).
+  const bookUnits = print ? 1 : quantity;
+  const minSubtotal =
+    bookFloorMinor(pricing, productionUnit, input.pages) * bookUnits +
+    (print && quantity > 1 ? withPaymentFee(productionUnit, fee) * (quantity - 1) : 0);
 
   return finalize(
     [
@@ -236,6 +245,8 @@ export function quote(input: QuoteInput): QuoteResult {
       etaDaysMax: print?.etaDaysMax ?? 0,
       pending: print !== null && print.shippingUsdMinor === null,
     },
+    0,
+    minSubtotal,
   );
 }
 
@@ -333,6 +344,8 @@ function finalize(
   shipping: PriceSnapshot['shipping'],
   /** Porcentaje por kit completo (Eventos): compite con el resto, se aplica el mayor. */
   bundlePercent = 0,
+  /** Lo mínimo que puede quedar el subtotal con el descuento (margen neto mínimo; DECISIONS 241). */
+  minSubtotalMinor = 0,
 ): QuoteResult {
   const subtotal = Math.max(
     0,
@@ -364,7 +377,9 @@ function finalize(
   const proMinor = Math.round((subtotal * percentPro) / 100);
   const bundleMinor = Math.round((subtotal * bundlePercent) / 100);
   const best = Math.max(couponMinor, promotionMinor, proMinor, bundleMinor);
-  const discount =
+  // El descuento nunca baja el subtotal del piso (el margen neto mínimo).
+  const cap = Math.max(0, subtotal - minSubtotalMinor);
+  const chosen =
     best === 0
       ? { minor: 0, reason: null, label: null }
       : couponMinor === best
@@ -378,6 +393,12 @@ function finalize(
                 reason: 'promotion' as const,
                 label: promotion?.name ?? null,
               };
+  const discount =
+    chosen.minor > cap
+      ? cap > 0
+        ? { ...chosen, minor: cap }
+        : { minor: 0, reason: null, label: null }
+      : chosen;
 
   const taxable = subtotal - discount.minor + shipping.minor;
   const basisPoints = country.taxBasisPoints;

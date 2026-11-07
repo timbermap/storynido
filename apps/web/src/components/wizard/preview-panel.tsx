@@ -100,7 +100,8 @@ export function PreviewPanel({
   const { status: proStatus } = useProStatus();
   const professional = proStatus?.accountType === 'professional';
   // Precio exacto de este libro (su extensión), el mismo que las tarjetas y el resumen del pago.
-  const bookPrice = prices && book.length ? bookPrices(prices, book.length, professional) : null;
+  const bookPrice =
+    prices && book.length ? bookPrices(prices, book.length, professional, book.contentType) : null;
   const locale = useLocale() as Locale;
   const money = (minor: number) =>
     prices ? formatPrice(minor, prices.currency, locale, prices.country) : '';

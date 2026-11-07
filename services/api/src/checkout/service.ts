@@ -13,6 +13,9 @@ import {
   referenceCurrency,
   referencePrintCost,
   SAMPLE_PRINT_ADDRESSES,
+  generatedPages,
+  matrixCostFor,
+  stablePrintCost,
   printPageCount,
   rankPrintQuotes,
   type cardsOrderBodySchema,
@@ -24,6 +27,8 @@ import {
   quoteKit,
   type AuditLogEntry,
   type BookFormat,
+  type BookLength,
+  type ContentType,
   type Address,
   type CountryCode,
   type KitSelection,
@@ -144,12 +149,24 @@ export function bookPrintCost(input: {
   estimate: PrintEstimate | null;
   matrix: { productionUsdMinor: number; etaDaysMin: number; etaDaysMax: number } | null;
   quantity: number;
+  /** Costo por ejemplar de la matriz para esa imprenta (la regla del 5 %); null si no hay fila. */
+  matrixFor?: (provider: string) => number | null;
 }): PrintCost | null {
   const { routing, estimate, matrix } = input;
   if (!matrix) return null;
+  const quantity = Math.max(1, Math.floor(input.quantity));
+  // El precio cambia solo si el costo se mueve más de 5 % respecto de la matriz.
+  const stable = (provider: string, totalUsdMinor: number) =>
+    stablePrintCost(
+      Math.round(totalUsdMinor / quantity),
+      input.matrixFor?.(provider) ?? null,
+    ) * quantity;
   if (routing) {
     return {
-      productionUsdMinor: routing.productionCostUsdMinor ?? routing.totalCostUsdMinor,
+      productionUsdMinor: stable(
+        routing.provider,
+        routing.productionCostUsdMinor ?? routing.totalCostUsdMinor,
+      ),
       shippingUsdMinor: routing.shippingCostUsdMinor ?? 0,
       etaDaysMin: routing.etaDaysMin,
       etaDaysMax: routing.etaDaysMax,
@@ -157,14 +174,14 @@ export function bookPrintCost(input: {
   }
   if (estimate) {
     return {
-      productionUsdMinor: estimate.productionUsdMinor,
+      productionUsdMinor: stable(estimate.provider, estimate.productionUsdMinor),
       shippingUsdMinor: null,
       etaDaysMin: estimate.etaDaysMin,
       etaDaysMax: estimate.etaDaysMax,
     };
   }
   return {
-    productionUsdMinor: matrix.productionUsdMinor * input.quantity,
+    productionUsdMinor: matrix.productionUsdMinor * quantity,
     shippingUsdMinor: null,
     etaDaysMin: matrix.etaDaysMin,
     etaDaysMax: matrix.etaDaysMax,
@@ -269,7 +286,7 @@ export class CheckoutService {
         : bookFormatPrices({
             country,
             pricing,
-            pages: loaded.pages,
+            pages: await this.pricedPages(loaded.book, loaded.pages),
             professional: pro?.professional ?? false,
             formats: availableFormats,
             productionUsdMinor: (format) => {
@@ -300,8 +317,9 @@ export class CheckoutService {
     routing?: PrintRouting | null,
   ): Promise<PrintCost | null> {
     if (body.format === 'digital') return null;
+    const options = await this.catalog.printOptions(body.country);
     const matrix = referencePrintCost(
-      await this.catalog.printOptions(body.country),
+      options,
       body.format,
       pages,
       this.activePrinters(),
@@ -321,7 +339,22 @@ export class CheckoutService {
         : await this.printEstimate(body.country, body.format, pages, body.quantity),
       matrix,
       quantity: body.quantity,
+      matrixFor: (provider) => matrixCostFor(options, body.format, provider, body.country),
     });
+  }
+
+  /** Páginas con ilustración generada del libro (DECISIONS 241): las que pagan IA y margen. */
+  private async pricedPages(book: Record<string, unknown>, interiorPages: number) {
+    const preview = book.preview as { activityPages?: number } | null | undefined;
+    return generatedPages(
+      {
+        length: (book.length as BookLength | null | undefined) ?? null,
+        contentType: (book.contentType as ContentType | null | undefined) ?? null,
+        interiorPages,
+        activityPages: preview?.activityPages ?? 0,
+      },
+      await this.catalog.editorial(),
+    );
   }
 
   private activePrinters(): string[] {
@@ -408,7 +441,8 @@ export class CheckoutService {
       fx,
       print,
       format: body.format,
-      pages,
+      // IA y margen por página: solo las páginas con ilustración generada.
+      pages: await this.pricedPages(book, pages),
       quantity: body.quantity,
       coupon,
       couponCode: body.couponCode,

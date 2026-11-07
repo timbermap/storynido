@@ -5,7 +5,7 @@
  * la que entró la visita).
  */
 
-import type { BookLength } from '@storynido/shared';
+import type { BookLength, ContentType } from '@storynido/shared';
 
 import type { ProjectSettings } from '@/lib/firebase/drafts';
 
@@ -27,8 +27,9 @@ export interface HomeBook {
   totalPages: number | null;
   /** Celebraciones: temática de la fiesta (texto que escribió la persona). */
   eventTheme?: string | null;
-  /** Extensión del libro (para dar su precio exacto). */
+  /** Extensión y tipo de contenido del libro (para dar su precio exacto). */
   length?: BookLength | null;
+  contentType?: ContentType | null;
   /**
    * `draft`: faltan pasos; `generating`: se está dibujando; `character`: el personaje espera que
    * lo aprueben; `preview`: la portada y las primeras páginas (o el kit) están listas.

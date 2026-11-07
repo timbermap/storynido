@@ -247,7 +247,9 @@ export function BookOptions({
               const printLabel = printed.every((format) => format === 'booklet')
                 ? t('chipBooklet')
                 : t('chipPrint');
-              const lengthPrice = prices ? bookPrices(prices, length, professional) : null;
+              const lengthPrice = prices
+                ? bookPrices(prices, length, professional, value.contentType)
+                : null;
               return (
                 <OptionCard
                   key={length}

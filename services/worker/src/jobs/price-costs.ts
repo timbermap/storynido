@@ -2,6 +2,12 @@ import {
   ANY_COUNTRY,
   CARD_COPIES,
   COLLECTIONS,
+  GLOBAL_DOC_ID,
+  generatedPages,
+  DEFAULT_EDITORIAL_CONFIG,
+  editorialConfigSchema,
+  type BookLength,
+  type ContentType,
   aiUsageSchema,
   measuredAiCostPerPage,
   normalizeFirestoreData,
@@ -19,6 +25,21 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { Firestore } from 'firebase-admin/firestore';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+/** El precio al cliente cambia solo si el costo se mueve más de 5 %, como mucho una vez por semana. */
+const CHANGE_THRESHOLD = 0.05;
+const MIN_DAYS_BETWEEN_CHANGES = 7;
+
+/** ¿Se publica el costo nuevo? Solo si se movió más de 5 % y pasó una semana del último cambio. */
+export function shouldChange(
+  current: number,
+  next: number,
+  lastChange: Date | null,
+  now: Date,
+): boolean {
+  if (current <= 0) return next > 0;
+  if (Math.abs(next - current) <= current * CHANGE_THRESHOLD) return false;
+  return !lastChange || now.getTime() - lastChange.getTime() >= MIN_DAYS_BETWEEN_CHANGES * DAY_MS;
+}
 /** Cuánto espera la cotización de una imprenta antes de darla por fallida. */
 const QUOTE_TIMEOUT_MS = 20_000;
 /** Pedidos que cuentan como libro pagado (no los cancelados, reembolsados ni sin pagar). */
@@ -115,6 +136,8 @@ export class PriceCostRefresh {
         previousCostUsdMinor: null,
         previousEtaDaysMin: null,
         previousEtaDaysMax: null,
+        quotedCostUsdMinor: null,
+        quotedAt: null,
         failedAt: null,
         error: null,
       };
@@ -123,21 +146,37 @@ export class PriceCostRefresh {
           printer.quote([item], { ...sample, country: option.country }, 'USD'),
           QUOTE_TIMEOUT_MS,
         );
+        const cost = Math.round(quoted.productionCostUsdMinor / item.quantity);
+        // El plazo se actualiza siempre; el costo (que mueve el precio), con la regla del 5 %.
+        const change = shouldChange(
+          option.productionCostUsdMinor,
+          cost,
+          option.autoPricing?.updatedAt ?? null,
+          now,
+        );
         await doc.ref.update({
-          productionCostUsdMinor: Math.round(quoted.productionCostUsdMinor / item.quantity),
           etaDaysMin: quoted.etaDaysMin,
           etaDaysMax: quoted.etaDaysMax,
-          autoPricing: {
-            updatedAt: now,
-            previousCostUsdMinor: option.productionCostUsdMinor,
-            previousEtaDaysMin: option.etaDaysMin,
-            previousEtaDaysMax: option.etaDaysMax,
-            failedAt: null,
-            error: null,
-          },
+          ...(change
+            ? {
+                productionCostUsdMinor: cost,
+                autoPricing: {
+                  updatedAt: now,
+                  previousCostUsdMinor: option.productionCostUsdMinor,
+                  previousEtaDaysMin: option.etaDaysMin,
+                  previousEtaDaysMax: option.etaDaysMax,
+                  quotedCostUsdMinor: cost,
+                  quotedAt: now,
+                  failedAt: null,
+                  error: null,
+                },
+              }
+            : {
+                autoPricing: { ...previous, quotedCostUsdMinor: cost, quotedAt: now, error: null },
+              }),
           updatedAt: now,
         });
-        updated.push(doc.id);
+        if (change) updated.push(doc.id);
       } catch (error) {
         const message = (error instanceof Error ? error.message : String(error)).slice(0, 300);
         failed.push({ id: doc.id, error: message });
@@ -159,7 +198,7 @@ export class PriceCostRefresh {
   }
 
   /**
-   * Costo de IA por página medido con los libros pagados de los últimos 30 días. Se guarda en
+   * Costo de IA por página generada medido con los libros pagados de los últimos 30 días. Se guarda en
    * cada producto y, salvo que esté fijado a mano, pasa a ser el costo con el que se calcula el
    * precio. Con menos de 20 libros con datos queda el valor actual.
    */
@@ -178,11 +217,33 @@ export class PriceCostRefresh {
           .map((doc) => String(doc.get('bookId'))),
       ),
     ];
+    // La configuración editorial vigente (la del admin pisa la de fábrica clave por clave).
+    const stored: unknown = (
+      await this.db.collection(COLLECTIONS.editorialConfig).doc(GLOBAL_DOC_ID).get()
+    ).data();
+    const parsedEditorial = editorialConfigSchema.safeParse({
+      ...DEFAULT_EDITORIAL_CONFIG,
+      ...(stored && typeof stored === 'object' ? stored : {}),
+    });
+    const editorial = parsedEditorial.success ? parsedEditorial.data : DEFAULT_EDITORIAL_CONFIG;
+    // Páginas con ilustración generada de cada libro (las fijas y las de actividades no cuentan).
     const books = (
       await Promise.all(
         bookIds.map(async (bookId) => {
           const book = await this.db.collection(COLLECTIONS.books).doc(bookId).get();
-          const pages = Number(book.get('preview.interiorPages') ?? 0);
+          const interiorPages = Number(book.get('preview.interiorPages') ?? 0);
+          const pages =
+            interiorPages > 0
+              ? generatedPages(
+                  {
+                    length: (book.get('length') as BookLength | undefined) ?? null,
+                    contentType: (book.get('contentType') as ContentType | undefined) ?? null,
+                    interiorPages,
+                    activityPages: Number(book.get('preview.activityPages') ?? 0),
+                  },
+                  editorial,
+                )
+              : 0;
           return { bookId, pages };
         }),
       )
@@ -203,14 +264,22 @@ export class PriceCostRefresh {
       const parsed = productPricingSchema.safeParse(normalizeFirestoreData(doc.data()));
       if (!parsed.success || !measured) continue;
       const product = parsed.data;
+      // Con la regla del 5 % y una vez por semana; fijado a mano, solo se informa.
       const apply =
-        !product.aiCostManual && product.aiCostPerPageUsdMinor !== measured.perPageUsdMinor;
+        !product.aiCostManual &&
+        shouldChange(
+          product.aiCostPerPageUsdMinor,
+          measured.perPageUsdMinor,
+          product.aiCostAuto?.appliedAt ?? null,
+          now,
+        );
       await doc.ref.update({
         aiCostAuto: {
           perPageUsdMinor: measured.perPageUsdMinor,
           books: measured.books,
           updatedAt: now,
           previousUsdMinor: apply ? product.aiCostPerPageUsdMinor : null,
+          appliedAt: apply ? now : (product.aiCostAuto?.appliedAt ?? null),
         },
         ...(apply ? { aiCostPerPageUsdMinor: measured.perPageUsdMinor, updatedAt: now } : {}),
       });

@@ -5,7 +5,15 @@ import { BOOK_FORMATS, type BookFormat } from './common';
 import type { FxRates } from './metrics';
 import { CHARGE_CURRENCY } from './pricing';
 import { printAvailability, printPageCount, type PrintOption } from './print';
-import { charmPrice, unitPriceUsdMinor, type ProductPricing } from './product-pricing';
+import {
+  aiCostUsdMinor,
+  charmPrice,
+  minNetMarginUsdMinor,
+  paymentFeePercent,
+  unitPriceUsdMinor,
+  withPaymentFee,
+  type ProductPricing,
+} from './product-pricing';
 
 /**
  * Precios claros (DECISIONS 241): el precio de un libro se calcula en un solo lugar. La barra de
@@ -46,8 +54,10 @@ export function referencePrintCost(
 }
 
 /**
- * Precio de un ejemplar del libro, sin envío, en centavos de USD: costo + márgenes, redondeado
- * a ,99. Una cuenta profesional paga con el descuento base del producto (antes de redondear).
+ * Precio de un ejemplar del libro, sin envío, en centavos de USD (DECISIONS 241): costo +
+ * márgenes, más la comisión de cobro, redondeado a ,99 hacia arriba. Una cuenta profesional paga
+ * con el descuento base del producto, sin bajar nunca del margen neto mínimo. `pages`: páginas
+ * con ilustración generada.
  */
 export function bookPriceMinor(
   pricing: Pricing,
@@ -55,14 +65,47 @@ export function bookPriceMinor(
   pages: number,
   professional = false,
 ): number {
-  const usd = unitPriceUsdMinor(pricing, productionUsdMinor, pages);
-  const withBase = professional ? Math.round((usd * (100 - pricing.proPercentOff)) / 100) : usd;
-  return charmPrice(withBase, CHARGE_CURRENCY);
+  const fee = paymentFeePercent(pricing);
+  const gross = withPaymentFee(unitPriceUsdMinor(pricing, productionUsdMinor, pages), fee);
+  const discounted = professional
+    ? Math.round((gross * (100 - pricing.proPercentOff)) / 100)
+    : gross;
+  return charmPrice(
+    Math.max(discounted, bookFloorMinor(pricing, productionUsdMinor, pages)),
+    CHARGE_CURRENCY,
+  );
+}
+
+/**
+ * Lo mínimo que se puede cobrar por un ejemplar del libro con descuentos: costos + margen neto
+ * mínimo + comisión. Ningún cupón, promoción ni descuento profesional baja de acá.
+ */
+export function bookFloorMinor(
+  pricing: Pricing,
+  productionUsdMinor: number,
+  pages: number,
+): number {
+  const production = pricing.product === 'digital' ? 0 : Math.max(0, productionUsdMinor);
+  return withPaymentFee(
+    aiCostUsdMinor(pricing, pages) + production + minNetMarginUsdMinor(pricing),
+    paymentFeePercent(pricing),
+  );
+}
+
+/**
+ * Costo estable de impresión (DECISIONS 241): el precio cambia solo si el costo se mueve más de
+ * 5 %. Si la cotización en vivo está a 5 % o menos del costo de la matriz, se usa el de la matriz.
+ */
+export function stablePrintCost(liveUsdMinor: number, matrixUsdMinor: number | null): number {
+  if (matrixUsdMinor === null || matrixUsdMinor <= 0) return liveUsdMinor;
+  return Math.abs(liveUsdMinor - matrixUsdMinor) <= matrixUsdMinor * 0.05
+    ? matrixUsdMinor
+    : liveUsdMinor;
 }
 
 /**
  * Precio exacto del libro (sin envío) en cada formato que se puede comprar en el país, para un
- * libro de `pages` páginas interiores. `productionUsdMinor` da el costo de impresión por ejemplar
+ * libro con `pages` páginas generadas. `productionUsdMinor` da el costo de impresión por ejemplar
  * de cada formato impreso (null: no se puede imprimir). El orden es el de `BOOK_FORMATS`.
  */
 export function bookFormatPrices(input: {
@@ -103,4 +146,16 @@ export function referenceCurrency(
     country.currency !== CHARGE_CURRENCY ? country.currency : REFERENCE_CURRENCIES[code];
   const rate = currency ? fx.rates[currency] : undefined;
   return currency && rate ? { currency, rate } : null;
+}
+
+/** Costo por ejemplar de la matriz para una imprenta (la fila del país o, si no, la global). */
+export function matrixCostFor(
+  options: readonly PrintOption[],
+  format: BookFormat,
+  provider: string,
+  country: CountryCode,
+): number | null {
+  const rows = options.filter((option) => option.provider === provider && option.format === format);
+  const row = rows.find((option) => option.country === country) ?? rows[0];
+  return row ? row.productionCostUsdMinor : null;
 }
