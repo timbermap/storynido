@@ -14,6 +14,7 @@ import {
   bookPriceMinor,
   CONTENT_TYPES,
   editorialPlan,
+  pricedPages,
   matrixCostFor,
   stablePrintCost,
   printCandidates,
@@ -156,7 +157,8 @@ export function buildOffer(input: {
           bookFormatPrices({
             country,
             pricing,
-            pages: plan.narrativePages,
+            // Nunca menos que el cuento mini (DECISIONS 242).
+            pages: pricedPages(plan.narrativePages, editorial),
             professional,
             formats: offered,
             productionUsdMinor: (format) => productionFor(format, plan.interiorPages),

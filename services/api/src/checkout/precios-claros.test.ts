@@ -289,6 +289,15 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
     expect(rule(20 * pages, 0, aiPricier.digital)).toBe(rule(15 * pages, 0, pricing.digital));
   });
 
+  it('ningún ebook baja del mini: el de solo actividades también sale 13,99 (DECISIONS 242)', () => {
+    const offer = offerFor('AR');
+    const activities = offer.lengthPrices.find(
+      (item) => item.length === 'mini' && item.contentType === 'activities',
+    )?.amountMinor;
+    expect(activities).toBe(1399);
+    expect(Math.min(...offer.lengthPrices.map((item) => item.amountMinor))).toBe(1399);
+  });
+
   it('ebook por extensión: 13,99 / 15,99 / 21,99 / 23,99', () => {
     const offer = offerFor('AR');
     const story = (length: string) =>

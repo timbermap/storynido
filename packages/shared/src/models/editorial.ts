@@ -553,3 +553,17 @@ export function generatedPages(
   const available = book.interiorPages - config.lengths[book.length].fixedPages;
   return Math.max(book.contentType === 'activities' ? 0 : 2, available - (book.activityPages ?? 0));
 }
+
+/**
+ * Páginas con las que se calcula el precio (DECISIONS 242): las generadas, pero nunca menos que
+ * las del cuento mini. Así ningún ebook (ni la creación de un impreso) sale más barato que el
+ * ebook mini, aunque tenga pocas páginas generadas (un libro de solo actividades).
+ */
+export function pricedPages(generated: number, config: EditorialConfig): number {
+  const mini = editorialPlan(
+    { length: 'mini', contentType: 'story', textDensity: 'balanced', readingLevel: 'developing' },
+    config,
+    config.lengths.mini.interiorPages,
+  ).narrativePages;
+  return Math.max(generated, mini);
+}

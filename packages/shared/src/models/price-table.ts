@@ -3,7 +3,13 @@ import { z } from 'zod';
 import { countryCodeSchema, type CountryCode } from '../countries';
 import type { CountryConfig } from './commerce';
 import { bookFormatSchema, type BookFormat } from './common';
-import { BOOK_LENGTHS, bookLengthSchema, editorialPlan, type EditorialConfig } from './editorial';
+import {
+  BOOK_LENGTHS,
+  bookLengthSchema,
+  editorialPlan,
+  pricedPages,
+  type EditorialConfig,
+} from './editorial';
 import type { FxRates } from './metrics';
 import { printCandidates, printPageCount, type PrintOption } from './print';
 import { quote, type ProDiscountConfig } from './pricing';
@@ -66,11 +72,14 @@ export function buildPriceTable(input: {
       const config = input.editorial.lengths[length];
       const pages = config.interiorPages;
       // IA y margen por página: las páginas con ilustración generada de un cuento (DECISIONS 241).
-      const generated = editorialPlan(
-        { length, contentType: 'story', textDensity: 'balanced', readingLevel: 'developing' },
+      const generated = pricedPages(
+        editorialPlan(
+          { length, contentType: 'story', textDensity: 'balanced', readingLevel: 'developing' },
+          input.editorial,
+          pages,
+        ).narrativePages,
         input.editorial,
-        pages,
-      ).narrativePages;
+      );
       for (const format of bookFormatSchema.options) {
         const pricing = input.pricing[format];
         const printPages = printPageCount(format, pages);
