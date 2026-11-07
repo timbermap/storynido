@@ -1,5 +1,5 @@
 import type { Browser } from 'playwright-core';
-import { letterJitter } from '@storynido/shared';
+import { bookLayout, letterJitter, pageLayout, storyTypography } from '@storynido/shared';
 import sharp from 'sharp';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -263,6 +263,98 @@ describe.skipIf(!chromePath())('PDF', () => {
     });
     expect(result.overflow).toEqual([]);
   }, 30_000);
+
+  it('letra por edad: Quicksand en MAYÚSCULAS de 0 a 6 (es), Andika de 7 a 8; sin ella, como siempre', () => {
+    const small = digitalHtml(
+      book({ typography: storyTypography('3-4', '3-4', 'es') }),
+      FORMAT_SPECS.digital,
+    );
+    expect(small).toContain('class="story f-quicksand upper"');
+    expect(small).toContain("font-family:'Quicksand'");
+    expect(small).toContain('data-font-pt="26.00"');
+    // El tamaño de la franja reemplaza la escala por nivel y la del mini cuento.
+    const mini = digitalHtml(
+      book({ mini: true, typography: storyTypography('3-4', '3-4', 'es') }),
+      FORMAT_SPECS.digital,
+    );
+    expect(mini).toContain('data-font-pt="26.00"');
+    const english = digitalHtml(
+      book({ language: 'en', typography: storyTypography('3-4', '3-4', 'en') }),
+      FORMAT_SPECS.digital,
+    );
+    expect(english).toContain('class="story f-quicksand"');
+    const reader = digitalHtml(
+      book({ typography: storyTypography('7-8', '7-8', 'es') }),
+      FORMAT_SPECS.digital,
+    );
+    expect(reader).toContain('class="story f-andika"');
+    expect(digitalHtml(book(), FORMAT_SPECS.digital)).toContain('<div class="story">');
+  });
+
+  it('página sin texto: solo la ilustración, sin panel', () => {
+    const pages = interiorPages(
+      book({
+        pages: [
+          { text: 'Martín sube al cohete.', image },
+          { text: '', image },
+        ],
+      }),
+      FORMAT_SPECS.digital,
+    );
+    const wordless = pages.find((page) => page.includes('data-label="página 2"')) ?? '';
+    expect(wordless).toContain('data-wordless="true"');
+    expect(wordless).not.toContain('class="panel');
+  });
+
+  it('el tope de palabras de cada franja entra con su letra y su armado por edad', async () => {
+    const words = (count: number) =>
+      Array.from({ length: count }, (_, index) => (index % 3 ? 'mariposa' : 'Martín')).join(' ');
+    const failures: string[] = [];
+    for (const [band, age, cap, spec] of [
+      ['0-2', 1, 10, FORMAT_SPECS.softcover],
+      ['3-4', 4, 30, FORMAT_SPECS.booklet],
+      ['3-4', 4, 30, FORMAT_SPECS.softcover],
+      ['5-6', 6, 50, FORMAT_SPECS.booklet],
+      ['5-6', 6, 50, FORMAT_SPECS.softcover],
+      ['7-8', 8, 80, FORMAT_SPECS.softcover],
+      ['9+', 10, 140, FORMAT_SPECS.softcover],
+    ] as const) {
+      const layout = book({
+        density: 'balanced',
+        typography: storyTypography(band, band, 'es'),
+        activities: [],
+        // El armado que tendría el libro: arriba y abajo, como las páginas impares y pares.
+        pages: [1, 2].map((pageIndex) => ({
+          text: words(cap),
+          image,
+          layout: pageLayout({ layout: bookLayout(age, 'story'), words: cap, pageIndex }),
+        })),
+      });
+      const result = await renderPdf(browser, printInteriorHtml(layout, spec), pageSizeMm(spec), {
+        bleedMm: spec.bleedMm,
+        title: layout.title,
+      });
+      failures.push(...result.overflow.map((page) => `${band} ${spec.format} ${page}`));
+    }
+    expect(failures).toEqual([]);
+    // Y con el panel de siempre (colorear, libros sin armado), también en una esquina.
+    const overlay = book({
+      density: 'rich',
+      typography: storyTypography('5-6', '5-6', 'es'),
+      activities: [],
+      pages: (['bottom', 'top-left'] as const).map((placement) => ({
+        text: words(50),
+        image,
+        placement,
+      })),
+    });
+    const spec = FORMAT_SPECS.softcover;
+    const result = await renderPdf(browser, printInteriorHtml(overlay, spec), pageSizeMm(spec), {
+      bleedMm: spec.bleedMm,
+      title: overlay.title,
+    });
+    expect(result.overflow).toEqual([]);
+  }, 90_000);
 
   it('mínimo de la imprenta: páginas para dibujar antes del cierre', () => {
     const spec = FORMAT_SPECS.softcover;

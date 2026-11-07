@@ -1039,7 +1039,7 @@
         "limit_reached": "Você já testou várias versões hoje. Salvamos tudo e amanhã você continua.",
         "photo_unreadable": "Não conseguimos ler esta foto. Tente outra (de frente, bem iluminada, só o rosto) ou escolha os traços do personagem. Não conta para o seu limite de hoje.",
         "ai_unavailable": "Não conseguimos terminar a amostra agora. Tente de novo em alguns minutos; seu rascunho fica salvo.",
-        "ai_budget_exhausted": "Atingimos o limite de geração de hoje. Tente de novo amanhã; seu rascunho fica salvo.",
+        "ai_budget_exhausted": "Estamos com muita procura agora. Tente de novo daqui a pouco; seu rascunho fica salvo.",
         "validation_failed": "Esse texto não é adequado para uma história infantil. Mude e tente de novo.",
         "bad_request": "Confira se o protagonista, a foto, a história e o estilo estão completos.",
         "generic": "Algo deu errado. Tente de novo em alguns minutos.",
@@ -1083,10 +1083,10 @@
       "lockedNote": "O que você corrigir fica igual em todas as páginas.",
       "illustratingText": "Ilustramos a capa e as primeiras páginas. Leva alguns minutos.",
       "waitSteps": {
-        "character": "Desenhamos {name} (alguns minutos)",
+        "character": "Desenhamos {name}",
         "review": "Você revisa e confirma a semelhança",
         "illustrate": "Ilustramos a capa e 2 páginas",
-        "order": "Se gostar, você pede e fazemos o livro completo"
+        "order": "Se gostar, fazemos o livro completo"
       },
       "leaveText": "Continuamos trabalhando mesmo que você saia. Avisamos por e-mail quando a amostra estiver pronta. Para retomar: Minhas histórias, “Em andamento”, Continuar.",
       "leaveButton": "Voltar para Minhas histórias",
@@ -1107,7 +1107,7 @@
         "steps": {
           "write": "Escrevemos a história",
           "illustrate": "Ilustramos a capa e 2 páginas",
-          "order": "Se gostar, você pede e fazemos o livro completo"
+          "order": "Se gostar, fazemos o livro completo"
         }
       },
       "waitEstimate": "{minutes, plural, one {Costuma ficar pronta em um minuto.} other {Costuma ficar pronta em uns # minutos.}}",
@@ -1120,19 +1120,25 @@
         "textDrawing": "Usamos o desenho de sempre. Montamos o convite e a história de lembrança com o tema {theme}.",
         "steps": {
           "write": "Escrevemos a história de lembrança",
-          "illustrate": "Ilustramos a capa (vai no convite) e 2 páginas",
-          "order": "Se gostar, você pede e preparamos o kit completo"
+          "illustrate": "Ilustramos a capa do convite e 2 páginas",
+          "order": "Se gostar, preparamos o kit completo"
         },
         "steps4": {
-          "character": "Desenhamos {name} (alguns minutos)",
+          "character": "Desenhamos {name}",
           "review": "Você confere e confirma a semelhança",
-          "illustrate": "Ilustramos a capa (vai no convite) e 2 páginas",
-          "order": "Se gostar, você pede e preparamos o kit completo"
+          "illustrate": "Ilustramos a capa do convite e 2 páginas",
+          "order": "Se gostar, preparamos o kit completo"
         }
       },
       "eventDifferencesPages": "A mini história tem {total} páginas; aqui você vê a capa e as primeiras {shown}.",
       "continueKit": "Quero este kit",
-      "continueInvitation": "Quero o convite"
+      "continueInvitation": "Quero o convite",
+      "queued": {
+        "title": "Estamos preparando a prévia de {name}",
+        "text": "Muitas histórias estão sendo criadas agora. A sua já está a caminho: avisamos por e-mail assim que estiver pronta, então você pode fechar esta página.",
+        "illustrationsTitle": "Estamos ilustrando a história de {name}",
+        "back": "Ver minhas histórias"
+      }
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",
@@ -1249,15 +1255,15 @@
       "densities": {
         "visual": {
           "name": "Bem visual",
-          "text": "Poucas palavras, muita ilustração."
+          "text": "Um degrau a menos de texto que o da idade."
         },
         "balanced": {
           "name": "Equilibrado",
-          "text": "Para ler juntos."
+          "text": "O texto certo para a idade."
         },
         "rich": {
           "name": "Mais leitura",
-          "text": "Para quem já lê sozinho."
+          "text": "Um degrau a mais de texto que o da idade."
         }
       },
       "levels": {
@@ -1307,7 +1313,7 @@
         },
         "read_alone": {
           "name": "Eu leio sozinho",
-          "text": "Frases curtas e uma ilustração por página, para a criança ler sozinha."
+          "text": "Frases curtas e menos texto por página, para ler sem ajuda."
         },
         "longer_story": {
           "name": "Conto longo",
@@ -1721,7 +1727,8 @@
     "thumbnails": "Páginas do livro",
     "noDedication": "Aqui vai a sua dedicatória",
     "example": "Exemplo",
-    "exampleLabel": "Exemplo do estilo · no seu livro, {name} será o protagonista"
+    "exampleLabel": "Exemplo do estilo · no seu livro, {name} será o protagonista",
+    "wordless": "Página sem texto: a ilustração conta este momento."
   },
   "Checkout": {
     "shippingEstimate": "Frete estimado para o seu país: cerca de {price}, para um total de cerca de {total}. Chega em {min} a {max} dias úteis. Confirmado com o seu endereço.",
@@ -2057,6 +2064,7 @@
       "repeatNote": "“Repetir configuração” copia a história, a extensão, a densidade, o nível e o estilo para um novo rascunho, sem os dados nem as fotos da criança.",
       "status": {
         "draft": "Rascunho",
+        "preview_queued": "Preparando a prévia",
         "preview_generating": "Criando a amostra",
         "preview_ready": "Amostra pronta",
         "ordered": "Comprado"

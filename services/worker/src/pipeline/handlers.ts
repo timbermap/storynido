@@ -13,6 +13,8 @@ export interface PipelineOrder {
   sourceOrderId?: string | null;
   /** Revisión manual (fase 15): un admin aprobó las ilustraciones de esta generación. */
   humanApproval?: { generation: number; by: string | null } | null;
+  /** País del pedido: el español de las actividades usa «vos» en Argentina y Uruguay. */
+  country?: string | null;
 }
 
 export type StepOutputs = Partial<Record<PipelineStep, Record<string, unknown>>>;

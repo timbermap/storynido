@@ -144,6 +144,105 @@ describe('Vertex AI', () => {
     });
   });
 
+  it('plan con biblia visual: limpia nombres sueltos, varía encuadres y es compatible sin biblia', async () => {
+    const scene = (shot: string, extra: Record<string, unknown> = {}) => ({
+      sceneGoal: 'meta',
+      emotionalBeat: 'alegría',
+      mustBeVisible: [],
+      notVisible: [],
+      continuityFacts: [],
+      wordBudget: 20,
+      shot,
+      ...extra,
+    });
+    const reply = {
+      theme: 't',
+      arc: 'a',
+      props: [
+        { name: 'the kite', look: 'arc-shaped kite; NO sail' },
+        { name: '', look: 'x' },
+        ...Array.from({ length: 5 }, (_, index) => ({ name: `p${String(index)}`, look: 'l' })),
+      ],
+      places: [{ name: 'the beach', look: 'sandy beach' }],
+      outfits: [{ context: 'in the water', look: 'wetsuit' }],
+      scenes: [
+        scene('wide', {
+          props: ['the kite', 'a ghost prop'],
+          place: 'the moon',
+          outfit: 'in the water',
+        }),
+        scene('wide'),
+        scene('wide'),
+        scene('medium'),
+      ],
+    };
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const plan = await new VertexTextProvider(clientWith(() => jsonReply(reply), calls)).planStory(
+      sampleStoryRequest,
+    );
+    expect(plan.props).toHaveLength(4);
+    expect(plan.scenes[0]).toMatchObject({
+      props: ['the kite'],
+      place: null,
+      outfit: 'in the water',
+    });
+    expect(plan.scenes.map((item) => item.shot)).not.toEqual(['wide', 'wide', 'wide', 'medium']);
+    const prompt = calls[0]?.contents[0]?.parts[0]?.text ?? '';
+    expect(prompt).toContain('NO sail and NO mast');
+    expect(prompt).toContain('who is not in that scene');
+
+    const old = await new VertexTextProvider(
+      clientWith(() =>
+        jsonReply({ theme: 't', arc: 'a', scenes: [0, 1, 2, 3].map(() => scene('medium')) }),
+      ),
+    ).planStory(sampleStoryRequest);
+    expect(old.props).toEqual([]);
+    expect(old.scenes[0]?.place).toBeNull();
+  });
+
+  it('la revisión de página recibe la continuidad y la biblia visual de la escena', async () => {
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const provider = new VertexTextProvider(
+      clientWith(
+        () =>
+          jsonReply({
+            status: 'pass',
+            criticalIssues: [],
+            nonCriticalIssues: [],
+            continuityChecks: [],
+            imageTextMatches: true,
+            textInImage: false,
+            repairTarget: 'none',
+          }),
+        calls,
+      ),
+    );
+    const image = { bytes: new Uint8Array([1]), mimeType: 'image/webp' };
+    await provider.reviewPage({
+      pageIndex: 2,
+      text: 'texto',
+      image,
+      reference: image,
+      character: 'Martina',
+      mustKeep: [],
+      scene: {
+        pageIndex: 1,
+        sceneGoal: 'meta',
+        emotionalBeat: 'alegría',
+        mustBeVisible: [],
+        notVisible: [],
+        continuityFacts: ['the red lantern'],
+        wordBudget: 20,
+        personalDetail: null,
+      },
+      visualBible: 'Place: the beach, sandy beach.',
+    });
+    const text = (calls[0]?.contents[0]?.parts ?? []).map((part) => part.text ?? '').join(' ');
+    expect(text).toContain('Continuity (must match');
+    expect(text).toContain('the red lantern');
+    expect(text).toContain('Fixed looks for this scene: Place: the beach');
+  });
+
   it('ortografía aparte a temperatura 0; si cambia las páginas, conserva el texto', async () => {
     const story = {
       title: 'Martina',

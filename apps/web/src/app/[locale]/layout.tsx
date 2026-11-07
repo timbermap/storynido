@@ -20,7 +20,14 @@ import { StickyCta } from '@/components/layout/sticky-cta';
 import { routing } from '@/i18n/routing';
 import { brand } from '@/lib/brand';
 import { CONSENT_COOKIE, parseConsent } from '@/lib/consent';
-import { fontContent, fontCover, fontScript, fontUi } from '@/lib/fonts';
+import {
+  fontContent,
+  fontCover,
+  fontScript,
+  fontStoryReader,
+  fontStorySerif,
+  fontUi,
+} from '@/lib/fonts';
 import { localizedAlternates } from '@/lib/seo';
 import { getSiteMode } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
@@ -97,7 +104,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
       lang={LOCALE_DEFINITIONS[locale].bcp47}
       // Scroll suave solo dentro de la página: al cambiar de página Next.js lo apaga y abre arriba.
       data-scroll-behavior="smooth"
-      className={`${fontUi.variable} ${fontContent.variable} ${fontScript.variable} ${fontCover.variable}`}
+      className={`${fontUi.variable} ${fontContent.variable} ${fontScript.variable} ${fontCover.variable} ${fontStoryReader.variable} ${fontStorySerif.variable}`}
     >
       <body>
         <NextIntlClientProvider messages={clientMessages}>

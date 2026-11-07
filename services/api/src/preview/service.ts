@@ -21,6 +21,10 @@ import {
   type MustKeepTrait,
   type QaEvent,
   pagesOutOfRange,
+  pagesOverCap,
+  wordlessPages,
+  spanishVoiceFor,
+  storyTypography,
   type BookEvent,
   type BookLength,
   type ContentType,
@@ -37,6 +41,7 @@ import {
   buildIllustrationPrompt,
   companionNote,
   companionReferenceScene,
+  visualBibleCheck,
   coverScene,
   describeCharacter,
   buildStoryPrompt,
@@ -61,7 +66,7 @@ import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type DocumentReference, type Firestore } from 'firebase-admin/firestore';
 
-import { AiBudget, type AiLimits, type UsageContext } from '../ai/budget';
+import { AiBudget, isBudgetExceeded, type AiLimits, type UsageContext } from '../ai/budget';
 import type { CatalogRepository } from '../catalog';
 import { AppError } from '../errors';
 
@@ -70,6 +75,14 @@ const IMAGE_URL_SECONDS = 30 * 60;
 const STALE_GENERATION_MS = 10 * 60 * 1000;
 /** Vistas previas por IP y día: varias personas pueden compartir una IP (casa, oficina). */
 const IP_QUOTA_MULTIPLIER = 3;
+/**
+ * Muestras de la fila que arranca cada pasada del trabajo programado. Van en paralelo y cada
+ * una tarda de 1 a 3 minutos: tienen que entrar en los 300 s del request de Cloud Run.
+ */
+const QUEUE_BATCH = 4;
+
+/** Lo que espera en la fila: crear la muestra (texto y lámina) o ilustrar portada y páginas. */
+type QueuedStep = 'preview' | 'illustrations';
 
 const notFound = () => new AppError(404, 'not_found', 'No encontramos ese borrador.');
 const generationFailed = (cause?: unknown) =>
@@ -121,6 +134,11 @@ interface BookData {
   regenerationsUsed: number;
   previewError?: string | null;
   previewStartedAt?: unknown;
+  /** Fila sin cupo de IA (status preview_queued). */
+  queuedAt?: unknown;
+  queuedStep?: QueuedStep | null;
+  /** Cupos que reservó la muestra (para devolverlos si falla, aunque haya esperado en la fila). */
+  previewQuotaDocs?: string[] | null;
 }
 
 function toDate(value: unknown): Date | null {
@@ -157,6 +175,16 @@ async function withModeratedRetry<T>(
  * páginas con la foto y la ficha del personaje, modera todo y guarda dos versiones de cada
  * imagen (limpia, para el libro comprado; con marca de agua, la única que ve el cliente).
  */
+
+/** Lo que la biblia visual del plan fija para la escena `index` (vacío en planes anteriores). */
+function sceneVisuals(plan: BookPreview['plan'] | undefined, index: number): string {
+  const note = visualBibleCheck(
+    plan,
+    plan?.scenes.find((scene) => scene.pageIndex === index),
+  );
+  return note ? ` ${note}` : '';
+}
+
 export class PreviewService {
   private readonly budget: AiBudget;
 
@@ -311,6 +339,10 @@ export class PreviewService {
           })),
         ),
         totalPages: preview.interiorPages ?? preview.pages.length,
+        // Tipografía por edad, igual que el PDF (las muestras anteriores no la traen).
+        ...(preview.ageBand && preview.textBand
+          ? { typography: storyTypography(preview.ageBand, preview.textBand, book.language) }
+          : {}),
         stale: isStale(preview, book),
         generatedAt: (toDate(preview.generatedAt) ?? new Date()).toISOString(),
       },
@@ -320,7 +352,17 @@ export class PreviewService {
   // ---------------------------------------------------------- generación
 
   /** Reserva el turno: cuotas del día y estado "generando" en una sola transacción. */
-  private async reserve(uid: string, ip: string, ref: DocumentReference, limits: AiLimits) {
+  /**
+   * Valida el borrador y reserva el cupo diario. `queue`: no hay presupuesto de IA en este
+   * momento, así que en vez de generar ya, la muestra queda en la fila (el cupo cuenta igual).
+   */
+  private async reserve(
+    uid: string,
+    ip: string,
+    ref: DocumentReference,
+    limits: AiLimits,
+    queue = false,
+  ) {
     const day = utcDay();
     const quotas = this.db.collection(COLLECTIONS.previewQuota);
     const userQuota = quotas.doc(`${uid}_${day}`);
@@ -351,6 +393,13 @@ export class PreviewService {
         (!startedAt || Date.now() - startedAt.getTime() > STALE_GENERATION_MS);
       if (book.status === 'preview_generating' && !stuck) {
         throw new AppError(409, 'bad_request', 'Ya estamos generando esta vista previa.');
+      }
+      if (book.status === 'preview_queued') {
+        throw new AppError(
+          409,
+          'bad_request',
+          'Ya estamos preparando esta vista previa. Te avisamos por correo cuando esté lista.',
+        );
       }
       if (!['draft', 'preview_ready', 'preview_generating'].includes(book.status)) {
         throw new AppError(409, 'bad_request', 'Este libro ya no se puede modificar.');
@@ -399,9 +448,11 @@ export class PreviewService {
         { merge: true },
       );
       tx.update(ref, {
-        status: 'preview_generating',
-        previewStartedAt: new Date(),
+        ...(queue
+          ? { status: 'preview_queued', queuedAt: new Date(), queuedStep: 'preview' }
+          : { status: 'preview_generating', previewStartedAt: new Date() }),
         previewError: null,
+        previewQuotaDocs: [userQuota.id, ipQuota.id, weekQuota.id],
         updatedAt: new Date(),
       });
     });
@@ -435,18 +486,18 @@ export class PreviewService {
     }
   }
 
-  /** Devuelve el cupo diario reservado (la muestra no se llegó a crear). */
-  private async refundQuota(uid: string, ip: string): Promise<void> {
-    const day = utcDay();
+  /**
+   * Devuelve el cupo reservado (la muestra no se llegó a crear). Usa los documentos que guardó
+   * la reserva: si la muestra esperó en la fila, el día de la reserva puede ser otro.
+   */
+  private async refundQuota(docs: readonly string[]): Promise<void> {
     const quotas = this.db.collection(COLLECTIONS.previewQuota);
     const back = { count: FieldValue.increment(-1) };
-    await Promise.all([
-      quotas.doc(`${uid}_${day}`).set(back, { merge: true }),
-      quotas.doc(`ip_${hashIp(ip)}_${day}`).set(back, { merge: true }),
-      quotas.doc(`${uid}_${utcIsoWeek()}`).set(back, { merge: true }),
-    ]).catch((error: unknown) => {
-      this.log.warn({ err: error }, 'could not refund preview quota');
-    });
+    await Promise.all(docs.map((id) => quotas.doc(id).set(back, { merge: true }))).catch(
+      (error: unknown) => {
+        this.log.warn({ err: error }, 'could not refund preview quota');
+      },
+    );
   }
 
   async generate(
@@ -465,11 +516,31 @@ export class PreviewService {
     }
     const startedAt = Date.now();
     const limits = await this.budget.limits();
-    await this.budget.ensureAvailable(limits);
     const ref = this.bookRef(bookId);
+    // Sin presupuesto de IA hoy: la muestra queda en la fila y la crea el trabajo programado
+    // apenas haya cupo (se avisa por correo). El cliente no ve ningún "límite".
+    if (!(await this.budget.available(limits))) {
+      await this.reserve(uid, ip, ref, limits, true);
+      this.log.warn({ bookId }, 'preview queued: AI budget exhausted');
+      return this.get(uid, bookId);
+    }
     await this.reserve(uid, ip, ref, limits);
+    return this.runPreview(uid, bookId, limits, { startedAt, notify: false });
+  }
 
-    const { book } = await this.ownedBook(uid, bookId);
+  /**
+   * Crea la muestra de un libro ya reservado (status preview_generating). Si el presupuesto se
+   * acaba a mitad de camino, vuelve a la fila en vez de fallar (el cupo sigue reservado).
+   */
+  private async runPreview(
+    uid: string,
+    bookId: string,
+    limits: AiLimits,
+    options: { startedAt: number; notify: boolean },
+  ): Promise<PublicPreview> {
+    const { startedAt } = options;
+    const anonymous = false;
+    const { ref, book } = await this.ownedBook(uid, bookId);
     try {
       const preview = await this.buildPreview(uid, bookId, book, limits);
       await ref.update({
@@ -491,13 +562,26 @@ export class PreviewService {
           this.log.warn({ err: error, bookId }, 'auto-approve of drawing failed');
         }
       }
+      // Desde la fila nadie está mirando la pantalla: el correo avisa que la muestra está lista.
+      if (options.notify) await this.notifyPreviewReady(uid, bookId);
     } catch (error) {
+      if (isBudgetExceeded(error)) {
+        this.log.warn({ bookId }, 'preview back to the queue: AI budget exhausted');
+        await ref.update({
+          status: 'preview_queued',
+          queuedAt: new Date(),
+          queuedStep: 'preview',
+          previewStartedAt: null,
+          updatedAt: new Date(),
+        });
+        return this.get(uid, bookId);
+      }
       const appError = error instanceof AppError ? error : generationFailed();
       this.log.error({ err: error, bookId }, 'preview failed');
       await this.auditAiError('preview', bookId, error);
       // Una muestra que falló no gasta el cupo diario de la persona.
       if (!(error instanceof AppError && error.code === 'limit_reached')) {
-        await this.refundQuota(uid, ip);
+        await this.refundQuota(book.previewQuotaDocs ?? []);
       }
       await ref.update({
         // Si había una vista previa anterior, sigue disponible.
@@ -531,7 +615,7 @@ export class PreviewService {
       return result;
     };
 
-    const [stories, styles, lessons, childSnap] = await Promise.all([
+    const [stories, styles, lessons, childSnap, userSnap, editorial] = await Promise.all([
       this.catalog.stories(),
       this.catalog.styles(),
       this.catalog.lessons(),
@@ -539,6 +623,8 @@ export class PreviewService {
         .collection(COLLECTIONS.children)
         .doc(book.childId ?? '-')
         .get(),
+      this.db.collection(COLLECTIONS.users).doc(uid).get(),
+      this.catalog.editorial(),
     ]);
     const story = stories.find((item) => item.slug === book.storyId);
     const choice = editorialChoice(book);
@@ -547,12 +633,23 @@ export class PreviewService {
       choice.contentType === 'coloring'
         ? styles.find((item) => item.contentTypes.includes('coloring'))
         : styles.find((item) => item.slug === book.styleId);
-    // Eventos: el mini cuento lleva un tope de palabras por página (Celebraciones, ola 1).
-    const plan = withEventWordCap(
-      editorialPlan(choice, await this.catalog.editorial(), story?.pageCount ?? 12),
-      Boolean(book.event),
-    );
     const child = childSnap.data();
+    // Edad que dice el cuento: la que cumple en un cumpleaños; si no, la del protagonista. Es la
+    // que elige la franja de texto, la tipografía y las reglas de forma.
+    const storyAge =
+      book.event?.type === 'birthday' && typeof book.event.turningAge === 'number'
+        ? book.event.turningAge
+        : Number(child?.age);
+    const readerAge = Number.isFinite(storyAge) ? storyAge : null;
+    // Eventos: el mini cuento no pasa del tope de la edad que celebra (Celebraciones, ola 1).
+    const plan = withEventWordCap(
+      editorialPlan(choice, editorial, story?.pageCount ?? 12, readerAge),
+      Boolean(book.event),
+      readerAge,
+      editorial,
+    );
+    // «vos» en Argentina y Uruguay; «tú» en el resto o si no se sabe el país.
+    const spanishVoice = spanishVoiceFor(userSnap.data()?.country as string | undefined);
     if (!story || !style || child?.ownerUid !== uid) {
       throw new AppError(
         409,
@@ -624,16 +721,12 @@ export class PreviewService {
       track,
     );
     const characterDescription = describeCharacter(String(child.name), sheet, traits, mustKeep);
-    // Edad que dice el cuento: la que cumple en un cumpleaños; si no, la del protagonista.
-    const storyAge =
-      event?.type === 'birthday' && typeof event.turningAge === 'number'
-        ? event.turningAge
-        : Number(child.age);
     // Nombres que tienen que aparecer tal cual: el del protagonista y el apodo de los recuerdos.
     const requiredNames = [String(child.name), memories?.nickname ?? ''].filter(Boolean);
 
-    // Armado por edad (page-layout.ts): se decide con la muestra y queda con ella.
-    const layout = bookLayout(Number(child.age), plan.contentType);
+    // Armado por edad (page-layout.ts): se decide con la muestra y queda con ella. Con la misma
+    // edad que la cantidad de texto y la letra (en un cumpleaños, la que cumple).
+    const layout = bookLayout(readerAge ?? Number(child.age), plan.contentType);
     const request = {
       language: book.language,
       childName: String(child.name),
@@ -651,6 +744,7 @@ export class PreviewService {
       pageCount: Math.max(scenesFor(plan.narrativePages, layout), PREVIEW_ILLUSTRATED_PAGES),
       wordsPerPage: plan.words,
       mustInclude: requiredNames.slice(1),
+      spanishVoice,
     };
     const promptInput = {
       ...request,
@@ -663,11 +757,20 @@ export class PreviewService {
     };
     // Planificador editorial (guía A): arco, escenas y qué se ve en cada página. El redactor lo
     // sigue y el pipeline lo usa para ilustrar y revisar cada página.
-    const { usage: planUsage, ...storyPlan } = await ai.text.planStory({
+    const { usage: planUsage, ...plannedStory } = await ai.text.planStory({
       ...request,
       prompt: buildStoryPrompt(promptInput),
     });
     await track('story', { usage: planUsage });
+    // Páginas sin texto (3 a 6 años, 1 o 2 en el clímax): se sanean y quedan en el plan.
+    const wordless = readerAge === null ? [] : wordlessPages(plannedStory.scenes, readerAge);
+    const storyPlan = {
+      ...plannedStory,
+      scenes: plannedStory.scenes.map((scene) => ({
+        ...scene,
+        wordless: wordless.includes(scene.pageIndex),
+      })),
+    };
     const prompt = buildStoryPrompt({ ...promptInput, plan: storyPlan });
 
     // Texto: cuento, revisión editorial y moderación (un reintento si no pasa).
@@ -675,21 +778,58 @@ export class PreviewService {
       async () => {
         // Si el modelo solo cambió las tildes del nombre, se deja como lo escribió la persona.
         const fix = (text: string) => repairNameAccents(text, requiredNames);
+        // Las páginas sin texto del plan quedan vacías aunque una pasada de la IA escriba algo.
+        const keepWordless = <T extends { text: string }>(list: T[]) =>
+          list.map((page, index) => (wordless.includes(index) ? { ...page, text: '' } : page));
         const write = async () => {
           const draft = await track('story', await ai.text.generateStory({ ...request, prompt }));
           const review = await track(
             'review',
             await ai.text.reviewStory(draft, { ...request, prompt }),
           );
-          return {
-            title: fix(draft.title),
-            pages: review.pages.map((page) => ({ ...page, text: fix(page.text) })),
-            approved: review.approved,
-          };
+          // Las páginas sin texto del plan quedan vacías aunque el modelo haya escrito algo.
+          const pages = review.pages.map((page, index) => ({
+            ...page,
+            text: wordless.includes(index) ? '' : fix(page.text),
+          }));
+          // Para los más chicos el exceso de texto es el defecto más visible: la página que pasa
+          // el tope de la edad se reescribe (una vez), no solo se avisa.
+          const over = pagesOverCap(pages, plan.words);
+          if (over.length > 0) {
+            await this.qaEvent(bookId, 'length_rewritten', { pages: over.length });
+            await Promise.all(
+              over.map(async (index) => {
+                const page = pages[index];
+                if (!page) return;
+                const rewrite = await track(
+                  'review',
+                  await ai.text.rewritePage({
+                    language: book.language,
+                    spanishVoice,
+                    childName: request.childName,
+                    age: readerAge ?? request.age,
+                    storyTitle: draft.title,
+                    pageIndex: index,
+                    previous: pages[index - 1]?.text ?? null,
+                    next: pages[index + 1]?.text ?? null,
+                    text: page.text,
+                    words: { min: plan.words.min, max: plan.words.max },
+                    mustInclude: requiredNames,
+                  }),
+                );
+                const text = fix(rewrite.text);
+                // Se queda con la reescritura solo si es más corta y no perdió texto del todo.
+                if (text && countWords(text) < countWords(page.text)) {
+                  pages[index] = { ...page, text };
+                }
+              }),
+            );
+          }
+          return { title: fix(draft.title), pages, approved: review.approved };
         };
         // Densidad y nombres exactos: si algo no cumple, 1 reescritura.
         const problems = (draft: { title: string; pages: { text: string }[] }) => ({
-          outOfRange: pagesOutOfRange(draft.pages, plan.words).length,
+          outOfRange: pagesOutOfRange(draft.pages, plan.words, wordless).length,
           names: nameIssues([draft.title, ...draft.pages.map((page) => page.text)], requiredNames)
             .length,
         });
@@ -737,7 +877,7 @@ export class PreviewService {
             );
             const candidate = {
               title: current.title,
-              pages: rewrite.pages.map((page) => ({ ...page, text: fix(page.text) })),
+              pages: keepWordless(rewrite.pages.map((page) => ({ ...page, text: fix(page.text) }))),
               approved: current.approved && rewrite.approved,
             };
             if (safe(current, candidate)) current = candidate;
@@ -750,7 +890,7 @@ export class PreviewService {
             const candidate = {
               ...current,
               title: fix(proof.title),
-              pages: proof.pages.map((page) => ({ ...page, text: fix(page.text) })),
+              pages: keepWordless(proof.pages.map((page) => ({ ...page, text: fix(page.text) }))),
             };
             if (safe(current, candidate)) current = candidate;
           } catch (error) {
@@ -901,6 +1041,7 @@ export class PreviewService {
       activityPages: plan.activityPages,
       words: plan.words,
       pageLayout: layout,
+      ...(plan.ageBand && plan.textBand ? { ageBand: plan.ageBand, textBand: plan.textBand } : {}),
       plan: storyPlan,
       generatedAt: new Date(),
     };
@@ -1048,6 +1189,63 @@ export class PreviewService {
 
   /** Registro de control de calidad del libro (sin datos del niño). */
   /** "Tu muestra está lista" (una vez por libro), por si se fue de la página mientras tanto. */
+  /**
+   * Trabajo programado (cada 5 minutos): arranca las muestras que esperan en la fila, en orden
+   * de llegada, mientras haya presupuesto de IA. Cada una se toma con una transacción (dos
+   * pasadas simultáneas no generan dos veces) y, al terminar, el correo avisa que está lista.
+   */
+  async processQueue(max = QUEUE_BATCH): Promise<{ started: number; waiting: number }> {
+    const queued = await this.db
+      .collection(COLLECTIONS.books)
+      .where('status', '==', 'preview_queued')
+      .orderBy('queuedAt')
+      .limit(max)
+      .get();
+    if (queued.empty) return { started: 0, waiting: 0 };
+    const limits = await this.budget.limits();
+    if (!(await this.budget.available(limits, false))) {
+      this.log.info({ waiting: queued.size }, 'preview queue waiting for AI budget');
+      return { started: 0, waiting: queued.size };
+    }
+
+    const claimed: { bookId: string; book: BookData }[] = [];
+    for (const doc of queued.docs) {
+      const book = await this.db.runTransaction(async (tx) => {
+        const current = (await tx.get(doc.ref)).data() as BookData | undefined;
+        if (current?.status !== 'preview_queued') return null;
+        tx.update(doc.ref, {
+          status: 'preview_generating',
+          previewStartedAt: new Date(),
+          updatedAt: new Date(),
+        });
+        return current;
+      });
+      if (book) claimed.push({ bookId: doc.id, book });
+    }
+
+    const results = await Promise.allSettled(
+      claimed.map(({ bookId, book }) =>
+        book.queuedStep === 'illustrations'
+          ? this.illustrate(book.ownerUid, bookId, limits, false)
+          : this.runPreview(book.ownerUid, bookId, limits, {
+              startedAt: Date.now(),
+              notify: true,
+            }),
+      ),
+    );
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        // El libro ya volvió a su estado (con el error a la vista) y la falla quedó auditada.
+        this.log.error(
+          { err: result.reason, bookId: claimed[index]?.bookId },
+          'queued preview failed',
+        );
+      }
+    });
+    this.log.info({ started: claimed.length }, 'preview queue processed');
+    return { started: claimed.length, waiting: queued.size - claimed.length };
+  }
+
   private async notifyPreviewReady(uid: string, bookId: string) {
     if (!this.notifier) return;
     const book = (await this.bookRef(bookId).get()).data() ?? {};
@@ -1104,7 +1302,6 @@ export class PreviewService {
         'Crea tu cuenta gratis para ver la portada y las páginas ilustradas.',
       );
     }
-    await this.budget.ensureAvailable(limits);
     const { ref, book, preview } = await this.readyBook(uid, bookId);
     if ((preview.stage ?? 'complete') !== 'character' || !preview.character) {
       throw new AppError(409, 'bad_request', 'El personaje ya está aprobado.');
@@ -1114,15 +1311,47 @@ export class PreviewService {
     if (isStale(preview, book)) {
       throw new AppError(409, 'bad_request', 'Cambiaste tus elecciones: crea la muestra de nuevo.');
     }
+    // Sin presupuesto de IA hoy: las ilustraciones esperan en la fila (se avisa por correo).
+    const queue = !(await this.budget.available(limits));
     // Bloqueo: mientras se ilustra, el libro queda "generando" (la web lo sigue en vivo).
     await this.db.runTransaction(async (tx) => {
       const current = (await tx.get(ref)).data() as BookData | undefined;
       if (current?.status !== 'preview_ready') {
         throw new AppError(409, 'bad_request', 'Ya estamos ilustrando esta vista previa.');
       }
-      tx.update(ref, { status: 'preview_generating', previewStartedAt: new Date() });
+      tx.update(
+        ref,
+        queue
+          ? { status: 'preview_queued', queuedAt: new Date(), queuedStep: 'illustrations' }
+          : { status: 'preview_generating', previewStartedAt: new Date() },
+      );
     });
+    if (queue) {
+      this.log.warn({ bookId }, 'illustrations queued: AI budget exhausted');
+      return this.get(uid, bookId);
+    }
+    return this.illustrate(uid, bookId, limits, anonymous);
+  }
 
+  /**
+   * Ilustra la portada y las primeras páginas con la lámina aprobada (el libro ya está en
+   * preview_generating). Si el presupuesto se acaba a mitad de camino, vuelve a la fila.
+   */
+  private async illustrate(
+    uid: string,
+    bookId: string,
+    limits: AiLimits,
+    anonymous: boolean,
+  ): Promise<PublicPreview> {
+    const { ref, book } = await this.ownedBook(uid, bookId);
+    const preview = book.preview;
+    if (!preview?.character) {
+      await ref.update({
+        status: book.preview ? 'preview_ready' : 'draft',
+        previewStartedAt: null,
+      });
+      throw new AppError(409, 'bad_request', 'Primero genera la vista previa.');
+    }
     try {
       const { story, style, child } = await this.context(uid, book, preview);
       const ai = this.providers.ai();
@@ -1184,8 +1413,9 @@ export class PreviewService {
         illustrate(coverScene(preview.pages[0]?.illustrationPrompt, preview.title), 1),
         ...preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map((page) =>
           illustrate(
-            // El espacio para el texto según el armado (zona calma, papel fundido o entera).
-            `${page.illustrationPrompt}${layoutSceneNote(
+            // Biblia visual (objetos, lugar, ropa especial y encuadre de la escena) y el espacio
+            // para el texto según el armado (zona calma, papel fundido o entera).
+            `${page.illustrationPrompt}${sceneVisuals(preview.plan, page.index)}${layoutSceneNote(
               pageLayout({
                 layout: preview.pageLayout ?? null,
                 words: countWords(page.text),
@@ -1238,6 +1468,16 @@ export class PreviewService {
       await this.qaEvent(bookId, 'character_approved', { mustKeep: mustKeep.length });
       if (!anonymous) await this.notifyPreviewReady(uid, bookId);
     } catch (error) {
+      if (isBudgetExceeded(error)) {
+        this.log.warn({ bookId }, 'illustrations back to the queue: AI budget exhausted');
+        await ref.update({
+          status: 'preview_queued',
+          queuedAt: new Date(),
+          queuedStep: 'illustrations',
+          previewStartedAt: null,
+        });
+        return this.get(uid, bookId);
+      }
       await ref.update({ status: 'preview_ready', previewStartedAt: null });
       await this.auditAiError('preview', bookId, error);
       throw error instanceof AppError ? error : generationFailed(error);

@@ -2517,7 +2517,39 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Infra:** Terraform habilita `addressvalidation.googleapis.com` y suma `roles/serviceusage.serviceUsageConsumer` al worker.
 - **Costo:** USD 17 cada 1.000 después de 5.000 gratis por mes; una llamada por impreso.
 
-## 237 — Oficio del texto: reglas, promesas, controles y ortografía aparte
+## 236 — Cantidad de texto, forma, letra y voz por edad («Cuentos que cuidan»)
+
+- **Franjas de edad:** 0-2, 3-4, 5-6, 7-8 y 9+ (antes 0-2, 3-5, 6-8, 9+). Palabras por página (rango y tope): 0-8 (10), 10-25 (30), 20-40 (50), 40-70 (80), 70-120 (140). Están en `editorialConfig.ageBands`, editables en el admin («Palabras por edad»); un documento guardado antes toma las de fábrica. Sin edad conocida se usan las densidades de siempre.
+- **«Ajustar» mueve un escalón:** la densidad pasa a ser un escalón sobre la franja de la edad (muy visual, una franja menos; más lectura, una más), así nunca se aleja más de uno.
+- **Formatos:** 0-2 mini (10 páginas de cuento); 3-4 short (14); 5-8 classic (26); 9+ epic (30). Para 5-6 se sugieren 16 a 24 páginas, que no coincide con ninguna extensión: queda classic (26), la imprimible más cercana, sin cambiar las reglas de la imprenta. «Leo solo» (5-8) ahora es menos texto por página (un escalón menos), no un libro más largo.
+- **Celebraciones:** el tope de 60 palabras (DECISIONS 231) pasa a ser el de la edad que se celebra (30 en un cumple de 4); 60 si no se sabe la edad.
+- **Tope duro:** la página que pasa el tope se reescribe una vez con el modelo (`rewritePage`) y queda el evento `length_rewritten`. En el pedido, el texto es el que aprobó el adulto: se registra, no se cambia.
+- **Forma para menores de 7:** una estructura para todo el libro (estribillo, cuartetas, días de la semana, acumulativo, pregunta y respuesta) que el planificador anota en el plan, una frase que se repite 3 veces, onomatopeyas, humor concreto sin adjetivos genéricos, el texto no describe el dibujo, giro final y primera persona posible. De 3 a 6, 1 o 2 páginas sin texto en el clímax (nunca la primera, la última ni dos seguidas); la maquetación las arma sin panel.
+- **Letra:** de 0 a 6, Quicksand Bold, en MAYÚSCULAS en español y portugués (en inglés, mayúscula y minúscula); 7-8, Andika; 9+, Fraunces. Tamaños (pt): 30-36, 22-26, 18-22, 15-17 y 13-15; el tamaño sigue la cantidad de texto si el adulto subió un escalón, y en el grapado A5 se escala por el ancho de la página (0,75). Va con el armado por edad de DECISIONS 232 (zona calma, papel fundido, enfrentadas); una página en el tope que no entra en la zona calma puede bajar hasta el 80 % del mínimo de su franja antes de frenar el pedido. Reemplaza la escala por nivel y la del mini cuento. La vista previa web usa la misma letra.
+- **Voz:** «vos» si la cuenta es de Argentina o Uruguay, «tú» en el resto o si no se sabe (también la revisión, las reescrituras y las actividades, con el país del pedido).
+- Los libros ya generados no cambian: palabras, franjas y letra quedan congeladas en la muestra; sin franjas, el libro se arma como siempre.
+
+## 237 — Sin presupuesto de IA, la muestra espera en la fila (sin mostrar un límite)
+
+- **Fecha:** 2026-11-06. Pedido por Sebas: que el cliente nunca vea "Alcanzamos el límite de generación por hoy"; que la muestra quede en cola y arranque sola cuando se libere el cupo.
+- **Estado nuevo `preview_queued`:** si el presupuesto diario de IA (`aiConfig/global.dailyBudgetUsd`) está agotado al crear la muestra o al aprobar el personaje, el libro queda en la fila (`queuedAt`, `queuedStep`: `preview` o `illustrations`) y la web muestra "Estamos preparando la muestra de {nombre}; te avisamos por correo". Si el presupuesto se acaba a mitad de camino, también vuelve a la fila en vez de fallar. El cupo diario de la persona se reserva al encolar (los documentos quedan en `previewQuotaDocs` para devolverlo aunque haya cambiado el día).
+- **Trabajo programado:** Cloud Scheduler (`preview-queue`, cada 5 minutos) llama `POST /jobs/preview-queue` en la API con un token OIDC de `sn-invoker` (audiencia `storynido-api-jobs`; la API es pública, así que la ruta verifica el token). Toma hasta 4 libros en orden de llegada, cada uno con una transacción, y los genera en paralelo dentro de los 300 s del request; al terminar manda el correo `preview_ready`. Sin presupuesto, no toma nada.
+- **Donde no hay fila** (corregir rasgos, regenerar una ilustración, dibujo del perfil), el aviso pasa a ser "Hay mucha demanda en este momento" en vez de hablar de un límite.
+- **La alerta de Monitoring sigue igual:** el log `ai_budget_exhausted` se escribe cuando una muestra entra a la fila, no en cada pasada del trabajo.
+
+## 238 — Continuidad de ilustraciones: biblia visual del plan
+
+- **Fecha:** 2026-11-06. Pedido por Sebas (arreglos del generador, PR A).
+- **Contexto:** en un cuento de kitesurf la tabla cambiaba de página a página (a veces con vela y mástil), la playa era otra en cada escena y el protagonista entraba al agua con jean y zapatillas. `continuityFacts` ya llegaba al prompt de cada página (DECISIONS 231), pero la revisión de la página no lo veía y nada fijaba el aspecto de los objetos, los lugares o la ropa especial.
+- **Decisión:**
+  - **Biblia visual en el plan:** `props` (hasta 4: nombre y aspecto fijo en inglés; en una actividad poco común, qué es y qué no es: «tabla chica con straps tirada por una cometa en arco con líneas largas, SIN vela ni mástil»), `places` (hasta 3) y `outfits` (hasta 3, solo para contextos donde la ropa de la lámina no sirve: en el agua, de noche, en la nieve; la ropa de todos los días sigue siendo la de la lámina). Cada escena nombra sus `props`, su `place`, su `outfit` y su encuadre (`shot`: general, medio, primer plano o picado; nunca el mismo tres veces seguidas, y si el modelo lo repite se corrige solo). Se guarda en la muestra y en el libro congelado como el elenco, y entra al prompt de cada página solo con lo que esa escena incluye (también en las páginas de la muestra).
+  - **Revisión de cada página:** recibe `continuityFacts` y la biblia de la escena; un objeto, lugar o ropa dibujado distinto es una reparación.
+  - **Planificador:** `notVisible` lista a los personajes que se repiten y no están en el lugar de esa escena.
+  - **Dirección de arte:** regla de ropa para deportes de agua y de riesgo (traje de neopreno o malla, chaleco de impacto y casco cuando corresponde, descalzo o con botitas; nunca jean ni zapatos en el agua; casco en bici, patines y tablas), que también se suma a los libros congelados antes. De 9 a 12 años se saca la técnica («tinta firme y color plano»), que peleaba con el estilo elegido; quedan las proporciones, el encuadre cinematográfico y el tono.
+- **Compatibilidad:** los planes y libros anteriores no traen la biblia: el prompt queda igual y su huella no cambia.
+- **Costo:** ninguna llamada extra (el plan devuelve un poco más de texto).
+
+## 239 — Oficio del texto: reglas, promesas, controles y ortografía aparte
 
 - **Fecha:** 2026-11-06. Pedido por Sebas (arreglos del generador, PR B). Depende del tratamiento «vos»/«tú» del PR #55, que no se toca acá.
 - **Reglas del redactor** (`craftRules`, en `narrativeRules`): mostrar, no contar; todo lo que se plantea se paga (un misterio con su pista plantada antes, un objeto importante que vuelve a servir); como máximo dos intentos fallidos y cada uno enseña algo distinto; el mentor ayuda, pero la solución la encuentra el protagonista; si hace algo imitable y riesgoso, usa equipo de seguridad y un adulto sabe dónde está; la última página termina en una imagen o una frase, nunca en una lección; cada detalle personal aparece donde cambia algo. Por edad: desde 6 años, diálogo en al menos una de cada tres páginas, con una voz distinta por personaje; desde 9, oraciones de 20 palabras como máximo y sin jerga técnica sin explicar. En un bautismo o un primer añito no van los intentos fallidos ni el mentor.
@@ -2526,8 +2558,9 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
   - Diálogo desde 6 años: raya, comillas o guion en al menos un tercio de las páginas con texto.
   - Palabras con contenido repetidas: más de 2 veces en una página, o más de 4 en el libro. Sin contar las palabras vacías ni los nombres de los personajes. En los libros de más de 12 páginas el tope del libro es una cada tres páginas: el objeto central se llama siempre igual y en 26 páginas vuelve más de cuatro veces.
   - Moralejas explícitas («aprendió que», «la lección», «perseverancia», «el verdadero valor»…).
-  
+
   Si alguno falla, la revisión editorial recibe la lista concreta y reescribe una sola vez (`story_craft` en el control de calidad). La reescritura se acepta solo si no rompe los nombres ni empeora la densidad.
+
 - **Ortografía aparte:** después de la revisión, una pasada a temperatura 0 que solo corrige ortografía, tildes, puntuación y concordancia. Si cambia la cantidad de páginas o rompe un nombre, queda el texto anterior.
 - **Escenas desde el texto final:** con el texto ya corregido, se reescribe el `illustrationPrompt` de cada página: quién está y quién no, el lugar, la hora del día, el objeto clave y un solo momento.
 - Si la ortografía o las escenas fallan en la IA, la muestra sigue con lo que había (no se cae).

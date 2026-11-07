@@ -31,7 +31,10 @@ import {
   describeCharacter,
   nameIssues,
   pagesOutOfRange,
+  spanishVoiceFor,
+  storyTypography,
   utcDay,
+  type AgeBand,
   type AIProvider,
   type ActivitySpec,
   type BookFormat,
@@ -47,7 +50,12 @@ import {
   type PageReview,
   type QaCode,
   type CastMember,
+  type OutfitPlan,
   type ScenePlan,
+  type VisualBibleItem,
+  sceneOutfit,
+  visualBibleCheck,
+  visualBibleNote,
   catalogPrices,
   SAME_OUTFIT,
   calmSideFor,
@@ -112,6 +120,13 @@ export class IllustrationRejectedError extends Error {
   }
 }
 
+/** Letra del cuento por edad (null en los libros anteriores a las franjas: se arman como siempre). */
+export function typographyOf(snapshot: Pick<BookSnapshot, 'ageBand' | 'textBand' | 'language'>) {
+  return snapshot.ageBand && snapshot.textBand
+    ? storyTypography(snapshot.ageBand, snapshot.textBand, snapshot.language as Lang)
+    : null;
+}
+
 /** Libro aprobado y congelado al empezar el pedido. El texto ya no cambia sin el adulto. */
 export interface BookSnapshot {
   hash: string;
@@ -128,12 +143,19 @@ export interface BookSnapshot {
   textDensity: string;
   /** Sinopsis para la contratapa (descripción de la historia en el idioma del libro). */
   synopsis?: string | null;
-  words: { min: number; max: number } | null;
+  words: { min: number; max: number; cap?: number } | null;
+  /** Franjas de edad del lector y del texto (tipografía por edad); faltan en libros anteriores. */
+  ageBand?: AgeBand;
+  textBand?: AgeBand;
   activityPages: number;
   pages: { index: number; text: string; illustrationPrompt: string }[];
   scenes: ScenePlan[] | null;
   /** Personas secundarias con género y aspecto fijos (muestras nuevas; ausente en las anteriores). */
   cast?: CastMember[];
+  /** Biblia visual: objetos, lugares y ropa con aspecto fijo (ausente en las muestras anteriores). */
+  props?: VisualBibleItem[];
+  places?: VisualBibleItem[];
+  outfits?: OutfitPlan[];
   imagePromptTemplate: string;
   stylePrompt: string;
   /** Dirección de arte de la muestra (null en muestras anteriores a ella). */
@@ -285,6 +307,7 @@ function pageScene(
   scene: ScenePlan | null | undefined,
   hint?: string,
   layout?: PageLayout,
+  bible?: Pick<BookSnapshot, 'props' | 'places' | 'outfits'>,
 ): string {
   const visible = scene?.mustBeVisible.length
     ? ` Must be visible: ${scene.mustBeVisible.join(', ')}.`
@@ -294,7 +317,12 @@ function pageScene(
   const continuity = scene?.continuityFacts.length
     ? ` Keep consistent with the other pages, drawn exactly the same way: ${scene.continuityFacts.join('; ')}.`
     : '';
-  const outfit = scene ? ` The main character wears ${SAME_OUTFIT}.` : '';
+  // Ropa especial del plan (en el agua, de noche) o la de la lámina.
+  const outfit = scene
+    ? ` The main character wears ${sceneOutfit(bible, scene) ?? SAME_OUTFIT}.`
+    : '';
+  // Objetos, lugar y encuadre con el aspecto fijo de la biblia visual (solo los de la escena).
+  const visuals = visualBibleNote(bible, scene);
   const fix = hint
     ? ` Make sure that: ${hint}. Draw exactly this scene, with the protagonist clearly visible.`
     : '';
@@ -303,7 +331,7 @@ function pageScene(
   const calm = scene
     ? layoutSceneNote(layout ?? { kind: 'overlay', side: calmSideFor(scene.pageIndex) })
     : '';
-  return `${prompt}${visible}${hidden}${continuity}${outfit}${fix}${calm} No text, letters or words anywhere in the image.`;
+  return `${prompt}${visible}${hidden}${continuity}${visuals}${outfit}${fix}${calm} No text, letters or words anywhere in the image.`;
 }
 
 /** Texto que se suma a la escena en cada reintento (1: ninguno). */
@@ -507,7 +535,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const baseScene =
       index === 0
         ? pageScene(coverScene(snapshot.pages[0]?.illustrationPrompt, snapshot.title), null, hint)
-        : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint, layoutOf(snapshot, index - 1))}${castNote(snapshot.cast)}`;
+        : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint, layoutOf(snapshot, index - 1), snapshot)}${castNote(snapshot.cast)}`;
     const reference = await load(snapshot.character.sheetPath);
     const companion = snapshot.companion ?? null;
     const references = companion ? [reference, await load(companion.sheetPath)] : [reference];
@@ -597,8 +625,16 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             mustKeep: MustKeepTrait[];
             approvedAt: unknown;
           };
-          plan?: { scenes: ScenePlan[]; cast?: CastMember[] } | null;
-          words?: { min: number; max: number };
+          plan?: {
+            scenes: ScenePlan[];
+            cast?: CastMember[];
+            props?: VisualBibleItem[];
+            places?: VisualBibleItem[];
+            outfits?: OutfitPlan[];
+          } | null;
+          words?: { min: number; max: number; cap?: number };
+          ageBand?: AgeBand;
+          textBand?: AgeBand;
           activityPages?: number;
           artDirection?: string | null;
           companion?: { name: string; look: string; imagePath: string } | null;
@@ -693,6 +729,10 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       synopsis:
         (story.description as Record<string, string> | undefined)?.[String(book.language)] ?? null,
       words: preview.words ?? null,
+      // Solo si la muestra las trae: así un libro anterior se arma igual que siempre.
+      ...(preview.ageBand && preview.textBand
+        ? { ageBand: preview.ageBand, textBand: preview.textBand }
+        : {}),
       activityPages: preview.activityPages ?? 0,
       pages: preview.pages.map(({ index, text, illustrationPrompt }) => ({
         index,
@@ -702,6 +742,10 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       scenes: preview.plan?.scenes ?? null,
       // Solo si el plan lo trae: así el libro de una muestra anterior conserva su huella.
       ...(preview.plan?.cast?.length ? { cast: preview.plan.cast } : {}),
+      // Biblia visual: igual que el elenco, solo si el plan la trae.
+      ...(preview.plan?.props?.length ? { props: preview.plan.props } : {}),
+      ...(preview.plan?.places?.length ? { places: preview.plan.places } : {}),
+      ...(preview.plan?.outfits?.length ? { outfits: preview.plan.outfits } : {}),
       imagePromptTemplate: String(story.imagePromptTemplate),
       stylePrompt: String(style.promptModifier),
       artDirection: preview.artDirection ?? null,
@@ -789,7 +833,13 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       });
     }
     // El adulto pudo editar el texto: fuera de rango se registra, no bloquea.
-    const outOfRange = snapshot.words ? pagesOutOfRange(snapshot.pages, snapshot.words) : [];
+    // Las páginas sin texto que pidió el plan no cuentan como cortas.
+    const wordless = (snapshot.scenes ?? []).flatMap((scene) =>
+      scene.wordless ? [scene.pageIndex] : [],
+    );
+    const outOfRange = snapshot.words
+      ? pagesOutOfRange(snapshot.pages, snapshot.words, wordless)
+      : [];
     if (outOfRange.length > 0) {
       await qaEvent(ctx, 'length_out_of_range', { pages: outOfRange.length });
     }
@@ -826,6 +876,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         templates,
         count: snapshot.activityPages,
         goal: null,
+        spanishVoice: spanishVoiceFor(ctx.order.country),
       });
       cost += await record(ctx, 'story', generated.usage);
       const check = await provider.text.moderateText(
@@ -910,6 +961,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             character: snapshot.character.description,
             mustKeep: snapshot.character.mustKeep,
             scene: index === 0 ? null : (snapshot.scenes?.[index - 1] ?? null),
+            visualBible:
+              index === 0 ? '' : visualBibleCheck(snapshot, snapshot.scenes?.[index - 1]),
           };
           // Una revisión que se cuelga no tumba el control de todo el libro: 1 reintento y,
           // si sigue sin responder, esa página va a una persona.
@@ -1186,6 +1239,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             ? snapshot.textDensity
             : 'balanced') as Density,
           readingLevel: snapshot.readingLevel as LayoutBook['readingLevel'],
+          typography: typographyOf(snapshot),
           cover: prepared[0]?.uri ?? '',
           pages: snapshot.pages.map((page, index) => ({
             text: page.text,
@@ -1736,6 +1790,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         ? snapshot.textDensity
         : 'balanced') as Density,
       readingLevel: snapshot.readingLevel as LayoutBook['readingLevel'],
+      typography: typographyOf(snapshot),
       cover: prepared[0] ?? '',
       pages: snapshot.pages.map((page, index) => ({
         text: page.text,
