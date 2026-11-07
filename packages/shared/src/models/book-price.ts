@@ -8,17 +8,18 @@ import { printAvailability, printPageCount, type PrintOption } from './print';
 import { charmPrice, unitPriceUsdMinor, type ProductPricing } from './product-pricing';
 
 /**
- * Precios claros (DECISIONS 236): el precio de un libro se calcula en un solo lugar. La barra de
+ * Precios claros (DECISIONS 241): el precio de un libro se calcula en un solo lugar. La barra de
  * la muestra, las tarjetas del checkout y el resumen usan estas funciones con las páginas reales
- * del libro, así que muestran el mismo número.
+ * del libro y el costo real de la imprenta, así que muestran el mismo número. El margen es fijo:
+ * si sube un costo (imprenta o IA), sube el precio.
  */
 
 type Pricing = ProductPricing | Omit<ProductPricing, 'updatedAt'>;
 
 /**
- * Costo de referencia de impresión de un ejemplar: la imprenta habilitada más barata de la matriz
- * (admin) que puede imprimir ese formato y esas páginas en el país. Es el costo con el que se
- * calcula el precio del impreso: la dirección no lo cambia (solo agrega el envío). Null si
+ * Costo de impresión de un ejemplar según la matriz (admin, actualizada a diario con las
+ * cotizaciones de las imprentas): la imprenta habilitada más barata que puede imprimir ese
+ * formato y esas páginas en el país. Es el respaldo cuando no hay cotización en vivo. Null si
  * ninguna imprenta activa puede.
  */
 export function referencePrintCost(
@@ -61,14 +62,14 @@ export function bookPriceMinor(
 
 /**
  * Precio exacto del libro (sin envío) en cada formato que se puede comprar en el país, para un
- * libro de `pages` páginas interiores. El orden es el de `BOOK_FORMATS`.
+ * libro de `pages` páginas interiores. `productionUsdMinor` da el costo de impresión por ejemplar
+ * de cada formato impreso (null: no se puede imprimir). El orden es el de `BOOK_FORMATS`.
  */
 export function bookFormatPrices(input: {
   country: CountryConfig | null;
   pricing: Partial<Record<BookFormat, Pricing>>;
-  options: readonly PrintOption[];
-  activeProviders: readonly string[];
   pages: number;
+  productionUsdMinor: (format: BookFormat) => number | null;
   professional?: boolean;
   /** Formatos a considerar (por defecto, todos). */
   formats?: readonly BookFormat[];
@@ -78,17 +79,12 @@ export function bookFormatPrices(input: {
   return (input.formats ?? BOOK_FORMATS).flatMap((format) => {
     const pricing = input.pricing[format];
     if (!country.formats[format] || !pricing?.active) return [];
-    const print = referencePrintCost(input.options, format, input.pages, input.activeProviders);
-    if (format !== 'digital' && !print) return [];
+    const production = format === 'digital' ? 0 : input.productionUsdMinor(format);
+    if (production === null) return [];
     return [
       {
         format,
-        amountMinor: bookPriceMinor(
-          pricing,
-          print?.productionUsdMinor ?? 0,
-          input.pages,
-          input.professional,
-        ),
+        amountMinor: bookPriceMinor(pricing, production, input.pages, input.professional),
       },
     ];
   });

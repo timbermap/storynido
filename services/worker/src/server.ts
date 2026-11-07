@@ -16,6 +16,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { buildApp } from './app';
 import { AnonymousCleanup } from './jobs/anonymous-cleanup';
 import { PostSaleJobs } from './jobs/post-sale';
+import { PriceCostRefresh } from './jobs/price-costs';
 import { PipelineWatchdog } from './jobs/watchdog';
 import { loadWorkerEnv } from './config';
 import { generationHandlers } from './pipeline/generation';
@@ -134,9 +135,19 @@ const anonymousCleanup = new AnonymousCleanup(
   () => providers.storage(),
   app.log,
 );
-// Una vez por día: postventa y limpieza de sesiones anónimas abandonadas (privacidad).
+// Costos que siguen solos a la realidad (DECISIONS 241): matriz de imprentas y costo de IA.
+const priceCosts = new PriceCostRefresh(db, () => providers.printers(), notifier, app.log);
+// Una vez por día: postventa, limpieza de sesiones anónimas abandonadas (privacidad) y costos.
 const jobs = {
-  run: async () => ({ ...(await postSale.run()), anonymous: await anonymousCleanup.run() }),
+  run: async () => ({
+    ...(await postSale.run()),
+    anonymous: await anonymousCleanup.run(),
+    // Si los costos fallan, la postventa ya corrió: se registra y se sigue.
+    costs: await priceCosts.run().catch((error: unknown) => {
+      app.log.error({ err: error }, 'price cost refresh failed');
+      return null;
+    }),
+  }),
 };
 const watchdog = new PipelineWatchdog(
   db,

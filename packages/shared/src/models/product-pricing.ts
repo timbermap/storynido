@@ -38,6 +38,21 @@ export const productPricingSchema = z.object({
   printMargin: marginSchema,
   /** Profesionales: descuento base sobre el precio (aparte del de recurrencia). */
   proPercentOff: z.number().int().min(0).max(80).default(0),
+  /**
+   * Costo de IA por página medido (DECISIONS 241): un job diario lo calcula con los libros pagados
+   * de los últimos 30 días y, salvo que esté fijado a mano, lo copia a `aiCostPerPageUsdMinor`.
+   */
+  aiCostAuto: z
+    .object({
+      perPageUsdMinor: z.number().int().nonnegative(),
+      books: z.number().int().nonnegative(),
+      updatedAt: z.coerce.date(),
+      /** El valor que había antes de copiarlo (null si no se copió: pocos libros o fijado a mano). */
+      previousUsdMinor: z.number().int().nonnegative().nullable(),
+    })
+    .nullish(),
+  /** Fijar a mano: el job diario no toca `aiCostPerPageUsdMinor`. */
+  aiCostManual: z.boolean().optional(),
   active: z.boolean(),
   updatedAt: z.date(),
 });

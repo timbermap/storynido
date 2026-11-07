@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { aiCostReport } from './ai-costs';
+import { aiCostReport, measuredAiCostPerPage } from './ai-costs';
 
 const call = (
   kind: 'story' | 'illustration' | 'character' | 'moderation',
@@ -46,5 +46,34 @@ describe('costo real de IA', () => {
 
   it('sin llamadas, todo en cero', () => {
     expect(aiCostReport([])).toEqual({ byModel: [], perPreview: [], perBook: [] });
+  });
+});
+
+describe('measuredAiCostPerPage', () => {
+  const books = Array.from({ length: 20 }, (_, index) => ({
+    bookId: `b${String(index)}`,
+    pages: 28,
+  }));
+  it('divide todo lo que gastó la IA en los libros pagados por sus páginas (hacia arriba)', () => {
+    // 4,90 USD por libro de 28 páginas = 0,175 por página → 18 centavos.
+    const records = books.flatMap((book) => [
+      { bookId: book.bookId, costUsdMicros: 3_000_000 },
+      { bookId: book.bookId, costUsdMicros: 1_900_000 },
+    ]);
+    expect(measuredAiCostPerPage(records, books)).toEqual({ perPageUsdMinor: 18, books: 20 });
+  });
+
+  it('con pocos libros no se confía en la medición', () => {
+    const records = books.slice(0, 19).map((book) => ({ bookId: book.bookId, costUsdMicros: 1 }));
+    expect(measuredAiCostPerPage(records, books)).toBeNull();
+  });
+
+  it('ignora llamadas de libros que no se pagaron', () => {
+    const records = [
+      ...books.map((book) => ({ bookId: book.bookId, costUsdMicros: 2_800_000 })),
+      { bookId: 'sin-pagar', costUsdMicros: 99_000_000 },
+      { bookId: null, costUsdMicros: 5_000_000 },
+    ];
+    expect(measuredAiCostPerPage(records, books)).toEqual({ perPageUsdMinor: 10, books: 20 });
   });
 });

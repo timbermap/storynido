@@ -9,7 +9,7 @@ import {
 } from '@storynido/shared';
 
 import { ConfigEditor } from '@/components/config/config-editor';
-import { money, yesNo } from '@/lib/format';
+import { day, money, yesNo } from '@/lib/format';
 
 /** Ficha del producto (tamaño, encuadernación, papel) según la imprenta y el formato. */
 const specOf = (data: Record<string, unknown>) =>
@@ -24,7 +24,7 @@ export default function PrintOptionsPage() {
     <ConfigEditor
       kind="printOptions"
       title="Imprentas"
-      text="Costo de producción por ejemplar (sin envío), plazo y si imprime, por país, formato e imprenta. Una imprenta imprime solo si está habilitada, pasó la muestra física y está activa en este ambiente. El checkout usa la más barata para estimar y elige con la dirección. Lo editado acá ya no lo pisa seed:cloud --refresh-print. Tarda hasta un minuto en llegar al sitio."
+      text="Costo de producción por ejemplar (sin envío), plazo y si imprime, por país, formato e imprenta. Cada día se vuelve a cotizar cada imprenta habilitada con una dirección de ejemplo del país y se actualizan el costo y el plazo (si la cotización falla, queda el valor anterior y llega un aviso). Una imprenta imprime solo si está habilitada, pasó la muestra física y está activa en este ambiente. El checkout usa la más barata para estimar y elige con la dirección. Lo editado acá ya no lo pisa seed:cloud --refresh-print. Tarda hasta un minuto en llegar al sitio."
       idFrom={(data) => `${String(data.country)}_${String(data.format)}_${String(data.provider)}`}
       blank={() => ({
         country: 'US',
@@ -115,8 +115,36 @@ export default function PrintOptionsPage() {
         { label: 'Habilitada', render: (data) => yesNo(data.enabled) },
         { label: 'Muestra', render: (data) => yesNo(data.qaSamplePassed) },
         {
-          label: 'Editada',
-          render: (data) => (typeof data.updatedBy === 'string' ? data.updatedBy : 'seed'),
+          label: 'Actualizada',
+          render: (data) => {
+            const auto = data.autoPricing as
+              | {
+                  updatedAt: unknown;
+                  previousCostUsdMinor: number | null;
+                  failedAt: unknown;
+                  error: string | null;
+                }
+              | null
+              | undefined;
+            return (
+              <span className="grid text-xs">
+                {auto?.updatedAt ? (
+                  <span>
+                    Automáticamente el {day(auto.updatedAt)}
+                    {auto.previousCostUsdMinor !== null &&
+                      ` (antes ${money(auto.previousCostUsdMinor, 'USD')})`}
+                  </span>
+                ) : (
+                  <span>{typeof data.updatedBy === 'string' ? data.updatedBy : 'seed'}</span>
+                )}
+                {auto?.error && (
+                  <span className="text-destructive">
+                    Falló el {day(auto.failedAt)}: {auto.error}
+                  </span>
+                )}
+              </span>
+            );
+          },
         },
       ]}
     />

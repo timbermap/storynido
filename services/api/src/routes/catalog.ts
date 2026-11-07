@@ -12,7 +12,10 @@ import {
   defaultCountryConfig,
   bookFormatPrices,
   bookPriceMinor,
+  printCandidates,
+  printPageCount,
   referenceCurrency,
+  referencePrintCost,
   type BookFormat,
   type EditorialConfig,
   type FxRates,
@@ -101,6 +104,11 @@ export function buildOffer(input: {
   activePrinters?: readonly string[];
   /** Extensiones y sus páginas (las del admin); por defecto, las de fábrica. */
   editorial?: EditorialConfig;
+  /**
+   * Impresión por ejemplar según el estimado del país (la imprenta que gana con la dirección de
+   * ejemplo; DECISIONS 241). Sin estimado para ese formato y páginas, la matriz.
+   */
+  printCost?: (format: BookFormat, pages: number) => number | null;
 }): Offer {
   const { code, country, pricing, fx, products, locale } = input;
   const options = input.printOptions ?? [];
@@ -116,6 +124,12 @@ export function buildOffer(input: {
         option.qaSamplePassed &&
         activePrinters.includes(option.provider),
     );
+  // Impresión por ejemplar: el estimado del país o, si no hay, la matriz (null: no se imprime).
+  const productionFor = (format: BookFormat, pages: number) => {
+    const matrix = referencePrintCost(options, format, pages, activePrinters);
+    if (!matrix) return null;
+    return input.printCost?.(format, pages) ?? matrix.productionUsdMinor;
+  };
   const offered = BOOK_FORMATS.filter((format) => {
     const product = products.find((p) => p.format === format);
     if (!country.active || !country.formats[format] || !product || !pricing[format].active) {
@@ -130,11 +144,11 @@ export function buildOffer(input: {
         bookFormatPrices({
           country,
           pricing,
-          options,
-          activeProviders: activePrinters,
           pages: editorial.lengths[length].interiorPages,
           professional,
           formats: offered,
+          productionUsdMinor: (format) =>
+            productionFor(format, editorial.lengths[length].interiorPages),
         });
       const pro = prices(true);
       return prices(false).map((item) => ({
@@ -206,12 +220,21 @@ export function buildOffer(input: {
   };
 }
 
+/** Cuánto espera la oferta una cotización de imprenta antes de usar la matriz. */
+const OFFER_ESTIMATE_WAIT_MS = 4000;
+
 export function registerCatalogRoutes(
   app: FastifyInstance,
   catalog: CatalogRepository,
   activePrinters: readonly string[],
   /** Tipo de cambio del día (para mostrar precios en la moneda de cada país). */
   fxRates: () => Promise<FxRates>,
+  /** Estimado de impresión del país (dirección de ejemplo; DECISIONS 241). */
+  printEstimate?: (
+    country: CountryCode,
+    format: BookFormat,
+    pages: number,
+  ) => Promise<{ productionUsdMinor: number } | null>,
 ): void {
   addRoute(app, apiRoutes.catalogStories, {}, async (request) => {
     const { locale, age, channel, collection } = query<'catalogStories'>(request);
@@ -320,6 +343,34 @@ export function registerCatalogRoutes(
       catalog.printOptions(code),
       catalog.editorial(),
     ]);
+    // El estimado de cada formato impreso en cada extensión que se puede imprimir. Con las
+    // cotizaciones en caché es inmediato; si una imprenta tarda, esa extensión usa la matriz.
+    const costs = new Map<string, number>();
+    if (printEstimate) {
+      const combos = BOOK_FORMATS.filter((format) => format !== 'digital').flatMap((format) =>
+        BOOK_LENGTHS.map((length) => ({ format, pages: editorial.lengths[length].interiorPages })),
+      );
+      await Promise.all(
+        combos
+          .filter(
+            ({ format, pages }) =>
+              printCandidates(
+                printOptions,
+                [{ format, pages: printPageCount(format, pages), quantity: 1 }],
+                activePrinters,
+              ).length > 0,
+          )
+          .map(async ({ format, pages }) => {
+            const estimate = await Promise.race([
+              printEstimate(code, format, pages).catch(() => null),
+              new Promise<null>((resolve) =>
+                setTimeout(() => { resolve(null); }, OFFER_ESTIMATE_WAIT_MS),
+              ),
+            ]);
+            if (estimate) costs.set(`${format}:${String(pages)}`, estimate.productionUsdMinor);
+          }),
+      );
+    }
     return buildOffer({
       code,
       country,
@@ -330,6 +381,7 @@ export function registerCatalogRoutes(
       printOptions,
       activePrinters,
       editorial,
+      printCost: (format, pages) => costs.get(`${format}:${String(pages)}`) ?? null,
     });
   });
 

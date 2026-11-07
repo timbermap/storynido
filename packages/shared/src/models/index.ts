@@ -9,6 +9,7 @@ export * from './pipeline';
 export * from './pricing';
 export * from './book-price';
 export * from './print';
+export * from './print-samples';
 export * from './qa';
 export * from './config';
 export * from './firestore';
