@@ -10,6 +10,7 @@ import {
   editorialPlan,
   pagesOutOfRange,
   pagesOverCap,
+  pricedPages,
   readingFormatsFor,
   suggestedReading,
   textBandFor,
@@ -228,5 +229,14 @@ describe('tipografía por edad', () => {
       maxPt: 22,
       uppercase: true,
     });
+  });
+});
+
+describe('páginas con las que se calcula el precio (DECISIONS 242)', () => {
+  it('nunca menos que las del cuento mini', () => {
+    // Mini: 12 páginas, 2 fijas → 10 generadas.
+    expect(pricedPages(0, DEFAULT_EDITORIAL_CONFIG)).toBe(10);
+    expect(pricedPages(4, DEFAULT_EDITORIAL_CONFIG)).toBe(10);
+    expect(pricedPages(26, DEFAULT_EDITORIAL_CONFIG)).toBe(26);
   });
 });

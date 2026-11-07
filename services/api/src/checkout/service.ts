@@ -14,6 +14,7 @@ import {
   referencePrintCost,
   SAMPLE_PRINT_ADDRESSES,
   generatedPages,
+  pricedPages,
   matrixCostFor,
   paymentFeePercent,
   stablePrintCost,
@@ -346,14 +347,19 @@ export class CheckoutService {
   /** Páginas con ilustración generada del libro (DECISIONS 241): las que pagan IA y margen. */
   private async pricedPages(book: Record<string, unknown>, interiorPages: number) {
     const preview = book.preview as { activityPages?: number } | null | undefined;
-    return generatedPages(
-      {
-        length: (book.length as BookLength | null | undefined) ?? null,
-        contentType: (book.contentType as ContentType | null | undefined) ?? null,
-        interiorPages,
-        activityPages: preview?.activityPages ?? 0,
-      },
-      await this.catalog.editorial(),
+    const editorial = await this.catalog.editorial();
+    // Nunca menos que el cuento mini (DECISIONS 242).
+    return pricedPages(
+      generatedPages(
+        {
+          length: (book.length as BookLength | null | undefined) ?? null,
+          contentType: (book.contentType as ContentType | null | undefined) ?? null,
+          interiorPages,
+          activityPages: preview?.activityPages ?? 0,
+        },
+        editorial,
+      ),
+      editorial,
     );
   }
 
