@@ -2523,7 +2523,7 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Problema:** el mismo libro mostraba tres precios distintos (barra de la muestra con las páginas fijas del producto, tarjetas del checkout con el ebook más corto de todos y la matriz, resumen con las páginas reales y la imprenta cotizada). El resumen aplicaba el descuento profesional y la barra y las tarjetas no. La referencia en moneda local salía del país de la visita. El margen era el mismo para un libro de 12 páginas que para uno de 32, la comisión de cobro no estaba contemplada y un descuento podía comerse todo el margen.
 - **Regla de precio** (valores de fábrica, editables en Admin → Precios):
   1. **Páginas que cuentan:** las que tienen ilustración generada. No cuentan las 2 fijas de cada extensión ni las de actividades que arma el sistema. El costo de IA también es por página generada.
-  2. **Creación (ebook e impreso):** costo de IA + margen de creación = **USD 8 de base + USD 0,35 por página generada**.
+  2. **Creación (ebook e impreso):** costo de IA + margen de creación = **USD 8 de base + USD 0,35 por página generada**, con un **margen mínimo por libro igual al del mini (USD 11,50)**: un libro de solo actividades (sin páginas generadas) sale 11,99.
   3. **Impreso:** creación + costo real de la imprenta que se usa + **margen de impresión del 30 % con piso de USD 8 (USD 10 en tapa dura)**.
   4. **Comisión de cobro (3,5 %) como costo:** precio = (costo + margen) ÷ (1 − comisión), redondeado a ,99 hacia arriba. El margen que se fija es lo que queda.
   5. **Envío:** al costo más su parte de la comisión, en renglón aparte ("Envío a México").

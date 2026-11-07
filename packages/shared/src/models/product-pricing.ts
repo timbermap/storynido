@@ -27,6 +27,8 @@ export const marginSchema = z.object({
   percent: z.number().min(0).max(1000),
   /** Modo `fixed`: además, un monto por página con ilustración generada (centavos de USD). */
   perPageUsdMinor: z.number().int().min(0).optional(),
+  /** Modo `fixed`: margen mínimo por libro (un libro con pocas páginas generadas no baja de acá). */
+  minUsdMinor: z.number().int().min(0).optional(),
 });
 
 export type Margin = z.infer<typeof marginSchema>;
@@ -82,7 +84,14 @@ export type ProductPricing = z.infer<typeof productPricingSchema>;
  * 21,76 → 21,99.
  */
 export const DEFAULT_PAYMENT_FEE_PERCENT = 3.5;
-const CREATION: Margin = { mode: 'fixed', fixedUsdMinor: 800, percent: 0, perPageUsdMinor: 35 };
+// Mínimo por libro: el del mini (8 + 10 páginas × 0,35 = 11,50).
+const CREATION: Margin = {
+  mode: 'fixed',
+  fixedUsdMinor: 800,
+  percent: 0,
+  perPageUsdMinor: 35,
+  minUsdMinor: 1150,
+};
 const PRINTING: Margin = { mode: 'percent_min', fixedUsdMinor: 800, percent: 30 };
 
 const product = (format: BookFormat, printMin = 800) => ({
@@ -109,7 +118,10 @@ export function marginUsdMinor(margin: Margin, costUsdMinor: number, pages = 0):
   const percent = Math.round((costUsdMinor * margin.percent) / 100);
   switch (margin.mode) {
     case 'fixed':
-      return margin.fixedUsdMinor + (margin.perPageUsdMinor ?? 0) * Math.max(0, pages);
+      return Math.max(
+        margin.fixedUsdMinor + (margin.perPageUsdMinor ?? 0) * Math.max(0, pages),
+        margin.minUsdMinor ?? 0,
+      );
     case 'percent':
       return percent;
     case 'percent_min':

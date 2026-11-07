@@ -9,14 +9,22 @@ import { day, money, yesNo } from '@/lib/format';
 /** Resumen de un margen para la tabla ("% con mínimo: 30 % / USD 8,00"). */
 function describe(margin: unknown): string {
   const value = margin as
-    | { mode?: string; fixedUsdMinor?: number; percent?: number; perPageUsdMinor?: number }
+    | {
+        mode?: string;
+        fixedUsdMinor?: number;
+        percent?: number;
+        perPageUsdMinor?: number;
+        minUsdMinor?: number;
+      }
     | undefined;
   if (!value?.mode) return '—';
   const fixed = money(value.fixedUsdMinor, 'USD');
   const percent = `${String(value.percent ?? 0)} %`;
   if (value.mode === 'fixed') {
     return value.perPageUsdMinor
-      ? `${fixed} + ${money(value.perPageUsdMinor, 'USD')} por página generada`
+      ? `${fixed} + ${money(value.perPageUsdMinor, 'USD')} por página generada${
+          value.minUsdMinor ? ` (mín. ${money(value.minUsdMinor, 'USD')})` : ''
+        }`
       : `Fijo: ${fixed}`;
   }
   if (value.mode === 'percent') return percent;
@@ -38,7 +46,13 @@ export default function PricesPage() {
         blank={() => ({
           product: 'digital',
           aiCostPerPageUsdMinor: 15,
-          creationMargin: { mode: 'fixed', fixedUsdMinor: 800, percent: 0, perPageUsdMinor: 35 },
+          creationMargin: {
+            mode: 'fixed',
+            fixedUsdMinor: 800,
+            percent: 0,
+            perPageUsdMinor: 35,
+            minUsdMinor: 1150,
+          },
           printMargin: { mode: 'percent_min', fixedUsdMinor: 800, percent: 30 },
           proPercentOff: 10,
           paymentFeePercent: 3.5,
@@ -84,6 +98,13 @@ export default function PricesPage() {
             path: 'creationMargin.perPageUsdMinor',
             label: 'Margen de creación: por página con ilustración generada (USD)',
             hint: 'Tipo «fijo»: se suma a la base por cada página generada (no cuentan las fijas ni las de actividades).',
+            currencyPath: 'currency',
+          },
+          {
+            kind: 'money',
+            path: 'creationMargin.minUsdMinor',
+            label: 'Margen mínimo por libro (USD)',
+            hint: 'Tipo «fijo»: un libro con pocas páginas generadas (por ejemplo, solo actividades) no baja de este margen. De fábrica, el del mini.',
             currencyPath: 'currency',
           },
           {

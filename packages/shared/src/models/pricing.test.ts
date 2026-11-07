@@ -491,6 +491,12 @@ describe('margen fijo, precio que sigue al costo (DECISIONS 241)', () => {
     expect([10, 14, 26, 30].map((pages) => unit(ebook(pages)))).toEqual([1399, 1599, 2199, 2399]);
   });
 
+  it('un libro con pocas páginas generadas (solo actividades) no baja del margen mínimo', () => {
+    // Sin páginas generadas: el margen mínimo por libro (11,50, el del mini) ÷ 0,965 → 11,99.
+    expect(unit(ebook(0))).toBe(1199);
+    expect(unit(ebook(10))).toBe(1399);
+  });
+
   it('margen neto por producto: después de costos y comisión queda el margen fijo', () => {
     const fee = 0.035;
     // Ebook clásico: 21,99 − 3,5 % − IA 3,90 ≥ 8 + 0,35 × 26 = 17,10.
