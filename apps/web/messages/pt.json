@@ -1249,15 +1249,15 @@
       "densities": {
         "visual": {
           "name": "Bem visual",
-          "text": "Poucas palavras, muita ilustração."
+          "text": "Um degrau a menos de texto que o da idade."
         },
         "balanced": {
           "name": "Equilibrado",
-          "text": "Para ler juntos."
+          "text": "O texto certo para a idade."
         },
         "rich": {
           "name": "Mais leitura",
-          "text": "Para quem já lê sozinho."
+          "text": "Um degrau a mais de texto que o da idade."
         }
       },
       "levels": {
@@ -1307,7 +1307,7 @@
         },
         "read_alone": {
           "name": "Eu leio sozinho",
-          "text": "Frases curtas e uma ilustração por página, para a criança ler sozinha."
+          "text": "Frases curtas e menos texto por página, para ler sem ajuda."
         },
         "longer_story": {
           "name": "Conto longo",
@@ -1721,7 +1721,8 @@
     "thumbnails": "Páginas do livro",
     "noDedication": "Aqui vai a sua dedicatória",
     "example": "Exemplo",
-    "exampleLabel": "Exemplo do estilo · no seu livro, {name} será o protagonista"
+    "exampleLabel": "Exemplo do estilo · no seu livro, {name} será o protagonista",
+    "wordless": "Página sem texto: a ilustração conta este momento."
   },
   "Checkout": {
     "shippingEstimate": "Frete estimado para o seu país: cerca de {price}, para um total de cerca de {total}. Chega em {min} a {max} dias úteis. Confirmado com o seu endereço.",

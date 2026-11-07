@@ -4,6 +4,8 @@ import { z } from 'zod';
 export const QA_CODES = [
   'name_mismatch',
   'length_out_of_range',
+  /** Una página pasó el tope de palabras de la edad y se reescribió con el modelo. */
+  'length_rewritten',
   'moderation_text',
   'moderation_image',
   'character_approved',

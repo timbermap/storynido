@@ -8,6 +8,7 @@ import {
   READING_LEVELS,
   TEXT_DENSITIES,
   readingFormatsFor,
+  wordsForAge,
   type BookLength,
   type ContentType,
   type EditorialConfig,
@@ -191,7 +192,15 @@ export function BookOptions({
           <legend className="mb-3 font-bold">{t('formatLegend')}</legend>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {readingFormats.map((format) => {
-              const words = editorial.densities[format.textDensity];
+              // Las palabras salen de la franja de la edad (± un escalón por la densidad).
+              const range =
+                age === null
+                  ? {
+                      min: editorial.densities[format.textDensity].minWords,
+                      max: editorial.densities[format.textDensity].maxWords,
+                    }
+                  : wordsForAge(age, format.textDensity, editorial);
+              const words = { minWords: range.min, maxWords: range.max };
               return (
                 <OptionCard
                   key={format.key}
