@@ -352,6 +352,158 @@ describe('generación del libro (fase 09)', () => {
     ).toBe(true);
   });
 
+  it('biblia visual: objetos, lugar, ropa especial y encuadre llegan al prompt y a la revisión de cada página', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    await db.doc('books/b1').update({
+      'preview.plan': {
+        theme: 'espacio',
+        arc: 'arco',
+        props: [{ name: 'the kite', look: 'an arc-shaped orange kite on long lines; NO sail' }],
+        places: [{ name: 'the beach', look: 'a wide sandy beach with a red lifeguard hut' }],
+        outfits: [{ context: 'in the water', look: 'a blue wetsuit and a helmet' }],
+        scenes: PAGES.map((_, pageIndex) => ({
+          pageIndex,
+          sceneGoal: 'meta',
+          emotionalBeat: 'alegría',
+          mustBeVisible: ['rocket'],
+          notVisible: ['text'],
+          continuityFacts: ['the orange kite'],
+          wordBudget: 10,
+          personalDetail: null,
+          props: pageIndex === 2 ? ['the kite'] : [],
+          place: pageIndex === 2 ? 'the beach' : null,
+          outfit: pageIndex === 2 ? 'in the water' : null,
+          shot: 'wide',
+        })),
+      },
+    });
+    const generate = vi.spyOn(providers.ai().image, 'generateIllustration');
+    const reviews = vi.spyOn(providers.ai().text, 'reviewPage');
+    await setup(providers).run();
+
+    const snapshot = (await order()).snapshot as BookSnapshot;
+    expect(snapshot.props?.[0]?.name).toBe('the kite');
+    // Página 3 (escena 2): con la biblia; página 4: sin el barrilete ni la playa.
+    // Las páginas se dibujan en paralelo: cada llamada se busca por su escena, no por su orden.
+    const prompts = generate.mock.calls.map((call) => call[0].prompt);
+    const third = prompts.find((prompt) => prompt.startsWith('scene 3')) ?? '';
+    const fourth = prompts.find((prompt) => prompt.startsWith('scene 4')) ?? '';
+    expect(third).toContain('arc-shaped orange kite on long lines; NO sail');
+    expect(third).toContain('red lifeguard hut');
+    expect(third).toContain('The main character wears a blue wetsuit and a helmet');
+    expect(third).toContain('Camera: wide shot.');
+    expect(fourth).not.toContain('kite on long lines');
+    expect(fourth).toContain('the same outfit as in the reference sheet');
+    const thirdReview = reviews.mock.calls.find((call) => call[0].pageIndex === 3)?.[0];
+    expect(thirdReview?.visualBible).toContain('red lifeguard hut');
+    expect(thirdReview?.scene?.continuityFacts).toEqual(['the orange kite']);
+  });
+
+  it('revisión del libro entero: la página que se aparta se vuelve a pintar y queda si pasa su revisión', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const text = providers.ai().text;
+    const book = vi.spyOn(text, 'reviewBook').mockResolvedValue({
+      deviations: [
+        { pageIndex: 3, issue: 'the kite has a sail', expected: 'an arc kite on lines, no sail' },
+        { pageIndex: 3, issue: 'duplicate', expected: 'ignored' },
+      ],
+      usage: { provider: 'mock', model: 'mock-review', costUsdMicros: 0 },
+    });
+    const generate = vi.spyOn(providers.ai().image, 'generateIllustration');
+    await setup(providers).run();
+
+    expect((await order()).status).toBe('ready');
+    const request = book.mock.calls[0]?.[0];
+    // Miniaturas de las 5 imágenes (portada + 4 páginas), chicas y en JPEG.
+    expect(request?.pages.map((page) => page.pageIndex)).toEqual([0, 1, 2, 3, 4]);
+    expect(request?.pages[0]?.image.mimeType).toBe('image/jpeg');
+    expect(request?.bible).toContain('Page 1: shows rocket');
+    // 2 páginas nuevas + 1 reparación del libro (una sola por página).
+    expect(generate).toHaveBeenCalledTimes(3);
+    expect(generate.mock.calls[2]?.[0].prompt).toContain('an arc kite on lines, no sail');
+    const qa = (await step('quality_check')).output as {
+      images: { index: number; imagePath: string }[];
+      bookDeviations: number;
+      bookRepaired: number;
+    };
+    expect(qa.bookDeviations).toBe(1);
+    expect(qa.bookRepaired).toBe(1);
+    expect(qa.images.find((image) => image.index === 3)?.imagePath).toMatch(/-book\.webp$/);
+    const consistency = (await qaCodes()).filter((event) => event.code === 'book_consistency');
+    expect(consistency).toHaveLength(1);
+    expect(consistency[0]?.detail).toMatchObject({ pageIndex: 3, finalStatus: 'repaired' });
+  });
+
+  it('revisión del libro entero: si la nueva versión no pasa su revisión, queda la anterior', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const text = providers.ai().text;
+    vi.spyOn(text, 'reviewBook').mockResolvedValue({
+      deviations: [{ pageIndex: 2, issue: 'other beach', expected: 'the same sandy beach' }],
+      usage: { provider: 'mock', model: 'mock-review', costUsdMicros: 0 },
+    });
+    // La primera revisión de cada página pasa; la de la versión nueva de la página 2, no.
+    const original = text.reviewPage.bind(text);
+    const seen = new Set<number>();
+    vi.spyOn(text, 'reviewPage').mockImplementation(async (request) => {
+      const review = await original(request);
+      if (!seen.has(request.pageIndex)) {
+        seen.add(request.pageIndex);
+        return review;
+      }
+      return { ...review, status: 'repair', repairTarget: 'illustration_only' };
+    });
+    await setup(providers).run();
+    const qa = (await step('quality_check')).output as {
+      images: { index: number; imagePath: string }[];
+      bookRepaired: number;
+    };
+    expect(qa.bookRepaired).toBe(0);
+    expect(qa.images.find((image) => image.index === 2)?.imagePath).not.toMatch(/-book\.webp$/);
+    expect(
+      (await qaCodes()).find((event) => event.code === 'book_consistency')?.detail,
+    ).toMatchObject({
+      finalStatus: 'accepted',
+    });
+  });
+
+  it('lámina del elenco: se dibuja al congelar si la muestra no la tenía y va solo en las escenas con esa persona', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    await db.doc('books/b1').update({
+      'preview.plan.cast': [{ role: 'the teacher', gender: 'male', look: 'tall, grey beard' }],
+      'preview.plan.scenes': PAGES.map((_, pageIndex) => ({
+        pageIndex,
+        sceneGoal: 'meta',
+        emotionalBeat: 'alegría',
+        mustBeVisible: pageIndex >= 2 ? ['rocket', 'the male teacher'] : ['rocket'],
+        notVisible: ['text'],
+        continuityFacts: [],
+        wordBudget: 10,
+        personalDetail: null,
+      })),
+    });
+    const generate = vi.spyOn(providers.ai().image, 'generateIllustration');
+    await setup(providers).run();
+
+    const snapshot = (await order()).snapshot as BookSnapshot;
+    expect(snapshot.castSheet).toEqual({
+      role: 'the teacher',
+      sheetPath: 'orders/o1/approved/cast.webp',
+    });
+    // La lámina del profe y las páginas 3 y 4 (las dos con el profe).
+    expect(generate).toHaveBeenCalledTimes(3);
+    expect(generate.mock.calls[0]?.[0].prompt).toContain(
+      'Character reference sheet of the teacher',
+    );
+    for (const call of generate.mock.calls.slice(1)) {
+      expect(call[0].references).toHaveLength(2);
+      expect(call[0].prompt).toContain('the teacher looks exactly like the last reference image');
+    }
+  });
+
   it('vista previa para revisión: arma el PDF con tapa aunque falte una ilustración (marcador) y no cambia el pedido', async () => {
     const providers = registry();
     await seedBook(providers);

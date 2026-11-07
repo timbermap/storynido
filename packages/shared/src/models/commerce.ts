@@ -11,13 +11,16 @@ import { characterTraitsSchema, mustKeepSchema } from './character';
 import { channelSchema } from './channels';
 import { orderPipelineSchema } from './pipeline';
 import { priceSnapshotSchema } from './pricing';
+import { STORY_STRUCTURES } from '../providers/ai';
 import {
+  ageBandSchema,
   bookLengthSchema,
   contentTypeSchema,
   readingLevelSchema,
   textDensitySchema,
 } from './editorial';
 import { CHILD_LIMITS } from './users';
+import { SHOT_TYPES } from '../providers/ai';
 import { bookFormatSchema, timestampsSchema, uidSchema } from './common';
 
 /** countries/{countryCode}: configuración comercial por país (editable en el admin). */
@@ -115,7 +118,17 @@ export const promotionSchema = timestampsSchema.extend({
 
 export type Promotion = z.infer<typeof promotionSchema>;
 
-export const BOOK_STATUSES = ['draft', 'preview_generating', 'preview_ready', 'ordered'] as const;
+/**
+ * `preview_queued`: sin cupo de IA en este momento, la muestra (o sus ilustraciones) espera en la
+ * fila y la genera el trabajo programado apenas haya cupo (el cliente no ve ningún límite).
+ */
+export const BOOK_STATUSES = [
+  'draft',
+  'preview_queued',
+  'preview_generating',
+  'preview_ready',
+  'ordered',
+] as const;
 
 export const bookStatusSchema = z.enum(BOOK_STATUSES);
 
@@ -186,6 +199,11 @@ export const bookPreviewSchema = z.object({
     .object({ name: z.string(), look: z.string(), imagePath: z.string() })
     .nullable()
     .optional(),
+  /**
+   * Lámina de la persona del elenco que más se repite (el profe, una compañera): referencia de las
+   * escenas que la incluyen. Ausente en las muestras anteriores.
+   */
+  castSheet: z.object({ role: z.string(), imagePath: z.string() }).nullable().optional(),
   /** Lámina del personaje (referencia interna de cada ilustración; el cliente no la ve). */
   characterImagePath: z.string().nullable().optional(),
   pages: z.array(bookPageSchema),
@@ -202,7 +220,15 @@ export const bookPreviewSchema = z.object({
   artDirection: z.string().nullable().optional(),
   /** Páginas de actividades y rango de palabras con que se escribió (los usa el pipeline). */
   activityPages: z.number().int().nonnegative().optional(),
-  words: z.object({ min: z.number().int(), max: z.number().int() }).optional(),
+  words: z
+    .object({ min: z.number().int(), max: z.number().int(), cap: z.number().int().optional() })
+    .optional(),
+  /**
+   * Franja de edad del lector y del texto (tipografía por edad). Faltan en las muestras anteriores:
+   * esos libros se arman como siempre.
+   */
+  ageBand: ageBandSchema.optional(),
+  textBand: ageBandSchema.optional(),
   /**
    * Armado por edad (page-layout.ts): con `facing`, cada escena es página de texto + ilustración.
    * Ausente en las muestras anteriores (siguen con el panel sobre la ilustración).
@@ -213,7 +239,27 @@ export const bookPreviewSchema = z.object({
     .object({
       theme: z.string(),
       arc: z.string(),
+      promises: z
+        .array(
+          z.object({
+            setup: z.string(),
+            setupPage: z.number().int(),
+            payoffPage: z.number().int(),
+          }),
+        )
+        .optional(),
+      structure: z.enum(STORY_STRUCTURES).nullable().optional(),
+      refrain: z.string().nullable().optional(),
       companion: z.object({ name: z.string(), look: z.string() }).nullable().optional(),
+      cast: z
+        .array(
+          z.object({
+            role: z.string(),
+            gender: z.enum(['male', 'female', 'unspecified']),
+            look: z.string(),
+          }),
+        )
+        .optional(),
       scenes: z.array(
         z.object({
           pageIndex: z.number().int().nonnegative(),
@@ -224,8 +270,17 @@ export const bookPreviewSchema = z.object({
           continuityFacts: z.array(z.string()),
           wordBudget: z.number().int(),
           personalDetail: z.string().nullable(),
+          // Biblia visual (ausente en las muestras anteriores).
+          props: z.array(z.string()).optional(),
+          place: z.string().nullable().optional(),
+          outfit: z.string().nullable().optional(),
+          shot: z.enum(SHOT_TYPES).nullable().optional(),
+          wordless: z.boolean().optional(),
         }),
       ),
+      props: z.array(z.object({ name: z.string(), look: z.string() })).optional(),
+      places: z.array(z.object({ name: z.string(), look: z.string() })).optional(),
+      outfits: z.array(z.object({ context: z.string(), look: z.string() })).optional(),
     })
     .nullable()
     .optional(),

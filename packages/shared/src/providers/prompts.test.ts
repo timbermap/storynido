@@ -10,10 +10,20 @@ import {
   buildStoryPrompt,
   coverScene,
   describeCharacter,
+  languageName,
   lessonsBlock,
+  craftRules,
   narrativeRules,
   renderTemplate,
   samplePrompts,
+  bookBibleSummary,
+  mainCastMember,
+  sceneIncludes,
+  sceneOutfit,
+  varyShots,
+  visualBibleCheck,
+  visualBibleNote,
+  spanishVoiceFor,
 } from './prompts';
 
 const base = {
@@ -236,5 +246,211 @@ describe('castNote', () => {
     expect(castNote(undefined)).toBe('');
     expect(castNote([])).toBe('');
     expect(castNote([{ role: ' ', gender: 'male', look: 'x' }])).toBe('');
+  });
+});
+
+describe('biblia visual', () => {
+  const bible = {
+    props: [
+      {
+        name: 'the kite',
+        look: 'a small board with foot straps pulled by a large arc-shaped orange kite on long lines; NO sail, NO mast',
+      },
+      { name: 'the lantern', look: 'a small round brass lantern' },
+    ],
+    places: [
+      { name: 'the lighthouse', look: 'a white lighthouse with a red top on a rocky point' },
+    ],
+    outfits: [{ context: 'in the water', look: 'a blue wetsuit, an impact vest and a helmet' }],
+  };
+  const scene = {
+    pageIndex: 2,
+    sceneGoal: '',
+    emotionalBeat: '',
+    mustBeVisible: [],
+    notVisible: [],
+    continuityFacts: [],
+    wordBudget: 30,
+    personalDetail: null,
+  };
+
+  it('solo nombra lo que está en la escena, con su aspecto fijo', () => {
+    const note = visualBibleNote(bible, {
+      ...scene,
+      props: ['The Kite'],
+      place: 'the lighthouse',
+      shot: 'wide',
+    });
+    expect(note).toContain('NO sail, NO mast');
+    expect(note).not.toContain('lantern');
+    expect(note).toContain('white lighthouse with a red top');
+    expect(note).toContain('Camera: wide shot.');
+  });
+
+  it('un plan anterior (sin biblia) no suma nada', () => {
+    expect(visualBibleNote(undefined, scene)).toBe('');
+    expect(visualBibleNote({}, { ...scene, props: ['the kite'], place: 'x' })).toBe('');
+    expect(sceneOutfit(undefined, scene)).toBeNull();
+  });
+
+  it('ropa especial solo cuando la escena la pide', () => {
+    expect(sceneOutfit(bible, { ...scene, outfit: 'in the water' })).toContain('blue wetsuit');
+    expect(sceneOutfit(bible, { ...scene, outfit: null })).toBeNull();
+    expect(visualBibleCheck(bible, { ...scene, outfit: 'in the water' })).toContain(
+      'The main character wears a blue wetsuit',
+    );
+  });
+
+  it('nunca el mismo encuadre tres veces seguidas', () => {
+    const shots = varyShots(
+      (['wide', 'wide', 'wide', 'close-up', 'close-up', 'close-up'] as const).map((shot) => ({
+        shot,
+      })),
+    ).map((item) => item.shot);
+    for (let index = 2; index < shots.length; index += 1) {
+      expect(shots[index] === shots[index - 1] && shots[index] === shots[index - 2]).toBe(false);
+    }
+    expect(shots[0]).toBe('wide');
+  });
+});
+
+describe('revisión del libro entero', () => {
+  const scene = (pageIndex: number, mustBeVisible: string[]) => ({
+    pageIndex,
+    sceneGoal: '',
+    emotionalBeat: '',
+    mustBeVisible,
+    notVisible: [],
+    continuityFacts: [],
+    wordBudget: 20,
+    personalDetail: null,
+  });
+  const teacher = { role: 'the teacher', gender: 'male' as const, look: 'tall, grey beard' };
+  const classmate = { role: 'a classmate', gender: 'female' as const, look: 'red braids' };
+
+  it('la persona del elenco que más se repite (dos escenas o más) tiene lámina', () => {
+    const scenes = [
+      scene(0, ['Sofi', 'the male teacher']),
+      scene(1, ['the male teacher at the board']),
+      scene(2, ['a classmate']),
+    ];
+    expect(sceneIncludes(scenes[0], 'the teacher')).toBe(true);
+    expect(sceneIncludes(scenes[2], 'the teacher')).toBe(false);
+    expect(mainCastMember({ cast: [classmate, teacher], scenes })).toEqual(teacher);
+    expect(mainCastMember({ cast: [classmate], scenes })).toBeNull();
+    expect(mainCastMember(null)).toBeNull();
+  });
+
+  it('resume la biblia visual y qué tiene cada página', () => {
+    const summary = bookBibleSummary({
+      cast: [teacher],
+      props: [{ name: 'the kite', look: 'orange arc kite' }],
+      scenes: [
+        { ...scene(0, ['Sofi']), props: ['the kite'], outfit: 'in the water' },
+        scene(1, []),
+      ],
+    });
+    expect(summary).toContain('Recurring the teacher (male): tall, grey beard');
+    expect(summary).toContain('Object the kite: orange arc kite');
+    expect(summary).toContain('Page 1: shows Sofi; objects the kite; outfit in the water');
+    expect(summary).toContain('Page 2: everyday outfit of the reference sheet');
+  });
+});
+
+describe('español según el país', () => {
+  it('«vos» en Argentina y Uruguay; «tú» en el resto o sin país', () => {
+    expect(spanishVoiceFor('AR')).toBe('vos');
+    expect(spanishVoiceFor('uy')).toBe('vos');
+    expect(spanishVoiceFor('MX')).toBe('tu');
+    expect(spanishVoiceFor(null)).toBe('tu');
+    expect(buildStoryPrompt({ ...base, spanishVoice: 'vos' })).toContain('usa "vos"');
+    expect(buildStoryPrompt({ ...base, spanishVoice: 'vos' })).not.toContain('nunca "vos"');
+    expect(buildStoryPrompt(base)).toContain('usa "tú", nunca "vos"');
+    // En inglés y portugués no cambia nada.
+    expect(languageName('en', 'vos')).toBe('English');
+  });
+});
+
+describe('forma del cuento para menores de 7', () => {
+  it('estructura, estribillo, onomatopeyas, humor concreto, giro final y primera persona', () => {
+    const rules = narrativeRules({ childName: 'Martina', age: 4 });
+    expect(rules).toContain('Elige UNA estructura');
+    expect(rules).toContain('cuartetas');
+    expect(rules).toContain('al menos 3 veces');
+    expect(rules).toContain('onomatopeyas');
+    expect(rules).toContain('«mágico»');
+    expect(rules).toContain('nunca describe lo que muestra el dibujo');
+    expect(rules).toContain('giro o una sorpresa');
+    expect(rules).toContain('primera persona');
+    expect(rules).toContain('SIN TEXTO');
+    // Los bebés no tienen páginas sin texto pedidas; de 7 en adelante, ninguna regla de forma.
+    expect(narrativeRules({ childName: 'Martina', age: 2 })).not.toContain('SIN TEXTO');
+    expect(narrativeRules({ childName: 'Martina', age: 7 })).not.toContain('Elige UNA estructura');
+  });
+
+  it('el plan lleva la estructura, el estribillo y las páginas sin texto al redactor', () => {
+    const prompt = buildStoryPrompt({
+      ...base,
+      age: 4,
+      wordsPerPage: { min: 10, max: 25, cap: 30 },
+      plan: {
+        theme: 'Volar',
+        arc: 'Quiere volar y lo logra',
+        structure: 'cumulative',
+        refrain: '¡Arriba, Martina!',
+        scenes: [0, 1, 2].map((pageIndex) => ({
+          pageIndex,
+          sceneGoal: `Escena ${String(pageIndex + 1)}`,
+          emotionalBeat: 'alegría',
+          mustBeVisible: [],
+          notVisible: [],
+          continuityFacts: [],
+          wordBudget: 15,
+          personalDetail: null,
+          wordless: pageIndex === 1,
+        })),
+      },
+    });
+    expect(prompt).toContain('patrón acumulativo');
+    expect(prompt).toContain('«¡Arriba, Martina!»');
+    expect(prompt).toContain('Página 2: Escena 2 (alegría) · SIN TEXTO');
+    expect(prompt).not.toContain('Página 1: Escena 1 (alegría) · SIN TEXTO');
+    expect(prompt).toContain('nunca más de 30');
+  });
+});
+
+describe('oficio del texto', () => {
+  it('reglas por edad: diálogo desde 6 años, oraciones cortas desde 9', () => {
+    const four = craftRules('Sofi', 4).join('\n');
+    expect(four).toContain('Muestra, no cuentes');
+    expect(four).toContain('nunca en una lección');
+    expect(four).toContain('la solución final la encuentra Sofi');
+    expect(four).not.toContain('diálogo');
+    const seven = craftRules('Sofi', 7).join('\n');
+    expect(seven).toContain('al menos una de cada tres páginas');
+    expect(seven).not.toContain('20 palabras');
+    expect(craftRules('Sofi', 10).join('\n')).toContain('20 palabras como máximo');
+    // Un bebé (bautismo, primer añito): sin intentos fallidos ni mentor.
+    expect(craftRules('Sofi', 1, true).join('\n')).not.toContain('intentos fallidos');
+  });
+
+  it('el prompt del cuento usa la edad y lista lo que se planta y se paga', () => {
+    const prompt = buildStoryPrompt({
+      ...base,
+      age: 8,
+      plan: {
+        theme: 't',
+        arc: 'a',
+        promises: [{ setup: 'una llave dorada', setupPage: 2, payoffPage: 10 }],
+        scenes: [],
+      },
+    });
+    expect(prompt).toContain('al menos una de cada tres páginas');
+    expect(prompt).toContain(
+      '«una llave dorada»: se planta en la página 2 y se paga en la página 10',
+    );
+    expect(narrativeRules({ childName: 'Sofi', event: null, goal: null })).not.toContain(
+      'una de cada tres',
+    );
   });
 });

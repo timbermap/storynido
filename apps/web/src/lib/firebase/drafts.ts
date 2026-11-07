@@ -67,8 +67,11 @@ export interface DraftSummary {
   updatedAt: Date | null;
   wizardStep: number;
   channel: Channel;
-  /** `preview_generating`: se está dibujando la muestra; `preview_ready`: ya tiene muestra. */
-  status: 'draft' | 'preview_generating' | 'preview_ready';
+  /**
+   * `preview_queued`: espera en la fila (sin cupo de IA por ahora); `preview_generating`: se está
+   * dibujando la muestra; `preview_ready`: ya tiene muestra.
+   */
+  status: 'draft' | 'preview_queued' | 'preview_generating' | 'preview_ready';
   /** Historia elegida (para mostrar su portada). */
   storyId: string | null;
   /** Se está dibujando ahora (una generación de más de 10 minutos se da por colgada). */
@@ -82,10 +85,12 @@ export interface DraftSummary {
 }
 
 const STALE_GENERATION_MS = 10 * 60 * 1000;
+/** En la fila (sin cupo de IA por ahora) cuenta como "creándose": arranca sola y se avisa. */
 const isGeneratingNow = (status: string, startedAt: Date | null) =>
-  status === 'preview_generating' &&
-  startedAt !== null &&
-  Date.now() - startedAt.getTime() < STALE_GENERATION_MS;
+  status === 'preview_queued' ||
+  (status === 'preview_generating' &&
+    startedAt !== null &&
+    Date.now() - startedAt.getTime() < STALE_GENERATION_MS);
 
 /** Borrador recién creado al que nunca se le cargó nada (se reutiliza en vez de listarlo). */
 export const isEmptyDraft = (draft: DraftSummary) => !draft.childName && draft.wizardStep === 0;
@@ -249,7 +254,7 @@ export async function listDrafts(db: Firestore, uid: string): Promise<DraftSumma
       collection(db, COLLECTIONS.books),
       where('ownerUid', '==', uid),
       // Libros sin comprar: borradores y los que ya tienen su muestra.
-      where('status', 'in', ['draft', 'preview_generating', 'preview_ready']),
+      where('status', 'in', ['draft', 'preview_queued', 'preview_generating', 'preview_ready']),
       orderBy('updatedAt', 'desc'),
       limit(50),
     ),

@@ -144,6 +144,205 @@ describe('Vertex AI', () => {
     });
   });
 
+  it('plan con biblia visual: limpia nombres sueltos, varía encuadres y es compatible sin biblia', async () => {
+    const scene = (shot: string, extra: Record<string, unknown> = {}) => ({
+      sceneGoal: 'meta',
+      emotionalBeat: 'alegría',
+      mustBeVisible: [],
+      notVisible: [],
+      continuityFacts: [],
+      wordBudget: 20,
+      shot,
+      ...extra,
+    });
+    const reply = {
+      theme: 't',
+      arc: 'a',
+      props: [
+        { name: 'the kite', look: 'arc-shaped kite; NO sail' },
+        { name: '', look: 'x' },
+        ...Array.from({ length: 5 }, (_, index) => ({ name: `p${String(index)}`, look: 'l' })),
+      ],
+      places: [{ name: 'the beach', look: 'sandy beach' }],
+      outfits: [{ context: 'in the water', look: 'wetsuit' }],
+      scenes: [
+        scene('wide', {
+          props: ['the kite', 'a ghost prop'],
+          place: 'the moon',
+          outfit: 'in the water',
+        }),
+        scene('wide'),
+        scene('wide'),
+        scene('medium'),
+      ],
+    };
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const plan = await new VertexTextProvider(clientWith(() => jsonReply(reply), calls)).planStory(
+      sampleStoryRequest,
+    );
+    expect(plan.props).toHaveLength(4);
+    expect(plan.scenes[0]).toMatchObject({
+      props: ['the kite'],
+      place: null,
+      outfit: 'in the water',
+    });
+    expect(plan.scenes.map((item) => item.shot)).not.toEqual(['wide', 'wide', 'wide', 'medium']);
+    const prompt = calls[0]?.contents[0]?.parts[0]?.text ?? '';
+    expect(prompt).toContain('NO sail and NO mast');
+    expect(prompt).toContain('who is not in that scene');
+
+    const old = await new VertexTextProvider(
+      clientWith(() =>
+        jsonReply({ theme: 't', arc: 'a', scenes: [0, 1, 2, 3].map(() => scene('medium')) }),
+      ),
+    ).planStory(sampleStoryRequest);
+    expect(old.props).toEqual([]);
+    expect(old.scenes[0]?.place).toBeNull();
+  });
+
+  it('la revisión de página recibe la continuidad y la biblia visual de la escena', async () => {
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const provider = new VertexTextProvider(
+      clientWith(
+        () =>
+          jsonReply({
+            status: 'pass',
+            criticalIssues: [],
+            nonCriticalIssues: [],
+            continuityChecks: [],
+            imageTextMatches: true,
+            textInImage: false,
+            repairTarget: 'none',
+          }),
+        calls,
+      ),
+    );
+    const image = { bytes: new Uint8Array([1]), mimeType: 'image/webp' };
+    await provider.reviewPage({
+      pageIndex: 2,
+      text: 'texto',
+      image,
+      reference: image,
+      character: 'Martina',
+      mustKeep: [],
+      scene: {
+        pageIndex: 1,
+        sceneGoal: 'meta',
+        emotionalBeat: 'alegría',
+        mustBeVisible: [],
+        notVisible: [],
+        continuityFacts: ['the red lantern'],
+        wordBudget: 20,
+        personalDetail: null,
+      },
+      visualBible: 'Place: the beach, sandy beach.',
+    });
+    const text = (calls[0]?.contents[0]?.parts ?? []).map((part) => part.text ?? '').join(' ');
+    expect(text).toContain('Continuity (must match');
+    expect(text).toContain('the red lantern');
+    expect(text).toContain('Fixed looks for this scene: Place: the beach');
+  });
+
+  it('revisión del libro entero: todas las miniaturas en una llamada y solo páginas que existen', async () => {
+    const calls: { contents: { parts: Record<string, unknown>[] }[] }[] = [];
+    const image = { bytes: new Uint8Array([1]), mimeType: 'image/jpeg' };
+    const review = await new VertexTextProvider(
+      clientWith(
+        () =>
+          jsonReply({
+            deviations: [
+              { pageIndex: 2, issue: 'kite has a sail', expected: 'arc kite on lines, no sail' },
+              { pageIndex: 9, issue: 'x', expected: 'y' },
+              { pageIndex: 1, issue: 'x', expected: ' ' },
+            ],
+          }),
+        calls,
+      ),
+    ).reviewBook({
+      pages: [0, 1, 2].map((pageIndex) => ({ pageIndex, image })),
+      reference: image,
+      character: 'Sofi',
+      bible: 'Object the kite: arc kite',
+    });
+    expect(review.deviations).toEqual([
+      { pageIndex: 2, issue: 'kite has a sail', expected: 'arc kite on lines, no sail' },
+    ]);
+    const parts = calls[0]?.contents[0]?.parts ?? [];
+    expect(parts.filter((part) => 'inlineData' in part)).toHaveLength(4);
+    expect(parts.map((part) => part.text).join(' ')).toContain('Object the kite: arc kite');
+  });
+
+  it('ortografía aparte a temperatura 0; si cambia las páginas, conserva el texto', async () => {
+    const story = {
+      title: 'Martina',
+      pages: [0, 1, 2, 3].map((index) => ({
+        index,
+        text: `Pagina ${String(index + 1)}`,
+        illustrationPrompt: `Scene ${String(index + 1)}`,
+      })),
+      usage: { provider: 'vertex', model: 'm', costUsdMicros: 0 },
+    };
+    const calls: { generationConfig: { temperature: number } }[] = [];
+    const fixed = await new VertexTextProvider(
+      clientWith(
+        () =>
+          jsonReply({
+            title: 'Martina',
+            pages: story.pages.map((page) => ({ text: page.text.replace('Pagina', 'Página') })),
+          }),
+        calls,
+      ),
+    ).proofreadStory(story, sampleStoryRequest);
+    expect(calls[0]?.generationConfig.temperature).toBe(0);
+    expect(fixed.pages[0]).toEqual({ index: 0, text: 'Página 1', illustrationPrompt: 'Scene 1' });
+    const short = await new VertexTextProvider(
+      clientWith(() => jsonReply({ title: 'Martina', pages: [{ text: 'x' }] })),
+    ).proofreadStory(story, sampleStoryRequest);
+    expect(short.pages).toEqual(story.pages);
+  });
+
+  it('la revisión editorial recibe los problemas concretos para reescribir', async () => {
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const story = {
+      title: 'Martina',
+      pages: [{ index: 0, text: 'a', illustrationPrompt: 'b' }],
+      usage: { provider: 'vertex', model: 'm', costUsdMicros: 0 },
+    };
+    await new VertexTextProvider(
+      clientWith(
+        () =>
+          jsonReply({
+            approved: true,
+            issues: [],
+            pages: [{ text: 'a', illustrationPrompt: 'b' }],
+          }),
+        calls,
+      ),
+    ).reviewStory(story, sampleStoryRequest, { issues: ['Moraleja explícita («la lección»)'] });
+    expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('- Moraleja explícita («la lección»)');
+  });
+
+  it('escenas desde el texto final: una por página o reintentable', async () => {
+    const pages = [0, 1].map((index) => ({
+      index,
+      text: `t${String(index)}`,
+      illustrationPrompt: 'p',
+    }));
+    const request = { childName: 'Martina', pages, scenes: null, recurring: ['Grandma Rosa'] };
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const ok = await new VertexTextProvider(
+      clientWith(() => jsonReply({ prompts: [' one ', 'two'] }), calls),
+    ).describeScenes(request);
+    expect(ok.prompts).toEqual(['one', 'two']);
+    expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('who is not');
+    expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('Grandma Rosa');
+    await expect(
+      new VertexTextProvider(clientWith(() => jsonReply({ prompts: ['one'] }))).describeScenes(
+        request,
+      ),
+    ).rejects.toMatchObject({ retryable: true });
+  });
+
   it('rechaza un cuento con otra cantidad de páginas (reintentable)', async () => {
     const provider = new VertexTextProvider(
       clientWith(() => jsonReply({ title: 'x', pages: [{ text: 'a', illustrationPrompt: 'b' }] })),

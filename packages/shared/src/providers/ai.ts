@@ -23,10 +23,37 @@ export interface StoryRequest {
   /** Prompt ya armado con la plantilla de la historia (stories.textPromptTemplate). */
   prompt: string;
   pageCount: number;
-  /** Rango de palabras por página (densidad de texto). */
-  wordsPerPage?: { min: number; max: number };
+  /** Rango de palabras por página (densidad de texto) y tope duro de la franja de edad. */
+  wordsPerPage?: { min: number; max: number; cap?: number };
   /** Nombres que tienen que aparecer tal cual (protagonista y apodo). */
   mustInclude?: readonly string[];
+  /** Español: «vos» (Argentina y Uruguay) o «tú» (el resto). Lo respeta también la revisión. */
+  spanishVoice?: SpanishVoice;
+}
+
+/** Tratamiento en español: voseo rioplatense o tuteo neutro. */
+export type SpanishVoice = 'vos' | 'tu';
+
+/** Reescritura de una página que pasó el tope de palabras de la edad. */
+export interface PageRewriteRequest {
+  language: Locale;
+  spanishVoice?: SpanishVoice;
+  childName: string;
+  age: number;
+  storyTitle: string;
+  pageIndex: number;
+  /** El texto de la página anterior y de la siguiente, para que siga encadenando. */
+  previous: string | null;
+  next: string | null;
+  text: string;
+  words: { min: number; max: number };
+  /** Nombres que tienen que quedar tal cual. */
+  mustInclude: readonly string[];
+}
+
+export interface PageRewrite {
+  text: string;
+  usage: AiUsage;
 }
 
 /** Enseñanza que la IA teje en la trama sin sermonear. */
@@ -54,6 +81,28 @@ export interface StoryReview {
   issues: string[];
   /** Páginas corregidas (ortografía, coherencia, contenido apto para chicos). */
   pages: StoryPage[];
+  usage: AiUsage;
+}
+
+export interface ProofreadStory {
+  title: string;
+  pages: StoryPage[];
+  usage: AiUsage;
+}
+
+export interface SceneRequest {
+  childName: string;
+  /** Texto final de cada página (puede venir vacía si el dibujo cuenta solo). */
+  pages: readonly StoryPage[];
+  /** Plan de cada página, si hay (qué se ve y qué no). */
+  scenes: readonly ScenePlan[] | null;
+  /** Personajes que se repiten (acompañante y elenco), para decir quién está y quién no. */
+  recurring: readonly string[];
+}
+
+export interface SceneDescriptions {
+  /** Una por página, en el mismo orden. */
+  prompts: string[];
   usage: AiUsage;
 }
 
@@ -136,7 +185,48 @@ export interface ScenePlan {
   wordBudget: number;
   /** Qué detalle personal mueve la escena, si alguno. */
   personalDetail: string | null;
+  /** Página sin texto (3 a 6 años: 1 o 2 en el clímax); el dibujo cuenta solo. */
+  wordless?: boolean;
+  /** Objetos de la biblia visual que aparecen en la escena (por nombre; ausente en planes anteriores). */
+  props?: string[];
+  /** Lugar de la biblia visual donde ocurre la escena (por nombre), o null. */
+  place?: string | null;
+  /** Ropa especial del protagonista en la escena (por contexto), o null: la de la lámina. */
+  outfit?: string | null;
+  /** Encuadre de la ilustración; nunca el mismo tres veces seguidas. */
+  shot?: ShotType | null;
 }
+
+/** Encuadres que puede pedir el plan para variar las ilustraciones. */
+export const SHOT_TYPES = ['wide', 'medium', 'close-up', 'high angle'] as const;
+
+export type ShotType = (typeof SHOT_TYPES)[number];
+
+/**
+ * Objeto o lugar de la biblia visual: se describe una vez y se dibuja igual en todas las escenas
+ * donde aparece (una tabla de kitesurf, el faro del pueblo).
+ */
+export interface VisualBibleItem {
+  name: string;
+  /** Aspecto fijo, en inglés. En actividades poco comunes, qué es y qué no es. */
+  look: string;
+}
+
+/** Ropa del protagonista para un contexto (en el agua, de noche), con aspecto fijo en inglés. */
+export interface OutfitPlan {
+  context: string;
+  look: string;
+}
+
+/** Estructuras que sostienen un cuento para menores de 7 (una sola para todo el libro). */
+export const STORY_STRUCTURES = [
+  'refrain',
+  'rhymed_quatrains',
+  'days_of_week',
+  'cumulative',
+  'question_answer',
+] as const;
+export type StoryStructure = (typeof STORY_STRUCTURES)[number];
 
 /** Personaje secundario que se repite (abuela, mascota): se dibuja igual en todo el libro. */
 export interface CompanionPlan {
@@ -157,14 +247,32 @@ export interface CastMember {
   look: string;
 }
 
+/** Lo que el cuento plantea y después paga (un misterio y su pista, un objeto que vuelve a servir). */
+export interface StoryPromise {
+  /** Qué se plantea, en el idioma del cuento. */
+  setup: string;
+  /** Página (1 = primera) donde se planta y donde se paga. */
+  setupPage: number;
+  payoffPage: number;
+}
+
 export interface StoryPlan {
   theme: string;
+  /** Promesas que se pagan (ausente en planes anteriores). */
+  promises?: StoryPromise[];
   /** Personas secundarias que se repiten, con género y aspecto fijos (vacío si no hay). */
   cast?: CastMember[];
   /** El acompañante que más se repite, o null si ninguno vuelve en varias páginas. */
   companion?: CompanionPlan | null;
+  /** Biblia visual (ausente en planes anteriores): objetos, lugares y ropa que se repiten. */
+  props?: VisualBibleItem[];
+  places?: VisualBibleItem[];
+  outfits?: OutfitPlan[];
   /** Principio, motivación, dificultad, decisión del protagonista y resolución. */
   arc: string;
+  /** Menores de 7: la forma elegida para todo el libro y la frase que se repite. */
+  structure?: StoryStructure | null;
+  refrain?: string | null;
   scenes: ScenePlan[];
   usage: AiUsage;
 }
@@ -186,6 +294,33 @@ export interface PageReviewRequest {
   /** Rasgos esenciales, en inglés ("glasses: present", "hair: short curly black"). */
   mustKeep: readonly string[];
   scene: ScenePlan | null;
+  /** Aspecto fijo de los objetos, el lugar y la ropa de esta escena (biblia visual), si hay. */
+  visualBible?: string;
+}
+
+/** Revisión del libro entero (miniaturas de todas las páginas contra la biblia visual). */
+export interface BookReviewRequest {
+  /** Miniatura de cada página ilustrada (0 = portada), reducida para que entre en una llamada. */
+  pages: readonly { pageIndex: number; image: ImageData }[];
+  /** Lámina aprobada del protagonista. */
+  reference: ImageData;
+  /** Descripción del protagonista con los rasgos que no pueden cambiar. */
+  character: string;
+  /** Biblia visual del libro y qué tiene cada página (personajes, objetos, lugar, ropa). */
+  bible: string;
+}
+
+export interface BookDeviation {
+  pageIndex: number;
+  /** Qué se aparta del resto del libro (en inglés, sin describir letras de la imagen). */
+  issue: string;
+  /** Cómo tendría que verse, para pedirlo en la reparación (en inglés). */
+  expected: string;
+}
+
+export interface BookReview {
+  deviations: BookDeviation[];
+  usage: AiUsage;
 }
 
 export interface ContinuityCheck {
@@ -232,6 +367,7 @@ export interface ActivityRequest {
   count: number;
   /** Profesionales: objetivo general elegido (nunca un protocolo clínico). */
   goal: string | null;
+  spanishVoice?: SpanishVoice;
 }
 
 export interface GeneratedActivities {
@@ -245,12 +381,28 @@ export interface AITextProvider {
   planStory(request: StoryRequest): Promise<StoryPlan>;
   /** Revisión multimodal de una página ilustrada (guía D). */
   reviewPage(request: PageReviewRequest): Promise<PageReview>;
+  /** Revisión del libro entero: qué páginas se apartan de las demás (objetos, lugares, ropa). */
+  reviewBook(request: BookReviewRequest): Promise<BookReview>;
   /** Actividades a partir de plantillas aprobadas. */
   generateActivities(request: ActivityRequest): Promise<GeneratedActivities>;
   /** Extrae la ficha del personaje a partir de la foto procesada. */
   describeCharacter(photo: ImageData): Promise<CharacterSheetResult>;
   generateStory(request: StoryRequest): Promise<GeneratedStory>;
-  reviewStory(story: GeneratedStory, request: StoryRequest): Promise<StoryReview>;
+  /**
+   * Revisión editorial. Con `issues` (controles deterministas que fallaron), además reescribe para
+   * arreglar esos problemas concretos.
+   */
+  reviewStory(
+    story: GeneratedStory,
+    request: StoryRequest,
+    options?: { issues?: readonly string[] },
+  ): Promise<StoryReview>;
+  /** Pasada de ortografía (temperatura 0): solo corrige, misma cantidad de páginas. */
+  proofreadStory(story: GeneratedStory, request: StoryRequest): Promise<ProofreadStory>;
+  /** Escena de cada página (inglés) escrita desde el texto final, para ilustrarla. */
+  describeScenes(request: SceneRequest): Promise<SceneDescriptions>;
+  /** Reescribe una página más corta (pasó el tope de palabras de la edad). */
+  rewritePage(request: PageRewriteRequest): Promise<PageRewrite>;
   moderateText(text: string): Promise<ModerationResult>;
 }
 

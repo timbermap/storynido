@@ -5,6 +5,7 @@ export * from './collections';
 export * from './commerce';
 export * from './common';
 export * from './editorial';
+export * from './typography';
 export * from './pipeline';
 export * from './pricing';
 export * from './book-price';

@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { splitCoverTitle } from '@storynido/shared';
+import { splitCoverTitle, type StoryTypography } from '@storynido/shared';
 
 import { CoverTitle } from '@/components/stories/story-cover';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,46 @@ export interface ViewerPage {
   number?: number;
   /** Armado en el libro (page-layout.ts): la página se ve igual que en el PDF. */
   layout?: { kind: 'facing' | 'calm' | 'vignette' | 'overlay'; side: 'top' | 'bottom' };
+}
+
+const STORY_FONT_CLASS: Record<StoryTypography['font'], string> = {
+  quicksand: 'font-display font-bold',
+  andika: 'font-[family-name:var(--font-story-reader)]',
+  fraunces: 'font-[family-name:var(--font-story-serif)] font-medium',
+};
+
+/**
+ * Clases del texto del cuento con la letra por edad (la misma del PDF, en escala de pantalla).
+ * Sin tipografía (muestras anteriores), la de siempre.
+ */
+export function storyTextClass(typography: StoryTypography | null | undefined): string {
+  if (!typography) return 'font-display text-lg leading-relaxed sm:text-xl';
+  const size =
+    typography.maxPt >= 30
+      ? 'text-3xl leading-snug sm:text-4xl'
+      : typography.maxPt >= 22
+        ? 'text-2xl leading-snug sm:text-3xl'
+        : typography.maxPt >= 18
+          ? 'text-xl leading-normal sm:text-2xl'
+          : typography.maxPt >= 15
+            ? 'text-lg leading-relaxed sm:text-xl'
+            : 'text-base leading-relaxed sm:text-lg';
+  return cn(storyFontClass(typography), size);
+}
+
+/** Familia y mayúsculas de la letra por edad. */
+export function storyFontClass(typography: StoryTypography): string {
+  return cn(STORY_FONT_CLASS[typography.font], typography.uppercase && 'uppercase tracking-wide');
+}
+
+/**
+ * Tamaño en la página del visor, proporcional al ancho como en el PDF (la misma escala que el
+ * armado por edad: 15,5 pt ≈ 3,9 % del ancho).
+ */
+export function storyFontSize(typography: StoryTypography): string {
+  const cqw = (typography.maxPt * 0.25).toFixed(2);
+  const max = (typography.maxPt / 13).toFixed(2);
+  return `clamp(0.8rem, ${cqw}cqw, ${max}rem)`;
 }
 
 /**
@@ -48,6 +88,7 @@ export function BookViewer({
   actions,
   onPageChange,
   examples,
+  typography,
 }: {
   title: string;
   /** Nombre del protagonista: en la portada va grande, con letra a mano. */
@@ -62,6 +103,8 @@ export function BookViewer({
   actions?: (page: ViewerPage) => ReactNode;
   onPageChange?: (page: ViewerPage) => void;
   examples?: ViewerExamples;
+  /** Letra del cuento por edad (la del PDF); sin ella, la de siempre. */
+  typography?: StoryTypography | null;
 }) {
   const t = useTranslations('Viewer');
   const [index, setIndex] = useState(0);
@@ -136,6 +179,8 @@ export function BookViewer({
           examples={examples}
           noDedication={t('noDedication')}
           theEnd={t('theEnd')}
+          wordless={t('wordless')}
+          typography={typography}
         />
         <button
           type="button"
@@ -270,6 +315,8 @@ function PageSpread({
   examples,
   noDedication,
   theEnd,
+  wordless,
+  typography,
 }: {
   page: ViewerPage;
   title: string;
@@ -280,6 +327,8 @@ function PageSpread({
   examples?: ViewerExamples;
   noDedication: string;
   theEnd: string;
+  wordless: string;
+  typography?: StoryTypography | null;
 }) {
   const paper =
     'flex min-h-[18rem] flex-col justify-center rounded-xl bg-[#fffaf5] p-6 shadow-[inset_0_0_0_1px_rgb(38_50_74/0.06)] sm:p-10';
@@ -327,7 +376,15 @@ function PageSpread({
       example={exampleFor(page, examples)}
     />
   );
-  const text = (
+  // Letra por edad, la del PDF: el tamaño en proporción al ancho de la página (como el libro).
+  const text = typography ? (
+    <p
+      className={cn(storyFontClass(typography), 'leading-snug whitespace-pre-line')}
+      style={{ fontSize: storyFontSize(typography) }}
+    >
+      {page.text}
+    </p>
+  ) : (
     <p className="font-display text-[clamp(0.8rem,3.9cqw,1.15rem)] leading-relaxed whitespace-pre-line">
       {page.text}
     </p>
@@ -351,9 +408,7 @@ function PageSpread({
           {layout ? (
             text
           ) : (
-            <p className="font-display text-lg leading-relaxed whitespace-pre-line sm:text-xl">
-              {page.text}
-            </p>
+            <p className={cn(storyTextClass(typography), 'whitespace-pre-line')}>{page.text}</p>
           )}
         </div>
         <div className="relative aspect-[3/4] overflow-hidden rounded-xl md:order-2">
@@ -398,6 +453,7 @@ function PageSpread({
           {text}
         </div>
       )}
+      {!hasText && <span className="sr-only">{wordless}</span>}
       {/* El rótulo va del lado opuesto al texto. */}
       {badge && (
         <div className={cn(!top && '[&>span]:top-3 [&>span]:bottom-auto')}>

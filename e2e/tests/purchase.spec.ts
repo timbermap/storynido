@@ -36,7 +36,7 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await heading(page, 'Cuéntanos sobre el protagonista');
   await expect(page.getByRole('link', { name: 'Guardar y salir' })).toBeVisible();
   await page.locator('#child-name').fill('Martina');
-  await page.locator('#child-age').selectOption('5');
+  await page.locator('#child-age').selectOption('4');
   await page.locator('#child-like').fill('dinosaurios');
   await page.keyboard.press('Enter');
   await expectAccessible(page);
@@ -52,8 +52,8 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
 
   await heading(page, 'Elige la aventura');
   await page.locator('label', { hasText: 'La gran aventura espacial' }).click();
-  // «¿Cómo lo van a leer?»: para 5 años, el formato corto es «Para mirar y contar» (16 páginas).
-  await page.locator('label', { hasText: 'Para mirar y contar' }).click();
+  // «¿Cómo lo van a leer?»: para 4 años, el recomendado es «Para leer juntos» (corto, 16 páginas).
+  await page.locator('label', { hasText: 'Para leer juntos' }).click();
   await page.locator('summary', { hasText: 'Ajustar la lectura' }).click();
   await page.locator('label', { hasText: 'Más lectura' }).click();
   await next(page);

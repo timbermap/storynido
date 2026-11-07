@@ -6,7 +6,18 @@ import {
   type Memories,
   type MustKeepTrait,
 } from '../models/character';
-import type { CastMember, CharacterSheet, LessonPrompt, StoryPlan } from './ai';
+import {
+  SHOT_TYPES,
+  type CastMember,
+  type CharacterSheet,
+  type LessonPrompt,
+  type ScenePlan,
+  type ShotType,
+  type SpanishVoice,
+  type StoryPlan,
+  type StoryStructure,
+} from './ai';
+import { DIALOGUE_MIN_AGE } from './story-checks';
 
 /** Variables que admiten las plantillas de stories (textPromptTemplate / imagePromptTemplate). */
 export type TemplateVariables = Readonly<Record<string, string | number | null | undefined>>;
@@ -16,6 +27,22 @@ const LANGUAGE_NAMES: Record<Locale, string> = {
   en: 'English',
   pt: 'português do Brasil',
 };
+
+/** Países donde el cuento habla de «vos» (voseo rioplatense, decidido el 05/11). */
+export const VOSEO_COUNTRIES: readonly string[] = ['AR', 'UY'];
+
+/** «vos» en Argentina y Uruguay; «tú» en el resto o si no se sabe el país. */
+export function spanishVoiceFor(country: string | null | undefined): SpanishVoice {
+  return country && VOSEO_COUNTRIES.includes(country.toUpperCase()) ? 'vos' : 'tu';
+}
+
+/** Idioma para el prompt, con el tratamiento del español según el país. */
+export function languageName(language: Locale, voice: SpanishVoice = 'tu'): string {
+  if (language === 'es' && voice === 'vos') {
+    return 'español rioplatense (usa "vos" con sus formas: "querés", "mirá", "tenés", "vení"; nunca "tú" ni "vosotros")';
+  }
+  return LANGUAGE_NAMES[language];
+}
 
 const PRONOUN_LABELS = { she: 'ella', he: 'él', they: 'elle' } as const;
 
@@ -60,8 +87,10 @@ export interface StoryPromptInput {
   event?: Pick<BookEvent, 'type' | 'date' | 'turningAge' | 'theme'> | null;
   /** Profesionales: objetivo general (guía narrativa, nunca clínica). */
   goal?: string | null;
-  /** Densidad de texto y nivel de lectura (fase 07b). */
-  wordsPerPage?: { min: number; max: number };
+  /** Densidad de texto (rango y tope de la franja de edad) y nivel de lectura (fase 07b). */
+  wordsPerPage?: { min: number; max: number; cap?: number };
+  /** Español: «vos» o «tú» según el país (por defecto «tú»). */
+  spanishVoice?: SpanishVoice;
   levelGuidance?: string;
   /** Libro para colorear: escenas simples con frases muy breves. */
   coloring?: boolean;
@@ -87,8 +116,9 @@ export function memoriesBlock(memories: Memories | null | undefined): string | n
 
 /** Prompt de texto con la plantilla de la historia y reglas fijas que el admin no puede quitar. */
 export function buildStoryPrompt(input: StoryPromptInput): string {
+  const language = languageName(input.language, input.spanishVoice);
   const body = renderTemplate(input.template, {
-    language: LANGUAGE_NAMES[input.language],
+    language,
     pageCount: input.pageCount,
     storyTitle: input.storyTitle,
     childName: input.childName,
@@ -128,24 +158,49 @@ indicaciones terapéuticas ni diagnósticos, y no menciones el objetivo de forma
 
 Plan aprobado por el editor (seguilo página por página; no agregues personajes ni hechos fuera de él):
 Tema: ${input.plan.theme}
-Arco: ${input.plan.arc}
+Arco: ${input.plan.arc}${
+        input.plan.structure
+          ? `
+Estructura de todo el libro: ${STRUCTURE_LABELS[input.plan.structure]}.`
+          : ''
+      }${
+        input.plan.refrain
+          ? `
+Frase que se repite (al menos 3 veces, igual): «${input.plan.refrain}»`
+          : ''
+      }
 ${input.plan.scenes
   .map(
     (scene) =>
       `- Página ${String(scene.pageIndex + 1)}: ${scene.sceneGoal} (${scene.emotionalBeat})${
         scene.personalDetail ? ` · detalle personal: ${scene.personalDetail}` : ''
-      }`,
+      }${scene.wordless ? ' · SIN TEXTO: "text" vacío (""), el dibujo cuenta solo' : ''}`,
+  )
+  .join('\n')}${
+        input.plan.promises?.length
+          ? `
+Lo que se planta y se paga (respétalo: la pista o el objeto aparece antes y vuelve a servir después):
+${input.plan.promises
+  .map(
+    (promise) =>
+      `- «${promise.setup}»: se planta en la página ${String(promise.setupPage)} y se paga en la página ${String(promise.payoffPage)}.`,
   )
   .join('\n')}`
+          : ''
+      }`
     : '';
   return `${body}${memoriesSection}${eventSection}${goalSection}${planSection}
 
 Reglas obligatorias:
-- Escribe en ${LANGUAGE_NAMES[input.language]}.
+- Escribe en ${language}.
 - Exactamente ${String(input.pageCount)} páginas; ${input.childName} es el protagonista en todas.${
     input.wordsPerPage
       ? `
-- Cada página tiene entre ${String(input.wordsPerPage.min)} y ${String(input.wordsPerPage.max)} palabras (esto reemplaza cualquier indicación anterior sobre la cantidad de oraciones).`
+- Cada página tiene entre ${String(input.wordsPerPage.min)} y ${String(input.wordsPerPage.max)} palabras${
+          input.wordsPerPage.cap
+            ? `, nunca más de ${String(input.wordsPerPage.cap)} (es para la edad de quien lo lee)`
+            : ''
+        } (esto reemplaza cualquier indicación anterior sobre la cantidad de oraciones).`
       : ''
   }${
     input.levelGuidance
@@ -181,11 +236,45 @@ const EVENT_STORY: Record<BookEvent['type'], (name: string, age: number | null) 
     `Es un cuento para regalar a los compañeros en el egreso o el fin de año escolar de ${name}.\nLa historia recorre lo vivido en el año (amigos, juegos, lo aprendido) y termina con el festejo y las ganas de lo que viene.`,
 };
 
+/** Cómo se le explica al redactor cada estructura del plan. */
+export const STRUCTURE_LABELS: Record<StoryStructure, string> = {
+  refrain: 'estribillo que vuelve (la misma frase al principio, en el medio y al final)',
+  rhymed_quatrains: 'rima en cuartetas (cuatro versos por página que riman)',
+  days_of_week: 'días de la semana (cada página o par de páginas es un día, de lunes a domingo)',
+  cumulative: 'patrón acumulativo (cada página suma un personaje u objeto y repite los anteriores)',
+  question_answer: 'pregunta y respuesta (cada página pregunta algo y la siguiente lo contesta)',
+};
+
+/**
+ * Reglas de forma para menores de 7 (docs «Cuentos que cuidan»): lo que los hace inolvidables es
+ * la forma, no solo la trama.
+ */
+export function formRules(age: number): string[] {
+  if (age >= 7) return [];
+  const rules = [
+    `- Elige UNA estructura y respétala en todo el libro: ${Object.values(STRUCTURE_LABELS).join('; ')}.`,
+    '- Una frase corta, fácil de decir en voz alta, se repite igual al menos 3 veces (es la que el chico termina diciendo con el adulto).',
+    '- Usa onomatopeyas y sonidos (BRUM, PLAF, KIKIRIKÍ) cuando la escena lo permite.',
+    '- Humor absurdo y lógica de chico con detalles concretos y sensoriales (un helado de papas fritas, un perro que va a la escuela en la mochila). Nada de adjetivos genéricos como «mágico», «increíble» o «maravilloso».',
+    '- El texto nunca describe lo que muestra el dibujo: si se ve el cohete, cuenta lo que siente, dice o decide el protagonista.',
+    '- Al final, un giro o una sorpresa que invite a releerlo.',
+    '- Puedes narrar en primera persona, con la voz del protagonista («Hoy empiezo un viaje»), si le queda bien al cuento.',
+  ];
+  if (age >= 3) {
+    rules.push(
+      '- Las páginas que el plan marca SIN TEXTO llevan "text" vacío (""): en el clímax, el dibujo cuenta solo.',
+    );
+  }
+  return rules;
+}
+
 /**
  * Reglas narrativas (AUDITORIA-PRODUCTO §4): lo que separa un cuento memorable de uno genérico.
  * Las de cada público salen del pedido: eventos traen la fiesta; profesionales, el objetivo.
  */
-export function narrativeRules(input: Pick<StoryPromptInput, 'childName' | 'event' | 'goal'>) {
+export function narrativeRules(
+  input: Pick<StoryPromptInput, 'childName' | 'event' | 'goal'> & { age?: number },
+) {
   const rules = [
     `- ${input.childName} decide y resuelve: no mira la aventura, la protagoniza.`,
     '- La primera página tiene un gancho que invita a dar vuelta la hoja.',
@@ -221,7 +310,40 @@ export function narrativeRules(input: Pick<StoryPromptInput, 'childName' | 'even
   } else {
     rules.push('- Emoción y vínculo, con un conflicto verdadero que se resuelve.');
   }
+  if (input.age !== undefined) rules.push(...formRules(input.age));
+  rules.push(...craftRules(input.childName, input.age, Boolean(baby)));
   return rules.join('\n');
+}
+
+/**
+ * Oficio del texto (arreglos del generador, PR B): lo que hace que un cuento se sienta escrito por
+ * una persona. Por edad cuando se sabe; sin edad, las que valen para todos.
+ */
+export function craftRules(childName: string, age: number | undefined, baby = false): string[] {
+  const rules = [
+    '- Muestra, no cuentes: en lugar de decir lo que siente un personaje («estaba triste»), muestra lo que hace, dice o nota su cuerpo.',
+    '- Todo lo que se plantea se paga: un misterio se resuelve con una pista plantada antes, y un objeto importante vuelve a servir más adelante.',
+    '- Cada detalle personal aparece donde cambia algo en la escena, nunca de relleno.',
+    '- La última página termina en una imagen o una frase que queda, nunca en una lección ni en una moraleja.',
+  ];
+  if (!baby) {
+    rules.push(
+      `- Como máximo dos intentos fallidos antes de lograrlo, y cada uno enseña algo distinto que ${childName} usa después.`,
+      `- Si hay un mentor o un adulto, ayuda o da una pista, pero la solución final la encuentra ${childName}.`,
+      '- Si el protagonista hace algo que un chico podría imitar y tiene riesgo (agua, altura, velocidad, fuego), usa el equipo de seguridad que corresponde y un adulto sabe dónde está.',
+    );
+  }
+  if (age !== undefined && age >= DIALOGUE_MIN_AGE) {
+    rules.push(
+      '- Hay diálogo (con raya) en al menos una de cada tres páginas, y cada personaje habla distinto (su forma de decir las cosas lo delata sin nombrarlo).',
+    );
+  }
+  if (age !== undefined && age >= 9) {
+    rules.push(
+      '- Oraciones de 20 palabras como máximo; nada de jerga técnica sin explicarla con palabras del lector.',
+    );
+  }
+  return rules;
 }
 
 export interface IllustrationPromptInput {
@@ -349,4 +471,165 @@ export function castNote(cast: readonly CastMember[] | null | undefined): string
     return `${member.role}: ${gender}${member.look}`;
   });
   return ` Recurring supporting characters (draw each one with exactly the same gender and look on every page where the scene includes them; never add them to scenes that do not include them): ${lines.join('; ')}.`;
+}
+
+/** Biblia visual del libro (plan): objetos, lugares y ropa con aspecto fijo. */
+export type VisualBible = Pick<StoryPlan, 'props' | 'places' | 'outfits'>;
+
+const sameName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/**
+ * Objetos, lugar y encuadre de una escena, con el aspecto fijo de la biblia visual. Solo entra lo
+ * que la escena incluye: un objeto que no está en la escena no se nombra (si se nombra, se dibuja).
+ * Los planes anteriores a la biblia no traen nada y el prompt queda como antes.
+ */
+export function visualBibleNote(
+  bible: VisualBible | null | undefined,
+  scene: ScenePlan | null | undefined,
+): string {
+  if (!scene) return '';
+  const props = [
+    ...new Set(
+      (scene.props ?? []).flatMap((name) =>
+        (bible?.props ?? []).filter((prop) => prop.look.trim() && sameName(prop.name, name)),
+      ),
+    ),
+  ];
+  const scenePlace = scene.place;
+  const place = scenePlace
+    ? (bible?.places ?? []).find((item) => item.look.trim() && sameName(item.name, scenePlace))
+    : undefined;
+  const parts: string[] = [];
+  if (props.length > 0) {
+    parts.push(
+      ` Recurring objects in this scene (draw each exactly like this, the same on every page): ${props
+        .map((prop) => `${prop.name}: ${prop.look}`)
+        .join('; ')}.`,
+    );
+  }
+  if (place) parts.push(` Place: ${place.name}, ${place.look} (drawn the same way on every page).`);
+  if (scene.shot) parts.push(` Camera: ${scene.shot} shot.`);
+  return parts.join('');
+}
+
+/**
+ * Ropa del protagonista en la escena si el plan pide una especial (en el agua, de noche); null:
+ * la de la lámina.
+ */
+export function sceneOutfit(
+  bible: VisualBible | null | undefined,
+  scene: ScenePlan | null | undefined,
+): string | null {
+  const context = scene?.outfit;
+  if (!context) return null;
+  const outfit = (bible?.outfits ?? []).find(
+    (item) => item.look.trim() && sameName(item.context, context),
+  );
+  return outfit
+    ? `${outfit.look} (${outfit.context}; the same look on every page in this context)`
+    : null;
+}
+
+/** Lo que la revisión de cada página compara con la biblia visual (objetos, lugar y ropa). */
+export function visualBibleCheck(
+  bible: VisualBible | null | undefined,
+  scene: ScenePlan | null | undefined,
+): string {
+  const outfit = sceneOutfit(bible, scene);
+  return `${visualBibleNote(bible, scene)}${outfit ? ` The main character wears ${outfit}.` : ''}`.trim();
+}
+
+/**
+ * Encuadres variados: el mismo tres veces seguidas se cambia por otro (el modelo a veces los
+ * repite aunque el prompt lo prohíba).
+ */
+export function varyShots<T extends { shot?: ShotType | null }>(scenes: readonly T[]): T[] {
+  const result = scenes.map((scene) => ({ ...scene }));
+  for (let index = 2; index < result.length; index += 1) {
+    const current = result[index];
+    const shot = current?.shot;
+    if (!current || !shot) continue;
+    if (result[index - 1]?.shot === shot && result[index - 2]?.shot === shot) {
+      current.shot =
+        SHOT_TYPES.find((other) => other !== shot && other !== result[index + 1]?.shot) ?? shot;
+    }
+  }
+  return result;
+}
+
+/** Núcleo del rol para buscarlo en las escenas («the teacher» → «teacher»). */
+const roleCore = (role: string) =>
+  role
+    .toLowerCase()
+    .replace(/\b(the|a|an|male|female|young|old)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** La escena incluye a esa persona del elenco (la nombra en lo que tiene que verse). */
+export function sceneIncludes(scene: ScenePlan | null | undefined, role: string): boolean {
+  const core = roleCore(role);
+  if (!scene || !core) return false;
+  return scene.mustBeVisible.some((item) => item.toLowerCase().includes(core));
+}
+
+/**
+ * La persona del elenco que más se repite (en dos escenas o más): tiene su propia lámina, como el
+ * acompañante, para que se dibuje igual en todo el libro. null si nadie del elenco vuelve.
+ */
+export function mainCastMember(
+  plan: Pick<StoryPlan, 'cast' | 'scenes'> | null | undefined,
+): CastMember | null {
+  let best: { member: CastMember; count: number } | null = null;
+  for (const member of plan?.cast ?? []) {
+    if (!member.role.trim() || !member.look.trim()) continue;
+    const count = plan?.scenes.filter((scene) => sceneIncludes(scene, member.role)).length ?? 0;
+    if (count >= 2 && (!best || count > best.count)) best = { member, count };
+  }
+  return best?.member ?? null;
+}
+
+/** La persona del elenco para su lámina (misma escena que la del acompañante). */
+export const castMemberSheet = (member: CastMember) => ({
+  name: member.role,
+  look: member.gender === 'unspecified' ? member.look : `${member.gender}, ${member.look}`,
+});
+
+/** Nota para las escenas que incluyen a esa persona: dibujarla igual que su lámina. */
+export const castSheetNote = (member: Pick<CastMember, 'role'>) =>
+  ` ${member.role} looks exactly like the last reference image (their own reference sheet): same face, hair, build and clothes.`;
+
+/**
+ * Lo que la revisión del libro entero compara: el protagonista, quién se repite, la biblia visual y
+ * qué tiene cada página según el plan.
+ */
+export function bookBibleSummary(input: {
+  companion?: { name: string; look: string } | null;
+  cast?: readonly CastMember[] | null;
+  props?: VisualBible['props'];
+  places?: VisualBible['places'];
+  outfits?: VisualBible['outfits'];
+  scenes: readonly ScenePlan[] | null;
+}): string {
+  const lines: string[] = [];
+  if (input.companion)
+    lines.push(`Recurring companion ${input.companion.name}: ${input.companion.look}`);
+  for (const member of input.cast ?? []) {
+    lines.push(`Recurring ${member.role} (${member.gender}): ${member.look}`);
+  }
+  for (const prop of input.props ?? []) lines.push(`Object ${prop.name}: ${prop.look}`);
+  for (const place of input.places ?? []) lines.push(`Place ${place.name}: ${place.look}`);
+  for (const outfit of input.outfits ?? []) {
+    lines.push(`Protagonist outfit ${outfit.context}: ${outfit.look}`);
+  }
+  for (const scene of input.scenes ?? []) {
+    const parts = [
+      scene.mustBeVisible.length ? `shows ${scene.mustBeVisible.join(', ')}` : '',
+      scene.notVisible.length ? `not ${scene.notVisible.join(', ')}` : '',
+      scene.props?.length ? `objects ${scene.props.join(', ')}` : '',
+      scene.place ? `place ${scene.place}` : '',
+      scene.outfit ? `outfit ${scene.outfit}` : 'everyday outfit of the reference sheet',
+    ].filter(Boolean);
+    lines.push(`Page ${String(scene.pageIndex + 1)}: ${parts.join('; ')}`);
+  }
+  return lines.join('\n');
 }

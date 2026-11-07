@@ -22,6 +22,7 @@ export const AI_CONFIG_DEFAULTS: Omit<AiConfig, 'updatedAt' | 'updatedBy'> = {
   maxPreviewsPerUserPerDay: 5,
   maxPreviewsPerUserPerWeek: 15,
   illustrationsRequireAccount: true,
+  reviewPreviews: false,
   dailyBudgetUsd: 5,
   budgetAlertPercent: 80,
 };
@@ -38,8 +39,13 @@ export const budgetExceeded = () =>
   new AppError(
     503,
     'ai_budget_exhausted',
-    'Alcanzamos el límite de generación por hoy. Vuelve a intentarlo mañana; tu borrador queda guardado.',
+    // El cliente nunca ve un "límite": la muestra va a la fila (preview_queued) y, donde no hay
+    // fila (ajustes puntuales), un aviso de mucha demanda.
+    'Hay mucha demanda en este momento. Intenta de nuevo en un rato; tu borrador queda guardado.',
   );
+
+export const isBudgetExceeded = (error: unknown): boolean =>
+  error instanceof AppError && error.code === 'ai_budget_exhausted';
 
 /**
  * Presupuesto diario de IA: cada llamada se registra en aiUsage con su costo estimado y se
@@ -74,12 +80,19 @@ export class AiBudget {
     return typeof value === 'number' ? value : 0;
   }
 
+  /**
+   * ¿Queda presupuesto hoy? Si no, deja el log que dispara la alerta de Monitoring (salvo que
+   * `alert` sea false: el trabajo de la fila pregunta seguido y no debe repetir la alerta).
+   */
+  async available(limits: AiLimits, alert = true): Promise<boolean> {
+    if ((await this.spentTodayUsdMicros()) < limits.dailyBudgetUsd * 1_000_000) return true;
+    if (alert) this.log.error({ alert: 'ai_budget_exhausted' }, 'AI daily budget exhausted');
+    return false;
+  }
+
   /** Corta si el gasto del día ya llegó al tope. */
   async ensureAvailable(limits: AiLimits): Promise<void> {
-    if ((await this.spentTodayUsdMicros()) >= limits.dailyBudgetUsd * 1_000_000) {
-      this.log.error({ alert: 'ai_budget_exhausted' }, 'AI daily budget exhausted');
-      throw budgetExceeded();
-    }
+    if (!(await this.available(limits))) throw budgetExceeded();
   }
 
   async record(usage: AiUsage, context: UsageContext, limits: AiLimits): Promise<void> {

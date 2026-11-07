@@ -12,6 +12,7 @@ import type { CheckoutService } from './checkout/service';
 import type { PipelineEventPublisher } from './orders/events';
 import type { FulfillmentService } from './orders/fulfillment';
 import type { ApiConfig } from './config';
+import type { JobCallerVerifier } from './jobs-auth';
 import type { PhotoService } from './photos/service';
 import type { PreviewService } from './preview/service';
 
@@ -57,6 +58,8 @@ export interface ApiDeps {
   notifier: EmailNotifier;
   /** Eventos del pipeline del pedido (worker directo en local, Pub/Sub en la nube). */
   pipelineEvents: PipelineEventPublisher;
+  /** Quién puede llamar a /jobs (Cloud Scheduler); sin esto, esas rutas no existen. */
+  jobCaller?: JobCallerVerifier;
   /** Spans de los requests muestreados (Cloud Trace en la nube; sin esto, no se mandan). */
   spans?: SpanSink;
   db: Firestore;

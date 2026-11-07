@@ -27,6 +27,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { InMemoryCatalog } from '../catalog';
 import { RecordingConversions } from '../checkout/conversions';
+import { AppError } from '../errors';
 import { RecordingPublisher } from '../orders/events';
 import { initFirebaseAdmin } from '../firebase';
 import { auth, createTestApp } from '../test-helpers';
@@ -186,6 +187,8 @@ describe('vista previa', () => {
         styles: [style, lineArt],
         lessons: [lesson],
       }),
+      // Cloud Scheduler: solo este token llama a la fila.
+      jobCaller: { verify: (token) => Promise.resolve(token === 'job-ok') },
     });
     app = created.app;
     providers = created.providers;
@@ -257,6 +260,52 @@ describe('vista previa', () => {
     expect(usage.docs.filter((doc) => doc.get('kind') === 'illustration')).toHaveLength(1);
   });
 
+  it('oficio del texto: reescribe con la lista de problemas, corrige la ortografía y escribe las escenas del texto final', async () => {
+    const text = providers.ai().text;
+    const original = text.generateStory.bind(text);
+    // Una moraleja explícita: el control determinista la detecta y pide una reescritura.
+    vi.spyOn(text, 'generateStory').mockImplementation(async (request) => {
+      const story = await original(request);
+      return {
+        ...story,
+        pages: story.pages.map((page, index) =>
+          index === story.pages.length - 1
+            ? { ...page, text: `${page.text} Y aprendió que compartir es lo mejor.` }
+            : page,
+        ),
+      };
+    });
+    const review = vi.spyOn(text, 'reviewStory');
+    const proofread = vi.spyOn(text, 'proofreadStory');
+    vi.spyOn(text, 'describeScenes').mockImplementation((request) =>
+      Promise.resolve({
+        prompts: request.pages.map((_, index) => `final brief ${String(index + 1)}`),
+        usage: { provider: 'mock', model: 'mock-text', costUsdMicros: 0 },
+      }),
+    );
+    await seedBook(providers, 'book-1');
+    const res = await generate('book-1');
+    expect(res.statusCode).toBe(200);
+
+    const rewrite = review.mock.calls.find((call) => call[2]?.issues?.length);
+    expect(rewrite?.[2]?.issues?.join('\n')).toContain('«aprendio que»');
+    expect(proofread).toHaveBeenCalledTimes(1);
+    const pages = (await db.doc('books/book-1').get()).get('preview.pages') as {
+      illustrationPrompt: string;
+    }[];
+    expect(pages.map((page) => page.illustrationPrompt)).toEqual([
+      'final brief 1',
+      'final brief 2',
+      'final brief 3',
+      'final brief 4',
+    ]);
+    const codes = (await db.collection('books/book-1/qaEvents').get()).docs.map(
+      (doc) => doc.get('code') as string,
+    );
+    expect(codes).toContain('story_craft');
+    vi.restoreAllMocks();
+  });
+
   it('la lámina va en 1K; la portada y las páginas aprobadas, en 2K (pueden ir a imprenta)', async () => {
     await seedBook(providers, 'book-1');
     const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
@@ -291,6 +340,77 @@ describe('vista previa', () => {
     const path = book.get('preview.companion.imagePath') as string;
     expect(await providers.storage().exists({ bucket: 'assets', path })).toBe(true);
     paint.mockRestore();
+  });
+
+  it('la persona del elenco que más se repite tiene su lámina si aparece en las páginas de la muestra', async () => {
+    vi.restoreAllMocks();
+    const text = providers.ai().text;
+    const plan = text.planStory.bind(text);
+    vi.spyOn(text, 'planStory').mockImplementation(async (request) => {
+      const result = await plan(request);
+      return {
+        ...result,
+        cast: [{ role: 'the teacher', gender: 'male', look: 'tall, grey beard' }],
+        scenes: result.scenes.map((scene) => ({
+          ...scene,
+          mustBeVisible: scene.pageIndex <= 1 ? [...scene.mustBeVisible, 'the male teacher'] : [],
+        })),
+      };
+    });
+    await seedBook(providers, 'book-1');
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    const review = vi.spyOn(text, 'reviewPage');
+    await generate('book-1');
+    expect((await approve('book-1')).statusCode).toBe(200);
+    // La portada y las páginas se pintan en paralelo: se buscan por su escena.
+    const [castSheet, ...rest] = paint.mock.calls.slice(1).map(([request]) => request);
+    expect(castSheet?.prompt).toContain('Character reference sheet of the teacher');
+    const cover = rest.find((request) => request.prompt.includes('Book cover'));
+    const pages = rest.filter((request) => request !== cover);
+    expect(cover?.references).toHaveLength(1);
+    expect(pages).toHaveLength(2);
+    for (const request of pages) {
+      expect(request.references).toHaveLength(2);
+      expect(request.prompt).toContain('the teacher looks exactly like the last reference image');
+    }
+    const book = await db.doc('books/book-1').get();
+    expect(book.get('preview.castSheet.role')).toBe('the teacher');
+    // Sin la bandera, la muestra no se revisa (es el pedido el que revisa cada página).
+    expect(review).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+
+  it('con reviewPreviews, revisa la portada y las páginas de la muestra y repara la que lo pide', async () => {
+    vi.restoreAllMocks();
+    await setAiConfig({ reviewPreviews: true });
+    await seedBook(providers, 'book-1');
+    const text = providers.ai().text;
+    const original = text.reviewPage.bind(text);
+    const review = vi.spyOn(text, 'reviewPage').mockImplementation(async (request) => {
+      const result = await original(request);
+      return request.pageIndex === 1
+        ? {
+            ...result,
+            status: 'repair',
+            repairTarget: 'illustration_only',
+            continuityChecks: [
+              { trait: 'glasses', expected: 'present', observed: 'absent', confidence: 'high' },
+            ],
+          }
+        : result;
+    });
+    await generate('book-1');
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    expect((await approve('book-1')).statusCode).toBe(200);
+    expect(review).toHaveBeenCalledTimes(3);
+    // Portada + 2 páginas + 1 reparación.
+    expect(paint).toHaveBeenCalledTimes(4);
+    expect(paint.mock.calls[3]?.[0].prompt).toContain('Make sure that: glasses present');
+    const codes = (await db.collection('books/book-1/qaEvents').get()).docs.map(
+      (doc) => doc.get('code') as string,
+    );
+    expect(codes).toContain('page_repair');
+    vi.restoreAllMocks();
   });
 
   it('aprobar al personaje ilustra la portada y 2 páginas con marca de agua, y registra el uso', async () => {
@@ -429,17 +549,69 @@ describe('vista previa', () => {
     expect(visual.preview?.totalPages).toBe(28);
     expect(rich.preview?.totalPages).toBe(28);
     const words = (text: string) => countWords(text);
+    // 5 años (franja 5-6): «muy visual» baja a la de 3-4 y «más lectura» sube a la de 7-8.
     for (const page of visual.preview?.pages ?? []) {
-      expect(words(page.text)).toBeGreaterThanOrEqual(5);
-      expect(words(page.text)).toBeLessThanOrEqual(20);
+      expect(words(page.text)).toBeGreaterThanOrEqual(10);
+      expect(words(page.text)).toBeLessThanOrEqual(25);
     }
     for (const page of rich.preview?.pages ?? []) {
-      expect(words(page.text)).toBeGreaterThanOrEqual(70);
-      expect(words(page.text)).toBeLessThanOrEqual(120);
+      expect(words(page.text)).toBeGreaterThanOrEqual(40);
+      expect(words(page.text)).toBeLessThanOrEqual(70);
     }
+    // La letra de la edad (Quicksand en mayúsculas) con el tamaño de la cantidad de texto.
+    expect(visual.preview?.typography).toEqual({
+      font: 'quicksand',
+      minPt: 22,
+      maxPt: 26,
+      uppercase: true,
+    });
+    expect(rich.preview?.typography).toMatchObject({ font: 'quicksand', maxPt: 17 });
     // El cuento completo tiene las páginas narrativas de la extensión (28 - 2 fijas).
     const book = await db.doc('books/book-rich').get();
     expect((book.get('preview.pages') as unknown[]).length).toBe(26);
+  });
+
+  it('español: «vos» si la cuenta es de Argentina o Uruguay, «tú» en el resto', async () => {
+    const write = vi.spyOn(providers.ai().text, 'generateStory');
+    await seedBook(providers, 'book-1');
+    await db.doc(`users/${UID}`).set({ country: 'AR' }, { merge: true });
+    await generate('book-1');
+    expect(write.mock.calls.at(-1)?.[0].prompt).toContain('español rioplatense (usa "vos"');
+    expect(write.mock.calls.at(-1)?.[0].spanishVoice).toBe('vos');
+    await db.doc(`users/${UID}`).set({ country: 'MX' }, { merge: true });
+    await seedBook(providers, 'book-2');
+    await generate('book-2');
+    expect(write.mock.calls.at(-1)?.[0].prompt).toContain('usa "tú", nunca "vos"');
+    await db.doc(`users/${UID}`).delete();
+    write.mockRestore();
+  });
+
+  it('una página que pasa el tope de la edad se reescribe, no solo se avisa', async () => {
+    const text = providers.ai().text;
+    const original = text.generateStory.bind(text);
+    const write = vi.spyOn(text, 'generateStory').mockImplementation(async (request) => {
+      const story = await original(request);
+      const first = story.pages[0];
+      if (first) first.text = `${first.text} ${'muy muy largo '.repeat(40)}`;
+      return story;
+    });
+    const rewrite = vi.spyOn(text, 'rewritePage');
+    await seedBook(providers, 'book-1', { length: 'short', textDensity: 'balanced' });
+    expect((await generate('book-1')).statusCode).toBe(200);
+    expect(rewrite).toHaveBeenCalled();
+    expect(rewrite.mock.calls[0]?.[0]).toMatchObject({ pageIndex: 0, words: { min: 20, max: 40 } });
+    const pages = (await db.doc('books/book-1').get()).get('preview.pages') as { text: string }[];
+    // 5 años: tope de 50 palabras.
+    expect(countWords(pages[0]?.text ?? '')).toBeLessThanOrEqual(50);
+    expect((await db.doc('books/book-1').get()).get('preview.words')).toEqual({
+      min: 20,
+      max: 40,
+      cap: 50,
+    });
+    const qa = await db.collection('books/book-1/qaEvents').get();
+    expect(qa.docs.map((doc) => String(doc.get('code')))).toContain('length_rewritten');
+    write.mockRestore();
+    rewrite.mockRestore();
   });
 
   it('un libro anterior (sin extensión) conserva las páginas de su historia', async () => {
@@ -665,14 +837,92 @@ describe('vista previa', () => {
     expect(retry.statusCode).toBe(200);
   });
 
-  it('corta cuando se agotó el presupuesto diario, sin tocar el borrador', async () => {
-    await setAiConfig({ dailyBudgetUsd: 1 });
-    await db.doc(`aiBudget/${utcDay()}`).set({ spentUsdMicros: 1_000_000, calls: 10 });
-    await seedBook(providers, 'book-1');
-    const res = await generate('book-1');
-    expect(res.statusCode).toBe(503);
-    expect(res.json<{ error: { code: string } }>().error.code).toBe('ai_budget_exhausted');
-    expect((await db.doc('books/book-1').get()).get('status')).toBe('draft');
+  describe('fila sin presupuesto de IA', () => {
+    const runQueue = (token = 'job-ok') =>
+      app.inject({
+        method: 'POST',
+        url: '/jobs/preview-queue',
+        headers: { authorization: `Bearer ${token}` },
+      });
+    const exhaustBudget = async () => {
+      await setAiConfig({ dailyBudgetUsd: 1 });
+      await db.doc(`aiBudget/${utcDay()}`).set({ spentUsdMicros: 1_000_000, calls: 10 });
+    };
+    const book1 = async () => (await db.doc('books/book-1').get()).data();
+    const readyMails = () =>
+      (providers.email() as MockEmailProvider).sent.filter(
+        (message) => message.idempotencyKey === 'book:book-1:preview_ready',
+      );
+
+    it('sin presupuesto, la muestra queda en la fila en vez de mostrar un límite', async () => {
+      await exhaustBudget();
+      await seedBook(providers, 'book-1');
+      const res = await generate('book-1');
+      expect(res.statusCode).toBe(200);
+      expect(res.json<PublicPreview>().status).toBe('preview_queued');
+      expect((await book1())?.queuedStep).toBe('preview');
+      // Ya está pedida: un segundo clic no la vuelve a encolar.
+      expect((await generate('book-1')).statusCode).toBe(409);
+    });
+
+    it('el trabajo espera mientras no hay presupuesto y la crea (con correo) cuando vuelve', async () => {
+      await db.doc(`users/${UID}`).set({ email: `${UID}@storynido.test`, locale: 'es' });
+      // Los mails son idempotentes por libro: otros tests ya avisaron por "book-1".
+      const logged = await db.collection('emailLog').listDocuments();
+      await Promise.all(logged.map((doc) => doc.delete()));
+      const before = readyMails().length;
+      await exhaustBudget();
+      await seedBook(providers, 'book-1');
+      await generate('book-1');
+      expect((await runQueue()).json()).toEqual({ started: 0, waiting: 1 });
+      expect((await book1())?.status).toBe('preview_queued');
+
+      await setAiConfig({ dailyBudgetUsd: 5 });
+      expect((await runQueue()).json()).toEqual({ started: 1, waiting: 0 });
+      const book = await book1();
+      expect(book?.status).toBe('preview_ready');
+      expect((book?.preview as { stage?: string } | undefined)?.stage).toBe('character');
+      expect(readyMails().length).toBe(before + 1);
+      // Ya no queda nada en la fila.
+      expect((await runQueue()).json()).toEqual({ started: 0, waiting: 0 });
+    });
+
+    it('aprobar el personaje sin presupuesto deja las ilustraciones en la fila', async () => {
+      await seedBook(providers, 'book-1');
+      await generate('book-1');
+      await exhaustBudget();
+      const res = await approve('book-1');
+      expect(res.statusCode).toBe(200);
+      expect(res.json<PublicPreview>().status).toBe('preview_queued');
+      expect((await book1())?.queuedStep).toBe('illustrations');
+
+      await setAiConfig({ dailyBudgetUsd: 5 });
+      expect((await runQueue()).json()).toEqual({ started: 1, waiting: 0 });
+      const book = await book1();
+      expect(book?.status).toBe('preview_ready');
+      expect((book?.preview as { stage?: string } | undefined)?.stage).toBe('complete');
+    });
+
+    it('si el presupuesto se acaba a mitad de camino, vuelve a la fila', async () => {
+      await seedBook(providers, 'book-1');
+      const paint = vi
+        .spyOn(providers.ai().image, 'generateIllustration')
+        .mockRejectedValueOnce(
+          new AppError(503, 'ai_budget_exhausted', 'Hay mucha demanda en este momento.'),
+        );
+      const res = await generate('book-1');
+      paint.mockRestore();
+      expect(res.statusCode).toBe(200);
+      expect(res.json<PublicPreview>().status).toBe('preview_queued');
+      expect((await runQueue()).json()).toEqual({ started: 1, waiting: 0 });
+      expect((await book1())?.status).toBe('preview_ready');
+    });
+
+    it('la ruta de la fila solo acepta a Cloud Scheduler', async () => {
+      expect((await runQueue('otro')).statusCode).toBe(401);
+      const noToken = await app.inject({ method: 'POST', url: '/jobs/preview-queue' });
+      expect(noToken.statusCode).toBe(401);
+    });
   });
 
   it('si el mensaje propio no es apto, informa y vuelve a borrador', async () => {

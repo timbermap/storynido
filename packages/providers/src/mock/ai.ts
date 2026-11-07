@@ -3,6 +3,7 @@ import type {
   AITextProvider,
   ActivityRequest,
   AiUsage,
+  BookReview,
   CharacterSheetResult,
   GeneratedActivities,
   GeneratedImage,
@@ -13,6 +14,11 @@ import type {
   ModerationResult,
   PageReview,
   PageReviewRequest,
+  ProofreadStory,
+  SceneDescriptions,
+  SceneRequest,
+  PageRewrite,
+  PageRewriteRequest,
   StoryPlan,
   StoryRequest,
   StoryReview,
@@ -44,6 +50,8 @@ function fitWords(text: string, filler: string, range?: { min: number; max: numb
   while (words.length < range.min) words = [...words, ...filler.split(/\s+/)];
   return words.slice(0, range.max).join(' ');
 }
+
+const SHOTS = ['wide', 'medium', 'close-up'] as const;
 
 const usage = (model: string): AiUsage => ({ provider: 'mock', model, costUsdMicros: 0 });
 
@@ -98,6 +106,28 @@ export class MockAITextProvider implements AITextProvider {
     });
   }
 
+  /** Recorta la página al máximo de palabras (sin IA): alcanza para probar la reescritura. */
+  rewritePage(request: PageRewriteRequest): Promise<PageRewrite> {
+    const words = request.text.trim().split(/\s+/u);
+    return Promise.resolve({
+      text: words.slice(0, request.words.max).join(' '),
+      usage: usage('mock-text'),
+    });
+  }
+
+  /** Ortografía simulada: deja el texto tal cual (los espacios ya los normaliza la revisión). */
+  proofreadStory(story: GeneratedStory): Promise<ProofreadStory> {
+    return Promise.resolve({ title: story.title, pages: story.pages, usage: usage('mock-text') });
+  }
+
+  /** Escenas simuladas: conserva las del redactor (deterministas para los tests). */
+  describeScenes(request: SceneRequest): Promise<SceneDescriptions> {
+    return Promise.resolve({
+      prompts: request.pages.map((page) => page.illustrationPrompt),
+      usage: usage('mock-text'),
+    });
+  }
+
   moderateText(text: string): Promise<ModerationResult> {
     return Promise.resolve(moderate(text));
   }
@@ -109,6 +139,14 @@ export class MockAITextProvider implements AITextProvider {
     return Promise.resolve({
       theme: request.storyTitle,
       arc: `${request.childName} quiere algo, encuentra una dificultad, decide y lo logra.`,
+      // Una promesa que se paga al final (para probar que llega al redactor sin IA real).
+      promises:
+        request.pageCount >= 3
+          ? [{ setup: 'una llave dorada', setupPage: 1, payoffPage: request.pageCount }]
+          : [],
+      // Menores de 7: una estructura y un estribillo (como el planificador real).
+      structure: request.age < 7 ? 'refrain' : null,
+      refrain: request.age < 7 ? `¡Vamos, ${request.childName}!` : null,
       // Con mascota, el acompañante que se repite (para probar su lámina sin IA real).
       companion: request.petName
         ? { name: request.petName, look: 'a small friendly golden dog with a red collar' }
@@ -122,7 +160,15 @@ export class MockAITextProvider implements AITextProvider {
         continuityFacts: [],
         wordBudget: budget,
         personalDetail: pageIndex === 0 ? (request.likes[0] ?? null) : null,
+        props: [],
+        place: null,
+        outfit: null,
+        shot: SHOTS[pageIndex % SHOTS.length] ?? null,
+        wordless: false,
       })),
+      props: [],
+      places: [],
+      outfits: [],
       usage: usage('mock-text'),
     });
   }
@@ -140,6 +186,11 @@ export class MockAITextProvider implements AITextProvider {
       repairTarget: 'none',
       usage: usage('mock-review'),
     });
+  }
+
+  /** Siempre coherente: los tests que prueban desvíos envuelven este método. */
+  reviewBook(): Promise<BookReview> {
+    return Promise.resolve({ deviations: [], usage: usage('mock-review') });
   }
 
   generateActivities(request: ActivityRequest): Promise<GeneratedActivities> {

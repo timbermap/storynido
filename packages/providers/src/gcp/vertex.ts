@@ -1,10 +1,15 @@
 import {
   AVATAR_OPTIONS,
   ProviderError,
+  SHOT_TYPES,
+  varyShots,
   type Avatar,
   type AIImageProvider,
   type AITextProvider,
   type ActivityRequest,
+  type BookDeviation,
+  type BookReview,
+  type BookReviewRequest,
   type AiUsage,
   type CharacterSheetResult,
   type GeneratedActivities,
@@ -15,10 +20,18 @@ import {
   type ModerationResult,
   type PageReview,
   type PageReviewRequest,
+  type PageRewrite,
+  type PageRewriteRequest,
+  type ProofreadStory,
+  type SceneDescriptions,
+  type SceneRequest,
+  type SpanishVoice,
   type StoryPage,
   type StoryPlan,
+  type VisualBibleItem,
   type StoryRequest,
   type StoryReview,
+  STORY_STRUCTURES,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
 
@@ -320,11 +333,62 @@ const REVIEW_SCHEMA = {
   required: ['approved', 'issues', 'pages'],
 };
 
+const BIBLE_ITEM = {
+  type: 'OBJECT',
+  properties: { name: { type: 'STRING' }, look: { type: 'STRING' } },
+  required: ['name', 'look'],
+};
+
+const REWRITE_SCHEMA = {
+  type: 'OBJECT',
+  properties: { text: { type: 'STRING' } },
+  required: ['text'],
+};
+
+/** El tratamiento del español: la revisión y las reescrituras no lo cambian. */
+function voiceNote(language: string, voice: SpanishVoice | undefined): string {
+  if (language !== 'es') return '';
+  return voice === 'vos'
+    ? '\nUse Rioplatense Spanish voseo ("vos querés", "mirá", "tenés"); never "tú" or "vosotros".'
+    : '\nUse neutral Spanish with "tú" ("tú quieres", "mira"); never "vos".';
+}
+
+/** Forma del cuento para menores de 7 (docs «Cuentos que cuidan»): la elige el planificador. */
+function formPlanRules(age: number): string {
+  if (age >= 7) return 'structure and refrain: null.';
+  const wordless =
+    age >= 3
+      ? ' Mark wordless=true on 1 or 2 scenes at the climax (never the first or last page, never two in a row): the picture tells those pages alone, so their mustBeVisible must carry the whole moment. All other scenes wordless=false.'
+      : ' wordless=false on every scene.';
+  return `This reader is under 7: choose ONE structure for the whole book (${STORY_STRUCTURES.join(', ')}) and record it in structure;
+write in refrain a short phrase, easy to say aloud, that the text repeats at least 3 times (in the language of the brief).${wordless}`;
+}
+
+const PROOFREAD_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    title: { type: 'STRING' },
+    pages: {
+      type: 'ARRAY',
+      items: { type: 'OBJECT', properties: { text: { type: 'STRING' } }, required: ['text'] },
+    },
+  },
+  required: ['title', 'pages'],
+};
+
+const SCENES_SCHEMA = {
+  type: 'OBJECT',
+  properties: { prompts: { type: 'ARRAY', items: { type: 'STRING' } } },
+  required: ['prompts'],
+};
+
 const PLAN_SCHEMA = {
   type: 'OBJECT',
   properties: {
     theme: { type: 'STRING' },
     arc: { type: 'STRING' },
+    structure: { type: 'STRING', nullable: true, enum: [...STORY_STRUCTURES] },
+    refrain: { type: 'STRING', nullable: true },
     companion: {
       type: 'OBJECT',
       nullable: true,
@@ -343,11 +407,38 @@ const PLAN_SCHEMA = {
         required: ['role', 'gender', 'look'],
       },
     },
+    // Biblia visual: lo que se repite se describe una vez y cada escena lo nombra.
+    props: { type: 'ARRAY', items: BIBLE_ITEM },
+    places: { type: 'ARRAY', items: BIBLE_ITEM },
+    outfits: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: { context: { type: 'STRING' }, look: { type: 'STRING' } },
+        required: ['context', 'look'],
+      },
+    },
+    promises: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          setup: { type: 'STRING' },
+          setupPage: { type: 'INTEGER' },
+          payoffPage: { type: 'INTEGER' },
+        },
+        required: ['setup', 'setupPage', 'payoffPage'],
+      },
+    },
     scenes: {
       type: 'ARRAY',
       items: {
         type: 'OBJECT',
         properties: {
+          props: { type: 'ARRAY', items: { type: 'STRING' } },
+          place: { type: 'STRING', nullable: true },
+          outfit: { type: 'STRING', nullable: true },
+          shot: { type: 'STRING', enum: [...SHOT_TYPES] },
           sceneGoal: { type: 'STRING' },
           emotionalBeat: { type: 'STRING' },
           mustBeVisible: { type: 'ARRAY', items: { type: 'STRING' } },
@@ -355,6 +446,7 @@ const PLAN_SCHEMA = {
           continuityFacts: { type: 'ARRAY', items: { type: 'STRING' } },
           wordBudget: { type: 'INTEGER' },
           personalDetail: { type: 'STRING', nullable: true },
+          wordless: { type: 'BOOLEAN' },
         },
         required: [
           'sceneGoal',
@@ -402,6 +494,25 @@ const PAGE_REVIEW_SCHEMA = {
     'textInImage',
     'repairTarget',
   ],
+};
+
+const BOOK_REVIEW_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    deviations: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          pageIndex: { type: 'INTEGER' },
+          issue: { type: 'STRING' },
+          expected: { type: 'STRING' },
+        },
+        required: ['pageIndex', 'issue', 'expected'],
+      },
+    },
+  },
+  required: ['deviations'],
 };
 
 const ACTIVITIES_SCHEMA = {
@@ -568,15 +679,27 @@ Distinctive features only if clearly visible (glasses, freckles, dimples, missin
     };
   }
 
-  async reviewStory(story: GeneratedStory, request: StoryRequest): Promise<StoryReview> {
+  async reviewStory(
+    story: GeneratedStory,
+    request: StoryRequest,
+    options: { issues?: readonly string[] } = {},
+  ): Promise<StoryReview> {
+    const issues = options.issues?.length
+      ? `
+These concrete problems were found by automatic checks: rewrite the pages involved to fix every one of them, keeping the plot,
+the names and the length of each page:
+${options.issues.map((issue) => `- ${issue}`).join('\n')}
+`
+      : '';
     const { response, usage } = await this.client.generate(
       this.model,
       [
         {
           text: `You are the editor of a personalized children's book. Review the story below written for ${request.childName} (${String(request.age)} years old).
 Fix spelling, grammar, consistency of names and details, and anything not suitable for young children. Keep the language, tone, length and page count.
-Keep the lessons subtle (no explicit moral). Set approved=false only if it cannot be fixed. List the issues you found.
-
+Keep the lessons subtle (no explicit moral). Show, don't tell. Set approved=false only if it cannot be fixed. List the issues you found.${voiceNote(request.language, request.spanishVoice)}
+Pages with an empty text are intentionally wordless (the picture tells it): keep them empty. Keep repeated refrains, rhymes and sound words.
+${issues}
 Story (JSON):
 ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrationPrompt }) => ({ text, illustrationPrompt })) })}`,
         },
@@ -597,6 +720,99 @@ ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrat
     return { approved: review.approved, issues: review.issues, pages, usage };
   }
 
+  /** Una página que pasó el tope de palabras de la edad: la misma escena, más corta. */
+  async rewritePage(request: PageRewriteRequest): Promise<PageRewrite> {
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [
+        {
+          text: `You are the editor of a personalized picture book for ${request.childName} (${String(request.age)} years old), "${request.storyTitle}".
+Page ${String(request.pageIndex + 1)} is too long for the reader's age. Rewrite ONLY this page in ${String(request.words.min)}-${String(request.words.max)} words,
+in the same language, voice and tone, keeping the same scene, events, names and any refrain or rhyme.${voiceNote(request.language, request.spanishVoice)}
+${request.mustInclude.length ? `These names must appear exactly as written: ${request.mustInclude.join(', ')}.\n` : ''}Do not describe what the picture shows; keep what the character feels, says or decides.
+Previous page: ${request.previous ?? '(none: this is the first page)'}
+Next page: ${request.next ?? '(none: this is the last page)'}
+Page to rewrite: ${request.text}`,
+        },
+      ],
+      { temperature: 0.4, responseMimeType: 'application/json', responseSchema: REWRITE_SCHEMA },
+    );
+    const page = parseJson(response, 'reescritura') as { text: string };
+    return { text: page.text.trim(), usage };
+  }
+
+  /** Pasada de ortografía aparte, a temperatura 0: solo corrige (nada de estilo ni de trama). */
+  async proofreadStory(story: GeneratedStory, request: StoryRequest): Promise<ProofreadStory> {
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [
+        {
+          text: `You are a proofreader. Correct ONLY spelling, accents, punctuation (including dialogue dashes) and agreement errors in this
+children's book, in its own language. Do not change words, style, plot, names or length; do not add or remove pages. Keep
+"${request.childName}" written exactly like that. Return the title and every page text (an empty page stays empty).
+
+Book (JSON):
+${JSON.stringify({ title: story.title, pages: story.pages.map(({ text }) => ({ text })) })}`,
+        },
+      ],
+      { temperature: 0, responseMimeType: 'application/json', responseSchema: PROOFREAD_SCHEMA },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
+    );
+    const fixed = parseJson(response, 'ortografía') as { title: string; pages: { text: string }[] };
+    // Si cambia la cantidad de páginas, se conserva el texto anterior.
+    const pages =
+      fixed.pages.length === story.pages.length
+        ? story.pages.map((page, index) => ({
+            ...page,
+            text: fixed.pages[index]?.text ?? page.text,
+          }))
+        : story.pages;
+    return { title: fixed.title.trim() || story.title, pages, usage };
+  }
+
+  /** La escena de cada página, escrita desde el texto final (quién está y quién no, lugar, hora). */
+  async describeScenes(request: SceneRequest): Promise<SceneDescriptions> {
+    const pages = request.pages.map((page, index) => {
+      const scene = request.scenes?.find((item) => item.pageIndex === index);
+      return {
+        page: index + 1,
+        text: page.text,
+        ...(scene
+          ? { mustBeVisible: scene.mustBeVisible, notVisible: scene.notVisible }
+          : { previousScene: page.illustrationPrompt }),
+      };
+    });
+    const { response, usage } = await this.client.generate(
+      this.model,
+      [
+        {
+          text: `You write the illustration brief for each page of a children's picture book, from its FINAL text. For every page, in English,
+one or two sentences: who is in the picture and who is not (the protagonist ${request.childName}${
+            request.recurring.length
+              ? `; recurring characters: ${request.recurring.join(', ')}`
+              : ''
+          }), the place, the time of day, the key object, and ONE single moment of the page (never two actions in a row).
+Draw only what the text says or implies; follow mustBeVisible / notVisible when given. A page with empty text: the moment the
+plan describes, told by the picture alone. No text, letters or signs in the image. Exactly ${String(request.pages.length)} prompts, in order.
+
+Pages (JSON):
+${JSON.stringify(pages)}`,
+        },
+      ],
+      { temperature: 0.3, responseMimeType: 'application/json', responseSchema: SCENES_SCHEMA },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
+    );
+    const result = parseJson(response, 'escenas') as { prompts: string[] };
+    if (result.prompts.length !== request.pages.length) {
+      throw new ProviderError(
+        'vertex',
+        `Vinieron ${String(result.prompts.length)} escenas en vez de ${String(request.pages.length)}`,
+        true,
+      );
+    }
+    return { prompts: result.prompts.map((prompt) => prompt.trim()), usage };
+  }
+
   async moderateText(text: string): Promise<ModerationResult> {
     return moderate(this.client, [{ text: `${MODERATION_RULES}\n\nText:\n"""${text}"""` }]);
   }
@@ -612,7 +828,8 @@ Respect the child: never ridicule appearance, abilities, origin or emotions. Do 
 that were not provided. Before narrating, define beginning, motivation, an age-appropriate difficulty, the protagonist's own decisions,
 consequence and resolution. At least two personal details from the brief must change the action naturally (not just be mentioned).
 No two consecutive scenes may be nearly identical. Exactly ${String(request.pageCount)} scenes, one per narrative page.
-wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min)}-${String(request.wordsPerPage.max)} words` : 'as the brief says'}.
+wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min)}-${String(request.wordsPerPage.max)} words${request.wordsPerPage.cap ? `, never more than ${String(request.wordsPerPage.cap)}` : ''}` : 'as the brief says'}.
+${formPlanRules(request.age)}
 mustBeVisible / notVisible / continuityFacts in short English phrases for the illustrator. Write theme, arc, sceneGoal and emotionalBeat
 in the language of the brief. companion: the one secondary character (relative, friend or pet from the brief) who appears in two or
 more scenes, with a fixed look in English (age, hair, skin tone, clothes and colors; species and fur for a pet); null if none recurs.
@@ -627,6 +844,23 @@ look, is always called by the same name, and is drawn the same way in every scen
 continuityFacts of every scene where it appears. Use a single central metaphor for the whole book, never several. When a sport, hobby
 or tool appears, name it precisely in mustBeVisible with its distinctive look (for example "a squash racket: small round head, long
 thin throat", never just "a racket"). The protagonist keeps the same outfit in every scene unless the text says they change clothes.
+promises: what the story sets up and later pays off (a mystery and the clue planted before it is solved, an important object that is
+used again later, a skill that is practiced and then saves the day), each with setupPage and payoffPage (1 = first page, setupPage
+before payoffPage). Everything that is set up is paid off. Up to 3; empty array if none. Write setup in the language of the brief.
+At most two failed attempts before the protagonist succeeds, each teaching something different; a mentor may help, but the
+protagonist finds the final solution.
+Visual bible (English, fixed looks the illustrator repeats word for word):
+- props: up to 4 objects that matter in two or more scenes, each with a name and a fixed look (shape, size, colors). For an unusual
+  sport or activity, define what it is and what it is not (kiteboarding: "a small board with foot straps, pulled by a large arc-shaped
+  kite on long lines; NO sail and NO mast"). Empty array if none.
+- places: up to 3 places where two or more scenes happen, each with a name and a fixed look. Empty array if none.
+- outfits: up to 3 special outfits of the protagonist, only for contexts where the everyday outfit of the reference sheet is impossible
+  (in the water, at night in pyjamas, in the snow), each with a context and a fixed look. Never describe the everyday outfit. Empty
+  array if none.
+- In each scene: props (names from props that appear in it), place (a name from places, or null), outfit (a context from outfits, or
+  null for the everyday outfit) and shot (wide, medium, close-up or high angle, serving the beat; never the same shot three scenes in
+  a row).
+notVisible of each scene lists every recurring character (companion and cast) who is not in that scene's place.
 
 Brief:
 ${request.prompt}`,
@@ -639,6 +873,8 @@ ${request.prompt}`,
       scenes: (Omit<StoryPlan['scenes'][number], 'pageIndex' | 'personalDetail'> & {
         personalDetail?: string | null;
       })[];
+      props?: VisualBibleItem[];
+      places?: VisualBibleItem[];
     };
     if (plan.scenes.length !== request.pageCount) {
       throw new ProviderError(
@@ -647,16 +883,54 @@ ${request.prompt}`,
         true,
       );
     }
+    const bible = (items: VisualBibleItem[] | undefined, max: number) =>
+      (items ?? []).filter((item) => item.name.trim() && item.look.trim()).slice(0, max);
+    const props = bible(plan.props, 4);
+    const places = bible(plan.places, 3);
+    const outfits = (plan.outfits ?? [])
+      .filter((item) => item.context.trim() && item.look.trim())
+      .slice(0, 3);
+    // Cada escena solo nombra lo que está en la biblia (un nombre suelto no tiene aspecto fijo).
+    const known = (list: { name: string }[], name: string) =>
+      list.some((item) => item.name.trim().toLowerCase() === name.trim().toLowerCase());
+    const young = request.age < 7;
     return {
       theme: plan.theme,
       arc: plan.arc,
+      promises: (plan.promises ?? [])
+        .filter(
+          (promise) =>
+            promise.setup.trim() &&
+            promise.setupPage >= 1 &&
+            promise.setupPage < promise.payoffPage &&
+            promise.payoffPage <= request.pageCount,
+        )
+        .slice(0, 3),
+      structure: young && plan.structure ? plan.structure : null,
+      refrain: young && plan.refrain?.trim() ? plan.refrain.trim() : null,
       companion: plan.companion?.name && plan.companion.look ? plan.companion : null,
       cast: (plan.cast ?? []).filter((member) => member.role && member.look).slice(0, 4),
-      scenes: plan.scenes.map((scene, pageIndex) => ({
-        ...scene,
-        pageIndex,
-        personalDetail: scene.personalDetail ?? null,
-      })),
+      props,
+      places,
+      outfits,
+      scenes: varyShots(
+        plan.scenes.map((scene, pageIndex) => ({
+          ...scene,
+          pageIndex,
+          personalDetail: scene.personalDetail ?? null,
+          wordless: request.age >= 3 && young ? Boolean(scene.wordless) : false,
+          props: (scene.props ?? []).filter((name) => known(props, name)),
+          place: scene.place && known(places, scene.place) ? scene.place : null,
+          outfit:
+            scene.outfit &&
+            outfits.some(
+              (item) => item.context.trim().toLowerCase() === scene.outfit?.trim().toLowerCase(),
+            )
+              ? scene.outfit
+              : null,
+          shot: scene.shot && SHOT_TYPES.includes(scene.shot) ? scene.shot : null,
+        })),
+      ),
       usage,
     };
   }
@@ -664,7 +938,11 @@ ${request.prompt}`,
   /** Revisor cruzado texto-imagen (guía D): preliminar, nunca biométrico. */
   async reviewPage(request: PageReviewRequest): Promise<PageReview> {
     const scene = request.scene
-      ? `Scene plan: ${request.scene.sceneGoal}. Must be visible: ${request.scene.mustBeVisible.join(', ') || '-'}. Must NOT appear: ${request.scene.notVisible.join(', ') || '-'}.`
+      ? `Scene plan: ${request.scene.sceneGoal}. Must be visible: ${request.scene.mustBeVisible.join(', ') || '-'}. Must NOT appear: ${request.scene.notVisible.join(', ') || '-'}.${
+          request.scene.continuityFacts.length
+            ? ` Continuity (must match, drawn the same as on the other pages): ${request.scene.continuityFacts.join('; ')}.`
+            : ''
+        }${request.visualBible ? ` Fixed looks for this scene: ${request.visualBible}` : ''}`
       : 'Scene plan: not available.';
     const { response, usage } = await this.client.generate(
       this.model,
@@ -678,7 +956,8 @@ ${request.prompt}`,
         {
           text: `You are a quality reviewer for a children's picture book, not a salesperson. Evaluate this ONE illustration against the
 page text, the scene plan and the approved character sheet. Look for: internal inconsistencies, improbable anatomy (hands, limbs, faces),
-incoherent clothing or accessories, missing or mixed-up characters, objects that contradict the text, cropped heads, and any letters or
+incoherent clothing or accessories, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
+below (a recurring object, place or outfit drawn differently is a repair), cropped heads, and any letters or
 words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks).
 Never claim to verify biometric identity or exact likeness to a real person; your evaluation is preliminary and may mark uncertainty.
 Do not invent evidence: anything you cannot evaluate without another reference must be status needs_reference.
@@ -706,6 +985,48 @@ Page text: ${request.text ?? '(cover: no text)'}`,
     return { ...review, pageIndex: request.pageIndex, usage };
   }
 
+  /**
+   * Revisión del libro entero: las miniaturas de todas las páginas juntas, para ver lo que una
+   * revisión página por página no ve (la tabla que cambia de forma, la playa que es otra).
+   */
+  async reviewBook(request: BookReviewRequest): Promise<BookReview> {
+    const parts: Part[] = [
+      { text: 'Approved character reference sheet (the protagonist):' },
+      imagePart(request.reference),
+    ];
+    for (const page of request.pages) {
+      parts.push({ text: page.pageIndex === 0 ? 'Cover:' : `Page ${String(page.pageIndex)}:` });
+      parts.push(imagePart(page.image));
+    }
+    parts.push({
+      text: `You are the art director of a children's picture book. Above are small thumbnails of EVERY illustration of the book, in
+order. Compare them with each other and with the visual bible below and find the pages that deviate from the rest of the book:
+a recurring object drawn with a different shape, size or color (or a different kind of object), a recurring place that looks like
+another place, the protagonist in a different outfit when the bible does not say so, a recurring character with a different gender,
+age, hair or clothes, a character who should not be on that page, or the protagonist not looking like the reference sheet.
+Only report clear deviations that a reader would notice; ignore style variation, camera angle and small details. Never report letters or
+text. For each deviation: pageIndex (0 = cover, otherwise the page number), issue (short English), and expected (how it must look,
+in short English, to redraw that page). Empty array if the book is consistent.
+
+Protagonist: ${request.character}
+Visual bible:
+${request.bible || '(none)'}`,
+    });
+    const { response, usage } = await this.client.generate(this.model, parts, {
+      temperature: 0,
+      responseMimeType: 'application/json',
+      responseSchema: BOOK_REVIEW_SCHEMA,
+    });
+    const result = parseJson(response, 'revisión del libro') as { deviations: BookDeviation[] };
+    const known = new Set(request.pages.map((page) => page.pageIndex));
+    return {
+      deviations: result.deviations.filter(
+        (item) => known.has(item.pageIndex) && item.expected.trim(),
+      ),
+      usage,
+    };
+  }
+
   /** Actividades a partir de plantillas aprobadas (fase 09; se dibujan en la fase 10). */
   async generateActivities(request: ActivityRequest): Promise<GeneratedActivities> {
     const { response, usage } = await this.client.generate(
@@ -716,7 +1037,7 @@ Page text: ${request.text ?? '(cover: no text)'}`,
 (${String(request.age)} years old, reading level ${request.readingLevel}), based on the story "${request.storyTitle}".
 Use only these approved activity templates (kind and guidance), cycling through them; do not invent other kinds:
 ${request.templates.map((template) => `- ${template.kind}: ${template.guidance}`).join('\n')}
-${request.goal ? `General goal chosen by the professional (educational, never clinical): ${request.goal}\n` : ''}Write title, instructions and items in ${request.language === 'es' ? 'Spanish' : request.language === 'pt' ? 'Portuguese' : 'English'};
+${request.goal ? `General goal chosen by the professional (educational, never clinical): ${request.goal}\n` : ''}Write title, instructions and items in ${request.language === 'es' ? 'Spanish' : request.language === 'pt' ? 'Portuguese' : 'English'};${voiceNote(request.language, request.spanishVoice)}
 items are characters, objects or words from the story. illustrationPrompt (English, simple outline scene, no text in the image) only if the
 activity needs a picture, else null. No diagnoses, therapy language or cure promises.
 

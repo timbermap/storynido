@@ -22,6 +22,7 @@ import { registerFulfillmentRoutes } from './routes/fulfillment';
 import { registerDevStorageRoutes } from './routes/dev-storage';
 import { registerOrderRoutes } from './routes/orders';
 import { registerPhotoRoutes } from './routes/photos';
+import { registerJobRoutes } from './routes/jobs';
 import { registerPreviewRoutes } from './routes/previews';
 import { registerEmailRoutes } from './routes/email';
 import { registerProRoutes } from './routes/pro';
@@ -67,6 +68,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   );
   registerPhotoRoutes(app, deps.photos);
   registerPreviewRoutes(app, deps.previews);
+  registerJobRoutes(app, deps.previews, deps.jobCaller);
   registerAiConfigRoutes(app, deps.db);
   registerAdminRoutes(app, deps.db);
   registerAdminOrderRoutes(app);
