@@ -234,6 +234,15 @@ export const bookPreviewSchema = z.object({
     .object({
       theme: z.string(),
       arc: z.string(),
+      promises: z
+        .array(
+          z.object({
+            setup: z.string(),
+            setupPage: z.number().int(),
+            payoffPage: z.number().int(),
+          }),
+        )
+        .optional(),
       structure: z.enum(STORY_STRUCTURES).nullable().optional(),
       refrain: z.string().nullable().optional(),
       companion: z.object({ name: z.string(), look: z.string() }).nullable().optional(),

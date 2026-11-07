@@ -2548,3 +2548,20 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
   - **Dirección de arte:** regla de ropa para deportes de agua y de riesgo (traje de neopreno o malla, chaleco de impacto y casco cuando corresponde, descalzo o con botitas; nunca jean ni zapatos en el agua; casco en bici, patines y tablas), que también se suma a los libros congelados antes. De 9 a 12 años se saca la técnica («tinta firme y color plano»), que peleaba con el estilo elegido; quedan las proporciones, el encuadre cinematográfico y el tono.
 - **Compatibilidad:** los planes y libros anteriores no traen la biblia: el prompt queda igual y su huella no cambia.
 - **Costo:** ninguna llamada extra (el plan devuelve un poco más de texto).
+
+## 239 — Oficio del texto: reglas, promesas, controles y ortografía aparte
+
+- **Fecha:** 2026-11-06. Pedido por Sebas (arreglos del generador, PR B). Depende del tratamiento «vos»/«tú» del PR #55, que no se toca acá.
+- **Reglas del redactor** (`craftRules`, en `narrativeRules`): mostrar, no contar; todo lo que se plantea se paga (un misterio con su pista plantada antes, un objeto importante que vuelve a servir); como máximo dos intentos fallidos y cada uno enseña algo distinto; el mentor ayuda, pero la solución la encuentra el protagonista; si hace algo imitable y riesgoso, usa equipo de seguridad y un adulto sabe dónde está; la última página termina en una imagen o una frase, nunca en una lección; cada detalle personal aparece donde cambia algo. Por edad: desde 6 años, diálogo en al menos una de cada tres páginas, con una voz distinta por personaje; desde 9, oraciones de 20 palabras como máximo y sin jerga técnica sin explicar. En un bautismo o un primer añito no van los intentos fallidos ni el mentor.
+- **Promesas en el plan:** `promises` (qué se planta, en qué página y dónde se paga; hasta 3). El redactor las recibe en la lista del plan.
+- **Controles deterministas** (`story-checks.ts`, sin IA):
+  - Diálogo desde 6 años: raya, comillas o guion en al menos un tercio de las páginas con texto.
+  - Palabras con contenido repetidas: más de 2 veces en una página, o más de 4 en el libro. Sin contar las palabras vacías ni los nombres de los personajes. En los libros de más de 12 páginas el tope del libro es una cada tres páginas: el objeto central se llama siempre igual y en 26 páginas vuelve más de cuatro veces.
+  - Moralejas explícitas («aprendió que», «la lección», «perseverancia», «el verdadero valor»…).
+
+  Si alguno falla, la revisión editorial recibe la lista concreta y reescribe una sola vez (`story_craft` en el control de calidad). La reescritura se acepta solo si no rompe los nombres ni empeora la densidad.
+
+- **Ortografía aparte:** después de la revisión, una pasada a temperatura 0 que solo corrige ortografía, tildes, puntuación y concordancia. Si cambia la cantidad de páginas o rompe un nombre, queda el texto anterior.
+- **Escenas desde el texto final:** con el texto ya corregido, se reescribe el `illustrationPrompt` de cada página: quién está y quién no, el lugar, la hora del día, el objeto clave y un solo momento.
+- Si la ortografía o las escenas fallan en la IA, la muestra sigue con lo que había (no se cae).
+- **Costo:** por muestra, 2 llamadas de texto más (ortografía y escenas) y 1 más solo si fallan los controles (reescritura). Con Gemini Flash son centavos por libro.

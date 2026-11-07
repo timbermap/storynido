@@ -260,6 +260,52 @@ describe('vista previa', () => {
     expect(usage.docs.filter((doc) => doc.get('kind') === 'illustration')).toHaveLength(1);
   });
 
+  it('oficio del texto: reescribe con la lista de problemas, corrige la ortografía y escribe las escenas del texto final', async () => {
+    const text = providers.ai().text;
+    const original = text.generateStory.bind(text);
+    // Una moraleja explícita: el control determinista la detecta y pide una reescritura.
+    vi.spyOn(text, 'generateStory').mockImplementation(async (request) => {
+      const story = await original(request);
+      return {
+        ...story,
+        pages: story.pages.map((page, index) =>
+          index === story.pages.length - 1
+            ? { ...page, text: `${page.text} Y aprendió que compartir es lo mejor.` }
+            : page,
+        ),
+      };
+    });
+    const review = vi.spyOn(text, 'reviewStory');
+    const proofread = vi.spyOn(text, 'proofreadStory');
+    vi.spyOn(text, 'describeScenes').mockImplementation((request) =>
+      Promise.resolve({
+        prompts: request.pages.map((_, index) => `final brief ${String(index + 1)}`),
+        usage: { provider: 'mock', model: 'mock-text', costUsdMicros: 0 },
+      }),
+    );
+    await seedBook(providers, 'book-1');
+    const res = await generate('book-1');
+    expect(res.statusCode).toBe(200);
+
+    const rewrite = review.mock.calls.find((call) => call[2]?.issues?.length);
+    expect(rewrite?.[2]?.issues?.join('\n')).toContain('«aprendio que»');
+    expect(proofread).toHaveBeenCalledTimes(1);
+    const pages = (await db.doc('books/book-1').get()).get('preview.pages') as {
+      illustrationPrompt: string;
+    }[];
+    expect(pages.map((page) => page.illustrationPrompt)).toEqual([
+      'final brief 1',
+      'final brief 2',
+      'final brief 3',
+      'final brief 4',
+    ]);
+    const codes = (await db.collection('books/book-1/qaEvents').get()).docs.map(
+      (doc) => doc.get('code') as string,
+    );
+    expect(codes).toContain('story_craft');
+    vi.restoreAllMocks();
+  });
+
   it('la lámina va en 1K; la portada y las páginas aprobadas, en 2K (pueden ir a imprenta)', async () => {
     await seedBook(providers, 'book-1');
     const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
