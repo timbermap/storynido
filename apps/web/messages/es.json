@@ -1083,10 +1083,10 @@
       "lockedNote": "Lo que corrijas queda fijo en todas las páginas.",
       "illustratingText": "Ilustramos la portada y las primeras páginas. Tarda un par de minutos.",
       "waitSteps": {
-        "character": "Dibujamos a {name} (unos minutos)",
+        "character": "Dibujamos a {name}",
         "review": "Tú revisas y confirmas el parecido",
         "illustrate": "Ilustramos la portada y 2 páginas",
-        "order": "Si te gusta, lo pides y hacemos el libro completo"
+        "order": "Si te gusta, hacemos el libro completo"
       },
       "leaveText": "Seguimos trabajando aunque salgas. Te escribimos cuando la muestra esté lista. Para retomarla: Mis cuentos, «En proceso», Continuar.",
       "leaveButton": "Volver a Mis cuentos",
@@ -1107,7 +1107,7 @@
         "steps": {
           "write": "Escribimos la historia",
           "illustrate": "Ilustramos la portada y 2 páginas",
-          "order": "Si te gusta, lo pides y hacemos el libro completo"
+          "order": "Si te gusta, hacemos el libro completo"
         }
       },
       "waitEstimate": "{minutes, plural, one {Suele estar en un minuto.} other {Suele estar en unos # minutos.}}",
@@ -1120,14 +1120,14 @@
         "textDrawing": "Usamos su dibujo de siempre. Armamos la invitación y el cuento de recuerdo con la temática {theme}.",
         "steps": {
           "write": "Escribimos el cuento de recuerdo",
-          "illustrate": "Ilustramos la portada (va en la invitación) y 2 páginas",
-          "order": "Si te gusta, lo pides y preparamos todo el kit"
+          "illustrate": "Ilustramos la portada de la invitación y 2 páginas",
+          "order": "Si te gusta, preparamos todo el kit"
         },
         "steps4": {
-          "character": "Dibujamos a {name} (unos minutos)",
+          "character": "Dibujamos a {name}",
           "review": "Tú revisas y confirmas el parecido",
-          "illustrate": "Ilustramos la portada (va en la invitación) y 2 páginas",
-          "order": "Si te gusta, lo pides y preparamos todo el kit"
+          "illustrate": "Ilustramos la portada de la invitación y 2 páginas",
+          "order": "Si te gusta, preparamos todo el kit"
         }
       },
       "eventDifferencesPages": "El mini cuento tiene {total} páginas; aquí ves la portada y las primeras {shown}.",
@@ -1255,15 +1255,15 @@
       "densities": {
         "visual": {
           "name": "Muy visual",
-          "text": "Pocas palabras, mucha ilustración."
+          "text": "Un escalón menos de texto que el de su edad."
         },
         "balanced": {
           "name": "Equilibrado",
-          "text": "Para leer juntos."
+          "text": "El texto justo para su edad."
         },
         "rich": {
           "name": "Más lectura",
-          "text": "Para lectores que ya leen solos."
+          "text": "Un escalón más de texto que el de su edad."
         }
       },
       "levels": {
@@ -1313,7 +1313,7 @@
         },
         "read_alone": {
           "name": "Leo solo",
-          "text": "Frases cortas y una ilustración por página, para que lo lea él."
+          "text": "Frases cortas y menos texto por página, para leer sin ayuda."
         },
         "longer_story": {
           "name": "Cuento largo",
@@ -1727,7 +1727,8 @@
     "thumbnails": "Páginas del libro",
     "noDedication": "Aquí irá tu dedicatoria",
     "example": "Ejemplo",
-    "exampleLabel": "Ejemplo del estilo · en tu libro, el protagonista será {name}"
+    "exampleLabel": "Ejemplo del estilo · en tu libro, el protagonista será {name}",
+    "wordless": "Página sin texto: la ilustración cuenta este momento."
   },
   "Checkout": {
     "shippingEstimate": "Envío estimado a tu país: unos {price}, para un total de unos {total}. Llega en {min} a {max} días hábiles. Se confirma con tu dirección.",

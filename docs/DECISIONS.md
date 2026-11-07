@@ -2517,7 +2517,19 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Infra:** Terraform habilita `addressvalidation.googleapis.com` y suma `roles/serviceusage.serviceUsageConsumer` al worker.
 - **Costo:** USD 17 cada 1.000 después de 5.000 gratis por mes; una llamada por impreso.
 
-## 236 — Sin presupuesto de IA, la muestra espera en la fila (sin mostrar un límite)
+## 236 — Cantidad de texto, forma, letra y voz por edad («Cuentos que cuidan»)
+
+- **Franjas de edad:** 0-2, 3-4, 5-6, 7-8 y 9+ (antes 0-2, 3-5, 6-8, 9+). Palabras por página (rango y tope): 0-8 (10), 10-25 (30), 20-40 (50), 40-70 (80), 70-120 (140). Están en `editorialConfig.ageBands`, editables en el admin («Palabras por edad»); un documento guardado antes toma las de fábrica. Sin edad conocida se usan las densidades de siempre.
+- **«Ajustar» mueve un escalón:** la densidad pasa a ser un escalón sobre la franja de la edad (muy visual, una franja menos; más lectura, una más), así nunca se aleja más de uno.
+- **Formatos:** 0-2 mini (10 páginas de cuento); 3-4 short (14); 5-8 classic (26); 9+ epic (30). Para 5-6 se sugieren 16 a 24 páginas, que no coincide con ninguna extensión: queda classic (26), la imprimible más cercana, sin cambiar las reglas de la imprenta. «Leo solo» (5-8) ahora es menos texto por página (un escalón menos), no un libro más largo.
+- **Celebraciones:** el tope de 60 palabras (DECISIONS 231) pasa a ser el de la edad que se celebra (30 en un cumple de 4); 60 si no se sabe la edad.
+- **Tope duro:** la página que pasa el tope se reescribe una vez con el modelo (`rewritePage`) y queda el evento `length_rewritten`. En el pedido, el texto es el que aprobó el adulto: se registra, no se cambia.
+- **Forma para menores de 7:** una estructura para todo el libro (estribillo, cuartetas, días de la semana, acumulativo, pregunta y respuesta) que el planificador anota en el plan, una frase que se repite 3 veces, onomatopeyas, humor concreto sin adjetivos genéricos, el texto no describe el dibujo, giro final y primera persona posible. De 3 a 6, 1 o 2 páginas sin texto en el clímax (nunca la primera, la última ni dos seguidas); la maquetación las arma sin panel.
+- **Letra:** de 0 a 6, Quicksand Bold, en MAYÚSCULAS en español y portugués (en inglés, mayúscula y minúscula); 7-8, Andika; 9+, Fraunces. Tamaños (pt): 30-36, 22-26, 18-22, 15-17 y 13-15; el tamaño sigue la cantidad de texto si el adulto subió un escalón, y en el grapado A5 se escala por el ancho de la página (0,75). Va con el armado por edad de DECISIONS 232 (zona calma, papel fundido, enfrentadas); una página en el tope que no entra en la zona calma puede bajar hasta el 80 % del mínimo de su franja antes de frenar el pedido. Reemplaza la escala por nivel y la del mini cuento. La vista previa web usa la misma letra.
+- **Voz:** «vos» si la cuenta es de Argentina o Uruguay, «tú» en el resto o si no se sabe (también la revisión, las reescrituras y las actividades, con el país del pedido).
+- Los libros ya generados no cambian: palabras, franjas y letra quedan congeladas en la muestra; sin franjas, el libro se arma como siempre.
+
+## 237 — Sin presupuesto de IA, la muestra espera en la fila (sin mostrar un límite)
 
 - **Fecha:** 2026-11-06. Pedido por Sebas: que el cliente nunca vea "Alcanzamos el límite de generación por hoy"; que la muestra quede en cola y arranque sola cuando se libere el cupo.
 - **Estado nuevo `preview_queued`:** si el presupuesto diario de IA (`aiConfig/global.dailyBudgetUsd`) está agotado al crear la muestra o al aprobar el personaje, el libro queda en la fila (`queuedAt`, `queuedStep`: `preview` o `illustrations`) y la web muestra "Estamos preparando la muestra de {nombre}; te avisamos por correo". Si el presupuesto se acaba a mitad de camino, también vuelve a la fila en vez de fallar. El cupo diario de la persona se reserva al encolar (los documentos quedan en `previewQuotaDocs` para devolverlo aunque haya cambiado el día).

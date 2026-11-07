@@ -85,6 +85,7 @@ interface OrderDoc {
   bookId: string;
   status: OrderStatus;
   channel?: string;
+  country?: string;
   items?: PipelineOrder['items'];
   sourceOrderId?: string | null;
   pipeline?: {
@@ -656,6 +657,7 @@ export class Pipeline {
       items: order.items ?? [],
       sourceOrderId: order.sourceOrderId ?? null,
       humanApproval: order.pipeline?.humanApproval ?? null,
+      country: order.country ?? null,
     };
   }
 
@@ -681,6 +683,7 @@ export class Pipeline {
         items: order.items ?? [],
         sourceOrderId: order.sourceOrderId ?? null,
         humanApproval: order.pipeline?.humanApproval ?? null,
+        country: order.country ?? null,
       },
       orderId,
       generation,

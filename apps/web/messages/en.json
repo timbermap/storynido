@@ -1083,10 +1083,10 @@
       "lockedNote": "What you fix stays the same on every page.",
       "illustratingText": "We are illustrating the cover and the first pages. It takes a couple of minutes.",
       "waitSteps": {
-        "character": "We draw {name} (a few minutes)",
+        "character": "We draw {name}",
         "review": "You review and confirm the likeness",
         "illustrate": "We illustrate the cover and 2 pages",
-        "order": "If you like it, you order and we make the full book"
+        "order": "If you like it, we make the full book"
       },
       "leaveText": "We keep working even if you leave. We’ll email you when the sample is ready. To pick it up again: My stories, “In progress”, Continue.",
       "leaveButton": "Back to My stories",
@@ -1107,7 +1107,7 @@
         "steps": {
           "write": "We write the story",
           "illustrate": "We illustrate the cover and 2 pages",
-          "order": "If you like it, you order it and we make the full book"
+          "order": "If you like it, we make the full book"
         }
       },
       "waitEstimate": "{minutes, plural, one {It’s usually ready in about a minute.} other {It’s usually ready in about # minutes.}}",
@@ -1120,14 +1120,14 @@
         "textDrawing": "We use their usual drawing. We put together the invitation and the keepsake story with the {theme} theme.",
         "steps": {
           "write": "We write the keepsake story",
-          "illustrate": "We illustrate the cover (it goes on the invitation) and 2 pages",
-          "order": "If you like it, you order it and we prepare the whole kit"
+          "illustrate": "We illustrate the invitation cover and 2 pages",
+          "order": "If you like it, we prepare the whole kit"
         },
         "steps4": {
-          "character": "We draw {name} (a few minutes)",
+          "character": "We draw {name}",
           "review": "You check the likeness and confirm",
-          "illustrate": "We illustrate the cover (it goes on the invitation) and 2 pages",
-          "order": "If you like it, you order it and we prepare the whole kit"
+          "illustrate": "We illustrate the invitation cover and 2 pages",
+          "order": "If you like it, we prepare the whole kit"
         }
       },
       "eventDifferencesPages": "The mini story has {total} pages; here you see the cover and the first {shown}.",
@@ -1255,15 +1255,15 @@
       "densities": {
         "visual": {
           "name": "Very visual",
-          "text": "Few words, lots of illustration."
+          "text": "One step less text than usual for their age."
         },
         "balanced": {
           "name": "Balanced",
-          "text": "For reading together."
+          "text": "Just the right amount of text for their age."
         },
         "rich": {
           "name": "More reading",
-          "text": "For kids who already read on their own."
+          "text": "One step more text than usual for their age."
         }
       },
       "levels": {
@@ -1313,7 +1313,7 @@
         },
         "read_alone": {
           "name": "I read it myself",
-          "text": "Short sentences and one illustration per page, so they can read it on their own."
+          "text": "Short sentences and less text per page, to read without help."
         },
         "longer_story": {
           "name": "Longer story",
@@ -1727,7 +1727,8 @@
     "thumbnails": "Book pages",
     "noDedication": "Your dedication goes here",
     "example": "Example",
-    "exampleLabel": "Style example · in your book, {name} will be the hero"
+    "exampleLabel": "Style example · in your book, {name} will be the hero",
+    "wordless": "Wordless page: the illustration tells this moment."
   },
   "Checkout": {
     "shippingEstimate": "Estimated shipping to your country: about {price}, for a total of about {total}. Arrives in {min} to {max} business days. Confirmed with your address.",
