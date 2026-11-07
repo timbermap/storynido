@@ -20,6 +20,7 @@ import {
   textDensitySchema,
 } from './editorial';
 import { CHILD_LIMITS } from './users';
+import { SHOT_TYPES } from '../providers/ai';
 import { bookFormatSchema, timestampsSchema, uidSchema } from './common';
 
 /** countries/{countryCode}: configuración comercial por país (editable en el admin). */
@@ -246,9 +247,17 @@ export const bookPreviewSchema = z.object({
           continuityFacts: z.array(z.string()),
           wordBudget: z.number().int(),
           personalDetail: z.string().nullable(),
+          // Biblia visual (ausente en las muestras anteriores).
+          props: z.array(z.string()).optional(),
+          place: z.string().nullable().optional(),
+          outfit: z.string().nullable().optional(),
+          shot: z.enum(SHOT_TYPES).nullable().optional(),
           wordless: z.boolean().optional(),
         }),
       ),
+      props: z.array(z.object({ name: z.string(), look: z.string() })).optional(),
+      places: z.array(z.object({ name: z.string(), look: z.string() })).optional(),
+      outfits: z.array(z.object({ context: z.string(), look: z.string() })).optional(),
     })
     .nullable()
     .optional(),

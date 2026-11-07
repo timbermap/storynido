@@ -2536,3 +2536,15 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Trabajo programado:** Cloud Scheduler (`preview-queue`, cada 5 minutos) llama `POST /jobs/preview-queue` en la API con un token OIDC de `sn-invoker` (audiencia `storynido-api-jobs`; la API es pública, así que la ruta verifica el token). Toma hasta 4 libros en orden de llegada, cada uno con una transacción, y los genera en paralelo dentro de los 300 s del request; al terminar manda el correo `preview_ready`. Sin presupuesto, no toma nada.
 - **Donde no hay fila** (corregir rasgos, regenerar una ilustración, dibujo del perfil), el aviso pasa a ser "Hay mucha demanda en este momento" en vez de hablar de un límite.
 - **La alerta de Monitoring sigue igual:** el log `ai_budget_exhausted` se escribe cuando una muestra entra a la fila, no en cada pasada del trabajo.
+
+## 238 — Continuidad de ilustraciones: biblia visual del plan
+
+- **Fecha:** 2026-11-06. Pedido por Sebas (arreglos del generador, PR A).
+- **Contexto:** en un cuento de kitesurf la tabla cambiaba de página a página (a veces con vela y mástil), la playa era otra en cada escena y el protagonista entraba al agua con jean y zapatillas. `continuityFacts` ya llegaba al prompt de cada página (DECISIONS 231), pero la revisión de la página no lo veía y nada fijaba el aspecto de los objetos, los lugares o la ropa especial.
+- **Decisión:**
+  - **Biblia visual en el plan:** `props` (hasta 4: nombre y aspecto fijo en inglés; en una actividad poco común, qué es y qué no es: «tabla chica con straps tirada por una cometa en arco con líneas largas, SIN vela ni mástil»), `places` (hasta 3) y `outfits` (hasta 3, solo para contextos donde la ropa de la lámina no sirve: en el agua, de noche, en la nieve; la ropa de todos los días sigue siendo la de la lámina). Cada escena nombra sus `props`, su `place`, su `outfit` y su encuadre (`shot`: general, medio, primer plano o picado; nunca el mismo tres veces seguidas, y si el modelo lo repite se corrige solo). Se guarda en la muestra y en el libro congelado como el elenco, y entra al prompt de cada página solo con lo que esa escena incluye (también en las páginas de la muestra).
+  - **Revisión de cada página:** recibe `continuityFacts` y la biblia de la escena; un objeto, lugar o ropa dibujado distinto es una reparación.
+  - **Planificador:** `notVisible` lista a los personajes que se repiten y no están en el lugar de esa escena.
+  - **Dirección de arte:** regla de ropa para deportes de agua y de riesgo (traje de neopreno o malla, chaleco de impacto y casco cuando corresponde, descalzo o con botitas; nunca jean ni zapatos en el agua; casco en bici, patines y tablas), que también se suma a los libros congelados antes. De 9 a 12 años se saca la técnica («tinta firme y color plano»), que peleaba con el estilo elegido; quedan las proporciones, el encuadre cinematográfico y el tono.
+- **Compatibilidad:** los planes y libros anteriores no traen la biblia: el prompt queda igual y su huella no cambia.
+- **Costo:** ninguna llamada extra (el plan devuelve un poco más de texto).

@@ -1,6 +1,8 @@
 import {
   AVATAR_OPTIONS,
   ProviderError,
+  SHOT_TYPES,
+  varyShots,
   type Avatar,
   type AIImageProvider,
   type AITextProvider,
@@ -20,6 +22,7 @@ import {
   type SpanishVoice,
   type StoryPage,
   type StoryPlan,
+  type VisualBibleItem,
   type StoryRequest,
   type StoryReview,
   STORY_STRUCTURES,
@@ -324,6 +327,12 @@ const REVIEW_SCHEMA = {
   required: ['approved', 'issues', 'pages'],
 };
 
+const BIBLE_ITEM = {
+  type: 'OBJECT',
+  properties: { name: { type: 'STRING' }, look: { type: 'STRING' } },
+  required: ['name', 'look'],
+};
+
 const REWRITE_SCHEMA = {
   type: 'OBJECT',
   properties: { text: { type: 'STRING' } },
@@ -374,11 +383,26 @@ const PLAN_SCHEMA = {
         required: ['role', 'gender', 'look'],
       },
     },
+    // Biblia visual: lo que se repite se describe una vez y cada escena lo nombra.
+    props: { type: 'ARRAY', items: BIBLE_ITEM },
+    places: { type: 'ARRAY', items: BIBLE_ITEM },
+    outfits: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: { context: { type: 'STRING' }, look: { type: 'STRING' } },
+        required: ['context', 'look'],
+      },
+    },
     scenes: {
       type: 'ARRAY',
       items: {
         type: 'OBJECT',
         properties: {
+          props: { type: 'ARRAY', items: { type: 'STRING' } },
+          place: { type: 'STRING', nullable: true },
+          outfit: { type: 'STRING', nullable: true },
+          shot: { type: 'STRING', enum: [...SHOT_TYPES] },
           sceneGoal: { type: 'STRING' },
           emotionalBeat: { type: 'STRING' },
           mustBeVisible: { type: 'ARRAY', items: { type: 'STRING' } },
@@ -682,6 +706,18 @@ look, is always called by the same name, and is drawn the same way in every scen
 continuityFacts of every scene where it appears. Use a single central metaphor for the whole book, never several. When a sport, hobby
 or tool appears, name it precisely in mustBeVisible with its distinctive look (for example "a squash racket: small round head, long
 thin throat", never just "a racket"). The protagonist keeps the same outfit in every scene unless the text says they change clothes.
+Visual bible (English, fixed looks the illustrator repeats word for word):
+- props: up to 4 objects that matter in two or more scenes, each with a name and a fixed look (shape, size, colors). For an unusual
+  sport or activity, define what it is and what it is not (kiteboarding: "a small board with foot straps, pulled by a large arc-shaped
+  kite on long lines; NO sail and NO mast"). Empty array if none.
+- places: up to 3 places where two or more scenes happen, each with a name and a fixed look. Empty array if none.
+- outfits: up to 3 special outfits of the protagonist, only for contexts where the everyday outfit of the reference sheet is impossible
+  (in the water, at night in pyjamas, in the snow), each with a context and a fixed look. Never describe the everyday outfit. Empty
+  array if none.
+- In each scene: props (names from props that appear in it), place (a name from places, or null), outfit (a context from outfits, or
+  null for the everyday outfit) and shot (wide, medium, close-up or high angle, serving the beat; never the same shot three scenes in
+  a row).
+notVisible of each scene lists every recurring character (companion and cast) who is not in that scene's place.
 
 Brief:
 ${request.prompt}`,
@@ -694,6 +730,8 @@ ${request.prompt}`,
       scenes: (Omit<StoryPlan['scenes'][number], 'pageIndex' | 'personalDetail'> & {
         personalDetail?: string | null;
       })[];
+      props?: VisualBibleItem[];
+      places?: VisualBibleItem[];
     };
     if (plan.scenes.length !== request.pageCount) {
       throw new ProviderError(
@@ -702,6 +740,16 @@ ${request.prompt}`,
         true,
       );
     }
+    const bible = (items: VisualBibleItem[] | undefined, max: number) =>
+      (items ?? []).filter((item) => item.name.trim() && item.look.trim()).slice(0, max);
+    const props = bible(plan.props, 4);
+    const places = bible(plan.places, 3);
+    const outfits = (plan.outfits ?? [])
+      .filter((item) => item.context.trim() && item.look.trim())
+      .slice(0, 3);
+    // Cada escena solo nombra lo que está en la biblia (un nombre suelto no tiene aspecto fijo).
+    const known = (list: { name: string }[], name: string) =>
+      list.some((item) => item.name.trim().toLowerCase() === name.trim().toLowerCase());
     const young = request.age < 7;
     return {
       theme: plan.theme,
@@ -710,12 +758,27 @@ ${request.prompt}`,
       refrain: young && plan.refrain?.trim() ? plan.refrain.trim() : null,
       companion: plan.companion?.name && plan.companion.look ? plan.companion : null,
       cast: (plan.cast ?? []).filter((member) => member.role && member.look).slice(0, 4),
-      scenes: plan.scenes.map((scene, pageIndex) => ({
-        ...scene,
-        pageIndex,
-        personalDetail: scene.personalDetail ?? null,
-        wordless: request.age >= 3 && young ? Boolean(scene.wordless) : false,
-      })),
+      props,
+      places,
+      outfits,
+      scenes: varyShots(
+        plan.scenes.map((scene, pageIndex) => ({
+          ...scene,
+          pageIndex,
+          personalDetail: scene.personalDetail ?? null,
+          wordless: request.age >= 3 && young ? Boolean(scene.wordless) : false,
+          props: (scene.props ?? []).filter((name) => known(props, name)),
+          place: scene.place && known(places, scene.place) ? scene.place : null,
+          outfit:
+            scene.outfit &&
+            outfits.some(
+              (item) => item.context.trim().toLowerCase() === scene.outfit?.trim().toLowerCase(),
+            )
+              ? scene.outfit
+              : null,
+          shot: scene.shot && SHOT_TYPES.includes(scene.shot) ? scene.shot : null,
+        })),
+      ),
       usage,
     };
   }
@@ -723,7 +786,11 @@ ${request.prompt}`,
   /** Revisor cruzado texto-imagen (guía D): preliminar, nunca biométrico. */
   async reviewPage(request: PageReviewRequest): Promise<PageReview> {
     const scene = request.scene
-      ? `Scene plan: ${request.scene.sceneGoal}. Must be visible: ${request.scene.mustBeVisible.join(', ') || '-'}. Must NOT appear: ${request.scene.notVisible.join(', ') || '-'}.`
+      ? `Scene plan: ${request.scene.sceneGoal}. Must be visible: ${request.scene.mustBeVisible.join(', ') || '-'}. Must NOT appear: ${request.scene.notVisible.join(', ') || '-'}.${
+          request.scene.continuityFacts.length
+            ? ` Continuity (must match, drawn the same as on the other pages): ${request.scene.continuityFacts.join('; ')}.`
+            : ''
+        }${request.visualBible ? ` Fixed looks for this scene: ${request.visualBible}` : ''}`
       : 'Scene plan: not available.';
     const { response, usage } = await this.client.generate(
       this.model,
@@ -737,7 +804,8 @@ ${request.prompt}`,
         {
           text: `You are a quality reviewer for a children's picture book, not a salesperson. Evaluate this ONE illustration against the
 page text, the scene plan and the approved character sheet. Look for: internal inconsistencies, improbable anatomy (hands, limbs, faces),
-incoherent clothing or accessories, missing or mixed-up characters, objects that contradict the text, cropped heads, and any letters or
+incoherent clothing or accessories, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
+below (a recurring object, place or outfit drawn differently is a repair), cropped heads, and any letters or
 words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks).
 Never claim to verify biometric identity or exact likeness to a real person; your evaluation is preliminary and may mark uncertainty.
 Do not invent evidence: anything you cannot evaluate without another reference must be status needs_reference.

@@ -6,13 +6,16 @@ import {
   type Memories,
   type MustKeepTrait,
 } from '../models/character';
-import type {
-  CastMember,
-  CharacterSheet,
-  LessonPrompt,
-  SpanishVoice,
-  StoryPlan,
-  StoryStructure,
+import {
+  SHOT_TYPES,
+  type CastMember,
+  type CharacterSheet,
+  type LessonPrompt,
+  type ScenePlan,
+  type ShotType,
+  type SpanishVoice,
+  type StoryPlan,
+  type StoryStructure,
 } from './ai';
 
 /** Variables que admiten las plantillas de stories (textPromptTemplate / imagePromptTemplate). */
@@ -424,4 +427,88 @@ export function castNote(cast: readonly CastMember[] | null | undefined): string
     return `${member.role}: ${gender}${member.look}`;
   });
   return ` Recurring supporting characters (draw each one with exactly the same gender and look on every page where the scene includes them; never add them to scenes that do not include them): ${lines.join('; ')}.`;
+}
+
+/** Biblia visual del libro (plan): objetos, lugares y ropa con aspecto fijo. */
+export type VisualBible = Pick<StoryPlan, 'props' | 'places' | 'outfits'>;
+
+const sameName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/**
+ * Objetos, lugar y encuadre de una escena, con el aspecto fijo de la biblia visual. Solo entra lo
+ * que la escena incluye: un objeto que no está en la escena no se nombra (si se nombra, se dibuja).
+ * Los planes anteriores a la biblia no traen nada y el prompt queda como antes.
+ */
+export function visualBibleNote(
+  bible: VisualBible | null | undefined,
+  scene: ScenePlan | null | undefined,
+): string {
+  if (!scene) return '';
+  const props = [
+    ...new Set(
+      (scene.props ?? []).flatMap((name) =>
+        (bible?.props ?? []).filter((prop) => prop.look.trim() && sameName(prop.name, name)),
+      ),
+    ),
+  ];
+  const scenePlace = scene.place;
+  const place = scenePlace
+    ? (bible?.places ?? []).find((item) => item.look.trim() && sameName(item.name, scenePlace))
+    : undefined;
+  const parts: string[] = [];
+  if (props.length > 0) {
+    parts.push(
+      ` Recurring objects in this scene (draw each exactly like this, the same on every page): ${props
+        .map((prop) => `${prop.name}: ${prop.look}`)
+        .join('; ')}.`,
+    );
+  }
+  if (place) parts.push(` Place: ${place.name}, ${place.look} (drawn the same way on every page).`);
+  if (scene.shot) parts.push(` Camera: ${scene.shot} shot.`);
+  return parts.join('');
+}
+
+/**
+ * Ropa del protagonista en la escena si el plan pide una especial (en el agua, de noche); null:
+ * la de la lámina.
+ */
+export function sceneOutfit(
+  bible: VisualBible | null | undefined,
+  scene: ScenePlan | null | undefined,
+): string | null {
+  const context = scene?.outfit;
+  if (!context) return null;
+  const outfit = (bible?.outfits ?? []).find(
+    (item) => item.look.trim() && sameName(item.context, context),
+  );
+  return outfit
+    ? `${outfit.look} (${outfit.context}; the same look on every page in this context)`
+    : null;
+}
+
+/** Lo que la revisión de cada página compara con la biblia visual (objetos, lugar y ropa). */
+export function visualBibleCheck(
+  bible: VisualBible | null | undefined,
+  scene: ScenePlan | null | undefined,
+): string {
+  const outfit = sceneOutfit(bible, scene);
+  return `${visualBibleNote(bible, scene)}${outfit ? ` The main character wears ${outfit}.` : ''}`.trim();
+}
+
+/**
+ * Encuadres variados: el mismo tres veces seguidas se cambia por otro (el modelo a veces los
+ * repite aunque el prompt lo prohíba).
+ */
+export function varyShots<T extends { shot?: ShotType | null }>(scenes: readonly T[]): T[] {
+  const result = scenes.map((scene) => ({ ...scene }));
+  for (let index = 2; index < result.length; index += 1) {
+    const current = result[index];
+    const shot = current?.shot;
+    if (!current || !shot) continue;
+    if (result[index - 1]?.shot === shot && result[index - 2]?.shot === shot) {
+      current.shot =
+        SHOT_TYPES.find((other) => other !== shot && other !== result[index + 1]?.shot) ?? shot;
+    }
+  }
+  return result;
 }

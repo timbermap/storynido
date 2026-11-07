@@ -352,6 +352,51 @@ describe('generación del libro (fase 09)', () => {
     ).toBe(true);
   });
 
+  it('biblia visual: objetos, lugar, ropa especial y encuadre llegan al prompt y a la revisión de cada página', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    await db.doc('books/b1').update({
+      'preview.plan': {
+        theme: 'espacio',
+        arc: 'arco',
+        props: [{ name: 'the kite', look: 'an arc-shaped orange kite on long lines; NO sail' }],
+        places: [{ name: 'the beach', look: 'a wide sandy beach with a red lifeguard hut' }],
+        outfits: [{ context: 'in the water', look: 'a blue wetsuit and a helmet' }],
+        scenes: PAGES.map((_, pageIndex) => ({
+          pageIndex,
+          sceneGoal: 'meta',
+          emotionalBeat: 'alegría',
+          mustBeVisible: ['rocket'],
+          notVisible: ['text'],
+          continuityFacts: ['the orange kite'],
+          wordBudget: 10,
+          personalDetail: null,
+          props: pageIndex === 2 ? ['the kite'] : [],
+          place: pageIndex === 2 ? 'the beach' : null,
+          outfit: pageIndex === 2 ? 'in the water' : null,
+          shot: 'wide',
+        })),
+      },
+    });
+    const generate = vi.spyOn(providers.ai().image, 'generateIllustration');
+    const reviews = vi.spyOn(providers.ai().text, 'reviewPage');
+    await setup(providers).run();
+
+    const snapshot = (await order()).snapshot as BookSnapshot;
+    expect(snapshot.props?.[0]?.name).toBe('the kite');
+    // Página 3 (escena 2): con la biblia; página 4: sin el barrilete ni la playa.
+    const [third, fourth] = generate.mock.calls.map((call) => call[0].prompt);
+    expect(third).toContain('arc-shaped orange kite on long lines; NO sail');
+    expect(third).toContain('red lifeguard hut');
+    expect(third).toContain('The main character wears a blue wetsuit and a helmet');
+    expect(third).toContain('Camera: wide shot.');
+    expect(fourth).not.toContain('kite on long lines');
+    expect(fourth).toContain('the same outfit as in the reference sheet');
+    const thirdReview = reviews.mock.calls.find((call) => call[0].pageIndex === 3)?.[0];
+    expect(thirdReview?.visualBible).toContain('red lifeguard hut');
+    expect(thirdReview?.scene?.continuityFacts).toEqual(['the orange kite']);
+  });
+
   it('vista previa para revisión: arma el PDF con tapa aunque falte una ilustración (marcador) y no cambia el pedido', async () => {
     const providers = registry();
     await seedBook(providers);

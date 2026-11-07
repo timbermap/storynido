@@ -47,6 +47,8 @@ function fitWords(text: string, filler: string, range?: { min: number; max: numb
   return words.slice(0, range.max).join(' ');
 }
 
+const SHOTS = ['wide', 'medium', 'close-up'] as const;
+
 const usage = (model: string): AiUsage => ({ provider: 'mock', model, costUsdMicros: 0 });
 
 function moderate(text: string): ModerationResult {
@@ -136,8 +138,15 @@ export class MockAITextProvider implements AITextProvider {
         continuityFacts: [],
         wordBudget: budget,
         personalDetail: pageIndex === 0 ? (request.likes[0] ?? null) : null,
+        props: [],
+        place: null,
+        outfit: null,
+        shot: SHOTS[pageIndex % SHOTS.length] ?? null,
         wordless: false,
       })),
+      props: [],
+      places: [],
+      outfits: [],
       usage: usage('mock-text'),
     });
   }

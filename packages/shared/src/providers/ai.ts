@@ -165,6 +165,35 @@ export interface ScenePlan {
   personalDetail: string | null;
   /** Página sin texto (3 a 6 años: 1 o 2 en el clímax); el dibujo cuenta solo. */
   wordless?: boolean;
+  /** Objetos de la biblia visual que aparecen en la escena (por nombre; ausente en planes anteriores). */
+  props?: string[];
+  /** Lugar de la biblia visual donde ocurre la escena (por nombre), o null. */
+  place?: string | null;
+  /** Ropa especial del protagonista en la escena (por contexto), o null: la de la lámina. */
+  outfit?: string | null;
+  /** Encuadre de la ilustración; nunca el mismo tres veces seguidas. */
+  shot?: ShotType | null;
+}
+
+/** Encuadres que puede pedir el plan para variar las ilustraciones. */
+export const SHOT_TYPES = ['wide', 'medium', 'close-up', 'high angle'] as const;
+
+export type ShotType = (typeof SHOT_TYPES)[number];
+
+/**
+ * Objeto o lugar de la biblia visual: se describe una vez y se dibuja igual en todas las escenas
+ * donde aparece (una tabla de kitesurf, el faro del pueblo).
+ */
+export interface VisualBibleItem {
+  name: string;
+  /** Aspecto fijo, en inglés. En actividades poco comunes, qué es y qué no es. */
+  look: string;
+}
+
+/** Ropa del protagonista para un contexto (en el agua, de noche), con aspecto fijo en inglés. */
+export interface OutfitPlan {
+  context: string;
+  look: string;
 }
 
 /** Estructuras que sostienen un cuento para menores de 7 (una sola para todo el libro). */
@@ -202,6 +231,10 @@ export interface StoryPlan {
   cast?: CastMember[];
   /** El acompañante que más se repite, o null si ninguno vuelve en varias páginas. */
   companion?: CompanionPlan | null;
+  /** Biblia visual (ausente en planes anteriores): objetos, lugares y ropa que se repiten. */
+  props?: VisualBibleItem[];
+  places?: VisualBibleItem[];
+  outfits?: OutfitPlan[];
   /** Principio, motivación, dificultad, decisión del protagonista y resolución. */
   arc: string;
   /** Menores de 7: la forma elegida para todo el libro y la frase que se repite. */
@@ -228,6 +261,8 @@ export interface PageReviewRequest {
   /** Rasgos esenciales, en inglés ("glasses: present", "hair: short curly black"). */
   mustKeep: readonly string[];
   scene: ScenePlan | null;
+  /** Aspecto fijo de los objetos, el lugar y la ropa de esta escena (biblia visual), si hay. */
+  visualBible?: string;
 }
 
 export interface ContinuityCheck {
