@@ -2,8 +2,10 @@ import {
   letterJitter,
   splitCoverTitle,
   type ActivitySpec,
+  type AgeBand,
   type PageLayout,
   type PrintFileSpec,
+  type StoryTypography,
 } from '@storynido/shared';
 
 import { fontFaces } from './fonts';
@@ -23,6 +25,12 @@ export interface LayoutBook {
   contentType: string;
   density: Density;
   readingLevel: 'beginner' | 'developing' | 'advanced';
+  /**
+   * Letra del cuento por edad (Quicksand en MAYÚSCULAS de 0 a 6 en español y portugués, Andika de
+   * 7 a 8, Fraunces de 9 en adelante) con su tamaño. Null en los libros anteriores: Fraunces y el
+   * tamaño por densidad y nivel, como siempre.
+   */
+  typography?: (StoryTypography & { textBand?: AgeBand }) | null;
   /** Portada: data URI de la ilustración. */
   cover: string;
   /**
@@ -70,6 +78,26 @@ export const DENSITY_LAYOUT: Record<Density, { panelPct: number; fontPt: number;
     balanced: { panelPct: 34, fontPt: 15.5, minPt: 11.5 },
     rich: { panelPct: 46, fontPt: 13, minPt: 10 },
   };
+
+/**
+ * Con la letra por edad, el alto máximo del panel sale de la cantidad de texto de la franja (la
+ * letra es más grande que la de las densidades) y no de la densidad.
+ */
+export const BAND_PANEL_PCT: Record<StoryTypography['font'] | 'default', number> = {
+  quicksand: 42,
+  andika: 44,
+  fraunces: 46,
+  default: 42,
+};
+
+/**
+ * Red de seguridad del ajuste: si una página larga no entra ni con el mínimo de la edad, la letra
+ * puede bajar hasta este factor antes de marcar el desborde (mejor que frenar el pedido).
+ */
+export const BAND_MIN_FACTOR = 0.8;
+
+/** Escala mínima de la letra por edad en páginas más chicas que 21×28 (el A5 queda en 0,75). */
+export const BAND_MIN_PAGE_SCALE = 0.75;
 
 /** El nivel de lectura ajusta el tamaño: letra más grande para quienes empiezan a leer. */
 const LEVEL_SCALE = { beginner: 1.12, developing: 1, advanced: 0.95 } as const;
@@ -167,6 +195,9 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .back .qr svg { width: 22mm; height: 22mm; }
 .barcode-zone { position: absolute; right: ${String(inset)}mm; bottom: ${String(inset)}mm; width: 50mm; height: 30mm; background: #fff; }
 .story { font-family: 'Fraunces', serif; font-weight: 500; line-height: 1.42; color: ${INK}; }
+.story.f-quicksand { font-family: 'Quicksand', 'Nunito Sans', sans-serif; font-weight: 700; line-height: 1.32; }
+.story.f-andika { font-family: 'Andika', 'Nunito Sans', sans-serif; font-weight: 400; line-height: 1.45; }
+.story.upper { text-transform: uppercase; letter-spacing: 0.03em; }
 .story p + p { margin-top: 0.6em; }
 .center { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .title-band { position: absolute; left: 0; right: 0; top: 0; padding: ${String(inset)}mm ${String(inset)}mm 14mm; background: linear-gradient(to bottom, rgba(255,250,243,0.97) 0%, rgba(255,250,243,0.95) 72%, rgba(255,250,243,0)); text-align: center; }
@@ -236,35 +267,48 @@ function storyPage(
   number: number,
 ): string[] {
   const coloring = book.contentType === 'coloring';
-  const layout = DENSITY_LAYOUT[coloring ? 'visual' : book.density];
-  const scale = LEVEL_SCALE[book.readingLevel] * (book.mini ? MINI_TEXT_SCALE : 1);
   const height = pageSizeMm(spec).height;
   const trimHeight = trimOf(spec).height;
-  const fit = (maxMm: number, fontPt: number, minPt: number) =>
-    `data-max-mm="${maxMm.toFixed(1)}" data-font-pt="${(fontPt * scale).toFixed(2)}" data-min-pt="${(minPt * scale).toFixed(2)}"`;
-  const story = `<div class="story">${paragraphs(page.text)}</div>`;
+  const label = (suffix = '') =>
+    `data-label="página ${String(number)}${suffix}" style="height:${String(height)}mm"`;
   const kind = coloring ? 'overlay' : (page.layout?.kind ?? 'overlay');
   const side = page.layout?.side ?? 'bottom';
 
-  // Página sin texto (las más chicas pueden tener alguna): solo la ilustración, sin panel.
-  if (page.layout && !coloring && kind !== 'facing' && page.text.trim() === '') {
+  // Página sin texto (el clímax de 3 a 6 años): solo la ilustración, sin panel.
+  if (!coloring && kind !== 'facing' && page.text.trim() === '') {
     return [
-      `<section class="page" data-label="página ${String(number)}" style="height:${String(height)}mm">
+      `<section class="page" ${label()} data-wordless="true">
   <img class="art" src="${page.image}" alt="">
 </section>`,
     ];
   }
+
+  const layout = DENSITY_LAYOUT[coloring ? 'visual' : book.density];
+  const typography = book.typography ?? null;
+  // Con la letra por edad, el tamaño es el de la franja (reemplaza la escala por nivel y la del
+  // mini cuento); sin ella, el de siempre.
+  const scale = LEVEL_SCALE[book.readingLevel] * (book.mini ? MINI_TEXT_SCALE : 1);
+  // Los tamaños por edad son para la página de 21×28: el cuento grapado A5 los escala por el ancho.
+  const pageScale = Math.min(1, Math.max(BAND_MIN_PAGE_SCALE, trimOf(spec).width / 210));
+  const fontPt = typography ? typography.maxPt * pageScale : layout.fontPt * scale;
+  const minPt = typography ? typography.minPt * pageScale * BAND_MIN_FACTOR : layout.minPt * scale;
+  const fit = (maxMm: number, font = fontPt) =>
+    `data-max-mm="${maxMm.toFixed(1)}" data-font-pt="${font.toFixed(2)}" data-min-pt="${minPt.toFixed(2)}"`;
+  const storyClass = typography
+    ? `story f-${typography.font}${typography.uppercase ? ' upper' : ''}`
+    : 'story';
+  const story = `<div class="${storyClass}">${paragraphs(page.text)}</div>`;
 
   if (kind === 'facing') {
     // Página de texto (izquierda) con un detalle de la ilustración, y la ilustración entera enfrente.
     const inset = spec.bleedMm + spec.safeMm;
     const maxMm = trimHeight - 2 * (inset + 6) - FACING_RESERVED_MM;
     return [
-      `<section class="page" data-label="página ${String(number)} (texto)" style="height:${String(height)}mm">
+      `<section class="page" ${label(' (texto)')}>
   <div class="facing-wrap"><img class="detail" src="${page.image}" alt="">
-  <div class="panel facing" ${fit(maxMm, Math.max(layout.fontPt, 15), layout.minPt)}>${story}</div></div>
+  <div class="panel facing" ${fit(maxMm, typography ? fontPt : Math.max(fontPt, 15 * scale))}>${story}</div></div>
 </section>`,
-      `<section class="page" data-label="página ${String(number)} (ilustración)" style="height:${String(height)}mm">
+      `<section class="page" ${label(' (ilustración)')}>
   <img class="art" src="${page.image}" alt="">
 </section>`,
     ];
@@ -278,28 +322,29 @@ function storyPage(
       // El texto, centrado en el tercio de papel donde se funde la ilustración.
       const maxMm = (trimHeight * (100 - VIGNETTE_ART_PCT + 2)) / 100 - inset - 2;
       return [
-        `<section class="page" data-label="página ${String(number)}" style="height:${String(height)}mm">
+        `<section class="page" ${label()}>
   <img class="art vignette ${side}" src="${page.image}" alt="">
-  <div class="band ${side}"><div class="panel vignette ${side}" ${fit(maxMm, layout.fontPt, layout.minPt)}>${story}</div></div>
+  <div class="band ${side}"><div class="panel vignette ${side}" ${fit(maxMm)}>${story}</div></div>
 </section>`,
       ];
     }
     return [
-      `<section class="page" data-label="página ${String(number)}" style="height:${String(height)}mm">
+      `<section class="page" ${label()}>
   <img class="art" src="${page.image}" alt="">
-  <div class="panel calm ${side}" ${fit((trimHeight * 30) / 100, layout.fontPt, layout.minPt)}>${story}</div>
+  <div class="panel calm ${side}" ${fit((trimHeight * 30) / 100)}>${story}</div>
 </section>`,
     ];
   }
 
+  const panelPct = typography ? BAND_PANEL_PCT[typography.font] : layout.panelPct;
   const placement = coloring ? 'top' : (page.placement ?? 'bottom');
   // En una esquina el panel es más angosto: puede crecer más en alto.
-  const pct = placement.includes('-') ? Math.min(layout.panelPct * 1.6, 55) : layout.panelPct;
+  const pct = placement.includes('-') ? Math.min(panelPct * 1.6, 55) : panelPct;
   const maxMm = (trimHeight * pct) / 100;
   return [
-    `<section class="page${coloring ? ' coloring' : ''}" data-label="página ${String(number)}" style="height:${String(height)}mm">
+    `<section class="page${coloring ? ' coloring' : ''}" ${label()}>
   <img class="art" src="${page.image}" alt="">
-  <div class="panel ${placement}${book.mini ? ' mini' : ''}" ${fit(maxMm, layout.fontPt, layout.minPt)}>
+  <div class="panel ${placement}${book.mini ? ' mini' : ''}" ${fit(maxMm)}>
     ${story}
   </div>
 </section>`,

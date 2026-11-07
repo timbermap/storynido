@@ -31,7 +31,10 @@ import {
   describeCharacter,
   nameIssues,
   pagesOutOfRange,
+  spanishVoiceFor,
+  storyTypography,
   utcDay,
+  type AgeBand,
   type AIProvider,
   type ActivitySpec,
   type BookFormat,
@@ -117,6 +120,13 @@ export class IllustrationRejectedError extends Error {
   }
 }
 
+/** Letra del cuento por edad (null en los libros anteriores a las franjas: se arman como siempre). */
+export function typographyOf(snapshot: Pick<BookSnapshot, 'ageBand' | 'textBand' | 'language'>) {
+  return snapshot.ageBand && snapshot.textBand
+    ? storyTypography(snapshot.ageBand, snapshot.textBand, snapshot.language as Lang)
+    : null;
+}
+
 /** Libro aprobado y congelado al empezar el pedido. El texto ya no cambia sin el adulto. */
 export interface BookSnapshot {
   hash: string;
@@ -133,7 +143,10 @@ export interface BookSnapshot {
   textDensity: string;
   /** Sinopsis para la contratapa (descripción de la historia en el idioma del libro). */
   synopsis?: string | null;
-  words: { min: number; max: number } | null;
+  words: { min: number; max: number; cap?: number } | null;
+  /** Franjas de edad del lector y del texto (tipografía por edad); faltan en libros anteriores. */
+  ageBand?: AgeBand;
+  textBand?: AgeBand;
   activityPages: number;
   pages: { index: number; text: string; illustrationPrompt: string }[];
   scenes: ScenePlan[] | null;
@@ -619,7 +632,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             places?: VisualBibleItem[];
             outfits?: OutfitPlan[];
           } | null;
-          words?: { min: number; max: number };
+          words?: { min: number; max: number; cap?: number };
+          ageBand?: AgeBand;
+          textBand?: AgeBand;
           activityPages?: number;
           artDirection?: string | null;
           companion?: { name: string; look: string; imagePath: string } | null;
@@ -714,6 +729,10 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       synopsis:
         (story.description as Record<string, string> | undefined)?.[String(book.language)] ?? null,
       words: preview.words ?? null,
+      // Solo si la muestra las trae: así un libro anterior se arma igual que siempre.
+      ...(preview.ageBand && preview.textBand
+        ? { ageBand: preview.ageBand, textBand: preview.textBand }
+        : {}),
       activityPages: preview.activityPages ?? 0,
       pages: preview.pages.map(({ index, text, illustrationPrompt }) => ({
         index,
@@ -814,7 +833,13 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       });
     }
     // El adulto pudo editar el texto: fuera de rango se registra, no bloquea.
-    const outOfRange = snapshot.words ? pagesOutOfRange(snapshot.pages, snapshot.words) : [];
+    // Las páginas sin texto que pidió el plan no cuentan como cortas.
+    const wordless = (snapshot.scenes ?? []).flatMap((scene) =>
+      scene.wordless ? [scene.pageIndex] : [],
+    );
+    const outOfRange = snapshot.words
+      ? pagesOutOfRange(snapshot.pages, snapshot.words, wordless)
+      : [];
     if (outOfRange.length > 0) {
       await qaEvent(ctx, 'length_out_of_range', { pages: outOfRange.length });
     }
@@ -851,6 +876,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         templates,
         count: snapshot.activityPages,
         goal: null,
+        spanishVoice: spanishVoiceFor(ctx.order.country),
       });
       cost += await record(ctx, 'story', generated.usage);
       const check = await provider.text.moderateText(
@@ -1213,6 +1239,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             ? snapshot.textDensity
             : 'balanced') as Density,
           readingLevel: snapshot.readingLevel as LayoutBook['readingLevel'],
+          typography: typographyOf(snapshot),
           cover: prepared[0]?.uri ?? '',
           pages: snapshot.pages.map((page, index) => ({
             text: page.text,
@@ -1763,6 +1790,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         ? snapshot.textDensity
         : 'balanced') as Density,
       readingLevel: snapshot.readingLevel as LayoutBook['readingLevel'],
+      typography: typographyOf(snapshot),
       cover: prepared[0] ?? '',
       pages: snapshot.pages.map((page, index) => ({
         text: page.text,
