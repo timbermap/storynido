@@ -18,7 +18,9 @@ import {
   type TextDensity,
 } from '@storynido/shared';
 
+import { useProStatus } from '@/components/pro/use-pro-status';
 import { formatPrice } from '@/lib/format';
+import { bookPrices } from '@/lib/offer';
 import { cn } from '@/lib/utils';
 
 import { OptionCard } from './option-card';
@@ -104,6 +106,8 @@ export function BookOptions({
 }) {
   const t = useTranslations('Wizard.book');
   const locale = useLocale() as Locale;
+  const { status: proStatus } = useProStatus();
+  const professional = proStatus?.accountType === 'professional';
   const money = (minor: number) =>
     prices ? formatPrice(minor, prices.currency, locale, prices.country) : '';
   const set = (patch: Partial<BookChoice>) => {
@@ -252,6 +256,9 @@ export function BookOptions({
               const printLabel = printed.every((format) => format === 'booklet')
                 ? t('chipBooklet')
                 : t('chipPrint');
+              const lengthPrice = prices
+                ? bookPrices(prices, length, professional, value.contentType)
+                : null;
               return (
                 <OptionCard
                   key={length}
@@ -282,12 +289,18 @@ export function BookOptions({
                         </span>
                       )}
                     </span>
-                    {prices?.digitalMinor != null && (
+                    {lengthPrice?.digital != null && (
+                      // El precio exacto de esa extensión (el mismo del pago), sin envío.
                       <span className="grid gap-0.5 border-t pt-2 text-xs font-semibold tabular-nums">
-                        <span>{t('priceDigital', { price: money(prices.digitalMinor) })}</span>
-                        {printable && prices.printedFromMinor != null && (
+                        <span>{t('priceDigital', { price: money(lengthPrice.digital) })}</span>
+                        {printable && lengthPrice.printed != null && (
                           <span>
-                            {t('pricePrinted', { price: money(prices.printedFromMinor) })}
+                            {t(
+                              lengthPrice.printedFormats.length > 1
+                                ? 'pricePrintedFrom'
+                                : 'pricePrinted',
+                              { price: money(lengthPrice.printed) },
+                            )}
                           </span>
                         )}
                       </span>

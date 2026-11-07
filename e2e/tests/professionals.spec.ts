@@ -101,7 +101,7 @@ test('Profesionales: del alias a la vista previa con texto editable y precio', a
     timeout: 120_000,
   });
   await expect(page.locator('body')).toContainText('no es clínico');
-  await expect(page.locator('body')).toContainText('Cuento digital:');
+  await expect(page.locator('body')).toContainText('Ebook: USD');
   await expect(page.getByRole('button', { name: 'Probar otra ilustración' })).toBeVisible();
   await expect(page.locator('body')).not.toContainText('¿Le regalas');
   await expectAccessible(page);

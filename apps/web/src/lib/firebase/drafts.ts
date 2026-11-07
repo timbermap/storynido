@@ -78,6 +78,10 @@ export interface DraftSummary {
   generating: boolean;
   /** Celebraciones: temática de la fiesta. */
   eventTheme: string | null;
+  /** Extensión elegida (define las páginas y el precio exacto). */
+  length?: Book['length'] | null;
+  /** Tipo de contenido (las actividades tienen menos páginas generadas: cambia el precio). */
+  contentType?: Book['contentType'] | null;
 }
 
 const STALE_GENERATION_MS = 10 * 60 * 1000;
@@ -275,6 +279,8 @@ export async function listDrafts(db: Firestore, uid: string): Promise<DraftSumma
           asDate(book.get('previewStartedAt') as Timestampish),
         ),
         eventTheme: (book.get('event.theme') as string | null | undefined) ?? null,
+        length: (book.get('length') as Book['length'] | undefined) ?? null,
+        contentType: (book.get('contentType') as Book['contentType'] | undefined) ?? null,
       };
     }),
   );

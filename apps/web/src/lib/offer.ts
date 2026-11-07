@@ -1,4 +1,11 @@
-import type { BookLength, CountryCode, Locale, Offer } from '@storynido/shared';
+import type {
+  BookFormat,
+  BookLength,
+  ContentType,
+  CountryCode,
+  Locale,
+  Offer,
+} from '@storynido/shared';
 
 import { formatPrice } from './format';
 
@@ -13,13 +20,17 @@ export function lowestPrice(
   lengths?: readonly BookLength[],
   /** Precio del perfil profesional (con su descuento base). */
   pro = false,
+  /** Tipos de contenido que admite la historia (las actividades cuestan menos). */
+  contentTypes?: readonly ContentType[],
 ): string | null {
   if (!offer?.available) return null;
   const prices =
     pro && offer.proLengthPrices.length > 0 ? offer.proLengthPrices : offer.lengthPrices;
-  const byLength = (lengths ? prices.filter((item) => lengths.includes(item.length)) : prices).map(
-    (item) => item.amountMinor,
-  );
+  const byLength = prices
+    .filter((item) => !lengths || lengths.includes(item.length))
+    // El «desde» es el del cuento (las actividades sueltas cuestan menos y se ven al elegirlas).
+    .filter((item) => (contentTypes ?? ['story']).includes(item.contentType ?? 'story'))
+    .map((item) => item.amountMinor);
   const lowest = byLength.length
     ? Math.min(...byLength)
     : Math.min(...offer.formats.map((f) => f.amountMinor));
@@ -40,14 +51,51 @@ export function offerHighlights(
   const digital = offer.formats.find((f) => f.format === 'digital');
   // El digital «desde» es el más bajo que de verdad se puede pagar (la extensión más corta), el
   // mismo que muestran las tarjetas del catálogo.
-  const digitalFrom = offer.lengthPrices.length
-    ? Math.min(...offer.lengthPrices.map((item) => item.amountMinor))
+  const stories = offer.lengthPrices.filter((item) => (item.contentType ?? 'story') === 'story');
+  const digitalFrom = stories.length
+    ? Math.min(...stories.map((item) => item.amountMinor))
     : digital?.amountMinor;
+  // El impreso «desde»: el formato más barato en su extensión más corta (sin envío).
   const printed = offer.formats
     .filter((f) => f.format !== 'digital')
     .sort((a, b) => a.amountMinor - b.amountMinor)[0];
   return {
     digital: digitalFrom === undefined ? null : money(digitalFrom),
     printed: printed ? money(printed.amountMinor) : null,
+  };
+}
+
+/** Lo que la web necesita de la oferta para dar el precio de un libro ya elegido. */
+export type BookPriceSource = Pick<Offer, 'lengthPrices' | 'proLengthPrices' | 'printLengthPrices'>;
+
+/**
+ * Precio exacto de un libro de esa extensión y tipo de contenido (sin envío), el mismo que el checkout: el digital y
+ * el impreso más barato (`printedFormats` > 1: hay más de una tapa, el impreso va con «desde»).
+ * `professional`: cuentas profesionales, con su descuento base.
+ */
+export function bookPrices(
+  source: BookPriceSource,
+  length: BookLength,
+  professional = false,
+  contentType: ContentType = 'story',
+): {
+  digital: number | null;
+  printed: number | null;
+  printedFormats: BookFormat[];
+} {
+  const matches = (item: { length: BookLength; contentType?: ContentType }) =>
+    item.length === length && (item.contentType ?? 'story') === contentType;
+  const digital = (professional ? source.proLengthPrices : source.lengthPrices).find(matches);
+  const printed = source.printLengthPrices
+    .filter(matches)
+    .map((item) => ({
+      format: item.format,
+      amountMinor: professional ? item.proAmountMinor : item.amountMinor,
+    }))
+    .sort((a, b) => a.amountMinor - b.amountMinor);
+  return {
+    digital: digital?.amountMinor ?? null,
+    printed: printed[0]?.amountMinor ?? null,
+    printedFormats: printed.map((item) => item.format),
   };
 }

@@ -6,33 +6,41 @@ import {
   fromUsdMinor,
   marginUsdMinor,
   unitPriceUsdMinor,
+  withPaymentFee,
 } from './product-pricing';
 
 const fx = { rates: { MXN: 18.5, CLP: 940, EUR: 0.92 }, source: 'test', date: '2026-10-29' };
 
 describe('precio por costo + dos márgenes', () => {
-  it('margen fijo, porcentaje o porcentaje con mínimo', () => {
+  it('margen fijo (con monto por página), porcentaje o porcentaje con mínimo', () => {
     const base = { fixedUsdMinor: 1500, percent: 40 };
     expect(marginUsdMinor({ ...base, mode: 'fixed' }, 2000)).toBe(1500);
+    expect(marginUsdMinor({ ...base, mode: 'fixed', perPageUsdMinor: 35 }, 2000, 26)).toBe(2410);
     expect(marginUsdMinor({ ...base, mode: 'percent' }, 2000)).toBe(800);
     expect(marginUsdMinor({ ...base, mode: 'percent_min' }, 2000)).toBe(1500);
     expect(marginUsdMinor({ ...base, mode: 'percent_min' }, 5000)).toBe(2000);
   });
 
-  it('digital: IA por páginas + margen de creación (el libro largo cuesta más solo)', () => {
+  it('digital: IA por páginas generadas + margen de creación (base + por página)', () => {
     const digital = DEFAULT_PRODUCT_PRICING.digital;
-    // USD 0,15 × 12 + 17 = 18,80; × 28 = 4,20 + 17 = 21,20. La imprenta no cuenta.
-    expect(unitPriceUsdMinor(digital, 0, 12)).toBe(1880);
-    expect(unitPriceUsdMinor(digital, 0, 28)).toBe(2120);
-    expect(unitPriceUsdMinor(digital, 999, 28)).toBe(2120);
+    // Mini (10 generadas): 1,50 + 8 + 3,50 = 13; clásico (26): 3,90 + 8 + 9,10 = 21. La imprenta no cuenta.
+    expect(unitPriceUsdMinor(digital, 0, 10)).toBe(1300);
+    expect(unitPriceUsdMinor(digital, 0, 26)).toBe(2100);
+    expect(unitPriceUsdMinor(digital, 999, 26)).toBe(2100);
   });
 
-  it('impreso: creación + imprenta + margen de impresión (30 %, mínimo USD 8)', () => {
+  it('impreso: creación + imprenta + margen de impresión (30 %, mínimo USD 8; tapa dura 10)', () => {
     const softcover = DEFAULT_PRODUCT_PRICING.softcover;
     // Lulu USD 5,83: el 30 % (1,75) no llega al mínimo → 8.
-    expect(unitPriceUsdMinor(softcover, 583, 28)).toBe(2120 + 583 + 800);
+    expect(unitPriceUsdMinor(softcover, 583, 26)).toBe(2100 + 583 + 800);
     // Imprenta USD 40: el 30 % (12) supera el mínimo.
-    expect(unitPriceUsdMinor(softcover, 4000, 28)).toBe(2120 + 4000 + 1200);
+    expect(unitPriceUsdMinor(softcover, 4000, 26)).toBe(2100 + 4000 + 1200);
+    expect(unitPriceUsdMinor(DEFAULT_PRODUCT_PRICING.hardcover, 1187, 26)).toBe(2100 + 1187 + 1000);
+  });
+
+  it('la comisión de cobro es un costo: el precio se calcula hacia arriba', () => {
+    expect(withPaymentFee(2100, 3.5)).toBe(2177);
+    expect(withPaymentFee(0, 3.5)).toBe(0);
   });
 
   it('convierte de dólares a otra moneda (referencia)', () => {

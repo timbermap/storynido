@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import type { BookFormat, CountryCode, Locale, Offer, PriceSnapshot } from '@storynido/shared';
 
+import { countryName } from '@/lib/country-names';
 import { formatPrice, localReference } from '@/lib/format';
 
 /** Resumen del precio tal como lo calculó el servidor (cada componente y el total). */
@@ -12,6 +13,7 @@ export function PriceSummary({
   country,
   local = null,
   format = null,
+  shipTo = null,
 }: {
   snapshot: PriceSnapshot;
   country: CountryCode;
@@ -19,6 +21,8 @@ export function PriceSummary({
   local?: Offer['local'];
   /** Formato pedido: la fila del libro dice cuál es («Cuento grapado») en vez de «Libro». */
   format?: BookFormat | null;
+  /** Impreso: país de envío (el envío va en su propio renglón, «Envío a México»). */
+  shipTo?: CountryCode | null;
 }) {
   const t = useTranslations('Checkout');
   const locale = useLocale() as Locale;
@@ -44,17 +48,22 @@ export function PriceSummary({
       value: `−${money(snapshot.discount.minor)}`,
     });
   }
+  const destination = shipTo ? countryName(shipTo, locale) : null;
   if (snapshot.shipping.pending) {
     // Impreso sin dirección: el envío se cotiza al completarla (no está en el total).
-    rows.push({ label: t('shippingPending'), value: '—', muted: true });
+    rows.push({
+      label: destination ? t('shippingToPending', { country: destination }) : t('shippingPending'),
+      value: '—',
+      muted: true,
+    });
   } else {
+    const eta = { min: snapshot.shipping.etaDaysMin, max: snapshot.shipping.etaDaysMax };
     rows.push({
       label:
         snapshot.shipping.minor > 0
-          ? t('shippingEta', {
-              min: snapshot.shipping.etaDaysMin,
-              max: snapshot.shipping.etaDaysMax,
-            })
+          ? destination
+            ? t('shippingTo', { country: destination, ...eta })
+            : t('shippingEta', eta)
           : t('shippingDigital'),
       value: snapshot.shipping.minor > 0 ? money(snapshot.shipping.minor) : t('free'),
     });

@@ -10,10 +10,18 @@ import {
   splitTitleAtName,
   withChildName,
   defaultCountryConfig,
-  REFERENCE_CURRENCIES,
-  charmPrice,
-  unitPriceUsdMinor,
+  bookFormatPrices,
+  bookPriceMinor,
+  CONTENT_TYPES,
+  editorialPlan,
+  matrixCostFor,
+  stablePrintCost,
+  printCandidates,
+  printPageCount,
+  referenceCurrency,
+  referencePrintCost,
   type BookFormat,
+  type EditorialConfig,
   type FxRates,
   type ProductPricing,
   type CountryCode,
@@ -83,12 +91,11 @@ export function toPublicStory(story: Story, locale: Locale): PublicStory {
   };
 }
 
-/** Oferta de un país: solo formatos habilitados en el país, con producto activo y precio. */
 /**
- * Lo que se puede comprar en un país (DECISIONS 096 y 097): precio = costo + margen, en dólares
- * (la moneda local va solo como referencia).
- * El impreso se muestra estimado con la imprenta más barata habilitada; la impresión exacta y
- * el envío se cotizan en el checkout, con la dirección.
+ * Lo que se puede comprar en un país (DECISIONS 096, 097 y 236): precio = costo + margen, en
+ * dólares (la moneda local va solo como referencia). Cada precio sale de `bookFormatPrices`, el
+ * mismo cálculo que el checkout, con las páginas de cada extensión y la imprenta de referencia
+ * del país. El envío se cotiza aparte, con la dirección.
  */
 export function buildOffer(input: {
   code: CountryCode;
@@ -99,77 +106,105 @@ export function buildOffer(input: {
   locale: Locale;
   printOptions?: PrintOption[];
   activePrinters?: readonly string[];
+  /** Extensiones y sus páginas (las del admin); por defecto, las de fábrica. */
+  editorial?: EditorialConfig;
+  /**
+   * Impresión por ejemplar según el estimado del país (la imprenta que gana con la dirección de
+   * ejemplo; DECISIONS 241). Sin estimado para ese formato y páginas, la matriz.
+   */
+  printCost?: (format: BookFormat, pages: number) => number | null;
 }): Offer {
   const { code, country, pricing, fx, products, locale } = input;
+  const options = input.printOptions ?? [];
+  const activePrinters = input.activePrinters ?? [];
+  const editorial = input.editorial ?? DEFAULT_EDITORIAL_CONFIG;
   // Un impreso se ofrece si al menos una imprenta activa lo tiene habilitado con la muestra
   // aprobada (cuál gana se decide al pagar, con la dirección).
   const printable = (format: string) =>
-    (input.printOptions ?? []).filter(
+    options.filter(
       (option) =>
         option.format === format &&
         option.enabled &&
         option.qaSamplePassed &&
-        (input.activePrinters ?? []).includes(option.provider),
+        activePrinters.includes(option.provider),
     );
-  const formats = BOOK_FORMATS.flatMap((format) => {
+  // Impresión por ejemplar: el estimado del país o, si no hay, la matriz (null: no se imprime).
+  const productionFor = (format: BookFormat, pages: number) => {
+    const matrix = referencePrintCost(options, format, pages, activePrinters);
+    if (!matrix) return null;
+    return input.printCost?.(format, pages) ?? matrix.productionUsdMinor;
+  };
+  const offered = BOOK_FORMATS.filter((format) => {
     const product = products.find((p) => p.format === format);
-    const productPricing = pricing[format];
-    if (!country.active || !country.formats[format] || !product || !productPricing.active) {
-      return [];
+    if (!country.active || !country.formats[format] || !product || !pricing[format].active) {
+      return false;
     }
-    const options = format === 'digital' ? [] : printable(format);
-    if (format !== 'digital' && options.length === 0) return [];
-    const production =
-      options.length > 0 ? Math.min(...options.map((option) => option.productionCostUsdMinor)) : 0;
+    return format === 'digital' || printable(format).length > 0;
+  });
+  // Precio exacto de cada formato en cada extensión y tipo de contenido activos (sin envío): la IA
+  // y el margen se cuentan por página con ilustración generada; la imprenta, por página impresa.
+  const contentTypes = CONTENT_TYPES.filter((type) => editorial.contentTypes[type].active);
+  const byLength = BOOK_LENGTHS.filter((length) => editorial.lengths[length].active).flatMap(
+    (length) =>
+      contentTypes.flatMap((contentType) => {
+        const plan = editorialPlan(
+          { length, contentType, textDensity: 'balanced', readingLevel: 'developing' },
+          editorial,
+          editorial.lengths[length].interiorPages,
+        );
+        const prices = (professional: boolean) =>
+          bookFormatPrices({
+            country,
+            pricing,
+            pages: plan.narrativePages,
+            professional,
+            formats: offered,
+            productionUsdMinor: (format) => productionFor(format, plan.interiorPages),
+          });
+        const pro = prices(true);
+        return prices(false).map((item) => ({
+          ...item,
+          length,
+          contentType,
+          proAmountMinor:
+            pro.find((other) => other.format === item.format)?.amountMinor ?? item.amountMinor,
+        }));
+      }),
+  );
+  const formats = offered.flatMap((format) => {
+    const product = products.find((p) => p.format === format);
+    if (!product) return [];
+    // El «desde» del formato: su extensión más corta que se puede hacer, en cuento (sin envío).
+    const lengths = byLength.filter(
+      (item) => item.format === format && item.contentType === 'story',
+    );
+    const fallback = bookPriceMinor(
+      pricing[format],
+      format === 'digital'
+        ? 0
+        : Math.min(...printable(format).map((option) => option.productionCostUsdMinor)),
+      product.pageCount,
+    );
     return [
       {
         format,
         name: product.name[locale],
         pageCount: product.pageCount,
-        amountMinor: charmPrice(
-          unitPriceUsdMinor(productPricing, production, product.pageCount),
-          CHARGE_CURRENCY,
-        ),
+        amountMinor: lengths.length
+          ? Math.min(...lengths.map((item) => item.amountMinor))
+          : fallback,
         estimated: format !== 'digital',
       },
     ];
   });
-  const digital = country.active && country.formats.digital ? pricing.digital : null;
-  const lengthPrices = digital?.active
-    ? BOOK_LENGTHS.map((length) => ({
-        length,
-        amountMinor: charmPrice(
-          unitPriceUsdMinor(digital, 0, DEFAULT_EDITORIAL_CONFIG.lengths[length].interiorPages),
-          CHARGE_CURRENCY,
-        ),
-      }))
-    : [];
-  // El perfil profesional paga con su descuento base (igual que `quote`: se descuenta antes de redondear).
-  const proLengthPrices = digital?.active
-    ? BOOK_LENGTHS.map((length) => ({
-        length,
-        amountMinor: charmPrice(
-          Math.round(
-            (unitPriceUsdMinor(digital, 0, DEFAULT_EDITORIAL_CONFIG.lengths[length].interiorPages) *
-              (100 - digital.proPercentOff)) /
-              100,
-          ),
-          CHARGE_CURRENCY,
-        ),
-      }))
-    : [];
-  const printOptions = BOOK_FORMATS.flatMap((format) =>
-    format === 'digital' ? [] : printable(format),
-  );
-  // Referencia: la moneda del país o, si cobra en dólares, la de la región (Latinoamérica).
-  const localCurrency =
-    country.currency !== CHARGE_CURRENCY ? country.currency : REFERENCE_CURRENCIES[code];
-  const rate = localCurrency ? fx.rates[localCurrency] : undefined;
+  const digital = byLength.filter((item) => item.format === 'digital');
+  const printOptions = offered.flatMap((format) => (format === 'digital' ? [] : printable(format)));
   return {
     country: code,
     available: formats.length > 0,
     currency: CHARGE_CURRENCY,
-    local: localCurrency && rate ? { currency: localCurrency, rate } : null,
+    // Referencia: la moneda del país o, si cobra en dólares, la de la región (Latinoamérica).
+    local: referenceCurrency(code, country, fx),
     taxBasisPoints: country.taxBasisPoints,
     taxIncludedInPrice: country.taxIncludedInPrice,
     shipping: {
@@ -179,8 +214,25 @@ export function buildOffer(input: {
       quoted: true,
     },
     formats,
-    lengthPrices,
-    proLengthPrices,
+    lengthPrices: digital.map(({ length, contentType, amountMinor }) => ({
+      length,
+      contentType,
+      amountMinor,
+    })),
+    proLengthPrices: digital.map(({ length, contentType, proAmountMinor }) => ({
+      length,
+      contentType,
+      amountMinor: proAmountMinor,
+    })),
+    printLengthPrices: byLength
+      .filter((item) => item.format !== 'digital')
+      .map(({ format, length, contentType, amountMinor, proAmountMinor }) => ({
+        format,
+        length,
+        contentType,
+        amountMinor,
+        proAmountMinor,
+      })),
     printUnavailable:
       country.active &&
       BOOK_FORMATS.some((format) => format !== 'digital' && country.formats[format]) &&
@@ -188,12 +240,21 @@ export function buildOffer(input: {
   };
 }
 
+/** Cuánto espera la oferta una cotización de imprenta antes de usar la matriz. */
+const OFFER_ESTIMATE_WAIT_MS = 4000;
+
 export function registerCatalogRoutes(
   app: FastifyInstance,
   catalog: CatalogRepository,
   activePrinters: readonly string[],
   /** Tipo de cambio del día (para mostrar precios en la moneda de cada país). */
   fxRates: () => Promise<FxRates>,
+  /** Estimado de impresión del país (dirección de ejemplo; DECISIONS 241). */
+  printEstimate?: (
+    country: CountryCode,
+    format: BookFormat,
+    pages: number,
+  ) => Promise<{ provider: string; productionUsdMinor: number } | null>,
 ): void {
   addRoute(app, apiRoutes.catalogStories, {}, async (request) => {
     const { locale, age, channel, collection } = query<'catalogStories'>(request);
@@ -294,13 +355,53 @@ export function registerCatalogRoutes(
 
   addRoute(app, apiRoutes.catalogOffer, {}, async (request) => {
     const { country: code, locale } = query<'catalogOffer'>(request);
-    const [country, pricing, fx, products, printOptions] = await Promise.all([
+    const [country, pricing, fx, products, printOptions, editorial] = await Promise.all([
       catalog.country(code),
       catalog.productPricing(),
       fxRates(),
       catalog.products(),
       catalog.printOptions(code),
+      catalog.editorial(),
     ]);
+    // El estimado de cada formato impreso en cada extensión que se puede imprimir. Con las
+    // cotizaciones en caché es inmediato; si una imprenta tarda, esa extensión usa la matriz.
+    const costs = new Map<string, number>();
+    if (printEstimate) {
+      const combos = BOOK_FORMATS.filter((format) => format !== 'digital').flatMap((format) =>
+        BOOK_LENGTHS.map((length) => ({ format, pages: editorial.lengths[length].interiorPages })),
+      );
+      await Promise.all(
+        combos
+          .filter(
+            ({ format, pages }) =>
+              printCandidates(
+                printOptions,
+                [{ format, pages: printPageCount(format, pages), quantity: 1 }],
+                activePrinters,
+              ).length > 0,
+          )
+          .map(async ({ format, pages }) => {
+            const estimate = await Promise.race([
+              printEstimate(code, format, pages).catch(() => null),
+              new Promise<null>((resolve) =>
+                setTimeout(() => {
+                  resolve(null);
+                }, OFFER_ESTIMATE_WAIT_MS),
+              ),
+            ]);
+            if (estimate) {
+              // La regla del 5 %: el mismo costo estable que usa el checkout.
+              costs.set(
+                `${format}:${String(pages)}`,
+                stablePrintCost(
+                  estimate.productionUsdMinor,
+                  matrixCostFor(printOptions, format, estimate.provider, code),
+                ),
+              );
+            }
+          }),
+      );
+    }
     return buildOffer({
       code,
       country,
@@ -310,6 +411,8 @@ export function registerCatalogRoutes(
       locale,
       printOptions,
       activePrinters,
+      editorial,
+      printCost: (format, pages) => costs.get(`${format}:${String(pages)}`) ?? null,
     });
   });
 

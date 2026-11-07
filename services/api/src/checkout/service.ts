@@ -8,7 +8,16 @@ import {
   addressProblems,
   assertOrderTransition,
   canTransitionOrder,
+  bookFormatPrices,
   printCandidates,
+  referenceCurrency,
+  referencePrintCost,
+  SAMPLE_PRINT_ADDRESSES,
+  generatedPages,
+  matrixCostFor,
+  paymentFeePercent,
+  stablePrintCost,
+  withPaymentFee,
   printPageCount,
   rankPrintQuotes,
   type cardsOrderBodySchema,
@@ -20,6 +29,8 @@ import {
   quoteKit,
   type AuditLogEntry,
   type BookFormat,
+  type BookLength,
+  type ContentType,
   type Address,
   type CountryCode,
   type KitSelection,
@@ -59,100 +70,6 @@ function quoteErrorMessage(error: unknown): string {
   if (message.includes('phone_number')) return 'Lulu necesita el teléfono de quien recibe.';
   return message.slice(0, 200);
 }
-
-/** Direcciones de ejemplo (una por país) para estimar el envío antes de pedir la dirección real. */
-const SAMPLE_ADDRESSES: Record<string, Omit<Address, 'country'>> = {
-  AR: {
-    name: 'Estimación',
-    line1: 'Av. Santa Fe 1000',
-    line2: null,
-    city: 'Buenos Aires',
-    state: 'CABA',
-    postalCode: 'C1059',
-    phone: '+541150000000',
-    taxId: null,
-  },
-  MX: {
-    name: 'Estimación',
-    line1: 'Av. Reforma 100',
-    line2: null,
-    city: 'Ciudad de México',
-    state: 'CDMX',
-    postalCode: '06600',
-    phone: '+525550000000',
-    taxId: null,
-  },
-  US: {
-    name: 'Estimación',
-    line1: '100 Congress Ave',
-    line2: null,
-    city: 'Austin',
-    state: 'TX',
-    postalCode: '78701',
-    phone: '+15125550100',
-    taxId: null,
-  },
-  ES: {
-    name: 'Estimación',
-    line1: 'Calle Mayor 1',
-    line2: null,
-    city: 'Madrid',
-    state: 'Madrid',
-    postalCode: '28013',
-    phone: '+34910000000',
-    taxId: null,
-  },
-  CL: {
-    name: 'Estimación',
-    line1: 'Av. Providencia 1000',
-    line2: null,
-    city: 'Santiago',
-    state: 'RM',
-    postalCode: '7500000',
-    phone: '+56220000000',
-    taxId: null,
-  },
-  CO: {
-    name: 'Estimación',
-    line1: 'Carrera 7 # 32-16',
-    line2: null,
-    city: 'Bogotá',
-    state: 'DC',
-    postalCode: '110111',
-    phone: '+576010000000',
-    taxId: null,
-  },
-  PE: {
-    name: 'Estimación',
-    line1: 'Av. Arequipa 1000',
-    line2: null,
-    city: 'Lima',
-    state: 'Lima',
-    postalCode: '15046',
-    phone: '+5110000000',
-    taxId: null,
-  },
-  BR: {
-    name: 'Estimação',
-    line1: 'Av. Paulista 1000',
-    line2: null,
-    city: 'São Paulo',
-    state: 'SP',
-    postalCode: '01310-100',
-    phone: '+551130000000',
-    taxId: null,
-  },
-  UY: {
-    name: 'Estimación',
-    line1: 'Av. 18 de Julio 1000',
-    line2: null,
-    city: 'Montevideo',
-    state: 'Montevideo',
-    postalCode: '11100',
-    phone: '+59820000000',
-    taxId: null,
-  },
-};
 
 type PriceBody = Omit<QuoteBody, 'sourceOrderId'>;
 type CheckoutBody = z.output<typeof createCheckoutBodySchema>;
@@ -212,6 +129,69 @@ const DOWNLOADABLE_STATUSES: readonly OrderStatus[] = [
   'delivered',
 ];
 
+/** Cotización con la dirección de ejemplo del país: la imprenta que gana, su impresión y su envío. */
+export interface PrintEstimate {
+  provider: string;
+  /** Impresión de todas las unidades, en centavos de USD. */
+  productionUsdMinor: number;
+  shippingUsdMinor: number;
+  etaDaysMin: number;
+  etaDaysMax: number;
+}
+
+/**
+ * Costo del impreso para el precio (DECISIONS 241): siempre el de la imprenta que se va a usar,
+ * con el margen encima (el margen nunca absorbe diferencias). Con la dirección, la imprenta
+ * elegida para ella (`routing`); sin dirección, la que gana con la dirección de ejemplo del país
+ * (`estimate`), con el envío pendiente; si ninguna imprenta cotizó, la matriz (`matrix`, por
+ * ejemplar). Null si ninguna imprenta activa puede con este libro.
+ */
+export function bookPrintCost(input: {
+  routing: PrintRouting | null;
+  estimate: PrintEstimate | null;
+  matrix: { productionUsdMinor: number; etaDaysMin: number; etaDaysMax: number } | null;
+  quantity: number;
+  /** Costo por ejemplar de la matriz para esa imprenta (la regla del 5 %); null si no hay fila. */
+  matrixFor?: (provider: string) => number | null;
+}): PrintCost | null {
+  const { routing, estimate, matrix } = input;
+  if (!matrix) return null;
+  const quantity = Math.max(1, Math.floor(input.quantity));
+  // El precio cambia solo si el costo se mueve más de 5 % respecto de la matriz.
+  const stable = (provider: string, totalUsdMinor: number) =>
+    stablePrintCost(Math.round(totalUsdMinor / quantity), input.matrixFor?.(provider) ?? null) *
+    quantity;
+  if (routing) {
+    return {
+      productionUsdMinor: stable(
+        routing.provider,
+        routing.productionCostUsdMinor ?? routing.totalCostUsdMinor,
+      ),
+      shippingUsdMinor: routing.shippingCostUsdMinor ?? 0,
+      etaDaysMin: routing.etaDaysMin,
+      etaDaysMax: routing.etaDaysMax,
+    };
+  }
+  if (estimate) {
+    return {
+      productionUsdMinor: stable(estimate.provider, estimate.productionUsdMinor),
+      shippingUsdMinor: null,
+      etaDaysMin: estimate.etaDaysMin,
+      etaDaysMax: estimate.etaDaysMax,
+    };
+  }
+  return {
+    productionUsdMinor: matrix.productionUsdMinor * quantity,
+    shippingUsdMinor: null,
+    etaDaysMin: matrix.etaDaysMin,
+    etaDaysMax: matrix.etaDaysMax,
+  };
+}
+
+/** Impresión por ejemplar de un costo (lo mismo que divide `quote`). */
+export const perCopy = (cost: PrintCost, quantity: number) =>
+  Math.round(cost.productionUsdMinor / Math.max(1, Math.floor(quantity)));
+
 /** Se opina sobre lo recibido: el digital listo o el impreso entregado. */
 export function reviewable(order: { status: OrderStatus; items: { format: BookFormat }[] }) {
   const digitalOnly = order.items.every((item) => item.format === 'digital');
@@ -253,28 +233,139 @@ export class CheckoutService {
 
   /**
    * Cotización para el checkout. Un impreso con la dirección completa se cotiza con las
-   * imprentas (impresión y envío reales); sin dirección, se estima y el envío queda pendiente.
+   * imprentas (impresión y envío reales); sin dirección, con la dirección de ejemplo del país y el
+   * envío queda pendiente. Las tarjetas de cada formato salen del mismo costo que el resumen.
    */
   async quote(uid: string, body: QuoteBody) {
     const source = body.sourceOrderId
       ? await this.reorderSource(uid, body.sourceOrderId, body.format, body.kit !== null)
       : null;
     const loaded = source ?? (await this.loadBook(uid, body));
-    const routing =
-      body.format !== 'digital' &&
-      body.shippingAddress?.country === body.country &&
-      addressProblems(body.shippingAddress).length === 0
-        ? await this.routePrint(body, loaded.pages)
-        : null;
-    const result = await this.price(loaded.book, body, loaded.pages, source !== null, routing);
+    // Otra copia de un libro ya comprado: solo impresa (el PDF ya lo tiene).
+    const availableFormats = (await this.availableFormats(body.country, loaded.pages)).filter(
+      (format) => !source || format !== 'digital',
+    );
+    // El costo de impresión de cada formato impreso (el elegido con su cantidad; los demás, de a
+    // uno): con la dirección, la imprenta que gana para ella; sin dirección, el estimado del país.
+    const costs = new Map<BookFormat, PrintCost | null>();
+    if (!body.kit) {
+      await Promise.all(
+        availableFormats
+          .filter((format) => format !== 'digital')
+          .map(async (format) => {
+            const quantity = format === body.format ? body.quantity : 1;
+            costs.set(
+              format,
+              await this.printCostFor({ ...body, format, quantity }, loaded.pages).catch(
+                () => null,
+              ),
+            );
+          }),
+      );
+    }
+    const result = await this.price(
+      loaded.book,
+      body,
+      loaded.pages,
+      source !== null,
+      costs.get(body.format) ?? null,
+    );
+    const [country, pricing, fx, pro] = await Promise.all([
+      this.catalog.country(body.country),
+      this.catalog.productPricing(),
+      this.options.fx(),
+      this.professional(loaded.book),
+    ]);
     return {
       snapshot: result.snapshot,
       couponError: result.couponError,
-      // Otra copia de un libro ya comprado: solo impresa (el PDF ya lo tiene).
-      availableFormats: (await this.availableFormats(body.country, loaded.pages)).filter(
-        (format) => !source || format !== 'digital',
-      ),
+      availableFormats,
+      // Las tarjetas del checkout: el mismo cálculo y el mismo costo que el renglón del libro.
+      formatPrices: body.kit
+        ? []
+        : bookFormatPrices({
+            country,
+            pricing,
+            pages: await this.pricedPages(loaded.book, loaded.pages),
+            professional: pro?.professional ?? false,
+            formats: availableFormats,
+            productionUsdMinor: (format) => {
+              const cost = costs.get(format);
+              return cost ? perCopy(cost, format === body.format ? body.quantity : 1) : null;
+            },
+          }),
+      // Referencia en la moneda del país del pedido (en un impreso, el de envío).
+      local: referenceCurrency(body.country, country, fx),
     };
+  }
+
+  /** ¿La dirección alcanza para cotizar con las imprentas? */
+  private static routable(body: Pick<CheckoutBody, 'shippingAddress'> & { country: CountryCode }) {
+    return (
+      body.shippingAddress?.country === body.country &&
+      addressProblems(body.shippingAddress).length === 0
+    );
+  }
+
+  /**
+   * Costo de impresión de un formato para este libro (ver `bookPrintCost`): con la dirección, la
+   * imprenta elegida para ella; sin dirección, el estimado del país; si nada cotiza, la matriz.
+   */
+  private async printCostFor(
+    body: PriceBody & Pick<CheckoutBody, 'shippingAddress'>,
+    pages: number,
+    routing?: PrintRouting | null,
+  ): Promise<PrintCost | null> {
+    if (body.format === 'digital') return null;
+    const options = await this.catalog.printOptions(body.country);
+    const matrix = referencePrintCost(
+      options,
+      body.format,
+      pages,
+      this.activePrinters(),
+      body.quantity,
+    );
+    if (!matrix) return null;
+    const routed =
+      routing !== undefined
+        ? routing
+        : CheckoutService.routable(body)
+          ? await this.routePrint(body, pages)
+          : null;
+    return bookPrintCost({
+      routing: routed,
+      estimate: routed
+        ? null
+        : await this.printEstimate(body.country, body.format, pages, body.quantity),
+      matrix,
+      quantity: body.quantity,
+      matrixFor: (provider) => matrixCostFor(options, body.format, provider, body.country),
+    });
+  }
+
+  /** Páginas con ilustración generada del libro (DECISIONS 241): las que pagan IA y margen. */
+  private async pricedPages(book: Record<string, unknown>, interiorPages: number) {
+    const preview = book.preview as { activityPages?: number } | null | undefined;
+    return generatedPages(
+      {
+        length: (book.length as BookLength | null | undefined) ?? null,
+        contentType: (book.contentType as ContentType | null | undefined) ?? null,
+        interiorPages,
+        activityPages: preview?.activityPages ?? 0,
+      },
+      await this.catalog.editorial(),
+    );
+  }
+
+  private activePrinters(): string[] {
+    return this.providers.printers().map((printer) => printer.id);
+  }
+
+  /** Profesionales: lo decide la cuenta (servidor), nunca la petición. */
+  private professional(book: Record<string, unknown>) {
+    return this.pro && typeof book.ownerUid === 'string'
+      ? this.pro.context(book.ownerUid)
+      : Promise.resolve(null);
   }
 
   /** Formatos que este libro admite en el país: el digital y los impresos que alguna imprenta puede. */
@@ -320,28 +411,19 @@ export class CheckoutService {
   }
 
   /**
-   * Precio de un libro ya validado (DECISIONS 096): costo + margen del producto. El impreso usa
-   * la imprenta elegida para la dirección (`routing`) o, sin dirección, la estimación.
+   * Precio de un libro ya validado (DECISIONS 096 y 241): costo + margen del producto. El
+   * impreso usa el costo de la imprenta que se va a usar (con la dirección, la elegida para ella;
+   * sin dirección, el estimado del país): el margen queda fijo y el precio sigue al costo.
    */
   private async price(
     book: Record<string, unknown>,
     body: PriceBody,
     pages: number,
     reorder = false,
-    routing: PrintRouting | null = null,
+    /** Impreso: el costo de la imprenta que se va a usar (`printCostFor`). */
+    print: PrintCost | null = null,
   ) {
     if (body.kit) return this.priceKit(book, body, body.kit, reorder);
-    const print: PrintCost | null =
-      body.format === 'digital'
-        ? null
-        : routing
-          ? {
-              productionUsdMinor: routing.productionCostUsdMinor ?? routing.totalCostUsdMinor,
-              shippingUsdMinor: routing.shippingCostUsdMinor ?? 0,
-              etaDaysMin: routing.etaDaysMin,
-              etaDaysMax: routing.etaDaysMax,
-            }
-          : await this.printEstimate(body, pages);
     // Nunca se manda a imprenta algo incompatible: alguna imprenta activa tiene que poder.
     if (body.format !== 'digital' && !print) throw printUnavailable();
     const [country, pricing, fx, coupon, promotions, pro] = await Promise.all([
@@ -350,10 +432,7 @@ export class CheckoutService {
       this.options.fx(),
       body.couponCode ? this.coupon(body.couponCode) : Promise.resolve(null),
       this.promotions(),
-      // Profesionales: lo decide la cuenta (servidor), nunca la petición.
-      this.pro && typeof book.ownerUid === 'string'
-        ? this.pro.context(book.ownerUid)
-        : Promise.resolve(null),
+      this.professional(book),
     ]);
     const result = quote({
       pro,
@@ -362,7 +441,8 @@ export class CheckoutService {
       fx,
       print,
       format: body.format,
-      pages,
+      // IA y margen por página: solo las páginas con ilustración generada.
+      pages: await this.pricedPages(book, pages),
       quantity: body.quantity,
       coupon,
       couponCode: body.couponCode,
@@ -413,26 +493,6 @@ export class CheckoutService {
     return result;
   }
 
-  /**
-   * Impreso sin dirección: la imprenta habilitada más barata según la matriz (el envío queda
-   * pendiente hasta tener la dirección). Null si ninguna puede imprimir este libro.
-   */
-  private async printEstimate(body: PriceBody, pages: number): Promise<PrintCost | null> {
-    const options = await this.catalog.printOptions(body.country);
-    const candidates = await this.printCandidates(body, pages);
-    const usable = options.filter(
-      (option) => candidates.includes(option.provider) && option.format === body.format,
-    );
-    if (usable.length === 0) return null;
-    return {
-      productionUsdMinor:
-        Math.min(...usable.map((option) => option.productionCostUsdMinor)) * body.quantity,
-      shippingUsdMinor: null,
-      etaDaysMin: Math.min(...usable.map((option) => option.etaDaysMin)),
-      etaDaysMax: Math.max(...usable.map((option) => option.etaDaysMax)),
-    };
-  }
-
   private async printCandidates(body: PriceBody, pages: number) {
     return printCandidates(
       await this.catalog.printOptions(body.country),
@@ -442,40 +502,43 @@ export class CheckoutService {
   }
 
   /**
-   * Envío estimado a un país, antes de que la persona cargue su dirección: se cotiza una dirección
-   * de ejemplo de ese país con las mismas imprentas. Se guarda 12 horas. Es una referencia: el
-   * precio exacto sale con la dirección real.
+   * Estimado de un país, antes de que la persona cargue su dirección (DECISIONS 241): se cotiza
+   * la dirección de ejemplo de ese país con las mismas imprentas y gana la más barata en
+   * impresión + envío. Da el precio de la muestra, las landings y el checkout sin dirección. Se
+   * guarda 12 horas (una falla, 30 minutos).
    */
-  private readonly shippingEstimates = new Map<
-    string,
-    {
-      at: number;
-      value: { shippingUsdMinor: number; etaDaysMin: number; etaDaysMax: number } | null;
-    }
-  >();
+  private readonly estimates = new Map<string, { at: number; value: PrintEstimate | null }>();
 
-  async shippingEstimate(country: string, format: 'softcover' | 'hardcover' | 'booklet') {
-    const key = `${country}:${format}`;
-    const cached = this.shippingEstimates.get(key);
-    if (cached && Date.now() - cached.at < 12 * 60 * 60 * 1000) return cached.value;
-    const sample = SAMPLE_ADDRESSES[country];
-    let value: { shippingUsdMinor: number; etaDaysMin: number; etaDaysMax: number } | null = null;
+  async printEstimate(
+    country: CountryCode,
+    format: BookFormat,
+    pages: number,
+    quantity = 1,
+  ): Promise<PrintEstimate | null> {
+    if (format === 'digital') return null;
+    const key = `${country}:${format}:${String(pages)}:${String(quantity)}`;
+    const cached = this.estimates.get(key);
+    const ttl = cached?.value ? 12 * 60 * 60 * 1000 : 30 * 60 * 1000;
+    if (cached && Date.now() - cached.at < ttl) return cached.value;
+    const sample = SAMPLE_PRINT_ADDRESSES[country];
+    let value: PrintEstimate | null = null;
     if (sample) {
       try {
-        const pages = 28;
-        const items = [{ format, pageCount: printPageCount(format, pages), quantity: 1 }];
+        const pageCount = printPageCount(format, pages);
         const candidates = printCandidates(
-          await this.catalog.printOptions(country as CountryCode),
-          [{ format, pages: printPageCount(format, pages), quantity: 1 }],
-          this.providers.printers().map((printer) => printer.id),
+          await this.catalog.printOptions(country),
+          [{ format, pages: pageCount, quantity }],
+          this.activePrinters(),
         );
         if (candidates.length > 0) {
           const routing = await this.routeItems(
-            items,
-            { ...sample, country } as Address,
+            [{ format, pageCount, quantity }],
+            { ...sample, country },
             candidates,
           );
           value = {
+            provider: routing.provider,
+            productionUsdMinor: routing.productionCostUsdMinor ?? routing.totalCostUsdMinor,
             shippingUsdMinor: routing.shippingCostUsdMinor ?? 0,
             etaDaysMin: routing.etaDaysMin,
             etaDaysMax: routing.etaDaysMax,
@@ -485,14 +548,32 @@ export class CheckoutService {
         value = null;
       }
     }
-    this.shippingEstimates.set(key, { at: Date.now(), value });
+    this.estimates.set(key, { at: Date.now(), value });
     return value;
+  }
+
+  /** Envío estimado a un país (un libro clásico; el cuento grapado, de 12 páginas). */
+  async shippingEstimate(country: string, format: 'softcover' | 'hardcover' | 'booklet') {
+    const estimate = await this.printEstimate(
+      country as CountryCode,
+      format,
+      format === 'booklet' ? 12 : 28,
+    );
+    // Lo que se va a cobrar: el envío al costo más su parte de la comisión de cobro.
+    const fee = paymentFeePercent((await this.catalog.productPricing())[format]);
+    return estimate
+      ? {
+          shippingUsdMinor: withPaymentFee(estimate.shippingUsdMinor, fee),
+          etaDaysMin: estimate.etaDaysMin,
+          etaDaysMax: estimate.etaDaysMax,
+        }
+      : null;
   }
 
   /**
    * Elige la imprenta: cotiza con todas las que pueden (ya con la dirección) y gana la más
-   * barata en impresión + envío; si empatan, la que llega antes. El precio al cliente no cambia:
-   * sale siempre del catálogo. La elección queda congelada en el pedido.
+   * barata en impresión + envío; si empatan, la que llega antes. El precio del libro usa su
+   * impresión (margen fijo). La elección queda congelada en el pedido.
    */
   private async routePrint(
     body: PriceBody & Pick<CheckoutBody, 'shippingAddress'>,
@@ -775,7 +856,13 @@ export class CheckoutService {
     const { book, preview, pages } = await this.loadBook(user.uid, body);
     this.checkAddress(body);
     const printRouting = await this.routePrint(body, pages);
-    const result = await this.price(book, body, pages, false, printRouting);
+    const result = await this.price(
+      book,
+      body,
+      pages,
+      false,
+      await this.printCostFor(body, pages, printRouting),
+    );
     return this.open(user, origin, {
       bookId: body.bookId,
       book,
@@ -811,7 +898,13 @@ export class CheckoutService {
     const full = { ...body, bookId };
     this.checkAddress(full);
     const printRouting = await this.routePrint(full, pages);
-    const price = await this.price(book, full, pages, true, printRouting);
+    const price = await this.price(
+      book,
+      full,
+      pages,
+      true,
+      await this.printCostFor(full, pages, printRouting),
+    );
     const snapshot = source.snapshot as { title?: string };
     return this.open(user, origin, {
       bookId,

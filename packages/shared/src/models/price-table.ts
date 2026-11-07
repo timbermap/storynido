@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { countryCodeSchema, type CountryCode } from '../countries';
 import type { CountryConfig } from './commerce';
 import { bookFormatSchema, type BookFormat } from './common';
-import { BOOK_LENGTHS, bookLengthSchema, type EditorialConfig } from './editorial';
+import { BOOK_LENGTHS, bookLengthSchema, editorialPlan, type EditorialConfig } from './editorial';
 import type { FxRates } from './metrics';
 import { printCandidates, printPageCount, type PrintOption } from './print';
 import { quote, type ProDiscountConfig } from './pricing';
@@ -23,8 +23,10 @@ export const priceTableRowSchema = z.object({
   country: countryCodeSchema,
   format: bookFormatSchema,
   length: bookLengthSchema,
-  /** Páginas interiores de la extensión (las que pagan IA). */
+  /** Páginas interiores de la extensión. */
   pages: z.number().int(),
+  /** Páginas con ilustración generada (las que pagan IA y margen por página). */
+  generatedPages: z.number().int().optional(),
   /** Páginas que cuenta la imprenta (el grapado suma tapas y cierra en múltiplo de 4). */
   printPages: z.number().int(),
   aiCostUsdMinor: z.number().int(),
@@ -63,10 +65,16 @@ export function buildPriceTable(input: {
     for (const length of BOOK_LENGTHS) {
       const config = input.editorial.lengths[length];
       const pages = config.interiorPages;
+      // IA y margen por página: las páginas con ilustración generada de un cuento (DECISIONS 241).
+      const generated = editorialPlan(
+        { length, contentType: 'story', textDensity: 'balanced', readingLevel: 'developing' },
+        input.editorial,
+        pages,
+      ).narrativePages;
       for (const format of bookFormatSchema.options) {
         const pricing = input.pricing[format];
         const printPages = printPageCount(format, pages);
-        const ai = pricing.aiCostPerPageUsdMinor * pages;
+        const ai = pricing.aiCostPerPageUsdMinor * generated;
         // La imprenta más barata entre las que pueden con estas páginas.
         const usable =
           format === 'digital'
@@ -100,7 +108,7 @@ export function buildPriceTable(input: {
             pricing,
             fx: input.fx,
             format,
-            pages,
+            pages: generated,
             quantity: 1,
             print: cheapest
               ? {
@@ -127,9 +135,10 @@ export function buildPriceTable(input: {
           format,
           length,
           pages,
+          generatedPages: generated,
           printPages,
           aiCostUsdMinor: ai,
-          creationMarginUsdMinor: marginUsdMinor(pricing.creationMargin, ai),
+          creationMarginUsdMinor: marginUsdMinor(pricing.creationMargin, ai, generated),
           provider: cheapest?.provider ?? null,
           productionCostUsdMinor: production,
           printMarginUsdMinor: cheapest ? marginUsdMinor(pricing.printMargin, production) : 0,

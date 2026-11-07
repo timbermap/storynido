@@ -1092,7 +1092,6 @@
       "leaveButton": "Back to My stories",
       "leaveTitle": "You can close this screen",
       "approveAndPay": "Approve and pay",
-      "proPrice": "Digital story: {price}",
       "proVolume": "The more stories you make, the less you pay for each. No subscription.",
       "proNotice": "This is educational, supportive material: it isn’t clinical and doesn’t replace your professional judgment.",
       "proDifferencesEdit": "You can edit the text of each page and change the base story or the photo again.",
@@ -1280,8 +1279,10 @@
           "text": "Richer vocabulary and a plot with twists."
         }
       },
-      "priceDigital": "Ebook from {price}",
-      "pricePrinted": "Printed from {price}",
+      "priceDigital": "Ebook: {price}",
+      "pricePrinted": "Printed: {price} + shipping",
+      "pricePrintedFrom": "Printed from {price} + shipping",
+      "priceUsd": "Prices in US dollars (USD)",
       "chipEbook": "Ebook",
       "chipPrint": "Printed book",
       "chipBooklet": "Stapled storybook",
@@ -1731,7 +1732,7 @@
     "wordless": "Wordless page: the illustration tells this moment."
   },
   "Checkout": {
-    "shippingEstimate": "Estimated shipping to your country: about {price}, for a total of about {total}. Arrives in {min} to {max} business days. Confirmed with your address.",
+    "shippingEstimate": "Estimated shipping to {country}: about {price}, for a total of about {total}. Arrives in {min} to {max} business days. Confirmed with your address.",
     "yourBook": "Your book",
     "yourBookText": "This is the one you approved. Choose how to receive it.",
     "title": "Your book",
@@ -1863,6 +1864,7 @@
       "bundle": "Full kit discount {label}"
     },
     "shippingEta": "Shipping (arrives in {min} to {max} business days)",
+    "shippingTo": "Shipping to {country} (arrives in {min} to {max} business days)",
     "shippingDigital": "Digital delivery",
     "free": "Free",
     "taxIncluded": "Tax included ({rate}%)",
@@ -1870,6 +1872,7 @@
     "total": "Total",
     "pay": "Pay",
     "payNote": "Secure payment with our payment processor. Your book is created as soon as the payment is confirmed.",
+    "pricesUsd": "Prices in US dollars (USD).",
     "errors": {
       "generic": "Something went wrong. Please try again in a few minutes."
     },
@@ -2001,8 +2004,9 @@
       "guestsNote": "One per line: each tag reads “For …” with their name ({count} of {max}). Without a list, the tags say “Thanks for coming!”.",
       "signature": "Include the “Made with StoryNido” signature on the back of the invitation"
     },
-    "fromPrice": "from {price}",
+    "pricePlusShipping": "{price} + shipping",
     "shippingPending": "Shipping: calculated from your address",
+    "shippingToPending": "Shipping to {country}: calculated from your address",
     "addressToQuote": "Complete the address to see shipping and the total.",
     "importDuties": "International shipping: the recipient may have to pay import duties.",
     "localReference": "Reference in your currency (charged in US dollars)",
@@ -2216,7 +2220,7 @@
       "sub": "We already illustrated the cover and the first pages.",
       "cta": "See {name}'s book",
       "ctaNoName": "See my book",
-      "price": "Digital from {price}"
+      "price": "Ebook: {price}"
     },
     "orderPreparing": {
       "title": "We're preparing {name}'s book",

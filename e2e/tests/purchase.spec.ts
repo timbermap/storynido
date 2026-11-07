@@ -119,7 +119,9 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await heading(page, 'Tu libro');
   await page.locator('label', { hasText: 'Tapa blanda' }).click();
   // Sin dirección, el envío se cotiza después (no se puede pagar todavía).
-  await expect(page.locator('aside dl')).toContainText('Envío: se calcula con tu dirección');
+  await expect(page.locator('aside dl')).toContainText(
+    'Envío a México: se calcula con tu dirección',
+  );
   await expect(page.getByRole('button', { name: 'Pagar' })).toBeDisabled();
   const address = {
     name: 'Ana Pérez',
@@ -133,7 +135,9 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   for (const [key, value] of Object.entries(address))
     await page.locator(`#address-${key}`).fill(value);
   // Con la dirección completa se cotiza con las imprentas: envío real y plazo.
-  await expect(page.locator('aside dl')).toContainText('Envío (llega en', { timeout: 30_000 });
+  await expect(page.locator('aside dl')).toContainText('Envío a México (llega en', {
+    timeout: 30_000,
+  });
   // Sin confirmar el domicilio de entrega no se puede pagar.
   await expect(page.getByRole('button', { name: 'Pagar' })).toBeDisabled();
   await page.getByLabel('Confirmo que el domicilio de entrega es correcto.').check();
@@ -185,7 +189,9 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await expect(body(page)).toContainText('Pides otra copia impresa del mismo libro');
   await expect(page.locator('label', { hasText: 'Ebook' })).toHaveCount(0);
   await expect(page.locator('input[name=format][value=softcover]')).toBeChecked();
-  await expect(page.locator('aside dl')).toContainText('Envío: se calcula con tu dirección');
+  await expect(page.locator('aside dl')).toContainText(
+    'Envío a México: se calcula con tu dirección',
+  );
 
   await page.goto('/es/mis-cuentos?estado=terminados');
   await expect(shelf).toHaveCount(1, { timeout: 30_000 });

@@ -64,6 +64,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
     deps.catalog,
     deps.providers.printers().map((printer) => printer.id),
     () => deps.metrics.fx(utcDay()),
+    (country, format, pages) => deps.checkout.printEstimate(country, format, pages),
   );
   registerPhotoRoutes(app, deps.photos);
   registerPreviewRoutes(app, deps.previews);

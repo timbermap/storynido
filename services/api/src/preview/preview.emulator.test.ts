@@ -1375,14 +1375,16 @@ describe('checkout y pagos (fase 11)', () => {
     expect(res.statusCode).toBe(200);
     const body = res.json<{ snapshot: PriceSnapshot; couponError: string | null }>();
     expect(body.couponError).toBeNull();
-    // Libro de prueba de 4 páginas. Creación: 0,15 × 4 + 17 = 17,60. Tapa dura: + imprenta 14
-    // + 8 (mínimo de impresión) = 39,60 → 39,99 (todo en dólares; DECISIONS 096 a 098).
-    // Sin dirección, el envío queda pendiente (fuera del total).
-    expect(body.snapshot.discount).toEqual({ minor: 400, reason: 'coupon', label: 'BIENVENIDA' });
+    // Libro de prueba de 4 páginas generadas (DECISIONS 241). Creación: IA 0,15 × 4 + margen
+    // mínimo por libro 11,50 = 12,10. Tapa dura: + imprenta 14 + 10 (mínimo de impresión) = 36,10,
+    // ÷ 0,965 de comisión = 37,41 → 37,99 (todo en dólares). Sin dirección, el envío queda
+    // pendiente (fuera del total).
+    expect(body.snapshot.discount).toEqual({ minor: 380, reason: 'coupon', label: 'BIENVENIDA' });
     expect(body.snapshot.shipping).toMatchObject({ minor: 0, pending: true });
-    expect(body.snapshot.totalMinor).toBe(3999 - 400);
+    expect(body.snapshot.totalMinor).toBe(3799 - 380);
 
-    // Con la dirección: se cotiza con las imprentas y el envío (USD 5,50, al costo) se suma.
+    // Con la dirección: se cotiza con las imprentas y el envío (USD 5,50 al costo, más su parte de
+    // la comisión: 5,70) se suma.
     const withAddress = await post('/v1/checkout/quote', {
       bookId: 'book-1',
       format: 'hardcover',
@@ -1392,12 +1394,12 @@ describe('checkout y pagos (fase 11)', () => {
     });
     const quoted = withAddress.json<{ snapshot: PriceSnapshot }>().snapshot;
     expect(quoted.shipping).toEqual({
-      minor: 550,
+      minor: 570,
       etaDaysMin: 5,
       etaDaysMax: 10,
       pending: false,
     });
-    expect(quoted.totalMinor).toBe(3999 - 400 + 550);
+    expect(quoted.totalMinor).toBe(3799 - 380 + 570);
 
     const bad = await post('/v1/checkout/quote', {
       bookId: 'book-1',
@@ -1415,7 +1417,7 @@ describe('checkout y pagos (fase 11)', () => {
     });
     expect(res.statusCode).toBe(200);
     expect(res.json<{ estimate: { shippingUsdMinor: number } | null }>().estimate).toMatchObject({
-      shippingUsdMinor: 550,
+      shippingUsdMinor: 570,
     });
     // Un país sin dirección de ejemplo no se puede estimar.
     const none = await app.inject({
@@ -1444,7 +1446,7 @@ describe('checkout y pagos (fase 11)', () => {
 
     // Familia: aunque la petición diga que es Pro, paga el precio de Familias.
     const family = await quoteDigital({ pro: { purchases: 50 }, accountType: 'professional' });
-    expect(family.subtotalMinor).toBe(1799);
+    expect(family.subtotalMinor).toBe(1299);
     expect(family.discount.reason).toBeNull();
     expect((await status()).accountType).toBe('family');
 
@@ -1463,8 +1465,8 @@ describe('checkout y pagos (fase 11)', () => {
       accountType: 'professional',
       discount: { purchases: 0, next: { purchases: 5, percent: 10 } },
     });
-    // Precio Pro base (10 % menos), sin descuento por recurrencia todavía.
-    expect((await quoteDigital()).subtotalMinor).toBe(1599);
+    // Precio Pro base (10 % menos: 12,54 → 11,29 → 11,99), sin descuento por recurrencia todavía.
+    expect((await quoteDigital()).subtotalMinor).toBe(1199);
 
     // 5 compras elegibles en 90 días → 10 %. No cuentan: reembolsadas, canceladas, pendientes,
     // las de otra cuenta ni las anteriores a la ventana.
@@ -1488,8 +1490,8 @@ describe('checkout y pagos (fase 11)', () => {
     }
     expect((await status()).discount?.purchases).toBe(5);
     const tier = await quoteDigital();
-    expect(tier.discount).toEqual({ minor: 160, reason: 'pro', label: '10 %' });
-    expect(tier.totalMinor).toBe(1599 - 160);
+    expect(tier.discount).toEqual({ minor: 120, reason: 'pro', label: '10 %' });
+    expect(tier.totalMinor).toBe(1199 - 120);
 
     // Un reembolso posterior baja el escalón para las compras siguientes.
     await db.doc('orders/o2').update({ status: 'refunded' });
@@ -1553,7 +1555,7 @@ describe('checkout y pagos (fase 11)', () => {
       | undefined;
     expect(stored?.status).toBe('pending_payment');
     expect(stored?.approval.fingerprint).toMatch(/^[0-9a-f]{64}$/);
-    expect(stored?.priceSnapshot.totalMinor).toBe(4549);
+    expect(stored?.priceSnapshot.totalMinor).toBe(4369);
     // A México la imprenta simulada principal sale más barata (mismo envío, menos impresión).
     const routing = (await db.doc(`orders/${orderId}`).get()).get('printRouting') as {
       provider: string;
@@ -1566,13 +1568,13 @@ describe('checkout y pagos (fase 11)', () => {
     ]);
 
     // Firma inválida: se rechaza y no cambia nada.
-    expect((await webhook(completed(orderId, 4549), 'otro-secreto')).statusCode).toBe(400);
+    expect((await webhook(completed(orderId, 4369), 'otro-secreto')).statusCode).toBe(400);
     expect((await db.doc(`orders/${orderId}`).get()).get('status')).toBe('pending_payment');
 
-    const ok = await webhook(completed(orderId, 4549));
+    const ok = await webhook(completed(orderId, 4369));
     expect(ok.json<{ outcome: string }>().outcome).toBe('processed');
     // El mismo evento otra vez no duplica nada.
-    const again = await webhook(completed(orderId, 4549));
+    const again = await webhook(completed(orderId, 4369));
     expect(again.json<{ outcome: string }>().outcome).toBe('duplicate');
 
     expect((await db.doc(`orders/${orderId}`).get()).get('status')).toBe('paid');
@@ -1580,7 +1582,7 @@ describe('checkout y pagos (fase 11)', () => {
     expect(events.events).toEqual([
       { type: 'order.paid', orderId, requestId: `paid:${orderId}:pay_1` },
     ]);
-    expect(conversions.purchases).toEqual([{ orderId, valueMinor: 4549, currency: 'USD' }]);
+    expect(conversions.purchases).toEqual([{ orderId, valueMinor: 4369, currency: 'USD' }]);
   });
 
   it('si lo cobrado no coincide con lo congelado, no se fabrica y se avisa al admin', async () => {
@@ -1604,7 +1606,7 @@ describe('checkout y pagos (fase 11)', () => {
     expect((await db.doc(`orders/${first}`).get()).get('status')).toBe('cancelled');
 
     const second = (await checkout()).json<{ orderId: string }>().orderId;
-    await webhook(completed(second, 1799, 'evt_2'));
+    await webhook(completed(second, 1299, 'evt_2'));
     const refund = await post(
       `/v1/admin/orders/${second}/refund`,
       { reason: 'No le gustó' },
@@ -1625,7 +1627,7 @@ describe('checkout y pagos (fase 11)', () => {
   it('otra copia: mismo libro sin muestra nueva, solo impresa; un libro creado en digital no se reimprime', async () => {
     await approvedBook();
     const { orderId } = (await checkout()).json<{ orderId: string }>();
-    await webhook(completed(orderId, 1799, 'evt_src'));
+    await webhook(completed(orderId, 1299, 'evt_src'));
     // El libro ya se generó (lo haría el worker).
     await db.doc(`orders/${orderId}`).update({
       status: 'ready',
@@ -1722,8 +1724,8 @@ describe('checkout y pagos (fase 11)', () => {
       orderId: string;
     }>();
     // El webhook duplicado no repite el mail.
-    await webhook(completed(orderId, 4549, 'evt_mail'));
-    await webhook(completed(orderId, 4549, 'evt_mail_2'));
+    await webhook(completed(orderId, 4369, 'evt_mail'));
+    await webhook(completed(orderId, 4369, 'evt_mail_2'));
     const ofOrder = () =>
       mails((message) => message.idempotencyKey.startsWith(`order:${orderId}:`));
     expect(ofOrder().map((message) => message.template)).toEqual(['payment_confirmed']);
@@ -2001,7 +2003,7 @@ describe('checkout y pagos (fase 11)', () => {
       ).json<{ snapshot: PriceSnapshot }>().snapshot;
     // Familia: precio de siempre, aunque la petición traiga cosas raras.
     const family = await quoted();
-    expect(family.components[0]?.unitMinor).toBe(3999);
+    expect(family.components[0]?.unitMinor).toBe(3799);
     const status = () =>
       app.inject({ method: 'GET', url: '/v1/me/professional', headers: auth(TOKEN) });
     expect((await status()).json<{ accountType: string }>().accountType).toBe('family');
@@ -2013,7 +2015,7 @@ describe('checkout y pagos (fase 11)', () => {
       country: 'MX',
     });
     expect(activated.statusCode).toBe(200);
-    expect((await quoted()).components[0]?.unitMinor).toBe(3599);
+    expect((await quoted()).components[0]?.unitMinor).toBe(3399);
 
     // 5 compras elegibles en 90 días → 10 %. No cuentan: reembolsado, cancelado,
     // pendiente de pago ni una de hace 100 días.
@@ -2043,7 +2045,7 @@ describe('checkout y pagos (fase 11)', () => {
     }>().discount;
     expect(discount).toMatchObject({ purchases: 5, digitalPercent: 10, next: { purchases: 10 } });
     const pro = await quoted();
-    expect(pro.discount).toEqual({ minor: 360, reason: 'pro', label: '10 %' });
+    expect(pro.discount).toEqual({ minor: 340, reason: 'pro', label: '10 %' });
 
     // Otra cuenta (Familia) no ve el precio Pro.
     const other = await post(

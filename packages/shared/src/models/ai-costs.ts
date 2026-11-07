@@ -89,3 +89,32 @@ export function aiCostReport(records: readonly Usage[]): AiCostReport {
     perBook: grouped(records, (record) => record.orderId),
   };
 }
+
+/** Libros pagados mínimos para confiar en el costo de IA medido (con menos, queda el actual). */
+export const MIN_BOOKS_FOR_AI_COST = 20;
+
+/**
+ * Costo de IA por página medido (DECISIONS 241): todo lo que gastó la IA en cada libro pagado
+ * (muestra, regeneraciones, revisión y libro final) dividido por sus páginas, en centavos de USD
+ * redondeados hacia arriba. Null si hay menos de `MIN_BOOKS_FOR_AI_COST` libros con datos.
+ */
+export function measuredAiCostPerPage(
+  records: readonly Pick<AiUsageRecord, 'bookId' | 'costUsdMicros'>[],
+  books: readonly { bookId: string; pages: number }[],
+): { perPageUsdMinor: number; books: number } | null {
+  const pages = new Map(books.filter((book) => book.pages > 0).map((b) => [b.bookId, b.pages]));
+  const spent = new Map<string, number>();
+  for (const record of records) {
+    if (!record.bookId || !pages.has(record.bookId)) continue;
+    spent.set(record.bookId, (spent.get(record.bookId) ?? 0) + record.costUsdMicros);
+  }
+  if (spent.size < MIN_BOOKS_FOR_AI_COST) return null;
+  let micros = 0;
+  let totalPages = 0;
+  for (const [bookId, value] of spent) {
+    micros += value;
+    totalPages += pages.get(bookId) ?? 0;
+  }
+  // 1 centavo = 10.000 millonésimas de dólar.
+  return { perPageUsdMinor: Math.ceil(micros / totalPages / 10_000), books: spent.size };
+}

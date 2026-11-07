@@ -4,15 +4,29 @@ import { BOOK_FORMATS, MARGIN_MODES } from '@storynido/shared';
 
 import { ConfigEditor } from '@/components/config/config-editor';
 import { PriceTable } from '@/components/config/price-table';
-import { money, yesNo } from '@/lib/format';
+import { day, money, yesNo } from '@/lib/format';
 
 /** Resumen de un margen para la tabla ("% con mínimo: 30 % / USD 8,00"). */
 function describe(margin: unknown): string {
-  const value = margin as { mode?: string; fixedUsdMinor?: number; percent?: number } | undefined;
+  const value = margin as
+    | {
+        mode?: string;
+        fixedUsdMinor?: number;
+        percent?: number;
+        perPageUsdMinor?: number;
+        minUsdMinor?: number;
+      }
+    | undefined;
   if (!value?.mode) return '—';
   const fixed = money(value.fixedUsdMinor, 'USD');
   const percent = `${String(value.percent ?? 0)} %`;
-  if (value.mode === 'fixed') return `Fijo: ${fixed}`;
+  if (value.mode === 'fixed') {
+    return value.perPageUsdMinor
+      ? `${fixed} + ${money(value.perPageUsdMinor, 'USD')} por página generada${
+          value.minUsdMinor ? ` (mín. ${money(value.minUsdMinor, 'USD')})` : ''
+        }`
+      : `Fijo: ${fixed}`;
+  }
   if (value.mode === 'percent') return percent;
   return `${percent}, mín. ${fixed}`;
 }
@@ -27,14 +41,22 @@ export default function PricesPage() {
       <ConfigEditor
         kind="productPricing"
         title="Precios y márgenes"
-        text="Todo en dólares. Precio = creación + impresión + envío. Creación: costo de IA (costo por página × páginas del libro) + margen de creación. Impresión (solo impresos): lo que cobra la imprenta más barata para esa dirección + margen de impresión. El envío se cobra al costo. Cada margen puede ser fijo, un porcentaje del costo, o un porcentaje con mínimo."
+        text="Todo en dólares. El margen es fijo y el precio sigue al costo: si sube lo que cobra la imprenta o lo que gasta la IA más de 5 %, sube el precio (como mucho una vez por semana; los pedidos pagados quedan con su precio). Precio = (creación + impresión) ÷ (1 − comisión de cobro), redondeado a ,99; el envío se cobra al costo más su parte de la comisión. Creación: costo de IA (costo por página × páginas del libro) + margen de creación. Impresión (solo impresos): lo que cobra la imprenta que se usa para esa dirección (sin dirección, la que gana para el país) + margen de impresión. El envío se cobra al costo. Cada margen puede ser fijo, un porcentaje del costo, o un porcentaje con mínimo."
         idFrom={(data) => String(data.product)}
         blank={() => ({
           product: 'digital',
           aiCostPerPageUsdMinor: 15,
-          creationMargin: { mode: 'fixed', fixedUsdMinor: 1700, percent: 0 },
+          creationMargin: {
+            mode: 'fixed',
+            fixedUsdMinor: 800,
+            percent: 0,
+            perPageUsdMinor: 35,
+            minUsdMinor: 1150,
+          },
           printMargin: { mode: 'percent_min', fixedUsdMinor: 800, percent: 30 },
           proPercentOff: 10,
+          paymentFeePercent: 3.5,
+          minNetMarginUsdMinor: 800,
           active: false,
         })}
         fields={[
@@ -47,10 +69,16 @@ export default function PricesPage() {
           },
           { kind: 'boolean', path: 'active', label: 'Se vende' },
           {
+            kind: 'boolean',
+            path: 'aiCostManual',
+            label: 'Fijar a mano el costo de IA',
+            hint: 'Apagado: se actualiza solo cada día con lo que gastó la IA en los libros pagados de los últimos 30 días (desde 20 libros).',
+          },
+          {
             kind: 'money',
             path: 'aiCostPerPageUsdMinor',
-            label: 'Costo de IA por página (USD)',
-            hint: 'Con regeneraciones y revisión. El real por libro está en Resumen → costo de IA.',
+            label: 'Costo de IA por página con ilustración generada (USD)',
+            hint: 'Con regeneraciones y revisión. Si no está fijado a mano, lo pisa la actualización diaria.',
             currencyPath: 'currency',
           },
           {
@@ -63,6 +91,20 @@ export default function PricesPage() {
             kind: 'money',
             path: 'creationMargin.fixedUsdMinor',
             label: 'Margen de creación: fijo o mínimo (USD)',
+            currencyPath: 'currency',
+          },
+          {
+            kind: 'money',
+            path: 'creationMargin.perPageUsdMinor',
+            label: 'Margen de creación: por página con ilustración generada (USD)',
+            hint: 'Tipo «fijo»: se suma a la base por cada página generada (no cuentan las fijas ni las de actividades).',
+            currencyPath: 'currency',
+          },
+          {
+            kind: 'money',
+            path: 'creationMargin.minUsdMinor',
+            label: 'Margen mínimo por libro (USD)',
+            hint: 'Tipo «fijo»: un libro con pocas páginas generadas (por ejemplo, solo actividades) no baja de este margen. De fábrica, el del mini.',
             currencyPath: 'currency',
           },
           {
@@ -94,6 +136,21 @@ export default function PricesPage() {
           },
           {
             kind: 'number',
+            path: 'paymentFeePercent',
+            label: 'Comisión de cobro (%)',
+            hint: 'Es un costo: el precio se calcula para que, después de la comisión, quede el margen. También se suma al envío.',
+            min: 0,
+            max: 20,
+          },
+          {
+            kind: 'money',
+            path: 'minNetMarginUsdMinor',
+            label: 'Margen neto mínimo por libro (USD)',
+            hint: 'Ningún descuento (cupón, promoción, Profesionales, recurrencia) baja el margen de acá.',
+            currencyPath: 'currency',
+          },
+          {
+            kind: 'number',
             path: 'proPercentOff',
             label: 'Descuento base Profesionales (%)',
             hint: 'Aparte del descuento por compras (en Profesionales).',
@@ -104,10 +161,42 @@ export default function PricesPage() {
         columns={[
           { label: 'Producto', render: (data) => String(data.product) },
           { label: 'IA por página', render: (data) => money(data.aiCostPerPageUsdMinor, 'USD') },
+          {
+            label: 'IA medida',
+            render: (data) => {
+              const auto = data.aiCostAuto as
+                { perPageUsdMinor: number; books: number; updatedAt: unknown } | null | undefined;
+              if (!auto) return 'Sin datos suficientes';
+              return (
+                <span className="grid text-xs">
+                  <span>
+                    {money(auto.perPageUsdMinor, 'USD')} ({String(auto.books)} libros)
+                  </span>
+                  <span className="text-muted-foreground">
+                    {data.aiCostManual === true
+                      ? 'Fijado a mano'
+                      : `Actualizado automáticamente el ${day(auto.updatedAt)}`}
+                  </span>
+                </span>
+              );
+            },
+          },
           { label: 'Creación', render: (data) => describe(data.creationMargin) },
           {
             label: 'Impresión',
             render: (data) => (data.product === 'digital' ? '—' : describe(data.printMargin)),
+          },
+          {
+            label: 'Comisión · mínimo neto',
+            render: (data) =>
+              `${String(typeof data.paymentFeePercent === 'number' ? data.paymentFeePercent : 3.5)} % · ${money(
+                typeof data.minNetMarginUsdMinor === 'number'
+                  ? data.minNetMarginUsdMinor
+                  : data.product === 'digital'
+                    ? 800
+                    : 1200,
+                'USD',
+              )}`,
           },
           { label: 'Se vende', render: (data) => yesNo(data.active) },
         ]}
@@ -117,7 +206,7 @@ export default function PricesPage() {
         section
         kind="products"
         title="Páginas de referencia"
-        text="Con cuántas páginas se calcula el precio de la tarjeta de cada formato en el checkout (sin libro elegido todavía). El precio que se cobra siempre usa las páginas reales del libro."
+        text="Respaldo: con cuántas páginas se calcula el «desde» de un formato si ninguna extensión lo admite. El precio de un libro elegido siempre usa sus páginas reales."
         idFrom={(data) => String(data.format)}
         blank={() => ({
           format: 'digital',

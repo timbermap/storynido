@@ -217,12 +217,13 @@ describe('admin: interruptor del sitio y auditoría', () => {
       .rows.find(
         (item) => item.country === 'UY' && item.length === 'classic' && item.format === 'softcover',
       );
-    // 28 págs: IA 4,20 + 17 de creación + imprenta 20 + margen (30 % = 6, mínimo 8) = 49,20 → 49,99.
+    // 28 págs (26 generadas): IA 3,90 + creación 8 + 0,35 × 26 + imprenta 20 + margen (30 % = 6,
+    // mínimo 8) = 49 ÷ 0,965 de comisión = 50,78 → 50,99 (DECISIONS 241).
     expect(row).toMatchObject({
       provider: 'mock',
       productionCostUsdMinor: 2000,
       printMarginUsdMinor: 800,
-      priceMinor: 4999,
+      priceMinor: 5099,
       blocked: null,
     });
     expect((await app.inject({ method: 'GET', url: '/v1/admin/price-table' })).statusCode).toBe(

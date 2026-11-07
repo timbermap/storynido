@@ -533,3 +533,23 @@ export const activityTemplateSchema = z.object({
 });
 
 export type ActivityTemplate = z.infer<typeof activityTemplateSchema>;
+
+/**
+ * Páginas con ilustración generada de un libro ya armado (DECISIONS 241): las que pagan IA y
+ * margen por página. No cuentan las fijas de la extensión ni las de actividades que arma el
+ * sistema. Es la misma cuenta que `editorialPlan` (`narrativePages`).
+ */
+export function generatedPages(
+  book: {
+    length: BookLength | null;
+    contentType?: ContentType | null;
+    interiorPages: number;
+    activityPages?: number | null;
+  },
+  config: EditorialConfig,
+): number {
+  // Libros anteriores a las extensiones: todas sus páginas son de la historia.
+  if (!book.length) return Math.max(0, book.interiorPages);
+  const available = book.interiorPages - config.lengths[book.length].fixedPages;
+  return Math.max(book.contentType === 'activities' ? 0 : 2, available - (book.activityPages ?? 0));
+}

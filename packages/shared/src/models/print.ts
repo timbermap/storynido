@@ -149,6 +149,23 @@ export const printOptionSchema = z.object({
   etaDaysMax: z.number().int().nonnegative(),
   /** Costo por ejemplar en centavos de USD (margen). */
   productionCostUsdMinor: z.number().int().nonnegative(),
+  /**
+   * Actualización diaria con la cotización de la imprenta (DECISIONS 241): cuándo, qué había antes
+   * y si la última falló (entonces queda el valor anterior). Null: nunca se actualizó sola.
+   */
+  autoPricing: z
+    .object({
+      updatedAt: z.coerce.date().nullable(),
+      previousCostUsdMinor: z.number().int().nonnegative().nullable(),
+      previousEtaDaysMin: z.number().int().nonnegative().nullable(),
+      previousEtaDaysMax: z.number().int().nonnegative().nullable(),
+      /** Lo último que cotizó (aunque no haya movido el costo: la regla del 5 % y una vez por semana). */
+      quotedCostUsdMinor: z.number().int().nonnegative().nullish(),
+      quotedAt: z.coerce.date().nullish(),
+      failedAt: z.coerce.date().nullable(),
+      error: z.string().nullable(),
+    })
+    .nullish(),
   updatedAt: z.date(),
 });
 
