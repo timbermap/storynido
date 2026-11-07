@@ -84,6 +84,28 @@ export interface StoryReview {
   usage: AiUsage;
 }
 
+export interface ProofreadStory {
+  title: string;
+  pages: StoryPage[];
+  usage: AiUsage;
+}
+
+export interface SceneRequest {
+  childName: string;
+  /** Texto final de cada página (puede venir vacía si el dibujo cuenta solo). */
+  pages: readonly StoryPage[];
+  /** Plan de cada página, si hay (qué se ve y qué no). */
+  scenes: readonly ScenePlan[] | null;
+  /** Personajes que se repiten (acompañante y elenco), para decir quién está y quién no. */
+  recurring: readonly string[];
+}
+
+export interface SceneDescriptions {
+  /** Una por página, en el mismo orden. */
+  prompts: string[];
+  usage: AiUsage;
+}
+
 export interface ModerationResult {
   allowed: boolean;
   /** Categorías que motivaron el rechazo (vacío si se permite). */
@@ -225,8 +247,19 @@ export interface CastMember {
   look: string;
 }
 
+/** Lo que el cuento plantea y después paga (un misterio y su pista, un objeto que vuelve a servir). */
+export interface StoryPromise {
+  /** Qué se plantea, en el idioma del cuento. */
+  setup: string;
+  /** Página (1 = primera) donde se planta y donde se paga. */
+  setupPage: number;
+  payoffPage: number;
+}
+
 export interface StoryPlan {
   theme: string;
+  /** Promesas que se pagan (ausente en planes anteriores). */
+  promises?: StoryPromise[];
   /** Personas secundarias que se repiten, con género y aspecto fijos (vacío si no hay). */
   cast?: CastMember[];
   /** El acompañante que más se repite, o null si ninguno vuelve en varias páginas. */
@@ -355,7 +388,19 @@ export interface AITextProvider {
   /** Extrae la ficha del personaje a partir de la foto procesada. */
   describeCharacter(photo: ImageData): Promise<CharacterSheetResult>;
   generateStory(request: StoryRequest): Promise<GeneratedStory>;
-  reviewStory(story: GeneratedStory, request: StoryRequest): Promise<StoryReview>;
+  /**
+   * Revisión editorial. Con `issues` (controles deterministas que fallaron), además reescribe para
+   * arreglar esos problemas concretos.
+   */
+  reviewStory(
+    story: GeneratedStory,
+    request: StoryRequest,
+    options?: { issues?: readonly string[] },
+  ): Promise<StoryReview>;
+  /** Pasada de ortografía (temperatura 0): solo corrige, misma cantidad de páginas. */
+  proofreadStory(story: GeneratedStory, request: StoryRequest): Promise<ProofreadStory>;
+  /** Escena de cada página (inglés) escrita desde el texto final, para ilustrarla. */
+  describeScenes(request: SceneRequest): Promise<SceneDescriptions>;
   /** Reescribe una página más corta (pasó el tope de palabras de la edad). */
   rewritePage(request: PageRewriteRequest): Promise<PageRewrite>;
   moderateText(text: string): Promise<ModerationResult>;

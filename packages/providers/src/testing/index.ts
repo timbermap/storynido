@@ -79,6 +79,19 @@ export function describeAITextContract(name: string, create: () => AITextProvide
       expect(typeof review.approved).toBe('boolean');
     });
 
+    it('la ortografía y las escenas conservan la cantidad de páginas', async () => {
+      const story = await provider.generateStory(sampleStoryRequest);
+      const proof = await provider.proofreadStory(story, sampleStoryRequest);
+      expect(proof.pages).toHaveLength(story.pages.length);
+      const scenes = await provider.describeScenes({
+        childName: sampleStoryRequest.childName,
+        pages: proof.pages,
+        scenes: null,
+        recurring: [],
+      });
+      expect(scenes.prompts).toHaveLength(story.pages.length);
+    });
+
     it('extrae una ficha del personaje completa', async () => {
       const { sheet, usage } = await provider.describeCharacter(sampleCharacterPhoto());
       for (const field of [sheet.apparentAge, sheet.hair, sheet.eyes, sheet.skinTone]) {
