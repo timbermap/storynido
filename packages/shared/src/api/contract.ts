@@ -188,6 +188,12 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
       country: z.string(),
       /** ¿Tiene teléfono? (la imprenta lo exige; el número no se muestra en la lista). */
       hasPhone: z.boolean().optional(),
+      /** Google Maps con el pin de quien compra o el lugar que eligió (null si la cargó a mano). */
+      mapUrl: z.string().nullable().optional(),
+      /** Quien compra movió el pin: la dirección escrita puede no coincidir con el punto. */
+      pinMoved: z.boolean().optional(),
+      /** El equipo revisó la dirección: la validación de Google no la frena. */
+      reviewed: z.boolean().optional(),
     })
     .nullable(),
   payment: z.object({ provider: z.string(), paymentId: z.string().nullable() }),
@@ -1667,6 +1673,28 @@ export const apiRoutes = {
         .nullable()
         .optional(),
     }),
+    response: pipelineRequestResponseSchema.pick({ accepted: true }),
+  },
+  adminSetShippingAddress: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/shipping-address',
+    access: 'admin',
+    summary:
+      'Corrige la dirección de entrega de un pedido que todavía no fue a la imprenta (mismo país; sin teléfono ni documento se conservan los de antes); queda en auditoría sin los datos',
+    params: z.object({ orderId: z.string().min(1) }),
+    body: addressSchema.omit({ country: true, phone: true, taxId: true }).extend({
+      phone: z.string().trim().max(30).optional(),
+      taxId: z.string().trim().max(30).optional(),
+    }),
+    response: pipelineRequestResponseSchema.pick({ accepted: true }),
+  },
+  adminConfirmShippingAddress: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/shipping-address/confirm',
+    access: 'admin',
+    summary:
+      'Marca la dirección como revisada por el equipo: la validación de Google ya no frena la entrega; queda en auditoría',
+    params: z.object({ orderId: z.string().min(1) }),
     response: pipelineRequestResponseSchema.pick({ accepted: true }),
   },
   adminPreviewBook: {

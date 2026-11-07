@@ -1083,10 +1083,10 @@
       "lockedNote": "O que você corrigir fica igual em todas as páginas.",
       "illustratingText": "Ilustramos a capa e as primeiras páginas. Leva alguns minutos.",
       "waitSteps": {
-        "character": "Desenhamos {name} (alguns minutos)",
+        "character": "Desenhamos {name}",
         "review": "Você revisa e confirma a semelhança",
         "illustrate": "Ilustramos a capa e 2 páginas",
-        "order": "Se gostar, você pede e fazemos o livro completo"
+        "order": "Se gostar, fazemos o livro completo"
       },
       "leaveText": "Continuamos trabalhando mesmo que você saia. Avisamos por e-mail quando a amostra estiver pronta. Para retomar: Minhas histórias, “Em andamento”, Continuar.",
       "leaveButton": "Voltar para Minhas histórias",
@@ -1107,7 +1107,7 @@
         "steps": {
           "write": "Escrevemos a história",
           "illustrate": "Ilustramos a capa e 2 páginas",
-          "order": "Se gostar, você pede e fazemos o livro completo"
+          "order": "Se gostar, fazemos o livro completo"
         }
       },
       "waitEstimate": "{minutes, plural, one {Costuma ficar pronta em um minuto.} other {Costuma ficar pronta em uns # minutos.}}",
@@ -1120,14 +1120,14 @@
         "textDrawing": "Usamos o desenho de sempre. Montamos o convite e a história de lembrança com o tema {theme}.",
         "steps": {
           "write": "Escrevemos a história de lembrança",
-          "illustrate": "Ilustramos a capa (vai no convite) e 2 páginas",
-          "order": "Se gostar, você pede e preparamos o kit completo"
+          "illustrate": "Ilustramos a capa do convite e 2 páginas",
+          "order": "Se gostar, preparamos o kit completo"
         },
         "steps4": {
-          "character": "Desenhamos {name} (alguns minutos)",
+          "character": "Desenhamos {name}",
           "review": "Você confere e confirma a semelhança",
-          "illustrate": "Ilustramos a capa (vai no convite) e 2 páginas",
-          "order": "Se gostar, você pede e preparamos o kit completo"
+          "illustrate": "Ilustramos a capa do convite e 2 páginas",
+          "order": "Se gostar, preparamos o kit completo"
         }
       },
       "eventDifferencesPages": "A mini história tem {total} páginas; aqui você vê a capa e as primeiras {shown}.",
@@ -1773,7 +1773,8 @@
         "CO": "Departamento",
         "PE": "Departamento",
         "UY": "Departamento",
-        "ES": "Província"
+        "ES": "Província",
+        "EC": "Província"
       },
       "stateOther": "Província, departamento ou região",
       "line2Other": "Apto., andar ou bairro",
@@ -1781,12 +1782,37 @@
       "postalCode": "CEP",
       "phone": "Telefone",
       "taxId": {
-        "MX": "RFC ou CURP de quem recebe",
-        "AR": "CUIT, CUIL ou DNI de quem recebe",
-        "BR": "CPF de quem recebe"
+        "MX": "RFC de quem recebe",
+        "AR": "CUIT ou CUIL de quem recebe",
+        "BR": "CPF de quem recebe",
+        "CL": "RUT de quem recebe",
+        "PE": "DNI ou RUC de quem recebe",
+        "EC": "Cédula ou RUC de quem recebe",
+        "UY": "Cédula de quem recebe"
       },
-      "taxIdHint": "Opcional. Com este dado podemos usar uma gráfica mais econômica; só é usado para o envio e a alfândega.",
-      "confirm": "Confirmo que o endereço de entrega está correto."
+      "taxIdHint": "A alfândega exige para entregar o livro. Só é usado para o envio.",
+      "taxIdHintOptional": "Opcional. Ajuda a alfândega a entregar o livro sem atrasos. Só é usado para o envio.",
+      "errors": {
+        "postalCode": "Confira o CEP ou código postal.",
+        "postalCodeExample": "Confira o código postal (por exemplo, {example}).",
+        "phone": "Confira o telefone: com DDD, só números.",
+        "taxId": "Confira o número: não corresponde a um documento válido.",
+        "state": "Confira este campo.",
+        "streetNumber": "Adicione o número."
+      },
+      "confirm": "Confirmo que o endereço de entrega está correto.",
+      "confirmMap": "Confirmo que o endereço e o pino do mapa estão corretos.",
+      "search": {
+        "label": "Buscar o endereço",
+        "placeholder": "Rua e número, por exemplo Av. Paulista 1578",
+        "hint": "Escolha seu endereço na lista: completamos o resto e mostramos no mapa. Se não aparecer, preencha abaixo.",
+        "poweredBy": "Sugestões do Google"
+      },
+      "map": {
+        "label": "Mapa do endereço de entrega",
+        "pin": "Endereço de entrega",
+        "hint": "Se o pino não estiver na porta certa, arraste até lá."
+      }
     },
     "giftTitle": "Presente",
     "isGift": "É um presente",

@@ -1,6 +1,6 @@
 'use client';
 
-import { PIPELINE_STEPS, type PipelineStep } from '@storynido/shared';
+import { PIPELINE_STEPS, type AdminOrderDetail, type PipelineStep } from '@storynido/shared';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useState } from 'react';
 
@@ -25,6 +25,78 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
+/** Estados en los que la dirección todavía se puede corregir (antes de la imprenta). */
+const ADDRESS_EDITABLE = ['paid', 'generating', 'qa_failed', 'ready'];
+
+const ADDRESS_INPUTS = [
+  { key: 'name', label: 'Recibe' },
+  { key: 'line1', label: 'Calle y número' },
+  { key: 'line2', label: 'Piso, depto. o barrio' },
+  { key: 'city', label: 'Ciudad' },
+  { key: 'state', label: 'Provincia o estado' },
+  { key: 'postalCode', label: 'Código postal' },
+  { key: 'phone', label: 'Teléfono (vacío: se conserva)' },
+  { key: 'taxId', label: 'Documento (vacío: se conserva)' },
+] as const;
+
+type AddressInput = Record<(typeof ADDRESS_INPUTS)[number]['key'], string>;
+
+/** Formulario para corregir la dirección: el país no cambia (define precio e imprentas). */
+function AddressEditor({
+  shipping,
+  busy,
+  onSave,
+  onCancel,
+}: {
+  shipping: NonNullable<AdminOrderDetail['shipping']>;
+  busy: boolean;
+  onSave: (value: AddressInput) => void;
+  onCancel: () => void;
+}) {
+  const [value, setValue] = useState<AddressInput>({
+    name: shipping.name,
+    line1: shipping.line1 ?? '',
+    line2: shipping.line2 ?? '',
+    city: shipping.city,
+    state: shipping.state ?? '',
+    postalCode: shipping.postalCode,
+    phone: '',
+    taxId: '',
+  });
+  return (
+    <form
+      className="mt-3 grid gap-2 text-sm"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSave(value);
+      }}
+    >
+      <p className="text-muted-foreground">País: {shipping.country} (no se puede cambiar).</p>
+      {ADDRESS_INPUTS.map(({ key, label }) => (
+        <label key={key} className="grid gap-1">
+          <span>{label}</span>
+          <input
+            id={`fix-${key}`}
+            value={value[key]}
+            onChange={(event) => {
+              setValue((current) => ({ ...current, [key]: event.target.value }));
+            }}
+            className="h-9 rounded-md border bg-background px-2"
+          />
+        </label>
+      ))}
+      <div className="flex gap-2">
+        <Button type="submit" disabled={busy}>
+          Guardar dirección
+        </Button>
+        <Button type="button" variant="outline" disabled={busy} onClick={onCancel}>
+          Cancelar
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 /** Detalle del pedido: montos, costos y margen, imprenta, pipeline, QA y acciones. */
 function OrderDetail({ id }: { id: string }) {
   const load = useCallback(
@@ -40,6 +112,7 @@ function OrderDetail({ id }: { id: string }) {
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
   const [fromStep, setFromStep] = useState<PipelineStep | ''>('');
   const [showPages, setShowPages] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(false);
 
   async function act(question: string, run: () => Promise<string>) {
     if (!window.confirm(question)) return;
@@ -157,7 +230,91 @@ function OrderDetail({ id }: { id: string }) {
                     .join(', ')
                 : '—'}
             </Row>
+            <Row label="Dirección revisada">
+              {order.shipping ? (order.shipping.reviewed ? 'Sí, por el equipo' : 'No') : '—'}
+            </Row>
+            <Row label="Mapa">
+              {order.shipping?.mapUrl ? (
+                <a
+                  href={order.shipping.mapUrl}
+                  className="text-primary underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {order.shipping.pinMoved
+                    ? 'Ver el pin (lo movió quien compra)'
+                    : 'Ver en el mapa'}
+                </a>
+              ) : (
+                'Cargada a mano'
+              )}
+            </Row>
           </dl>
+          {order.shipping &&
+            ADDRESS_EDITABLE.includes(order.status) &&
+            !order.shipping.reviewed &&
+            !editingAddress && (
+              <Button
+                variant="outline"
+                className="mt-3 mr-2"
+                disabled={busy}
+                onClick={() =>
+                  void act(
+                    '¿La dirección está bien así? Google no la va a volver a frenar en este pedido.',
+                    async () => {
+                      await api('adminConfirmShippingAddress', { params });
+                      return order.status === 'qa_failed'
+                        ? 'Dirección marcada como revisada. Ahora reintenta desde «deliver».'
+                        : 'Dirección marcada como revisada.';
+                    },
+                  )
+                }
+              >
+                Dirección revisada
+              </Button>
+            )}
+          {order.shipping && ADDRESS_EDITABLE.includes(order.status) && !editingAddress && (
+            <Button
+              variant="outline"
+              className="mt-3"
+              disabled={busy}
+              onClick={() => {
+                setEditingAddress(true);
+              }}
+            >
+              Corregir dirección
+            </Button>
+          )}
+          {order.shipping && editingAddress && (
+            <AddressEditor
+              shipping={order.shipping}
+              busy={busy}
+              onCancel={() => {
+                setEditingAddress(false);
+              }}
+              onSave={(value) => {
+                void act('¿Guardar la dirección nueva en este pedido?', async () => {
+                  await api('adminSetShippingAddress', {
+                    params,
+                    body: {
+                      name: value.name,
+                      line1: value.line1,
+                      line2: value.line2.trim() ? value.line2 : null,
+                      city: value.city,
+                      state: value.state.trim() ? value.state : null,
+                      postalCode: value.postalCode,
+                      ...(value.phone.trim() ? { phone: value.phone } : {}),
+                      ...(value.taxId.trim() ? { taxId: value.taxId } : {}),
+                    },
+                  });
+                  setEditingAddress(false);
+                  return order.status === 'qa_failed'
+                    ? 'Dirección guardada. Ahora reintenta desde «deliver».'
+                    : 'Dirección guardada.';
+                });
+              }}
+            />
+          )}
           {order.printQuotes.length > 0 && (
             <ul className="mt-2 text-xs text-muted-foreground">
               {order.printQuotes.map((quote) => (

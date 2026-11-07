@@ -2493,7 +2493,31 @@ Lo que se ve en la muestra es lo que se imprime. Una sola regla (`pageLayout`, e
 
 Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configuración, no números sueltos en el código. La cantidad de palabras por edad la define otra decisión (texto por edad); este armado no la cambia.
 
-## 233 — Cantidad de texto, forma, letra y voz por edad («Cuentos que cuidan»)
+## 233 — Dirección de envío: reglas por país y documento obligatorio donde la aduana lo pide
+
+- **Fecha:** 2026-11-06.
+- **Contexto:** la dirección era texto libre y solo México y EE. UU. tenían reglas. Lulu documenta que Argentina (CUIT o CUIL), Brasil (CPF), Chile (RUT), México (RFC, no CURP), Perú (RUC o DNI) y Ecuador piden el documento de quien recibe para cualquier envío del exterior; sin él, el paquete puede volver al origen. Gelato exige el CPF en Brasil (`federalTaxId`) y el estado en Brasil y Chile. Cloudprinter acepta el documento en `customer_identification`.
+- **Decisión:** reemplaza lo de la decisión 139 sobre el documento. Es obligatorio en México, Argentina, Brasil, Chile y Perú, opcional en Uruguay (cédula), y se valida con el dígito verificador (CUIT/CUIL, CPF, RUT) o el formato (RFC, DNI/RUC, cédula). Se manda a las tres imprentas. Código postal con formato por país (AR, UY, BR, CL, CO, PE, ES, además de MX y US) y estado obligatorio también en Brasil y Chile. El checkout muestra el motivo debajo del campo con un ejemplo de código postal del país.
+- **Alternativas:** dejarlo opcional (menos fricción, pero más envíos retenidos en la aduana) o pedirlo solo cuando gana Lulu (la aduana lo pide igual con cualquier imprenta).
+- **Pendiente:** autocompletado de Google con mapa y pin (decidido por Sebas el 5 de noviembre de 2026), en un cambio aparte.
+
+## 234 — Dirección con autocompletado de Google y mapa con pin
+
+- **Fecha:** 2026-11-06. Decidido por Sebas el 5 de noviembre de 2026 (opción "Google con mapa y pin").
+- **Contexto:** muchas calles y avenidas se llaman igual en distintas ciudades ("San Martín"); un error se descubre cuando el correo devuelve el libro. Comparamos Google, Mapbox y Loqate: Google tiene la mejor cobertura en Latinoamérica y, con los cupos gratis por mes (10.000 detalles de lugar y 10.000 cargas del mapa), cuesta USD 0 al volumen actual. Mapbox no deja guardar los resultados sin un plan aparte; Loqate cobra desde la primera búsqueda y no trae mapa.
+- **Decisión:** si hay clave (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`), el checkout del impreso suma un buscador con sugerencias de Google limitadas al país (cada una con ciudad y provincia) que completa calle, número, ciudad, provincia y código postal, y un mapa chico con un pin que se puede arrastrar. Si la sugerencia no trae número, se pide. Si el pin se mueve, hay que volver a confirmar. Los campos siguen editables y, si Google no carga, queda la carga manual de siempre. Una sesión de autocompletado por dirección (Google cobra solo el detalle). Se guarda el `placeId` y, solo si quien compra movió el pin, sus coordenadas (dato propio, no de Google: las coordenadas de Google no se guardan más de 30 días). La imprenta no recibe el pin; el admin muestra un enlace a Google Maps.
+- **Infra:** Terraform habilita Maps JavaScript, Places y API Keys y crea una clave de navegador restringida a los dominios de la web. La clave va como secreto de App Hosting; la CSP suma los orígenes de Maps solo si hay clave.
+- **Privacidad:** Google Maps Platform suma a la tabla de encargados (`docs/PRIVACY.md`). Falta actualizar la política de privacidad publicada antes de producción.
+
+## 235 — Ecuador y validación de Google antes de la imprenta
+
+- **Fecha:** 2026-11-06. Pedido por Sebas ("hacé ambos").
+- **Ecuador:** cédula (10 dígitos, verificador módulo 10) o RUC (13) obligatorio, como pide Lulu para la aduana; código postal de 6 dígitos.
+- **Validación antes de la imprenta:** en el paso `deliver`, el worker llama a Google Address Validation con su cuenta de servicio (OAuth, sin clave; factura al proyecto con `X-Goog-User-Project`). Si Google dice que hay que corregirla (`possibleNextAction: FIX`) o el pin que movió quien compra está a más de 300 m de donde Google ubica la dirección escrita, el pedido queda en revisión (`address_review`) y no se paga la impresión. El admin la corrige ("Corregir dirección") o la marca como revisada ("Dirección revisada") y reintenta desde `deliver`; una dirección revisada ya no se frena. Si Google no responde, no frena. Uruguay y Perú no tienen datos en Address Validation: ahí manda la confirmación de quien compra con el mapa.
+- **Infra:** Terraform habilita `addressvalidation.googleapis.com` y suma `roles/serviceusage.serviceUsageConsumer` al worker.
+- **Costo:** USD 17 cada 1.000 después de 5.000 gratis por mes; una llamada por impreso.
+
+## 236 — Cantidad de texto, forma, letra y voz por edad («Cuentos que cuidan»)
 
 - **Franjas de edad:** 0-2, 3-4, 5-6, 7-8 y 9+ (antes 0-2, 3-5, 6-8, 9+). Palabras por página (rango y tope): 0-8 (10), 10-25 (30), 20-40 (50), 40-70 (80), 70-120 (140). Están en `editorialConfig.ageBands`, editables en el admin («Palabras por edad»); un documento guardado antes toma las de fábrica. Sin edad conocida se usan las densidades de siempre.
 - **«Ajustar» mueve un escalón:** la densidad pasa a ser un escalón sobre la franja de la edad (muy visual, una franja menos; más lectura, una más), así nunca se aleja más de uno.

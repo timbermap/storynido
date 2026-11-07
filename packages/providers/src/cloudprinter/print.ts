@@ -216,6 +216,8 @@ export class CloudprinterPrintProvider implements PrintProvider {
           country: request.address.country,
           email: request.email,
           phone: request.address.phone ?? '',
+          // Documento de quien recibe (CPF, CUIT, RUT…): la aduana del destino lo pide.
+          ...(request.address.taxId ? { customer_identification: request.address.taxId } : {}),
         },
       ],
       items: request.items.map((item, index) => {

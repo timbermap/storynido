@@ -1000,6 +1000,8 @@ describe('checkout y pagos (fase 11)', () => {
     postalCode: '06600',
     country: 'MX',
     phone: '+52 55 1234 5678',
+    // RFC genérico: México pide el documento de quien recibe (aduana).
+    taxId: 'XAXX010101000',
   };
 
   beforeAll(async () => {

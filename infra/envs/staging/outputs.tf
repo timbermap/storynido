@@ -47,3 +47,9 @@ output "recaptcha_site_key" {
   description = "Clave pública de reCAPTCHA Enterprise de la web (va en apphosting*.yaml)."
   value       = module.environment.recaptcha_site_key
 }
+
+output "maps_browser_key" {
+  description = "Clave de navegador de Google Maps del checkout (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY)."
+  value       = module.environment.maps_browser_key
+  sensitive   = true
+}

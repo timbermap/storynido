@@ -3,7 +3,10 @@
 import {
   ApiError,
   CONFIGURED_COUNTRIES,
+  POSTAL_CODE_EXAMPLES,
+  STATE_REQUIRED_COUNTRIES,
   TAX_ID_COUNTRIES,
+  TAX_ID_REQUIRED_COUNTRIES,
   addressProblems,
   type Address,
   type BookFormat,
@@ -14,7 +17,7 @@ import {
 } from '@storynido/shared';
 import { Gift, Loader2, Lock } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { trackConversion } from '@/lib/conversions';
 
@@ -29,12 +32,15 @@ import { CountryOptions } from '@/components/country-options';
 import { formatPrice } from '@/lib/format';
 import { reorderStart } from '@/lib/reorder';
 import { cn } from '@/lib/utils';
+import { MAPS_API_KEY, type LatLng } from '@/lib/google-maps';
+import { AddressMap } from './address-map';
+import { AddressSearch, type PickedAddress } from './address-search';
 import { CheckoutBook } from './checkout-book';
 
 import { ChristmasNote, GiftDeadline } from './gift-deadline';
 import { PriceSummary } from './price-summary';
 
-type AddressDraft = Omit<Address, 'country'>;
+type AddressDraft = Omit<Address, 'country' | 'placeId' | 'pin'>;
 
 /** Dirección lista para cotizar: lo obligatorio cargado y las reglas de su país cumplidas. */
 function addressComplete(address: Address): boolean {
@@ -53,8 +59,11 @@ const EMPTY_ADDRESS: AddressDraft = {
   taxId: null,
 };
 
-/** Países donde la imprenta exige el estado en la dirección. */
-const STATE_REQUIRED: readonly string[] = ['MX', 'US'];
+const STATE_REQUIRED: readonly string[] = STATE_REQUIRED_COUNTRIES;
+const TAX_ID_REQUIRED: readonly string[] = TAX_ID_REQUIRED_COUNTRIES;
+
+/** Campos que, cargados con un valor que no cumple la regla del país, muestran el motivo. */
+const EXPLAINED: readonly (keyof AddressDraft)[] = ['postalCode', 'phone', 'taxId', 'state'];
 
 const ADDRESS_FIELDS: { key: keyof AddressDraft; optional?: boolean; autoComplete: string }[] = [
   { key: 'name', autoComplete: 'name' },
@@ -155,6 +164,30 @@ export function Checkout({
   } | null>(null);
   // País de envío del impreso (cualquiera: la imprenta se cotiza con la dirección).
   const [shipTo, setShipTo] = useState<CountryCode>(country);
+  // Autocompletado de Google con mapa (solo con clave; si Google falla, queda la carga manual).
+  const [mapsOn, setMapsOn] = useState(MAPS_API_KEY !== '');
+  const [located, setLocated] = useState<{
+    placeId: string;
+    location: LatLng | null;
+    pin: LatLng | null;
+  } | null>(null);
+  const [numberNeeded, setNumberNeeded] = useState(false);
+  const mapsUnavailable = useCallback(() => {
+    setMapsOn(false);
+    setLocated(null);
+  }, []);
+  const pick = useCallback((picked: PickedAddress) => {
+    setAddress((current) => ({
+      ...current,
+      line1: picked.line1 || current.line1,
+      city: picked.city || current.city,
+      state: picked.state ?? current.state,
+      postalCode: picked.postalCode || current.postalCode,
+    }));
+    setLocated({ placeId: picked.placeId, location: picked.location, pin: null });
+    setNumberNeeded(picked.missingNumber);
+    if (picked.missingNumber) document.getElementById('address-line1')?.focus();
+  }, []);
   const print = format !== 'digital';
   // Ejemplares: solo el cuento grapado (ideal para souvenirs); lo demás es de a uno.
   const quantity = format === 'booklet' ? copies : 1;
@@ -176,6 +209,7 @@ export function Checkout({
   // Con la dirección completa se cotiza con las imprentas (envío real).
   const addressKey =
     shippingAddress && addressComplete(shippingAddress) ? JSON.stringify(shippingAddress) : null;
+  const problems = shippingAddress ? addressProblems(shippingAddress) : [];
   const confirmed = addressKey !== null && confirmedKey === addressKey;
 
   useEffect(() => {
@@ -267,7 +301,10 @@ export function Checkout({
         country: orderCountry,
         quantity,
         couponCode: coupon,
-        shippingAddress,
+        shippingAddress:
+          shippingAddress && located
+            ? { ...shippingAddress, placeId: located.placeId, pin: located.pin }
+            : shippingAddress,
         gift: {
           isGift: gift.isGift,
           message: gift.isGift && gift.message.trim() ? gift.message : null,
@@ -408,21 +445,40 @@ export function Checkout({
                   value={shipTo}
                   onChange={(event) => {
                     setShipTo(event.target.value as CountryCode);
+                    setLocated(null);
                   }}
                   className={field}
                 >
                   <CountryOptions locale={locale} current={shipTo} />
                 </select>
               </label>
+              {mapsOn && (
+                <AddressSearch
+                  key={shipTo}
+                  country={shipTo}
+                  language={locale.slice(0, 2)}
+                  onPick={pick}
+                  onUnavailable={mapsUnavailable}
+                />
+              )}
               {ADDRESS_FIELDS.filter(
                 ({ key }) =>
                   key !== 'taxId' || (TAX_ID_COUNTRIES as readonly string[]).includes(shipTo),
               ).map(({ key, optional: alwaysOptional, autoComplete }) => {
-                // El estado solo es obligatorio donde las imprentas lo exigen (México y EE. UU.);
-                // en otros países se llama provincia, departamento o región, o no existe.
+                // El estado solo es obligatorio donde las imprentas lo exigen (México, EE. UU.,
+                // Brasil y Chile); en otros países se llama provincia o departamento, o no existe.
+                // El documento es obligatorio donde la aduana lo pide para entregar.
                 const optional =
-                  (alwaysOptional ?? false) ||
-                  (key === 'state' && !STATE_REQUIRED.includes(shipTo));
+                  key === 'taxId'
+                    ? !TAX_ID_REQUIRED.includes(shipTo)
+                    : (alwaysOptional ?? false) ||
+                      (key === 'state' && !STATE_REQUIRED.includes(shipTo));
+                const value = address[key] ?? '';
+                // La sugerencia de Google no traía el número de la puerta: se pide hasta que esté.
+                const noNumber = key === 'line1' && numberNeeded && !/\d/.test(value);
+                const invalid =
+                  noNumber ||
+                  (EXPLAINED.includes(key) && value.trim() !== '' && problems.includes(key));
                 return (
                   <label
                     key={key}
@@ -449,16 +505,29 @@ export function Checkout({
                     <input
                       id={`address-${key}`}
                       autoComplete={autoComplete}
-                      value={address[key] ?? ''}
+                      value={value}
                       required={!optional}
+                      aria-invalid={invalid || undefined}
+                      aria-describedby={invalid ? `address-${key}-error` : undefined}
                       onChange={(event) => {
                         setAddress((current) => ({ ...current, [key]: event.target.value }));
                       }}
                       className={field}
                     />
-                    {key === 'taxId' && (
+                    {invalid && (
+                      <span id={`address-${key}-error`} className="text-xs text-destructive">
+                        {noNumber
+                          ? t('address.errors.streetNumber')
+                          : key === 'postalCode' && POSTAL_CODE_EXAMPLES[shipTo]
+                            ? t('address.errors.postalCodeExample', {
+                                example: POSTAL_CODE_EXAMPLES[shipTo],
+                              })
+                            : t(`address.errors.${key}`)}
+                      </span>
+                    )}
+                    {key === 'taxId' && !invalid && (
                       <span className="text-xs text-muted-foreground">
-                        {t('address.taxIdHint')}
+                        {t(optional ? 'address.taxIdHintOptional' : 'address.taxIdHint')}
                       </span>
                     )}
                   </label>
@@ -467,6 +536,18 @@ export function Checkout({
             </div>
             {!CONFIGURED_COUNTRIES.includes(shipTo) && (
               <p className="text-sm text-muted-foreground">{t('importDuties')}</p>
+            )}
+            {mapsOn && located?.location && (
+              <AddressMap
+                location={located.pin ?? located.location}
+                language={locale.slice(0, 2)}
+                onMove={(position) => {
+                  setLocated((current) => (current ? { ...current, pin: position } : current));
+                  // Con el pin en otro lugar, hay que volver a confirmar.
+                  setConfirmedKey(null);
+                }}
+                onUnavailable={mapsUnavailable}
+              />
             )}
             {addressKey && (
               <label className="flex items-start gap-3 rounded-xl border bg-card p-3 text-sm">
@@ -479,7 +560,9 @@ export function Checkout({
                   className="mt-0.5 size-4 accent-[var(--primary)]"
                 />
                 <span>
-                  <span className="font-semibold">{t('address.confirm')}</span>
+                  <span className="font-semibold">
+                    {t(mapsOn && located?.location ? 'address.confirmMap' : 'address.confirm')}
+                  </span>
                   <span className="mt-1 block text-muted-foreground">
                     {[address.line1, address.city, address.state, address.postalCode, shipTo]
                       .filter(Boolean)

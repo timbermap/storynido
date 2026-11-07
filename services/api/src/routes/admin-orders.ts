@@ -2,12 +2,14 @@ import { randomUUID } from 'node:crypto';
 
 import {
   COLLECTIONS,
+  addressProblems,
   apiRoutes,
   normalizeFirestoreData,
   toUsd,
   utcDay,
   type AdminOrderDetail,
   type AdminOrderSummary,
+  type Address,
   type Currency,
   type OrderStatus,
 } from '@storynido/shared';
@@ -22,7 +24,34 @@ import { addRoute } from '../plugins/route';
 type ListQuery = z.output<(typeof apiRoutes)['adminOrders']['query']>;
 type Data = Record<string, unknown>;
 
+/** Estados en los que la dirección todavía se puede corregir: antes de mandarlo a la imprenta. */
+const ADDRESS_EDITABLE: readonly OrderStatus[] = ['paid', 'generating', 'qa_failed', 'ready'];
+
 const iso = (value: unknown) => (value instanceof Date ? value.toISOString() : null);
+
+/**
+ * Enlace a Google Maps de la dirección: el pin que movió quien compra, o el lugar que eligió en
+ * el autocompletado. Sin ninguno de los dos (carga manual), no hay enlace.
+ */
+function mapLink(address: Data): { mapUrl: string | null; pinMoved: boolean } {
+  const pin = address.pin as { lat?: unknown; lng?: unknown } | null | undefined;
+  if (pin && typeof pin.lat === 'number' && typeof pin.lng === 'number') {
+    return {
+      mapUrl: `https://www.google.com/maps/search/?api=1&query=${String(pin.lat)},${String(pin.lng)}`,
+      pinMoved: true,
+    };
+  }
+  if (typeof address.placeId === 'string' && address.placeId) {
+    const text = [address.line1, address.city, address.country].filter(Boolean).join(', ');
+    const query = new URLSearchParams({
+      api: '1',
+      query: text,
+      query_place_id: address.placeId,
+    });
+    return { mapUrl: `https://www.google.com/maps/search/?${query.toString()}`, pinMoved: false };
+  }
+  return { mapUrl: null, pinMoved: false };
+}
 
 /** Resumen de un pedido para las listas del panel (sin datos del niño). */
 export function toOrderSummary(
@@ -284,6 +313,8 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
             postalCode: String(address.postalCode),
             country: String(address.country),
             hasPhone: typeof address.phone === 'string' && address.phone.trim().length > 0,
+            ...mapLink(address),
+            reviewed: data.shippingAddressReviewed === true,
           }
         : null,
       payment: {
@@ -344,6 +375,96 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
         batch.update(orders.doc(orderId), {
           'shippingAddress.phone': phone,
           ...(taxId !== undefined ? { 'shippingAddress.taxId': taxId } : {}),
+          updatedAt: new Date(),
+        });
+      },
+    );
+    return { accepted: true as const };
+  });
+
+  // La dirección se corrige mientras el pedido no fue a la imprenta (la persona avisó que se
+  // equivocó, o la imprenta la rechazó). El país no cambia: define la moneda, el precio y las
+  // imprentas. Queda auditado con los campos que cambiaron, sin los datos.
+  addRoute(app, apiRoutes.adminSetShippingAddress, {}, async (request) => {
+    const { orderId } = request.params as { orderId: string };
+    const body = request.body as Omit<Address, 'country' | 'phone' | 'taxId'> & {
+      phone?: string;
+      taxId?: string;
+    };
+    const doc = await load(orderId);
+    const status = doc.get('status') as OrderStatus;
+    if (!ADDRESS_EDITABLE.includes(status)) {
+      throw new AppError(
+        409,
+        'bad_request',
+        `El pedido está en "${status}": la dirección ya no se puede cambiar.`,
+      );
+    }
+    const current = doc.get('shippingAddress') as Address | null | undefined;
+    if (!current) {
+      throw new AppError(409, 'bad_request', 'El pedido no tiene dirección de envío.');
+    }
+    const next: Address = {
+      name: body.name.trim(),
+      line1: body.line1.trim(),
+      line2: body.line2?.trim() ? body.line2.trim() : null,
+      city: body.city.trim(),
+      state: body.state?.trim() ? body.state.trim() : null,
+      postalCode: body.postalCode.trim(),
+      country: current.country,
+      phone: body.phone?.trim() ? body.phone.trim() : (current.phone ?? null),
+      taxId: body.taxId?.trim() ? body.taxId.trim() : (current.taxId ?? null),
+    };
+    const problems = addressProblems(next);
+    if (problems.length > 0) {
+      throw new AppError(400, 'validation_failed', `Revisa la dirección: ${problems.join(', ')}.`);
+    }
+    const changed = (Object.keys(next) as (keyof Address)[]).filter(
+      (key) => (next[key] ?? null) !== (current[key] ?? null),
+    );
+    await auditedWrite(
+      db,
+      request.user,
+      {
+        action: 'order.set_shipping_address',
+        entity: COLLECTIONS.orders,
+        entityId: orderId,
+        before: { status },
+        after: { changed },
+      },
+      (batch) => {
+        // Una persona del equipo la revisó: la validación de Google ya no la frena.
+        batch.update(orders.doc(orderId), {
+          shippingAddress: next,
+          shippingAddressReviewed: true,
+          updatedAt: new Date(),
+        });
+      },
+    );
+    return { accepted: true as const };
+  });
+
+  // Google no confirmó la dirección, pero el equipo la revisó (con quien compra) y está bien.
+  addRoute(app, apiRoutes.adminConfirmShippingAddress, {}, async (request) => {
+    const { orderId } = request.params as { orderId: string };
+    const doc = await load(orderId);
+    const status = doc.get('status') as OrderStatus;
+    if (!ADDRESS_EDITABLE.includes(status) || !doc.get('shippingAddress')) {
+      throw new AppError(409, 'bad_request', `El pedido está en "${status}".`);
+    }
+    await auditedWrite(
+      db,
+      request.user,
+      {
+        action: 'order.confirm_shipping_address',
+        entity: COLLECTIONS.orders,
+        entityId: orderId,
+        before: { reviewed: doc.get('shippingAddressReviewed') === true },
+        after: { reviewed: true },
+      },
+      (batch) => {
+        batch.update(orders.doc(orderId), {
+          shippingAddressReviewed: true,
           updatedAt: new Date(),
         });
       },

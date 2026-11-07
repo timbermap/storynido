@@ -12,11 +12,18 @@ export interface SecurityOptions {
   dev: boolean;
   /** Analítica con consentimiento (GA4 y Meta): solo la web. */
   analytics: boolean;
+  /** Google Maps en el checkout (autocompletado y mapa): solo si hay clave. */
+  maps?: boolean;
 }
 
 const unique = (values: string[]) => [...new Set(values.filter(Boolean))];
 
-export function contentSecurityPolicy({ apiUrl, dev, analytics }: SecurityOptions): string {
+export function contentSecurityPolicy({
+  apiUrl,
+  dev,
+  analytics,
+  maps = false,
+}: SecurityOptions): string {
   const api = new URL(apiUrl).origin;
   const firebase = [
     'https://*.googleapis.com',
@@ -27,6 +34,10 @@ export function contentSecurityPolicy({ apiUrl, dev, analytics }: SecurityOption
   const recaptcha = ['https://www.google.com/recaptcha/', 'https://www.gstatic.com/recaptcha/'];
   const ga = ['https://www.googletagmanager.com', 'https://*.google-analytics.com'];
   const meta = ['https://connect.facebook.net', 'https://www.facebook.com'];
+  // Maps JavaScript API (lista de Google para CSP con orígenes permitidos).
+  const googleMaps = maps
+    ? ['https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://*.ggpht.com']
+    : [];
   // En desarrollo: recarga en caliente de Next y los emuladores de Firebase.
   const local = dev ? ['http://localhost:*', 'http://127.0.0.1:*', 'ws://localhost:*'] : [];
   const directives: Record<string, string[]> = {
@@ -37,9 +48,14 @@ export function contentSecurityPolicy({ apiUrl, dev, analytics }: SecurityOption
       ...(dev ? ["'unsafe-eval'"] : []),
       'https://apis.google.com',
       ...recaptcha,
+      ...googleMaps,
       ...(analytics ? [...ga, 'https://connect.facebook.net'] : []),
     ]),
-    'style-src': ["'self'", "'unsafe-inline'"],
+    'style-src': unique([
+      "'self'",
+      "'unsafe-inline'",
+      ...(maps ? ['https://fonts.googleapis.com'] : []),
+    ]),
     'img-src': unique([
       "'self'",
       'data:',
@@ -47,16 +63,18 @@ export function contentSecurityPolicy({ apiUrl, dev, analytics }: SecurityOption
       api,
       'https://storage.googleapis.com',
       'https://lh3.googleusercontent.com',
+      ...googleMaps,
       ...(analytics ? [...ga, 'https://www.facebook.com'] : []),
       ...local,
     ]),
-    'font-src': ["'self'", 'data:'],
+    'font-src': unique(["'self'", 'data:', ...(maps ? ['https://fonts.gstatic.com'] : [])]),
     'connect-src': unique([
       "'self'",
       api,
       'https://storage.googleapis.com',
       ...firebase,
       ...recaptcha,
+      ...googleMaps,
       ...(analytics ? [...ga, ...meta] : []),
       ...local,
     ]),
@@ -72,6 +90,7 @@ export function contentSecurityPolicy({ apiUrl, dev, analytics }: SecurityOption
       ...(analytics ? ['https://www.facebook.com'] : []),
       ...local,
     ]),
+    ...(maps ? { 'worker-src': ["'self'", 'blob:'] } : {}),
     'object-src': ["'none'"],
     'base-uri': ["'self'"],
     'form-action': ["'self'"],

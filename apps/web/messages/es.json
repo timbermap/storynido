@@ -1083,10 +1083,10 @@
       "lockedNote": "Lo que corrijas queda fijo en todas las páginas.",
       "illustratingText": "Ilustramos la portada y las primeras páginas. Tarda un par de minutos.",
       "waitSteps": {
-        "character": "Dibujamos a {name} (unos minutos)",
+        "character": "Dibujamos a {name}",
         "review": "Tú revisas y confirmas el parecido",
         "illustrate": "Ilustramos la portada y 2 páginas",
-        "order": "Si te gusta, lo pides y hacemos el libro completo"
+        "order": "Si te gusta, hacemos el libro completo"
       },
       "leaveText": "Seguimos trabajando aunque salgas. Te escribimos cuando la muestra esté lista. Para retomarla: Mis cuentos, «En proceso», Continuar.",
       "leaveButton": "Volver a Mis cuentos",
@@ -1107,7 +1107,7 @@
         "steps": {
           "write": "Escribimos la historia",
           "illustrate": "Ilustramos la portada y 2 páginas",
-          "order": "Si te gusta, lo pides y hacemos el libro completo"
+          "order": "Si te gusta, hacemos el libro completo"
         }
       },
       "waitEstimate": "{minutes, plural, one {Suele estar en un minuto.} other {Suele estar en unos # minutos.}}",
@@ -1120,14 +1120,14 @@
         "textDrawing": "Usamos su dibujo de siempre. Armamos la invitación y el cuento de recuerdo con la temática {theme}.",
         "steps": {
           "write": "Escribimos el cuento de recuerdo",
-          "illustrate": "Ilustramos la portada (va en la invitación) y 2 páginas",
-          "order": "Si te gusta, lo pides y preparamos todo el kit"
+          "illustrate": "Ilustramos la portada de la invitación y 2 páginas",
+          "order": "Si te gusta, preparamos todo el kit"
         },
         "steps4": {
-          "character": "Dibujamos a {name} (unos minutos)",
+          "character": "Dibujamos a {name}",
           "review": "Tú revisas y confirmas el parecido",
-          "illustrate": "Ilustramos la portada (va en la invitación) y 2 páginas",
-          "order": "Si te gusta, lo pides y preparamos todo el kit"
+          "illustrate": "Ilustramos la portada de la invitación y 2 páginas",
+          "order": "Si te gusta, preparamos todo el kit"
         }
       },
       "eventDifferencesPages": "El mini cuento tiene {total} páginas; aquí ves la portada y las primeras {shown}.",
@@ -1773,7 +1773,8 @@
         "CO": "Departamento",
         "PE": "Departamento",
         "UY": "Departamento",
-        "ES": "Provincia"
+        "ES": "Provincia",
+        "EC": "Provincia"
       },
       "stateOther": "Provincia, departamento o región",
       "line2Other": "Piso, depto. o barrio",
@@ -1781,12 +1782,37 @@
       "postalCode": "Código postal",
       "phone": "Teléfono",
       "taxId": {
-        "MX": "RFC o CURP de quien recibe",
-        "AR": "CUIT, CUIL o DNI de quien recibe",
-        "BR": "CPF de quem recebe"
+        "MX": "RFC de quien recibe",
+        "AR": "CUIT o CUIL de quien recibe",
+        "BR": "CPF de quien recibe",
+        "CL": "RUT de quien recibe",
+        "PE": "DNI o RUC de quien recibe",
+        "EC": "Cédula o RUC de quien recibe",
+        "UY": "Cédula de quien recibe"
       },
-      "taxIdHint": "Opcional. Con este dato podemos usar una imprenta más económica; solo se usa para el envío y la aduana.",
-      "confirm": "Confirmo que el domicilio de entrega es correcto."
+      "taxIdHint": "La aduana lo pide para entregar el libro. Solo se usa para el envío.",
+      "taxIdHintOptional": "Opcional. Ayuda a que la aduana entregue el libro sin demoras. Solo se usa para el envío.",
+      "errors": {
+        "postalCode": "Revisa el código postal.",
+        "postalCodeExample": "Revisa el código postal (por ejemplo, {example}).",
+        "phone": "Revisa el teléfono: con código de área, solo números.",
+        "taxId": "Revisa el número: no coincide con un documento válido.",
+        "state": "Revisa este dato.",
+        "streetNumber": "Agrega el número de la puerta."
+      },
+      "confirm": "Confirmo que el domicilio de entrega es correcto.",
+      "confirmMap": "Confirmo que la dirección y el pin del mapa son correctos.",
+      "search": {
+        "label": "Buscar la dirección",
+        "placeholder": "Calle y número, por ejemplo San Martín 1234",
+        "hint": "Elige tu dirección de la lista: completamos el resto y la vemos en el mapa. Si no aparece, cárgala a mano abajo.",
+        "poweredBy": "Sugerencias de Google"
+      },
+      "map": {
+        "label": "Mapa de la dirección de entrega",
+        "pin": "Dirección de entrega",
+        "hint": "Si el pin no está en la puerta correcta, arrástralo hasta ahí."
+      }
     },
     "giftTitle": "Regalo",
     "isGift": "Es un regalo",

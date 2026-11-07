@@ -1083,10 +1083,10 @@
       "lockedNote": "What you fix stays the same on every page.",
       "illustratingText": "We are illustrating the cover and the first pages. It takes a couple of minutes.",
       "waitSteps": {
-        "character": "We draw {name} (a few minutes)",
+        "character": "We draw {name}",
         "review": "You review and confirm the likeness",
         "illustrate": "We illustrate the cover and 2 pages",
-        "order": "If you like it, you order and we make the full book"
+        "order": "If you like it, we make the full book"
       },
       "leaveText": "We keep working even if you leave. We’ll email you when the sample is ready. To pick it up again: My stories, “In progress”, Continue.",
       "leaveButton": "Back to My stories",
@@ -1107,7 +1107,7 @@
         "steps": {
           "write": "We write the story",
           "illustrate": "We illustrate the cover and 2 pages",
-          "order": "If you like it, you order it and we make the full book"
+          "order": "If you like it, we make the full book"
         }
       },
       "waitEstimate": "{minutes, plural, one {It’s usually ready in about a minute.} other {It’s usually ready in about # minutes.}}",
@@ -1120,14 +1120,14 @@
         "textDrawing": "We use their usual drawing. We put together the invitation and the keepsake story with the {theme} theme.",
         "steps": {
           "write": "We write the keepsake story",
-          "illustrate": "We illustrate the cover (it goes on the invitation) and 2 pages",
-          "order": "If you like it, you order it and we prepare the whole kit"
+          "illustrate": "We illustrate the invitation cover and 2 pages",
+          "order": "If you like it, we prepare the whole kit"
         },
         "steps4": {
-          "character": "We draw {name} (a few minutes)",
+          "character": "We draw {name}",
           "review": "You check the likeness and confirm",
-          "illustrate": "We illustrate the cover (it goes on the invitation) and 2 pages",
-          "order": "If you like it, you order it and we prepare the whole kit"
+          "illustrate": "We illustrate the invitation cover and 2 pages",
+          "order": "If you like it, we prepare the whole kit"
         }
       },
       "eventDifferencesPages": "The mini story has {total} pages; here you see the cover and the first {shown}.",
@@ -1773,7 +1773,8 @@
         "CO": "Department",
         "PE": "Department",
         "UY": "Department",
-        "ES": "Province"
+        "ES": "Province",
+        "EC": "Province"
       },
       "stateOther": "Province, department or region",
       "line2Other": "Apartment, floor or neighborhood",
@@ -1781,12 +1782,37 @@
       "postalCode": "ZIP code",
       "phone": "Phone",
       "taxId": {
-        "MX": "RFC or CURP of the recipient",
-        "AR": "CUIT, CUIL or DNI of the recipient",
-        "BR": "CPF of the recipient"
+        "MX": "Recipient's RFC",
+        "AR": "Recipient's CUIT or CUIL",
+        "BR": "Recipient's CPF",
+        "CL": "Recipient's RUT",
+        "PE": "Recipient's DNI or RUC",
+        "EC": "Recipient's cédula or RUC",
+        "UY": "Recipient's ID (cédula)"
       },
-      "taxIdHint": "Optional. With it we can use a cheaper printer; it is only used for shipping and customs.",
-      "confirm": "I confirm the delivery address is correct."
+      "taxIdHint": "Customs requires it to deliver the book. It is only used for shipping.",
+      "taxIdHintOptional": "Optional. It helps customs deliver the book without delays. It is only used for shipping.",
+      "errors": {
+        "postalCode": "Check the postal code.",
+        "postalCodeExample": "Check the postal code (for example, {example}).",
+        "phone": "Check the phone number: include the area code, digits only.",
+        "taxId": "Check the number: it does not match a valid ID.",
+        "state": "Check this field.",
+        "streetNumber": "Add the house or building number."
+      },
+      "confirm": "I confirm the delivery address is correct.",
+      "confirmMap": "I confirm the address and the pin on the map are correct.",
+      "search": {
+        "label": "Search for the address",
+        "placeholder": "Street and number, for example 350 5th Ave",
+        "hint": "Pick your address from the list: we fill in the rest and show it on the map. If it doesn't appear, enter it by hand below.",
+        "poweredBy": "Suggestions by Google"
+      },
+      "map": {
+        "label": "Map of the delivery address",
+        "pin": "Delivery address",
+        "hint": "If the pin isn't at the right door, drag it there."
+      }
     },
     "giftTitle": "Gift",
     "isGift": "It’s a gift",
