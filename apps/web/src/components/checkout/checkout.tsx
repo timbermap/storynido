@@ -128,6 +128,9 @@ export function Checkout({
     availableFormats?: BookFormat[];
     formatPrices: { format: BookFormat; amountMinor: number }[];
     local: Offer['local'];
+    /** Formato y país con los que se cotizó (el resumen no mezcla la etiqueta nueva con el precio viejo). */
+    format: BookFormat;
+    country: CountryCode;
   } | null>(null);
   // Solo los formatos que este libro admite (un cuento corto no se imprime como fotolibro).
   const available = quote?.availableFormats;
@@ -274,7 +277,7 @@ export function Checkout({
         })
           .then((result) => {
             if (cancelled) return;
-            setQuote(result);
+            setQuote({ ...result, format, country: orderCountry });
             setError(null);
           })
           .catch((caught: unknown) => {
@@ -657,10 +660,10 @@ export function Checkout({
           <>
             <PriceSummary
               snapshot={quote.snapshot}
-              country={orderCountry}
+              country={quote.country}
               local={quote.local}
-              format={format}
-              shipTo={print ? shipTo : null}
+              format={quote.format}
+              shipTo={quote.format !== 'digital' ? quote.country : null}
             />
             {print && quote.snapshot.shipping.pending && estimate && (
               <p className="rounded-xl bg-peach/60 px-4 py-3 text-sm font-semibold text-navy">
