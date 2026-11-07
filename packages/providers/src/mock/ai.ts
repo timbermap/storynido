@@ -3,6 +3,7 @@ import type {
   AITextProvider,
   ActivityRequest,
   AiUsage,
+  BookReview,
   CharacterSheetResult,
   GeneratedActivities,
   GeneratedImage,
@@ -185,6 +186,11 @@ export class MockAITextProvider implements AITextProvider {
       repairTarget: 'none',
       usage: usage('mock-review'),
     });
+  }
+
+  /** Siempre coherente: los tests que prueban desvíos envuelven este método. */
+  reviewBook(): Promise<BookReview> {
+    return Promise.resolve({ deviations: [], usage: usage('mock-review') });
   }
 
   generateActivities(request: ActivityRequest): Promise<GeneratedActivities> {

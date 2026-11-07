@@ -342,6 +342,77 @@ describe('vista previa', () => {
     paint.mockRestore();
   });
 
+  it('la persona del elenco que más se repite tiene su lámina si aparece en las páginas de la muestra', async () => {
+    vi.restoreAllMocks();
+    const text = providers.ai().text;
+    const plan = text.planStory.bind(text);
+    vi.spyOn(text, 'planStory').mockImplementation(async (request) => {
+      const result = await plan(request);
+      return {
+        ...result,
+        cast: [{ role: 'the teacher', gender: 'male', look: 'tall, grey beard' }],
+        scenes: result.scenes.map((scene) => ({
+          ...scene,
+          mustBeVisible: scene.pageIndex <= 1 ? [...scene.mustBeVisible, 'the male teacher'] : [],
+        })),
+      };
+    });
+    await seedBook(providers, 'book-1');
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    const review = vi.spyOn(text, 'reviewPage');
+    await generate('book-1');
+    expect((await approve('book-1')).statusCode).toBe(200);
+    // La portada y las páginas se pintan en paralelo: se buscan por su escena.
+    const [castSheet, ...rest] = paint.mock.calls.slice(1).map(([request]) => request);
+    expect(castSheet?.prompt).toContain('Character reference sheet of the teacher');
+    const cover = rest.find((request) => request.prompt.includes('Book cover'));
+    const pages = rest.filter((request) => request !== cover);
+    expect(cover?.references).toHaveLength(1);
+    expect(pages).toHaveLength(2);
+    for (const request of pages) {
+      expect(request.references).toHaveLength(2);
+      expect(request.prompt).toContain('the teacher looks exactly like the last reference image');
+    }
+    const book = await db.doc('books/book-1').get();
+    expect(book.get('preview.castSheet.role')).toBe('the teacher');
+    // Sin la bandera, la muestra no se revisa (es el pedido el que revisa cada página).
+    expect(review).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+
+  it('con reviewPreviews, revisa la portada y las páginas de la muestra y repara la que lo pide', async () => {
+    vi.restoreAllMocks();
+    await setAiConfig({ reviewPreviews: true });
+    await seedBook(providers, 'book-1');
+    const text = providers.ai().text;
+    const original = text.reviewPage.bind(text);
+    const review = vi.spyOn(text, 'reviewPage').mockImplementation(async (request) => {
+      const result = await original(request);
+      return request.pageIndex === 1
+        ? {
+            ...result,
+            status: 'repair',
+            repairTarget: 'illustration_only',
+            continuityChecks: [
+              { trait: 'glasses', expected: 'present', observed: 'absent', confidence: 'high' },
+            ],
+          }
+        : result;
+    });
+    await generate('book-1');
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    expect((await approve('book-1')).statusCode).toBe(200);
+    expect(review).toHaveBeenCalledTimes(3);
+    // Portada + 2 páginas + 1 reparación.
+    expect(paint).toHaveBeenCalledTimes(4);
+    expect(paint.mock.calls[3]?.[0].prompt).toContain('Make sure that: glasses present');
+    const codes = (await db.collection('books/book-1/qaEvents').get()).docs.map(
+      (doc) => doc.get('code') as string,
+    );
+    expect(codes).toContain('page_repair');
+    vi.restoreAllMocks();
+  });
+
   it('aprobar al personaje ilustra la portada y 2 páginas con marca de agua, y registra el uso', async () => {
     await seedBook(providers, 'book-1');
     await generate('book-1');

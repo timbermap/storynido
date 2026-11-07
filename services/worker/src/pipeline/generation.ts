@@ -49,7 +49,14 @@ import {
   type MustKeepTrait,
   type PageReview,
   type QaCode,
+  type BookDeviation,
   type CastMember,
+  bookBibleSummary,
+  castMemberSheet,
+  castSheetNote,
+  companionReferenceScene,
+  mainCastMember,
+  sceneIncludes,
   type OutfitPlan,
   type ScenePlan,
   type VisualBibleItem,
@@ -163,6 +170,8 @@ export interface BookSnapshot {
   character: { description: string; mustKeep: string[]; sheetPath: string };
   /** Acompañante que se repite, con su lámina aprobada en la muestra (DECISIONS 117). */
   companion?: { name: string; look: string; sheetPath: string } | null;
+  /** Lámina de la persona del elenco que más se repite (ausente en los pedidos anteriores). */
+  castSheet?: { role: string; sheetPath: string } | null;
   /** Ilustraciones aprobadas en la vista previa, copiadas al pedido: índice -> ruta. */
   approved: Record<string, string>;
   /** Armado por edad (page-layout.ts); ausente en los pedidos anteriores: panel de siempre. */
@@ -179,6 +188,8 @@ export interface QaLimits {
   repairBudgetUsdMicros: number;
   /** Páginas revisadas en paralelo. */
   concurrency: number;
+  /** Revisión del libro entero después de la de cada página (miniaturas contra la biblia visual). */
+  bookReview: boolean;
 }
 
 export const DEFAULT_QA_LIMITS: QaLimits = {
@@ -187,7 +198,11 @@ export const DEFAULT_QA_LIMITS: QaLimits = {
   repairShare: 0.3,
   repairBudgetUsdMicros: 1_500_000,
   concurrency: 4,
+  bookReview: true,
 };
+
+/** Lado mayor de las miniaturas de la revisión del libro entero (todas entran en una llamada). */
+const BOOK_REVIEW_THUMB_PX = 384;
 
 /**
  * Dominio del QR de la contratapa: siempre el público de la marca. El libro se queda con la familia
@@ -539,12 +554,22 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const reference = await load(snapshot.character.sheetPath);
     const companion = snapshot.companion ?? null;
     const references = companion ? [reference, await load(companion.sheetPath)] : [reference];
+    // La persona del elenco que más se repite va con su lámina, solo en las escenas que la incluyen.
+    const castSheet = snapshot.castSheet ?? null;
+    const withCast =
+      index > 0 &&
+      castSheet !== null &&
+      sceneIncludes(snapshot.scenes?.[index - 1], castSheet.role);
+    if (castSheet && withCast) references.push(await load(castSheet.sheetPath));
     let cost = 0;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       // Si la moderación rechaza, cada nuevo intento pide algo más simple, hasta que salga una
       // imagen aprobada: un libro no se entrega con páginas sin ilustrar.
       const escalation = Math.min(level + attempt, 4);
-      const scene = escalateScene(baseScene, escalation);
+      const scene = escalateScene(
+        castSheet && withCast ? `${baseScene}${castSheetNote(castSheet)}` : baseScene,
+        escalation,
+      );
       const image = await provider.image.generateIllustration({
         prompt: buildIllustrationPrompt({
           template: snapshot.imagePromptTemplate,
@@ -625,6 +650,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             mustKeep: MustKeepTrait[];
             approvedAt: unknown;
           };
+          castSheet?: { role: string; imagePath: string } | null;
           plan?: {
             scenes: ScenePlan[];
             cast?: CastMember[];
@@ -702,6 +728,26 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       : null;
     if (companion && preview.companion)
       await copy(preview.companion.imagePath, companion.sheetPath);
+    let castSheet = preview.castSheet
+      ? { role: preview.castSheet.role, sheetPath: `${base}/cast.webp` }
+      : null;
+    if (castSheet && preview.castSheet)
+      await copy(preview.castSheet.imagePath, castSheet.sheetPath);
+    // Si la muestra no la necesitó (la persona no estaba en sus páginas), se dibuja ahora, una vez,
+    // con la lámina del protagonista como referencia del estilo. Una recompra no ilustra nada.
+    let castCost = 0;
+    const castMember = castSheet || ctx.order.sourceOrderId ? null : mainCastMember(preview.plan);
+    if (castMember) {
+      const drawn = await drawCastSheet(ctx, castMember, {
+        path: `${base}/cast.webp`,
+        sheetPath,
+        template: String(story.imagePromptTemplate),
+        style: String(style.promptModifier),
+        direction: preview.artDirection ?? null,
+      });
+      castCost = drawn.cost;
+      if (drawn.ok) castSheet = { role: castMember.role, sheetPath: `${base}/cast.webp` };
+    }
     const approved: Record<string, string> = {};
     const sources: [number, string | null | undefined][] = [
       [0, preview.cover?.imagePath],
@@ -761,6 +807,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         sheetPath,
       },
       companion,
+      // Solo si la muestra la trae: los libros anteriores conservan su huella.
+      ...(castSheet ? { castSheet } : {}),
       approved,
     };
     const snapshot: BookSnapshot = { ...content, hash: hashSnapshot(content) };
@@ -772,7 +820,59 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         pages: snapshot.pages.length,
         approvedImages: Object.keys(approved).length,
       },
+      costUsdMicros: castCost,
     };
+  }
+
+  /** Lámina de una persona del elenco (moderada). Si no sale, el libro sigue sin ella. */
+  async function drawCastSheet(
+    ctx: StepContext,
+    member: CastMember,
+    input: {
+      path: string;
+      sheetPath: string;
+      template: string;
+      style: string;
+      direction: string | null;
+    },
+  ): Promise<{ ok: boolean; cost: number }> {
+    let cost = 0;
+    try {
+      const provider = await ai();
+      const sheet = castMemberSheet(member);
+      const image = await provider.image.generateIllustration({
+        prompt: buildIllustrationPrompt({
+          template: input.template,
+          scene: companionReferenceScene(sheet),
+          character: sheet.look,
+          style: input.style,
+          direction: withCurrentGuards(input.direction),
+        }),
+        stylePrompt: input.style,
+        character: { description: sheet.look, photo: null },
+        references: [await load(input.sheetPath)],
+        aspectRatio: '3:4',
+        resolution: '1K',
+        seed: 0,
+      });
+      cost += await record(ctx, 'illustration', image.usage);
+      const verdict = await provider.image.moderateImage(image);
+      cost += await record(ctx, 'moderation', verdict.usage);
+      if (!verdict.allowed) return { ok: false, cost };
+      await storage().upload(
+        { bucket: ASSETS, path: input.path },
+        await encodeIllustration(image.bytes),
+        WEBP,
+      );
+      return { ok: true, cost };
+    } catch (error) {
+      if (!(error instanceof ProviderError)) throw error;
+      ctx.log.warn(
+        { orderId: ctx.order.id, err: error },
+        'cast sheet failed; continuing without it',
+      );
+      return { ok: false, cost };
+    }
   }
 
   /** G2 + G3 sobre el texto congelado (no se reescribe) y actividades si corresponden. */
@@ -942,6 +1042,17 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const blocked: { index: number; reason: string }[] = [];
     let needsReference = 0;
 
+    const reviewRequest = async (index: number, path: string) => ({
+      pageIndex: index,
+      text: index === 0 ? null : (snapshot.pages[index - 1]?.text ?? null),
+      image: await load(path),
+      reference,
+      character: snapshot.character.description,
+      mustKeep: snapshot.character.mustKeep,
+      scene: index === 0 ? null : (snapshot.scenes?.[index - 1] ?? null),
+      visualBible: index === 0 ? '' : visualBibleCheck(snapshot, snapshot.scenes?.[index - 1]),
+    });
+
     const indices = Array.from({ length: total }, (_, index) => index);
     await pool(indices, limits.concurrency, async (index) => {
       let path = produced.get(index) ?? null;
@@ -953,17 +1064,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         let review: PageReview | null = pending;
         pending = null;
         if (path && !review) {
-          const request = {
-            pageIndex: index,
-            text: index === 0 ? null : (snapshot.pages[index - 1]?.text ?? null),
-            image: await load(path),
-            reference,
-            character: snapshot.character.description,
-            mustKeep: snapshot.character.mustKeep,
-            scene: index === 0 ? null : (snapshot.scenes?.[index - 1] ?? null),
-            visualBible:
-              index === 0 ? '' : visualBibleCheck(snapshot, snapshot.scenes?.[index - 1]),
-          };
+          const request = await reviewRequest(index, path);
           // Una revisión que se cuelga no tumba el control de todo el libro: 1 reintento y,
           // si sigue sin responder, esa página va a una persona.
           for (let tries = 0; tries < 2 && !review; tries += 1) {
@@ -1069,8 +1170,111 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           .join(', ')}`.slice(0, 500),
       );
     }
+
+    // Revisión del libro entero: miniaturas de todas las páginas juntas contra la biblia visual.
+    // Lo que se aparta se vuelve a pintar dentro de los mismos topes de reparación, y la nueva
+    // versión tiene que pasar la revisión de su página; si no, queda la anterior (que ya pasó).
+    let bookDeviations = 0;
+    let bookRepaired = 0;
+    if (limits.bookReview && finalImages.size >= 3) {
+      const thumbs = await Promise.all(
+        [...finalImages.entries()]
+          .sort(([a], [b]) => a - b)
+          .map(async ([pageIndex, path]) => ({
+            pageIndex,
+            image: {
+              bytes: new Uint8Array(
+                await sharp(await storage().download({ bucket: ASSETS, path }))
+                  .resize({
+                    width: BOOK_REVIEW_THUMB_PX,
+                    height: BOOK_REVIEW_THUMB_PX,
+                    fit: 'inside',
+                  })
+                  .jpeg({ quality: 70 })
+                  .toBuffer(),
+              ),
+              mimeType: 'image/jpeg',
+            },
+          })),
+      );
+      let deviations: BookDeviation[] = [];
+      try {
+        const verdict = await provider.text.reviewBook({
+          pages: thumbs,
+          reference,
+          character: snapshot.character.description,
+          bible: bookBibleSummary(snapshot),
+        });
+        cost += await record(ctx, 'review', verdict.usage);
+        // Una por página (la primera que nombra cada una).
+        deviations = verdict.deviations.filter(
+          (item, position, all) =>
+            all.findIndex((other) => other.pageIndex === item.pageIndex) === position,
+        );
+      } catch (error) {
+        // Sin la revisión del libro, el libro sigue con las páginas ya revisadas una por una.
+        log.warn({ orderId: ctx.order.id, err: error }, 'book review failed');
+      }
+      bookDeviations = deviations.length;
+      for (const deviation of deviations) {
+        const current = finalImages.get(deviation.pageIndex);
+        if (!current) continue;
+        if (repairsUsed >= bookRepairs || repairCost >= limits.repairBudgetUsdMicros) {
+          await qaEvent(ctx, 'book_consistency', {
+            pageIndex: deviation.pageIndex,
+            finalStatus: 'accepted',
+            reason: 'repair_limits',
+          });
+          continue;
+        }
+        repairsUsed += 1;
+        const next = `orders/${ctx.order.id}/g${String(ctx.generation)}/illustration-${String(deviation.pageIndex)}-book.webp`;
+        let spent = 0;
+        let drawn = false;
+        try {
+          spent = await illustrate(
+            ctx,
+            snapshot,
+            deviation.pageIndex,
+            next,
+            5000 + deviation.pageIndex,
+            deviation.expected,
+          );
+          drawn = true;
+        } catch (error) {
+          if (!(error instanceof IllustrationRejectedError)) throw error;
+          spent = error.costUsdMicros;
+        }
+        cost += spent;
+        repairCost += spent;
+        let fixed = false;
+        if (drawn) {
+          try {
+            const check = await provider.text.reviewPage(
+              await reviewRequest(deviation.pageIndex, next),
+            );
+            cost += await record(ctx, 'review', check.usage);
+            fixed = check.status === 'pass' || check.status === 'needs_reference';
+          } catch (error) {
+            log.warn({ orderId: ctx.order.id, err: error }, 'book repair review failed');
+          }
+        }
+        if (fixed) {
+          finalImages.set(deviation.pageIndex, next);
+          bookRepaired += 1;
+        }
+        await qaEvent(ctx, 'book_consistency', {
+          pageIndex: deviation.pageIndex,
+          repairCostUsdMicros: spent,
+          finalStatus: fixed ? 'repaired' : 'accepted',
+          issue: deviation.issue.slice(0, 80),
+        });
+      }
+    }
     return {
       output: {
+        bookDeviations,
+        bookRepaired,
         images: [...finalImages.entries()]
           .sort(([a], [b]) => a - b)
           .map(([index, imagePath]) => ({ index, imagePath })),

@@ -243,6 +243,35 @@ describe('Vertex AI', () => {
     expect(text).toContain('Fixed looks for this scene: Place: the beach');
   });
 
+  it('revisión del libro entero: todas las miniaturas en una llamada y solo páginas que existen', async () => {
+    const calls: { contents: { parts: Record<string, unknown>[] }[] }[] = [];
+    const image = { bytes: new Uint8Array([1]), mimeType: 'image/jpeg' };
+    const review = await new VertexTextProvider(
+      clientWith(
+        () =>
+          jsonReply({
+            deviations: [
+              { pageIndex: 2, issue: 'kite has a sail', expected: 'arc kite on lines, no sail' },
+              { pageIndex: 9, issue: 'x', expected: 'y' },
+              { pageIndex: 1, issue: 'x', expected: ' ' },
+            ],
+          }),
+        calls,
+      ),
+    ).reviewBook({
+      pages: [0, 1, 2].map((pageIndex) => ({ pageIndex, image })),
+      reference: image,
+      character: 'Sofi',
+      bible: 'Object the kite: arc kite',
+    });
+    expect(review.deviations).toEqual([
+      { pageIndex: 2, issue: 'kite has a sail', expected: 'arc kite on lines, no sail' },
+    ]);
+    const parts = calls[0]?.contents[0]?.parts ?? [];
+    expect(parts.filter((part) => 'inlineData' in part)).toHaveLength(4);
+    expect(parts.map((part) => part.text).join(' ')).toContain('Object the kite: arc kite');
+  });
+
   it('ortografía aparte a temperatura 0; si cambia las páginas, conserva el texto', async () => {
     const story = {
       title: 'Martina',

@@ -556,3 +556,80 @@ export function varyShots<T extends { shot?: ShotType | null }>(scenes: readonly
   }
   return result;
 }
+
+/** Núcleo del rol para buscarlo en las escenas («the teacher» → «teacher»). */
+const roleCore = (role: string) =>
+  role
+    .toLowerCase()
+    .replace(/\b(the|a|an|male|female|young|old)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** La escena incluye a esa persona del elenco (la nombra en lo que tiene que verse). */
+export function sceneIncludes(scene: ScenePlan | null | undefined, role: string): boolean {
+  const core = roleCore(role);
+  if (!scene || !core) return false;
+  return scene.mustBeVisible.some((item) => item.toLowerCase().includes(core));
+}
+
+/**
+ * La persona del elenco que más se repite (en dos escenas o más): tiene su propia lámina, como el
+ * acompañante, para que se dibuje igual en todo el libro. null si nadie del elenco vuelve.
+ */
+export function mainCastMember(
+  plan: Pick<StoryPlan, 'cast' | 'scenes'> | null | undefined,
+): CastMember | null {
+  let best: { member: CastMember; count: number } | null = null;
+  for (const member of plan?.cast ?? []) {
+    if (!member.role.trim() || !member.look.trim()) continue;
+    const count = plan?.scenes.filter((scene) => sceneIncludes(scene, member.role)).length ?? 0;
+    if (count >= 2 && (!best || count > best.count)) best = { member, count };
+  }
+  return best?.member ?? null;
+}
+
+/** La persona del elenco para su lámina (misma escena que la del acompañante). */
+export const castMemberSheet = (member: CastMember) => ({
+  name: member.role,
+  look: member.gender === 'unspecified' ? member.look : `${member.gender}, ${member.look}`,
+});
+
+/** Nota para las escenas que incluyen a esa persona: dibujarla igual que su lámina. */
+export const castSheetNote = (member: Pick<CastMember, 'role'>) =>
+  ` ${member.role} looks exactly like the last reference image (their own reference sheet): same face, hair, build and clothes.`;
+
+/**
+ * Lo que la revisión del libro entero compara: el protagonista, quién se repite, la biblia visual y
+ * qué tiene cada página según el plan.
+ */
+export function bookBibleSummary(input: {
+  companion?: { name: string; look: string } | null;
+  cast?: readonly CastMember[] | null;
+  props?: VisualBible['props'];
+  places?: VisualBible['places'];
+  outfits?: VisualBible['outfits'];
+  scenes: readonly ScenePlan[] | null;
+}): string {
+  const lines: string[] = [];
+  if (input.companion)
+    lines.push(`Recurring companion ${input.companion.name}: ${input.companion.look}`);
+  for (const member of input.cast ?? []) {
+    lines.push(`Recurring ${member.role} (${member.gender}): ${member.look}`);
+  }
+  for (const prop of input.props ?? []) lines.push(`Object ${prop.name}: ${prop.look}`);
+  for (const place of input.places ?? []) lines.push(`Place ${place.name}: ${place.look}`);
+  for (const outfit of input.outfits ?? []) {
+    lines.push(`Protagonist outfit ${outfit.context}: ${outfit.look}`);
+  }
+  for (const scene of input.scenes ?? []) {
+    const parts = [
+      scene.mustBeVisible.length ? `shows ${scene.mustBeVisible.join(', ')}` : '',
+      scene.notVisible.length ? `not ${scene.notVisible.join(', ')}` : '',
+      scene.props?.length ? `objects ${scene.props.join(', ')}` : '',
+      scene.place ? `place ${scene.place}` : '',
+      scene.outfit ? `outfit ${scene.outfit}` : 'everyday outfit of the reference sheet',
+    ].filter(Boolean);
+    lines.push(`Page ${String(scene.pageIndex + 1)}: ${parts.join('; ')}`);
+  }
+  return lines.join('\n');
+}
