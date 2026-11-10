@@ -14,7 +14,7 @@ import {
   ctaClass,
 } from '@/components/landing/sections';
 import { PhotoPromise } from '@/components/landing/photo-promise';
-import { PartyKitRender } from '@/components/events/party-kit-render';
+import { HeroPhoto } from '@/components/home/hero-photo';
 import { PartyValue } from '@/components/events/party-value';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
@@ -72,7 +72,7 @@ export default async function EventsPage({ params }: Props) {
   const bookFrom = hardcover
     ? formatPrice(hardcover.amountMinor, offer?.currency ?? 'USD', locale, display.country)
     : null;
-  // La historia que ilustra el kit del hero (la del cumpleaños; si no está, la primera).
+  // La historia del cumpleaños (si no está, la primera): su tapa ilustra «Su cara, en toda la fiesta».
   const heroStory =
     stories.find((story) => story.slug === 'el-cumpleanos-mas-magico') ?? stories[0];
 
@@ -118,7 +118,16 @@ export default async function EventsPage({ params }: Props) {
         cta={cta}
         priceLine={pricing ? t('hero.price', { price: money(partyMinor) }) : undefined}
         note={t('note')}
-        media={heroStory ? <PartyKitRender story={heroStory} /> : null}
+        media={
+          <HeroPhoto
+            src="/images/heroes/cumple-digital.webp"
+            alt={t('hero.photoAlt')}
+            width={1400}
+            height={1050}
+            tone="bg-[#ffe7df]"
+            caption={t('hero.imageCaption')}
+          />
+        }
       />
       <PartyValue coverImage={heroStory?.coverImage} />
       <section className="bg-white py-20 lg:py-24">
