@@ -1,22 +1,27 @@
 import { ImageSlot } from '@/components/landing/image-slot';
 
-/** Hero con una sola foto horizontal (Home y Profesionales): una foto real, no una ilustración. */
+/**
+ * Hero con una sola foto horizontal (Profesionales y Celebraciones). `caption` es un rótulo chico
+ * en la esquina («Imagen ilustrativa») para las fotos que no son de un cliente real.
+ */
 export function HeroPhoto({
   src,
   alt,
   width,
   height,
   tone,
+  caption,
 }: {
   src: string;
   alt: string;
   width: number;
   height: number;
   tone?: string;
+  caption?: string;
 }) {
   return (
     <figure className="mx-auto w-full max-w-[40rem] lg:max-w-none">
-      <div className="overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-24px_rgb(38_50_74/0.35)]">
+      <div className="relative overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-24px_rgb(38_50_74/0.35)]">
         <ImageSlot
           src={src}
           alt={alt}
@@ -26,6 +31,11 @@ export function HeroPhoto({
           sizes="(min-width: 1024px) 640px, 92vw"
           tone={tone}
         />
+        {caption && (
+          <figcaption className="absolute right-3 bottom-3 rounded-full bg-white/80 px-2.5 py-0.5 text-[0.72rem] font-bold text-foreground backdrop-blur-sm sm:right-4 sm:bottom-4">
+            {caption}
+          </figcaption>
+        )}
       </div>
     </figure>
   );

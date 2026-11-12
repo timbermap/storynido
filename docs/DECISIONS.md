@@ -2598,3 +2598,12 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Problema:** con la regla de DECISIONS 241, un libro de solo actividades no tiene páginas con ilustración generada y salía USD 11,99, más barato que el cuento mini (13,99).
 - **Decisión:** piso de precio, no de margen. El precio se calcula con las páginas generadas, pero nunca con menos que las del cuento mini (`pricedPages`, hoy 10). Así ningún ebook (ni la creación de un impreso) sale más barato que el ebook mini calculado con la misma regla. El mini queda en 13,99 y el de solo actividades sube a 13,99; los demás no cambian. El costo de IA medido sigue usando las páginas generadas reales.
 - **Test:** `packages/shared/src/models/editorial.test.ts` y `services/api/src/checkout/precios-claros.test.ts`.
+
+## 243 — Celebraciones: el hero vuelve a ser una foto (mini cuento digital + invitación por WhatsApp)
+
+- **Fecha:** 2026-11-10. Pedido por Sebas (fotos de muestra para las landings; aprobó la foto «cumple» como hero de Celebraciones).
+- **Cambio:** el hero de `/events` muestra `heroes/cumple-digital.webp` (1400×1050, 4:3, como las otras fotos de hero): la mesa del cumpleaños con el mini cuento en una tablet y la invitación en un celular por WhatsApp. Reemplaza al kit armado en código (`PartyKitRender`, DECISIONS 186), que queda en el repo sin uso: volver atrás es cambiar una línea en `events/page.tsx`.
+- **Todo el texto que se ve es real:** la página de la tablet es una página real del mini cuento y la pantalla del celular se dibujó en código (encabezado «Mamá de Angelica», «Hoy», «Mensaje») con la imagen real de la invitación, puesta con transformación de perspectiva. La escena (mesa, torta, globos, manos) es una foto generada con IA.
+- **Rótulo:** `HeroPhoto` acepta `caption`; aquí lleva «Imagen ilustrativa» / «Imagem ilustrativa» / «Illustrative image» (`Landing.events.hero.imageCaption`), chico, en la esquina, sobre fondo blanco translúcido. El alt (`hero.photoAlt`) describe la foto nueva.
+- **Sin cambio:** `kit-completo.webp` sigue en uso en la tarjeta de Celebraciones de la home con sesión (`LINE_IMAGES`) y en `dev-home`.
+- **Pendiente:** cambiar por una foto real de un cliente antes de producción, si la hay.
