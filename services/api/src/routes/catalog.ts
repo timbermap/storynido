@@ -161,7 +161,7 @@ export function buildOffer(input: {
             // Margen por página de contenido (también las de actividades) e IA por página
             // ilustrada; nunca menos que el cuento mini (DECISIONS 242 y 246).
             pages: pricedPages(plan.narrativePages + plan.activityPages, editorial),
-            aiPages: plan.narrativePages,
+            aiPages: pricedPages(plan.narrativePages, editorial),
             // Ningún ebook, ni el profesional, baja del mini (DECISIONS 246).
             minPages: miniPricedPages(editorial),
             professional,

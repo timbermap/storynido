@@ -357,9 +357,9 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
             (item) => item.length === length && item.contentType === contentType,
           )?.amountMinor,
       );
-    // Las páginas de actividades pagan margen por página (0,35) pero no IA de ilustración.
-    // Mini y corto quedan en el piso del mini.
-    expect(price('activities')).toEqual([1399, 1399, 1799, 1999]);
+    // Las páginas de actividades pagan margen por página (0,35) pero no IA de ilustración; la IA
+    // nunca cuenta menos páginas que el mini (DECISIONS 242).
+    expect(price('activities')).toEqual([1399, 1499, 1999, 2099]);
     expect(price('story_activities')).toEqual([1399, 1499, 2099, 2299]);
     // Para colorear y el cuento no cambian.
     expect(price('coloring')).toEqual([1399, 1599, 2199, 2399]);

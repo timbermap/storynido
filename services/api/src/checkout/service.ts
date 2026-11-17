@@ -362,7 +362,7 @@ export class CheckoutService {
     };
     return {
       pages: pricedPages(contentPages(shape, editorial), editorial),
-      aiPages: generatedPages(shape, editorial),
+      aiPages: pricedPages(generatedPages(shape, editorial), editorial),
     };
   }
 
