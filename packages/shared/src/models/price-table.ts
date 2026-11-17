@@ -118,6 +118,7 @@ export function buildPriceTable(input: {
             fx: input.fx,
             format,
             pages: generated,
+            minPages: pricedPages(0, input.editorial),
             quantity: 1,
             print: cheapest
               ? {

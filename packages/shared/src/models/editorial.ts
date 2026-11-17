@@ -567,3 +567,8 @@ export function pricedPages(generated: number, config: EditorialConfig): number 
   ).narrativePages;
   return Math.max(generated, mini);
 }
+
+/** Páginas generadas del cuento mini: el piso de precio de un ebook (DECISIONS 242 y 245). */
+export function miniPricedPages(config: EditorialConfig): number {
+  return pricedPages(0, config);
+}

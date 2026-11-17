@@ -57,13 +57,15 @@ export function referencePrintCost(
  * Precio de un ejemplar del libro, sin envío, en centavos de USD (DECISIONS 241): costo +
  * márgenes, más la comisión de cobro, redondeado a ,99 hacia arriba. Una cuenta profesional paga
  * con el descuento base del producto, sin bajar nunca del margen neto mínimo. `pages`: páginas
- * con ilustración generada.
+ * con ilustración generada. `minPages` (DECISIONS 245): las del cuento mini; ningún ebook, ni con
+ * el descuento profesional, baja del precio de lista del ebook mini.
  */
 export function bookPriceMinor(
   pricing: Pricing,
   productionUsdMinor: number,
   pages: number,
   professional = false,
+  minPages?: number,
 ): number {
   const fee = paymentFeePercent(pricing);
   const gross = withPaymentFee(unitPriceUsdMinor(pricing, productionUsdMinor, pages), fee);
@@ -71,7 +73,24 @@ export function bookPriceMinor(
     ? Math.round((gross * (100 - pricing.proPercentOff)) / 100)
     : gross;
   return charmPrice(
-    Math.max(discounted, bookFloorMinor(pricing, productionUsdMinor, pages)),
+    Math.max(
+      discounted,
+      bookFloorMinor(pricing, productionUsdMinor, pages),
+      ebookMinimumMinor(pricing, minPages),
+    ),
+    CHARGE_CURRENCY,
+  );
+}
+
+/**
+ * Lo mínimo que se cobra por un ebook (DECISIONS 245): el precio de lista del ebook mini
+ * (`minPages`, sus páginas generadas), hoy US$ 13,99. Ni el descuento profesional ni un cupón
+ * bajan de acá (el cobro digital no acepta menos). 0 en los impresos o sin `minPages`.
+ */
+export function ebookMinimumMinor(pricing: Pricing, minPages?: number): number {
+  if (pricing.product !== 'digital' || minPages === undefined) return 0;
+  return charmPrice(
+    withPaymentFee(unitPriceUsdMinor(pricing, 0, minPages), paymentFeePercent(pricing)),
     CHARGE_CURRENCY,
   );
 }
@@ -116,6 +135,8 @@ export function bookFormatPrices(input: {
   professional?: boolean;
   /** Formatos a considerar (por defecto, todos). */
   formats?: readonly BookFormat[];
+  /** Páginas generadas del cuento mini: el piso del ebook (DECISIONS 245). */
+  minPages?: number;
 }): { format: BookFormat; amountMinor: number }[] {
   const { country } = input;
   if (!country?.active) return [];
@@ -127,7 +148,13 @@ export function bookFormatPrices(input: {
     return [
       {
         format,
-        amountMinor: bookPriceMinor(pricing, production, input.pages, input.professional),
+        amountMinor: bookPriceMinor(
+          pricing,
+          production,
+          input.pages,
+          input.professional,
+          input.minPages,
+        ),
       },
     ];
   });

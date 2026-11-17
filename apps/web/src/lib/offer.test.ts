@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { bookPrices } from './offer';
+import { bookPrices, orderablePrintFormats } from './offer';
 
 const source = {
   lengthPrices: [
@@ -54,5 +54,21 @@ describe('bookPrices', () => {
       printed: null,
       printedFormats: [],
     });
+  });
+});
+
+describe('orderablePrintFormats', () => {
+  it('en un país sin imprenta no muestra impresos aunque la extensión los admita', () => {
+    const digitalOnly = { ...source, printLengthPrices: [] };
+    expect(
+      orderablePrintFormats(bookPrices(digitalOnly, 'classic'), ['digital', 'softcover']),
+    ).toEqual([]);
+  });
+
+  it('con imprenta, los de la oferta; sin precios (Eventos), los del admin', () => {
+    expect(orderablePrintFormats(bookPrices(source, 'short'), ['digital', 'booklet'])).toEqual([
+      'booklet',
+    ]);
+    expect(orderablePrintFormats(null, ['digital', 'booklet'])).toEqual(['booklet']);
   });
 });

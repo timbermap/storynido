@@ -99,3 +99,15 @@ export function bookPrices(
     printedFormats: printed.map((item) => item.format),
   };
 }
+
+/**
+ * Impresos que se muestran en una extensión del creador: con precios del país, solo los que la
+ * oferta permite pedir (los mismos que la ficha de la historia); sin precios (Eventos), los que
+ * la extensión admite en el admin.
+ */
+export function orderablePrintFormats(
+  price: { printedFormats: BookFormat[] } | null,
+  lengthFormats: readonly BookFormat[],
+): BookFormat[] {
+  return price ? price.printedFormats : lengthFormats.filter((format) => format !== 'digital');
+}

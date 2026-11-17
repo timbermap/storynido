@@ -15,6 +15,7 @@ import {
   SAMPLE_PRINT_ADDRESSES,
   generatedPages,
   pricedPages,
+  miniPricedPages,
   matrixCostFor,
   paymentFeePercent,
   stablePrintCost,
@@ -288,6 +289,7 @@ export class CheckoutService {
             country,
             pricing,
             pages: await this.pricedPages(loaded.book, loaded.pages),
+            minPages: miniPricedPages(await this.catalog.editorial()),
             professional: pro?.professional ?? false,
             formats: availableFormats,
             productionUsdMinor: (format) => {
@@ -449,6 +451,8 @@ export class CheckoutService {
       format: body.format,
       // IA y margen por página: solo las páginas con ilustración generada.
       pages: await this.pricedPages(book, pages),
+      // Ningún ebook se cobra por debajo del mini (DECISIONS 245).
+      minPages: miniPricedPages(await this.catalog.editorial()),
       quantity: body.quantity,
       coupon,
       couponCode: body.couponCode,

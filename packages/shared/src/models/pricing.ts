@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { currencySchema, type Currency } from '../currency';
 import type { CountryConfig, Coupon, Promotion } from './commerce';
 import type { BookFormat } from './common';
-import { bookFloorMinor, bookPriceMinor } from './book-price';
+import { bookFloorMinor, bookPriceMinor, ebookMinimumMinor } from './book-price';
 import { kitPieceSchema, type EventPricing, type KitSelection } from './kit';
 import type { FxRates } from './metrics';
 import {
@@ -147,6 +147,11 @@ export interface QuoteInput {
    * `professional`: además, el descuento base del producto del perfil profesional.
    */
   pro?: { purchases: number; config: ProDiscountConfig; professional: boolean } | null;
+  /**
+   * Páginas generadas del cuento mini (DECISIONS 245): ningún ebook se cobra por debajo del
+   * precio de lista del mini, ni con descuento profesional, cupón ni promoción.
+   */
+  minPages?: number;
 }
 
 export type QuoteResult =
@@ -203,7 +208,13 @@ export function quote(input: QuoteInput): QuoteResult {
   const withBase = (value: number) =>
     input.pro?.professional ? Math.round((value * (100 - pricing.proPercentOff)) / 100) : value;
   // El libro: el mismo cálculo que la barra de la muestra y las tarjetas del checkout.
-  const unit = bookPriceMinor(pricing, productionUnit, input.pages, input.pro?.professional);
+  const unit = bookPriceMinor(
+    pricing,
+    productionUnit,
+    input.pages,
+    input.pro?.professional,
+    input.minPages,
+  );
   const copyLocal = fromUsdMinor(withBase(withPaymentFee(copyUsd, fee)), CHARGE_CURRENCY, input.fx);
   const copy = copyLocal === null ? null : charmPrice(copyLocal, CHARGE_CURRENCY);
   if (copy === null) return { ok: false, error: 'price_missing' };
@@ -214,7 +225,11 @@ export function quote(input: QuoteInput): QuoteResult {
   // extra, de su costo (con la comisión).
   const bookUnits = print ? 1 : quantity;
   const minSubtotal =
-    bookFloorMinor(pricing, productionUnit, input.pages) * bookUnits +
+    Math.max(
+      bookFloorMinor(pricing, productionUnit, input.pages),
+      ebookMinimumMinor(pricing, input.minPages),
+    ) *
+      bookUnits +
     (print && quantity > 1 ? withPaymentFee(productionUnit, fee) * (quantity - 1) : 0);
 
   return finalize(

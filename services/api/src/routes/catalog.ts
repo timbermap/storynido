@@ -15,6 +15,7 @@ import {
   CONTENT_TYPES,
   editorialPlan,
   pricedPages,
+  miniPricedPages,
   matrixCostFor,
   stablePrintCost,
   printCandidates,
@@ -159,6 +160,8 @@ export function buildOffer(input: {
             pricing,
             // Nunca menos que el cuento mini (DECISIONS 242).
             pages: pricedPages(plan.narrativePages, editorial),
+            // Ningún ebook, ni el profesional, baja del mini (DECISIONS 245).
+            minPages: miniPricedPages(editorial),
             professional,
             formats: offered,
             productionUsdMinor: (format) => productionFor(format, plan.interiorPages),

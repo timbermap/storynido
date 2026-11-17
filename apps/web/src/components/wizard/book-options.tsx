@@ -20,7 +20,7 @@ import {
 
 import { useProStatus } from '@/components/pro/use-pro-status';
 import { formatPrice } from '@/lib/format';
-import { bookPrices } from '@/lib/offer';
+import { bookPrices, orderablePrintFormats } from '@/lib/offer';
 import { cn } from '@/lib/utils';
 
 import { OptionCard } from './option-card';
@@ -250,15 +250,17 @@ export function BookOptions({
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {lengths.map((length) => {
               const config = editorial.lengths[length];
-              const printed = config.formats.filter((format) => format !== 'digital');
+              const lengthPrice = prices
+                ? bookPrices(prices, length, professional, value.contentType)
+                : null;
+              // Solo los impresos que de verdad se pueden pedir en el país (los mismos que la
+              // ficha de la historia): con precios, los de la oferta; sin precios, los del admin.
+              const printed = orderablePrintFormats(lengthPrice, config.formats);
               const printable = printed.length > 0;
               // Los libros cortos se imprimen como cuento grapado; los largos, como libro físico.
               const printLabel = printed.every((format) => format === 'booklet')
                 ? t('chipBooklet')
                 : t('chipPrint');
-              const lengthPrice = prices
-                ? bookPrices(prices, length, professional, value.contentType)
-                : null;
               return (
                 <OptionCard
                   key={length}
