@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 
-import type { PublicStory } from '@storynido/shared';
+import { splitCoverTitle, type PublicStory } from '@storynido/shared';
 
 import { AUDIENCE_TONES } from '@/lib/audience-tones';
-import { StoryCover } from '@/components/stories/story-cover';
+import { CoverTitle, StoryCover } from '@/components/stories/story-cover';
 import type { HomeChannel } from '@/lib/home-state';
 import { cn } from '@/lib/utils';
 
@@ -68,6 +68,7 @@ export function Thumb({
   line,
   sizes,
   priority = false,
+  title = null,
 }: {
   src: string | null;
   story: PublicStory | undefined;
@@ -75,9 +76,36 @@ export function Thumb({
   line: HomeChannel;
   sizes: string;
   priority?: boolean;
+  /**
+   * Título del libro sobre la portada generada, como en el visor y en el PDF (la ilustración
+   * nunca lo trae). Solo en las portadas grandes: en una miniatura no se lee.
+   */
+  title?: string | null;
 }) {
   if (!src && story) {
     return <StoryCover story={story} name={name} line={line} sizes={sizes} priority={priority} />;
+  }
+  if (src && title) {
+    return (
+      <span className="[container-type:inline-size] absolute inset-0 block">
+        <Image
+          src={src}
+          alt=""
+          fill
+          unoptimized
+          priority={priority}
+          sizes={sizes}
+          className="object-cover"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-[38%] bg-gradient-to-b from-[#fffaf5]/90 via-[#fffaf5]/60 to-transparent"
+        />
+        <span aria-hidden="true" className="contents">
+          <CoverTitle {...splitCoverTitle(title, name ?? '')} />
+        </span>
+      </span>
+    );
   }
   return (
     <Image

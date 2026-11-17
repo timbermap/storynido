@@ -331,6 +331,7 @@ export function ShelfItem({
           name={order.childName}
           line={order.channel}
           sizes="(min-width: 1024px) 240px, (min-width: 640px) 30vw, 45vw"
+          title={order.title}
         />
       </Link>
       <LineChip line={order.channel} label={lines[order.channel].chip} small />
