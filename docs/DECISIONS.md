@@ -2607,3 +2607,13 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Rótulo:** `HeroPhoto` acepta `caption`; aquí lleva «Imagen ilustrativa» / «Imagem ilustrativa» / «Illustrative image» (`Landing.events.hero.imageCaption`), chico, en la esquina, sobre fondo blanco translúcido. El alt (`hero.photoAlt`) describe la foto nueva.
 - **Sin cambio:** `kit-completo.webp` sigue en uso en la tarjeta de Celebraciones de la home con sesión (`LINE_IMAGES`) y en `dev-home`.
 - **Pendiente:** cambiar por una foto real de un cliente antes de producción, si la hay.
+
+## 245 — Admin: portada Hoy y contribución en lugar de «margen neto»
+
+- **Fecha:** 2026-11-17. Pedido por Sebas (propuesta de la mesa para el dashboard; aprobó las etapas 1 y 2).
+- **Problema:** «Margen neto estimado» decía «sin impuestos, IA ni impresión» pero los restaba, y no restaba la comisión de pago (con Gumroad, US$ 2 a 3 por ebook). Los días cerrados quedaban guardados y no veían reembolsos ni cambios de estado posteriores. El embudo no separaba líneas. Los avisos de `adminAlerts` (contracargos, cobros que no coinciden, fallas de imprenta y del pipeline) se guardaban pero el admin no los mostraba.
+- **Decisión:** la portada pasa a ser **Hoy**: (1) lo que necesita atención (`GET /v1/admin/attention`: avisos sin resolver, revisión manual, pedidos pagados que no terminan de generarse en 2 h, cotizaciones nuevas, IA sobre el umbral de alerta), con «Marcar resuelto» para los avisos (`POST /v1/admin/alerts/:id/resolve`, queda en auditoría); (2) contribución, pedidos, conversión y contribución por venta contra el período anterior (`compare=true`, hasta 90 días); (3) cascada de ventas a contribución; (4) tabla por producto con el piso de US$ 8; (5) embudo por línea.
+- **Contribución** = ventas − impuestos − comisión de pago − toda la IA del día − impresión y envío. La comisión se **estima** por proveedor (`PAYMENT_FEES`: Dodo 5,5 % + 0,40, Gumroad 12,9 % + 0,80, tarjeta no estadounidense, publicadas al 16 nov 2026); `mock` y desconocidos usan Dodo. Incluye la de los pedidos reembolsados, porque no se devuelve. `marginUsd` queda por compatibilidad.
+- **Días:** se recalculan en cada visita hasta 35 días después (`METRICS_SETTLE_DAYS`) y recién ahí se guardan; un día guardado con otra versión del cálculo (`METRICS_VERSION` = 2) también se recalcula.
+- **Por producto:** `metricsProductKey` (Celebraciones por lo cobrado: kit completo, invitación, piezas extra, tarjetas; libros por extensión, contenido, formato y `pro_`). La IA por producto es la gastada en cada pedido (`aiUsage.orderId`).
+- **Pendiente (etapa 3):** guardar la comisión real de cada cobro cuando el adaptador de Dodo la informe, pagos sin pedido y conciliación.
