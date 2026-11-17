@@ -39,6 +39,12 @@ export const apiConfigSchema = serviceEnvSchema.extend({
         .filter(Boolean),
     ),
   EMAIL_LINK_SECRET: z.string().trim().min(16).optional(),
+  /** Dodo Payments (PAYMENT_PROVIDER=dodo): sin las tres variables no se registra. */
+  DODO_API_KEY: z.string().trim().optional(),
+  DODO_WEBHOOK_SECRET: z.string().trim().optional(),
+  DODO_PRODUCT_ID: z.string().trim().optional(),
+  /** test_mode (por defecto) o live_mode. */
+  DODO_ENV: z.enum(['test_mode', 'live_mode']).default('test_mode'),
   /** Resend: sin clave, los mails quedan en el proveedor simulado (EMAIL_PROVIDER=mock). */
   RESEND_API_KEY: z.string().trim().optional(),
   EMAIL_FROM: z.string().default('StoryNido <hola@storynido.com>'),

@@ -7,4 +7,6 @@ Implementaciones de los proveedores externos (IA, pagos, imprenta, mails, storag
 - **Registro** (`src/registry.ts`): lee la configuración de las variables de entorno (`AI_TEXT_PROVIDER`, `PAYMENT_PROVIDER`, etc.) y permite que `aiConfig` (Firestore, editable en el admin) cambie la IA sin redeploy.
 - **Tests de contrato** (`@storynido/providers/testing`): cada implementación, simulada o real, tiene que pasar la misma suite.
 
-Las implementaciones reales se suman en sus fases: Vertex AI (07), Cloud Storage (06), Stripe (11), Gelato (12) y Resend (13).
+Las implementaciones reales se suman en sus fases: Vertex AI (07), Cloud Storage (06), pagos (11), Gelato (12) y Resend (13).
+
+- **Dodo Payments** (`src/dodo/payment.ts`, DECISIONS 244): `PAYMENT_PROVIDER=dodo` con `DODO_API_KEY`, `DODO_WEBHOOK_SECRET`, `DODO_PRODUCT_ID` y `DODO_ENV` (`test_mode` o `live_mode`). Un solo ítem con el total del servidor, solo USD; webhooks con Standard Webhooks en `POST /v1/webhooks/payments/dodo`.
