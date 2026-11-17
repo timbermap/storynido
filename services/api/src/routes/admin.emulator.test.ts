@@ -347,7 +347,7 @@ describe('admin: interruptor del sitio y auditoría', () => {
     await db.recursiveDelete(db.collection(COLLECTIONS.aiModels));
   });
 
-  it('dashboard: el día cerrado se guarda y no se recalcula; hoy va en vivo', async () => {
+  it('dashboard: los días recientes se recalculan en cada visita y no se guardan', async () => {
     const today = utcDay();
     const yesterday = utcDay(new Date(Date.now() - 24 * 3600 * 1000));
     const at = (day: string) => new Date(`${day}T12:00:00.000Z`);
@@ -389,7 +389,15 @@ describe('admin: interruptor del sitio y auditoría', () => {
       app.inject({ method: 'GET', url: '/v1/admin/metrics?days=2', headers: auth(ADMIN) });
     const first = (await metrics()).json<{
       days: { day: string; final: boolean; orders: number; revenueUsd: number; previews: number }[];
-      totals: { orders: number; revenueUsd: number; marginUsd: number };
+      totals: {
+        orders: number;
+        revenueUsd: number;
+        marginUsd: number;
+        paymentFeeUsd: number;
+        aiBooksUsd: number;
+        aiPreviewsUsd: number;
+        contributionUsd: number;
+      };
     }>();
     expect(first.days.map((day) => [day.day, day.final, day.orders])).toEqual([
       [yesterday, true, 1],
@@ -398,18 +406,101 @@ describe('admin: interruptor del sitio y auditoría', () => {
     expect(first.days[0]).toMatchObject({ revenueUsd: 20, previews: 2 });
     // 20 + 10 de ingresos; 2 de IA y 5 + 5 de impresión.
     expect(first.totals).toMatchObject({ orders: 2, revenueUsd: 30, marginUsd: 18 });
-    expect((await db.doc(`metricsDaily/${yesterday}`).get()).exists).toBe(true);
+    // Comisión estimada (Dodo: 5,5 % + 0,40): 1,50 + 0,95 de las ventas y 1,50 del reembolso.
+    expect(first.totals).toMatchObject({
+      paymentFeeUsd: 3.95,
+      aiBooksUsd: 1.5,
+      aiPreviewsUsd: 0.5,
+      contributionUsd: 14.05,
+    });
+    // Ayer todavía puede cambiar (reembolsos, estados): no se congela hasta los 35 días.
+    expect((await db.doc(`metricsDaily/${yesterday}`).get()).exists).toBe(false);
 
-    // Un cambio posterior en un día cerrado no altera lo guardado (no se recalcula).
+    // Un cambio posterior en un día reciente sí se ve (antes quedaba la cifra vieja).
     await db.doc('orders/o2').update({ status: 'paid' });
     const second = (await metrics()).json<{ days: { orders: number }[] }>();
-    expect(second.days[0]?.orders).toBe(1);
+    expect(second.days[0]?.orders).toBe(2);
+
+    // Con comparación, el período anterior viene aparte.
+    const compared = (
+      await app.inject({
+        method: 'GET',
+        url: '/v1/admin/metrics?days=1&compare=true',
+        headers: auth(ADMIN),
+      })
+    ).json<{ days: { day: string }[]; previous: { orders: number } | null }>();
+    expect(compared.days.map((day) => day.day)).toEqual([today]);
+    expect(compared.previous?.orders).toBe(2);
 
     const costs = (
       await app.inject({ method: 'GET', url: '/v1/admin/ai-costs?days=3', headers: auth(ADMIN) })
     ).json<{ perPreview: { count: number; p50Usd: number }[]; perBook: { avgUsd: number }[] }>();
     expect(costs.perPreview[0]).toMatchObject({ count: 2, p50Usd: 0.3 });
     expect(costs.perBook[0]).toMatchObject({ avgUsd: 1.5 });
+  });
+
+  it('portada Hoy: avisos sin resolver, revisión manual y cotizaciones; un aviso se resuelve', async () => {
+    const old = new Date(Date.now() - 26 * 3600 * 1000);
+    const alert = await db.collection(COLLECTIONS.adminAlerts).add({
+      kind: 'payment_dispute',
+      orderId: 'o9',
+      step: null,
+      message: 'Contracargo abierto por 2199.',
+      createdAt: old,
+      resolvedAt: null,
+    });
+    await db.collection(COLLECTIONS.adminAlerts).add({
+      kind: 'pipeline_failed',
+      orderId: 'o8',
+      step: 'generate_illustrations',
+      message: 'timeout',
+      createdAt: new Date(),
+      resolvedAt: null,
+    });
+    await db.doc('orders/o8').set({ status: 'qa_failed', createdAt: old, updatedAt: old });
+    await db.doc('orders/o7').set({ status: 'qa_failed', createdAt: old, updatedAt: old });
+    await db.doc('orders/o6').set({ status: 'generating', createdAt: old, updatedAt: old });
+    await db.collection(COLLECTIONS.printQuoteRequests).add({ createdAt: new Date() });
+    const attention = async () =>
+      (await app.inject({ method: 'GET', url: '/v1/admin/attention', headers: auth(ADMIN) })).json<{
+        items: { id: string; kind: string; level: string; orderId: string | null }[];
+      }>().items;
+    const items = await attention();
+    // La falla del pipeline aparece una vez (como aviso), no también como revisión.
+    expect(items.map((item) => [item.kind, item.orderId])).toEqual([
+      ['payment_dispute', 'o9'],
+      ['review', 'o7'],
+      ['stuck', 'o6'],
+      ['pipeline_failed', 'o8'],
+      ['quote', null],
+    ]);
+    expect(items[0]?.level).toBe('urgent');
+
+    const resolved = await app.inject({
+      method: 'POST',
+      url: `/v1/admin/alerts/${alert.id}/resolve`,
+      headers: auth(ADMIN),
+    });
+    expect(resolved.statusCode).toBe(200);
+    expect((await attention()).some((item) => item.orderId === 'o9')).toBe(false);
+    const audit = await db
+      .collection(COLLECTIONS.auditLog)
+      .where('action', '==', 'admin_alert.resolve')
+      .get();
+    expect(audit.size).toBe(1);
+    expect(
+      (
+        await app.inject({
+          method: 'POST',
+          url: '/v1/admin/alerts/nada/resolve',
+          headers: auth(ADMIN),
+        })
+      ).statusCode,
+    ).toBe(404);
+    for (const name of [COLLECTIONS.adminAlerts, COLLECTIONS.printQuoteRequests]) {
+      await db.recursiveDelete(db.collection(name));
+    }
+    for (const id of ['o6', 'o7', 'o8']) await db.doc(`orders/${id}`).delete();
   });
 
   it('un customer no lee ni escribe la configuración', async () => {

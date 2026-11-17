@@ -173,8 +173,11 @@ export function registerAdminRoutes(app: FastifyInstance, db: Firestore): void {
 
   // Dashboard: días cerrados precalculados (metricsDaily) y hoy en vivo.
   addRoute(app, apiRoutes.adminMetrics, {}, async (request) => {
-    const { days } = request.query as { days: number };
-    const list = await app.deps.metrics.range(days);
+    const { days, compare } = request.query as { days: number; compare: boolean };
+    // Con comparación (hasta 90 días) se calcula el doble y se separa el período anterior.
+    const withPrevious = compare && days <= 90;
+    const all = await app.deps.metrics.range(withPrevious ? days * 2 : days);
+    const list = withPrevious ? all.slice(days) : all;
     // Login por navegador: suma de los contadores diarios del rango.
     const refs = list.map((day) => db.collection(COLLECTIONS.loginMetrics).doc(day.day));
     const logins: Record<string, number> = {};
@@ -182,7 +185,11 @@ export function registerAdminRoutes(app: FastifyInstance, db: Firestore): void {
       const counts = (snapshot.get('counts') ?? {}) as Record<string, number>;
       for (const [key, value] of Object.entries(counts)) logins[key] = (logins[key] ?? 0) + value;
     }
-    return { days: list, totals: { ...sumMetrics(list), logins } };
+    return {
+      days: list,
+      totals: { ...sumMetrics(list), logins },
+      previous: withPrevious ? sumMetrics(all.slice(0, days)) : null,
+    };
   });
 
   addRoute(app, apiRoutes.adminAiCosts, {}, async (request) => {
