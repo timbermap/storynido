@@ -22,7 +22,7 @@ async function signIn(page: Page, role: 'admin' | 'superadmin') {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Contraseña').fill(password);
   await page.getByRole('button', { name: 'Entrar' }).click();
-  await expect(page.getByRole('heading', { name: 'Resumen' })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole('heading', { name: 'Hoy' })).toBeVisible({ timeout: 30_000 });
   return { email, uid };
 }
 
