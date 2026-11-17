@@ -1,5 +1,7 @@
 import {
   COLLECTIONS,
+  METRICS_SETTLE_DAYS,
+  METRICS_VERSION,
   aggregateDay,
   aiCostReport,
   aiUsageSchema,
@@ -10,6 +12,7 @@ import {
   type FxRates,
   type MetricsOrder,
   type OrderStatus,
+  metricsProductKey,
 } from '@storynido/shared';
 import type { Firestore } from 'firebase-admin/firestore';
 
@@ -34,10 +37,17 @@ const DAY_MS = 24 * 3600 * 1000;
 
 const dayStart = (day: string) => new Date(`${day}T00:00:00.000Z`);
 
+/** `in` de Firestore admite hasta 30 valores. */
+const chunks = <T>(list: readonly T[], size = 30): T[][] =>
+  Array.from({ length: Math.ceil(list.length / size) }, (_, index) =>
+    list.slice(index * size, index * size + size),
+  );
+
 /**
- * Dashboard del admin (fase 14): agregados por día. Los días cerrados se guardan en
- * metricsDaily y no se recalculan; hoy se calcula en vivo. Escala porque cada consulta
- * lee a lo sumo los pedidos de un día.
+ * Dashboard del admin: agregados por día. Un día se recalcula en cada visita hasta
+ * METRICS_SETTLE_DAYS días después (reembolsos, cancelaciones y cambios de estado cambian sus
+ * números) y recién ahí queda guardado en metricsDaily. Un día guardado con otra versión del
+ * cálculo también se recalcula. Cada cálculo lee a lo sumo los pedidos y libros de un día.
  */
 export class MetricsService {
   constructor(
@@ -89,9 +99,48 @@ export class MetricsService {
         .collection(COLLECTIONS.books)
         .where('createdAt', '>=', start)
         .where('createdAt', '<', end)
-        .select('preview.stage', 'preview.character.approvedAt', 'preview.characterImagePath')
+        .select(
+          'preview.stage',
+          'preview.character.approvedAt',
+          'preview.characterImagePath',
+          'channel',
+        )
         .get(),
     ]);
+    // Extensión y tipo de contenido de los libros comprados (para la tabla por producto) e IA
+    // gastada en cada pedido (puede caer en otro día que su creación).
+    const orderIds = orders.docs.map((doc) => doc.id);
+    const bookIds = [...new Set(orders.docs.map((doc) => String(doc.get('bookId'))))];
+    const [orderBooks, orderUsage] = await Promise.all([
+      bookIds.length
+        ? this.db.getAll(...bookIds.map((id) => this.db.collection(COLLECTIONS.books).doc(id)), {
+            fieldMask: ['length', 'contentType'],
+          })
+        : Promise.resolve([]),
+      Promise.all(
+        chunks(orderIds).map((ids) =>
+          this.db.collection(COLLECTIONS.aiUsage).where('orderId', 'in', ids).get(),
+        ),
+      ),
+    ]);
+    const bookInfo = new Map(
+      orderBooks.map((doc) => [
+        doc.id,
+        {
+          length: typeof doc.get('length') === 'string' ? String(doc.get('length')) : null,
+          contentType:
+            typeof doc.get('contentType') === 'string' ? String(doc.get('contentType')) : null,
+        },
+      ]),
+    );
+    const aiByOrder = new Map<string, number>();
+    for (const doc of orderUsage.flatMap((snapshot) => snapshot.docs)) {
+      const id = String(doc.get('orderId'));
+      aiByOrder.set(id, (aiByOrder.get(id) ?? 0) + Number(doc.get('costUsdMicros') ?? 0));
+    }
+    const aiOrdersUsdMicros = usage.docs
+      .filter((doc) => doc.get('orderId'))
+      .reduce((sum, doc) => sum + Number(doc.get('costUsdMicros') ?? 0), 0);
     const previewBooks = new Set(
       usage.docs
         .filter((doc) => !doc.get('orderId') && doc.get('bookId'))
@@ -102,6 +151,7 @@ export class MetricsService {
       final,
       previews: previewBooks.size,
       aiCostUsdMicros: Number(budget.get('spentUsdMicros') ?? 0),
+      aiOrdersUsdMicros,
       fx,
       books: books.docs.map((doc) => {
         const preview = doc.get('preview') as
@@ -117,38 +167,64 @@ export class MetricsService {
           // Las muestras anteriores a la lámina no tienen etapa: llegaron completas.
           preview: Boolean(preview && (preview.stage ?? 'complete') === 'complete'),
           approved: Boolean(preview?.character?.approvedAt),
+          channel: typeof doc.get('channel') === 'string' ? String(doc.get('channel')) : 'families',
         };
       }),
       orders: orders.docs.map((doc): MetricsOrder => {
         const data = doc.data();
         const routing = data.printRouting as { totalCostUsdMinor?: number } | undefined;
         const amounts = (data.amounts ?? {}) as { totalMinor?: number; taxMinor?: number };
+        const channel = typeof data.channel === 'string' ? data.channel : 'families';
+        const snapshot = data.priceSnapshot as
+          | { components?: { code: string }[]; discount?: { reason?: string | null } }
+          | null
+          | undefined;
+        const items = (data.items ?? []) as { piece?: string; format?: string }[];
+        const book = bookInfo.get(String(data.bookId));
         return {
           status: data.status as OrderStatus,
-          channel: typeof data.channel === 'string' ? data.channel : 'families',
+          channel,
           country: String(data.country),
           currency: data.currency as Currency,
           amounts: { totalMinor: amounts.totalMinor ?? 0, taxMinor: amounts.taxMinor ?? 0 },
           printCostUsdMinor: routing?.totalCostUsdMinor ?? null,
+          paymentProvider: (data.payment as { provider?: string } | undefined)?.provider,
+          product: metricsProductKey({
+            channel,
+            format:
+              (items.find((item) => (item.piece ?? 'book') === 'book') ?? items[0])?.format ?? null,
+            components: (snapshot?.components ?? []).map((component) => component.code),
+            discountReason: snapshot?.discount?.reason ?? null,
+            length: book?.length ?? null,
+            contentType: book?.contentType ?? null,
+          }),
+          aiCostUsdMicros: aiByOrder.get(doc.id) ?? 0,
         };
       }),
     });
   }
 
-  /** Los últimos N días (hoy incluido, en vivo). Los cerrados se leen de metricsDaily. */
+  /**
+   * Los últimos N días (hoy incluido). Los asentados (más de METRICS_SETTLE_DAYS) se leen de
+   * metricsDaily; los recientes se recalculan, porque un reembolso o un cambio de estado
+   * posterior cambia sus números.
+   */
   async range(days: number, today = utcDay()): Promise<DayMetrics[]> {
     const list = Array.from({ length: days }, (_, index) =>
       utcDay(new Date(dayStart(today).getTime() - (days - 1 - index) * DAY_MS)),
+    );
+    const settledBefore = utcDay(
+      new Date(dayStart(today).getTime() - METRICS_SETTLE_DAYS * DAY_MS),
     );
     const collection = this.db.collection(COLLECTIONS.metricsDaily);
     const stored = await Promise.all(list.map((day) => collection.doc(day).get()));
     return Promise.all(
       list.map(async (day, index) => {
-        const doc = stored[index];
-        if (doc?.exists) return doc.data() as DayMetrics;
-        const final = day < today;
-        const metrics = await this.compute(day, final);
-        if (final) await collection.doc(day).set(metrics);
+        const settled = day < settledBefore;
+        const saved = stored[index]?.data() as DayMetrics | undefined;
+        if (settled && saved?.version === METRICS_VERSION) return saved;
+        const metrics = await this.compute(day, day < today);
+        if (settled) await collection.doc(day).set(metrics);
         return metrics;
       }),
     );

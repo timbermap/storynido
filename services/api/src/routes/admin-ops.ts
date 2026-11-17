@@ -1,8 +1,14 @@
-import { COLLECTIONS, apiRoutes, normalizeFirestoreData } from '@storynido/shared';
+import {
+  COLLECTIONS,
+  apiRoutes,
+  normalizeFirestoreData,
+  type AttentionItem,
+} from '@storynido/shared';
 import type { FastifyInstance } from 'fastify';
 import type { z } from 'zod';
 
 import { auditedWrite } from '../admin/audit';
+import { AiBudget } from '../ai/budget';
 import { AppError } from '../errors';
 import { InsightsService } from '../metrics/insights';
 import { addRoute } from '../plugins/route';
@@ -23,6 +29,18 @@ const SAMPLE_US = {
 } as const;
 
 const iso = (value: unknown) => (value instanceof Date ? value.toISOString() : null);
+
+/** Un pedido pagado que lleva más que esto sin terminar de generarse está trabado. */
+const STUCK_MS = 2 * 3600 * 1000;
+
+const ALERT_TITLES: Record<string, string> = {
+  payment_mismatch: 'Lo cobrado no coincide con el precio del pedido',
+  payment_dispute: 'Contracargo abierto',
+  print_failed: 'La imprenta informó una falla',
+  pipeline_failed: 'La generación falló después de los reintentos',
+};
+
+const LEVEL_ORDER = { urgent: 0, review: 1, notice: 2 } as const;
 
 /**
  * Operación (fase 15): prueba de conexión de los proveedores, cola de cotizaciones de Eventos
@@ -131,6 +149,128 @@ export function registerAdminOpsRoutes(app: FastifyInstance): void {
       (batch) => batch.update(ref, { status, note, updatedAt: new Date() }),
     );
     return { id, status };
+  });
+
+  // Portada Hoy: lo que espera una acción, lo más urgente y lo más viejo primero.
+  addRoute(app, apiRoutes.adminAttention, {}, async () => {
+    const budget = new AiBudget(db, app.log);
+    const [alerts, review, running, quotes, limits, spent] = await Promise.all([
+      db.collection(COLLECTIONS.adminAlerts).where('resolvedAt', '==', null).limit(100).get(),
+      db.collection(COLLECTIONS.orders).where('status', '==', 'qa_failed').limit(100).get(),
+      db
+        .collection(COLLECTIONS.orders)
+        .where('status', 'in', ['paid', 'generating'])
+        .limit(100)
+        .get(),
+      db.collection(COLLECTIONS.printQuoteRequests).orderBy('createdAt', 'desc').limit(50).get(),
+      budget.limits(),
+      budget.spentTodayUsdMicros(),
+    ]);
+    const items: AttentionItem[] = [];
+    const alerted = new Set<string>();
+    for (const doc of alerts.docs) {
+      const data = normalizeFirestoreData(doc.data()) as Record<string, unknown>;
+      const kind = String(data.kind);
+      const orderId = typeof data.orderId === 'string' ? data.orderId : null;
+      if (orderId && kind === 'pipeline_failed') alerted.add(orderId);
+      items.push({
+        id: `alert:${doc.id}`,
+        kind: kind in ALERT_TITLES ? (kind as AttentionItem['kind']) : 'alert',
+        level: kind === 'pipeline_failed' ? 'review' : 'urgent',
+        title: ALERT_TITLES[kind] ?? (typeof data.message === 'string' ? data.message : kind),
+        orderId,
+        since: iso(data.createdAt),
+        href: orderId ? `/order?id=${orderId}` : '/orders',
+        resolvable: true,
+      });
+    }
+    for (const doc of review.docs) {
+      // Una falla del pipeline ya aparece como aviso (y también deja el pedido en revisión).
+      if (alerted.has(doc.id)) continue;
+      const data = normalizeFirestoreData(doc.data()) as Record<string, unknown>;
+      items.push({
+        id: `review:${doc.id}`,
+        kind: 'review',
+        level: 'review',
+        title: 'Pedido en revisión manual',
+        orderId: doc.id,
+        since: iso(data.updatedAt) ?? iso(data.createdAt),
+        href: '/review',
+        resolvable: false,
+      });
+    }
+    const now = Date.now();
+    for (const doc of running.docs) {
+      const data = normalizeFirestoreData(doc.data()) as Record<string, unknown>;
+      const since = data.updatedAt instanceof Date ? data.updatedAt : null;
+      if (!since || now - since.getTime() < STUCK_MS) continue;
+      items.push({
+        id: `stuck:${doc.id}`,
+        kind: 'stuck',
+        level: 'review',
+        title: 'Pedido pagado que no termina de generarse',
+        orderId: doc.id,
+        since: since.toISOString(),
+        href: `/order?id=${doc.id}`,
+        resolvable: false,
+      });
+    }
+    for (const doc of quotes.docs) {
+      const data = normalizeFirestoreData(doc.data()) as Record<string, unknown>;
+      if ((data.status ?? 'new') !== 'new') continue;
+      items.push({
+        id: `quote:${doc.id}`,
+        kind: 'quote',
+        level: 'notice',
+        title: 'Cotización de Eventos sin responder',
+        orderId: null,
+        since: iso(data.createdAt),
+        href: '/quotes',
+        resolvable: false,
+      });
+    }
+    const usedPercent = limits.dailyBudgetUsd
+      ? Math.round((spent / 1_000_000 / limits.dailyBudgetUsd) * 100)
+      : 0;
+    if (usedPercent >= limits.budgetAlertPercent) {
+      items.push({
+        id: 'ai_budget',
+        kind: 'ai_budget',
+        level: usedPercent >= 100 ? 'urgent' : 'notice',
+        title: `Gasto de IA de hoy al ${String(usedPercent)} % del presupuesto`,
+        orderId: null,
+        since: null,
+        href: '/ai',
+        resolvable: false,
+      });
+    }
+    items.sort(
+      (a, b) =>
+        LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level] ||
+        (a.since ?? '9').localeCompare(b.since ?? '9'),
+    );
+    return { items };
+  });
+
+  addRoute(app, apiRoutes.adminResolveAlert, {}, async (request) => {
+    const { id } = request.params as { id: string };
+    const ref = db.collection(COLLECTIONS.adminAlerts).doc(id);
+    const before = (await ref.get()).data();
+    if (!before) throw new AppError(404, 'not_found', 'Aviso inexistente.');
+    const resolvedAt = new Date();
+    await auditedWrite(
+      db,
+      request.user,
+      {
+        action: 'admin_alert.resolve',
+        entity: COLLECTIONS.adminAlerts,
+        entityId: id,
+        before: { resolvedAt: null },
+        after: { resolvedAt: resolvedAt.toISOString() },
+      },
+      (batch) => batch.update(ref, { resolvedAt }),
+    );
+    return { id, resolvedAt: resolvedAt.toISOString() };
   });
 
   addRoute(app, apiRoutes.adminInsights, {}, async (request) => {
