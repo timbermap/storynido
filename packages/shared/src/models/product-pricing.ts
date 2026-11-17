@@ -50,6 +50,11 @@ export const productPricingSchema = z.object({
   /** Comisión de cobro (Stripe, Mercado Pago), en %: un costo más. Sin valor, 3,5 %. */
   paymentFeePercent: z.number().min(0).max(20).optional(),
   /**
+   * Parte fija de la comisión de cobro por transacción (Dodo: USD 0,40), en centavos de USD. Se
+   * suma una vez por libro, no al envío ni a los ejemplares extra. Sin valor, 0 (DECISIONS 247).
+   */
+  paymentFeeFixedUsdMinor: z.number().int().min(0).max(500).optional(),
+  /**
    * Margen neto mínimo por libro (después de costos y comisión): ningún descuento (cupón, pro,
    * recurrencia) lo perfora. Sin valor, USD 8 en digital y USD 12 en impresos.
    */
@@ -159,6 +164,18 @@ export function unitPriceUsdMinor(
 /** Comisión de cobro del producto, en %. */
 export const paymentFeePercent = (pricing: Pricing) =>
   pricing.paymentFeePercent ?? DEFAULT_PAYMENT_FEE_PERCENT;
+
+/** Parte fija de la comisión de cobro, en centavos de USD (DECISIONS 247). Sin valor, 0. */
+export const paymentFeeFixedUsdMinor = (pricing: Pricing) => pricing.paymentFeeFixedUsdMinor ?? 0;
+
+/**
+ * Lo que hay que cobrar por un libro para que, después de la comisión (porcentaje + fijo por
+ * transacción), queden `usdMinor` (DECISIONS 247). El fijo va una sola vez, en el libro.
+ */
+export function withBookPaymentFee(pricing: Pricing, usdMinor: number): number {
+  if (usdMinor <= 0) return 0;
+  return withPaymentFee(usdMinor + paymentFeeFixedUsdMinor(pricing), paymentFeePercent(pricing));
+}
 
 /** Lo que hay que cobrar para que, después de la comisión, queden `usdMinor` (hacia arriba). */
 export function withPaymentFee(usdMinor: number, feePercent: number): number {

@@ -2641,3 +2641,12 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Problema 4:** las tarjetas de extensión mostraban "Cuento grapado" / "Libro físico" con la config del admin aunque el país no tuviera imprenta. **Decisión 4:** con precios del país, solo los impresos que la oferta permite pedir (`orderablePrintFormats`), igual que la ficha. En staging, además, los impresos quedaron "Se vende: No" en Admin → Precios mientras el cobro sea solo digital (se reactivan con un clic).
 - **CI:** `pnpm audit` ignora GHSA-fc5q-39xc-vjpf (picomatch ≤ 4.0.7, sin 4.0.8 publicada), igual que en la rama dashboard-hoy.
 - **Tests:** `services/api/src/checkout/precios-claros.test.ts`, `packages/shared/src/models/price-table.test.ts`, `services/api/src/preview/preview.emulator.test.ts`, `apps/web/src/lib/offer.test.ts`, `e2e/tests/purchase.spec.ts`.
+
+## 247 — Comisión de Dodo (porcentaje + fijo por libro) e IVA siempre incluido con Dodo
+
+- **Fecha:** 2026-11-17. Pedido por Sebas en el hilo: "si corrige lo de dodo".
+- **Problema:** Dodo cobra 4 % + USD 0,40 por transacción + 1,5 % en pagos internacionales (dodopayments.com/pricing). El precio solo contemplaba un porcentaje (3,5 %) y no la parte fija; y Dodo, como merchant of record, incluye el IVA en el cobro, pero los países configurados con IVA aparte lo sumaban encima.
+- **Decisión 1:** `paymentFeeFixedUsdMinor` en `productPricing` (centavos de USD, sin valor 0). `withBookPaymentFee` lo suma una vez por libro antes de aplicar el porcentaje (precio de lista, mínimo del ebook y piso con descuentos). El envío y los ejemplares extra siguen solo con el porcentaje. Para Dodo se usa 5,5 % + 0,40 (se carga en Admin → Precios).
+- **Decisión 2:** con un cobrador `taxInclusive` (Dodo) todos los países se tratan como IVA incluido (`FirestoreCatalog` con `taxIncluded`): el impuesto sale del margen, como se decidió el 7 Nov.
+- **Decisión 3:** el webhook `payment.succeeded` guarda el impuesto real que informa Dodo (`tax`) en `payment.taxMinor` y `amounts.taxMinor` del pedido.
+- **Tests:** `packages/providers/src/dodo/payment.test.ts`, `packages/shared/src/models/product-pricing.test.ts`, `services/api/src/checkout/precios-claros.test.ts`, `services/api/src/firebase.emulator.test.ts`.

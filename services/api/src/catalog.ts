@@ -154,8 +154,15 @@ export class FirestoreCatalog implements CatalogRepository {
   constructor(
     private readonly db: Firestore,
     ttlSeconds = 60,
+    /** `taxIncluded`: el cobrador incluye el IVA en todos los países (Dodo, DECISIONS 247). */
+    private readonly options: { taxIncluded?: () => boolean } = {},
   ) {
     this.cache = new TtlCache(ttlSeconds * 1000);
+  }
+
+  /** Con un cobrador que incluye impuestos, todos los países son IVA incluido (DECISIONS 247). */
+  private withTax(country: CountryConfig): CountryConfig {
+    return this.options.taxIncluded?.() ? { ...country, taxIncludedInPrice: true } : country;
   }
 
   stories(): Promise<Story[]> {
@@ -218,25 +225,29 @@ export class FirestoreCatalog implements CatalogRepository {
   }
 
   countries(): Promise<CountryConfig[]> {
-    return this.cache.get('countries', async () => {
-      const snapshot = await this.db
-        .collection(COLLECTIONS.countries)
-        .withConverter(converters.countries)
-        .where('active', '==', true)
-        .get();
-      return snapshot.docs.map((doc) => doc.data());
-    });
+    return this.cache
+      .get('countries', async () => {
+        const snapshot = await this.db
+          .collection(COLLECTIONS.countries)
+          .withConverter(converters.countries)
+          .where('active', '==', true)
+          .get();
+        return snapshot.docs.map((doc) => doc.data());
+      })
+      .then((countries) => countries.map((country) => this.withTax(country)));
   }
 
   country(code: CountryCode): Promise<CountryConfig> {
-    return this.cache.get(`country:${code}`, async () => {
-      const snapshot = await this.db
-        .collection(COLLECTIONS.countries)
-        .withConverter(converters.countries)
-        .doc(code)
-        .get();
-      return snapshot.data() ?? defaultCountryConfig(code);
-    });
+    return this.cache
+      .get(`country:${code}`, async () => {
+        const snapshot = await this.db
+          .collection(COLLECTIONS.countries)
+          .withConverter(converters.countries)
+          .doc(code)
+          .get();
+        return snapshot.data() ?? defaultCountryConfig(code);
+      })
+      .then((country) => this.withTax(country));
   }
 
   productPricing(): Promise<Record<BookFormat, ProductPricing>> {

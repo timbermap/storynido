@@ -1236,6 +1236,9 @@ export class CheckoutService {
         status: 'paid',
         'payment.paymentId': event.paymentId,
         'payment.checkoutSessionId': event.sessionId,
+        ...(typeof event.taxMinor === 'number'
+          ? { 'payment.taxMinor': event.taxMinor, 'amounts.taxMinor': event.taxMinor }
+          : {}),
         updatedAt: new Date(),
       });
       tx.update(this.db.collection(COLLECTIONS.books).doc(order.bookId), {

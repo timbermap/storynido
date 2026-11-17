@@ -373,6 +373,29 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
     expect(['mini', 'short', 'classic', 'epic'].map(story)).toEqual([1399, 1599, 2199, 2399]);
   });
 
+  it('con la comisión de Dodo (5,5 % + 0,40 por libro) los ebooks suben (DECISIONS 247)', () => {
+    const offer = buildOffer({
+      code: 'AR',
+      country: countries.AR,
+      pricing: {
+        ...pricing,
+        digital: { ...pricing.digital, paymentFeePercent: 5.5, paymentFeeFixedUsdMinor: 40 },
+      },
+      fx,
+      products,
+      locale: 'es',
+      printOptions: matrix.AR,
+      activePrinters: PRINTERS,
+      editorial: DEFAULT_EDITORIAL_CONFIG,
+      printCost: (format) => estimated.AR[format] ?? null,
+    });
+    const story = (length: string) =>
+      offer.lengthPrices.find((item) => item.length === length && item.contentType === 'story')
+        ?.amountMinor;
+    expect(['mini', 'short', 'classic', 'epic'].map(story)).toEqual([1499, 1699, 2299, 2499]);
+    expect(Math.min(...offer.proLengthPrices.map((item) => item.amountMinor))).toBe(1499);
+  });
+
   it('el «desde» del impreso es el formato más barato en su extensión más corta', () => {
     const offer = offerFor('AR');
     const printed = offer.formats.filter((item) => item.format !== 'digital');
