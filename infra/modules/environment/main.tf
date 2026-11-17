@@ -306,8 +306,21 @@ locals {
     var.email_link_secret_loaded ? { EMAIL_LINK_SECRET = "email-link-secret" } : {},
     var.email_provider == "resend" ? { RESEND_API_KEY = "resend-api-key" } : {},
   )
+  # Pagos: solo la API cobra. Con "mock" no se lee ningún secreto (DECISIONS 244).
+  payment_env = merge(
+    { PAYMENT_PROVIDER = var.payment_provider },
+    var.payment_provider == "dodo" ? {
+      # Fuera de producción, siempre el modo de prueba de Dodo (no cobra).
+      DODO_ENV        = var.environment == "production" ? "live_mode" : "test_mode"
+      DODO_PRODUCT_ID = var.dodo_product_id
+    } : {},
+  )
+  payment_secret_env = var.payment_provider == "dodo" ? {
+    DODO_API_KEY        = "dodo-api-key"
+    DODO_WEBHOOK_SECRET = "dodo-webhook-secret"
+  } : {}
   service_secret_env = merge(local.print_secret_env, local.email_secret_env)
-  api_secret_env     = merge(local.service_secret_env, local.api_print_secret_env)
+  api_secret_env     = merge(local.service_secret_env, local.api_print_secret_env, local.payment_secret_env)
 }
 
 module "worker" {
@@ -370,7 +383,7 @@ module "api" {
     # Rutas /jobs: solo Cloud Scheduler con un token OIDC de esta cuenta y esta audiencia.
     JOBS_INVOKER_EMAIL = local.sa["sn-invoker"]
     JOBS_AUDIENCE      = local.jobs_audience
-  })
+  }, local.payment_env)
   secret_env = local.api_secret_env
 
   # La API es pública: la autenticación la hacen Firebase Auth y App Check en la app.
@@ -578,6 +591,14 @@ module "secrets" {
     }
     stripe-webhook-secret = {
       description = "Stripe: secreto de firma de webhooks (whsec_...)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    dodo-api-key = {
+      description = "Dodo Payments: API key (modo test fuera de producción)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    dodo-webhook-secret = {
+      description = "Dodo Payments: secreto de firma de webhooks (whsec_...)"
       accessors   = { api = local.member["sn-api"] }
     }
     gelato-api-key = {

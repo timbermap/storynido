@@ -40,7 +40,10 @@ module "environment" {
   # Mails reales con Resend; el secreto de las bajas ya tiene valor (DECISIONS 078).
   email_provider           = "resend"
   email_link_secret_loaded = true
-  log_level                = "debug"
+  # Pagos de lo digital con Dodo Payments en modo test (DECISIONS 244): no cobra de verdad.
+  payment_provider = "dodo"
+  dodo_product_id  = "pdt_0Ns9WghE2X0qwP6OPfN7D"
+  log_level        = "debug"
   # Panel de admin: 2FA (TOTP) obligatorio desde Identity Platform (DECISIONS 092).
   admin_url          = "https://admin--storynido-staging.us-central1.hosted.app"
   admin_mfa_required = true

@@ -9,6 +9,7 @@ import {
 } from './gcp/vertex';
 import { VisionPhotoAnalyzer } from './gcp/vision';
 import { CloudprinterPrintProvider, type CloudprinterOptions } from './cloudprinter/print';
+import { DodoPaymentProvider, type DodoOptions } from './dodo/payment';
 import { GelatoPrintProvider, type GelatoOptions } from './gelato/print';
 import { LuluPrintProvider, type LuluOptions } from './lulu/print';
 import { ResendEmailProvider, type ResendOptions } from './resend/email';
@@ -45,6 +46,8 @@ export interface DefaultProviderOptions {
   cloudprinter?: Omit<CloudprinterOptions, 'fetchImpl'>;
   /** Lulu (solo si hay clave; fuera de producción, el sandbox). */
   lulu?: Omit<LuluOptions, 'fetchImpl'>;
+  /** Dodo Payments (solo si hay clave, secreto del webhook y producto). */
+  dodo?: Omit<DodoOptions, 'fetchImpl' | 'now'>;
   /** Resend (solo si hay clave): sin clave, los mails quedan en el proveedor simulado. */
   resend?: Omit<ResendOptions, 'fetchImpl'>;
   onMockEmail?: (message: EmailMessage) => void;
@@ -61,6 +64,7 @@ export function createProviderFactories(
   const cloudprinter = options.cloudprinter;
   const lulu = options.lulu;
   const resend = options.resend;
+  const dodo = options.dodo;
   const projectId = options.vertexProjectId;
   let vertex: VertexClient | undefined;
   const vertexClient = (id: string) =>
@@ -79,7 +83,10 @@ export function createProviderFactories(
       mock: () => new MockAIImageProvider(),
       ...(projectId ? { vertex: () => new VertexImageProvider(vertexClient(projectId)) } : {}),
     },
-    payment: { mock: () => new MockPaymentProvider(options.mockWebhookSecret) },
+    payment: {
+      mock: () => new MockPaymentProvider(options.mockWebhookSecret),
+      ...(dodo ? { dodo: () => new DodoPaymentProvider(dodo) } : {}),
+    },
     print: {
       mock: () => new MockPrintProvider(options.mockWebhookSecret),
       // Más cara en impresión y más barata en envío a EE. UU.: gana según el destino.

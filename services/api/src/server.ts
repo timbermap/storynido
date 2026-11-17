@@ -66,6 +66,15 @@ const providers = createProviderRegistry({
       }
     : undefined,
   lulu: luluOptionsFromEnv(config.env),
+  dodo:
+    config.env.DODO_API_KEY && config.env.DODO_WEBHOOK_SECRET && config.env.DODO_PRODUCT_ID
+      ? {
+          apiKey: config.env.DODO_API_KEY,
+          webhookSecret: config.env.DODO_WEBHOOK_SECRET,
+          productId: config.env.DODO_PRODUCT_ID,
+          environment: config.env.DODO_ENV,
+        }
+      : undefined,
   resend: config.env.RESEND_API_KEY
     ? {
         apiKey: config.env.RESEND_API_KEY,

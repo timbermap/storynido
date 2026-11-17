@@ -58,7 +58,8 @@ pnpm --filter @storynido/firebase set-role --project storynido-staging --email t
 
 ## 5c. Checkout y pagos (fase 11)
 
-- **Local y staging (`PAYMENT_PROVIDER=mock`):** desde la muestra aprobada, "Elegir formato" lleva a `/es/pagar/<libro>`. "Pagar" crea el pedido y vuelve a `/es/pedido/<pedido>`, donde "Simular el pago" lo confirma con el mismo webhook firmado que usará el procesador real.
+- **Local (`PAYMENT_PROVIDER=mock`):** desde la muestra aprobada, "Elegir formato" lleva a `/es/pagar/<libro>`. "Pagar" crea el pedido y vuelve a `/es/pedido/<pedido>`, donde "Simular el pago" lo confirma con el mismo webhook firmado que usará el procesador real.
+- **Staging (`PAYMENT_PROVIDER=dodo`, modo test):** "Pagar" lleva al checkout de Dodo (tarjeta de prueba `4242 4242 4242 4242`) y vuelve a `/es/pedido/<pedido>`; el pago se confirma con el webhook de Dodo (DECISIONS 244).
 - **Cupón de prueba (emuladores):** `PRUEBA10` (10 %).
 - **Webhook del proveedor:** `POST /v1/webhooks/payments/<proveedor>` con el cuerpo crudo; se verifica la firma.
 - **Conversiones del servidor (opcional):** `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`, `META_PIXEL_ID` y `META_CAPI_ACCESS_TOKEN`. Sin claves no se envía nada.
@@ -89,6 +90,7 @@ Cada secreto se carga con `infra/scripts/set-secret.sh <proyecto> <secreto>` cua
 | Secreto                                      | Plataforma                                  | Fase |
 | -------------------------------------------- | ------------------------------------------- | ---- |
 | `stripe-secret-key`, `stripe-webhook-secret` | Stripe                                      | 11   |
+| `dodo-api-key`, `dodo-webhook-secret`        | Dodo Payments (DECISIONS 244)               | 11   |
 | `gelato-api-key`, `gelato-webhook-secret`    | Gelato                                      | 12   |
 | `resend-api-key`                             | Resend                                      | 13   |
 | `meta-capi-access-token`                     | Meta                                        | 11   |

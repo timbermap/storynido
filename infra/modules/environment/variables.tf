@@ -102,6 +102,28 @@ variable "email_provider" {
   }
 }
 
+variable "payment_provider" {
+  type        = string
+  default     = "mock"
+  description = "Pagos: mock (simulado) o dodo (requiere dodo-api-key y dodo-webhook-secret con valor)."
+
+  validation {
+    condition     = contains(["mock", "dodo"], var.payment_provider)
+    error_message = "payment_provider debe ser mock o dodo."
+  }
+}
+
+variable "dodo_product_id" {
+  type        = string
+  default     = ""
+  description = "Producto de Dodo \"paga lo que quieras\" (pdt_...) al que se le fija el total de cada checkout."
+
+  validation {
+    condition     = var.payment_provider != "dodo" || startswith(var.dodo_product_id, "pdt_")
+    error_message = "Con payment_provider = dodo, dodo_product_id tiene que ser un pdt_..."
+  }
+}
+
 variable "email_link_secret_loaded" {
   type        = bool
   default     = false
