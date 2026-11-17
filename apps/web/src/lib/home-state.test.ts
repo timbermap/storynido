@@ -87,11 +87,21 @@ describe('pickHomeLine · regla 1: la muestra más cercana a la compra, de cualq
     expect(view.next?.kind).toBe('draft');
   });
 
-  it('una muestra profesional que gana pone el modo Pro, sin «Lo próximo»', () => {
+  it('una muestra profesional que gana en una cuenta mixta: sin modo Pro, con «Lo próximo»', () => {
     const view = pick([
       book({ id: 'p', channel: 'professionals', stage: 'preview' }),
       book({ id: 'f', stage: 'draft' }),
     ]);
+    expect(view).toMatchObject({
+      line: 'professionals',
+      reason: 'book',
+      pro: false,
+      next: { kind: 'preview', book: { id: 'p' } },
+    });
+  });
+
+  it('solo muestras profesionales: modo Pro, sin «Lo próximo»', () => {
+    const view = pick([book({ id: 'p', channel: 'professionals', stage: 'preview' })]);
     expect(view).toEqual({ line: 'professionals', reason: 'book', pro: true, next: null });
   });
 
