@@ -155,7 +155,8 @@ export const parseRemembered = (value: unknown): HomeChannel | null =>
  * 3. si no, el perfil profesional activado;
  * 4. si no, la línea por la que entró (RememberChannel);
  * 5. si no, la del último pedido; sin nada, Familias.
- * Modo Pro: cuando Profesionales gana por la regla 1 o la 3, o todo lo de la cuenta es profesional.
+ * Modo Pro: cuando Profesionales gana por la regla 1, o por la 3 si la cuenta no tiene nada de
+ * otras líneas, o cuando todo lo de la cuenta es profesional.
  */
 export function pickHomeLine(
   books: readonly HomeBook[],
@@ -166,10 +167,16 @@ export function pickHomeLine(
   const everything = [...books.map((book) => book.channel), ...live.map((order) => order.channel)];
   const onlyPro =
     everything.length > 0 && everything.every((channel) => channel === 'professionals');
+  const hasOtherLines = everything.some((channel) => channel !== 'professionals');
 
   const view = (line: HomeChannel, reason: HomeLineReason, next: HomeNext | null): HomeView => {
+    // Una cuenta mixta (Familias/Celebraciones + Pro) sin nada en curso tiene la home normal: las
+    // tres tarjetas de línea (Profesionales destacada) y «Tus proyectos» con todas las líneas, así
+    // «Nuevo proyecto» nunca manda a una familia a Profesionales. Pro puro o nuevo: modo Pro igual.
     const pro =
-      onlyPro || (line === 'professionals' && (reason === 'book' || reason === 'profile'));
+      onlyPro ||
+      (line === 'professionals' &&
+        (reason === 'book' || (reason === 'profile' && !hasOtherLines)));
     // En modo Pro la lista de proyectos reemplaza a «Lo próximo» (un solo botón: «Nuevo proyecto»).
     return { line, reason, pro, next: pro ? null : next };
   };

@@ -149,6 +149,25 @@ describe('pickHomeLine · regla 3: perfil profesional activado', () => {
     });
     expect(view.reason).toBe('profile');
   });
+
+  it('cuenta mixta (perfil Pro + pedidos de Familias y Celebraciones): Profesionales sin modo Pro', () => {
+    const view = pick(
+      [],
+      [
+        order({ id: 'f', status: 'delivered', createdAt: 2 }),
+        order({ id: 'e', channel: 'events', status: 'ready', print: false, createdAt: 3 }),
+      ],
+      { proProfile: true },
+    );
+    expect(view).toEqual({ line: 'professionals', reason: 'profile', pro: false, next: null });
+  });
+
+  it('perfil Pro con solo pedidos profesionales: modo Pro', () => {
+    const view = pick([], [order({ channel: 'professionals', status: 'delivered' })], {
+      proProfile: true,
+    });
+    expect(view).toMatchObject({ line: 'professionals', pro: true });
+  });
 });
 
 describe('pickHomeLine · regla 4: la línea por la que entró', () => {
