@@ -138,13 +138,16 @@ export const aiCostUsdMinor = (pricing: Pricing, pages: number) =>
 /**
  * Costo + márgenes de un ejemplar, en centavos de USD, antes de la comisión de cobro: creación
  * (IA por páginas generadas + margen) e impresión (imprenta + margen, si es impreso).
+ * `pages`: páginas que pagan el margen por página; `aiPages`: las que pagan IA de ilustración
+ * (por defecto, las mismas). Las de actividades pagan margen pero no IA (DECISIONS 246).
  */
 export function unitPriceUsdMinor(
   pricing: Pricing,
   productionCostUsdMinor: number,
   pages: number,
+  aiPages = pages,
 ): number {
-  const ai = aiCostUsdMinor(pricing, pages);
+  const ai = aiCostUsdMinor(pricing, aiPages);
   const creation = ai + marginUsdMinor(pricing.creationMargin, ai, pages);
   const printing =
     pricing.product === 'digital' || productionCostUsdMinor <= 0

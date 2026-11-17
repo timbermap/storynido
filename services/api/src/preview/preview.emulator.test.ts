@@ -1465,7 +1465,7 @@ describe('checkout y pagos (fase 11)', () => {
       accountType: 'professional',
       discount: { purchases: 0, next: { purchases: 5, percent: 10 } },
     });
-    // Precio Pro base: 10 % menos, pero ningún ebook baja del mini (13,99; DECISIONS 245).
+    // Precio Pro base: 10 % menos, pero ningún ebook baja del mini (13,99; DECISIONS 246).
     expect((await quoteDigital()).subtotalMinor).toBe(1399);
 
     // 5 compras elegibles en 90 días → 10 %. No cuentan: reembolsadas, canceladas, pendientes,
@@ -1489,7 +1489,7 @@ describe('checkout y pagos (fase 11)', () => {
         .set({ ownerUid, status: orderStatus, createdAt: new Date(Date.now() - daysAgo * day) });
     }
     expect((await status()).discount?.purchases).toBe(5);
-    // El escalón del 10 % no deja el ebook mini por debajo de 13,99 (DECISIONS 245).
+    // El escalón del 10 % no deja el ebook mini por debajo de 13,99 (DECISIONS 246).
     const tier = await quoteDigital();
     expect(tier.discount.reason).toBeNull();
     expect(tier.totalMinor).toBe(1399);

@@ -68,7 +68,7 @@ describe('tabla «Precio final» del admin', () => {
       blocked: null,
     });
     expect(row(rows, 'classic', 'digital')?.priceMinor).toBe(2199);
-    // Profesionales: 10 % antes de redondear, pero ningún ebook baja del mini (DECISIONS 245).
+    // Profesionales: 10 % antes de redondear, pero ningún ebook baja del mini (DECISIONS 246).
     expect(row(rows, 'mini', 'digital')?.proPriceMinor).toBe(1399);
     expect(row(rows, 'classic', 'digital')?.proPriceMinor).toBeLessThan(2199);
   });

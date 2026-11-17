@@ -301,7 +301,7 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
     expect(Math.min(...offer.lengthPrices.map((item) => item.amountMinor))).toBe(1399);
   });
 
-  it('ningún ebook baja de 13,99, tampoco con el descuento profesional (DECISIONS 245)', () => {
+  it('ningún ebook baja de 13,99, tampoco con el descuento profesional (DECISIONS 246)', () => {
     const offer = offerFor('AR');
     const pro = (length: string, contentType: string) =>
       offer.proLengthPrices.find(
@@ -309,7 +309,7 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
       )?.amountMinor;
     expect(Math.min(...offer.proLengthPrices.map((item) => item.amountMinor))).toBe(1399);
     expect(pro('mini', 'story')).toBe(1399);
-    expect(pro('epic', 'activities')).toBe(1399);
+    expect(pro('mini', 'activities')).toBe(1399);
     // Las extensiones largas conservan su descuento.
     expect(pro('classic', 'story')).toBeLessThan(2199);
     // El resumen cobra lo mismo que la tarjeta: 13,99 también para la cuenta profesional.
@@ -317,7 +317,7 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
     expect(summary('AR', 'digital', mini, null, true).components[0]?.totalMinor).toBe(1399);
   });
 
-  it('un cupón no deja un ebook por debajo de 13,99 (DECISIONS 245)', () => {
+  it('un cupón no deja un ebook por debajo de 13,99 (DECISIONS 246)', () => {
     const mini = DEFAULT_EDITORIAL_CONFIG.lengths.mini.interiorPages;
     const result = quote({
       country: countries.AR,
@@ -346,6 +346,23 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
     });
     if (!result.ok) throw new Error(result.error);
     expect(result.snapshot.subtotalMinor - result.snapshot.discount.minor).toBe(1399);
+  });
+
+  it('libro de actividades y cuento con actividades: precio por extensión (DECISIONS 246)', () => {
+    const offer = offerFor('AR');
+    const price = (contentType: string) =>
+      ['mini', 'short', 'classic', 'epic'].map(
+        (length) =>
+          offer.lengthPrices.find(
+            (item) => item.length === length && item.contentType === contentType,
+          )?.amountMinor,
+      );
+    // Las páginas de actividades pagan margen por página (0,35) pero no IA de ilustración.
+    // Mini y corto quedan en el piso del mini.
+    expect(price('activities')).toEqual([1399, 1399, 1799, 1999]);
+    expect(price('story_activities')).toEqual([1399, 1499, 2099, 2299]);
+    // Para colorear y el cuento no cambian.
+    expect(price('coloring')).toEqual([1399, 1599, 2199, 2399]);
   });
 
   it('ebook por extensión: 13,99 / 15,99 / 21,99 / 23,99', () => {

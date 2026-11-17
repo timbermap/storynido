@@ -148,10 +148,15 @@ export interface QuoteInput {
    */
   pro?: { purchases: number; config: ProDiscountConfig; professional: boolean } | null;
   /**
-   * Páginas generadas del cuento mini (DECISIONS 245): ningún ebook se cobra por debajo del
+   * Páginas generadas del cuento mini (DECISIONS 246): ningún ebook se cobra por debajo del
    * precio de lista del mini, ni con descuento profesional, cupón ni promoción.
    */
   minPages?: number;
+  /**
+   * Páginas con ilustración generada (pagan IA). `pages` son las que pagan margen por página: con
+   * actividades, también las de actividades (DECISIONS 246). Por defecto, las mismas.
+   */
+  aiPages?: number;
 }
 
 export type QuoteResult =
@@ -201,9 +206,10 @@ export function quote(input: QuoteInput): QuoteResult {
   const quantity = Math.max(1, Math.floor(input.quantity));
   const productionUnit = print ? Math.round(print.productionUsdMinor / quantity) : 0;
   const fee = paymentFeePercent(pricing);
-  const usd = unitPriceUsdMinor(pricing, productionUnit, input.pages);
+  const aiPages = input.aiPages ?? input.pages;
+  const usd = unitPriceUsdMinor(pricing, productionUnit, input.pages, aiPages);
   // La creación (IA + margen) se cobra una vez; cada ejemplar extra paga solo su impresión.
-  const copyUsd = usd - unitPriceUsdMinor(pricing, 0, input.pages);
+  const copyUsd = usd - unitPriceUsdMinor(pricing, 0, input.pages, aiPages);
   // Perfil profesional: descuento base del producto (además del de recurrencia, que es de todos).
   const withBase = (value: number) =>
     input.pro?.professional ? Math.round((value * (100 - pricing.proPercentOff)) / 100) : value;
@@ -214,6 +220,7 @@ export function quote(input: QuoteInput): QuoteResult {
     input.pages,
     input.pro?.professional,
     input.minPages,
+    aiPages,
   );
   const copyLocal = fromUsdMinor(withBase(withPaymentFee(copyUsd, fee)), CHARGE_CURRENCY, input.fx);
   const copy = copyLocal === null ? null : charmPrice(copyLocal, CHARGE_CURRENCY);
@@ -226,7 +233,7 @@ export function quote(input: QuoteInput): QuoteResult {
   const bookUnits = print ? 1 : quantity;
   const minSubtotal =
     Math.max(
-      bookFloorMinor(pricing, productionUnit, input.pages),
+      bookFloorMinor(pricing, productionUnit, aiPages),
       ebookMinimumMinor(pricing, input.minPages),
     ) *
       bookUnits +
