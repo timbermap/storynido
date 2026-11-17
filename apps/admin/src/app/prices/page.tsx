@@ -146,6 +146,13 @@ export default function PricesPage() {
           },
           {
             kind: 'money',
+            path: 'paymentFeeFixedUsdMinor',
+            label: 'Comisión de cobro: fijo por transacción (USD)',
+            hint: 'Dodo cobra 0,40 por pago. Se suma una vez por libro (no al envío ni a los ejemplares extra).',
+            currencyPath: 'currency',
+          },
+          {
+            kind: 'money',
             path: 'minNetMarginUsdMinor',
             label: 'Margen neto mínimo por libro (USD)',
             hint: 'Ningún descuento (cupón, promoción, Profesionales, recurrencia) baja el margen de acá.',
@@ -191,7 +198,11 @@ export default function PricesPage() {
           {
             label: 'Comisión · mínimo neto',
             render: (data) =>
-              `${String(typeof data.paymentFeePercent === 'number' ? data.paymentFeePercent : 3.5)} % · ${money(
+              `${String(typeof data.paymentFeePercent === 'number' ? data.paymentFeePercent : 3.5)} %${
+                typeof data.paymentFeeFixedUsdMinor === 'number' && data.paymentFeeFixedUsdMinor > 0
+                  ? ` + ${money(data.paymentFeeFixedUsdMinor, 'USD')}`
+                  : ''
+              } · ${money(
                 typeof data.minNetMarginUsdMinor === 'number'
                   ? data.minNetMarginUsdMinor
                   : data.product === 'digital'

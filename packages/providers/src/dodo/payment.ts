@@ -58,6 +58,7 @@ const paymentSchema = z.object({
   payment_id: z.string(),
   total_amount: z.number().int().nonnegative(),
   currency: currencySchema,
+  tax: z.number().int().nullish(),
   checkout_session_id: z.string().nullish(),
   metadata: z.record(z.string(), z.unknown()).nullish(),
 });
@@ -96,6 +97,8 @@ function safeEqualBase64(a: string, b: string): boolean {
  */
 export class DodoPaymentProvider implements PaymentProvider {
   readonly id = 'dodo';
+  /** Dodo es merchant of record: el IVA va incluido en todos los países (DECISIONS 247). */
+  readonly taxInclusive = true;
   private readonly fetchImpl: typeof fetch;
   private readonly baseUrl: string;
   private readonly now: () => Date;
@@ -215,6 +218,7 @@ export class DodoPaymentProvider implements PaymentProvider {
           paymentId: payment.payment_id,
           amountMinor: payment.total_amount,
           currency: payment.currency,
+          taxMinor: payment.tax ?? null,
         };
       }
       case 'payment.failed':

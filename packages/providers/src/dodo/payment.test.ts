@@ -135,7 +135,14 @@ describe('Dodo Payments', () => {
       paymentId: 'pay_1',
       amountMinor: 1999,
       currency: 'USD',
+      taxMinor: null,
     });
+  });
+
+  it('devuelve el impuesto que Dodo incluyó en el cobro y avisa que es IVA incluido', () => {
+    const event = provider().parseWebhook(webhook(payment('payment.succeeded', { tax: 361 })));
+    expect(event).toMatchObject({ type: 'checkout.completed', taxMinor: 361 });
+    expect(provider().taxInclusive).toBe(true);
   });
 
   it('acepta la firma correcta entre varias (rotación de secretos)', () => {

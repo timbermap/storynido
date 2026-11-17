@@ -9,9 +9,8 @@ import {
   aiCostUsdMinor,
   charmPrice,
   minNetMarginUsdMinor,
-  paymentFeePercent,
   unitPriceUsdMinor,
-  withPaymentFee,
+  withBookPaymentFee,
   type ProductPricing,
 } from './product-pricing';
 
@@ -69,8 +68,10 @@ export function bookPriceMinor(
   /** Páginas con ilustración generada (IA); por defecto, `pages` (DECISIONS 246). */
   aiPages = pages,
 ): number {
-  const fee = paymentFeePercent(pricing);
-  const gross = withPaymentFee(unitPriceUsdMinor(pricing, productionUsdMinor, pages, aiPages), fee);
+  const gross = withBookPaymentFee(
+    pricing,
+    unitPriceUsdMinor(pricing, productionUsdMinor, pages, aiPages),
+  );
   const discounted = professional
     ? Math.round((gross * (100 - pricing.proPercentOff)) / 100)
     : gross;
@@ -92,7 +93,7 @@ export function bookPriceMinor(
 export function ebookMinimumMinor(pricing: Pricing, minPages?: number): number {
   if (pricing.product !== 'digital' || minPages === undefined) return 0;
   return charmPrice(
-    withPaymentFee(unitPriceUsdMinor(pricing, 0, minPages), paymentFeePercent(pricing)),
+    withBookPaymentFee(pricing, unitPriceUsdMinor(pricing, 0, minPages)),
     CHARGE_CURRENCY,
   );
 }
@@ -107,9 +108,9 @@ export function bookFloorMinor(
   pages: number,
 ): number {
   const production = pricing.product === 'digital' ? 0 : Math.max(0, productionUsdMinor);
-  return withPaymentFee(
+  return withBookPaymentFee(
+    pricing,
     aiCostUsdMinor(pricing, pages) + production + minNetMarginUsdMinor(pricing),
-    paymentFeePercent(pricing),
   );
 }
 

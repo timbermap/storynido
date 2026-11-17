@@ -6,6 +6,7 @@ import {
   fromUsdMinor,
   marginUsdMinor,
   unitPriceUsdMinor,
+  withBookPaymentFee,
   withPaymentFee,
 } from './product-pricing';
 
@@ -41,6 +42,16 @@ describe('precio por costo + dos márgenes', () => {
   it('la comisión de cobro es un costo: el precio se calcula hacia arriba', () => {
     expect(withPaymentFee(2100, 3.5)).toBe(2177);
     expect(withPaymentFee(0, 3.5)).toBe(0);
+  });
+
+  it('la comisión de Dodo suma el fijo por transacción una vez por libro (DECISIONS 247)', () => {
+    const dodo = {
+      ...DEFAULT_PRODUCT_PRICING.digital,
+      paymentFeePercent: 5.5,
+      paymentFeeFixedUsdMinor: 40,
+    };
+    expect(withBookPaymentFee(dodo, 2100)).toBe(2265);
+    expect(withBookPaymentFee(dodo, 0)).toBe(0);
   });
 
   it('convierte de dólares a otra moneda (referencia)', () => {
