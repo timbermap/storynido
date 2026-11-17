@@ -8,6 +8,9 @@ import { getFirestore } from 'firebase-admin/firestore';
 import pino from 'pino';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
+import { defaultCountryConfig } from '@storynido/shared';
+
+import { FirestoreCatalog } from './catalog';
 import { FirebaseTokenVerifier, FirestoreLiveConfig, initFirebaseAdmin } from './firebase';
 import { auth, createTestApp, fakeAppCheck } from './test-helpers';
 
@@ -94,6 +97,27 @@ describe('API con emuladores', () => {
     expect(
       (await ctx.app.inject({ method: 'GET', url: '/v1/me', headers: auth(tampered) })).statusCode,
     ).toBe(401);
+  });
+
+  it('con Dodo todos los países son IVA incluido (DECISIONS 247)', async () => {
+    await db
+      .collection('countries')
+      .doc('ES')
+      .set({
+        ...defaultCountryConfig('ES'),
+        taxBasisPoints: 400,
+        taxIncludedInPrice: false,
+        updatedAt: new Date(),
+      });
+    let dodo = true;
+    const catalog = new FirestoreCatalog(db, 0, { taxIncluded: () => dodo });
+    expect((await catalog.country('ES')).taxIncludedInPrice).toBe(true);
+    expect((await catalog.countries()).find((c) => c.code === 'ES')?.taxIncludedInPrice).toBe(true);
+    dodo = false;
+    expect((await catalog.country('ES')).taxIncludedInPrice).toBe(false);
+    expect((await catalog.countries()).find((c) => c.code === 'ES')?.taxIncludedInPrice).toBe(
+      false,
+    );
   });
 
   it('el modo del sitio cambia en vivo desde Firestore, sin reiniciar', async () => {

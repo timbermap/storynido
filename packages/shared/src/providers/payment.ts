@@ -34,6 +34,8 @@ export type PaymentEvent =
       paymentId: string;
       amountMinor: number;
       currency: Currency;
+      /** Impuesto que el cobrador incluyó en el cobro (Dodo), si lo informa. */
+      taxMinor?: number | null;
     }
   | { type: 'checkout.expired'; eventId: string; orderId: string; sessionId: string }
   | { type: 'refund.succeeded'; eventId: string; paymentId: string; amountMinor: number }
@@ -56,6 +58,11 @@ export interface Refund {
 
 export interface PaymentProvider {
   readonly id: string;
+  /**
+   * Merchant of record con impuestos incluidos: el IVA va incluido en el precio en todos los
+   * países y sale del margen (DECISIONS 247).
+   */
+  readonly taxInclusive?: boolean;
   createCheckout(request: CheckoutRequest): Promise<CheckoutSession>;
   /** Verifica la firma y traduce el evento. Lanza WebhookSignatureError si la firma es inválida. */
   parseWebhook(input: WebhookInput): PaymentEvent;

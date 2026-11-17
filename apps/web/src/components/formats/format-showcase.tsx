@@ -6,7 +6,7 @@ import type { BookFormat } from '@storynido/shared';
 import { cn } from '@/lib/utils';
 
 /**
- * Imágenes de lo que se recibe (DECISIONS 247). Todas son ilustrativas: páginas reales de un cuento
+ * Imágenes de lo que se recibe (DECISIONS 248). Todas son ilustrativas: páginas reales de un cuento
  * de muestra con un personaje inventado, compuestas en un dispositivo, o la foto aprobada del regalo.
  */
 export const FORMAT_IMAGES = {

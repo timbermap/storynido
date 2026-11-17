@@ -102,7 +102,9 @@ const db = getFirestore(firebase);
 const liveConfig = new FirestoreLiveConfig(firebase, providers, log);
 liveConfig.start();
 
-const catalog = new FirestoreCatalog(db);
+const catalog = new FirestoreCatalog(db, 60, {
+  taxIncluded: () => providers.payment().taxInclusive === true,
+});
 const tokens = new FirebaseTokenVerifier(firebase);
 
 const notifier = new EmailNotifier(db, () => providers.email(), {
