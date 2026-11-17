@@ -269,7 +269,19 @@ export const adminCustomerSchema = z.object({
 
 const usdByKey = z.record(z.string(), z.number());
 
+const funnelSchema = z.record(z.string(), z.number());
+
+const productMetricsSchema = z.object({
+  units: z.number(),
+  revenueUsd: z.number(),
+  taxUsd: z.number(),
+  feeUsd: z.number(),
+  aiUsd: z.number(),
+  printUsd: z.number(),
+});
+
 export const dayMetricsSchema = z.object({
+  version: z.number().optional(),
   day: z.string(),
   final: z.boolean(),
   orders: z.number(),
@@ -285,10 +297,73 @@ export const dayMetricsSchema = z.object({
   aiCostUsd: z.number(),
   printCostUsd: z.number(),
   marginUsd: z.number(),
+  taxUsd: z.number(),
+  paymentFeeUsd: z.number(),
+  aiBooksUsd: z.number(),
+  aiPreviewsUsd: z.number(),
+  refundedUsd: z.number(),
+  contributionUsd: z.number(),
+  products: z.record(z.string(), productMetricsSchema),
   fxSource: z.string(),
   fxDate: z.string(),
-  funnel: z.record(z.string(), z.number()).optional(),
+  funnel: funnelSchema.optional(),
+  funnelByChannel: z.record(z.string(), funnelSchema).optional(),
 });
+
+const metricsTotalsSchema = dayMetricsSchema
+  .pick({
+    orders: true,
+    refunds: true,
+    previews: true,
+    revenueUsd: true,
+    netRevenueUsd: true,
+    aiCostUsd: true,
+    printCostUsd: true,
+    marginUsd: true,
+    taxUsd: true,
+    paymentFeeUsd: true,
+    aiBooksUsd: true,
+    aiPreviewsUsd: true,
+    refundedUsd: true,
+    contributionUsd: true,
+    products: true,
+    avgTicketUsd: true,
+    conversionPct: true,
+    revenueUsdByCountry: true,
+  })
+  .extend({
+    funnel: funnelSchema,
+    funnelByChannel: z.record(z.string(), funnelSchema),
+    daysWithoutFunnel: z.number(),
+  });
+
+/** Lo que espera al admin en la portada Hoy (sin datos de chicos ni direcciones). */
+export const attentionItemSchema = z.object({
+  /** alert:<id> | review:<pedido> | stuck:<pedido> | quote:<id> | ai_budget. */
+  id: z.string(),
+  kind: z.enum([
+    'payment_mismatch',
+    'payment_dispute',
+    'print_failed',
+    'pipeline_failed',
+    'alert',
+    'review',
+    'stuck',
+    'quote',
+    'ai_budget',
+  ]),
+  level: z.enum(['urgent', 'review', 'notice']),
+  title: z.string(),
+  orderId: z.string().nullable(),
+  /** Desde cuándo espera (ISO), si se sabe. */
+  since: z.string().nullable(),
+  /** Pantalla del admin donde se resuelve. */
+  href: z.string(),
+  /** Solo los avisos (alert:…) se marcan como resueltos desde la portada. */
+  resolvable: z.boolean(),
+});
+
+export type AttentionItem = z.infer<typeof attentionItemSchema>;
 
 const costStatsSchema = z.object({
   count: z.number(),
@@ -1080,30 +1155,38 @@ export const apiRoutes = {
     path: '/v1/admin/metrics',
     access: 'admin',
     summary: 'Métricas por día (los cerrados precalculados, hoy en vivo) y totales del rango',
-    query: z.object({ days: z.coerce.number().int().min(1).max(366).default(30) }),
+    query: z.object({
+      days: z.coerce.number().int().min(1).max(366).default(30),
+      /** Suma también el período anterior de igual largo (hasta 90 días) para comparar. */
+      compare: z
+        .enum(['true', 'false'])
+        .default('false')
+        .transform((value) => value === 'true'),
+    }),
     response: z.object({
       days: z.array(dayMetricsSchema),
-      totals: dayMetricsSchema
-        .pick({
-          orders: true,
-          refunds: true,
-          previews: true,
-          revenueUsd: true,
-          netRevenueUsd: true,
-          aiCostUsd: true,
-          printCostUsd: true,
-          marginUsd: true,
-          avgTicketUsd: true,
-          conversionPct: true,
-          revenueUsdByCountry: true,
-        })
-        .extend({
-          funnel: z.record(z.string(), z.number()),
-          daysWithoutFunnel: z.number(),
-          /** Login: `navegador_método_vía_etapa` → cantidad en el rango. */
-          logins: z.record(z.string(), z.number()).default({}),
-        }),
+      totals: metricsTotalsSchema.extend({
+        /** Login: `navegador_método_vía_etapa` → cantidad en el rango. */
+        logins: z.record(z.string(), z.number()).default({}),
+      }),
+      previous: metricsTotalsSchema.nullable().default(null),
     }),
+  },
+  adminAttention: {
+    method: 'GET',
+    path: '/v1/admin/attention',
+    access: 'admin',
+    summary:
+      'Lo que espera una acción: avisos sin resolver, revisión manual, pedidos trabados, cotizaciones nuevas y presupuesto de IA',
+    response: z.object({ items: z.array(attentionItemSchema) }),
+  },
+  adminResolveAlert: {
+    method: 'POST',
+    path: '/v1/admin/alerts/:id/resolve',
+    access: 'admin',
+    summary: 'Marca un aviso del admin como resuelto (queda en auditoría)',
+    params: z.object({ id: z.string() }),
+    response: z.object({ id: z.string(), resolvedAt: z.string() }),
   },
   adminAiCosts: {
     method: 'GET',

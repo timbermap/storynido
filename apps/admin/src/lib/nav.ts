@@ -77,7 +77,13 @@ export interface NavItem {
 
 /** Secciones del panel. Las de las etapas siguientes se suman acá. */
 export const NAV_ITEMS: readonly NavItem[] = [
-  { href: '/', area: null, label: 'Resumen', keywords: 'dashboard inicio ventas', icon: Gauge },
+  {
+    href: '/',
+    area: null,
+    label: 'Hoy',
+    keywords: 'dashboard inicio resumen ventas contribución avisos',
+    icon: Gauge,
+  },
   {
     href: '/orders',
     area: 'Logística',

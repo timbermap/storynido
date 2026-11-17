@@ -15,3 +15,8 @@ allowBuilds:
 # Seguridad (fase 16): versiones transitivas con vulnerabilidades altas (pnpm audit en CI).
 overrides:
   '@grpc/grpc-js@<1.13.6': 1.13.7
+# Seguridad (17 Nov 2026, OK de Sebas): picomatch 4.0.8 todavía no existe en npm; ver DECISIONS 245.
+# Sacar este ignore cuando se publique la 4.0.8.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-fc5q-39xc-vjpf
