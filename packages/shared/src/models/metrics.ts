@@ -1,6 +1,8 @@
 import { CURRENCY_MINOR_UNITS, type Currency } from '../currency';
 import type { OrderStatus } from '../order-status';
 
+import { CHANNELS } from './channels';
+
 /** Pedidos que cuentan como venta: pagados y no reembolsados ni cancelados. */
 export const REVENUE_ORDER_STATUSES: readonly OrderStatus[] = [
   'paid',
@@ -29,7 +31,76 @@ export interface MetricsOrder {
   amounts: { totalMinor: number; taxMinor: number };
   /** Costo de impresión y envío que cotizó la imprenta elegida (USD, centavos). */
   printCostUsdMinor: number | null;
+  /** Proveedor de pago del pedido (`dodo`, `gumroad`, `mock`…). Sin él, el previsto. */
+  paymentProvider?: string;
+  /** Producto para la tabla por producto (`metricsProductKey`). */
+  product?: string;
+  /** IA gastada en este pedido (generación del libro), en millonésimas de USD. */
+  aiCostUsdMicros?: number;
 }
+
+/**
+ * Comisión de cada proveedor de pago con tarjeta no estadounidense, publicada al 16 nov 2026
+ * (flaviocopes.com/payment-provider-fees). Es una estimación hasta guardar la comisión real de
+ * cada cobro. `mock` y los desconocidos usan la del proveedor previsto (Dodo), para que la
+ * contribución de staging se parezca a la real.
+ */
+export const PAYMENT_FEES: Record<string, { percent: number; fixedUsd: number }> = {
+  dodo: { percent: 5.5, fixedUsd: 0.4 },
+  gumroad: { percent: 12.9, fixedUsd: 0.8 },
+  creem: { percent: 3.9, fixedUsd: 0.4 },
+  paddle: { percent: 5, fixedUsd: 0.5 },
+  polar: { percent: 6.5, fixedUsd: 0.5 },
+};
+
+export const DEFAULT_PAYMENT_PROVIDER = 'dodo';
+
+/** Comisión estimada de un cobro (USD). Un reembolso no la devuelve. */
+export function estimatePaymentFeeUsd(totalUsd: number, provider?: string): number {
+  if (totalUsd <= 0) return 0;
+  const fee = PAYMENT_FEES[provider ?? ''] ?? PAYMENT_FEES[DEFAULT_PAYMENT_PROVIDER];
+  return fee ? (totalUsd * fee.percent) / 100 + fee.fixedUsd : 0;
+}
+
+/**
+ * Producto de un pedido para la tabla por producto. Celebraciones se separa por lo que se cobró
+ * (kit completo, invitación sola, piezas extra, tarjetas impresas); los libros por extensión,
+ * tipo de contenido y formato, con `pro_` delante en Profesionales.
+ */
+export function metricsProductKey(input: {
+  channel: string;
+  format: string | null;
+  components: readonly string[];
+  discountReason: string | null;
+  length: string | null;
+  contentType: string | null;
+}): string {
+  if (input.components.includes('cards')) return 'event_cards';
+  if (input.channel === 'events') {
+    if (!input.components.includes('design')) return 'event_extra';
+    if (!input.components.includes('piece')) return 'event_invitation';
+    return input.discountReason === 'bundle' ? 'event_kit' : 'event_kit_partial';
+  }
+  const prefix = input.channel === 'professionals' ? 'pro_' : '';
+  const content = input.contentType && input.contentType !== 'story' ? `${input.contentType}_` : '';
+  return `${prefix}${content}${input.length ?? 'classic'}_${input.format ?? 'digital'}`;
+}
+
+/** Lo vendido de un producto en el período (USD). */
+export interface ProductMetrics {
+  units: number;
+  revenueUsd: number;
+  taxUsd: number;
+  feeUsd: number;
+  aiUsd: number;
+  printUsd: number;
+}
+
+/** Sube cuando cambia el cálculo: los días guardados con otra versión se recalculan. */
+export const METRICS_VERSION = 2;
+
+/** A los N días un día queda congelado (ya no se esperan reembolsos ni cambios). */
+export const METRICS_SETTLE_DAYS = 35;
 
 /**
  * Embudo del día, contado en el servidor con datos propios (en el creador no hay analítica de
@@ -55,10 +126,17 @@ export interface FunnelBook {
   preview: boolean;
   /** Personaje aprobado por el adulto. */
   approved: boolean;
+  /** Línea por la que se creó (lo anterior es de Familias). */
+  channel?: string;
 }
 
-/** metricsDaily/{AAAA-MM-DD}: agregados del día (los días cerrados no se recalculan). */
+/**
+ * metricsDaily/{AAAA-MM-DD}: agregados del día. Se recalcula en cada visita hasta
+ * METRICS_SETTLE_DAYS días después (reembolsos y cambios de estado), y después queda guardado.
+ */
 export interface DayMetrics {
+  /** Versión del cálculo (ausente = 1). */
+  version?: number;
   day: string;
   /** El día de hoy se calcula en vivo (todavía puede cambiar). */
   final: boolean;
@@ -78,8 +156,23 @@ export interface DayMetrics {
   /** Todo el gasto de IA del día (muestras que no se compraron incluidas). */
   aiCostUsd: number;
   printCostUsd: number;
-  /** Ingresos sin impuestos − IA − impresión y envío (sin comisiones de pago: proveedor por definir). */
+  /** Ingresos sin impuestos − IA − impresión y envío (cálculo anterior, sin comisión de pago). */
   marginUsd: number;
+  taxUsd: number;
+  /** Comisión estimada de los cobros del día, reembolsados incluidos (no se devuelve). */
+  paymentFeeUsd: number;
+  /** IA de los libros generados para pedidos ese día. */
+  aiBooksUsd: number;
+  /** IA de muestras y personajes (lo que no está atado a un pedido), compradas o no. */
+  aiPreviewsUsd: number;
+  /** Total cobrado de los pedidos del día que se reembolsaron (ya fuera de las ventas). */
+  refundedUsd: number;
+  /** Lo que queda: ventas − impuestos − comisión − toda la IA − impresión y envío. */
+  contributionUsd: number;
+  /** Por producto (`metricsProductKey`). */
+  products: Record<string, ProductMetrics>;
+  /** Embudo por línea (ausente en días calculados antes). */
+  funnelByChannel?: Record<string, Funnel>;
   fxSource: string;
   fxDate: string;
   /** Ausente en días calculados antes del embudo. */
@@ -101,6 +194,8 @@ export function aggregateDay(input: {
   orders: readonly MetricsOrder[];
   previews: number;
   aiCostUsdMicros: number;
+  /** Parte de `aiCostUsdMicros` atada a pedidos (generación de libros). */
+  aiOrdersUsdMicros?: number;
   fx: FxRates;
   /** Libros creados ese día. */
   books?: readonly FunnelBook[];
@@ -109,26 +204,72 @@ export function aggregateDay(input: {
   const revenueByCurrency: Partial<Record<Currency, number>> = {};
   const revenueUsdByCountry: Record<string, number> = {};
   const ordersByChannel: Record<string, number> = {};
+  const products: Record<string, ProductMetrics> = {};
   let revenueUsd = 0;
   let taxUsd = 0;
   let printUsd = 0;
+  let feeUsd = 0;
   for (const order of sold) {
     const total = toUsd(order.amounts.totalMinor, order.currency, input.fx);
+    const tax = toUsd(order.amounts.taxMinor, order.currency, input.fx);
+    const print = (order.printCostUsdMinor ?? 0) / 100;
+    const fee = estimatePaymentFeeUsd(total, order.paymentProvider);
     revenueUsd += total;
-    taxUsd += toUsd(order.amounts.taxMinor, order.currency, input.fx);
-    printUsd += (order.printCostUsdMinor ?? 0) / 100;
+    taxUsd += tax;
+    printUsd += print;
+    feeUsd += fee;
     revenueByCurrency[order.currency] =
       (revenueByCurrency[order.currency] ?? 0) + order.amounts.totalMinor;
     revenueUsdByCountry[order.country] = round((revenueUsdByCountry[order.country] ?? 0) + total);
     ordersByChannel[order.channel] = (ordersByChannel[order.channel] ?? 0) + 1;
+    const key = order.product ?? 'other';
+    const current = products[key] ?? {
+      units: 0,
+      revenueUsd: 0,
+      taxUsd: 0,
+      feeUsd: 0,
+      aiUsd: 0,
+      printUsd: 0,
+    };
+    products[key] = {
+      units: current.units + 1,
+      revenueUsd: round(current.revenueUsd + total),
+      taxUsd: round(current.taxUsd + tax),
+      feeUsd: round(current.feeUsd + fee),
+      aiUsd: round(current.aiUsd + (order.aiCostUsdMicros ?? 0) / 1_000_000),
+      printUsd: round(current.printUsd + print),
+    };
+  }
+  // Un reembolso no devuelve la comisión: se resta igual.
+  const refunded = input.orders.filter((order) => order.status === 'refunded');
+  let refundedUsd = 0;
+  for (const order of refunded) {
+    const total = toUsd(order.amounts.totalMinor, order.currency, input.fx);
+    refundedUsd += total;
+    feeUsd += estimatePaymentFeeUsd(total, order.paymentProvider);
   }
   const aiCostUsd = input.aiCostUsdMicros / 1_000_000;
+  const aiBooksUsd = Math.min(aiCostUsd, (input.aiOrdersUsdMicros ?? 0) / 1_000_000);
   const netRevenueUsd = revenueUsd - taxUsd;
+  const byChannel = (channel: string) => ({
+    books: (input.books ?? []).filter((book) => (book.channel ?? 'families') === channel),
+    orders: input.orders.filter((order) => order.channel === channel),
+  });
+  const funnelOf = (books: readonly FunnelBook[], orders: readonly MetricsOrder[]): Funnel => ({
+    started: books.length,
+    character: books.filter((book) => book.character).length,
+    preview: books.filter((book) => book.preview).length,
+    approved: books.filter((book) => book.approved).length,
+    // Pedidos creados ese día (cualquier estado) y los que se pagaron.
+    checkout: orders.length,
+    purchased: orders.filter((order) => REVENUE_ORDER_STATUSES.includes(order.status)).length,
+  });
   return {
+    version: METRICS_VERSION,
     day: input.day,
     final: input.final,
     orders: sold.length,
-    refunds: input.orders.filter((order) => order.status === 'refunded').length,
+    refunds: refunded.length,
     revenueUsd: round(revenueUsd),
     netRevenueUsd: round(netRevenueUsd),
     revenueByCurrency,
@@ -140,30 +281,49 @@ export function aggregateDay(input: {
     aiCostUsd: round(aiCostUsd),
     printCostUsd: round(printUsd),
     marginUsd: round(netRevenueUsd - aiCostUsd - printUsd),
+    taxUsd: round(taxUsd),
+    paymentFeeUsd: round(feeUsd),
+    aiBooksUsd: round(aiBooksUsd),
+    aiPreviewsUsd: round(aiCostUsd - aiBooksUsd),
+    refundedUsd: round(refundedUsd),
+    contributionUsd: round(netRevenueUsd - feeUsd - aiCostUsd - printUsd),
+    products,
     fxSource: input.fx.source,
     fxDate: input.fx.date,
     ...(input.books
       ? {
-          funnel: {
-            started: input.books.length,
-            character: input.books.filter((book) => book.character).length,
-            preview: input.books.filter((book) => book.preview).length,
-            approved: input.books.filter((book) => book.approved).length,
-            // Pedidos creados ese día (cualquier estado) y los que se pagaron.
-            checkout: input.orders.length,
-            purchased: sold.length,
-          },
+          funnel: funnelOf(input.books, input.orders),
+          funnelByChannel: Object.fromEntries(
+            CHANNELS.map((channel) => {
+              const { books, orders } = byChannel(channel);
+              return [channel, funnelOf(books, orders)];
+            }),
+          ),
         }
       : {}),
   };
 }
+
+const emptyFunnel = (): Funnel =>
+  Object.fromEntries(FUNNEL_STEPS.map((step) => [step, 0])) as Funnel;
 
 /** Totales de un rango (los promedios se recalculan sobre la suma, no se promedian promedios). */
 export function sumMetrics(days: readonly DayMetrics[]) {
   const total = (key: 'orders' | 'refunds' | 'previews') =>
     days.reduce((sum, day) => sum + day[key], 0);
   const money = (
-    key: 'revenueUsd' | 'netRevenueUsd' | 'aiCostUsd' | 'printCostUsd' | 'marginUsd',
+    key:
+      | 'revenueUsd'
+      | 'netRevenueUsd'
+      | 'aiCostUsd'
+      | 'printCostUsd'
+      | 'marginUsd'
+      | 'taxUsd'
+      | 'paymentFeeUsd'
+      | 'aiBooksUsd'
+      | 'aiPreviewsUsd'
+      | 'refundedUsd'
+      | 'contributionUsd',
   ) => round(days.reduce((sum, day) => sum + day[key], 0));
   const orders = total('orders');
   const previews = total('previews');
@@ -171,6 +331,29 @@ export function sumMetrics(days: readonly DayMetrics[]) {
   for (const day of days) {
     for (const [country, value] of Object.entries(day.revenueUsdByCountry)) {
       revenueUsdByCountry[country] = round((revenueUsdByCountry[country] ?? 0) + value);
+    }
+  }
+  const products: Record<string, ProductMetrics> = {};
+  const funnelByChannel: Record<string, Funnel> = {};
+  for (const day of days) {
+    for (const [key, value] of Object.entries(day.products)) {
+      const current = products[key];
+      products[key] = current
+        ? {
+            units: current.units + value.units,
+            revenueUsd: round(current.revenueUsd + value.revenueUsd),
+            taxUsd: round(current.taxUsd + value.taxUsd),
+            feeUsd: round(current.feeUsd + value.feeUsd),
+            aiUsd: round(current.aiUsd + value.aiUsd),
+            printUsd: round(current.printUsd + value.printUsd),
+          }
+        : { ...value };
+    }
+    for (const [channel, funnel] of Object.entries(day.funnelByChannel ?? {})) {
+      const current = funnelByChannel[channel] ?? emptyFunnel();
+      funnelByChannel[channel] = Object.fromEntries(
+        FUNNEL_STEPS.map((step) => [step, current[step] + funnel[step]]),
+      ) as Funnel;
     }
   }
   return {
@@ -182,6 +365,14 @@ export function sumMetrics(days: readonly DayMetrics[]) {
     aiCostUsd: money('aiCostUsd'),
     printCostUsd: money('printCostUsd'),
     marginUsd: money('marginUsd'),
+    taxUsd: money('taxUsd'),
+    paymentFeeUsd: money('paymentFeeUsd'),
+    aiBooksUsd: money('aiBooksUsd'),
+    aiPreviewsUsd: money('aiPreviewsUsd'),
+    refundedUsd: money('refundedUsd'),
+    contributionUsd: money('contributionUsd'),
+    products,
+    funnelByChannel,
     avgTicketUsd: orders ? round(money('revenueUsd') / orders) : 0,
     conversionPct: previews ? round((orders / previews) * 100) : 0,
     revenueUsdByCountry,
