@@ -2650,3 +2650,11 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Decisión 2:** con un cobrador `taxInclusive` (Dodo) todos los países se tratan como IVA incluido (`FirestoreCatalog` con `taxIncluded`): el impuesto sale del margen, como se decidió el 7 Nov.
 - **Decisión 3:** el webhook `payment.succeeded` guarda el impuesto real que informa Dodo (`tax`) en `payment.taxMinor` y `amounts.taxMinor` del pedido.
 - **Tests:** `packages/providers/src/dodo/payment.test.ts`, `packages/shared/src/models/product-pricing.test.ts`, `services/api/src/checkout/precios-claros.test.ts`, `services/api/src/firebase.emulator.test.ts`.
+
+## 248 — Imágenes de cada tipo de libro, del ebook, del libro impreso («Muy pronto») y de las piezas del kit
+
+- **Fecha:** 2026-11-17. Pedido por Sebas; la mesa decidió el enfoque (páginas reales antes que IA).
+- **Problema:** el creador y la ficha describían los tipos de libro y los formatos solo con texto: no se veía qué se recibe.
+- **Decisión:** una imagen 4:3 por tipo (en cada tarjeta de «¿Qué tipo de libro?») y un bloque compartido «Así lo recibes» (`components/formats/format-showcase.tsx`) bajo las extensiones del creador y en la ficha: ebook en tablet y celular, y el libro impreso. Los impresos que el país no puede pedir se ven con «Muy pronto», sin precio ni opción para elegirlos; el cuento grapado es una tarjeta de texto (no hay foto aprobada). En «¿Qué llevas?» y en la muestra del kit, una miniatura por pieza. En el pago, una miniatura chica en Ebook y en los impresos.
+- **Fuentes (todas ilustrativas, rótulo «Imagen ilustrativa», alt en es/en/pt):** páginas reales de PDFs de staging del cuento «El rincón de la calma» (personaje creado por avatar, sin foto de un niño real) compuestas por código; hojas reales de actividades, invitación, stickers y portada del mini cuento de un kit de Celebraciones de staging; la foto del regalo aprobada el 10 Nov (`.fotos-mockups/final2/regalo.png`). Para colorear: dos páginas de ese cuento pasadas a línea negra con Gemini (Vertex, staging, 2 llamadas, unos USD 0,27), igual que hace el producto.
+- **Archivos:** `apps/web/public/images/formatos/*.webp` (1000×750 o 480×360, todos debajo de 100 KB).

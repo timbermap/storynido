@@ -359,6 +359,20 @@
     "hardcover": "Tapa dura",
     "booklet": "Cuento grapado"
   },
+  "FormatShowcase": {
+    "title": "Así lo recibes",
+    "caption": "Imagen ilustrativa",
+    "soon": "Muy pronto",
+    "ebookName": "Ebook (PDF)",
+    "ebookText": "Llega a tu correo y a tu biblioteca. Se lee en tablet, celular o computadora, y se puede imprimir en casa.",
+    "ebookAlt": "Una página del cuento en una tablet y la portada en un celular",
+    "printName": "Libro impreso",
+    "printText": "Tapa blanda o tapa dura, de unos 21×28 cm, listo para regalar.",
+    "printTextSoon": "Tapa blanda o tapa dura, de unos 21×28 cm. Estamos preparando la imprenta.",
+    "printAlt": "Unas manos abren una caja de regalo con el libro impreso adentro",
+    "bookletName": "Cuento grapado",
+    "bookletText": "Cuento impreso de unos 15×21 cm, con grapas."
+  },
   "Blog": {
     "title": "Blog",
     "subtitle": "Ideas para leer en familia, regalar y acompañar cada etapa.",
@@ -1218,19 +1232,23 @@
       "types": {
         "story": {
           "name": "Cuento ilustrado",
-          "text": "Una historia con ilustraciones en cada página."
+          "text": "Una historia con ilustraciones en cada página.",
+          "alt": "Dos páginas ilustradas de un cuento de muestra"
         },
         "coloring": {
           "name": "Para colorear",
-          "text": "Las escenas de su historia, listas para pintar."
+          "text": "Las escenas de su historia, listas para pintar.",
+          "alt": "Dos páginas del cuento en líneas negras, listas para colorear"
         },
         "story_activities": {
           "name": "Cuento con actividades",
-          "text": "La historia, con juegos y desafíos entre páginas."
+          "text": "La historia, con juegos y desafíos entre páginas.",
+          "alt": "Una página del cuento junto a un laberinto para resolver"
         },
         "activities": {
           "name": "Libro de actividades",
-          "text": "Laberintos, diferencias y juegos con su personaje."
+          "text": "Laberintos, diferencias y juegos con su personaje.",
+          "alt": "Hojas de actividades: un laberinto, unir palabras y dibujar"
         }
       },
       "lengths": {
@@ -1333,7 +1351,8 @@
           "name": "Cuento ilustrado",
           "text": "Un cuento clásico: texto e ilustración en equilibrio en cada página."
         }
-      }
+      },
+      "imageCaption": "Imagen ilustrativa"
     },
     "feedback": {
       "title": "¿Qué mejorarías de esta muestra?",
@@ -1404,7 +1423,14 @@
       "toneLegend": "Tono de la invitación",
       "toneSample": "«{text}»",
       "includesTitle": "Qué trae tu kit",
-      "includesInvitationTitle": "Qué trae tu invitación"
+      "includesInvitationTitle": "Qué trae tu invitación",
+      "imageCaption": "Imagen ilustrativa",
+      "pieceAlt": {
+        "invitation": "La invitación del cumpleaños con el personaje",
+        "decoration": "Una hoja de stickers redondos con el personaje y su nombre",
+        "keepsake": "La portada del cuento de recuerdo",
+        "activities": "Un laberinto para imprimir con el personaje"
+      }
     },
     "partyPreview": {
       "invitationTitle": "Tu invitación",

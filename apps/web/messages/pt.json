@@ -359,6 +359,20 @@
     "hardcover": "Capa dura",
     "booklet": "Livro grampeado"
   },
+  "FormatShowcase": {
+    "title": "Assim você recebe",
+    "caption": "Imagem ilustrativa",
+    "soon": "Em breve",
+    "ebookName": "Ebook (PDF)",
+    "ebookText": "Chega no seu e-mail e na sua biblioteca. Dá para ler no tablet, celular ou computador e imprimir em casa.",
+    "ebookAlt": "Uma página da história em um tablet e a capa em um celular",
+    "printName": "Livro impresso",
+    "printText": "Capa mole ou capa dura, com cerca de 21×28 cm, pronto para presentear.",
+    "printTextSoon": "Capa mole ou capa dura, com cerca de 21×28 cm. Estamos preparando a gráfica.",
+    "printAlt": "Mãos abrindo uma caixa de presente com o livro impresso dentro",
+    "bookletName": "Livreto grampeado",
+    "bookletText": "História impressa com cerca de 15×21 cm, grampeada."
+  },
   "Blog": {
     "title": "Blog",
     "subtitle": "Ideias para ler em família, presentear e acompanhar cada fase.",
@@ -1218,19 +1232,23 @@
       "types": {
         "story": {
           "name": "História ilustrada",
-          "text": "Uma história com ilustrações em cada página."
+          "text": "Uma história com ilustrações em cada página.",
+          "alt": "Duas páginas ilustradas de uma história de exemplo"
         },
         "coloring": {
           "name": "Para colorir",
-          "text": "As cenas da história, prontas para pintar."
+          "text": "As cenas da história, prontas para pintar.",
+          "alt": "Duas páginas da história em linhas pretas, prontas para colorir"
         },
         "story_activities": {
           "name": "História com atividades",
-          "text": "A história, com jogos e desafios entre as páginas."
+          "text": "A história, com jogos e desafios entre as páginas.",
+          "alt": "Uma página da história ao lado de um labirinto para resolver"
         },
         "activities": {
           "name": "Livro de atividades",
-          "text": "Labirintos, jogo dos erros e brincadeiras com o personagem."
+          "text": "Labirintos, jogo dos erros e brincadeiras com o personagem.",
+          "alt": "Folhas de atividades: labirinto, ligar palavras e desenhar"
         }
       },
       "lengths": {
@@ -1333,7 +1351,8 @@
           "name": "História ilustrada",
           "text": "Uma história clássica: texto e ilustração em equilíbrio em cada página."
         }
-      }
+      },
+      "imageCaption": "Imagem ilustrativa"
     },
     "feedback": {
       "title": "O que você melhoraria nesta prévia?",
@@ -1404,7 +1423,14 @@
       "toneLegend": "Tom do convite",
       "toneSample": "“{text}”",
       "includesTitle": "O que vem no seu kit",
-      "includesInvitationTitle": "O que vem no seu convite"
+      "includesInvitationTitle": "O que vem no seu convite",
+      "imageCaption": "Imagem ilustrativa",
+      "pieceAlt": {
+        "invitation": "O convite de aniversário com o personagem",
+        "decoration": "Uma folha de adesivos redondos com o personagem e o nome",
+        "keepsake": "A capa da história de lembrança",
+        "activities": "Um labirinto para imprimir com o personagem"
+      }
     },
     "partyPreview": {
       "invitationTitle": "O seu convite",

@@ -359,6 +359,20 @@
     "hardcover": "Hardcover",
     "booklet": "Stapled storybook"
   },
+  "FormatShowcase": {
+    "title": "What you get",
+    "caption": "Illustrative image",
+    "soon": "Coming soon",
+    "ebookName": "Ebook (PDF)",
+    "ebookText": "Sent to your email and your library. Read it on a tablet, phone or computer, or print it at home.",
+    "ebookAlt": "A story page on a tablet and the cover on a phone",
+    "printName": "Printed book",
+    "printText": "Softcover or hardcover, about 21×28 cm, ready to give.",
+    "printTextSoon": "Softcover or hardcover, about 21×28 cm. We're getting printing ready.",
+    "printAlt": "Hands opening a gift box with the printed book inside",
+    "bookletName": "Stapled booklet",
+    "bookletText": "A printed story of about 15×21 cm, stapled."
+  },
   "Blog": {
     "title": "Blog",
     "subtitle": "Ideas for reading together, gifting and every stage of childhood.",
@@ -1218,19 +1232,23 @@
       "types": {
         "story": {
           "name": "Illustrated story",
-          "text": "A story with illustrations on every page."
+          "text": "A story with illustrations on every page.",
+          "alt": "Two illustrated pages from a sample story"
         },
         "coloring": {
           "name": "Coloring book",
-          "text": "The scenes of their story, ready to color."
+          "text": "The scenes of their story, ready to color.",
+          "alt": "Two story pages in black outlines, ready to color"
         },
         "story_activities": {
           "name": "Story with activities",
-          "text": "The story, with games and challenges between pages."
+          "text": "The story, with games and challenges between pages.",
+          "alt": "A story page next to a maze to solve"
         },
         "activities": {
           "name": "Activity book",
-          "text": "Mazes, spot-the-difference and games with their character."
+          "text": "Mazes, spot-the-difference and games with their character.",
+          "alt": "Activity sheets: a maze, word matching and drawing"
         }
       },
       "lengths": {
@@ -1333,7 +1351,8 @@
           "name": "Illustrated story",
           "text": "A classic picture book: text and illustration in balance on every page."
         }
-      }
+      },
+      "imageCaption": "Illustrative image"
     },
     "feedback": {
       "title": "What would you improve in this sample?",
@@ -1404,7 +1423,14 @@
       "toneLegend": "Invitation tone",
       "toneSample": "“{text}”",
       "includesTitle": "What your kit includes",
-      "includesInvitationTitle": "What your invitation includes"
+      "includesInvitationTitle": "What your invitation includes",
+      "imageCaption": "Illustrative image",
+      "pieceAlt": {
+        "invitation": "The birthday invitation with the character",
+        "decoration": "A sheet of round stickers with the character and name",
+        "keepsake": "The cover of the keepsake story",
+        "activities": "A printable maze with the character"
+      }
     },
     "partyPreview": {
       "invitationTitle": "Your invitation",

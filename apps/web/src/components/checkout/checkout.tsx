@@ -16,12 +16,14 @@ import {
   type PriceSnapshot,
 } from '@storynido/shared';
 import { Gift, Loader2, Lock } from 'lucide-react';
+import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 
 import { trackConversion } from '@/lib/conversions';
 
 import { SignInPanel } from '@/components/auth/sign-in-panel';
+import { FORMAT_IMAGES } from '@/components/formats/format-showcase';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useConsent } from '@/components/consent/consent-provider';
 import { useProStatus } from '@/components/pro/use-pro-status';
@@ -407,7 +409,28 @@ export function Checkout({
                           }}
                           className="sr-only"
                         />
-                        <span className="font-semibold">{t(`formats.${option.format}.name`)}</span>
+                        <span className="flex items-center gap-3">
+                          {option.format !== 'booklet' && (
+                            <span className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+                              <Image
+                                src={
+                                  option.format === 'digital'
+                                    ? FORMAT_IMAGES.ebook
+                                    : FORMAT_IMAGES.printed
+                                }
+                                alt=""
+                                fill
+                                sizes="48px"
+                                loading="lazy"
+                                unoptimized
+                                className="object-cover"
+                              />
+                            </span>
+                          )}
+                          <span className="font-semibold">
+                            {t(`formats.${option.format}.name`)}
+                          </span>
+                        </span>
                         <span className="text-sm text-muted-foreground">
                           {t(`formats.${option.format}.text`)}
                         </span>

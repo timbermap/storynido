@@ -17,6 +17,7 @@ import {
   type TextDensity,
 } from '@storynido/shared';
 
+import { FormatImage, FormatShowcase, TYPE_IMAGES } from '@/components/formats/format-showcase';
 import { useProStatus } from '@/components/pro/use-pro-status';
 import { formatPrice } from '@/lib/format';
 import { bookPrices, orderablePrintFormats } from '@/lib/offer';
@@ -137,6 +138,19 @@ export function BookOptions({
       editorial.lengths[format.length].active,
   );
   const suggestedFormat = readingFormats.find((format) => format.recommended);
+  // «Así lo recibes»: los impresos que el país puede pedir en alguna extensión (sin precios, ninguno).
+  const showcasePrint = prices
+    ? [
+        ...new Set(
+          lengths.flatMap((length) =>
+            orderablePrintFormats(
+              bookPrices(prices, length, professional, value.contentType),
+              editorial.lengths[length].formats,
+            ),
+          ),
+        ),
+      ]
+    : [];
 
   return (
     <section aria-labelledby="book-options" className="mt-10 grid gap-8 border-t pt-8">
@@ -157,12 +171,21 @@ export function BookOptions({
                 set({ contentType: selected as ContentType });
               }}
             >
-              <span className="block p-4 pr-12">
-                <span className="block font-display text-lg font-semibold">
-                  {t(`types.${type}.name`)}
-                </span>
-                <span className="mt-1 block text-sm text-muted-foreground">
-                  {t(`types.${type}.text`)}
+              <span className="grid grid-cols-[40%_1fr] sm:grid-cols-1">
+                <FormatImage
+                  src={TYPE_IMAGES[type]}
+                  alt={t(`types.${type}.alt`)}
+                  caption={t('imageCaption')}
+                  sizes="(min-width: 640px) 320px, 40vw"
+                  className="self-start sm:self-auto"
+                />
+                <span className="block p-4 pr-12">
+                  <span className="block font-display text-lg font-semibold">
+                    {t(`types.${type}.name`)}
+                  </span>
+                  <span className="mt-1 block text-sm text-muted-foreground">
+                    {t(`types.${type}.text`)}
+                  </span>
                 </span>
               </span>
             </OptionCard>
@@ -243,6 +266,8 @@ export function BookOptions({
           })}
         </div>
       </fieldset>
+
+      {prices && <FormatShowcase printFormats={showcasePrint} />}
 
       {!coloring && (
         <details className="group rounded-xl border bg-card p-4">

@@ -19,7 +19,7 @@ import { updateBook } from '@/lib/firebase/drafts';
 import { formatPrice } from '@/lib/format';
 import { useStepDraft } from '@/lib/use-step-draft';
 
-import { KIT_INCLUDES } from './kit-includes';
+import { KIT_INCLUDES, KitPieceThumbs } from './kit-includes';
 import { OptionCard } from './option-card';
 import { inputClass, labelClass } from './step-child';
 import type { StepNav, WizardData } from './types';
@@ -114,6 +114,12 @@ export function StepKit({ nav, data }: { nav: StepNav; data: WizardData }) {
             </OptionCard>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">{t('copiesNote')}</p>
+          <div className="mt-5 grid gap-2">
+            <p className="text-sm font-bold">
+              {offer === 'invitation' ? t('includesInvitationTitle') : t('includesTitle')}
+            </p>
+            <KitPieceThumbs items={offer === 'invitation' ? ['invitation'] : KIT_INCLUDES} />
+          </div>
         </fieldset>
 
         {offer === 'full_kit' && (
