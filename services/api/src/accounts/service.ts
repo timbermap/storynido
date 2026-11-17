@@ -142,7 +142,7 @@ export class AccountService {
         preview: doc.get('preview') as
           | {
               title?: string;
-              cover?: { previewImagePath?: string } | null;
+              cover?: { imagePath?: string; previewImagePath?: string } | null;
               character?: { previewImagePath?: string } | null;
             }
           | null
@@ -184,7 +184,11 @@ export class AccountService {
           id: book.id,
           title: book.preview?.title ?? null,
           status: book.status,
-          coverUrl: await url(book.preview?.cover?.previewImagePath),
+          // Pagado: la portada limpia, la del libro; sin pagar, la de la muestra con marca de agua.
+          coverUrl: await url(
+            (book.status === 'ordered' ? book.preview?.cover?.imagePath : undefined) ??
+              book.preview?.cover?.previewImagePath,
+          ),
         })),
       ),
     };

@@ -310,15 +310,22 @@ export class PreviewService {
     const url = async (path: string) =>
       (await storage.signedDownloadUrl({ bucket: 'assets', path }, IMAGE_URL_SECONDS)).url;
     const stage = preview.stage ?? 'complete';
+    // Un libro pagado se ve como es: las ilustraciones limpias, sin la marca de agua de la muestra
+    // (la portada limpia es la misma que lleva el libro). Sin pagar, siempre la versión marcada.
+    const paid = book.status === 'ordered';
+    const shown = <P extends string | null>(image: {
+      imagePath: string | null;
+      previewImagePath: P;
+    }) => ((paid ? image.imagePath : null) ?? image.previewImagePath) as P;
     return {
       ...base,
       preview: {
         stage,
         title: preview.title,
-        coverUrl: preview.cover ? await url(preview.cover.previewImagePath) : null,
+        coverUrl: preview.cover ? await url(shown(preview.cover)) : null,
         character: preview.character
           ? {
-              imageUrl: await url(preview.character.previewImagePath),
+              imageUrl: await url(shown(preview.character)),
               traits: preview.character.traits,
               mustKeep: preview.character.mustKeep,
               approved: preview.character.approvedAt !== null,
@@ -332,7 +339,9 @@ export class PreviewService {
           preview.pages.map(async (page) => ({
             index: page.index,
             text: page.text,
-            imageUrl: page.previewImagePath ? await url(page.previewImagePath) : null,
+            imageUrl: page.previewImagePath
+              ? await url(shown(page) ?? page.previewImagePath)
+              : null,
             // Cómo se arma en el libro: el visor la muestra igual que el PDF.
             layout: pageLayout({
               layout: preview.pageLayout ?? null,

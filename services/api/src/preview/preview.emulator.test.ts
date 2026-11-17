@@ -413,6 +413,24 @@ describe('vista previa', () => {
     vi.restoreAllMocks();
   });
 
+  it('un libro pagado muestra la portada y las páginas limpias, sin marca de agua', async () => {
+    await seedBook(providers, 'book-1');
+    await generate('book-1');
+    await approve('book-1');
+    await db.doc('books/book-1').update({ status: 'ordered' });
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/books/book-1/preview',
+      headers: auth(TOKEN),
+    });
+    const body = res.json<PublicPreview>();
+    expect(body.preview?.coverUrl).toContain('.webp');
+    expect(body.preview?.coverUrl).not.toContain('-preview.webp');
+    const pages = body.preview?.pages.filter((page) => page.imageUrl) ?? [];
+    expect(pages).toHaveLength(2);
+    for (const page of pages) expect(page.imageUrl).not.toContain('-preview.webp');
+  });
+
   it('aprobar al personaje ilustra la portada y 2 páginas con marca de agua, y registra el uso', async () => {
     await seedBook(providers, 'book-1');
     await generate('book-1');
