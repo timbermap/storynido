@@ -15,6 +15,7 @@ import {
   CONTENT_TYPES,
   editorialPlan,
   pricedPages,
+  miniPricedPages,
   matrixCostFor,
   stablePrintCost,
   printCandidates,
@@ -157,8 +158,12 @@ export function buildOffer(input: {
           bookFormatPrices({
             country,
             pricing,
-            // Nunca menos que el cuento mini (DECISIONS 242).
-            pages: pricedPages(plan.narrativePages, editorial),
+            // Margen por página de contenido (también las de actividades) e IA por página
+            // ilustrada; nunca menos que el cuento mini (DECISIONS 242 y 246).
+            pages: pricedPages(plan.narrativePages + plan.activityPages, editorial),
+            aiPages: pricedPages(plan.narrativePages, editorial),
+            // Ningún ebook, ni el profesional, baja del mini (DECISIONS 246).
+            minPages: miniPricedPages(editorial),
             professional,
             formats: offered,
             productionUsdMinor: (format) => productionFor(format, plan.interiorPages),

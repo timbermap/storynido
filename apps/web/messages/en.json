@@ -1290,6 +1290,7 @@
       "formatPages": "{count} pages",
       "formatWords": "{min} to {max} words per page",
       "formatRecommended": "Recommended",
+      "lengthRecommended": "Best for age {age}",
       "formatCustom": "Adjusted by hand in “Adjust the reading”.",
       "formats": {
         "first_words": {

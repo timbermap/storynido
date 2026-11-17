@@ -15,6 +15,8 @@ import {
   SAMPLE_PRINT_ADDRESSES,
   generatedPages,
   pricedPages,
+  miniPricedPages,
+  contentPages,
   matrixCostFor,
   paymentFeePercent,
   stablePrintCost,
@@ -287,7 +289,8 @@ export class CheckoutService {
         : bookFormatPrices({
             country,
             pricing,
-            pages: await this.pricedPages(loaded.book, loaded.pages),
+            ...(await this.pricedPages(loaded.book, loaded.pages)),
+            minPages: miniPricedPages(await this.catalog.editorial()),
             professional: pro?.professional ?? false,
             formats: availableFormats,
             productionUsdMinor: (format) => {
@@ -344,23 +347,23 @@ export class CheckoutService {
     });
   }
 
-  /** Páginas con ilustración generada del libro (DECISIONS 241): las que pagan IA y margen. */
+  /**
+   * Páginas que pagan margen (las de contenido, también las de actividades; nunca menos que el
+   * mini) y las que pagan IA (las de ilustración generada). DECISIONS 241, 242 y 246.
+   */
   private async pricedPages(book: Record<string, unknown>, interiorPages: number) {
     const preview = book.preview as { activityPages?: number } | null | undefined;
     const editorial = await this.catalog.editorial();
-    // Nunca menos que el cuento mini (DECISIONS 242).
-    return pricedPages(
-      generatedPages(
-        {
-          length: (book.length as BookLength | null | undefined) ?? null,
-          contentType: (book.contentType as ContentType | null | undefined) ?? null,
-          interiorPages,
-          activityPages: preview?.activityPages ?? 0,
-        },
-        editorial,
-      ),
-      editorial,
-    );
+    const shape = {
+      length: (book.length as BookLength | null | undefined) ?? null,
+      contentType: (book.contentType as ContentType | null | undefined) ?? null,
+      interiorPages,
+      activityPages: preview?.activityPages ?? 0,
+    };
+    return {
+      pages: pricedPages(contentPages(shape, editorial), editorial),
+      aiPages: pricedPages(generatedPages(shape, editorial), editorial),
+    };
   }
 
   private activePrinters(): string[] {
@@ -448,7 +451,9 @@ export class CheckoutService {
       print,
       format: body.format,
       // IA y margen por página: solo las páginas con ilustración generada.
-      pages: await this.pricedPages(book, pages),
+      ...(await this.pricedPages(book, pages)),
+      // Ningún ebook se cobra por debajo del mini (DECISIONS 246).
+      minPages: miniPricedPages(await this.catalog.editorial()),
       quantity: body.quantity,
       coupon,
       couponCode: body.couponCode,

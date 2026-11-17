@@ -52,8 +52,8 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
 
   await heading(page, 'Elige la aventura');
   await page.locator('label', { hasText: 'La gran aventura espacial' }).click();
-  // «¿Cómo lo van a leer?»: para 4 años, el recomendado es «Para leer juntos» (corto, 16 páginas).
-  await page.locator('label', { hasText: 'Para leer juntos' }).click();
+  // Extensión: para 4 años, la recomendada es Corto (16 páginas).
+  await page.locator('label', { hasText: 'Ideal para 4 años' }).click();
   await page.locator('summary', { hasText: 'Ajustar la lectura' }).click();
   await page.locator('label', { hasText: 'Más lectura' }).click();
   await next(page);

@@ -4,6 +4,7 @@ import {
   bookFormatPrices,
   defaultCountryConfig,
   marginUsdMinor,
+  miniPricedPages,
   quote,
   referencePrintCost,
   type BookFormat,
@@ -142,6 +143,7 @@ function summary(
     fx,
     format,
     pages: generated(pages),
+    minPages: miniPricedPages(DEFAULT_EDITORIAL_CONFIG),
     quantity: 1,
     print: format === 'digital' ? null : cost(code, format, pages, routing),
     coupon: null,
@@ -169,6 +171,7 @@ const cards = (
     country: countries[code],
     pricing,
     pages: generated(pages),
+    minPages: miniPricedPages(DEFAULT_EDITORIAL_CONFIG),
     professional,
     productionUsdMinor: (format) => {
       const value = cost(code, format, pages, routing);
@@ -296,6 +299,70 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
     )?.amountMinor;
     expect(activities).toBe(1399);
     expect(Math.min(...offer.lengthPrices.map((item) => item.amountMinor))).toBe(1399);
+  });
+
+  it('ningún ebook baja de 13,99, tampoco con el descuento profesional (DECISIONS 246)', () => {
+    const offer = offerFor('AR');
+    const pro = (length: string, contentType: string) =>
+      offer.proLengthPrices.find(
+        (item) => item.length === length && item.contentType === contentType,
+      )?.amountMinor;
+    expect(Math.min(...offer.proLengthPrices.map((item) => item.amountMinor))).toBe(1399);
+    expect(pro('mini', 'story')).toBe(1399);
+    expect(pro('mini', 'activities')).toBe(1399);
+    // Las extensiones largas conservan su descuento.
+    expect(pro('classic', 'story')).toBeLessThan(2199);
+    // El resumen cobra lo mismo que la tarjeta: 13,99 también para la cuenta profesional.
+    const mini = DEFAULT_EDITORIAL_CONFIG.lengths.mini.interiorPages;
+    expect(summary('AR', 'digital', mini, null, true).components[0]?.totalMinor).toBe(1399);
+  });
+
+  it('un cupón no deja un ebook por debajo de 13,99 (DECISIONS 246)', () => {
+    const mini = DEFAULT_EDITORIAL_CONFIG.lengths.mini.interiorPages;
+    const result = quote({
+      country: countries.AR,
+      pricing: pricing.digital,
+      fx,
+      format: 'digital',
+      pages: generated(mini),
+      minPages: miniPricedPages(DEFAULT_EDITORIAL_CONFIG),
+      quantity: 1,
+      print: null,
+      coupon: {
+        code: 'MITAD',
+        type: 'percent',
+        value: 50,
+        currency: 'USD',
+        active: true,
+        validFrom: new Date('2026-01-01T00:00:00Z'),
+        validUntil: null,
+        maxRedemptions: null,
+        redemptions: 0,
+        countries: [],
+      } as never,
+      couponCode: 'MITAD',
+      promotions: [],
+      now,
+    });
+    if (!result.ok) throw new Error(result.error);
+    expect(result.snapshot.subtotalMinor - result.snapshot.discount.minor).toBe(1399);
+  });
+
+  it('libro de actividades y cuento con actividades: precio por extensión (DECISIONS 246)', () => {
+    const offer = offerFor('AR');
+    const price = (contentType: string) =>
+      ['mini', 'short', 'classic', 'epic'].map(
+        (length) =>
+          offer.lengthPrices.find(
+            (item) => item.length === length && item.contentType === contentType,
+          )?.amountMinor,
+      );
+    // Las páginas de actividades pagan margen por página (0,35) pero no IA de ilustración; la IA
+    // nunca cuenta menos páginas que el mini (DECISIONS 242).
+    expect(price('activities')).toEqual([1399, 1499, 1999, 2099]);
+    expect(price('story_activities')).toEqual([1399, 1499, 2099, 2299]);
+    // Para colorear y el cuento no cambian.
+    expect(price('coloring')).toEqual([1399, 1599, 2199, 2399]);
   });
 
   it('ebook por extensión: 13,99 / 15,99 / 21,99 / 23,99', () => {

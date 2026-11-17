@@ -1465,8 +1465,8 @@ describe('checkout y pagos (fase 11)', () => {
       accountType: 'professional',
       discount: { purchases: 0, next: { purchases: 5, percent: 10 } },
     });
-    // Precio Pro base (10 % menos: 13,48 → 12,13 → 12,99), sin descuento por recurrencia todavía.
-    expect((await quoteDigital()).subtotalMinor).toBe(1299);
+    // Precio Pro base: 10 % menos, pero ningún ebook baja del mini (13,99; DECISIONS 246).
+    expect((await quoteDigital()).subtotalMinor).toBe(1399);
 
     // 5 compras elegibles en 90 días → 10 %. No cuentan: reembolsadas, canceladas, pendientes,
     // las de otra cuenta ni las anteriores a la ventana.
@@ -1489,9 +1489,10 @@ describe('checkout y pagos (fase 11)', () => {
         .set({ ownerUid, status: orderStatus, createdAt: new Date(Date.now() - daysAgo * day) });
     }
     expect((await status()).discount?.purchases).toBe(5);
+    // El escalón del 10 % no deja el ebook mini por debajo de 13,99 (DECISIONS 246).
     const tier = await quoteDigital();
-    expect(tier.discount).toEqual({ minor: 130, reason: 'pro', label: '10 %' });
-    expect(tier.totalMinor).toBe(1299 - 130);
+    expect(tier.discount.reason).toBeNull();
+    expect(tier.totalMinor).toBe(1399);
 
     // Un reembolso posterior baja el escalón para las compras siguientes.
     await db.doc('orders/o2').update({ status: 'refunded' });

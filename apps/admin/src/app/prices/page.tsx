@@ -141,6 +141,8 @@ export default function PricesPage() {
             hint: 'Es un costo: el precio se calcula para que, después de la comisión, quede el margen. También se suma al envío.',
             min: 0,
             max: 20,
+            // Admite decimales (3,5 %): con el paso de 1 el formulario no se podía guardar.
+            step: 0.1,
           },
           {
             kind: 'money',

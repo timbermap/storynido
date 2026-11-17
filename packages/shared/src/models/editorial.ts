@@ -567,3 +567,21 @@ export function pricedPages(generated: number, config: EditorialConfig): number 
   ).narrativePages;
   return Math.max(generated, mini);
 }
+
+/**
+ * Páginas de contenido de un libro ya armado (DECISIONS 246): las generadas más las de
+ * actividades, sin las fijas. Pagan el margen por página; la IA de ilustración, solo las
+ * generadas (`generatedPages`). Así el libro de actividades tiene precio por extensión.
+ */
+export function contentPages(
+  book: { length: BookLength | null; interiorPages: number },
+  config: EditorialConfig,
+): number {
+  if (!book.length) return Math.max(0, book.interiorPages);
+  return Math.max(0, book.interiorPages - config.lengths[book.length].fixedPages);
+}
+
+/** Páginas generadas del cuento mini: el piso de precio de un ebook (DECISIONS 242 y 246). */
+export function miniPricedPages(config: EditorialConfig): number {
+  return pricedPages(0, config);
+}

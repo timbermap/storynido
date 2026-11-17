@@ -68,8 +68,9 @@ describe('tabla «Precio final» del admin', () => {
       blocked: null,
     });
     expect(row(rows, 'classic', 'digital')?.priceMinor).toBe(2199);
-    // Profesionales: 10 % antes de redondear (13,48 → 12,13 → 12,99), sin bajar del piso.
-    expect(row(rows, 'mini', 'digital')?.proPriceMinor).toBe(1299);
+    // Profesionales: 10 % antes de redondear, pero ningún ebook baja del mini (DECISIONS 246).
+    expect(row(rows, 'mini', 'digital')?.proPriceMinor).toBe(1399);
+    expect(row(rows, 'classic', 'digital')?.proPriceMinor).toBeLessThan(2199);
   });
 
   it('impreso: la imprenta activa más barata + margen con mínimo de USD 8', () => {
