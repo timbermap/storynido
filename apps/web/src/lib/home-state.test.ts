@@ -87,11 +87,21 @@ describe('pickHomeLine · regla 1: la muestra más cercana a la compra, de cualq
     expect(view.next?.kind).toBe('draft');
   });
 
-  it('una muestra profesional que gana pone el modo Pro, sin «Lo próximo»', () => {
+  it('una muestra profesional que gana en una cuenta mixta: sin modo Pro, con «Lo próximo»', () => {
     const view = pick([
       book({ id: 'p', channel: 'professionals', stage: 'preview' }),
       book({ id: 'f', stage: 'draft' }),
     ]);
+    expect(view).toMatchObject({
+      line: 'professionals',
+      reason: 'book',
+      pro: false,
+      next: { kind: 'preview', book: { id: 'p' } },
+    });
+  });
+
+  it('solo muestras profesionales: modo Pro, sin «Lo próximo»', () => {
+    const view = pick([book({ id: 'p', channel: 'professionals', stage: 'preview' })]);
     expect(view).toEqual({ line: 'professionals', reason: 'book', pro: true, next: null });
   });
 
@@ -148,6 +158,25 @@ describe('pickHomeLine · regla 3: perfil profesional activado', () => {
       remembered: 'events',
     });
     expect(view.reason).toBe('profile');
+  });
+
+  it('cuenta mixta (perfil Pro + pedidos de Familias y Celebraciones): Profesionales sin modo Pro', () => {
+    const view = pick(
+      [],
+      [
+        order({ id: 'f', status: 'delivered', createdAt: 2 }),
+        order({ id: 'e', channel: 'events', status: 'ready', print: false, createdAt: 3 }),
+      ],
+      { proProfile: true },
+    );
+    expect(view).toEqual({ line: 'professionals', reason: 'profile', pro: false, next: null });
+  });
+
+  it('perfil Pro con solo pedidos profesionales: modo Pro', () => {
+    const view = pick([], [order({ channel: 'professionals', status: 'delivered' })], {
+      proProfile: true,
+    });
+    expect(view).toMatchObject({ line: 'professionals', pro: true });
   });
 });
 
