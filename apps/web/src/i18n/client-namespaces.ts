@@ -20,4 +20,6 @@ export const CLIENT_NAMESPACES = [
   'Error',
   'Pro',
   'Contact',
+  // «Así lo recibes» (components/formats): lo usa el creador, que es de cliente.
+  'FormatShowcase',
 ];

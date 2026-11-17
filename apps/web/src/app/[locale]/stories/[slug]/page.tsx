@@ -12,6 +12,7 @@ import {
 } from '@storynido/shared';
 
 import { AuthLink } from '@/components/auth/auth-link';
+import { FormatShowcase } from '@/components/formats/format-showcase';
 import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
 import { JsonLd } from '@/components/json-ld';
 import { StoryCover } from '@/components/stories/story-cover';
@@ -277,6 +278,14 @@ export default async function StoryPage({ params, searchParams }: Props) {
                 ))}
               </ul>
             </section>
+          )}
+
+          {line !== 'events' && (
+            <FormatShowcase
+              printFormats={[...offered].filter((format) => format !== 'digital')}
+              headingLevel="h2"
+              headingClassName="text-xl font-medium"
+            />
           )}
 
           {/* El precio y el país de envío se ven en el creador y el pago; acá solo se avisa del envío. */}
