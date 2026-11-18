@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, Lock, Mail, X } from 'lucide-react';
+import { CreditCard, Lock, ReceiptText, Undo2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
@@ -103,7 +103,7 @@ function PaymentHandoffDialog({ onGo, onClose }: { onGo: () => void; onClose: ()
         </div>
         <ul className="grid gap-3 text-sm">
           <li className="flex gap-3">
-            <Mail className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+            <Lock className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
             {t('noAccount')}
           </li>
           <li className="flex gap-3">
@@ -111,7 +111,11 @@ function PaymentHandoffDialog({ onGo, onClose }: { onGo: () => void; onClose: ()
             {t('methods')}
           </li>
           <li className="flex gap-3">
-            <Lock className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+            <ReceiptText className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+            {t('statement')}
+          </li>
+          <li className="flex gap-3">
+            <Undo2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
             {t('comeBack')}
           </li>
         </ul>
