@@ -171,9 +171,14 @@ test('ficha profesional: objetivos propios en vez de enseñanzas generales; env�
   await expect(page.getByRole('heading', { name: 'Qué trabaja este cuento' })).toBeVisible();
   await expect(page.locator('main')).toContainText('Conocer el consultorio antes de ir');
   await expect(page.getByRole('heading', { name: 'Combínala con una enseñanza' })).toHaveCount(0);
-  await expect(page.locator('main')).toContainText(
-    'El costo de envío del libro impreso se calcula',
-  );
+  // El aviso de envío depende de la oferta del país: solo si la ficha ofrece un impreso (la misma
+  // oferta que arma las tarjetas de «Así lo recibes»). Staging hoy vende solo el ebook.
+  await expect(page.locator('#format-showcase')).toBeVisible();
+  const printedOffered =
+    (await page.locator('[data-piece="printed"], [data-piece="booklet"]').count()) > 0;
+  const shipping = page.getByText('El costo de envío del libro impreso se calcula');
+  if (printedOffered) await expect(shipping).toBeVisible();
+  else await expect(shipping).toHaveCount(0);
   await expect(page.getByLabel('Enviar a')).toHaveCount(0);
   await expectAccessible(page);
 });

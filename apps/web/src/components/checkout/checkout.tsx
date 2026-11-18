@@ -434,6 +434,12 @@ export function Checkout({
                         <span className="text-sm text-muted-foreground">
                           {t(`formats.${option.format}.text`)}
                         </span>
+                        {option.format !== 'digital' && !reorderOf && (
+                          // El impreso trae también el PDF (DECISIONS 256); en otra copia ya lo tiene.
+                          <span className="w-fit rounded-full bg-mint px-2.5 py-1 text-xs leading-none font-bold text-success">
+                            {t('includesPdf')}
+                          </span>
+                        )}
                         <span className="mt-auto min-h-6 pt-2 font-semibold tabular-nums">
                           {(() => {
                             const minor = exactMinor(option.format);

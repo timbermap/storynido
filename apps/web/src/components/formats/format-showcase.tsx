@@ -69,22 +69,33 @@ export function FormatImage({
 type ShowcasePiece = keyof typeof FORMAT_IMAGES;
 
 /**
+ * Lo que entrega cada formato: el ebook es solo el PDF; un impreso trae el libro y también el PDF
+ * (decisión de Sebas, DECISIONS 256). El worker siempre maqueta el PDF digital y se descarga
+ * desde el pedido también en los impresos.
+ */
+export function deliveredPieces(format: BookFormat): ShowcasePiece[] {
+  if (format === 'digital') return ['ebook'];
+  return [format === 'booklet' ? 'booklet' : 'printed', 'ebook'];
+}
+
+/**
  * Piezas que se ven en «Así lo recibes»: siempre el ebook (el formato por defecto de Familias) y,
  * solo si el país de verdad los vende, el libro impreso y el cuento grapado. Nada de «Muy pronto»
  * en el flujo de compra: los impresos que vienen se anuncian en la home (DECISIONS 253).
  */
 export function showcasePieces(printFormats: readonly BookFormat[]): ShowcasePiece[] {
-  const pieces: ShowcasePiece[] = ['ebook'];
-  if (printFormats.some((format) => format === 'softcover' || format === 'hardcover')) {
-    pieces.push('printed');
+  const pieces = new Set<ShowcasePiece>(deliveredPieces('digital'));
+  for (const format of printFormats) {
+    if (format !== 'digital') for (const piece of deliveredPieces(format)) pieces.add(piece);
   }
-  if (printFormats.includes('booklet')) pieces.push('booklet');
-  return pieces;
+  const order: ShowcasePiece[] = ['ebook', 'printed', 'booklet'];
+  return order.filter((piece) => pieces.has(piece));
 }
 
 /**
  * «Así lo recibes»: lo que la persona recibe con el formato del libro. Con solo el ebook a la
- * venta, una sola tarjeta (horizontal en pantallas anchas); con impresos a la venta, una por pieza.
+ * venta, una sola tarjeta (horizontal en pantallas anchas); con impresos a la venta, una por pieza,
+ * y cada impreso avisa que trae también el PDF.
  */
 export function FormatShowcase({
   printFormats,
@@ -127,6 +138,11 @@ export function FormatShowcase({
             <figcaption className="grid gap-1 p-4">
               <span className="font-display text-lg font-semibold">{t(`${piece}Name`)}</span>
               <span className="text-sm text-muted-foreground">{t(`${piece}Text`)}</span>
+              {piece !== 'ebook' && (
+                <span className="mt-1 w-fit rounded-full bg-mint px-2.5 py-1 text-xs leading-none font-bold text-success">
+                  {t('includesPdf')}
+                </span>
+              )}
             </figcaption>
           </figure>
         ))}
