@@ -2835,6 +2835,17 @@ Sebas, 18 nov 2026: «¿podrías asegurar que cada prompt usa el estilo que sele
 - **Texto:** el cuento nunca se narra en segunda persona (nada de «tú/vos/you» fuera de un diálogo; tercera persona o primera con la voz del protagonista). Las imágenes dejan en blanco lomos de libros, carteles, etiquetas y ropa.
 - **Tests:** `art-direction.test.ts` falla si alguna edad o estilo mete otra técnica; el test de la API «candado de estilo» falla si alguna imagen del libro sale sin el estilo elegido.
 
+## 267 — Coherencia del elenco, la ropa y los objetos en todo el cuento
+
+Sebas, 18 nov 2026: «revisa la totalidad de los prompts… personajes que tengan relación con el personaje principal, cosas que aparecen en los cuentos, ropas de acuerdo a las situaciones». Revisión con la mesa sobre planificador, redactor, escenas, lámina, páginas y revisión. Lo que ya estaba (DECISIONS 236, 264): biblia visual de objetos, lugares y ropa especial; familia recurrente parecida al protagonista; elenco con género y aspecto fijo; regla de ropa de agua y deportes. Huecos que se cierran:
+
+- **Familia que aparece una sola vez:** el que escribe las escenas no sabía cómo era el protagonista. Ahora recibe su aspecto y la regla: un familiar se parece (tono de piel parecido, color de pelo posible, sin estereotipos); cualquier otra persona es claramente distinta. Dice su edad y un color de ropa.
+- **Ropa según la situación:** escenas, planificador y dirección de arte piden ropa acorde al lugar, el clima y la actividad (pijama en la cama, piloto en la lluvia, abrigo en el frío, malla en el agua, ropa deportiva); en casa, sin camperas ni zapatillas de calle salvo al llegar o salir. El planificador define ropa especial también para lluvia, frío, deportes y disfraces o uniformes del cuento.
+- **Ropa de una foto de adulto:** la ropa de todos los días sale «en versión de su edad» (antes Lu, de 5, llevaba la campera de abrigo de la foto adulta adentro de su cuarto).
+- **Lo que hace y usa según su edad:** el que escribe las escenas sabe la edad; lo riesgoso, con un adulto cerca.
+- **Revisión de cada página:** también marca ropa que no va con el lugar y familiares que no se parecen.
+- **Registro:** el plan dentro del prompt decía «seguilo» en un prompt en «tú»; ahora «síguelo».
+
 ## 268 — Métricas por estilo de ilustración
 
 Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para decidir con datos y no solo con estudios de mercado. Las métricas del día suman `styles` por slug: elegido (libros que llegaron a la lámina), muestras completas, compras pagadas y ventas en USD. Los libros sin estilo van como `sin-estilo`. La portada del admin muestra la tabla «Por estilo de ilustración». `METRICS_VERSION` pasa a 3 para que los días asentados se recalculen con el estilo.
