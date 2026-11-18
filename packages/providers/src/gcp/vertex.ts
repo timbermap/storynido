@@ -298,6 +298,13 @@ function parseJson(response: GenerateContentResponse, what: string): unknown {
   }
 }
 
+/** El plan trajo otra cantidad de escenas que páginas (se reintenta una vez). */
+class SceneCountError extends Error {
+  constructor(readonly count: number) {
+    super(`scene count ${String(count)}`);
+  }
+}
+
 const sumUsage = (model: string, ...usages: AiUsage[]): AiUsage => ({
   provider: 'vertex',
   model,
@@ -832,7 +839,33 @@ ${JSON.stringify(pages)}`,
 
   /** Planificador editorial (guía A de docs/estrategia/feedback/PROMPTS-LLM-Y-QA.md). */
   async planStory(request: StoryRequest): Promise<StoryPlan> {
-    const { response, usage } = await this.client.generate(
+    // A veces el modelo devuelve menos escenas que páginas (18 nov 2026: 1 de 10). Se reintenta una
+    // vez recordándole la cantidad antes de fallar la muestra.
+    const usages: AiUsage[] = [];
+    let retryNote = '';
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        return await this.planStoryOnce(request, retryNote, usages);
+      } catch (error) {
+        if (!(error instanceof SceneCountError)) throw error;
+        if (attempt >= 2) {
+          throw new ProviderError(
+            'vertex',
+            `El plan vino con ${String(error.count)} escenas en vez de ${String(request.pageCount)}`,
+            true,
+          );
+        }
+        retryNote = `\nYour previous answer had ${String(error.count)} scenes. Return exactly ${String(request.pageCount)} scenes in the scenes array, one per narrative page.`;
+      }
+    }
+  }
+
+  private async planStoryOnce(
+    request: StoryRequest,
+    retryNote: string,
+    usages: AiUsage[],
+  ): Promise<StoryPlan> {
+    const { response, usage: callUsage } = await this.client.generate(
       this.model,
       [
         {
@@ -884,7 +917,7 @@ Visual bible (English, fixed looks the illustrator repeats word for word):
 notVisible of each scene lists every recurring character (companion and cast) who is not in that scene's place.
 
 Brief:
-${request.prompt}`,
+${request.prompt}${retryNote}`,
         },
       ],
       { temperature: 0.7, responseMimeType: 'application/json', responseSchema: PLAN_SCHEMA },
@@ -897,13 +930,9 @@ ${request.prompt}`,
       props?: VisualBibleItem[];
       places?: VisualBibleItem[];
     };
-    if (plan.scenes.length !== request.pageCount) {
-      throw new ProviderError(
-        'vertex',
-        `El plan vino con ${String(plan.scenes.length)} escenas en vez de ${String(request.pageCount)}`,
-        true,
-      );
-    }
+    usages.push(callUsage);
+    const usage = sumUsage(this.model, ...usages);
+    if (plan.scenes.length !== request.pageCount) throw new SceneCountError(plan.scenes.length);
     const bible = (items: VisualBibleItem[] | undefined, max: number) =>
       (items ?? []).filter((item) => item.name.trim() && item.look.trim()).slice(0, max);
     const props = bible(plan.props, 4);

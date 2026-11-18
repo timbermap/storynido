@@ -202,6 +202,43 @@ describe('Vertex AI', () => {
     expect(old.scenes[0]?.place).toBeNull();
   });
 
+  it('el plan con menos escenas que páginas se reintenta una vez y después falla', async () => {
+    const scene = () => ({
+      sceneGoal: 'meta',
+      emotionalBeat: 'alegría',
+      mustBeVisible: [],
+      notVisible: [],
+      continuityFacts: [],
+      wordBudget: 20,
+    });
+    const plan = (count: number) => ({
+      theme: 't',
+      arc: 'a',
+      scenes: Array.from({ length: count }, scene),
+    });
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    let call = 0;
+    const ok = await new VertexTextProvider(
+      clientWith(() => {
+        call += 1;
+        return jsonReply(plan(call === 1 ? 1 : sampleStoryRequest.pageCount));
+      }, calls),
+    ).planStory(sampleStoryRequest);
+    expect(ok.scenes).toHaveLength(sampleStoryRequest.pageCount);
+    expect(calls).toHaveLength(2);
+    expect(calls[1]?.contents[0]?.parts[0]?.text).toContain('Your previous answer had 1 scenes');
+    // Se cobran las dos llamadas.
+    expect(ok.usage.costUsdMicros).toBe(4000);
+
+    const failing: unknown[] = [];
+    await expect(
+      new VertexTextProvider(clientWith(() => jsonReply(plan(1)), failing)).planStory(
+        sampleStoryRequest,
+      ),
+    ).rejects.toThrow('El plan vino con 1 escenas en vez de 4');
+    expect(failing).toHaveLength(2);
+  });
+
   it('la revisión de página recibe la continuidad y la biblia visual de la escena', async () => {
     const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
     const provider = new VertexTextProvider(
