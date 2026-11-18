@@ -73,19 +73,17 @@ describe('caso Lu: portada en un lugar del cuento y con la técnica de las pági
       { name: 'the cave', look: 'a dark cave' },
       { name: "Lu's bedroom", look: 'a cozy bedroom with a wooden bed and a blue mat' },
     ],
-    scenes: [0, 1, 2].map(
-      (pageIndex) =>
-        ({
-          pageIndex,
-          sceneGoal: '',
-          emotionalBeat: '',
-          mustBeVisible: [],
-          notVisible: [],
-          continuityFacts: [],
-          wordBudget: 20,
-          place: pageIndex === 0 ? 'the cave' : "Lu's bedroom",
-        }) as ScenePlan,
-    ),
+    scenes: [0, 1, 2].map((pageIndex): ScenePlan => ({
+      pageIndex,
+      sceneGoal: '',
+      emotionalBeat: '',
+      mustBeVisible: [],
+      notVisible: [],
+      continuityFacts: [],
+      wordBudget: 20,
+      personalDetail: null,
+      place: pageIndex === 0 ? 'the cave' : "Lu's bedroom",
+    })),
   };
 
   it('elige el lugar que más se repite y no inventa paisajes', () => {

@@ -805,7 +805,7 @@ export class PreviewService {
       ...request,
       template: story.textPromptTemplate,
       // Historia de otra edad (Buenas noches, de 0 a 2, para una nena de 5): se adapta.
-      storyAges: { min: Number(story.ageMin), max: Number(story.ageMax) },
+      storyAges: { min: story.ageMin, max: story.ageMax },
       memories,
       event,
       goal,
