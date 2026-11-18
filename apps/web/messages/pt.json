@@ -759,6 +759,7 @@
         "keep": "Ficar com o anterior",
         "redrawAdjusted": "Desenhar de novo",
         "error": "Não conseguimos desenhar agora. Tente de novo daqui a pouco.",
+        "qualityError": "Não conseguimos fazer um desenho que passe no nosso controle com estas fotos. Tente outra foto da idade atual, de frente e só com o rosto (sem outras pessoas, placas ou bebidas), ou escolha as características.",
         "choose": "Gostou do novo desenho de {name}?",
         "chooseFirst": "Gostou do desenho?",
         "discard": "Descartar",

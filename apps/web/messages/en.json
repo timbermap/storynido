@@ -759,6 +759,7 @@
         "keep": "Keep the previous one",
         "redrawAdjusted": "Draw it again",
         "error": "We could not draw it right now. Please try again in a while.",
+        "qualityError": "We couldn't make a drawing that passes our checks with these photos. Try another photo at their current age, facing the camera with only their face (no other people, signs or drinks), or choose their features.",
         "choose": "Do you like the new drawing of {name}?",
         "chooseFirst": "Do you like the drawing?",
         "discard": "Discard",
