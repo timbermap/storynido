@@ -90,8 +90,8 @@ export default function StoriesPage() {
         { kind: 'tags', path: 'collectionIds', label: 'Colecciones (slugs)' },
         { kind: 'tags', path: 'suggestedLessons', label: 'Enseñanzas sugeridas (slugs)' },
         { kind: 'multi', path: 'lengths', label: 'Extensiones', options: BOOK_LENGTHS },
-        { kind: 'multi', path: 'textDensities', label: 'Densidades', options: TEXT_DENSITIES },
-        { kind: 'multi', path: 'readingLevels', label: 'Niveles', options: READING_LEVELS },
+        { kind: 'multi', path: 'textDensities', label: 'Densidades (referencia, no limita el creador)', options: TEXT_DENSITIES },
+        { kind: 'multi', path: 'readingLevels', label: 'Niveles (referencia, no limita el creador)', options: READING_LEVELS },
         {
           kind: 'multi',
           path: 'contentTypes',

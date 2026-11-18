@@ -320,6 +320,9 @@
       "requiredCollection": "Elegí una colección para continuar.",
       "requiredGoal": "Elegí un objetivo para continuar.",
       "requiredStory": "Elegí un cuento base para continuar."
+    },
+    "book": {
+      "adjustHint": "Elegí cuánto texto y qué nivel de lectura querés."
     }
   },
   "Landing": {
