@@ -73,7 +73,7 @@ export function OrderReview({
         </div>
       </div>
       {/* El comentario aparece después de elegir las estrellas: antes era una caja grande vacía
-          que pesaba más que el libro (DECISIONS 274). */}
+          que pesaba más que el libro (DECISIONS 275). */}
       {rating > 0 && (
         <>
           <label className="grid gap-1.5 text-sm">

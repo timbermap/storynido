@@ -2138,6 +2138,11 @@
     },
     "reorderBack": "Back to My stories",
     "includesPdf": "Includes the ebook (PDF)",
+    "countrySwitch": {
+      "label": "Prices for",
+      "auto": "Based on my location ({country})",
+      "chosenNote": "You picked this yourself; your location says {country}."
+    },
     "handoff": {
       "title": "You'll pay on Gumroad",
       "text": "Gumroad is StoryNido's secure payment processor. It opens in a new tab and this one waits for your payment.",

@@ -56,13 +56,18 @@ export async function updateUserLocale(db: Firestore, uid: string, locale: Local
 export function subscribePreferences(
   db: Firestore,
   uid: string,
-  onChange: (preferences: { marketingOptIn: boolean; country: CountryCode | null }) => void,
+  onChange: (preferences: {
+    marketingOptIn: boolean;
+    country: CountryCode | null;
+    countryChosen: boolean;
+  }) => void,
 ): () => void {
   return onSnapshot(doc(db, COLLECTIONS.users, uid), (snapshot) => {
     const country = countryCodeSchema.safeParse(snapshot.get('country'));
     onChange({
       marketingOptIn: snapshot.get('marketingOptIn') === true,
       country: country.success ? country.data : null,
+      countryChosen: snapshot.get('countryChosen') === true,
     });
   });
 }
@@ -72,6 +77,15 @@ export async function updateUserCountry(db: Firestore, uid: string, country: Cou
   await updateDoc(doc(db, COLLECTIONS.users, uid), {
     country,
     countryChosen: true,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/** La cuenta vuelve al país de la ubicación: deja de imponerlo en otros dispositivos. */
+export async function clearUserCountryChoice(db: Firestore, uid: string, detected: CountryCode) {
+  await updateDoc(doc(db, COLLECTIONS.users, uid), {
+    country: detected,
+    countryChosen: false,
     updatedAt: serverTimestamp(),
   });
 }

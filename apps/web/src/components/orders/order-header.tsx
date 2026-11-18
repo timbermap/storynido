@@ -31,7 +31,7 @@ export function OrderHeader({
   bookId: string;
   /** Formato pedido («Cuento grapado», «Tapa dura»…); null en un pedido de tarjetas. */
   format: BookFormat | null;
-  /** Libro ya entregado: la portada pasa a ser lo principal de la página (DECISIONS 274). */
+  /** Libro ya entregado: la portada pasa a ser lo principal de la página (DECISIONS 275). */
   large?: boolean;
 }) {
   const t = useTranslations('Account.myStories');

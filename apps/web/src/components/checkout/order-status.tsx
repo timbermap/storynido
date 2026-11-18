@@ -152,7 +152,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
     query: { desde: 'pedido' },
   } as const;
   // Ya lo tiene (digital listo o impreso entregado): el libro pasa a ser lo principal y los
-  // pasos, todos hechos, ya no suman (DECISIONS 274).
+  // pasos, todos hechos, ya no suman (DECISIONS 275).
   const finished = order.status === 'delivered' || (!print && order.status === 'ready');
   const statusText =
     isKit && order.status === 'ready' ? tKit('ready') : t(`status.${order.status}`);

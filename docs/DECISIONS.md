@@ -2888,13 +2888,21 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Pendiente (propuesto por la mesa):** conciliar con `GET /v2/sales` los pedidos pendientes si un ping se pierde; reembolsar solo cuando el monto no coincide; mails de pago abandonado; cobrar impresos por Gumroad solo con su OK por escrito (legales); términos §5 («los impuestos se indican antes de pagar») y privacidad con Gumroad como vendedor de registro.
 - **Salida definitiva:** el CEO propone PayPal integrado en nuestra página; producto propone LLC + Stripe. Lo decide Sebas.
 
-## 273 — «Leer el cuento» también en «Tu pedido»
+## 273 — El país de los precios, a la vista y con vuelta a la ubicación
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: desde Argentina el pago mostraba la referencia en COP y los textos en «tú».
+- **Causa:** su navegador tenía guardado a mano Colombia (`sn_country_choice=CO`, de algún «Enviar a» o prueba anterior). Esa elección dura un año y manda sobre la IP, que sí detecta Argentina (verificado en staging), pero no se veía en ningún lado: Mi cuenta mostraba Argentina (el país deducido al crear la cuenta) mientras el sitio usaba Colombia.
+- **Orden:** cuenta con país elegido > elegido a mano en este navegador > ubicación (IP) > idioma del navegador. Al iniciar sesión, si la cuenta tiene país elegido se aplica y la página se refresca enseguida.
+- **Pago:** junto al total digital (y en el kit) se ve «Precios para: …» con la opción «Según mi ubicación (país)», que borra la elección y vuelve a la IP. Con sesión, el cambio queda también en la cuenta. En el impreso el país sigue saliendo de la dirección.
+- **Mi cuenta:** si la cuenta no eligió país, muestra el que usa el sitio, así coincide con los precios.
+
+## 274 — «Leer el cuento» también en «Tu pedido»
 
 - **Fecha:** 2026-11-18. Pedido por Sebas: el detalle del pedido entregado solo ofrecía «Descargar el PDF»; el visor de DECISIONS 254 estaba solo en Terminados.
 - **Decisión:** el detalle del pedido muestra «Leer el cuento» cuando el pedido ya tiene el PDF limpio del libro (`canDownload` y el archivo `book`), igual que la estantería: ebook, impreso y el librito del kit. Las tarjetas impresas no. En un libro, leer es el botón principal y la descarga pasa a secundario; en el kit, «Descargar todo» sigue principal y leer queda al lado.
 - **Volver:** el enlace lleva `?desde=pedido` y la X del visor vuelve al pedido (desde Terminados sigue volviendo a Terminados).
 
-## 274 — «Tu pedido» rediseñado: el libro primero, sin pasos repetidos y una columna útil
+## 275 — «Tu pedido» rediseñado: el libro primero, sin pasos repetidos y una columna útil
 
 - **Fecha:** 2026-11-18. Pedido por Sebas («esta también se podría mejorar»); revisaron diseño/UX, usuario familia, producto y marketing.
 - **Lo que veía la mesa:** con el libro entregado, la portada era chica; los tres pasos («Pagado», «Creando», «Entregado») tenían el mismo tilde y no decían nada; la columna derecha era solo el precio y quedaba vacía; la caja de opinión, con un comentario grande vacío, pesaba más que el libro.

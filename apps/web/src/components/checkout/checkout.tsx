@@ -42,6 +42,7 @@ import { AddressSearch, type PickedAddress } from './address-search';
 import { CheckoutBook } from './checkout-book';
 
 import { ChristmasNote, GiftDeadline } from './gift-deadline';
+import { CountrySwitch } from './country-switch';
 import { PriceSummary } from './price-summary';
 
 type AddressDraft = Omit<Address, 'country' | 'placeId' | 'pin'>;
@@ -88,11 +89,14 @@ export function Checkout({
   bookId,
   offer,
   country,
+  countryChoice,
   reorderOf = null,
 }: {
   bookId: string;
   offer: Offer;
   country: CountryCode;
+  /** País de la ubicación y si el actual lo eligió la persona (para cambiarlo junto al precio). */
+  countryChoice: { detected: CountryCode; chosen: boolean };
   /**
    * Otra copia: el pedido cuyo libro ya generado se vuelve a pedir (sin IA). Solo impresa: el PDF
    * ya lo tiene y se descarga gratis desde Mis cuentos.
@@ -706,6 +710,8 @@ export function Checkout({
               format={quote.format}
               shipTo={quote.format !== 'digital' ? quote.country : null}
             />
+            {/* Digital: el país (moneda de referencia, impuestos) se ve y se cambia acá. Impreso: sale de la dirección. */}
+            {!print && <CountrySwitch country={country} {...countryChoice} />}
             {print && quote.snapshot.shipping.pending && estimate && (
               <p className="rounded-xl bg-peach/60 px-4 py-3 text-sm font-semibold text-navy">
                 {t('shippingEstimate', {
