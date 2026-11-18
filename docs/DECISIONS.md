@@ -2832,5 +2832,5 @@ Sebas, 18 nov 2026: «¿podrías asegurar que cada prompt usa el estilo que sele
 - **Candado:** la dirección de arte suma «Style lock: …» con la técnica elegida para la lámina, la portada, las páginas, el elenco y cada nueva versión.
 - **Muestras y pedidos anteriores:** `withCurrentGuards` cambia las frases viejas por las nuevas y suma el candado; la API ahora también lo aplica (antes solo el worker).
 - **Muestras del selector:** `generate-brand-images.ts` arma las muestras de estilo con la misma dirección de arte y el mismo modificador que los libros (antes cada una tenía su frase y no se parecía al libro).
-- **Texto:** el cuento se narra en tercera persona (nada de «tú/vos/you» fuera de un diálogo). Las imágenes dejan en blanco lomos de libros, carteles, etiquetas y ropa.
+- **Texto:** el cuento nunca se narra en segunda persona (nada de «tú/vos/you» fuera de un diálogo; tercera persona o primera con la voz del protagonista). Las imágenes dejan en blanco lomos de libros, carteles, etiquetas y ropa.
 - **Tests:** `art-direction.test.ts` falla si alguna edad o estilo mete otra técnica; el test de la API «candado de estilo» falla si alguna imagen del libro sale sin el estilo elegido.
