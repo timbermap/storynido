@@ -6,6 +6,7 @@ import type { CountryCode, Locale } from '@storynido/shared';
 
 import { AuthProvider } from '@/components/auth/auth-provider';
 import { ConsentProvider } from '@/components/consent/consent-provider';
+import { SiteCountryProvider } from '@/components/site-country';
 import type { ConsentChoice } from '@/lib/consent';
 
 export function Providers({
@@ -21,9 +22,11 @@ export function Providers({
 }) {
   return (
     <ConsentProvider initial={consent}>
-      <AuthProvider locale={locale} country={country}>
-        {children}
-      </AuthProvider>
+      <SiteCountryProvider country={country}>
+        <AuthProvider locale={locale} country={country}>
+          {children}
+        </AuthProvider>
+      </SiteCountryProvider>
     </ConsentProvider>
   );
 }

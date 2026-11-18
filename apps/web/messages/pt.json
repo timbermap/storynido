@@ -2124,6 +2124,11 @@
     },
     "reorderBack": "Voltar para Minhas histórias",
     "includesPdf": "Inclui o ebook (PDF)",
+    "countrySwitch": {
+      "label": "Preços para",
+      "auto": "Pela minha localização ({country})",
+      "chosenNote": "Você escolheu manualmente; sua localização indica {country}."
+    },
     "handoff": {
       "title": "Você vai pagar na Gumroad",
       "text": "A Gumroad é o processador de pagamentos seguro da StoryNido. Ela abre em uma nova aba e esta fica aguardando o seu pagamento.",

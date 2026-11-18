@@ -2888,13 +2888,21 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Pendiente (propuesto por la mesa):** conciliar con `GET /v2/sales` los pedidos pendientes si un ping se pierde; reembolsar solo cuando el monto no coincide; mails de pago abandonado; cobrar impresos por Gumroad solo con su OK por escrito (legales); términos §5 («los impuestos se indican antes de pagar») y privacidad con Gumroad como vendedor de registro.
 - **Salida definitiva:** el CEO propone PayPal integrado en nuestra página; producto propone LLC + Stripe. Lo decide Sebas.
 
-## 273 — Revisión de página bloqueada por el filtro de seguridad: se redibuja, no va a una persona
+## 273 — El país de los precios, a la vista y con vuelta a la ubicación
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: desde Argentina el pago mostraba la referencia en COP y los textos en «tú».
+- **Causa:** su navegador tenía guardado a mano Colombia (`sn_country_choice=CO`, de algún «Enviar a» o prueba anterior). Esa elección dura un año y manda sobre la IP, que sí detecta Argentina (verificado en staging), pero no se veía en ningún lado: Mi cuenta mostraba Argentina (el país deducido al crear la cuenta) mientras el sitio usaba Colombia.
+- **Orden:** cuenta con país elegido > elegido a mano en este navegador > ubicación (IP) > idioma del navegador. Al iniciar sesión, si la cuenta tiene país elegido se aplica y la página se refresca enseguida.
+- **Pago:** junto al total digital (y en el kit) se ve «Precios para: …» con la opción «Según mi ubicación (país)», que borra la elección y vuelve a la IP. Con sesión, el cambio queda también en la cuenta. En el impreso el país sigue saliendo de la dirección.
+- **Mi cuenta:** si la cuenta no eligió país, muestra el que usa el sitio, así coincide con los precios.
+
+## 274 — Revisión de página bloqueada por el filtro de seguridad: se redibuja, no va a una persona
 
 - **Fecha:** 2026-11-18. Pedido por Sebas: el pedido de «Goodnight, Lu» (cuento para dormir) quedó en revisión manual. El dibujo de la página 10 (Lu en pijama, en la cama) había pasado la moderación, pero el revisor automático de Vertex devolvió `blockReason=PROHIBITED_CONTENT` dos veces (la misma llamada vuelve a bloquear) y la página fue a una persona con «revisión automática no disponible».
 - **Cambio:** un bloqueo del filtro de seguridad es `ContentBlockedError` (no reintentable). El control de calidad no repite la misma llamada: redibuja esa página una vez, con ropa completa y pudorosa (si está en la cama, tapada hasta los hombros), plano tranquilo y escena simple, y revisa el dibujo nuevo. No se intenta esquivar el filtro con la misma imagen. Si también bloquea, la página va a una persona como antes. Cuenta dentro de los topes de reparación. Código de calidad nuevo `page_review_blocked`.
 - **Avisos:** cuando un pedido termina bien (por ejemplo, tras la revisión manual y el reintento), los avisos `pipeline_failed` abiertos de ese pedido se cierran solos (`resolvedBy: 'system'`). La portada Hoy tampoco muestra avisos viejos de pedidos que ya no están en revisión.
 
-## 274 — La idea de la ficha entra al prompt del cuento y manda sobre los gustos
+## 275 — La idea de la ficha entra al prompt del cuento y manda sobre los gustos
 
 - **Fecha:** 2026-11-18. La mesa revisó el PDF de «Goodnight, Lu» (Buenas noches, 5 años, gusto «gimnasia»). La ficha promete «la rutina de dormir contada con rima: el baño, el pijama, el último abrazo y las cosas que también se van a dormir». El libro salió de acrobacias: salta en la cama para alcanzar un estante, se cae, hace la vertical contra la pared y un puente. No hay rima, baño ni cosas que se van a dormir.
 - **Causa:** las historias con la plantilla genérica (`TEXT_PROMPT`) solo le pasaban a la IA el título, los gustos y «un pequeño desafío y un final feliz». El resumen de la ficha no llegaba al planificador ni al redactor, así que el único tema real era el gusto del chico.

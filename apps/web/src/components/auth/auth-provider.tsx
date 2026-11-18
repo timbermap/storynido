@@ -88,8 +88,11 @@ export function AuthProvider({
           // Cuenta existente: su país e idioma quedan en este dispositivo (sin recargar).
           const saved = await readPreferences(db, user.uid).catch(() => null);
           const age = String(COUNTRY_CHOICE_MAX_AGE);
-          if (saved?.country)
+          // El país elegido en la cuenta manda sobre lo elegido en este navegador y sobre la IP.
+          if (saved?.country) {
             document.cookie = `${COUNTRY_CHOICE_COOKIE}=${saved.country}; path=/; max-age=${age}; samesite=lax`;
+            if (saved.country !== country && !effect.cancelled) router.refresh();
+          }
           if (saved?.locale)
             // El idioma guardado en la cuenta es una elección: manda sobre el de la IP.
             document.cookie = `${LOCALE_CHOICE_COOKIE}=${saved.locale}; path=/; max-age=${age}; samesite=lax`;

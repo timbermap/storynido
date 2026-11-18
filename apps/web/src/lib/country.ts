@@ -27,6 +27,17 @@ const GEO_HEADERS = [
   'x-vercel-ip-country',
 ] as const;
 
+/** Guarda en este navegador el país elegido a mano (manda sobre la IP). Solo en el cliente. */
+export function rememberCountryChoice(country: CountryCode) {
+  document.cookie = `${COUNTRY_CHOICE_COOKIE}=${country}; path=/; max-age=${String(COUNTRY_CHOICE_MAX_AGE)}; samesite=lax`;
+}
+
+/** Olvida el país elegido a mano: vuelve a detectarse por la ubicación (IP). Solo en el cliente. */
+export function forgetCountryChoice() {
+  document.cookie = `${COUNTRY_CHOICE_COOKIE}=; path=/; max-age=0; samesite=lax`;
+  document.cookie = `${COUNTRY_COOKIE}=; path=/; max-age=0; samesite=lax`;
+}
+
 export function parseCountry(value: string | null | undefined): CountryCode | null {
   const parsed = countryCodeSchema.safeParse(value?.trim().toUpperCase());
   return parsed.success ? parsed.data : null;
