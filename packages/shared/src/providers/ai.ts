@@ -29,6 +29,11 @@ export interface StoryRequest {
   mustInclude?: readonly string[];
   /** Español: «vos» (Argentina y Uruguay) o «tú» (el resto). Lo respeta también la revisión. */
   spanishVoice?: SpanishVoice;
+  /**
+   * Aspecto del protagonista (en inglés): la familia que el adulto no describió se le parece
+   * (DECISIONS 264).
+   */
+  protagonistLook?: string;
 }
 
 /** Tratamiento en español: voseo rioplatense o tuteo neutro. */
@@ -158,8 +163,16 @@ export interface IllustrationRequest {
   /** Modificador del estilo elegido (illustrationStyles.promptModifier). */
   stylePrompt: string;
   character: CharacterReference;
-  /** Ilustraciones ya generadas del mismo libro (p. ej. la portada) para mantener la consistencia. */
+  /**
+   * Ilustraciones del mismo libro y en su estilo (la lámina, el acompañante): referencia de
+   * identidad y de estilo.
+   */
   references: readonly ImageData[];
+  /**
+   * Dibujos del personaje en OTRO estilo (el dibujo del perfil): solo rasgos, se ignora su técnica
+   * (DECISIONS 264).
+   */
+  traitReferences?: readonly ImageData[];
   aspectRatio: '1:1' | '3:4' | '4:3';
   /** 1K para pantalla; 2K para imprenta (~220 dpi a 21×28 cm). */
   resolution?: '1K' | '2K';

@@ -2793,3 +2793,31 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Fecha:** 2026-11-18. Para bajar el tiempo del merge a staging (DECISIONS 260) sin pagar runners más grandes.
 - **Cambio:** el job de chequeos se parte en dos que corren al mismo tiempo: «Lint, tipos y build» (más `audit` y `format:check`) y «Tests» (con Java y los emuladores). Cada uno sigue con Turborepo de a una tarea (`--concurrency=1`) y su propia caché, así no vuelve la saturación del runner de 2 CPU.
 - **Efecto esperado:** el CI pasa de la suma (~6 min) al más largo de los dos (~4 min, los tests). El Deploy de staging sigue esperando al CI completo.
+
+## 264 — Vista previa: un solo artista por libro, la edad del cuento y el idioma del perfil
+
+- **Fecha:** 2026-11-18. Pedido por Sebas, a partir de su muestra de «Lu» en staging (diagnóstico en `.claude-previa/diagnostico.md`, fuera del repo).
+- **Problema:** el cuento de una nena de 5 años, en estilo «Cuento clásico», salió con:
+  - la portada en tinta de historieta, anteojos de sol y un lago con montañas;
+  - las páginas en otro estilo;
+  - Lu dibujada como adulta;
+  - todo en inglés.
+    Las causas:
+  1. con «Usamos el dibujo de…», la lámina era el dibujo del perfil (siempre gouache, hecho desde la foto adulta y sin regla de edad), y el prompt pedía copiar «the same art style» de esa referencia;
+  2. la descripción decía `child (around 35-40 years old)`;
+  3. la portada pedía «more dramatic»;
+  4. el idioma del libro salía solo de la URL (`/en`), aunque el perfil dijera español.
+- **Un solo artista por libro:** la lámina se dibuja en el estilo elegido. El dibujo del perfil y la foto van solo como referencia de rasgos: `IllustrationRequest.traitReferences`, con la nota «IGNORE their technique… and age». El dibujo se usa tal cual solo si ya está en ese estilo y esa edad: los dibujos nuevos guardan `styleId` y `age`. La lámina queda en `children.styleSheets.<estilo>`, con una clave de estilo, edad, rasgos, fotos, dibujo y dirección de arte, y se reutiliza en los próximos cuentos del personaje. Con «Usamos el dibujo de…» se sigue aprobando sola. Al borrar el personaje se borran sus láminas.
+- **La edad del cuento manda:** el texto de la imagen es `Lu: a 5-year-old child (draw them exactly as they would look at 5 years old…)`; en un cumpleaños, cuenta la edad que cumple.
+  - De la foto solo se toman rasgos.
+  - No se copian anteojos de sol, gorros ni marcas de la edad (arrugas, barba).
+  - Los anteojos son «clear prescription glasses (never sunglasses)», y la ficha de la foto ya no cuenta los de sol como anteojos.
+  - El dibujo del perfil también usa las proporciones de su edad.
+  - El aviso «la foto parece de otra edad» ahora dice que la dibujamos con la edad del cuento.
+- **Portada:** va en el lugar del cuento que más se repite (biblia visual), en medio de la actividad central o del momento más feliz, nunca con la pose quieta de la lámina. Usa exactamente la técnica de las páginas, sin «more dramatic» ni paisajes inventados. Igual en el pedido (worker).
+- **Familia:** los familiares que el adulto no describió se parecen al protagonista (tono de piel parecido, color de pelo posible, sin estereotipos) y se distinguen por edad, cuerpo, peinado y color de ropa. El planificador recibe el aspecto del protagonista. Antes se le pedía que todo personaje que se repite fuera distinto en piel y pelo, y así salió un papá que no se parecía a Lu.
+- **Zona del texto:** la regla general ya no deja elegir «abajo (o arriba)». La nota de cada página dice qué tercio lleva el texto y que el personaje entero (cabeza, manos y acción) va en los otros dos, del mismo lado que pone la maqueta.
+- **Idioma:** el libro nuevo toma el idioma del perfil (`users.locale`) antes que el de la URL (que sale de la elección manual o de la IP). El selector «Idioma del cuento» arranca con el del perfil. La revisión muestra la fila «Idioma del cuento» y el título en el idioma del libro.
+- **Historias de otra edad:** si la historia elegida no es para la edad del protagonista, el paso de historia lo avisa y el prompt pide adaptar el conflicto, el vocabulario y la estructura a su edad.
+- **Casos fijos:** `previa-casos.test.ts` cubre foto adulta con 5 años, portada, zona del texto, historia de otra edad e idioma. Los tests de la API cubren el dibujo en otro estilo y la reutilización de la lámina. `pnpm eval:preview --case lu|lu-otro-estilo|adulto-5|familia` arma la muestra con IA real como la API.
+- **Verificación:** el caso de Lu (foto y dibujo de Sebas, «Buenas noches, Lu», clásico y lápices de colores, español de Argentina) costó US$ 1,41 en tres corridas. Lu sale con 5 años, portada y páginas en el mismo estilo, texto en español con voseo y mamá con su mismo tono de piel.

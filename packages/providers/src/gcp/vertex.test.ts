@@ -190,6 +190,8 @@ describe('Vertex AI', () => {
     const prompt = calls[0]?.contents[0]?.parts[0]?.text ?? '';
     expect(prompt).toContain('NO sail and NO mast');
     expect(prompt).toContain('who is not in that scene');
+    // La familia no descrita se parece al protagonista (DECISIONS 264).
+    expect(prompt).toContain('look like a plausible family of the protagonist');
 
     const old = await new VertexTextProvider(
       clientWith(() =>
@@ -399,7 +401,55 @@ describe('Vertex AI', () => {
     expect(image.usage.costUsdMicros).toBe(Math.ceil(600 * 0.5 + 1120 * 60));
     const parts = calls[0]?.contents[0]?.parts ?? [];
     expect(parts.filter((part) => 'inlineData' in part)).toHaveLength(2);
-    expect(String(parts.at(-1)?.text)).toContain('reference illustrations of the main character');
+    expect(String(parts.at(-1)?.text)).toContain(
+      'Image 2 is reference illustrations from this same book',
+    );
+    // La foto solo da rasgos: la edad, los anteojos de sol y los gorros no (DECISIONS 264).
+    expect(String(parts.at(-1)?.text)).toContain('Image 1 is a photo of the real person');
+    expect(String(parts.at(-1)?.text)).toContain('Ignore everything else: their age');
+  });
+
+  it('el dibujo del perfil en otro estilo va solo como rasgos, antes de las ilustraciones del libro', async () => {
+    const png = await sharp({
+      create: { width: 8, height: 8, channels: 3, background: '#fff' },
+    })
+      .png()
+      .toBuffer();
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const provider = new VertexImageProvider(
+      clientWith(
+        () => ({
+          status: 200,
+          json: {
+            candidates: [
+              {
+                content: {
+                  parts: [{ inlineData: { mimeType: 'image/png', data: png.toString('base64') } }],
+                },
+              },
+            ],
+            usageMetadata: { promptTokenCount: 600, candidatesTokenCount: 1120 },
+          },
+        }),
+        calls,
+      ),
+    );
+    const image = { bytes: new Uint8Array(png), mimeType: 'image/png' };
+    await provider.generateIllustration({
+      prompt: 'Lu does a handstand',
+      stylePrompt: 'classic narrative editorial illustration',
+      character: { description: 'Lu: a 5-year-old child', photo: sampleCharacterPhoto() },
+      references: [image],
+      traitReferences: [image],
+      aspectRatio: '3:4',
+      seed: 1,
+    });
+    const text = String(calls[0]?.contents[0]?.parts.at(-1)?.text);
+    expect(text).toContain(
+      'Image 2 is drawings of the main character made in a DIFFERENT art style',
+    );
+    expect(text).toContain('IGNORE their technique');
+    expect(text).toContain('Image 3 is reference illustrations from this same book');
   });
 
   it('reintenta ante un 429 y después responde', async () => {

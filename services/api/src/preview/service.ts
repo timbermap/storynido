@@ -48,6 +48,9 @@ import {
   visualBibleCheck,
   coverScene,
   describeCharacter,
+  describeTraits,
+  coverSetting,
+  ageDirection,
   buildStoryPrompt,
   utcDay,
   utcIsoWeek,
@@ -68,7 +71,12 @@ import {
 } from '@storynido/shared';
 import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
-import { FieldValue, type DocumentReference, type Firestore } from 'firebase-admin/firestore';
+import {
+  FieldPath,
+  FieldValue,
+  type DocumentReference,
+  type Firestore,
+} from 'firebase-admin/firestore';
 
 import { GenerationTimings } from '../generation-times';
 import { AiBudget, isBudgetExceeded, type AiLimits, type UsageContext } from '../ai/budget';
@@ -757,7 +765,15 @@ export class PreviewService {
       ai,
       track,
     );
-    const characterDescription = describeCharacter(String(child.name), sheet, traits, mustKeep);
+    // La edad del cuento manda sobre la de la foto (DECISIONS 264): en un cumpleaños, la que cumple.
+    const imageAge = readerAge ?? Number(child.age);
+    const characterDescription = describeCharacter(
+      String(child.name),
+      imageAge,
+      sheet,
+      traits,
+      mustKeep,
+    );
     // Nombres que tienen que aparecer tal cual: el del protagonista y el apodo de los recuerdos.
     const requiredNames = [String(child.name), memories?.nickname ?? ''].filter(Boolean);
 
@@ -782,10 +798,14 @@ export class PreviewService {
       wordsPerPage: plan.words,
       mustInclude: requiredNames.slice(1),
       spanishVoice,
+      // La familia que el adulto no describió se parece al protagonista (DECISIONS 264).
+      protagonistLook: describeTraits(traits, []),
     };
     const promptInput = {
       ...request,
       template: story.textPromptTemplate,
+      // Historia de otra edad (Buenas noches, de 0 a 2, para una nena de 5): se adapta.
+      storyAges: { min: story.ageMin, max: story.ageMax },
       memories,
       event,
       goal,
@@ -992,14 +1012,14 @@ export class PreviewService {
     // Dirección de arte (paleta, edad, encuadre, qué evitar): queda en la muestra y se congela
     // en el pedido, así el libro final se ilustra igual que lo aprobado.
     const direction = artDirection({
-      age: Number(child.age),
+      age: imageAge,
       channel: book.channel ?? 'families',
       palette: story.palette,
       coloring: plan.contentType === 'coloring',
       style: style.slug,
     });
 
-    // El dibujo que el adulto aprobó en el perfil del personaje es la referencia de sus cuentos.
+    // El dibujo que el adulto aprobó en el perfil del personaje es la referencia de sus rasgos.
     const savedDrawing = child.drawing as StoredDrawing | undefined;
     const approvedDrawing = savedDrawing?.imagePath;
     const drawingBytes = approvedDrawing
@@ -1008,41 +1028,70 @@ export class PreviewService {
           .download({ bucket: 'assets', path: approvedDrawing })
           .catch(() => new Uint8Array())
       : new Uint8Array();
-    const characterBase = `previews/${uid}/${bookId}/character-${Date.now().toString(36)}`;
+    const sheetBase = `previews/${uid}/${bookId}/character-${Date.now().toString(36)}`;
 
     let characterPaths: { clean: string; preview: string };
     let fromDrawing = false;
-    let sheetTraits = traits;
-    let sheetMustKeep = mustKeep;
-    if (book.useDrawing === true && drawingBytes.length > 0) {
+    const useDrawing = book.useDrawing === true && drawingBytes.length > 0;
+    const sheetTraits = useDrawing ? (savedDrawing?.traits ?? traits) : traits;
+    const sheetMustKeep = useDrawing ? (savedDrawing?.mustKeep ?? mustKeep) : mustKeep;
+    // Un solo artista por libro (DECISIONS 264): el dibujo del perfil sirve tal cual solo si ya
+    // está en el estilo y la edad del cuento. Si no, la lámina se dibuja en el estilo elegido y el
+    // dibujo del perfil queda como referencia solo de rasgos (antes era gouache y adulto, y la
+    // portada y las páginas lo copiaban cada una a su manera).
+    if (
+      useDrawing &&
+      (savedDrawing?.styleId ?? PROFILE_DRAWING_STYLE) === style.slug &&
+      savedDrawing?.age === imageAge
+    ) {
       // «Usamos el dibujo de…»: la lámina es ese dibujo (copiado al libro, por si después se
       // actualiza en el perfil). No se genera otra imagen ni se gasta una generación.
-      characterPaths = await this.store(characterBase, {
+      characterPaths = await this.store(sheetBase, {
         bytes: drawingBytes,
         mimeType: 'image/webp',
       });
       fromDrawing = true;
-      sheetTraits = savedDrawing?.traits ?? traits;
-      sheetMustKeep = savedDrawing?.mustKeep ?? mustKeep;
     } else {
       // Etapa 1: solo la lámina del personaje (1 imagen). La portada y las páginas se ilustran
       // cuando el adulto aprueba al personaje: si no se parece, no se gastan más imágenes.
-      const character = await this.illustration(ai, track, limits, {
-        prompt: buildIllustrationPrompt({
-          template: story.imagePromptTemplate,
-          scene: CHARACTER_REFERENCE_SCENE,
-          character: characterDescription,
-          style: style.promptModifier,
+      const description = useDrawing
+        ? describeCharacter(String(child.name), imageAge, sheet, sheetTraits, sheetMustKeep)
+        : characterDescription;
+      // Con «Usamos el dibujo de…», la lámina en el estilo del cuento sale de ese dibujo ya
+      // aprobado: se ilustra directo, como antes.
+      fromDrawing = useDrawing;
+      characterPaths = await this.styleSheet(uid, book, child, {
+        key: styleSheetKey({
+          style: style.slug,
+          age: imageAge,
+          traits: traitsKey(sheetTraits, sheetMustKeep),
+          drawing: approvedDrawing ?? null,
+          // Las fotos (los rasgos ya van aparte): no cambia al confirmar los rasgos.
+          photo: characterBase(book),
           direction,
         }),
-        stylePrompt: style.promptModifier,
-        character: { description: characterDescription, photo },
-        references:
-          drawingBytes.length > 0 ? [{ bytes: drawingBytes, mimeType: 'image/webp' }] : [],
-        aspectRatio: '3:4',
-        seed: 0,
+        style: style.slug,
+        base: sheetBase,
+        draw: async () =>
+          (
+            await this.illustration(ai, track, limits, {
+              prompt: buildIllustrationPrompt({
+                template: story.imagePromptTemplate,
+                scene: CHARACTER_REFERENCE_SCENE,
+                character: description,
+                style: style.promptModifier,
+                direction,
+              }),
+              stylePrompt: style.promptModifier,
+              character: { description, photo },
+              references: [],
+              traitReferences:
+                drawingBytes.length > 0 ? [{ bytes: drawingBytes, mimeType: 'image/webp' }] : [],
+              aspectRatio: '3:4',
+              seed: 0,
+            })
+          ).image,
       });
-      characterPaths = await this.store(characterBase, character.image);
     }
 
     return {
@@ -1391,12 +1440,12 @@ export class PreviewService {
       throw new AppError(409, 'bad_request', 'Primero genera la vista previa.');
     }
     try {
-      const { story, style, child } = await this.context(uid, book, preview);
+      const { story, style, child, imageAge } = await this.context(uid, book, preview);
       const ai = this.providers.ai();
       const track = this.tracker(uid, bookId, limits);
       const { photo, sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
       const { traits, mustKeep } = preview.character;
-      const description = describeCharacter(String(child.name), sheet, traits, mustKeep);
+      const description = describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
       const storage = this.providers.storage();
       const lamina: ImageData = {
         bytes: await storage.download({ bucket: 'assets', path: preview.character.imagePath }),
@@ -1479,7 +1528,7 @@ export class PreviewService {
           seed,
         });
       const pageScenes = [
-        coverScene(preview.pages[0]?.illustrationPrompt, preview.title),
+        coverScene(preview.pages[0]?.illustrationPrompt, preview.title, coverSetting(preview.plan)),
         ...preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map(
           (page) =>
             // Biblia visual (objetos, lugar, ropa especial y encuadre de la escena) y el espacio
@@ -1655,10 +1704,10 @@ export class PreviewService {
     const fixStartedAt = Date.now();
 
     try {
-      const { story, style, child } = await this.context(uid, book, preview);
+      const { story, style, child, imageAge } = await this.context(uid, book, preview);
       const track = this.tracker(uid, bookId, limits);
       const { photo, sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
-      const description = `${describeCharacter(String(child.name), sheet, traits, mustKeep)}${
+      const description = `${describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep)}${
         note ? `\nCorrection requested by the parent (apply it): ${note}` : ''
       }`;
       const { image } = await this.illustration(ai, track, limits, {
@@ -1851,11 +1900,11 @@ export class PreviewService {
       const mustKeep = [
         ...new Set([...(previous?.mustKeep ?? defaultMustKeep(traits)), ...input.mustKeep]),
       ];
-      const description = `${describeCharacter(String(child.name), sheet, traits, mustKeep)}${
+      const description = `${describeCharacter(String(child.name), age, sheet, traits, mustKeep)}${
         input.note ? `\nCorrection requested by the parent (apply it): ${input.note}` : ''
       }`;
       const styles = await this.catalog.styles();
-      const style = styles.find((item) => item.slug === 'gouache-editorial') ?? styles[0];
+      const style = styles.find((item) => item.slug === PROFILE_DRAWING_STYLE) ?? styles[0];
       if (!style) throw new AppError(503, 'ai_unavailable', 'No pudimos dibujarlo ahora.');
       const { image } = await this.illustration(ai, track, limits, {
         prompt: buildIllustrationPrompt({
@@ -1863,6 +1912,8 @@ export class PreviewService {
           scene: CHARACTER_REFERENCE_SCENE,
           character: description,
           style: style.promptModifier,
+          // Las proporciones de su edad, también en el perfil (DECISIONS 264).
+          direction: Number.isFinite(age) ? ageDirection(age) : null,
         }),
         stylePrompt: style.promptModifier,
         character: { description, photo },
@@ -1881,6 +1932,8 @@ export class PreviewService {
           previewImagePath: paths.preview,
           traits,
           mustKeep,
+          styleId: style.slug,
+          ...(Number.isFinite(age) ? { age } : {}),
           createdAt: new Date(),
         },
         updatedAt: new Date(),
@@ -1915,6 +1968,49 @@ export class PreviewService {
     await ref.update({ drawingCandidate: FieldValue.delete(), updatedAt: new Date() });
     await this.deleteDrawing(child.drawingCandidate as StoredDrawing | undefined);
     return this.childDrawing(uid, childId);
+  }
+
+  /**
+   * Lámina del personaje en el estilo del libro (DECISIONS 264): se dibuja una vez por personaje,
+   * estilo, edad, rasgos y fotos, y se reutiliza en sus próximos cuentos con ese estilo. Siempre se
+   * copia al libro (si se borra el libro, el personaje la conserva, y al revés).
+   */
+  private async styleSheet(
+    uid: string,
+    book: BookData,
+    child: Record<string, unknown>,
+    input: { key: string; style: string; base: string; draw: () => Promise<ImageData> },
+  ): Promise<{ clean: string; preview: string }> {
+    const storage = this.providers.storage();
+    const sheets = (child.styleSheets ?? {}) as Record<string, StoredStyleSheet | undefined>;
+    const cached = sheets[input.style];
+    if (cached?.key === input.key && cached.imagePath) {
+      const bytes = await storage
+        .download({ bucket: 'assets', path: cached.imagePath })
+        .catch(() => new Uint8Array());
+      if (bytes.length > 0) return this.store(input.base, { bytes, mimeType: 'image/webp' });
+    }
+    const image = await input.draw();
+    const paths = await this.store(input.base, image);
+    if (book.childId) {
+      const saved = await this.store(
+        `characters/${uid}/${book.childId}/sheet-${input.style}-${Date.now().toString(36)}`,
+        image,
+      );
+      await this.db.collection(COLLECTIONS.children).doc(book.childId).update(
+        new FieldPath('styleSheets', input.style),
+        {
+          key: input.key,
+          imagePath: saved.clean,
+          previewImagePath: saved.preview,
+          createdAt: new Date(),
+        },
+        'updatedAt',
+        new Date(),
+      );
+      if (cached) await this.deleteDrawing(cached);
+    }
+    return paths;
   }
 
   private async deleteDrawing(drawing: StoredDrawing | undefined) {
@@ -2048,7 +2144,7 @@ export class PreviewService {
     const style = styles.find((item) => item.slug === preview.styleId);
     const child = childSnap.data();
     if (!story || !style || child?.ownerUid !== uid) throw generationFailed();
-    return { story, style, child };
+    return { story, style, child, imageAge: storyAgeFor(book, child) };
   }
 
   // ------------------------------------------------------------- edición
@@ -2101,7 +2197,7 @@ export class PreviewService {
     const regenerateStartedAt = Date.now();
 
     try {
-      const { story, style, child } = await this.context(uid, book, preview);
+      const { story, style, child, imageAge } = await this.context(uid, book, preview);
       const ai = this.providers.ai();
       const track = this.tracker(uid, bookId, limits);
       const { photo, sheet, traits, mustKeep } = await this.characterOf(
@@ -2111,7 +2207,7 @@ export class PreviewService {
         ai,
         track,
       );
-      const description = describeCharacter(String(child.name), sheet, traits, mustKeep);
+      const description = describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
       const storage = this.providers.storage();
       // Referencia: la lámina del personaje (las muestras anteriores a ella usan la portada).
       const reference: ImageData = {
@@ -2124,7 +2220,11 @@ export class PreviewService {
       };
       const scene =
         target === 'cover'
-          ? coverScene(preview.pages[0]?.illustrationPrompt, preview.title)
+          ? coverScene(
+              preview.pages[0]?.illustrationPrompt,
+              preview.title,
+              coverSetting(preview.plan),
+            )
           : (preview.pages[target]?.illustrationPrompt ?? '');
       const companion = preview.companion ?? null;
       const companionImage: ImageData | null = companion
@@ -2288,6 +2388,48 @@ interface StoredDrawing {
   previewImagePath?: string;
   traits?: CharacterTraits;
   mustKeep?: MustKeepTrait[];
+  /** Estilo y edad con que se dibujó (los dibujos anteriores a DECISIONS 264 no los traen). */
+  styleId?: string;
+  age?: number;
+}
+
+/** Lámina del personaje en un estilo, guardada en el personaje para reutilizarla. */
+interface StoredStyleSheet extends StoredDrawing {
+  key?: string;
+}
+
+/** Edad con que se dibuja al personaje: la del cuento (en un cumpleaños, la que cumple). */
+function storyAgeFor(book: BookData, child: Record<string, unknown> | undefined): number {
+  return book.event?.type === 'birthday' && typeof book.event.turningAge === 'number'
+    ? book.event.turningAge
+    : Number(child?.age);
+}
+
+/** Estilo del dibujo del perfil (el de «Crear su dibujo»). */
+const PROFILE_DRAWING_STYLE = 'gouache-editorial';
+
+/** Lo que define una lámina: si algo cambia (rasgos, fotos, dibujo, edad o estilo), se redibuja. */
+function styleSheetKey(input: {
+  style: string;
+  age: number;
+  traits: string;
+  drawing: string | null;
+  photo: string;
+  direction: string;
+}): string {
+  return createHash('sha256')
+    .update(
+      [
+        input.style,
+        String(input.age),
+        input.traits,
+        input.drawing ?? '',
+        input.photo,
+        input.direction,
+      ].join('|'),
+    )
+    .digest('hex')
+    .slice(0, 32);
 }
 
 /** Plantilla de la lámina del perfil (sin cuento): la misma estructura que la de las historias. */

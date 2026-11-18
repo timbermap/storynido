@@ -618,7 +618,8 @@ export class VertexTextProvider implements AITextProvider {
         {
           text: `Describe only the visible physical traits of the main person in this photo (a child or an adult: the character can be anyone in the family) so an illustrator can draw them consistently.
 Use short English phrases. Do not guess identity, ethnicity, name or location. Hair: color, length and texture.
-Distinctive features only if clearly visible (glasses, freckles, dimples, missing teeth...).`,
+Distinctive features only if clearly visible (freckles, dimples, missing teeth...); never accessories such as sunglasses or hats.
+wearsGlasses is true only for clear prescription eyeglasses: sunglasses do not count.`,
         },
       ],
       { temperature: 0.2, responseMimeType: 'application/json', responseSchema: CHARACTER_SCHEMA },
@@ -837,9 +838,16 @@ cast: every OTHER person who appears in two or more scenes (a teacher, a classma
 look in English (age, hair, clothes and colors). Take the gender from the brief and the story (for example "el profe" or "he" means male,
 "la profe" means female); use unspecified only when nothing says it. In mustBeVisible, always name these people with that gender
 ("the male teacher") so every scene agrees. Empty array if nobody else recurs.
-Recurring characters must be told apart at a glance, even in silhouette: every companion and cast member differs from the protagonist
-in hair color and style, skin tone or build, and has a signature outfit color the protagonist never wears; two characters never swap
-outfits. One central place or object that recurs (a shelter, a ship, a lantern) is described once in continuityFacts with a fixed
+Recurring characters must be told apart at a glance, even in silhouette, and each has a signature outfit color the protagonist never
+wears; two characters never swap outfits. Relatives of the protagonist (parents, siblings, grandparents, cousins) whose look the brief
+does not give look like a plausible family of the protagonist: a similar skin tone and a related hair color, never a stereotype; tell
+them apart by age, build, hairstyle and outfit color. Every other person (teacher, friend, neighbor) differs from the protagonist in
+hair color and style, skin tone or build.${
+            request.protagonistLook
+              ? `
+Protagonist's look, for family resemblance: ${request.protagonistLook}.`
+              : ''
+          } One central place or object that recurs (a shelter, a ship, a lantern) is described once in continuityFacts with a fixed
 look, is always called by the same name, and is drawn the same way in every scene; repeat that fixed look word for word in the
 continuityFacts of every scene where it appears. Use a single central metaphor for the whole book, never several. When a sport, hobby
 or tool appears, name it precisely in mustBeVisible with its distinctive look (for example "a squash racket: small round head, long
@@ -1070,16 +1078,32 @@ export class VertexImageProvider implements AIImageProvider {
     const model = this.client.options.models().image;
     const parts: Part[] = [];
     const notes: string[] = [];
+    // Cada nota nombra sus imágenes por número: la foto, los dibujos de otro estilo (solo rasgos) y
+    // las ilustraciones del libro (rasgos y estilo), en ese orden (DECISIONS 264).
+    const label = (from: number, count: number) =>
+      count === 1
+        ? `Image ${String(from)} is`
+        : `Images ${String(from)} to ${String(from + count - 1)} are`;
+    let next = 1;
     if (request.character.photo) {
       parts.push(imagePart(request.character.photo));
       notes.push(
-        'The first image is a photo of the child: draw the main character with the same face, hair and skin tone, as an illustrated character (never a photo).',
+        `${label(next, 1)} a photo of the real person the main character is based on. Take ONLY identity traits from it: face shape, hair color and style, skin tone, eye color, and prescription glasses if they wear them. Ignore everything else: their age (draw the age given in "Main character"), sunglasses, hats and other accessories, the background, the lighting and the photographic look. Never draw a photo.`,
       );
+      next += 1;
+    }
+    const traitReferences = request.traitReferences ?? [];
+    for (const reference of traitReferences) parts.push(imagePart(reference));
+    if (traitReferences.length > 0) {
+      notes.push(
+        `${label(next, traitReferences.length)} drawings of the main character made in a DIFFERENT art style. Use them ONLY for identity (face, hair color and style, skin tone, eye color, glasses and outfit) and IGNORE their technique, line, texture, colors, proportions and age: draw in the art style described above, at the age given in "Main character".`,
+      );
+      next += traitReferences.length;
     }
     for (const reference of request.references) parts.push(imagePart(reference));
     if (request.references.length > 0) {
       notes.push(
-        'The other images are reference illustrations of the main character for this same book. Use them ONLY to keep the character identical (face, hair, outfit) and the same art style. Draw a completely NEW scene as described above: do not copy their composition, background, objects or pose.',
+        `${label(next, request.references.length)} reference illustrations from this same book. Keep the main character identical to them (face, hair, age, proportions, outfit) and match their art style exactly (technique, line, texture and colors). Draw a completely NEW scene as described above: do not copy their composition, background, objects or pose.`,
       );
     }
     parts.push({

@@ -12,6 +12,7 @@
     "typecheck": "tsc",
     "test": "vitest run",
     "eval:character": "tsx scripts/eval-character.ts",
+    "eval:preview": "tsx scripts/eval-preview.ts",
     "eval:prompts": "tsx scripts/eval-prompts.ts"
   },
   "dependencies": {

@@ -89,9 +89,10 @@ export class AccountService {
       await this.db.recursiveDelete(doc.ref);
       deletedBooks += 1;
     }
-    // Su dibujo del perfil (el actual y uno nuevo sin aprobar).
-    for (const key of ['drawing', 'drawingCandidate'] as const) {
-      const drawing = child[key] as { imagePath?: unknown; previewImagePath?: unknown } | undefined;
+    // Su dibujo del perfil (el actual y uno nuevo sin aprobar) y sus láminas por estilo.
+    type Stored = { imagePath?: unknown; previewImagePath?: unknown } | undefined;
+    const sheets = Object.values((child.styleSheets ?? {}) as Record<string, Stored>);
+    for (const drawing of [child.drawing as Stored, child.drawingCandidate as Stored, ...sheets]) {
       for (const path of [drawing?.imagePath, drawing?.previewImagePath]) {
         if (typeof path === 'string') await storage.delete({ bucket: 'assets', path });
       }

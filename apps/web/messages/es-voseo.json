@@ -250,7 +250,7 @@
       "generatingText": "Escribimos la historia y dibujamos a {name}. Esto lleva unos minutos, porque cuidamos que se parezca. Después vos lo revisás y, recién con tu OK, ilustramos la portada y las primeras páginas.",
       "differencesEdit": "Podés editar los textos de cada página antes de pedirlo.",
       "staleText": "Esta muestra corresponde a la versión anterior. Creala de nuevo para ver los cambios.",
-      "ageMismatchText": "En el cuento, {name} tiene {age} años, pero la foto parece de alguien de otra edad. Si es correcto, seguí adelante; si no, revisá la edad o cambiá la foto antes de pagar.",
+      "ageMismatchText": "En el cuento, {name} tiene {age} años, pero la foto parece de alguien de otra edad. La dibujamos con {age} años, como en el cuento. Si la edad no es correcta, revisala antes de pagar.",
       "errors": {
         "limit_reached": "Ya probaste varias versiones hoy. Guardamos todo y mañana seguís.",
         "photo_unreadable": "No pudimos leer esta foto. Probá con otra (de frente, bien iluminada, solo el rostro) o elegí los rasgos del personaje. No cuenta para tu límite de hoy.",
