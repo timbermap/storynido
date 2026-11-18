@@ -10,12 +10,12 @@ Lo que falta para abrir la venta. Se marca ✅ solo lo verificado. El orden de l
 
 ## 1. Decisiones pendientes
 
-| Estado | Qué                                                                                                                                 | Quién |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| 🟡     | Procesador de pagos: Dodo Payments para lo digital, en modo test en staging (DECISIONS 244); falta la cuenta en vivo y los impresos | 👤    |
-| ⬜     | Imprenta para Latinoamérica (respuestas de Cloudprinter, RPI y Peecho)                                                              | 👤    |
-| ⬜     | BookVault para Europa (sí o no)                                                                                                     | 👤    |
-| ⬜     | Revisar márgenes por producto (Admin → Precios y márgenes) y activarlos en producción; todos los países se venden (DECISIONS 096)   | 👤    |
+| Estado | Qué                                                                                                                               | Quién |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| 🟡     | Procesador de pagos: Gumroad como puente en staging (DECISIONS 255); Dodo rechazó la cuenta el 18 Nov y se apeló (DECISIONS 244)  | 👤    |
+| ⬜     | Imprenta para Latinoamérica (respuestas de Cloudprinter, RPI y Peecho)                                                            | 👤    |
+| ⬜     | BookVault para Europa (sí o no)                                                                                                   | 👤    |
+| ⬜     | Revisar márgenes por producto (Admin → Precios y márgenes) y activarlos en producción; todos los países se venden (DECISIONS 096) | 👤    |
 
 ## 2. Calidad antes de vender
 

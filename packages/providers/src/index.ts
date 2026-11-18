@@ -3,6 +3,7 @@ export * from './gcp/storage';
 export * from './gcp/trace';
 export * from './cloudprinter/print';
 export * from './dodo/payment';
+export * from './gumroad/payment';
 export * from './lulu/print';
 export * from './gelato/print';
 export * from './resend/email';

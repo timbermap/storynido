@@ -40,10 +40,13 @@ module "environment" {
   # Mails reales con Resend; el secreto de las bajas ya tiene valor (DECISIONS 078).
   email_provider           = "resend"
   email_link_secret_loaded = true
-  # Pagos de lo digital con Dodo Payments en modo test (DECISIONS 244): no cobra de verdad.
-  payment_provider = "dodo"
-  dodo_product_id  = "pdt_0Ns9WghE2X0qwP6OPfN7D"
-  log_level        = "debug"
+  # Pagos con Gumroad (DECISIONS 255) mientras Dodo revisa la apelación. Gumroad no tiene modo de
+  # prueba: en staging solo vale la compra del propio vendedor (test=true, no cobra).
+  payment_provider    = "gumroad"
+  gumroad_product_url = "https://storynidoar.gumroad.com/l/cjlkhc"
+  # Dodo (DECISIONS 244) queda listo para volver: payment_provider = "dodo".
+  dodo_product_id = "pdt_0Ns9WghE2X0qwP6OPfN7D"
+  log_level       = "debug"
   # Panel de admin: 2FA (TOTP) obligatorio desde Identity Platform (DECISIONS 092).
   admin_url          = "https://admin--storynido-staging.us-central1.hosted.app"
   admin_mfa_required = true

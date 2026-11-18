@@ -9,4 +9,5 @@ Implementaciones de los proveedores externos (IA, pagos, imprenta, mails, storag
 
 Las implementaciones reales se suman en sus fases: Vertex AI (07), Cloud Storage (06), pagos (11), Gelato (12) y Resend (13).
 
+- **Gumroad** (`src/gumroad/payment.ts`, DECISIONS 255): `PAYMENT_PROVIDER=gumroad` con `GUMROAD_PRODUCT_URL`, `GUMROAD_ACCESS_TOKEN` y `GUMROAD_PING_SECRET`. URL del producto con `wanted`, `price` y `order_id`; pings firmados (`X-Gumroad-Signature`) en `POST /v1/webhooks/payments/gumroad`; solo USD.
 - **Dodo Payments** (`src/dodo/payment.ts`, DECISIONS 244): `PAYMENT_PROVIDER=dodo` con `DODO_API_KEY`, `DODO_WEBHOOK_SECRET`, `DODO_PRODUCT_ID` y `DODO_ENV` (`test_mode` o `live_mode`). Un solo ítem con el total del servidor, solo USD; webhooks con Standard Webhooks en `POST /v1/webhooks/payments/dodo`.
