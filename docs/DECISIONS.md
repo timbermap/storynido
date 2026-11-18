@@ -2838,3 +2838,14 @@ Sebas, 18 nov 2026: «¿podrías asegurar que cada prompt usa el estilo que sele
 ## 266 — Estilo «Novela gráfica» para 9 a 12
 
 Sebas, 18 nov 2026 («1 estilo propio ok»): la mesa y el estudio de mercado (Amazon, 5 nov) muestran que de 9 a 12 se lee novela gráfica. Antes eso entraba como «toques de historieta» en la dirección de arte de 6-8 y se mezclaba con cualquier estilo (DECISIONS 265). Ahora es un estilo propio (`novela-grafica`): tinta segura de grosor variable, color plano con sombreado suave y encuadres de cine, siempre una sola imagen por página, sin viñetas ni globos. Es el recomendado para las historias de 9+ (antes Cuento clásico). Su muestra del selector sale de `generate-brand-images.ts` con el mismo prompt que los libros.
+
+## 267 — Coherencia del elenco, la ropa y los objetos en todo el cuento
+
+Sebas, 18 nov 2026: «revisa la totalidad de los prompts… personajes que tengan relación con el personaje principal, cosas que aparecen en los cuentos, ropas de acuerdo a las situaciones». Revisión con la mesa sobre planificador, redactor, escenas, lámina, páginas y revisión. Lo que ya estaba (DECISIONS 236, 264): biblia visual de objetos, lugares y ropa especial; familia recurrente parecida al protagonista; elenco con género y aspecto fijo; regla de ropa de agua y deportes. Huecos que se cierran:
+
+- **Familia que aparece una sola vez:** el que escribe las escenas no sabía cómo era el protagonista. Ahora recibe su aspecto y la regla: un familiar se parece (tono de piel parecido, color de pelo posible, sin estereotipos); cualquier otra persona es claramente distinta. Dice su edad y un color de ropa.
+- **Ropa según la situación:** escenas, planificador y dirección de arte piden ropa acorde al lugar, el clima y la actividad (pijama en la cama, piloto en la lluvia, abrigo en el frío, malla en el agua, ropa deportiva); en casa, sin camperas ni zapatillas de calle salvo al llegar o salir. El planificador define ropa especial también para lluvia, frío, deportes y disfraces o uniformes del cuento.
+- **Ropa de una foto de adulto:** la ropa de todos los días sale «en versión de su edad» (antes Lu, de 5, llevaba la campera de abrigo de la foto adulta adentro de su cuarto).
+- **Lo que hace y usa según su edad:** el que escribe las escenas sabe la edad; lo riesgoso, con un adulto cerca.
+- **Revisión de cada página:** también marca ropa que no va con el lugar y familiares que no se parecen.
+- **Registro:** el plan dentro del prompt decía «seguilo» en un prompt en «tú»; ahora «síguelo».

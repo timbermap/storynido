@@ -330,7 +330,14 @@ describe('Vertex AI', () => {
       text: `t${String(index)}`,
       illustrationPrompt: 'p',
     }));
-    const request = { childName: 'Martina', pages, scenes: null, recurring: ['Grandma Rosa'] };
+    const request = {
+      childName: 'Martina',
+      pages,
+      scenes: null,
+      recurring: ['Grandma Rosa'],
+      protagonistLook: 'light skin, curly red hair',
+      age: 5,
+    };
     const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
     const ok = await new VertexTextProvider(
       clientWith(() => jsonReply({ prompts: [' one ', 'two'] }), calls),
@@ -338,6 +345,12 @@ describe('Vertex AI', () => {
     expect(ok.prompts).toEqual(['one', 'two']);
     expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('who is not');
     expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('Grandma Rosa');
+    // Familia que aparece una vez, parecida a la protagonista; ropa según el lugar (DECISIONS 267).
+    expect(calls[0]?.contents[0]?.parts[0]?.text).toContain(
+      'the protagonist looks like this: light skin, curly red hair',
+    );
+    expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('pyjamas in bed');
+    expect(calls[0]?.contents[0]?.parts[0]?.text).toContain('The protagonist is 5 years old');
     await expect(
       new VertexTextProvider(clientWith(() => jsonReply({ prompts: ['one'] }))).describeScenes(
         request,

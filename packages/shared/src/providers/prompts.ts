@@ -174,7 +174,7 @@ indicaciones terapéuticas ni diagnósticos, y no menciones el objetivo de forma
   const planSection = input.plan
     ? `
 
-Plan aprobado por el editor (seguilo página por página; no agregues personajes ni hechos fuera de él):
+Plan aprobado por el editor (síguelo página por página; no agregues personajes ni hechos fuera de él):
 Tema: ${input.plan.theme}
 Arco: ${input.plan.arc}${
         input.plan.structure
@@ -444,7 +444,7 @@ export function describeCharacter(
 ): string {
   const features = identityFeatures(sheet.distinctiveFeatures);
   const extras = features.length ? `; also: ${features.join(', ')}` : '';
-  return `${name}: ${ageLabel(age)} (${storyAgeRule(age)}); ${describeTraits(traits, mustKeep)}; outfit: ${sheet.clothing} (${SAME_OUTFIT}); ${NO_PHOTO_ACCESSORIES}${extras}`;
+  return `${name}: ${ageLabel(age)} (${storyAgeRule(age)}); ${describeTraits(traits, mustKeep)}; outfit: ${ageLabel(age)}'s version of ${sheet.clothing} (${SAME_OUTFIT}); ${NO_PHOTO_ACCESSORIES}${extras}`;
 }
 
 /** Lo mínimo del plan que necesita la portada: sus lugares y la escena de cada página. */

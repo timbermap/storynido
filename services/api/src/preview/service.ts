@@ -966,6 +966,8 @@ export class PreviewService {
                   ...(storyPlan.companion ? [storyPlan.companion.name] : []),
                   ...(storyPlan.cast ?? []).map((member) => member.role),
                 ],
+                ...(request.protagonistLook ? { protagonistLook: request.protagonistLook } : {}),
+                age: request.age,
               }),
             );
             current = {
