@@ -759,6 +759,7 @@
         "keep": "Quedarme con el anterior",
         "redrawAdjusted": "Volver a dibujarlo",
         "error": "No pudimos dibujarlo ahora. Intenta de nuevo en un rato.",
+        "qualityError": "No pudimos hacer un dibujo que pase nuestro control con estas fotos. Prueba con otra foto de su edad, de frente y con solo su cara (sin otras personas, carteles ni bebidas), o elige sus rasgos.",
         "choose": "¿Te gusta el nuevo dibujo de {name}?",
         "chooseFirst": "¿Te gusta su dibujo?",
         "discard": "Descartar",

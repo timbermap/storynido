@@ -163,6 +163,7 @@
       "profileRedrawNote": "Empezamos un cuento nuevo con sus fotos: al crear la muestra ves su dibujo nuevo y lo aprobás. Cada dibujo nuevo usa una generación de IA.",
       "drawing": {
         "error": "No pudimos dibujarlo ahora. Intentá de nuevo en un rato.",
+        "qualityError": "No pudimos hacer un dibujo que pase nuestro control con estas fotos. Probá con otra foto de su edad, de frente y con solo su cara (sin otras personas, carteles ni bebidas), o elegí sus rasgos.",
         "needsPhoto": "Para crear su dibujo ahora, <link>subí una foto</link>."
       },
       "newCharacter": {

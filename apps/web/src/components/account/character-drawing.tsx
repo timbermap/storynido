@@ -14,6 +14,19 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
+/**
+ * El dibujo no pasó el control de calidad en ningún intento: casi siempre es la foto (otras
+ * personas, carteles o bebidas en el recorte, o alguien que no parece de su edad). Reintentar
+ * con la misma foto no ayuda, así que se pide otra.
+ */
+function isQualityRejection(caught: unknown) {
+  return (
+    caught instanceof ApiError &&
+    caught.code === 'ai_unavailable' &&
+    (caught.details as { reason?: string } | undefined)?.reason === 'quality'
+  );
+}
+
 const KNOWN_ERRORS = [
   'limit_reached',
   'limit_reached_week',
@@ -65,9 +78,11 @@ export function CharacterDrawing({
       setNote('');
     } catch (caught) {
       setError(
-        caught instanceof ApiError && KNOWN_ERRORS.includes(caught.code)
-          ? tPreview(`errors.${caught.code}`)
-          : t('error'),
+        isQualityRejection(caught)
+          ? t('qualityError')
+          : caught instanceof ApiError && KNOWN_ERRORS.includes(caught.code)
+            ? tPreview(`errors.${caught.code}`)
+            : t('error'),
       );
     } finally {
       setBusy(null);

@@ -160,17 +160,32 @@ const RETRY_HINT =
 
 async function withModeratedRetry<T>(
   produce: (attempt: number) => Promise<T>,
-  check: (value: T) => Promise<boolean>,
+  check: (value: T) => Promise<boolean | { allowed: boolean; categories?: string[] }>,
   attempts = 2,
 ): Promise<T> {
+  const rejected = new Set<string>();
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const value = await produce(attempt);
-    if (await check(value)) return value;
+    const verdict = await check(value);
+    const allowed = typeof verdict === 'boolean' ? verdict : verdict.allowed;
+    if (allowed) return value;
+    if (typeof verdict !== 'boolean')
+      for (const label of verdict.categories ?? []) rejected.add(label);
   }
-  throw new AppError(
-    422,
-    'ai_unavailable',
-    'El contenido generado no pasó nuestro control de calidad. Prueba con otra historia o estilo.',
+  const categories = [...rejected];
+  // Los motivos del control (categorías cortas, sin contenido) van a la auditoría y a la web.
+  throw Object.assign(
+    new AppError(
+      422,
+      'ai_unavailable',
+      'El contenido generado no pasó nuestro control de calidad. Prueba con otra historia o estilo.',
+      { reason: 'quality', categories },
+    ),
+    {
+      cause: new Error(
+        `quality control rejected ${String(attempts)} attempts: ${categories.join(', ') || 'no categories'}`,
+      ),
+    },
   );
 }
 
@@ -1178,7 +1193,7 @@ export class PreviewService {
           throw error;
         }
       },
-      async ({ image }) => (await track('moderation', await ai.image.moderateImage(image))).allowed,
+      async ({ image }) => track('moderation', await ai.image.moderateImage(image)),
       // Tres intentos: una página que falla el control no tiene que tirar toda la muestra.
       3,
     );
