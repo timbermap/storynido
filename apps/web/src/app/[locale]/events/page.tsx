@@ -120,10 +120,10 @@ export default async function EventsPage({ params }: Props) {
         note={t('note')}
         media={
           <HeroPhoto
-            src="/images/heroes/cumple-digital.webp"
+            src="/images/formatos/landing-kit.webp"
             alt={t('hero.photoAlt')}
-            width={1400}
-            height={1050}
+            width={1000}
+            height={750}
             tone="bg-[#ffe7df]"
             caption={t('hero.imageCaption')}
           />
