@@ -1991,6 +1991,19 @@
       "simulateText": "Payments are simulated in this environment: nobody pays anything.",
       "simulate": "Simulate the payment",
       "progress": "Step {current} of {total}",
+      "details": {
+        "number": "Order",
+        "date": "Date"
+      },
+      "next": {
+        "title": "Another adventure?",
+        "text": "With the same character, in minutes, with a free preview.",
+        "cta": "Create another story"
+      },
+      "help": {
+        "text": "Something not as expected?",
+        "link": "FAQ"
+      },
       "read": "Read the story",
       "download": "Download the PDF",
       "track": "Track shipment",

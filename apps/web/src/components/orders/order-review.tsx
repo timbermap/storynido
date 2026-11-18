@@ -46,56 +46,68 @@ export function OrderReview({
       aria-labelledby="opinion-title"
       className="grid scroll-mt-28 gap-3 rounded-2xl border bg-card p-5"
     >
-      <h2 id="opinion-title" className="text-xl font-medium">
-        {t('title')}
-      </h2>
-      <div role="radiogroup" aria-label={t('rating')} className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((value) => (
-          <button
-            key={value}
-            type="button"
-            role="radio"
-            aria-checked={rating === value}
-            aria-label={t('stars', { count: value })}
-            onClick={() => {
-              setRating(value);
-              setSaved(false);
-            }}
-            className="rounded-full p-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            <Star
-              className={cn('size-7', value <= rating ? 'fill-star text-star' : 'text-border')}
-              aria-hidden="true"
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <h2 id="opinion-title" className="text-lg font-medium">
+          {t('title')}
+        </h2>
+        <div role="radiogroup" aria-label={t('rating')} className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((value) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={rating === value}
+              aria-label={t('stars', { count: value })}
+              onClick={() => {
+                setRating(value);
+                setSaved(false);
+              }}
+              className="rounded-full p-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            >
+              <Star
+                className={cn('size-7', value <= rating ? 'fill-star text-star' : 'text-border')}
+                aria-hidden="true"
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* El comentario aparece después de elegir las estrellas: antes era una caja grande vacía
+          que pesaba más que el libro (DECISIONS 274). */}
+      {rating > 0 && (
+        <>
+          <label className="grid gap-1.5 text-sm">
+            <span className="font-semibold">{t('comment')}</span>
+            <textarea
+              id="review-comment"
+              rows={3}
+              maxLength={1000}
+              value={comment}
+              onChange={(event) => {
+                setComment(event.target.value);
+                setSaved(false);
+              }}
+              className="w-full rounded-xl border bg-background p-3"
             />
-          </button>
-        ))}
-      </div>
-      <label className="grid gap-1.5 text-sm">
-        <span className="font-semibold">{t('comment')}</span>
-        <textarea
-          id="review-comment"
-          rows={3}
-          maxLength={1000}
-          value={comment}
-          onChange={(event) => {
-            setComment(event.target.value);
-            setSaved(false);
-          }}
-          className="w-full rounded-xl border bg-background p-3"
-        />
-      </label>
-      <p className="text-xs text-muted-foreground">{t('privacy')}</p>
-      <div className="flex items-center gap-3">
-        <Button size="sm" disabled={rating === 0 || saving || saved} onClick={() => void save()}>
-          {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
-          {t('save')}
-        </Button>
-        {saved && (
-          <p role="status" className="text-sm font-semibold text-success">
-            {t('thanks')}
-          </p>
-        )}
-      </div>
+          </label>
+          <p className="text-xs text-muted-foreground">{t('privacy')}</p>
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              disabled={rating === 0 || saving || saved}
+              onClick={() => void save()}
+            >
+              {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
+              {t('save')}
+            </Button>
+            {saved && (
+              <p role="status" className="text-sm font-semibold text-success">
+                {t('thanks')}
+              </p>
+            )}
+          </div>
+        </>
+      )}
       {error && (
         <p role="alert" className="text-sm font-semibold text-destructive">
           {error}

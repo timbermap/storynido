@@ -4,14 +4,17 @@ import { ApiError, type BookFormat, type CountryCode, type PublicOrder } from '@
 import {
   BookHeart,
   BookOpen,
+  CircleCheck,
   Download,
   FlaskConical,
+  LifeBuoy,
   Loader2,
   Printer,
   RotateCcw,
+  Sparkles,
   Truck,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
@@ -44,6 +47,7 @@ const AT_PRINTER = new Set(['sent_to_print', 'in_production', 'shipped']);
 /** Estado del pedido, en vivo: se consulta cada pocos segundos hasta que se resuelve. */
 export function OrderStatus({ orderId, country }: { orderId: string; country: CountryCode }) {
   const t = useTranslations('Checkout.order');
+  const locale = useLocale();
   const { signedIn, loading } = useAuth();
   const [order, setOrder] = useState<PublicOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -147,14 +151,37 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
     params: { orderId: order.orderId },
     query: { desde: 'pedido' },
   } as const;
+  // Ya lo tiene (digital listo o impreso entregado): el libro pasa a ser lo principal y los
+  // pasos, todos hechos, ya no suman (DECISIONS 274).
+  const finished = order.status === 'delivered' || (!print && order.status === 'ready');
+  const statusText =
+    isKit && order.status === 'ready' ? tKit('ready') : t(`status.${order.status}`);
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-10">
       <div className="grid content-start gap-6">
-        <OrderHeader orderId={order.orderId} bookId={order.bookId} format={format} />
-        <p role="status" aria-live="polite" className="text-xl font-medium">
-          {isKit && order.status === 'ready' ? tKit('ready') : t(`status.${order.status}`)}
-        </p>
-        <OrderTimeline status={order.status} print={print} />
+        <OrderHeader
+          orderId={order.orderId}
+          bookId={order.bookId}
+          format={format}
+          large={finished}
+        />
+        {finished ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="flex items-center gap-2 text-xl font-medium"
+          >
+            <CircleCheck className="size-6 shrink-0 text-success" aria-hidden="true" />
+            {statusText}
+          </p>
+        ) : (
+          <>
+            <p role="status" aria-live="polite" className="text-xl font-medium">
+              {statusText}
+            </p>
+            <OrderTimeline status={order.status} print={print} />
+          </>
+        )}
         {order.status === 'pending_payment' && !order.canSimulatePayment && (
           <AwaitingPayment
             orderId={order.orderId}
@@ -341,11 +368,58 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
           </p>
         )}
       </div>
-      {order.priceSnapshot && (
-        <aside className="self-start rounded-2xl border bg-card p-6">
-          <PriceSummary snapshot={order.priceSnapshot} country={country} format={format} />
-        </aside>
-      )}
+      {/* Columna del costado: los datos del pedido, el precio, ayuda y qué hacer después. */}
+      <aside className="grid content-start gap-4 lg:sticky lg:top-28">
+        <section className="grid gap-5 rounded-2xl border bg-card p-6">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+            <div className="grid gap-0.5">
+              <dt className="text-muted-foreground">{t('details.number')}</dt>
+              <dd className="font-semibold tabular-nums">
+                {order.orderId.slice(0, 8).toUpperCase()}
+              </dd>
+            </div>
+            <div className="grid gap-0.5">
+              <dt className="text-muted-foreground">{t('details.date')}</dt>
+              <dd className="font-semibold">
+                {new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(
+                  new Date(order.createdAt),
+                )}
+              </dd>
+            </div>
+          </dl>
+          {order.priceSnapshot && (
+            <div className="border-t pt-5">
+              <PriceSummary snapshot={order.priceSnapshot} country={country} format={format} />
+            </div>
+          )}
+        </section>
+        {finished && !isCards && (
+          <section className="grid gap-3 rounded-2xl bg-secondary p-5">
+            <p className="font-serif text-lg leading-snug font-semibold">{t('next.title')}</p>
+            <p className="text-sm text-muted-foreground">{t('next.text')}</p>
+            <Link
+              href="/new"
+              data-track="pedido_crear_otro"
+              className={buttonVariants({ variant: 'outline', className: 'w-fit' })}
+            >
+              <Sparkles aria-hidden="true" />
+              {t('next.cta')}
+            </Link>
+          </section>
+        )}
+        <p className="flex items-center gap-2 px-1 text-sm text-muted-foreground">
+          <LifeBuoy className="size-4 shrink-0" aria-hidden="true" />
+          <span>
+            {t('help.text')}{' '}
+            <Link
+              href="/faq"
+              className="font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              {t('help.link')}
+            </Link>
+          </span>
+        </p>
+      </aside>
     </div>
   );
 }
