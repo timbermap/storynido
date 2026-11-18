@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { GenerationProgress } from '@/components/ui/generation-progress';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
@@ -113,10 +114,13 @@ export function CharacterDrawing({
   return (
     <div className="grid gap-4">
       {busy === 'draw' && (
-        <p role="status" className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          {t('drawing', { name })}
-        </p>
+        <div role="status" className="grid gap-2">
+          <p className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            {t('drawing', { name })}
+          </p>
+          <GenerationProgress compact kinds="child_drawing" className="mx-0" />
+        </div>
       )}
 
       {drawing.candidateUrl ? (

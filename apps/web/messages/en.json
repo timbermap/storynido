@@ -1166,8 +1166,6 @@
           "order": "If you like it, we make the full book"
         }
       },
-      "waitEstimate": "{minutes, plural, one {It’s usually ready in about a minute.} other {It’s usually ready in about # minutes.}}",
-      "waitLate": "It’s taking a little longer than usual. We’re still on it and will email you when it’s ready.",
       "readyTab": "{name}’s sample is ready!",
       "drawingStatus": "We used {name}'s drawing · Doesn't look right? <link>Adjust the likeness</link>",
       "eventWait": {
@@ -2391,6 +2389,27 @@
       "text": "Read it as many times as you like. How about choosing the next adventure together?",
       "create": "Create another story",
       "again": "Read again"
+    }
+  },
+  "Generation": {
+    "label": "Progress",
+    "usually": "{minutes, plural, one {It usually takes about a minute.} other {It usually takes about # minutes.}}",
+    "remaining": "{minutes, plural, one {About a minute to go.} other {About # minutes to go.}}",
+    "almost": "Almost there…",
+    "late": "It’s taking a little longer than usual. We’re still on it.",
+    "book": {
+      "label": "Book progress",
+      "stages": {
+        "story": "Writing the story",
+        "illustrations": "Illustrating the pages",
+        "review": "Checking every page",
+        "layout": "Putting the book together"
+      },
+      "pages": "Illustrating page {done} of {total}",
+      "remaining": "About {minutes} minutes to go",
+      "almost": "Almost there",
+      "late": "Taking longer than usual, still on it",
+      "leave": "No need to wait here: we’ll email you as soon as it’s ready."
     }
   }
 }

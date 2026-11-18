@@ -17,7 +17,7 @@ export * from './firestore';
 export * from './users';
 export * from './events';
 export * from './cover-lettering';
-export * from './preview-wait';
+export * from './generation-times';
 export * from './story-groups';
 export * from './kit';
 export * from './admin-config';

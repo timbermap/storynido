@@ -14,6 +14,7 @@ import { useState } from 'react';
 
 import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { Button } from '@/components/ui/button';
+import { GenerationProgress } from '@/components/ui/generation-progress';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
@@ -109,8 +110,12 @@ export function CharacterReview({
           className="size-full object-cover"
         />
         {busy === 'save' && (
-          <div role="status" className="absolute inset-0 grid place-items-center bg-background/70">
+          <div
+            role="status"
+            className="absolute inset-0 grid place-content-center justify-items-center gap-4 bg-background/80 p-6"
+          >
             <Loader2 className="size-7 animate-spin text-primary" aria-hidden="true" />
+            <GenerationProgress compact kinds="character_fix" className="w-56" />
           </div>
         )}
       </div>

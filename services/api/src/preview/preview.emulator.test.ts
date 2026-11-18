@@ -208,6 +208,7 @@ describe('vista previa', () => {
       'aiConfig',
       'previewQuota',
       'auditLog',
+      'generationTimings',
     ]) {
       const docs = await db.collection(name).listDocuments();
       await Promise.all(docs.map((doc) => doc.delete()));
@@ -465,6 +466,27 @@ describe('vista previa', () => {
     expect(book.get('characterTraits.hairType')).toBeTruthy();
     const qa = await db.collection('books/book-1/qaEvents').get();
     expect(qa.docs.map((doc) => doc.get('code') as string)).toContain('character_approved');
+  });
+
+  it('registra cuánto tarda cada generación y publica la mediana (con pocas, el valor de partida)', async () => {
+    const times = async () =>
+      (await app.inject({ method: 'GET', url: '/v1/generation-times' })).json<{
+        times: Record<string, { typicalSeconds: number; slowSeconds: number; samples: number }>;
+      }>().times;
+    expect((await times()).illustrate).toEqual({ typicalSeconds: 55, slowSeconds: 75, samples: 0 });
+    for (const seconds of [40, 50, 60, 70, 300]) {
+      await app.deps.previews.timings.record('illustrate', seconds * 1000);
+    }
+    // Menos de un segundo no es una generación real: no cuenta.
+    await app.deps.previews.timings.record('illustrate', 200);
+    const doc = await db.doc('generationTimings/illustrate').get();
+    expect(doc.get('samples')).toEqual([40, 50, 60, 70, 300]);
+    expect((await times()).illustrate).toEqual({
+      typicalSeconds: 60,
+      slowSeconds: 116,
+      samples: 5,
+    });
+    expect((await times()).book?.samples).toBe(0);
   });
 
   it('no aprueba una muestra desactualizada (los rasgos no se confirman para otra foto)', async () => {

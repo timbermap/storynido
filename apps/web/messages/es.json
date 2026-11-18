@@ -1166,8 +1166,6 @@
           "order": "Si te gusta, hacemos el libro completo"
         }
       },
-      "waitEstimate": "{minutes, plural, one {Suele estar en un minuto.} other {Suele estar en unos # minutos.}}",
-      "waitLate": "Está tardando un poco más de lo normal. Seguimos, y te escribimos cuando esté.",
       "readyTab": "¡Lista la muestra de {name}!",
       "drawingStatus": "Usamos el dibujo de {name} · ¿No se parece? <link>Ajustar el parecido</link>",
       "eventWait": {
@@ -2391,6 +2389,27 @@
       "text": "Pueden leerlo las veces que quieran. ¿Y si la próxima aventura la eligen juntos?",
       "create": "Crear otro cuento",
       "again": "Leer de nuevo"
+    }
+  },
+  "Generation": {
+    "label": "Avance",
+    "usually": "{minutes, plural, one {Suele tardar alrededor de un minuto.} other {Suele tardar unos # minutos.}}",
+    "remaining": "{minutes, plural, one {Falta alrededor de un minuto.} other {Faltan unos # minutos.}}",
+    "almost": "Falta poco…",
+    "late": "Está tardando un poco más de lo normal. Seguimos con lo tuyo.",
+    "book": {
+      "label": "Avance del libro",
+      "stages": {
+        "story": "Escribiendo el cuento",
+        "illustrations": "Ilustrando las páginas",
+        "review": "Revisando cada página",
+        "layout": "Armando el libro"
+      },
+      "pages": "Ilustrando la página {done} de {total}",
+      "remaining": "Faltan unos {minutes} minutos",
+      "almost": "Falta poco",
+      "late": "Tarda más de lo normal, seguimos",
+      "leave": "No hace falta esperar acá: te escribimos apenas esté listo."
     }
   }
 }

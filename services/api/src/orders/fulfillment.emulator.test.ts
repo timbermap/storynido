@@ -116,6 +116,54 @@ describe('imprenta, descarga y cancelación (fase 12)', () => {
     expect(view.json<PublicOrder>().tracking?.number).toBeTruthy();
   });
 
+  it('mientras se crea el libro, el pedido dice la etapa, las páginas pintadas y cuánto falta', async () => {
+    await seedOrder('generating', false);
+    await db.doc('orders/o1').update({
+      pipeline: { generation: 0, runId: 'r1', startedAt: new Date(Date.now() - 120_000) },
+    });
+    // Los pasos de la siembra son de un libro terminado: acá recién va por las ilustraciones.
+    await db.doc('orders/o1/steps/layout_pdf').delete();
+    await db.doc('orders/o1/steps/deliver').delete();
+    for (const name of ['prepare_photo', 'generate_story']) {
+      await db.doc(`orders/o1/steps/${name}`).set({ generation: 0, status: 'succeeded' });
+    }
+    await db.doc('orders/o1/steps/generate_illustrations').set({
+      generation: 0,
+      status: 'running',
+      startedAt: new Date(Date.now() - 30_000),
+      output: null,
+    });
+    for (let index = 0; index < 4; index += 1) {
+      await db.doc(`orders/o1/steps/generate_illustrations/pages/${String(index)}`).set({
+        index,
+        generation: 0,
+        status: index < 3 ? 'succeeded' : 'running',
+      });
+    }
+    const view = await app.inject({
+      method: 'GET',
+      url: '/v1/orders/o1',
+      headers: auth('token-ana'),
+    });
+    const progress = view.json<PublicOrder>().progress;
+    expect(progress?.stage).toBe('illustrations');
+    expect(progress?.pagesDone).toBe(3);
+    expect(progress?.pagesTotal).toBe(4);
+    expect(progress?.fraction).toBeGreaterThan(0.3);
+    expect(progress?.fraction).toBeLessThan(1);
+    expect(progress?.remainingSeconds).toBeGreaterThan(0);
+    expect(progress?.late).toBe(false);
+
+    // Con el libro listo ya no hay avance que mostrar.
+    await db.doc('orders/o1').update({ status: 'ready' });
+    const ready = await app.inject({
+      method: 'GET',
+      url: '/v1/orders/o1',
+      headers: auth('token-ana'),
+    });
+    expect(ready.json<PublicOrder>().progress).toBeNull();
+  });
+
   it('un webhook de otro pedido de imprenta se ignora', async () => {
     await seedOrder('sent_to_print');
     const [production] = mockPrintWebhookSequence('o1', 'po_otro');

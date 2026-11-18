@@ -22,6 +22,7 @@ import {
 } from '@/components/orders/timeline';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { OrderHeader } from '@/components/orders/order-header';
+import { BookProgressView } from '@/components/orders/book-progress';
 import { OrderReview } from '@/components/orders/order-review';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
@@ -142,6 +143,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
           {isKit && order.status === 'ready' ? tKit('ready') : t(`status.${order.status}`)}
         </p>
         <OrderTimeline status={order.status} print={print} />
+        {order.progress && <BookProgressView progress={order.progress} />}
 
         {(order.canDownload ||
           Boolean(order.tracking?.url) ||

@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  PREVIEW_PAGE_TEXT_MAX,
-  PREVIEW_WAIT_MINUTES,
-  type Locale,
-  type PreviewWaitKind,
-  type PublicPreview,
-} from '@storynido/shared';
+import { PREVIEW_PAGE_TEXT_MAX, type Locale, type PublicPreview } from '@storynido/shared';
 import {
   AlertTriangle,
   BookOpen,
@@ -28,6 +22,7 @@ import { SignInPanel } from '@/components/auth/sign-in-panel';
 import { useProStatus } from '@/components/pro/use-pro-status';
 import { BookViewer, type ViewerPage } from '@/components/book/book-viewer';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { GenerationProgress } from '@/components/ui/generation-progress';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { trackConversion } from '@/lib/conversions';
@@ -242,7 +237,13 @@ export function PreviewPanel({
             ? t('eventWait.textDrawing', { theme: book.event?.theme ?? '' })
             : t('drawingWait.text')}
         </p>
-        <WaitEstimate kind="withDrawing" startedAt={book.previewStartedAt} />
+        {/* Una sola barra para las dos partes: escribir y después ilustrar (DECISIONS 261). */}
+        <GenerationProgress
+          className="mt-6"
+          kinds={active === 1 ? 'illustrate' : ['preview_story', 'illustrate']}
+          before={active === 1 ? ['preview_story'] : []}
+          startedAt={book.previewStartedAt}
+        />
         <WaitSteps
           active={active}
           labels={steps.map((step) =>
@@ -281,8 +282,10 @@ export function PreviewPanel({
         <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
           {illustrating ? t('illustratingText') : t('generatingText', { name: childName })}
         </p>
-        <WaitEstimate
-          kind={illustrating ? 'illustrate' : 'character'}
+        {/* Tiempo estimado con lo que tardaron las últimas muestras (DECISIONS 261). */}
+        <GenerationProgress
+          className="mt-6"
+          kinds={illustrating ? 'illustrate' : 'preview'}
           startedAt={book.previewStartedAt}
         />
         <WaitSteps
@@ -391,6 +394,9 @@ export function PreviewPanel({
             )}
             {busy === target ? t('regenerating') : t('regenerate')}
           </Button>
+        )}
+        {busy === target && (
+          <GenerationProgress compact kinds="regenerate" className="mx-0 basis-full" />
         )}
         {illustrated && adjustmentNotice && (
           // Sin contador visible (decisión del 4/11): solo el aviso del último ajuste o de que ya no
@@ -751,42 +757,6 @@ export function PreviewPanel({
       )}
     </div>
   );
-}
-
-/**
- * «Suele estar en unos N minutos», con los tiempos reales (PREVIEW_WAIT_MINUTES). Si pasa del
- * estimado, lo dice con calma; nada de cuenta regresiva ni barra inventada.
- */
-function WaitEstimate({ kind, startedAt }: { kind: PreviewWaitKind; startedAt: unknown }) {
-  const t = useTranslations('Wizard.preview');
-  const minutes = PREVIEW_WAIT_MINUTES[kind];
-  const [mountedAt] = useState(() => Date.now());
-  const since = millisOf(startedAt) ?? mountedAt;
-  const [late, setLate] = useState(false);
-  useEffect(() => {
-    const check = () => {
-      setLate(Date.now() - since > minutes * 60_000);
-    };
-    check();
-    const timer = window.setInterval(check, 15_000);
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [since, minutes]);
-  return (
-    <p className="mx-auto mt-2 max-w-xl text-sm font-semibold text-muted-foreground">
-      {late ? t('waitLate') : t('waitEstimate', { minutes })}
-    </p>
-  );
-}
-
-/** Fecha de Firestore (Timestamp), Date o nada → milisegundos. */
-function millisOf(value: unknown): number | null {
-  if (value instanceof Date) return value.getTime();
-  if (value && typeof value === 'object' && 'toMillis' in value) {
-    return (value as { toMillis: () => number }).toMillis();
-  }
-  return null;
 }
 
 /**
