@@ -2,18 +2,25 @@
 
 import { ExternalLink, Loader2, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Link } from '@/i18n/navigation';
 
 import { readPaymentUrl } from './payment-url';
+
+/** Si el pago sigue sin confirmarse pasado este tiempo, se ofrece ayuda. */
+const SLOW_AFTER_MS = 3 * 60 * 1000;
+/** «Ya pagué»: si en este tiempo la consulta no trajo el pago, se avisa que puede tardar. */
+const NOT_YET_AFTER_MS = 6000;
 
 const noSubscription = () => () => undefined;
 
 /**
  * Pedido esperando el pago que se hace en otra pestaña (Gumroad): la página consulta sola y pasa a
- * «pago confirmado» cuando llega el aviso del cobrador. Deja volver a abrir el pago y un «Ya pagué»
- * que consulta en el momento (DECISIONS 271).
+ * «pago confirmado» cuando llega el aviso del cobrador. Deja volver a abrir el pago, un «Ya pagué»
+ * que consulta en el momento y, si tarda, ayuda (DECISIONS 271 y 272). Al confirmarse el pago este
+ * bloque desaparece, así que los avisos solo se ven mientras sigue pendiente.
  */
 export function AwaitingPayment({ orderId, onCheck }: { orderId: string; onCheck: () => void }) {
   const t = useTranslations('Checkout.order.awaiting');
@@ -23,7 +30,28 @@ export function AwaitingPayment({ orderId, onCheck }: { orderId: string; onCheck
     () => readPaymentUrl(orderId),
     () => null,
   );
-  const [checked, setChecked] = useState(false);
+  const [checkedAt, setCheckedAt] = useState<number | null>(null);
+  const [notYet, setNotYet] = useState(false);
+  const [slow, setSlow] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSlow(true);
+    }, SLOW_AFTER_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (checkedAt === null) return;
+    const timer = setTimeout(() => {
+      setNotYet(true);
+    }, NOT_YET_AFTER_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [checkedAt]);
 
   return (
     <section
@@ -43,7 +71,8 @@ export function AwaitingPayment({ orderId, onCheck }: { orderId: string; onCheck
         <Button
           variant="outline"
           onClick={() => {
-            setChecked(true);
+            setNotYet(false);
+            setCheckedAt(Date.now());
             onCheck();
           }}
         >
@@ -62,9 +91,20 @@ export function AwaitingPayment({ orderId, onCheck }: { orderId: string; onCheck
           </a>
         )}
       </div>
-      {checked && (
+      {notYet && (
         <p role="status" className="text-sm text-muted-foreground">
           {t('notYet')}
+        </p>
+      )}
+      {slow && (
+        <p className="text-sm">
+          {t.rich('slow', {
+            link: (chunks) => (
+              <Link href="/faq" className="font-semibold text-primary underline underline-offset-4">
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       )}
     </section>

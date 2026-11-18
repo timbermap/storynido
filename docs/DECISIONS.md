@@ -2880,7 +2880,15 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Decisión:** con un cobrador que no vuelve solo (Gumroad), «Pagar» abre primero un diálogo que explica el pago (procesador seguro, sin crear cuenta, tarjeta o Apple/Google Pay, en USD, volver a esta pestaña). «Ir a pagar» abre Gumroad en una pestaña nueva y lleva esta a `/pedido/<id>`, que muestra «Esperando tu pago», consulta cada 4 s y pasa sola a «pago confirmado» cuando llega el ping. «Ya pagué» consulta en el momento; «Abrir el pago otra vez» reabre la URL guardada en `sessionStorage`. Dodo y el simulado siguen yendo directo (`components/checkout/payment-handoff.tsx`, `awaiting-payment.tsx`).
 - **Textos:** es (tú), voseo para AR/UY (`es-voseo.json`, a mano), pt y en.
 
-## 272 — El país de los precios, a la vista y con vuelta a la ubicación
+## 272 — La mesa revisa el pago con Gumroad: avisos en el diálogo y ayuda si tarda
+
+- **Fecha:** 2026-11-18. Pedido por Sebas ("que participe toda la mesa"); revisaron diseño/UX, producto, marketing, usuario familia, legales y CEO.
+- **Hecho en la web:** el diálogo previo avisa que en el resumen de la tarjeta figura Gumroad (no StoryNido), que la invitación de Gumroad a crear cuenta (en inglés) no hace falta, y que en la UE y el Reino Unido Gumroad suma el IVA. Íconos: candado para «sin cuenta», flecha de vuelta para «volvé a esta pestaña». En la espera, el aviso de «Ya pagué» aparece solo si a los 6 s sigue sin confirmarse; a los 3 minutos se ofrece ayuda (revisar el correo y escribirnos).
+- **Para configurar en Gumroad (lo hace Sebas, en su cuenta):** perfil «StoryNido» con el avatar del logo; fondo `#FFF8F1`, resaltado `#A33F33`, fuente Inter, bordes grandes (Settings → Profile; tiñe la ficha y el checkout); producto «Pedido StoryNido» (sirve para libros, kits y tarjetas) con miniatura del logo, portada 1280×720 en crema y descripción corta en es/pt/en; texto del recibo y botón «Volver a StoryNido» con el contenido que enlaza a `/mis-pedidos`; producto oculto de Discover/perfil; precio mínimo igual al ebook más barato.
+- **Pendiente (propuesto por la mesa):** conciliar con `GET /v2/sales` los pedidos pendientes si un ping se pierde; reembolsar solo cuando el monto no coincide; mails de pago abandonado; cobrar impresos por Gumroad solo con su OK por escrito (legales); términos §5 («los impuestos se indican antes de pagar») y privacidad con Gumroad como vendedor de registro.
+- **Salida definitiva:** el CEO propone PayPal integrado en nuestra página; producto propone LLC + Stripe. Lo decide Sebas.
+
+## 273 — El país de los precios, a la vista y con vuelta a la ubicación
 
 - **Fecha:** 2026-11-18. Pedido por Sebas: desde Argentina el pago mostraba la referencia en COP y los textos en «tú».
 - **Causa:** su navegador tenía guardado a mano Colombia (`sn_country_choice=CO`, de algún «Enviar a» o prueba anterior). Esa elección dura un año y manda sobre la IP, que sí detecta Argentina (verificado en staging), pero no se veía en ningún lado: Mi cuenta mostraba Argentina (el país deducido al crear la cuenta) mientras el sitio usaba Colombia.
