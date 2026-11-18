@@ -29,8 +29,8 @@ const { values, positionals } = parseArgs({
 const OUT = path.resolve(positionals[0] ?? 'brand-images');
 
 // --- Dirección de arte (archivo 01) -------------------------------------------------------------
-const GOUACHE = `Gouache editorial children's picture-book illustration. Opaque matte paint with visible brush texture and subtle paper grain, bold simple shapes, confident outlines only where needed, slightly imperfect hand-made edges. Limited palette of 4-5 colors chosen from: navy, coral, terracotta, mustard, mint, lavender, cream. Simple background with one or two story elements and generous empty space. Even soft daylight, flat lighting. Characters with rounded proportions (head about one quarter of the body), friendly expressive faces, dot eyes with a small highlight.`;
-const MINIMAL = `Minimal graphic children's book illustration. Flat shapes, clean even line, no texture except a very subtle paper grain, lots of white space, calm composition. Palette of 3-4 colors from: navy, lavender, mint, mustard, cream. Clear readable facial expressions, simple neutral clothing, no busy background.`;
+const GOUACHE = `Gouache editorial children's picture-book illustration. Opaque matte paint with visible brush texture and subtle paper grain, bold simple shapes, confident outlines only where needed, slightly imperfect hand-made edges. Limited palette of 4-5 colors chosen from: navy, coral, terracotta, mustard, mint, lavender, cream, all slightly softened like printed paint; no pure primary red, blue or yellow, no neon, no candy colors. Simple background with one or two story elements and generous empty space. Even soft daylight, flat lighting. Characters with rounded proportions (head about one quarter of the body), friendly expressive faces, small dark dot eyes without glossy highlights, natural cheeks with no perfect round blush circles.`;
+const MINIMAL = `Minimal graphic children's book illustration. Flat shapes, clean even line, no texture except a very subtle paper grain, lots of white space, calm composition. Palette of 3-4 muted colors from: navy, lavender, mint, mustard, cream; no pure primaries, no large areas of saturated yellow. Clear readable facial expressions, simple neutral clothing, no busy background.`;
 const BLACKLIST = `Avoid: watercolor bleeds, soft pastel haze, glow, bloom, sparkles, glitter, fireflies, magic trails, bokeh, sunset gradients, lens flare, rim light, 3D render or Pixar look, plastic skin, hyper-detailed backgrounds, torn-paper borders, painted frames, text or letters, watermarks, extra fingers. NEVER draw color swatches, palette chips, hex codes, labels or captions anywhere in the image.`;
 
 const BG: Record<string, string> = {
@@ -278,13 +278,13 @@ const JOBS: Job[] = [
     'secreto-del-fondo-del-mar',
     GOUACHE,
     'mint',
-    `${at('sofi', 5)} swims underwater inside a clear round bubble helmet next to a big friendly sea turtle. Two coral plants and a small treasure chest. Flat blues and terracotta.`,
+    `${at('sofi', 5)} swims underwater inside a clear round bubble helmet next to a big friendly sea turtle. Two coral plants and a small treasure chest. Muted teal-blue water and soft terracotta, no bright orange. Full-bleed illustration that fills the whole canvas edge to edge: no inset panel, margin, border or frame.`,
   ),
   cover(
     'superheroe-por-un-dia',
     GOUACHE,
-    'mustard',
-    `${at('benja', 5)} in a coral cape and a navy eye mask stands on a rooftop with fists on hips, a small cat on the chimney looking at him admiringly. Two simple houses below.`,
+    'ochreSoft',
+    `${at('benja', 5)} in a dusty coral cape and a navy eye mask stands on a rooftop with fists on hips, a small cat on the chimney looking at him admiringly. Two simple houses below. Full-bleed illustration that fills the whole canvas edge to edge: no inset panel, margin, border or frame.`,
   ),
   cover(
     'la-gran-carrera',
@@ -355,8 +355,8 @@ const JOBS: Job[] = [
   cover(
     'el-volcan-del-enojo',
     GOUACHE,
-    'mustard',
-    `${at('sofi', 5)} stands with fists clenched and puffed red cheeks, taking a deep breath; beside her a small friendly volcano as tall as she is, letting out one puff of red smoke. Flat shapes, no fire glow.`,
+    'ochreSoft',
+    `${at('sofi', 5)} stands with fists clenched and slightly flushed puffed cheeks, taking a deep breath; beside her a small friendly volcano as tall as she is, letting out one puff of soft terracotta smoke. Thin hand-made brown outlines, no thick black outline, no round blush circles, no fire glow.`,
   ),
   cover(
     'el-diente-que-se-cayo',
@@ -442,8 +442,8 @@ const JOBS: Job[] = [
   cover(
     'las-letras-de-mi-nombre',
     MINIMAL,
-    'mustard',
-    `${GENERIC} holds four big flat building blocks, each with a different simple shape on it (no readable letters), lined up like the letters of a name, proud smile.`,
+    'ochreSoft',
+    `${GENERIC} holds four big flat building blocks in muted navy, sage, ochre and lavender, each with a different simple shape on it (no readable letters), lined up like the letters of a name, proud smile.`,
     true,
   ),
   cover(
@@ -457,7 +457,7 @@ const JOBS: Job[] = [
     'detective-de-palabras',
     MINIMAL,
     'lavender',
-    `${GENERIC} holds a magnifying glass over a big open book, a few empty flat speech-bubble shapes floating above, curious expression. No text.`,
+    `${GENERIC} holds a magnifying glass over a big open book, a few empty flat speech-bubble shapes floating above, curious expression. No text. Full-bleed illustration that fills the whole canvas edge to edge: do not draw a book, card, page, frame, border or mockup inside the image.`,
     true,
   ),
   cover(
@@ -499,7 +499,7 @@ const JOBS: Job[] = [
     'hermano-mayor-pro',
     MINIMAL,
     'lavender',
-    `${GENERIC} sits on a simple sofa holding a small wrapped baby carefully in both arms, looking down gently. Calm, tender, minimal graphic style.`,
+    `${GENERIC} sits on a simple sofa holding a small wrapped baby carefully in both arms, looking down gently. Calm, tender, minimal graphic style. Full-bleed illustration that fills the whole canvas edge to edge: do not draw a book, card, page, frame, border or mockup inside the image.`,
     true,
   ),
   cover(
@@ -571,7 +571,7 @@ const JOBS: Job[] = [
     'el-jardin-de-las-emociones',
     MINIMAL,
     'mint',
-    `${GENERIC} kneels in a simple garden where five flowers each have a different simple face (happy, sad, angry, scared, calm); the child touches the calm one.`,
+    `${GENERIC} kneels in a simple garden where five flowers each have a different simple face (happy, sad, angry, scared, calm); the child touches the calm one. Soft sage and pale ochre ground, no saturated yellow field. Full-bleed illustration that fills the whole canvas edge to edge: do not draw a book, card, page, frame, border or mockup inside the image.`,
     true,
   ),
   cover(
@@ -585,7 +585,7 @@ const JOBS: Job[] = [
     'mi-visita-al-dentista',
     MINIMAL,
     'mint',
-    `${GENERIC} sits in a simple dental chair, smiling with a hand mirror, while a friendly dentist (mask down, kind eyes) shows a toothbrush. Very simple clean room.`,
+    `${GENERIC} sits in a simple dental chair, smiling with a hand mirror, while a friendly dentist (mask down, kind eyes) shows a toothbrush. Very simple clean room. Full-bleed illustration that fills the whole canvas edge to edge: do not draw a book, card, page, frame, border or mockup inside the image.`,
     true,
   ),
   cover(
