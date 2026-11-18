@@ -65,6 +65,22 @@ export function offerHighlights(
   };
 }
 
+/**
+ * Impresos que el país puede pedir hoy (vacío: solo digital). Sirve para no prometer tapa dura ni
+ * envíos donde todavía no se imprime (staging vende solo digital).
+ */
+export function printFormatsOnSale(offer: Offer | null): BookFormat[] {
+  if (!offer?.available) return [];
+  return offer.formats.map((f) => f.format).filter((format) => format !== 'digital');
+}
+
+/** ¿Se puede pedir un libro impreso con tapa (blanda o dura) en el país? */
+export function canOrderPrinted(offer: Offer | null): boolean {
+  return printFormatsOnSale(offer).some(
+    (format) => format === 'softcover' || format === 'hardcover',
+  );
+}
+
 /** Lo que la web necesita de la oferta para dar el precio de un libro ya elegido. */
 export type BookPriceSource = Pick<Offer, 'lengthPrices' | 'proLengthPrices' | 'printLengthPrices'>;
 

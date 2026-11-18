@@ -23,7 +23,7 @@ import { Link } from '@/i18n/navigation';
 import { CONTACT_ID } from '@/components/home/contact-form';
 import { brand } from '@/lib/brand';
 import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
-import { lowestPrice, offerHighlights } from '@/lib/offer';
+import { canOrderPrinted, lowestPrice, offerHighlights } from '@/lib/offer';
 import { getContent, getLessons, getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { localizedAlternates } from '@/lib/seo';
@@ -70,6 +70,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
     </>
   );
   const highlights = offerHighlights(offer, locale, display.country);
+  const printAvailable = canOrderPrinted(offer);
   // Galería por edad: hasta cinco historias de Familias de cada etapa.
   const galleryStages = AGE_STAGES.map((stage) => ({
     ...stage,
@@ -97,7 +98,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
     {
       icon: BookOpen,
       title: t('how.step3Title'),
-      text: t('how.step3Text'),
+      text: printAvailable ? t('how.step3Text') : t('how.step3TextDigital'),
       tone: 'bg-mint text-success',
     },
   ];
@@ -167,7 +168,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
                 </p>
               </div>
             )}
-            <HeroFacts />
+            <HeroFacts printAvailable={printAvailable} />
           </div>
           <HeroFamilias pageAlt={t('hero.pageAlt')} photoAlt={t('hero.familiasPhotoAlt')} />
         </div>
