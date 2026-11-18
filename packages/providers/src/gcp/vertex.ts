@@ -1112,7 +1112,7 @@ export class VertexImageProvider implements AIImageProvider {
 Art style: ${request.stylePrompt}
 Main character: ${request.character.description}
 ${notes.join('\n')}
-Children's picture book illustration. No text, letters, numbers, logos or watermarks.`,
+Children's picture book illustration, drawn only in the art style above. No text, letters, numbers, logos or watermarks anywhere: book spines and covers, posters, signs, labels and clothing stay blank.`,
     });
 
     let lastUsage: AiUsage[] = [];

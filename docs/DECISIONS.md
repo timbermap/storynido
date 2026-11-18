@@ -2821,3 +2821,16 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Historias de otra edad:** si la historia elegida no es para la edad del protagonista, el paso de historia lo avisa y el prompt pide adaptar el conflicto, el vocabulario y la estructura a su edad.
 - **Casos fijos:** `previa-casos.test.ts` cubre foto adulta con 5 años, portada, zona del texto, historia de otra edad e idioma. Los tests de la API cubren el dibujo en otro estilo y la reutilización de la lámina. `pnpm eval:preview --case lu|lu-otro-estilo|adulto-5|familia` arma la muestra con IA real como la API.
 - **Verificación:** el caso de Lu (foto y dibujo de Sebas, «Buenas noches, Lu», clásico y lápices de colores, español de Argentina) costó US$ 1,41 en tres corridas. Lu sale con 5 años, portada y páginas en el mismo estilo, texto en español con voseo y mamá con su mismo tono de piel.
+
+## 265 — Candado de estilo: cada imagen usa solo el estilo elegido
+
+Sebas, 18 nov 2026: «¿podrías asegurar que cada prompt usa el estilo que selecciona el usuario?». Revisamos todos los caminos que generan imágenes (lámina del personaje, ajuste del parecido, acompañante, elenco, portada, páginas, «Probar otra ilustración», pedido en el worker). Todos pasaban el estilo elegido, pero partes comunes de la dirección de arte imponían otra técnica:
+
+- **Edad sin técnica:** 0-2 pedía contornos marrones siempre (ahora «si el estilo usa contornos»); 3-5, «textured brush work»; 6-8, «comic-book touches such as motion lines and the occasional panel» (de ahí la tinta de historieta). Ahora la edad solo define proporciones, encuadre y tono.
+- **Paleta:** «like printed paint» se quitó.
+- **Técnica por estilo:** cada estilo tiene su bloque (`STYLE_MEDIUM`). Acuarela y Para colorear no lo tenían y caían en el gouache de la casa. Un estilo nuevo del admin usa su propio modificador, nunca el gouache.
+- **Candado:** la dirección de arte suma «Style lock: …» con la técnica elegida para la lámina, la portada, las páginas, el elenco y cada nueva versión.
+- **Muestras y pedidos anteriores:** `withCurrentGuards` cambia las frases viejas por las nuevas y suma el candado; la API ahora también lo aplica (antes solo el worker).
+- **Muestras del selector:** `generate-brand-images.ts` arma las muestras de estilo con la misma dirección de arte y el mismo modificador que los libros (antes cada una tenía su frase y no se parecía al libro).
+- **Texto:** el cuento se narra en tercera persona (nada de «tú/vos/you» fuera de un diálogo). Las imágenes dejan en blanco lomos de libros, carteles, etiquetas y ropa.
+- **Tests:** `art-direction.test.ts` falla si alguna edad o estilo mete otra técnica; el test de la API «candado de estilo» falla si alguna imagen del libro sale sin el estilo elegido.
