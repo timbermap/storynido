@@ -210,4 +210,37 @@ describe('métricas del dashboard', () => {
     expect(metricsProductKey({ ...kit, components: ['piece'] })).toBe('event_extra');
     expect(metricsProductKey({ ...kit, components: ['cards'] })).toBe('event_cards');
   });
+
+  it('por estilo: qué eligen, qué muestras completan y qué compran (DECISIONS 268)', () => {
+    const day = aggregateDay({
+      day: '2026-11-18',
+      final: true,
+      previews: 3,
+      aiCostUsdMicros: 0,
+      fx,
+      books: [
+        { character: true, preview: true, approved: true, style: 'gouache-editorial' },
+        { character: true, preview: false, approved: false, style: 'gouache-editorial' },
+        { character: true, preview: true, approved: true, style: 'novela-grafica' },
+        { character: false, preview: false, approved: false, style: 'acuarela' },
+        { character: true, preview: false, approved: false },
+      ],
+      orders: [
+        order({ style: 'gouache-editorial' }),
+        order({ style: 'novela-grafica', status: 'refunded' }),
+      ],
+    });
+    expect(day.styles).toEqual({
+      'gouache-editorial': { chosen: 2, previews: 1, purchased: 1, revenueUsd: 20 },
+      'novela-grafica': { chosen: 1, previews: 1, purchased: 0, revenueUsd: 0 },
+      'sin-estilo': { chosen: 1, previews: 0, purchased: 0, revenueUsd: 0 },
+    });
+    const total = sumMetrics([day, day]);
+    expect(total.styles['gouache-editorial']).toEqual({
+      chosen: 4,
+      previews: 2,
+      purchased: 2,
+      revenueUsd: 40,
+    });
+  });
 });

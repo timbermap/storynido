@@ -37,6 +37,8 @@ export interface MetricsOrder {
   product?: string;
   /** IA gastada en este pedido (generación del libro), en millonésimas de USD. */
   aiCostUsdMicros?: number;
+  /** Estilo de ilustración del libro comprado (DECISIONS 268). */
+  style?: string | null;
 }
 
 /**
@@ -97,7 +99,7 @@ export interface ProductMetrics {
 }
 
 /** Sube cuando cambia el cálculo: los días guardados con otra versión se recalculan. */
-export const METRICS_VERSION = 2;
+export const METRICS_VERSION = 3;
 
 /** A los N días un día queda congelado (ya no se esperan reembolsos ni cambios). */
 export const METRICS_SETTLE_DAYS = 35;
@@ -128,7 +130,23 @@ export interface FunnelBook {
   approved: boolean;
   /** Línea por la que se creó (lo anterior es de Familias). */
   channel?: string;
+  /** Estilo de ilustración elegido (DECISIONS 268). */
+  style?: string | null;
 }
+
+/** Por estilo de ilustración: qué eligen y qué compran (DECISIONS 268). */
+export interface StyleMetrics {
+  /** Libros creados ese día con ese estilo que llegaron a la lámina del personaje. */
+  chosen: number;
+  /** Muestras completas (portada y páginas) con ese estilo. */
+  previews: number;
+  /** Pedidos pagados de libros con ese estilo. */
+  purchased: number;
+  revenueUsd: number;
+}
+
+/** Libros sin estilo guardado (borradores viejos o actividades) van como «sin estilo». */
+export const NO_STYLE = 'sin-estilo';
 
 /**
  * metricsDaily/{AAAA-MM-DD}: agregados del día. Se recalcula en cada visita hasta
@@ -173,6 +191,8 @@ export interface DayMetrics {
   products: Record<string, ProductMetrics>;
   /** Embudo por línea (ausente en días calculados antes). */
   funnelByChannel?: Record<string, Funnel>;
+  /** Por estilo de ilustración (ausente en días calculados antes). */
+  styles?: Record<string, StyleMetrics>;
   fxSource: string;
   fxDate: string;
   /** Ausente en días calculados antes del embudo. */
@@ -264,6 +284,25 @@ export function aggregateDay(input: {
     checkout: orders.length,
     purchased: orders.filter((order) => REVENUE_ORDER_STATUSES.includes(order.status)).length,
   });
+  const styles: Record<string, StyleMetrics> = {};
+  const style = (key: string | null | undefined) =>
+    (styles[key?.trim() ? key : NO_STYLE] ??= {
+      chosen: 0,
+      previews: 0,
+      purchased: 0,
+      revenueUsd: 0,
+    });
+  for (const book of input.books ?? []) {
+    if (book.character) style(book.style).chosen += 1;
+    if (book.preview) style(book.style).previews += 1;
+  }
+  for (const order of sold) {
+    const entry = style(order.style);
+    entry.purchased += 1;
+    entry.revenueUsd = round(
+      entry.revenueUsd + toUsd(order.amounts.totalMinor, order.currency, input.fx),
+    );
+  }
   return {
     version: METRICS_VERSION,
     day: input.day,
@@ -299,6 +338,7 @@ export function aggregateDay(input: {
               return [channel, funnelOf(books, orders)];
             }),
           ),
+          styles,
         }
       : {}),
   };
@@ -335,7 +375,17 @@ export function sumMetrics(days: readonly DayMetrics[]) {
   }
   const products: Record<string, ProductMetrics> = {};
   const funnelByChannel: Record<string, Funnel> = {};
+  const styles: Record<string, StyleMetrics> = {};
   for (const day of days) {
+    for (const [key, value] of Object.entries(day.styles ?? {})) {
+      const current = styles[key] ?? { chosen: 0, previews: 0, purchased: 0, revenueUsd: 0 };
+      styles[key] = {
+        chosen: current.chosen + value.chosen,
+        previews: current.previews + value.previews,
+        purchased: current.purchased + value.purchased,
+        revenueUsd: round(current.revenueUsd + value.revenueUsd),
+      };
+    }
     for (const [key, value] of Object.entries(day.products)) {
       const current = products[key];
       products[key] = current
@@ -373,6 +423,7 @@ export function sumMetrics(days: readonly DayMetrics[]) {
     contributionUsd: money('contributionUsd'),
     products,
     funnelByChannel,
+    styles,
     avgTicketUsd: orders ? round(money('revenueUsd') / orders) : 0,
     conversionPct: previews ? round((orders / previews) * 100) : 0,
     revenueUsdByCountry,

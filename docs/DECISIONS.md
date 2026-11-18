@@ -2821,3 +2821,7 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Historias de otra edad:** si la historia elegida no es para la edad del protagonista, el paso de historia lo avisa y el prompt pide adaptar el conflicto, el vocabulario y la estructura a su edad.
 - **Casos fijos:** `previa-casos.test.ts` cubre foto adulta con 5 años, portada, zona del texto, historia de otra edad e idioma. Los tests de la API cubren el dibujo en otro estilo y la reutilización de la lámina. `pnpm eval:preview --case lu|lu-otro-estilo|adulto-5|familia` arma la muestra con IA real como la API.
 - **Verificación:** el caso de Lu (foto y dibujo de Sebas, «Buenas noches, Lu», clásico y lápices de colores, español de Argentina) costó US$ 1,41 en tres corridas. Lu sale con 5 años, portada y páginas en el mismo estilo, texto en español con voseo y mamá con su mismo tono de piel.
+
+## 268 — Métricas por estilo de ilustración
+
+Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para decidir con datos y no solo con estudios de mercado. Las métricas del día suman `styles` por slug: elegido (libros que llegaron a la lámina), muestras completas, compras pagadas y ventas en USD. Los libros sin estilo van como `sin-estilo`. La portada del admin muestra la tabla «Por estilo de ilustración». `METRICS_VERSION` pasa a 3 para que los días asentados se recalculen con el estilo.

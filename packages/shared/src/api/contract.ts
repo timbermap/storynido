@@ -281,6 +281,13 @@ const productMetricsSchema = z.object({
   printUsd: z.number(),
 });
 
+const styleMetricsSchema = z.object({
+  chosen: z.number(),
+  previews: z.number(),
+  purchased: z.number(),
+  revenueUsd: z.number(),
+});
+
 export const dayMetricsSchema = z.object({
   version: z.number().optional(),
   day: z.string(),
@@ -309,6 +316,7 @@ export const dayMetricsSchema = z.object({
   fxDate: z.string(),
   funnel: funnelSchema.optional(),
   funnelByChannel: z.record(z.string(), funnelSchema).optional(),
+  styles: z.record(z.string(), styleMetricsSchema).optional(),
 });
 
 const metricsTotalsSchema = dayMetricsSchema
@@ -335,6 +343,7 @@ const metricsTotalsSchema = dayMetricsSchema
   .extend({
     funnel: funnelSchema,
     funnelByChannel: z.record(z.string(), funnelSchema),
+    styles: z.record(z.string(), styleMetricsSchema).default({}),
     daysWithoutFunnel: z.number(),
   });
 
