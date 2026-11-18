@@ -21,6 +21,7 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
   ]);
   const locale = rawLocale as Locale;
   const display = await getDisplayCountry(locale);
+  const countryChoice = { detected: display.detected, chosen: display.chosen };
   const [t, offer] = await Promise.all([
     getTranslations('Checkout'),
     getOffer(display.country, locale),
@@ -43,12 +44,13 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
         {cards ? (
           <CardsCheckout sourceOrderId={cards} country={display.country} />
         ) : kit && !reorder ? (
-          <KitCheckout bookId={bookId} country={display.country} />
+          <KitCheckout bookId={bookId} country={display.country} countryChoice={countryChoice} />
         ) : offer?.available ? (
           <Checkout
             bookId={bookId}
             offer={offer}
             country={display.country}
+            countryChoice={countryChoice}
             reorderOf={reorder ?? null}
           />
         ) : (

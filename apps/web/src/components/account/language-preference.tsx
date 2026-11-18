@@ -6,8 +6,9 @@ import { useEffect, useState, useTransition } from 'react';
 import { LOCALES, LOCALE_DEFINITIONS, type CountryCode, type Locale } from '@storynido/shared';
 
 import { useRouter } from '@/i18n/navigation';
-import { COUNTRY_CHOICE_COOKIE, COUNTRY_CHOICE_MAX_AGE } from '@/lib/country';
+import { rememberCountryChoice } from '@/lib/country';
 import { CountryOptions } from '@/components/country-options';
+import { useSiteCountry } from '@/components/site-country';
 import { rememberLocaleChoice } from '@/lib/locale-choice';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import {
@@ -28,7 +29,11 @@ export function LanguagePreference({ uid }: { uid: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState(false);
   const [optIn, setOptIn] = useState<boolean | null>(null);
-  const [country, setCountry] = useState<CountryCode | null>(null);
+  const [saved, setSaved] = useState<{ country: CountryCode | null; chosen: boolean } | null>(null);
+  // Si la cuenta no eligió país, se muestra el que usa el sitio (el de este navegador o la
+  // ubicación), no el que se dedujo al crear la cuenta: así coincide con los precios.
+  const siteCountry = useSiteCountry();
+  const country = saved ? (saved.chosen ? saved.country : (siteCountry ?? saved.country)) : null;
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -37,7 +42,7 @@ export function LanguagePreference({ uid }: { uid: string }) {
       if (!cancelled)
         unsubscribe = subscribePreferences(db, uid, (preferences) => {
           setOptIn(preferences.marketingOptIn);
-          setCountry(preferences.country);
+          setSaved({ country: preferences.country, chosen: preferences.countryChosen });
         });
     });
     return () => {
@@ -58,14 +63,14 @@ export function LanguagePreference({ uid }: { uid: string }) {
 
   async function changeCountry(next: CountryCode) {
     setError(false);
-    setCountry(next);
+    setSaved({ country: next, chosen: true });
     try {
       await updateUserCountry(await getFirebaseDb(), uid, next);
     } catch {
       setError(true);
       return;
     }
-    document.cookie = `${COUNTRY_CHOICE_COOKIE}=${next}; path=/; max-age=${String(COUNTRY_CHOICE_MAX_AGE)}; samesite=lax`;
+    rememberCountryChoice(next);
     startTransition(() => {
       router.refresh();
     });

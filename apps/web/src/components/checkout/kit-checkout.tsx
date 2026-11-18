@@ -29,6 +29,7 @@ import { getFirebaseDb } from '@/lib/firebase/client';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
+import { CountrySwitch } from './country-switch';
 import { PriceSummary } from './price-summary';
 
 type Pricing = NonNullable<Awaited<ReturnType<typeof api<'catalogEventPricing'>>>['pricing']>;
@@ -40,7 +41,15 @@ const field = 'h-11 w-full rounded-xl border bg-card px-3';
  * local. El precio lo calcula la API. El impreso de las piezas se pide por cotización. El kit no
  * se vuelve a pedir: ya tiene todos los archivos y las copias que imprima no cambian el precio.
  */
-export function KitCheckout({ bookId, country }: { bookId: string; country: CountryCode }) {
+export function KitCheckout({
+  bookId,
+  country,
+  countryChoice,
+}: {
+  bookId: string;
+  country: CountryCode;
+  countryChoice: { detected: CountryCode; chosen: boolean };
+}) {
   const t = useTranslations('Checkout');
   const tKit = useTranslations('Checkout.kit');
   const locale = useLocale() as Locale;
@@ -371,7 +380,10 @@ export function KitCheckout({ bookId, country }: { bookId: string; country: Coun
           </p>
         )}
         {quote ? (
-          <PriceSummary snapshot={quote.snapshot} country={country} />
+          <>
+            <PriceSummary snapshot={quote.snapshot} country={country} />
+            <CountrySwitch country={country} {...countryChoice} />
+          </>
         ) : (
           <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />

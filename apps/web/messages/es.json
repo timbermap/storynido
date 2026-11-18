@@ -2115,7 +2115,12 @@
       "text": "El PDF ya es tuyo: lo descargas gratis cuando quieras desde Mis cuentos."
     },
     "reorderBack": "Volver a Mis cuentos",
-    "includesPdf": "Incluye el ebook (PDF)"
+    "includesPdf": "Incluye el ebook (PDF)",
+    "countrySwitch": {
+      "label": "Precios para",
+      "auto": "Según mi ubicación ({country})",
+      "chosenNote": "Lo elegiste a mano; tu ubicación indica {country}."
+    }
   },
   "Pro": {
     "activation": {

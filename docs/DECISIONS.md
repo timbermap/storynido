@@ -2868,3 +2868,11 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Mientras tanto:** un consejo que se turna cada 9 s (editar textos, pedir otra ilustración, la muestra es gratis, releer, el personaje queda guardado; WhatsApp en Celebraciones), fuera del aviso de lectores de pantalla.
 - **Salir:** «Podés cerrar esta pantalla» queda abajo, sin caja, con el correo al que avisamos. En el flujo con revisión del parecido, la primera parte no manda correo: el texto dice que lo encuentra listo para revisar en Mis cuentos (antes prometía un correo que no salía).
 - La barra de avance de DECISIONS 262 sigue igual.
+
+## 271 — El país de los precios, a la vista y con vuelta a la ubicación
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: desde Argentina el pago mostraba la referencia en COP y los textos en «tú».
+- **Causa:** su navegador tenía guardado a mano Colombia (`sn_country_choice=CO`, de algún «Enviar a» o prueba anterior). Esa elección dura un año y manda sobre la IP, que sí detecta Argentina (verificado en staging), pero no se veía en ningún lado: Mi cuenta mostraba Argentina (el país deducido al crear la cuenta) mientras el sitio usaba Colombia.
+- **Orden:** cuenta con país elegido > elegido a mano en este navegador > ubicación (IP) > idioma del navegador. Al iniciar sesión, si la cuenta tiene país elegido se aplica y la página se refresca enseguida.
+- **Pago:** junto al total digital (y en el kit) se ve «Precios para: …» con la opción «Según mi ubicación (país)», que borra la elección y vuelve a la IP. Con sesión, el cambio queda también en la cuenta. En el impreso el país sigue saliendo de la dirección.
+- **Mi cuenta:** si la cuenta no eligió país, muestra el que usa el sitio, así coincide con los precios.

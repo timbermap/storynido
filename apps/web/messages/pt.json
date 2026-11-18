@@ -2115,7 +2115,12 @@
       "text": "O PDF já é seu: baixe grátis quando quiser em Minhas histórias."
     },
     "reorderBack": "Voltar para Minhas histórias",
-    "includesPdf": "Inclui o ebook (PDF)"
+    "includesPdf": "Inclui o ebook (PDF)",
+    "countrySwitch": {
+      "label": "Preços para",
+      "auto": "Pela minha localização ({country})",
+      "chosenNote": "Você escolheu manualmente; sua localização indica {country}."
+    }
   },
   "Pro": {
     "activation": {

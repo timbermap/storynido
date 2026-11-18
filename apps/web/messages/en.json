@@ -2115,7 +2115,12 @@
       "text": "The PDF is already yours: download it for free anytime from My stories."
     },
     "reorderBack": "Back to My stories",
-    "includesPdf": "Includes the ebook (PDF)"
+    "includesPdf": "Includes the ebook (PDF)",
+    "countrySwitch": {
+      "label": "Prices for",
+      "auto": "Based on my location ({country})",
+      "chosenNote": "You picked this yourself; your location says {country}."
+    }
   },
   "Pro": {
     "activation": {
