@@ -2787,3 +2787,9 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Barra (opinión de la mesa):** nunca miente. Por tiempo, llega al 90 % en el tiempo típico y después se acerca despacio sin llegar al final; no vuelve atrás ni muestra segundos que corren («Faltan unos 2 minutos», «Falta poco…», «Está tardando un poco más de lo normal»). En el libro completo hay avance real: cada paso pesa lo que suele tardar y las ilustraciones avanzan por páginas pintadas («Ilustrando la página 7 de 16»), y se aclara que no hace falta esperar porque llega el correo. Con su dibujo guardado, escribir e ilustrar son una sola barra que sigue donde quedó.
 - **Dónde:** espera de la muestra (con y sin dibujo), lámina al corregir rasgos, botón de regenerar, dibujo del perfil y página del pedido (`progress` en `PublicOrder`).
 - **Datos iniciales:** `services/worker/scripts/seed-generation-times.ts` mide lo ya generado en un ambiente (libro: exacto, de los pasos; muestras: aproximado, por las llamadas de `aiUsage`) y con `--write` lo carga.
+
+## 263 — CI: tests en un runner aparte
+
+- **Fecha:** 2026-11-18. Para bajar el tiempo del merge a staging (DECISIONS 260) sin pagar runners más grandes.
+- **Cambio:** el job de chequeos se parte en dos que corren al mismo tiempo: «Lint, tipos y build» (más `audit` y `format:check`) y «Tests» (con Java y los emuladores). Cada uno sigue con Turborepo de a una tarea (`--concurrency=1`) y su propia caché, así no vuelve la saturación del runner de 2 CPU.
+- **Efecto esperado:** el CI pasa de la suma (~6 min) al más largo de los dos (~4 min, los tests). El Deploy de staging sigue esperando al CI completo.
