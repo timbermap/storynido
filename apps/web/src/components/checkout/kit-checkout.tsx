@@ -29,6 +29,7 @@ import { getFirebaseDb } from '@/lib/firebase/client';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
+import { usePaymentHandoff } from './payment-handoff';
 import { PriceSummary } from './price-summary';
 
 type Pricing = NonNullable<Awaited<ReturnType<typeof api<'catalogEventPricing'>>>['pricing']>;
@@ -60,6 +61,9 @@ export function KitCheckout({ bookId, country }: { bookId: string; country: Coun
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const handoff = usePaymentHandoff(() => {
+    setPaying(false);
+  });
   const [chosen, setChosen] = useState<KitOffer | null>(null);
 
   useEffect(() => {
@@ -173,8 +177,7 @@ export function KitCheckout({ bookId, country }: { bookId: string; country: Coun
         analyticsConsent: choice?.analytics ?? false,
         kit,
       };
-      const { checkoutUrl } = await api('createCheckout', { body: { ...body, bookId } });
-      window.location.assign(checkoutUrl);
+      handoff.start(await api('createCheckout', { body: { ...body, bookId } }));
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
       setPaying(false);
@@ -210,6 +213,7 @@ export function KitCheckout({ bookId, country }: { bookId: string; country: Coun
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      {handoff.dialog}
       <div className="grid content-start gap-8">
         <fieldset>
           <legend className="text-lg font-semibold">{tKit('piecesTitle')}</legend>

@@ -2869,6 +2869,25 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Salir:** «Podés cerrar esta pantalla» queda abajo, sin caja, con el correo al que avisamos. En el flujo con revisión del parecido, la primera parte no manda correo: el texto dice que lo encuentra listo para revisar en Mis cuentos (antes prometía un correo que no salía).
 - La barra de avance de DECISIONS 262 sigue igual.
 
+## 271 — Pago con Gumroad: explicación antes, pago en otra pestaña y el pedido que se actualiza solo
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: después de pagar quedaba en una página pelada de Gumroad (recibo y biblioteca) y nunca volvía a StoryNido.
+- **Lo que permite Gumroad** (revisado en su código abierto, `antiwork/gumroad`):
+  - El overlay de `gumroad.js` no sirve con `wanted=true`: con ese parámetro el enlace navega directo al checkout (no abre modal). El modal sin `wanted` muestra la ficha del producto, no el pago. El script solo emite mensajes internos (`loaded`, `height`, `translations`): no hay evento de compra exitosa para escuchar.
+  - El comprador no necesita cuenta: paga con mail y tarjeta. Después ve el recibo y una biblioteca temporal con la invitación (opcional) a crear cuenta. El vendedor que compra su propio producto, logueado, ve su biblioteca.
+  - No hay redirección por producto después de la compra. El recibo tiene el botón para ver el contenido del producto (con texto configurable): ahí se puede poner un enlace de vuelta a StoryNido, igual para todos los pedidos.
+  - Medios: tarjeta, Apple Pay, Google Pay y PayPal (si el vendedor lo tiene); métodos locales (iDEAL, Bancontact, UPI, Pix con QR) existen detrás de flags de Gumroad, sin control del vendedor.
+- **Decisión:** con un cobrador que no vuelve solo (Gumroad), «Pagar» abre primero un diálogo que explica el pago (procesador seguro, sin crear cuenta, tarjeta o Apple/Google Pay, en USD, volver a esta pestaña). «Ir a pagar» abre Gumroad en una pestaña nueva y lleva esta a `/pedido/<id>`, que muestra «Esperando tu pago», consulta cada 4 s y pasa sola a «pago confirmado» cuando llega el ping. «Ya pagué» consulta en el momento; «Abrir el pago otra vez» reabre la URL guardada en `sessionStorage`. Dodo y el simulado siguen yendo directo (`components/checkout/payment-handoff.tsx`, `awaiting-payment.tsx`).
+- **Textos:** es (tú), voseo para AR/UY (`es-voseo.json`, a mano), pt y en.
+
+## 272 — La mesa revisa el pago con Gumroad: avisos en el diálogo y ayuda si tarda
+
+- **Fecha:** 2026-11-18. Pedido por Sebas ("que participe toda la mesa"); revisaron diseño/UX, producto, marketing, usuario familia, legales y CEO.
+- **Hecho en la web:** el diálogo previo avisa que en el resumen de la tarjeta figura Gumroad (no StoryNido), que la invitación de Gumroad a crear cuenta (en inglés) no hace falta, y que en la UE y el Reino Unido Gumroad suma el IVA. Íconos: candado para «sin cuenta», flecha de vuelta para «volvé a esta pestaña». En la espera, el aviso de «Ya pagué» aparece solo si a los 6 s sigue sin confirmarse; a los 3 minutos se ofrece ayuda (revisar el correo y escribirnos).
+- **Para configurar en Gumroad (lo hace Sebas, en su cuenta):** perfil «StoryNido» con el avatar del logo; fondo `#FFF8F1`, resaltado `#A33F33`, fuente Inter, bordes grandes (Settings → Profile; tiñe la ficha y el checkout); producto «Pedido StoryNido» (sirve para libros, kits y tarjetas) con miniatura del logo, portada 1280×720 en crema y descripción corta en es/pt/en; texto del recibo y botón «Volver a StoryNido» con el contenido que enlaza a `/mis-pedidos`; producto oculto de Discover/perfil; precio mínimo igual al ebook más barato.
+- **Pendiente (propuesto por la mesa):** conciliar con `GET /v2/sales` los pedidos pendientes si un ping se pierde; reembolsar solo cuando el monto no coincide; mails de pago abandonado; cobrar impresos por Gumroad solo con su OK por escrito (legales); términos §5 («los impuestos se indican antes de pagar») y privacidad con Gumroad como vendedor de registro.
+- **Salida definitiva:** el CEO propone PayPal integrado en nuestra página; producto propone LLC + Stripe. Lo decide Sebas.
+
 ## 273 — Revisión de página bloqueada por el filtro de seguridad: se redibuja, no va a una persona
 
 - **Fecha:** 2026-11-18. Pedido por Sebas: el pedido de «Goodnight, Lu» (cuento para dormir) quedó en revisión manual. El dibujo de la página 10 (Lu en pijama, en la cama) había pasado la moderación, pero el revisor automático de Vertex devolvió `blockReason=PROHIBITED_CONTENT` dos veces (la misma llamada vuelve a bloquear) y la página fue a una persona con «revisión automática no disponible».

@@ -2014,6 +2014,14 @@
         "printing": "Imprimindo",
         "shipping": "A caminho",
         "delivered": "Entregue"
+      },
+      "awaiting": {
+        "title": "Aguardando seu pagamento",
+        "text": "Conclua o pagamento na aba da Gumroad. Quando for confirmado, esta página se atualiza sozinha e sua história começa a ser preparada. Pode levar alguns segundos.",
+        "paid": "Já paguei",
+        "reopen": "Abrir o pagamento de novo",
+        "notYet": "Ainda não recebemos a confirmação. Costuma levar menos de um minuto: esta página continua verificando sozinha.",
+        "slow": "Pagou e ainda não mudou? Veja seu e-mail: a Gumroad envia o recibo na hora. Se já passaram mais de 5 minutos, <link>fale com a gente</link> e resolvemos."
       }
     },
     "reorderSubtitle": "Você pede outra cópia impressa do mesmo livro, do jeito que ficou.",
@@ -2115,7 +2123,17 @@
       "text": "O PDF já é seu: baixe grátis quando quiser em Minhas histórias."
     },
     "reorderBack": "Voltar para Minhas histórias",
-    "includesPdf": "Inclui o ebook (PDF)"
+    "includesPdf": "Inclui o ebook (PDF)",
+    "handoff": {
+      "title": "Você vai pagar na Gumroad",
+      "text": "A Gumroad é o processador de pagamentos seguro da StoryNido. Ela abre em uma nova aba e esta fica aguardando o seu pagamento.",
+      "noAccount": "Não precisa criar conta: só seu e-mail e seu cartão.",
+      "methods": "Cartão de crédito ou débito e, dependendo do seu dispositivo, Apple Pay ou Google Pay. A cobrança é em dólares (USD) e, na União Europeia e no Reino Unido, a Gumroad soma o IVA do seu país.",
+      "comeBack": "Ao terminar, volte para esta aba: sua história começa a ser preparada sozinha e você recebe um e-mail.",
+      "go": "Ir para o pagamento",
+      "close": "Fechar",
+      "statement": "Na fatura do seu cartão vai aparecer Gumroad, não StoryNido. Se a Gumroad convidar você a criar uma conta (em inglês), não precisa."
+    }
   },
   "Pro": {
     "activation": {

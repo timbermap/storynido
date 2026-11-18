@@ -2014,6 +2014,14 @@
         "printing": "Printing",
         "shipping": "On its way",
         "delivered": "Delivered"
+      },
+      "awaiting": {
+        "title": "Waiting for your payment",
+        "text": "Finish paying in the Gumroad tab. Once it is confirmed, this page updates on its own and your story starts. It can take a few seconds.",
+        "paid": "I've paid",
+        "reopen": "Open the payment again",
+        "notYet": "We haven't received the confirmation yet. It usually takes less than a minute: this page keeps checking on its own.",
+        "slow": "Paid and nothing changed yet? Check your email: Gumroad sends the receipt right away. If more than 5 minutes have passed, <link>contact us</link> and we'll sort it out."
       }
     },
     "reorderSubtitle": "You're ordering another printed copy of the same book, exactly as it turned out.",
@@ -2115,7 +2123,17 @@
       "text": "The PDF is already yours: download it for free anytime from My stories."
     },
     "reorderBack": "Back to My stories",
-    "includesPdf": "Includes the ebook (PDF)"
+    "includesPdf": "Includes the ebook (PDF)",
+    "handoff": {
+      "title": "You'll pay on Gumroad",
+      "text": "Gumroad is StoryNido's secure payment processor. It opens in a new tab and this one waits for your payment.",
+      "noAccount": "No account needed: just your email and your card.",
+      "methods": "Credit or debit card and, depending on your device, Apple Pay or Google Pay. You are charged in US dollars (USD); in the EU and the UK, Gumroad adds your country's VAT.",
+      "comeBack": "When you finish, come back to this tab: your story starts on its own and you get an email.",
+      "go": "Go to payment",
+      "close": "Close",
+      "statement": "Your card statement will show Gumroad, not StoryNido. If Gumroad invites you to create an account, you don't need one."
+    }
   },
   "Pro": {
     "activation": {
