@@ -161,10 +161,14 @@ describe('modo sin foto', () => {
       describeCharacterSheet(sheet),
       describeCharacter('Sofi', 6, sheet, { ...avatar, distinctive: null }, ['hair']),
     ]) {
-      expect(description).toContain('outfit: white t-shirt and blue jeans');
+      expect(description).toContain('white t-shirt and blue jeans');
       expect(description).toContain('same outfit as in the reference sheet on every page');
       expect(description).not.toContain('dress the character for the activity');
     }
+    // La ropa de una foto de adulto se dibuja en versión de su edad (DECISIONS 267).
+    expect(describeCharacter('Sofi', 6, sheet, { ...avatar, distinctive: null }, [])).toContain(
+      "outfit: a 6-year-old child's version of white t-shirt and blue jeans",
+    );
   });
 
   it('la clave cambia si cambia un rasgo', () => {

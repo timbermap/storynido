@@ -795,6 +795,18 @@ one or two sentences: who is in the picture and who is not (the protagonist ${re
           }), the place, the time of day, the key object, and ONE single moment of the page (never two actions in a row).
 Draw only what the text says or implies; follow mustBeVisible / notVisible when given. A page with empty text: the moment the
 plan describes, told by the picture alone. No text, letters or signs in the image. Exactly ${String(request.pages.length)} prompts, in order.
+People who are not recurring characters: a relative of the protagonist (mother, father, grandparent, sibling, cousin) looks like a
+plausible family of the protagonist (a similar skin tone and a related hair color, never a stereotype)${
+            request.protagonistLook
+              ? `; the protagonist looks like this: ${request.protagonistLook}`
+              : ''
+          }; anyone else is clearly different from the protagonist. Say their age group and one clothing color.
+Clothes fit the place, weather, season and activity of the page: pyjamas in bed, a raincoat in the rain, a coat in the cold,
+swimwear in the water, sportswear for a sport; indoors at home, no jackets or outdoor shoes unless someone is arriving or leaving.${
+            request.age !== undefined
+              ? ` The protagonist is ${String(request.age)} years old: what they hold, wear and do fits that age, and anything risky has an adult nearby.`
+              : ''
+          }
 
 Pages (JSON):
 ${JSON.stringify(pages)}`,
@@ -862,9 +874,10 @@ Visual bible (English, fixed looks the illustrator repeats word for word):
   sport or activity, define what it is and what it is not (kiteboarding: "a small board with foot straps, pulled by a large arc-shaped
   kite on long lines; NO sail and NO mast"). Empty array if none.
 - places: up to 3 places where two or more scenes happen, each with a name and a fixed look. Empty array if none.
-- outfits: up to 3 special outfits of the protagonist, only for contexts where the everyday outfit of the reference sheet is impossible
-  (in the water, at night in pyjamas, in the snow), each with a context and a fixed look. Never describe the everyday outfit. Empty
-  array if none.
+- outfits: up to 3 special outfits of the protagonist, only for contexts where the everyday outfit of the reference sheet does not fit
+  the place, weather or activity (in the water, in bed in pyjamas, in the rain, in the cold or snow, a sport, a costume or uniform the
+  story names), each with a context and a fixed look suited to the protagonist's age. Never describe the everyday outfit. Empty array
+  if none.
 - In each scene: props (names from props that appear in it), place (a name from places, or null), outfit (a context from outfits, or
   null for the everyday outfit) and shot (wide, medium, close-up or high angle, serving the beat; never the same shot three scenes in
   a row).
@@ -964,7 +977,8 @@ ${request.prompt}`,
         {
           text: `You are a quality reviewer for a children's picture book, not a salesperson. Evaluate this ONE illustration against the
 page text, the scene plan and the approved character sheet. Look for: internal inconsistencies, improbable anatomy (hands, limbs, faces),
-incoherent clothing or accessories, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
+incoherent clothing or accessories (or clothes that do not fit the place, weather or activity: a jacket in bed, street clothes in the water), relatives
+who look nothing like the protagonist's family, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
 below (a recurring object, place or outfit drawn differently is a repair), cropped heads, and any letters or
 words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks).
 Never claim to verify biometric identity or exact likeness to a real person; your evaluation is preliminary and may mark uncertainty.
