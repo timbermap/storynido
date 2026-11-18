@@ -162,7 +162,9 @@ export function CharacterProfile({ childId }: { childId: string }) {
     setUploading(true);
     setMessage(null);
     try {
-      const rejected = await uploadChildPhotos(childId, chosen, locale);
+      const rejected = await uploadChildPhotos(childId, chosen, locale, {
+        guardian: details?.professional === true,
+      });
       await reloadProfile();
       if (rejected.length > 0) setMessage({ text: rejectedText(rejected), error: true });
     } catch {
@@ -368,6 +370,7 @@ export function CharacterProfile({ childId }: { childId: string }) {
           onFiles={(chosen) => void addPhotos(chosen)}
           onRemove={(index) => void removePhoto(profile.photoIds[index] ?? '')}
           confirmRemove={t('profilePhotoConfirmOne')}
+          guardian={details.professional === true}
         />
         <p className="text-sm text-muted-foreground">
           {profile.photos > 0 && profile.photosExpireAt
