@@ -54,6 +54,23 @@ describe('plantillas de prompts', () => {
     expect(block).toContain('Secundaria: Valentía');
   });
 
+  it('la idea de la ficha va en el prompt y manda sobre los gustos; un cuento para dormir baja la energía', () => {
+    expect(buildStoryPrompt(base)).not.toContain('Idea de esta historia');
+    const prompt = buildStoryPrompt({
+      ...base,
+      likes: ['gimnasia'],
+      premise: 'La rutina de dormir contada con rima: el baño, el pijama y el último abrazo.',
+      bedtime: true,
+    });
+    expect(prompt).toContain('Idea de esta historia');
+    expect(prompt).toContain('La rutina de dormir contada con rima');
+    expect(prompt).toContain('nunca cambian la idea');
+    expect(prompt).toContain('cuento para leer antes de dormir');
+    expect(prompt).not.toContain('Un objetivo claro y un desafío real');
+    expect(buildStoryPrompt(base)).toContain('Un objetivo claro y un desafío real');
+    expect(prompt).toContain('saltar en la cama');
+  });
+
   it('agrega los recuerdos de la familia solo si hay alguno', () => {
     expect(buildStoryPrompt(base)).not.toContain('Detalles reales de la familia');
     const prompt = buildStoryPrompt({

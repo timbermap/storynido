@@ -807,6 +807,9 @@ export class PreviewService {
       template: story.textPromptTemplate,
       // Historia de otra edad (Buenas noches, de 0 a 2, para una nena de 5): se adapta.
       storyAges: { min: story.ageMin, max: story.ageMax },
+      // La idea de la ficha manda sobre los gustos del chico (DECISIONS 274).
+      premise: story.summary[book.language] || null,
+      bedtime: story.tags.includes('dormir'),
       memories,
       event,
       goal,
