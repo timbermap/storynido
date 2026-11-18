@@ -234,20 +234,30 @@ export function BookOptions({
                   <span className="text-sm leading-snug text-muted-foreground">
                     {t(`lengths.${length}.text`)}
                   </span>
-                  <span className="mt-auto flex flex-wrap gap-1.5 pt-2">
-                    <span className="rounded-full border bg-card px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
-                      {t('chipEbook')}
-                    </span>
-                    {printable && (
+                  {/* Con solo el ebook a la venta no hace falta decir «Ebook» dos veces: va solo el precio. */}
+                  {printable && (
+                    <span className="mt-auto flex flex-wrap gap-1.5 pt-2">
+                      <span className="rounded-full border bg-card px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
+                        {t('chipEbook')}
+                      </span>
                       <span className="rounded-full bg-accent px-2.5 py-1 text-xs leading-none font-bold whitespace-nowrap">
                         {printLabel}
                       </span>
-                    )}
-                  </span>
+                    </span>
+                  )}
                   {lengthPrice?.digital != null && (
                     // El precio exacto de esa extensión (el mismo del pago), sin envío.
-                    <span className="grid gap-0.5 border-t pt-2 text-xs font-semibold tabular-nums">
-                      <span>{t('priceDigital', { price: money(lengthPrice.digital) })}</span>
+                    <span
+                      className={cn(
+                        'grid gap-0.5 border-t pt-2 text-xs font-semibold tabular-nums',
+                        !printable && 'mt-auto',
+                      )}
+                    >
+                      <span>
+                        {printable
+                          ? t('priceDigital', { price: money(lengthPrice.digital) })
+                          : money(lengthPrice.digital)}
+                      </span>
                       {printable && lengthPrice.printed != null && (
                         <span>
                           {t(
