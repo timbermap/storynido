@@ -10,7 +10,13 @@ import {
   type AddressValidator,
   type ProviderRegistry,
 } from '@storynido/providers';
-import { ProviderError, STEP_POLICIES, type PageReview, type PrintItem } from '@storynido/shared';
+import {
+  ContentBlockedError,
+  ProviderError,
+  STEP_POLICIES,
+  type PageReview,
+  type PrintItem,
+} from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import { unzipSync } from 'fflate';
 import Fastify from 'fastify';
@@ -1081,6 +1087,73 @@ describe('generación del libro (fase 09)', () => {
     expect(reviews.mock.calls.filter(([request]) => request.pageIndex === 1)).toHaveLength(2);
     const human = (await qaCodes()).find((event) => event.code === 'page_human_review');
     expect(human?.detail).toMatchObject({ pageIndex: 3, reason: 'review_unavailable' });
+  });
+
+  it('el filtro de seguridad bloquea la revisión de una página: se redibuja más pudorosa y el libro termina solo', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const text = providers.ai().text;
+    const original = text.reviewPage.bind(text);
+    let blockedOnce = false;
+    const reviews = vi.spyOn(text, 'reviewPage').mockImplementation(async (request) => {
+      if (request.pageIndex === 3 && !blockedOnce) {
+        blockedOnce = true;
+        throw new ContentBlockedError(
+          'vertex',
+          'revisión de página: bloqueado por seguridad (blockReason=PROHIBITED_CONTENT)',
+        );
+      }
+      return original(request);
+    });
+    const generate = vi.spyOn(providers.ai().image, 'generateIllustration');
+    // Un aviso de una corrida anterior que falló por lo mismo: se cierra solo al terminar.
+    await db.collection('adminAlerts').add({
+      kind: 'pipeline_failed',
+      orderId: 'o1',
+      step: 'quality_check',
+      message: 'Revisión manual: página 3 (revisión automática no disponible)',
+      createdAt: new Date(),
+      resolvedAt: null,
+    });
+    await setup(providers).run();
+
+    expect((await order()).status).toBe('ready');
+    // El bloqueo no se repite igual: 1 llamada bloqueada + 1 revisión del dibujo nuevo.
+    expect(reviews.mock.calls.filter(([request]) => request.pageIndex === 3)).toHaveLength(2);
+    const redraw = generate.mock.calls.at(-1)?.[0].prompt ?? '';
+    expect(redraw).toContain('fully and modestly clothed');
+    const codes = await qaCodes();
+    expect(codes.find((event) => event.code === 'page_review_blocked')?.detail).toMatchObject({
+      pageIndex: 3,
+    });
+    expect(codes.find((event) => event.code === 'page_repair')?.detail).toMatchObject({
+      pageIndex: 3,
+      finalStatus: 'repaired',
+    });
+    const alerts = await db.collection('adminAlerts').where('orderId', '==', 'o1').get();
+    expect(alerts.docs.map((doc) => doc.get('resolvedBy') as unknown)).toEqual(['system']);
+  });
+
+  it('si el filtro de seguridad también bloquea la revisión del dibujo nuevo, esa página va a una persona', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    const text = providers.ai().text;
+    const original = text.reviewPage.bind(text);
+    const reviews = vi.spyOn(text, 'reviewPage').mockImplementation(async (request) => {
+      if (request.pageIndex === 3) {
+        throw new ContentBlockedError('vertex', 'revisión de página: bloqueado por seguridad');
+      }
+      return original(request);
+    });
+    await setup(providers).run();
+
+    const failed = await order();
+    expect(failed.status).toBe('qa_failed');
+    expect((failed.pipeline as { error: string }).error).toContain('página 3');
+    expect(reviews.mock.calls.filter(([request]) => request.pageIndex === 3)).toHaveLength(2);
+    expect(
+      (await qaCodes()).find((event) => event.code === 'page_human_review')?.detail,
+    ).toMatchObject({ pageIndex: 3, reason: 'review_unavailable' });
   });
 
   it('una reparación que la moderación rechaza es un intento fallido de esa página, no del QA', async () => {

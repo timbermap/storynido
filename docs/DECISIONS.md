@@ -2868,3 +2868,9 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Mientras tanto:** un consejo que se turna cada 9 s (editar textos, pedir otra ilustración, la muestra es gratis, releer, el personaje queda guardado; WhatsApp en Celebraciones), fuera del aviso de lectores de pantalla.
 - **Salir:** «Podés cerrar esta pantalla» queda abajo, sin caja, con el correo al que avisamos. En el flujo con revisión del parecido, la primera parte no manda correo: el texto dice que lo encuentra listo para revisar en Mis cuentos (antes prometía un correo que no salía).
 - La barra de avance de DECISIONS 262 sigue igual.
+
+## 273 — Revisión de página bloqueada por el filtro de seguridad: se redibuja, no va a una persona
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: el pedido de «Goodnight, Lu» (cuento para dormir) quedó en revisión manual. El dibujo de la página 10 (Lu en pijama, en la cama) había pasado la moderación, pero el revisor automático de Vertex devolvió `blockReason=PROHIBITED_CONTENT` dos veces (la misma llamada vuelve a bloquear) y la página fue a una persona con «revisión automática no disponible».
+- **Cambio:** un bloqueo del filtro de seguridad es `ContentBlockedError` (no reintentable). El control de calidad no repite la misma llamada: redibuja esa página una vez, con ropa completa y pudorosa (si está en la cama, tapada hasta los hombros), plano tranquilo y escena simple, y revisa el dibujo nuevo. No se intenta esquivar el filtro con la misma imagen. Si también bloquea, la página va a una persona como antes. Cuenta dentro de los topes de reparación. Código de calidad nuevo `page_review_blocked`.
+- **Avisos:** cuando un pedido termina bien (por ejemplo, tras la revisión manual y el reintento), los avisos `pipeline_failed` abiertos de ese pedido se cierran solos (`resolvedBy: 'system'`). La portada Hoy tampoco muestra avisos viejos de pedidos que ya no están en revisión.

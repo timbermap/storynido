@@ -15,6 +15,8 @@ export const QA_CODES = [
   'page_repair',
   'page_human_review',
   'page_needs_reference',
+  // El filtro de seguridad no dejó revisar la página: se redibuja más pudorosa y simple.
+  'page_review_blocked',
   'snapshot_mismatch',
   'layout_blocked',
   // Revisión del libro entero: una página se apartaba de las demás (objeto, lugar, ropa, personaje).

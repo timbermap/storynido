@@ -11,6 +11,18 @@ export class ProviderError extends Error {
   }
 }
 
+/**
+ * El filtro de seguridad del proveedor bloqueó el pedido o la respuesta. No es una falla pasajera:
+ * repetir la misma llamada vuelve a bloquear, así que no es reintentable. El mensaje conserva
+ * «bloqueado por seguridad» (hay código que lo busca).
+ */
+export class ContentBlockedError extends ProviderError {
+  constructor(provider: string, message: string) {
+    super(provider, message, false);
+    this.name = 'ContentBlockedError';
+  }
+}
+
 /** La firma de un webhook no es válida: la request se rechaza sin procesarla. */
 export class WebhookSignatureError extends ProviderError {
   constructor(provider: string, message = 'Firma de webhook inválida') {
