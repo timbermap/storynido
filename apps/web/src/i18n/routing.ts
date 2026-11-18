@@ -57,6 +57,8 @@ export const routing = defineRouting({
     '/create': { es: '/crear', en: '/create', pt: '/criar' },
     '/new': { es: '/nuevo', en: '/new', pt: '/novo' },
     '/faq': { es: '/preguntas-frecuentes', en: '/faq', pt: '/perguntas-frequentes' },
+    // Cómo funciona: precios, entrega y formatos (DECISIONS 251).
+    '/how-it-works': { es: '/como-funciona', en: '/how-it-works', pt: '/como-funciona' },
     '/create/[bookId]': { es: '/crear/[bookId]', en: '/create/[bookId]', pt: '/criar/[bookId]' },
     // Pago y pedido (la API arma la URL de vuelta del pago con estas mismas rutas).
     '/checkout/[bookId]': {

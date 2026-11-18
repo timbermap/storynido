@@ -64,7 +64,7 @@ export async function SiteHeader() {
             </NavLink>
           ))}
           <Link
-            href={{ pathname: '/', hash: HOW_IT_WORKS_ID }}
+            href="/how-it-works"
             className="ml-3 rounded-full px-3 py-2 whitespace-nowrap text-muted-foreground transition-colors hover:text-primary"
           >
             {t('howItWorksShort')}
@@ -110,7 +110,7 @@ export async function SiteHeader() {
                 );
               })}
               <Link
-                href={{ pathname: '/', hash: HOW_IT_WORKS_ID }}
+                href="/how-it-works"
                 className="rounded-2xl px-4 py-3.5 text-lg font-semibold text-foreground/80"
               >
                 {t('howItWorksShort')}

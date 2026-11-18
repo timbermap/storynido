@@ -259,3 +259,18 @@ test('idioma: visitar una página en otro idioma no lo fija y no pregunta nada',
   // Haber visto la página en inglés no cambia el idioma de entrada.
   expect((await context.cookies()).some((cookie) => cookie.name === 'sn_lang')).toBe(false);
 });
+
+test('Cómo funciona: página propia con precios del país, entrega y «Empezar gratis»', async ({
+  page,
+}) => {
+  await page.goto('/es/como-funciona');
+  await expectAccessible(page);
+  await expectNoHorizontalScroll(page);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  // Los precios del ebook salen de la oferta del país, no del texto.
+  await expect(page.locator('#precios dd').first()).toContainText(/\d/);
+  await expect(page.getByRole('link', { name: /Empezar gratis/ }).first()).toHaveAttribute(
+    'href',
+    /\/es\/ingresar/,
+  );
+});

@@ -47,6 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...entry(() => '/professionals', 0.9),
     ...entry(() => '/stories', 0.9),
     ...entry(() => '/families/stories', 0.9),
+    ...entry(() => '/how-it-works', 0.8),
     ...entry(() => '/events/themes', 0.8),
     ...entry(() => '/professionals/templates', 0.8),
     ...entry(() => '/lessons', 0.8),

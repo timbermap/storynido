@@ -2308,5 +2308,59 @@
     },
     "loading": "Loading your stories…",
     "coverAlt": "Sample cover: {title}"
+  },
+  "HowItWorks": {
+    "metaTitle": "How it works: prices, delivery and formats",
+    "metaDescription": "Create your child's personalized story for free, see the preview and pay only if you love it. The ebook arrives instantly; prices include taxes.",
+    "kicker": "How it works",
+    "title": "Their story, in three steps",
+    "lead": "Create it for free, see the preview and pay only if you love it. The ebook arrives instantly.",
+    "cta": "Start for free",
+    "ctaMember": "Create a story",
+    "seePrices": "See prices",
+    "note": "Create your free account with Google or with a link to your email.",
+    "stepsTitle": "It's that simple",
+    "steps": {
+      "1": {
+        "title": "Tell us about the hero",
+        "text": "Their name, age, what they love and a photo. You can also do it without a photo."
+      },
+      "2": {
+        "title": "See the free preview",
+        "text": "Pick the adventure and see their story before you pay."
+      },
+      "3": {
+        "title": "Pay only if you love it",
+        "text": "Choose the format, pay and receive it instantly."
+      }
+    },
+    "prices": {
+      "title": "What you get and what it costs",
+      "subtitle": "Today everything is digital and arrives instantly. Printed books are coming soon.",
+      "subtitlePrint": "Digital in an instant, or printed and ready to give.",
+      "ebookName": "Digital story (ebook)",
+      "ebookText": "A PDF to read on a phone, tablet or computer, or print at home. The price depends on the length.",
+      "kitText": "A WhatsApp invitation, decorations to print at home and mini stories for the guests, all with the same character.",
+      "from": "From {price}",
+      "inCreator": "You see your country's price in the creator, before paying."
+    },
+    "delivery": {
+      "title": "Delivery, payment and photos",
+      "digitalTitle": "Arrives instantly",
+      "digitalText": "As soon as you pay, the ebook and the kit are in My stories to download anytime.",
+      "printSoonTitle": "Printed: coming soon",
+      "printSoonText": "Softcover, hardcover and stapled booklet. We'll let you know when you can order them in your country.",
+      "printTitle": "Printed, to your door",
+      "printText": "Printed and delivered in {min} to {max} days. Shipping is calculated with your address, before you pay.",
+      "printTextNoEta": "Printed and shipped to your door. Shipping is calculated with your address, before you pay.",
+      "pricesTitle": "Final price, no surprises",
+      "pricesTextTax": "Prices in US dollars with taxes included. You see the total before paying.",
+      "pricesText": "Prices in US dollars. You see the total before paying.",
+      "photosTitle": "Photos taken care of",
+      "photosText": "Used only to create the character and deleted automatically after 30 days.",
+      "more": "More questions? See the <faq>FAQ</faq>."
+    },
+    "finalTitle": "Start their story today",
+    "finalText": "Creating your account and the preview is free."
   }
 }

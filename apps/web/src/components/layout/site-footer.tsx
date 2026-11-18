@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { CookiePreferencesButton } from './cookie-preferences-button';
 import { LanguageSwitcher } from './language-switcher';
 import { Logo } from './logo';
-import { AUDIENCE_TONES, HOW_IT_WORKS_ID } from './site-header';
+import { AUDIENCE_TONES } from './site-header';
 
 type Href = ComponentProps<typeof Link>['href'];
 
@@ -67,7 +67,7 @@ export async function SiteFooter() {
       links: [
         { href: '/families', label: tNav('menuFamilies') },
         { href: '/stories', label: tNav('allStories') },
-        { href: { pathname: '/', hash: HOW_IT_WORKS_ID }, label: tNav('howItWorks') },
+        { href: '/how-it-works', label: tNav('howItWorks') },
         { href: '/create', label: tNav('familiesCreate') },
       ],
     },
