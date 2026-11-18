@@ -38,7 +38,7 @@ Qué hacer en el día a día y cuando algo falla. Los comandos de `gcloud` lleva
 
 ## 4. Deploys y vuelta atrás
 
-- **Staging:** automático al terminar el CI de `main` en verde (Firestore, `api` y `worker`). Web y admin: `firebase deploy --only apphosting --project storynido-staging`.
+- **Staging:** automático al terminar el CI de `main` en verde: Firestore, `api`, `worker`, web y admin (DECISIONS 260). Para volver a publicar sin un push: Actions → Deploy → Run workflow → staging (o `gh workflow run deploy.yml -f environment=staging`). A mano sigue andando `firebase deploy --only apphosting --project storynido-staging`.
 - **Producción:** al publicar un tag `v*` (por ejemplo `git tag v1.0.0 && git push --tags`) o desde Actions → Deploy → Run workflow.
 - **Volver a la revisión anterior de Cloud Run:**
   ```bash

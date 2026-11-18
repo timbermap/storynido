@@ -39,6 +39,31 @@ jobs:
       - name: Deploy
         run: pnpm --filter @storynido/firebase exec firebase deploy --only firestore --project "${{ vars.GCP_PROJECT_ID }}" --config ../firebase.json --non-interactive
 
+  # Web y admin (App Hosting): solo staging por ahora; producción sigue a mano (DECISIONS 260).
+  apphosting:
+    name: web y admin → ${{ inputs.environment }}
+    if: inputs.environment == 'staging'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 30
+    concurrency:
+      group: deploy-${{ inputs.environment }}-apphosting
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+      # Sube el código (respeta .gitignore) y App Hosting arma y publica los dos backends en paralelo.
+      - name: Deploy
+        run: npx --yes firebase-tools@15.34.1 deploy --only apphosting --project "${{ vars.GCP_PROJECT_ID }}" --non-interactive
+
   deploy:
     name: ${{ matrix.service }} → ${{ inputs.environment }}
     runs-on: ubuntu-latest

@@ -213,3 +213,9 @@ variable "api_keep_warm" {
   default     = false
   description = "Ping cada 10 minutos a /health para evitar arranques en frío con mínimo 0 instancias."
 }
+
+variable "apphosting_ci_deploy" {
+  type        = bool
+  default     = false
+  description = "Deja que el deployer de GitHub Actions publique la web y el admin (App Hosting) en cada deploy. Requiere que los backends de App Hosting ya existan (DECISIONS 260)."
+}
