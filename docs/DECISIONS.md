@@ -2879,3 +2879,9 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
   - Medios: tarjeta, Apple Pay, Google Pay y PayPal (si el vendedor lo tiene); métodos locales (iDEAL, Bancontact, UPI, Pix con QR) existen detrás de flags de Gumroad, sin control del vendedor.
 - **Decisión:** con un cobrador que no vuelve solo (Gumroad), «Pagar» abre primero un diálogo que explica el pago (procesador seguro, sin crear cuenta, tarjeta o Apple/Google Pay, en USD, volver a esta pestaña). «Ir a pagar» abre Gumroad en una pestaña nueva y lleva esta a `/pedido/<id>`, que muestra «Esperando tu pago», consulta cada 4 s y pasa sola a «pago confirmado» cuando llega el ping. «Ya pagué» consulta en el momento; «Abrir el pago otra vez» reabre la URL guardada en `sessionStorage`. Dodo y el simulado siguen yendo directo (`components/checkout/payment-handoff.tsx`, `awaiting-payment.tsx`).
 - **Textos:** es (tú), voseo para AR/UY (`es-voseo.json`, a mano), pt y en.
+
+## 272 — «Leer el cuento» también en «Tu pedido»
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: el detalle del pedido entregado solo ofrecía «Descargar el PDF»; el visor de DECISIONS 254 estaba solo en Terminados.
+- **Decisión:** el detalle del pedido muestra «Leer el cuento» cuando el pedido ya tiene el PDF limpio del libro (`canDownload` y el archivo `book`), igual que la estantería: ebook, impreso y el librito del kit. Las tarjetas impresas no. En un libro, leer es el botón principal y la descarga pasa a secundario; en el kit, «Descargar todo» sigue principal y leer queda al lado.
+- **Volver:** el enlace lleva `?desde=pedido` y la X del visor vuelve al pedido (desde Terminados sigue volviendo a Terminados).

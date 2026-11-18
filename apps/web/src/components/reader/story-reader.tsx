@@ -19,6 +19,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type ComponentProps,
   type ReactNode,
 } from 'react';
 
@@ -78,6 +79,8 @@ export interface StoryReaderProps {
   downloading?: boolean;
   /** Algo para mostrar en vez del libro (no está listo, falta la sesión). */
   blocked?: ReactNode;
+  /** A dónde lleva la X (por defecto, Terminados de Mis cuentos). */
+  closeHref?: ComponentProps<typeof Link>['href'];
 }
 
 /**
@@ -92,6 +95,7 @@ export function StoryReader({
   onDownload,
   downloading = false,
   blocked,
+  closeHref = { pathname: '/my-stories', query: { estado: 'terminados' } },
 }: StoryReaderProps) {
   const t = useTranslations('Reader');
   const rootRef = useRef<HTMLDivElement>(null);
@@ -334,7 +338,7 @@ export function StoryReader({
       {/* Arriba: cerrar, el título y las herramientas. */}
       <header className="flex items-center gap-2 px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-1 sm:px-4">
         <Link
-          href={{ pathname: '/my-stories', query: { estado: 'terminados' } }}
+          href={closeHref}
           aria-label={t('close')}
           className={cn(
             buttonVariants({ variant: 'ghost', size: 'icon' }),

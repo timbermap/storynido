@@ -3,6 +3,7 @@
 import { ApiError, type BookFormat, type CountryCode, type PublicOrder } from '@storynido/shared';
 import {
   BookHeart,
+  BookOpen,
   Download,
   FlaskConical,
   Loader2,
@@ -138,6 +139,14 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
     (item): item is { format: BookFormat; quantity: number } => item.format !== 'card',
   );
   const format = isKit ? null : (bookItem?.format ?? null);
+  // Leer online (DECISIONS 254): el mismo visor de Mis cuentos → Terminados, cuando el pedido ya
+  // tiene el PDF limpio del libro (ebook, impreso o el librito del kit). Las tarjetas no.
+  const readable = order.canDownload && order.files.includes('book') && !isCards;
+  const readHref = {
+    pathname: '/my-stories/read/[orderId]',
+    params: { orderId: order.orderId },
+    query: { desde: 'pedido' },
+  } as const;
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="grid content-start gap-6">
@@ -170,8 +179,20 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 {tKit('downloadAll')}
               </Button>
             )}
+            {/* Un libro: leer es lo principal y la descarga queda al lado. En el kit lo principal
+                sigue siendo bajar todo; el librito se lee al lado. */}
+            {readable && !isKit && (
+              <Link href={readHref} data-track="leer" className={buttonVariants()}>
+                <BookOpen aria-hidden="true" />
+                {t('read')}
+              </Link>
+            )}
             {order.canDownload && !isKit && !isCards && (
-              <Button disabled={busy !== null} onClick={() => void run('download')}>
+              <Button
+                variant={readable ? 'outline' : 'default'}
+                disabled={busy !== null}
+                onClick={() => void run('download')}
+              >
                 {busy === 'download:book' ? (
                   <Loader2 className="animate-spin" aria-hidden="true" />
                 ) : (
@@ -179,6 +200,16 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 )}
                 {t('download')}
               </Button>
+            )}
+            {readable && isKit && (
+              <Link
+                href={readHref}
+                data-track="leer"
+                className={buttonVariants({ variant: 'outline' })}
+              >
+                <BookOpen aria-hidden="true" />
+                {t('read')}
+              </Link>
             )}
             {order.tracking?.url && (
               <a

@@ -39,7 +39,13 @@ async function fetchWithProgress(url: string, onProgress: (fraction: number) => 
  * El visor de un pedido propio: solo el dueño, y solo cuando el PDF del libro ya está (la API lo
  * comprueba al firmar la URL). Es el mismo PDF limpio que se descarga, sin marca de agua.
  */
-export function OrderReader({ orderId }: { orderId: string }) {
+export function OrderReader({
+  orderId,
+  fromOrder = false,
+}: {
+  orderId: string;
+  fromOrder?: boolean;
+}) {
   const t = useTranslations('Reader');
   const { signedIn, loading } = useAuth();
   const router = useRouter();
@@ -88,6 +94,8 @@ export function OrderReader({ orderId }: { orderId: string }) {
     <StoryReader
       load={load}
       storageKey={orderId}
+      // Abierto desde «Tu pedido»: la X vuelve al pedido, no a Mis cuentos.
+      closeHref={fromOrder ? { pathname: '/order/[orderId]', params: { orderId } } : undefined}
       onDownload={notReady ? undefined : () => void download()}
       downloading={downloading}
       blocked={

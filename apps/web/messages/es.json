@@ -1991,6 +1991,7 @@
       "simulateText": "Los pagos son simulados en este ambiente: nadie paga nada.",
       "simulate": "Simular el pago",
       "progress": "Paso {current} de {total}",
+      "read": "Leer el cuento",
       "download": "Descargar el PDF",
       "track": "Seguir el envío",
       "reorder": "Pedir de nuevo",
