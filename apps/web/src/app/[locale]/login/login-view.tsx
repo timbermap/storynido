@@ -20,8 +20,8 @@ export function LoginView() {
   const router = useRouter();
   const next = useSearchParams().get('next');
 
-  // Con sesión: a la home con sesión (solo se vuelve a un pago o a un pedido). Nunca al creador ni a
-  // los ajustes.
+  // Con sesión: a la home con sesión. Solo se vuelve a un pago, a un pedido o, desde «Empezar
+  // gratis», a la portada del creador (DECISIONS 252).
   useEffect(() => {
     if (loading || !signedIn) return;
     const target = afterLoginPath(safePath(next));

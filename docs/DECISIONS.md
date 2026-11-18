@@ -2686,3 +2686,10 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Medición:** `how_cta_top`, `how_cta_bottom` y `how_kit`.
 - **Voseo:** claves nuevas en `es-voseo.json` (con `generar.py` y tres arreglos manuales).
 - **Test:** `e2e/tests/landings.spec.ts` («Cómo funciona: página propia…»).
+
+## 252 — «Empezar gratis» sin sesión: siempre a ingresar y, después, al creador
+
+- **Fecha:** 2026-11-18. Pedido en el hilo de la landing al ver que el mismo botón llevaba a dos lugares (el del menú al creador, el del hero a ingresar).
+- **Decisión:** sin sesión, todos los «Empezar gratis» (menú, hero de la home y de /families, botón fijo del celular y cierre de /families) llevan a `/ingresar?next=/<idioma>/crear` (`useStartFreeHref`). Después de entrar, `afterLoginPath` vuelve a la portada del creador (`creatorReturn` en `lib/after-login.ts`), también con el enlace mágico (lee el `next` de la página de ingresar guardada). Solo se acepta la portada del creador, nunca un borrador ni otra página; pago y pedido siguen teniendo prioridad y todo lo demás cae en la home con sesión (DECISIONS 110, 152 y 220).
+- **Sin cambios:** «Diseñar el kit» (Celebraciones) y «Probar gratis» (Profesionales) siguen arrancando el creador en su línea.
+- **Tests:** `apps/web/src/lib/after-login.test.ts`, `e2e/tests/landings.spec.ts`.

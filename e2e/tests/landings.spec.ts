@@ -84,7 +84,7 @@ for (const [locale, pages] of Object.entries(PAGES)) {
             line
               ? `a[href*="line=${line}"]:visible`
               : // Sin sesión, el botón de Familias lleva al login (y de ahí a la home con sesión).
-                'main a[href$="/ingresar"]:visible, main a[href$="/login"]:visible, main a[href$="/entrar"]:visible',
+                'main a[href*="/ingresar"]:visible, main a[href*="/login"]:visible, main a[href*="/entrar"]:visible',
           )
           .last();
         await expect(create).toBeVisible();
@@ -106,7 +106,7 @@ for (const [locale, pages] of Object.entries(PAGES)) {
       await expect(
         page
           .locator(
-            'main a[href$="/ingresar"]:visible, main a[href$="/login"]:visible, main a[href$="/entrar"]:visible',
+            'main a[href*="/ingresar"]:visible, main a[href*="/login"]:visible, main a[href*="/entrar"]:visible',
           )
           .first(),
       ).toBeVisible();
@@ -224,12 +224,14 @@ test('el logo vuelve a la home: arriba de todo y sin hash', async ({ page }) => 
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
 });
 
-test('Empezar gratis: sin sesión lleva al login', async ({ page }) => {
+test('Empezar gratis: sin sesión todos llevan a ingresar y de ahí al creador', async ({ page }) => {
   await page.goto('/es');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
-  await expect(
-    page.locator('main').getByRole('link', { name: 'Empezar gratis' }).first(),
-  ).toHaveAttribute('href', /\/ingresar$/);
+  const links = page.getByRole('link', { name: 'Empezar gratis' });
+  await expect(links.first()).toBeVisible();
+  for (const link of await links.all()) {
+    await expect(link).toHaveAttribute('href', /\/es\/ingresar\?next=%2Fes%2Fcrear$/);
+  }
 });
 
 test('¿Para quién es?: los links siguen andando al volver atrás desde una landing', async ({

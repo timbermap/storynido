@@ -8,10 +8,11 @@ import { useLatestDraft } from '@/components/layout/use-account-activity';
 import { Link } from '@/i18n/navigation';
 
 import { useAuth } from './auth-provider';
+import { useStartFreeHref } from './start-free';
 
 /**
- * "Empezar mi cuento" de la home. Sin sesión lleva al login (y de ahí a Mis cuentos). Con sesión
- * ya no se vende nada: si hay un borrador, "Continuar mi cuento"; si no, "Crear otro cuento", que
+ * «Empezar gratis» de la home. Sin sesión lleva a ingresar y, después, al creador (DECISIONS 252).
+ * Con sesión ya no se vende nada: si hay un borrador, "Continuar mi cuento"; si no, "Crear otro cuento", que
  * baja a "¿Para quién es?" para elegir la línea.
  */
 export function StartStoryLink({
@@ -29,9 +30,10 @@ export function StartStoryLink({
 }) {
   const { signedIn } = useAuth();
   const draft = useLatestDraft();
+  const startFree = useStartFreeHref();
   if (!signedIn) {
     return (
-      <Link href="/login" className={className}>
+      <Link href={startFree} className={className}>
         {children}
         <ArrowRight aria-hidden="true" />
       </Link>

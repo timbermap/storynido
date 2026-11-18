@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { useConsent } from '@/components/consent/consent-provider';
+import { useStartFreeHref } from '@/components/auth/start-free';
 import { buttonVariants } from '@/components/ui/button';
 import { Link, usePathname } from '@/i18n/navigation';
 
@@ -21,6 +22,7 @@ export function StickyCta() {
   const { signedIn, loading } = useAuth();
   const { choice } = useConsent();
   const [past, setPast] = useState(false);
+  const startFree = useStartFreeHref();
 
   useEffect(() => {
     const onScroll = () => {
@@ -43,7 +45,8 @@ export function StickyCta() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[rgb(38_50_74/0.08)] bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
       <Link
-        href="/login"
+        // «Empezar gratis» va a ingresar y de ahí al creador (DECISIONS 252).
+        href={pathname === '/events' || pathname === '/professionals' ? '/login' : startFree}
         data-track="sticky_cta"
         className={buttonVariants({ size: 'lg', className: 'w-full' })}
       >
