@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { CountryOptions } from '@/components/country-options';
 import { api } from '@/lib/api';
 
+import { usePaymentHandoff } from './payment-handoff';
 import { PriceSummary } from './price-summary';
 
 type AddressDraft = Omit<Address, 'country' | 'taxId' | 'placeId' | 'pin'>;
@@ -75,6 +76,9 @@ export function CardsCheckout({
   const [quote, setQuote] = useState<PriceSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const handoff = usePaymentHandoff(() => {
+    setPaying(false);
+  });
 
   useEffect(() => {
     if (!signedIn) return;
@@ -152,7 +156,7 @@ export function CardsCheckout({
     setPaying(true);
     setError(null);
     try {
-      const { checkoutUrl } = await api('createCards', {
+      const result = await api('createCards', {
         body: {
           sourceOrderId,
           cards,
@@ -162,7 +166,7 @@ export function CardsCheckout({
           analyticsConsent: choice?.analytics ?? false,
         },
       });
-      window.location.assign(checkoutUrl);
+      handoff.start(result);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : t('error'));
       setPaying(false);
@@ -193,6 +197,7 @@ export function CardsCheckout({
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      {handoff.dialog}
       <div className="grid content-start gap-8">
         <fieldset className="grid gap-3">
           <legend className="mb-1 text-lg font-semibold">{t('piecesTitle')}</legend>

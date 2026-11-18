@@ -28,6 +28,7 @@ import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { trackConversion } from '@/lib/conversions';
 
+import { AwaitingPayment } from './awaiting-payment';
 import { PriceSummary } from './price-summary';
 
 /** «Imprimir tarjetas» del kit: apagado por defecto (NEXT_PUBLIC_KIT_PRINT_CARDS=true lo prende). */
@@ -46,6 +47,8 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   const [order, setOrder] = useState<PublicOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  // «Ya pagué»: vuelve a consultar en el momento (reinicia la consulta periódica).
+  const [checkNow, setCheckNow] = useState(0);
   const tKit = useTranslations('Checkout.kit');
   // Compra: cuando el pedido ya está pagado (una sola vez por pedido).
   const paidOrder = order && !UNPAID.has(order.status) ? order : null;
@@ -82,7 +85,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [orderId, signedIn, t]);
+  }, [orderId, signedIn, t, checkNow]);
 
   async function run(kind: 'payment' | 'print' | 'download', file = 'book') {
     setBusy(kind === 'download' ? `download:${file}` : kind);
@@ -143,6 +146,14 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
           {isKit && order.status === 'ready' ? tKit('ready') : t(`status.${order.status}`)}
         </p>
         <OrderTimeline status={order.status} print={print} />
+        {order.status === 'pending_payment' && !order.canSimulatePayment && (
+          <AwaitingPayment
+            orderId={order.orderId}
+            onCheck={() => {
+              setCheckNow((count) => count + 1);
+            }}
+          />
+        )}
         {order.progress && <BookProgressView progress={order.progress} />}
 
         {(order.canDownload ||
