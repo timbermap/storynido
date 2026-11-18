@@ -36,6 +36,7 @@ import { formatPrice } from '@/lib/format';
 import { reorderStart } from '@/lib/reorder';
 import { cn } from '@/lib/utils';
 import { MAPS_API_KEY, type LatLng } from '@/lib/google-maps';
+import { usePaymentHandoff } from './payment-handoff';
 import { AddressMap } from './address-map';
 import { AddressSearch, type PickedAddress } from './address-search';
 import { CheckoutBook } from './checkout-book';
@@ -149,6 +150,9 @@ export function Checkout({
   const format = available && !available.includes(chosenFormat) ? fallback : chosenFormat;
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const handoff = usePaymentHandoff(() => {
+    setPaying(false);
+  });
   // Pago iniciado: la primera vez que hay precio para este libro (una sola vez, sin pasos nuevos).
   const quotedTotal = quote?.snapshot.totalMinor;
   const quotedCurrency = quote?.snapshot.currency;
@@ -325,10 +329,11 @@ export function Checkout({
         },
         analyticsConsent: choice?.analytics ?? false,
       };
-      const { checkoutUrl } = reorderOf
-        ? await api('reorder', { params: { orderId: reorderOf }, body })
-        : await api('createCheckout', { body: { ...body, bookId } });
-      window.location.assign(checkoutUrl);
+      handoff.start(
+        reorderOf
+          ? await api('reorder', { params: { orderId: reorderOf }, body })
+          : await api('createCheckout', { body: { ...body, bookId } }),
+      );
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : t('errors.generic'));
       setPaying(false);
@@ -373,6 +378,7 @@ export function Checkout({
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      {handoff.dialog}
       {reorderOf === null && <CheckoutBook bookId={bookId} />}
       <div className="grid content-start gap-8">
         <fieldset>

@@ -460,6 +460,9 @@
     "order": {
       "review": {
         "error": "No pudimos guardar tu opinión. Intentá de nuevo."
+      },
+      "awaiting": {
+        "text": "Completá el pago en la pestaña de Gumroad. Cuando se confirme, esta página se actualiza sola y tu cuento empieza a prepararse. Puede tardar unos segundos."
       }
     },
     "reorderSubtitle": "Pedís otra copia impresa del mismo libro, tal como quedó.",
@@ -482,6 +485,9 @@
     "addressToQuote": "Completá la dirección para ver el envío y el total.",
     "copies": {
       "hint": "Pagás la creación una sola vez; cada ejemplar extra cuesta solo su impresión (ideal para souvenirs)."
+    },
+    "handoff": {
+      "comeBack": "Al terminar, volvé a esta pestaña: tu cuento empieza a prepararse solo y te llega un correo."
     }
   },
   "Pro": {
