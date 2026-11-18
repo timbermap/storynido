@@ -105,11 +105,22 @@ variable "email_provider" {
 variable "payment_provider" {
   type        = string
   default     = "mock"
-  description = "Pagos: mock (simulado) o dodo (requiere dodo-api-key y dodo-webhook-secret con valor)."
+  description = "Pagos: mock (simulado), dodo (dodo-api-key y dodo-webhook-secret) o gumroad (gumroad-access-token y gumroad-ping-secret), con los secretos con valor."
 
   validation {
-    condition     = contains(["mock", "dodo"], var.payment_provider)
-    error_message = "payment_provider debe ser mock o dodo."
+    condition     = contains(["mock", "dodo", "gumroad"], var.payment_provider)
+    error_message = "payment_provider debe ser mock, dodo o gumroad."
+  }
+}
+
+variable "gumroad_product_url" {
+  type        = string
+  default     = ""
+  description = "Producto de Gumroad \"paga lo que quieras\" (https://<usuario>.gumroad.com/l/<permalink>) al que se le pasa el total de cada pedido."
+
+  validation {
+    condition     = var.payment_provider != "gumroad" || can(regex("^https://[a-z0-9-]+\\.gumroad\\.com/l/[A-Za-z0-9_-]+$", var.gumroad_product_url))
+    error_message = "Con payment_provider = gumroad, gumroad_product_url tiene que ser https://<usuario>.gumroad.com/l/<permalink>."
   }
 }
 

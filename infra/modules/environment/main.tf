@@ -314,11 +314,19 @@ locals {
       DODO_ENV        = var.environment == "production" ? "live_mode" : "test_mode"
       DODO_PRODUCT_ID = var.dodo_product_id
     } : {},
+    var.payment_provider == "gumroad" ? { GUMROAD_PRODUCT_URL = var.gumroad_product_url } : {},
   )
-  payment_secret_env = var.payment_provider == "dodo" ? {
-    DODO_API_KEY        = "dodo-api-key"
-    DODO_WEBHOOK_SECRET = "dodo-webhook-secret"
-  } : {}
+  payment_secret_env = merge(
+    var.payment_provider == "dodo" ? {
+      DODO_API_KEY        = "dodo-api-key"
+      DODO_WEBHOOK_SECRET = "dodo-webhook-secret"
+    } : {},
+    # Gumroad (DECISIONS 255): token de la API (reembolsos) y secreto de la firma de los pings.
+    var.payment_provider == "gumroad" ? {
+      GUMROAD_ACCESS_TOKEN = "gumroad-access-token"
+      GUMROAD_PING_SECRET  = "gumroad-ping-secret"
+    } : {},
+  )
   service_secret_env = merge(local.print_secret_env, local.email_secret_env)
   api_secret_env     = merge(local.service_secret_env, local.api_print_secret_env, local.payment_secret_env)
 }
@@ -591,6 +599,14 @@ module "secrets" {
     }
     stripe-webhook-secret = {
       description = "Stripe: secreto de firma de webhooks (whsec_...)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    gumroad-access-token = {
+      description = "Gumroad: access token de la API (reembolsos)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    gumroad-ping-secret = {
+      description = "Gumroad: secreto de la firma de los pings (Settings → Advanced)"
       accessors   = { api = local.member["sn-api"] }
     }
     dodo-api-key = {

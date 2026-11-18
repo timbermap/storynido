@@ -101,6 +101,14 @@ export function registerCheckoutRoutes(app: FastifyInstance, checkout: CheckoutS
     scope.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, next) => {
       next(null, body);
     });
+    // Gumroad manda los pings como formulario (x-www-form-urlencoded): también crudo.
+    scope.addContentTypeParser(
+      'application/x-www-form-urlencoded',
+      { parseAs: 'string' },
+      (_req, body, next) => {
+        next(null, body);
+      },
+    );
     scope.post<{ Params: { provider: string } }>(
       '/v1/webhooks/payments/:provider',
       async (request, reply) => {

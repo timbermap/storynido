@@ -66,6 +66,18 @@ const providers = createProviderRegistry({
       }
     : undefined,
   lulu: luluOptionsFromEnv(config.env),
+  gumroad:
+    config.env.GUMROAD_PRODUCT_URL &&
+    config.env.GUMROAD_ACCESS_TOKEN &&
+    config.env.GUMROAD_PING_SECRET
+      ? {
+          productUrl: config.env.GUMROAD_PRODUCT_URL,
+          accessToken: config.env.GUMROAD_ACCESS_TOKEN,
+          pingSecret: config.env.GUMROAD_PING_SECRET,
+          // Gumroad no tiene modo de prueba: fuera de producción vale la compra del propio vendedor.
+          acceptTestSales: config.appEnv !== 'production',
+        }
+      : undefined,
   dodo:
     config.env.DODO_API_KEY && config.env.DODO_WEBHOOK_SECRET && config.env.DODO_PRODUCT_ID
       ? {

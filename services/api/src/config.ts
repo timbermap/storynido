@@ -39,6 +39,10 @@ export const apiConfigSchema = serviceEnvSchema.extend({
         .filter(Boolean),
     ),
   EMAIL_LINK_SECRET: z.string().trim().min(16).optional(),
+  /** Gumroad (PAYMENT_PROVIDER=gumroad): sin las tres variables no se registra. */
+  GUMROAD_PRODUCT_URL: z.url().optional(),
+  GUMROAD_ACCESS_TOKEN: z.string().trim().optional(),
+  GUMROAD_PING_SECRET: z.string().trim().optional(),
   /** Dodo Payments (PAYMENT_PROVIDER=dodo): sin las tres variables no se registra. */
   DODO_API_KEY: z.string().trim().optional(),
   DODO_WEBHOOK_SECRET: z.string().trim().optional(),

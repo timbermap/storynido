@@ -15,7 +15,7 @@ import { z } from 'zod';
 export const PROVIDER_IDS = {
   aiText: ['mock', 'vertex', 'anthropic'],
   aiImage: ['mock', 'vertex', 'flux'],
-  payment: ['mock', 'stripe', 'dodo'],
+  payment: ['mock', 'stripe', 'dodo', 'gumroad'],
   // mock_alt: segunda imprenta simulada (otros precios) para probar la elección entre varias.
   print: ['mock', 'mock_alt', 'gelato', 'cloudprinter', 'lulu'],
   email: ['mock', 'resend'],
