@@ -1163,7 +1163,7 @@
       "drawingWait": {
         "alt": "El dibujo de {name}",
         "title": "Escribimos el cuento de {name}…",
-        "text": "Usamos su dibujo de siempre. Escribimos la historia e ilustramos la portada y las primeras páginas.",
+        "text": "Escribimos la historia y dibujamos a {name} con la edad y el estilo de este cuento. Después ilustramos la portada y las primeras páginas.",
         "steps": {
           "write": "Escribimos la historia",
           "illustrate": "Ilustramos la portada y 2 páginas",
@@ -1175,7 +1175,7 @@
       "eventWait": {
         "titleKit": "Diseñamos el kit de {name}…",
         "titleInvitation": "Diseñamos la invitación de {name}…",
-        "textDrawing": "Usamos su dibujo de siempre. Armamos la invitación y el cuento de recuerdo con la temática {theme}.",
+        "textDrawing": "Dibujamos a {name} con la temática {theme} y armamos la invitación y el cuento de recuerdo.",
         "steps": {
           "write": "Escribimos el cuento de recuerdo",
           "illustrate": "Ilustramos la portada de la invitación y 2 páginas",
@@ -1196,6 +1196,23 @@
         "text": "Hay muchos cuentos creándose ahora mismo. La tuya ya está en camino: te avisamos por correo apenas esté lista, así que puedes cerrar esta página.",
         "illustrationsTitle": "Estamos ilustrando el cuento de {name}",
         "back": "Ver mis cuentos"
+      },
+      "wait": {
+        "drawing": "Dibujando a su personaje",
+        "reveal": "Así quedó {name} en este cuento",
+        "bookTitle": "Se llama «{title}»",
+        "tipLabel": "Mientras tanto:",
+        "leaveTextEmail": "Seguimos trabajando aunque salgas. Te escribimos a {email} cuando la muestra esté lista.",
+        "leaveTextReview": "Seguimos trabajando aunque salgas. Cuando vuelvas, lo encuentras listo para revisar en Mis cuentos, «En proceso».",
+        "tips": {
+          "edit": "en la muestra puedes cambiar el texto de cualquier página.",
+          "redraw": "si una ilustración no te convence, puedes pedir otra.",
+          "free": "la muestra es gratis. Pagas solo si quieres el libro.",
+          "reread": "a los niños les encanta escuchar el mismo cuento muchas veces, y así aprenden palabras nuevas.",
+          "reuse": "el personaje queda guardado para tus próximos cuentos, sin volver a subir fotos.",
+          "whatsapp": "la invitación sale lista para mandar por WhatsApp.",
+          "reusePro": "el personaje queda guardado en su proyecto para los próximos cuentos."
+        }
       }
     },
     "character": {

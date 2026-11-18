@@ -2859,3 +2859,12 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Fecha:** 2026-11-18. Pedido por Sebas: en unas 20 portadas de Profesionales el niño genérico salía con pelo gris o ceniza y parecía un adulto mayor.
 - **Cambio:** `GENERIC` en `generate-brand-images.ts` pide «short warm chestnut-brown hair (clearly a child, never grey or ash hair)». Cuatro escenas que dibujaban un libro maqueta dentro de la portada (El rincón de la calma, Mi termómetro, El sonido escondido, Chau pañal pro) piden ahora «full-bleed», sin libro, tarjeta ni marco adentro.
 - **Portadas:** se regeneran las 21 que usaban el niño genérico con pelo gris. «Cuando todo es demasiado ruido» y «Las letras que bailan» ya tenían pelo castaño y quedan. Costo: USD 1,68 (21 más 4 reintentos).
+
+## 270 — Pantalla de espera de la muestra: pasos que no parecen botones y la lámina de este cuento
+
+- **Fecha:** 2026-11-18. Pedido por Sebas («se ven pasos que parecen botones»), revisado por la mesa (diseño/ux, producto, usuario familia y profesional, marketing).
+- **Pasos:** las tres tarjetas con borde se cambiaron por una línea de tiempo sin cajas (punto que late en el paso actual, tilde en los hechos, círculo vacío en los que siguen; en el celular, en columna). «Si te gusta, hacemos el libro completo» ya no es un paso de la espera (lo decide la persona): va como nota debajo.
+- **Personaje:** ya no se muestra el dibujo viejo del perfil (podía ser de otra edad o de otro estilo, DECISIONS 264). Mientras se escribe, un lugar «Dibujando a su personaje»; cuando la lámina de ESTE cuento está lista (etapa `character`), aparece con «Así quedó {name} en este cuento» y el título del cuento. El texto dice que lo dibujamos con la edad y el estilo del cuento.
+- **Mientras tanto:** un consejo que se turna cada 9 s (editar textos, pedir otra ilustración, la muestra es gratis, releer, el personaje queda guardado; WhatsApp en Celebraciones), fuera del aviso de lectores de pantalla.
+- **Salir:** «Podés cerrar esta pantalla» queda abajo, sin caja, con el correo al que avisamos. En el flujo con revisión del parecido, la primera parte no manda correo: el texto dice que lo encuentra listo para revisar en Mis cuentos (antes prometía un correo que no salía).
+- La barra de avance de DECISIONS 262 sigue igual.

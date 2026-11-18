@@ -1163,7 +1163,7 @@
       "drawingWait": {
         "alt": "{name}'s drawing",
         "title": "Writing {name}'s story…",
-        "text": "We use their usual drawing. We write the story and illustrate the cover and the first pages.",
+        "text": "We write the story and draw {name} at the age and in the style of this book. Then we illustrate the cover and the first pages.",
         "steps": {
           "write": "We write the story",
           "illustrate": "We illustrate the cover and 2 pages",
@@ -1175,7 +1175,7 @@
       "eventWait": {
         "titleKit": "Designing {name}'s kit…",
         "titleInvitation": "Designing {name}'s invitation…",
-        "textDrawing": "We use their usual drawing. We put together the invitation and the keepsake story with the {theme} theme.",
+        "textDrawing": "We draw {name} with the {theme} theme and put together the invitation and the keepsake story.",
         "steps": {
           "write": "We write the keepsake story",
           "illustrate": "We illustrate the invitation cover and 2 pages",
@@ -1196,6 +1196,23 @@
         "text": "Lots of stories are being created right now. Yours is on its way: we'll email you as soon as it's ready, so feel free to close this page.",
         "illustrationsTitle": "We're illustrating {name}'s story",
         "back": "See my stories"
+      },
+      "wait": {
+        "drawing": "Drawing their character",
+        "reveal": "This is {name} in this story",
+        "bookTitle": "It’s called “{title}”",
+        "tipLabel": "Meanwhile:",
+        "leaveTextEmail": "We keep working even if you leave. We’ll email {email} when the sample is ready.",
+        "leaveTextReview": "We keep working even if you leave. When you come back, it will be ready to review in My stories, “In progress”.",
+        "tips": {
+          "edit": "in the sample you can change the text of any page.",
+          "redraw": "if an illustration doesn’t feel right, you can ask for another one.",
+          "free": "the sample is free. You only pay if you want the book.",
+          "reread": "kids love hearing the same story again and again, and that’s how they learn new words.",
+          "reuse": "the character is saved for your next stories, no need to upload photos again.",
+          "whatsapp": "the invitation comes ready to send on WhatsApp.",
+          "reusePro": "the character is saved in their project for the next stories."
+        }
       }
     },
     "character": {

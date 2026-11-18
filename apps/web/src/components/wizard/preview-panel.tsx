@@ -4,7 +4,6 @@ import { PREVIEW_PAGE_TEXT_MAX, type Locale, type PublicPreview } from '@storyni
 import {
   AlertTriangle,
   BookOpen,
-  Check,
   CheckCircle2,
   Clock,
   Droplets,
@@ -36,6 +35,7 @@ import { cn } from '@/lib/utils';
 
 import { previewErrorKey } from './preview-errors';
 import { PreviewFeedback } from './preview-feedback';
+import { LeaveNote, WaitScreen } from './wait-screen';
 import type { WizardData } from './types';
 
 type Target = 'cover' | number;
@@ -152,21 +152,28 @@ export function PreviewPanel({
     headingRef.current?.focus();
   }, [isGenerating]);
 
-  // Cuento con su dibujo de siempre (del perfil): la espera lo muestra y no pide aprobarlo.
+  // Cuento con su dibujo de siempre (del perfil): no pide aprobar al personaje.
   const withDrawing = book.useDrawing === true && Boolean(book.childId);
-  const [drawingUrl, setDrawingUrl] = useState<string | null>(null);
+  // La lámina de ESTE cuento (con su edad y su estilo, DECISIONS 264) ya está dibujada: la espera
+  // la muestra junto al título. El dibujo viejo del perfil no se muestra (podía ser de otra edad).
+  const sheetReady = isGenerating && (book.preview?.stage ?? 'complete') === 'character';
+  const [sheet, setSheet] = useState<{ url: string | null; title: string | null } | null>(null);
   useEffect(() => {
-    if (!withDrawing || !book.childId || !isGenerating) return;
+    if (!sheetReady) return;
     let cancelled = false;
-    api('getChildProfile', { params: { childId: book.childId } })
-      .then((profile) => {
-        if (!cancelled) setDrawingUrl(profile.characterImageUrl);
+    api('bookPreview', { params: { bookId: book.id } })
+      .then((result) => {
+        if (!cancelled)
+          setSheet({
+            url: result.preview?.character?.imageUrl ?? null,
+            title: result.preview?.title ?? null,
+          });
       })
       .catch(() => undefined);
     return () => {
       cancelled = true;
     };
-  }, [withDrawing, book.childId, isGenerating]);
+  }, [sheetReady, book.id]);
 
   const data = preview?.preview ?? null;
   // Vista previa lista: se cuenta una vez por libro (solo la línea, nada del niño).
@@ -199,111 +206,88 @@ export function PreviewPanel({
     );
   }
 
-  if (isGenerating && withDrawing) {
-    // Con su dibujo de siempre: no se dibuja ni se aprueba de nuevo, se escribe y se ilustra.
-    const steps = ['write', 'illustrate', 'order'] as const;
-    const active = data?.stage === 'character' ? 1 : 0;
-    return (
-      <div className="container-page max-w-3xl py-16 text-center" role="status" aria-live="polite">
-        <div className="relative mx-auto w-24">
-          <div className="aspect-[3/4] overflow-hidden rounded-2xl border bg-card">
-            {drawingUrl && (
-              // eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min.
-              <img
-                src={drawingUrl}
-                alt={t('drawingWait.alt', { name: childName })}
-                className="size-full object-cover"
-              />
-            )}
-          </div>
-          <Loader2
-            className="absolute -right-3 -bottom-3 size-8 animate-spin rounded-full bg-background p-1 text-primary motion-reduce:animate-none"
-            aria-hidden="true"
-          />
-        </div>
-        <h1
-          ref={headingRef}
-          tabIndex={-1}
-          className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-medium outline-none"
-        >
-          {isEvent
-            ? book.event?.offer === 'invitation'
-              ? t('eventWait.titleInvitation', { name: childName })
-              : t('eventWait.titleKit', { name: childName })
-            : t('drawingWait.title', { name: childName })}
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-          {isEvent
-            ? t('eventWait.textDrawing', { theme: book.event?.theme ?? '' })
-            : t('drawingWait.text')}
-        </p>
-        {/* Una sola barra para las dos partes: escribir y después ilustrar (DECISIONS 262). */}
-        <GenerationProgress
-          className="mt-6"
-          kinds={active === 1 ? 'illustrate' : ['preview_story', 'illustrate']}
-          before={active === 1 ? ['preview_story'] : []}
-          startedAt={book.previewStartedAt}
-        />
-        <WaitSteps
-          active={active}
-          labels={steps.map((step) =>
-            isEvent ? t(`eventWait.steps.${step}`) : t(`drawingWait.steps.${step}`),
-          )}
-        />
-        <div className="mx-auto mt-8 grid max-w-xl justify-items-center gap-2 rounded-2xl border bg-card p-5">
-          <p className="font-semibold">{t('leaveTitle')}</p>
-          <p className="text-sm text-muted-foreground">{t('leaveText')}</p>
-          <Link href="/my-stories" className={buttonVariants({ variant: 'outline' })}>
-            {t('leaveButton')}
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   if (isGenerating) {
-    // Si ya había un personaje en revisión, lo que se está generando son las ilustraciones.
-    const illustrating = data?.stage === 'character';
-    const steps = ['character', 'review', 'illustrate', 'order'] as const;
-    const active = illustrating ? 2 : 0;
-    return (
-      <div className="container-page max-w-3xl py-16 text-center" role="status" aria-live="polite">
-        <Loader2
-          className="mx-auto size-10 animate-spin text-primary motion-reduce:animate-none"
-          aria-hidden="true"
-        />
-        <h1
-          ref={headingRef}
-          tabIndex={-1}
-          className="mt-6 text-[clamp(1.8rem,4vw,2.6rem)] font-medium outline-none"
-        >
-          {illustrating ? t('illustrating') : t('generatingTitle', { name: childName })}
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-          {illustrating ? t('illustratingText') : t('generatingText', { name: childName })}
-        </p>
-        {/* Tiempo estimado con lo que tardaron las últimas muestras (DECISIONS 262). */}
-        <GenerationProgress
-          className="mt-6"
-          kinds={illustrating ? 'illustrate' : 'preview'}
-          startedAt={book.previewStartedAt}
-        />
-        <WaitSteps
-          active={active}
-          labels={steps.map((step) =>
+    const line = isEvent ? 'events' : isPro ? 'professionals' : 'families';
+    const waitKey = (step: string) =>
+      withDrawing
+        ? isEvent
+          ? `eventWait.steps.${step}`
+          : `drawingWait.steps.${step}`
+        : isEvent
+          ? `eventWait.steps4.${step}`
+          : `waitSteps.${step}`;
+    const email = user?.email ?? null;
+    // Sin su dibujo, la primera parte termina en «revisar el parecido»: no hay correo para eso.
+    const leaveText =
+      !withDrawing && !sheetReady
+        ? t('wait.leaveTextReview')
+        : email
+          ? t('wait.leaveTextEmail', { email })
+          : t('leaveText');
+    const leave = <LeaveNote title={t('leaveTitle')} text={leaveText} />;
+    const sheetUrl = sheetReady ? (sheet?.url ?? null) : null;
+
+    if (withDrawing) {
+      // Con su dibujo de siempre: no se aprueba de nuevo, se escribe y se ilustra.
+      const active = sheetReady ? 1 : 0;
+      return (
+        <WaitScreen
+          headingRef={headingRef}
+          title={
             isEvent
-              ? t(`eventWait.steps4.${step}`, { name: childName })
-              : t(`waitSteps.${step}`, { name: childName }),
-          )}
+              ? book.event?.offer === 'invitation'
+                ? t('eventWait.titleInvitation', { name: childName })
+                : t('eventWait.titleKit', { name: childName })
+              : t('drawingWait.title', { name: childName })
+          }
+          text={
+            isEvent
+              ? t('eventWait.textDrawing', { name: childName, theme: book.event?.theme ?? '' })
+              : t('drawingWait.text', { name: childName })
+          }
+          characterUrl={sheetUrl}
+          characterAlt={t('drawingWait.alt', { name: childName })}
+          revealLabel={t('wait.reveal', { name: childName })}
+          bookTitle={sheetReady ? (sheet?.title ?? null) : null}
+          // Una sola barra para las dos partes: escribir y después ilustrar (DECISIONS 262).
+          progress={{
+            kinds: active === 1 ? 'illustrate' : ['preview_story', 'illustrate'],
+            before: active === 1 ? ['preview_story'] : [],
+            startedAt: book.previewStartedAt,
+          }}
+          steps={(['write', 'illustrate'] as const).map((step) => t(waitKey(step)))}
+          active={active}
+          after={t(waitKey('order'))}
+          line={line}
+          leave={leave}
         />
-        <div className="mx-auto mt-8 grid max-w-xl justify-items-center gap-2 rounded-2xl border bg-card p-5">
-          <p className="font-semibold">{t('leaveTitle')}</p>
-          <p className="text-sm text-muted-foreground">{t('leaveText')}</p>
-          <Link href="/my-stories" className={buttonVariants({ variant: 'outline' })}>
-            {t('leaveButton')}
-          </Link>
-        </div>
-      </div>
+      );
+    }
+
+    // Si ya había un personaje aprobado, lo que se está generando son las ilustraciones.
+    const illustrating = sheetReady;
+    return (
+      <WaitScreen
+        headingRef={headingRef}
+        title={illustrating ? t('illustrating') : t('generatingTitle', { name: childName })}
+        text={illustrating ? t('illustratingText') : t('generatingText', { name: childName })}
+        characterUrl={sheetUrl}
+        characterAlt={t('drawingWait.alt', { name: childName })}
+        revealLabel={null}
+        bookTitle={illustrating ? (sheet?.title ?? null) : null}
+        // Tiempo estimado con lo que tardaron las últimas muestras (DECISIONS 262).
+        progress={{
+          kinds: illustrating ? 'illustrate' : 'preview',
+          startedAt: book.previewStartedAt,
+        }}
+        steps={(['character', 'review', 'illustrate'] as const).map((step) =>
+          t(waitKey(step), { name: childName }),
+        )}
+        active={illustrating ? 2 : 0}
+        after={t(waitKey('order'))}
+        line={line}
+        leave={leave}
+      />
     );
   }
 
@@ -756,50 +740,5 @@ export function PreviewPanel({
         </section>
       )}
     </div>
-  );
-}
-
-/**
- * Pasos de la espera. Todas las tarjetas tienen el mismo borde, el mismo peso de letra y la
- * misma altura (la fila se estira a la más alta), así el texto no salta ni se desalinea:
- * el paso actual se marca solo con el color del borde y del número, y los anteriores con ✓.
- */
-function WaitSteps({ labels, active }: { labels: string[]; active: number }) {
-  return (
-    <ol
-      className={cn(
-        'mx-auto mt-8 grid max-w-3xl gap-2 text-left text-sm',
-        labels.length === 4 ? 'sm:grid-cols-4' : 'sm:grid-cols-3',
-      )}
-    >
-      {labels.map((label, index) => {
-        const state = index < active ? 'done' : index === active ? 'current' : 'next';
-        return (
-          <li
-            key={index}
-            aria-current={state === 'current' ? 'step' : undefined}
-            className={cn(
-              'flex items-center gap-3 rounded-xl border-2 bg-card p-3 font-sans font-medium sm:flex-col sm:items-start sm:gap-2',
-              state === 'current'
-                ? 'border-primary text-foreground shadow-sm'
-                : 'border-border text-muted-foreground',
-            )}
-          >
-            <span
-              className={cn(
-                'grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold',
-                state === 'current' && 'bg-primary text-primary-foreground',
-                state === 'done' && 'bg-mint text-success',
-                state === 'next' && 'bg-muted text-muted-foreground',
-              )}
-              aria-hidden="true"
-            >
-              {state === 'done' ? <Check className="size-3.5" strokeWidth={3} /> : index + 1}
-            </span>
-            <span className="leading-snug text-balance">{label}</span>
-          </li>
-        );
-      })}
-    </ol>
   );
 }

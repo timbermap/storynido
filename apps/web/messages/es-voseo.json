@@ -282,6 +282,14 @@
       },
       "queued": {
         "text": "Hay muchos cuentos creándose ahora mismo. La tuya ya está en camino: te avisamos por correo apenas esté lista, así que podés cerrar esta página."
+      },
+      "wait": {
+        "leaveTextReview": "Seguimos trabajando aunque salgas. Cuando vuelvas, lo encontrás listo para revisar en Mis cuentos, «En proceso».",
+        "tips": {
+          "edit": "en la muestra podés cambiar el texto de cualquier página.",
+          "redraw": "si una ilustración no te convence, podés pedir otra.",
+          "free": "la muestra es gratis. Pagás solo si querés el libro."
+        }
       }
     },
     "character": {
