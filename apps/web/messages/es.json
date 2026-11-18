@@ -660,8 +660,8 @@
         "seePreview": "Ver la muestra",
         "viewOrder": "Ver pedido",
         "track": "Seguir el envío",
-        "read": "Ver",
-        "readLabel": "Ver {title}",
+        "read": "Leer",
+        "readLabel": "Leer {title}",
         "download": "Descargar PDF",
         "downloadError": "No pudimos preparar la descarga. Intenta de nuevo.",
         "reorder": "Pedir de nuevo",
@@ -2362,5 +2362,34 @@
     },
     "finalTitle": "Empieza su cuento hoy",
     "finalText": "Crear la cuenta y la vista previa es gratis."
+  },
+  "Reader": {
+    "pageTitle": "Leer el cuento",
+    "label": "Leer «{title}»",
+    "fallbackTitle": "Tu cuento",
+    "opening": "Abriendo el cuento…",
+    "openingPercent": "Abriendo el cuento… {percent} %",
+    "close": "Cerrar y volver a Mis cuentos",
+    "fullscreen": "Pantalla completa",
+    "exitFullscreen": "Salir de pantalla completa",
+    "download": "Descargar PDF",
+    "prev": "Página anterior",
+    "next": "Página siguiente",
+    "page": "Página {page} de {total}",
+    "pages": "Páginas {from} y {to} de {total}",
+    "pageAlt": "Página {page} de {total}",
+    "progress": "Avance de la lectura",
+    "resumed": "Volviste a la página {page}.",
+    "fromStart": "Desde el principio",
+    "failed": "No pudimos abrir el cuento. Revisa tu conexión e intenta de nuevo.",
+    "retry": "Intentar de nuevo",
+    "notReady": "Tu libro todavía se está preparando. Te avisamos por correo cuando esté listo.",
+    "viewOrder": "Ver el pedido",
+    "end": {
+      "title": "Fin",
+      "text": "Pueden leerlo las veces que quieran. ¿Y si la próxima aventura la eligen juntos?",
+      "create": "Crear otro cuento",
+      "again": "Leer de nuevo"
+    }
   }
 }

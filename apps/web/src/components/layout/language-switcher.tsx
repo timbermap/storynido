@@ -40,7 +40,7 @@ export function useLocaleSwitch() {
         router.replace('/blog', { locale: next });
       } else if (pathname === '/create/[bookId]' || pathname === '/checkout/[bookId]') {
         router.replace({ pathname, params: { bookId: params.bookId ?? '' } }, { locale: next });
-      } else if (pathname === '/order/[orderId]') {
+      } else if (pathname === '/order/[orderId]' || pathname === '/my-stories/read/[orderId]') {
         router.replace({ pathname, params: { orderId: params.orderId ?? '' } }, { locale: next });
       } else if (pathname === '/my-stories/characters/[childId]') {
         router.replace({ pathname, params: { childId: params.childId ?? '' } }, { locale: next });

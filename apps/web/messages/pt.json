@@ -660,8 +660,8 @@
         "seePreview": "Ver a prévia",
         "viewOrder": "Ver pedido",
         "track": "Acompanhar o envio",
-        "read": "Ver",
-        "readLabel": "Ver {title}",
+        "read": "Ler",
+        "readLabel": "Ler {title}",
         "download": "Baixar PDF",
         "downloadError": "Não conseguimos preparar o download. Tente de novo.",
         "reorder": "Pedir de novo",
@@ -2362,5 +2362,34 @@
     },
     "finalTitle": "Comece a história hoje",
     "finalText": "Criar a conta e a prévia é grátis."
+  },
+  "Reader": {
+    "pageTitle": "Ler a história",
+    "label": "Ler “{title}”",
+    "fallbackTitle": "Sua história",
+    "opening": "Abrindo a história…",
+    "openingPercent": "Abrindo a história… {percent}%",
+    "close": "Fechar e voltar para Minhas histórias",
+    "fullscreen": "Tela cheia",
+    "exitFullscreen": "Sair da tela cheia",
+    "download": "Baixar PDF",
+    "prev": "Página anterior",
+    "next": "Próxima página",
+    "page": "Página {page} de {total}",
+    "pages": "Páginas {from} e {to} de {total}",
+    "pageAlt": "Página {page} de {total}",
+    "progress": "Progresso da leitura",
+    "resumed": "Você voltou para a página {page}.",
+    "fromStart": "Do começo",
+    "failed": "Não conseguimos abrir a história. Verifique sua conexão e tente de novo.",
+    "retry": "Tentar de novo",
+    "notReady": "Seu livro ainda está sendo preparado. Avisamos por e-mail quando estiver pronto.",
+    "viewOrder": "Ver o pedido",
+    "end": {
+      "title": "Fim",
+      "text": "Podem ler quantas vezes quiserem. Que tal escolher juntos a próxima aventura?",
+      "create": "Criar outra história",
+      "again": "Ler de novo"
+    }
   }
 }

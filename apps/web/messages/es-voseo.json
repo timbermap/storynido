@@ -553,5 +553,8 @@
       "more": "¿Más dudas? Mirá las <faq>preguntas frecuentes</faq>."
     },
     "finalTitle": "Empezá su cuento hoy"
+  },
+  "Reader": {
+    "failed": "No pudimos abrir el cuento. Revisá tu conexión e intentá de nuevo."
   }
 }
