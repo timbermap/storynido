@@ -2853,3 +2853,9 @@ Sebas, 18 nov 2026: «revisa la totalidad de los prompts… personajes que tenga
 ## 268 — Métricas por estilo de ilustración
 
 Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para decidir con datos y no solo con estudios de mercado. Las métricas del día suman `styles` por slug: elegido (libros que llegaron a la lámina), muestras completas, compras pagadas y ventas en USD. Los libros sin estilo van como `sin-estilo`. La portada del admin muestra la tabla «Por estilo de ilustración». `METRICS_VERSION` pasa a 3 para que los días asentados se recalculen con el estilo.
+
+## 269 — Profesionales: el niño genérico con pelo castaño, no gris
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: en unas 20 portadas de Profesionales el niño genérico salía con pelo gris o ceniza y parecía un adulto mayor.
+- **Cambio:** `GENERIC` en `generate-brand-images.ts` pide «short warm chestnut-brown hair (clearly a child, never grey or ash hair)». Cuatro escenas que dibujaban un libro maqueta dentro de la portada (El rincón de la calma, Mi termómetro, El sonido escondido, Chau pañal pro) piden ahora «full-bleed», sin libro, tarjeta ni marco adentro.
+- **Portadas:** se regeneran las 21 que usaban el niño genérico con pelo gris. «Cuando todo es demasiado ruido» y «Las letras que bailan» ya tenían pelo castaño y quedan. Costo: USD 1,68 (21 más 4 reintentos).
