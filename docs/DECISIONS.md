@@ -2758,3 +2758,11 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Decisión:** un solo consentimiento (`photo_upload`, `photo-upload-v2`) para Familias, Celebraciones y Profesionales, en el creador, en «Agregar a otro chico» y en el perfil. La API ya no exige `guardian_authorization`; el tipo sigue aceptado en `/v1/consents` y los registros viejos se conservan. Se revierte la casilla que agregó el PR #88 en el perfil.
 - **Personajes:** son un solo modelo para todas las líneas; el alias es solo una etiqueta del proyecto profesional (para no usar el nombre real). Lo que cambia por línea es el libro (canal, lectura, precios), no el personaje.
 - **Pendiente:** la revisión de abogado de `LAUNCH.md` cubre este texto único (que sirva para un profesional con autorización de los padres).
+
+## 260 — Staging se publica solo: web y admin desde GitHub Actions
+
+- **Fecha:** 2026-11-18. Pedido por Sebas («¿por qué tarda tanto en subir?»).
+- **Problema:** el CI de `main` ya desplegaba Firestore, `api` y `worker`, pero la web y el admin (App Hosting sin repositorio conectado, DECISIONS 148) se publicaban con `firebase deploy --only apphosting` desde la Mac de Sebas. Cada cambio esperaba a que la Mac estuviera prendida, conectada y con los permisos de la terminal aprobados.
+- **Cambio:** `_deploy.yml` suma el job `apphosting` (solo staging) que corre `firebase deploy --only apphosting` con la identidad del deployer (Workload Identity Federation, sin claves). Corre en paralelo con Firestore, `api` y `worker`, y el E2E de humo contra staging ahora corre con la web nueva ya publicada.
+- **Permisos (Terraform, `apphosting_ci_deploy = true` solo en staging):** `roles/firebaseapphosting.admin`; un rol propio con `storage.buckets.get/list` (el CLI busca el bucket de fuentes); `roles/storage.objectAdmin` con condición, solo en los buckets `firebaseapphosting-sources-<número>-*`; y `iam.serviceAccountUser` sobre `firebase-app-hosting-compute@`. Producción no cambia: sigue a mano hasta que se decida.
+- **CI más rápido:** lint, tipos, tests y build van en una sola corrida de Turborepo (en paralelo entre paquetes) con la caché local guardada en GitHub (`actions/cache`), así los paquetes que no cambiaron no se vuelven a chequear.

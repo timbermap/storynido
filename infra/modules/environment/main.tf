@@ -690,6 +690,57 @@ module "github_wif" {
   service_account_name       = local.sa_name["sn-deployer"]
 }
 
+# Web y admin (App Hosting) desde GitHub Actions (DECISIONS 260): `firebase deploy --only apphosting`
+# sube el código al bucket de fuentes de App Hosting y crea el build y el rollout.
+resource "google_project_iam_member" "deployer_apphosting" {
+  count = var.apphosting_ci_deploy ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/firebaseapphosting.admin"
+  member  = local.member["sn-deployer"]
+}
+
+# El CLI lista los buckets del proyecto para encontrar el de fuentes (no hay rol predefinido chico).
+resource "google_project_iam_custom_role" "apphosting_source_buckets" {
+  count = var.apphosting_ci_deploy ? 1 : 0
+
+  project     = var.project_id
+  role_id     = "snAppHostingSourceBuckets"
+  title       = "StoryNido: buscar el bucket de fuentes de App Hosting"
+  permissions = ["storage.buckets.get", "storage.buckets.list"]
+}
+
+resource "google_project_iam_member" "deployer_apphosting_buckets" {
+  count = var.apphosting_ci_deploy ? 1 : 0
+
+  project = var.project_id
+  role    = google_project_iam_custom_role.apphosting_source_buckets[0].name
+  member  = local.member["sn-deployer"]
+}
+
+# Subir el zip del código: solo en los buckets de fuentes de App Hosting, no en los de fotos o PDFs.
+resource "google_project_iam_member" "deployer_apphosting_sources" {
+  count = var.apphosting_ci_deploy ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = local.member["sn-deployer"]
+
+  condition {
+    title      = "apphosting-sources"
+    expression = "resource.name.startsWith(\"projects/_/buckets/firebaseapphosting-sources-${data.google_project.this.number}-\")"
+  }
+}
+
+# Los rollouts corren como la cuenta de servicio por defecto de App Hosting.
+resource "google_service_account_iam_member" "deployer_acts_as_apphosting" {
+  count = var.apphosting_ci_deploy ? 1 : 0
+
+  service_account_id = "projects/${var.project_id}/serviceAccounts/firebase-app-hosting-compute@${var.project_id}.iam.gserviceaccount.com"
+  role               = "roles/iam.serviceAccountUser"
+  member             = local.member["sn-deployer"]
+}
+
 # --- Monitoreo y costos --------------------------------------------------------
 
 # Cloud Run manda sus spans a Cloud Trace, pero no crea el bucket donde se guardan: sin él se
