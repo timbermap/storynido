@@ -22,4 +22,6 @@ export const CLIENT_NAMESPACES = [
   'Contact',
   // «Así lo recibes» (components/formats): lo usa el creador, que es de cliente.
   'FormatShowcase',
+  // El visor de cuentos comprados (components/reader).
+  'Reader',
 ];

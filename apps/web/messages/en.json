@@ -659,8 +659,8 @@
         "seePreview": "See the preview",
         "viewOrder": "View order",
         "track": "Track the shipment",
-        "read": "View",
-        "readLabel": "View {title}",
+        "read": "Read",
+        "readLabel": "Read {title}",
         "download": "Download PDF",
         "downloadError": "We couldn’t prepare the download. Please try again.",
         "reorder": "Order again",
@@ -2361,5 +2361,34 @@
     },
     "finalTitle": "Start their story today",
     "finalText": "Creating your account and the preview is free."
+  },
+  "Reader": {
+    "pageTitle": "Read the story",
+    "label": "Read “{title}”",
+    "fallbackTitle": "Your story",
+    "opening": "Opening the story…",
+    "openingPercent": "Opening the story… {percent}%",
+    "close": "Close and go back to My stories",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen",
+    "download": "Download PDF",
+    "prev": "Previous page",
+    "next": "Next page",
+    "page": "Page {page} of {total}",
+    "pages": "Pages {from} and {to} of {total}",
+    "pageAlt": "Page {page} of {total}",
+    "progress": "Reading progress",
+    "resumed": "Back on page {page}.",
+    "fromStart": "Start from the beginning",
+    "failed": "We couldn’t open the story. Check your connection and try again.",
+    "retry": "Try again",
+    "notReady": "Your book is still being prepared. We’ll email you when it’s ready.",
+    "viewOrder": "View the order",
+    "end": {
+      "title": "The end",
+      "text": "Read it as many times as you like. How about choosing the next adventure together?",
+      "create": "Create another story",
+      "again": "Read again"
+    }
   }
 }

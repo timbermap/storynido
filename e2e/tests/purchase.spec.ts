@@ -184,6 +184,16 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   const shelf = page.locator('#panel-terminados > ul > li');
   await expect(shelf).toHaveCount(1, { timeout: 30_000 });
   await expect(shelf.first()).toContainText('Tapa');
+  // Leer: el visor abre el PDF limpio del libro, página por página (DECISIONS 254).
+  await shelf.first().getByRole('link', { name: 'Leer', exact: true }).click();
+  await expect(page).toHaveURL(/\/es\/mis-cuentos\/leer\//);
+  const reader = page.getByRole('dialog');
+  await expect(reader).toContainText(/Página 1 de \d+/, { timeout: 30_000 });
+  await expect(reader.locator('img[alt^="Página 1 de"]')).toBeVisible({ timeout: 30_000 });
+  await page.keyboard.press('ArrowRight');
+  await expect(reader).toContainText(/Páginas? 2 (de|y) /);
+  await reader.getByRole('link', { name: 'Cerrar y volver a Mis cuentos' }).click();
+  await expect(shelf).toHaveCount(1, { timeout: 30_000 });
   // Otra copia: solo impresa (el PDF ya lo tiene), arranca en el formato que compró.
   await shelf.first().getByRole('link', { name: 'Pedir otra copia' }).click();
   await expect(body(page)).toContainText('Pides otra copia impresa del mismo libro');

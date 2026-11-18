@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Loader2, RotateCcw, Trash2 } from 'lucide-react';
+import { BookOpen, Download, Loader2, RotateCcw, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState, type ReactNode } from 'react';
 
@@ -248,8 +248,8 @@ const ACTION =
   'inline-flex min-h-10 items-center gap-1.5 text-sm font-bold text-primary underline-offset-4 hover:underline disabled:opacity-60';
 
 /**
- * Un libro terminado en el estante: la portada grande, Ver, Descargar PDF (si se puede) y volver a
- * pedirlo. Un ebook ofrece la versión impresa; un impreso, otra copia.
+ * Un libro terminado en el estante: la portada grande, Leer (el visor, DECISIONS 254), Descargar
+ * PDF (si se puede) y volver a pedirlo. Un impreso ofrece otra copia y el pedido (el envío).
  */
 export function ShelfItem({
   order,
@@ -263,7 +263,11 @@ export function ShelfItem({
   const t = useTranslations('Account.myStories.library');
   const tOrders = useTranslations('Account.myStories');
   const meta = useOrderMeta();
-  const [info, setInfo] = useState<{ canDownload: boolean; kit: boolean } | null>(null);
+  const [info, setInfo] = useState<{
+    canDownload: boolean;
+    kit: boolean;
+    readable: boolean;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const cards = isCardsOrder(order);
@@ -275,11 +279,15 @@ export function ShelfItem({
     void api('order', { params: { orderId: order.id } })
       .then((found) => {
         if (!cancelled) {
-          setInfo({ canDownload: found.canDownload, kit: found.files.includes('kit_zip') });
+          setInfo({
+            canDownload: found.canDownload,
+            kit: found.files.includes('kit_zip'),
+            readable: found.canDownload && found.files.includes('book'),
+          });
         }
       })
       .catch(() => {
-        if (!cancelled) setInfo({ canDownload: false, kit: false });
+        if (!cancelled) setInfo({ canDownload: false, kit: false, readable: true });
       });
     return () => {
       cancelled = true;
@@ -304,6 +312,12 @@ export function ShelfItem({
 
   const title = order.title ?? tOrders('finishedUntitled');
   const orderHref = { pathname: '/order/[orderId]', params: { orderId: order.id } } as const;
+  // Leer abre el visor con el PDF limpio del libro. Si la API dice que no hay PDF del libro (o
+  // son tarjetas impresas), queda el pedido.
+  const readHref =
+    !cards && info?.readable !== false
+      ? ({ pathname: '/my-stories/read/[orderId]', params: { orderId: order.id } } as const)
+      : orderHref;
   const reorder = {
     pathname: '/checkout/[bookId]',
     params: { bookId: order.bookId },
@@ -317,7 +331,7 @@ export function ShelfItem({
   return (
     <li className="grid content-start gap-2">
       <Link
-        href={orderHref}
+        href={readHref}
         data-track="leer"
         className={cn(
           COVER,
@@ -340,7 +354,8 @@ export function ShelfItem({
       </p>
       <p className="text-sm text-muted-foreground">{meta(order)}</p>
       <div className="flex flex-wrap gap-x-4">
-        <Link href={orderHref} data-track="leer" className={ACTION}>
+        <Link href={readHref} data-track="leer" className={ACTION}>
+          <BookOpen className="size-4" aria-hidden="true" />
           {t('read')}
         </Link>
         {info?.canDownload && (
@@ -361,6 +376,11 @@ export function ShelfItem({
           >
             <RotateCcw className="size-4" aria-hidden="true" />
             {order.print ? t('anotherCopy') : t('reorder')}
+          </Link>
+        )}
+        {order.print && (
+          <Link href={orderHref} className={cn(ACTION, 'font-semibold text-muted-foreground')}>
+            {t('viewOrder')}
           </Link>
         )}
       </div>

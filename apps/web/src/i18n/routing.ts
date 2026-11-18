@@ -44,6 +44,11 @@ export const routing = defineRouting({
     '/account': { es: '/cuenta', en: '/account', pt: '/conta' },
     '/my-stories': { es: '/mis-cuentos', en: '/my-stories', pt: '/minhas-historias' },
     '/my-orders': { es: '/mis-pedidos', en: '/my-orders', pt: '/meus-pedidos' },
+    '/my-stories/read/[orderId]': {
+      es: '/mis-cuentos/leer/[orderId]',
+      en: '/my-stories/read/[orderId]',
+      pt: '/minhas-historias/ler/[orderId]',
+    },
     '/my-stories/characters/new': {
       es: '/mis-cuentos/personajes/nuevo',
       en: '/my-stories/characters/new',
