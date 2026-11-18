@@ -227,10 +227,9 @@ test('el logo vuelve a la home: arriba de todo y sin hash', async ({ page }) => 
 test('Empezar gratis: sin sesión lleva al login', async ({ page }) => {
   await page.goto('/es');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
-  await expect(page.getByRole('link', { name: 'Empezar gratis' }).first()).toHaveAttribute(
-    'href',
-    /\/ingresar$/,
-  );
+  await expect(
+    page.locator('main').getByRole('link', { name: 'Empezar gratis' }).first(),
+  ).toHaveAttribute('href', /\/ingresar$/);
 });
 
 test('¿Para quién es?: los links siguen andando al volver atrás desde una landing', async ({
