@@ -3,11 +3,12 @@
 import { ArrowRight } from 'lucide-react';
 
 import { useAuth } from '@/components/auth/auth-provider';
+import { useStartFreeHref } from '@/components/auth/start-free';
 import { Link } from '@/i18n/navigation';
 
 /**
- * «Empezar gratis» de la página Cómo funciona: sin sesión lleva a ingresar (crear la cuenta es
- * gratis); con sesión, directo a elegir qué crear.
+ * «Empezar gratis» de la página Cómo funciona: sin sesión lleva a ingresar y, después, al creador,
+ * igual que el resto de los «Empezar gratis» (DECISIONS 252); con sesión, directo a elegir qué crear.
  */
 export function StartFreeLink({
   label,
@@ -22,8 +23,9 @@ export function StartFreeLink({
   className?: string;
 }) {
   const { signedIn } = useAuth();
+  const startFree = useStartFreeHref();
   return (
-    <Link href={signedIn ? '/new' : '/login'} data-track={track} className={className}>
+    <Link href={signedIn ? '/new' : startFree} data-track={track} className={className}>
       {signedIn ? memberLabel : label}
       <ArrowRight aria-hidden="true" />
     </Link>
