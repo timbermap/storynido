@@ -2014,6 +2014,13 @@
         "printing": "Imprimiendo",
         "shipping": "En camino",
         "delivered": "Entregado"
+      },
+      "awaiting": {
+        "title": "Esperando tu pago",
+        "text": "Completa el pago en la pestaña de Gumroad. Cuando se confirme, esta página se actualiza sola y tu cuento empieza a prepararse. Puede tardar unos segundos.",
+        "paid": "Ya pagué",
+        "reopen": "Abrir el pago otra vez",
+        "notYet": "Todavía no nos llegó la confirmación. Suele tardar menos de un minuto: esta página sigue revisando sola."
       }
     },
     "reorderSubtitle": "Pides otra copia impresa del mismo libro, tal como quedó.",
@@ -2120,6 +2127,15 @@
       "label": "Precios para",
       "auto": "Según mi ubicación ({country})",
       "chosenNote": "Lo elegiste a mano; tu ubicación indica {country}."
+    },
+    "handoff": {
+      "title": "Vas a pagar en Gumroad",
+      "text": "Gumroad es el procesador de pagos seguro de StoryNido. Se abre en una pestaña nueva y esta queda esperando tu pago.",
+      "noAccount": "No hace falta crear una cuenta: solo tu correo y tu tarjeta.",
+      "methods": "Tarjeta de crédito o débito y, según tu dispositivo, Apple Pay o Google Pay. El cobro es en dólares (USD).",
+      "comeBack": "Al terminar, vuelve a esta pestaña: tu cuento empieza a prepararse solo y te llega un correo.",
+      "go": "Ir a pagar",
+      "close": "Cerrar"
     }
   },
   "Pro": {
