@@ -406,7 +406,7 @@ export class Pipeline {
   }
 
   /**
-   * Registro de cuánto tarda cada paso y el libro entero (generationTimings, DECISIONS 261): con
+   * Registro de cuánto tarda cada paso y el libro entero (generationTimings, DECISIONS 262): con
    * eso la web muestra el tiempo estimado y la barra de avance. Si falla, se pierde una muestra.
    */
   private async recordTiming(kind: GenerationKind, durationMs: number): Promise<void> {

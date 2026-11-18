@@ -510,7 +510,7 @@ const generationEstimateSchema = z.object({
   samples: z.number().int().nonnegative(),
 });
 
-/** Cuánto suele tardar cada tipo de generación (DECISIONS 261). */
+/** Cuánto suele tardar cada tipo de generación (DECISIONS 262). */
 export const generationTimesResponseSchema = z.object({
   times: z.record(z.enum(GENERATION_KINDS), generationEstimateSchema),
 });

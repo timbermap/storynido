@@ -8,7 +8,7 @@ import { ProgressBar } from '@/components/ui/generation-progress';
 type Progress = NonNullable<PublicOrder['progress']>;
 
 /**
- * Avance del libro completo mientras se crea (DECISIONS 261): en qué etapa va, cuántas páginas
+ * Avance del libro completo mientras se crea (DECISIONS 262): en qué etapa va, cuántas páginas
  * ya están ilustradas y cuánto suele faltar, con los tiempos reales de los últimos libros.
  */
 export function BookProgressView({ progress }: { progress: Progress }) {

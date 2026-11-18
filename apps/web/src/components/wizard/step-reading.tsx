@@ -27,8 +27,9 @@ export function StepReading({ nav, data }: { nav: StepNav; data: WizardData }) {
   const lengths = BOOK_LENGTHS.filter(
     (length) => editorial.lengths[length].active && (story?.lengths.includes(length) ?? true),
   );
-  const densities = TEXT_DENSITIES.filter((value) => story?.textDensities.includes(value) ?? true);
-  const levels = READING_LEVELS.filter((value) => story?.readingLevels.includes(value) ?? true);
+  // Cantidad de texto y nivel, siempre completos (DECISIONS 261).
+  const densities = TEXT_DENSITIES;
+  const levels = READING_LEVELS;
   const [length, setLength] = useState<BookLength>(book.length ?? editorial.defaults.length);
   const [textDensity, setTextDensity] = useState(book.textDensity);
   const [readingLevel, setReadingLevel] = useState(book.readingLevel);
@@ -74,6 +75,8 @@ export function StepReading({ nav, data }: { nav: StepNav; data: WizardData }) {
           label={(value) => tBook(`densities.${value}.name`)}
           hint={(value) => tBook(`densities.${value}.text`)}
           onSelect={setTextDensity}
+          suggested={suggested?.textDensity}
+          suggestedLabel={tBook('suggestedTag')}
         />
         <Chips
           name="reading-level"
@@ -83,6 +86,8 @@ export function StepReading({ nav, data }: { nav: StepNav; data: WizardData }) {
           label={(value) => tBook(`levels.${value}.name`)}
           hint={(value) => tBook(`levels.${value}.text`)}
           onSelect={setReadingLevel}
+          suggested={suggested?.readingLevel}
+          suggestedLabel={tBook('suggestedTag')}
         />
         <p className="rounded-xl bg-secondary p-4 text-sm">{t('notice')}</p>
       </div>

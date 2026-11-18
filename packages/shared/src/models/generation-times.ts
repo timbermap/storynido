@@ -7,7 +7,7 @@ import { PIPELINE_STEPS, type PipelineStep } from './pipeline';
  * Cada vez que una generación sale bien, el servidor guarda su duración en
  * `generationTimings/{tipo}` (las últimas MAX_SAMPLES). El estimado es la mediana; «tarda más de
  * lo normal» se dice pasado el percentil 80. Con menos de MIN_SAMPLES se usan los valores de
- * abajo (DECISIONS 261).
+ * abajo (DECISIONS 262).
  */
 export const GENERATION_KINDS = [
   /** Escribir el cuento y dibujar la lámina del personaje (muestra con foto o rasgos). */

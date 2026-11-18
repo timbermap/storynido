@@ -1145,7 +1145,7 @@ export class CheckoutService {
 
   /**
    * Cuánto va del libro completo: los pasos de esta generación, las páginas ya pintadas y lo que
-   * suele tardar cada paso (DECISIONS 261).
+   * suele tardar cada paso (DECISIONS 262).
    */
   private async orderProgress(ref: DocumentReference, order: OrderDoc) {
     const generation = order.pipeline?.generation ?? 0;

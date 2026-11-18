@@ -441,7 +441,7 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Cuánto tarda cada tipo de generación (DECISIONS 261): lo escribe el servidor y la web lo
+    // Cuánto tarda cada tipo de generación (DECISIONS 262): lo escribe el servidor y la web lo
     // lee por la API; el admin puede mirarlo.
     match /generationTimings/{kind} {
       allow read: if isAdmin();

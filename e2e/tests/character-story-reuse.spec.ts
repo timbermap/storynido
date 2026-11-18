@@ -68,7 +68,7 @@ test('personaje con dibujo aprobado: el cuento usa ese dibujo, sin fotos ni rasg
     await route.continue();
   });
   await page.getByRole('button', { name: 'Crear la vista previa gratis' }).click();
-  // DECISIONS 261: barra de avance con el tiempo típico medido (los minutos dependen de los datos).
+  // DECISIONS 262: barra de avance con el tiempo típico medido (los minutos dependen de los datos).
   await expect(page.getByRole('progressbar', { name: 'Avance' })).toBeVisible();
   await expect(
     page.getByText(/Suele tardar|Faltan? (unos|alrededor)|Falta poco/).first(),

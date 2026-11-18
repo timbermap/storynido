@@ -11,7 +11,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 const CACHE_MS = 5 * 60 * 1000;
 
 /**
- * Registro de cuánto tarda cada tipo de generación (generationTimings/{tipo}, DECISIONS 261).
+ * Registro de cuánto tarda cada tipo de generación (generationTimings/{tipo}, DECISIONS 262).
  * Guardar nunca rompe la generación: si falla, se pierde una muestra y listo.
  */
 export class GenerationTimings {

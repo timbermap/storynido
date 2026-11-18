@@ -237,7 +237,7 @@ export function PreviewPanel({
             ? t('eventWait.textDrawing', { theme: book.event?.theme ?? '' })
             : t('drawingWait.text')}
         </p>
-        {/* Una sola barra para las dos partes: escribir y después ilustrar (DECISIONS 261). */}
+        {/* Una sola barra para las dos partes: escribir y después ilustrar (DECISIONS 262). */}
         <GenerationProgress
           className="mt-6"
           kinds={active === 1 ? 'illustrate' : ['preview_story', 'illustrate']}
@@ -282,7 +282,7 @@ export function PreviewPanel({
         <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
           {illustrating ? t('illustratingText') : t('generatingText', { name: childName })}
         </p>
-        {/* Tiempo estimado con lo que tardaron las últimas muestras (DECISIONS 261). */}
+        {/* Tiempo estimado con lo que tardaron las últimas muestras (DECISIONS 262). */}
         <GenerationProgress
           className="mt-6"
           kinds={illustrating ? 'illustrate' : 'preview'}

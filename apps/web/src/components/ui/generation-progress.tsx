@@ -66,7 +66,7 @@ function useNow(everyMs: number): number {
 }
 
 /**
- * Barra de avance y tiempo estimado de una generación (DECISIONS 261). El estimado sale de lo que
+ * Barra de avance y tiempo estimado de una generación (DECISIONS 262). El estimado sale de lo que
  * tardaron las últimas de ese tipo; la barra llega al 90 % en el tiempo típico y después se acerca
  * despacio sin llegar al final (eso lo marca que termine). Nunca muestra segundos que corren.
  */

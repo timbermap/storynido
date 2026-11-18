@@ -2770,7 +2770,15 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Ajuste (misma fecha):** en `web` y `admin`, lint, tipos y build escriben los tipos de Next en `.next` (`next typegen`); en paralelo se pisaban y ESLint veía `any`. En esas dos apps `turbo.json` los corre en orden (lint → tipos → build); el resto sigue en paralelo.
 - **Ajuste final (misma fecha):** igual falló por tiempo la prueba de reglas de Firestore (emulador). El CI corre Turborepo con `--concurrency=1`: las tareas van de a una y la ganancia queda en la caché (los paquetes sin cambios no se vuelven a correr).
 
-## 261 — Tiempo estimado y barra de avance de cada generación
+## 261 — «Ajustar la lectura» ofrece siempre las tres cantidades de texto y los tres niveles
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: en una historia de Bebés elegida para un chico de 5, «Ajustar la lectura» mostraba solo «Muy visual» e «Inicial», así que no se podía ajustar nada. Revisado por la mesa (producto, diseño/UX, usuario familia, usuario profesional).
+- **Causa:** el creador filtraba cantidad de texto y nivel por lo que admite cada historia (`textDensities`, `readingLevels`). Las de Bebés (0–2) admiten solo «Muy visual» e «Inicial», y las de Grandes lectores no admiten «Muy visual» ni «Inicial». Ese límite venía de cuando la densidad era fija en palabras; desde DECISIONS 236 la densidad es un escalón sobre la franja de la edad del chico, así que «Más lectura» en una historia de Bebés para un chico de 5 da 40–70 palabras por página, no un libro de bebé con texto de 9 años.
+- **Cambio:** el creador (Familias, Celebraciones y la etapa Ajustes de Profesionales) ofrece siempre las tres cantidades y los tres niveles, en cualquier historia. Queda preseleccionado lo sugerido para la edad (`suggestedReading`) y esa opción lleva la etiqueta «Sugerido». El resumen «Sugerido para 5 años: …» sale de la edad aunque la extensión recomendada no entre en la historia. La extensión y el tipo de libro siguen limitados por la historia (son páginas y formatos de imprenta).
+- **Mesa:** producto y usuario profesional, abrir todo (una fonoaudióloga o docente adapta por el chico, no por la edad); diseño/UX, dejar la sugerencia preseleccionada y marcada para que no sea una decisión obligada; usuario familia, que el padre pueda subir o bajar el texto (chico que ya lee o que todavía no).
+- **Admin:** los campos «Densidades» y «Niveles» de la historia ya no limitan al creador; quedan como referencia.
+
+## 262 — Tiempo estimado y barra de avance de cada generación
 
 - **Fecha:** 2026-11-18. Pedido por Sebas («llevar un registro aprox de cuánto lleva cada tipo de generación para dar tiempo estimado o una barra de avance; mismo para el cuento completo»).
 - **Antes:** la espera de la muestra decía «Suele estar en unos N minutos» con números fijos medidos a mano una vez (`PREVIEW_WAIT_MINUTES`, 24/10–05/11). El dibujo del perfil, «Corregir rasgos», regenerar una ilustración y el libro completo no decían nada; el pedido mostraba solo «Estamos creando tu libro».

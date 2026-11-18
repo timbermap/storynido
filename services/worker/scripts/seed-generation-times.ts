@@ -1,7 +1,7 @@
 /* eslint-disable no-console -- script de línea de comandos: el resultado se lee en la consola. */
 /**
  * Mide cuánto tardaron las generaciones reales de un ambiente y, con --write, carga esas
- * duraciones en generationTimings (DECISIONS 261) para que el tiempo estimado arranque con datos.
+ * duraciones en generationTimings (DECISIONS 262) para que el tiempo estimado arranque con datos.
  *
  * - Libro completo: exacto, de orders/{id}/steps (durationMs) y del pipeline (inicio → fin).
  * - Muestras, ilustraciones, regeneraciones y dibujos del perfil: aproximado, con las llamadas de
