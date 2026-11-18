@@ -103,6 +103,13 @@ export interface SceneRequest {
   scenes: readonly ScenePlan[] | null;
   /** Personajes que se repiten (acompañante y elenco), para decir quién está y quién no. */
   recurring: readonly string[];
+  /**
+   * Aspecto del protagonista: los familiares que aparecen una sola vez también se le parecen
+   * (DECISIONS 267).
+   */
+  protagonistLook?: string;
+  /** Edad del protagonista en el cuento, para la ropa y lo que puede hacer. */
+  age?: number;
 }
 
 export interface SceneDescriptions {
