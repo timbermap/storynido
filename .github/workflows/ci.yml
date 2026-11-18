@@ -26,8 +26,32 @@ jobs:
           fetch-depth: 0
       - run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --verbose
 
+  # Los chequeos van en dos runners al mismo tiempo (DECISIONS 263): cada uno corre de a una
+  # tarea, así no se repite la saturación del runner de 2 CPU (DECISIONS 260).
   checks:
-    name: Lint, tipos, tests y build
+    name: Lint, tipos y build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Dependencias de producción sin vulnerabilidades altas ni críticas (fase 16).
+      - run: pnpm audit --prod --audit-level=high
+      - run: pnpm format:check
+      # Caché local de Turborepo: los paquetes que no cambiaron no se vuelven a chequear (DECISIONS 260).
+      - uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-checks-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-checks-${{ runner.os }}-
+      - run: pnpm turbo run lint typecheck build --cache-dir=.turbo/cache --concurrency=1
+
+  tests:
+    name: Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -46,17 +70,12 @@ jobs:
           path: ~/.cache/firebase/emulators
           key: firebase-emulators-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm install --frozen-lockfile
-      # Dependencias de producción sin vulnerabilidades altas ni críticas (fase 16).
-      - run: pnpm audit --prod --audit-level=high
-      - run: pnpm format:check
-      # Caché local de Turborepo: los paquetes que no cambiaron no se vuelven a chequear (DECISIONS 260).
       - uses: actions/cache@v6
         with:
           path: .turbo/cache
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: turbo-${{ runner.os }}-
-      # Las cuatro tareas en una sola corrida de Turborepo, de a una: en paralelo se pisaban los emuladores y las pruebas lentas en un runner de 2 CPU (DECISIONS 260).
-      - run: pnpm turbo run lint typecheck test build --cache-dir=.turbo/cache --concurrency=1
+          key: turbo-tests-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-tests-${{ runner.os }}-
+      - run: pnpm turbo run test --cache-dir=.turbo/cache --concurrency=1
 
   terraform:
     name: Terraform (fmt, validate, tflint)
