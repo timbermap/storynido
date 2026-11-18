@@ -11,10 +11,10 @@ Resumen operativo de la **marca v3** ("cálida, luminosa y editorial"), aprobada
 ## Voz
 
 - Cálida, cercana, imaginativa, clara y segura. Adulto accesible, no tono de jardín.
-- **Español neutro con "tú"** (México, EE. UU. hispano, Latinoamérica). Nunca voseo en el sitio.
+- **Español neutro con "tú"** (México, EE. UU. hispano, Latinoamérica). **Voseo para Argentina y Uruguay** (`messages/es-voseo.json`, DECISIONS 250).
 - Lema: **"Historias que inspiran, enseñan y quedan para siempre."** (va en letra manuscrita, Caveat).
 - Hero de la home: "Tu hijo, protagonista de una historia única." y el botón "Elegir para quién es", que baja a las tres entradas por público.
-- CTA principal: **"Crear una vista previa gratis"**.
+- CTA principal: **"Empezar gratis"**, el mismo en el menú, el hero, el botón fijo del celular y el cierre (DECISIONS 250).
 - Checkout: "Elige cómo quieres recibir su historia".
 
 ## Reglas de honestidad (no negociables)

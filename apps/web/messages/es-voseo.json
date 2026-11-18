@@ -1,0 +1,531 @@
+{
+  "Meta": {
+    "description": "Un cuento ilustrado único con su nombre, su carita y las aventuras que siempre soñó. Mirá una vista previa gratis y recibilo en digital o impreso."
+  },
+  "Nav": {
+    "allStoriesText": "Elegí la aventura y la adaptamos a su edad.",
+    "eventsCreateText": "Empezá con el protagonista del festejo.",
+    "professionalsText": "Cuentos para cada niño que acompañás, con colecciones educativas.",
+    "professionalsCreateText": "Elegí una colección y personalizá el cuento.",
+    "createTitle": "¿Qué querés crear?",
+    "exitText": "Tu cuento queda guardado tal como está; lo retomás cuando quieras desde Mis cuentos.",
+    "discardError": "No pudimos descartarlo. Intentá de nuevo."
+  },
+  "Footer": {
+    "follow": "Seguinos"
+  },
+  "Legal": {
+    "termsDescription": "Las condiciones de uso de StoryNido: qué comprás, cómo podés usar tu libro y tus derechos.",
+    "shipNoPrint": "Impreso: todavía no imprimimos para este país. Podés comprar el digital."
+  },
+  "Home": {
+    "hero": {
+      "lead": "Subís una foto y la convertimos en el personaje del cuento. Lo ves gratis antes de decidir.",
+      "audienceTitle": "Elegí para quién es",
+      "homeLead": "Subís una foto, eligen juntos la aventura y en minutos ves su cuento ilustrado. Si te encanta, podés pedirlo impreso en tapa dura.",
+      "photoNote": "Entrás gratis con Google o con un enlace al correo. Usamos la foto solo para crear el personaje.",
+      "homeLeadDigital": "Subís una foto, eligen juntos la aventura y en minutos ves su cuento ilustrado. Si te encanta, lo recibís en digital al instante. El libro impreso llega muy pronto."
+    },
+    "how": {
+      "step1Title": "Contanos sobre el protagonista",
+      "step2Title": "Elegí una aventura",
+      "step3Title": "Descubrí su cuento",
+      "step3Text": "Mirá una vista previa gratis y elegí tu formato favorito: digital, tapa blanda o tapa dura.",
+      "step3TextDigital": "Mirá una vista previa gratis y recibilo en digital al instante. Tapa blanda y tapa dura, muy pronto."
+    },
+    "gallery": {
+      "subtitle": "Elegí la edad y mirá cómo se ve su libro."
+    },
+    "faq": {
+      "contact": "¿Otra duda? <form>Escribinos con el formulario</form> y te respondemos.",
+      "pageIntro": "Todo lo que suelen preguntarnos, por tema. ¿No está tu duda? <form>Escribinos</form>."
+    },
+    "guarantee": {
+      "title": "Mirá antes de comprar",
+      "text": "Creás una vista previa gratis y decidís si querés convertirla en tu libro. Y si el libro tiene un error o llega dañado, lo corregimos, lo reimprimimos o te devolvemos el dinero."
+    },
+    "cover": {
+      "subtitle": "Escribí su nombre y mirá cómo aparece en la portada, en su personaje y dentro del cuento."
+    },
+    "familiesMetaDescription": "Creá un libro con tu hijo como protagonista: subí su foto, mirá la vista previa gratis y recibilo digital o impreso.",
+    "printedBook": {
+      "text": "Impreso de unos 21×28 cm, con su nombre y su personaje en cada página. Y si lo preferís, lo recibís en digital al instante, para leerlo hoy mismo."
+    },
+    "finalCta": {
+      "title": "Elegí tu línea y empezá gratis",
+      "text": "Familias, celebraciones o consultorio: mirá cómo queda antes de pagar."
+    },
+    "audience": {
+      "professionals": {
+        "text": "Cuentos para cada niño que acompañás, con colecciones educativas."
+      }
+    },
+    "formats": {
+      "title": "Así lo recibís",
+      "subtitle": "Hoy lo recibís en digital, al instante. Los libros impresos llegan muy pronto."
+    }
+  },
+  "Stories": {
+    "notAvailable": "Todavía no vendemos en {country}. Podés elegir otro país en Mi cuenta.",
+    "error": "No pudimos cargar las historias. Intentalo de nuevo en unos minutos.",
+    "objectivesText": "Al crearlo elegís uno como objetivo principal y la historia gira en torno a él.",
+    "christmasOpen": "Para Navidad en {country}: pedí el libro impreso antes del {date} y llega antes del 24 de diciembre. El digital está listo en minutos.",
+    "createGuest": "Iniciá sesión para crear",
+    "createKitGuest": "Iniciá sesión para diseñar el kit",
+    "lengthsTitle": "Elegí la extensión",
+    "lengthsText": "Al crear el libro elegís cuántas páginas tiene; abajo de cada una, los formatos en que sale.",
+    "visitorName": {
+      "placeholder": "Escribí un nombre",
+      "hint": "Escribí un nombre y verás todas las portadas con él."
+    }
+  },
+  "FormatShowcase": {
+    "title": "Así lo recibís"
+  },
+  "Consent": {
+    "text": "Usamos cookies necesarias para que el sitio funcione y, si aceptás, cookies de analítica y marketing para mejorarlo. Podés cambiar tu elección cuando quieras."
+  },
+  "Auth": {
+    "title": "Entrá a {brand}",
+    "subtitle": "Guardá tus cuentos y seguí tus pedidos.",
+    "checkEmailTitle": "Revisá tu correo",
+    "checkEmailText": "Te enviamos un enlace a {email}. Abrilo desde este mismo dispositivo para entrar.",
+    "requestNewLink": "Pedí uno nuevo",
+    "confirmEmail": "Confirmá tu email para terminar de entrar",
+    "errors": {
+      "popupClosed": "Cerraste la ventana antes de terminar. Intentalo de nuevo.",
+      "popupBlocked": "El navegador bloqueó la ventana de inicio de sesión. Habilitá las ventanas emergentes.",
+      "expiredLink": "El enlace venció o ya se usó. Pedí uno nuevo.",
+      "accountExists": "Ya existe una cuenta con ese email. Iniciá sesión con el método que usaste antes.",
+      "network": "No hay conexión. Revisá tu internet e intentalo de nuevo.",
+      "generic": "No pudimos iniciar sesión. Intentalo de nuevo en unos minutos.",
+      "mfaInvalid": "El código no es válido o venció. Probá con el siguiente."
+    },
+    "mfaText": "Escribí el código de 6 dígitos de tu app autenticadora."
+  },
+  "Account": {
+    "languageNote": "Lo detectamos por tu ubicación; si preferís otro, elegilo aquí y lo recordamos. También podés cambiarlo en el pie de página.",
+    "preferencesError": "No pudimos guardar tu preferencia. Intentá de nuevo.",
+    "orders": {
+      "empty": "Todavía no tenés pedidos."
+    },
+    "children": {
+      "error": "No pudimos borrar los datos. Intentá de nuevo."
+    },
+    "deleteAccount": {
+      "error": "No pudimos borrar tu cuenta. Intentá de nuevo."
+    },
+    "myStories": {
+      "newTitle": "¿Qué querés crear?",
+      "resume": "Seguí donde lo dejaste",
+      "loadFailed": "No pudimos cargar tus cuentos en proceso. Recargá la página para intentarlo de nuevo.",
+      "charactersNote": "Tus chicos y sus personajes. Podés cambiar su nombre y edad, crear su dibujo o borrar sus datos.",
+      "characterSaveError": "No pudimos guardar los cambios. Intentá de nuevo.",
+      "profileLikesHint": "Separalos con comas (hasta 10).",
+      "profileSaveError": "No pudimos guardar. Intentá de nuevo.",
+      "profilePhotoNone": "Subí una foto de frente para crear o actualizar su dibujo. Se borra sola a los 30 días.",
+      "profilePhotoError": "No pudimos borrar la foto. Intentá de nuevo.",
+      "emptyCreating": "No tenés cuentos en creación.",
+      "emptyInProgress": "No tenés pedidos en curso.",
+      "emptyDone": "Todavía no tenés cuentos terminados.",
+      "library": {
+        "next": {
+          "preview": {
+            "sub": "Ya ilustramos la portada y las primeras páginas. Mirala antes de pagar."
+          },
+          "kitPreview": {
+            "sub": "Mirá la invitación, la decoración y el cuento antes de pagar."
+          },
+          "character": {
+            "sub": "Aprobalo y seguimos con la portada y las primeras páginas."
+          },
+          "generating": {
+            "sub": "Tarda unos minutos. Podés cerrar esta pantalla: te avisamos por correo."
+          }
+        },
+        "downloadError": "No pudimos preparar la descarga. Intentá de nuevo.",
+        "characters": {
+          "addText": "Guardá sus datos y su foto; después decidís si crear un cuento."
+        },
+        "empty": {
+          "creating": "No tenés cuentos en creación.",
+          "creatingWithCharacter": "No tenés cuentos en creación. ¿Otra aventura para {name}? Ya tenemos sus datos y su personaje.",
+          "inProgress": "No tenés pedidos en curso. Cuando pagues un libro, aquí ves cada paso: la creación, la imprenta y el envío.",
+          "done": "Todavía no tenés cuentos terminados. Aquí quedan los libros entregados y los digitales listos, para verlos, descargarlos o volver a pedirlos."
+        },
+        "welcome": {
+          "text": "Aquí vas a encontrar todo lo que creés, ordenado por estado."
+        },
+        "trust": {
+          "reorder": "Podés volver a pedir cualquier libro"
+        }
+      },
+      "profileRedrawNote": "Empezamos un cuento nuevo con sus fotos: al crear la muestra ves su dibujo nuevo y lo aprobás. Cada dibujo nuevo usa una generación de IA.",
+      "drawing": {
+        "error": "No pudimos dibujarlo ahora. Intentá de nuevo en un rato.",
+        "needsPhoto": "Para crear su dibujo ahora, <link>subí una foto</link>."
+      },
+      "newCharacter": {
+        "text": "Guardá sus datos y su foto (o sus rasgos). Después creás su dibujo o un cuento con su personaje cuando quieras.",
+        "error": "No pudimos guardarlo. Intentá de nuevo."
+      },
+      "profilePhotoUploadError": "No pudimos subir la foto. Probá con otra."
+    }
+  },
+  "Maintenance": {
+    "previewOnly": "Podés crear tu muestra gratis. Las compras están pausadas por el momento: volvé pronto."
+  },
+  "Error": {
+    "text": "Ocurrió un error inesperado. Intentalo de nuevo."
+  },
+  "Lessons": {
+    "subtitle": "Elegí qué querés que aprenda: la aventura y la enseñanza se combinan en una historia única.",
+    "finalTitle": "Comenzá ahora",
+    "finalText": "Elegí la aventura, agregá su nombre y mirá gratis cómo queda la historia.",
+    "combineTitle": "Combinalo con cualquier aventura",
+    "combineText": "Elegí la aventura que más le guste: la historia se escribe con este mensaje, adaptado a su edad.",
+    "custom": "¿Preferís otro mensaje? Al crear el cuento podés escribir el tuyo, en hasta 150 caracteres.",
+    "storyCombine": "Combinala con una enseñanza",
+    "storyCombineText": "Al crear el cuento elegís qué mensaje querés que tenga. Por ejemplo:",
+    "indexText": "Elegí qué querés que aprenda: cada una tiene su historia y se combina con la aventura que le guste."
+  },
+  "Wizard": {
+    "title": "Creá su cuento",
+    "steps": {
+      "kit": "Qué llevás"
+    },
+    "saveError": "No pudimos guardar. Revisá tu conexión e intentalo de nuevo.",
+    "signInTitle": "Iniciá sesión para crear su cuento",
+    "drafts": {
+      "deleteFailed": "No pudimos borrarlo. Si ya tiene un pedido, no se puede borrar; si no, intentá de nuevo."
+    },
+    "child": {
+      "title": "Contanos sobre el protagonista",
+      "likesPlaceholder": "Escribí algo y presioná Enter",
+      "required": "Escribí su nombre para continuar.",
+      "pro": {
+        "required": "Escribí un alias para continuar."
+      },
+      "reuseLook": "Usamos su aspecto del último cuento; igual lo ves y lo aprobás en la muestra.",
+      "reuseNoLook": "Sus datos ya están; el aspecto lo elegís en el paso del personaje.",
+      "reuseTyped": "Ya tenés a {name} guardado, con su dibujo o sus fotos."
+    },
+    "photos": {
+      "title": "Subí de 1 a 3 fotos",
+      "reasons": {
+        "unsupported_format": "No pudimos abrir el archivo. Usá una foto JPG, PNG o WebP.",
+        "low_resolution": "La foto es muy chica. Usá una de mayor calidad.",
+        "no_face": "No encontramos una cara. Usá una foto donde se vea su cara de frente.",
+        "multiple_faces": "Hay más de una persona. Usá una foto donde aparezca solo el niño.",
+        "face_too_small": "La cara se ve muy chica. Acercate más o recortá la foto.",
+        "too_dark": "Está muy oscura. Probá con una foto con más luz.",
+        "too_bright": "Está muy clara. Evitá el flash o el sol directo.",
+        "blurry": "Está movida o desenfocada. Probá con una más nítida.",
+        "unreadable": "No pudimos usar esta foto. Probá con otra: de frente, bien iluminada y solo con el rostro. O elegí los rasgos del personaje."
+      },
+      "badType": "Ese formato no está soportado. Usá JPG, PNG o WebP.",
+      "limit": "Ya tenés 3 fotos. Eliminá una para subir otra.",
+      "needOne": "Subí al menos una foto válida para continuar.",
+      "uploadError": "No pudimos subir la foto. Intentalo de nuevo."
+    },
+    "story": {
+      "title": "Elegí la aventura",
+      "required": "Elegí una aventura para continuar."
+    },
+    "lesson": {
+      "title": "¿Qué querés que aprenda?",
+      "pickUpTo": "Elegí hasta {max} ({count}/{max}). Si no elegís ninguna, la historia igual tendrá un mensaje positivo."
+    },
+    "style": {
+      "title": "Elegí el estilo de ilustración",
+      "required": "Elegí un estilo para continuar."
+    },
+    "review": {
+      "subtitle": "Revisá los datos. Podés volver a cualquier paso.",
+      "limitReached": "Hoy ya creaste tus muestras gratis. Tu cuento quedó guardado: mañana lo terminás con un clic.",
+      "kit": "Qué llevás"
+    },
+    "preview": {
+      "generatingText": "Escribimos la historia y dibujamos a {name}. Esto lleva unos minutos, porque cuidamos que se parezca. Después vos lo revisás y, recién con tu OK, ilustramos la portada y las primeras páginas.",
+      "differencesEdit": "Podés editar los textos de cada página antes de pedirlo.",
+      "staleText": "Esta muestra corresponde a la versión anterior. Creala de nuevo para ver los cambios.",
+      "ageMismatchText": "En el cuento, {name} tiene {age} años, pero la foto parece de alguien de otra edad. Si es correcto, seguí adelante; si no, revisá la edad o cambiá la foto antes de pagar.",
+      "errors": {
+        "limit_reached": "Ya probaste varias versiones hoy. Guardamos todo y mañana seguís.",
+        "photo_unreadable": "No pudimos leer esta foto. Probá con otra (de frente, bien iluminada, solo el rostro) o elegí los rasgos del personaje. No cuenta para tu límite de hoy.",
+        "ai_unavailable": "No pudimos terminar la muestra en este momento. Intentá de nuevo en unos minutos; tu borrador queda guardado.",
+        "ai_budget_exhausted": "Hay mucha demanda en este momento. Intentá de nuevo en un rato; tu borrador queda guardado.",
+        "validation_failed": "Ese texto no es apto para un cuento infantil. Cambialo e intentá de nuevo.",
+        "bad_request": "Revisá que estén completos el protagonista, la foto, la historia y el estilo.",
+        "generic": "Algo salió mal. Intentá de nuevo en unos minutos.",
+        "account_required": "Creá tu cuenta gratis para ver la portada y las páginas ilustradas.",
+        "limit_reached_week": "Ya probaste varias versiones esta semana. Guardamos todo y en unos días seguís."
+      },
+      "saveStoryTitle": "Guardá tu cuento",
+      "saveStoryText": "Creá tu cuenta gratis para no perder esta muestra y retomarla desde cualquier dispositivo.",
+      "characterText": "Revisá que se parezca. Si algo no está bien, corregilo antes de ilustrar el libro.",
+      "accountTitle": "Creá tu cuenta para ver la portada y las páginas",
+      "continueAfterApproval": "Elegí el formato cuando apruebes al personaje y la muestra esté al día.",
+      "whatsOffHint": "Marcá lo que hay que corregir y te mostramos solo eso.",
+      "waitSteps": {
+        "review": "Vos revisás y confirmás el parecido"
+      },
+      "leaveTitle": "Podés cerrar esta pantalla",
+      "proVolume": "Cuantos más cuentos hacés, menos pagás por cada uno. Sin suscripción.",
+      "proDifferencesEdit": "Podés editar el texto de cada página y volver a cambiar el cuento base o la foto.",
+      "noAdjustmentsLeft": "Ya usaste los ajustes incluidos: podés aprobarlo o crear una vista previa nueva.",
+      "eventWait": {
+        "steps4": {
+          "review": "Vos revisás y confirmás el parecido"
+        }
+      },
+      "queued": {
+        "text": "Hay muchos cuentos creándose ahora mismo. La tuya ya está en camino: te avisamos por correo apenas esté lista, así que podés cerrar esta página."
+      }
+    },
+    "character": {
+      "avatarText": "Elegís sus rasgos: piel, pelo, ojos y anteojos.",
+      "avatarTitle": "Elegí cómo se ve",
+      "required": "Elegí todos los rasgos para continuar."
+    },
+    "memories": {
+      "title": "Hacelo realmente suyo",
+      "subtitle": "Contanos algunos detalles reales y los convertimos en escenas del cuento. Todo es opcional.",
+      "moment": "¿Qué recuerdo o momento especial querés que aparezca?"
+    },
+    "feedback": {
+      "error": "No pudimos enviarlo. Intentalo de nuevo."
+    },
+    "startFailed": "No pudimos preparar tu cuento. Revisá tu conexión e intentalo de nuevo.",
+    "party": {
+      "subtitle": "Elegí la temática y contanos cuándo y dónde. Con eso armamos la invitación y el cuento de recuerdo.",
+      "required": "Elegí una temática para continuar."
+    },
+    "kit": {
+      "title": "¿Qué llevás?",
+      "subtitle": "Primero ves tu muestra gratis. Pagás solo si te gusta.",
+      "dedicationHint": "Todos los invitados reciben el mismo cuento, aprobado por vos."
+    },
+    "partyPreview": {
+      "book": {
+        "afterKit": "Anotado. Después de pagar el kit, desde tu pedido creás su libro con el mismo personaje.",
+        "shareText": "Estamos preparando la fiesta de {name}. Si querés regalarle un cuento donde sea protagonista, podés crearlo aquí:"
+      },
+      "differencesEdit": "Podés editar los textos y volver a cambiar la temática o la foto."
+    },
+    "focus": {
+      "title": "¿Qué querés trabajar?",
+      "subtitle": "Empezá por la situación. Cada colección tiene objetivos y cuentos listos para adaptar.",
+      "requiredCollection": "Elegí una colección para continuar.",
+      "requiredGoal": "Elegí un objetivo para continuar.",
+      "requiredStory": "Elegí un cuento base para continuar."
+    }
+  },
+  "Landing": {
+    "events": {
+      "note": "Creás tu cuenta gratis (con Google o con un enlace al correo) y ves la muestra antes de pagar.",
+      "steps": {
+        "1": {
+          "title": "Elegís el tema (1 minuto)"
+        },
+        "2": {
+          "text": "Diseñamos el personaje y su mini cuento, y vos lo aprobás antes de pagar."
+        },
+        "3": {
+          "text": "Imprimís en casa o en la imprenta que prefieras, tantas copias como invitados."
+        }
+      },
+      "faq": {
+        "2": {
+          "a": "Todo viene en PDF listo para imprimir en casa o en la imprenta que prefieras. Después podés pedir las invitaciones y los agradecimientos impresos y enviados a tu casa."
+        },
+        "3": {
+          "a": "No. Podés elegir los rasgos del protagonista sin subir ninguna foto."
+        },
+        "4": {
+          "a": "Como es digital, descargás los archivos al instante. Pedilo con unos días de margen para imprimir las piezas donde prefieras."
+        }
+      },
+      "catalogSubtitle": "Elegí la temática y armá el kit completo: invitación, mini cuento, stickers y más, con un mismo protagonista.",
+      "hero": {
+        "point3": "Elegís entre {count} temas de fiesta"
+      },
+      "products": {
+        "3": {
+          "text": "Un librito ilustrado con el personaje de tu hijo, en PDF. Lo imprimís una vez por invitado y cada uno se lleva su cuento de recuerdo."
+        }
+      },
+      "packagesNote": "Precios en dólares (USD). Las copias que imprimís no cambian el precio."
+    },
+    "professionals": {
+      "metaDescription": "Creá cuentos personalizados para cada niño que acompañás, con colecciones educativas y lectura a medida, desde una sola cuenta.",
+      "title": "Un cuento para cada niño que acompañás",
+      "subtitle": "Historias que trabajan emociones, rutinas o lectura, con el niño como protagonista. Usás un alias: nunca pedimos apellido ni datos clínicos.",
+      "note": "Ves los ejemplos sin cuenta. La necesitás para crear y guardar tus proyectos por niño.",
+      "steps": {
+        "1": {
+          "title": "Creá tu cuenta"
+        },
+        "2": {
+          "title": "Elegí una colección"
+        },
+        "3": {
+          "title": "Personalizá para cada niño",
+          "text": "Usá un alias y ajustá la extensión, la cantidad de texto y el nivel de lectura."
+        }
+      },
+      "benefits": {
+        "4": {
+          "title": "El texto lo ajustás vos",
+          "text": "Antes de pagar editás el texto de cada página, ves la portada y las primeras páginas ilustradas y podés probar otra ilustración. Contás con un aviso de material educativo, no clínico."
+        }
+      },
+      "collectionsTitle": "Empezá por lo que necesitás",
+      "faq": {
+        "2": {
+          "a": "No. Recomendamos el modo sin foto. Si usás una foto, necesitás la autorización de la madre, el padre o el tutor."
+        },
+        "3": {
+          "a": "Sí: elegís la cantidad de texto y el nivel de lectura, independientes de la extensión del libro."
+        },
+        "5": {
+          "a": "Sí. Antes de pagar podés cambiar el texto de cada página de la vista previa. La vista previa ilustra la portada y las primeras páginas, y ahí podés probar otra ilustración."
+        },
+        "6": {
+          "a": "No. Pagás cada cuento y, si hacés muchos, tu cuenta recibe descuentos por volumen. Para consultorios e instituciones que necesitan cantidad, escribinos desde Contacto."
+        }
+      },
+      "finalTitle": "Un cuento para cada niño que acompañás",
+      "signInTitle": "Creá tu cuenta para empezar",
+      "collectionsSubtitle": "Cada colección responde a una situación real. Mirá las historias, hojeá un ejemplo y recién después creá tu cuenta.",
+      "pricingSubtitle": "Pagás cada cuento cuando lo creás. Cuantos más cuentos hacés, menos pagás por cada uno.",
+      "pricing": {
+        "1": {
+          "text": "El digital, con sus ilustraciones y el texto que vos ajustás. El libro impreso suma su impresión y el envío, que se calcula con la dirección."
+        },
+        "3": {
+          "text": "Ves la vista previa del cuento sin pagar y solo pagás si lo querés. Sin planes mensuales ni cuotas."
+        }
+      },
+      "catalogSubtitle": "Para anticipar situaciones, trabajar emociones, rutinas, escuela o lenguaje. Elegí la plantilla, hojeá un ejemplo y ajustá el texto para cada niño.",
+      "catalogNote": "Ves todo sin cuenta. Solo la necesitás para crear."
+    }
+  },
+  "Checkout": {
+    "yourBookText": "Así quedó el que aprobaste. Elegí cómo recibirlo.",
+    "subtitle": "Elegí el formato. El precio lo calculamos con los impuestos y el envío de tu país.",
+    "unavailable": "Todavía no vendemos en tu país. Podés ver los precios de otro país desde el pie de página.",
+    "signInTitle": "Iniciá sesión para comprar",
+    "address": {
+      "errors": {
+        "postalCode": "Revisá el código postal.",
+        "postalCodeExample": "Revisá el código postal (por ejemplo, {example}).",
+        "phone": "Revisá el teléfono: con código de área, solo números.",
+        "taxId": "Revisá el número: no coincide con un documento válido.",
+        "state": "Revisá este dato.",
+        "streetNumber": "Agregá el número de la puerta."
+      },
+      "search": {
+        "hint": "Elegí tu dirección de la lista: completamos el resto y la vemos en el mapa. Si no aparece, cargala a mano abajo."
+      },
+      "map": {
+        "hint": "Si el pin no está en la puerta correcta, arrastralo hasta ahí."
+      }
+    },
+    "giftDate": "¿Para qué fecha lo necesitás?",
+    "christmas": {
+      "on_time": "Si lo pedís hoy, llega antes de Navidad: lo estimamos entre el {earliest} y el {latest}.",
+      "at_risk": "Si lo pedís hoy, puede llegar antes de Navidad, pero no está asegurado: lo estimamos entre el {earliest} y el {latest}. El libro digital está listo en minutos.",
+      "late": "Si lo pedís hoy, no llega antes de Navidad (lo antes posible es el {earliest}). El libro digital está listo en minutos."
+    },
+    "giftDateStatus": {
+      "at_risk": "Puede no llegar a tiempo: estimamos la entrega entre el {earliest} y el {latest}. Si lo necesitás sí o sí para esa fecha, el libro digital está listo en minutos.",
+      "late": "No llega para esa fecha: lo antes posible es el {earliest}. El libro digital está listo en minutos, y el impreso podés pedirlo después desde tu cuenta."
+    },
+    "errors": {
+      "generic": "Algo salió mal. Intentá de nuevo en unos minutos."
+    },
+    "order": {
+      "review": {
+        "error": "No pudimos guardar tu opinión. Intentá de nuevo."
+      }
+    },
+    "reorderSubtitle": "Pedís otra copia impresa del mismo libro, tal como quedó.",
+    "kit": {
+      "subtitle": "Un diseño, muchas copias: elegí las piezas y cuántos invitados. Te las damos listas para imprimir en casa o en una imprenta.",
+      "invitationRequired": "Completá la hora y el lugar para pagar: van en la invitación.",
+      "license": "Imprimí las copias que necesites para la celebración, en casa o en una imprenta.",
+      "printGuide": {
+        "tip2": "Al imprimir elegí «tamaño real» o «100 %». Si el programa ajusta la hoja, las marcas de corte se corren.",
+        "tip3": "Cortá siguiendo las marcas. Los stickers y las etiquetas se pueden imprimir en papel autoadhesivo.",
+        "tip4": "La imagen de la invitación para WhatsApp es un PNG: guardala en el celular y enviala como foto."
+      },
+      "printCards": {
+        "subtitle": "Pedí las invitaciones y los agradecimientos de tu kit impresos y enviados a tu casa.",
+        "piecesTitle": "¿Cuántas tarjetas querés?",
+        "piecesText": "Tarjetas de 12,7 × 17,8 cm (5×7\"), a todo color de los dos lados, con el diseño de tu kit. Dejá en 0 la que no quieras.",
+        "error": "No pudimos calcular el pedido. Intentalo de nuevo."
+      }
+    },
+    "addressToQuote": "Completá la dirección para ver el envío y el total.",
+    "copies": {
+      "hint": "Pagás la creación una sola vez; cada ejemplar extra cuesta solo su impresión (ideal para souvenirs)."
+    }
+  },
+  "Pro": {
+    "activation": {
+      "title": "Contanos a qué te dedicás",
+      "professionEmpty": "Elegí una opción",
+      "required": "Elegí tu profesión.",
+      "error": "No pudimos activar la cuenta. Intentá de nuevo."
+    },
+    "account": {
+      "next": "Con {missing, plural, one {# compra más} other {# compras más}} llegás al {percent} %.",
+      "empty": "Todavía no tenés proyectos. Cada niño con el que trabajás es un proyecto.",
+      "deleteError": "No pudimos borrarlo. Intentá de nuevo."
+    }
+  },
+  "PhotoPromise": {
+    "noPhoto": "¿Preferís no subir fotos? Creá el personaje eligiendo sus rasgos."
+  },
+  "Contact": {
+    "title": "Escribinos",
+    "error": "No pudimos enviar tu mensaje. Intentalo de nuevo en unos minutos.",
+    "limited": "Recibimos varios mensajes desde tu conexión hoy. Intentalo de nuevo mañana."
+  },
+  "HomeSession": {
+    "titleResume": "Retomá donde lo dejaste",
+    "titleNew": "¿Qué querés crear hoy?",
+    "events": {
+      "draft": {
+        "sub": "Retomalo donde lo dejaste: lo que ya contestaste está guardado."
+      },
+      "generating": {
+        "sub": "Tarda unos minutos. Podés cerrar esta pantalla: te avisamos por correo."
+      },
+      "character": {
+        "sub": "Confirmá su personaje para ver el kit de la fiesta."
+      },
+      "preview": {
+        "sub": "Mirá la invitación, la decoración y el cuento antes de pagar."
+      }
+    },
+    "create": {
+      "professionals": {
+        "title": "Un cuento para cada niño que acompañás"
+      }
+    },
+    "draft": {
+      "sub": "Retomalo donde lo dejaste: lo que ya contestaste está guardado."
+    },
+    "generating": {
+      "sub": "Tarda unos minutos. Podés cerrar esta pantalla: te avisamos por correo."
+    },
+    "character": {
+      "sub": "Confirmá su personaje para ver la portada y las primeras páginas."
+    },
+    "orderShipped": {
+      "sub": "Podés seguir el envío desde tu pedido."
+    }
+  }
+}
