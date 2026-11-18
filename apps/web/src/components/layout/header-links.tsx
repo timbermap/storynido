@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 
+import { useStartFreeHref } from '@/components/auth/start-free';
 import { buttonVariants } from '@/components/ui/button';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
@@ -32,9 +33,9 @@ export function NavLink({
 }
 
 /**
- * Botón de crear del encabezado (sin sesión): lleva al login y de ahí a Mis cuentos (DECISIONS 144),
- * con el texto de la sección: "Crear vista previa gratis", "Diseñar el kit" en Celebraciones y
- * "Probar gratis" en Profesionales (reporte de navegación).
+ * Botón de crear del encabezado (sin sesión), con el texto de la sección: «Empezar gratis» lleva a
+ * ingresar y de ahí al creador, igual que el hero (DECISIONS 251); "Diseñar el kit" en
+ * Celebraciones y "Probar gratis" en Profesionales arrancan el creador en su línea.
  */
 export function HeaderCta({
   children,
@@ -53,12 +54,11 @@ export function HeaderCta({
   const inEvents = pathname.startsWith('/events') && Boolean(eventsLabel);
   const inProfessionals = pathname.startsWith('/professionals') && Boolean(professionalsLabel);
   const label = inEvents ? eventsLabel : inProfessionals ? professionalsLabel : children;
-  // Crear arranca el creador sin cuenta (en la línea de la sección); "Ingresar" es el único
-  // que lleva al login.
   const line = inEvents ? 'events' : inProfessionals ? 'professionals' : undefined;
+  const startFree = useStartFreeHref();
   return (
     <Link
-      href={line ? { pathname: '/create', query: { line } } : '/create'}
+      href={line ? { pathname: '/create', query: { line } } : startFree}
       className={buttonVariants({ size, className })}
     >
       {label}

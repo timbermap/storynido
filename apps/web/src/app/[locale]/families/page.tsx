@@ -129,6 +129,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
             <div className="mt-9 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
               <AuthLink
                 href="/create"
+                startFree
                 guest={heroCta}
                 member={heroMember}
                 className={buttonVariants({
@@ -367,6 +368,7 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
         cta={
           <AuthLink
             href="/create"
+            startFree
             guest={t('cta.button')}
             member={t('cta.button')}
             className={ctaClass}

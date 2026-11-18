@@ -19,6 +19,8 @@ import {
   type MultiFactorResolver,
 } from 'firebase/auth';
 
+import { creatorReturn } from '@/lib/after-login';
+
 import { api } from '../api';
 import { getFirebaseAuth } from './client';
 
@@ -304,17 +306,23 @@ export function takeReturnPath(): string | null {
 const KEEP_RETURN = /\/(pagar|checkout|pagamento|pedido|order)\//;
 
 /**
- * Adónde se va después de entrar (DECISIONS 152 y 220): siempre a la home con sesión, donde ve qué
- * sigue en su libro y cuál es el botón. Solo se respeta volver a un pago o a un
- * pedido; la ruta guardada se borra en todos los casos.
+ * Adónde se va después de entrar (DECISIONS 152, 220 y 251): a la home con sesión, donde ve qué
+ * sigue en su libro y cuál es el botón. Se respeta volver a un pago o a un pedido y, si entró desde
+ * «Empezar gratis», a la portada del creador; la ruta guardada se borra en todos los casos.
  */
 export function afterLoginPath(requested?: string | null): string | null {
   const saved = takeReturnPath();
-  const candidate = [requested, saved].find(
+  const paths = [requested, saved];
+  const keep = paths.find(
     (path): path is string =>
       Boolean(path?.startsWith('/')) && !path?.startsWith('//') && KEEP_RETURN.test(path ?? ''),
   );
-  return candidate ?? null;
+  if (keep) return keep;
+  for (const path of paths) {
+    const creator = creatorReturn(path);
+    if (creator) return creator;
+  }
+  return null;
 }
 
 export async function logOut(): Promise<void> {

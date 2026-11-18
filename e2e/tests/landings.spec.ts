@@ -224,12 +224,14 @@ test('el logo vuelve a la home: arriba de todo y sin hash', async ({ page }) => 
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
 });
 
-test('Empezar gratis: sin sesión lleva al login', async ({ page }) => {
+test('Empezar gratis: sin sesión todos llevan a ingresar y de ahí al creador', async ({ page }) => {
   await page.goto('/es');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
-  await expect(
-    page.locator('main').getByRole('link', { name: 'Empezar gratis' }).first(),
-  ).toHaveAttribute('href', /\/ingresar$/);
+  const links = page.getByRole('link', { name: 'Empezar gratis' });
+  await expect(links.first()).toBeVisible();
+  for (const link of await links.all()) {
+    await expect(link).toHaveAttribute('href', /\/es\/ingresar\?next=%2Fes%2Fcrear$/);
+  }
 });
 
 test('¿Para quién es?: los links siguen andando al volver atrás desde una landing', async ({
