@@ -24,6 +24,22 @@
     "@storynido/worker#test": {
       "dependsOn": ["@storynido/api#test"],
       "outputs": []
+    },
+    "@storynido/web#typecheck": {
+      "dependsOn": ["@storynido/web#lint"]
+    },
+    "@storynido/web#build": {
+      "dependsOn": ["^build", "@storynido/web#typecheck"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "@storynido/admin#typecheck": {
+      "dependsOn": ["@storynido/admin#lint"]
+    },
+    "@storynido/admin#build": {
+      "dependsOn": ["^build", "@storynido/admin#typecheck"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     }
   }
 }
