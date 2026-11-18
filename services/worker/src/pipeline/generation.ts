@@ -28,6 +28,7 @@ import {
   printRoutingSchema,
   printOptionSchema,
   coverScene,
+  coverSetting,
   describeCharacter,
   nameIssues,
   pagesOutOfRange,
@@ -549,7 +550,15 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const page = index === 0 ? null : snapshot.pages[index - 1];
     const baseScene =
       index === 0
-        ? pageScene(coverScene(snapshot.pages[0]?.illustrationPrompt, snapshot.title), null, hint)
+        ? pageScene(
+            coverScene(
+              snapshot.pages[0]?.illustrationPrompt,
+              snapshot.title,
+              coverSetting({ places: snapshot.places ?? [], scenes: snapshot.scenes ?? [] }),
+            ),
+            null,
+            hint,
+          )
         : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint, layoutOf(snapshot, index - 1), snapshot)}${castNote(snapshot.cast)}`;
     const reference = await load(snapshot.character.sheetPath);
     const companion = snapshot.companion ?? null;
@@ -698,6 +707,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       throw new Error('Falta el protagonista, la historia o el estilo.');
 
     const age = Number(child.age);
+    const event = book.event as { type?: string; turningAge?: unknown } | null | undefined;
+    const storyAge =
+      event?.type === 'birthday' && typeof event.turningAge === 'number' ? event.turningAge : age;
     let sheet: CharacterSheet;
     if (book.characterMode === 'avatar' && book.avatar) {
       sheet = avatarToSheet(book.avatar as Avatar, age);
@@ -798,7 +810,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       // Armado por edad: solo si la muestra lo trae (las anteriores conservan su huella).
       ...(preview.pageLayout ? { pageLayout: preview.pageLayout } : {}),
       character: {
-        description: describeCharacter(name, sheet, traits, mustKeep),
+        // La edad del cuento, nunca la aparente de la foto (DECISIONS 264).
+        description: describeCharacter(name, storyAge, sheet, traits, mustKeep),
         // La ropa de la lámina también se revisa en cada página (salvo que el texto la cambie).
         mustKeep: [
           ...mustKeepLabels(traits, mustKeep),

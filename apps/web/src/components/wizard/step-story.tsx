@@ -1,7 +1,7 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 import {
   LOCALES,
@@ -17,6 +17,7 @@ import { StoryCover } from '@/components/stories/story-cover';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
 import { titleForChild } from '@/lib/story-title';
+import { useProfileLocale } from '@/lib/use-profile-locale';
 import { cn } from '@/lib/utils';
 
 import { BookOptions, type BookChoice } from './book-options';
@@ -35,14 +36,21 @@ const LANGUAGE_NAMES: Record<Locale, string> = {
 export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   const t = useTranslations('Wizard.story');
   const tStories = useTranslations('Stories');
-  const locale = useLocale() as Locale;
   const [selected, setSelected] = useState(data.book.storyId);
   const [error, setError] = useState<string | null>(null);
-  // Idioma del cuento: arranca con el del sitio, pero se puede elegir otro (familias bilingües o de otro país).
+  // Idioma del cuento: arranca con el del perfil (o el del sitio), pero se puede elegir otro
+  // (familias bilingües o de otro país).
   const [language, setLanguage] = useState<Locale>(data.book.language);
   const age = data.child?.age;
   // La primera vez que se llega a este paso, la lectura se sugiere según la edad.
   const firstVisit = nav.reached <= nav.flow.indexOf('story');
+  // La primera vez, el idioma del perfil manda sobre el que trajo el borrador (DECISIONS 264).
+  const profileLocale = useProfileLocale();
+  const [languageTouched, setLanguageTouched] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (firstVisit && profileLocale && !languageTouched) setLanguage(profileLocale);
+  }, [firstVisit, profileLocale, languageTouched]);
   const [choice, setChoice] = useState<BookChoice>(() => ({
     contentType: data.book.contentType,
     ...(firstVisit && age !== undefined
@@ -124,7 +132,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
       {!expanded && story ? (
         <ChosenSummary
           story={story}
-          title={titleForChild(story, data.child?.name, locale)}
+          title={titleForChild(story, data.child?.name, language)}
           detail={lesson ? tWizard('chosenLesson', { name: lesson.name }) : null}
           onChange={() => {
             setExpanded(true);
@@ -210,7 +218,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
                 </div>
                 <span className="grid gap-1.5 p-3">
                   <span className="font-display text-lg leading-snug font-semibold">
-                    {titleForChild(story, data.child?.name, locale)}
+                    {titleForChild(story, data.child?.name, language)}
                   </span>
                   <span className="text-xs font-bold text-muted-foreground">
                     {tStories('agesFor', { min: story.ageMin, max: story.ageMax })}
@@ -233,6 +241,16 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
         </fieldset>
       )}
 
+      {story && age !== undefined && !fits(story.ageMin, story.ageMax) && (
+        // Historia de otra edad (Buenas noches es de 0 a 2): se puede elegir, pero se avisa que el
+        // cuento se adapta a su edad (DECISIONS 264).
+        <p role="status" className="mt-4 rounded-xl border bg-butter/60 p-4 text-sm">
+          {childName
+            ? t('ageOutside', { min: story.ageMin, max: story.ageMax, name: childName, age })
+            : t('ageOutsideNoName', { min: story.ageMin, max: story.ageMax })}
+        </p>
+      )}
+
       <fieldset className="mt-8">
         <legend className="font-display text-xl font-semibold">{t('languageTitle')}</legend>
         <p className="mt-1 text-sm text-muted-foreground">{t('languageHint')}</p>
@@ -245,6 +263,7 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
               checked={language === code}
               onSelect={() => {
                 setLanguage(code);
+                setLanguageTouched(true);
               }}
             >
               <span className="p-3 text-center font-semibold">{LANGUAGE_NAMES[code]}</span>

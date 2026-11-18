@@ -98,16 +98,17 @@ export function pageLayout(
 /** Lo que el prompt de la ilustración pide según el armado (en inglés, para el modelo). */
 export function layoutSceneNote(layout: PageLayout): string {
   const third = layout.side === 'top' ? 'top' : 'bottom';
+  const other = layout.side === 'top' ? 'lower' : 'upper';
   switch (layout.kind) {
     case 'facing':
       return ' Full-page illustration with the whole scene: the text goes on the facing page, so no empty area for text is needed. Keep faces away from the edges.';
     case 'vignette':
-      return ` Keep the ${third} third of the image as plain warm cream paper (#fffaf3): the illustration fades softly into it with soft, painterly edges and no hard border, and nothing important (no faces, no hands, no key objects) is in that third. The text is printed there.`;
+      return ` Keep the ${third} third of the image as plain warm cream paper (#fffaf3): the illustration fades softly into it with soft, painterly edges and no hard border, and nothing important (no faces, no hands, no key objects) is in that third; the main character and the action stay in the ${other} two thirds. The text is printed there.`;
     case 'calm':
-      return ` Keep the ${third} third of the image calm and simple (sky, wall, floor or grass, light and with little detail) for the text, with no faces there.`;
+      return ` The text is printed over the ${third} third of the image: keep that third calm and simple (sky, wall, floor or grass, light and with little detail), and place the main character whole (head, face, hands and the main action) in the ${other} two thirds, never under the text.`;
     default:
       return layout.side === 'top'
-        ? ' Keep the top third of the image calm and simple (sky, wall or soft background) for the text, with no faces there.'
-        : ' Keep the bottom third of the image calm and simple (floor, grass or soft background) for the text, with no faces there.';
+        ? ' The text is printed over the top third: keep it calm and simple (sky, wall or soft background), with the main character, faces and the action in the lower two thirds.'
+        : ' The text is printed over the bottom third: keep it calm and simple (floor, grass or soft background), with the main character, faces and the action in the upper two thirds.';
   }
 }

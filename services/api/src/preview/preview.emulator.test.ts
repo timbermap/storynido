@@ -21,7 +21,7 @@ import {
   type PublicPreview,
   type Story,
 } from '@storynido/shared';
-import { getFirestore } from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import sharp from 'sharp';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -799,7 +799,70 @@ describe('vista previa', () => {
     });
     const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
     expect((await generate('book-1')).statusCode).toBe(200);
-    expect(paint.mock.calls[0]?.[0].references).toHaveLength(1);
+    // Solo rasgos: su técnica no se copia (DECISIONS 264).
+    expect(paint.mock.calls[0]?.[0].traitReferences).toHaveLength(1);
+    expect(paint.mock.calls[0]?.[0].references).toHaveLength(0);
+    paint.mockRestore();
+  });
+
+  it('el dibujo del perfil en otro estilo o sin edad: lámina nueva en el estilo del cuento, reutilizable', async () => {
+    await seedBook(providers, 'book-1');
+    await app.inject({
+      method: 'POST',
+      url: '/v1/me/children/book-1-child/drawing',
+      headers: auth(TOKEN),
+      payload: {},
+    });
+    await app.inject({
+      method: 'POST',
+      url: '/v1/me/children/book-1-child/drawing/accept',
+      headers: auth(TOKEN),
+    });
+    const drawing = (await db.doc('children/book-1-child').get()).get('drawing') as {
+      styleId: string;
+      age: number;
+    };
+    // El dibujo nuevo guarda su estilo y su edad.
+    expect(drawing.age).toBe(5);
+    expect(drawing.styleId).toBe('acuarela');
+    // Como los de antes: gouache, sin edad.
+    await db.doc('children/book-1-child').update({
+      'drawing.styleId': 'gouache-editorial',
+      'drawing.age': FieldValue.delete(),
+    });
+    await db.doc('books/book-1').update({ useDrawing: true });
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    expect((await generate('book-1')).statusCode).toBe(200);
+    // La lámina en acuarela (con el dibujo solo como rasgos) y después portada y páginas.
+    expect(paint.mock.calls.map(([request]) => request.resolution ?? '1K')).toEqual([
+      '1K',
+      '2K',
+      '2K',
+      '2K',
+    ]);
+    expect(paint.mock.calls[0]?.[0].stylePrompt).toBe('soft watercolor');
+    expect(paint.mock.calls[0]?.[0].traitReferences).toHaveLength(1);
+    expect(paint.mock.calls[0]?.[0].references).toHaveLength(0);
+    expect(paint.mock.calls[0]?.[0].character.description).toContain('a 5-year-old child');
+    const child = (await db.doc('children/book-1-child').get()).data() as {
+      styleSheets?: Record<string, { imagePath: string }>;
+    };
+    expect(child.styleSheets?.acuarela?.imagePath).toMatch(
+      /^characters\/ana\/book-1-child\/sheet-acuarela-/,
+    );
+
+    // Otro cuento del mismo personaje y estilo: reutiliza la lámina, no la vuelve a dibujar.
+    const { previewQuotaDocs: _quota, ...book } = (await db.doc('books/book-1').get()).data() ?? {};
+    await db
+      .doc('books/book-2')
+      .set({ ...book, status: 'draft', preview: null, regenerationsUsed: 0 });
+    paint.mockClear();
+    expect((await generate('book-2')).statusCode).toBe(200);
+    expect(paint.mock.calls.map(([request]) => request.resolution ?? '1K')).toEqual([
+      '2K',
+      '2K',
+      '2K',
+    ]);
     paint.mockRestore();
   });
 

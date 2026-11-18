@@ -5,6 +5,7 @@ import { useEffect, useEffectEvent, useState } from 'react';
 
 import {
   EMPTY_BIRTHDAY,
+  bookLanguageFor,
   type Channel,
   type ContentType,
   type EventType,
@@ -17,6 +18,7 @@ import { useRouter } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import type { WizardCatalog } from '@/lib/server/wizard-catalog';
 import { isEmptyDraft, listDrafts, updateBook, type DraftSummary } from '@/lib/firebase/drafts';
+import { readProfileLocale } from '@/lib/firebase/profile';
 import { clearStepDrafts } from '@/lib/use-step-draft';
 import { saveReuseCharacter } from '@/lib/reuse-character';
 
@@ -100,6 +102,9 @@ export function CreateStart({
   // Si leer o crear el borrador falla (red, permisos), se avisa y se puede reintentar: nunca
   // queda en "Preparando tu cuento…" para siempre.
   const [failed, setFailed] = useState(false);
+  // Idioma del libro nuevo: el del perfil manda sobre el de la URL (DECISIONS 264).
+  const [profileLocale, setProfileLocale] = useState<Locale | null>(null);
+  const language = bookLanguageFor(profileLocale, locale);
 
   // Borrador nuevo: el creador abre acá mismo, en memoria; se guarda en el primer paso.
   const [fresh, setFresh] = useState(false);
@@ -121,7 +126,11 @@ export function CreateStart({
   const onUser = useEffectEvent(async () => {
     if (!user || !signedIn || !proReady) return;
     const db = await getFirebaseDb();
-    const all = await listDrafts(db, user.uid);
+    const [all, saved] = await Promise.all([
+      listDrafts(db, user.uid),
+      readProfileLocale(db, user.uid).catch(() => null),
+    ]);
+    setProfileLocale(saved);
     // Qué crear: la línea de la URL, la de la landing de la que viene, Familias si eligió una
     // historia, o la única que usó. Si no se sabe, se pregunta en /nuevo (DECISIONS 115).
     const line =
@@ -143,6 +152,7 @@ export function CreateStart({
       clearStepDrafts(reusable.id);
       const party = eventPreset(line);
       await updateBook(db, reusable.id, {
+        language: bookLanguageFor(saved, locale),
         ...(storyId ? { storyId } : {}),
         ...(lessonId ? { lessonIds: [lessonId] } : {}),
         ...(contentType ? { contentType } : {}),
@@ -206,7 +216,7 @@ export function CreateStart({
       <Wizard
         bookId={null}
         preset={{
-          language: locale,
+          language,
           storyId,
           lessonId,
           channel,

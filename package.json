@@ -17,6 +17,7 @@
     "emulators": "pnpm --filter @storynido/firebase emulators",
     "seed": "pnpm --filter @storynido/firebase seed",
     "eval:character": "pnpm --filter @storynido/providers eval:character",
+    "eval:preview": "pnpm --filter @storynido/providers eval:preview",
     "eval:prompts": "pnpm --filter @storynido/providers eval:prompts"
   },
   "devDependencies": {

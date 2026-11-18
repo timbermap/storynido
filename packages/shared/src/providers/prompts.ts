@@ -96,6 +96,24 @@ export interface StoryPromptInput {
   coloring?: boolean;
   /** Plan del planificador editorial (guía A): el redactor lo sigue. */
   plan?: Omit<StoryPlan, 'usage'> | null;
+  /** Edades para las que se escribió la historia del catálogo (si el protagonista no entra, se adapta). */
+  storyAges?: { min: number; max: number } | null;
+}
+
+/**
+ * Historia elegida para otra edad (DECISIONS 264): «Buenas noches» es para 0 a 2 años y la eligieron
+ * para una nena de 5. El cuento se adapta a la edad del protagonista.
+ */
+export function ageFitRule(
+  age: number,
+  storyAges: { min: number; max: number } | null | undefined,
+): string | null {
+  if (!storyAges || !Number.isFinite(age)) return null;
+  if (age >= storyAges.min && age <= storyAges.max) return null;
+  const range = `${String(storyAges.min)} a ${String(storyAges.max)} años`;
+  return age > storyAges.max
+    ? `- La historia del catálogo está pensada para ${range}, pero el protagonista tiene ${String(age)}: conserva su idea y su tono, y adapta el conflicto, el vocabulario y la estructura a ${String(age)} años (nada de fórmulas para bebés).`
+    : `- La historia del catálogo está pensada para ${range}, pero el protagonista tiene ${String(age)}: conserva su idea y simplifica el conflicto, el vocabulario y las frases para ${String(age)} años.`;
 }
 
 const MEMORY_LABELS: Record<keyof Memories, string> = {
@@ -213,7 +231,12 @@ Reglas obligatorias:
 - Es un libro para colorear: cada escena tiene pocos elementos grandes y bien separados, fáciles de pintar.`
       : ''
   }
-- Las enseñanzas se muestran con lo que hacen los personajes, nunca como moraleja explícita ni sermón.
+- Las enseñanzas se muestran con lo que hacen los personajes, nunca como moraleja explícita ni sermón.${
+    ageFitRule(input.age, input.storyAges)
+      ? `
+${ageFitRule(input.age, input.storyAges) ?? ''}`
+      : ''
+  }
 ${narrativeRules(input)}
 - Nada de violencia, miedo intenso, marcas, personajes con derechos de autor ni datos personales reales.
 - Nunca te burles del cuerpo, la apariencia, la higiene, las capacidades o las necesidades del protagonista; nada de castigos que avergüencen, diagnósticos ni promesas de curación. El protagonista puede equivocarse, aprender y pedir ayuda sin quedar humillado.
@@ -378,32 +401,86 @@ export const CHARACTER_REFERENCE_SCENE =
 export const SAME_OUTFIT =
   'the same outfit as in the reference sheet on every page, unless the page text explicitly says the character changes clothes or the action is impossible in it, such as swimming or sleeping';
 
-/** Protagonista en una frase para los prompts de imagen, con los rasgos que no pueden cambiar. */
+/** La edad en palabras para el modelo: bebé, chico, adolescente o adulto. */
+export function ageLabel(age: number): string {
+  if (!Number.isFinite(age) || age < 1) return 'a baby under one year old';
+  if (age < 13) return `a ${String(age)}-year-old child`;
+  if (age < 18) return `a ${String(age)}-year-old teenager`;
+  return `a ${String(age)}-year-old adult`;
+}
+
+/**
+ * La edad del cuento manda sobre la de la foto (DECISIONS 264): una foto de adulto para un cuento
+ * de 5 años se dibuja como esa persona a los 5.
+ */
+export const storyAgeRule = (age: number) =>
+  `draw them exactly as they would look at ${String(age)} years old, with the face, height and body proportions of that age, even if the reference photo shows an older or younger person`;
+
+/** Accesorios de la foto (anteojos de sol, gorros) que no son del personaje. */
+export const NO_PHOTO_ACCESSORIES =
+  'no accessories except the ones named here: never copy sunglasses, hats, caps, headphones, jewelry or bags from the photo';
+
+/**
+ * Rasgos de la foto que no sirven para dibujar al personaje: accesorios, marcas de la edad de
+ * la foto (arrugas, barba, maquillaje) y anteojos (que van por el rasgo confirmado).
+ */
+const NOT_IDENTITY =
+  /sunglass|shades|glasses|spectacles|hat\b|cap\b|beanie|hood|headphone|earbud|earring|necklace|bracelet|jewel|watch|bag\b|wrinkle|crow'?s feet|laugh lines|fine lines|age spots|beard|mustache|moustache|stubble|make-?up|lipstick|mascara|eyeliner|grey hair|gray hair|receding/i;
+
+export const identityFeatures = (features: readonly string[]) =>
+  features.filter((feature) => feature.trim() && !NOT_IDENTITY.test(feature));
+
+/**
+ * Protagonista en una frase para los prompts de imagen, con los rasgos que no pueden cambiar. La
+ * edad es la del cuento, nunca la aparente de la foto (DECISIONS 264).
+ */
 export function describeCharacter(
   name: string,
+  age: number,
   sheet: CharacterSheet,
   traits: CharacterTraits,
   mustKeep: readonly MustKeepTrait[],
 ): string {
-  const extras = sheet.distinctiveFeatures.length
-    ? `; also: ${sheet.distinctiveFeatures.join(', ')}`
-    : '';
-  return `${name}: child (${sheet.apparentAge}); ${describeTraits(traits, mustKeep)}; outfit: ${sheet.clothing} (${SAME_OUTFIT})${extras}`;
+  const features = identityFeatures(sheet.distinctiveFeatures);
+  const extras = features.length ? `; also: ${features.join(', ')}` : '';
+  return `${name}: ${ageLabel(age)} (${storyAgeRule(age)}); ${describeTraits(traits, mustKeep)}; outfit: ${sheet.clothing} (${SAME_OUTFIT}); ${NO_PHOTO_ACCESSORIES}${extras}`;
+}
+
+/** Lo mínimo del plan que necesita la portada: sus lugares y la escena de cada página. */
+export type CoverPlan = Pick<StoryPlan, 'places' | 'scenes'> | null | undefined;
+
+/**
+ * Lugar de la portada: el lugar del cuento que más se repite, con su aspecto fijo. Sin plan con lugares, null.
+ */
+export function coverSetting(plan: CoverPlan): string | null {
+  const places = (plan?.places ?? []).filter((place) => place.name.trim() && place.look.trim());
+  if (places.length === 0) return null;
+  const count = (name: string) =>
+    plan?.scenes.filter((scene) => scene.place && sameName(scene.place, name)).length ?? 0;
+  const main = places.toSorted((a, b) => count(b.name) - count(a.name))[0];
+  return main ? `${main.name}, ${main.look}` : null;
 }
 
 /**
  * Escena de la portada: el título va en la capa tipográfica, nunca dentro de la imagen. La portada
- * es una imagen propia (emblemática, más amplia que una página), no la primera página repetida:
- * la escena de la página 1 solo da el mundo de la historia, y el título, su idea.
+ * es una imagen propia (más amplia que una página), no la primera página repetida. Va en un lugar
+ * del cuento y con la misma técnica que las páginas: el «más dramático» de antes la llevaba a tinta
+ * de historieta y a paisajes inventados (DECISIONS 264).
  */
-export function coverScene(firstScene: string | undefined, title?: string): string {
+export function coverScene(
+  firstScene: string | undefined,
+  title?: string,
+  setting?: string | null,
+): string {
   const concept = title
-    ? ` The cover must express the idea of the book's title (“${title}”) at a glance, as a picture only: never draw the title or any letters.`
+    ? ` It should evoke the book's title (“${title}”) through the scene itself, as a picture only: never draw the title or any letters.`
     : '';
-  const world = firstScene
-    ? ` Story world, for the setting and mood only; do not copy this composition: ${firstScene}`
-    : '';
-  return `Book cover illustration, the single most iconic image of the book: the main character as the hero, large, joyful and centered, in a striking hero pose inside the story's most emblematic setting, richer and more dramatic than an inside page, with depth and a clear focal point and a different composition from the first page.${concept} Keep the top third as calm, simple background with no lettering: the title is typeset later.${world}`;
+  const place = setting
+    ? ` Setting: ${setting}. Use only places and objects from the story; never invent new landscapes or locations.`
+    : firstScene
+      ? ` Story world, for the setting and mood only; do not copy this composition: ${firstScene.trim().replace(/\.+$/, '')}. Use only places from the story; never invent new landscapes.`
+      : '';
+  return `Book cover illustration: the main character large and centered in one of the story's own places, caught in the middle of the story's central activity or its happiest moment, with genuine emotion and body language (never the stiff standing pose of the reference sheet), with a clear focal point and a different composition from the first page.${place}${concept} Draw it with exactly the same art technique, line, texture, color treatment and character proportions as the inside pages and the reference sheet: the cover is never more stylized, more inked or more dramatic than the pages. Keep the top third as calm, simple background with no lettering: the title is typeset later.`;
 }
 
 /** Datos de ejemplo para probar una plantilla desde el admin (sin datos reales ni IA). */

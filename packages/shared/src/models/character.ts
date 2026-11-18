@@ -149,7 +149,7 @@ export function describeTraits(
     hair: sheet.hair,
     skinTone: sheet.skinTone,
     eyeColor: sheet.eyes,
-    glasses: traits.glasses ? 'wears round glasses' : 'no glasses',
+    glasses: traits.glasses ? 'wears clear prescription glasses (never sunglasses)' : 'no glasses',
     distinctive: traits.distinctive ? `distinctive feature: ${traits.distinctive}` : null,
   };
   const all = Object.values(parts).filter(Boolean).join('; ');

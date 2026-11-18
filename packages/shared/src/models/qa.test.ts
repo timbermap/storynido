@@ -48,7 +48,7 @@ describe('rasgos confirmados', () => {
   it('destaca los rasgos que no pueden cambiar', () => {
     const text = describeTraits(traits, ['glasses', 'hair']);
     expect(text).toContain('MUST KEEP IDENTICAL in every illustration');
-    expect(text).toContain('wears round glasses');
+    expect(text).toContain('wears clear prescription glasses (never sunglasses)');
     expect(text).toContain('shoulder-length, curly, dark brown hair');
   });
 

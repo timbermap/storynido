@@ -99,3 +99,13 @@ export async function updateMarketingOptIn(db: Firestore, uid: string, optIn: bo
     updatedAt: serverTimestamp(),
   });
 }
+
+/**
+ * Idioma guardado en la cuenta, elegido o no: es el del libro nuevo (DECISIONS 264). Manda sobre
+ * el de la URL y la IP, que pueden ser de un viaje o de un enlace en otro idioma.
+ */
+export async function readProfileLocale(db: Firestore, uid: string): Promise<Locale | null> {
+  const snapshot = await getDoc(doc(db, COLLECTIONS.users, uid));
+  const locale = localeSchema.safeParse(snapshot.get('locale'));
+  return locale.success ? locale.data : null;
+}

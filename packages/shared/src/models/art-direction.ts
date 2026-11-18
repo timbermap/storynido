@@ -58,7 +58,7 @@ export const DEFAULT_PALETTE: Record<Channel, PaletteKey> = {
  * pero con el contraste, la proporción del personaje y el lenguaje (álbum, historieta, novela
  * gráfica) que corresponden a cada etapa.
  */
-function ageDirection(age: number): string {
+export function ageDirection(age: number): string {
   if (age <= 2) {
     // Contraste por valor (oscuro contra claro), no por saturación: los primarios puros y el
     // contorno negro de vector se leían «hechos por IA» (DECISIONS 257).
@@ -125,7 +125,7 @@ export const ONE_PROTAGONIST =
  * lugar. Sin esto, el panel de texto tapaba caras (informe de Profesionales).
  */
 export const TEXT_ZONE =
-  'Compose for a printed page with text: keep every face and the main action inside the middle band of the image, and leave the bottom third (or the top third) as plain, calm background such as sky, wall, floor or grass, with no heads or faces in it.';
+  'Compose for a printed page with text: the text is printed over one third of the image (the scene says which one, top or bottom); that third is plain, calm background such as sky, wall, floor or grass, and no face, head, hand or key action is ever in it.';
 
 export function artDirection(input: {
   age: number;

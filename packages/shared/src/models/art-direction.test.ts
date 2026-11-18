@@ -37,7 +37,7 @@ describe('dirección de arte de los libros', () => {
 
   it('deja lugar para el texto y dibuja al protagonista una sola vez', () => {
     const direction = artDirection({ age: 6, channel: 'professionals' });
-    expect(direction).toContain('bottom third (or the top third)');
+    expect(direction).toContain('the scene says which one, top or bottom');
     expect(direction).toContain('appears exactly once');
   });
 
@@ -45,7 +45,7 @@ describe('dirección de arte de los libros', () => {
     const old = "Art direction: premium children's picture book.";
     const updated = withCurrentGuards(old) ?? '';
     expect(updated).toContain('appears exactly once');
-    expect(updated).toContain('bottom third (or the top third)');
+    expect(updated).toContain('the scene says which one, top or bottom');
     expect(updated).toContain('never jeans, everyday clothes or shoes in the water');
     expect(withCurrentGuards(updated)).toBe(updated);
     expect(withCurrentGuards(null)).toBeNull();

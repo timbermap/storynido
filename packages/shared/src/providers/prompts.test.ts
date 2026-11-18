@@ -159,7 +159,7 @@ describe('modo sin foto', () => {
     const sheet = { ...avatarToSheet(avatar, 6), clothing: 'white t-shirt and blue jeans' };
     for (const description of [
       describeCharacterSheet(sheet),
-      describeCharacter('Sofi', sheet, { ...avatar, distinctive: null }, ['hair']),
+      describeCharacter('Sofi', 6, sheet, { ...avatar, distinctive: null }, ['hair']),
     ]) {
       expect(description).toContain('outfit: white t-shirt and blue jeans');
       expect(description).toContain('same outfit as in the reference sheet on every page');
@@ -215,10 +215,10 @@ describe('reglas narrativas y dirección de arte', () => {
 describe('escena de la portada', () => {
   it('es una imagen propia: usa el mundo de la página 1 sin copiar su composición y expresa el título', () => {
     const scene = coverScene('The hero sits under a tree.', 'Aggi, gol de campeón');
-    expect(scene).toContain('most iconic image');
     expect(scene).toContain('different composition from the first page');
     expect(scene).toContain('do not copy this composition');
     expect(scene).toContain('The hero sits under a tree.');
+    expect(scene).not.toContain('..');
     expect(scene).toContain('Aggi, gol de campeón');
     expect(scene).toContain('never draw the title');
   });

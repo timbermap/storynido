@@ -4,7 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { MEMORY_KEYS, type Locale } from '@storynido/shared';
+import { LOCALE_DEFINITIONS, MEMORY_KEYS } from '@storynido/shared';
 
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
@@ -108,7 +108,14 @@ export function StepReview({
     ...(isPro ? [{ label: t('goal'), value: book.goal ?? '—', step: step('focus') }] : []),
     {
       label: t('adventure'),
-      value: story ? titleForChild(story, child?.name, locale as Locale) : '—',
+      // En el idioma del libro, no en el del sitio: así se ve si el cuento va a salir en otro
+      // idioma (DECISIONS 264).
+      value: story ? titleForChild(story, child?.name, book.language) : '—',
+      step: isPro ? step('focus') : step('story'),
+    },
+    {
+      label: t('language'),
+      value: LOCALE_DEFINITIONS[book.language].label,
       step: isPro ? step('focus') : step('story'),
     },
     {

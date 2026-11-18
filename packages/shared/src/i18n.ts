@@ -15,6 +15,14 @@ export type Locale = z.infer<typeof localeSchema>;
 
 export const DEFAULT_LOCALE: Locale = 'es';
 
+/**
+ * Idioma de un libro nuevo (DECISIONS 264): el del perfil de la cuenta y, si no tiene, el de la URL
+ * (que a su vez sale de la elección manual o de la IP). Un borrador creado desde /en con el perfil
+ * en español salía en inglés.
+ */
+export const bookLanguageFor = (profile: Locale | null | undefined, url: Locale): Locale =>
+  profile ?? url;
+
 export interface LocaleDefinition {
   locale: Locale;
   /** Etiqueta BCP 47 del idioma (atributo lang y hreflang). */
