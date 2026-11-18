@@ -87,6 +87,11 @@ export interface ChildDetails {
   likes: string[];
   petName: string | null;
   bestFriendName: string | null;
+  /**
+   * Creado en Profesionales (tiene alias): sus fotos piden la autorización del tutor. Solo se lee;
+   * no se guarda con los datos.
+   */
+  professional?: boolean;
 }
 
 /** Datos completos de un perfil para su pantalla (null si no existe o no es del usuario). */
@@ -103,6 +108,7 @@ export async function getChildDetails(
     likes: (snapshot.get('likes') as string[] | undefined) ?? [],
     petName: (snapshot.get('petName') as string | null | undefined) ?? null,
     bestFriendName: (snapshot.get('bestFriendName') as string | null | undefined) ?? null,
+    professional: Boolean((snapshot.get('alias') as string | null | undefined)?.trim()),
   };
 }
 
@@ -112,8 +118,10 @@ export async function updateChildDetails(
   childId: string,
   fields: ChildDetails,
 ): Promise<void> {
+  // Solo los campos editables (professional se lee del alias y no se escribe).
+  const { professional: _professional, ...editable } = fields;
   await updateDoc(doc(db, COLLECTIONS.children, childId), {
-    ...fields,
+    ...editable,
     updatedAt: serverTimestamp(),
   });
 }

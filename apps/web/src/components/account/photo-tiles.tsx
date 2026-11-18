@@ -32,6 +32,7 @@ export function PhotoTiles({
   onFiles,
   onRemove,
   confirmRemove,
+  guardian = false,
 }: {
   inputId: string;
   tiles: PhotoTile[];
@@ -44,12 +45,15 @@ export function PhotoTiles({
   onRemove: (index: number) => void;
   /** Texto de confirmación antes de quitar (fotos ya guardadas); sin él, se quita directo. */
   confirmRemove?: string;
+  /** Personaje de Profesionales: además se confirma la autorización de la madre, padre o tutor. */
+  guardian?: boolean;
 }) {
   const t = useTranslations('Account.myStories.photoTiles');
   const tPhotos = useTranslations('Wizard.photos');
   const locale = useLocale() as Locale;
   const input = useRef<HTMLInputElement>(null);
   const [asking, setAsking] = useState(false);
+  const [guardianChecked, setGuardianChecked] = useState(false);
   const [removing, setRemoving] = useState<number | null>(null);
 
   function add() {
@@ -136,10 +140,24 @@ export function PhotoTiles({
               {tPhotos('privacy')}
             </Link>
           </p>
+          {guardian && (
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1 size-5 shrink-0 accent-[var(--primary)]"
+                checked={guardianChecked}
+                onChange={(event) => {
+                  setGuardianChecked(event.target.checked);
+                }}
+              />
+              <span>{tPhotos('guardianText')}</span>
+            </label>
+          )}
           <p className="text-sm text-muted-foreground">{t('tips')}</p>
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
+              disabled={guardian && !guardianChecked}
               onClick={() => {
                 onConsent();
                 setAsking(false);
