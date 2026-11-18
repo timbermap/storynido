@@ -405,16 +405,15 @@
   "FormatShowcase": {
     "title": "Assim você recebe",
     "caption": "Imagem ilustrativa",
-    "soon": "Em breve",
     "ebookName": "Ebook (PDF)",
     "ebookText": "Chega no seu e-mail e na sua biblioteca. Dá para ler no tablet, celular ou computador e imprimir em casa.",
-    "ebookAlt": "Uma página da história em um tablet e a capa em um celular",
-    "printName": "Livro impresso",
-    "printText": "Capa mole ou capa dura, com cerca de 21×28 cm, pronto para presentear.",
-    "printTextSoon": "Capa mole ou capa dura, com cerca de 21×28 cm. Estamos preparando a gráfica.",
-    "printAlt": "Mãos abrindo uma caixa de presente com o livro impresso dentro",
+    "ebookAlt": "Tomás na tela de um celular, nas mãos de alguém que lê sob uma manta",
+    "printedName": "Livro impresso",
+    "printedText": "Capa mole ou capa dura, com cerca de 21×28 cm, pronto para presentear.",
+    "printedAlt": "Um livro de capa dura com Tomás na capa, sobre uma mesa ao lado de uma fita de presente",
     "bookletName": "Livreto grampeado",
-    "bookletText": "História impressa com cerca de 15×21 cm, grampeada."
+    "bookletText": "História impressa com cerca de 15×21 cm, grampeada.",
+    "bookletAlt": "Uma história grampeada aberta, com Tomás num foguete, ao lado de um lápis"
   },
   "Blog": {
     "title": "Blog",

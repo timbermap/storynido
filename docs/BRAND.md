@@ -22,6 +22,8 @@ Resumen operativo de la **marca v3** ("cálida, luminosa y editorial"), aprobada
 - Nada de testimonios, cifras ("miles de familias") ni reseñas inventadas: solo reales y verificables.
 - No prometer envíos, plazos ni calidad que no estén medidos ("envío a todo el mundo" no: solo los países activos).
 - Las maquetas de branding (portadas "Emilia", "Mateo", etc.) son conceptuales: **no se publican como libros reales**. Los ejemplos del sitio salen del pipeline real (fase 07).
+- Las imágenes de formatos y ejemplos usan el elenco inventado (Tomás y compañía), **nunca un libro hecho con la foto de un niño real** (DECISIONS 253).
+- En el flujo de compra se muestra solo lo que se puede comprar: nada de «Muy pronto»; lo que viene se anuncia en la home.
 - No posicionar la IA como protagonista del copy ("La IA crea su historia" no; "Elige una aventura" sí).
 
 ## Producto: aventura + enseñanza

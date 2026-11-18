@@ -6,12 +6,13 @@ import type { BookFormat } from '@storynido/shared';
 import { cn } from '@/lib/utils';
 
 /**
- * Imágenes de lo que se recibe (DECISIONS 248). Todas son ilustrativas: páginas reales de un cuento
- * de muestra con un personaje inventado, compuestas en un dispositivo, o la foto aprobada del regalo.
+ * Imágenes de lo que se recibe (DECISIONS 248 y 253). Todas son ilustrativas y con Tomás, el
+ * personaje inventado: nunca un libro hecho con la foto de un niño real.
  */
 export const FORMAT_IMAGES = {
-  ebook: '/images/formatos/formato-ebook.webp',
-  printed: '/images/formatos/formato-libro-fisico.webp',
+  ebook: '/images/formatos/landing-ebook.webp',
+  printed: '/images/formatos/landing-tapa-dura.webp',
+  booklet: '/images/formatos/landing-grapado.webp',
 } as const;
 
 export const TYPE_IMAGES = {
@@ -65,9 +66,25 @@ export function FormatImage({
   );
 }
 
+type ShowcasePiece = keyof typeof FORMAT_IMAGES;
+
 /**
- * «Así lo recibes»: el ebook y, al lado, el libro impreso. Los impresos que el país no puede pedir
- * se ven como «Muy pronto», sin precio ni opción para elegirlos (hoy staging vende solo digital).
+ * Piezas que se ven en «Así lo recibes»: siempre el ebook (el formato por defecto de Familias) y,
+ * solo si el país de verdad los vende, el libro impreso y el cuento grapado. Nada de «Muy pronto»
+ * en el flujo de compra: los impresos que vienen se anuncian en la home (DECISIONS 253).
+ */
+export function showcasePieces(printFormats: readonly BookFormat[]): ShowcasePiece[] {
+  const pieces: ShowcasePiece[] = ['ebook'];
+  if (printFormats.some((format) => format === 'softcover' || format === 'hardcover')) {
+    pieces.push('printed');
+  }
+  if (printFormats.includes('booklet')) pieces.push('booklet');
+  return pieces;
+}
+
+/**
+ * «Así lo recibes»: lo que la persona recibe con el formato del libro. Con solo el ebook a la
+ * venta, una sola tarjeta (horizontal en pantallas anchas); con impresos a la venta, una por pieza.
  */
 export function FormatShowcase({
   printFormats,
@@ -75,7 +92,7 @@ export function FormatShowcase({
   headingLevel = 'h3',
   headingClassName = 'font-bold',
 }: {
-  /** Impresos que de verdad se pueden pedir en el país (vacío: todos «Muy pronto»). */
+  /** Impresos que de verdad se pueden pedir en el país (vacío: solo el ebook). */
   printFormats: readonly BookFormat[];
   className?: string;
   headingLevel?: 'h2' | 'h3';
@@ -83,57 +100,37 @@ export function FormatShowcase({
 }) {
   const t = useTranslations('FormatShowcase');
   const Heading = headingLevel;
-  const printReady = printFormats.some(
-    (format) => format === 'softcover' || format === 'hardcover',
-  );
-  const bookletReady = printFormats.includes('booklet');
-  const soon = (
-    <span className="w-fit rounded-full bg-butter px-2.5 py-1 text-xs leading-none font-bold text-foreground">
-      {t('soon')}
-    </span>
-  );
+  const pieces = showcasePieces(printFormats);
+  const single = pieces.length === 1;
 
   return (
     <section aria-labelledby="format-showcase" className={cn('grid gap-3 font-sans', className)}>
       <Heading id="format-showcase" className={headingClassName}>
         {t('title')}
       </Heading>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <figure className="overflow-hidden rounded-xl border bg-card">
-          <FormatImage
-            src={FORMAT_IMAGES.ebook}
-            alt={t('ebookAlt')}
-            caption={t('caption')}
-            sizes="(min-width: 640px) 360px, 92vw"
-          />
-          <figcaption className="grid gap-1 p-4">
-            <span className="font-display text-lg font-semibold">{t('ebookName')}</span>
-            <span className="text-sm text-muted-foreground">{t('ebookText')}</span>
-          </figcaption>
-        </figure>
-        <figure className="overflow-hidden rounded-xl border bg-card">
-          <FormatImage
-            src={FORMAT_IMAGES.printed}
-            alt={t('printAlt')}
-            caption={t('caption')}
-            sizes="(min-width: 640px) 360px, 92vw"
-          />
-          <figcaption className="grid gap-1 p-4">
-            <span className="flex flex-wrap items-center gap-2">
-              <span className="font-display text-lg font-semibold">{t('printName')}</span>
-              {!printReady && soon}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {printReady ? t('printText') : t('printTextSoon')}
-            </span>
-          </figcaption>
-        </figure>
+      <div className={cn('grid gap-3', !single && 'sm:grid-cols-2')}>
+        {pieces.map((piece) => (
+          <figure
+            key={piece}
+            data-piece={piece}
+            className={cn(
+              'overflow-hidden rounded-xl border bg-card',
+              single && 'sm:grid sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] sm:items-center',
+            )}
+          >
+            <FormatImage
+              src={FORMAT_IMAGES[piece]}
+              alt={t(`${piece}Alt`)}
+              caption={t('caption')}
+              sizes="(min-width: 640px) 360px, 92vw"
+            />
+            <figcaption className="grid gap-1 p-4">
+              <span className="font-display text-lg font-semibold">{t(`${piece}Name`)}</span>
+              <span className="text-sm text-muted-foreground">{t(`${piece}Text`)}</span>
+            </figcaption>
+          </figure>
+        ))}
       </div>
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-dashed bg-card px-4 py-3 text-sm">
-        <span className="font-semibold">{t('bookletName')}</span>
-        {!bookletReady && soon}
-        <span className="basis-full text-muted-foreground sm:basis-auto">{t('bookletText')}</span>
-      </p>
     </section>
   );
 }
