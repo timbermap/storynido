@@ -8,6 +8,7 @@ import {
   READING_LEVELS,
   TEXT_DENSITIES,
   readingFormatsFor,
+  suggestedReading,
   type BookLength,
   type ContentType,
   type EditorialConfig,
@@ -44,6 +45,8 @@ export function Chips<T extends string>({
   label,
   hint,
   onSelect,
+  suggested,
+  suggestedLabel,
 }: {
   name: string;
   legend: string;
@@ -52,6 +55,9 @@ export function Chips<T extends string>({
   label: (value: T) => string;
   hint: (value: T) => string;
   onSelect: (value: T) => void;
+  /** La opción sugerida para la edad lleva una etiqueta, sin dejar de poder elegir las demás. */
+  suggested?: T | null;
+  suggestedLabel?: string;
 }) {
   return (
     <fieldset>
@@ -75,7 +81,14 @@ export function Chips<T extends string>({
               }}
               className="sr-only"
             />
-            <span className="block font-bold">{label(value)}</span>
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1 font-bold">
+              {label(value)}
+              {suggested === value && suggestedLabel && (
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-secondary-foreground">
+                  {suggestedLabel}
+                </span>
+              )}
+            </span>
             <span className="mt-0.5 block text-muted-foreground">{hint(value)}</span>
           </label>
         ))}
@@ -121,12 +134,10 @@ export function BookOptions({
   const lengths = BOOK_LENGTHS.filter(
     (length) => editorial.lengths[length].active && (story ? story.lengths.includes(length) : true),
   );
-  const densities = TEXT_DENSITIES.filter((density) =>
-    story ? story.textDensities.includes(density) : true,
-  );
-  const levels = READING_LEVELS.filter((level) =>
-    story ? story.readingLevels.includes(level) : true,
-  );
+  // Cantidad de texto y nivel se ofrecen siempre completos (DECISIONS 261): la cantidad es un
+  // escalón sobre la franja de la edad, así que ninguna historia queda fuera de lugar.
+  const densities = TEXT_DENSITIES;
+  const levels = READING_LEVELS;
   const coloring = value.contentType === 'coloring';
   // Formatos de la edad que la historia admite: marcan la extensión recomendada y lo sugerido en
   // «Ajustar la lectura». Todas las extensiones se ofrecen en todos los tipos (DECISIONS 246).
@@ -138,6 +149,9 @@ export function BookOptions({
       editorial.lengths[format.length].active,
   );
   const suggestedFormat = readingFormats.find((format) => format.recommended);
+  // Lo sugerido para la lectura sale de la edad, aunque la extensión recomendada no entre en la
+  // historia (una historia de bebés para un chico de 5 sigue sugiriendo «Equilibrado»).
+  const suggestedLevels = age === null ? null : suggestedReading(age);
   // «Así lo recibes»: los impresos que el país puede pedir en alguna extensión (sin precios, ninguno).
   const showcasePrint = prices
     ? [
@@ -285,11 +299,13 @@ export function BookOptions({
             <span>
               {t('adjust')}
               <span className="mt-0.5 block text-sm font-normal text-muted-foreground">
-                {t('suggested', {
-                  age: age ?? 0,
-                  density: t(`densities.${(suggestedFormat ?? value).textDensity}.name`),
-                  level: t(`levels.${(suggestedFormat ?? value).readingLevel}.name`),
-                })}
+                {suggestedLevels
+                  ? t('suggested', {
+                      age: age ?? 0,
+                      density: t(`densities.${suggestedLevels.textDensity}.name`),
+                      level: t(`levels.${suggestedLevels.readingLevel}.name`),
+                    })
+                  : t('adjustHint')}
               </span>
             </span>
             <ChevronDown
@@ -308,6 +324,8 @@ export function BookOptions({
               onSelect={(textDensity) => {
                 set({ textDensity });
               }}
+              suggested={suggestedLevels?.textDensity}
+              suggestedLabel={t('suggestedTag')}
             />
             <Chips
               name="reading-level"
@@ -319,6 +337,8 @@ export function BookOptions({
               onSelect={(readingLevel) => {
                 set({ readingLevel });
               }}
+              suggested={suggestedLevels?.readingLevel}
+              suggestedLabel={t('suggestedTag')}
             />
           </div>
         </details>

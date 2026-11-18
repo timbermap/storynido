@@ -265,15 +265,18 @@ export function StepStory({ nav, data }: { nav: StepNav; data: WizardData }) {
   );
 }
 
-/** Si la historia no admite alguna opción elegida, se usa la primera que sí admite. */
+/**
+ * Si la historia no admite la extensión o el tipo elegido, se usa el primero que sí admite. La
+ * cantidad de texto y el nivel de lectura los elige el adulto en cualquier historia (DECISIONS 261).
+ */
 export function fitToStory(choice: BookChoice, story: PublicStory | undefined): BookChoice {
   if (!story) return choice;
   const pick = <T,>(value: T, allowed: readonly T[]) =>
     allowed.includes(value) ? value : (allowed[0] ?? value);
   return {
     length: pick(choice.length, story.lengths),
-    textDensity: pick(choice.textDensity, story.textDensities),
-    readingLevel: pick(choice.readingLevel, story.readingLevels),
+    textDensity: choice.textDensity,
+    readingLevel: choice.readingLevel,
     contentType: pick(choice.contentType, story.contentTypes),
   };
 }

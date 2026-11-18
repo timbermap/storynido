@@ -1270,6 +1270,8 @@
       "pages": "{count} páginas",
       "adjust": "Ajustar la lectura",
       "suggested": "Sugerido para {age, plural, one {# año} other {# años}}: {density} · {level}",
+      "suggestedTag": "Sugerido",
+      "adjustHint": "Elige cuánto texto y qué nivel de lectura quieres.",
       "densityLegend": "Cantidad de texto",
       "levelLegend": "Nivel de lectura",
       "types": {
