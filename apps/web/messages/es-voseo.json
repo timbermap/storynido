@@ -527,5 +527,31 @@
     "orderShipped": {
       "sub": "Podés seguir el envío desde tu pedido."
     }
+  },
+  "HowItWorks": {
+    "metaDescription": "Creá gratis el cuento personalizado de tu hijo, mirá la vista previa y pagá solo si te encanta. El ebook llega al instante; precios con IVA incluido.",
+    "lead": "Lo creás gratis, mirás la vista previa y pagás solo si te encanta. El ebook llega al instante.",
+    "note": "Creás tu cuenta gratis con Google o con un enlace a tu correo.",
+    "steps": {
+      "1": {
+        "title": "Contanos del protagonista"
+      },
+      "2": {
+        "title": "Mirá la vista previa gratis",
+        "text": "Elegís la aventura y ves cómo queda su cuento antes de pagar."
+      },
+      "3": {
+        "title": "Pagá solo si te encanta",
+        "text": "Elegís el formato, pagás y lo recibís al instante."
+      }
+    },
+    "prices": {
+      "title": "Qué recibís y cuánto cuesta"
+    },
+    "delivery": {
+      "digitalText": "Apenas pagás, el ebook y el kit quedan en Mis cuentos para descargarlos cuando quieras.",
+      "more": "¿Más dudas? Mirá las <faq>preguntas frecuentes</faq>."
+    },
+    "finalTitle": "Empezá su cuento hoy"
   }
 }

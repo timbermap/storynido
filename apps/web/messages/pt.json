@@ -2308,5 +2308,59 @@
     },
     "loading": "Carregando suas histórias…",
     "coverAlt": "Capa de exemplo: {title}"
+  },
+  "HowItWorks": {
+    "metaTitle": "Como funciona: preços, entrega e formatos",
+    "metaDescription": "Crie grátis a história personalizada do seu filho, veja a prévia e pague só se adorar. O ebook chega na hora; preços com impostos incluídos.",
+    "kicker": "Como funciona",
+    "title": "Sua história personalizada, em três passos",
+    "lead": "Você cria grátis, vê a prévia e paga só se adorar. O ebook chega na hora.",
+    "cta": "Começar grátis",
+    "ctaMember": "Criar uma história",
+    "seePrices": "Ver preços",
+    "note": "Crie sua conta grátis com o Google ou com um link no seu e-mail.",
+    "stepsTitle": "Simples assim",
+    "steps": {
+      "1": {
+        "title": "Conte sobre o protagonista",
+        "text": "Nome, idade, do que gosta e uma foto. Também dá para fazer sem foto."
+      },
+      "2": {
+        "title": "Veja a prévia grátis",
+        "text": "Escolha a aventura e veja como fica a história antes de pagar."
+      },
+      "3": {
+        "title": "Pague só se adorar",
+        "text": "Escolha o formato, pague e receba na hora."
+      }
+    },
+    "prices": {
+      "title": "O que você recebe e quanto custa",
+      "subtitle": "Hoje tudo é digital e chega na hora. Os livros impressos chegam em breve.",
+      "subtitlePrint": "Digital na hora ou impresso, pronto para presentear.",
+      "ebookName": "História digital (ebook)",
+      "ebookText": "Um PDF para ler no celular, no tablet ou no computador, ou imprimir em casa. O preço depende da extensão.",
+      "kitText": "Convite para WhatsApp, decoração para imprimir em casa e mini histórias para os convidados, com o mesmo personagem.",
+      "from": "A partir de {price}",
+      "inCreator": "Você vê o preço do seu país no criador, antes de pagar."
+    },
+    "delivery": {
+      "title": "Entrega, pagamento e fotos",
+      "digitalTitle": "Chega na hora",
+      "digitalText": "Assim que você paga, o ebook e o kit ficam em Minhas histórias para baixar quando quiser.",
+      "printSoonTitle": "Impresso: em breve",
+      "printSoonText": "Capa comum, capa dura e livreto grampeado. Avisamos quando puder pedir no seu país.",
+      "printTitle": "Impresso, na sua casa",
+      "printText": "É impresso e chega em {min} a {max} dias. O frete é calculado com o seu endereço, antes de pagar.",
+      "printTextNoEta": "É impresso e enviado para a sua casa. O frete é calculado com o seu endereço, antes de pagar.",
+      "pricesTitle": "Preço final, sem surpresas",
+      "pricesTextTax": "Preços em dólares com impostos incluídos. Você vê o total antes de pagar.",
+      "pricesText": "Preços em dólares. Você vê o total antes de pagar.",
+      "photosTitle": "Fotos protegidas",
+      "photosText": "Usadas só para criar o personagem e apagadas sozinhas após 30 dias.",
+      "more": "Mais dúvidas? Veja as <faq>perguntas frequentes</faq>."
+    },
+    "finalTitle": "Comece a história hoje",
+    "finalText": "Criar a conta e a prévia é grátis."
   }
 }

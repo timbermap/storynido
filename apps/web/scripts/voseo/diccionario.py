@@ -74,4 +74,8 @@ MANUAL = {
  'Checkout.kit.printCards.piecesText':[('Deja ','Dejá ')],
  'Checkout.addressToQuote':[('Completa ','Completá ')],
  'PhotoPromise.noPhoto':[('Crea ','Creá ')],
+ # Cómo funciona (DECISIONS 251).
+ 'HowItWorks.metaDescription':[('Crea gratis','Creá gratis'),('y paga solo','y pagá solo')],
+ 'HowItWorks.lead':[(', miras la',', mirás la')],
+ 'HowItWorks.steps.3.title':[('Paga solo','Pagá solo')],
 }
