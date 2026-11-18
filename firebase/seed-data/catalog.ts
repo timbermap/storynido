@@ -1976,6 +1976,17 @@ export const SEED_STYLES: SeedStyle[] = [
     contentTypes: ['story', 'activities', 'story_activities'],
   },
   {
+    // Para 9-12 (DECISIONS 266): lo que leen a esa edad; recomendado para las historias de 9+.
+    slug: 'novela-grafica',
+    active: true,
+    order: 9,
+    name: { es: 'Novela gráfica', en: 'Graphic novel', pt: 'Romance gráfico' },
+    promptModifier:
+      'bold contemporary graphic novel art for middle-grade readers, thick confident black ink outlines, spotted solid blacks, flat color fields with hard-edged cel shadows, slightly stylized proportions, dynamic camera angles, clearly a comic-book look rather than a painted storybook, one single full-page image without panels or speech bubbles',
+    sampleImage: '/styles/novela-grafica.webp',
+    contentTypes: ['story', 'activities', 'story_activities'],
+  },
+  {
     slug: 'lapices-de-colores',
     active: true,
     order: 5,

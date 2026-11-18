@@ -192,7 +192,7 @@ export function coverLayoutOf(story: { ageMin: number; ageMax: number }): CoverL
 /**
  * Estilo recomendado por etapa y línea (estudio de estilos, DECISIONS 158): bebés con color saturado y
  * formas simples (collage), 3–5 y 6–8 en gouache (6–8 con recursos de historieta en la dirección de arte),
- * 9+ con tinta y color plano (cuento clásico, hasta tener el estilo de novela gráfica). Profesionales
+ * 9+ en novela gráfica (DECISIONS 266). Profesionales
  * usa siempre el minimalismo gráfico.
  */
 export function recommendedStyle(story: {
@@ -203,7 +203,7 @@ export function recommendedStyle(story: {
   if (story.channels[0] === 'professionals') return 'minimalismo-grafico';
   const stage = stageOf(story);
   if (stage === 'babies') return 'gouache-editorial';
-  if (stage === 'big') return 'cuento-clasico';
+  if (stage === 'big') return 'novela-grafica';
   return 'gouache-editorial';
 }
 

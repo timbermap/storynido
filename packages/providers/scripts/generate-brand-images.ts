@@ -627,6 +627,10 @@ const JOBS: Job[] = [
     'classic narrative editorial illustration, ink line and opaque paint with moderate texture, believable gestures, warm vintage tones',
   ),
   style(
+    'novela-grafica',
+    'bold contemporary graphic novel art for middle-grade readers, thick confident black ink outlines, spotted solid blacks, flat color fields with hard-edged cel shadows, slightly stylized proportions, dynamic camera angles, clearly a comic-book look rather than a painted storybook, one single full-page image without panels or speech bubbles',
+  ),
+  style(
     'lapices-de-colores',
     'colored pencil drawing, imperfect human lines, visible strokes, paper grain and deliberately incomplete coloring',
   ),
