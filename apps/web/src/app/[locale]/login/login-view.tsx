@@ -21,7 +21,7 @@ export function LoginView() {
   const next = useSearchParams().get('next');
 
   // Con sesión: a la home con sesión. Solo se vuelve a un pago, a un pedido o, desde «Empezar
-  // gratis», a la portada del creador (DECISIONS 251).
+  // gratis», a la portada del creador (DECISIONS 252).
   useEffect(() => {
     if (loading || !signedIn) return;
     const target = afterLoginPath(safePath(next));

@@ -2677,7 +2677,17 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Decisión 3 (voseo):** para el español con país preferido Argentina o Uruguay (`preferredCountry`: el elegido o el de la IP), `i18n/request.ts` aplica `messages/es-voseo.json` sobre `es.json`. Ese archivo lo genera `scripts/voseo/generar.py` con un diccionario tú → vos y correcciones a mano para palabras ambiguas (crea, usa, prueba…); el test `i18n/voseo.test.ts` verifica que cada clave exista en es.json y conserve variables y etiquetas. El resto del español sigue con «tú». Cuando cambie un texto de es.json, hay que volver a correr el script y revisar el diff.
 - **Fuera de alcance:** los textos que vienen de la API (FAQ, legales, correos) siguen con «tú».
 
-## 251 — «Empezar gratis» sin sesión: siempre a ingresar y, después, al creador
+## 251 — Página «Cómo funciona» con productos, precios, entrega y fotos
+
+- **Fecha:** 2026-11-18. Pedido por Sebas en el hilo ("armar sección especial de cómo funciona… foco en logística, envíos, productos, precios… sin tirar data de más e intentar un call to action a loguearse"); la mesa (todos los roles) opinó antes de armarla.
+- **Problema:** «Cómo funciona» del menú y del pie llevaba a un ancla de la home, que solo tenía los tres pasos. Las dudas que frenan la compra (qué recibo, cuánto cuesta, cuándo llega, qué pasa con la foto) quedaban repartidas entre la home, las landings y las preguntas frecuentes.
+- **Decisión:** página `/how-it-works` (`/es/como-funciona`, `/en/how-it-works`, `/pt/como-funciona`) en cinco bloques cortos: promesa y «Empezar gratis»; tres pasos («pagas solo si te encanta»); qué recibes y cuánto cuesta (ebook con el precio de cada extensión y kit «desde», ambos de la API del país; impresos en una fila chica con «Muy pronto» hasta que el país los pueda pedir); entrega, pago y fotos (al instante, impreso pronto o plazo de la oferta, precio en dólares con impuestos incluidos si la oferta lo dice, fotos borradas a los 30 días); cierre con «Empezar gratis». Sin sesión el botón lleva a ingresar; con sesión, a `/new`.
+- **Menú y pie:** «Cómo funciona» apunta a la página. La home conserva su sección de pasos.
+- **Medición:** `how_cta_top`, `how_cta_bottom` y `how_kit`.
+- **Voseo:** claves nuevas en `es-voseo.json` (con `generar.py` y tres arreglos manuales).
+- **Test:** `e2e/tests/landings.spec.ts` («Cómo funciona: página propia…»).
+
+## 252 — «Empezar gratis» sin sesión: siempre a ingresar y, después, al creador
 
 - **Fecha:** 2026-11-18. Pedido en el hilo de la landing al ver que el mismo botón llevaba a dos lugares (el del menú al creador, el del hero a ingresar).
 - **Decisión:** sin sesión, todos los «Empezar gratis» (menú, hero de la home y de /families, botón fijo del celular y cierre de /families) llevan a `/ingresar?next=/<idioma>/crear` (`useStartFreeHref`). Después de entrar, `afterLoginPath` vuelve a la portada del creador (`creatorReturn` en `lib/after-login.ts`), también con el enlace mágico (lee el `next` de la página de ingresar guardada). Solo se acepta la portada del creador, nunca un borrador ni otra página; pago y pedido siguen teniendo prioridad y todo lo demás cae en la home con sesión (DECISIONS 110, 152 y 220).

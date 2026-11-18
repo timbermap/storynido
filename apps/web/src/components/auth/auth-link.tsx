@@ -11,7 +11,7 @@ import { useStartFreeHref } from './start-free';
  * Botón de entrada a crear: sin sesión lleva siempre al login ("Empezar a crear…") y, una vez
  * dentro, la persona cae en Mis cuentos (no en el formulario del cuento). Con sesión sigue directo
  * a `href` (la enseñanza o la historia que eligió). Con `startFree` («Empezar gratis»), después de
- * entrar va al creador (DECISIONS 251).
+ * entrar va al creador (DECISIONS 252).
  */
 export function AuthLink({
   href,

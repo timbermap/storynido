@@ -306,7 +306,7 @@ export function takeReturnPath(): string | null {
 const KEEP_RETURN = /\/(pagar|checkout|pagamento|pedido|order)\//;
 
 /**
- * Adónde se va después de entrar (DECISIONS 152, 220 y 251): a la home con sesión, donde ve qué
+ * Adónde se va después de entrar (DECISIONS 152, 220 y 252): a la home con sesión, donde ve qué
  * sigue en su libro y cuál es el botón. Se respeta volver a un pago o a un pedido y, si entró desde
  * «Empezar gratis», a la portada del creador; la ruta guardada se borra en todos los casos.
  */

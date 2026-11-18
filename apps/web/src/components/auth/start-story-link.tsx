@@ -11,7 +11,7 @@ import { useAuth } from './auth-provider';
 import { useStartFreeHref } from './start-free';
 
 /**
- * «Empezar gratis» de la home. Sin sesión lleva a ingresar y, después, al creador (DECISIONS 251).
+ * «Empezar gratis» de la home. Sin sesión lleva a ingresar y, después, al creador (DECISIONS 252).
  * Con sesión ya no se vende nada: si hay un borrador, "Continuar mi cuento"; si no, "Crear otro cuento", que
  * baja a "¿Para quién es?" para elegir la línea.
  */

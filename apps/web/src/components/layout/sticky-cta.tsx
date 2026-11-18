@@ -45,7 +45,7 @@ export function StickyCta() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[rgb(38_50_74/0.08)] bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
       <Link
-        // «Empezar gratis» va a ingresar y de ahí al creador (DECISIONS 251).
+        // «Empezar gratis» va a ingresar y de ahí al creador (DECISIONS 252).
         href={pathname === '/events' || pathname === '/professionals' ? '/login' : startFree}
         data-track="sticky_cta"
         className={buttonVariants({ size: 'lg', className: 'w-full' })}

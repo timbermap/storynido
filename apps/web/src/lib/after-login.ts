@@ -1,6 +1,6 @@
 /**
  * «Empezar gratis» sin sesión lleva a ingresar con `?next=` al creador y, después de entrar, al
- * creador (DECISIONS 251). Solo se acepta la portada del creador (`/es/crear`, `/en/create`,
+ * creador (DECISIONS 252). Solo se acepta la portada del creador (`/es/crear`, `/en/create`,
  * `/pt/criar`), nunca un borrador ni otra página: el resto sigue cayendo en la home con sesión.
  */
 const CREATOR = /^\/(es|en|pt)\/(crear|create|criar)$/;

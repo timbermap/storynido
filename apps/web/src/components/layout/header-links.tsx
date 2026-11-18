@@ -34,7 +34,7 @@ export function NavLink({
 
 /**
  * Botón de crear del encabezado (sin sesión), con el texto de la sección: «Empezar gratis» lleva a
- * ingresar y de ahí al creador, igual que el hero (DECISIONS 251); "Diseñar el kit" en
+ * ingresar y de ahí al creador, igual que el hero (DECISIONS 252); "Diseñar el kit" en
  * Celebraciones y "Probar gratis" en Profesionales arrancan el creador en su línea.
  */
 export function HeaderCta({

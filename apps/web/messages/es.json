@@ -2308,5 +2308,59 @@
     },
     "loading": "Cargando tus cuentos…",
     "coverAlt": "Portada de ejemplo: {title}"
+  },
+  "HowItWorks": {
+    "metaTitle": "Cómo funciona: precios, entrega y formatos",
+    "metaDescription": "Crea gratis el cuento personalizado de tu hijo, mira la vista previa y paga solo si te encanta. El ebook llega al instante; precios con IVA incluido.",
+    "kicker": "Cómo funciona",
+    "title": "Su cuento, en tres pasos",
+    "lead": "Lo creas gratis, miras la vista previa y pagas solo si te encanta. El ebook llega al instante.",
+    "cta": "Empezar gratis",
+    "ctaMember": "Crear un cuento",
+    "seePrices": "Ver precios",
+    "note": "Creas tu cuenta gratis con Google o con un enlace a tu correo.",
+    "stepsTitle": "Así de simple",
+    "steps": {
+      "1": {
+        "title": "Cuéntanos del protagonista",
+        "text": "Su nombre, su edad, lo que le gusta y una foto. También se puede sin foto."
+      },
+      "2": {
+        "title": "Mira la vista previa gratis",
+        "text": "Eliges la aventura y ves cómo queda su cuento antes de pagar."
+      },
+      "3": {
+        "title": "Paga solo si te encanta",
+        "text": "Eliges el formato, pagas y lo recibes al instante."
+      }
+    },
+    "prices": {
+      "title": "Qué recibes y cuánto cuesta",
+      "subtitle": "Hoy todo es digital y llega al instante. Los libros impresos llegan muy pronto.",
+      "subtitlePrint": "En digital al instante o impreso, listo para regalar.",
+      "ebookName": "Cuento digital (ebook)",
+      "ebookText": "Un PDF para leer en el celular, la tablet o la computadora, o imprimir en casa. El precio depende de la extensión.",
+      "kitText": "Invitación para WhatsApp, decoración para imprimir en casa y mini cuentos para los invitados, con el mismo personaje.",
+      "from": "Desde {price}",
+      "inCreator": "Ves el precio de tu país en el creador, antes de pagar."
+    },
+    "delivery": {
+      "title": "Entrega, pago y fotos",
+      "digitalTitle": "Llega al instante",
+      "digitalText": "Apenas pagas, el ebook y el kit quedan en Mis cuentos para descargarlos cuando quieras.",
+      "printSoonTitle": "Impreso: muy pronto",
+      "printSoonText": "Tapa blanda, tapa dura y cuento grapado. Te avisamos cuando se puedan pedir en tu país.",
+      "printTitle": "Impreso, a tu casa",
+      "printText": "Se imprime y llega en {min} a {max} días. El envío se calcula con tu dirección, antes de pagar.",
+      "printTextNoEta": "Se imprime y se envía a tu casa. El envío se calcula con tu dirección, antes de pagar.",
+      "pricesTitle": "Precio final, sin sorpresas",
+      "pricesTextTax": "Precios en dólares con impuestos incluidos. Ves el total antes de pagar.",
+      "pricesText": "Precios en dólares. Ves el total antes de pagar.",
+      "photosTitle": "Fotos cuidadas",
+      "photosText": "Se usan solo para crear el personaje y se borran solas a los 30 días.",
+      "more": "¿Más dudas? Mira las <faq>preguntas frecuentes</faq>."
+    },
+    "finalTitle": "Empieza su cuento hoy",
+    "finalText": "Crear la cuenta y la vista previa es gratis."
   }
 }
