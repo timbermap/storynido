@@ -55,8 +55,8 @@ jobs:
           path: .turbo/cache
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: turbo-${{ runner.os }}-
-      # Las cuatro tareas en una sola corrida de Turborepo, en paralelo entre paquetes.
-      - run: pnpm turbo run lint typecheck test build --cache-dir=.turbo/cache
+      # Las cuatro tareas en una sola corrida de Turborepo, de a una: en paralelo se pisaban los emuladores y las pruebas lentas en un runner de 2 CPU (DECISIONS 260).
+      - run: pnpm turbo run lint typecheck test build --cache-dir=.turbo/cache --concurrency=1
 
   terraform:
     name: Terraform (fmt, validate, tflint)
