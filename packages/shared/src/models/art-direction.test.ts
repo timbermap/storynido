@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_PALETTE, STORY_PALETTES, artDirection, withCurrentGuards } from './art-direction';
+import {
+  DEFAULT_PALETTE,
+  STORY_PALETTES,
+  ageDirection,
+  artDirection,
+  mediumFor,
+  withCurrentGuards,
+} from './art-direction';
 
 describe('dirección de arte de los libros', () => {
   it('paleta de la historia o, si no tiene, la del público', () => {
@@ -32,7 +39,8 @@ describe('dirección de arte de los libros', () => {
     expect(threeD).not.toContain('gouache');
     expect(threeD).not.toContain('glossy generic 3D');
     const watercolor = artDirection({ age: 6, channel: 'families', style: 'acuarela' });
-    expect(watercolor).toContain('gouache');
+    expect(watercolor).toContain('traditional watercolor');
+    expect(watercolor).not.toContain('hand-painted digital gouache');
   });
 
   it('deja lugar para el texto y dibuja al protagonista una sola vez', () => {
@@ -57,5 +65,77 @@ describe('dirección de arte de los libros', () => {
     expect(older).toContain('cinematic framing');
     expect(older).not.toContain('firm ink');
     expect(older).not.toContain('flat color');
+  });
+
+  // Candado de estilo (DECISIONS 265): ninguna parte de la dirección de arte impone otra técnica.
+  const STYLES = [
+    'acuarela',
+    'cartoon-3d',
+    'cuento-clasico',
+    'lapices-de-colores',
+    'collage-papel',
+    'minimalismo-grafico',
+    'gouache-editorial',
+  ];
+  const FOREIGN_TECHNIQUE = [
+    'comic-book touches',
+    'occasional panel',
+    'textured brush work',
+    'like printed paint',
+  ];
+
+  it.each(STYLES)('cada edad respeta el estilo elegido: %s', (style) => {
+    for (const age of [1, 4, 7, 11]) {
+      const direction = artDirection({ age, channel: 'families', style });
+      expect(direction).toContain(`Style lock: the chosen art style is the only technique`);
+      expect(direction).toContain(mediumFor({ style }));
+      for (const phrase of FOREIGN_TECHNIQUE) expect(direction).not.toContain(phrase);
+      if (style !== 'gouache-editorial') {
+        expect(direction).not.toContain('hand-painted digital gouache');
+        expect(direction).not.toContain('traditional editorial gouache');
+      }
+    }
+  });
+
+  it('un estilo nuevo del admin usa su propio modificador, no el gouache de la casa', () => {
+    const direction = artDirection({
+      age: 5,
+      channel: 'families',
+      style: 'linograbado',
+      stylePrompt: 'linocut print with bold carved lines',
+    });
+    expect(direction).toContain('linocut print with bold carved lines');
+    expect(direction).not.toContain('gouache');
+  });
+
+  it('para colorear: la técnica es de contornos, nunca gouache', () => {
+    const coloring = artDirection({
+      age: 5,
+      channel: 'families',
+      coloring: true,
+      style: 'acuarela',
+    });
+    expect(coloring).toContain('coloring book line art');
+    expect(coloring).not.toContain('gouache');
+    expect(coloring).not.toContain('watercolor');
+  });
+
+  it('la edad no impone técnica', () => {
+    for (const age of [1, 4, 7, 11]) {
+      for (const phrase of FOREIGN_TECHNIQUE) expect(ageDirection(age)).not.toContain(phrase);
+    }
+  });
+
+  it('las muestras y pedidos anteriores pierden las técnicas viejas y ganan el candado', () => {
+    const legacy =
+      "Art direction: premium children's picture book, classic narrative editorial illustration: ink line and opaque paint, as if one artist made the whole book. Color palette: #fff (calm); warm and harmonious like printed paint, slightly softened. For ages 6-8: taller proportions (head about a fifth of the body), diagonal dynamic compositions, the child in motion, humor, comic-book touches such as motion lines and the occasional panel, and memorable secondary characters. For ages 3-5: rounded proportions (head about a quarter of the body), expressive characters, textured brush work, a limited palette.";
+    const updated = withCurrentGuards(legacy) ?? '';
+    for (const phrase of FOREIGN_TECHNIQUE) expect(updated).not.toContain(phrase);
+    expect(updated).toContain(
+      'Style lock: the chosen art style is the only technique for every image of this book (character sheet, cover, every page, secondary characters and every redo): classic narrative editorial illustration: ink line and opaque paint.',
+    );
+    expect(withCurrentGuards(updated)).toBe(updated);
+    const baby = artDirection({ age: 1, channel: 'families', style: 'collage-papel' });
+    expect(withCurrentGuards(baby)).toBe(baby);
   });
 });

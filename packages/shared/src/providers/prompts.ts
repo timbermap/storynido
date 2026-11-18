@@ -353,6 +353,7 @@ export function craftRules(childName: string, age: number | undefined, baby = fa
     rules.push(
       `- Como máximo dos intentos fallidos antes de lograrlo, y cada uno enseña algo distinto que ${childName} usa después.`,
       `- Si hay un mentor o un adulto, ayuda o da una pista, pero la solución final la encuentra ${childName}.`,
+      `- Nunca narres en segunda persona: el narrador no le habla al lector ni al protagonista (nada de «tú», «vos» ni «you» fuera de un diálogo). Narra en tercera persona o, si le queda bien al cuento, en primera con la voz de ${childName}.`,
       '- Si el protagonista hace algo que un chico podría imitar y tiene riesgo (agua, altura, velocidad, fuego), usa el equipo de seguridad que corresponde y un adulto sabe dónde está.',
     );
   }

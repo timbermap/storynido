@@ -425,7 +425,8 @@ describe('oficio del texto', () => {
     expect(four).toContain('Muestra, no cuentes');
     expect(four).toContain('nunca en una lección');
     expect(four).toContain('la solución final la encuentra Sofi');
-    expect(four).not.toContain('diálogo');
+    expect(four).not.toContain('al menos una de cada tres páginas');
+    expect(four).toContain('Nunca narres en segunda persona');
     const seven = craftRules('Sofi', 7).join('\n');
     expect(seven).toContain('al menos una de cada tres páginas');
     expect(seven).not.toContain('20 palabras');

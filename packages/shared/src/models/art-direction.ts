@@ -62,13 +62,13 @@ export function ageDirection(age: number): string {
   if (age <= 2) {
     // Contraste por valor (oscuro contra claro), no por saturación: los primarios puros y el
     // contorno negro de vector se leían «hechos por IA» (DECISIONS 257).
-    return 'For ages 0-2: strong contrast of dark against light (deep navy or warm brown against cream), not of saturated hues; warm, slightly softened colors with one accent per scene, no pure primary red, blue or yellow; very simple shapes, one single element per scene on a calm background, and a large friendly face in the upper half; hand-made outlines in dark warm brown, thin-to-thick, never a uniform black vector outline; avoid washed-out pastels.';
+    return 'For ages 0-2: strong contrast of dark against light (deep navy or warm brown against cream), not of saturated hues; warm, slightly softened colors with one accent per scene, no pure primary red, blue or yellow; very simple shapes, one single element per scene on a calm background, and a large friendly face in the upper half; if the art style uses outlines, they are hand-made in dark warm brown, thin-to-thick, never a uniform black vector outline; avoid washed-out pastels.';
   }
   if (age <= 5) {
-    return 'For ages 3-5: rounded proportions (head about a quarter of the body), expressive characters, textured brush work, a limited palette, the child plus one or two elements of the theme and one clear action per scene.';
+    return 'For ages 3-5: rounded proportions (head about a quarter of the body), expressive characters, a limited palette, the child plus one or two elements of the theme and one clear action per scene.';
   }
   if (age <= 8) {
-    return 'For ages 6-8: taller proportions (head about a fifth of the body), diagonal dynamic compositions, the child in motion, humor, comic-book touches such as motion lines and the occasional panel, and memorable secondary characters.';
+    return 'For ages 6-8: taller proportions (head about a fifth of the body), diagonal dynamic compositions, the child in motion, humor and memorable secondary characters, always in the chosen art style (never comic panels, speech bubbles or comic-book inking).';
   }
   // Sin técnica (antes «tinta firme y color plano»): peleaba con el estilo elegido. La técnica la
   // define el estilo; la edad, las proporciones, el encuadre y el tono.
@@ -91,6 +91,10 @@ const STYLE_MEDIUM: Record<string, string> = {
     'cut-paper collage in the spirit of hand-made picture books: clean cut-out contours, layered sheets of painted and textured paper, visible paper fibers and very subtle shadows between layers; faces keep enough detail to resemble the child',
   'minimalismo-grafico':
     'contemporary graphic minimalism: expressive silhouettes, simple flat backgrounds, a limited palette of a few colors and a clear composition that reads well even as a small thumbnail; faces stay distinctive and true to the photo',
+  acuarela:
+    'traditional watercolor: transparent washes, soft wet edges, gentle color blooms and visible paper texture; never opaque paint or ink line art',
+  'para-colorear':
+    'black and white coloring book line art: clean closed outlines, no fills, no shading, no gray',
   'gouache-editorial':
     'traditional editorial gouache: matte pigment, irregular brush strokes, opaque layers and a controlled palette; faces slightly angular and individual, never overly round',
 };
@@ -127,6 +131,27 @@ export const ONE_PROTAGONIST =
 export const TEXT_ZONE =
   'Compose for a printed page with text: the text is printed over one third of the image (the scene says which one, top or bottom); that third is plain, calm background such as sky, wall, floor or grass, and no face, head, hand or key action is ever in it.';
 
+/** Técnica del estilo elegido; nunca el gouache de la casa si se eligió otro (DECISIONS 265). */
+export function mediumFor(input: {
+  style?: string | null;
+  stylePrompt?: string | null;
+  coloring?: boolean;
+}): string {
+  if (input.coloring) return STYLE_MEDIUM['para-colorear'] ?? DEFAULT_MEDIUM;
+  const known = input.style ? STYLE_MEDIUM[input.style] : undefined;
+  if (known) return known;
+  if (input.stylePrompt?.trim()) return input.stylePrompt.trim();
+  return DEFAULT_MEDIUM;
+}
+
+/**
+ * Candado de estilo (DECISIONS 265): la lámina, la portada, cada página, el elenco y cada
+ * «Probar otra ilustración» usan la misma técnica, la que eligió el adulto.
+ */
+export function styleLock(medium: string): string {
+  return `Style lock: the chosen art style is the only technique for every image of this book (character sheet, cover, every page, secondary characters and every redo): ${medium}. Never switch to another technique such as comic-book inking, manga, a sketch, a 3D render or a photo unless that is exactly the chosen style.`;
+}
+
 export function artDirection(input: {
   age: number;
   channel: Channel;
@@ -135,16 +160,22 @@ export function artDirection(input: {
   coloring?: boolean;
   /** Estilo elegido (slug): define la técnica. */
   style?: string | null;
+  /**
+   * Modificador del estilo elegido: es la técnica de un estilo que no está en STYLE_MEDIUM (uno
+   * nuevo del admin). Antes caía en el gouache de la casa y peleaba con el elegido.
+   */
+  stylePrompt?: string | null;
 }): string {
-  const medium = (input.style && STYLE_MEDIUM[input.style]) ?? DEFAULT_MEDIUM;
+  const medium = mediumFor(input);
   const threeD = input.style === 'cartoon-3d';
   const key = input.palette ?? DEFAULT_PALETTE[input.channel];
   const palette = STORY_PALETTES[key];
   const color = input.coloring
     ? 'Black line art only for coloring: clean closed outlines, no fills, no shading.'
-    : `Color palette: ${palette.colors.join(', ')} (${palette.mood}); warm and harmonious like printed paint, slightly softened: one accent color per scene and the rest earthy and calm; no pure primaries, neon or candy colors, never washed-out pastels.`;
+    : `Color palette: ${palette.colors.join(', ')} (${palette.mood}); warm and harmonious, slightly softened: one accent color per scene and the rest earthy and calm; no pure primaries, neon or candy colors, never washed-out pastels.`;
   return [
     `Art direction: premium children's picture book, ${medium}, as if one artist made the whole book.`,
+    styleLock(medium),
     color,
     ageDirection(input.age),
     HUMAN_CRAFT,
@@ -159,6 +190,26 @@ export function artDirection(input: {
     .join(' ');
 }
 
+/** Frases viejas de la dirección de arte que imponían una técnica (DECISIONS 265). */
+const LEGACY_TECHNIQUE: readonly (readonly [string, string])[] = [
+  [
+    'hand-made outlines in dark warm brown, thin-to-thick, never a uniform black vector outline;',
+    'if the art style uses outlines, they are hand-made in dark warm brown, thin-to-thick, never a uniform black vector outline;',
+  ],
+  [
+    'expressive characters, textured brush work, a limited palette',
+    'expressive characters, a limited palette',
+  ],
+  [
+    'humor, comic-book touches such as motion lines and the occasional panel, and memorable secondary characters.',
+    'humor and memorable secondary characters, always in the chosen art style (never comic panels, speech bubbles or comic-book inking).',
+  ],
+  [
+    'warm and harmonious like printed paint, slightly softened',
+    'warm and harmonious, slightly softened',
+  ],
+];
+
 /**
  * La dirección de arte se congela en la muestra y en el pedido: los libros armados antes de estas
  * reglas no las traen. Se las suma al generar, sin duplicarlas, para que también las usen las
@@ -166,8 +217,18 @@ export function artDirection(input: {
  */
 export function withCurrentGuards(direction: string | null | undefined): string | null {
   if (!direction) return null;
+  // Las técnicas que la edad o la paleta imponían antes se cambian por las de ahora, para que las
+  // muestras y los pedidos anteriores también respeten el estilo elegido (DECISIONS 265).
+  for (const [legacy, current] of LEGACY_TECHNIQUE) {
+    if (!direction.includes(current)) direction = direction.replace(legacy, current);
+  }
   const missing = [ONE_PROTAGONIST, TEXT_ZONE, SPORTS_GEAR].filter(
     (rule) => !direction.includes(rule),
   );
+  const medium =
+    /premium children's picture book, (.+?), as if one artist made the whole book\./.exec(
+      direction,
+    )?.[1];
+  if (medium && !direction.includes('Style lock:')) missing.unshift(styleLock(medium));
   return missing.length > 0 ? `${direction} ${missing.join(' ')}` : direction;
 }
