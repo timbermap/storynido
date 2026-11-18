@@ -405,16 +405,15 @@
   "FormatShowcase": {
     "title": "Assim você recebe",
     "caption": "Imagem ilustrativa",
-    "soon": "Em breve",
     "ebookName": "Ebook (PDF)",
     "ebookText": "Chega no seu e-mail e na sua biblioteca. Dá para ler no tablet, celular ou computador e imprimir em casa.",
-    "ebookAlt": "Uma página da história em um tablet e a capa em um celular",
-    "printName": "Livro impresso",
-    "printText": "Capa mole ou capa dura, com cerca de 21×28 cm, pronto para presentear.",
-    "printTextSoon": "Capa mole ou capa dura, com cerca de 21×28 cm. Estamos preparando a gráfica.",
-    "printAlt": "Mãos abrindo uma caixa de presente com o livro impresso dentro",
+    "ebookAlt": "Tomás na tela de um celular, nas mãos de alguém que lê sob uma manta",
+    "printedName": "Livro impresso",
+    "printedText": "Capa mole ou capa dura, com cerca de 21×28 cm, pronto para presentear.",
+    "printedAlt": "Um livro de capa dura com Tomás na capa, sobre uma mesa ao lado de uma fita de presente",
     "bookletName": "Livreto grampeado",
-    "bookletText": "História impressa com cerca de 15×21 cm, grampeada."
+    "bookletText": "História impressa com cerca de 15×21 cm, grampeada.",
+    "bookletAlt": "Uma história grampeada aberta, com Tomás num foguete, ao lado de um lápis"
   },
   "Blog": {
     "title": "Blog",
@@ -1622,7 +1621,7 @@
         "point2": "Convite para WhatsApp e decoração para imprimir",
         "point3": "Você escolhe entre {count} temas de festa",
         "price": "{price} · kit digital completo, a história está incluída",
-        "photoAlt": "A mini história digital num tablet e o convite pelo WhatsApp num celular, sobre a mesa do aniversário",
+        "photoAlt": "O kit de aniversário do Tomás sobre a mesa: o convite num celular, adesivos, uma bandeirinha e um labirinto para colorir",
         "imageCaption": "Imagem ilustrativa",
         "badge": "Foto de exemplo do kit"
       },

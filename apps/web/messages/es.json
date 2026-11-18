@@ -405,16 +405,15 @@
   "FormatShowcase": {
     "title": "Así lo recibes",
     "caption": "Imagen ilustrativa",
-    "soon": "Muy pronto",
     "ebookName": "Ebook (PDF)",
     "ebookText": "Llega a tu correo y a tu biblioteca. Se lee en tablet, celular o computadora, y se puede imprimir en casa.",
-    "ebookAlt": "Una página del cuento en una tablet y la portada en un celular",
-    "printName": "Libro impreso",
-    "printText": "Tapa blanda o tapa dura, de unos 21×28 cm, listo para regalar.",
-    "printTextSoon": "Tapa blanda o tapa dura, de unos 21×28 cm. Estamos preparando la imprenta.",
-    "printAlt": "Unas manos abren una caja de regalo con el libro impreso adentro",
+    "ebookAlt": "Tomás en la pantalla de un celular, en manos de alguien que lee bajo una manta",
+    "printedName": "Libro impreso",
+    "printedText": "Tapa blanda o tapa dura, de unos 21×28 cm, listo para regalar.",
+    "printedAlt": "Un libro de tapa dura con Tomás en la portada, sobre una mesa junto a una cinta de regalo",
     "bookletName": "Cuento grapado",
-    "bookletText": "Cuento impreso de unos 15×21 cm, con grapas."
+    "bookletText": "Cuento impreso de unos 15×21 cm, con grapas.",
+    "bookletAlt": "Un cuento grapado abierto, con Tomás en un cohete, junto a un lápiz"
   },
   "Blog": {
     "title": "Blog",
@@ -1622,7 +1621,7 @@
         "point2": "Invitación para WhatsApp y decoración para imprimir",
         "point3": "Eliges entre {count} temas de fiesta",
         "price": "{price} · kit digital completo, el cuento va incluido",
-        "photoAlt": "El mini cuento digital en una tablet y la invitación por WhatsApp en un celular, sobre la mesa del cumpleaños",
+        "photoAlt": "El kit de cumpleaños de Tomás sobre la mesa: la invitación en un celular, stickers, un banderín y un laberinto para colorear",
         "imageCaption": "Imagen ilustrativa",
         "badge": "Foto de muestra del kit"
       },

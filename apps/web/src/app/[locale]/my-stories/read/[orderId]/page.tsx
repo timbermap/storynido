@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: t('pageTitle'), robots: { index: false } };
 }
 
-/** Leer un libro comprado en el visor, desde Terminados de Mis cuentos (DECISIONS 253). */
+/** Leer un libro comprado en el visor, desde Terminados de Mis cuentos (DECISIONS 254). */
 export default async function ReadPage({ params }: Props) {
   const { orderId } = await params;
   return <OrderReader orderId={orderId} />;

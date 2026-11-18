@@ -1,5 +1,5 @@
 /**
- * El visor de cuentos (DECISIONS 253): cómo se agrupan las páginas del PDF en pantalla. Funciones
+ * El visor de cuentos (DECISIONS 254): cómo se agrupan las páginas del PDF en pantalla. Funciones
  * puras para poder probarlas sin el navegador.
  */
 

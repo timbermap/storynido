@@ -81,7 +81,7 @@ export interface StoryReaderProps {
 }
 
 /**
- * El visor de cuentos (DECISIONS 253): el PDF limpio del libro comprado, página por página, a
+ * El visor de cuentos (DECISIONS 254): el PDF limpio del libro comprado, página por página, a
  * pantalla completa. En el celular, una página por vez (deslizar o tocar los costados); en una
  * pantalla ancha, a doble página como un libro abierto. Recuerda la página y termina con «Fin».
  */

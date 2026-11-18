@@ -2694,7 +2694,16 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Sin cambios:** «Diseñar el kit» (Celebraciones) y «Probar gratis» (Profesionales) siguen arrancando el creador en su línea.
 - **Tests:** `apps/web/src/lib/after-login.test.ts`, `e2e/tests/landings.spec.ts`.
 
-## 253 — Visor de cuentos: leer el libro comprado en línea, desde Terminados
+## 253 — «Así lo recibes» muestra solo lo que se recibe, y las imágenes de formato son con Tomás
+
+- **Fecha:** 2026-11-18. Propuesto por la mesa y aprobado por Sebas en el hilo: en el paso de extensión del creador, la tarjeta del ebook al lado de «Libro impreso · Muy pronto» y «Cuento grapado · Muy pronto» confundía.
+- **Decisión 1 (qué se ve):** «Así lo recibes» (`FormatShowcase`, en el creador y en la ficha de la historia) lista las piezas que entrega el formato: el ebook, que es el formato de Familias mientras se elige la extensión (el formato se elige en el pago), y el libro impreso o el cuento grapado solo si el país los vende (`printFormatsOnSale` / la oferta del país, vía `showcasePieces`). Con solo el ebook, una sola tarjeta (horizontal en escritorio). Sin «Muy pronto», tapa blanda, tapa dura ni grapado en el flujo de compra; los impresos que vienen se siguen anunciando en la home (`FormatGallery`) y en «Cómo funciona». Cuando un impreso salga a la venta, su tarjeta aparece sola. En Celebraciones el creador ya muestra las piezas del kit elegido (`KitIncludes`: kit completo o solo invitación).
+- **Decisión 2 (tarjetas de extensión):** con solo el ebook a la venta se quita el chip «Ebook» y el precio va solo («US$ 14,99» en vez de «Ebook: US$ 14,99»). Con impresos a la venta sigue igual (chips y «Ebook: …» / «Impreso: …»).
+- **Decisión 3 (imágenes):** ninguna imagen de formato muestra a Angelica (un libro hecho con la foto de un niño real, que no se muestra nunca). Ebook e impreso usan `landing-ebook.webp` y `landing-tapa-dura.webp` (y el grapado `landing-grapado.webp`); se borraron `formato-ebook.webp` y `formato-libro-fisico.webp`. Las piezas del kit (`kit-*.webp`) son recortes de `landing-kit.webp` (invitación, banderín, laberinto) y `landing-grapado.webp` (mini cuento). Los tipos de contenido (`tipo-*.webp`) no tienen equivalente con Tomás: se usan los más cercanos (cuento: `landing-ebook`; cuento y actividades: `landing-grapado`; para colorear: `landing-tapa-blanda`, con crayones; actividades: el laberinto de `landing-kit`). Queda pendiente generar imágenes propias con Tomás para los cuatro tipos.
+- **Hero de /events:** `heroes/cumple-digital.webp` mostraba una página y la invitación de Angelica; se reemplazó por `formatos/landing-kit.webp` (el kit de Tomás, 4:3, con su «Imagen ilustrativa») y se borró el archivo. Cambia lo decidido en DECISIONS 243 sobre esa foto.
+- **Impreso + PDF:** mientras Sebas no decida si el impreso incluye el PDF, la tarjeta del impreso muestra solo el libro.
+
+## 254 — Visor de cuentos: leer el libro comprado en línea, desde Terminados
 
 - **Fecha:** 2026-11-18. Pedido por Sebas en el hilo ("estaría bueno que acá en los terminados pueda tener un visor de cuentos online"); la mesa (todos los roles) opinó antes de armarlo.
 - **Problema:** en Terminados, «Ver» llevaba a la página del pedido (estado, pasos y opinión). El libro solo se podía mirar descargando el PDF, incómodo en el celular, que es donde se lee a la hora de dormir.

@@ -248,7 +248,7 @@ const ACTION =
   'inline-flex min-h-10 items-center gap-1.5 text-sm font-bold text-primary underline-offset-4 hover:underline disabled:opacity-60';
 
 /**
- * Un libro terminado en el estante: la portada grande, Leer (el visor, DECISIONS 253), Descargar
+ * Un libro terminado en el estante: la portada grande, Leer (el visor, DECISIONS 254), Descargar
  * PDF (si se puede) y volver a pedirlo. Un impreso ofrece otra copia y el pedido (el envío).
  */
 export function ShelfItem({
