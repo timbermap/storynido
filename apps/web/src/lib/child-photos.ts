@@ -1,9 +1,4 @@
-import {
-  GUARDIAN_CONSENT_VERSION,
-  PHOTO_CONSENT_VERSION,
-  PHOTO_RULES,
-  type Locale,
-} from '@storynido/shared';
+import { PHOTO_CONSENT_VERSION, PHOTO_RULES, type Locale } from '@storynido/shared';
 
 import { api } from '@/lib/api';
 
@@ -41,19 +36,8 @@ export function acceptedPhotos(list: FileList | null): File[] {
  * Sube las fotos y devuelve los motivos de las que no sirvieron (esas se borran: no tienen archivo
  * y dejarían la miniatura rota). Las que sirven quedan en el personaje.
  */
-export async function uploadChildPhotos(
-  childId: string,
-  photos: File[],
-  locale: Locale,
-  options: { guardian?: boolean } = {},
-) {
+export async function uploadChildPhotos(childId: string, photos: File[], locale: Locale) {
   const rejected: string[] = [];
-  // Personaje de Profesionales: el servidor pide la autorización del tutor (como en el creador).
-  if (options.guardian && photos.length > 0) {
-    await api('createConsent', {
-      body: { type: 'guardian_authorization', textVersion: GUARDIAN_CONSENT_VERSION, locale },
-    });
-  }
   for (const photo of photos) {
     const result = await uploadChildPhoto(childId, photo, locale);
     if (result.status === 'rejected') {

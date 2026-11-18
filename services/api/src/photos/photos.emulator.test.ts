@@ -12,7 +12,7 @@ import {
   createProviderFactories,
   providerSettingsFromEnv,
 } from '@storynido/providers';
-import { GUARDIAN_CONSENT_VERSION, PHOTO_CONSENT_VERSION, ProviderError } from '@storynido/shared';
+import { PHOTO_CONSENT_VERSION, ProviderError } from '@storynido/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 import sharp from 'sharp';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -173,44 +173,21 @@ describe('fotos del protagonista', () => {
     expect(res.json<{ error: { code: string } }>().error.code).toBe('forbidden');
   });
 
-  it('un libro de Profesionales necesita la autorización del tutor antes de subir fotos', async () => {
+  it('un libro de Profesionales sube fotos con el mismo consentimiento que Familias', async () => {
     await seedDraft('ana', 'b1', 'professionals');
     await db.doc('users/ana').set({ accountType: 'professional' });
-    const photoConsent = await consent(app, 'token-ana');
-    const ask = () =>
-      app.inject({
-        method: 'POST',
-        url: '/v1/photos',
-        headers: auth('token-ana'),
-        payload: {
-          bookId: 'b1',
-          consentId: photoConsent,
-          contentType: 'image/jpeg',
-          sizeBytes: 1000,
-        },
-      });
-    const blocked = await ask();
-    expect(blocked.statusCode).toBe(403);
-    expect(blocked.json<{ error: { message: string } }>().error.message).toContain('tutor');
-    const guardian = await app.inject({
+    const res = await app.inject({
       method: 'POST',
-      url: '/v1/consents',
+      url: '/v1/photos',
       headers: auth('token-ana'),
       payload: {
-        type: 'guardian_authorization',
-        textVersion: GUARDIAN_CONSENT_VERSION,
-        locale: 'es',
+        bookId: 'b1',
+        consentId: await consent(app, 'token-ana'),
+        contentType: 'image/jpeg',
+        sizeBytes: 1000,
       },
     });
-    expect(guardian.statusCode).toBe(200);
-    const stored = (
-      await db.doc(`consents/${guardian.json<{ consentId: string }>().consentId}`).get()
-    ).data();
-    expect(stored).toMatchObject({
-      type: 'guardian_authorization',
-      textVersion: GUARDIAN_CONSENT_VERSION,
-    });
-    expect((await ask()).statusCode).toBe(200);
+    expect(res.statusCode).toBe(200);
   });
 
   it('un profesional que hace un cuento de Familia (su hijo) no necesita esa declaración', async () => {

@@ -2750,3 +2750,11 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Causa:** `recommendedStyle` sugería collage de papel para 0–2 (DECISIONS 158), pero las portadas de Bebés del catálogo son gouache suave (DECISIONS 257). Se veía un gouache en la vitrina y se recibía un collage.
 - **Cambio:** para la etapa bebés, `recommendedStyle` devuelve `gouache-editorial`. El collage de papel sigue disponible en el paso «Estilo». Las demás etapas no cambian (profesionales minimal, 3–8 gouache, 9+ cuento clásico).
 - **Datos:** el seed guarda `defaultStyle` en cada historia y en la nube solo crea lo que falta. En staging se actualizó `defaultStyle` de collage a gouache solo en las historias que lo tenían en collage, sin `--refresh-catalog`, para no pisar lo editado en el admin.
+
+## 259 — Un solo consentimiento de fotos para todas las líneas
+
+- **Fecha:** 2026-11-18. Pedido por Sebas al ver dos textos en el diálogo de fotos del perfil de un personaje de Profesionales ("¿no debería ser el mismo tratamiento?"); la mesa (legales, producto, diseño/UX, usuario profesional, usuario familia) opinó.
+- **Problema:** para Profesionales se pedía, además del consentimiento de fotos, una declaración aparte de autorización del tutor (`guardian_authorization`). El consentimiento común ya dice «Soy el padre, la madre o el tutor legal de este niño o niña, o tengo su autorización», así que la segunda casilla repetía lo mismo. Esa doble regla causó el error del perfil (PR #88: el perfil no la pedía y la API respondía 403).
+- **Decisión:** un solo consentimiento (`photo_upload`, `photo-upload-v2`) para Familias, Celebraciones y Profesionales, en el creador, en «Agregar a otro chico» y en el perfil. La API ya no exige `guardian_authorization`; el tipo sigue aceptado en `/v1/consents` y los registros viejos se conservan. Se revierte la casilla que agregó el PR #88 en el perfil.
+- **Personajes:** son un solo modelo para todas las líneas; el alias es solo una etiqueta del proyecto profesional (para no usar el nombre real). Lo que cambia por línea es el libro (canal, lectura, precios), no el personaje.
+- **Pendiente:** la revisión de abogado de `LAUNCH.md` cubre este texto único (que sirva para un profesional con autorización de los padres).
