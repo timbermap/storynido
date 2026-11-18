@@ -16,6 +16,8 @@ import { parseArgs } from 'node:util';
 
 import sharp from 'sharp';
 
+import { TEXT_ZONE, artDirection } from '@storynido/shared';
+
 import { VERTEX_PRICES, VertexClient } from '../src/gcp/vertex';
 
 const { values, positionals } = parseArgs({
@@ -123,13 +125,25 @@ const PHOTO = (body: string) =>
   `Candid real photograph, natural light, fine film grain, honest imperfect framing, off-center. ${body} No glow, no studio-perfect lighting, no text overlays.`;
 
 const SCENE = `${CAST.tomas.replace('Tomás, 5', 'Tomás, 5')} sits under a tree reading a book, with a small fox curled up next to him. A few flowers in the grass. Landscape composition, character on the left third.`;
+/**
+ * Muestra del selector de estilos con la MISMA dirección de arte que los libros (DECISIONS 265):
+ * técnica del estilo, paleta suavizada y candado de estilo. Antes cada muestra tenía su propia
+ * frase y no se parecía a lo que después salía en el libro (gouache más fuerte, clásico en sepia).
+ */
 const style = (file: string, line: string): Job => ({
   file: `styles/${file}.webp`,
   aspect: '4:3',
   size: '1K',
   width: 800,
   height: 600,
-  prompt: `${line}\n${SCENE}\nNo text, no letters, no swatches, no glow, no sparkles.`,
+  prompt: `Art style: ${line}\n${SCENE}\n${artDirection({
+    age: 5,
+    channel: 'families',
+    palette: 'nature',
+    style: file,
+    stylePrompt: line,
+    coloring: file === 'para-colorear',
+  }).replace(TEXT_ZONE, '')}\nNo text, no letters, no swatches, no glow, no sparkles.`,
 });
 
 const JOBS: Job[] = [
@@ -598,35 +612,32 @@ const JOBS: Job[] = [
   // ---- Muestras de estilo (archivo 04) --------------------------------------------------------
   style(
     'gouache-editorial',
-    'Gouache editorial picture-book illustration, opaque matte paint, visible brush texture, bold simple shapes, palette of navy, coral, mustard and mint.',
+    'traditional editorial gouache: matte pigment, irregular brush strokes, opaque layers, controlled palette, individual slightly angular faces',
   ),
   style(
     'collage-papel',
-    'Cut-paper collage illustration: shapes cut from hand-painted textured papers, visible paper edges and layering, slight shadows between layers, high contrast, bold flat colors.',
+    'cut-paper collage: clean cut-out contours, layered textured paper, visible paper fibers, very subtle shadows between layers, faces detailed enough to resemble the child',
   ),
   style(
     'minimalismo-grafico',
-    'Minimal flat graphic illustration, clean even line, geometric shapes, 3 colors on cream, lots of white space, no texture.',
+    'contemporary graphic minimalism: expressive silhouettes, simple backgrounds, a few colors, clear composition that reads as a thumbnail, distinctive faces true to the photo',
   ),
   style(
     'cuento-clasico',
-    'Classic storybook illustration, fine dip-pen ink line with gentle cross-hatching and a light wash of muted color, vintage book feel.',
+    'classic narrative editorial illustration, ink line and opaque paint with moderate texture, believable gestures, warm vintage tones',
   ),
   style(
     'lapices-de-colores',
-    'Colored pencil illustration on textured paper, visible pencil strokes and paper tooth, warm hand-made feel, slightly uneven coloring.',
+    'colored pencil drawing, imperfect human lines, visible strokes, paper grain and deliberately incomplete coloring',
   ),
-  style(
-    'acuarela',
-    'Traditional watercolor illustration with controlled washes and clear shapes, white paper showing through. Keep it crisp: no haze, no glow, no sparkles.',
-  ),
+  style('acuarela', 'soft watercolor children book illustration, gentle textures, pastel palette'),
   style(
     'cartoon-3d',
-    'Soft 3D cartoon render with rounded clay-like shapes and simple lighting. Original character design only, nothing that resembles a known studio character.',
+    '3D animated feature film style: rendered stylized characters with rounded proportions, soft global illumination, smooth materials, cinematic depth of field and warm, natural colors; not a flat drawing, not watercolor. Original character design only, nothing that resembles a known studio character',
   ),
   style(
     'para-colorear',
-    'Black-and-white coloring-book line art, clean closed outlines of even weight, no shading, no gray, white background.',
+    'black and white coloring book line art for children, clean bold uniform outlines, no shading, no gray, no color fills, large simple shapes with wide areas to color, plain white background',
   ),
 ];
 

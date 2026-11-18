@@ -1126,6 +1126,41 @@ describe('vista previa', () => {
     expect((await generate('book-1')).statusCode).toBe(409);
   });
 
+  it('candado de estilo: la lámina, el acompañante, la portada, las páginas, el ajuste y cada «Probar otra» usan el estilo elegido', async () => {
+    await setAiConfig({ maxRegenerationsPerBook: 3 });
+    await seedBook(providers, 'book-1');
+    // Con acompañante, para cubrir también su lámina.
+    await db.doc('children/book-1-child').update({ petName: 'Toby' });
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    const first = (await generate('book-1')).json<PublicPreview>();
+    const adjusted = await app.inject({
+      method: 'PUT',
+      url: '/v1/books/book-1/preview/character',
+      headers: auth(TOKEN),
+      payload: { traits: first.preview?.character?.traits, mustKeep: [], note: 'pelo más corto' },
+    });
+    expect(adjusted.statusCode).toBe(200);
+    expect((await approve('book-1')).statusCode).toBe(200);
+    for (const target of ['cover', '0']) {
+      const redo = await app.inject({
+        method: 'POST',
+        url: `/v1/books/book-1/preview/illustrations/${target}/regenerate`,
+        headers: auth(TOKEN),
+      });
+      expect(redo.statusCode).toBe(200);
+    }
+    // Lámina, ajuste, acompañante, portada, páginas y dos «Probar otra».
+    expect(paint.mock.calls.length).toBeGreaterThanOrEqual(7);
+    for (const [request] of paint.mock.calls) {
+      expect(request.stylePrompt).toBe(style.promptModifier);
+      expect(request.prompt).toContain(style.promptModifier);
+      expect(request.prompt).toContain('Style lock: the chosen art style is the only technique');
+      expect(request.prompt).toContain('traditional watercolor');
+      expect(request.prompt).not.toMatch(/gouache|comic-book touches|textured brush work/);
+    }
+    paint.mockRestore();
+  });
+
   it('regenera una ilustración hasta el límite y descuenta solo si sale bien', async () => {
     await seedBook(providers, 'book-1');
     const first = (await generateAndApprove('book-1')).json<PublicPreview>();
