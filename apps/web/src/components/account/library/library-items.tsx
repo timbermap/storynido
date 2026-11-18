@@ -349,7 +349,12 @@ export function ShelfItem({
         />
       </Link>
       <LineChip line={order.channel} label={lines[order.channel].chip} small />
-      <p className="line-clamp-2 font-serif text-base leading-snug font-semibold sm:text-lg">
+      {/* Alto fijo de dos líneas: con títulos de una o dos, la fecha y las acciones de todas las
+          tarjetas de una fila quedan a la misma altura. */}
+      <p
+        title={title}
+        className="line-clamp-2 min-h-[2lh] font-serif text-base leading-snug font-semibold sm:text-lg"
+      >
         {title}
       </p>
       <p className="text-sm text-muted-foreground">{meta(order)}</p>
@@ -368,22 +373,28 @@ export function ShelfItem({
             {t('download')}
           </button>
         )}
-        {!cards && canReorder && (
-          <Link
-            href={reorder}
-            data-track={order.print ? 'pedir-copia' : 'pedir-de-nuevo'}
-            className={ACTION}
-          >
-            <RotateCcw className="size-4" aria-hidden="true" />
-            {order.print ? t('anotherCopy') : t('reorder')}
-          </Link>
-        )}
-        {order.print && (
-          <Link href={orderHref} className={cn(ACTION, 'font-semibold text-muted-foreground')}>
-            {t('viewOrder')}
-          </Link>
-        )}
       </div>
+      {/* Lo secundario (otra copia, el pedido) va en su propia fila, más chica y debajo, para que
+          Leer y Descargar sigan alineados con las tarjetas que no lo tienen. */}
+      {((!cards && canReorder) || order.print) && (
+        <div className="-mt-1 flex flex-wrap gap-x-4 border-t border-navy/10 pt-1">
+          {!cards && canReorder && (
+            <Link
+              href={reorder}
+              data-track={order.print ? 'pedir-copia' : 'pedir-de-nuevo'}
+              className={ACTION}
+            >
+              <RotateCcw className="size-4" aria-hidden="true" />
+              {order.print ? t('anotherCopy') : t('reorder')}
+            </Link>
+          )}
+          {order.print && (
+            <Link href={orderHref} className={cn(ACTION, 'font-semibold text-muted-foreground')}>
+              {t('viewOrder')}
+            </Link>
+          )}
+        </div>
+      )}
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {t('downloadError')}
