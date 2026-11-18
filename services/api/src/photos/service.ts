@@ -93,25 +93,8 @@ export class PhotoService {
     ) {
       throw new AppError(403, 'forbidden', 'Necesitamos tu consentimiento antes de subir fotos.');
     }
-    // Libros de Profesionales: la foto es de un chico que no es propio; hace falta la
-    // declaración de que tienen la autorización de su madre, padre o tutor. Un profesional que
-    // hace un cuento de Familia para su propio hijo no la necesita (va por la línea del libro).
-    if (target.channel === 'professionals') {
-      const guardian = await this.db
-        .collection(COLLECTIONS.consents)
-        .where('ownerUid', '==', input.uid)
-        .where('type', '==', 'guardian_authorization')
-        .where('textVersion', '==', GUARDIAN_CONSENT_VERSION)
-        .limit(1)
-        .get();
-      if (guardian.empty) {
-        throw new AppError(
-          403,
-          'forbidden',
-          'Antes de subir la foto, confirma que tienes la autorización de su madre, padre o tutor.',
-        );
-      }
-    }
+    // Un solo consentimiento para todas las líneas (DECISIONS 259): su texto ya cubre al adulto
+    // responsable y a quien tiene su autorización (profesionales). Ya no se pide una aparte.
 
     const existing = await this.db
       .collection(COLLECTIONS.photos)
@@ -184,7 +167,6 @@ export class PhotoService {
     return {
       bookId: bookId as string | null,
       childId: book.childId,
-      channel: String(book.channel ?? 'families'),
       photoIds: (book.photoIds as string[] | undefined) ?? [],
     };
   }
@@ -198,8 +180,6 @@ export class PhotoService {
     return {
       bookId: null as string | null,
       childId,
-      // Un personaje con alias es de Profesionales: pide la autorización del tutor.
-      channel: child.alias ? 'professionals' : 'families',
       photoIds: [] as string[],
     };
   }

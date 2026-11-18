@@ -6,7 +6,6 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'reac
 
 import {
   ApiError,
-  GUARDIAN_CONSENT_VERSION,
   PHOTO_CONSENT_VERSION,
   PHOTO_RULES,
   type Locale,
@@ -32,12 +31,10 @@ interface LocalUpload {
 }
 
 const CONSENT_KEY = 'storynido:photoConsent';
-/** Profesionales: el consentimiento recordado incluye la autorización del tutor. */
-const consentKey = (pro: boolean) => (pro ? `${CONSENT_KEY}:pro` : CONSENT_KEY);
 
-function rememberedConsent(uid: string, pro: boolean): string | null {
+function rememberedConsent(uid: string): string | null {
   try {
-    const saved = window.sessionStorage.getItem(consentKey(pro));
+    const saved = window.sessionStorage.getItem(CONSENT_KEY);
     const [owner, version, id] = saved?.split('|') ?? [];
     return owner === uid && version === PHOTO_CONSENT_VERSION && id ? id : null;
   } catch {
@@ -54,8 +51,6 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [uploads, setUploads] = useState<LocalUpload[]>([]);
   const [consentId, setConsentId] = useState<string | null>(null);
   const [consentChecked, setConsentChecked] = useState(false);
-  const [guardianChecked, setGuardianChecked] = useState(false);
-  const pro = data.book.channel === 'professionals';
   const [error, setError] = useState<string | null>(null);
   const chooseRef = useRef<HTMLButtonElement>(null);
   const [reuseChoice, setReuseChoice] = useState<'keep' | 'change'>('keep');
@@ -69,11 +64,11 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
     if (!user) return;
     // Lectura de sessionStorage y de la API después de montar.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setConsentId(rememberedConsent(user.uid, pro));
+    setConsentId(rememberedConsent(user.uid));
     refresh().catch(() => {
       setError(t('uploadError'));
     });
-  }, [user, refresh, t, pro]);
+  }, [user, refresh, t]);
 
   const valid = photos.filter((photo) => photo.status === 'valid');
   const rejected = photos.filter((photo) => photo.status === 'rejected');
@@ -105,14 +100,8 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
     const { consentId: id } = await api('createConsent', {
       body: { type: 'photo_upload', textVersion: PHOTO_CONSENT_VERSION, locale },
     });
-    if (pro) {
-      // Profesionales: la foto no es de un hijo propio; queda registrada la autorización.
-      await api('createConsent', {
-        body: { type: 'guardian_authorization', textVersion: GUARDIAN_CONSENT_VERSION, locale },
-      });
-    }
     try {
-      window.sessionStorage.setItem(consentKey(pro), `${user.uid}|${PHOTO_CONSENT_VERSION}|${id}`);
+      window.sessionStorage.setItem(CONSENT_KEY, `${user.uid}|${PHOTO_CONSENT_VERSION}|${id}`);
     } catch {
       // Sin storage se vuelve a pedir el consentimiento en otra sesión.
     }
@@ -142,7 +131,7 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
         // El consentimiento guardado en esta sesión ya no vale (se borró o cambió de versión):
         // se vuelve a pedir en lugar de fallar sin explicación.
         try {
-          window.sessionStorage.removeItem(consentKey(pro));
+          window.sessionStorage.removeItem(CONSENT_KEY);
         } catch {
           // Nada que limpiar.
         }
@@ -301,22 +290,9 @@ export function StepPhotos({ nav, data }: { nav: StepNav; data: WizardData }) {
                 </Link>
               </span>
             </label>
-            {pro && (
-              <label className="mt-3 flex items-start gap-3 text-sm">
-                <input
-                  type="checkbox"
-                  className="mt-1 size-5 shrink-0 accent-[var(--primary)]"
-                  checked={guardianChecked}
-                  onChange={(event) => {
-                    setGuardianChecked(event.target.checked);
-                  }}
-                />
-                <span>{t('guardianText')}</span>
-              </label>
-            )}
             <Button
               className="mt-4"
-              disabled={!consentChecked || (pro && !guardianChecked)}
+              disabled={!consentChecked}
               onClick={() =>
                 void giveConsent().catch(() => {
                   setError(t('uploadError'));
