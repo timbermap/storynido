@@ -86,7 +86,8 @@ const at = (name: keyof typeof KID, age: number) =>
 const BABY = `Picture-book illustration for babies and toddlers in matte editorial gouache. Warm, softened palette: deep muted navy, terracotta, ochre mustard, sage green, dusty coral and warm cream, with one accent color per image; no pure primary red, blue or yellow, no neon, no candy colors. Contrast comes from dark against light values (navy against cream), not from saturation. Very simple shapes, a single main element on a calm, slightly textured background, a large friendly face. Hand-made edges, visible brush texture and paper grain; line work in dark warm brown only where needed, thin-to-thick and uneven, never a uniform black vector outline. Toddler proportions (big head, short limbs). Individual face: small dark eyes without glossy highlights, natural cheeks, no perfect round blush circles.`;
 const READER = `Gouache editorial children's illustration with comic-book energy. Opaque matte paint with visible brush texture, limited palette of navy, coral, mustard, mint. Taller proportions (head about one fifth of the body), diagonal dynamic composition, the child in motion, humor, hand-drawn motion lines, no text or lettering of any kind. Expressive faces with character.`;
 const NOVEL = `Graphic-novel illustration for pre-teen readers. Firm black ink linework with flat color fills, deep navy and terracotta palette, realistic proportions (head about one sixth of the body), cinematic low-angle framing, suspense and intrigue. Nothing cute, nothing babyish, no rounded cartoon face.`;
-const GENERIC = 'a child with short neutral brown hair and a plain t-shirt';
+const GENERIC =
+  'a child with short warm chestnut-brown hair (clearly a child, never grey or ash hair) and a plain t-shirt';
 
 interface Job {
   file: string;
@@ -401,7 +402,7 @@ const JOBS: Job[] = [
     'el-rincon-de-la-calma',
     MINIMAL,
     'lavender',
-    `${GENERIC} sits cross-legged on a round cushion in a cozy corner with a small lamp and a potted plant, eyes closed, both hands resting on the belly. Calm and quiet.`,
+    `${GENERIC} sits cross-legged on a round cushion in a cozy corner with a small lamp and a potted plant, eyes closed, both hands resting on the belly. Calm and quiet. Full-bleed illustration that fills the whole canvas edge to edge: do not draw a book, card, page, frame, border or mockup inside the image.`,
     true,
   ),
   cover(
@@ -415,7 +416,7 @@ const JOBS: Job[] = [
     'mi-termometro-verde-amarillo-rojo',
     MINIMAL,
     'cream',
-    `${GENERIC} stands beside a tall flat thermometer drawn with three zones in green, yellow and red, pointing at the green zone and smiling. No numbers or letters.`,
+    `${GENERIC} stands beside a tall flat thermometer drawn with three zones in green, yellow and red, pointing at the green zone and smiling. No numbers or letters. Full-bleed illustration that fills the whole canvas edge to edge: do not draw a book, card, page, frame, border or mockup inside the image.`,
     true,
   ),
   cover(
@@ -464,7 +465,7 @@ const JOBS: Job[] = [
     'el-sonido-escondido',
     MINIMAL,
     'mint',
-    `${GENERIC} with a hand cupped behind the ear, listening carefully, small round flat shapes floating around as if hidden sounds, curious smile.`,
+    `${GENERIC} with a hand cupped behind the ear, listening carefully, small round flat shapes floating around as if hidden sounds, curious smile. Full-bleed illustration that fills the whole canvas edge to edge: do not draw a book, card, page, frame, border or mockup inside the image.`,
     true,
   ),
   cover(
@@ -520,7 +521,7 @@ const JOBS: Job[] = [
     'chau-panal-pro',
     MINIMAL,
     'mint',
-    `${GENERIC} stands in a yellow t-shirt and simple trousers beside a small closed potty, one arm raised proudly, a folded diaper on the floor. Clothed, calm, minimal graphic style.`,
+    `${GENERIC} stands in a yellow t-shirt and simple trousers beside a small closed potty, one arm raised proudly, a folded diaper on the floor. Clothed, calm, minimal graphic style. Full-bleed illustration that fills the whole canvas edge to edge: do not draw a book, card, page, frame, border or mockup inside the image.`,
     true,
   ),
   // ---- Celebraciones -------------------------------------------------------------------------
