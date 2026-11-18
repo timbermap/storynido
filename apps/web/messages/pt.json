@@ -413,7 +413,8 @@
     "printedAlt": "Um livro de capa dura com Tomás na capa, sobre uma mesa ao lado de uma fita de presente",
     "bookletName": "Livreto grampeado",
     "bookletText": "História impressa com cerca de 15×21 cm, grampeada.",
-    "bookletAlt": "Uma história grampeada aberta, com Tomás num foguete, ao lado de um lápis"
+    "bookletAlt": "Uma história grampeada aberta, com Tomás num foguete, ao lado de um lápis",
+    "includesPdf": "Inclui o ebook (PDF)"
   },
   "Blog": {
     "title": "Blog",
@@ -2092,7 +2093,8 @@
       "title": "Ainda não imprimimos no seu país",
       "text": "O PDF já é seu: baixe grátis quando quiser em Minhas histórias."
     },
-    "reorderBack": "Voltar para Minhas histórias"
+    "reorderBack": "Voltar para Minhas histórias",
+    "includesPdf": "Inclui o ebook (PDF)"
   },
   "Pro": {
     "activation": {

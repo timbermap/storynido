@@ -413,7 +413,8 @@
     "printedAlt": "A hardcover book with Tomás on the cover, on a table next to a gift ribbon",
     "bookletName": "Stapled booklet",
     "bookletText": "A printed story of about 15×21 cm, stapled.",
-    "bookletAlt": "An open stapled storybook with Tomás on a rocket, next to a pencil"
+    "bookletAlt": "An open stapled storybook with Tomás on a rocket, next to a pencil",
+    "includesPdf": "Includes the ebook (PDF)"
   },
   "Blog": {
     "title": "Blog",
@@ -2092,7 +2093,8 @@
       "title": "We don't print in your country yet",
       "text": "The PDF is already yours: download it for free anytime from My stories."
     },
-    "reorderBack": "Back to My stories"
+    "reorderBack": "Back to My stories",
+    "includesPdf": "Includes the ebook (PDF)"
   },
   "Pro": {
     "activation": {

@@ -413,7 +413,8 @@
     "printedAlt": "Un libro de tapa dura con Tomás en la portada, sobre una mesa junto a una cinta de regalo",
     "bookletName": "Cuento grapado",
     "bookletText": "Cuento impreso de unos 15×21 cm, con grapas.",
-    "bookletAlt": "Un cuento grapado abierto, con Tomás en un cohete, junto a un lápiz"
+    "bookletAlt": "Un cuento grapado abierto, con Tomás en un cohete, junto a un lápiz",
+    "includesPdf": "Incluye el ebook (PDF)"
   },
   "Blog": {
     "title": "Blog",
@@ -2092,7 +2093,8 @@
       "title": "Todavía no imprimimos en tu país",
       "text": "El PDF ya es tuyo: lo descargas gratis cuando quieras desde Mis cuentos."
     },
-    "reorderBack": "Volver a Mis cuentos"
+    "reorderBack": "Volver a Mis cuentos",
+    "includesPdf": "Incluye el ebook (PDF)"
   },
   "Pro": {
     "activation": {

@@ -2727,3 +2727,10 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Impuestos y comisión:** Gumroad suma el IVA encima en UE y Reino Unido (no va incluido), así que `taxInclusive` es falso. La comisión de una venta directa es 10 % + USD 0,50 más el procesamiento (2,9 % + USD 0,30): se carga en Admin → Precios (`paymentFeePercent` y `paymentFeeFixedUsdMinor`).
 - **Infra:** `payment_provider = "gumroad"` y `gumroad_product_url` en staging; secretos `gumroad-access-token` y `gumroad-ping-secret` (solo los lee la API y solo con `gumroad`). Producción sigue en `mock`.
 - **Pendiente:** después de pagar, el comprador queda en el recibo de Gumroad (no vuelve solo a `/pedido/<pedido>`); el enlace al pedido le llega por el mail de pago confirmado.
+
+## 256 — El libro impreso incluye el PDF
+
+- **Fecha:** 2026-11-18. Decidido por Sebas en el hilo de «Así lo recibes» (DECISIONS 253): cuando el impreso salga a la venta, trae también el ebook (PDF).
+- **Entrega (ya existía):** el worker siempre maqueta el PDF digital, también en pedidos impresos (`layout_pdf`, `formats` empieza con `digital`); la descarga desde el pedido y la biblioteca está habilitada desde `ready` hasta `delivered` (`DOWNLOADABLE` en `orders/fulfillment.ts`), y el correo `print_sent` ya avisa que se puede descargar la versión digital. No hizo falta tocar el cumplimiento.
+- **Interfaz:** en «Así lo recibes» (`deliveredPieces` / `showcasePieces`) y en el checkout, cada impreso (tapa blanda, tapa dura, cuento grapado) muestra «Incluye el ebook (PDF)» (no en «Pedir otra copia», donde el PDF ya se tiene). Hoy staging vende solo digital, así que no se ve hasta que el impreso salga a la venta.
+- **Test:** `apps/web/src/components/formats/format-showcase.test.ts`.

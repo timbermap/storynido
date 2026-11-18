@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { FORMAT_IMAGES, showcasePieces } from './format-showcase';
+import { FORMAT_IMAGES, deliveredPieces, showcasePieces } from './format-showcase';
 
 describe('showcasePieces («Así lo recibes»)', () => {
   it('solo el ebook mientras no se vende ningún impreso (sin «Muy pronto»)', () => {
@@ -21,5 +21,12 @@ describe('showcasePieces («Así lo recibes»)', () => {
     for (const src of Object.values(FORMAT_IMAGES)) {
       expect(src).toMatch(/^\/images\/formatos\/landing-[a-z-]+\.webp$/);
     }
+  });
+
+  it('el ebook entrega solo el PDF; un impreso, el libro y el PDF', () => {
+    expect(deliveredPieces('digital')).toEqual(['ebook']);
+    expect(deliveredPieces('softcover')).toEqual(['printed', 'ebook']);
+    expect(deliveredPieces('hardcover')).toEqual(['printed', 'ebook']);
+    expect(deliveredPieces('booklet')).toEqual(['booklet', 'ebook']);
   });
 });
