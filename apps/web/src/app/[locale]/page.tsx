@@ -7,6 +7,7 @@ import type { Locale } from '@storynido/shared';
 import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
 import { HeroScene } from '@/components/home/hero-photo';
 import { HeroFacts } from '@/components/home/hero-facts';
+import { FormatGallery } from '@/components/home/format-gallery';
 import { FaqList, faqHighlights, parseFaqGroups } from '@/components/home/faq-list';
 import { AudienceSelector } from '@/components/landing/audience-selector';
 import { LandingFinalCta, ctaClass } from '@/components/landing/sections';
@@ -21,7 +22,7 @@ import { homeLineCopy } from '@/components/home/session/line-copy';
 import { getContent, getOffer, getStories } from '@/lib/server/api';
 import { SESSION_COOKIE } from '@/lib/session-hint';
 import { getDisplayCountry } from '@/lib/server/request-context';
-import { offerHighlights } from '@/lib/offer';
+import { canOrderPrinted, offerHighlights, printFormatsOnSale } from '@/lib/offer';
 import { SITE_URL, absoluteUrl } from '@/lib/site';
 import { StartStoryLink } from '@/components/auth/start-story-link';
 
@@ -64,6 +65,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getOffer(display.country, locale),
   ]);
   const highlights = offerHighlights(offer, locale, display.country);
+  // Sin impreso en el país (hoy staging vende solo digital) no se promete tapa dura ni envío.
+  const printFormats = printFormatsOnSale(offer);
+  const printAvailable = canOrderPrinted(offer);
   // Solo las destacadas: todas las preguntas y el contacto están en /faq.
   const faqItems = faq ? faqHighlights(parseFaqGroups(faq.body)) : [];
 
@@ -84,7 +88,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     {
       icon: BookOpen,
       title: t('how.step3Title'),
-      text: t('how.step3Text'),
+      text: printAvailable ? t('how.step3Text') : t('how.step3TextDigital'),
       tone: 'bg-mint text-success',
     },
   ];
@@ -109,7 +113,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               })}
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-[clamp(1.1rem,1.6vw,1.3rem)] leading-relaxed text-muted-foreground lg:mx-0">
-              {t('hero.homeLead')}
+              {printAvailable ? t('hero.homeLead') : t('hero.homeLeadDigital')}
             </p>
             <p className="mt-4 font-script text-[clamp(1.6rem,2.4vw,2.1rem)] leading-tight text-primary">
               {t('hero.script')}
@@ -130,12 +134,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <Link
                 href="/families/stories"
                 data-track="home_explore"
-                className="border-b-2 border-foreground/25 px-1 pb-0.5 text-lg font-semibold transition-colors hover:border-primary hover:text-primary"
+                className="border-b-2 border-foreground/25 px-1 pb-0.5 font-display text-lg font-semibold transition-colors hover:border-primary hover:text-primary"
               >
                 {t('hero.exploreStories')}
               </Link>
             </div>
-            <HeroFacts digitalPrice={highlights?.digital ?? null} />
+            <HeroFacts digitalPrice={highlights?.digital ?? null} printAvailable={printAvailable} />
           </div>
           <HeroScene
             bookAlt={t('hero.sceneBookAlt')}
@@ -143,6 +147,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             characterAlt={t('hero.sceneCharacterAlt')}
             photoLabel={t('hero.scenePhotoLabel')}
             characterLabel={t('hero.sceneCharacterLabel')}
+            caption={t('formats.caption')}
           />
         </div>
       </section>
@@ -189,6 +194,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </ol>
         </div>
       </section>
+
+      {/* Así lo recibes: lo digital que hoy se vende y los impresos que llegan pronto. */}
+      <FormatGallery printFormats={printFormats} digitalPrice={highlights?.digital ?? null} />
 
       {/* Preguntas frecuentes */}
       {faqItems.length > 0 && (

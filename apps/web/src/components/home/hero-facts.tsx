@@ -1,4 +1,4 @@
-import { Globe, MapPin, Sparkles, Truck } from 'lucide-react';
+import { Globe, MapPin, ShieldCheck, Sparkles, Truck, Zap } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 /**
@@ -6,13 +6,34 @@ import { getTranslations } from 'next-intl/server';
  * depende del país y la vista previa es gratis. En la home, el precio del digital sale de la
  * configuración de precios del país.
  */
-export async function HeroFacts({ digitalPrice = null }: { digitalPrice?: string | null }) {
+export async function HeroFacts({
+  digitalPrice = null,
+  printAvailable = true,
+}: {
+  digitalPrice?: string | null;
+  /** Sin impreso en el país no se habla de envíos: se cuenta la entrega al instante y la privacidad. */
+  printAvailable?: boolean;
+}) {
   const t = await getTranslations('Home.trustInline');
   const facts = [
     { icon: Sparkles, text: t('preview') },
-    { icon: Globe, text: digitalPrice ? t('digitalFrom', { price: digitalPrice }) : t('formats') },
-    { icon: MapPin, text: t('global') },
-    { icon: Truck, text: t('shipping') },
+    {
+      icon: Globe,
+      text: digitalPrice
+        ? t('digitalFrom', { price: digitalPrice })
+        : printAvailable
+          ? t('formats')
+          : t('formatsDigital'),
+    },
+    ...(printAvailable
+      ? [
+          { icon: MapPin, text: t('global') },
+          { icon: Truck, text: t('shipping') },
+        ]
+      : [
+          { icon: Zap, text: t('instant') },
+          { icon: ShieldCheck, text: t('privacy') },
+        ]),
   ];
   return (
     <ul className="mt-8 grid gap-x-8 gap-y-3 text-left text-sm font-semibold text-muted-foreground sm:grid-cols-2">

@@ -100,12 +100,15 @@ export function HeroScene({
   characterAlt,
   photoLabel,
   characterLabel,
+  caption,
 }: {
   bookAlt: string;
   photoAlt: string;
   characterAlt: string;
   photoLabel: string;
   characterLabel: string;
+  /** Rótulo «Imagen ilustrativa»: la foto, el personaje y el libro son de muestra. */
+  caption?: string;
 }) {
   const polaroid =
     'absolute top-0 z-10 w-[34%] bg-white p-[2.2%] pb-[7%] shadow-[0_16px_28px_-10px_rgb(38_50_74/0.5)] rounded-lg';
@@ -168,6 +171,11 @@ export function HeroScene({
           sizes="(min-width: 1024px) 640px, 92vw"
           tone="bg-[#e9dcc3]"
         />
+        {caption && (
+          <figcaption className="absolute right-3 bottom-3 rounded-full bg-white/80 px-2.5 py-0.5 text-[0.72rem] font-bold text-foreground backdrop-blur-sm sm:right-4 sm:bottom-4">
+            {caption}
+          </figcaption>
+        )}
       </div>
     </figure>
   );

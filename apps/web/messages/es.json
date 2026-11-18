@@ -162,7 +162,8 @@
       "scenePhotoAlt": "Foto de muestra de un niño de 5 años riéndose, con anteojos rojos.",
       "sceneCharacterAlt": "El mismo niño dibujado como personaje del cuento.",
       "scenePhotoLabel": "su foto",
-      "sceneCharacterLabel": "su personaje"
+      "sceneCharacterLabel": "su personaje",
+      "homeLeadDigital": "Subes una foto, eligen juntos la aventura y en minutos ves su cuento ilustrado. Si te encanta, lo recibes en digital al instante. El libro impreso llega muy pronto."
     },
     "trust": {
       "preview": "Vista previa gratis antes de pagar",
@@ -178,7 +179,8 @@
       "step2Title": "Elige una aventura",
       "step2Text": "Viajes al espacio, dinosaurios, reinos mágicos, fútbol y más.",
       "step3Title": "Descubre su cuento",
-      "step3Text": "Mira una vista previa gratis y elige tu formato favorito: digital, tapa blanda o tapa dura."
+      "step3Text": "Mira una vista previa gratis y elige tu formato favorito: digital, tapa blanda o tapa dura.",
+      "step3TextDigital": "Mira una vista previa gratis y recíbelo en digital al instante. Tapa blanda y tapa dura, muy pronto."
     },
     "gallery": {
       "title": "Un universo de aventuras",
@@ -244,7 +246,10 @@
       "formats": "Digital o impreso, con su nombre y su carita",
       "shipping": "El envío del impreso se calcula según tu país",
       "preview": "Vista previa gratis",
-      "global": "Digital en todo el mundo; impreso en los países donde enviamos"
+      "global": "Digital en todo el mundo; impreso en los países donde enviamos",
+      "formatsDigital": "Digital, con su nombre y su carita",
+      "instant": "El ebook llega al instante a tu correo",
+      "privacy": "Fotos protegidas y borradas a los 30 días"
     },
     "audience": {
       "title": "¿Para quién es?",
@@ -263,6 +268,44 @@
         "title": "Profesionales",
         "text": "Cuentos para cada niño que acompañas, con colecciones educativas.",
         "cta": "Conocer más"
+      }
+    },
+    "formats": {
+      "title": "Así lo recibes",
+      "subtitle": "Hoy lo recibes en digital, al instante. Los libros impresos llegan muy pronto.",
+      "subtitlePrint": "En digital al instante o impreso, listo para regalar.",
+      "caption": "Imagen ilustrativa",
+      "available": "Disponible hoy",
+      "soon": "Muy pronto",
+      "printTitle": "Muy pronto, también impreso",
+      "printTitleReady": "También impreso",
+      "ebook": {
+        "name": "Cuento digital (ebook)",
+        "text": "Un PDF que llega a tu correo y a tu biblioteca. Se lee en el celular, la tablet o la computadora, y se puede imprimir en casa.",
+        "price": "Desde {price}",
+        "cta": "Crear su cuento",
+        "alt": "Unas manos sostienen un celular con una página del cuento: un niño con anteojos vuela en un cohete de cartón."
+      },
+      "kit": {
+        "name": "Kit de Celebraciones",
+        "text": "Invitación para mandar por WhatsApp, decoración para imprimir en casa y su cuento, con tu hijo como protagonista.",
+        "cta": "Ver kits",
+        "alt": "Una mesa de cumpleaños con un celular que muestra la invitación digital y hojas impresas en casa con toppers y banderines del mismo niño."
+      },
+      "softcover": {
+        "name": "Tapa blanda",
+        "text": "Unos 21×28 cm, liviano para leer todos los días.",
+        "alt": "Un libro infantil de tapa blanda sobre una alfombra, junto a unos crayones."
+      },
+      "hardcover": {
+        "name": "Tapa dura",
+        "text": "Unos 21×28 cm, con tapas rígidas, para regalar y guardar.",
+        "alt": "Un libro infantil de tapa dura sobre una mesa de madera, con una cinta de regalo."
+      },
+      "booklet": {
+        "name": "Cuento grapado",
+        "text": "Unos 15×21 cm, más chico y liviano, con grapas.",
+        "alt": "Un cuadernillo grapado abierto sobre un mantel, con una ilustración del cuento."
       }
     }
   },

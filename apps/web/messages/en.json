@@ -162,7 +162,8 @@
       "scenePhotoAlt": "Sample photo of a laughing 5-year-old boy with red glasses.",
       "sceneCharacterAlt": "The same boy drawn as the story’s character.",
       "scenePhotoLabel": "their photo",
-      "sceneCharacterLabel": "their character"
+      "sceneCharacterLabel": "their character",
+      "homeLeadDigital": "Upload a photo, pick the adventure together and in minutes you see their illustrated story. If you love it, you get it as a digital book instantly. The printed book is coming soon."
     },
     "trust": {
       "preview": "Free preview before you pay",
@@ -178,7 +179,8 @@
       "step2Title": "Pick an adventure",
       "step2Text": "Space trips, dinosaurs, magical kingdoms, soccer and more.",
       "step3Title": "Discover their story",
-      "step3Text": "See a free preview and choose your favorite format: digital, softcover or hardcover."
+      "step3Text": "See a free preview and choose your favorite format: digital, softcover or hardcover.",
+      "step3TextDigital": "See a free preview and get it as a digital book instantly. Paperback and hardcover coming soon."
     },
     "gallery": {
       "title": "A universe of adventures",
@@ -244,7 +246,10 @@
       "formats": "Digital or printed, with their name and face",
       "shipping": "Shipping for printed books is calculated by country",
       "preview": "Free preview",
-      "global": "Digital worldwide; printed in the countries we ship to"
+      "global": "Digital worldwide; printed in the countries we ship to",
+      "formatsDigital": "Digital, with their name and their face",
+      "instant": "The ebook arrives instantly in your inbox",
+      "privacy": "Photos protected and deleted after 30 days"
     },
     "audience": {
       "title": "Who is it for?",
@@ -263,6 +268,44 @@
         "title": "Professionals",
         "text": "Stories for every child you support, with educational collections.",
         "cta": "Learn more"
+      }
+    },
+    "formats": {
+      "title": "How you receive it",
+      "subtitle": "Today you get it as a digital book, instantly. Printed books are coming soon.",
+      "subtitlePrint": "Digital right away, or printed and ready to give.",
+      "caption": "Illustrative image",
+      "available": "Available today",
+      "soon": "Coming soon",
+      "printTitle": "Coming soon in print",
+      "printTitleReady": "Also in print",
+      "ebook": {
+        "name": "Digital book (ebook)",
+        "text": "A PDF that arrives in your inbox and your library. Read it on a phone, tablet or computer, or print it at home.",
+        "price": "From {price}",
+        "cta": "Create their story",
+        "alt": "Hands holding a phone showing a story page: a boy with glasses flying a cardboard rocket."
+      },
+      "kit": {
+        "name": "Celebrations kit",
+        "text": "An invitation to send on WhatsApp, decorations to print at home and their story, with your child as the hero.",
+        "cta": "See kits",
+        "alt": "A birthday table with a phone showing the digital invitation and home-printed sheets with toppers and bunting of the same boy."
+      },
+      "softcover": {
+        "name": "Paperback",
+        "text": "About 21×28 cm, light enough for everyday reading.",
+        "alt": "A paperback picture book on a rug, next to some crayons."
+      },
+      "hardcover": {
+        "name": "Hardcover",
+        "text": "About 21×28 cm, with rigid covers, to give and to keep.",
+        "alt": "A hardcover picture book on a wooden table with a gift ribbon."
+      },
+      "booklet": {
+        "name": "Stapled booklet",
+        "text": "About 15×21 cm, smaller and lighter, stapled.",
+        "alt": "An open stapled booklet on a tablecloth, showing a story illustration."
       }
     }
   },
