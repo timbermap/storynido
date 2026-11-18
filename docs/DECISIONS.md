@@ -2887,3 +2887,11 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Para configurar en Gumroad (lo hace Sebas, en su cuenta):** perfil «StoryNido» con el avatar del logo; fondo `#FFF8F1`, resaltado `#A33F33`, fuente Inter, bordes grandes (Settings → Profile; tiñe la ficha y el checkout); producto «Pedido StoryNido» (sirve para libros, kits y tarjetas) con miniatura del logo, portada 1280×720 en crema y descripción corta en es/pt/en; texto del recibo y botón «Volver a StoryNido» con el contenido que enlaza a `/mis-pedidos`; producto oculto de Discover/perfil; precio mínimo igual al ebook más barato.
 - **Pendiente (propuesto por la mesa):** conciliar con `GET /v2/sales` los pedidos pendientes si un ping se pierde; reembolsar solo cuando el monto no coincide; mails de pago abandonado; cobrar impresos por Gumroad solo con su OK por escrito (legales); términos §5 («los impuestos se indican antes de pagar») y privacidad con Gumroad como vendedor de registro.
 - **Salida definitiva:** el CEO propone PayPal integrado en nuestra página; producto propone LLC + Stripe. Lo decide Sebas.
+
+## 273 — El país de los precios, a la vista y con vuelta a la ubicación
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: desde Argentina el pago mostraba la referencia en COP y los textos en «tú».
+- **Causa:** su navegador tenía guardado a mano Colombia (`sn_country_choice=CO`, de algún «Enviar a» o prueba anterior). Esa elección dura un año y manda sobre la IP, que sí detecta Argentina (verificado en staging), pero no se veía en ningún lado: Mi cuenta mostraba Argentina (el país deducido al crear la cuenta) mientras el sitio usaba Colombia.
+- **Orden:** cuenta con país elegido > elegido a mano en este navegador > ubicación (IP) > idioma del navegador. Al iniciar sesión, si la cuenta tiene país elegido se aplica y la página se refresca enseguida.
+- **Pago:** junto al total digital (y en el kit) se ve «Precios para: …» con la opción «Según mi ubicación (país)», que borra la elección y vuelve a la IP. Con sesión, el cambio queda también en la cuenta. En el impreso el país sigue saliendo de la dirección.
+- **Mi cuenta:** si la cuenta no eligió país, muestra el que usa el sitio, así coincide con los precios.
