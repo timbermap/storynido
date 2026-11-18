@@ -2835,6 +2835,10 @@ Sebas, 18 nov 2026: «¿podrías asegurar que cada prompt usa el estilo que sele
 - **Texto:** el cuento nunca se narra en segunda persona (nada de «tú/vos/you» fuera de un diálogo; tercera persona o primera con la voz del protagonista). Las imágenes dejan en blanco lomos de libros, carteles, etiquetas y ropa.
 - **Tests:** `art-direction.test.ts` falla si alguna edad o estilo mete otra técnica; el test de la API «candado de estilo» falla si alguna imagen del libro sale sin el estilo elegido.
 
+## 266 — Estilo «Novela gráfica» para 9 a 12
+
+Sebas, 18 nov 2026 («1 estilo propio ok»): la mesa y el estudio de mercado (Amazon, 5 nov) muestran que de 9 a 12 se lee novela gráfica. Antes eso entraba como «toques de historieta» en la dirección de arte de 6-8 y se mezclaba con cualquier estilo (DECISIONS 265). Ahora es un estilo propio (`novela-grafica`): tinta segura de grosor variable, color plano con sombreado suave y encuadres de cine, siempre una sola imagen por página, sin viñetas ni globos. Es el recomendado para las historias de 9+ (antes Cuento clásico). Su muestra del selector sale de `generate-brand-images.ts` con el mismo prompt que los libros.
+
 ## 267 — Coherencia del elenco, la ropa y los objetos en todo el cuento
 
 Sebas, 18 nov 2026: «revisa la totalidad de los prompts… personajes que tengan relación con el personaje principal, cosas que aparecen en los cuentos, ropas de acuerdo a las situaciones». Revisión con la mesa sobre planificador, redactor, escenas, lámina, páginas y revisión. Lo que ya estaba (DECISIONS 236, 264): biblia visual de objetos, lugares y ropa especial; familia recurrente parecida al protagonista; elenco con género y aspecto fijo; regla de ropa de agua y deportes. Huecos que se cierran:

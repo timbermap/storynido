@@ -65,7 +65,7 @@ describe('recommendedStyle', () => {
       'gouache-editorial',
     );
     expect(recommendedStyle({ channels: ['families'], ageMin: 9, ageMax: 12 })).toBe(
-      'cuento-clasico',
+      'novela-grafica',
     );
     expect(
       recommendedStyle({ channels: ['professionals', 'families'], ageMin: 0, ageMax: 2 }),

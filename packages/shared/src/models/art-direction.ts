@@ -68,7 +68,7 @@ export function ageDirection(age: number): string {
     return 'For ages 3-5: rounded proportions (head about a quarter of the body), expressive characters, a limited palette, the child plus one or two elements of the theme and one clear action per scene.';
   }
   if (age <= 8) {
-    return 'For ages 6-8: taller proportions (head about a fifth of the body), diagonal dynamic compositions, the child in motion, humor and memorable secondary characters, always in the chosen art style (never comic panels, speech bubbles or comic-book inking).';
+    return 'For ages 6-8: taller proportions (head about a fifth of the body), diagonal dynamic compositions, the child in motion, humor and memorable secondary characters, always in the chosen art style (never comic panels or speech bubbles).';
   }
   // Sin técnica (antes «tinta firme y color plano»): peleaba con el estilo elegido. La técnica la
   // define el estilo; la edad, las proporciones, el encuadre y el tono.
@@ -95,6 +95,10 @@ const STYLE_MEDIUM: Record<string, string> = {
     'traditional watercolor: transparent washes, soft wet edges, gentle color blooms and visible paper texture; never opaque paint or ink line art',
   'para-colorear':
     'black and white coloring book line art: clean closed outlines, no fills, no shading, no gray',
+  // Para 9-12 (estudio de mercado y mesa, DECISIONS 266): estilo propio en vez de «toques de
+  // historieta» mezclados en los demás estilos.
+  'novela-grafica':
+    'bold contemporary graphic novel art for middle-grade readers: thick confident black ink outlines, spotted solid blacks, flat color fields with hard-edged cel shadows, slightly stylized proportions with expressive eyes and dynamic low or high camera angles; clearly a comic-book look, not a painted storybook; one single full-page image, never panels or speech bubbles',
   'gouache-editorial':
     'traditional editorial gouache: matte pigment, irregular brush strokes, opaque layers and a controlled palette; faces slightly angular and individual, never overly round',
 };
@@ -202,7 +206,7 @@ const LEGACY_TECHNIQUE: readonly (readonly [string, string])[] = [
   ],
   [
     'humor, comic-book touches such as motion lines and the occasional panel, and memorable secondary characters.',
-    'humor and memorable secondary characters, always in the chosen art style (never comic panels, speech bubbles or comic-book inking).',
+    'humor and memorable secondary characters, always in the chosen art style (never comic panels or speech bubbles).',
   ],
   [
     'warm and harmonious like printed paint, slightly softened',
