@@ -202,7 +202,7 @@ export function recommendedStyle(story: {
 }): string {
   if (story.channels[0] === 'professionals') return 'minimalismo-grafico';
   const stage = stageOf(story);
-  if (stage === 'babies') return 'collage-papel';
+  if (stage === 'babies') return 'gouache-editorial';
   if (stage === 'big') return 'cuento-clasico';
   return 'gouache-editorial';
 }

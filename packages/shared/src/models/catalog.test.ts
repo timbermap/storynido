@@ -56,7 +56,7 @@ describe('recommendedStyle', () => {
   it('sigue la etapa y la línea', async () => {
     const { recommendedStyle } = await import('./catalog');
     expect(recommendedStyle({ channels: ['families'], ageMin: 0, ageMax: 2 })).toBe(
-      'collage-papel',
+      'gouache-editorial',
     );
     expect(recommendedStyle({ channels: ['families'], ageMin: 3, ageMax: 5 })).toBe(
       'gouache-editorial',
