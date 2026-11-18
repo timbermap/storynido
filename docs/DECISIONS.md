@@ -2668,3 +2668,11 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Decisión 3:** rótulo «Imagen ilustrativa» en la escena del hero y en cada foto. «Ver historias» pasa a Quicksand (BRAND.md v3).
 - **Fotos:** generadas con Gemini (Vertex, staging) a partir de Tomás, el personaje inventado de la home (`secciones/personaje.webp`, `pagina-cohete.webp`, `heroes/libro-impreso.webp`). Sin caras de niños reales. Archivos `apps/web/public/images/formatos/landing-*.webp`.
 - **Pendiente (propuesto por la mesa):** imagen del hero arriba en celular, un solo nombre para el botón principal y variante con voseo para AR/UY.
+
+## 250 — Home en el celular con imagen arriba, un solo botón «Empezar gratis» y voseo para AR y UY
+
+- **Fecha:** 2026-11-18. Propuesto por la mesa en la revisión de la home (DECISIONS 249) y aprobado por Sebas en el hilo ("Haz e implementa los cambios que se sugieren").
+- **Decisión 1 (celular):** en el hero, el orden en pantallas chicas es título, imagen (más chica, hasta 19 rem), botón, texto y datos. En escritorio no cambia. Se hace con `display: contents` y `order`, sin duplicar imágenes.
+- **Decisión 2 (botón):** el botón principal se llama «Empezar gratis» (en «Start free», pt «Começar grátis») en el menú, el hero de la home y de /families, el botón fijo del celular y el cierre. Antes había tres nombres («Crear gratis», «Empezar mi cuento», «Crear vista previa gratis»). La mesa eligió uno corto que entra en el menú del celular y no promete que el libro sea gratis; la vista previa gratis se explica al lado.
+- **Decisión 3 (voseo):** para el español con país preferido Argentina o Uruguay (`preferredCountry`: el elegido o el de la IP), `i18n/request.ts` aplica `messages/es-voseo.json` sobre `es.json`. Ese archivo lo genera `scripts/voseo/generar.py` con un diccionario tú → vos y correcciones a mano para palabras ambiguas (crea, usa, prueba…); el test `i18n/voseo.test.ts` verifica que cada clave exista en es.json y conserve variables y etiquetas. El resto del español sigue con «tú». Cuando cambie un texto de es.json, hay que volver a correr el script y revisar el diff.
+- **Fuera de alcance:** los textos que vienen de la API (FAQ, legales, correos) siguen con «tú».

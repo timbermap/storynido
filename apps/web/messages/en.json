@@ -51,14 +51,14 @@
     "back": "Back",
     "explore": "Explore",
     "createShort": "Create",
-    "createFree": "Create free",
+    "createFree": "Start free",
     "orders": "Orders",
     "ordersInProgress": "{count, plural, one {# order in progress} other {# orders in progress}}",
     "createPro": "Create a story",
     "storiesMenu": "Families",
     "storiesMenuToggle": "See stories by age",
     "howItWorksShort": "How it works",
-    "createPreview": "Create a free preview",
+    "createPreview": "Start free",
     "createKit": "Design the kit",
     "tryFree": "Try for free",
     "professionalsTemplates": "Professional templates",
@@ -129,7 +129,7 @@
       "eyebrow": "Stories that hug",
       "title": "Your child is the hero of this story.",
       "subtitle": "A one-of-a-kind story with their name, their face and the adventures they've always dreamed of.",
-      "cta": "Build my first story",
+      "cta": "Start free",
       "secondary": "See how it works",
       "fromPrice": "From {price}",
       "formats": "Available as a digital and printed book",
@@ -150,7 +150,7 @@
       "exploreStories": "Browse stories",
       "homeKicker": "From their photo to their book",
       "homeLead": "You upload a photo, choose the adventure together, and in minutes you see their illustrated story. If you love it, you can order it as a hardcover.",
-      "homeCta": "Start my story",
+      "homeCta": "Start free",
       "photoNote": "Sign in free with Google or an email link. We use the photo only to create the character.",
       "homeMember": "Create another story",
       "homeContinue": "Continue my story",
@@ -202,7 +202,7 @@
     "cta": {
       "title": "A story to remember forever.",
       "text": "The best gift is seeing yourself inside an adventure.",
-      "button": "Create a free preview"
+      "button": "Start free"
     },
     "photo": {
       "title": "From their photo to their character",

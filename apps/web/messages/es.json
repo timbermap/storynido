@@ -51,14 +51,14 @@
     "back": "Volver",
     "explore": "Explorar",
     "createShort": "Crear",
-    "createFree": "Crear gratis",
+    "createFree": "Empezar gratis",
     "orders": "Pedidos",
     "ordersInProgress": "{count, plural, one {# pedido en curso} other {# pedidos en curso}}",
     "createPro": "Crear un cuento",
     "storiesMenu": "Familias",
     "storiesMenuToggle": "Ver historias por edad",
     "howItWorksShort": "Cómo funciona",
-    "createPreview": "Crear vista previa gratis",
+    "createPreview": "Empezar gratis",
     "createKit": "Diseñar el kit",
     "tryFree": "Probar gratis",
     "professionalsTemplates": "Plantillas profesionales",
@@ -129,7 +129,7 @@
       "eyebrow": "Historias que abrazan",
       "title": "Tu hijo es el héroe de esta historia.",
       "subtitle": "Un cuento único con su nombre, su carita y las aventuras que siempre soñó.",
-      "cta": "Armar mi primer cuento",
+      "cta": "Empezar gratis",
       "secondary": "Ver cómo funciona",
       "fromPrice": "Desde {price}",
       "formats": "Disponible en digital y libro impreso",
@@ -150,7 +150,7 @@
       "exploreStories": "Ver historias",
       "homeKicker": "De su foto a su libro",
       "homeLead": "Subes una foto, eligen juntos la aventura y en minutos ves su cuento ilustrado. Si te encanta, puedes pedirlo impreso en tapa dura.",
-      "homeCta": "Empezar mi cuento",
+      "homeCta": "Empezar gratis",
       "photoNote": "Entras gratis con Google o con un enlace al correo. Usamos la foto solo para crear el personaje.",
       "homeMember": "Crear otro cuento",
       "homeContinue": "Continuar mi cuento",
@@ -202,7 +202,7 @@
     "cta": {
       "title": "Una historia para recordar siempre.",
       "text": "El mejor regalo es verse dentro de una aventura.",
-      "button": "Crear una vista previa gratis"
+      "button": "Empezar gratis"
     },
     "photo": {
       "title": "De su foto a su personaje",

@@ -36,7 +36,7 @@ export async function HeroFacts({
         ]),
   ];
   return (
-    <ul className="mt-8 grid gap-x-8 gap-y-3 text-left text-sm font-semibold text-muted-foreground sm:grid-cols-2">
+    <ul className="mt-6 grid gap-x-8 gap-y-3 text-left text-sm font-semibold text-muted-foreground sm:grid-cols-2">
       {facts.map(({ icon: Icon, text }) => (
         <li key={text} className="inline-flex items-start gap-2.5">
           <Icon
