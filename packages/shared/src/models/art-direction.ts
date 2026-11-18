@@ -11,23 +11,23 @@ import type { Channel } from './channels';
  */
 export const STORY_PALETTES = {
   magic: {
-    colors: ['#183F50', '#20A69C', '#F3BE65', '#EF8B91', '#F9EDD9'],
+    colors: ['#24404F', '#5E9C8F', '#D9A94F', '#D98A80', '#F5EBDA'],
     mood: 'wonder, warmth, gentle fantasy and discovery; golden light against cool forest tones',
   },
   adventure: {
-    colors: ['#283C83', '#744DC5', '#17B8C6', '#F5B942', '#F06D55'],
-    mood: 'discovery, excitement and invention; deep cosmic blues with bright accents',
+    colors: ['#2C3A63', '#6B5A94', '#4F98A0', '#D9A548', '#D97B5F'],
+    mood: 'discovery, excitement and invention; deep night blues with warm accents',
   },
   bedtime: {
-    colors: ['#536987', '#B5A5D6', '#F4D79D', '#E9B8B8', '#FFF6EB'],
+    colors: ['#536987', '#A99CC4', '#E8CF9C', '#DDB3AE', '#FBF3E6'],
     mood: 'affection, calm and reassurance; soft twilight and moonlight',
   },
   nature: {
-    colors: ['#347B63', '#44B9A5', '#E78658', '#F4C857', '#F7E6CA'],
+    colors: ['#3E6E5C', '#7FA88E', '#CF7F5A', '#DDB55A', '#F4E6CC'],
     mood: 'discovery, humor and energy; lush greens with warm sunlit accents',
   },
   celebration: {
-    colors: ['#FF6F76', '#FBC84B', '#31BFC4', '#A78BE4', '#FFF0DB'],
+    colors: ['#E07F73', '#E3B653', '#5FA6A3', '#9F8CC9', '#FBEFDC'],
     mood: 'joy and celebration; festive energy from the characters, with confetti used sparingly',
   },
   explorer: {
@@ -60,7 +60,9 @@ export const DEFAULT_PALETTE: Record<Channel, PaletteKey> = {
  */
 function ageDirection(age: number): string {
   if (age <= 2) {
-    return 'For ages 0-2: saturated, high-contrast colors (red, blue, turquoise, yellow), thick clear outlines, very simple shapes, one single element per scene on a plain background, and a large friendly face in the upper half; avoid pastels and low-contrast washes.';
+    // Contraste por valor (oscuro contra claro), no por saturación: los primarios puros y el
+    // contorno negro de vector se leían «hechos por IA» (DECISIONS 257).
+    return 'For ages 0-2: strong contrast of dark against light (deep navy or warm brown against cream), not of saturated hues; warm, slightly softened colors with one accent per scene, no pure primary red, blue or yellow; very simple shapes, one single element per scene on a calm background, and a large friendly face in the upper half; hand-made outlines in dark warm brown, thin-to-thick, never a uniform black vector outline; avoid washed-out pastels.';
   }
   if (age <= 5) {
     return 'For ages 3-5: rounded proportions (head about a quarter of the body), expressive characters, textured brush work, a limited palette, the child plus one or two elements of the theme and one clear action per scene.';
@@ -140,7 +142,7 @@ export function artDirection(input: {
   const palette = STORY_PALETTES[key];
   const color = input.coloring
     ? 'Black line art only for coloring: clean closed outlines, no fills, no shading.'
-    : `Color palette: ${palette.colors.join(', ')} (${palette.mood}); rich, harmonious, never washed-out pastels.`;
+    : `Color palette: ${palette.colors.join(', ')} (${palette.mood}); warm and harmonious like printed paint, slightly softened: one accent color per scene and the rest earthy and calm; no pure primaries, neon or candy colors, never washed-out pastels.`;
   return [
     `Art direction: premium children's picture book, ${medium}, as if one artist made the whole book.`,
     color,
@@ -151,7 +153,7 @@ export function artDirection(input: {
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     ONE_PROTAGONIST,
     TEXT_ZONE,
-    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated gradients, malformed anatomy, random decorative objects, a second copy, twin or look-alike of the main character anywhere in the image, any text, title, letters or signs in the image, clothing that changes between pages when the text does not say so, winter clothes on a beach, and any change of style between pages.`,
+    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated colors or gradients, glossy highlights in the eyes, perfectly round blush circles, symmetrical doll-like faces, malformed anatomy, random decorative objects, a second copy, twin or look-alike of the main character anywhere in the image, any text, title, letters or signs in the image, clothing that changes between pages when the text does not say so, winter clothes on a beach, and any change of style between pages.`,
   ]
     .filter(Boolean)
     .join(' ');

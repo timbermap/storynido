@@ -40,11 +40,14 @@ const BG: Record<string, string> = {
   lavender: 'pale lavender',
   mustard: 'warm mustard yellow',
   cream: 'warm cream',
-  // Bebés: color saturado (estudio de estilos, DECISIONS 158).
+  // Bebés: contraste por valor, no saturación (DECISIONS 257; antes saturado, DECISIONS 158).
   yellowSat: 'saturated sunflower yellow',
   blueSat: 'saturated deep blue',
   turquoise: 'saturated turquoise',
   redSat: 'saturated warm red',
+  ochreSoft: 'soft warm ochre',
+  navyMuted: 'deep muted navy',
+  sageSoft: 'soft sage green',
 };
 
 // --- Elenco (archivo 01) ------------------------------------------------------------------------
@@ -53,7 +56,7 @@ const CAST = {
     'Tomás, 5 (curly brown hair, round red glasses, light skin with rosy cheeks, blue-and-white striped sweater, green trousers)',
   martina: 'Martina, 6 (straight dark-brown bob with bangs, freckles, olive skin, coral sweater)',
   benja: 'Benja, 4 (short black coily hair, warm dark-brown skin, mustard t-shirt, red sneakers)',
-  lola: 'Lola, 2 (light-brown hair in two tiny pigtails, fair skin, yellow overalls)',
+  lola: 'Lola, 2 (light-brown hair in two tiny pigtails, fair skin, ochre overalls)',
   sofi: 'Sofi, 7 (long black braids, medium-brown skin, mint dress)',
   alex: 'Alex, 10 (short wavy black hair, light-brown skin, green hoodie)',
 };
@@ -64,7 +67,7 @@ const KID = {
   martina: 'straight dark-brown bob with bangs, freckles, olive skin, coral sweater',
   benja: 'short black coily hair, warm dark-brown skin, mustard t-shirt, red sneakers',
   sofi: 'long black braids, medium-brown skin, mint dress',
-  lola: 'light-brown hair in two tiny pigtails, fair skin, yellow overalls',
+  lola: 'light-brown hair in two tiny pigtails, fair skin, ochre mustard overalls',
   alex: 'short wavy black hair, light-brown skin, green hoodie',
 };
 const KID_NAME = {
@@ -78,7 +81,7 @@ const KID_NAME = {
 const at = (name: keyof typeof KID, age: number) =>
   `${KID_NAME[name]}, ${String(age)} (${KID[name]})`;
 // Por etapa: bebés saturado y simple, 6–8 historieta, 9+ novela gráfica.
-const BABY = `Flat gouache or cut-paper picture-book illustration for babies. Saturated high-contrast colors (red, blue, turquoise, sunflower yellow), NO pastels, thick clear outlines, very simple shapes, a single main element on a plain saturated background, a large friendly face in the upper half. Toddler proportions (big head, short limbs). Matte opaque paint, slight hand-made texture.`;
+const BABY = `Picture-book illustration for babies and toddlers in matte editorial gouache. Warm, softened palette: deep muted navy, terracotta, ochre mustard, sage green, dusty coral and warm cream, with one accent color per image; no pure primary red, blue or yellow, no neon, no candy colors. Contrast comes from dark against light values (navy against cream), not from saturation. Very simple shapes, a single main element on a calm, slightly textured background, a large friendly face. Hand-made edges, visible brush texture and paper grain; line work in dark warm brown only where needed, thin-to-thick and uneven, never a uniform black vector outline. Toddler proportions (big head, short limbs). Individual face: small dark eyes without glossy highlights, natural cheeks, no perfect round blush circles.`;
 const READER = `Gouache editorial children's illustration with comic-book energy. Opaque matte paint with visible brush texture, limited palette of navy, coral, mustard, mint. Taller proportions (head about one fifth of the body), diagonal dynamic composition, the child in motion, humor, hand-drawn motion lines, no text or lettering of any kind. Expressive faces with character.`;
 const NOVEL = `Graphic-novel illustration for pre-teen readers. Firm black ink linework with flat color fills, deep navy and terracotta palette, realistic proportions (head about one sixth of the body), cinematic low-angle framing, suspense and intrigue. Nothing cute, nothing babyish, no rounded cartoon face.`;
 const GENERIC = 'a child with short neutral brown hair and a plain t-shirt';
@@ -238,20 +241,20 @@ const JOBS: Job[] = [
   cover(
     'te-quiero-siempre',
     BABY,
-    'yellowSat',
-    `${at('lola', 2)} hugs the neck of an adult seen from behind (only shoulders, arms and hair visible), cheek on the shoulder, eyes closed, smiling. Three big flat red hearts.`,
+    'ochreSoft',
+    `${at('lola', 2)} hugs the neck of an adult seen from behind (only shoulders, arms and hair visible), cheek on the shoulder, eyes closed, smiling. Three small terracotta hearts.`,
   ),
   cover(
     'buenas-noches',
     BABY,
-    'blueSat',
-    `${at('lola', 2)} in blue pajamas yawning, holding a red bunny. One big flat yellow moon behind. No soft glow.`,
+    'navyMuted',
+    `${at('lola', 2)} in cream pajamas with navy stripes yawning, holding a terracotta bunny. One big pale ochre moon behind. No soft glow.`,
   ),
   cover(
     'amigos-de-la-selva',
     BABY,
-    'turquoise',
-    `${at('lola', 2)} laughing in front of an enormous toucan with a big orange beak. Two huge flat green leaves.`,
+    'sageSoft',
+    `${at('lola', 2)} laughing in front of an enormous toucan with a big orange beak. Two huge sage and deep-green leaves.`,
   ),
   cover(
     'aventura-espacial',
@@ -328,26 +331,26 @@ const JOBS: Job[] = [
   cover(
     'la-navidad-de-nombre',
     BABY,
-    'redSat',
-    `${at('lola', 2)} in a red knitted hat looks up at a big flat green fir tree with three round ornaments and one flat yellow star on top. No snow, no glow.`,
+    'cream',
+    `${at('lola', 2)} in a terracotta knitted hat looks up at a big deep-green fir tree with three round ornaments and one ochre star on top. No snow, no glow.`,
   ),
   cover(
     'cuando-naciste',
     BABY,
-    'turquoise',
-    `A newborn baby with light-brown wisps of hair and fair skin (Lola as a newborn), wrapped snugly in a yellow blanket, eyes wide open, held by two adult hands seen from below (hands only, no faces). Large friendly baby face in the upper half.`,
+    'sageSoft',
+    `A newborn baby with light-brown wisps of hair and fair skin (Lola as a newborn), wrapped snugly in an ochre blanket, eyes wide open, held by two adult hands seen from below (hands only, no faces). Large friendly baby face in the upper half.`,
   ),
   cover(
     'los-mejores-del-mundo',
     BABY,
-    'yellowSat',
-    `${at('lola', 2)} sits on the shoulders of a tall adult seen from behind (only back, arms and hair, no face), both arms raised high in joy, holding a big flat red heart.`,
+    'ochreSoft',
+    `${at('lola', 2)} sits on the shoulders of a tall adult seen from behind (only back, arms and hair, no face), both arms raised high in joy, holding a big terracotta heart.`,
   ),
   cover(
     'chau-panal',
     BABY,
-    'blueSat',
-    `${at('lola', 2)} stands proudly in a yellow t-shirt and colorful trousers next to a small flat red potty with the lid down, one arm raised high, waving goodbye to a folded white diaper on the floor. Big smile.`,
+    'navyMuted',
+    `${at('lola', 2)} stands proudly in an ochre t-shirt and sage trousers next to a small terracotta potty with the lid down, one arm raised high, waving goodbye to a folded white diaper on the floor. Big smile.`,
   ),
   cover(
     'el-volcan-del-enojo',
