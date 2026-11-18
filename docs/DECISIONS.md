@@ -2845,3 +2845,7 @@ Sebas, 18 nov 2026: «revisa la totalidad de los prompts… personajes que tenga
 - **Lo que hace y usa según su edad:** el que escribe las escenas sabe la edad; lo riesgoso, con un adulto cerca.
 - **Revisión de cada página:** también marca ropa que no va con el lugar y familiares que no se parecen.
 - **Registro:** el plan dentro del prompt decía «seguilo» en un prompt en «tú»; ahora «síguelo».
+
+## 268 — Métricas por estilo de ilustración
+
+Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para decidir con datos y no solo con estudios de mercado. Las métricas del día suman `styles` por slug: elegido (libros que llegaron a la lámina), muestras completas, compras pagadas y ventas en USD. Los libros sin estilo van como `sin-estilo`. La portada del admin muestra la tabla «Por estilo de ilustración». `METRICS_VERSION` pasa a 3 para que los días asentados se recalculen con el estilo.

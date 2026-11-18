@@ -477,3 +477,68 @@ export function ProductTable({ totals }: { totals: Totals }) {
     </Card>
   );
 }
+
+const STYLE_NAMES: Record<string, string> = {
+  'gouache-editorial': 'Gouache editorial',
+  'collage-papel': 'Collage de papel',
+  'minimalismo-grafico': 'Minimalismo gráfico',
+  'cuento-clasico': 'Cuento clásico',
+  'novela-grafica': 'Novela gráfica',
+  'lapices-de-colores': 'Lápices de colores',
+  acuarela: 'Acuarela',
+  'cartoon-3d': 'Cartoon 3D',
+  'para-colorear': 'Para colorear',
+  'sin-estilo': 'Sin estilo',
+};
+
+const pct = (part: number, whole: number) =>
+  whole ? `${String(Math.round((part / whole) * 100))} %` : '—';
+
+/** Bloque 5: qué estilo eligen y cuál compran (DECISIONS 268). */
+export function StyleTable({ totals }: { totals: Totals }) {
+  const rows = Object.entries(totals.styles)
+    .map(([key, value]) => ({ key, name: STYLE_NAMES[key] ?? key, ...value }))
+    .sort((a, b) => b.chosen - a.chosen || b.purchased - a.purchased);
+  const chosen = rows.reduce((sum, row) => sum + row.chosen, 0);
+  return (
+    <Card>
+      <h2 className="font-semibold">Por estilo de ilustración</h2>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Elegido = libros que llegaron a la lámina del personaje con ese estilo. Compra = pedidos
+        pagados de libros con ese estilo. Cuenta desde el 18 nov 2026.
+      </p>
+      {rows.length === 0 ? (
+        <p className="mt-3 text-sm text-muted-foreground">Sin muestras en el período.</p>
+      ) : (
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full min-w-[560px] text-sm tabular-nums">
+            <thead className="text-left text-xs text-muted-foreground">
+              <tr>
+                <th className="py-1">Estilo</th>
+                <th className="text-right">Elegido</th>
+                <th className="text-right">% del total</th>
+                <th className="text-right">Muestras</th>
+                <th className="text-right">Compras</th>
+                <th className="text-right">Compra / elegido</th>
+                <th className="text-right">Ventas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.key} className="border-t">
+                  <td className="py-2 font-medium">{row.name}</td>
+                  <td className="text-right">{row.chosen}</td>
+                  <td className="text-right">{pct(row.chosen, chosen)}</td>
+                  <td className="text-right">{row.previews}</td>
+                  <td className="text-right">{row.purchased}</td>
+                  <td className="text-right">{pct(row.purchased, row.chosen)}</td>
+                  <td className="text-right">{usd(row.revenueUsd)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Card>
+  );
+}

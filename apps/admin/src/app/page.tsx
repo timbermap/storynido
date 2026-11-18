@@ -11,6 +11,7 @@ import {
   FunnelByLine,
   KpiRow,
   ProductTable,
+  StyleTable,
   usd,
 } from '@/components/dashboard/today';
 import { Card, Notice, PageHeader } from '@/components/ui/page-header';
@@ -94,6 +95,7 @@ export default function TodayPage() {
           </div>
         )}
         {totals && <ProductTable totals={totals} />}
+        {totals && <StyleTable totals={totals} />}
 
         <Card>
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">

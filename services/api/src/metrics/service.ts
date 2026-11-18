@@ -104,6 +104,7 @@ export class MetricsService {
           'preview.character.approvedAt',
           'preview.characterImagePath',
           'channel',
+          'styleId',
         )
         .get(),
     ]);
@@ -114,7 +115,7 @@ export class MetricsService {
     const [orderBooks, orderUsage] = await Promise.all([
       bookIds.length
         ? this.db.getAll(...bookIds.map((id) => this.db.collection(COLLECTIONS.books).doc(id)), {
-            fieldMask: ['length', 'contentType'],
+            fieldMask: ['length', 'contentType', 'styleId'],
           })
         : Promise.resolve([]),
       Promise.all(
@@ -130,6 +131,7 @@ export class MetricsService {
           length: typeof doc.get('length') === 'string' ? String(doc.get('length')) : null,
           contentType:
             typeof doc.get('contentType') === 'string' ? String(doc.get('contentType')) : null,
+          style: typeof doc.get('styleId') === 'string' ? String(doc.get('styleId')) : null,
         },
       ]),
     );
@@ -168,6 +170,7 @@ export class MetricsService {
           preview: Boolean(preview && (preview.stage ?? 'complete') === 'complete'),
           approved: Boolean(preview?.character?.approvedAt),
           channel: typeof doc.get('channel') === 'string' ? String(doc.get('channel')) : 'families',
+          style: typeof doc.get('styleId') === 'string' ? String(doc.get('styleId')) : null,
         };
       }),
       orders: orders.docs.map((doc): MetricsOrder => {
@@ -199,6 +202,7 @@ export class MetricsService {
             contentType: book?.contentType ?? null,
           }),
           aiCostUsdMicros: aiByOrder.get(doc.id) ?? 0,
+          style: book?.style ?? null,
         };
       }),
     });
