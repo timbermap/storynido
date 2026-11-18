@@ -70,6 +70,7 @@ import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
 import { FieldValue, type DocumentReference, type Firestore } from 'firebase-admin/firestore';
 
+import { GenerationTimings } from '../generation-times';
 import { AiBudget, isBudgetExceeded, type AiLimits, type UsageContext } from '../ai/budget';
 import type { CatalogRepository } from '../catalog';
 import { AppError } from '../errors';
@@ -215,7 +216,11 @@ export class PreviewService {
     private readonly notifier: EmailNotifier | null = null,
   ) {
     this.budget = new AiBudget(db, log);
+    this.timings = new GenerationTimings(db);
   }
+
+  /** Cuánto tarda cada tipo de generación (para el tiempo estimado de la web). */
+  readonly timings: GenerationTimings;
 
   private bookRef(bookId: string) {
     return this.db.collection(COLLECTIONS.books).doc(bookId);
@@ -579,6 +584,10 @@ export class PreviewService {
         updatedAt: new Date(),
       });
       this.log.info({ bookId }, 'preview ready');
+      await this.timings.track(
+        preview.character?.fromDrawing ? 'preview_story' : 'preview',
+        startedAt,
+      );
       // Con su dibujo de siempre no hay nada que aprobar: se ilustran ya la portada y las páginas
       // (no cuenta como regeneración). Si eso falla, queda la lámina para aprobar a mano.
       // Solo si queda tiempo dentro del request (Cloud Run corta a los 300 s): si el texto tardó
@@ -1371,6 +1380,7 @@ export class PreviewService {
     limits: AiLimits,
     anonymous: boolean,
   ): Promise<PublicPreview> {
+    const illustrateStartedAt = Date.now();
     const { ref, book } = await this.ownedBook(uid, bookId);
     const preview = book.preview;
     if (!preview?.character) {
@@ -1586,6 +1596,7 @@ export class PreviewService {
         updatedAt: new Date(),
       });
       await this.qaEvent(bookId, 'character_approved', { mustKeep: mustKeep.length });
+      await this.timings.track('illustrate', book.previewStartedAt ?? illustrateStartedAt);
       if (!anonymous) await this.notifyPreviewReady(uid, bookId);
     } catch (error) {
       if (isBudgetExceeded(error)) {
@@ -1641,6 +1652,7 @@ export class PreviewService {
     }
     // Un ajuste del parecido usa uno de los del libro y cuenta para los topes por día y semana.
     await this.reserveAdjustment(uid, ref, limits);
+    const fixStartedAt = Date.now();
 
     try {
       const { story, style, child } = await this.context(uid, book, preview);
@@ -1708,6 +1720,7 @@ export class PreviewService {
       });
       await Promise.all(stale.map((path) => storage.delete({ bucket: 'assets', path })));
       await this.qaEvent(bookId, 'character_corrected', { mustKeep: mustKeep.length });
+      await this.timings.track('character_fix', fixStartedAt);
     } catch (error) {
       await ref.update({ regenerationsUsed: FieldValue.increment(-1) });
       await this.refundUserQuota(uid);
@@ -1816,6 +1829,7 @@ export class PreviewService {
       );
     }
     await this.reserveUserQuota(uid, limits);
+    const drawingStartedAt = Date.now();
     try {
       const age = Number(child.age);
       let photo: ImageData | null = null;
@@ -1872,6 +1886,7 @@ export class PreviewService {
         updatedAt: new Date(),
       });
       await this.deleteDrawing(stale);
+      await this.timings.track('child_drawing', drawingStartedAt);
     } catch (error) {
       await this.refundUserQuota(uid);
       await this.auditAiError('character_drawing', childId, error);
@@ -2083,6 +2098,7 @@ export class PreviewService {
       throw notFound();
     }
     await this.reserveRegeneration(ref, limits);
+    const regenerateStartedAt = Date.now();
 
     try {
       const { story, style, child } = await this.context(uid, book, preview);
@@ -2167,6 +2183,7 @@ export class PreviewService {
           .map((path) => storage.delete({ bucket: 'assets', path })),
       );
       this.log.info({ bookId, target, ipHash: hashIp(ip) }, 'preview illustration regenerated');
+      await this.timings.track('regenerate', regenerateStartedAt);
     } catch (error) {
       // Si falló, la regeneración no se cuenta.
       await ref.update({ regenerationsUsed: FieldValue.increment(-1) });

@@ -49,10 +49,13 @@ import {
   type FxRates,
   type Promotion,
   type PublicOrder,
+  bookProgress,
+  type BookStepState,
+  type PipelineStep,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
-import type { Firestore } from 'firebase-admin/firestore';
+import type { DocumentReference, Firestore } from 'firebase-admin/firestore';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { z } from 'zod';
 
@@ -121,6 +124,7 @@ interface OrderDoc {
     trackingNumber: string | null;
     trackingUrl: string | null;
   } | null;
+  pipeline?: { generation?: number; startedAt?: unknown } | null;
   createdAt: unknown;
 }
 
@@ -199,6 +203,14 @@ export const perCopy = (cost: PrintCost, quantity: number) =>
 export function reviewable(order: { status: OrderStatus; items: { format: BookFormat }[] }) {
   const digitalOnly = order.items.every((item) => item.format === 'digital');
   return order.status === 'delivered' || (order.status === 'ready' && digitalOnly);
+}
+
+function dateOf(value: unknown): Date | null {
+  if (value instanceof Date) return value;
+  if (value && typeof value === 'object' && 'toDate' in value) {
+    return (value as { toDate(): Date }).toDate();
+  }
+  return null;
 }
 
 function toIso(value: unknown): string {
@@ -1088,6 +1100,13 @@ export class CheckoutService {
     const order = snap.data() as OrderDoc | undefined;
     if (order?.ownerUid !== uid) throw new AppError(404, 'not_found', 'Pedido inexistente.');
     const review = reviewSnap.data();
+    const progress =
+      order.status === 'generating' || order.status === 'paid'
+        ? await this.orderProgress(ref, order).catch((error: unknown) => {
+            this.log.warn({ err: error, orderId }, 'could not compute order progress');
+            return null;
+          })
+        : null;
     return {
       orderId,
       bookId: order.bookId,
@@ -1120,7 +1139,45 @@ export class CheckoutService {
       tracking: order.print?.trackingNumber
         ? { number: order.print.trackingNumber, url: order.print.trackingUrl }
         : null,
+      progress,
     };
+  }
+
+  /**
+   * Cuánto va del libro completo: los pasos de esta generación, las páginas ya pintadas y lo que
+   * suele tardar cada paso (DECISIONS 262).
+   */
+  private async orderProgress(ref: DocumentReference, order: OrderDoc) {
+    const generation = order.pipeline?.generation ?? 0;
+    const steps = ref.collection(COLLECTIONS.orderSteps);
+    const [stepsSnap, pagesSnap, times] = await Promise.all([
+      steps.get(),
+      steps
+        .doc('generate_illustrations')
+        .collection(COLLECTIONS.illustrationTasks)
+        .where('generation', '==', generation)
+        .get(),
+      this.previews.timings.times(),
+    ]);
+    const stepStates = stepsSnap.docs
+      .filter((doc) => doc.get('generation') === generation)
+      .map((doc) => ({
+        name: doc.id as PipelineStep,
+        status: doc.get('status') as BookStepState['status'],
+        startedAt: dateOf(doc.get('startedAt')),
+      }));
+    const planned = stepsSnap.docs
+      .find((doc) => doc.id === 'generate_illustrations')
+      ?.get('output.total') as unknown;
+    const pagesTotal = typeof planned === 'number' ? planned : pagesSnap.size;
+    const pagesDone = pagesSnap.docs.filter((doc) => doc.get('status') === 'succeeded').length;
+    return bookProgress({
+      steps: stepStates,
+      pages: pagesTotal > 0 ? { done: pagesDone, total: pagesTotal } : null,
+      times,
+      startedAt: dateOf(order.pipeline?.startedAt),
+      now: new Date(),
+    });
   }
 
   /** Eventos: cotización de piezas impresas. Le llega al equipo; no se promete disponibilidad. */

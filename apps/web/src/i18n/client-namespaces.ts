@@ -24,4 +24,6 @@ export const CLIENT_NAMESPACES = [
   'FormatShowcase',
   // El visor de cuentos comprados (components/reader).
   'Reader',
+  // Barra de avance y tiempo estimado de cada generación (components/ui/generation-progress).
+  'Generation',
 ];

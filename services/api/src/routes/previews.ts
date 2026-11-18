@@ -30,6 +30,12 @@ export function registerPreviewRoutes(app: FastifyInstance, previews: PreviewSer
     ),
   );
 
+  // Cuánto suele tardar cada generación (público: es un promedio, sin datos de nadie).
+  addRoute(app, apiRoutes.generationTimes, {}, async (_request, reply) => {
+    void reply.header('cache-control', 'public, max-age=300');
+    return { times: await previews.timings.times() };
+  });
+
   addRoute(app, apiRoutes.bookPreview, {}, async (request) =>
     previews.get(uid(request), (request.params as ParamsOf<'bookPreview'>).bookId),
   );

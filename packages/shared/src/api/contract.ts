@@ -24,6 +24,7 @@ import { addressSchema, bookStatusSchema } from '../models/commerce';
 import { KIT_PIECES, eventPricingSchema, kitSelectionSchema } from '../models/kit';
 import { accountTypeSchema, proProfileSchema } from '../models/users';
 import { pipelineStepSchema } from '../models/pipeline';
+import { BOOK_PROGRESS_STAGES, GENERATION_KINDS } from '../models/generation-times';
 import { STORY_FONTS } from '../models/typography';
 import { QUOTE_ERRORS, priceSnapshotSchema } from '../models/pricing';
 import { priceTableRowSchema } from '../models/price-table';
@@ -503,6 +504,29 @@ export const createCheckoutResponseSchema = z.object({
   checkoutUrl: z.string(),
 });
 
+const generationEstimateSchema = z.object({
+  typicalSeconds: z.number().nonnegative(),
+  slowSeconds: z.number().nonnegative(),
+  samples: z.number().int().nonnegative(),
+});
+
+/** Cuánto suele tardar cada tipo de generación (DECISIONS 262). */
+export const generationTimesResponseSchema = z.object({
+  times: z.record(z.enum(GENERATION_KINDS), generationEstimateSchema),
+});
+
+export type GenerationTimesResponse = z.infer<typeof generationTimesResponseSchema>;
+
+/** Avance del libro completo mientras se crea. */
+export const bookProgressSchema = z.object({
+  fraction: z.number().min(0).max(1),
+  stage: z.enum(BOOK_PROGRESS_STAGES),
+  pagesDone: z.number().int().nonnegative().nullable(),
+  pagesTotal: z.number().int().nonnegative().nullable(),
+  remainingSeconds: z.number().nonnegative(),
+  late: z.boolean(),
+});
+
 export const publicOrderSchema = z.object({
   orderId: z.string(),
   bookId: z.string(),
@@ -524,6 +548,8 @@ export const publicOrderSchema = z.object({
   canReview: z.boolean(),
   review: z.object({ rating: z.number().int(), comment: z.string().nullable() }).nullable(),
   tracking: z.object({ number: z.string().nullable(), url: z.string().nullable() }).nullable(),
+  /** Mientras se crea el libro: cuánto va y cuánto suele faltar. */
+  progress: bookProgressSchema.nullable().default(null),
 });
 
 export type PublicOrder = z.infer<typeof publicOrderSchema>;
@@ -844,6 +870,13 @@ export const apiRoutes = {
     access: 'public',
     summary: 'Modo actual del sitio (en vivo, mantenimiento, solo vista previa)',
     response: siteConfigResponseSchema,
+  },
+  generationTimes: {
+    method: 'GET',
+    path: '/v1/generation-times',
+    access: 'public',
+    summary: 'Cuánto suele tardar cada tipo de generación (tiempos reales recientes)',
+    response: generationTimesResponseSchema,
   },
   me: {
     method: 'GET',

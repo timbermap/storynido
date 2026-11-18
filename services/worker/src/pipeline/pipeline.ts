@@ -6,9 +6,12 @@ import {
   ILLUSTRATION_PAGE_POLICY,
   PIPELINE_STEPS,
   STEP_POLICIES,
+  addSample,
   assertOrderTransition,
+  bookStepKind,
   stepIdempotencyKey,
   stepsFrom,
+  type GenerationKind,
   type OrderStatus,
   type PipelineEvent,
   type PipelineStep,
@@ -92,6 +95,7 @@ interface OrderDoc {
     generation?: number;
     runId?: string | null;
     failedStep?: PipelineStep | null;
+    startedAt?: unknown;
     humanApproval?: { generation: number; by: string | null } | null;
   };
 }
@@ -395,6 +399,26 @@ export class Pipeline {
       batch.update(orderRef, { 'costsUsdMicros.ai': FieldValue.increment(costUsdMicros) });
     }
     await batch.commit();
+    await this.recordTiming(
+      bookStepKind(stepRef.id as PipelineStep),
+      Date.now() - startedAt.getTime(),
+    );
+  }
+
+  /**
+   * Registro de cuánto tarda cada paso y el libro entero (generationTimings, DECISIONS 262): con
+   * eso la web muestra el tiempo estimado y la barra de avance. Si falla, se pierde una muestra.
+   */
+  private async recordTiming(kind: GenerationKind, durationMs: number): Promise<void> {
+    const ref = this.db.collection(COLLECTIONS.generationTimings).doc(kind);
+    try {
+      await this.db.runTransaction(async (tx) => {
+        const current = (await tx.get(ref)).get('samples') as number[] | undefined;
+        tx.set(ref, { kind, samples: addSample(current, durationMs), updatedAt: new Date() });
+      });
+    } catch (error) {
+      this.log.warn({ err: message(error), kind }, 'could not record generation timing');
+    }
   }
 
   // ------------------------------------------------------------ ilustraciones
@@ -612,8 +636,12 @@ export class Pipeline {
         ...extra,
         updatedAt: new Date(),
       });
-      return true;
+      return { startedAt: toDate(order.pipeline.startedAt) };
     });
+    // El libro entero, del arranque a listo (solo los que salieron bien).
+    if (closed && to !== 'qa_failed' && closed.startedAt) {
+      await this.recordTiming('book', Date.now() - closed.startedAt.getTime());
+    }
     // Métrica de pedidos por estado.
     if (closed) {
       this.log.info(
@@ -621,7 +649,7 @@ export class Pipeline {
         'order status changed',
       );
     }
-    return closed;
+    return Boolean(closed);
   }
 
   // ------------------------------------------------------------ utilidades

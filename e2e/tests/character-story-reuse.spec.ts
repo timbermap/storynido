@@ -60,7 +60,7 @@ test('personaje con dibujo aprobado: el cuento usa ese dibujo, sin fotos ni rasg
   await page.locator('label', { hasText: 'Acuarela' }).click();
   await next(page);
   await heading(page, '¡Todo listo para la vista previa!');
-  // La espera dice cuánto suele tardar (los tiempos reales, sin cuenta regresiva).
+  // La espera dice cuánto suele tardar (los tiempos medidos, sin segundos que corren).
   await page.route('**/v1/books/*/preview', async (route) => {
     if (route.request().method() === 'POST') {
       await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -68,7 +68,11 @@ test('personaje con dibujo aprobado: el cuento usa ese dibujo, sin fotos ni rasg
     await route.continue();
   });
   await page.getByRole('button', { name: 'Crear la vista previa gratis' }).click();
-  await expect(page.getByText('Suele estar en unos 4 minutos.')).toBeVisible();
+  // DECISIONS 262: barra de avance con el tiempo típico medido (los minutos dependen de los datos).
+  await expect(page.getByRole('progressbar', { name: 'Avance' })).toBeVisible();
+  await expect(
+    page.getByText(/Suele tardar|Faltan? (unos|alrededor)|Falta poco/).first(),
+  ).toBeVisible();
   await expect(page.locator('body')).toContainText('Usamos el dibujo de Lu', {
     timeout: 120_000,
   });

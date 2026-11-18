@@ -60,6 +60,8 @@ export const COLLECTIONS = {
   activityTemplates: 'activityTemplates',
   aiUsage: 'aiUsage',
   aiBudget: 'aiBudget',
+  /** generationTimings/{tipo}: últimas duraciones de cada tipo de generación (solo servidor). */
+  generationTimings: 'generationTimings',
   /** previewQuota/{uid_AAAA-MM-DD} y previewQuota/ip_{ip}_{AAAA-MM-DD}: vistas previas del día. */
   previewQuota: 'previewQuota',
   content: 'content',
