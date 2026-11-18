@@ -2743,3 +2743,10 @@ Los umbrales (`DEFAULT_PAGE_LAYOUT`: 9 años, 6 años, 45 palabras) son configur
 - **Portadas:** las 7 de Bebés se regeneran con el estilo nuevo (`generate-brand-images.ts`, BABY y fondos nuevos).
 - **Alcance:** libros y muestras nuevos. Los congelados (muestra aprobada o pedido) conservan su dirección de arte.
 - **Celebraciones y Profesionales (misma fecha):** la regla se extiende a los estilos `GOUACHE` y `MINIMAL` de las portadas: paleta algo suavizada, sin primarios puros, neón ni amarillo saturado en grandes áreas, ojos sin brillo y sin cachetes en círculo perfecto. Se regeneran solo las 8 portadas que se salían: las más saturadas («Superhéroe por un día», «El secreto del fondo del mar», «El volcán del enojo», «Las letras de mi nombre», «El jardín de las emociones») y las 4 de Profesionales que dibujaban un libro o una tarjeta dentro de la portada (Detective de palabras, Hermano mayor pro, El jardín de las emociones, Mi visita al dentista; ahora «full-bleed», sin marco). Las demás quedan; la nena genérica repetida de Profesionales queda pendiente.
+
+## 258 — Bebés sugiere gouache, como su portada del catálogo
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: que la portada del catálogo y el libro que se recibe tengan el mismo estilo.
+- **Causa:** `recommendedStyle` sugería collage de papel para 0–2 (DECISIONS 158), pero las portadas de Bebés del catálogo son gouache suave (DECISIONS 257). Se veía un gouache en la vitrina y se recibía un collage.
+- **Cambio:** para la etapa bebés, `recommendedStyle` devuelve `gouache-editorial`. El collage de papel sigue disponible en el paso «Estilo». Las demás etapas no cambian (profesionales minimal, 3–8 gouache, 9+ cuento clásico).
+- **Datos:** el seed guarda `defaultStyle` en cada historia y en la nube solo crea lo que falta. En staging se actualizó `defaultStyle` de collage a gouache solo en las historias que lo tenían en collage, sin `--refresh-catalog`, para no pisar lo editado en el admin.
