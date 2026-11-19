@@ -2938,3 +2938,10 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Interfaz:** `PaymentProvider.parseWebhook` puede ser asíncrono (como el de las imprentas).
 - **Espera del pedido:** sin URL de pago guardada (PayPal ya volvió), «Esperando tu pago» dice «Estamos confirmando tu pago» en vez de mandar a la pestaña de Gumroad.
 - **Infra:** `payment_provider = "paypal"` con los secretos `paypal-client-id`, `paypal-client-secret` y `paypal-webhook-id`; fuera de producción `PAYPAL_ENV=sandbox` siempre. Staging sigue en Gumroad hasta cargar las credenciales del sandbox y aplicar Terraform.
+
+## 280 — Ebook en 2K, título de la tapa más grande y aviso de la dedicatoria en otro idioma
+
+- **Fecha:** 2026-11-19. Pedido por Sebas («si, has»): las tres propuestas que quedaron de la mesa sobre el pedido «Goodnight, Lu».
+- **2K también en digital:** las páginas del pedido se dibujaban en 1K en el digital (896 px, ~108 ppi a 21 cm), al lado de la tapa y las páginas de la muestra en 2K (recortadas a 1600 px), y se notaba la diferencia de nitidez. Ahora todo pedido se ilustra en 2K (≈ +USD 0,03 por imagen, DECISIONS 069); el PDF digital sigue con tope de 1600 px. Los precios siguen al costo real (DECISIONS de precios del 7 nov).
+- **Tapa:** el nombre llega a 124 pt (antes 78) y reparte 820 pt de ancho entre sus letras (antes 560); lo de antes y después del nombre pasa de 34 a 46 pt. En tapas más angostas que 21 cm baja en proporción.
+- **Dedicatoria:** se imprime tal cual la escribe el adulto. Si parece estar en otro idioma que el cuento (detección simple de palabras frecuentes en es, en y pt; con menos de 3 palabras o sin un ganador claro no avisa), se avisa debajo del campo y en el paso de revisión, junto al idioma. No se traduce ni se bloquea.

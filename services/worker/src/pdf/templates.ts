@@ -389,6 +389,12 @@ function activityPage(book: LayoutBook, activity: ActivitySpec, index: number): 
 </section>`;
 }
 
+/** Tope del nombre en la tapa de 21 cm (2 a 4 letras) y ancho que reparte entre las letras. */
+export const COVER_NAME_MAX_PT = 124;
+const COVER_NAME_WIDTH_PT = 820;
+/** Lo de antes y después del nombre («Goodnight,»): legible en la miniatura de la tienda. */
+const COVER_SMALL_PT = 46;
+
 /** Tapa: el título siempre con el nombre del protagonista, bien grande (una tapa vendible). */
 function coverFront(book: LayoutBook, spec: FormatSpec): string {
   // Letra a mano (Amatic SC), igual que en la web: lo de antes del nombre, el nombre grande con
@@ -398,8 +404,15 @@ function coverFront(book: LayoutBook, spec: FormatSpec): string {
   const name = parts.name || book.childName;
   const before = parts.name ? parts.before : book.title;
   const after = parts.name ? parts.after : '';
-  // Amatic es angosta: el nombre va grande y baja con los nombres largos para que entre.
-  const nameSize = Math.min(78, Math.round(560 / Math.max(Array.from(name).length, 4)));
+  // Amatic es angosta: el nombre va grande y baja con los nombres largos para que entre. Se ve
+  // desde lejos en la miniatura (antes 78 pt tope: en «Goodnight, Lu» quedaba chico). En una tapa
+  // más chica que 21 cm (el grapado A5) baja en proporción al ancho.
+  const coverScale = Math.min(1, trimOf(spec).width / 210);
+  const nameSize = Math.round(
+    Math.min(COVER_NAME_MAX_PT, COVER_NAME_WIDTH_PT / Math.max(Array.from(name).length, 4)) *
+      coverScale,
+  );
+  const smallSize = Math.round(COVER_SMALL_PT * coverScale);
   const letters = letterJitter(name)
     .map(
       (letter) =>
@@ -407,7 +420,9 @@ function coverFront(book: LayoutBook, spec: FormatSpec): string {
     )
     .join('');
   const small = (text: string) =>
-    text ? `<span class="cover-small">${escapeHtml(text)}</span>` : '';
+    text
+      ? `<span class="cover-small" style="font-size:${String(smallSize)}pt">${escapeHtml(text)}</span>`
+      : '';
 
   return `<img class="art" src="${book.cover}" alt="">
   <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title" aria-label="${escapeHtml(book.title)}">${small(before)}<span class="cover-name" style="font-size:${String(nameSize)}pt">${letters}</span>${small(after)}</h1></div>`;

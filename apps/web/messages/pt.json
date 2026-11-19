@@ -910,6 +910,7 @@
       "friend": "Melhor amigo ou amiga (opcional)",
       "dedication": "Dedicatória (opcional)",
       "dedicationPlaceholder": "Ex.: Para Sofia, que toda noite sonha com as estrelas.",
+      "dedicationLanguage": "Sua dedicatória parece estar em {written, select, es {espanhol} en {inglês} pt {português} other {outro idioma}} e a história está em {book, select, es {espanhol} en {inglês} pt {português} other {outro idioma}}. Ela é impressa exatamente como você escreve.",
       "required": "Escreva o nome para continuar.",
       "event": {
         "turningAge": "Idade que vai fazer",
@@ -1066,7 +1067,8 @@
       "kitTone": "Tom {tone}",
       "kitDedication": "Com dedicatória",
       "goal": "Objetivo",
-      "alias": "Apelido"
+      "alias": "Apelido",
+      "dedicationLanguage": "A dedicatória parece estar em {written, select, es {espanhol} en {inglês} pt {português} other {outro idioma}}: é impressa como foi escrita, mesmo que a história esteja em outro idioma."
     },
     "preview": {
       "badge": "Amostra da história",

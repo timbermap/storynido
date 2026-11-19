@@ -182,7 +182,9 @@ describe.skipIf(!chromePath())('PDF', () => {
   it('portada con letra a mano: el nombre grande, cada letra con el mismo giro que la web', () => {
     const html = digitalHtml(book(), FORMAT_SPECS.digital);
     expect(html).toContain("font-family:'Amatic SC'");
-    expect(html).toContain('<span class="cover-small">La gran aventura de</span>');
+    expect(html).toMatch(
+      /<span class="cover-small" style="font-size:\d+pt">La gran aventura de<\/span>/,
+    );
     const [first] = letterJitter('Martín');
     expect(html).toContain(
       `<span class="l" style="transform:translateY(${String(first?.shift)}em) rotate(${String(first?.rotate)}deg)">M</span>`,

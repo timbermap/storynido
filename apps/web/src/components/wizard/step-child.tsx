@@ -3,7 +3,13 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
-import { CHILD_LIMITS, EMPTY_BIRTHDAY, turningAgeFor, type Child } from '@storynido/shared';
+import {
+  CHILD_LIMITS,
+  EMPTY_BIRTHDAY,
+  dedicationLanguageMismatch,
+  turningAgeFor,
+  type Child,
+} from '@storynido/shared';
 
 import { useAuth } from '@/components/auth/auth-provider';
 import { suggestAccent } from '@/lib/name-accent';
@@ -42,6 +48,7 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
   const [petName, setPetName] = useState(child?.petName ?? '');
   const [friend, setFriend] = useState(child?.bestFriendName ?? '');
   const [dedication, setDedication] = useState(book.dedication ?? '');
+  const dedicationLanguage = dedicationLanguageMismatch(dedication, book.language);
   // Protagonistas ya creados: en un borrador sin protagonista se ofrecen para reutilizar.
   const [saved, setSaved] = useState<SavedCharacter[]>([]);
   const [reuse, setReuse] = useState<SavedCharacter | null>(null);
@@ -405,7 +412,14 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
               onChange={(event) => {
                 setDedication(event.target.value);
               }}
+              aria-describedby={dedicationLanguage ? 'child-dedication-language' : undefined}
             />
+            {/* Se imprime tal cual: si está en otro idioma que el cuento, se avisa (no se cambia). */}
+            {dedicationLanguage && (
+              <p id="child-dedication-language" className="text-sm text-muted-foreground">
+                {t('dedicationLanguage', { written: dedicationLanguage, book: book.language })}
+              </p>
+            )}
           </div>
         )}
       </div>
