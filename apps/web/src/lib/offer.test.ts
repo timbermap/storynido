@@ -65,10 +65,10 @@ describe('orderablePrintFormats', () => {
     ).toEqual([]);
   });
 
-  it('con imprenta, los de la oferta; sin precios (Eventos), los del admin', () => {
+  it('con imprenta, los de la oferta; sin precios (Eventos), ninguno', () => {
     expect(orderablePrintFormats(bookPrices(source, 'short'), ['digital', 'booklet'])).toEqual([
       'booklet',
     ]);
-    expect(orderablePrintFormats(null, ['digital', 'booklet'])).toEqual(['booklet']);
+    expect(orderablePrintFormats(null, ['digital', 'booklet'])).toEqual([]);
   });
 });

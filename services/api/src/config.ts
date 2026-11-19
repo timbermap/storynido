@@ -10,6 +10,11 @@ const LOCAL_ORIGINS = 'http://localhost:3000,http://localhost:3001';
 
 export const apiConfigSchema = serviceEnvSchema.extend({
   APP_ENV: z.enum(['local', 'test', 'staging', 'production']).default('local'),
+  /**
+   * Interruptor de los libros impresos: apagado no se ofrece ni se cobra ninguno (sin imprentas
+   * activas). Por defecto solo prendido en local/test; PRINT_ENABLED=true lo prende en el resto.
+   */
+  PRINT_ENABLED: booleanString.optional(),
   /** Proyecto de Google Cloud / Firebase. Vacío en local: se usa el proyecto demo de los emuladores. */
   GCP_PROJECT_ID: z.string().default(''),
   /** Orígenes permitidos por CORS, separados por coma. */
@@ -94,6 +99,7 @@ export type ApiEnv = z.infer<typeof apiConfigSchema>;
 export interface ApiConfig {
   env: ApiEnv;
   appEnv: ApiEnv['APP_ENV'];
+  printEnabled: boolean;
   projectId: string;
   corsOrigins: string[];
   appCheckEnforced: boolean;
@@ -113,6 +119,7 @@ export function loadApiConfig(source: Readonly<Record<string, string | undefined
   return {
     env,
     appEnv: env.APP_ENV,
+    printEnabled: env.PRINT_ENABLED ?? isLocal,
     projectId: env.GCP_PROJECT_ID || 'demo-storynido',
     corsOrigins: origins
       .split(',')

@@ -45,6 +45,7 @@ if (config.appEnv === 'production' && simulatedProviders(settings).length > 0) {
 
 const providers = createProviderRegistry({
   settings,
+  printEnabled: config.printEnabled,
   mockWebhookSecret: config.env.MOCK_WEBHOOK_SECRET,
   gcsBuckets:
     config.env.BUCKET_PHOTOS && config.env.BUCKET_ASSETS && config.env.BUCKET_PDFS

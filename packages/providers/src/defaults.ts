@@ -32,6 +32,8 @@ import {
 
 export interface DefaultProviderOptions {
   settings: ProviderSettings;
+  /** Interruptor de impresos (PRINT_ENABLED); por defecto prendido. */
+  printEnabled?: boolean;
   /** Secreto de firma de los webhooks simulados (solo local; no es una clave real). */
   mockWebhookSecret: string;
   localStorage: { rootDir: string; publicBaseUrl: string; secret: string };
@@ -136,6 +138,7 @@ export function createProviderRegistry(options: DefaultProviderOptions): Provide
     ),
     options.settings,
     defaults,
+    options.printEnabled,
   );
   return registry;
 }

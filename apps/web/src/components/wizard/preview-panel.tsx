@@ -634,7 +634,8 @@ export function PreviewPanel({
         </div>
       )}
 
-      {isEvent && data?.stage === 'complete' && !data.stale && (
+      {/* El libro aparte (digital o impreso) se ofrece solo si hay impresos a la venta (PRINT_ENABLED). */}
+      {isEvent && data?.stage === 'complete' && !data.stale && prices?.printedFromMinor != null && (
         <div className="mt-8">
           <BirthdayBookOffer
             book={book}
