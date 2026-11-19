@@ -553,22 +553,99 @@ export class PreviewService {
    * (DECISIONS 284; a quien compra no se lo raciona, Sebas 4 nov).
    */
   private async limitsFor(uid: string, limits: AiLimits): Promise<AiLimits> {
-    const orders = await this.db
-      .collection(COLLECTIONS.orders)
-      .where('ownerUid', '==', uid)
-      .limit(25)
-      .get()
-      .catch(() => null);
-    const buyer = orders?.docs.some((doc) =>
-      PURCHASED_STATUSES.includes(String(doc.get('status'))),
-    );
-    if (!buyer) return limits;
+    if (!(await this.isBuyer(uid))) return limits;
     return {
       ...limits,
       maxPreviewsPerBook: limits.maxPreviewsPerBook * BUYER_MULTIPLIER,
       maxPreviewsPerUserPerDay: limits.maxPreviewsPerUserPerDay * BUYER_MULTIPLIER,
       maxPreviewsPerUserPerWeek: limits.maxPreviewsPerUserPerWeek * BUYER_MULTIPLIER,
     };
+  }
+
+  /** Tiene al menos un pedido pagado. */
+  private async isBuyer(uid: string): Promise<boolean> {
+    const orders = await this.db
+      .collection(COLLECTIONS.orders)
+      .where('ownerUid', '==', uid)
+      .limit(25)
+      .get()
+      .catch(() => null);
+    return Boolean(
+      orders?.docs.some((doc) => PURCHASED_STATUSES.includes(String(doc.get('status')))),
+    );
+  }
+
+  /**
+   * Dibuja la lámina o el dibujo del personaje y controla parecido y edad (DECISIONS 289). Si no
+   * pasa, se redibuja una vez con lo que hay que cambiar, y se queda el mejor de los dos.
+   */
+  private async drawCharacter(
+    ai: AIProvider,
+    track: <T extends { usage?: GeneratedImage['usage'] }>(
+      kind: UsageContext['kind'],
+      result: T,
+    ) => Promise<T>,
+    limits: AiLimits,
+    request: Parameters<AIProvider['image']['generateIllustration']>[0],
+    check: { age: number; glasses: boolean },
+  ): Promise<{ image: ImageData }> {
+    const photos = request.character.photo
+      ? [request.character.photo, ...(request.character.morePhotos ?? [])]
+      : [];
+    const first = await this.illustration(ai, track, limits, request);
+    // Sin foto (rasgos elegidos) no hay con qué comparar.
+    if (photos.length === 0) return first;
+    const judge = async (image: ImageData) => {
+      try {
+        const result = await track(
+          'moderation',
+          await ai.image.checkLikeness({
+            photos,
+            drawing: image,
+            age: check.age,
+            glasses: check.glasses,
+          }),
+        );
+        const ageOff =
+          result.apparentAge !== null &&
+          Math.abs(result.apparentAge - check.age) > (check.age < 13 ? 2 : 6);
+        const problems = [
+          result.score < 4 && result.fix ? result.fix : '',
+          ageOff
+            ? `the character must clearly look ${String(check.age)} years old (now looks about ${String(Math.round(result.apparentAge ?? 0))})`
+            : '',
+          result.glasses !== check.glasses
+            ? check.glasses
+              ? 'add clear prescription glasses'
+              : 'no glasses at all'
+            : '',
+        ].filter(Boolean);
+        return {
+          score: result.score - (ageOff ? 2 : 0) - (result.glasses !== check.glasses ? 2 : 0),
+          problems,
+        };
+      } catch (error) {
+        // El control no puede frenar la muestra: si falla, queda el dibujo.
+        this.log.warn({ err: error }, 'likeness check failed');
+        return { score: 5, problems: [] as string[] };
+      }
+    };
+    const verdict = await judge(first.image);
+    // Métrica del parecido (porcentaje que pasa a la primera): en los logs, sin datos del niño.
+    this.log.info(
+      { likenessScore: verdict.score, likenessRetry: verdict.problems.length > 0 },
+      'likeness checked',
+    );
+    if (verdict.problems.length === 0) return first;
+    const correction = [request.correction, ...verdict.problems].filter(Boolean).join('; ');
+    const second = await this.illustration(ai, track, limits, {
+      ...request,
+      correction,
+      seed: (request.seed ?? 0) + 1,
+    }).catch(() => null);
+    if (!second) return first;
+    const again = await judge(second.image);
+    return again.score >= verdict.score ? second : first;
   }
 
   private async refundQuota(docs: readonly string[]): Promise<void> {
@@ -811,7 +888,7 @@ export class PreviewService {
       }
     }
 
-    const { photo, sheet, traits, mustKeep, correction } = await this.characterOf(
+    const { photo, sheet, traits, mustKeep, correction, morePhotos } = await this.characterOf(
       uid,
       book,
       Number(child.age),
@@ -1160,27 +1237,33 @@ export class PreviewService {
         base: sheetBase,
         draw: async () =>
           (
-            await this.illustration(ai, track, limits, {
-              prompt: buildIllustrationPrompt({
-                template: story.imagePromptTemplate,
-                scene: CHARACTER_REFERENCE_SCENE,
-                character: description,
-                style: style.promptModifier,
-                // Sin reglas de página (tercio para el texto, plano general): DECISIONS 288.
-                direction: characterSheetDirection(direction),
-              }),
-              stylePrompt: style.promptModifier,
-              style: style.slug,
-              character: { description, photo },
-              references: [],
-              traitReferences:
-                drawingFits && drawingBytes.length > 0
-                  ? [{ bytes: drawingBytes, mimeType: 'image/webp' }]
-                  : [],
-              correction: sheetCorrection,
-              aspectRatio: '3:4',
-              seed: 0,
-            })
+            await this.drawCharacter(
+              ai,
+              track,
+              limits,
+              {
+                prompt: buildIllustrationPrompt({
+                  template: story.imagePromptTemplate,
+                  scene: CHARACTER_REFERENCE_SCENE,
+                  character: description,
+                  style: style.promptModifier,
+                  // Sin reglas de página (tercio para el texto, plano general): DECISIONS 288.
+                  direction: characterSheetDirection(direction),
+                }),
+                stylePrompt: style.promptModifier,
+                style: style.slug,
+                character: { description, photo, morePhotos },
+                references: [],
+                traitReferences:
+                  drawingFits && drawingBytes.length > 0
+                    ? [{ bytes: drawingBytes, mimeType: 'image/webp' }]
+                    : [],
+                correction: sheetCorrection,
+                aspectRatio: '3:4',
+                seed: 0,
+              },
+              { age: imageAge, glasses: sheetTraits.glasses },
+            )
           ).image,
       });
     }
@@ -1243,6 +1326,8 @@ export class PreviewService {
     mustKeep: MustKeepTrait[];
     /** La nota de «Ajustar el parecido» que va con esos rasgos (DECISIONS 288). */
     correction: string | null;
+    /** Las otras fotos del libro (hasta 2): más ángulos para el parecido (DECISIONS 289). */
+    morePhotos: ImageData[];
   }> {
     // Los rasgos que el adulto confirmó o corrigió tienen prioridad sobre los estimados: los de
     // este libro y, si no, los que corrigió antes para la misma foto (en otro cuento o en su
@@ -1258,6 +1343,7 @@ export class PreviewService {
         traits,
         mustKeep: confirmed?.mustKeep ?? defaultMustKeep(traits),
         correction: confirmed?.note ?? null,
+        morePhotos: [],
       };
     }
     const fromPhoto = await this.characterFor(uid, book.photoIds[0] ?? '', ai, track);
@@ -1267,7 +1353,30 @@ export class PreviewService {
       traits,
       mustKeep: confirmed?.mustKeep ?? defaultMustKeep(traits),
       correction: confirmed?.note ?? null,
+      morePhotos: await this.photosById(uid, book.photoIds.slice(1, 3)),
     };
+  }
+
+  /** Fotos procesadas vigentes (las que no están se saltean): más ángulos para el parecido. */
+  private async photosById(uid: string, photoIds: readonly string[]): Promise<ImageData[]> {
+    const storage = this.providers.storage();
+    const photos = await Promise.all(
+      photoIds.map(async (photoId) => {
+        const data = (await this.db.collection(COLLECTIONS.photos).doc(photoId).get()).data();
+        if (
+          data?.ownerUid !== uid ||
+          data.status !== 'valid' ||
+          typeof data.processedPath !== 'string'
+        ) {
+          return null;
+        }
+        const bytes = await storage
+          .download({ bucket: 'photos', path: data.processedPath })
+          .catch(() => new Uint8Array());
+        return bytes.length > 0 ? { bytes, mimeType: 'image/jpeg' } : null;
+      }),
+    );
+    return photos.filter((photo): photo is ImageData => photo !== null);
   }
 
   /** Rasgos que el adulto corrigió para esta misma foto (o rasgos) en otro cuento o su perfil. */
@@ -1870,7 +1979,13 @@ export class PreviewService {
     try {
       const { story, style, child, imageAge } = await this.context(uid, book, preview);
       const track = this.tracker(uid, bookId, limits);
-      const { photo, sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
+      const { photo, sheet, morePhotos } = await this.characterOf(
+        uid,
+        book,
+        Number(child.age),
+        ai,
+        track,
+      );
       const description = describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
       // Las notas se suman: corregir el pelo no deshace «sin anteojos» (DECISIONS 288).
       const correction = joinCorrections(preview.character?.correction, note);
@@ -1881,23 +1996,29 @@ export class PreviewService {
             .download({ bucket: 'assets', path: preview.character.imagePath })
             .catch(() => new Uint8Array())
         : new Uint8Array();
-      const { image } = await this.illustration(ai, track, limits, {
-        prompt: buildIllustrationPrompt({
-          template: story.imagePromptTemplate,
-          scene: CHARACTER_REFERENCE_SCENE,
-          character: description,
-          style: style.promptModifier,
-          direction: characterSheetDirection(withCurrentGuards(preview.artDirection)),
-        }),
-        stylePrompt: style.promptModifier,
-        style: style.slug,
-        character: { description, photo },
-        references: [],
-        correction,
-        editOf: current.length > 0 ? { bytes: current, mimeType: 'image/webp' } : null,
-        aspectRatio: '3:4',
-        seed: Date.now() % 100_000,
-      });
+      const { image } = await this.drawCharacter(
+        ai,
+        track,
+        limits,
+        {
+          prompt: buildIllustrationPrompt({
+            template: story.imagePromptTemplate,
+            scene: CHARACTER_REFERENCE_SCENE,
+            character: description,
+            style: style.promptModifier,
+            direction: characterSheetDirection(withCurrentGuards(preview.artDirection)),
+          }),
+          stylePrompt: style.promptModifier,
+          style: style.slug,
+          character: { description, photo, morePhotos },
+          references: [],
+          correction,
+          editOf: current.length > 0 ? { bytes: current, mimeType: 'image/webp' } : null,
+          aspectRatio: '3:4',
+          seed: Date.now() % 100_000,
+        },
+        { age: imageAge, glasses: traits.glasses },
+      );
       const paths = await this.store(
         `previews/${uid}/${bookId}/character-${Date.now().toString(36)}`,
         image,
@@ -1978,6 +2099,11 @@ export class PreviewService {
 
   /** La foto vigente más reciente del personaje (de cualquier cuento o subida en su perfil). */
   private async latestChildPhoto(uid: string, childId: string) {
+    return (await this.childPhotoDocs(uid, childId))[0] ?? null;
+  }
+
+  /** Sus fotos vigentes, la más reciente primero. */
+  private async childPhotoDocs(uid: string, childId: string) {
     const snapshot = await this.db
       .collection(COLLECTIONS.photos)
       .where('ownerUid', '==', uid)
@@ -1985,16 +2111,14 @@ export class PreviewService {
       .get();
     const now = Date.now();
     const time = (value: unknown) => toDate(value)?.getTime() ?? 0;
-    return (
-      snapshot.docs
-        .filter(
-          (doc) =>
-            doc.get('status') === 'valid' &&
-            typeof doc.get('processedPath') === 'string' &&
-            (toDate(doc.get('expiresAt'))?.getTime() ?? Infinity) > now,
-        )
-        .sort((a, b) => time(b.get('createdAt')) - time(a.get('createdAt')))[0] ?? null
-    );
+    return snapshot.docs
+      .filter(
+        (doc) =>
+          doc.get('status') === 'valid' &&
+          typeof doc.get('processedPath') === 'string' &&
+          (toDate(doc.get('expiresAt'))?.getTime() ?? Infinity) > now,
+      )
+      .sort((a, b) => time(b.get('createdAt')) - time(a.get('createdAt')));
   }
 
   /** Estado del dibujo del personaje: el actual, uno nuevo por aprobar y si se puede crear. */
@@ -2013,9 +2137,13 @@ export class PreviewService {
     // Los rasgos del último dibujo solo si se dibujó con la foto (o los rasgos) de ahora; si no,
     // los que leímos de la foto vigente (p. ej. sin los anteojos de una foto ya borrada).
     const last = [candidate, drawing].find((item) => item?.source === base.source && item.traits);
+    const alternatives = candidate ? ((child.drawingAlternatives ?? []) as StoredDrawing[]) : [];
     return {
       imageUrl: await url(drawing?.previewImagePath),
       candidateUrl: await url(candidate?.previewImagePath),
+      alternativeUrls: (
+        await Promise.all(alternatives.map((item) => url(item.previewImagePath)))
+      ).filter((item): item is string => item !== null),
       traits: last?.traits ?? base.traits,
       mustKeep: last?.mustKeep ?? (base.traits ? defaultMustKeep(base.traits) : []),
       canDraw: Boolean(avatar) || photoDoc !== null,
@@ -2064,7 +2192,8 @@ export class PreviewService {
         );
       }
     }
-    const photoDoc = await this.latestChildPhoto(uid, childId);
+    const photoDocs = await this.childPhotoDocs(uid, childId);
+    const photoDoc = photoDocs[0] ?? null;
     const avatar = child.avatar as Avatar | undefined;
     if (!photoDoc && !avatar) {
       throw new AppError(
@@ -2080,6 +2209,13 @@ export class PreviewService {
       let photo: ImageData | null = null;
       let sheet: CharacterSheet;
       let base: CharacterTraits;
+      // Sus otras fotos (hasta 2): más ángulos para el parecido (DECISIONS 289).
+      const morePhotos = photoDoc
+        ? await this.photosById(
+            uid,
+            photoDocs.slice(1, 3).map((doc) => doc.id),
+          )
+        : [];
       if (photoDoc) {
         const read = await this.characterFor(uid, photoDoc.id, ai, track);
         photo = read.photo;
@@ -2117,30 +2253,72 @@ export class PreviewService {
       const styles = await this.catalog.styles();
       const style = styles.find((item) => item.slug === PROFILE_DRAWING_STYLE) ?? styles[0];
       if (!style) throw new AppError(503, 'ai_unavailable', 'No pudimos dibujarlo ahora.');
-      const { image } = await this.illustration(ai, track, limits, {
-        prompt: buildIllustrationPrompt({
-          template: CHARACTER_DRAWING_TEMPLATE,
-          scene: CHARACTER_REFERENCE_SCENE,
-          character: description,
-          style: style.promptModifier,
-          // Las proporciones de su edad, también en el perfil (DECISIONS 264).
-          direction: Number.isFinite(age) ? ageDirection(age) : null,
-        }),
-        stylePrompt: style.promptModifier,
-        style: style.slug,
-        character: { description, photo },
-        references: [],
-        correction,
-        editOf: editBytes.length > 0 ? { bytes: editBytes, mimeType: 'image/webp' } : null,
-        aspectRatio: '3:4',
-        seed: Date.now() % 100_000,
-      });
+      const { image } = await this.drawCharacter(
+        ai,
+        track,
+        limits,
+        {
+          prompt: buildIllustrationPrompt({
+            template: CHARACTER_DRAWING_TEMPLATE,
+            scene: CHARACTER_REFERENCE_SCENE,
+            character: description,
+            style: style.promptModifier,
+            // Las proporciones de su edad, también en el perfil (DECISIONS 264).
+            direction: Number.isFinite(age) ? ageDirection(age) : null,
+          }),
+          stylePrompt: style.promptModifier,
+          style: style.slug,
+          character: { description, photo, morePhotos },
+          references: [],
+          correction,
+          editOf: editBytes.length > 0 ? { bytes: editBytes, mimeType: 'image/webp' } : null,
+          aspectRatio: '3:4',
+          seed: Date.now() % 100_000,
+        },
+        { age: age, glasses: traits.glasses },
+      );
       const paths = await this.store(
         `characters/${uid}/${childId}/drawing-${Date.now().toString(36)}`,
         image,
       );
+      // Quien ya compró elige entre 3 versiones del dibujo nuevo (Sebas, 19 nov 2026); quien
+      // todavía no compró recibe una. Al ajustar se edita una sola.
+      const alternatives: StoredDrawing[] = [];
+      if (!adjusting && (await this.isBuyer(uid))) {
+        const extra = await Promise.all(
+          [7, 13].map((offset) =>
+            this.illustration(ai, track, limits, {
+              prompt: buildIllustrationPrompt({
+                template: CHARACTER_DRAWING_TEMPLATE,
+                scene: CHARACTER_REFERENCE_SCENE,
+                character: description,
+                style: style.promptModifier,
+                direction: Number.isFinite(age) ? ageDirection(age) : null,
+              }),
+              stylePrompt: style.promptModifier,
+              style: style.slug,
+              character: { description, photo, morePhotos },
+              references: [],
+              aspectRatio: '3:4',
+              seed: (Date.now() + offset) % 100_000,
+            })
+              .then(({ image: other }) =>
+                this.store(
+                  `characters/${uid}/${childId}/drawing-${(Date.now() + offset).toString(36)}`,
+                  other,
+                ),
+              )
+              .catch(() => null),
+          ),
+        );
+        for (const item of extra) {
+          if (item) alternatives.push({ imagePath: item.clean, previewImagePath: item.preview });
+        }
+      }
       const stale = child.drawingCandidate as StoredDrawing | undefined;
+      const staleAlternatives = (child.drawingAlternatives ?? []) as StoredDrawing[];
       await ref.update({
+        drawingAlternatives: alternatives,
         drawingCandidate: {
           imagePath: paths.clean,
           previewImagePath: paths.preview,
@@ -2155,6 +2333,7 @@ export class PreviewService {
         updatedAt: new Date(),
       });
       await this.deleteDrawing(stale);
+      await Promise.all(staleAlternatives.map((item) => this.deleteDrawing(item)));
       await this.timings.track('child_drawing', drawingStartedAt);
     } catch (error) {
       await this.refundUserQuota(uid);
@@ -2175,6 +2354,7 @@ export class PreviewService {
     await ref.update({
       drawing: { ...candidate, approvedAt: new Date() },
       drawingCandidate: FieldValue.delete(),
+      drawingAlternatives: FieldValue.delete(),
       ...(base && candidate.traits
         ? {
             correctedTraits: {
@@ -2188,14 +2368,51 @@ export class PreviewService {
       updatedAt: new Date(),
     });
     await this.deleteDrawing(child.drawing as StoredDrawing | undefined);
+    await Promise.all(
+      ((child.drawingAlternatives ?? []) as StoredDrawing[]).map((item) =>
+        this.deleteDrawing(item),
+      ),
+    );
+    return this.childDrawing(uid, childId);
+  }
+
+  /** «Este»: otra de las versiones pasa a ser el dibujo nuevo por aprobar (se intercambian). */
+  async chooseChildDrawing(uid: string, childId: string, index: number) {
+    const { ref, child } = await this.ownedChild(uid, childId);
+    const candidate = child.drawingCandidate as StoredDrawing | undefined;
+    const alternatives = [...((child.drawingAlternatives ?? []) as StoredDrawing[])];
+    const chosen = alternatives[index];
+    if (!candidate || !chosen) throw new AppError(409, 'bad_request', 'Esa versión ya no está.');
+    alternatives[index] = {
+      imagePath: candidate.imagePath,
+      previewImagePath: candidate.previewImagePath,
+    };
+    await ref.update({
+      drawingCandidate: {
+        ...candidate,
+        imagePath: chosen.imagePath,
+        previewImagePath: chosen.previewImagePath,
+      },
+      drawingAlternatives: alternatives,
+      updatedAt: new Date(),
+    });
     return this.childDrawing(uid, childId);
   }
 
   /** «Quedarme con el anterior»: el dibujo nuevo se borra. */
   async discardChildDrawing(uid: string, childId: string) {
     const { ref, child } = await this.ownedChild(uid, childId);
-    await ref.update({ drawingCandidate: FieldValue.delete(), updatedAt: new Date() });
+    await ref.update({
+      drawingCandidate: FieldValue.delete(),
+      drawingAlternatives: FieldValue.delete(),
+      updatedAt: new Date(),
+    });
     await this.deleteDrawing(child.drawingCandidate as StoredDrawing | undefined);
+    await Promise.all(
+      ((child.drawingAlternatives ?? []) as StoredDrawing[]).map((item) =>
+        this.deleteDrawing(item),
+      ),
+    );
     return this.childDrawing(uid, childId);
   }
 

@@ -3025,3 +3025,10 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Dibujo del perfil como referencia:** solo con «Usamos el dibujo de…» o si salió de la misma foto que el libro.
 - **Rasgos de adulto:** pómulos, mandíbula marcada, «adult», tatuajes y piercings no pasan a la ficha.
 - **Al corregir** se borra la lámina guardada de ese estilo: el próximo cuento la redibuja con lo corregido.
+
+## 289 — Parecido P1: todas sus fotos, control de parecido y edad, y 3 versiones para quien ya compró
+
+- **Fecha:** 2026-11-19. Sebas eligió el paquete P1 de la mesa («ok, hacé A»), con un límite: un solo dibujo para quien todavía no compró; las 3 versiones, solo para quien ya compró.
+- **Todas sus fotos:** la lámina y el dibujo del perfil reciben hasta 3 fotos vigentes (`character.morePhotos`), no solo la primera. La ficha de rasgos sigue saliendo de la primera.
+- **Control de parecido y edad** (`checkLikeness`): un modelo de texto barato compara la lámina con las fotos (puntaje 1 a 5, edad aparente y anteojos). No usa reconocimiento facial ni guarda vectores de la cara. Si el puntaje es menor a 4, la edad no coincide o los anteojos no son los de la ficha, se redibuja una vez con lo que falta y se queda la mejor. Corre en la lámina del libro, el ajuste y el dibujo del perfil. Cuesta ≈ US$0,005 por control y una imagen más (≈ US$0,07) solo cuando falla. El puntaje queda en los logs («likeness checked») para medir cuántas pasan a la primera.
+- **3 versiones para elegir:** en «Crear / Actualizar su dibujo» del perfil, quien tiene un pedido pagado recibe 2 versiones más (`drawingAlternatives`) y elige con `chooseChildDrawing`. Al ajustar se edita una sola.

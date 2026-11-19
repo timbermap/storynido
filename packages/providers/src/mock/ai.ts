@@ -10,6 +10,8 @@ import type {
   GeneratedStory,
   IllustrationRequest,
   ImageData,
+  LikenessCheck,
+  LikenessRequest,
   Locale,
   ModerationResult,
   PageReview,
@@ -269,6 +271,16 @@ export class MockAIImageProvider implements AIImageProvider {
       bytes: new TextEncoder().encode(svg),
       mimeType: 'image/svg+xml',
       usage: usage('mock-image'),
+    });
+  }
+
+  /** Siempre se parece (los tests que necesitan otra cosa lo espían). */
+  checkLikeness(request: LikenessRequest): Promise<LikenessCheck> {
+    return Promise.resolve({
+      score: 5,
+      apparentAge: request.age,
+      glasses: request.glasses,
+      fix: '',
     });
   }
 

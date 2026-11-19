@@ -762,6 +762,8 @@
         "qualityError": "We couldn't make a drawing that passes our checks with these photos. Try another photo at their current age, facing the camera with only their face (no other people, signs or drinks), or choose their features.",
         "choose": "Do you like the new drawing of {name}?",
         "chooseFirst": "Do you like the drawing?",
+        "alternatives": "Or pick another version:",
+        "chooseAlternative": "Pick version {number}",
         "discard": "Discard",
         "needsPhoto": "To create the drawing now, <link>upload a photo</link>."
       },

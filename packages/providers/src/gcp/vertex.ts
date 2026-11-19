@@ -18,6 +18,8 @@ import {
   type GeneratedStory,
   type IllustrationRequest,
   type ImageData,
+  type LikenessCheck,
+  type LikenessRequest,
   type ModerationResult,
   type PageReview,
   type PageReviewRequest,
@@ -567,6 +569,17 @@ const MODERATION_SCHEMA = {
     categories: { type: 'ARRAY', items: { type: 'STRING' } },
   },
   required: ['allowed', 'categories'],
+};
+
+const LIKENESS_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    score: { type: 'INTEGER' },
+    apparentAge: { type: 'NUMBER' },
+    glasses: { type: 'BOOLEAN' },
+    fix: { type: 'STRING' },
+  },
+  required: ['score', 'apparentAge', 'glasses', 'fix'],
 };
 
 const CHARACTER_SCHEMA = {
@@ -1173,6 +1186,14 @@ export class VertexImageProvider implements AIImageProvider {
       );
       next += 1;
     }
+    const morePhotos = request.character.photo ? (request.character.morePhotos ?? []) : [];
+    for (const extra of morePhotos) parts.push(imagePart(extra));
+    if (morePhotos.length > 0) {
+      notes.push(
+        `${label(next, morePhotos.length)} more photos of the same real person, from other moments: use them, together with the first photo, ONLY to get the face right (face shape, eyes, eyebrows, nose, smile, hairline, hair part, hairstyle, hair and skin color), with the same rules as the first photo.`,
+      );
+      next += morePhotos.length;
+    }
     const traitReferences = request.traitReferences ?? [];
     for (const reference of traitReferences) parts.push(imagePart(reference));
     if (traitReferences.length > 0) {
@@ -1302,6 +1323,48 @@ Children's picture book illustration, drawn only in the art style above. No text
     return painted
       ? { ...painted, usage: sumUsage(model, ...usages) }
       : { ...lineArt, usage: sumUsage(model, ...usages) };
+  }
+
+  /**
+   * Control de parecido y edad (DECISIONS 289): un modelo de texto compara rasgos visibles, sin
+   * reconocimiento facial ni vectores. Barato (≈ US$0,002-0,005) frente a una imagen (≈ US$0,07).
+   */
+  async checkLikeness(request: LikenessRequest): Promise<LikenessCheck> {
+    const parts: Part[] = [
+      ...request.photos.map((photo) => imagePart(photo)),
+      imagePart(request.drawing),
+      {
+        text: `The first ${String(request.photos.length)} image(s) are photos of a real person. The last image is a children's picture-book drawing of that person, drawn on purpose at ${String(request.age)} years old and in an illustrated style.
+Judge as a parent would: could they recognize this person in the drawing, once age and style are taken into account? Compare face shape, eyes, eyebrows, nose, smile, hairline, hair part, hairstyle, hair color and skin tone. Do not penalize the age change or the style.
+score: 1 = a different person, 3 = vaguely similar, 4 = clearly them, 5 = instantly recognizable.
+apparentAge: how old the drawn character looks, in years.
+glasses: true only if the drawn character wears eyeglasses.
+fix: if score < 4, the 2 or 3 most important concrete changes to make the drawing look more like the person (short English, e.g. "rounder face, straight fringe, wider smile"); otherwise empty.`,
+      },
+    ];
+    const { response, usage } = await this.client.generate(
+      VERTEX_DEFAULT_MODELS.moderation,
+      parts,
+      {
+        temperature: 0,
+        responseMimeType: 'application/json',
+        responseSchema: LIKENESS_SCHEMA,
+      },
+    );
+    const result = parseJson(response, 'parecido') as {
+      score?: unknown;
+      apparentAge?: unknown;
+      glasses?: unknown;
+      fix?: unknown;
+    };
+    const age = Number(result.apparentAge);
+    return {
+      score: Math.min(5, Math.max(1, Math.round(Number(result.score ?? 3)))),
+      apparentAge: Number.isFinite(age) ? age : null,
+      glasses: result.glasses === true,
+      fix: (typeof result.fix === 'string' ? result.fix : '').slice(0, 300),
+      usage,
+    };
   }
 
   async moderateImage(

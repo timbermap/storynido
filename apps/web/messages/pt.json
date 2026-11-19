@@ -762,6 +762,8 @@
         "qualityError": "Não conseguimos fazer um desenho que passe no nosso controle com estas fotos. Tente outra foto da idade atual, de frente e só com o rosto (sem outras pessoas, placas ou bebidas), ou escolha as características.",
         "choose": "Gostou do novo desenho de {name}?",
         "chooseFirst": "Gostou do desenho?",
+        "alternatives": "Ou escolha outra versão:",
+        "chooseAlternative": "Escolher a versão {number}",
         "discard": "Descartar",
         "needsPhoto": "Para criar o desenho agora, <link>envie uma foto</link>."
       },

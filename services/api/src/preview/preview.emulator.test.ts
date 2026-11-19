@@ -769,6 +769,23 @@ describe('vista previa', () => {
     paint.mockRestore();
   });
 
+  it('control de parecido: si la lámina no se parece o no tiene la edad, se redibuja una vez con lo que falta', async () => {
+    await seedBook(providers, 'book-1');
+    const check = vi
+      .spyOn(providers.ai().image, 'checkLikeness')
+      .mockResolvedValueOnce({ score: 2, apparentAge: 30, glasses: false, fix: 'rounder face' })
+      .mockResolvedValueOnce({ score: 4, apparentAge: 5, glasses: false, fix: '' });
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    expect((await generate('book-1')).statusCode).toBe(200);
+    expect(check).toHaveBeenCalledTimes(2);
+    expect(check.mock.calls[0]?.[0].age).toBe(5);
+    const retry = paint.mock.calls[1]?.[0];
+    expect(retry?.correction).toContain('rounder face');
+    expect(retry?.correction).toContain('look 5 years old');
+    check.mockRestore();
+    paint.mockRestore();
+  });
+
   it('respeta el tope semanal con un aviso propio', async () => {
     await setAiConfig({ maxPreviewsPerUserPerDay: 5, maxPreviewsPerUserPerWeek: 1 });
     await seedBook(providers, 'book-1');
@@ -899,6 +916,43 @@ describe('vista previa', () => {
     expect((await generate('book-1')).statusCode).toBe(200);
     expect(paint.mock.calls[0]?.[0].character.description).toContain('prescription glasses');
     paint.mockRestore();
+  });
+
+  it('perfil: quien ya compró elige entre 3 versiones del dibujo; quien no, recibe una', async () => {
+    await setAiConfig({ maxPreviewsPerUserPerDay: 10 });
+    await seedBook(providers, 'book-1');
+    const call = (path: string, payload?: object) =>
+      app.inject({
+        method: 'POST',
+        url: `/v1/me/children/book-1-child/drawing${path}`,
+        headers: auth(TOKEN),
+        ...(payload ? { payload } : {}),
+      });
+    interface Drawing {
+      candidateUrl: string | null;
+      alternativeUrls: string[];
+    }
+    expect((await call('', {})).json<Drawing>().alternativeUrls).toHaveLength(0);
+    await db.doc('orders/order-1').set({ ownerUid: UID, status: 'delivered' });
+    try {
+      const three = (await call('', {})).json<Drawing>();
+      expect(three.alternativeUrls).toHaveLength(2);
+      const before = (
+        (await db.doc('children/book-1-child').get()).get('drawingAlternatives') as {
+          imagePath: string;
+        }[]
+      )[0]?.imagePath;
+      const chosen = await call('/choose', { index: 0 });
+      expect(chosen.statusCode).toBe(200);
+      expect((await db.doc('children/book-1-child').get()).get('drawingCandidate.imagePath')).toBe(
+        before,
+      );
+      // Al ajustar se edita una sola versión.
+      const adjusted = (await call('', { note: 'pelo más corto' })).json<Drawing>();
+      expect(adjusted.alternativeUrls).toHaveLength(0);
+    } finally {
+      await db.doc('orders/order-1').delete();
+    }
   });
 
   it('el dibujo aprobado del perfil es la referencia de la lámina de su próximo cuento', async () => {
