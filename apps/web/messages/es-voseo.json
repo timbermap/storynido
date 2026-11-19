@@ -259,9 +259,10 @@
         "ai_budget_exhausted": "Hay mucha demanda en este momento. Intentá de nuevo en un rato; tu borrador queda guardado.",
         "validation_failed": "Ese texto no es apto para un cuento infantil. Cambialo e intentá de nuevo.",
         "bad_request": "Revisá que estén completos el protagonista, la foto, la historia y el estilo.",
-        "generic": "Algo salió mal. Intentá de nuevo en unos minutos.",
+        "generic": "Estamos terminando tu muestra. Volvé a mirar en unos minutos; tu borrador queda guardado.",
         "account_required": "Creá tu cuenta gratis para ver la portada y las páginas ilustradas.",
-        "limit_reached_week": "Ya probaste varias versiones esta semana. Guardamos todo y en unos días seguís."
+        "limit_reached_week": "Ya probaste varias versiones esta semana. Guardamos todo y en unos días seguís.",
+        "limit_reached_book": "Ya creaste las muestras incluidas de este libro. Podés seguir ajustando esta (personaje e ilustraciones) o empezar un libro nuevo con otro estilo o historia."
       },
       "saveStoryTitle": "Guardá tu cuento",
       "saveStoryText": "Creá tu cuenta gratis para no perder esta muestra y retomarla desde cualquier dispositivo.",

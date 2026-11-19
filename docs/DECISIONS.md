@@ -2972,3 +2972,11 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Tapas (todos los tipos):** el pedido de imagen suma una regla de diseño (tercio superior libre, ninguna cara ahí) y la moderación, la categoría «title_zone». «style» y «title_zone» son rechazos blandos: se rehace, pero en el último intento se acepta, para no perder la muestra ni frenar el pedido.
 - **Tapa del libro para colorear:** va a color (los mismos contornos, pintados como ya coloreados), con el sello «Para colorear» en la web y en el PDF. El interior sigue en blanco y negro. Es lo que hacen los superventas del rubro (Bobbie Goods, Coco Wyo).
 - **Marca de agua:** en las páginas de colorear de la muestra, al 40 %. El libro comprado no la lleva.
+
+## 284 — Muestras por libro: ir y volver no gasta, dos por libro y el doble con compras
+
+- **Fecha:** 2026-11-19. Pedido por Sebas (aprobó la propuesta de la mesa con «ok»): se podía ir y volver en el asistente y rehacer la muestra varias veces, y a veces aparecía «Algo salió mal».
+- **Ir y volver sin cambios no rehace:** la muestra guarda una huella de lo que la define (niño, historia, estilo, personajes, ajustes de lectura, idioma, enseñanzas, recuerdos, evento, meta y dibujo). Si al volver la huella es la misma, se muestra la que ya está y no se gasta cupo.
+- **Dos muestras completas por libro** (`maxPreviewsPerBook`, editable en Admin → IA). La tercera devuelve `limit_reached_book` con un mensaje amable. Si la generación falla, se devuelve el cupo del libro.
+- **Compradores, el doble:** con al menos un pedido pagado, se duplican las muestras por libro y los cupos diario y semanal.
+- **Nunca un «Algo salió mal» seco:** la carga de la muestra se reintenta sola una vez; si sigue fallando, un mensaje que dice que la muestra se está terminando y un botón «Reintentar».

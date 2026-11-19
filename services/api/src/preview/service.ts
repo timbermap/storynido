@@ -156,6 +156,8 @@ interface BookData {
   queuedStep?: QueuedStep | null;
   /** Cupos que reservó la muestra (para devolverlos si falla, aunque haya esperado en la fila). */
   previewQuotaDocs?: string[] | null;
+  /** Muestras completas creadas para este libro (DECISIONS 284). */
+  previewsUsed?: number;
 }
 
 function toDate(value: unknown): Date | null {
@@ -408,6 +410,7 @@ export class PreviewService {
     limits: AiLimits,
     queue = false,
   ) {
+    limits = await this.limitsFor(uid, limits);
     const day = utcDay();
     const quotas = this.db.collection(COLLECTIONS.previewQuota);
     const userQuota = quotas.doc(`${uid}_${day}`);
@@ -473,6 +476,10 @@ export class PreviewService {
         );
       }
 
+      // Muestras completas por libro (DECISIONS 284): ir y volver sin cambiar nada no regenera;
+      // rehacerla al cambiar elecciones sí cuenta. Los libros anteriores cuentan la que tienen.
+      const usedByBook = book.previewsUsed ?? (book.preview ? 1 : 0);
+      if (usedByBook >= limits.maxPreviewsPerBook) throw bookLimit();
       const usedByUser = Number(userSnap.get('count') ?? 0);
       const usedByIp = Number(ipSnap.get('count') ?? 0);
       if (
@@ -498,6 +505,7 @@ export class PreviewService {
           : { status: 'preview_generating', previewStartedAt: new Date() }),
         previewError: null,
         previewQuotaDocs: [userQuota.id, ipQuota.id, weekQuota.id],
+        previewsUsed: usedByBook + 1,
         updatedAt: new Date(),
       });
     });
@@ -535,6 +543,29 @@ export class PreviewService {
    * Devuelve el cupo reservado (la muestra no se llegó a crear). Usa los documentos que guardó
    * la reserva: si la muestra esperó en la fila, el día de la reserva puede ser otro.
    */
+  /**
+   * Quien ya compró tiene el doble de muestras por libro y de topes por día y por semana
+   * (DECISIONS 284; a quien compra no se lo raciona, Sebas 4 nov).
+   */
+  private async limitsFor(uid: string, limits: AiLimits): Promise<AiLimits> {
+    const orders = await this.db
+      .collection(COLLECTIONS.orders)
+      .where('ownerUid', '==', uid)
+      .limit(25)
+      .get()
+      .catch(() => null);
+    const buyer = orders?.docs.some((doc) =>
+      PURCHASED_STATUSES.includes(String(doc.get('status'))),
+    );
+    if (!buyer) return limits;
+    return {
+      ...limits,
+      maxPreviewsPerBook: limits.maxPreviewsPerBook * BUYER_MULTIPLIER,
+      maxPreviewsPerUserPerDay: limits.maxPreviewsPerUserPerDay * BUYER_MULTIPLIER,
+      maxPreviewsPerUserPerWeek: limits.maxPreviewsPerUserPerWeek * BUYER_MULTIPLIER,
+    };
+  }
+
   private async refundQuota(docs: readonly string[]): Promise<void> {
     const quotas = this.db.collection(COLLECTIONS.previewQuota);
     const back = { count: FieldValue.increment(-1) };
@@ -562,6 +593,16 @@ export class PreviewService {
     const startedAt = Date.now();
     const limits = await this.budget.limits();
     const ref = this.bookRef(bookId);
+    // Ir y volver sin cambiar nada no regenera ni gasta una muestra (DECISIONS 284).
+    const current = (await ref.get()).data() as BookData | undefined;
+    if (
+      current?.ownerUid === uid &&
+      current.status === 'preview_ready' &&
+      current.preview?.inputsKey !== undefined &&
+      current.preview.inputsKey === inputsKey(current)
+    ) {
+      return this.get(uid, bookId);
+    }
     // Sin presupuesto de IA hoy: la muestra queda en la fila y la crea el trabajo programado
     // apenas haya cupo (se avisa por correo). El cliente no ve ningún "límite".
     if (!(await this.budget.available(limits))) {
@@ -629,10 +670,13 @@ export class PreviewService {
       this.log.error({ err: error, bookId }, 'preview failed');
       await this.auditAiError('preview', bookId, error);
       // Una muestra que falló no gasta el cupo diario de la persona.
-      if (!(error instanceof AppError && error.code === 'limit_reached')) {
-        await this.refundQuota(book.previewQuotaDocs ?? []);
-      }
+      const refund = !(error instanceof AppError && error.code === 'limit_reached');
+      if (refund) await this.refundQuota(book.previewQuotaDocs ?? []);
       await ref.update({
+        // Tampoco gasta una de las muestras del libro.
+        ...(refund && (book.previewsUsed ?? 0) > 0
+          ? { previewsUsed: FieldValue.increment(-1) }
+          : {}),
         // Si había una vista previa anterior, sigue disponible.
         status: book.preview ? 'preview_ready' : 'draft',
         previewStartedAt: null,
@@ -1143,6 +1187,7 @@ export class PreviewService {
       styleId: style.slug,
       photoId: characterKey(book),
       editorialKey: editorialKey(book),
+      inputsKey: inputsKey(book),
       interiorPages: plan.interiorPages,
       artDirection: direction,
       activityPages: plan.activityPages,
@@ -2083,6 +2128,7 @@ export class PreviewService {
 
   /** Reserva un lugar en los topes del usuario por día y por semana (dibujo sin cuento). */
   private async reserveUserQuota(uid: string, limits: AiLimits) {
+    limits = await this.limitsFor(uid, limits);
     const quotas = this.db.collection(COLLECTIONS.previewQuota);
     const dayQuota = quotas.doc(`${uid}_${utcDay()}`);
     const weekQuota = quotas.doc(`${uid}_${utcIsoWeek()}`);
@@ -2126,6 +2172,7 @@ export class PreviewService {
    * semana), en la misma transacción.
    */
   private async reserveAdjustment(uid: string, ref: DocumentReference, limits: AiLimits) {
+    limits = await this.limitsFor(uid, limits);
     const quotas = this.db.collection(COLLECTIONS.previewQuota);
     const dayQuota = quotas.doc(`${uid}_${utcDay()}`);
     const weekQuota = quotas.doc(`${uid}_${utcIsoWeek()}`);
@@ -2377,6 +2424,32 @@ function editorialKey(book: BookData): string {
   ].join('|');
 }
 
+/**
+ * Todo lo que el adulto eligió y cambia la muestra (DECISIONS 284). Con la misma clave y la
+ * muestra lista, «Crear la muestra» no genera otra: ir y volver sin cambiar nada no gasta.
+ */
+function inputsKey(book: BookData): string {
+  return createHash('sha256')
+    .update(
+      JSON.stringify([
+        book.childId,
+        book.storyId,
+        book.styleId,
+        characterKey(book),
+        editorialKey(book),
+        book.language,
+        [...book.lessonIds].sort(),
+        book.customLesson ?? null,
+        book.memories ?? null,
+        book.event ?? null,
+        book.goal ?? null,
+        book.useDrawing ?? false,
+      ]),
+    )
+    .digest('hex')
+    .slice(0, 24);
+}
+
 /** La muestra ya no corresponde a lo que eligió el adulto en el creador. */
 function isStale(preview: NonNullable<BookData['preview']>, book: BookData): boolean {
   return (
@@ -2429,6 +2502,28 @@ function dailyLimit() {
     429,
     'limit_reached',
     'Ya probaste varias versiones hoy. Guardamos todo y mañana sigues.',
+  );
+}
+
+/** Estados de un pedido ya pagado (cuentan como compra para los topes). */
+const PURCHASED_STATUSES: readonly string[] = [
+  'paid',
+  'generating',
+  'qa_failed',
+  'ready',
+  'sent_to_print',
+  'in_production',
+  'shipped',
+  'delivered',
+];
+const BUYER_MULTIPLIER = 2;
+
+/** Muestras completas del libro (DECISIONS 284): se puede ajustar esta o empezar otro libro. */
+function bookLimit() {
+  return new AppError(
+    429,
+    'limit_reached_book',
+    'Ya creaste las muestras incluidas de este libro. Puedes seguir ajustando esta o empezar un libro nuevo con otro estilo o historia.',
   );
 }
 

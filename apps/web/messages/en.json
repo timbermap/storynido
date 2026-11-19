@@ -1105,9 +1105,10 @@
         "ai_budget_exhausted": "We're very busy right now. Please try again in a little while; your draft is saved.",
         "validation_failed": "That text isn't suitable for a children's story. Please change it and try again.",
         "bad_request": "Make sure the main character, photo, story and style are complete.",
-        "generic": "Something went wrong. Please try again in a few minutes.",
+        "generic": "We're finishing your sample. Check back in a few minutes; your draft is saved.",
         "account_required": "Create a free account to see the cover and illustrated pages.",
-        "limit_reached_week": "You've tried several versions this week. We saved everything, so you can pick up in a few days."
+        "limit_reached_week": "You've tried several versions this week. We saved everything, so you can pick up in a few days.",
+        "limit_reached_book": "You've already created the samples included for this book. You can keep adjusting this one (character and illustrations) or start a new book with another style or story."
       },
       "saveStoryTitle": "Save your story",
       "saveStoryText": "Create a free account so you don’t lose this sample and can pick it up on any device.",
@@ -1215,7 +1216,8 @@
           "whatsapp": "the invitation comes ready to send on WhatsApp.",
           "reusePro": "the character is saved in their project for the next stories."
         }
-      }
+      },
+      "retry": "Try again"
     },
     "character": {
       "modeLegend": "How should we create the main character?",

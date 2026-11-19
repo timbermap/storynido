@@ -1105,9 +1105,10 @@
         "ai_budget_exhausted": "Estamos com muita procura agora. Tente de novo daqui a pouco; seu rascunho fica salvo.",
         "validation_failed": "Esse texto não é adequado para uma história infantil. Mude e tente de novo.",
         "bad_request": "Confira se o protagonista, a foto, a história e o estilo estão completos.",
-        "generic": "Algo deu errado. Tente de novo em alguns minutos.",
+        "generic": "Estamos terminando a sua amostra. Volte a olhar em alguns minutos; o seu rascunho fica salvo.",
         "account_required": "Crie sua conta grátis para ver a capa e as páginas ilustradas.",
-        "limit_reached_week": "Você já testou várias versões esta semana. Salvamos tudo e em alguns dias você continua."
+        "limit_reached_week": "Você já testou várias versões esta semana. Salvamos tudo e em alguns dias você continua.",
+        "limit_reached_book": "Você já criou as amostras incluídas deste livro. Pode continuar ajustando esta (personagem e ilustrações) ou começar um livro novo com outro estilo ou história."
       },
       "saveStoryTitle": "Salve sua história",
       "saveStoryText": "Crie sua conta grátis para não perder esta amostra e continuar em qualquer dispositivo.",
@@ -1215,7 +1216,8 @@
           "whatsapp": "o convite sai pronto para mandar pelo WhatsApp.",
           "reusePro": "o personagem fica salvo no projeto dele para as próximas histórias."
         }
-      }
+      },
+      "retry": "Tentar de novo"
     },
     "character": {
       "modeLegend": "Como criamos o protagonista?",

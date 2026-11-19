@@ -214,6 +214,8 @@ export const bookPreviewSchema = z.object({
   photoId: z.string(),
   /** Opciones editoriales con las que se generó ("extensión|densidad|nivel|tipo"). */
   editorialKey: z.string().optional(),
+  /** Todo lo elegido en el creador: si no cambió, no se rehace la muestra (DECISIONS 284). */
+  inputsKey: z.string().optional(),
   /** Páginas interiores del libro terminado según esas opciones. */
   interiorPages: z.number().int().positive().optional(),
   /** Dirección de arte con la que se ilustró (se congela: el libro sale igual que la muestra). */

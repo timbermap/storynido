@@ -149,6 +149,12 @@ export default function AiPage() {
             {number('maxPreviewsPerUserPerWeek')}
           </Field>
           <Field
+            label="Muestras completas por libro"
+            hint="La primera y las que se rehacen al cambiar elecciones. Quien ya compró tiene el doble (y el doble de los topes por día y semana)."
+          >
+            {number('maxPreviewsPerBook')}
+          </Field>
+          <Field
             label="Presupuesto diario (USD)"
             hint="Al llegar, la IA se corta sola hasta mañana."
           >
