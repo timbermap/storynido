@@ -50,7 +50,7 @@ import { failedCheck, toColoringPage } from '../images';
  * contornos negros del interior, pintados prolijos, como si un chico ya lo hubiera coloreado.
  */
 export const COLORING_COVER_RULE =
-  'COLORING BOOK COVER: the same bold black outlines and shapes as the inside coloring pages, but neatly filled with bright, cheerful flat colors as if it had already been colored in with markers, on a clean light background. Use the natural colors described for the character (hair, skin, clothes). This is the only colored image of the book.';
+  'Color in this coloring book drawing, like the cover of a best-selling coloring book: keep every black outline, shape, pose and the composition EXACTLY as they are and only fill the white areas with bright, cheerful flat colors, neatly inside the lines, as if colored with markers; a clean light colored background; no shading, no texture, no new lines or objects, no text. Use the natural colors described for the character';
 
 /** Tapa (DECISIONS 283): el título va arriba, en su franja; nada importante debajo. */
 export const COVER_TITLE_RULE =
@@ -1173,17 +1173,18 @@ export class VertexImageProvider implements AIImageProvider {
       );
     }
     // La ficha del estilo trae su control (DECISIONS 282); colorear también tiene su regla final.
-    let check = imageCheckFor({
+    const check = imageCheckFor({
       style: request.style,
       stylePrompt: request.stylePrompt,
       coloring: request.coloring,
     });
-    // La tapa del libro para colorear va a color: otro control y otra regla (DECISIONS 283).
+    // La tapa del libro para colorear va a color (DECISIONS 283): pedida de una vez, el modelo la
+    // devolvía en blanco y negro (la dirección de arte y las láminas lo son). Ahora se dibuja como
+    // una página más, con su franja de título, y después se pinta en un segundo pedido (DECISIONS 285).
     const coloringCover = request.cover === true && check.grayscale === true;
-    if (coloringCover) check = COLORING_COVER_CHECK;
     const coloring = check.grayscale === true;
     const rules = [
-      coloringCover ? COLORING_COVER_RULE : coloring ? COLORING_PAGE_RULE : '',
+      coloring ? COLORING_PAGE_RULE : '',
       request.cover ? COVER_TITLE_RULE : '',
     ].filter(Boolean);
     const instructions = `Scene to draw: ${request.prompt}
@@ -1228,12 +1229,53 @@ Children's picture book illustration, drawn only in the art style above. No text
           parts[parts.length - 1] = { text: `${instructions}\n${failure}` };
           continue;
         }
-        return result;
+        return coloringCover ? this.colorInCover(result, request, model, lastUsage) : result;
       }
     }
     // Si el segundo intento no devolvió imagen, queda la primera (ya en blanco y negro si es colorear).
-    if (offStyle) return { ...offStyle, usage: sumUsage(model, ...lastUsage) };
+    if (offStyle) {
+      const result = { ...offStyle, usage: sumUsage(model, ...lastUsage) };
+      return coloringCover ? this.colorInCover(result, request, model, lastUsage) : result;
+    }
     throw new ProviderError('vertex', 'El modelo no devolvió ninguna imagen', true);
+  }
+
+  /**
+   * Segundo paso de la tapa de colorear (DECISIONS 285): pinta el dibujo en blanco y negro sin tocar
+   * sus líneas, y se controla que haya vuelto a color. Si no vuelve ninguna imagen, queda la de
+   * líneas (mejor una tapa en blanco y negro que perder la muestra).
+   */
+  private async colorInCover(
+    lineArt: GeneratedImage,
+    request: IllustrationRequest,
+    model: string,
+    previousUsage: AiUsage[],
+  ): Promise<GeneratedImage> {
+    const instructions = `${COLORING_COVER_RULE}: ${request.character.description}. Keep the top third calm, with nothing new added there.`;
+    const parts: Part[] = [imagePart(lineArt), { text: instructions }];
+    let usages = [...previousUsage];
+    let painted: GeneratedImage | null = null;
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      const { response, usage } = await this.client.generate(model, parts, {
+        responseModalities: ['IMAGE'],
+        imageConfig: { aspectRatio: request.aspectRatio, imageSize: request.resolution ?? '1K' },
+        ...(request.seed === null ? {} : { seed: request.seed }),
+      });
+      usages = [...usages, usage];
+      if (blocked(response)) continue;
+      const inline = response.candidates?.[0]?.content?.parts?.find(
+        (part) => part.inlineData,
+      )?.inlineData;
+      if (!inline) continue;
+      const bytes = new Uint8Array(Buffer.from(inline.data, 'base64'));
+      const failure = await failedCheck(bytes, COLORING_COVER_CHECK);
+      painted = { bytes, mimeType: inline.mimeType, usage: sumUsage(model, ...usages) };
+      if (!failure) break;
+      parts[1] = { text: `${instructions}\n${failure}` };
+    }
+    return painted
+      ? { ...painted, usage: sumUsage(model, ...usages) }
+      : { ...lineArt, usage: sumUsage(model, ...usages) };
   }
 
   async moderateImage(

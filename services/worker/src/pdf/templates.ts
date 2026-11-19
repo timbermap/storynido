@@ -1,5 +1,7 @@
 import {
   STRIP_ART_PCT,
+  stripArtPct,
+  stripFontScale,
   letterJitter,
   splitCoverTitle,
   type ActivitySpec,
@@ -312,12 +314,17 @@ function storyPage(
   if (kind === 'strip') {
     // Pie del dibujo: letra de epígrafe (el mínimo de la franja) que puede achicarse para entrar.
     const inset = spec.bleedMm + spec.safeMm;
-    const maxMm = (trimHeight * (100 - STRIP_ART_PCT)) / 100 - inset - 2;
-    const captionPt = typography ? typography.minPt * pageScale : fontPt;
+    // Un pie más largo que lo previsto agranda la franja y achica la letra (DECISIONS 285).
+    const artPct = stripArtPct(page.text);
+    const maxMm = (trimHeight * (100 - artPct)) / 100 - inset - 2;
+    const captionPt =
+      (typography ? typography.minPt * pageScale : fontPt) * stripFontScale(page.text);
+    const sized = artPct === STRIP_ART_PCT ? '' : ` style="height:${String(artPct)}%"`;
+    const band = artPct === STRIP_ART_PCT ? '' : ` style="height:${String(100 - artPct)}%"`;
     return [
       `<section class="page coloring" ${label()}>
-  <img class="art strip" src="${page.image}" alt="">
-  <div class="strip-band"><div class="panel strip" ${fit(maxMm, captionPt)}>${story}</div></div>
+  <img class="art strip" src="${page.image}" alt=""${sized}>
+  <div class="strip-band"${band}><div class="panel strip" ${fit(maxMm, captionPt)}>${story}</div></div>
 </section>`,
     ];
   }

@@ -22,6 +22,8 @@ import {
   type QaEvent,
   pagesOutOfRange,
   pagesOverCap,
+  fitToCap,
+  wordCap,
   wordlessPages,
   spanishVoiceFor,
   storyTypography,
@@ -1039,6 +1041,19 @@ export class PreviewService {
           } catch (error) {
             if (!(error instanceof ProviderError)) throw error;
             this.log.warn({ err: error, bookId }, 'scene briefs failed; keeping the writer ones');
+          }
+          // Garantía final (DECISIONS 285): ninguna página pasa el tope de su edad o de su tipo
+          // de libro, aunque la reescritura o una pasada de revisión lo haya dejado largo.
+          const cap = wordCap(plan.words);
+          const trimmed = pagesOverCap(current.pages, plan.words);
+          if (trimmed.length > 0) {
+            await this.qaEvent(bookId, 'length_trimmed', { pages: trimmed.length });
+            current = {
+              ...current,
+              pages: current.pages.map((page, index) =>
+                trimmed.includes(index) ? { ...page, text: fitToCap(page.text, cap) } : page,
+              ),
+            };
           }
           return current;
         };
@@ -2266,6 +2281,15 @@ export class PreviewService {
   async updatePageText(uid: string, bookId: string, index: number, text: string) {
     const { ref, preview } = await this.readyBook(uid, bookId);
     if (!preview.pages[index]) throw notFound();
+    // El tope de palabras de la página también vale para el texto editado (DECISIONS 285): si no,
+    // no entra en su lugar del libro.
+    if (preview.words && countWords(text) > wordCap(preview.words)) {
+      throw new AppError(
+        422,
+        'text_too_long',
+        `Esta página admite hasta ${String(wordCap(preview.words))} palabras, para que el texto entre en su lugar del libro. Acórtalo un poco e intenta de nuevo.`,
+      );
+    }
     const limits = await this.budget.limits();
     const verdict = await this.providers.ai().text.moderateText(text);
     if (verdict.usage) {

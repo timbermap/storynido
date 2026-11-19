@@ -1108,7 +1108,8 @@
         "generic": "We're finishing your sample. Check back in a few minutes; your draft is saved.",
         "account_required": "Create a free account to see the cover and illustrated pages.",
         "limit_reached_week": "You've tried several versions this week. We saved everything, so you can pick up in a few days.",
-        "limit_reached_book": "You've already created the samples included for this book. You can keep adjusting this one (character and illustrations) or start a new book with another style or story."
+        "limit_reached_book": "You've already created the samples included for this book. You can keep adjusting this one (character and illustrations) or start a new book with another style or story.",
+        "text_too_long": "This text is too long for its place in the book. Shorten it a little and try again."
       },
       "saveStoryTitle": "Save your story",
       "saveStoryText": "Create a free account so you don’t lose this sample and can pick it up on any device.",

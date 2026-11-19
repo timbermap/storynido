@@ -505,6 +505,30 @@ export function pagesOverCap(pages: readonly { text: string }[], words: WordRang
   return pages.flatMap((page, index) => (countWords(page.text) > cap ? [index] : []));
 }
 
+/**
+ * Garantía final del tope de palabras (DECISIONS 285): si una página todavía lo pasa después de la
+ * reescritura con el modelo, se queda con las oraciones enteras que entran. Si ni la primera entra,
+ * se corta en el tope y se cierra con un punto. Nunca devuelve más palabras que el tope.
+ */
+export function fitToCap(text: string, cap: number): string {
+  if (countWords(text) <= cap) return text;
+  const sentences = text.trim().match(/[^.!?…]+(?:[.!?…]+["»”)]*|$)/gu) ?? [text];
+  let kept = '';
+  for (const sentence of sentences) {
+    const next = `${kept}${kept ? ' ' : ''}${sentence.trim()}`;
+    if (countWords(next) > cap) break;
+    kept = next;
+  }
+  if (kept) return kept;
+  const words = text.trim().split(/\s+/u);
+  const cut: string[] = [];
+  for (const word of words) {
+    if (countWords([...cut, word].join(' ')) > cap) break;
+    cut.push(word);
+  }
+  return `${cut.join(' ').replace(/[,;:¡¿—–-]+$/u, '')}.`;
+}
+
 /** Franjas con páginas sin texto en el clímax (3 a 6 años: «Cuentos que cuidan»). */
 export const WORDLESS_AGE_BANDS: readonly AgeBand[] = ['3-4', '5-6'];
 

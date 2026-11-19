@@ -62,6 +62,7 @@ export const API_ERROR_CODES = [
   'limit_reached_week',
   /** Ya se crearon las muestras completas incluidas de este libro (DECISIONS 284). */
   'limit_reached_book',
+  'text_too_long',
   /** La IA no pudo generar (proveedor caído, control de calidad o moderación fallida). */
   'ai_unavailable',
   /** Se agotó el presupuesto diario de IA: vuelve a haber generación al día siguiente (UTC). */

@@ -4,7 +4,12 @@ import { ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { splitCoverTitle, type StoryTypography } from '@storynido/shared';
+import {
+  splitCoverTitle,
+  stripArtPct,
+  stripFontScale,
+  type StoryTypography,
+} from '@storynido/shared';
 
 import { CoverTitle } from '@/components/stories/story-cover';
 import { cn } from '@/lib/utils';
@@ -434,16 +439,27 @@ function PageSpread({
   // Colorear (DECISIONS 283): el dibujo arriba y el texto en su franja blanca debajo, como en el
   // PDF. El texto nunca tapa lo que se pinta.
   if (layout.kind === 'strip') {
+    // Un pie más largo que lo previsto agranda la franja y achica la letra (DECISIONS 285).
+    const artPct = stripArtPct(page.text);
+    const fontScale = stripFontScale(page.text);
     return (
       <div className="[container-type:inline-size] relative mx-auto flex aspect-[3/4] w-full max-w-md flex-col overflow-hidden rounded-xl bg-white shadow-[0_17px_45px_rgb(80_52_84/0.18)]">
-        <div className="relative h-[80%] px-[5%] pt-[5%] [&_img]:object-contain">
+        <div
+          className="relative px-[5%] pt-[5%] [&_img]:object-contain"
+          style={{ height: `${String(artPct)}%` }}
+        >
           {illustration}
         </div>
         <div className="flex flex-1 items-center justify-center border-t border-[#e6ddd2] px-[8%] pb-[4%] text-center">
           {typography ? (
             <p
               className={cn(storyFontClass(typography), 'leading-snug whitespace-pre-line')}
-              style={{ fontSize: storyFontSize(typography, true) }}
+              style={{
+                fontSize:
+                  fontScale === 1
+                    ? storyFontSize(typography, true)
+                    : `calc(${storyFontSize(typography, true)} * ${fontScale.toFixed(2)})`,
+              }}
             >
               {page.text}
             </p>

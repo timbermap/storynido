@@ -1226,6 +1226,10 @@ describe('vista previa', () => {
       'Martina saluda a la Luna con su perro Rocco.',
     );
     expect((await edit(`Texto ${MOCK_UNSAFE_MARKER}`)).statusCode).toBe(422);
+    // Un texto más largo que el tope de la página no entra en su lugar (DECISIONS 285).
+    const long = await edit(Array.from({ length: 150 }, () => 'sol').join(' '));
+    expect(long.statusCode).toBe(422);
+    expect(long.json<{ error: { code: string } }>().error.code).toBe('text_too_long');
   });
 
   it('marca la vista previa como desactualizada si cambia el estilo', async () => {

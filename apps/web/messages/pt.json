@@ -1108,7 +1108,8 @@
         "generic": "Estamos terminando a sua amostra. Volte a olhar em alguns minutos; o seu rascunho fica salvo.",
         "account_required": "Crie sua conta grátis para ver a capa e as páginas ilustradas.",
         "limit_reached_week": "Você já testou várias versões esta semana. Salvamos tudo e em alguns dias você continua.",
-        "limit_reached_book": "Você já criou as amostras incluídas deste livro. Pode continuar ajustando esta (personagem e ilustrações) ou começar um livro novo com outro estilo ou história."
+        "limit_reached_book": "Você já criou as amostras incluídas deste livro. Pode continuar ajustando esta (personagem e ilustrações) ou começar um livro novo com outro estilo ou história.",
+        "text_too_long": "Este texto é longo demais para o seu lugar no livro. Encurte um pouco e tente de novo."
       },
       "saveStoryTitle": "Salve sua história",
       "saveStoryText": "Crie sua conta grátis para não perder esta amostra e continuar em qualquer dispositivo.",
