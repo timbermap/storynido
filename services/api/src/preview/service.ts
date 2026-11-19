@@ -1814,7 +1814,7 @@ export class PreviewService {
     // El rasgo distintivo y la nota del ajuste son texto libre: se moderan juntos.
     const freeText = [traits.distinctive, note].filter(Boolean).join('\n');
     if (freeText) {
-      const verdict = await ai.text.moderateText(freeText);
+      const verdict = await ai.text.moderateText(freeText, { purpose: 'correction' });
       if (verdict.usage) {
         await this.budget.record(
           verdict.usage,
@@ -2005,7 +2005,10 @@ export class PreviewService {
     };
     const freeText = [input.traits?.distinctive, input.note].filter(Boolean).join('\n');
     if (freeText) {
-      const verdict = await track('moderation', await ai.text.moderateText(freeText));
+      const verdict = await track(
+        'moderation',
+        await ai.text.moderateText(freeText, { purpose: 'correction' }),
+      );
       if (!verdict.allowed) {
         throw new AppError(
           422,

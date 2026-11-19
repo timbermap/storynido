@@ -128,7 +128,10 @@ export class MockAITextProvider implements AITextProvider {
     });
   }
 
-  moderateText(text: string): Promise<ModerationResult> {
+  moderateText(
+    text: string,
+    _options?: { purpose?: 'story' | 'correction' },
+  ): Promise<ModerationResult> {
     return Promise.resolve(moderate(text));
   }
 

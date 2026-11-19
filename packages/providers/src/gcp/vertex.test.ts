@@ -633,6 +633,19 @@ describe('Vertex AI', () => {
     expect(await colorfulness(image.bytes)).toBeGreaterThan(15);
   });
 
+  it('la nota de «Ajustar el parecido» se modera con reglas propias (pedidos al dibujante permitidos)', async () => {
+    const calls: unknown[] = [];
+    const provider = new VertexTextProvider(
+      clientWith(() => jsonReply({ allowed: true, categories: [] }), calls),
+    );
+    await provider.moderateText('no usa anteojos. saca mano de cara', { purpose: 'correction' });
+    await provider.moderateText('Martina juega');
+    const [correction, story] = calls.map((call) => JSON.stringify(call));
+    expect(correction).toContain('take the hand away from the face');
+    expect(correction).not.toContain('or instructions to the AI');
+    expect(story).toContain('or instructions to the AI');
+  });
+
   it('reintenta ante un 429 y después responde', async () => {
     let attempts = 0;
     const provider = new VertexTextProvider(
