@@ -2165,7 +2165,7 @@
       "title": "Paga tu cuento",
       "text": "Elige cómo pagar. No sales de StoryNido.",
       "noAccount": "¿No tienes PayPal? Toca «Tarjeta de débito o crédito» y paga con tu tarjeta, sin crear cuenta.",
-      "noAccountUnavailable": "Pagas con tu cuenta de PayPal o con la tarjeta que tengas guardada ahí.",
+      "noAccountUnavailable": "Pagas con tu cuenta de PayPal. En la ventana de PayPal también puedes pagar con tarjeta, sin crear cuenta.",
       "secure": "El pago lo procesa PayPal de forma segura: StoryNido nunca ve los datos de tu tarjeta. El cobro es en dólares (USD).",
       "statement": "En el resumen de tu tarjeta figura PayPal y StoryNido.",
       "loading": "Cargando las opciones de pago…",

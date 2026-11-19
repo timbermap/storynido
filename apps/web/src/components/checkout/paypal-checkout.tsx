@@ -150,15 +150,15 @@ export function PaypalCheckoutDialog({
           fundingSource: paypal.FUNDING.CARD,
           style: { layout: 'vertical', shape: 'pill', color: 'black', height: 48 },
         });
-        if (paypalSlot.current && wallet.isEligible()) {
-          rendered.push(wallet);
-          await wallet.render(paypalSlot.current);
-        }
         const cardOk = card.isEligible();
         setCardEligible(cardOk);
         if (cardSlot.current && cardOk) {
           rendered.push(card);
           await card.render(cardSlot.current);
+        }
+        if (paypalSlot.current && wallet.isEligible()) {
+          rendered.push(wallet);
+          await wallet.render(paypalSlot.current);
         }
         if (!stopped()) setState('ready');
       })
@@ -242,8 +242,8 @@ export function PaypalCheckoutDialog({
               </p>
             ) : (
               <div className="grid gap-3">
-                <div ref={paypalSlot} />
                 <div ref={cardSlot} />
+                <div ref={paypalSlot} />
               </div>
             )}
             {error && (

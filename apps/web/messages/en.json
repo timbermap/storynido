@@ -2165,7 +2165,7 @@
       "title": "Pay for your story",
       "text": "Choose how to pay. You stay on StoryNido.",
       "noAccount": "No PayPal? Tap “Debit or Credit Card” and pay with your card, no account needed.",
-      "noAccountUnavailable": "Pay with your PayPal account or the card saved in it.",
+      "noAccountUnavailable": "Pay with your PayPal account. In the PayPal window you can also pay by card, with no account needed.",
       "secure": "PayPal processes the payment securely: StoryNido never sees your card details. You are charged in US dollars (USD).",
       "statement": "Your card statement shows PayPal and StoryNido.",
       "loading": "Loading payment options…",
