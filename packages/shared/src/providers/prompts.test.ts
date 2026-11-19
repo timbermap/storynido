@@ -476,3 +476,11 @@ describe('oficio del texto', () => {
     );
   });
 });
+
+describe('contacto físico (DECISIONS 294)', () => {
+  it('las reglas del cuento lo limitan a la familia directa', () => {
+    expect(narrativeRules({ childName: 'Luli', event: null, goal: null })).toContain(
+      'Contacto físico',
+    );
+  });
+});

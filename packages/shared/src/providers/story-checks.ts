@@ -160,6 +160,23 @@ export function moralPhrases(pages: readonly CraftPage[], language: Locale): str
   return MORAL_PHRASES[language].filter((phrase) => text.includes(fold(phrase)));
 }
 
+/** Contacto físico en el texto (DECISIONS 294): abrazos, besos, brazos, regazo, cosquillas. */
+const TOUCH_WORDS =
+  /abraz|abrac|besa|beso|beij|en brazos|regazo|cosquill|\bhug|\bkiss|cuddl|\blap\b|tickl|\bcolo\b|carregou/;
+/** Familia directa: con ellos un abrazo corto está permitido. */
+const FAMILY_WORDS =
+  /mama|papa|madre|padre|abuel|herman|\bmom|\bdad|mother|father|grand|sister|brother|\bmae\b|\bpai\b|\bavo|\bavos|irma|\bvovo/;
+
+/** Páginas (1 = primera) con contacto físico donde no aparece nadie de la familia directa. */
+export function touchPages(pages: readonly CraftPage[]): number[] {
+  const found: number[] = [];
+  pages.forEach((page, index) => {
+    const text = fold(page.text);
+    if (TOUCH_WORDS.test(text) && !FAMILY_WORDS.test(text)) found.push(index + 1);
+  });
+  return found;
+}
+
 export interface CraftCheck {
   /** Problemas concretos para la reescritura (en el idioma del equipo: español). */
   issues: string[];
@@ -189,6 +206,12 @@ export function storyCraftIssues(input: {
       item.page === null
         ? `La palabra «${item.word}» aparece ${String(item.count)} veces en el libro: cambia algunas por sinónimos o reescribe la frase.`
         : `La palabra «${item.word}» aparece ${String(item.count)} veces en la página ${String(item.page)}: reescribe esa página para no repetirla.`,
+    );
+  }
+  const touch = touchPages(input.pages);
+  if (touch.length > 0) {
+    issues.push(
+      `Contacto físico en la página ${touch.join(', ')} (abrazo, beso, brazos, regazo o cosquillas con alguien que no es de la familia directa): reescribe sin tocarse; el consuelo va con palabras, estar al lado, un objeto compartido o chocar los cinco.`,
     );
   }
   const morals = moralPhrases(input.pages, input.language);

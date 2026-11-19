@@ -859,6 +859,7 @@ plausible family of the protagonist (a similar skin tone and a related hair colo
               ? `; the protagonist looks like this: ${request.protagonistLook}`
               : ''
           }; anyone else is clearly different from the protagonist. Say their age group and one clothing color.
+No physical contact in any picture: nobody hugs, kisses, carries or touches the protagonist, and the protagonist touches nobody; people stand or sit side by side at a small distance. If the text mentions a hug or a touch, show the moment before or after it (the warm look, an open arm at a distance, a high five), never the embrace. Only for a parent, grandparent or sibling and only when the text says so: one soft side-view hug, both faces visible, bodies clearly separate, never in bed. Everyone fully and modestly dressed.
 Clothes fit the place, weather, season and activity of the page: pyjamas in bed, a raincoat in the rain, a coat in the cold,
 swimwear in the water, sportswear for a sport; indoors at home, no jackets or outdoor shoes unless someone is arriving or leaving.${
             request.age !== undefined
@@ -955,6 +956,10 @@ thin throat", never just "a racket"). The protagonist keeps the same outfit in e
 promises: what the story sets up and later pays off (a mystery and the clue planted before it is solved, an important object that is
 used again later, a skill that is practiced and then saves the day), each with setupPage and payoffPage (1 = first page, setupPage
 before payoffPage). Everything that is set up is paid off. Up to 3; empty array if none. Write setup in the language of the brief.
+Physical contact: scenes never have the protagonist hug, kiss, carry or touch anyone outside the immediate family (parents, grandparents,
+siblings), nor anyone touch the protagonist; comfort between friends, classmates, teachers or professionals comes from words, presence,
+a shared object or a high five. A family hug is allowed only if the brief asks for it, at most once in the whole book, and never in bed.
+In mustBeVisible and sceneGoal, never describe an embrace: describe the moment before or after it.
 At most two failed attempts before the protagonist succeeds, each teaching something different; a mentor may help, but the
 protagonist finds the final solution.
 Visual bible (English, fixed looks the illustrator repeats word for word):
@@ -1063,14 +1068,15 @@ ${request.prompt}${retryNote}`,
 page text, the scene plan and the approved character sheet. Look for: internal inconsistencies, improbable anatomy (hands, limbs, faces),
 incoherent clothing or accessories (or clothes that do not fit the place, weather or activity: a jacket in bed, street clothes in the water), relatives
 who look nothing like the protagonist's family, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
-below (a recurring object, place or outfit drawn differently is a repair), cropped heads, and any letters or
+below (a recurring object, place or outfit drawn differently is a repair), a hug, embrace, kiss, lap, carrying, lying together or hands on another person's body
+(except one soft side-view hug between the protagonist and a parent, grandparent or sibling when the page text says so), bare midriffs or revealing clothes, cropped heads, and any letters or
 words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks).
 Never claim to verify biometric identity or exact likeness to a real person; your evaluation is preliminary and may mark uncertainty.
 Do not invent evidence: anything you cannot evaluate without another reference must be status needs_reference.
 
 Status:
 - pass: no critical issue.
-- repair: a critical issue that a new illustration of the same scene would fix (missing essential trait, wrong anatomy, text in image,
+- repair: a critical issue that a new illustration of the same scene would fix (physical contact between people, missing essential trait, wrong anatomy, text in image,
   image contradicts the text, a second figure in the background that duplicates, clones or looks like a twin of the protagonist, a
   different child standing in for the protagonist). repairTarget illustration_only. A new illustration fixes all of these.
 - human_review: only inappropriate content, sensitive data visible, or a problem in the text itself (repairTarget text_only — the
