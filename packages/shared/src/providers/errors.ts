@@ -23,6 +23,17 @@ export class ContentBlockedError extends ProviderError {
   }
 }
 
+/**
+ * El cobrador no pudo cobrar con el medio de pago elegido (tarjeta rechazada, sin fondos,
+ * bloqueada). No es una falla del cobrador: el comprador tiene que probar otro medio.
+ */
+export class PaymentDeclinedError extends ProviderError {
+  constructor(provider: string, message = 'Medio de pago rechazado') {
+    super(provider, message, false);
+    this.name = 'PaymentDeclinedError';
+  }
+}
+
 /** La firma de un webhook no es válida: la request se rechaza sin procesarla. */
 export class WebhookSignatureError extends ProviderError {
   constructor(provider: string, message = 'Firma de webhook inválida') {

@@ -63,6 +63,8 @@ export const API_ERROR_CODES = [
   /** Ya se crearon las muestras completas incluidas de este libro (DECISIONS 284). */
   'limit_reached_book',
   'text_too_long',
+  /** El cobrador rechazó el medio de pago (tarjeta rechazada): probar otro (DECISIONS 290). */
+  'payment_declined',
   /** La IA no pudo generar (proveedor caído, control de calidad o moderación fallida). */
   'ai_unavailable',
   /** Se agotó el presupuesto diario de IA: vuelve a haber generación al día siguiente (UTC). */

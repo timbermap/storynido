@@ -1,5 +1,6 @@
 'use client';
 
+import { ApiError } from '@storynido/shared';
 import { CreditCard, Lock, ReceiptText, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
@@ -30,13 +31,18 @@ interface PaypalButtonsInstance {
   close(): Promise<void>;
 }
 
+interface PaypalActions {
+  /** Vuelve a elegir el medio de pago de la misma orden (tarjeta rechazada). */
+  restart(): Promise<void>;
+}
+
 interface PaypalNamespace {
   FUNDING: { PAYPAL: string; CARD: string };
   Buttons(options: {
     fundingSource?: string;
     style?: Record<string, string | number | boolean>;
     createOrder: () => string;
-    onApprove: () => Promise<void>;
+    onApprove: (data: unknown, actions: PaypalActions) => Promise<void>;
     onCancel?: () => void;
     onError?: (error: unknown) => void;
   }): PaypalButtonsInstance;
@@ -117,13 +123,20 @@ export function PaypalCheckoutDialog({
     const stopped = () => cancelled;
     const rendered: PaypalButtonsInstance[] = [];
 
-    const approve = async () => {
-      setState('confirming');
+    const approve = async (_data: unknown, actions: PaypalActions) => {
       try {
         await api('confirmPayment', { params: { orderId } });
-      } catch {
-        // Si la confirmación inmediata falla, el webhook la hace igual: la página del pedido espera.
+      } catch (caught) {
+        if (caught instanceof ApiError && caught.code === 'payment_declined') {
+          // La tarjeta se aprobó pero se rechazó al cobrar: PayPal deja elegir otra sobre la misma
+          // orden (actions.restart); si no se puede, queda el aviso para volver a intentar.
+          setError(t('declined'));
+          await actions.restart().catch(() => undefined);
+          return;
+        }
+        // Otro fallo de la confirmación inmediata: el webhook la hace igual, la página espera.
       }
+      setState('confirming');
       router.push({ pathname: '/order/[orderId]', params: { orderId } });
     };
 

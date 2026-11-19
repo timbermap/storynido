@@ -2046,6 +2046,11 @@
         "slow": "Pagou e ainda não mudou? Veja seu e-mail: a Gumroad envia o recibo na hora. Se já passaram mais de 5 minutos, <link>fale com a gente</link> e resolvemos.",
         "confirming": "Estamos confirmando seu pagamento. Em alguns segundos esta página se atualiza sozinha e sua história começa a ser preparada.",
         "slowConfirming": "Pagou e ainda não mudou? Confira seu e-mail: o comprovante do pagamento chega lá. Se passaram mais de 5 minutos, <link>fale com a gente</link> e resolvemos."
+      },
+      "declined": {
+        "title": "Seu cartão foi recusado",
+        "text": "O pagamento não foi cobrado. Você pode tentar de novo com outro cartão ou com PayPal.",
+        "retry": "Tentar com outro cartão"
       }
     },
     "reorderSubtitle": "Você pede outra cópia impressa do mesmo livro, do jeito que ficou.",
@@ -2174,7 +2179,8 @@
       "confirming": "Pronto! Estamos confirmando seu pagamento. Em alguns segundos sua história começa a ser preparada.",
       "failed": "Não conseguimos carregar o pagamento aqui (às vezes um bloqueador de anúncios impede). <link>Pague na página do PayPal</link> e você volta sozinho para a StoryNido.",
       "error": "O PayPal não conseguiu processar o pagamento. Tente de novo ou com outro cartão.",
-      "close": "Fechar"
+      "close": "Fechar",
+      "declined": "Seu cartão foi recusado. Escolha outro cartão ou pague com PayPal."
     }
   },
   "Pro": {

@@ -1,4 +1,5 @@
 import {
+  PaymentDeclinedError,
   ProviderError,
   WebhookSignatureError,
   type CheckoutRequest,
@@ -340,7 +341,15 @@ export class PaypalPaymentProvider implements PaymentProvider {
         const order = approvedOrderSchema.parse(event.resource);
         const orderId = order.purchase_units[0]?.custom_id ?? order.purchase_units[0]?.reference_id;
         if (!orderId) return ignored;
-        const capture = await this.capture(order.id);
+        let capture: z.infer<typeof captureSchema> | null;
+        try {
+          capture = await this.capture(order.id);
+        } catch (error) {
+          // Tarjeta rechazada: se acepta el aviso (PayPal no lo reintenta); el comprador elige otra
+          // tarjeta en la página y la confirmación de ahí cobra la misma orden.
+          if (error instanceof PaymentDeclinedError) return ignored;
+          throw error;
+        }
         if (capture?.status !== 'COMPLETED') return ignored;
         return this.completed(eventId, orderId, order.id, capture);
       }
@@ -427,6 +436,10 @@ export class PaypalPaymentProvider implements PaymentProvider {
     );
     if (result.status === 422 && result.text.includes('ORDER_ALREADY_CAPTURED')) {
       return firstCapture(await this.readOrder(paypalOrderId));
+    }
+    // La tarjeta aprobada se rechazó al cobrar: no es una falla nuestra ni de PayPal.
+    if (result.status === 422 && result.text.includes('INSTRUMENT_DECLINED')) {
+      throw new PaymentDeclinedError(this.id, 'PayPal rechazó el medio de pago al cobrar');
     }
     if (!result.ok) this.fail('capturar el pago', result);
     return firstCapture(capturedOrderSchema.parse(result.json));
