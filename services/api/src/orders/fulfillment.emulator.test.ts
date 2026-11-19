@@ -265,4 +265,45 @@ describe('imprenta, descarga y cancelación (fase 12)', () => {
     });
     expect(early.statusCode).toBe(409);
   });
+
+  it('comprobante de compra: PDF con los datos del pedido pagado, solo para su dueño (no es factura)', async () => {
+    await seedOrder('ready', false);
+    await db.doc('orders/o1').update({
+      bookTitle: 'Tomás y el faro',
+      priceSnapshot: {
+        currency: 'USD',
+        components: [{ code: 'book', unitMinor: 1699, quantity: 1, totalMinor: 1699 }],
+        subtotalMinor: 1699,
+        discount: { minor: 0, reason: null, label: null },
+        shipping: { minor: 0, etaDaysMin: 0, etaDaysMax: 0, pending: false },
+        tax: { minor: 0, basisPoints: 0, included: true },
+        totalMinor: 1699,
+      },
+    });
+    const mine = await app.inject({
+      method: 'GET',
+      url: '/v1/orders/o1/receipt',
+      headers: auth('token-ana'),
+    });
+    expect(mine.statusCode).toBe(200);
+    const body = mine.json<{ filename: string; contentType: string; base64: string }>();
+    expect(body.contentType).toBe('application/pdf');
+    expect(body.filename).toBe('comprobante-storynido-SN-O1.pdf');
+    expect(Buffer.from(body.base64, 'base64').subarray(0, 5).toString()).toBe('%PDF-');
+
+    const other = await app.inject({
+      method: 'GET',
+      url: '/v1/orders/o1/receipt',
+      headers: auth('token-luis'),
+    });
+    expect(other.statusCode).toBe(404);
+
+    await db.doc('orders/o1').update({ status: 'pending_payment' });
+    const unpaid = await app.inject({
+      method: 'GET',
+      url: '/v1/orders/o1/receipt',
+      headers: auth('token-ana'),
+    });
+    expect(unpaid.statusCode).toBe(404);
+  });
 });

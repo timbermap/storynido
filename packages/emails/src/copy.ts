@@ -23,6 +23,8 @@ export interface LocaleCopy {
   };
 }
 
+export const formatLabel = (locale: Locale, format: BookFormat | 'card') => FORMATS[locale][format];
+
 const FORMATS: Record<Locale, Record<BookFormat | 'card', string>> = {
   es: {
     digital: 'digital (PDF)',
@@ -87,6 +89,7 @@ const es: LocaleCopy = {
       paragraphs: [
         `Confirmamos el pago de «${d.bookTitle}» (${FORMATS.es[d.format]}). Total: ${d.total}.`,
         'Ya empezamos a crearlo: ilustramos cada página y la revisamos. Te avisamos por correo en cada paso.',
+        ...(d.receipt ? ['Adjuntamos tu comprobante de compra en PDF. No es una factura.'] : []),
       ],
       cta: cta('Ver mi pedido', d.url),
     }),
@@ -256,6 +259,7 @@ const en: LocaleCopy = {
       paragraphs: [
         `We’ve confirmed your payment for “${d.bookTitle}” (${FORMATS.en[d.format]}). Total: ${d.total}.`,
         'We’ve started creating it: we illustrate every page and review it. We’ll email you at every step.',
+        ...(d.receipt ? ['Your purchase receipt is attached as a PDF. It is not an invoice.'] : []),
       ],
       cta: cta('View my order', d.url),
     }),
@@ -410,6 +414,9 @@ const pt: LocaleCopy = {
       paragraphs: [
         `Confirmamos o pagamento de “${d.bookTitle}” (${FORMATS.pt[d.format]}). Total: ${d.total}.`,
         'Já começamos a criá-lo: ilustramos cada página e revisamos. Avisamos você por e-mail a cada etapa.',
+        ...(d.receipt
+          ? ['Anexamos o comprovante da sua compra em PDF. Não é uma nota fiscal.']
+          : []),
       ],
       cta: cta('Ver meu pedido', d.url),
     }),

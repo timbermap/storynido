@@ -1,4 +1,10 @@
-import { renderEmail, type EmailBrand } from '@storynido/emails';
+import {
+  receiptFilename,
+  receiptSchema,
+  renderEmail,
+  renderReceiptPdf,
+  type EmailBrand,
+} from '@storynido/emails';
 import { ProviderError, type EmailMessage, type EmailProvider } from '@storynido/shared';
 import { z } from 'zod';
 
@@ -44,6 +50,24 @@ export class ResendEmailProvider implements EmailProvider {
 
   async send(message: EmailMessage): Promise<{ messageId: string }> {
     const mail = await renderEmail(message, this.options.brand);
+    // Pago confirmado: el comprobante de compra va adjunto en PDF. Si no se puede armar, el
+    // mail sale igual (el comprobante sigue disponible en el pedido).
+    const attachments: { filename: string; content: string }[] = [];
+    const receipt =
+      message.template === 'payment_confirmed'
+        ? receiptSchema.safeParse((message.data as { receipt?: unknown }).receipt)
+        : null;
+    if (receipt?.success) {
+      try {
+        const pdf = await renderReceiptPdf(receipt.data, this.options.brand);
+        attachments.push({
+          filename: receiptFilename(receipt.data),
+          content: Buffer.from(pdf).toString('base64'),
+        });
+      } catch {
+        // Sin adjunto.
+      }
+    }
     let response: Response;
     try {
       response = await this.fetchImpl('https://api.resend.com/emails', {
@@ -68,6 +92,7 @@ export class ResendEmailProvider implements EmailProvider {
                 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
               }
             : undefined,
+          ...(attachments.length ? { attachments } : {}),
           tags: [{ name: 'template', value: message.template }],
         }),
         signal: AbortSignal.timeout(15_000),

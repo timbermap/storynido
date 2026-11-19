@@ -1,3 +1,4 @@
+import { receiptFilename, renderReceiptPdf } from '@storynido/emails';
 import { apiRoutes } from '@storynido/shared';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 
@@ -20,6 +21,18 @@ export function registerFulfillmentRoutes(app: FastifyInstance, fulfillment: Ful
       (request.query as { file?: string }).file ?? 'book',
     ),
   );
+
+  // Comprobante de compra: se arma al momento con los datos del pedido (no se guarda).
+  addRoute(app, apiRoutes.orderReceipt, {}, async (request) => {
+    const data = await app.deps.notifier.receiptData(orderId(request), user(request).uid);
+    if (!data) throw new AppError(404, 'not_found', 'Todavía no hay comprobante para este pedido.');
+    const pdf = await renderReceiptPdf(data);
+    return {
+      filename: receiptFilename(data),
+      contentType: 'application/pdf' as const,
+      base64: Buffer.from(pdf).toString('base64'),
+    };
+  });
 
   addRoute(app, apiRoutes.orderReview, {}, (request) =>
     fulfillment.review(

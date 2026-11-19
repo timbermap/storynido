@@ -13,8 +13,10 @@
     "preview": "tsx scripts/preview.ts"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "1.1.1",
     "@react-email/components": "1.0.12",
     "@storynido/shared": "workspace:*",
+    "pdf-lib": "1.17.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "zod": "4.6.7"

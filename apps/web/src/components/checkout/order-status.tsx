@@ -6,6 +6,7 @@ import {
   BookOpen,
   CircleCheck,
   Download,
+  FileText,
   FlaskConical,
   LifeBuoy,
   Loader2,
@@ -107,7 +108,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
     };
   }, [orderId, signedIn, t, checkNow]);
 
-  async function run(kind: 'payment' | 'print' | 'download', file = 'book') {
+  async function run(kind: 'payment' | 'print' | 'download' | 'receipt', file = 'book') {
     setBusy(kind === 'download' ? `download:${file}` : kind);
     setError(null);
     try {
@@ -116,6 +117,18 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
       } else if (kind === 'print') {
         await api('devSimulatePrint', { params: { orderId } });
         setOrder(await api('order', { params: { orderId } }));
+      } else if (kind === 'receipt') {
+        // Comprobante de compra: llega en base64 y se baja con la sesión.
+        const receipt = await api('orderReceipt', { params: { orderId } });
+        const bytes = Uint8Array.from(atob(receipt.base64), (char) => char.charCodeAt(0));
+        const href = URL.createObjectURL(new Blob([bytes], { type: receipt.contentType }));
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = receipt.filename;
+        link.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(href);
+        }, 10_000);
       } else {
         const { url } = await api('orderDownload', {
           params: { orderId },
@@ -267,6 +280,20 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 <BookOpen aria-hidden="true" />
                 {t('read')}
               </Link>
+            )}
+            {order.canReceipt && (
+              <Button
+                variant="outline"
+                disabled={busy !== null}
+                onClick={() => void run('receipt')}
+              >
+                {busy === 'receipt' ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <FileText aria-hidden="true" />
+                )}
+                {t('receipt')}
+              </Button>
             )}
             {order.tracking?.url && (
               <a

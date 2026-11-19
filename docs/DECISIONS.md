@@ -3070,3 +3070,10 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Fecha:** 2026-11-19. Sebas vio en el kit de cumpleaños «¿Y un libro solo para…?» con «Libro impreso» sin precio. Todavía no hay proveedor de pago para físicos ni muestra aprobada.
 - **Interruptor:** `PRINT_ENABLED` en la API (por defecto apagado en staging y producción, prendido en local/test). Apagado, el registro de proveedores no tiene imprentas activas: la oferta del país, el creador, la ficha, el checkout, la landing y Cómo funciona dejan de ofrecer o cobrar impresos, y el servidor rechaza pedirlos. Para reabrir: `PRINT_ENABLED=true` en la API más las opciones de impresión habilitadas.
 - **Kit:** la sección del libro aparte se oculta mientras no haya impresos a la venta; Eventos no muestra impresos sin precios.
+
+## 296 — Comprobante de compra en PDF (no es una factura)
+
+- **Fecha:** 2026-11-19. Sebas todavía no tiene sociedad (SRL/LLC) para facturar y quiere probar que todo funcione. Mientras tanto, cada cliente recibe un comprobante de compra con la marca.
+- **Decisión:** al confirmarse el pago, el mail «Recibimos tu pago» lleva adjunto el PDF (A4, una página, es/en/pt) con marca v3 (Quicksand, Lora, Caveat, durazno y salvia): número de pedido (`SN-` + 8 caracteres), fecha del pago, medio de pago y su referencia, libro y formato, descuento, envío, impuestos incluidos y total, en la moneda cobrada. El mismo PDF se baja desde «Tu pedido» («Descargar comprobante», `GET /v1/orders/:id/receipt`, solo el dueño, con pago confirmado). Se arma al momento, no se guarda.
+- **Aviso fijo en el documento:** «Este comprobante no es una factura»: constancia de compra sin validez fiscal; quien necesite factura escribe desde el contacto con su número de pedido. Sin CUIT, razón social ni datos fiscales hasta que exista la sociedad que factura; entonces se cambia por la factura real (ARCA si vende desde Argentina).
+- **Dónde:** `packages/emails/src/receipt.ts` (PDF con pdf-lib, fuentes en `packages/emails/assets/fonts`), `EmailNotifier.receiptData`, adjunto en el proveedor Resend (si el PDF falla, el mail sale igual), `paidAt` en el pedido.
