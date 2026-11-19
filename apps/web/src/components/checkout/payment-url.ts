@@ -28,3 +28,15 @@ export function rememberPaymentUrl(orderId: string, url: string) {
     // Sin sessionStorage (navegación privada estricta): la página del pedido igual espera el pago.
   }
 }
+
+/** ID de la orden de PayPal dentro del enlace de pago (…/checkoutnow?token=<id>). */
+export function paypalOrderId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname;
+    if (host !== 'paypal.com' && !host.endsWith('.paypal.com')) return null;
+    return parsed.searchParams.get('token');
+  } catch {
+    return null;
+  }
+}

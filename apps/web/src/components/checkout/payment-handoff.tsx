@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/navigation';
 
 import { isExternalTabPayment, rememberPaymentUrl } from './payment-url';
+import { canPayInPage, PaypalCheckoutDialog } from './paypal-checkout';
 
 interface Pending {
   orderId: string;
@@ -16,8 +17,8 @@ interface Pending {
 }
 
 /**
- * Pasa del botón «Pagar» al cobrador. Con un cobrador que vuelve solo (Dodo, el simulado) va
- * directo. Con Gumroad, antes explica en un diálogo qué va a ver (tarjeta, sin crear cuenta) y,
+ * Pasa del botón «Pagar» al cobrador. Con PayPal, los botones de pago se abren en un diálogo sobre
+ * esta página (DECISIONS 286). Con un cobrador que vuelve solo (Dodo, el simulado) va directo. Con Gumroad, antes explica en un diálogo qué va a ver (tarjeta, sin crear cuenta) y,
  * con el clic en «Ir a pagar», abre Gumroad en otra pestaña y lleva esta a la página del pedido,
  * que se actualiza sola cuando llega la confirmación del pago.
  */
@@ -26,9 +27,14 @@ export function usePaymentHandoff(
   onDismiss: () => void,
 ): { start: (result: Pending) => void; dialog: ReactNode } {
   const [pending, setPending] = useState<Pending | null>(null);
+  const [inPage, setInPage] = useState<Pending | null>(null);
   const router = useRouter();
 
   function start(result: Pending) {
+    if (canPayInPage(result.checkoutUrl)) {
+      setInPage(result);
+      return;
+    }
     if (!isExternalTabPayment(result.checkoutUrl)) {
       window.location.assign(result.checkoutUrl);
       return;
@@ -47,10 +53,19 @@ export function usePaymentHandoff(
 
   function close() {
     setPending(null);
+    setInPage(null);
     onDismiss();
   }
 
-  const dialog = pending ? <PaymentHandoffDialog onGo={go} onClose={close} /> : null;
+  const dialog = inPage ? (
+    <PaypalCheckoutDialog
+      orderId={inPage.orderId}
+      checkoutUrl={inPage.checkoutUrl}
+      onClose={close}
+    />
+  ) : pending ? (
+    <PaymentHandoffDialog onGo={go} onClose={close} />
+  ) : null;
   return { start, dialog };
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isExternalTabPayment } from './payment-url';
+import { isExternalTabPayment, paypalOrderId } from './payment-url';
 
 describe('pago en otra pestaña', () => {
   it('Gumroad se abre en otra pestaña; el resto de los cobradores, en esta', () => {
@@ -12,5 +12,21 @@ describe('pago en otra pestaña', () => {
     );
     expect(isExternalTabPayment('https://evil-gumroad.com/l/x')).toBe(false);
     expect(isExternalTabPayment('no es una url')).toBe(false);
+  });
+});
+
+describe('paypalOrderId', () => {
+  it('lee la orden del enlace de pago de PayPal (sandbox y real)', () => {
+    expect(
+      paypalOrderId('https://www.sandbox.paypal.com/checkoutnow?token=6PB25671TM886432T'),
+    ).toBe('6PB25671TM886432T');
+    expect(paypalOrderId('https://www.paypal.com/checkoutnow?token=ABC')).toBe('ABC');
+  });
+
+  it('otros cobradores o enlaces raros: null', () => {
+    expect(paypalOrderId('https://storynidoar.gumroad.com/l/libro?wanted=true')).toBeNull();
+    expect(paypalOrderId('https://evil.example/paypal.com?token=X')).toBeNull();
+    expect(paypalOrderId('https://paypal.com.evil.example/checkoutnow?token=X')).toBeNull();
+    expect(paypalOrderId('no es una url')).toBeNull();
   });
 });

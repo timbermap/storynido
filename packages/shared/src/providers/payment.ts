@@ -70,4 +70,10 @@ export interface PaymentProvider {
    */
   parseWebhook(input: WebhookInput): PaymentEvent | Promise<PaymentEvent>;
   refund(request: RefundRequest): Promise<Refund>;
+  /**
+   * Confirma en el momento un pago que el comprador aprobó en nuestra página (PayPal embebido):
+   * cobra la sesión y devuelve el evento, o null si todavía no hay nada que confirmar. El webhook
+   * sigue llegando igual; aplicar los dos es seguro porque el pedido solo pasa a pagado una vez.
+   */
+  confirm?(sessionId: string, orderId: string): Promise<PaymentEvent | null>;
 }

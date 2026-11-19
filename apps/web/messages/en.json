@@ -2160,6 +2160,19 @@
       "go": "Go to payment",
       "close": "Close",
       "statement": "Your card statement will show Gumroad, not StoryNido. If Gumroad invites you to create an account, you don't need one."
+    },
+    "paypal": {
+      "title": "Pay for your story",
+      "text": "Choose how to pay. You stay on StoryNido.",
+      "noAccount": "No PayPal? Tap “Debit or Credit Card” and pay with your card, no account needed.",
+      "noAccountUnavailable": "Pay with your PayPal account or the card saved in it.",
+      "secure": "PayPal processes the payment securely: StoryNido never sees your card details. You are charged in US dollars (USD).",
+      "statement": "Your card statement shows PayPal and StoryNido.",
+      "loading": "Loading payment options…",
+      "confirming": "Done! We're confirming your payment. Your story starts in a few seconds.",
+      "failed": "We couldn't load the payment here (an ad blocker sometimes blocks it). <link>Pay on PayPal's page</link> and you'll come back to StoryNido automatically.",
+      "error": "PayPal couldn't process the payment. Try again or use another card.",
+      "close": "Close"
     }
   },
   "Pro": {

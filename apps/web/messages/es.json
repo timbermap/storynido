@@ -2160,6 +2160,19 @@
       "go": "Ir a pagar",
       "close": "Cerrar",
       "statement": "En el resumen de tu tarjeta va a figurar Gumroad, no StoryNido. Si Gumroad te invita a crear una cuenta (en inglés), no hace falta."
+    },
+    "paypal": {
+      "title": "Paga tu cuento",
+      "text": "Elige cómo pagar. No sales de StoryNido.",
+      "noAccount": "¿No tienes PayPal? Toca «Tarjeta de débito o crédito» y paga con tu tarjeta, sin crear cuenta.",
+      "noAccountUnavailable": "Pagas con tu cuenta de PayPal o con la tarjeta que tengas guardada ahí.",
+      "secure": "El pago lo procesa PayPal de forma segura: StoryNido nunca ve los datos de tu tarjeta. El cobro es en dólares (USD).",
+      "statement": "En el resumen de tu tarjeta figura PayPal y StoryNido.",
+      "loading": "Cargando las opciones de pago…",
+      "confirming": "¡Listo! Estamos confirmando tu pago. En unos segundos tu cuento empieza a prepararse.",
+      "failed": "No pudimos cargar el pago acá (a veces lo bloquea un bloqueador de anuncios). <link>Paga en la página de PayPal</link> y vuelves solo a StoryNido.",
+      "error": "PayPal no pudo procesar el pago. Prueba de nuevo o con otra tarjeta.",
+      "close": "Cerrar"
     }
   },
   "Pro": {
