@@ -49,7 +49,7 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   DODO_PRODUCT_ID: z.string().trim().optional(),
   /** test_mode (por defecto) o live_mode. */
   DODO_ENV: z.enum(['test_mode', 'live_mode']).default('test_mode'),
-  /** PayPal (PAYMENT_PROVIDER=paypal): sin las tres variables no se registra (DECISIONS 276). */
+  /** PayPal (PAYMENT_PROVIDER=paypal): sin las tres variables no se registra (DECISIONS 279). */
   PAYPAL_CLIENT_ID: z.string().trim().optional(),
   PAYPAL_CLIENT_SECRET: z.string().trim().optional(),
   PAYPAL_WEBHOOK_ID: z.string().trim().optional(),

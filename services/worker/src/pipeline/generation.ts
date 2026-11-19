@@ -20,6 +20,7 @@ import {
   companionNote,
   countWords,
   normalizeFirestoreData,
+  ContentBlockedError,
   ProviderError,
   bookEventSchema,
   kitSelectionSchema,
@@ -359,6 +360,36 @@ const ESCALATION = [
   ' NO TEXT-BEARING OBJECTS: keep the same place, the same people and the same action as described, but do not draw signs, posters, banners, blackboards or whiteboards, screens, maps, diagrams, labels, packaging with writing, books, notebooks or papers with visible writing, lockers or doors with numbers, clocks, calendars, license plates, or clothing with prints or lettering. Show those surfaces blank or leave those objects out. Keep hands simple and faces calm.',
   ' FINAL FALLBACK: keep the same place and the same characters (same gender, age and look as in the scene), as a simple medium shot with soft shapes for the background, with absolutely no signs, posters, boards, screens, notebooks, papers, numbers, letters or small props.',
 ] as const;
+
+/**
+ * Lo que se pide al redibujar una página cuya revisión bloqueó el filtro de seguridad: ropa
+ * completa y plano tranquilo (la causa típica es una escena en la cama o en pijama).
+ */
+export const SAFE_SCENE_HINT =
+  'every character fully and modestly clothed (long sleeves and long trousers, or long full-length pajamas; ' +
+  'if in bed, tucked under the blanket up to the shoulders), a calm medium-wide shot of the whole room, ' +
+  'nothing suggestive, the mood is cozy and innocent';
+
+const SAFE_REDRAW_MARK = 'safety_blocked_review';
+
+/** Revisión sintética que pide redibujar la página con {@link SAFE_SCENE_HINT}. */
+function safeRedrawReview(pageIndex: number): PageReview {
+  return {
+    pageIndex,
+    status: 'repair',
+    criticalIssues: [SAFE_REDRAW_MARK],
+    nonCriticalIssues: [],
+    continuityChecks: [],
+    imageTextMatches: true,
+    textInImage: false,
+    repairTarget: 'illustration_only',
+    usage: { provider: 'none', model: 'none', costUsdMicros: 0 },
+  };
+}
+
+function isSafeRedraw(review: PageReview | null): boolean {
+  return review?.criticalIssues[0] === SAFE_REDRAW_MARK;
+}
 
 function escalateScene(scene: string, level: number): string {
   // Nivel 2: sin texto legible; 3: además escena simple; 4: además solo el protagonista.
@@ -1054,6 +1085,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     const finalImages = new Map<number, string>();
     const blocked: { index: number; reason: string }[] = [];
     let needsReference = 0;
+    /** Páginas cuya revisión bloqueó el filtro de seguridad: se redibujan una vez, más pudorosas. */
+    const reviewBlocked = new Set<number>();
 
     const reviewRequest = async (index: number, path: string) => ({
       pageIndex: index,
@@ -1080,12 +1113,27 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           const request = await reviewRequest(index, path);
           // Una revisión que se cuelga no tumba el control de todo el libro: 1 reintento y,
           // si sigue sin responder, esa página va a una persona.
+          let safetyBlocked = false;
           for (let tries = 0; tries < 2 && !review; tries += 1) {
             try {
               review = await provider.text.reviewPage(request);
             } catch (error) {
               log.warn({ orderId: ctx.order.id, index, err: error }, 'page review failed');
+              // El filtro de seguridad bloquea igual la misma llamada: no se repite.
+              if (error instanceof ContentBlockedError) {
+                safetyBlocked = true;
+                break;
+              }
             }
+          }
+          // Si el filtro de seguridad no deja revisar el dibujo (pasa con escenas en la cama o en
+          // pijama), no se intenta esquivarlo: se vuelve a dibujar la página más pudorosa y simple,
+          // y el dibujo nuevo pasa por la revisión. Si también la bloquea, va a una persona.
+          if (!review && safetyBlocked && !reviewBlocked.has(index)) {
+            reviewBlocked.add(index);
+            await qaEvent(ctx, 'page_review_blocked', { pageIndex: index, attemptCount: attempts });
+            pending = safeRedrawReview(index);
+            continue;
           }
           if (!review) {
             await qaEvent(ctx, 'page_human_review', {
@@ -1133,7 +1181,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           repairCost < limits.repairBudgetUsdMicros;
         if (!canRepair) {
           const issues = review?.criticalIssues.join('; ') ?? '';
-          const reason = issues ? issues.slice(0, 200) : 'sin ilustración';
+          const reason = isSafeRedraw(review)
+            ? 'revisión automática bloqueada por el filtro de seguridad'
+            : issues
+              ? issues.slice(0, 200)
+              : 'sin ilustración';
           await qaEvent(ctx, 'page_human_review', {
             pageIndex: index,
             attemptCount: attempts,
@@ -1151,9 +1203,23 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         const expected = (review?.continuityChecks ?? [])
           .filter((check) => check.expected !== check.observed)
           .map((check) => `${check.trait} ${check.expected}`);
-        const hint = expected.length > 0 ? expected.join(', ') : 'the scene matches the page';
+        const safe = isSafeRedraw(review);
+        const hint = safe
+          ? SAFE_SCENE_HINT
+          : expected.length > 0
+            ? expected.join(', ')
+            : 'the scene matches the page';
         try {
-          const spent = await illustrate(ctx, snapshot, index, next, 1000 * attempts + index, hint);
+          const spent = await illustrate(
+            ctx,
+            snapshot,
+            index,
+            next,
+            1000 * attempts + index,
+            hint,
+            // Redibujo por bloqueo de seguridad: escena simple desde el primer intento.
+            safe ? 3 : 1,
+          );
           cost += spent;
           repairCost += spent;
           pageRepairCost += spent;

@@ -573,8 +573,33 @@ export class Pipeline {
     ).data() as { output?: { sentToPrint?: boolean } } | undefined;
     const to = deliver?.output?.sentToPrint ? 'sent_to_print' : 'ready';
     const closed = await this.close(orderId, runId, to, {});
-    if (closed) await this.notifier?.orderStatus(orderId, to);
+    if (closed) {
+      await this.resolveAlerts(orderId);
+      await this.notifier?.orderStatus(orderId, to);
+    }
     return closed;
+  }
+
+  /**
+   * El pedido terminó bien (por ejemplo, después de la revisión manual y el reintento): los avisos
+   * de falla que dejó abiertos ya no piden nada y se cierran solos.
+   */
+  private async resolveAlerts(orderId: string): Promise<void> {
+    try {
+      const open = await this.db
+        .collection(COLLECTIONS.adminAlerts)
+        .where('orderId', '==', orderId)
+        .where('resolvedAt', '==', null)
+        .get();
+      if (open.empty) return;
+      const batch = this.db.batch();
+      const resolvedAt = new Date();
+      for (const doc of open.docs) batch.update(doc.ref, { resolvedAt, resolvedBy: 'system' });
+      await batch.commit();
+    } catch (error) {
+      // Un aviso que queda abierto no frena la entrega del libro.
+      this.log.warn({ orderId, err: error }, 'admin alerts not resolved');
+    }
   }
 
   /** Se agotaron los reintentos: revisión manual y aviso al admin. */

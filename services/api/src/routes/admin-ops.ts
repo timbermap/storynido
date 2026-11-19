@@ -168,10 +168,29 @@ export function registerAdminOpsRoutes(app: FastifyInstance): void {
     ]);
     const items: AttentionItem[] = [];
     const alerted = new Set<string>();
+    // Un aviso de falla cuyo pedido ya salió de revisión manual (se reintentó y terminó) no pide
+    // nada: no se muestra aunque haya quedado abierto (los avisos viejos, de antes del cierre solo).
+    const alertOrderIds = [
+      ...new Set(
+        alerts.docs
+          .map((doc) => doc.data() as { kind?: unknown; orderId?: unknown })
+          .filter((data) => data.kind === 'pipeline_failed' && typeof data.orderId === 'string')
+          .map((data) => data.orderId as string),
+      ),
+    ];
+    const settled = new Set(
+      (alertOrderIds.length
+        ? await db.getAll(...alertOrderIds.map((id) => db.collection(COLLECTIONS.orders).doc(id)))
+        : []
+      )
+        .filter((snap) => snap.exists && snap.get('status') !== 'qa_failed')
+        .map((snap) => snap.id),
+    );
     for (const doc of alerts.docs) {
       const data = normalizeFirestoreData(doc.data()) as Record<string, unknown>;
       const kind = String(data.kind);
       const orderId = typeof data.orderId === 'string' ? data.orderId : null;
+      if (orderId && kind === 'pipeline_failed' && settled.has(orderId)) continue;
       if (orderId && kind === 'pipeline_failed') alerted.add(orderId);
       items.push({
         id: `alert:${doc.id}`,

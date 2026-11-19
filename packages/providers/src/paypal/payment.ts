@@ -128,7 +128,7 @@ function paypalValue(minor: number): string {
 
 /**
  * PayPal (Orders v2) para cobrar en USD. No es merchant of record: el IVA va incluido en el precio
- * y sale del margen, como con Dodo (DECISIONS 247 y 276).
+ * y sale del margen, como con Dodo (DECISIONS 247 y 279).
  *
  * Flujo: se crea la orden con `intent: CAPTURE` y el comprador la aprueba en PayPal (con su cuenta o
  * con tarjeta, sin cuenta). PayPal lo devuelve solo a `successUrl`. El webhook

@@ -1,5 +1,6 @@
 import {
   AVATAR_OPTIONS,
+  ContentBlockedError,
   ProviderError,
   SHOT_TYPES,
   varyShots,
@@ -284,10 +285,9 @@ export function blockDetail(response: GenerateContentResponse): string {
 
 function parseJson(response: GenerateContentResponse, what: string): unknown {
   if (blocked(response))
-    throw new ProviderError(
+    throw new ContentBlockedError(
       'vertex',
       `${what}: bloqueado por seguridad${blockDetail(response)}`,
-      true,
     );
   try {
     return JSON.parse(textOf(response)) as unknown;

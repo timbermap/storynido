@@ -330,7 +330,7 @@ locals {
       GUMROAD_ACCESS_TOKEN = "gumroad-access-token"
       GUMROAD_PING_SECRET  = "gumroad-ping-secret"
     } : {},
-    # PayPal (DECISIONS 276): credenciales de la app REST y el ID del webhook (verifica la firma).
+    # PayPal (DECISIONS 279): credenciales de la app REST y el ID del webhook (verifica la firma).
     var.payment_provider == "paypal" ? {
       PAYPAL_CLIENT_ID     = "paypal-client-id"
       PAYPAL_CLIENT_SECRET = "paypal-client-secret"

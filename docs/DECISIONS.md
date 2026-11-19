@@ -2912,7 +2912,24 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
   - Opinión: título y estrellas en una línea; el comentario y «Enviar» aparecen al elegir las estrellas.
 - **Textos:** es (vale también para AR/UY), pt y en.
 
-## 276 — PayPal como cobrador (sandbox en staging)
+## 276 — Revisión de página bloqueada por el filtro de seguridad: se redibuja, no va a una persona
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: el pedido de «Goodnight, Lu» (cuento para dormir) quedó en revisión manual. El dibujo de la página 10 (Lu en pijama, en la cama) había pasado la moderación, pero el revisor automático de Vertex devolvió `blockReason=PROHIBITED_CONTENT` dos veces (la misma llamada vuelve a bloquear) y la página fue a una persona con «revisión automática no disponible».
+- **Cambio:** un bloqueo del filtro de seguridad es `ContentBlockedError` (no reintentable). El control de calidad no repite la misma llamada: redibuja esa página una vez, con ropa completa y pudorosa (si está en la cama, tapada hasta los hombros), plano tranquilo y escena simple, y revisa el dibujo nuevo. No se intenta esquivar el filtro con la misma imagen. Si también bloquea, la página va a una persona como antes. Cuenta dentro de los topes de reparación. Código de calidad nuevo `page_review_blocked`.
+- **Avisos:** cuando un pedido termina bien (por ejemplo, tras la revisión manual y el reintento), los avisos `pipeline_failed` abiertos de ese pedido se cierran solos (`resolvedBy: 'system'`). La portada Hoy tampoco muestra avisos viejos de pedidos que ya no están en revisión.
+
+## 277 — La idea de la ficha entra al prompt del cuento y manda sobre los gustos
+
+- **Fecha:** 2026-11-18. La mesa revisó el PDF de «Goodnight, Lu» (Buenas noches, 5 años, gusto «gimnasia»). La ficha promete «la rutina de dormir contada con rima: el baño, el pijama, el último abrazo y las cosas que también se van a dormir». El libro salió de acrobacias: salta en la cama para alcanzar un estante, se cae, hace la vertical contra la pared y un puente. No hay rima, baño ni cosas que se van a dormir.
+- **Causa:** las historias con la plantilla genérica (`TEXT_PROMPT`) solo le pasaban a la IA el título, los gustos y «un pequeño desafío y un final feliz». El resumen de la ficha no llegaba al planificador ni al redactor, así que el único tema real era el gusto del chico.
+- **Cambio:** `buildStoryPrompt` recibe `premise` (el resumen de la ficha en el idioma del libro) como «Idea de esta historia»: hay que respetarla, y los gustos se suman como detalles sin cambiar la idea. Las historias con la etiqueta «dormir» cambian la regla del desafío por una de energía que baja hasta terminar en la cama. Dos reglas nuevas para todas: lo que lleva el protagonista se llama siempre igual (antes: «frames», «spectacles» y «glasses» en el mismo libro) y no se muestra como bueno lo que un chico podría imitar y lastimarse (saltar en la cama para alcanzar algo, trepar, la vertical contra la pared).
+
+## 278 — Sin páginas mudas en el libro mini ni en los cuentos para dormir
+
+- **Fecha:** 2026-11-19. Elegido por Sebas, a partir del pedido «Goodnight, Lu». La página 8 salió sin texto a propósito (el plan marca 1 o 2 páginas sin palabras en el clímax, de 3 a 6 años, DECISIONS de «Cuentos que cuidan»). Pero cayó en un momento tranquilo de un libro de 10 páginas, y para quien lee parecía un error.
+- **Cambio:** el libro mini y las historias con la etiqueta «dormir» no tienen páginas sin texto: si el planificador marca alguna, se escribe igual (y si la dejó con presupuesto 0, recupera el mínimo de palabras). En los libros más largos de 3 a 6 años sigue la regla del clímax.
+
+## 279 — PayPal como cobrador (sandbox en staging)
 
 - **Fecha:** 2026-11-19. Pedido por Sebas («paypal podría ser»), después de la mesa de DECISIONS 272 (el CEO propuso PayPal en nuestra página).
 - **Cómo cobra:** Orders v2 con `intent: CAPTURE`, en USD, marca «StoryNido» e idioma según el sitio (`es-MX`, `pt-BR`, `en-US`), sin envío (`NO_SHIPPING`) y «Pagar ahora». El comprador paga con su cuenta PayPal o con tarjeta sin cuenta, en la página de PayPal, y **PayPal lo devuelve solo** a `/pedido/<id>`: no hace falta el diálogo ni la otra pestaña de Gumroad (DECISIONS 271).

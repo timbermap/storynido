@@ -65,7 +65,7 @@ export function AwaitingPayment({ orderId, onCheck }: { orderId: string; onCheck
             {t('title')}
           </h2>
           {/* Con la URL guardada, el pago está en otra pestaña (Gumroad); si no, el cobrador ya
-              volvió solo (PayPal) y solo falta su confirmación (DECISIONS 276). */}
+              volvió solo (PayPal) y solo falta su confirmación (DECISIONS 279). */}
           <p className="mt-1 text-sm text-muted-foreground">
             {paymentUrl ? t('text') : t('confirming')}
           </p>
