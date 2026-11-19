@@ -81,6 +81,7 @@ export function OrderHeader({
           name={null}
           line={header.line}
           sizes={large ? '144px' : '88px'}
+          title={header.title}
         />
       </span>
       <div className="grid min-w-0 gap-1.5">

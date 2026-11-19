@@ -78,7 +78,8 @@ export function Thumb({
   priority?: boolean;
   /**
    * Título del libro sobre la portada generada, como en el visor y en el PDF (la ilustración
-   * nunca lo trae). Solo en las portadas grandes: en una miniatura no se lee.
+   * nunca lo trae). En toda portada de un libro listo, también en miniatura: la tipografía
+   * escala con el ancho de la portada (DECISIONS 292).
    */
   title?: string | null;
 }) {
