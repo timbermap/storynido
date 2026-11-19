@@ -2896,13 +2896,29 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Pago:** junto al total digital (y en el kit) se ve «Precios para: …» con la opción «Según mi ubicación (país)», que borra la elección y vuelve a la IP. Con sesión, el cambio queda también en la cuenta. En el impreso el país sigue saliendo de la dirección.
 - **Mi cuenta:** si la cuenta no eligió país, muestra el que usa el sitio, así coincide con los precios.
 
-## 274 — Revisión de página bloqueada por el filtro de seguridad: se redibuja, no va a una persona
+## 274 — «Leer el cuento» también en «Tu pedido»
+
+- **Fecha:** 2026-11-18. Pedido por Sebas: el detalle del pedido entregado solo ofrecía «Descargar el PDF»; el visor de DECISIONS 254 estaba solo en Terminados.
+- **Decisión:** el detalle del pedido muestra «Leer el cuento» cuando el pedido ya tiene el PDF limpio del libro (`canDownload` y el archivo `book`), igual que la estantería: ebook, impreso y el librito del kit. Las tarjetas impresas no. En un libro, leer es el botón principal y la descarga pasa a secundario; en el kit, «Descargar todo» sigue principal y leer queda al lado.
+- **Volver:** el enlace lleva `?desde=pedido` y la X del visor vuelve al pedido (desde Terminados sigue volviendo a Terminados).
+
+## 275 — «Tu pedido» rediseñado: el libro primero, sin pasos repetidos y una columna útil
+
+- **Fecha:** 2026-11-18. Pedido por Sebas («esta también se podría mejorar»); revisaron diseño/UX, usuario familia, producto y marketing.
+- **Lo que veía la mesa:** con el libro entregado, la portada era chica; los tres pasos («Pagado», «Creando», «Entregado») tenían el mismo tilde y no decían nada; la columna derecha era solo el precio y quedaba vacía; la caja de opinión, con un comentario grande vacío, pesaba más que el libro.
+- **Decisión:**
+  - Libro ya recibido (digital listo o impreso entregado): portada grande, el estado con un tilde verde y las acciones («Leer el cuento» principal, «Descargar el PDF» al lado). Los pasos se ocultan; mientras el pedido avanza siguen igual, con el paso en curso girando.
+  - Columna del costado (fija al bajar en compu): número corto y fecha del pedido arriba del precio; «¿Otra aventura?» con «Crear otro cuento» cuando ya lo tiene; ayuda con enlace a preguntas frecuentes.
+  - Opinión: título y estrellas en una línea; el comentario y «Enviar» aparecen al elegir las estrellas.
+- **Textos:** es (vale también para AR/UY), pt y en.
+
+## 276 — Revisión de página bloqueada por el filtro de seguridad: se redibuja, no va a una persona
 
 - **Fecha:** 2026-11-18. Pedido por Sebas: el pedido de «Goodnight, Lu» (cuento para dormir) quedó en revisión manual. El dibujo de la página 10 (Lu en pijama, en la cama) había pasado la moderación, pero el revisor automático de Vertex devolvió `blockReason=PROHIBITED_CONTENT` dos veces (la misma llamada vuelve a bloquear) y la página fue a una persona con «revisión automática no disponible».
 - **Cambio:** un bloqueo del filtro de seguridad es `ContentBlockedError` (no reintentable). El control de calidad no repite la misma llamada: redibuja esa página una vez, con ropa completa y pudorosa (si está en la cama, tapada hasta los hombros), plano tranquilo y escena simple, y revisa el dibujo nuevo. No se intenta esquivar el filtro con la misma imagen. Si también bloquea, la página va a una persona como antes. Cuenta dentro de los topes de reparación. Código de calidad nuevo `page_review_blocked`.
 - **Avisos:** cuando un pedido termina bien (por ejemplo, tras la revisión manual y el reintento), los avisos `pipeline_failed` abiertos de ese pedido se cierran solos (`resolvedBy: 'system'`). La portada Hoy tampoco muestra avisos viejos de pedidos que ya no están en revisión.
 
-## 275 — La idea de la ficha entra al prompt del cuento y manda sobre los gustos
+## 277 — La idea de la ficha entra al prompt del cuento y manda sobre los gustos
 
 - **Fecha:** 2026-11-18. La mesa revisó el PDF de «Goodnight, Lu» (Buenas noches, 5 años, gusto «gimnasia»). La ficha promete «la rutina de dormir contada con rima: el baño, el pijama, el último abrazo y las cosas que también se van a dormir». El libro salió de acrobacias: salta en la cama para alcanzar un estante, se cae, hace la vertical contra la pared y un puente. No hay rima, baño ni cosas que se van a dormir.
 - **Causa:** las historias con la plantilla genérica (`TEXT_PROMPT`) solo le pasaban a la IA el título, los gustos y «un pequeño desafío y un final feliz». El resumen de la ficha no llegaba al planificador ni al redactor, así que el único tema real era el gusto del chico.

@@ -5,6 +5,7 @@ import { OrderReader } from '@/components/reader/order-reader';
 
 interface Props {
   params: Promise<{ locale: string; orderId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -12,8 +13,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: t('pageTitle'), robots: { index: false } };
 }
 
-/** Leer un libro comprado en el visor, desde Terminados de Mis cuentos (DECISIONS 254). */
-export default async function ReadPage({ params }: Props) {
-  const { orderId } = await params;
-  return <OrderReader orderId={orderId} />;
+/**
+ * Leer un libro comprado en el visor, desde Terminados de Mis cuentos (DECISIONS 254) o desde
+ * «Tu pedido» (?desde=pedido: la X vuelve al pedido).
+ */
+export default async function ReadPage({ params, searchParams }: Props) {
+  const [{ orderId }, query] = await Promise.all([params, searchParams]);
+  return <OrderReader orderId={orderId} fromOrder={query.desde === 'pedido'} />;
 }

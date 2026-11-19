@@ -1991,6 +1991,20 @@
       "simulateText": "Os pagamentos são simulados neste ambiente: ninguém paga nada.",
       "simulate": "Simular o pagamento",
       "progress": "Etapa {current} de {total}",
+      "details": {
+        "number": "Pedido",
+        "date": "Data"
+      },
+      "next": {
+        "title": "Outra aventura?",
+        "text": "Com o mesmo personagem, em minutos e com a prévia grátis.",
+        "cta": "Criar outra história"
+      },
+      "help": {
+        "text": "Algo não saiu como você esperava?",
+        "link": "Perguntas frequentes"
+      },
+      "read": "Ler a história",
       "download": "Baixar o PDF",
       "track": "Acompanhar o envio",
       "reorder": "Pedir de novo",
