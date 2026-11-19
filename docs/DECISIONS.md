@@ -3046,3 +3046,7 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Causa:** la regla de pintura de la tapa de colorear (DECISIONS 285) pedía «bright, cheerful flat colors» y su tope de saturación era 0,75; los demás estilos solo recibían la paleta suave en la dirección de arte, sin una regla al final del pedido ni un tope bajo. La franja del título se pedía en «el tercio de arriba», pero título y subtítulo ocupan cerca del 40%.
 - **Decisión:** `SOFT_COLOR_RULE` va al final de todo pedido a color (cualquier estilo y tipo de libro); la tapa de colorear se pinta con colores suaves y apagados, tope 0,5; topes de las fichas 0,7/0,62 → 0,6 (las muestras aprobadas llegan a 0,58). La zona del título pasa a ser el 40% de arriba, también en el control `title_zone` y en el segundo paso de la tapa.
 - **Tests:** `style-checks.test.ts`, `vertex.test.ts` (tapa de colorear con colores suaves).
+
+## 292 — El título siempre sobre la portada de un libro listo
+
+Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae). Ahora toda portada generada de un libro con título lo lleva encima, igual que el visor y el PDF: cabecera del pedido, estantes de Mis cuentos (borradores con portada, pedidos, terminados), tarjeta «Lo próximo» de la home y de Mis cuentos. Escala con el ancho de la portada, así que también se ve en miniaturas. Quedan sin título las fotos del personaje y la lista compacta de 44 px.
