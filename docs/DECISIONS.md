@@ -2990,7 +2990,16 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Texto editado por el adulto:** el mismo tope vale al editar una página (`text_too_long`, con mensaje amable), así el texto siempre entra en su lugar del libro.
 - **Armado por tipo:** cuento (zona calma / papel fundido según palabras), colorear (franja que se adapta), 9+ (página de texto con ajuste de letra) y actividades (consigna en su encabezado). El test del PDF prueba el tope de cada franja y un pie largo de colorear sin desborde.
 
-## 286 — PayPal dentro de StoryNido: botones en un diálogo y confirmación inmediata
+## 286 — El personaje se dibuja con lo de ahora: fotos vigentes, rasgos corregidos y la nota del adulto primero
+
+- **Fecha:** 2026-11-19. Pedido por Sebas con Lu: borró la foto con anteojos, quedaron dos sin anteojos y «Actualizar su dibujo» volvió a salir con anteojos; el texto escrito en «Ajustar el parecido» no se tomaba.
+- **Rasgos de una foto borrada:** el dibujo nuevo del perfil partía de los rasgos del dibujo anterior (leídos de la foto con anteojos), con los anteojos fijados como «obligatorios». Ahora cada dibujo guarda de qué foto (o rasgos) salió (`source`) y sus rasgos solo se reusan si el dibujo nuevo sale de esa misma foto; si no, se parte de lo que se ve en la foto vigente.
+- **«Ajustar el parecido» del perfil estaba al revés:** las casillas de «¿Qué ajustamos?» se mandaban como rasgos que tienen que quedar iguales, así que marcar «Los anteojos» los fijaba. Ahora, como en la muestra, cada casilla abre la elección del rasgo (pelo, piel, ojos, anteojos, rasgo distintivo) y se manda el valor corregido. También se puede ajustar el dibujo actual, no solo uno nuevo.
+- **La nota del adulto manda:** antes iba pegada al final de la ficha del personaje, después de la regla de accesorios, y el modelo la ignoraba. Ahora va aparte y última en el pedido de imagen (`correction`), con prioridad sobre la foto y los dibujos de referencia.
+- **Anteojos solo por el rasgo:** la foto y los dibujos de referencia ya no dicen «copiá los anteojos»; los anteojos siguen lo que dice la ficha (leída de la foto o corregida por el adulto).
+- **Lo corregido sigue:** al corregir en una muestra o aprobar un dibujo del perfil, los rasgos quedan guardados en el personaje para esa foto (`correctedTraits`) y los próximos cuentos con esa foto parten de ahí (antes cada cuento volvía a lo leído de la foto y a la lámina guardada sin corregir).
+
+## 287 — PayPal dentro de StoryNido: botones en un diálogo y confirmación inmediata
 
 - **Fecha:** 2026-11-19
 - **Contexto:** con PayPal (279), «Pagar» llevaba a la página de PayPal (pedía iniciar sesión y parecía que se salía de StoryNido). Sebas pidió que el pago quede en nuestra página y preguntó qué hace quien no tiene cuenta de PayPal.

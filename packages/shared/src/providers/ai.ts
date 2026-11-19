@@ -180,6 +180,12 @@ export interface IllustrationRequest {
    * (DECISIONS 264).
    */
   traitReferences?: readonly ImageData[];
+  /**
+   * «Ajustar el parecido»: lo que el adulto pidió corregir, con sus palabras. Va aparte y manda
+   * sobre la foto y los dibujos de referencia (antes iba al final de la ficha y el modelo lo
+   * ignoraba).
+   */
+  correction?: string | null;
   aspectRatio: '1:1' | '3:4' | '4:3';
   /** 1K para pantalla; 2K para imprenta (~220 dpi a 21×28 cm). */
   resolution?: '1K' | '2K';

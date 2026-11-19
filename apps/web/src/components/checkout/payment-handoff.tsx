@@ -18,7 +18,7 @@ interface Pending {
 
 /**
  * Pasa del botón «Pagar» al cobrador. Con PayPal, los botones de pago se abren en un diálogo sobre
- * esta página (DECISIONS 286). Con un cobrador que vuelve solo (Dodo, el simulado) va directo. Con Gumroad, antes explica en un diálogo qué va a ver (tarjeta, sin crear cuenta) y,
+ * esta página (DECISIONS 287). Con un cobrador que vuelve solo (Dodo, el simulado) va directo. Con Gumroad, antes explica en un diálogo qué va a ver (tarjeta, sin crear cuenta) y,
  * con el clic en «Ir a pagar», abre Gumroad en otra pestaña y lleva esta a la página del pedido,
  * que se actualiza sola cuando llega la confirmación del pago.
  */

@@ -11,7 +11,7 @@ import { api } from '@/lib/api';
 import { paypalOrderId } from './payment-url';
 
 /**
- * PayPal dentro de StoryNido (DECISIONS 286): los botones oficiales de PayPal en un diálogo sobre
+ * PayPal dentro de StoryNido (DECISIONS 287): los botones oficiales de PayPal en un diálogo sobre
  * nuestra página. «PayPal» abre una ventanita encima; «Tarjeta de débito o crédito» despliega el
  * formulario de tarjeta acá mismo, sin cuenta de PayPal. La orden ya la creó la API: los botones
  * solo la aprueban, y al aprobar la API cobra y confirma en el momento (el webhook queda de red).
