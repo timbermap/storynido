@@ -78,6 +78,16 @@ const providers = createProviderRegistry({
           acceptTestSales: config.appEnv !== 'production',
         }
       : undefined,
+  paypal:
+    config.env.PAYPAL_CLIENT_ID && config.env.PAYPAL_CLIENT_SECRET && config.env.PAYPAL_WEBHOOK_ID
+      ? {
+          clientId: config.env.PAYPAL_CLIENT_ID,
+          clientSecret: config.env.PAYPAL_CLIENT_SECRET,
+          webhookId: config.env.PAYPAL_WEBHOOK_ID,
+          // Fuera de producción, siempre el sandbox (no cobra).
+          environment: config.appEnv === 'production' ? config.env.PAYPAL_ENV : 'sandbox',
+        }
+      : undefined,
   dodo:
     config.env.DODO_API_KEY && config.env.DODO_WEBHOOK_SECRET && config.env.DODO_PRODUCT_ID
       ? {

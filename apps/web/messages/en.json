@@ -2035,7 +2035,9 @@
         "paid": "I've paid",
         "reopen": "Open the payment again",
         "notYet": "We haven't received the confirmation yet. It usually takes less than a minute: this page keeps checking on its own.",
-        "slow": "Paid and nothing changed yet? Check your email: Gumroad sends the receipt right away. If more than 5 minutes have passed, <link>contact us</link> and we'll sort it out."
+        "slow": "Paid and nothing changed yet? Check your email: Gumroad sends the receipt right away. If more than 5 minutes have passed, <link>contact us</link> and we'll sort it out.",
+        "confirming": "We're confirming your payment. In a few seconds this page updates by itself and your story starts being prepared.",
+        "slowConfirming": "Paid and nothing changed yet? Check your email for the payment receipt. If it's been more than 5 minutes, <link>write to us</link> and we'll sort it out."
       }
     },
     "reorderSubtitle": "You're ordering another printed copy of the same book, exactly as it turned out.",
