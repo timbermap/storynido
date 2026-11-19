@@ -123,7 +123,8 @@ export function bookPrices(
  */
 export function orderablePrintFormats(
   price: { printedFormats: BookFormat[] } | null,
-  lengthFormats: readonly BookFormat[],
+  _lengthFormats?: readonly BookFormat[],
 ): BookFormat[] {
-  return price ? price.printedFormats : lengthFormats.filter((format) => format !== 'digital');
+  // Sin precios (Eventos) no hay oferta de impresos: se vende solo digital.
+  return price ? price.printedFormats : [];
 }

@@ -124,6 +124,11 @@ export class ProviderRegistry {
     private readonly factories: ProviderFactories,
     private readonly settings: ProviderSettings,
     private readonly defaultModels: AiModelSettings = aiModelSettingsSchema.parse({}),
+    /**
+     * Interruptor de la venta de impresos (PRINT_ENABLED): apagado, no hay imprentas activas y
+     * ningún impreso se ofrece ni se cobra. Los pedidos ya ruteados siguen resolviendo su imprenta.
+     */
+    private readonly printEnabled = true,
   ) {
     // Falla al arrancar si la configuración pide algo que no existe.
     for (const kind of Object.keys(PROVIDER_IDS) as ProviderKind[]) {
@@ -199,6 +204,7 @@ export class ProviderRegistry {
 
   /** Imprentas activas en este ambiente (en el orden configurado). */
   printers(): PrintProvider[] {
+    if (!this.printEnabled) return [];
     return this.settings.print.map((id) => this.resolve('print', id));
   }
 
