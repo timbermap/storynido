@@ -914,12 +914,12 @@ const DRAFT_STORIES: SeedStory[] = [
     summary: {
       es: 'Lo que [Nombre] más quiere en el mundo: mamá y papá (o quien lo cuide). Los abrazos, los juegos y el cuento de la noche que los hacen los mejores. Para el Día de la Madre, el del Padre o cualquier día.',
       en: 'What [Name] loves most in the world: Mom and Dad (or whoever takes care of them). The hugs, the games and the bedtime story that make them the best. For Mother’s Day, Father’s Day or any day.',
-      pt: 'O que [Nome] mais ama no mundo: mamãe e papai (ou quem cuida). Os abraços, as cócegas e a história de dormir que os tornam os melhores. Para o Dia das Mães, o dos Pais ou qualquer dia.',
+      pt: 'O que [Nome] mais ama no mundo: mamãe e papai (ou quem cuida). Os abraços, as brincadeiras e a história de dormir que os tornam os melhores. Para o Dia das Mães, o dos Pais ou qualquer dia.',
     },
     excerpt: {
       es: 'Mamá me abraza fuerte, fuerte. Papá me cuenta un cuento, un cuento. Los mejores del mundo, dice [Nombre]. ¡Y los quiere, y los quiere, y los quiere!',
       en: 'Mom hugs me tight, tight. Dad tells me a story, a story. The best in the world, says [Name]. And I love them, and I love them, and I love them!',
-      pt: 'A mamãe me abraça forte, forte. O papai me faz cócegas, cócegas. Os melhores do mundo, diz [Nome]. E eu os amo, e os amo, e os amo!',
+      pt: 'A mamãe me abraça forte, forte. O papai me conta uma história, uma história. Os melhores do mundo, diz [Nome]. E eu os amo, e os amo, e os amo!',
     },
     coverImage: '/samples/los-mejores-del-mundo.webp',
   },
@@ -970,7 +970,7 @@ const DRAFT_STORIES: SeedStory[] = [
     summary: {
       es: 'Cuando algo sale mal, adentro de [Nombre] empieza a burbujear un volcán. Con respiraciones, una pelotita para apretar y un amigo al lado, aprende a dejarlo salir sin que queme a nadie.',
       en: 'When something goes wrong, a volcano starts to bubble inside [Name]. With deep breaths, a squeeze ball and a friend nearby, the volcano learns to let it out without burning anyone.',
-      pt: 'Quando algo dá errado, um vulcão começa a borbulhar dentro de [Nome]. Com respirações, um abraço e um amigo, aprende a deixá-lo sair sem queimar ninguém.',
+      pt: 'Quando algo dá errado, um vulcão começa a borbulhar dentro de [Nome]. Com respirações, uma bolinha para apertar e um amigo por perto, aprende a deixá-lo sair sem queimar ninguém.',
     },
     excerpt: {
       es: 'La torre de bloques se cayó y, dentro de [Nombre], algo empezó a burbujear: glu, glu, glu. —¡Es mi volcán! —dijo, apretando los puños. Respiró hondo, una, dos, tres veces… y el volcán se calmó.',
