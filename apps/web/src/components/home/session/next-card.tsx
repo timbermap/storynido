@@ -136,7 +136,13 @@ export function NextCard({
           line={item.channel}
           sizes="92px"
           priority
-          title={next.kind === 'order' ? next.order.title : next.kind === 'preview' ? next.book.title : null}
+          title={
+            next.kind === 'order'
+              ? next.order.title
+              : next.kind === 'preview'
+                ? next.book.title
+                : null
+          }
         />
       </span>
       <div className="grid min-w-0 gap-1.5">

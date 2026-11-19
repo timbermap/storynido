@@ -48,7 +48,15 @@ export function NextUp({
       )}
     >
       <span className="relative block aspect-[3/4] w-[68px] -rotate-2 overflow-hidden rounded-[6px_12px_12px_6px] bg-muted shadow-[0_10px_18px_-12px_rgb(38_50_74/0.5)] motion-reduce:rotate-0 sm:w-[92px]">
-        <Thumb src={src} story={story} name={name} line={item.channel} sizes="92px" priority title={next.kind === 'character' ? null : item.title} />
+        <Thumb
+          src={src}
+          story={story}
+          name={name}
+          line={item.channel}
+          sizes="92px"
+          priority
+          title={next.kind === 'character' ? null : item.title}
+        />
       </span>
       <div className="grid min-w-0 gap-1.5">
         <p className="text-xs font-bold tracking-[0.08em] text-muted-foreground uppercase">
