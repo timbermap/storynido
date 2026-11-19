@@ -609,13 +609,18 @@ export const publicPreviewSchema = z.object({
           index: z.number().int(),
           text: z.string(),
           imageUrl: z.string().nullable(),
-          /** Armado de la página en el libro (page-layout.ts): el visor la muestra igual. */
+          /**
+           * Armado de la página en el libro (page-layout.ts): el visor la muestra igual. Un armado
+           * que esta versión de la web no conoce queda sin armado en vez de romper la muestra
+           * (19 nov 2026: la API nueva salió antes que la web y la muestra dio «Algo salió mal»).
+           */
           layout: z
             .object({
               kind: z.enum(['facing', 'calm', 'vignette', 'strip', 'overlay']),
               side: z.enum(['top', 'bottom']),
             })
-            .optional(),
+            .optional()
+            .catch(undefined),
         }),
       ),
       totalPages: z.number().int(),
