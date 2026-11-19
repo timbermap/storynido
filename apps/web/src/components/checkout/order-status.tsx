@@ -71,9 +71,18 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
     if (!signedIn) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
+    // Al abrir la página (vuelta de PayPal) y con «Ya pagué», se pide confirmar el pago en el
+    // momento: si el comprador ya aprobó, la API lo cobra sin esperar el aviso (DECISIONS 287).
+    // Si no hay nada que confirmar, devuelve el pedido como está. Después, solo se consulta.
+    let confirm = true;
     const load = async () => {
       try {
-        const current = await api('order', { params: { orderId } });
+        const current = confirm
+          ? await api('confirmPayment', { params: { orderId } }).catch(() =>
+              api('order', { params: { orderId } }),
+            )
+          : await api('order', { params: { orderId } });
+        confirm = false;
         if (cancelled) return;
         setOrder(current);
         const print = isPrintOrder(current.items);
