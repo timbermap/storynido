@@ -1154,7 +1154,7 @@ export class VertexImageProvider implements AIImageProvider {
     if (request.character.photo) {
       parts.push(imagePart(request.character.photo));
       notes.push(
-        `${label(next, 1)} a photo of the real person the main character is based on. Take ONLY identity traits from it: face shape, hair color and style, skin tone, eye color, and prescription glasses if they wear them. Ignore everything else: their age (draw the age given in "Main character"), sunglasses, hats and other accessories, the background, the lighting and the photographic look. Never draw a photo.`,
+        `${label(next, 1)} a photo of the real person the main character is based on. Take ONLY identity traits from it: face shape, hair color and style, skin tone and eye color. Glasses follow "Main character" only, never the photo. Ignore everything else: their age (draw the age given in "Main character"), sunglasses, hats and other accessories, the background, the lighting and the photographic look. Never draw a photo.`,
       );
       next += 1;
     }
@@ -1162,7 +1162,7 @@ export class VertexImageProvider implements AIImageProvider {
     for (const reference of traitReferences) parts.push(imagePart(reference));
     if (traitReferences.length > 0) {
       notes.push(
-        `${label(next, traitReferences.length)} drawings of the main character made in a DIFFERENT art style. Use them ONLY for identity (face, hair color and style, skin tone, eye color, glasses and outfit) and IGNORE their technique, line, texture, colors, proportions and age: draw in the art style described above, at the age given in "Main character".`,
+        `${label(next, traitReferences.length)} drawings of the main character made in a DIFFERENT art style. Use them ONLY for identity (face, hair color and style, skin tone, eye color and outfit; glasses follow "Main character" only) and IGNORE their technique, line, texture, colors, proportions and age: draw in the art style described above, at the age given in "Main character".`,
       );
       next += traitReferences.length;
     }
@@ -1187,11 +1187,15 @@ export class VertexImageProvider implements AIImageProvider {
       coloring ? COLORING_PAGE_RULE : '',
       request.cover ? COVER_TITLE_RULE : '',
     ].filter(Boolean);
+    // El pedido del adulto va último y explícito: manda sobre la foto y las referencias.
+    const correction = request.correction?.trim()
+      ? `\nCORRECTION REQUESTED BY THE PARENT (top priority: apply it even if the photo or the reference images show otherwise, and change nothing else): ${request.correction.trim()}`
+      : '';
     const instructions = `Scene to draw: ${request.prompt}
 
 Art style: ${request.stylePrompt}
 Main character: ${request.character.description}
-${notes.join('\n')}
+${notes.join('\n')}${correction}
 Children's picture book illustration, drawn only in the art style above. No text, letters, numbers, logos or watermarks anywhere: book spines and covers, posters, signs, labels and clothing stay blank.${rules.map((rule) => `\n${rule}`).join('')}`;
     parts.push({ text: instructions });
 
