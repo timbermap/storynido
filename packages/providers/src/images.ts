@@ -66,8 +66,24 @@ export async function cropPortrait(
 }
 
 /** Ilustración final sin marca, en WebP de alta calidad (se usa para el libro comprado). */
-export async function encodeIllustration(input: Uint8Array): Promise<Uint8Array> {
-  const data = await sharp(input, { failOn: 'error' }).webp({ quality: 92 }).toBuffer();
+export async function encodeIllustration(
+  input: Uint8Array,
+  /** Recorta este porcentaje de cada borde (el modelo dibuja a veces franjas grises de marco). */
+  trimEdgePct = 0,
+): Promise<Uint8Array> {
+  let image = sharp(input, { failOn: 'error' });
+  if (trimEdgePct > 0) {
+    const { width, height } = await image.metadata();
+    if (width && height) {
+      const dx = Math.round((width * trimEdgePct) / 100);
+      const dy = Math.round((height * trimEdgePct) / 100);
+      const trimmed = await image
+        .extract({ left: dx, top: dy, width: width - 2 * dx, height: height - 2 * dy })
+        .toBuffer();
+      image = sharp(trimmed, { failOn: 'error' });
+    }
+  }
+  const data = await image.webp({ quality: 92 }).toBuffer();
   return new Uint8Array(data);
 }
 

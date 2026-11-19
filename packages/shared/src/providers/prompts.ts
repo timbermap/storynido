@@ -245,7 +245,7 @@ Reglas obligatorias:
   }${
     input.coloring
       ? `
-- Es un libro para colorear: cada escena tiene pocos elementos grandes y bien separados, fáciles de pintar. El texto de cada página es una sola frase corta (hasta 12 palabras), como pie del dibujo.`
+- Es un libro para colorear: cada escena tiene pocos elementos grandes y bien separados, fáciles de pintar. El texto de cada página es una sola frase corta (hasta 12 palabras), como pie del dibujo. La historia tiene un misterio o secreto concreto (lo que promete el título) que se descubre y se explica en las últimas páginas, con un pequeño giro. Cada escena es distinta y muestra una acción distinta; la ropa del protagonista no cambia entre páginas salvo que la historia lo pida. Si usas una frase que se repite, la dice siempre el protagonista (con raya de diálogo y verbo, como «—¡…! —dijo Lu»), nunca un objeto ni queda sin dueño. Termina con el protagonista en el lugar donde ocurre la historia, sin personajes que no hayan aparecido.`
       : ''
   }
 - Las enseñanzas se muestran con lo que hacen los personajes, nunca como moraleja explícita ni sermón.${

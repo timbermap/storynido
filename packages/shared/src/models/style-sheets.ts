@@ -165,7 +165,7 @@ export const BOOK_TYPE_SHEETS: Record<ContentType, string> = {
   activities:
     'Book type: activity book. Simple, clear scenes with few elements, so mazes, spot-the-difference and counting games stay readable.',
   coloring:
-    'Book type: coloring book. Few large, well separated shapes with closed outlines and wide white areas a small hand can color; plain or very simple background; no tiny details, no textures, no crowds.',
+    'Book type: coloring book. Few large, well separated shapes with closed outlines and wide white areas a small hand can color; plain or very simple background; no tiny details, no textures, no crowds. The drawing fills the whole page edge to edge: never add a frame, border, vertical or horizontal edge lines, caption boxes, empty rectangles, banners, labels, speech bubbles or any text area. Vary the composition from page to page (close-up, wide view, from above, action pose): never put the character inside a circle, bubble or round frame unless the scene explicitly needs one, and never on more than one page in four. Draw only the characters named in the scene: no extra people.',
 };
 
 export function bookTypeSheet(contentType: ContentType | null | undefined): string {
