@@ -4,7 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { LOCALE_DEFINITIONS, MEMORY_KEYS } from '@storynido/shared';
+import { LOCALE_DEFINITIONS, MEMORY_KEYS, dedicationLanguageMismatch } from '@storynido/shared';
 
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
@@ -75,7 +75,8 @@ export function StepReview({
         .join(' · ') || t('eventEmpty')
     : null;
 
-  const rows: { label: string; value: string; step: WizardStep }[] = [
+  const dedicationLanguage = dedicationLanguageMismatch(book.dedication, book.language);
+  const rows: { label: string; value: string; step: WizardStep; note?: string | null }[] = [
     {
       label: isPro ? t('alias') : t('protagonist'),
       value: (isPro ? child?.alias : null) ?? child?.name ?? '—',
@@ -117,6 +118,8 @@ export function StepReview({
       label: t('language'),
       value: LOCALE_DEFINITIONS[book.language].label,
       step: isPro ? step('focus') : step('story'),
+      // La dedicatoria se imprime tal cual: si parece de otro idioma, se avisa acá (pedido de Lu).
+      note: dedicationLanguage ? t('dedicationLanguage', { written: dedicationLanguage }) : null,
     },
     {
       label: t('book'),
@@ -157,6 +160,9 @@ export function StepReview({
           <div key={row.label} className="grid grid-cols-[1fr_auto] items-center gap-x-4 px-5 py-4">
             <dt className="text-sm font-bold text-muted-foreground">{row.label}</dt>
             <dd className="col-start-1 mt-0.5 font-semibold">{row.value}</dd>
+            {row.note && (
+              <dd className="col-start-1 mt-1 text-sm text-muted-foreground">{row.note}</dd>
+            )}
             <dd className="col-start-2 row-span-2 row-start-1">
               <Button
                 variant="ghost"

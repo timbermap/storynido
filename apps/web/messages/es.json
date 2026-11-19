@@ -910,6 +910,7 @@
       "friend": "Su mejor amigo o amiga (opcional)",
       "dedication": "Dedicatoria (opcional)",
       "dedicationPlaceholder": "Ej.: Para Martina, que cada noche sueña con las estrellas.",
+      "dedicationLanguage": "Tu dedicatoria parece estar en {written, select, es {español} en {inglés} pt {portugués} other {otro idioma}} y el cuento va en {book, select, es {español} en {inglés} pt {portugués} other {otro idioma}}. Se imprime tal cual la escribes.",
       "required": "Escribe su nombre para continuar.",
       "event": {
         "turningAge": "Edad que cumple",
@@ -1066,7 +1067,8 @@
       "kitTone": "Tono {tone}",
       "kitDedication": "Con dedicatoria",
       "goal": "Objetivo",
-      "alias": "Alias"
+      "alias": "Alias",
+      "dedicationLanguage": "La dedicatoria parece estar en {written, select, es {español} en {inglés} pt {portugués} other {otro idioma}}: se imprime tal cual, aunque el cuento vaya en otro idioma."
     },
     "preview": {
       "badge": "Muestra de la historia",

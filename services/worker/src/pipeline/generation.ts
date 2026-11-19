@@ -624,8 +624,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         character: { description: snapshot.character.description, photo: null },
         references,
         aspectRatio: '3:4',
-        // Los pedidos impresos se ilustran en 2K (~220 dpi a 21×28 cm; DECISIONS 069).
-        resolution: isPrint(ctx.order) ? '2K' : '1K',
+        // Todo pedido se ilustra en 2K: ~220 dpi a 21×28 cm en el impreso (DECISIONS 069) y, en el
+        // digital, la misma nitidez que las páginas de la muestra (antes 1K se veía borroso al lado).
+        resolution: '2K',
         seed: seed + attempt,
       });
       cost += await record(ctx, 'illustration', image.usage);

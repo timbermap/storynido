@@ -209,7 +209,8 @@
       },
       "reuseLook": "Usamos su aspecto del último cuento; igual lo ves y lo aprobás en la muestra.",
       "reuseNoLook": "Sus datos ya están; el aspecto lo elegís en el paso del personaje.",
-      "reuseTyped": "Ya tenés a {name} guardado, con su dibujo o sus fotos."
+      "reuseTyped": "Ya tenés a {name} guardado, con su dibujo o sus fotos.",
+      "dedicationLanguage": "Tu dedicatoria parece estar en {written, select, es {español} en {inglés} pt {portugués} other {otro idioma}} y el cuento va en {book, select, es {español} en {inglés} pt {portugués} other {otro idioma}}. Se imprime tal cual la escribís."
     },
     "photos": {
       "title": "Subí de 1 a 3 fotos",
