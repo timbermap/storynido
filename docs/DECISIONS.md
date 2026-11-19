@@ -2945,3 +2945,10 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **2K también en digital:** las páginas del pedido se dibujaban en 1K en el digital (896 px, ~108 ppi a 21 cm), al lado de la tapa y las páginas de la muestra en 2K (recortadas a 1600 px), y se notaba la diferencia de nitidez. Ahora todo pedido se ilustra en 2K (≈ +USD 0,03 por imagen, DECISIONS 069); el PDF digital sigue con tope de 1600 px. Los precios siguen al costo real (DECISIONS de precios del 7 nov).
 - **Tapa:** el nombre llega a 124 pt (antes 78) y reparte 820 pt de ancho entre sus letras (antes 560); lo de antes y después del nombre pasa de 34 a 46 pt. En tapas más angostas que 21 cm baja en proporción.
 - **Dedicatoria:** se imprime tal cual la escribe el adulto. Si parece estar en otro idioma que el cuento (detección simple de palabras frecuentes en es, en y pt; con menos de 3 palabras o sin un ganador claro no avisa), se avisa debajo del campo y en el paso de revisión, junto al idioma. No se traduce ni se bloquea.
+
+## 281 — Para colorear siempre en blanco y negro
+
+- **Fecha:** 2026-11-19. Pedido por Sebas: la muestra mini «Para colorear» de Lu salió con páginas pintadas a color.
+- **Causa:** el pedido de imagen mezcla el estilo con la foto y la lámina a color, la ropa con colores de la ficha y la «luz cálida» de la plantilla; solo una frase defendía los contornos y nada revisaba el resultado.
+- **Regla:** cuando el estilo es el de colorear (o el pedido lo marca con `coloring`), el proveedor suma al final una regla de página para colorear (los colores nombrados son solo formas; se ignoran los colores de la foto y de las referencias). Si la imagen vuelve con color (colorfulness > 15), se pide una vez más; la que quede se pasa siempre a blanco y negro con fondo blanco limpio. Así nunca llega una página a color.
+- **Siguiente paso:** fichas por estilo y por tipo de libro, con un control automático propio de cada estilo (elegido por Sebas el mismo día).
