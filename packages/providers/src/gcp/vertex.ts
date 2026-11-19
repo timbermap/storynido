@@ -1181,6 +1181,13 @@ export class VertexImageProvider implements AIImageProvider {
       );
       next += traitReferences.length;
     }
+    if (request.editOf) {
+      parts.push(imagePart(request.editOf));
+      notes.push(
+        `${label(next, 1)} the CURRENT drawing of the main character, which the parent wants corrected. Redraw this same drawing: same person, face, age, proportions, pose, framing, outfit and art style, changing ONLY what the correction and "Main character" ask for.`,
+      );
+      next += 1;
+    }
     for (const reference of request.references) parts.push(imagePart(reference));
     if (request.references.length > 0) {
       notes.push(

@@ -192,6 +192,8 @@ export const bookPreviewSchema = z.object({
       fromDrawing: z.boolean().optional(),
       /** La foto parece de otra edad que la del cuento: se avisa antes de pagar (no bloquea). */
       ageMismatch: z.object({ apparent: z.string(), entered: z.number() }).optional(),
+      /** La nota de «Ajustar el parecido»: vale para la lámina y para cada página del libro. */
+      correction: z.string().optional(),
     })
     .optional(),
   /** Lámina del acompañante (abuela, mascota): segunda referencia de cada ilustración. */
@@ -350,6 +352,8 @@ export const bookSchema = timestampsSchema
     mustKeep: mustKeepSchema.optional(),
     /** Foto o rasgos sobre los que se confirmaron los rasgos: si cambian, dejan de valer. */
     characterBase: z.string().nullable().optional(),
+    /** Nota de «Ajustar el parecido» que va con esos rasgos (DECISIONS 288). */
+    characterNote: z.string().nullable().optional(),
     /** Solo servidor: costo de IA acumulado del libro, en millonésimas de dólar. */
     aiCostUsdMicros: z.number().int().nonnegative().optional(),
   })

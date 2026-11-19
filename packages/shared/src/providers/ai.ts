@@ -186,6 +186,11 @@ export interface IllustrationRequest {
    * ignoraba).
    */
   correction?: string | null;
+  /**
+   * «Ajustar el parecido»: la lámina actual. Se edita (cambia solo lo pedido) en vez de dibujar
+   * otro personaje desde cero (DECISIONS 288).
+   */
+  editOf?: ImageData | null;
   aspectRatio: '1:1' | '3:4' | '4:3';
   /** 1K para pantalla; 2K para imprenta (~220 dpi a 21×28 cm). */
   resolution?: '1K' | '2K';

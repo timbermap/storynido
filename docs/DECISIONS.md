@@ -3013,3 +3013,15 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Causa:** la nota pasaba por las reglas de moderación del texto del cuento, que rechazan «instrucciones a la IA», y una nota de ajuste es justamente una instrucción.
 - **Cambio:** `moderateText(text, { purpose: 'correction' })` para la nota y el rasgo distintivo, con reglas propias: el aspecto, la pose, la ropa, la edad, el pelo o los anteojos se permiten; se sigue frenando lo peligroso, la burla al cuerpo y los intentos de cambiar otras instrucciones.
 - **Pose de la foto:** el pedido de imagen ahora dice que no se copien la pose ni los gestos de la foto (p. ej. la mano en la cara).
+
+## 288 — La lámina aprobada manda: el ajuste la edita, la nota sigue y la foto no entra en las páginas
+
+- **Fecha:** 2026-11-19. Mesa completa sobre el parecido, pedida por Sebas («el parecido es casi la clave del éxito»). Arreglos P0, sin costo extra. Documento: «Parecido del personaje: propuesta de la mesa».
+- **Recorte de la foto:** 1,8 veces la cara (antes 2,4). Entra el pelo y el cuello, no las manos ni la pose. Vale para las fotos que se suban desde ahora.
+- **Lámina sin reglas de página:** `characterSheetDirection` saca el tercio para el texto, el plano general, las diagonales y el encuadre de cine, que achicaban la cara y cambiaban la pose.
+- **El ajuste edita:** «Ajustar el parecido» (en la muestra y en el perfil) manda el dibujo actual (`editOf`) y pide cambiar solo lo pedido. Antes dibujaba otro personaje desde cero.
+- **La nota sigue:** las notas se suman (`joinCorrections`), quedan en la lámina (`preview.character.correction`), en el libro (`characterNote`) y en el personaje (`correctedTraits.note`), y van en cada página de la muestra y del libro final.
+- **Páginas sin la foto cruda:** con lámina aprobada, la portada y las páginas de la muestra usan solo la lámina, como el libro final. La foto envejecía al personaje o deshacía lo corregido.
+- **Dibujo del perfil como referencia:** solo con «Usamos el dibujo de…» o si salió de la misma foto que el libro.
+- **Rasgos de adulto:** pómulos, mandíbula marcada, «adult», tatuajes y piercings no pasan a la ficha.
+- **Al corregir** se borra la lámina guardada de ese estilo: el próximo cuento la redibuja con lo corregido.

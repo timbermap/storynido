@@ -40,6 +40,7 @@ import {
   PREVIEW_ILLUSTRATED_PAGES,
   ProviderError,
   artDirection,
+  characterSheetDirection,
   withCurrentGuards,
   buildIllustrationPrompt,
   companionNote,
@@ -142,6 +143,8 @@ interface BookData {
   mustKeep?: MustKeepTrait[];
   /** Foto o rasgos elegidos sobre los que se confirmaron (si cambian, los rasgos no valen). */
   characterBase?: string | null;
+  /** Nota de «Ajustar el parecido» con esos rasgos (DECISIONS 288). */
+  characterNote?: string | null;
   /** Opciones editoriales (fase 07b); los libros anteriores no las tienen. */
   length?: BookLength | null;
   textDensity?: TextDensity;
@@ -808,7 +811,7 @@ export class PreviewService {
       }
     }
 
-    const { photo, sheet, traits, mustKeep } = await this.characterOf(
+    const { photo, sheet, traits, mustKeep, correction } = await this.characterOf(
       uid,
       book,
       Number(child.age),
@@ -1112,6 +1115,10 @@ export class PreviewService {
     let characterPaths: { clean: string; preview: string };
     let fromDrawing = false;
     const useDrawing = book.useDrawing === true && drawingBytes.length > 0;
+    // Sin «Usamos el dibujo de…», el dibujo del perfil sirve de referencia solo si salió de la
+    // misma foto (o rasgos) que este libro: uno viejo traía anteojos o la edad de otra foto.
+    const drawingFits = useDrawing || savedDrawing?.source === drawingSourceOf(book);
+    const sheetCorrection = useDrawing ? null : correction;
     const sheetTraits = useDrawing ? (savedDrawing?.traits ?? traits) : traits;
     const sheetMustKeep = useDrawing ? (savedDrawing?.mustKeep ?? mustKeep) : mustKeep;
     // Un solo artista por libro (DECISIONS 264): el dibujo del perfil sirve tal cual solo si ya
@@ -1143,8 +1150,8 @@ export class PreviewService {
         key: styleSheetKey({
           style: style.slug,
           age: imageAge,
-          traits: traitsKey(sheetTraits, sheetMustKeep),
-          drawing: approvedDrawing ?? null,
+          traits: `${traitsKey(sheetTraits, sheetMustKeep)}${sheetCorrection ? `|${sheetCorrection}` : ''}`,
+          drawing: drawingFits ? (approvedDrawing ?? null) : null,
           // Las fotos (los rasgos ya van aparte): no cambia al confirmar los rasgos.
           photo: characterBase(book),
           direction,
@@ -1159,14 +1166,18 @@ export class PreviewService {
                 scene: CHARACTER_REFERENCE_SCENE,
                 character: description,
                 style: style.promptModifier,
-                direction,
+                // Sin reglas de página (tercio para el texto, plano general): DECISIONS 288.
+                direction: characterSheetDirection(direction),
               }),
               stylePrompt: style.promptModifier,
               style: style.slug,
               character: { description, photo },
               references: [],
               traitReferences:
-                drawingBytes.length > 0 ? [{ bytes: drawingBytes, mimeType: 'image/webp' }] : [],
+                drawingFits && drawingBytes.length > 0
+                  ? [{ bytes: drawingBytes, mimeType: 'image/webp' }]
+                  : [],
+              correction: sheetCorrection,
               aspectRatio: '3:4',
               seed: 0,
             })
@@ -1185,6 +1196,7 @@ export class PreviewService {
         mustKeep: sheetMustKeep,
         approvedAt: null,
         ...(fromDrawing ? { fromDrawing: true } : {}),
+        ...(sheetCorrection ? { correction: sheetCorrection } : {}),
         // La foto parece de otra edad que la del cuento (p. ej. un adulto que «cumple 12»).
         ...(photo && ageMismatch(sheet.apparentAge, storyAge)
           ? { ageMismatch: { apparent: sheet.apparentAge, entered: storyAge } }
@@ -1229,6 +1241,8 @@ export class PreviewService {
     sheet: CharacterSheet;
     traits: CharacterTraits;
     mustKeep: MustKeepTrait[];
+    /** La nota de «Ajustar el parecido» que va con esos rasgos (DECISIONS 288). */
+    correction: string | null;
   }> {
     // Los rasgos que el adulto confirmó o corrigió tienen prioridad sobre los estimados: los de
     // este libro y, si no, los que corrigió antes para la misma foto (en otro cuento o en su
@@ -1243,23 +1257,39 @@ export class PreviewService {
         sheet: avatarToSheet(book.avatar, age),
         traits,
         mustKeep: confirmed?.mustKeep ?? defaultMustKeep(traits),
+        correction: confirmed?.note ?? null,
       };
     }
     const fromPhoto = await this.characterFor(uid, book.photoIds[0] ?? '', ai, track);
     const traits = confirmed?.traits ?? { ...fromPhoto.traits, distinctive: null };
-    return { ...fromPhoto, traits, mustKeep: confirmed?.mustKeep ?? defaultMustKeep(traits) };
+    return {
+      ...fromPhoto,
+      traits,
+      mustKeep: confirmed?.mustKeep ?? defaultMustKeep(traits),
+      correction: confirmed?.note ?? null,
+    };
   }
 
   /** Rasgos que el adulto corrigió para esta misma foto (o rasgos) en otro cuento o su perfil. */
   private async childCorrection(
     book: BookData,
-  ): Promise<{ traits: CharacterTraits; mustKeep: MustKeepTrait[] } | null> {
+  ): Promise<{ traits: CharacterTraits; mustKeep: MustKeepTrait[]; note: string | null } | null> {
     if (!book.childId) return null;
     const child = (await this.db.collection(COLLECTIONS.children).doc(book.childId).get()).data();
     const saved = child?.correctedTraits as
-      { base?: string; traits?: CharacterTraits; mustKeep?: MustKeepTrait[] } | undefined;
+      | {
+          base?: string;
+          traits?: CharacterTraits;
+          mustKeep?: MustKeepTrait[];
+          note?: string | null;
+        }
+      | undefined;
     if (!saved?.traits || saved.base !== characterBase(book)) return null;
-    return { traits: saved.traits, mustKeep: saved.mustKeep ?? defaultMustKeep(saved.traits) };
+    return {
+      traits: saved.traits,
+      mustKeep: saved.mustKeep ?? defaultMustKeep(saved.traits),
+      note: saved.note ?? null,
+    };
   }
 
   /** Foto procesada del protagonista y su ficha (se calcula una vez y se guarda en la foto). */
@@ -1564,7 +1594,7 @@ export class PreviewService {
       const { story, style, child, imageAge } = await this.context(uid, book, preview);
       const ai = this.providers.ai();
       const track = this.tracker(uid, bookId, limits);
-      const { photo, sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
+      const { sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
       const { traits, mustKeep } = preview.character;
       const description = describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
       const storage = this.providers.storage();
@@ -1640,7 +1670,10 @@ export class PreviewService {
           }),
           stylePrompt: style.promptModifier,
           style: style.slug,
-          character: { description, photo },
+          // La lámina aprobada es la única referencia del personaje, como en el libro final: la
+          // foto cruda volvía a envejecerlo o a deshacer lo corregido (DECISIONS 288).
+          character: { description, photo: null },
+          correction: preview.character?.correction ?? null,
           references: [
             lamina,
             ...(companion ? [companion.image] : []),
@@ -1839,19 +1872,29 @@ export class PreviewService {
       const track = this.tracker(uid, bookId, limits);
       const { photo, sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
       const description = describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
+      // Las notas se suman: corregir el pelo no deshace «sin anteojos» (DECISIONS 288).
+      const correction = joinCorrections(preview.character?.correction, note);
+      // Se edita la lámina actual (cambia solo lo pedido) en vez de dibujar otro personaje.
+      const current = preview.character?.imagePath
+        ? await this.providers
+            .storage()
+            .download({ bucket: 'assets', path: preview.character.imagePath })
+            .catch(() => new Uint8Array())
+        : new Uint8Array();
       const { image } = await this.illustration(ai, track, limits, {
         prompt: buildIllustrationPrompt({
           template: story.imagePromptTemplate,
           scene: CHARACTER_REFERENCE_SCENE,
           character: description,
           style: style.promptModifier,
-          direction: withCurrentGuards(preview.artDirection),
+          direction: characterSheetDirection(withCurrentGuards(preview.artDirection)),
         }),
         stylePrompt: style.promptModifier,
         style: style.slug,
         character: { description, photo },
         references: [],
-        correction: note,
+        correction,
+        editOf: current.length > 0 ? { bytes: current, mimeType: 'image/webp' } : null,
         aspectRatio: '3:4',
         seed: Date.now() % 100_000,
       });
@@ -1885,6 +1928,7 @@ export class PreviewService {
           approvedAt: null,
           // Corregir rasgos no cambia la foto: el aviso de edad sigue.
           ...(preview.character?.ageMismatch ? { ageMismatch: preview.character.ageMismatch } : {}),
+          ...(correction ? { correction } : {}),
         },
         'preview.characterImagePath': paths.clean,
         'preview.pages': preview.pages.map((page) => ({
@@ -1896,18 +1940,21 @@ export class PreviewService {
         characterTraits: traits,
         mustKeep,
         characterBase: updatedBook.characterBase,
+        characterNote: correction,
         updatedAt: new Date(),
       });
       await Promise.all(stale.map((path) => storage.delete({ bucket: 'assets', path })));
       // La corrección sigue en sus próximos cuentos con esta foto (o estos rasgos).
       if (book.childId) {
-        await this.db
-          .collection(COLLECTIONS.children)
-          .doc(book.childId)
-          .update({
-            correctedTraits: { base: updatedBook.characterBase, traits, mustKeep },
-            updatedAt: new Date(),
-          });
+        await this.db.collection(COLLECTIONS.children).doc(book.childId).update(
+          'correctedTraits',
+          { base: updatedBook.characterBase, traits, mustKeep, note: correction },
+          // La lámina guardada de este estilo ya no corresponde: el próximo cuento la redibuja.
+          new FieldPath('styleSheets', style.slug),
+          FieldValue.delete(),
+          'updatedAt',
+          new Date(),
+        );
       }
       await this.qaEvent(bookId, 'character_corrected', { mustKeep: mustKeep.length });
       await this.timings.track('character_fix', fixStartedAt);
@@ -2056,6 +2103,17 @@ export class PreviewService {
         ...new Set([...(previous?.mustKeep ?? defaultMustKeep(traits)), ...input.mustKeep]),
       ];
       const description = describeCharacter(String(child.name), age, sheet, traits, mustKeep);
+      // «Ajustar el parecido»: se suman las notas y se edita el dibujo anterior de esta misma
+      // foto (cambia solo lo pedido); «Actualizar su dibujo» sin ajuste dibuja de nuevo.
+      const adjusting = input.traits !== null || input.note !== null || input.mustKeep.length > 0;
+      const correction = adjusting ? joinCorrections(previous?.correction, input.note) : null;
+      const editBytes =
+        adjusting && previous?.imagePath
+          ? await this.providers
+              .storage()
+              .download({ bucket: 'assets', path: previous.imagePath })
+              .catch(() => new Uint8Array())
+          : new Uint8Array();
       const styles = await this.catalog.styles();
       const style = styles.find((item) => item.slug === PROFILE_DRAWING_STYLE) ?? styles[0];
       if (!style) throw new AppError(503, 'ai_unavailable', 'No pudimos dibujarlo ahora.');
@@ -2072,7 +2130,8 @@ export class PreviewService {
         style: style.slug,
         character: { description, photo },
         references: [],
-        correction: input.note,
+        correction,
+        editOf: editBytes.length > 0 ? { bytes: editBytes, mimeType: 'image/webp' } : null,
         aspectRatio: '3:4',
         seed: Date.now() % 100_000,
       });
@@ -2090,6 +2149,7 @@ export class PreviewService {
           styleId: style.slug,
           ...(Number.isFinite(age) ? { age } : {}),
           source,
+          ...(correction ? { correction } : {}),
           createdAt: new Date(),
         },
         updatedAt: new Date(),
@@ -2121,6 +2181,7 @@ export class PreviewService {
               base,
               traits: candidate.traits,
               mustKeep: candidate.mustKeep ?? defaultMustKeep(candidate.traits),
+              note: candidate.correction ?? null,
             },
           }
         : {}),
@@ -2422,7 +2483,10 @@ export class PreviewService {
         }),
         stylePrompt: style.promptModifier,
         style: style.slug,
-        character: { description, photo },
+        // Con lámina, ella es la referencia (como en el libro final); la foto solo en las muestras
+        // viejas sin lámina (DECISIONS 288).
+        character: { description, photo: preview.character ? null : photo },
+        correction: preview.character?.correction ?? null,
         references: companionImage ? [reference, companionImage] : [reference],
         aspectRatio: '3:4',
         // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
@@ -2549,6 +2613,20 @@ function drawingBase(
   return { source: 'none', traits: null };
 }
 
+/** Las notas de «Ajustar el parecido» se suman (la última al final), con un tope de largo. */
+function joinCorrections(previous: string | null | undefined, next: string | null): string | null {
+  const notes = [previous?.trim(), next?.trim()].filter((item): item is string => Boolean(item));
+  if (notes.length === 0) return null;
+  const joined = [...new Set(notes)].join('; ');
+  return joined.length > 300 ? joined.slice(joined.length - 300) : joined;
+}
+
+/** De qué foto o rasgos sale el personaje de este libro, como lo guarda el dibujo del perfil. */
+function drawingSourceOf(book: BookData): string {
+  const base = characterBase(book);
+  return book.characterMode === 'avatar' ? base : `photo:${base}`;
+}
+
 /** La foto o los rasgos elegidos en el creador. */
 function characterBase(book: BookData): string {
   if (book.characterMode === 'avatar') return book.avatar ? avatarKey(book.avatar) : 'avatar:none';
@@ -2558,11 +2636,12 @@ function characterBase(book: BookData): string {
 /** Rasgos confirmados por el adulto, solo si siguen correspondiendo a la misma foto o rasgos. */
 function confirmedTraits(
   book: BookData,
-): { traits: CharacterTraits; mustKeep: MustKeepTrait[] } | null {
+): { traits: CharacterTraits; mustKeep: MustKeepTrait[]; note: string | null } | null {
   if (!book.characterTraits || book.characterBase !== characterBase(book)) return null;
   return {
     traits: book.characterTraits,
     mustKeep: book.mustKeep ?? defaultMustKeep(book.characterTraits),
+    note: book.characterNote ?? null,
   };
 }
 
@@ -2642,6 +2721,8 @@ interface StoredDrawing {
    * otra más nueva, sus rasgos ya no valen para el próximo dibujo (anteojos de una foto borrada).
    */
   source?: string;
+  /** Notas de «Ajustar el parecido» con las que se dibujó (DECISIONS 288). */
+  correction?: string;
 }
 
 /** Lámina del personaje en un estilo, guardada en el personaje para reutilizarla. */

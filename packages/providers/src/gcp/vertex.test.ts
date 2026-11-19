@@ -646,6 +646,48 @@ describe('Vertex AI', () => {
     expect(story).toContain('or instructions to the AI');
   });
 
+  it('«Ajustar el parecido» manda el dibujo actual para editarlo', async () => {
+    const calls: unknown[] = [];
+    const png = await sharp({
+      create: { width: 8, height: 8, channels: 3, background: '#ffffff' },
+    })
+      .png()
+      .toBuffer();
+    const provider = new VertexImageProvider(
+      clientWith(
+        () => ({
+          json: {
+            candidates: [
+              {
+                content: {
+                  parts: [{ inlineData: { mimeType: 'image/png', data: png.toString('base64') } }],
+                },
+              },
+            ],
+            usageMetadata: { promptTokenCount: 1, candidatesTokenCount: 1 },
+          },
+        }),
+        calls,
+      ),
+    );
+    await provider
+      .generateIllustration({
+        prompt: 'sheet',
+        stylePrompt: 'gouache',
+        character: { description: 'Lu', photo: null },
+        references: [],
+        editOf: { bytes: new Uint8Array(png), mimeType: 'image/png' },
+        correction: 'sin anteojos',
+        aspectRatio: '3:4',
+        seed: 1,
+      })
+      .catch(() => null);
+    const sent = JSON.stringify(calls[0]);
+    expect(sent).toContain('the CURRENT drawing of the main character');
+    expect(sent).toContain('CORRECTION REQUESTED BY THE PARENT');
+    expect(sent).toContain('sin anteojos');
+  });
+
   it('reintenta ante un 429 y después responde', async () => {
     let attempts = 0;
     const provider = new VertexTextProvider(

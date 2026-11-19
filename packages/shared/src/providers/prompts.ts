@@ -446,7 +446,7 @@ export const NO_PHOTO_ACCESSORIES =
  * la foto (arrugas, barba, maquillaje) y anteojos (que van por el rasgo confirmado).
  */
 const NOT_IDENTITY =
-  /sunglass|shades|glasses|spectacles|hat\b|cap\b|beanie|hood|headphone|earbud|earring|necklace|bracelet|jewel|watch|bag\b|wrinkle|crow'?s feet|laugh lines|fine lines|age spots|beard|mustache|moustache|stubble|make-?up|lipstick|mascara|eyeliner|grey hair|gray hair|receding/i;
+  /sunglass|shades|glasses|spectacles|hat\b|cap\b|beanie|hood|headphone|earbud|earring|necklace|bracelet|jewel|watch|bag\b|wrinkle|crow'?s feet|laugh lines|fine lines|age spots|beard|mustache|moustache|stubble|make-?up|lipstick|mascara|eyeliner|grey hair|gray hair|receding|cheekbone|jawline|strong jaw|defined jaw|adult|mature|tattoo|piercing/i;
 
 export const identityFeatures = (features: readonly string[]) =>
   features.filter((feature) => feature.trim() && !NOT_IDENTITY.test(feature));
