@@ -2,15 +2,19 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
 import {
   COLLECTIONS,
+  RECEIPT_ORDER_STATUSES,
   type BookFormat,
   type EmailProvider,
   type EmailTemplate,
   type Locale,
   type OrderStatus,
+  priceSnapshotSchema,
 } from '@storynido/shared';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import { EMAIL_DATA, MARKETING_TEMPLATES } from './data';
+import { formatLabel } from './copy';
+import { RECEIPT_COPY, type ReceiptData } from './receipt';
 
 /** Rutas localizadas de la web (las mismas de next-intl). */
 const ORDER_PATH: Record<Locale, string> = { es: 'pedido', en: 'order', pt: 'pedido' };
@@ -44,6 +48,14 @@ export interface NotifyInput {
 }
 
 export type NotifyOutcome = 'sent' | 'duplicate' | 'skipped' | 'failed';
+
+const RECEIPT_STATUSES = new Set<OrderStatus>(RECEIPT_ORDER_STATUSES);
+const PAYMENT_LABELS: Record<string, string> = {
+  paypal: 'PayPal',
+  gumroad: 'Gumroad',
+  dodo: 'Dodo Payments',
+  mock: 'Pago de prueba',
+};
 
 const LOCK_MS = 5 * 60 * 1000;
 const asLocale = (value: unknown): Locale =>
@@ -214,6 +226,76 @@ export class EmailNotifier {
   }
 
   /**
+   * Datos del comprobante de compra de un pedido ya pagado (no es una factura). `null` si el
+   * pedido no existe, todavía no se pagó o no tiene precio congelado. Con `ownerUid`, solo si
+   * el pedido es de esa persona.
+   */
+  async receiptData(orderId: string, ownerUid?: string): Promise<ReceiptData | null> {
+    const order = (await this.db.collection(COLLECTIONS.orders).doc(orderId).get()).data();
+    if (!order || (ownerUid && order.ownerUid !== ownerUid)) return null;
+    if (!RECEIPT_STATUSES.has(order.status as OrderStatus)) return null;
+    // Un precio congelado incompleto no frena nada: el mail sale sin comprobante.
+    const parsed = priceSnapshotSchema.safeParse(order.priceSnapshot);
+    if (!parsed.success) return null;
+    const snapshot = parsed.data;
+    const user = (
+      await this.db.collection(COLLECTIONS.users).doc(String(order.ownerUid)).get()
+    ).data();
+    const locale = asLocale(user?.locale ?? order.locale);
+    const copy = RECEIPT_COPY[locale];
+    const money = (minor: number) => formatMoney(minor, snapshot.currency, locale);
+    const items = (order.items ?? []) as { format: BookFormat | 'card'; quantity?: number }[];
+    const bookTitle = typeof order.bookTitle === 'string' ? order.bookTitle : 'StoryNido';
+    const lines = snapshot.components.map((component) => {
+      const isBook = component.code === 'book';
+      return {
+        description: isBook
+          ? bookTitle
+          : component.piece
+            ? `${copy.lines.piece}: ${copy.pieces[component.piece] ?? component.piece}`
+            : copy.lines[component.code === 'book' ? 'piece' : component.code],
+        detail: isBook ? formatLabel(locale, items[0]?.format ?? 'digital') : null,
+        quantity: component.quantity,
+        amount: money(component.totalMinor),
+      };
+    });
+    const payment = (order.payment ?? {}) as { provider?: string; paymentId?: string | null };
+    const issued =
+      [order.paidAt, order.createdAt]
+        .map((value) => (value as { toDate?: () => Date } | undefined)?.toDate?.())
+        .find((value) => value instanceof Date) ?? new Date();
+    const printed = items.some((item) => item.format !== 'digital');
+    return {
+      orderId,
+      number: `SN-${orderId.slice(0, 8).toUpperCase()}`,
+      issuedAt: issued.toISOString(),
+      locale,
+      customerEmail: typeof user?.email === 'string' ? user.email : null,
+      lines: lines.length
+        ? lines
+        : [
+            {
+              description: bookTitle,
+              detail: null,
+              quantity: 1,
+              amount: money(snapshot.totalMinor),
+            },
+          ],
+      subtotal: money(snapshot.subtotalMinor),
+      discount: snapshot.discount.minor
+        ? { label: snapshot.discount.label, amount: money(snapshot.discount.minor) }
+        : null,
+      shipping: printed && !snapshot.shipping.pending ? money(snapshot.shipping.minor) : null,
+      tax: snapshot.tax.minor
+        ? { amount: money(snapshot.tax.minor), included: snapshot.tax.included }
+        : null,
+      total: money(snapshot.totalMinor),
+      paymentMethod: PAYMENT_LABELS[payment.provider ?? ''] ?? payment.provider ?? '—',
+      paymentRef: payment.paymentId ?? null,
+    };
+  }
+
+  /**
    * Avisa al cliente del estado del pedido. Una vez por estado (la clave lo garantiza), en su
    * idioma, con los datos del pedido.
    */
@@ -247,15 +329,17 @@ export class EmailNotifier {
       });
 
     switch (status) {
-      case 'paid':
-        return total
-          ? send('payment_confirmed', {
-              bookTitle,
-              total,
-              format: items[0]?.format ?? 'digital',
-              url,
-            })
-          : null;
+      case 'paid': {
+        if (!total) return null;
+        const receipt = await this.receiptData(orderId);
+        return send('payment_confirmed', {
+          bookTitle,
+          total,
+          format: items[0]?.format ?? 'digital',
+          url,
+          ...(receipt ? { receipt } : {}),
+        });
+      }
       case 'ready':
         // Un impreso avisa al ir a la imprenta (con el digital ya disponible).
         return print ? null : send('digital_ready', { bookTitle, url });

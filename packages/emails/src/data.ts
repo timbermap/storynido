@@ -1,6 +1,8 @@
 import { BOOK_FORMATS, type EmailTemplate } from '@storynido/shared';
 import { z } from 'zod';
 
+import { receiptSchema } from './receipt';
+
 const url = z.url();
 const title = z.string().min(1);
 
@@ -14,6 +16,8 @@ export const EMAIL_DATA = {
     total: z.string().min(1),
     format: z.enum([...BOOK_FORMATS, 'card']),
     url,
+    /** Comprobante de compra: el proveedor lo arma en PDF y lo adjunta. */
+    receipt: receiptSchema.optional(),
   }),
   digital_ready: z.object({ bookTitle: title, url }),
   print_sent: z.object({

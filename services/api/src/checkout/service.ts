@@ -53,6 +53,7 @@ import {
   bookProgress,
   type BookStepState,
   type PipelineStep,
+  RECEIPT_ORDER_STATUSES,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
@@ -1124,6 +1125,7 @@ export class CheckoutService {
         Boolean(order.print?.externalOrderId) &&
         ['sent_to_print', 'in_production', 'shipped'].includes(order.status),
       canDownload: DOWNLOADABLE_STATUSES.includes(order.status),
+      canReceipt: (RECEIPT_ORDER_STATUSES as readonly OrderStatus[]).includes(order.status),
       canReview: reviewable(order),
       files: DOWNLOADABLE_STATUSES.includes(order.status)
         ? (
@@ -1330,6 +1332,7 @@ export class CheckoutService {
       assertOrderTransition(order.status, 'paid');
       tx.update(ref, {
         status: 'paid',
+        paidAt: new Date(),
         'payment.paymentId': event.paymentId,
         'payment.checkoutSessionId': event.sessionId,
         ...(typeof event.taxMinor === 'number'

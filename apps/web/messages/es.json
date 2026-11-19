@@ -2014,6 +2014,7 @@
       },
       "read": "Leer el cuento",
       "download": "Descargar el PDF",
+      "receipt": "Descargar comprobante",
       "track": "Seguir el envío",
       "reorder": "Pedir de nuevo",
       "trackingNumber": "Número de seguimiento: {number}",

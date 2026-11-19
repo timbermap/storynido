@@ -2014,6 +2014,7 @@
       },
       "read": "Ler a história",
       "download": "Baixar o PDF",
+      "receipt": "Baixar comprovante",
       "track": "Acompanhar o envio",
       "reorder": "Pedir de novo",
       "trackingNumber": "Código de rastreio: {number}",

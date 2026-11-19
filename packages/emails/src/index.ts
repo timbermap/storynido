@@ -4,3 +4,4 @@ export * from './data';
 export * from './render';
 export * from './samples';
 export * from './notifier';
+export * from './receipt';

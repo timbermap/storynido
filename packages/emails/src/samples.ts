@@ -63,3 +63,29 @@ export const SAMPLE_DATA: { [T in EmailTemplate]: EmailData<T> } = {
     page: '/es',
   },
 };
+
+import type { ReceiptData } from './receipt';
+
+/** Comprobante de ejemplo para la vista previa y las pruebas. */
+export const RECEIPT_SAMPLE: ReceiptData = {
+  orderId: '3f9k2lqa8Xyz',
+  number: 'SN-3F9K2LQA',
+  issuedAt: '2026-11-19T19:30:00.000Z',
+  locale: 'es',
+  customerEmail: 'familia@ejemplo.com',
+  lines: [
+    {
+      description: 'Tomás y el misterio del faro',
+      detail: 'digital (PDF)',
+      quantity: 1,
+      amount: 'USD 16.99',
+    },
+  ],
+  subtotal: 'USD 16.99',
+  discount: null,
+  shipping: null,
+  tax: null,
+  total: 'USD 16.99',
+  paymentMethod: 'PayPal',
+  paymentRef: '5O190127TN364715T',
+};

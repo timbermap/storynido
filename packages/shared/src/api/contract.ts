@@ -556,6 +556,8 @@ export const publicOrderSchema = z.object({
   canSimulatePrint: z.boolean(),
   /** El PDF digital ya se puede descargar. */
   canDownload: z.boolean(),
+  /** Ya hay comprobante de compra (PDF) para bajar. */
+  canReceipt: z.boolean().default(false),
   /** Archivos digitales que se pueden descargar (el libro, cada pieza del kit y el ZIP). */
   files: z.array(z.string()),
   /** Ya se puede opinar (digital listo o impreso entregado). */
@@ -1798,6 +1800,19 @@ export const apiRoutes = {
       file: z.enum(['book', 'kit_zip', 'invitation_image', ...KIT_PIECES]).default('book'),
     }),
     response: z.object({ url: z.string(), expiresAt: z.string() }),
+  },
+  orderReceipt: {
+    method: 'GET',
+    path: '/v1/orders/:orderId/receipt',
+    access: 'user',
+    summary:
+      'Comprobante de compra en PDF de un pedido propio y pagado (no es una factura). Va en base64 para bajarlo con la sesión',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: z.object({
+      filename: z.string(),
+      contentType: z.literal('application/pdf'),
+      base64: z.string(),
+    }),
   },
   devSimulatePrint: {
     method: 'POST',
