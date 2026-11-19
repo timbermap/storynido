@@ -449,7 +449,14 @@ export interface AITextProvider {
   describeScenes(request: SceneRequest): Promise<SceneDescriptions>;
   /** Reescribe una página más corta (pasó el tope de palabras de la edad). */
   rewritePage(request: PageRewriteRequest): Promise<PageRewrite>;
-  moderateText(text: string): Promise<ModerationResult>;
+  /**
+   * `correction`: la nota de «Ajustar el parecido» o un rasgo del personaje. Son pedidos al
+   * dibujante («sin anteojos», «sacá la mano de la cara»): se permiten, solo se frena lo peligroso.
+   */
+  moderateText(
+    text: string,
+    options?: { purpose?: 'story' | 'correction' },
+  ): Promise<ModerationResult>;
 }
 
 export interface AIImageProvider {
