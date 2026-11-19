@@ -1,7 +1,7 @@
 'use client';
 
 import { CreditCard, Lock, ReceiptText, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -44,10 +44,14 @@ interface PaypalNamespace {
 
 let sdk: Promise<PaypalNamespace> | null = null;
 
-function loadSdk(): Promise<PaypalNamespace> {
+/** Idioma de los botones de PayPal (los mismos que usa la API al crear la orden). */
+const SDK_LOCALES: Record<string, string> = { es: 'es_MX', pt: 'pt_BR', en: 'en_US' };
+
+function loadSdk(locale: string): Promise<PaypalNamespace> {
   sdk ??= new Promise<PaypalNamespace>((resolve, reject) => {
     const params = new URLSearchParams({
       'client-id': CLIENT_ID,
+      locale: SDK_LOCALES[locale] ?? 'en_US',
       currency: 'USD',
       intent: 'capture',
       components: 'buttons',
@@ -82,6 +86,7 @@ export function PaypalCheckoutDialog({
   onClose: () => void;
 }) {
   const t = useTranslations('Checkout.paypal');
+  const locale = useLocale();
   const router = useRouter();
   const panel = useRef<HTMLDivElement>(null);
   const paypalSlot = useRef<HTMLDivElement>(null);
@@ -122,7 +127,7 @@ export function PaypalCheckoutDialog({
       router.push({ pathname: '/order/[orderId]', params: { orderId } });
     };
 
-    loadSdk()
+    loadSdk(locale)
       .then(async (paypal) => {
         if (stopped()) return;
         const common = {
@@ -145,15 +150,15 @@ export function PaypalCheckoutDialog({
           fundingSource: paypal.FUNDING.CARD,
           style: { layout: 'vertical', shape: 'pill', color: 'black', height: 48 },
         });
-        if (paypalSlot.current && wallet.isEligible()) {
-          rendered.push(wallet);
-          await wallet.render(paypalSlot.current);
-        }
         const cardOk = card.isEligible();
         setCardEligible(cardOk);
         if (cardSlot.current && cardOk) {
           rendered.push(card);
           await card.render(cardSlot.current);
+        }
+        if (paypalSlot.current && wallet.isEligible()) {
+          rendered.push(wallet);
+          await wallet.render(paypalSlot.current);
         }
         if (!stopped()) setState('ready');
       })
@@ -165,7 +170,7 @@ export function PaypalCheckoutDialog({
       cancelled = true;
       for (const buttons of rendered) void buttons.close().catch(() => undefined);
     };
-  }, [token, orderId, router, t]);
+  }, [token, orderId, router, t, locale]);
 
   return createPortal(
     <div
@@ -237,8 +242,8 @@ export function PaypalCheckoutDialog({
               </p>
             ) : (
               <div className="grid gap-3">
-                <div ref={paypalSlot} />
                 <div ref={cardSlot} />
+                <div ref={paypalSlot} />
               </div>
             )}
             {error && (

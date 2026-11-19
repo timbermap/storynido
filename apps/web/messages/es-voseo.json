@@ -501,7 +501,7 @@
       "title": "Pagá tu cuento",
       "text": "Elegí cómo pagar. No salís de StoryNido.",
       "noAccount": "¿No tenés PayPal? Tocá «Tarjeta de débito o crédito» y pagá con tu tarjeta, sin crear cuenta.",
-      "noAccountUnavailable": "Pagás con tu cuenta de PayPal o con la tarjeta que tengas guardada ahí.",
+      "noAccountUnavailable": "Pagás con tu cuenta de PayPal. En la ventana de PayPal también podés pagar con tarjeta, sin crear cuenta.",
       "failed": "No pudimos cargar el pago acá (a veces lo bloquea un bloqueador de anuncios). <link>Pagá en la página de PayPal</link> y volvés solo a StoryNido.",
       "error": "PayPal no pudo procesar el pago. Probá de nuevo o con otra tarjeta."
     }
