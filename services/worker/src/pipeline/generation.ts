@@ -658,7 +658,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       if (verdict.allowed || (attempt === 1 && onlySoftRejection(verdict.categories))) {
         await storage().upload(
           { bucket: ASSETS, path },
-          await encodeIllustration(image.bytes),
+          // Colorear (menos la tapa): se recortan los bordes, donde el modelo dibuja franjas de marco.
+          await encodeIllustration(image.bytes, coloring && index !== 0 ? 2.5 : 0),
           WEBP,
         );
         return cost;
