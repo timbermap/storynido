@@ -2,7 +2,7 @@ import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
 import { sampleCharacterPhoto, sampleStoryRequest } from '../testing';
-import { watermarkPreview } from '../images';
+import { colorfulness, watermarkPreview } from '../images';
 import {
   VertexClient,
   VertexImageProvider,
@@ -500,6 +500,46 @@ describe('Vertex AI', () => {
     );
     expect(text).toContain('IGNORE their technique');
     expect(text).toContain('Image 3 is reference illustrations from this same book');
+  });
+
+  it('para colorear: si vuelve pintada la pide otra vez y entrega blanco y negro', async () => {
+    const red = await sharp({
+      create: { width: 16, height: 16, channels: 3, background: '#d23a2a' },
+    })
+      .png()
+      .toBuffer();
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const provider = new VertexImageProvider(
+      clientWith(
+        () => ({
+          status: 200,
+          json: {
+            candidates: [
+              {
+                content: {
+                  parts: [{ inlineData: { mimeType: 'image/png', data: red.toString('base64') } }],
+                },
+              },
+            ],
+            usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 10 },
+          },
+        }),
+        calls,
+      ),
+    );
+    const image = await provider.generateIllustration({
+      prompt: 'Lu enters the cardboard rocket',
+      stylePrompt: 'black and white coloring book line art for children, clean bold outlines',
+      character: { description: 'Lu: a 5-year-old child in light blue pajamas', photo: null },
+      references: [],
+      aspectRatio: '3:4',
+      seed: 1,
+    });
+    expect(calls).toHaveLength(2);
+    expect(String(calls[0]?.contents[0]?.parts.at(-1)?.text)).toContain('COLORING PAGE');
+    expect(String(calls[1]?.contents[0]?.parts.at(-1)?.text)).toContain('was painted in color');
+    expect(image.mimeType).toBe('image/png');
+    expect(await colorfulness(image.bytes)).toBeLessThan(1);
   });
 
   it('reintenta ante un 429 y después responde', async () => {

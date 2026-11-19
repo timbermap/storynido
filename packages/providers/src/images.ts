@@ -83,3 +83,58 @@ export async function watermarkPreview(input: Uint8Array): Promise<Uint8Array> {
     .toBuffer();
   return new Uint8Array(data);
 }
+
+/**
+ * Cuánto color tiene una imagen (métrica de Hasler y Süsstrunk, 0 = gris). Una página para
+ * colorear bien hecha da menos de 10; una ilustración pintada, más de 30.
+ */
+export async function colorfulness(input: Uint8Array): Promise<number> {
+  const { data, info } = await sharp(input)
+    .removeAlpha()
+    .resize({ width: 256, height: 256, fit: 'inside' })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const pixels = Math.floor(data.length / info.channels);
+  if (pixels === 0 || info.channels < 3) return 0;
+  let rgSum = 0;
+  let ybSum = 0;
+  let rgSq = 0;
+  let ybSq = 0;
+  for (let i = 0; i < pixels; i += 1) {
+    const offset = i * info.channels;
+    const r = data[offset] ?? 0;
+    const g = data[offset + 1] ?? 0;
+    const b = data[offset + 2] ?? 0;
+    const rg = r - g;
+    const yb = 0.5 * (r + g) - b;
+    rgSum += rg;
+    ybSum += yb;
+    rgSq += rg * rg;
+    ybSq += yb * yb;
+  }
+  const rgMean = rgSum / pixels;
+  const ybMean = ybSum / pixels;
+  const rgStd = Math.sqrt(Math.max(rgSq / pixels - rgMean * rgMean, 0));
+  const ybStd = Math.sqrt(Math.max(ybSq / pixels - ybMean * ybMean, 0));
+  return Math.hypot(rgStd, ybStd) + 0.3 * Math.hypot(rgMean, ybMean);
+}
+
+/** Por encima de esto, la «página para colorear» vino pintada y se vuelve a pedir. */
+export const COLORING_MAX_COLORFULNESS = 15;
+
+/**
+ * Página para colorear: blanco y negro puro (sin color ni tintes), con los grises claros llevados a
+ * blanco para que el papel quede limpio y los contornos bien negros. Es la garantía final: aunque
+ * el modelo pinte algo, al cliente nunca le llega una página a color (Lu, 19 nov 2026).
+ */
+export async function toColoringPage(input: Uint8Array): Promise<Uint8Array> {
+  const data = await sharp(input, { failOn: 'error' })
+    .removeAlpha()
+    .greyscale()
+    .normalise({ lower: 1, upper: 99 })
+    // Levanta los grises claros (fondos, sombras suaves) hacia el blanco del papel.
+    .linear(1.35, -40)
+    .png()
+    .toBuffer();
+  return new Uint8Array(data);
+}
