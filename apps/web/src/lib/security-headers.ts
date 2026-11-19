@@ -14,6 +14,8 @@ export interface SecurityOptions {
   analytics: boolean;
   /** Google Maps en el checkout (autocompletado y mapa): solo si hay clave. */
   maps?: boolean;
+  /** Botones de pago de PayPal en el checkout (DECISIONS 287): solo si hay client ID. */
+  paypal?: boolean;
 }
 
 const unique = (values: string[]) => [...new Set(values.filter(Boolean))];
@@ -23,6 +25,7 @@ export function contentSecurityPolicy({
   dev,
   analytics,
   maps = false,
+  paypal = false,
 }: SecurityOptions): string {
   const api = new URL(apiUrl).origin;
   const firebase = [
@@ -38,6 +41,8 @@ export function contentSecurityPolicy({
   const googleMaps = maps
     ? ['https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://*.ggpht.com']
     : [];
+  // SDK de PayPal (script, iframes de los botones y de la tarjeta, sus imágenes y su API).
+  const paypalHosts = paypal ? ['https://*.paypal.com', 'https://*.paypalobjects.com'] : [];
   // En desarrollo: recarga en caliente de Next y los emuladores de Firebase.
   const local = dev ? ['http://localhost:*', 'http://127.0.0.1:*', 'ws://localhost:*'] : [];
   const directives: Record<string, string[]> = {
@@ -49,6 +54,7 @@ export function contentSecurityPolicy({
       'https://apis.google.com',
       ...recaptcha,
       ...googleMaps,
+      ...paypalHosts,
       ...(analytics ? [...ga, 'https://connect.facebook.net'] : []),
     ]),
     'style-src': unique([
@@ -64,6 +70,7 @@ export function contentSecurityPolicy({
       'https://storage.googleapis.com',
       'https://lh3.googleusercontent.com',
       ...googleMaps,
+      ...paypalHosts,
       ...(analytics ? [...ga, 'https://www.facebook.com'] : []),
       ...local,
     ]),
@@ -75,6 +82,7 @@ export function contentSecurityPolicy({
       ...firebase,
       ...recaptcha,
       ...googleMaps,
+      ...paypalHosts,
       ...(analytics ? [...ga, ...meta] : []),
       ...local,
     ]),
@@ -88,6 +96,7 @@ export function contentSecurityPolicy({
       ...recaptcha,
       'https://recaptcha.google.com',
       ...(analytics ? ['https://www.facebook.com'] : []),
+      ...paypalHosts,
       ...local,
     ]),
     ...(maps ? { 'worker-src': ["'self'", 'blob:'] } : {}),
