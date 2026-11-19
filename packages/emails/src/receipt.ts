@@ -11,7 +11,7 @@ import { DEFAULT_BRAND, type EmailBrand } from './brand';
  * Comprobante de compra en PDF. NO es una factura ni un documento fiscal: así lo dice el propio
  * documento. Los importes llegan ya formateados (moneda y decimales del idioma) para que el PDF
  * no decida nada de plata. Sin CUIT, razón social ni números fiscales hasta que exista la
- * sociedad que factura (DECISIONS 295).
+ * sociedad que factura (DECISIONS 296).
  */
 export const receiptSchema = z.object({
   orderId: z.string().min(1),
