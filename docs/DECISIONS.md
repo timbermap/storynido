@@ -2911,3 +2911,13 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
   - Columna del costado (fija al bajar en compu): número corto y fecha del pedido arriba del precio; «¿Otra aventura?» con «Crear otro cuento» cuando ya lo tiene; ayuda con enlace a preguntas frecuentes.
   - Opinión: título y estrellas en una línea; el comentario y «Enviar» aparecen al elegir las estrellas.
 - **Textos:** es (vale también para AR/UY), pt y en.
+
+## 276 — PayPal como cobrador (sandbox en staging)
+
+- **Fecha:** 2026-11-19. Pedido por Sebas («paypal podría ser»), después de la mesa de DECISIONS 272 (el CEO propuso PayPal en nuestra página).
+- **Cómo cobra:** Orders v2 con `intent: CAPTURE`, en USD, marca «StoryNido» e idioma según el sitio (`es-MX`, `pt-BR`, `en-US`), sin envío (`NO_SHIPPING`) y «Pagar ahora». El comprador paga con su cuenta PayPal o con tarjeta sin cuenta, en la página de PayPal, y **PayPal lo devuelve solo** a `/pedido/<id>`: no hace falta el diálogo ni la otra pestaña de Gumroad (DECISIONS 271).
+- **Confirmación:** el webhook `CHECKOUT.ORDER.APPROVED` captura el pago desde la API (idempotente con `PayPal-Request-Id: capture-<orden>`); `PAYMENT.CAPTURE.COMPLETED` confirma. Los dos dan `checkout.completed` y el pedido pasa a pagado una sola vez (el monto se compara con el congelado). Captura pendiente (revisión de PayPal): se espera. Reembolsos (`PAYMENT.CAPTURE.REFUNDED`) y disputas (`CUSTOMER.DISPUTE.CREATED`) igual que con los otros cobradores. La firma se verifica con `POST /v1/notifications/verify-webhook-signature`, mandando el cuerpo crudo sin volver a serializarlo.
+- **Impuestos:** PayPal no es merchant of record: el IVA va incluido en el precio y sale del margen (`taxInclusive`, como Dodo). Las obligaciones de IVA por país quedan de nuestro lado: consulta con contador pendiente.
+- **Interfaz:** `PaymentProvider.parseWebhook` puede ser asíncrono (como el de las imprentas).
+- **Espera del pedido:** sin URL de pago guardada (PayPal ya volvió), «Esperando tu pago» dice «Estamos confirmando tu pago» en vez de mandar a la pestaña de Gumroad.
+- **Infra:** `payment_provider = "paypal"` con los secretos `paypal-client-id`, `paypal-client-secret` y `paypal-webhook-id`; fuera de producción `PAYPAL_ENV=sandbox` siempre. Staging sigue en Gumroad hasta cargar las credenciales del sandbox y aplicar Terraform.

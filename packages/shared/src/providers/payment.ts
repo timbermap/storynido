@@ -64,7 +64,10 @@ export interface PaymentProvider {
    */
   readonly taxInclusive?: boolean;
   createCheckout(request: CheckoutRequest): Promise<CheckoutSession>;
-  /** Verifica la firma y traduce el evento. Lanza WebhookSignatureError si la firma es inválida. */
-  parseWebhook(input: WebhookInput): PaymentEvent;
+  /**
+   * Verifica la firma y traduce el evento. Lanza WebhookSignatureError si la firma es inválida.
+   * Puede ser asíncrono (PayPal verifica con su API y captura el pago aprobado).
+   */
+  parseWebhook(input: WebhookInput): PaymentEvent | Promise<PaymentEvent>;
   refund(request: RefundRequest): Promise<Refund>;
 }

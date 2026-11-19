@@ -64,7 +64,11 @@ export function AwaitingPayment({ orderId, onCheck }: { orderId: string; onCheck
           <h2 id="awaiting-payment-title" className="font-semibold">
             {t('title')}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">{t('text')}</p>
+          {/* Con la URL guardada, el pago está en otra pestaña (Gumroad); si no, el cobrador ya
+              volvió solo (PayPal) y solo falta su confirmación (DECISIONS 276). */}
+          <p className="mt-1 text-sm text-muted-foreground">
+            {paymentUrl ? t('text') : t('confirming')}
+          </p>
         </div>
       </div>
       <div className="flex flex-wrap gap-3">
@@ -98,7 +102,7 @@ export function AwaitingPayment({ orderId, onCheck }: { orderId: string; onCheck
       )}
       {slow && (
         <p className="text-sm">
-          {t.rich('slow', {
+          {t.rich(paymentUrl ? 'slow' : 'slowConfirming', {
             link: (chunks) => (
               <Link href="/faq" className="font-semibold text-primary underline underline-offset-4">
                 {chunks}

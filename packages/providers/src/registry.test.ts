@@ -61,7 +61,7 @@ describe('ProviderRegistry', () => {
         settings: providerSettingsFromEnv({ PAYMENT_PROVIDER: 'stripe' }),
       }),
     ).toThrow(ProviderUnavailableError);
-    expect(() => providerSettingsFromEnv({ PAYMENT_PROVIDER: 'paypal' })).toThrow();
+    expect(() => providerSettingsFromEnv({ PAYMENT_PROVIDER: 'square' })).toThrow();
   });
 
   it('la configuración de IA del admin solo acepta proveedores disponibles', () => {

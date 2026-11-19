@@ -105,11 +105,11 @@ variable "email_provider" {
 variable "payment_provider" {
   type        = string
   default     = "mock"
-  description = "Pagos: mock (simulado), dodo (dodo-api-key y dodo-webhook-secret) o gumroad (gumroad-access-token y gumroad-ping-secret), con los secretos con valor."
+  description = "Pagos: mock (simulado), dodo (dodo-api-key y dodo-webhook-secret) gumroad (gumroad-access-token y gumroad-ping-secret) o paypal (paypal-client-id, paypal-client-secret y paypal-webhook-id), con los secretos con valor."
 
   validation {
-    condition     = contains(["mock", "dodo", "gumroad"], var.payment_provider)
-    error_message = "payment_provider debe ser mock, dodo o gumroad."
+    condition     = contains(["mock", "dodo", "gumroad", "paypal"], var.payment_provider)
+    error_message = "payment_provider debe ser mock, dodo, gumroad o paypal."
   }
 }
 
