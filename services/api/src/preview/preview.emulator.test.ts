@@ -12,6 +12,7 @@ import {
 import {
   countWords,
   utcDay,
+  type CharacterTraits,
   type CountryConfig,
   type EmailMessage,
   type IllustrationStyle,
@@ -809,6 +810,53 @@ describe('vista previa', () => {
       payload: {},
     });
     expect(other.statusCode).toBe(404);
+  });
+
+  it('perfil: un dibujo nuevo no hereda rasgos de una foto borrada y «Ajustar» corrige, no fija lo que estaba mal', async () => {
+    await setAiConfig({ maxPreviewsPerUserPerDay: 10 });
+    await seedBook(providers, 'book-1');
+    const call = (path: string, payload?: object) =>
+      app.inject({
+        method: 'POST',
+        url: `/v1/me/children/book-1-child/drawing${path}`,
+        headers: auth(TOKEN),
+        ...(payload ? { payload } : {}),
+      });
+    await call('', {});
+    await call('/accept');
+    // Como el de Lu: dibujado con otra foto (ya borrada) que tenía anteojos.
+    await db.doc('children/book-1-child').update({
+      'drawing.traits.glasses': true,
+      'drawing.mustKeep': ['hair', 'skinTone', 'glasses'],
+      'drawing.source': 'photo:borrada',
+    });
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    // «Actualizar su dibujo»: sale de la foto de ahora, sin los anteojos de la foto borrada.
+    expect((await call('', {})).statusCode).toBe(200);
+    const fresh = paint.mock.calls.at(-1)?.[0].character.description ?? '';
+    expect(fresh).toContain('no glasses');
+    expect(fresh).not.toContain('prescription glasses');
+    // «Ajustar el parecido»: los rasgos corregidos y la nota van aparte, con prioridad.
+    const traits = (await call('', {})).json<{ traits: CharacterTraits }>().traits;
+    expect(traits.glasses).toBe(false);
+    expect(
+      (
+        await call('', {
+          traits: { ...traits, glasses: true },
+          mustKeep: ['glasses'],
+          note: 'pelo más corto',
+        })
+      ).statusCode,
+    ).toBe(200);
+    const adjusted = paint.mock.calls.at(-1)?.[0];
+    expect(adjusted?.character.description).toContain('prescription glasses');
+    expect(adjusted?.correction).toBe('pelo más corto');
+    // Aprobado, lo corregido sigue en su próximo cuento con esa foto.
+    await call('/accept');
+    paint.mockClear();
+    expect((await generate('book-1')).statusCode).toBe(200);
+    expect(paint.mock.calls[0]?.[0].character.description).toContain('prescription glasses');
+    paint.mockRestore();
   });
 
   it('el dibujo aprobado del perfil es la referencia de la lámina de su próximo cuento', async () => {

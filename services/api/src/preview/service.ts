@@ -1230,22 +1230,36 @@ export class PreviewService {
     traits: CharacterTraits;
     mustKeep: MustKeepTrait[];
   }> {
-    // Los rasgos que el adulto confirmó o corrigió tienen prioridad sobre los estimados.
+    // Los rasgos que el adulto confirmó o corrigió tienen prioridad sobre los estimados: los de
+    // este libro y, si no, los que corrigió antes para la misma foto (en otro cuento o en su
+    // perfil). Antes cada cuento nuevo volvía a lo leído de la foto.
+    const confirmed = confirmedTraits(book) ?? (await this.childCorrection(book));
     if (book.characterMode === 'avatar') {
       if (!book.avatar)
         throw new AppError(409, 'bad_request', 'Elige los rasgos del protagonista.');
-      const traits = confirmedTraits(book)?.traits ?? { ...book.avatar, distinctive: null };
+      const traits = confirmed?.traits ?? { ...book.avatar, distinctive: null };
       return {
         photo: null,
         sheet: avatarToSheet(book.avatar, age),
         traits,
-        mustKeep: confirmedTraits(book)?.mustKeep ?? defaultMustKeep(traits),
+        mustKeep: confirmed?.mustKeep ?? defaultMustKeep(traits),
       };
     }
     const fromPhoto = await this.characterFor(uid, book.photoIds[0] ?? '', ai, track);
-    const confirmed = confirmedTraits(book);
     const traits = confirmed?.traits ?? { ...fromPhoto.traits, distinctive: null };
     return { ...fromPhoto, traits, mustKeep: confirmed?.mustKeep ?? defaultMustKeep(traits) };
+  }
+
+  /** Rasgos que el adulto corrigió para esta misma foto (o rasgos) en otro cuento o su perfil. */
+  private async childCorrection(
+    book: BookData,
+  ): Promise<{ traits: CharacterTraits; mustKeep: MustKeepTrait[] } | null> {
+    if (!book.childId) return null;
+    const child = (await this.db.collection(COLLECTIONS.children).doc(book.childId).get()).data();
+    const saved = child?.correctedTraits as
+      { base?: string; traits?: CharacterTraits; mustKeep?: MustKeepTrait[] } | undefined;
+    if (!saved?.traits || saved.base !== characterBase(book)) return null;
+    return { traits: saved.traits, mustKeep: saved.mustKeep ?? defaultMustKeep(saved.traits) };
   }
 
   /** Foto procesada del protagonista y su ficha (se calcula una vez y se guarda en la foto). */
@@ -1824,9 +1838,7 @@ export class PreviewService {
       const { story, style, child, imageAge } = await this.context(uid, book, preview);
       const track = this.tracker(uid, bookId, limits);
       const { photo, sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
-      const description = `${describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep)}${
-        note ? `\nCorrection requested by the parent (apply it): ${note}` : ''
-      }`;
+      const description = describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
       const { image } = await this.illustration(ai, track, limits, {
         prompt: buildIllustrationPrompt({
           template: story.imagePromptTemplate,
@@ -1839,6 +1851,7 @@ export class PreviewService {
         style: style.slug,
         character: { description, photo },
         references: [],
+        correction: note,
         aspectRatio: '3:4',
         seed: Date.now() % 100_000,
       });
@@ -1886,6 +1899,16 @@ export class PreviewService {
         updatedAt: new Date(),
       });
       await Promise.all(stale.map((path) => storage.delete({ bucket: 'assets', path })));
+      // La corrección sigue en sus próximos cuentos con esta foto (o estos rasgos).
+      if (book.childId) {
+        await this.db
+          .collection(COLLECTIONS.children)
+          .doc(book.childId)
+          .update({
+            correctedTraits: { base: updatedBook.characterBase, traits, mustKeep },
+            updatedAt: new Date(),
+          });
+      }
       await this.qaEvent(bookId, 'character_corrected', { mustKeep: mustKeep.length });
       await this.timings.track('character_fix', fixStartedAt);
     } catch (error) {
@@ -1937,13 +1960,18 @@ export class PreviewService {
         : null;
     const drawing = child.drawing as StoredDrawing | undefined;
     const candidate = child.drawingCandidate as StoredDrawing | undefined;
-    const last = candidate ?? drawing;
+    const photoDoc = await this.latestChildPhoto(uid, childId);
+    const avatar = child.avatar as Avatar | undefined;
+    const base = drawingBase(photoDoc, avatar);
+    // Los rasgos del último dibujo solo si se dibujó con la foto (o los rasgos) de ahora; si no,
+    // los que leímos de la foto vigente (p. ej. sin los anteojos de una foto ya borrada).
+    const last = [candidate, drawing].find((item) => item?.source === base.source && item.traits);
     return {
       imageUrl: await url(drawing?.previewImagePath),
       candidateUrl: await url(candidate?.previewImagePath),
-      traits: last?.traits ?? null,
-      mustKeep: last?.mustKeep ?? [],
-      canDraw: Boolean(child.avatar) || (await this.latestChildPhoto(uid, childId)) !== null,
+      traits: last?.traits ?? base.traits,
+      mustKeep: last?.mustKeep ?? (base.traits ? defaultMustKeep(base.traits) : []),
+      canDraw: Boolean(avatar) || photoDoc !== null,
     };
   }
 
@@ -2013,14 +2041,18 @@ export class PreviewService {
       } else {
         throw new AppError(409, 'bad_request', 'Sube una foto o elige sus rasgos.');
       }
-      const previous = (child.drawingCandidate ?? child.drawing) as StoredDrawing | undefined;
+      const source = drawingBase(photoDoc, avatar).source;
+      // Lo corregido antes vale solo si el dibujo anterior salió de esta misma foto: si la foto
+      // se borró o hay otra más nueva, se parte de lo que se ve en la foto de ahora.
+      const previous = [
+        child.drawingCandidate as StoredDrawing | undefined,
+        child.drawing as StoredDrawing | undefined,
+      ].find((item) => item?.source === source);
       const traits = input.traits ?? previous?.traits ?? base;
       const mustKeep = [
         ...new Set([...(previous?.mustKeep ?? defaultMustKeep(traits)), ...input.mustKeep]),
       ];
-      const description = `${describeCharacter(String(child.name), age, sheet, traits, mustKeep)}${
-        input.note ? `\nCorrection requested by the parent (apply it): ${input.note}` : ''
-      }`;
+      const description = describeCharacter(String(child.name), age, sheet, traits, mustKeep);
       const styles = await this.catalog.styles();
       const style = styles.find((item) => item.slug === PROFILE_DRAWING_STYLE) ?? styles[0];
       if (!style) throw new AppError(503, 'ai_unavailable', 'No pudimos dibujarlo ahora.');
@@ -2037,6 +2069,7 @@ export class PreviewService {
         style: style.slug,
         character: { description, photo },
         references: [],
+        correction: input.note,
         aspectRatio: '3:4',
         seed: Date.now() % 100_000,
       });
@@ -2053,6 +2086,7 @@ export class PreviewService {
           mustKeep,
           styleId: style.slug,
           ...(Number.isFinite(age) ? { age } : {}),
+          source,
           createdAt: new Date(),
         },
         updatedAt: new Date(),
@@ -2072,9 +2106,21 @@ export class PreviewService {
     const { ref, child } = await this.ownedChild(uid, childId);
     const candidate = child.drawingCandidate as StoredDrawing | undefined;
     if (!candidate) throw new AppError(409, 'bad_request', 'No hay un dibujo nuevo para usar.');
+    // Lo que se ve en el dibujo aprobado (p. ej. sin anteojos) vale para sus próximos cuentos con
+    // la misma foto, aunque no usen el dibujo.
+    const base = candidate.source?.replace(/^photo:/, '');
     await ref.update({
       drawing: { ...candidate, approvedAt: new Date() },
       drawingCandidate: FieldValue.delete(),
+      ...(base && candidate.traits
+        ? {
+            correctedTraits: {
+              base,
+              traits: candidate.traits,
+              mustKeep: candidate.mustKeep ?? defaultMustKeep(candidate.traits),
+            },
+          }
+        : {}),
       updatedAt: new Date(),
     });
     await this.deleteDrawing(child.drawing as StoredDrawing | undefined);
@@ -2484,6 +2530,22 @@ function isStale(preview: NonNullable<BookData['preview']>, book: BookData): boo
   );
 }
 
+/**
+ * De qué sale el dibujo del perfil ahora: la foto vigente más reciente o los rasgos elegidos, con
+ * los rasgos que ya leímos de esa foto (si todavía no se leyó, null).
+ */
+function drawingBase(
+  photoDoc: { id: string; get: (field: string) => unknown } | null,
+  avatar: Avatar | undefined,
+): { source: string; traits: CharacterTraits | null } {
+  if (photoDoc) {
+    const read = photoDoc.get('characterTraits') as Avatar | undefined;
+    return { source: `photo:${photoDoc.id}`, traits: read ? { ...read, distinctive: null } : null };
+  }
+  if (avatar) return { source: avatarKey(avatar), traits: { ...avatar, distinctive: null } };
+  return { source: 'none', traits: null };
+}
+
 /** La foto o los rasgos elegidos en el creador. */
 function characterBase(book: BookData): string {
   if (book.characterMode === 'avatar') return book.avatar ? avatarKey(book.avatar) : 'avatar:none';
@@ -2572,6 +2634,11 @@ interface StoredDrawing {
   /** Estilo y edad con que se dibujó (los dibujos anteriores a DECISIONS 264 no los traen). */
   styleId?: string;
   age?: number;
+  /**
+   * De qué se dibujó: la foto (`photo:<id>`) o los rasgos (`avatar:…`). Si esa foto se borró o hay
+   * otra más nueva, sus rasgos ya no valen para el próximo dibujo (anteojos de una foto borrada).
+   */
+  source?: string;
 }
 
 /** Lámina del personaje en un estilo, guardada en el personaje para reutilizarla. */

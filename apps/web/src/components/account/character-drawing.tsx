@@ -3,7 +3,9 @@
 import {
   ApiError,
   MUST_KEEP_TRAITS,
+  type AvatarTrait,
   type CharacterDrawing as Drawing,
+  type CharacterTraits,
   type MustKeepTrait,
 } from '@storynido/shared';
 import { Loader2 } from 'lucide-react';
@@ -14,6 +16,15 @@ import { Button } from '@/components/ui/button';
 import { GenerationProgress } from '@/components/ui/generation-progress';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
+
+import { AVATAR_TRAITS, TraitPicker, type TraitDraft } from '../wizard/trait-picker';
+
+/** Qué rasgos cambia cada cosa que «no se parece» (igual que en la muestra). */
+const ASPECT_TRAITS: Partial<Record<MustKeepTrait, readonly AvatarTrait[]>> = {
+  hair: ['hairColor', 'hairLength', 'hairType'],
+  skinTone: ['skinTone'],
+  eyeColor: ['eyeColor'],
+};
 
 /**
  * El dibujo no pasó el control de calidad en ningún intento: casi siempre es la foto (otras
@@ -66,6 +77,10 @@ export function CharacterDrawing({
   const [adjusting, setAdjusting] = useState(false);
   const [aspects, setAspects] = useState<MustKeepTrait[]>([]);
   const [note, setNote] = useState('');
+  // Los rasgos que se corrigen (anteojos, pelo…): antes solo se mandaba qué estaba mal y el
+  // servidor lo fijaba como estaba, al revés de lo pedido.
+  const [traits, setTraits] = useState<TraitDraft>(drawing.traits ?? { glasses: false });
+  const [distinctive, setDistinctive] = useState(drawing.traits?.distinctive ?? '');
 
   async function run(kind: 'draw' | 'accept' | 'discard', call: () => ReturnType<typeof draw>) {
     setBusy(kind);
@@ -77,6 +92,8 @@ export function CharacterDrawing({
       setAdjusting(false);
       setAspects([]);
       setNote('');
+      setTraits(next.traits ?? { glasses: false });
+      setDistinctive(next.traits?.distinctive ?? '');
     } catch (caught) {
       setError(
         isQualityRejection(caught)
@@ -91,8 +108,24 @@ export function CharacterDrawing({
     }
   }
 
-  const draw = (body: { mustKeep?: MustKeepTrait[]; note?: string | null } = {}) =>
-    api('generateChildDrawing', { params: { childId }, body });
+  const draw = (
+    body: {
+      traits?: CharacterTraits | null;
+      mustKeep?: MustKeepTrait[];
+      note?: string | null;
+    } = {},
+  ) => api('generateChildDrawing', { params: { childId }, body });
+
+  /** Con rasgos leídos se mandan corregidos; sin ellos (todavía), solo la nota. */
+  const canEditTraits = drawing.traits !== null && AVATAR_TRAITS.every((trait) => traits[trait]);
+  function redrawAdjusted() {
+    const corrected = canEditTraits
+      ? { ...(traits as CharacterTraits), distinctive: distinctive.trim() || null }
+      : null;
+    // Lo corregido queda fijo, con el valor nuevo (como en la muestra).
+    const mustKeep = corrected ? [...new Set([...drawing.mustKeep, ...aspects])] : [];
+    void run('draw', () => draw({ traits: corrected, mustKeep, note: note.trim() || null }));
+  }
 
   const drawButton = (label: string, variant: 'default' | 'outline' | 'link') => (
     <Button
@@ -175,7 +208,21 @@ export function CharacterDrawing({
         <div className="grid gap-2">
           {storyButton('default')}
           <p className="text-sm text-muted-foreground">{tProfile('profileCreateNote')}</p>
-          {drawing.canDraw && drawButton(t('update'), 'link')}
+          {drawing.canDraw && (
+            <div className="flex flex-wrap items-center gap-x-5">
+              {drawButton(t('update'), 'link')}
+              <Button
+                variant="link"
+                className="h-auto w-fit px-0"
+                disabled={busy !== null}
+                onClick={() => {
+                  setAdjusting((open) => !open);
+                }}
+              >
+                {tPreview('correct')}
+              </Button>
+            </div>
+          )}
         </div>
       ) : drawing.canDraw ? (
         // Sin dibujo, con foto o rasgos: lo principal es crearlo; el cuento queda secundario.
@@ -204,37 +251,66 @@ export function CharacterDrawing({
 
       {adjusting && (
         <div className="grid gap-4 rounded-xl bg-muted/50 p-4">
-          <fieldset>
-            <legend className="font-bold">{tPreview('whatsOff')}</legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {MUST_KEEP_TRAITS.map((trait) => {
-                const checked = aspects.includes(trait);
-                return (
-                  <label
-                    key={trait}
-                    className={cn(
-                      'inline-flex min-h-11 items-center gap-2 rounded-full border-2 bg-card px-4 text-sm font-bold',
-                      checked ? 'border-navy' : 'border-border',
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      className="size-4 accent-[var(--primary)]"
-                      checked={checked}
-                      onChange={(event) => {
-                        setAspects((current) =>
-                          event.target.checked
-                            ? [...current, trait]
-                            : current.filter((item) => item !== trait),
-                        );
-                      }}
-                    />
-                    {tPreview(`aspects.${trait}`)}
-                  </label>
-                );
-              })}
+          {canEditTraits && (
+            <fieldset>
+              <legend className="font-bold">{tPreview('whatsOff')}</legend>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {MUST_KEEP_TRAITS.map((trait) => {
+                  const checked = aspects.includes(trait);
+                  return (
+                    <label
+                      key={trait}
+                      className={cn(
+                        'inline-flex min-h-11 items-center gap-2 rounded-full border-2 bg-card px-4 text-sm font-bold',
+                        checked ? 'border-navy' : 'border-border',
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-[var(--primary)]"
+                        checked={checked}
+                        onChange={(event) => {
+                          setAspects((current) =>
+                            event.target.checked
+                              ? [...current, trait]
+                              : current.filter((item) => item !== trait),
+                          );
+                        }}
+                      />
+                      {tPreview(`aspects.${trait}`)}
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+          )}
+          {canEditTraits &&
+          (aspects.some((aspect) => ASPECT_TRAITS[aspect]) || aspects.includes('glasses')) ? (
+            <TraitPicker
+              idPrefix="drawing"
+              value={traits}
+              onChange={setTraits}
+              only={aspects.flatMap((aspect) => ASPECT_TRAITS[aspect] ?? [])}
+              showGlasses={aspects.includes('glasses')}
+            />
+          ) : null}
+          {canEditTraits && aspects.includes('distinctive') && (
+            <div className="grid gap-2">
+              <label htmlFor="drawing-distinctive" className="font-bold">
+                {tPreview('distinctive')}
+              </label>
+              <input
+                id="drawing-distinctive"
+                value={distinctive}
+                maxLength={60}
+                placeholder={tPreview('distinctivePlaceholder')}
+                onChange={(event) => {
+                  setDistinctive(event.target.value);
+                }}
+                className="h-11 rounded-lg border bg-card px-3"
+              />
             </div>
-          </fieldset>
+          )}
           <div className="grid gap-2">
             <label htmlFor="drawing-note" className="font-bold">
               {tPreview('adjustNote')}
@@ -253,9 +329,7 @@ export function CharacterDrawing({
           <Button
             className="w-fit"
             disabled={busy !== null || (aspects.length === 0 && !note.trim())}
-            onClick={() =>
-              void run('draw', () => draw({ mustKeep: aspects, note: note.trim() || null }))
-            }
+            onClick={redrawAdjusted}
           >
             {t('redrawAdjusted')}
           </Button>
