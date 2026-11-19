@@ -186,15 +186,13 @@ export interface IllustrationRequest {
   /** Semilla para reproducibilidad, si el proveedor la soporta. */
   seed: number | null;
   /**
-   * Libro para colorear: la imagen sale en blanco y negro, solo contornos. Si no se pasa, se deduce
-   * del estilo («coloring book line art»), así ningún llamador se olvida.
+   * Estilo elegido (slug): su ficha trae el control automático de cada imagen (DECISIONS 282).
+   * Sin slug, el control sale de la técnica (`stylePrompt`), así ningún llamador se olvida.
    */
+  style?: string | null;
+  /** Libro para colorear: la imagen sale en blanco y negro, solo contornos (DECISIONS 281). */
   coloring?: boolean;
 }
-
-/** El estilo es el de los libros para colorear (contornos en blanco y negro). */
-export const isColoringStyle = (stylePrompt: string | null | undefined): boolean =>
-  /coloring (book|page) line art/i.test(stylePrompt ?? '');
 
 export interface GeneratedImage extends ImageData {
   usage: AiUsage;
@@ -438,7 +436,11 @@ export interface AITextProvider {
 export interface AIImageProvider {
   readonly id: string;
   generateIllustration(request: IllustrationRequest): Promise<GeneratedImage>;
-  moderateImage(image: ImageData): Promise<ModerationResult>;
+  /**
+   * Control de la imagen. Con `style` (la técnica elegida) también rechaza, en la misma llamada, una
+   * imagen hecha claramente en otra técnica (categoría "style", DECISIONS 282).
+   */
+  moderateImage(image: ImageData, options?: { style?: string | null }): Promise<ModerationResult>;
 }
 
 /** Texto e imagen se eligen por separado desde el admin (aiConfig). */

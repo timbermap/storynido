@@ -27,5 +27,6 @@ export * from './metrics';
 export * from './delivery';
 export * from './product-pricing';
 export * from './art-direction';
+export * from './style-sheets';
 export * from './price-table';
 export * from './page-layout';

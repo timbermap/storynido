@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 
-import type { FaceBox } from '@storynido/shared';
+import type { FaceBox, ImageCheck } from '@storynido/shared';
 
 import { WATERMARK_TILE_PNG_BASE64 } from './watermark-tile';
 
@@ -119,8 +119,47 @@ export async function colorfulness(input: Uint8Array): Promise<number> {
   return Math.hypot(rgStd, ybStd) + 0.3 * Math.hypot(rgMean, ybMean);
 }
 
-/** Por encima de esto, la «página para colorear» vino pintada y se vuelve a pedir. */
-export const COLORING_MAX_COLORFULNESS = 15;
+/** Saturación media (0-1) de una imagen. */
+export async function meanSaturation(input: Uint8Array): Promise<number> {
+  const { data, info } = await sharp(input)
+    .removeAlpha()
+    .resize({ width: 256, height: 256, fit: 'inside' })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const pixels = Math.floor(data.length / info.channels);
+  if (pixels === 0 || info.channels < 3) return 0;
+  let total = 0;
+  for (let i = 0; i < pixels; i += 1) {
+    const offset = i * info.channels;
+    const r = data[offset] ?? 0;
+    const g = data[offset + 1] ?? 0;
+    const b = data[offset + 2] ?? 0;
+    const max = Math.max(r, g, b);
+    total += max === 0 ? 0 : (max - Math.min(r, g, b)) / max;
+  }
+  return total / pixels;
+}
+
+/**
+ * Lo que falla del control de la ficha del estilo (DECISIONS 282), o null si pasa. Mide la imagen
+ * tal cual la devolvió el modelo.
+ */
+export async function failedCheck(input: Uint8Array, check: ImageCheck): Promise<string | null> {
+  const needsColor = check.maxColorfulness !== undefined || check.minColorfulness !== undefined;
+  if (needsColor) {
+    const color = await colorfulness(input);
+    if (check.maxColorfulness !== undefined && color > check.maxColorfulness) {
+      return 'The previous attempt was painted in color. This time draw ONLY black line art on white: zero color, zero gray.';
+    }
+    if (check.minColorfulness !== undefined && color < check.minColorfulness) {
+      return 'The previous attempt came out black and white or as an uncolored sketch. This time it is a fully colored illustration in the chosen art style.';
+    }
+  }
+  if (check.maxSaturation !== undefined && (await meanSaturation(input)) > check.maxSaturation) {
+    return 'The previous attempt was oversaturated and looked artificial. This time use calm, softened colors with a single accent, never neon, candy or pure primaries.';
+  }
+  return null;
+}
 
 /**
  * Página para colorear: blanco y negro puro (sin color ni tintes), con los grises claros llevados a

@@ -8,6 +8,7 @@ import {
   mediumFor,
   withCurrentGuards,
 } from './art-direction';
+import { STYLE_SHEETS, bookTypeSheet, imageCheckFor } from './style-sheets';
 
 describe('dirección de arte de los libros', () => {
   it('paleta de la historia o, si no tiene, la del público', () => {
@@ -138,5 +139,45 @@ describe('dirección de arte de los libros', () => {
     expect(withCurrentGuards(updated)).toBe(updated);
     const baby = artDirection({ age: 1, channel: 'families', style: 'collage-papel' });
     expect(withCurrentGuards(baby)).toBe(baby);
+  });
+});
+
+describe('fichas de estilo y de tipo de libro (DECISIONS 282)', () => {
+  const TYPES = ['story', 'story_activities', 'activities', 'coloring'] as const;
+
+  it.each(Object.keys(STYLE_SHEETS))('%s combina su ficha con cada tipo de libro', (style) => {
+    const sheet = STYLE_SHEETS[style];
+    if (!sheet) throw new Error(style);
+    for (const contentType of TYPES) {
+      const coloring = contentType === 'coloring';
+      const direction = artDirection({ age: 5, channel: 'families', style, contentType, coloring });
+      expect(direction).toContain(
+        bookTypeSheet(coloring || !sheet.usesPalette ? 'coloring' : contentType),
+      );
+      if (coloring || !sheet.usesPalette) {
+        expect(direction).toContain('Black line art only for coloring');
+        expect(direction).not.toContain('Color palette:');
+      } else {
+        expect(direction).toContain(sheet.medium);
+        expect(direction).toContain(sheet.references);
+        expect(direction).toContain('Color palette:');
+      }
+    }
+  });
+
+  it('colorear para bebés no pide colores por la edad', () => {
+    const direction = artDirection({ age: 1, channel: 'families', coloring: true });
+    expect(direction).not.toContain('warm, slightly softened colors');
+    expect(direction).toContain('Ignore all their colors');
+  });
+
+  it('el control de un estilo sin ficha: colorear si su técnica es de colorear; si no, solo lo chillón', () => {
+    expect(imageCheckFor({ stylePrompt: 'black and white coloring book line art' }).grayscale).toBe(
+      true,
+    );
+    expect(imageCheckFor({ style: 'linograbado', stylePrompt: 'linocut print' })).toEqual({
+      maxSaturation: 0.7,
+    });
+    expect(imageCheckFor({ style: 'acuarela', coloring: true }).grayscale).toBe(true);
   });
 });

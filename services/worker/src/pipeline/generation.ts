@@ -74,6 +74,7 @@ import {
   type BookLayout,
   type PageLayout,
   withCurrentGuards,
+  mediumFor,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
@@ -621,6 +622,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           direction: withCurrentGuards(snapshot.artDirection),
         }),
         stylePrompt: snapshot.stylePrompt,
+        // La ficha del estilo controla cada imagen (DECISIONS 282); colorear sale en blanco y negro.
+        coloring: snapshot.contentType === 'coloring',
         character: { description: snapshot.character.description, photo: null },
         references,
         aspectRatio: '3:4',
@@ -630,7 +633,12 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         seed: seed + attempt,
       });
       cost += await record(ctx, 'illustration', image.usage);
-      const verdict = await provider.image.moderateImage(image);
+      const verdict = await provider.image.moderateImage(image, {
+        style:
+          snapshot.contentType === 'coloring'
+            ? mediumFor({ coloring: true })
+            : snapshot.stylePrompt,
+      });
       cost += await record(ctx, 'moderation', verdict.usage);
       if (verdict.allowed) {
         await storage().upload(

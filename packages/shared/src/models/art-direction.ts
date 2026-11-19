@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 import type { Channel } from './channels';
+import type { ContentType } from './editorial';
+import { STYLE_SHEETS, bookTypeSheet, styleSheetFor } from './style-sheets';
 
 /**
  * Dirección de arte de los libros (AUDITORIA-PRODUCTO §3): la marca de la web es suave, pero
@@ -77,31 +79,11 @@ export function ageDirection(age: number): string {
 
 /**
  * Técnica según el estilo elegido. Sin esto, el gouache se imponía a todos los estilos y el
- * Cartoon 3D salía pintado a mano (DECISIONS 121).
+ * Cartoon 3D salía pintado a mano (DECISIONS 121). Vive en las fichas de estilo (DECISIONS 282).
  */
-const STYLE_MEDIUM: Record<string, string> = {
-  'cartoon-3d':
-    'polished 3D animated feature film look: stylized rounded characters, soft global illumination, gentle subsurface skin, smooth materials and cinematic depth of field (not a flat drawing, not watercolor)',
-  // Direcciones de ilustración (DECISIONS 141): técnicas humanas y reconocibles, no "IA genérica".
-  'lapices-de-colores':
-    'hand-drawn colored pencil illustration: imperfect human lines, visible pencil strokes, natural paper grain and deliberately incomplete coloring that lets the paper show through; vary pressure and hatching from page to page',
-  'cuento-clasico':
-    'classic narrative editorial illustration: ink line and opaque paint with moderate texture, believable gestures and storytelling scenography, warm vintage feel',
-  'collage-papel':
-    'cut-paper collage in the spirit of hand-made picture books: clean cut-out contours, layered sheets of painted and textured paper, visible paper fibers and very subtle shadows between layers; faces keep enough detail to resemble the child',
-  'minimalismo-grafico':
-    'contemporary graphic minimalism: expressive silhouettes, simple flat backgrounds, a limited palette of a few colors and a clear composition that reads well even as a small thumbnail; faces stay distinctive and true to the photo',
-  acuarela:
-    'traditional watercolor: transparent washes, soft wet edges, gentle color blooms and visible paper texture; never opaque paint or ink line art',
-  'para-colorear':
-    'black and white coloring book line art: clean closed outlines, no fills, no shading, no gray',
-  // Para 9-12 (estudio de mercado y mesa, DECISIONS 266): estilo propio en vez de «toques de
-  // historieta» mezclados en los demás estilos.
-  'novela-grafica':
-    'bold contemporary graphic novel art for middle-grade readers: thick confident black ink outlines, spotted solid blacks, flat color fields with hard-edged cel shadows, slightly stylized proportions with expressive eyes and dynamic low or high camera angles; clearly a comic-book look, not a painted storybook; one single full-page image, never panels or speech bubbles',
-  'gouache-editorial':
-    'traditional editorial gouache: matte pigment, irregular brush strokes, opaque layers and a controlled palette; faces slightly angular and individual, never overly round',
-};
+const STYLE_MEDIUM: Record<string, string> = Object.fromEntries(
+  Object.entries(STYLE_SHEETS).map(([slug, sheet]) => [slug, sheet.medium]),
+);
 
 /**
  * Reglas para que no se note que es IA (DECISIONS 141): valen para todos los estilos. El 3D conserva
@@ -169,19 +151,28 @@ export function artDirection(input: {
    * nuevo del admin). Antes caía en el gouache de la casa y peleaba con el elegido.
    */
   stylePrompt?: string | null;
+  /** Tipo de libro: su ficha dice cuánto detalle y qué composición (DECISIONS 282). */
+  contentType?: ContentType | null;
 }): string {
   const medium = mediumFor(input);
+  const sheet = styleSheetFor(input);
+  // La ficha del estilo manda: sin paleta, la edad tampoco habla de colores.
+  const colorless = input.coloring === true || sheet?.usesPalette === false;
   const threeD = input.style === 'cartoon-3d';
   const key = input.palette ?? DEFAULT_PALETTE[input.channel];
   const palette = STORY_PALETTES[key];
-  const color = input.coloring
+  const color = colorless
     ? 'Black line art only for coloring: clean closed outlines, no fills, no shading.'
     : `Color palette: ${palette.colors.join(', ')} (${palette.mood}); warm and harmonious, slightly softened: one accent color per scene and the rest earthy and calm; no pure primaries, neon or candy colors, never washed-out pastels.`;
   return [
     `Art direction: premium children's picture book, ${medium}, as if one artist made the whole book.`,
     styleLock(medium),
     color,
-    ageDirection(input.age),
+    colorless && input.age <= 2
+      ? 'For ages 0-2: very simple shapes, one single element per scene on a calm background, and a large friendly face in the upper half.'
+      : ageDirection(input.age),
+    input.contentType || colorless ? bookTypeSheet(colorless ? 'coloring' : input.contentType) : '',
+    sheet ? `${sheet.references} This style never uses: ${sheet.avoid}.` : '',
     HUMAN_CRAFT,
     SPORTS_GEAR,
     threeD ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
