@@ -43,6 +43,16 @@ describe('cabeceras de seguridad', () => {
     expect(csp).toContain("worker-src 'self' blob:");
   });
 
+  it('PayPal: solo con client ID, en scripts, iframes, imágenes y conexiones', () => {
+    const base = { apiUrl: 'https://a.test', dev: false, analytics: false };
+    expect(contentSecurityPolicy(base)).not.toContain('paypal.com');
+    const csp = contentSecurityPolicy({ ...base, paypal: true });
+    for (const directive of ['script-src', 'frame-src', 'img-src', 'connect-src']) {
+      expect(csp).toMatch(new RegExp(`${directive} [^;]*https://\\*\\.paypal\\.com`));
+    }
+    expect(csp).toMatch(/script-src [^;]*https:\/\/\*\.paypalobjects\.com/);
+  });
+
   it('HSTS, anti-iframe, nosniff y permisos del navegador cerrados', () => {
     const headers = Object.fromEntries(
       securityHeaders({ apiUrl: 'https://a.test', dev: false, analytics: false }).map((header) => [
