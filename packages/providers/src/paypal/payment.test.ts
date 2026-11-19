@@ -115,14 +115,15 @@ describe('PaypalPaymentProvider.createCheckout', () => {
     const body = JSON.parse(bodyOf(create)) as {
       intent: string;
       purchase_units: { custom_id: string; amount: { value: string; currency_code: string } }[];
-      payment_source: {
-        paypal: { experience_context: { brand_name: string; locale: string; return_url: string } };
-      };
+      payment_source?: unknown;
+      application_context: { brand_name: string; locale: string; return_url: string };
     };
     expect(body.intent).toBe('CAPTURE');
     expect(body.purchase_units[0]?.custom_id).toBe('ord_1');
     expect(body.purchase_units[0]?.amount).toMatchObject({ currency_code: 'USD', value: '15.99' });
-    expect(body.payment_source.paypal.experience_context).toMatchObject({
+    // Sin payment_source: la misma orden sirve para el botón de PayPal y para el de tarjeta.
+    expect(body.payment_source).toBeUndefined();
+    expect(body.application_context).toMatchObject({
       brand_name: 'StoryNido',
       locale: 'es-MX',
       return_url: checkoutRequest.successUrl,
@@ -230,9 +231,10 @@ describe('PaypalPaymentProvider.parseWebhook', () => {
       amountMinor: 1599,
     });
     const captureCall = calls.find((call) => call.url.endsWith('/capture'));
-    expect((captureCall?.init?.headers as Record<string, string>)['PayPal-Request-Id']).toBe(
-      'capture-PP-ORDER-1',
-    );
+    // Sin clave de idempotencia: un intento antes de aprobar no debe quedar guardado.
+    expect(
+      (captureCall?.init?.headers as Record<string, string>)['PayPal-Request-Id'],
+    ).toBeUndefined();
   });
 
   it('orden ya capturada: se ignora (la confirma el evento de la captura)', async () => {
@@ -326,6 +328,62 @@ describe('PaypalPaymentProvider.parseWebhook', () => {
         headers: signedHeaders,
       }),
     ).resolves.toMatchObject({ type: 'ignored', rawType: 'PAYMENT.CAPTURE.DENIED' });
+  });
+});
+
+describe('PaypalPaymentProvider.confirm', () => {
+  it('aprobada en la página: la cobra y confirma el pago', async () => {
+    const { fetchImpl } = fakePaypal({
+      '/v2/checkout/orders/PP-ORDER-1/capture': {
+        status: 201,
+        body: {
+          id: 'PP-ORDER-1',
+          status: 'COMPLETED',
+          purchase_units: [{ payments: { captures: [capture()] } }],
+        },
+      },
+    });
+    await expect(provider(fetchImpl).confirm('PP-ORDER-1', 'ord_1')).resolves.toMatchObject({
+      type: 'checkout.completed',
+      eventId: 'confirm-CAP-1',
+      orderId: 'ord_1',
+      sessionId: 'PP-ORDER-1',
+      paymentId: 'CAP-1',
+      amountMinor: 1599,
+    });
+  });
+
+  it('ya cobrada por el webhook: lee la captura de la orden', async () => {
+    const { fetchImpl } = fakePaypal({
+      '/v2/checkout/orders/PP-ORDER-1/capture': {
+        status: 422,
+        body: { details: [{ issue: 'ORDER_ALREADY_CAPTURED' }] },
+      },
+      '/v2/checkout/orders/PP-ORDER-1': {
+        body: {
+          id: 'PP-ORDER-1',
+          status: 'COMPLETED',
+          purchase_units: [{ payments: { captures: [capture()] } }],
+        },
+      },
+    });
+    await expect(provider(fetchImpl).confirm('PP-ORDER-1', 'ord_1')).resolves.toMatchObject({
+      type: 'checkout.completed',
+      paymentId: 'CAP-1',
+    });
+  });
+
+  it('todavía sin aprobar: no hay nada que confirmar', async () => {
+    const { fetchImpl } = fakePaypal({
+      '/v2/checkout/orders/PP-ORDER-1/capture': {
+        status: 422,
+        body: { details: [{ issue: 'ORDER_NOT_APPROVED' }] },
+      },
+      '/v2/checkout/orders/PP-ORDER-1': {
+        body: { id: 'PP-ORDER-1', status: 'CREATED', purchase_units: [{}] },
+      },
+    });
+    await expect(provider(fetchImpl).confirm('PP-ORDER-1', 'ord_1')).resolves.toBeNull();
   });
 });
 

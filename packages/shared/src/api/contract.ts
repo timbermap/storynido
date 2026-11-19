@@ -1542,6 +1542,15 @@ export const apiRoutes = {
     params: z.object({ orderId: z.string().min(1) }),
     response: publicOrderSchema,
   },
+  confirmPayment: {
+    method: 'POST',
+    path: '/v1/orders/:orderId/confirm-payment',
+    access: 'user',
+    summary:
+      'Confirma el pago aprobado en la página (PayPal embebido) sin esperar el webhook; si no hay nada que confirmar, devuelve el pedido como está',
+    params: z.object({ orderId: z.string().min(1) }),
+    response: publicOrderSchema,
+  },
   reorder: {
     method: 'POST',
     path: '/v1/orders/:orderId/reorder',

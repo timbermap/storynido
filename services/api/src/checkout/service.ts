@@ -1239,12 +1239,40 @@ export class CheckoutService {
       }
       throw error;
     }
+    return this.record(providerId, event);
+  }
+
+  /** Aplica un evento de pago una sola vez (por proveedor e ID de evento). */
+  private async record(
+    providerId: string,
+    event: PaymentEvent,
+  ): Promise<'processed' | 'duplicate' | 'ignored'> {
     const eventRef = this.db.collection('paymentEvents').doc(`${providerId}_${event.eventId}`);
     if ((await eventRef.get()).exists) return 'duplicate';
 
     const outcome = await this.apply(event);
     await eventRef.set({ type: event.type, outcome, at: new Date() });
     return outcome;
+  }
+
+  /**
+   * El comprador aprobó el pago en nuestra página (PayPal embebido): se cobra y se confirma ya,
+   * sin esperar el webhook. Si el cobrador no sabe confirmar o no hay nada aprobado, devuelve el
+   * pedido como está y la página sigue esperando el webhook.
+   */
+  async confirmPayment(uid: string, orderId: string): Promise<PublicOrder> {
+    const current = await this.order(uid, orderId);
+    if (current.status !== 'pending_payment') return current;
+    const provider = this.providers.payment();
+    const snap = await this.db.collection(COLLECTIONS.orders).doc(orderId).get();
+    const payment = (snap.data() as OrderDoc | undefined)?.payment;
+    const sessionId = payment?.checkoutSessionId;
+    if (!provider.confirm || payment?.provider !== provider.id || !sessionId) return current;
+    const event = await provider.confirm(sessionId, orderId);
+    if (event?.type === 'checkout.completed' && event.orderId === orderId) {
+      await this.record(provider.id, event);
+    }
+    return this.order(uid, orderId);
   }
 
   private async apply(event: PaymentEvent): Promise<'processed' | 'ignored'> {

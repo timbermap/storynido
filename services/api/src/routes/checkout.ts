@@ -81,6 +81,10 @@ export function registerCheckoutRoutes(app: FastifyInstance, checkout: CheckoutS
     checkout.order(user(request).uid, (request.params as { orderId: string }).orderId),
   );
 
+  addRoute(app, apiRoutes.confirmPayment, {}, (request) =>
+    checkout.confirmPayment(user(request).uid, (request.params as { orderId: string }).orderId),
+  );
+
   addRoute(app, apiRoutes.adminRefundOrder, {}, (request) => {
     const current = user(request);
     return checkout.refund(

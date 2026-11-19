@@ -33,3 +33,8 @@ env:
   - variable: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     secret: google-maps-browser-key
     availability: [BUILD, RUNTIME]
+  # PayPal sandbox: ID público de la app (va en la URL del SDK de cada página; no es secreto).
+  # Botones de pago dentro de la página (DECISIONS 287).
+  - variable: NEXT_PUBLIC_PAYPAL_CLIENT_ID
+    value: ARC3yzZAzV-SFzSFjpZ5xT7UPfm-WI-ag0YxvUqwtIIGQqkGicdQEWigIyQdTpM3DAmfuuEBYJwl1xYJ
+    availability: [BUILD, RUNTIME]

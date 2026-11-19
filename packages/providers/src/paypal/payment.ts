@@ -261,19 +261,16 @@ export class PaypalPaymentProvider implements PaymentProvider {
           })),
         },
       ],
-      payment_source: {
-        paypal: {
-          ...(request.customerEmail ? { email_address: request.customerEmail } : {}),
-          experience_context: {
-            brand_name: (this.options.brandName ?? 'StoryNido').slice(0, 127),
-            locale: PAYPAL_LOCALES[request.locale],
-            landing_page: 'NO_PREFERENCE',
-            shipping_preference: 'NO_SHIPPING',
-            user_action: 'PAY_NOW',
-            return_url: request.successUrl,
-            cancel_url: request.cancelUrl,
-          },
-        },
+      // application_context (no payment_source.paypal): la misma orden sirve para el botón de
+      // PayPal, para el de tarjeta sin cuenta en nuestra página y para el enlace de respaldo.
+      application_context: {
+        brand_name: (this.options.brandName ?? 'StoryNido').slice(0, 127),
+        locale: PAYPAL_LOCALES[request.locale],
+        landing_page: 'NO_PREFERENCE',
+        shipping_preference: 'NO_SHIPPING',
+        user_action: 'PAY_NOW',
+        return_url: request.successUrl,
+        cancel_url: request.cancelUrl,
       },
     };
     const result = await this.call('/v2/checkout/orders', {
@@ -407,14 +404,39 @@ export class PaypalPaymentProvider implements PaymentProvider {
     const result = await this.call(
       `/v2/checkout/orders/${encodeURIComponent(paypalOrderId)}/capture`,
       {
+        // Sin PayPal-Request-Id: un intento antes de aprobar (ORDER_NOT_APPROVED) no debe quedar
+        // guardado como respuesta del reintento. Cobrar dos veces no pasa: PayPal contesta
+        // ORDER_ALREADY_CAPTURED.
         method: 'POST',
-        headers: { 'PayPal-Request-Id': `capture-${paypalOrderId}` },
       },
     );
-    if (result.status === 422 && result.text.includes('ORDER_ALREADY_CAPTURED')) return null;
+    if (
+      result.status === 422 &&
+      (result.text.includes('ORDER_ALREADY_CAPTURED') || result.text.includes('ORDER_NOT_APPROVED'))
+    ) {
+      return null;
+    }
     if (!result.ok) this.fail('capturar el pago', result);
     const order = capturedOrderSchema.parse(result.json);
     return order.purchase_units[0]?.payments?.captures?.[0] ?? null;
+  }
+
+  /**
+   * El comprador aprobó en nuestra página (botones de PayPal): se cobra ya, sin esperar el webhook.
+   * Si ya estaba cobrada (llegó antes el webhook), se lee la captura de la orden.
+   */
+  async confirm(sessionId: string, orderId: string): Promise<PaymentEvent | null> {
+    let capture = await this.capture(sessionId);
+    if (!capture) {
+      const result = await this.call(`/v2/checkout/orders/${encodeURIComponent(sessionId)}`, {
+        method: 'GET',
+      });
+      if (!result.ok) this.fail('leer la orden', result);
+      const order = capturedOrderSchema.parse(result.json);
+      capture = order.purchase_units[0]?.payments?.captures?.[0] ?? null;
+    }
+    if (capture?.status !== 'COMPLETED') return null;
+    return this.completed(`confirm-${capture.id}`, orderId, sessionId, capture);
   }
 
   async refund(request: RefundRequest): Promise<Refund> {
