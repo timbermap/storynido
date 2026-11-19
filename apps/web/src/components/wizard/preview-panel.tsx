@@ -33,7 +33,7 @@ import { KitIncludes } from './kit-includes';
 import { BirthdayBookOffer, InvitationPreview } from './party-preview';
 import { cn } from '@/lib/utils';
 
-import { previewErrorKey } from './preview-errors';
+import { previewErrorKey, withOneRetry } from './preview-errors';
 import { PreviewFeedback } from './preview-feedback';
 import { LeaveNote, WaitScreen } from './wait-screen';
 import type { WizardData } from './types';
@@ -111,6 +111,8 @@ export function PreviewPanel({
   const [preview, setPreview] = useState<PublicPreview | null>(null);
   const [busy, setBusy] = useState<Target | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Reintentos de la carga de la muestra (botón «Reintentar» tras un error inesperado).
+  const [reloads, setReloads] = useState(0);
   const [editing, setEditing] = useState<{ index: number; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -141,7 +143,7 @@ export function PreviewPanel({
   useEffect(() => {
     if (isGenerating) return;
     let cancelled = false;
-    api('bookPreview', { params: { bookId: book.id } }).then(
+    withOneRetry(() => api('bookPreview', { params: { bookId: book.id } })).then(
       (result) => {
         if (!cancelled) setPreview(result);
       },
@@ -152,7 +154,7 @@ export function PreviewPanel({
     return () => {
       cancelled = true;
     };
-  }, [isGenerating, book.id, book.status]);
+  }, [isGenerating, book.id, book.status, reloads]);
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -453,9 +455,22 @@ export function PreviewPanel({
       )}
 
       {error && (
-        <p role="alert" className="mt-6 font-semibold text-destructive">
-          {t(`errors.${error}`)}
-        </p>
+        <div role="alert" className="mt-6 flex flex-wrap items-center gap-3">
+          <p className="font-semibold text-destructive">{t(`errors.${error}`)}</p>
+          {error === 'generic' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setError(null);
+                setReloads((count) => count + 1);
+              }}
+            >
+              <RefreshCw aria-hidden="true" />
+              {t('retry')}
+            </Button>
+          )}
+        </div>
       )}
 
       {data?.stage === 'character' && data.character && (

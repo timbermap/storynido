@@ -29,6 +29,11 @@ export const aiConfigSchema = z.object({
   /** Vistas previas y ajustes del personaje por usuario y por semana (anti abuso, silencioso). */
   maxPreviewsPerUserPerWeek: z.number().int().min(1).max(500).default(15),
   /**
+   * Muestras completas por libro (la primera y una más al cambiar elecciones, DECISIONS 284). Quien
+   * ya compró tiene el doble de esto y de los topes por día y por semana.
+   */
+  maxPreviewsPerBook: z.number().int().min(1).max(50).default(2),
+  /**
    * La etapa 2 de la muestra (portada y páginas, la parte cara) pide cuenta: filtra curiosos
    * y deja el contacto. La etapa 1 (texto + personaje) sigue sin cuenta.
    */

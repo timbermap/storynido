@@ -699,6 +699,33 @@ describe('vista previa', () => {
     expect(second.json<{ error: { code: string } }>().error.code).toBe('limit_reached');
   });
 
+  it('muestras por libro: ir y volver no gasta; dos por libro y el doble con compras (DECISIONS 284)', async () => {
+    await setAiConfig({ maxPreviewsPerUserPerDay: 20, maxPreviewsPerUserPerWeek: 50 });
+    await seedBook(providers, 'book-1');
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    expect((await generate('book-1')).statusCode).toBe(200);
+    const drawn = paint.mock.calls.length;
+    // Sin cambios: devuelve la misma muestra, sin dibujar ni contar.
+    expect((await generate('book-1')).statusCode).toBe(200);
+    expect(paint.mock.calls.length).toBe(drawn);
+    paint.mockRestore();
+    // Cambia una elección: la segunda muestra sí se crea.
+    await db.doc('books/book-1').update({ language: 'en' });
+    expect((await generate('book-1')).statusCode).toBe(200);
+    // La tercera ya no.
+    await db.doc('books/book-1').update({ language: 'pt' });
+    const third = await generate('book-1');
+    expect(third.statusCode).toBe(429);
+    expect(third.json<{ error: { code: string } }>().error.code).toBe('limit_reached_book');
+    // Quien ya compró tiene el doble.
+    await db.doc('orders/order-1').set({ ownerUid: UID, status: 'delivered' });
+    try {
+      expect((await generate('book-1')).statusCode).toBe(200);
+    } finally {
+      await db.doc('orders/order-1').delete();
+    }
+  });
+
   it('respeta el tope semanal con un aviso propio', async () => {
     await setAiConfig({ maxPreviewsPerUserPerDay: 5, maxPreviewsPerUserPerWeek: 1 });
     await seedBook(providers, 'book-1');
