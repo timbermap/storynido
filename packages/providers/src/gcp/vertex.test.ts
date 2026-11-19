@@ -542,48 +542,94 @@ describe('Vertex AI', () => {
     expect(await colorfulness(image.bytes)).toBeLessThan(1);
   });
 
-  it('la tapa de colorear va a color, sin pasar a blanco y negro, y deja libre el título', async () => {
+  it('la tapa de colorear se dibuja en líneas con su franja de título y después se pinta', async () => {
+    const lines = await sharp({
+      create: { width: 16, height: 16, channels: 3, background: '#ffffff' },
+    })
+      .png()
+      .toBuffer();
     const colored = await sharp({
       create: { width: 16, height: 16, channels: 3, background: '#3a8fd2' },
     })
       .png()
       .toBuffer();
-    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
-    const provider = new VertexImageProvider(
-      clientWith(
-        () => ({
-          status: 200,
-          json: {
-            candidates: [
-              {
-                content: {
-                  parts: [
-                    { inlineData: { mimeType: 'image/png', data: colored.toString('base64') } },
-                  ],
-                },
-              },
-            ],
-            usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 10 },
+    const calls: { contents: { parts: { text?: string; inlineData?: unknown }[] }[] }[] = [];
+    const reply = (png: Buffer) => ({
+      status: 200,
+      json: {
+        candidates: [
+          {
+            content: {
+              parts: [{ inlineData: { mimeType: 'image/png', data: png.toString('base64') } }],
+            },
           },
-        }),
-        calls,
-      ),
+        ],
+        usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 10 },
+      },
+    });
+    const provider = new VertexImageProvider(
+      clientWith(() => reply(calls.length <= 1 ? lines : colored), calls),
     );
     const image = await provider.generateIllustration({
       prompt: 'Book cover: Lu in her cardboard rocket',
       stylePrompt: 'black and white coloring book line art for children',
       style: 'para-colorear',
-      character: { description: 'Lu: a 5-year-old child', photo: null },
+      character: { description: 'Lu: a 5-year-old child with brown hair', photo: null },
       references: [],
       aspectRatio: '3:4',
       seed: 1,
       cover: true,
     });
-    expect(calls).toHaveLength(1);
-    const text = String(calls[0]?.contents[0]?.parts.at(-1)?.text);
-    expect(text).toContain('COLORING BOOK COVER');
-    expect(text).toContain('COVER LAYOUT');
-    expect(text).not.toContain('COLORING PAGE:');
+    expect(calls).toHaveLength(2);
+    const first = String(calls[0]?.contents[0]?.parts.at(-1)?.text);
+    expect(first).toContain('COLORING PAGE:');
+    expect(first).toContain('COVER LAYOUT');
+    const second = calls[1]?.contents[0]?.parts ?? [];
+    expect(second[0]?.inlineData).toBeTruthy();
+    expect(String(second.at(-1)?.text)).toContain('Color in this coloring book drawing');
+    expect(String(second.at(-1)?.text)).toContain('brown hair');
+    expect(await colorfulness(image.bytes)).toBeGreaterThan(15);
+  });
+
+  it('si la tapa de colorear vuelve sin color, la pide pintada otra vez', async () => {
+    const lines = await sharp({
+      create: { width: 16, height: 16, channels: 3, background: '#ffffff' },
+    })
+      .png()
+      .toBuffer();
+    const colored = await sharp({
+      create: { width: 16, height: 16, channels: 3, background: '#e0a030' },
+    })
+      .png()
+      .toBuffer();
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const reply = (png: Buffer) => ({
+      status: 200,
+      json: {
+        candidates: [
+          {
+            content: {
+              parts: [{ inlineData: { mimeType: 'image/png', data: png.toString('base64') } }],
+            },
+          },
+        ],
+        usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 10 },
+      },
+    });
+    const provider = new VertexImageProvider(
+      clientWith(() => reply(calls.length <= 2 ? lines : colored), calls),
+    );
+    const image = await provider.generateIllustration({
+      prompt: 'Book cover',
+      stylePrompt: 'black and white coloring book line art for children',
+      style: 'para-colorear',
+      character: { description: 'Lu', photo: null },
+      references: [],
+      aspectRatio: '3:4',
+      seed: 1,
+      cover: true,
+    });
+    expect(calls).toHaveLength(3);
     expect(await colorfulness(image.bytes)).toBeGreaterThan(15);
   });
 

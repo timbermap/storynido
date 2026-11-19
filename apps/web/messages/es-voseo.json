@@ -262,7 +262,8 @@
         "generic": "Estamos terminando tu muestra. Volvé a mirar en unos minutos; tu borrador queda guardado.",
         "account_required": "Creá tu cuenta gratis para ver la portada y las páginas ilustradas.",
         "limit_reached_week": "Ya probaste varias versiones esta semana. Guardamos todo y en unos días seguís.",
-        "limit_reached_book": "Ya creaste las muestras incluidas de este libro. Podés seguir ajustando esta (personaje e ilustraciones) o empezar un libro nuevo con otro estilo o historia."
+        "limit_reached_book": "Ya creaste las muestras incluidas de este libro. Podés seguir ajustando esta (personaje e ilustraciones) o empezar un libro nuevo con otro estilo o historia.",
+        "text_too_long": "Este texto es largo para su lugar en el libro. Acortalo un poco e intentá de nuevo."
       },
       "saveStoryTitle": "Guardá tu cuento",
       "saveStoryText": "Creá tu cuenta gratis para no perder esta muestra y retomarla desde cualquier dispositivo.",

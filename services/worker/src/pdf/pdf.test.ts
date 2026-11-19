@@ -328,6 +328,26 @@ describe.skipIf(!chromePath())('PDF', () => {
     expect(result.overflow).toEqual([]);
   }, 60_000);
 
+  it('colorear: un pie largo agranda la franja y nunca se sale de la hoja (DECISIONS 285)', async () => {
+    const long =
+      'Lu se acomoda los anteojos y se prepara para el gran viaje espacial. ¡Giro, pirueta y salto! Su cohete de cartón brilla bajo las estrellas mientras saluda a la luna y a todos sus amigos del barrio.';
+    for (const spec of [FORMAT_SPECS.softcover, FORMAT_SPECS.booklet]) {
+      const coloring = book({
+        contentType: 'coloring',
+        typography: storyTypography('3-4', '3-4', 'es'),
+        activities: [],
+        pages: [{ text: long, image }],
+      });
+      const html = printInteriorHtml(coloring, spec);
+      expect(html).toContain('class="strip-band" style="height:38%"');
+      const result = await renderPdf(browser, html, pageSizeMm(spec), {
+        bleedMm: spec.bleedMm,
+        title: coloring.title,
+      });
+      expect(result.overflow).toEqual([]);
+    }
+  }, 90_000);
+
   it('el tope de palabras de cada franja entra con su letra y su armado por edad', async () => {
     const words = (count: number) =>
       Array.from({ length: count }, (_, index) => (index % 3 ? 'mariposa' : 'Martín')).join(' ');

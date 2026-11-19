@@ -4,6 +4,7 @@ const KNOWN_ERRORS = [
   'limit_reached',
   'limit_reached_week',
   'limit_reached_book',
+  'text_too_long',
   'ai_unavailable',
   'ai_budget_exhausted',
   'photo_unreadable',

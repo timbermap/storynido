@@ -7,6 +7,8 @@ import {
   pageLayout,
   pagesPerScene,
   scenesFor,
+  stripArtPct,
+  stripFontScale,
 } from './page-layout';
 
 const at = (age: number, words: number, pageIndex = 1, contentType = 'story') =>
@@ -62,5 +64,18 @@ describe('armado de página por edad', () => {
     );
     expect(layoutSceneNote({ kind: 'facing', side: 'top' })).toContain('Full-page illustration');
     expect(layoutSceneNote({ kind: 'calm', side: 'top' })).toContain('top third');
+  });
+});
+
+describe('franja de colorear según el largo del pie (DECISIONS 285)', () => {
+  const words = (count: number) => Array.from({ length: count }, () => 'luna').join(' ');
+  it('con el pie de siempre, 80 % de dibujo y la letra de siempre', () => {
+    expect(stripArtPct(words(12))).toBe(80);
+    expect(stripFontScale(words(12))).toBe(1);
+  });
+  it('con un pie largo la franja crece y la letra baja, con piso', () => {
+    expect(stripArtPct(words(20))).toBe(70);
+    expect(stripArtPct(words(37))).toBe(62);
+    expect(stripFontScale(words(37))).toBe(0.8);
   });
 });

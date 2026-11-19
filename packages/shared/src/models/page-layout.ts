@@ -1,3 +1,5 @@
+import { countWords } from './editorial';
+
 /**
  * Armado de cada página por edad (DECISIONS 232): la misma regla para el PDF, la vista previa y los
  * prompts de ilustración, así lo que se ve en la muestra es lo que se imprime.
@@ -17,6 +19,28 @@ export type PageLayoutKind = 'facing' | 'calm' | 'vignette' | 'strip' | 'overlay
 
 /** Alto del dibujo en una página `strip` (%): el resto es la franja blanca del texto. */
 export const STRIP_ART_PCT = 80;
+
+/** Hasta cuántas palabras entra el pie de una página `strip` con la franja normal. */
+export const STRIP_CAPTION_WORDS = 14;
+
+/**
+ * Alto del dibujo en una página `strip` según el largo del pie (DECISIONS 285): con el texto de
+ * siempre (hasta 14 palabras), 80 %; si es más largo (textos viejos o editados a mano), la franja
+ * crece para que el texto nunca se salga de la hoja.
+ */
+export function stripArtPct(text: string | null | undefined): number {
+  const words = countWords(text ?? '');
+  if (words <= STRIP_CAPTION_WORDS) return STRIP_ART_PCT;
+  if (words <= 2 * STRIP_CAPTION_WORDS) return 70;
+  return 62;
+}
+
+/** Cuánto se achica la letra del pie largo (1 = sin cambio), además de la franja más alta. */
+export function stripFontScale(text: string | null | undefined): number {
+  const words = countWords(text ?? '');
+  if (words <= STRIP_CAPTION_WORDS) return 1;
+  return Math.max(0.8, Math.sqrt(STRIP_CAPTION_WORDS / words));
+}
 
 /**
  * Palabras que entran en la zona calma (el tercio libre) con la letra de cada edad (DECISIONS 283).

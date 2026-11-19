@@ -2980,3 +2980,12 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Dos muestras completas por libro** (`maxPreviewsPerBook`, editable en Admin → IA). La tercera devuelve `limit_reached_book` con un mensaje amable. Si la generación falla, se devuelve el cupo del libro.
 - **Compradores, el doble:** con al menos un pedido pagado, se duplican las muestras por libro y los cupos diario y semanal.
 - **Nunca un «Algo salió mal» seco:** la carga de la muestra se reintenta sola una vez; si sigue fallando, un mensaje que dice que la muestra se está terminando y un botón «Reintentar».
+
+## 285 — Tapa de colorear pintada en dos pasos y tope de palabras garantizado en todos los tipos
+
+- **Fecha:** 2026-11-19. Pedido por Sebas después de la muestra de colorear de Lu: «¿no iba a salir a color la tapa?», «texto fuera de hoja» y «revisá todos los prompts en todas las ilustraciones y tipos de cuentos para evitar esto».
+- **Tapa de colorear:** pedida a color de una vez, el modelo la devolvía en blanco y negro (la dirección de arte, la ficha y la lámina de referencia son de líneas) y quedaba la de líneas. Ahora se dibuja como una página más (líneas negras, franja del título libre) y un segundo pedido la pinta sin tocar sus líneas, con los colores del personaje; se controla que vuelva a color (si no, se pide otra vez). Cuesta una imagen más por tapa (≈ USD 0,07).
+- **Franja de colorear que se adapta:** hasta 14 palabras, 80 % de dibujo; con más (textos viejos o editados), la franja crece (70 % o 62 % de dibujo) y la letra baja hasta un 20 %. Igual en el PDF y en la vista.
+- **Tope de palabras garantizado (todos los estilos y tipos de libro):** los prompts ya pedían el rango y el tope de cada edad y tipo (colorear, una frase de hasta 12), y una página pasada se reescribía una vez; pero nada garantizaba el resultado final. Ahora, al terminar el texto de la muestra, la página que todavía pasa el tope se queda con las oraciones enteras que entran (`fitToCap`; evento `length_trimmed` para medir cuántas veces pasa).
+- **Texto editado por el adulto:** el mismo tope vale al editar una página (`text_too_long`, con mensaje amable), así el texto siempre entra en su lugar del libro.
+- **Armado por tipo:** cuento (zona calma / papel fundido según palabras), colorear (franja que se adapta), 9+ (página de texto con ajuste de letra) y actividades (consigna en su encabezado). El test del PDF prueba el tope de cada franja y un pie largo de colorear sin desborde.

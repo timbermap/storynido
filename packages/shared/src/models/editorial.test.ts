@@ -8,6 +8,8 @@ import {
   ageBandOf,
   editorialConfigSchema,
   editorialPlan,
+  fitToCap,
+  countWords,
   pagesOutOfRange,
   pagesOverCap,
   pricedPages,
@@ -238,5 +240,36 @@ describe('páginas con las que se calcula el precio (DECISIONS 242)', () => {
     expect(pricedPages(0, DEFAULT_EDITORIAL_CONFIG)).toBe(10);
     expect(pricedPages(4, DEFAULT_EDITORIAL_CONFIG)).toBe(10);
     expect(pricedPages(26, DEFAULT_EDITORIAL_CONFIG)).toBe(26);
+  });
+});
+
+describe('fitToCap (DECISIONS 285)', () => {
+  it('deja el texto igual si entra', () => {
+    expect(fitToCap('Lu sube al cohete.', 12)).toBe('Lu sube al cohete.');
+  });
+
+  it('se queda con las oraciones enteras que entran', () => {
+    const text =
+      'Lu se acomoda los anteojos. Se prepara para el gran viaje espacial. ¡Giro, pirueta y salto!';
+    expect(fitToCap(text, 12)).toBe(
+      'Lu se acomoda los anteojos. Se prepara para el gran viaje espacial.',
+    );
+  });
+
+  it('si ni la primera oración entra, corta en el tope y cierra con punto', () => {
+    const text =
+      'Lu se acomoda los anteojos y se prepara para el gran viaje espacial, con giro, pirueta y salto';
+    const fitted = fitToCap(text, 12);
+    expect(countWords(fitted)).toBe(12);
+    expect(fitted.endsWith('.')).toBe(true);
+  });
+
+  it('nunca devuelve más palabras que el tope', () => {
+    for (let cap = 3; cap <= 40; cap += 1) {
+      const text = Array.from({ length: 60 }, (_, i) => (i % 7 === 6 ? 'luna.' : 'estrella')).join(
+        ' ',
+      );
+      expect(countWords(fitToCap(text, cap))).toBeLessThanOrEqual(cap);
+    }
   });
 });
