@@ -42,9 +42,9 @@ module "environment" {
   # Mails reales con Resend; el secreto de las bajas ya tiene valor (DECISIONS 078).
   email_provider           = "resend"
   email_link_secret_loaded = true
-  # Pagos con Gumroad (DECISIONS 255) mientras Dodo revisa la apelación. Gumroad no tiene modo de
-  # prueba: en staging solo vale la compra del propio vendedor (test=true, no cobra).
-  payment_provider    = "gumroad"
+  # Pagos con PayPal en sandbox (DECISIONS 279): no cobra. Gumroad (DECISIONS 255) queda de
+  # respaldo mientras se prueba: para volver, payment_provider = "gumroad".
+  payment_provider    = "paypal"
   gumroad_product_url = "https://storynidoar.gumroad.com/l/cjlkhc"
   # Dodo (DECISIONS 244) queda listo para volver: payment_provider = "dodo".
   dodo_product_id = "pdt_0Ns9WghE2X0qwP6OPfN7D"
