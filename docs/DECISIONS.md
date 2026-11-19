@@ -3077,3 +3077,9 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Decisión:** al confirmarse el pago, el mail «Recibimos tu pago» lleva adjunto el PDF (A4, una página, es/en/pt) con marca v3 (Quicksand, Lora, Caveat, durazno y salvia): número de pedido (`SN-` + 8 caracteres), fecha del pago, medio de pago y su referencia, libro y formato, descuento, envío, impuestos incluidos y total, en la moneda cobrada. El mismo PDF se baja desde «Tu pedido» («Descargar comprobante», `GET /v1/orders/:id/receipt`, solo el dueño, con pago confirmado). Se arma al momento, no se guarda.
 - **Aviso fijo en el documento:** «Este comprobante no es una factura»: constancia de compra sin validez fiscal; quien necesite factura escribe desde el contacto con su número de pedido. Sin CUIT, razón social ni datos fiscales hasta que exista la sociedad que factura; entonces se cambia por la factura real (ARCA si vende desde Argentina).
 - **Dónde:** `packages/emails/src/receipt.ts` (PDF con pdf-lib, fuentes en `packages/emails/assets/fonts`), `EmailNotifier.receiptData`, adjunto en el proveedor Resend (si el PDF falla, el mail sale igual), `paidAt` en el pedido.
+
+## 297 — Textos del sitio sin promesa de impreso mientras `PRINT_ENABLED` esté apagado
+
+- **Fecha:** 2026-11-19. Barrido de la mesa (legales, producto, marketing) tras DECISIONS 295.
+- **Cambios:** descripción de la web, pie, Familias, «Así lo recibes», Cómo funciona (se quita la fila de impresos y «Impreso: muy pronto»), FAQ del kit, kit y «El cuento grande del cumpleañero» ya no dicen impreso, tapa dura ni envío. En es, en, pt y voseo.
+- **Pendiente (Sebas / contenido):** términos, reembolsos, envíos y FAQ general viven en Firestore y siguen describiendo el impreso; es texto legal y se edita desde el admin, no desde código.

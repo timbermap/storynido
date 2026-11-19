@@ -1,7 +1,7 @@
 {
   "Meta": {
     "title": "{brand}: cada criança, protagonista de uma história única",
-    "description": "Uma história ilustrada única com o nome, o rostinho e as aventuras que ele sempre sonhou. Veja uma prévia grátis e receba em digital ou impresso.",
+    "description": "Uma história ilustrada única com o nome, o rostinho e as aventuras que ele sempre sonhou. Veja uma prévia grátis e receba em digital na hora.",
     "skipToContent": "Pular para o conteúdo"
   },
   "Nav": {
@@ -100,7 +100,7 @@
     "rights": "© {year} {brand}. Todos os direitos reservados.",
     "contact": "Contato",
     "help": "Ajuda",
-    "pitch": "Histórias ilustradas em que a criança é o protagonista: com o nome, o rostinho e o que mais gosta. Em digital ou impressas.",
+    "pitch": "Histórias ilustradas em que a criança é o protagonista: com o nome, o rostinho e o que mais gosta. Em digital, na hora.",
     "follow": "Siga a gente",
     "newTab": "abre em outra aba",
     "preferences": "Idioma"
@@ -132,7 +132,7 @@
       "cta": "Começar grátis",
       "secondary": "Ver como funciona",
       "fromPrice": "A partir de {price}",
-      "formats": "Disponível em livro digital e impresso",
+      "formats": "Disponível em digital, na hora",
       "imageAlt": "Ilustração em aquarela de um menino astronauta e seu cachorro olhando a lua entre as estrelas",
       "kicker": "Histórias personalizadas, feitas com carinho",
       "headline": "O rosto dele.<br></br>O nome dele.<br></br>A <hl>aventura</hl> dele.",
@@ -180,7 +180,7 @@
       "step2Text": "Viagens ao espaço, dinossauros, reinos mágicos, futebol e muito mais.",
       "step3Title": "Descubra a história dele",
       "step3Text": "Veja uma prévia grátis e escolha seu formato favorito: digital, capa mole ou capa dura.",
-      "step3TextDigital": "Veja uma prévia grátis e receba em digital na hora. Capa comum e capa dura, em breve."
+      "step3TextDigital": "Veja uma prévia grátis e receba em digital na hora."
     },
     "gallery": {
       "title": "Um universo de aventuras",
@@ -230,7 +230,7 @@
       "storyText": "Naquela noite, o foguete de papelão começou a brilhar. {name} colocou o capacete, contou até três… e lá foram eles rumo à Lua!"
     },
     "familiesMetaTitle": "Livros infantis personalizados com a foto e o nome",
-    "familiesMetaDescription": "Crie um livro com o seu filho como protagonista: envie a foto, veja a prévia grátis e receba digital ou impresso.",
+    "familiesMetaDescription": "Crie um livro com o seu filho como protagonista: envie a foto, veja a prévia grátis e receba digital na hora.",
     "printedBook": {
       "title": "Um livro de verdade, para ter nas mãos",
       "text": "Impresso em cerca de 21×28 cm, com o nome e o personagem dele em cada página. Ou, se preferir, receba o digital na hora e leia hoje mesmo.",
@@ -272,7 +272,7 @@
     },
     "formats": {
       "title": "Assim você recebe",
-      "subtitle": "Hoje você recebe em digital, na hora. Os livros impressos chegam em breve.",
+      "subtitle": "Você recebe em digital, na hora.",
       "subtitlePrint": "Em digital na hora ou impresso, pronto para presentear.",
       "caption": "Imagem ilustrativa",
       "available": "Disponível hoje",
@@ -1592,7 +1592,7 @@
         },
         "2": {
           "q": "Como imprimo e monto?",
-          "a": "Tudo vem em PDF pronto para imprimir em casa ou na gráfica que preferir. Depois você pode pedir os convites e agradecimentos impressos e enviados para sua casa."
+          "a": "Tudo vem em PDF pronto para imprimir em casa ou na gráfica que preferir."
         },
         "3": {
           "q": "Preciso de uma foto?",
@@ -1675,7 +1675,7 @@
         "4": {
           "name": "O livro do aniversariante",
           "question": "O que dou a ele?",
-          "text": "Um livro de Famílias com seu filho como protagonista, em capa dura. Avós e tios podem comprar."
+          "text": "Um livro de Famílias com seu filho como protagonista, para ler e guardar. Avós e tios podem comprar."
         }
       },
       "priceFrom": "a partir de {price}",
@@ -1795,7 +1795,7 @@
       "pricing": {
         "1": {
           "title": "A partir de {price} cada história",
-          "text": "O digital, com suas ilustrações e o texto que você ajusta. O livro impresso soma a impressão e o frete, calculado com o endereço."
+          "text": "O digital, com suas ilustrações e o texto que você ajusta."
         },
         "2": {
           "title": "Descontos por volume",
@@ -2109,7 +2109,7 @@
       },
       "downloadAll": "Baixar tudo (ZIP)",
       "ready": "Seu kit está pronto!",
-      "digitalOnly": "O kit é digital: chega em PDF pronto para imprimir em casa ou na gráfica que preferir. Os cartões impressos são pedidos depois, a partir do pedido concluído.",
+      "digitalOnly": "O kit é digital: chega em PDF pronto para imprimir em casa ou na gráfica que preferir.",
       "printCards": {
         "cta": "Imprimir cartões",
         "title": "Cartões impressos",
@@ -2125,8 +2125,8 @@
         "error": "Não conseguimos calcular o pedido. Tente novamente."
       },
       "bigBook": {
-        "title": "O livro completo do aniversariante, em capa dura",
-        "text": "A história completa, com o mesmo personagem e sem enviar fotos de novo: a lembrança que fica. Ele é criado em Famílias e o frete é calculado com seu endereço.",
+        "title": "O livro completo do aniversariante",
+        "text": "A história completa, com o mesmo personagem e sem enviar fotos de novo: a lembrança que fica. Ele é criado em Famílias.",
         "cta": "Criar o livro completo"
       },
       "guests": "Nomes dos convidados (opcional)",
@@ -2425,7 +2425,7 @@
     },
     "prices": {
       "title": "O que você recebe e quanto custa",
-      "subtitle": "Hoje tudo é digital e chega na hora. Os livros impressos chegam em breve.",
+      "subtitle": "Tudo é digital e chega na hora.",
       "subtitlePrint": "Digital na hora ou impresso, pronto para presentear.",
       "ebookName": "História digital (ebook)",
       "ebookText": "Um PDF para ler no celular, no tablet ou no computador, ou imprimir em casa. O preço depende da extensão.",

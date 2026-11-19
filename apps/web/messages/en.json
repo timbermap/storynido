@@ -1,7 +1,7 @@
 {
   "Meta": {
     "title": "{brand}: every child, the hero of a one-of-a-kind story",
-    "description": "A one-of-a-kind illustrated story with their name, their face and the adventures they've always dreamed of. See a free preview and get it digital or printed.",
+    "description": "A one-of-a-kind illustrated story with their name, their face and the adventures they've always dreamed of. See a free preview and get it digital, instantly.",
     "skipToContent": "Skip to content"
   },
   "Nav": {
@@ -100,7 +100,7 @@
     "rights": "© {year} {brand}. All rights reserved.",
     "contact": "Contact",
     "help": "Help",
-    "pitch": "Illustrated stories where the child is the hero: with their name, their face and the things they love. Digital or printed.",
+    "pitch": "Illustrated stories where the child is the hero: with their name, their face and the things they love. Digital, instantly.",
     "follow": "Follow us",
     "newTab": "opens in a new tab",
     "preferences": "Language"
@@ -132,7 +132,7 @@
       "cta": "Start free",
       "secondary": "See how it works",
       "fromPrice": "From {price}",
-      "formats": "Available as a digital and printed book",
+      "formats": "Available digitally, instantly",
       "imageAlt": "Watercolor illustration of a young astronaut and his dog looking at the moon among the stars",
       "kicker": "Personalized stories, made with heart",
       "headline": "Their face.<br></br>Their name.<br></br>Their <hl>adventure</hl>.",
@@ -180,7 +180,7 @@
       "step2Text": "Space trips, dinosaurs, magical kingdoms, soccer and more.",
       "step3Title": "Discover their story",
       "step3Text": "See a free preview and choose your favorite format: digital, softcover or hardcover.",
-      "step3TextDigital": "See a free preview and get it as a digital book instantly. Paperback and hardcover coming soon."
+      "step3TextDigital": "See a free preview and get it as a digital book instantly."
     },
     "gallery": {
       "title": "A universe of adventures",
@@ -230,7 +230,7 @@
       "storyText": "That night, the cardboard rocket began to glow. {name} put on the helmet, counted to three… and off they zoomed to the Moon!"
     },
     "familiesMetaTitle": "Personalized children’s books with their photo and name",
-    "familiesMetaDescription": "Create a book starring your child: upload their photo, see a free preview and get it as an ebook or printed.",
+    "familiesMetaDescription": "Create a book starring your child: upload their photo, see a free preview and get it as an ebook instantly.",
     "printedBook": {
       "title": "A real book to hold in your hands",
       "text": "Printed at about 21×28 cm, with their name and their character on every page. Or, if you prefer, get it as a digital book right away and read it today.",
@@ -272,7 +272,7 @@
     },
     "formats": {
       "title": "How you receive it",
-      "subtitle": "Today you get it as a digital book, instantly. Printed books are coming soon.",
+      "subtitle": "You get it as a digital book, instantly.",
       "subtitlePrint": "Digital right away, or printed and ready to give.",
       "caption": "Illustrative image",
       "available": "Available today",
@@ -1592,7 +1592,7 @@
         },
         "2": {
           "q": "How do I print and assemble it?",
-          "a": "Everything comes as a print-ready PDF for home or the print shop you prefer. Afterwards you can order printed invitations and thank-yous shipped to your home."
+          "a": "Everything comes as a print-ready PDF for home or the print shop you prefer."
         },
         "3": {
           "q": "Do I need a photo?",
@@ -1675,7 +1675,7 @@
         "4": {
           "name": "The birthday child's book",
           "question": "What do I give them?",
-          "text": "A Families book starring your child, hardcover. Grandparents and aunts and uncles can buy it."
+          "text": "A Families book starring your child, to read and keep. Grandparents and aunts and uncles can buy it."
         }
       },
       "priceFrom": "from {price}",
@@ -1795,7 +1795,7 @@
       "pricing": {
         "1": {
           "title": "From {price} per story",
-          "text": "The digital version, with its illustrations and the text you adjust. A printed book adds printing and shipping, calculated with the address."
+          "text": "The digital version, with its illustrations and the text you adjust."
         },
         "2": {
           "title": "Volume discounts",
@@ -2109,7 +2109,7 @@
       },
       "downloadAll": "Download everything (ZIP)",
       "ready": "Your kit is ready!",
-      "digitalOnly": "The kit is digital: you get print-ready PDFs to print at home or at the print shop you prefer. Printed cards are ordered afterwards, from the finished order.",
+      "digitalOnly": "The kit is digital: you get print-ready PDFs to print at home or at the print shop you prefer.",
       "printCards": {
         "cta": "Print cards",
         "title": "Printed cards",
@@ -2125,8 +2125,8 @@
         "error": "We couldn't calculate the order. Please try again."
       },
       "bigBook": {
-        "title": "The birthday star's full storybook, in hardcover",
-        "text": "The complete story with the same character and no new photo uploads: the keepsake that lasts. You create it from Families and shipping is calculated with your address.",
+        "title": "The birthday star's full storybook",
+        "text": "The complete story with the same character and no new photo uploads: the keepsake that lasts. You create it from Families.",
         "cta": "Create the full storybook"
       },
       "guests": "Guest names (optional)",
@@ -2425,7 +2425,7 @@
     },
     "prices": {
       "title": "What you get and what it costs",
-      "subtitle": "Today everything is digital and arrives instantly. Printed books are coming soon.",
+      "subtitle": "Everything is digital and arrives instantly.",
       "subtitlePrint": "Digital in an instant, or printed and ready to give.",
       "ebookName": "Digital story (ebook)",
       "ebookText": "A PDF to read on a phone, tablet or computer, or print at home. The price depends on the length.",

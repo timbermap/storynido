@@ -101,30 +101,37 @@ export async function FormatGallery({
           ))}
         </ul>
 
-        <h3 className="mt-14 text-center font-display text-2xl font-semibold">
-          {anyPrint ? t('printTitleReady') : t('printTitle')}
-        </h3>
-        <ul className="mt-6 grid gap-5 sm:grid-cols-3">
-          {PRINTED.map((format) => (
-            <li key={format}>
-              <figure className="h-full overflow-hidden rounded-[1.5rem] border bg-card">
-                <FormatImage
-                  src={LANDING_FORMAT_IMAGES[format]}
-                  alt={t(`${format}.alt`)}
-                  caption={caption}
-                  sizes="(min-width: 640px) 360px, 92vw"
-                />
-                <figcaption className="grid gap-1.5 p-5 font-sans">
-                  {printFormats.includes(format) ? available : soon}
-                  <span className="font-display text-lg font-semibold">{t(`${format}.name`)}</span>
-                  <span className="font-serif text-sm text-muted-foreground">
-                    {t(`${format}.text`)}
-                  </span>
-                </figcaption>
-              </figure>
-            </li>
-          ))}
-        </ul>
+        {/* Los impresos solo se muestran cuando el país puede pedirlos (PRINT_ENABLED). */}
+        {anyPrint && (
+          <>
+            <h3 className="mt-14 text-center font-display text-2xl font-semibold">
+              {t('printTitleReady')}
+            </h3>
+            <ul className="mt-6 grid gap-5 sm:grid-cols-3">
+              {PRINTED.map((format) => (
+                <li key={format}>
+                  <figure className="h-full overflow-hidden rounded-[1.5rem] border bg-card">
+                    <FormatImage
+                      src={LANDING_FORMAT_IMAGES[format]}
+                      alt={t(`${format}.alt`)}
+                      caption={caption}
+                      sizes="(min-width: 640px) 360px, 92vw"
+                    />
+                    <figcaption className="grid gap-1.5 p-5 font-sans">
+                      {printFormats.includes(format) ? available : soon}
+                      <span className="font-display text-lg font-semibold">
+                        {t(`${format}.name`)}
+                      </span>
+                      <span className="font-serif text-sm text-muted-foreground">
+                        {t(`${format}.text`)}
+                      </span>
+                    </figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
     </section>
   );

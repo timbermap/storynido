@@ -1,6 +1,6 @@
 {
   "Meta": {
-    "description": "Un cuento ilustrado único con su nombre, su carita y las aventuras que siempre soñó. Mirá una vista previa gratis y recibilo en digital o impreso."
+    "description": "Un cuento ilustrado único con su nombre, su carita y las aventuras que siempre soñó. Mirá una vista previa gratis y recibilo en digital al instante."
   },
   "Nav": {
     "allStoriesText": "Elegí la aventura y la adaptamos a su edad.",
@@ -31,7 +31,7 @@
       "step2Title": "Elegí una aventura",
       "step3Title": "Descubrí su cuento",
       "step3Text": "Mirá una vista previa gratis y elegí tu formato favorito: digital, tapa blanda o tapa dura.",
-      "step3TextDigital": "Mirá una vista previa gratis y recibilo en digital al instante. Tapa blanda y tapa dura, muy pronto."
+      "step3TextDigital": "Mirá una vista previa gratis y recibilo en digital al instante."
     },
     "gallery": {
       "subtitle": "Elegí la edad y mirá cómo se ve su libro."
@@ -47,7 +47,7 @@
     "cover": {
       "subtitle": "Escribí su nombre y mirá cómo aparece en la portada, en su personaje y dentro del cuento."
     },
-    "familiesMetaDescription": "Creá un libro con tu hijo como protagonista: subí su foto, mirá la vista previa gratis y recibilo digital o impreso.",
+    "familiesMetaDescription": "Creá un libro con tu hijo como protagonista: subí su foto, mirá la vista previa gratis y recibilo digital al instante.",
     "printedBook": {
       "text": "Impreso de unos 21×28 cm, con su nombre y su personaje en cada página. Y si lo preferís, lo recibís en digital al instante, para leerlo hoy mismo."
     },
@@ -62,7 +62,7 @@
     },
     "formats": {
       "title": "Así lo recibís",
-      "subtitle": "Hoy lo recibís en digital, al instante. Los libros impresos llegan muy pronto."
+      "subtitle": "Lo recibís en digital, al instante."
     }
   },
   "Stories": {
@@ -353,7 +353,7 @@
       },
       "faq": {
         "2": {
-          "a": "Todo viene en PDF listo para imprimir en casa o en la imprenta que prefieras. Después podés pedir las invitaciones y los agradecimientos impresos y enviados a tu casa."
+          "a": "Todo viene en PDF listo para imprimir en casa o en la imprenta que prefieras."
         },
         "3": {
           "a": "No. Podés elegir los rasgos del protagonista sin subir ninguna foto."
@@ -417,7 +417,7 @@
       "pricingSubtitle": "Pagás cada cuento cuando lo creás. Cuantos más cuentos hacés, menos pagás por cada uno.",
       "pricing": {
         "1": {
-          "text": "El digital, con sus ilustraciones y el texto que vos ajustás. El libro impreso suma su impresión y el envío, que se calcula con la dirección."
+          "text": "El digital, con sus ilustraciones y el texto que vos ajustás."
         },
         "3": {
           "text": "Ves la vista previa del cuento sin pagar y solo pagás si lo querés. Sin planes mensuales ni cuotas."
