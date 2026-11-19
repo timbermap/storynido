@@ -464,7 +464,9 @@
       },
       "awaiting": {
         "text": "Completá el pago en la pestaña de Gumroad. Cuando se confirme, esta página se actualiza sola y tu cuento empieza a prepararse. Puede tardar unos segundos.",
-        "slow": "¿Pagaste y todavía no cambia? Revisá tu correo: Gumroad te manda el recibo al instante. Si pasaron más de 5 minutos, <link>escribinos</link> y lo resolvemos."
+        "slow": "¿Pagaste y todavía no cambia? Revisá tu correo: Gumroad te manda el recibo al instante. Si pasaron más de 5 minutos, <link>escribinos</link> y lo resolvemos.",
+        "confirming": "Estamos confirmando tu pago. En unos segundos esta página se actualiza sola y tu cuento empieza a prepararse.",
+        "slowConfirming": "¿Pagaste y todavía no cambia? Revisá tu correo: te llega el comprobante del pago. Si pasaron más de 5 minutos, <link>escribinos</link> y lo resolvemos."
       }
     },
     "reorderSubtitle": "Pedís otra copia impresa del mismo libro, tal como quedó.",

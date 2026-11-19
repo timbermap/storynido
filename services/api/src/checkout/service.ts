@@ -1228,7 +1228,7 @@ export class CheckoutService {
     if (provider.id !== providerId) throw new AppError(404, 'not_found', 'Proveedor desconocido.');
     let event: PaymentEvent;
     try {
-      event = provider.parseWebhook({ rawBody, headers });
+      event = await provider.parseWebhook({ rawBody, headers });
     } catch (error) {
       if (error instanceof WebhookSignatureError) {
         this.log.warn(

@@ -1,0 +1,373 @@
+import { ProviderError, WebhookSignatureError, type CheckoutRequest } from '@storynido/shared';
+import { describe, expect, it } from 'vitest';
+
+import { PaypalPaymentProvider, paypalMinor } from './payment';
+
+const NOW = new Date('2026-11-19T12:00:00Z');
+
+interface Call {
+  url: string;
+  init: RequestInit | undefined;
+}
+
+/** Simula la API de PayPal: cada ruta responde lo que se le indique. */
+function fakePaypal(routes: Record<string, { status?: number; body: unknown }>) {
+  const calls: Call[] = [];
+  const fetchImpl = ((url: string, init?: RequestInit) => {
+    calls.push({ url, init });
+    const path = new URL(url).pathname;
+    if (path === '/v1/oauth2/token') {
+      return Promise.resolve(
+        new Response(JSON.stringify({ access_token: 'tok', expires_in: 32400 }), { status: 200 }),
+      );
+    }
+    const route = routes[path];
+    if (!route) return Promise.resolve(new Response('not found', { status: 404 }));
+    return Promise.resolve(
+      new Response(JSON.stringify(route.body), { status: route.status ?? 200 }),
+    );
+  }) as typeof fetch;
+  return { calls, fetchImpl };
+}
+
+/** Cuerpo enviado (siempre texto JSON en este proveedor). */
+const bodyOf = (call: Call | undefined): string =>
+  typeof call?.init?.body === 'string' ? call.init.body : '';
+
+const provider = (fetchImpl: typeof fetch) =>
+  new PaypalPaymentProvider({
+    clientId: 'client',
+    clientSecret: 'secret',
+    webhookId: 'WH-1',
+    environment: 'sandbox',
+    fetchImpl,
+    now: () => NOW,
+  });
+
+const checkoutRequest: CheckoutRequest = {
+  orderId: 'ord_1',
+  customerEmail: 'ana@example.com',
+  currency: 'USD',
+  locale: 'es',
+  lineItems: [{ name: 'Ebook', amountMinor: 1599, quantity: 1 }],
+  successUrl: 'https://staging.storynido.com/es/pedido/ord_1',
+  cancelUrl: 'https://staging.storynido.com/es/crear/b1',
+};
+
+const signedHeaders = {
+  'paypal-auth-algo': 'SHA256withRSA',
+  'paypal-cert-url': 'https://api.sandbox.paypal.com/v1/notifications/certs/CERT',
+  'paypal-transmission-id': 'tx-1',
+  'paypal-transmission-sig': 'sig',
+  'paypal-transmission-time': NOW.toISOString(),
+};
+
+const verified = {
+  '/v1/notifications/verify-webhook-signature': { body: { verification_status: 'SUCCESS' } },
+};
+
+const capture = (extra: Record<string, unknown> = {}) => ({
+  id: 'CAP-1',
+  status: 'COMPLETED',
+  amount: { currency_code: 'USD', value: '15.99' },
+  custom_id: 'ord_1',
+  invoice_id: 'ord_1',
+  supplementary_data: { related_ids: { order_id: 'PP-ORDER-1' } },
+  ...extra,
+});
+
+describe('paypalMinor', () => {
+  it('pasa el texto de PayPal a centavos', () => {
+    expect(paypalMinor('15.99')).toBe(1599);
+    expect(paypalMinor('20')).toBe(2000);
+    expect(paypalMinor('0.5')).toBe(50);
+    expect(paypalMinor('abc')).toBeNaN();
+  });
+});
+
+describe('PaypalPaymentProvider.createCheckout', () => {
+  it('crea la orden en USD con StoryNido como marca y devuelve el enlace de pago', async () => {
+    const { calls, fetchImpl } = fakePaypal({
+      '/v2/checkout/orders': {
+        status: 201,
+        body: {
+          id: 'PP-ORDER-1',
+          status: 'PAYER_ACTION_REQUIRED',
+          links: [
+            { rel: 'self', href: 'https://api-m.sandbox.paypal.com/v2/checkout/orders/PP-ORDER-1' },
+            {
+              rel: 'payer-action',
+              href: 'https://www.sandbox.paypal.com/checkoutnow?token=PP-ORDER-1',
+            },
+          ],
+        },
+      },
+    });
+    const session = await provider(fetchImpl).createCheckout(checkoutRequest);
+    expect(session.id).toBe('PP-ORDER-1');
+    expect(session.url).toBe('https://www.sandbox.paypal.com/checkoutnow?token=PP-ORDER-1');
+
+    const create = calls.find((call) => call.url.endsWith('/v2/checkout/orders'));
+    expect(create?.url.startsWith('https://api-m.sandbox.paypal.com')).toBe(true);
+    const headers = create?.init?.headers as Record<string, string>;
+    expect(headers['PayPal-Request-Id']).toBe('order-ord_1');
+    expect(headers.Authorization).toBe('Bearer tok');
+    const body = JSON.parse(bodyOf(create)) as {
+      intent: string;
+      purchase_units: { custom_id: string; amount: { value: string; currency_code: string } }[];
+      payment_source: {
+        paypal: { experience_context: { brand_name: string; locale: string; return_url: string } };
+      };
+    };
+    expect(body.intent).toBe('CAPTURE');
+    expect(body.purchase_units[0]?.custom_id).toBe('ord_1');
+    expect(body.purchase_units[0]?.amount).toMatchObject({ currency_code: 'USD', value: '15.99' });
+    expect(body.payment_source.paypal.experience_context).toMatchObject({
+      brand_name: 'StoryNido',
+      locale: 'es-MX',
+      return_url: checkoutRequest.successUrl,
+    });
+  });
+
+  it('rechaza otra moneda que no sea USD', async () => {
+    const { fetchImpl } = fakePaypal({});
+    await expect(
+      provider(fetchImpl).createCheckout({ ...checkoutRequest, currency: 'ARS' }),
+    ).rejects.toBeInstanceOf(ProviderError);
+  });
+
+  it('informa el error de PayPal', async () => {
+    const { fetchImpl } = fakePaypal({
+      '/v2/checkout/orders': { status: 400, body: { name: 'INVALID_REQUEST' } },
+    });
+    await expect(provider(fetchImpl).createCheckout(checkoutRequest)).rejects.toThrow(
+      /crear la orden/,
+    );
+  });
+});
+
+describe('PaypalPaymentProvider.parseWebhook', () => {
+  const event = (eventType: string, resource: unknown) =>
+    JSON.stringify({ id: 'WH-EVT-1', event_type: eventType, resource });
+
+  it('sin cabeceras de firma: rechaza', async () => {
+    const { fetchImpl } = fakePaypal(verified);
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('PAYMENT.CAPTURE.COMPLETED', capture()),
+        headers: {},
+      }),
+    ).rejects.toBeInstanceOf(WebhookSignatureError);
+  });
+
+  it('firma que PayPal no reconoce: rechaza', async () => {
+    const { fetchImpl } = fakePaypal({
+      '/v1/notifications/verify-webhook-signature': {
+        body: { verification_status: 'FAILURE' },
+      },
+    });
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('PAYMENT.CAPTURE.COMPLETED', capture()),
+        headers: signedHeaders,
+      }),
+    ).rejects.toBeInstanceOf(WebhookSignatureError);
+  });
+
+  it('manda el cuerpo crudo tal cual a la verificación', async () => {
+    const { calls, fetchImpl } = fakePaypal(verified);
+    const rawBody = event('PAYMENT.CAPTURE.COMPLETED', capture());
+    await provider(fetchImpl).parseWebhook({ rawBody, headers: signedHeaders });
+    const verify = calls.find((call) => call.url.endsWith('/verify-webhook-signature'));
+    const sent = bodyOf(verify);
+    expect(sent.endsWith(`"webhook_event":${rawBody}}`)).toBe(true);
+    expect(JSON.parse(sent)).toMatchObject({ webhook_id: 'WH-1', transmission_id: 'tx-1' });
+  });
+
+  it('captura completada: pago confirmado con el monto en centavos', async () => {
+    const { fetchImpl } = fakePaypal(verified);
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('PAYMENT.CAPTURE.COMPLETED', capture()),
+        headers: signedHeaders,
+      }),
+    ).resolves.toEqual({
+      type: 'checkout.completed',
+      eventId: 'WH-EVT-1',
+      orderId: 'ord_1',
+      sessionId: 'PP-ORDER-1',
+      paymentId: 'CAP-1',
+      amountMinor: 1599,
+      currency: 'USD',
+      taxMinor: null,
+    });
+  });
+
+  it('orden aprobada: la captura y confirma el pago', async () => {
+    const { calls, fetchImpl } = fakePaypal({
+      ...verified,
+      '/v2/checkout/orders/PP-ORDER-1/capture': {
+        status: 201,
+        body: {
+          id: 'PP-ORDER-1',
+          status: 'COMPLETED',
+          purchase_units: [{ payments: { captures: [capture()] } }],
+        },
+      },
+    });
+    const result = await provider(fetchImpl).parseWebhook({
+      rawBody: event('CHECKOUT.ORDER.APPROVED', {
+        id: 'PP-ORDER-1',
+        purchase_units: [{ custom_id: 'ord_1', reference_id: 'ord_1' }],
+      }),
+      headers: signedHeaders,
+    });
+    expect(result).toMatchObject({
+      type: 'checkout.completed',
+      orderId: 'ord_1',
+      sessionId: 'PP-ORDER-1',
+      paymentId: 'CAP-1',
+      amountMinor: 1599,
+    });
+    const captureCall = calls.find((call) => call.url.endsWith('/capture'));
+    expect((captureCall?.init?.headers as Record<string, string>)['PayPal-Request-Id']).toBe(
+      'capture-PP-ORDER-1',
+    );
+  });
+
+  it('orden ya capturada: se ignora (la confirma el evento de la captura)', async () => {
+    const { fetchImpl } = fakePaypal({
+      ...verified,
+      '/v2/checkout/orders/PP-ORDER-1/capture': {
+        status: 422,
+        body: { name: 'UNPROCESSABLE_ENTITY', details: [{ issue: 'ORDER_ALREADY_CAPTURED' }] },
+      },
+    });
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('CHECKOUT.ORDER.APPROVED', {
+          id: 'PP-ORDER-1',
+          purchase_units: [{ custom_id: 'ord_1' }],
+        }),
+        headers: signedHeaders,
+      }),
+    ).resolves.toMatchObject({ type: 'ignored' });
+  });
+
+  it('captura pendiente (revisión de PayPal): todavía no es pago', async () => {
+    const { fetchImpl } = fakePaypal({
+      ...verified,
+      '/v2/checkout/orders/PP-ORDER-1/capture': {
+        status: 201,
+        body: {
+          id: 'PP-ORDER-1',
+          status: 'COMPLETED',
+          purchase_units: [{ payments: { captures: [capture({ status: 'PENDING' })] } }],
+        },
+      },
+    });
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('CHECKOUT.ORDER.APPROVED', {
+          id: 'PP-ORDER-1',
+          purchase_units: [{ custom_id: 'ord_1' }],
+        }),
+        headers: signedHeaders,
+      }),
+    ).resolves.toMatchObject({ type: 'ignored' });
+  });
+
+  it('reembolso: lo asocia a la captura por el enlace "up"', async () => {
+    const { fetchImpl } = fakePaypal(verified);
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('PAYMENT.CAPTURE.REFUNDED', {
+          id: 'REF-1',
+          amount: { currency_code: 'USD', value: '15.99' },
+          links: [
+            { rel: 'self', href: 'https://api-m.sandbox.paypal.com/v2/payments/refunds/REF-1' },
+            { rel: 'up', href: 'https://api-m.sandbox.paypal.com/v2/payments/captures/CAP-1' },
+          ],
+        }),
+        headers: signedHeaders,
+      }),
+    ).resolves.toEqual({
+      type: 'refund.succeeded',
+      eventId: 'WH-EVT-1',
+      paymentId: 'CAP-1',
+      amountMinor: 1599,
+    });
+  });
+
+  it('disputa: abre el aviso con la captura y el monto', async () => {
+    const { fetchImpl } = fakePaypal(verified);
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('CUSTOMER.DISPUTE.CREATED', {
+          dispute_id: 'PP-D-1',
+          dispute_amount: { currency_code: 'USD', value: '15.99' },
+          disputed_transactions: [{ seller_transaction_id: 'CAP-1' }],
+        }),
+        headers: signedHeaders,
+      }),
+    ).resolves.toEqual({
+      type: 'dispute.opened',
+      eventId: 'WH-EVT-1',
+      paymentId: 'CAP-1',
+      amountMinor: 1599,
+    });
+  });
+
+  it('otros eventos: se ignoran', async () => {
+    const { fetchImpl } = fakePaypal(verified);
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('PAYMENT.CAPTURE.DENIED', capture()),
+        headers: signedHeaders,
+      }),
+    ).resolves.toMatchObject({ type: 'ignored', rawType: 'PAYMENT.CAPTURE.DENIED' });
+  });
+});
+
+describe('PaypalPaymentProvider.refund', () => {
+  it('reembolsa la captura (parcial) con clave de idempotencia', async () => {
+    const { calls, fetchImpl } = fakePaypal({
+      '/v2/payments/captures/CAP-1/refund': {
+        status: 201,
+        body: { id: 'REF-1', status: 'COMPLETED' },
+      },
+    });
+    await expect(
+      provider(fetchImpl).refund({
+        paymentId: 'CAP-1',
+        amountMinor: 500,
+        reason: 'parcial',
+        idempotencyKey: 'ref-ord_1',
+      }),
+    ).resolves.toEqual({ refundId: 'REF-1', status: 'succeeded' });
+    const call = calls.find((c) => c.url.endsWith('/refund'));
+    expect((call?.init?.headers as Record<string, string>)['PayPal-Request-Id']).toBe('ref-ord_1');
+    expect(JSON.parse(bodyOf(call))).toEqual({
+      amount: { currency_code: 'USD', value: '5.00' },
+    });
+  });
+
+  it('reembolso total: sin monto', async () => {
+    const { calls, fetchImpl } = fakePaypal({
+      '/v2/payments/captures/CAP-1/refund': {
+        status: 201,
+        body: { id: 'REF-2', status: 'PENDING' },
+      },
+    });
+    await expect(
+      provider(fetchImpl).refund({
+        paymentId: 'CAP-1',
+        amountMinor: null,
+        reason: 'total',
+        idempotencyKey: 'ref-2',
+      }),
+    ).resolves.toEqual({ refundId: 'REF-2', status: 'pending' });
+    const call = calls.find((c) => c.url.endsWith('/refund'));
+    expect(JSON.parse(bodyOf(call))).toEqual({});
+  });
+});

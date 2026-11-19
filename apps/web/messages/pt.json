@@ -2037,7 +2037,9 @@
         "paid": "Já paguei",
         "reopen": "Abrir o pagamento de novo",
         "notYet": "Ainda não recebemos a confirmação. Costuma levar menos de um minuto: esta página continua verificando sozinha.",
-        "slow": "Pagou e ainda não mudou? Veja seu e-mail: a Gumroad envia o recibo na hora. Se já passaram mais de 5 minutos, <link>fale com a gente</link> e resolvemos."
+        "slow": "Pagou e ainda não mudou? Veja seu e-mail: a Gumroad envia o recibo na hora. Se já passaram mais de 5 minutos, <link>fale com a gente</link> e resolvemos.",
+        "confirming": "Estamos confirmando seu pagamento. Em alguns segundos esta página se atualiza sozinha e sua história começa a ser preparada.",
+        "slowConfirming": "Pagou e ainda não mudou? Confira seu e-mail: o comprovante do pagamento chega lá. Se passaram mais de 5 minutos, <link>fale com a gente</link> e resolvemos."
       }
     },
     "reorderSubtitle": "Você pede outra cópia impressa do mesmo livro, do jeito que ficou.",

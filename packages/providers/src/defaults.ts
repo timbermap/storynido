@@ -11,6 +11,7 @@ import { VisionPhotoAnalyzer } from './gcp/vision';
 import { CloudprinterPrintProvider, type CloudprinterOptions } from './cloudprinter/print';
 import { DodoPaymentProvider, type DodoOptions } from './dodo/payment';
 import { GumroadPaymentProvider, type GumroadOptions } from './gumroad/payment';
+import { PaypalPaymentProvider, type PaypalOptions } from './paypal/payment';
 import { GelatoPrintProvider, type GelatoOptions } from './gelato/print';
 import { LuluPrintProvider, type LuluOptions } from './lulu/print';
 import { ResendEmailProvider, type ResendOptions } from './resend/email';
@@ -51,6 +52,8 @@ export interface DefaultProviderOptions {
   dodo?: Omit<DodoOptions, 'fetchImpl' | 'now'>;
   /** Gumroad (solo si hay URL del producto, token y secreto de los pings). */
   gumroad?: Omit<GumroadOptions, 'fetchImpl' | 'now'>;
+  /** PayPal (solo si hay client ID, secreto y webhook ID). */
+  paypal?: Omit<PaypalOptions, 'fetchImpl' | 'now'>;
   /** Resend (solo si hay clave): sin clave, los mails quedan en el proveedor simulado. */
   resend?: Omit<ResendOptions, 'fetchImpl'>;
   onMockEmail?: (message: EmailMessage) => void;
@@ -69,6 +72,7 @@ export function createProviderFactories(
   const resend = options.resend;
   const dodo = options.dodo;
   const gumroad = options.gumroad;
+  const paypal = options.paypal;
   const projectId = options.vertexProjectId;
   let vertex: VertexClient | undefined;
   const vertexClient = (id: string) =>
@@ -91,6 +95,7 @@ export function createProviderFactories(
       mock: () => new MockPaymentProvider(options.mockWebhookSecret),
       ...(dodo ? { dodo: () => new DodoPaymentProvider(dodo) } : {}),
       ...(gumroad ? { gumroad: () => new GumroadPaymentProvider(gumroad) } : {}),
+      ...(paypal ? { paypal: () => new PaypalPaymentProvider(paypal) } : {}),
     },
     print: {
       mock: () => new MockPrintProvider(options.mockWebhookSecret),

@@ -315,6 +315,10 @@ locals {
       DODO_PRODUCT_ID = var.dodo_product_id
     } : {},
     var.payment_provider == "gumroad" ? { GUMROAD_PRODUCT_URL = var.gumroad_product_url } : {},
+    # Fuera de producción, siempre el sandbox de PayPal (no cobra).
+    var.payment_provider == "paypal" ? {
+      PAYPAL_ENV = var.environment == "production" ? "live" : "sandbox"
+    } : {},
   )
   payment_secret_env = merge(
     var.payment_provider == "dodo" ? {
@@ -325,6 +329,12 @@ locals {
     var.payment_provider == "gumroad" ? {
       GUMROAD_ACCESS_TOKEN = "gumroad-access-token"
       GUMROAD_PING_SECRET  = "gumroad-ping-secret"
+    } : {},
+    # PayPal (DECISIONS 279): credenciales de la app REST y el ID del webhook (verifica la firma).
+    var.payment_provider == "paypal" ? {
+      PAYPAL_CLIENT_ID     = "paypal-client-id"
+      PAYPAL_CLIENT_SECRET = "paypal-client-secret"
+      PAYPAL_WEBHOOK_ID    = "paypal-webhook-id"
     } : {},
   )
   service_secret_env = merge(local.print_secret_env, local.email_secret_env)
@@ -607,6 +617,18 @@ module "secrets" {
     }
     gumroad-ping-secret = {
       description = "Gumroad: secreto de la firma de los pings (Settings → Advanced)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    paypal-client-id = {
+      description = "PayPal: client ID de la app REST (sandbox fuera de producción)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    paypal-client-secret = {
+      description = "PayPal: secret de la app REST"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    paypal-webhook-id = {
+      description = "PayPal: ID del webhook de la app (verifica la firma de los eventos)"
       accessors   = { api = local.member["sn-api"] }
     }
     dodo-api-key = {
