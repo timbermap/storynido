@@ -3047,9 +3047,13 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Decisión:** `SOFT_COLOR_RULE` va al final de todo pedido a color (cualquier estilo y tipo de libro); la tapa de colorear se pinta con colores suaves y apagados, tope 0,5; topes de las fichas 0,7/0,62 → 0,6 (las muestras aprobadas llegan a 0,58). La zona del título pasa a ser el 40% de arriba, también en el control `title_zone` y en el segundo paso de la tapa.
 - **Tests:** `style-checks.test.ts`, `vertex.test.ts` (tapa de colorear con colores suaves).
 
-## 292 — Tarjeta rechazada al cobrar con PayPal: se avisa y se elige otra, sin quedar «esperando el pago»
+## 293 — Tarjeta rechazada al cobrar con PayPal: se avisa y se elige otra, sin quedar «esperando el pago»
 
 - **Fecha:** 2026-11-19. Sebas pagó con una tarjeta de prueba y el pedido quedó en «Esperando la confirmación del pago» para siempre.
 - **Causa:** PayPal aprobó la orden pero rechazó la tarjeta al cobrarla (422 INSTRUMENT_DECLINED). La API lo trataba como falla del cobrador (500) en la confirmación y en el webhook, así que el comprador no se enteraba y PayPal reintentaba el aviso muchas veces.
 - **Decisión:** el adaptador lanza `PaymentDeclinedError` (nuevo) en ese caso. La confirmación (`confirm-payment`) responde 402 `payment_declined`; el webhook acepta el aviso y lo ignora (PayPal deja de reintentar). En el cuadro de pago, la web muestra «tu tarjeta fue rechazada» y llama a `actions.restart()` para elegir otra tarjeta o PayPal sobre la misma orden. Si el comprador vuelve a la página del pedido (enlace de respaldo), se muestra el aviso con el botón «Probar con otra tarjeta».
 - **Motivo:** una tarjeta rechazada es algo normal de la compra; el comprador tiene que saberlo y poder reintentar, y los registros no deben llenarse de falsos errores.
+
+## 292 — El título siempre sobre la portada de un libro listo
+
+Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae). Ahora toda portada generada de un libro con título lo lleva encima, igual que el visor y el PDF: cabecera del pedido, estantes de Mis cuentos (borradores con portada, pedidos, terminados), tarjeta «Lo próximo» de la home y de Mis cuentos. Escala con el ancho de la portada, así que también se ve en miniaturas. Quedan sin título las fotos del personaje y la lista compacta de 44 px.

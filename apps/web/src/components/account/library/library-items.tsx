@@ -129,6 +129,7 @@ export function DraftCard({
           name={book.childName}
           line={book.channel}
           sizes="72px"
+          title={book.stage === 'character' ? null : book.title}
         />
       }
       line={book.channel}
@@ -223,6 +224,7 @@ export function OrderCard({
           name={order.childName}
           line={order.channel}
           sizes="72px"
+          title={order.title}
         />
       }
       line={order.channel}
