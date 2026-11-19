@@ -72,7 +72,7 @@ export function CharacterDrawing({
   const t = useTranslations('Account.myStories.drawing');
   const tPreview = useTranslations('Wizard.preview');
   const tProfile = useTranslations('Account.myStories');
-  const [busy, setBusy] = useState<'draw' | 'accept' | 'discard' | null>(null);
+  const [busy, setBusy] = useState<'draw' | 'accept' | 'discard' | 'choose' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adjusting, setAdjusting] = useState(false);
   const [aspects, setAspects] = useState<MustKeepTrait[]>([]);
@@ -82,7 +82,10 @@ export function CharacterDrawing({
   const [traits, setTraits] = useState<TraitDraft>(drawing.traits ?? { glasses: false });
   const [distinctive, setDistinctive] = useState(drawing.traits?.distinctive ?? '');
 
-  async function run(kind: 'draw' | 'accept' | 'discard', call: () => ReturnType<typeof draw>) {
+  async function run(
+    kind: 'draw' | 'accept' | 'discard' | 'choose',
+    call: () => ReturnType<typeof draw>,
+  ) {
     setBusy(kind);
     if (kind === 'draw') onBusyChange(true);
     setError(null);
@@ -172,6 +175,31 @@ export function CharacterDrawing({
               </div>
               <figcaption className="text-sm text-muted-foreground">{t('current')}</figcaption>
             </figure>
+          )}
+          {drawing.alternativeUrls.length > 0 && (
+            // Quien ya compró elige entre 3 versiones: la grande es la elegida (DECISIONS 289).
+            <div className="grid gap-2">
+              <p className="text-sm text-muted-foreground">{t('alternatives')}</p>
+              <div className="flex flex-wrap gap-3">
+                {drawing.alternativeUrls.map((alternative, index) => (
+                  <button
+                    key={alternative}
+                    type="button"
+                    disabled={busy !== null}
+                    aria-label={t('chooseAlternative', { number: index + 2 })}
+                    onClick={() =>
+                      void run('choose', () =>
+                        api('chooseChildDrawing', { params: { childId }, body: { index } }),
+                      )
+                    }
+                    className="aspect-[3/4] w-20 overflow-hidden rounded-lg border-2 border-border bg-muted transition hover:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de 30 min. */}
+                    <img src={alternative} alt="" className="size-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
           <div className="flex flex-wrap gap-2">
             <Button

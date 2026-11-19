@@ -126,6 +126,32 @@ export interface ModerationResult {
   usage?: AiUsage;
 }
 
+/**
+ * Control de parecido y edad de la lámina (DECISIONS 289): compara rasgos con texto, sin
+ * reconocimiento facial ni vectores de la cara (datos de menores).
+ */
+export interface LikenessCheck {
+  /** 1 (otra persona) a 5 (se reconoce enseguida), ya traducido a la edad y el estilo. */
+  score: number;
+  /** Edad que aparenta el dibujo, en años. */
+  apparentAge: number | null;
+  /** El dibujo lleva anteojos. */
+  glasses: boolean;
+  /** Qué cambiar para que se parezca más, en inglés y corto (va al reintento). */
+  fix: string;
+  usage?: AiUsage;
+}
+
+export interface LikenessRequest {
+  /** Fotos de la persona (1 a 3). */
+  photos: readonly ImageData[];
+  drawing: ImageData;
+  /** Edad del cuento: la que tiene que aparentar el dibujo. */
+  age: number;
+  /** Lo que dice la ficha: con o sin anteojos. */
+  glasses: boolean;
+}
+
 export interface ImageData {
   bytes: Uint8Array;
   mimeType: string;
@@ -163,6 +189,8 @@ export interface CharacterReference {
   /** Ficha de rasgos extraída de la foto (pelo, ojos, tono de piel...). */
   description: string;
   photo: ImageData | null;
+  /** Otras fotos de la misma persona (hasta 2 más): más ángulos para el parecido (DECISIONS 289). */
+  morePhotos?: readonly ImageData[];
 }
 
 export interface IllustrationRequest {
@@ -467,6 +495,8 @@ export interface AITextProvider {
 export interface AIImageProvider {
   readonly id: string;
   generateIllustration(request: IllustrationRequest): Promise<GeneratedImage>;
+  /** ¿El dibujo se parece a las fotos y tiene la edad del cuento? (DECISIONS 289). */
+  checkLikeness(request: LikenessRequest): Promise<LikenessCheck>;
   /**
    * Control de la imagen. Con `style` (la técnica elegida) también rechaza, en la misma llamada, una
    * imagen hecha claramente en otra técnica (categoría "style", DECISIONS 282).

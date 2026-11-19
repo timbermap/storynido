@@ -98,6 +98,14 @@ export function registerPreviewRoutes(app: FastifyInstance, previews: PreviewSer
     ),
   );
 
+  addRoute(app, apiRoutes.chooseChildDrawing, {}, async (request) =>
+    previews.chooseChildDrawing(
+      uid(request),
+      (request.params as ParamsOf<'chooseChildDrawing'>).childId,
+      (request.body as BodyOf<'chooseChildDrawing'>).index,
+    ),
+  );
+
   addRoute(app, apiRoutes.discardChildDrawing, {}, async (request) =>
     previews.discardChildDrawing(
       uid(request),

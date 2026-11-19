@@ -843,6 +843,11 @@ export const characterDrawingSchema = z.object({
   mustKeep: mustKeepSchema,
   /** Tiene fotos vigentes o rasgos elegidos: se le puede crear o actualizar el dibujo. */
   canDraw: z.boolean(),
+  /**
+   * Otras versiones del dibujo nuevo para elegir (quien ya compró recibe 3; DECISIONS 289). URL
+   * firmadas, 30 min.
+   */
+  alternativeUrls: z.array(z.string()).default([]),
 });
 
 export type CharacterDrawing = z.infer<typeof characterDrawingSchema>;
@@ -1599,6 +1604,7 @@ export const apiRoutes = {
         traits: null,
         mustKeep: [],
         canDraw: false,
+        alternativeUrls: [],
       }),
       books: z.array(
         z.object({
@@ -1632,6 +1638,16 @@ export const apiRoutes = {
     summary:
       'Usa el dibujo nuevo: pasa a ser el del personaje y la referencia de sus próximos cuentos (los libros ya hechos no cambian)',
     params: z.object({ childId: z.string().min(1) }),
+    response: characterDrawingResponseSchema,
+  },
+  chooseChildDrawing: {
+    method: 'POST',
+    path: '/v1/me/children/:childId/drawing/choose',
+    access: 'user',
+    summary:
+      'Elige otra de las versiones del dibujo nuevo (pasa a ser el dibujo nuevo por aprobar)',
+    params: z.object({ childId: z.string().min(1) }),
+    body: z.object({ index: z.number().int().min(0).max(1) }),
     response: characterDrawingResponseSchema,
   },
   discardChildDrawing: {
