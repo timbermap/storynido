@@ -81,7 +81,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
       try {
         const current = confirm
           ? await api('confirmPayment', { params: { orderId } }).catch((caught: unknown) => {
-              // Tarjeta rechazada al cobrar: se avisa y se ofrece probar con otra (DECISIONS 290).
+              // Tarjeta rechazada al cobrar: se avisa y se ofrece probar con otra (DECISIONS 292).
               if (caught instanceof ApiError && caught.code === 'payment_declined') {
                 setDeclined(true);
               }
