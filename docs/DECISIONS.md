@@ -3070,3 +3070,9 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Fecha:** 2026-11-19. Sebas vio en el kit de cumpleaños «¿Y un libro solo para…?» con «Libro impreso» sin precio. Todavía no hay proveedor de pago para físicos ni muestra aprobada.
 - **Interruptor:** `PRINT_ENABLED` en la API (por defecto apagado en staging y producción, prendido en local/test). Apagado, el registro de proveedores no tiene imprentas activas: la oferta del país, el creador, la ficha, el checkout, la landing y Cómo funciona dejan de ofrecer o cobrar impresos, y el servidor rechaza pedirlos. Para reabrir: `PRINT_ENABLED=true` en la API más las opciones de impresión habilitadas.
 - **Kit:** la sección del libro aparte se oculta mientras no haya impresos a la venta; Eventos no muestra impresos sin precios.
+
+## 296 — Textos del sitio sin promesa de impreso mientras `PRINT_ENABLED` esté apagado
+
+- **Fecha:** 2026-11-19. Barrido de la mesa (legales, producto, marketing) tras DECISIONS 295.
+- **Cambios:** descripción de la web, pie, Familias, «Así lo recibes», Cómo funciona (se quita la fila de impresos y «Impreso: muy pronto»), FAQ del kit, kit y «El cuento grande del cumpleañero» ya no dicen impreso, tapa dura ni envío. En es, en, pt y voseo.
+- **Pendiente (Sebas / contenido):** términos, reembolsos, envíos y FAQ general viven en Firestore y siguen describiendo el impreso; es texto legal y se edita desde el admin, no desde código.

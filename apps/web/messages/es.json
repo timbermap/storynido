@@ -1,7 +1,7 @@
 {
   "Meta": {
     "title": "{brand}: cada niño, protagonista de una historia única",
-    "description": "Un cuento ilustrado único con su nombre, su carita y las aventuras que siempre soñó. Mira una vista previa gratis y recíbelo en digital o impreso.",
+    "description": "Un cuento ilustrado único con su nombre, su carita y las aventuras que siempre soñó. Mira una vista previa gratis y recíbelo en digital al instante.",
     "skipToContent": "Saltar al contenido"
   },
   "Nav": {
@@ -100,7 +100,7 @@
     "rights": "© {year} {brand}. Todos los derechos reservados.",
     "contact": "Contacto",
     "help": "Ayuda",
-    "pitch": "Cuentos ilustrados donde el niño es el protagonista: con su nombre, su carita y lo que más le gusta. En digital o impresos.",
+    "pitch": "Cuentos ilustrados donde el niño es el protagonista: con su nombre, su carita y lo que más le gusta. En digital, al instante.",
     "follow": "Síguenos",
     "newTab": "se abre en otra pestaña",
     "preferences": "Idioma"
@@ -132,7 +132,7 @@
       "cta": "Empezar gratis",
       "secondary": "Ver cómo funciona",
       "fromPrice": "Desde {price}",
-      "formats": "Disponible en digital y libro impreso",
+      "formats": "Disponible en digital, al instante",
       "imageAlt": "Ilustración en acuarela de un niño astronauta y su perro mirando la luna entre estrellas",
       "kicker": "Cuentos personalizados, hechos con cariño",
       "headline": "Su cara.<br></br>Su nombre.<br></br>Su <hl>aventura</hl>.",
@@ -180,7 +180,7 @@
       "step2Text": "Viajes al espacio, dinosaurios, reinos mágicos, fútbol y más.",
       "step3Title": "Descubre su cuento",
       "step3Text": "Mira una vista previa gratis y elige tu formato favorito: digital, tapa blanda o tapa dura.",
-      "step3TextDigital": "Mira una vista previa gratis y recíbelo en digital al instante. Tapa blanda y tapa dura, muy pronto."
+      "step3TextDigital": "Mira una vista previa gratis y recíbelo en digital al instante."
     },
     "gallery": {
       "title": "Un universo de aventuras",
@@ -230,7 +230,7 @@
       "storyText": "Esa noche, el cohete de cartón empezó a brillar. {name} se puso el casco, contó hasta tres… ¡y salieron disparados hacia la Luna!"
     },
     "familiesMetaTitle": "Cuentos personalizados con su foto y su nombre",
-    "familiesMetaDescription": "Crea un libro con tu hijo como protagonista: sube su foto, mira la vista previa gratis y recíbelo digital o impreso.",
+    "familiesMetaDescription": "Crea un libro con tu hijo como protagonista: sube su foto, mira la vista previa gratis y recíbelo digital al instante.",
     "printedBook": {
       "title": "Un libro de verdad, para tener en las manos",
       "text": "Impreso de unos 21×28 cm, con su nombre y su personaje en cada página. Y si lo prefieres, lo recibes en digital al instante, para leerlo hoy mismo.",
@@ -272,7 +272,7 @@
     },
     "formats": {
       "title": "Así lo recibes",
-      "subtitle": "Hoy lo recibes en digital, al instante. Los libros impresos llegan muy pronto.",
+      "subtitle": "Lo recibes en digital, al instante.",
       "subtitlePrint": "En digital al instante o impreso, listo para regalar.",
       "caption": "Imagen ilustrativa",
       "available": "Disponible hoy",
@@ -1592,7 +1592,7 @@
         },
         "2": {
           "q": "¿Cómo lo imprimo y lo armo?",
-          "a": "Todo viene en PDF listo para imprimir en casa o en la imprenta que prefieras. Después puedes pedir las invitaciones y los agradecimientos impresos y enviados a tu casa."
+          "a": "Todo viene en PDF listo para imprimir en casa o en la imprenta que prefieras."
         },
         "3": {
           "q": "¿Necesito una foto?",
@@ -1675,7 +1675,7 @@
         "4": {
           "name": "El libro del cumpleañero",
           "question": "¿Qué le regalo a él?",
-          "text": "Un libro de Familias con tu hijo como protagonista, en tapa dura. Lo pueden comprar abuelos y tíos."
+          "text": "Un libro de Familias con tu hijo como protagonista, para leer y guardar. Lo pueden comprar abuelos y tíos."
         }
       },
       "priceFrom": "desde {price}",
@@ -1795,7 +1795,7 @@
       "pricing": {
         "1": {
           "title": "Desde {price} cada cuento",
-          "text": "El digital, con sus ilustraciones y el texto que tú ajustas. El libro impreso suma su impresión y el envío, que se calcula con la dirección."
+          "text": "El digital, con sus ilustraciones y el texto que tú ajustas."
         },
         "2": {
           "title": "Descuentos por volumen",
@@ -2108,7 +2108,7 @@
       },
       "downloadAll": "Descargar todo (ZIP)",
       "ready": "¡Tu kit está listo!",
-      "digitalOnly": "El kit es digital: te llega en PDF listo para imprimir en casa o en la imprenta que prefieras. Las tarjetas impresas se piden después, desde el pedido terminado.",
+      "digitalOnly": "El kit es digital: te llega en PDF listo para imprimir en casa o en la imprenta que prefieras.",
       "printCards": {
         "cta": "Imprimir tarjetas",
         "title": "Tarjetas impresas",
@@ -2124,8 +2124,8 @@
         "error": "No pudimos calcular el pedido. Inténtalo de nuevo."
       },
       "bigBook": {
-        "title": "El cuento grande del cumpleañero, en tapa dura",
-        "text": "La historia completa, con el mismo personaje y sin subir fotos de nuevo: el recuerdo que se guarda. Se crea desde Familias y el envío se calcula con tu dirección.",
+        "title": "El cuento grande del cumpleañero",
+        "text": "La historia completa, con el mismo personaje y sin subir fotos de nuevo: el recuerdo que se guarda. Se crea desde Familias.",
         "cta": "Crear el cuento grande"
       },
       "guests": "Nombres de los invitados (opcional)",
@@ -2424,7 +2424,7 @@
     },
     "prices": {
       "title": "Qué recibes y cuánto cuesta",
-      "subtitle": "Hoy todo es digital y llega al instante. Los libros impresos llegan muy pronto.",
+      "subtitle": "Todo es digital y llega al instante.",
       "subtitlePrint": "En digital al instante o impreso, listo para regalar.",
       "ebookName": "Cuento digital (ebook)",
       "ebookText": "Un PDF para leer en el celular, la tablet o la computadora, o imprimir en casa. El precio depende de la extensión.",

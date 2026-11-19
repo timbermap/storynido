@@ -91,18 +91,22 @@ export default async function HowItWorksPage({ params }: Props) {
 
   const delivery = [
     { icon: Mail, title: t('delivery.digitalTitle'), text: t('delivery.digitalText') },
-    {
-      icon: Truck,
-      title: printAvailable ? t('delivery.printTitle') : t('delivery.printSoonTitle'),
-      text: printAvailable
-        ? offer && offer.shipping.etaDaysMax > 0
-          ? t('delivery.printText', {
-              min: offer.shipping.etaDaysMin,
-              max: offer.shipping.etaDaysMax,
-            })
-          : t('delivery.printTextNoEta')
-        : t('delivery.printSoonText'),
-    },
+    // Sin impresos a la venta (PRINT_ENABLED apagado) no se nombra el impreso ni su «muy pronto».
+    ...(printAvailable
+      ? [
+          {
+            icon: Truck,
+            title: t('delivery.printTitle'),
+            text:
+              offer && offer.shipping.etaDaysMax > 0
+                ? t('delivery.printText', {
+                    min: offer.shipping.etaDaysMin,
+                    max: offer.shipping.etaDaysMax,
+                  })
+                : t('delivery.printTextNoEta'),
+          },
+        ]
+      : []),
     {
       icon: Receipt,
       title: t('delivery.pricesTitle'),
@@ -259,32 +263,36 @@ export default async function HowItWorksPage({ params }: Props) {
             </li>
           </ul>
 
-          {/* Impresos: una fila chica, sin precios hasta que se puedan pedir. */}
-          <h3 className="mt-12 text-center font-display text-xl font-semibold">
-            {printAvailable ? tFormats('printTitleReady') : tFormats('printTitle')}
-          </h3>
-          <ul className="mx-auto mt-5 grid max-w-3xl grid-cols-3 gap-3 sm:gap-5">
-            {PRINTED.map((format) => (
-              <li key={format}>
-                <figure className="h-full overflow-hidden rounded-[1.25rem] border bg-card">
-                  <FormatImage
-                    src={LANDING_FORMAT_IMAGES[format]}
-                    alt={tFormats(`${format}.alt`)}
-                    caption={tFormats('caption')}
-                    sizes="(min-width: 640px) 240px, 30vw"
-                  />
-                  <figcaption className="grid gap-1 p-3 font-sans sm:p-4">
-                    <span className="font-display text-sm font-semibold sm:text-base">
-                      {tFormats(`${format}.name`)}
-                    </span>
-                    <span className="text-xs font-bold text-muted-foreground">
-                      {printFormats.includes(format) ? tFormats('available') : tFormats('soon')}
-                    </span>
-                  </figcaption>
-                </figure>
-              </li>
-            ))}
-          </ul>
+          {printAvailable && (
+            <>
+              {/* Impresos: una fila chica, sin precios hasta que se puedan pedir. */}
+              <h3 className="mt-12 text-center font-display text-xl font-semibold">
+                {tFormats('printTitleReady')}
+              </h3>
+              <ul className="mx-auto mt-5 grid max-w-3xl grid-cols-3 gap-3 sm:gap-5">
+                {PRINTED.map((format) => (
+                  <li key={format}>
+                    <figure className="h-full overflow-hidden rounded-[1.25rem] border bg-card">
+                      <FormatImage
+                        src={LANDING_FORMAT_IMAGES[format]}
+                        alt={tFormats(`${format}.alt`)}
+                        caption={tFormats('caption')}
+                        sizes="(min-width: 640px) 240px, 30vw"
+                      />
+                      <figcaption className="grid gap-1 p-3 font-sans sm:p-4">
+                        <span className="font-display text-sm font-semibold sm:text-base">
+                          {tFormats(`${format}.name`)}
+                        </span>
+                        <span className="text-xs font-bold text-muted-foreground">
+                          {printFormats.includes(format) ? tFormats('available') : tFormats('soon')}
+                        </span>
+                      </figcaption>
+                    </figure>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </section>
 
