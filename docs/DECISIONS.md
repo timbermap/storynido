@@ -2962,3 +2962,13 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Control automático de cada imagen**, en el proveedor (cubre muestra, pedido y scripts): píxeles (color mínimo para los estilos a color, color máximo para colorear, tope de saturación) y, en la misma llamada de moderación, rechazo si la técnica es claramente otra (categoría «style»). Si falla se pide una vez más con el motivo; la que quede se usa (colorear siempre en blanco y negro).
 - **Calibración y set fijo de pruebas:** los topes salen de las muestras aprobadas de cada estilo (estilos a color 33-60 de color y 0,16-0,58 de saturación; colorear 0,1). `style-checks.test.ts` corre cada muestra contra su ficha; `art-direction.test.ts` combina cada estilo con cada tipo de libro.
 - **Pendiente:** medir en el admin cuántas imágenes reintenta el control por estilo, para ajustar topes.
+
+## 283 — El texto nunca tapa el dibujo; tapas con su franja de título y tapa a color en colorear
+
+- **Fecha:** 2026-11-19. Pedido por Sebas («Todo, para todos los tipos»), después de la muestra de colorear de Lu: el panel tapaba media página, «LU» caía sobre la cara y la marca de agua se confundía con las líneas.
+- **Colorear:** armado nuevo `strip`: el dibujo arriba (80 %) y el texto en una franja blanca debajo, con letra de epígrafe (el mínimo de la franja). Una sola frase de hasta 12 palabras por página (`COLORING_MAX_WORDS`; tope duro 14). Igual en el PDF y en la vista previa.
+- **Cuentos de 0 a 6 años:** la zona calma admite según la letra 12 palabras (0-2), 22 (3-4) o 32 (5-6). Con más, la página pasa sola a papel fundido (antes, recién con más de 45).
+- **Actividades:** sin cambios; la consigna ya va en su encabezado, separada del juego.
+- **Tapas (todos los tipos):** el pedido de imagen suma una regla de diseño (tercio superior libre, ninguna cara ahí) y la moderación, la categoría «title_zone». «style» y «title_zone» son rechazos blandos: se rehace, pero en el último intento se acepta, para no perder la muestra ni frenar el pedido.
+- **Tapa del libro para colorear:** va a color (los mismos contornos, pintados como ya coloreados), con el sello «Para colorear» en la web y en el PDF. El interior sigue en blanco y negro. Es lo que hacen los superventas del rubro (Bobbie Goods, Coco Wyo).
+- **Marca de agua:** en las páginas de colorear de la muestra, al 40 %. El libro comprado no la lleva.

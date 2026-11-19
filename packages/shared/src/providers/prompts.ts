@@ -245,7 +245,7 @@ Reglas obligatorias:
   }${
     input.coloring
       ? `
-- Es un libro para colorear: cada escena tiene pocos elementos grandes y bien separados, fáciles de pintar.`
+- Es un libro para colorear: cada escena tiene pocos elementos grandes y bien separados, fáciles de pintar. El texto de cada página es una sola frase corta (hasta 12 palabras), como pie del dibujo.`
       : ''
   }
 - Las enseñanzas se muestran con lo que hacen los personajes, nunca como moraleja explícita ni sermón.${

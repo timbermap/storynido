@@ -17,8 +17,13 @@ export interface ViewerPage {
   text: string | null;
   /** Número de página del cuento (solo kind = story). */
   number?: number;
+  /** Sello de la tapa («Para colorear», DECISIONS 283). */
+  seal?: string;
   /** Armado en el libro (page-layout.ts): la página se ve igual que en el PDF. */
-  layout?: { kind: 'facing' | 'calm' | 'vignette' | 'overlay'; side: 'top' | 'bottom' };
+  layout?: {
+    kind: 'facing' | 'calm' | 'vignette' | 'strip' | 'overlay';
+    side: 'top' | 'bottom';
+  };
 }
 
 const STORY_FONT_CLASS: Record<StoryTypography['font'], string> = {
@@ -55,9 +60,11 @@ export function storyFontClass(typography: StoryTypography): string {
  * Tamaño en la página del visor, proporcional al ancho como en el PDF (la misma escala que el
  * armado por edad: 15,5 pt ≈ 3,9 % del ancho).
  */
-export function storyFontSize(typography: StoryTypography): string {
-  const cqw = (typography.maxPt * 0.25).toFixed(2);
-  const max = (typography.maxPt / 13).toFixed(2);
+export function storyFontSize(typography: StoryTypography, caption = false): string {
+  // Pie de un dibujo para colorear: la letra mínima de la franja (DECISIONS 283).
+  const pt = caption ? typography.minPt : typography.maxPt;
+  const cqw = (pt * 0.25).toFixed(2);
+  const max = (pt / 13).toFixed(2);
   return `clamp(0.8rem, ${cqw}cqw, ${max}rem)`;
 }
 
@@ -352,6 +359,11 @@ function PageSpread({
         <h3 className="contents">
           <CoverTitle {...splitCoverTitle(title, coverName ?? '')} />
         </h3>
+        {page.seal && (
+          <span className="absolute right-[5%] bottom-[5%] rotate-[-6deg] rounded-full border-2 border-white bg-primary px-[4cqw] py-[1.6cqw] font-display text-[4.2cqw] font-bold text-primary-foreground shadow-md">
+            {page.seal}
+          </span>
+        )}
         {badge && <Badge>{badge}</Badge>}
       </div>
     );
@@ -415,6 +427,35 @@ function PageSpread({
           {illustration}
           {badge && <Badge>{badge}</Badge>}
         </div>
+      </div>
+    );
+  }
+
+  // Colorear (DECISIONS 283): el dibujo arriba y el texto en su franja blanca debajo, como en el
+  // PDF. El texto nunca tapa lo que se pinta.
+  if (layout.kind === 'strip') {
+    return (
+      <div className="[container-type:inline-size] relative mx-auto flex aspect-[3/4] w-full max-w-md flex-col overflow-hidden rounded-xl bg-white shadow-[0_17px_45px_rgb(80_52_84/0.18)]">
+        <div className="relative h-[80%] px-[5%] pt-[5%] [&_img]:object-contain">
+          {illustration}
+        </div>
+        <div className="flex flex-1 items-center justify-center border-t border-[#e6ddd2] px-[8%] pb-[4%] text-center">
+          {typography ? (
+            <p
+              className={cn(storyFontClass(typography), 'leading-snug whitespace-pre-line')}
+              style={{ fontSize: storyFontSize(typography, true) }}
+            >
+              {page.text}
+            </p>
+          ) : (
+            text
+          )}
+        </div>
+        {badge && (
+          <div className="[&>span]:top-3 [&>span]:bottom-auto">
+            <Badge>{badge}</Badge>
+          </div>
+        )}
       </div>
     );
   }

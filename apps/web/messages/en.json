@@ -1823,7 +1823,8 @@
     "noDedication": "Your dedication goes here",
     "example": "Example",
     "exampleLabel": "Style example · in your book, {name} will be the hero",
-    "wordless": "Wordless page: the illustration tells this moment."
+    "wordless": "Wordless page: the illustration tells this moment.",
+    "coloringSeal": "Coloring book"
   },
   "Checkout": {
     "shippingEstimate": "Estimated shipping to {country}: about {price}, for a total of about {total}. Arrives in {min} to {max} business days. Confirmed with your address.",

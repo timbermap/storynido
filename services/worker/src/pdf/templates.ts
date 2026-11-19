@@ -1,4 +1,5 @@
 import {
+  STRIP_ART_PCT,
   letterJitter,
   splitCoverTitle,
   type ActivitySpec,
@@ -117,6 +118,7 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     drawingsHint: 'Dibuja aquí tu parte favorita del cuento.',
     back: 'Historias que abrazan.',
     words: 'Palabras',
+    coloringSeal: 'Para colorear',
   },
   en: {
     dedicationFor: 'This story is for {name}.',
@@ -132,6 +134,7 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     drawingsHint: 'Draw your favorite part of the story here.',
     back: 'Stories that hug.',
     words: 'Words',
+    coloringSeal: 'Coloring book',
   },
   pt: {
     dedicationFor: 'Esta história é para {name}.',
@@ -147,6 +150,7 @@ const STRINGS: Record<Lang, Record<string, string>> = {
     drawingsHint: 'Desenhe aqui a sua parte favorita da história.',
     back: 'Histórias que abraçam.',
     words: 'Palavras',
+    coloringSeal: 'Para colorir',
   },
 };
 
@@ -204,6 +208,11 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .title-band .title { text-shadow: 0 0 0.5mm ${PAPER}, 0 0 1.4mm rgba(255,250,243,0.9); }
 .title { font-family: 'Amatic SC', 'Fraunces', serif; font-weight: 700; font-size: 40pt; line-height: 1; margin: 0; color: ${INK}; }
 .coloring .art { object-fit: contain; background: #fff; }
+.page.coloring { background: #fff; }
+.seal { position: absolute; right: ${String(inset + 4)}mm; bottom: ${String(inset + 4)}mm; transform: rotate(-6deg); padding: 3mm 7mm; border-radius: 999px; border: 0.8mm solid #fff; background: #a33f33; color: #fff; font-family: 'Quicksand', 'Nunito Sans', sans-serif; font-weight: 700; box-shadow: 0 0.6mm 2mm rgba(52,42,64,0.2); }
+.art.strip { top: 0; bottom: auto; height: ${String(STRIP_ART_PCT)}%; padding: ${String(inset)}mm ${String(inset)}mm 0; box-sizing: border-box; }
+.strip-band { position: absolute; left: ${String(inset)}mm; right: ${String(inset)}mm; bottom: 0; height: ${String(100 - STRIP_ART_PCT)}%; padding-bottom: ${String(inset)}mm; box-sizing: border-box; display: flex; align-items: center; justify-content: center; text-align: center; border-top: 0.3mm solid #e6ddd2; }
+.panel.strip { position: static; background: none; border-radius: 0; padding: 0 4mm; }
 .activity { position: absolute; inset: ${String(inset)}mm; display: flex; flex-direction: column; gap: 6mm; }
 .activity .kicker { font-size: 10pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #79518c; }
 .activity h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24pt; line-height: 1.1; }
@@ -271,7 +280,8 @@ function storyPage(
   const trimHeight = trimOf(spec).height;
   const label = (suffix = '') =>
     `data-label="página ${String(number)}${suffix}" style="height:${String(height)}mm"`;
-  const kind = coloring ? 'overlay' : (page.layout?.kind ?? 'overlay');
+  // Colorear: el dibujo arriba y el texto en su franja blanca debajo, nunca encima (DECISIONS 283).
+  const kind = coloring ? 'strip' : (page.layout?.kind ?? 'overlay');
   const side = page.layout?.side ?? 'bottom';
 
   // Página sin texto (el clímax de 3 a 6 años): solo la ilustración, sin panel.
@@ -298,6 +308,19 @@ function storyPage(
     ? `story f-${typography.font}${typography.uppercase ? ' upper' : ''}`
     : 'story';
   const story = `<div class="${storyClass}">${paragraphs(page.text)}</div>`;
+
+  if (kind === 'strip') {
+    // Pie del dibujo: letra de epígrafe (el mínimo de la franja) que puede achicarse para entrar.
+    const inset = spec.bleedMm + spec.safeMm;
+    const maxMm = (trimHeight * (100 - STRIP_ART_PCT)) / 100 - inset - 2;
+    const captionPt = typography ? typography.minPt * pageScale : fontPt;
+    return [
+      `<section class="page coloring" ${label()}>
+  <img class="art strip" src="${page.image}" alt="">
+  <div class="strip-band"><div class="panel strip" ${fit(maxMm, captionPt)}>${story}</div></div>
+</section>`,
+    ];
+  }
 
   if (kind === 'facing') {
     // Página de texto (izquierda) con un detalle de la ilustración, y la ilustración entera enfrente.
@@ -424,7 +447,12 @@ function coverFront(book: LayoutBook, spec: FormatSpec): string {
       ? `<span class="cover-small" style="font-size:${String(smallSize)}pt">${escapeHtml(text)}</span>`
       : '';
 
-  return `<img class="art" src="${book.cover}" alt="">
+  // Libro para colorear: sello en la tapa, que va a color (DECISIONS 283).
+  const seal =
+    book.contentType === 'coloring'
+      ? `<span class="seal" style="font-size:${String(Math.round(20 * coverScale))}pt">${escapeHtml(text(book, 'coloringSeal'))}</span>`
+      : '';
+  return `<img class="art" src="${book.cover}" alt="">${seal}
   <div class="title-band" style="padding-top:${String(spec.bleedMm + spec.safeMm)}mm"><h1 class="title" aria-label="${escapeHtml(book.title)}">${small(before)}<span class="cover-name" style="font-size:${String(nameSize)}pt">${letters}</span>${small(after)}</h1></div>`;
 }
 

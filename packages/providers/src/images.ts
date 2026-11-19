@@ -69,16 +69,43 @@ export async function encodeIllustration(input: Uint8Array): Promise<Uint8Array>
   return new Uint8Array(data);
 }
 
+/** Marca de agua tenue: en un dibujo para colorear la de siempre se confundía con las líneas. */
+const FAINT_WATERMARK_ALPHA = 0.4;
+let faintTile: Promise<Buffer> | null = null;
+
+function faintWatermarkTile(): Promise<Buffer> {
+  faintTile ??= (async () => {
+    const { data, info } = await sharp(Buffer.from(WATERMARK_TILE_PNG_BASE64, 'base64'))
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    for (let i = 3; i < data.length; i += 4) {
+      data[i] = Math.round((data[i] ?? 0) * FAINT_WATERMARK_ALPHA);
+    }
+    return sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+      .png()
+      .toBuffer();
+  })();
+  return faintTile;
+}
+
 /**
  * Versión de la vista previa: lado máximo 1024 px y la marca de agua en mosaico.
- * Es la única versión que ve el cliente antes de comprar.
+ * Es la única versión que ve el cliente antes de comprar. `faint`: más tenue (páginas para
+ * colorear, DECISIONS 283).
  */
-export async function watermarkPreview(input: Uint8Array): Promise<Uint8Array> {
+export async function watermarkPreview(
+  input: Uint8Array,
+  options: { faint?: boolean } = {},
+): Promise<Uint8Array> {
   const resized = await sharp(input, { failOn: 'error' })
     .resize({ width: 1024, height: 1024, fit: 'inside', withoutEnlargement: true })
     .toBuffer();
+  const tile = options.faint
+    ? await faintWatermarkTile()
+    : Buffer.from(WATERMARK_TILE_PNG_BASE64, 'base64');
   const data = await sharp(resized)
-    .composite([{ input: Buffer.from(WATERMARK_TILE_PNG_BASE64, 'base64'), tile: true }])
+    .composite([{ input: tile, tile: true }])
     .webp({ quality: 80 })
     .toBuffer();
   return new Uint8Array(data);

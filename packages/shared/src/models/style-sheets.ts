@@ -41,6 +41,9 @@ const COLOR_STYLE_CHECK: ImageCheck = { minColorfulness: 15, maxSaturation: 0.62
 
 const COLORING_CHECK: ImageCheck = { maxColorfulness: 15, grayscale: true };
 
+/** Tapa del libro para colorear: a color (DECISIONS 283). */
+export const COLORING_COVER_CHECK: ImageCheck = { minColorfulness: 15, maxSaturation: 0.75 };
+
 const KEEP_IDENTITY =
   'From the photo and the reference images take only identity (face, hair, skin tone, eyes, glasses, outfit) and, from this book’s own illustrations, the technique.';
 

@@ -192,7 +192,20 @@ export interface IllustrationRequest {
   style?: string | null;
   /** Libro para colorear: la imagen sale en blanco y negro, solo contornos (DECISIONS 281). */
   coloring?: boolean;
+  /**
+   * Es la tapa: deja libre el tercio del título y, en un libro para colorear, va a color
+   * (DECISIONS 283).
+   */
+  cover?: boolean;
 }
+
+/** Categorías de la moderación que piden rehacer la imagen pero no la descartan si no sale otra. */
+export const SOFT_IMAGE_CATEGORIES = /^(style|title_zone)$/i;
+
+/** El rechazo es solo de estilo o de la zona del título (no de seguridad ni de calidad). */
+export const onlySoftRejection = (categories: readonly string[]): boolean =>
+  categories.length > 0 &&
+  categories.every((category) => SOFT_IMAGE_CATEGORIES.test(category.trim()));
 
 export interface GeneratedImage extends ImageData {
   usage: AiUsage;
@@ -440,7 +453,10 @@ export interface AIImageProvider {
    * Control de la imagen. Con `style` (la técnica elegida) también rechaza, en la misma llamada, una
    * imagen hecha claramente en otra técnica (categoría "style", DECISIONS 282).
    */
-  moderateImage(image: ImageData, options?: { style?: string | null }): Promise<ModerationResult>;
+  moderateImage(
+    image: ImageData,
+    options?: { style?: string | null; cover?: boolean },
+  ): Promise<ModerationResult>;
 }
 
 /** Texto e imagen se eligen por separado desde el admin (aiConfig). */

@@ -33,6 +33,7 @@ import {
   type StoryRequest,
   type StoryReview,
   STORY_STRUCTURES,
+  COLORING_COVER_CHECK,
   imageCheckFor,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
@@ -44,6 +45,17 @@ import { failedCheck, toColoringPage } from '../images';
  * cálida» de la plantilla empujaban al modelo a pintar. Esta nota va al final, que es lo que más
  * pesa, y los colores nombrados pasan a ser solo formas.
  */
+/**
+ * Tapa del libro para colorear (DECISIONS 283): a color, como los superventas del rubro. Los mismos
+ * contornos negros del interior, pintados prolijos, como si un chico ya lo hubiera coloreado.
+ */
+export const COLORING_COVER_RULE =
+  'COLORING BOOK COVER: the same bold black outlines and shapes as the inside coloring pages, but neatly filled with bright, cheerful flat colors as if it had already been colored in with markers, on a clean light background. Use the natural colors described for the character (hair, skin, clothes). This is the only colored image of the book.';
+
+/** Tapa (DECISIONS 283): el título va arriba, en su franja; nada importante debajo. */
+export const COVER_TITLE_RULE =
+  'COVER LAYOUT: the title is printed over the top third of the image. Keep that top third as plain, calm background (sky, wall, soft color) with nothing important: no head, face, hair or hands in it; the main character stands in the lower two thirds.';
+
 export const COLORING_PAGE_RULE =
   'COLORING PAGE: pure black outlines on plain white paper, like a printed coloring book. No color at all, no gray, no shading, no filled or painted areas, no colored background. Colors named in the scene or for the character (hair, skin, clothes, objects) are NOT painted: they are only shapes and patterns left white for the child to color. Ignore the colors and the lighting of the photo and of the reference images; keep only their shapes.';
 
@@ -1161,18 +1173,25 @@ export class VertexImageProvider implements AIImageProvider {
       );
     }
     // La ficha del estilo trae su control (DECISIONS 282); colorear también tiene su regla final.
-    const check = imageCheckFor({
+    let check = imageCheckFor({
       style: request.style,
       stylePrompt: request.stylePrompt,
       coloring: request.coloring,
     });
+    // La tapa del libro para colorear va a color: otro control y otra regla (DECISIONS 283).
+    const coloringCover = request.cover === true && check.grayscale === true;
+    if (coloringCover) check = COLORING_COVER_CHECK;
     const coloring = check.grayscale === true;
+    const rules = [
+      coloringCover ? COLORING_COVER_RULE : coloring ? COLORING_PAGE_RULE : '',
+      request.cover ? COVER_TITLE_RULE : '',
+    ].filter(Boolean);
     const instructions = `Scene to draw: ${request.prompt}
 
 Art style: ${request.stylePrompt}
 Main character: ${request.character.description}
 ${notes.join('\n')}
-Children's picture book illustration, drawn only in the art style above. No text, letters, numbers, logos or watermarks anywhere: book spines and covers, posters, signs, labels and clothing stay blank.${coloring ? `\n${COLORING_PAGE_RULE}` : ''}`;
+Children's picture book illustration, drawn only in the art style above. No text, letters, numbers, logos or watermarks anywhere: book spines and covers, posters, signs, labels and clothing stay blank.${rules.map((rule) => `\n${rule}`).join('')}`;
     parts.push({ text: instructions });
 
     let lastUsage: AiUsage[] = [];
@@ -1219,10 +1238,14 @@ Children's picture book illustration, drawn only in the art style above. No text
 
   async moderateImage(
     image: ImageData,
-    options: { style?: string | null } = {},
+    options: { style?: string | null; cover?: boolean } = {},
   ): Promise<ModerationResult> {
     // La técnica de la ficha del estilo (DECISIONS 282): solo se rechaza una técnica claramente
     // distinta, no matices; va en la misma llamada, sin costo extra.
+    // Tapa: ninguna cara debajo del título (DECISIONS 283).
+    const titleZone = options.cover
+      ? '\nThis image is a book cover and its title is printed over the top third. Reject it (category "title_zone") if a face or head is in that top third.'
+      : '';
     const style = options.style?.trim()
       ? `\nThe chosen art style is: ${options.style.trim()}. Reject it (category "style") only if it is CLEARLY made in a different technique (for example a 3D render, a photo or a color painting when the style is a watercolor or a black and white coloring page); small variations of the same technique are fine.`
       : '';
@@ -1233,7 +1256,7 @@ Children's picture book illustration, drawn only in the art style above. No text
 
 The image above is an illustration for the book. Also reject it (category "text") if it shows any
 readable words, letters or numbers (signs, labels, captions): the book's text is added separately.
-Reject it (category "deformed") if faces or hands are clearly malformed.${style}`,
+Reject it (category "deformed") if faces or hands are clearly malformed.${style}${titleZone}`,
       },
     ]);
   }

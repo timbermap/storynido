@@ -70,6 +70,8 @@ import {
   aiModelSchema,
   type PreviewFeedbackReason,
   mediumFor,
+  imageCheckFor,
+  onlySoftRejection,
 } from '@storynido/shared';
 import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
@@ -1250,6 +1252,11 @@ export class PreviewService {
     limits: AiLimits,
     request: Parameters<AIProvider['image']['generateIllustration']>[0],
   ): Promise<{ image: ImageData }> {
+    // Una tapa a color de un libro para colorear no se controla contra la técnica de contornos.
+    const coloringCover =
+      request.cover === true &&
+      imageCheckFor({ style: request.style, stylePrompt: request.stylePrompt }).grayscale === true;
+    let checks = 0;
     return withModeratedRetry(
       async (attempt) => {
         // Cada imagen es la parte cara: se verifica el tope antes de pedirla.
@@ -1270,26 +1277,41 @@ export class PreviewService {
           throw error;
         }
       },
-      async ({ image }) =>
-        track(
+      async ({ image }) => {
+        checks += 1;
+        const verdict = await track(
           'moderation',
           await ai.image.moderateImage(image, {
-            style: mediumFor({ style: request.style, stylePrompt: request.stylePrompt }),
+            style: coloringCover
+              ? null
+              : mediumFor({ style: request.style, stylePrompt: request.stylePrompt }),
+            ...(request.cover ? { cover: true } : {}),
           }),
-        ),
+        );
+        // Estilo o zona del título: se rehace, pero en el último intento se acepta (no se pierde
+        // la muestra por una cara un poco alta; DECISIONS 283).
+        return checks >= 3 && !verdict.allowed && onlySoftRejection(verdict.categories)
+          ? { ...verdict, allowed: true }
+          : verdict;
+      },
       // Tres intentos: una página que falla el control no tiene que tirar toda la muestra.
       3,
     );
   }
 
   /** Guarda la versión limpia y la que tiene marca de agua. */
-  private async store(base: string, image: ImageData): Promise<{ clean: string; preview: string }> {
+  private async store(
+    base: string,
+    image: ImageData,
+    /** Marca de agua tenue: páginas para colorear (DECISIONS 283). */
+    faint = false,
+  ): Promise<{ clean: string; preview: string }> {
     const storage = this.providers.storage();
     const clean = `${base}.webp`;
     const preview = `${base}-preview.webp`;
     const [cleanBytes, previewBytes] = await Promise.all([
       encodeIllustration(image.bytes),
-      watermarkPreview(image.bytes),
+      watermarkPreview(image.bytes, faint ? { faint: true } : {}),
     ]);
     await Promise.all([
       storage.upload({ bucket: 'assets', path: clean }, cleanBytes, 'image/webp'),
@@ -1533,7 +1555,7 @@ export class PreviewService {
       const sceneCharacter = companion
         ? `${description}\n${companionNote(companion)}`
         : description;
-      const illustrate = (scene: string, seed: number, cast = false) =>
+      const illustrate = (scene: string, seed: number, cast = false, cover = false) =>
         this.illustration(ai, track, limits, {
           prompt: buildIllustrationPrompt({
             template: story.imagePromptTemplate,
@@ -1554,6 +1576,7 @@ export class PreviewService {
           // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
           resolution: '2K',
           seed,
+          ...(cover ? { cover: true } : {}),
         });
       const pageScenes = [
         coverScene(preview.pages[0]?.illustrationPrompt, preview.title, coverSetting(preview.plan)),
@@ -1581,6 +1604,7 @@ export class PreviewService {
             scene,
             image === 0 ? 1 : (preview.pages[image - 1]?.index ?? 0) + 2,
             castOn(image),
+            image === 0,
           ),
         ),
       );
@@ -1619,6 +1643,7 @@ export class PreviewService {
               `${pageScenes[image] ?? ''} Make sure that: ${hint}.`,
               100 + image,
               castOn(image),
+              image === 0,
             );
             await this.qaEvent(bookId, 'page_repair', {
               pageIndex: image,
@@ -1643,7 +1668,11 @@ export class PreviewService {
         preview.pages.map(async (page, index) => {
           const image = illustrated[index];
           if (!image) return page;
-          const paths = await this.store(`${folder}/page-${String(index)}-${version}`, image.image);
+          const paths = await this.store(
+            `${folder}/page-${String(index)}-${version}`,
+            image.image,
+            book.contentType === 'coloring',
+          );
           return { ...page, imagePath: paths.clean, previewImagePath: paths.preview };
         }),
       );
@@ -2279,6 +2308,7 @@ export class PreviewService {
         // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
         resolution: '2K',
         seed: Date.now() % 100_000,
+        ...(target === 'cover' ? { cover: true } : {}),
       });
 
       const version = Date.now().toString(36);
@@ -2293,6 +2323,7 @@ export class PreviewService {
       const paths = await this.store(
         `${folder}/${target === 'cover' ? 'cover' : `page-${String(target)}`}-${version}`,
         image,
+        target !== 'cover' && book.contentType === 'coloring',
       );
       if (target === 'cover') {
         await ref.update({

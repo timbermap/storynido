@@ -8,11 +8,26 @@
  * - `calm` (hasta 6 años): el texto va directo en la zona calma de la ilustración, sin panel.
  * - `vignette` (7 y 8 años, y cualquier página larga hasta 8 años): la ilustración se funde en el
  *   papel crema arriba o abajo y el texto va ahí, sin taparla.
- * - `overlay`: el panel sobre la ilustración de siempre (libros congelados antes de esto y libros
- *   para colorear).
+ * - `strip` (libros para colorear, DECISIONS 283): el dibujo arriba y, debajo, una franja blanca
+ *   con el texto como pie. El texto nunca tapa lo que se pinta.
+ * - `overlay`: el panel sobre la ilustración de siempre (libros congelados antes de esto).
  */
 
-export type PageLayoutKind = 'facing' | 'calm' | 'vignette' | 'overlay';
+export type PageLayoutKind = 'facing' | 'calm' | 'vignette' | 'strip' | 'overlay';
+
+/** Alto del dibujo en una página `strip` (%): el resto es la franja blanca del texto. */
+export const STRIP_ART_PCT = 80;
+
+/**
+ * Palabras que entran en la zona calma (el tercio libre) con la letra de cada edad (DECISIONS 283).
+ * Más que esto, la página pasa al papel fundido: antes solo lo hacía con más de 45 palabras y el
+ * texto tapaba la ilustración (MAYÚSCULAS de 22-26 pt en 3-4 años).
+ */
+export function calmMaxWords(age: number): number {
+  if (age <= 2) return 12;
+  if (age <= 4) return 22;
+  return 32;
+}
 
 /** Mitad de la página que la ilustración deja libre para el texto. */
 export type CalmSide = 'top' | 'bottom';
@@ -86,10 +101,13 @@ export function pageLayout(
   config: PageLayoutConfig = DEFAULT_PAGE_LAYOUT,
 ): PageLayout {
   const side = calmSideFor(input.pageIndex);
-  if (input.contentType === 'coloring') return { kind: 'overlay', side: 'top' };
+  if (input.contentType === 'coloring') return { kind: 'strip', side: 'bottom' };
   if (!input.layout) return { kind: 'overlay', side };
   if (input.layout.facing) return { kind: 'facing', side };
-  if (input.words > config.vignetteMinWords || input.layout.age > config.calmMaxAge) {
+  if (
+    input.words > Math.min(config.vignetteMinWords, calmMaxWords(input.layout.age)) ||
+    input.layout.age > config.calmMaxAge
+  ) {
     return { kind: 'vignette', side };
   }
   return { kind: 'calm', side };
@@ -100,6 +118,8 @@ export function layoutSceneNote(layout: PageLayout): string {
   const third = layout.side === 'top' ? 'top' : 'bottom';
   const other = layout.side === 'top' ? 'lower' : 'upper';
   switch (layout.kind) {
+    case 'strip':
+      return ' Full drawing for a coloring page: the text goes in a separate white band below the drawing, so no empty area for text is needed. Keep the main character whole and away from the edges.';
     case 'facing':
       return ' Full-page illustration with the whole scene: the text goes on the facing page, so no empty area for text is needed. Keep faces away from the edges.';
     case 'vignette':

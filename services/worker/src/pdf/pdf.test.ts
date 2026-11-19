@@ -308,6 +308,26 @@ describe.skipIf(!chromePath())('PDF', () => {
     expect(wordless).not.toContain('class="panel');
   });
 
+  it('colorear: el texto va en una franja debajo del dibujo y la tapa lleva el sello (DECISIONS 283)', async () => {
+    const coloring = book({
+      contentType: 'coloring',
+      typography: storyTypography('3-4', '3-4', 'es'),
+      activities: [],
+      pages: [{ text: 'Lu sube al cohete de cartón y mira las estrellas.', image }],
+    });
+    const html = digitalHtml(coloring, FORMAT_SPECS.digital);
+    expect(html).toContain('class="art strip"');
+    expect(html).toContain('class="strip-band"');
+    expect(html).not.toContain('class="panel top');
+    expect(html).toContain('Para colorear');
+    const spec = FORMAT_SPECS.softcover;
+    const result = await renderPdf(browser, printInteriorHtml(coloring, spec), pageSizeMm(spec), {
+      bleedMm: spec.bleedMm,
+      title: coloring.title,
+    });
+    expect(result.overflow).toEqual([]);
+  }, 60_000);
+
   it('el tope de palabras de cada franja entra con su letra y su armado por edad', async () => {
     const words = (count: number) =>
       Array.from({ length: count }, (_, index) => (index % 3 ? 'mariposa' : 'Martín')).join(' ');

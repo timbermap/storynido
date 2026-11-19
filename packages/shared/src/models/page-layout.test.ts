@@ -15,8 +15,15 @@ const at = (age: number, words: number, pageIndex = 1, contentType = 'story') =>
 describe('armado de página por edad', () => {
   it('hasta 6 años el texto va en la zona calma; si es largo, sobre el papel fundido', () => {
     expect(at(4, 20).kind).toBe('calm');
-    expect(at(6, 45).kind).toBe('calm');
-    expect(at(6, 46).kind).toBe('vignette');
+    expect(at(6, 32).kind).toBe('calm');
+    expect(at(6, 33).kind).toBe('vignette');
+  });
+
+  it('la zona calma admite menos palabras cuanto más grande es la letra (DECISIONS 283)', () => {
+    expect(at(2, 12).kind).toBe('calm');
+    expect(at(2, 13).kind).toBe('vignette');
+    expect(at(4, 22).kind).toBe('calm');
+    expect(at(4, 25).kind).toBe('vignette');
   });
 
   it('7 y 8 años: la ilustración se funde en el papel', () => {
@@ -42,9 +49,11 @@ describe('armado de página por edad', () => {
     });
   });
 
-  it('colorear conserva su armado', () => {
+  it('colorear: el texto va en una franja debajo del dibujo, nunca encima', () => {
     expect(bookLayout(10, 'coloring').facing).toBe(false);
-    expect(at(10, 10, 1, 'coloring')).toEqual({ kind: 'overlay', side: 'top' });
+    expect(at(10, 10, 1, 'coloring')).toEqual({ kind: 'strip', side: 'bottom' });
+    expect(at(4, 10, 2, 'coloring')).toEqual({ kind: 'strip', side: 'bottom' });
+    expect(layoutSceneNote({ kind: 'strip', side: 'bottom' })).toContain('separate white band');
   });
 
   it('el prompt pide el espacio que el armado necesita', () => {
