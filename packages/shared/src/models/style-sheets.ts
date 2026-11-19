@@ -91,7 +91,7 @@ export const STYLE_SHEETS: Record<string, StyleSheet> = {
       'traditional watercolor: transparent washes, soft wet edges, gentle color blooms and visible paper texture; never opaque paint or ink line art',
     usesPalette: true,
     references: KEEP_IDENTITY,
-    avoid: 'opaque gouache, thick black ink outlines, flat vector color, 3D render',
+    avoid: 'opaque matte paint, thick black ink outlines, flat vector color, 3D render',
     check: COLOR_STYLE_CHECK,
   },
   'para-colorear': {
