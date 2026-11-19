@@ -201,7 +201,7 @@ export async function failedCheck(input: Uint8Array, check: ImageCheck): Promise
     }
   }
   if (check.maxSaturation !== undefined && (await meanSaturation(input)) > check.maxSaturation) {
-    return 'The previous attempt was oversaturated and looked artificial. This time use calm, softened colors with a single accent, never neon, candy or pure primaries.';
+    return 'The previous attempt was oversaturated and looked artificial. This time use calm, muted, dusty colors with a single accent, never neon, lime, candy or pure primaries.';
   }
   return null;
 }

@@ -187,7 +187,7 @@ describe('fichas de estilo y de tipo de libro (DECISIONS 282)', () => {
       true,
     );
     expect(imageCheckFor({ style: 'linograbado', stylePrompt: 'linocut print' })).toEqual({
-      maxSaturation: 0.7,
+      maxSaturation: 0.6,
     });
     expect(imageCheckFor({ style: 'acuarela', coloring: true }).grayscale).toBe(true);
   });

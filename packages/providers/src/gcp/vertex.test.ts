@@ -549,7 +549,7 @@ describe('Vertex AI', () => {
       .png()
       .toBuffer();
     const colored = await sharp({
-      create: { width: 16, height: 16, channels: 3, background: '#3a8fd2' },
+      create: { width: 16, height: 16, channels: 3, background: '#7fa6cf' },
     })
       .png()
       .toBuffer();
@@ -598,7 +598,7 @@ describe('Vertex AI', () => {
       .png()
       .toBuffer();
     const colored = await sharp({
-      create: { width: 16, height: 16, channels: 3, background: '#e0a030' },
+      create: { width: 16, height: 16, channels: 3, background: '#d9a860' },
     })
       .png()
       .toBuffer();

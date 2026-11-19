@@ -37,12 +37,12 @@ export interface StyleSheet {
  * color dan 33-60 de color y 0,16-0,58 de saturación; colorear, 0,1 y 0. El test de fichas corre
  * cada muestra contra su propio control.
  */
-const COLOR_STYLE_CHECK: ImageCheck = { minColorfulness: 15, maxSaturation: 0.62 };
+const COLOR_STYLE_CHECK: ImageCheck = { minColorfulness: 15, maxSaturation: 0.6 };
 
 const COLORING_CHECK: ImageCheck = { maxColorfulness: 15, grayscale: true };
 
 /** Tapa del libro para colorear: a color (DECISIONS 283). */
-export const COLORING_COVER_CHECK: ImageCheck = { minColorfulness: 15, maxSaturation: 0.75 };
+export const COLORING_COVER_CHECK: ImageCheck = { minColorfulness: 15, maxSaturation: 0.65 };
 
 const KEEP_IDENTITY =
   'From the photo and the reference images take only identity (face, hair, skin tone, eyes, glasses, outfit) and, from this book’s own illustrations, the technique.';
@@ -54,7 +54,7 @@ export const STYLE_SHEETS: Record<string, StyleSheet> = {
     usesPalette: true,
     references: KEEP_IDENTITY,
     avoid: 'flat 2D drawing, visible brush strokes, uncanny realistic skin, cheap plastic toys',
-    check: { minColorfulness: 15, maxSaturation: 0.7 },
+    check: { minColorfulness: 15, maxSaturation: 0.6 },
   },
   // Direcciones de ilustración (DECISIONS 141): técnicas humanas y reconocibles, no "IA genérica".
   'lapices-de-colores': {
@@ -115,7 +115,7 @@ export const STYLE_SHEETS: Record<string, StyleSheet> = {
     usesPalette: true,
     references: KEEP_IDENTITY,
     avoid: 'soft painted storybook look, watercolor, panels or speech bubbles',
-    check: { minColorfulness: 15, maxSaturation: 0.7 },
+    check: { minColorfulness: 15, maxSaturation: 0.6 },
   },
   'gouache-editorial': {
     medium:
@@ -153,7 +153,7 @@ export function imageCheckFor(input: {
   }
   // Sin ficha (un estilo nuevo del admin o un pedido sin slug): solo el tope de lo chillón; un
   // estilo nuevo puede ser en blanco y negro a propósito.
-  return { maxSaturation: 0.7 };
+  return { maxSaturation: 0.6 };
 }
 
 /** Ficha por tipo de libro: cuánto detalle, qué composición y cuánto lugar para el texto. */
