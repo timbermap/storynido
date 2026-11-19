@@ -2014,6 +2014,7 @@
       },
       "read": "Read the story",
       "download": "Download the PDF",
+      "receipt": "Download receipt",
       "track": "Track shipment",
       "reorder": "Order again",
       "trackingNumber": "Tracking number: {number}",

@@ -20,6 +20,19 @@ export const orderStatusSchema = z.enum(ORDER_STATUSES);
 
 export type OrderStatus = z.infer<typeof orderStatusSchema>;
 
+/** Con un pago confirmado ya hay comprobante de compra. */
+export const RECEIPT_ORDER_STATUSES = [
+  'paid',
+  'generating',
+  'qa_failed',
+  'ready',
+  'sent_to_print',
+  'in_production',
+  'shipped',
+  'delivered',
+  'refunded',
+] as const satisfies readonly OrderStatus[];
+
 export const TERMINAL_ORDER_STATUSES = [
   'delivered',
   'refunded',
