@@ -2046,6 +2046,11 @@
         "slow": "Paid and nothing changed yet? Check your email: Gumroad sends the receipt right away. If more than 5 minutes have passed, <link>contact us</link> and we'll sort it out.",
         "confirming": "We're confirming your payment. In a few seconds this page updates by itself and your story starts being prepared.",
         "slowConfirming": "Paid and nothing changed yet? Check your email for the payment receipt. If it's been more than 5 minutes, <link>write to us</link> and we'll sort it out."
+      },
+      "declined": {
+        "title": "Your card was declined",
+        "text": "You were not charged. You can try again with another card or with PayPal.",
+        "retry": "Try another card"
       }
     },
     "reorderSubtitle": "You're ordering another printed copy of the same book, exactly as it turned out.",
@@ -2174,7 +2179,8 @@
       "confirming": "Done! We're confirming your payment. Your story starts in a few seconds.",
       "failed": "We couldn't load the payment here (an ad blocker sometimes blocks it). <link>Pay on PayPal's page</link> and you'll come back to StoryNido automatically.",
       "error": "PayPal couldn't process the payment. Try again or use another card.",
-      "close": "Close"
+      "close": "Close",
+      "declined": "Your card was declined. Choose another card or pay with PayPal."
     }
   },
   "Pro": {

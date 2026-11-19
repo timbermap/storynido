@@ -1,4 +1,9 @@
-import { ProviderError, WebhookSignatureError, type CheckoutRequest } from '@storynido/shared';
+import {
+  PaymentDeclinedError,
+  ProviderError,
+  WebhookSignatureError,
+  type CheckoutRequest,
+} from '@storynido/shared';
 import { describe, expect, it } from 'vitest';
 
 import { PaypalPaymentProvider, paypalMinor } from './payment';
@@ -280,6 +285,28 @@ describe('PaypalPaymentProvider.parseWebhook', () => {
     ).resolves.toMatchObject({ type: 'checkout.completed', paymentId: 'CAP-1' });
   });
 
+  it('tarjeta rechazada al cobrar: el aviso se acepta (no se reintenta) y no hay pago', async () => {
+    const { fetchImpl } = fakePaypal({
+      ...verified,
+      '/v2/checkout/orders/PP-ORDER-1': {
+        body: { id: 'PP-ORDER-1', status: 'APPROVED', purchase_units: [{}] },
+      },
+      '/v2/checkout/orders/PP-ORDER-1/capture': {
+        status: 422,
+        body: { name: 'UNPROCESSABLE_ENTITY', details: [{ issue: 'INSTRUMENT_DECLINED' }] },
+      },
+    });
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('CHECKOUT.ORDER.APPROVED', {
+          id: 'PP-ORDER-1',
+          purchase_units: [{ custom_id: 'ord_1' }],
+        }),
+        headers: signedHeaders,
+      }),
+    ).resolves.toMatchObject({ type: 'ignored' });
+  });
+
   it('captura pendiente (revisión de PayPal): todavía no es pago', async () => {
     const { fetchImpl } = fakePaypal({
       ...verified,
@@ -353,6 +380,21 @@ describe('PaypalPaymentProvider.parseWebhook', () => {
 });
 
 describe('PaypalPaymentProvider.confirm', () => {
+  it('tarjeta rechazada al cobrar: avisa que se rechazó, no es una falla del cobrador', async () => {
+    const { fetchImpl } = fakePaypal({
+      '/v2/checkout/orders/PP-ORDER-1': {
+        body: { id: 'PP-ORDER-1', status: 'APPROVED', purchase_units: [{}] },
+      },
+      '/v2/checkout/orders/PP-ORDER-1/capture': {
+        status: 422,
+        body: { name: 'UNPROCESSABLE_ENTITY', details: [{ issue: 'INSTRUMENT_DECLINED' }] },
+      },
+    });
+    await expect(provider(fetchImpl).confirm('PP-ORDER-1', 'ord_1')).rejects.toBeInstanceOf(
+      PaymentDeclinedError,
+    );
+  });
+
   it('aprobada en la página: la cobra y confirma el pago', async () => {
     const { fetchImpl } = fakePaypal({
       [ORDER_PATH]: { body: order('APPROVED') },

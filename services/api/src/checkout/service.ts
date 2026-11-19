@@ -4,6 +4,7 @@ import { signMockPaymentWebhook } from '@storynido/providers';
 import {
   COLLECTIONS,
   PRINT_FORMATS,
+  PaymentDeclinedError,
   WebhookSignatureError,
   addressProblems,
   assertOrderTransition,
@@ -1268,7 +1269,17 @@ export class CheckoutService {
     const payment = (snap.data() as OrderDoc | undefined)?.payment;
     const sessionId = payment?.checkoutSessionId;
     if (!provider.confirm || payment?.provider !== provider.id || !sessionId) return current;
-    const event = await provider.confirm(sessionId, orderId);
+    let event: PaymentEvent | null;
+    try {
+      event = await provider.confirm(sessionId, orderId);
+    } catch (error) {
+      // Tarjeta rechazada al cobrar: el comprador elige otra (no es un error nuestro).
+      if (error instanceof PaymentDeclinedError) {
+        this.log.warn({ event: 'payment_declined', orderId }, 'payment declined at capture');
+        throw new AppError(402, 'payment_declined', 'Tu tarjeta fue rechazada. Prueba con otra.');
+      }
+      throw error;
+    }
     if (event?.type === 'checkout.completed' && event.orderId === orderId) {
       await this.record(provider.id, event);
     }

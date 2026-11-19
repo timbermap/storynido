@@ -54,6 +54,8 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   const [busy, setBusy] = useState<string | null>(null);
   // «Ya pagué»: vuelve a consultar en el momento (reinicia la consulta periódica).
   const [checkNow, setCheckNow] = useState(0);
+  // El cobrador rechazó la tarjeta al cobrar: se ofrece volver a pagar con otra.
+  const [declined, setDeclined] = useState(false);
   const tKit = useTranslations('Checkout.kit');
   // Compra: cuando el pedido ya está pagado (una sola vez por pedido).
   const paidOrder = order && !UNPAID.has(order.status) ? order : null;
@@ -78,9 +80,13 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
     const load = async () => {
       try {
         const current = confirm
-          ? await api('confirmPayment', { params: { orderId } }).catch(() =>
-              api('order', { params: { orderId } }),
-            )
+          ? await api('confirmPayment', { params: { orderId } }).catch((caught: unknown) => {
+              // Tarjeta rechazada al cobrar: se avisa y se ofrece probar con otra (DECISIONS 293).
+              if (caught instanceof ApiError && caught.code === 'payment_declined') {
+                setDeclined(true);
+              }
+              return api('order', { params: { orderId } });
+            })
           : await api('order', { params: { orderId } });
         confirm = false;
         if (cancelled) return;
@@ -191,7 +197,22 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
             <OrderTimeline status={order.status} print={print} />
           </>
         )}
-        {order.status === 'pending_payment' && !order.canSimulatePayment && (
+        {order.status === 'pending_payment' && declined && (
+          <section
+            role="alert"
+            className="grid gap-3 rounded-2xl border border-destructive/40 bg-card p-5"
+          >
+            <h2 className="font-semibold">{t('declined.title')}</h2>
+            <p className="text-sm text-muted-foreground">{t('declined.text')}</p>
+            <Link
+              href={{ pathname: '/checkout/[bookId]', params: { bookId: order.bookId } }}
+              className={buttonVariants({ variant: 'default' })}
+            >
+              {t('declined.retry')}
+            </Link>
+          </section>
+        )}
+        {order.status === 'pending_payment' && !declined && !order.canSimulatePayment && (
           <AwaitingPayment
             orderId={order.orderId}
             onCheck={() => {
