@@ -84,6 +84,11 @@ const capturedOrderSchema = z.object({
     .default([]),
 });
 
+/** La primera captura de una orden (las nuestras tienen un solo ítem y una sola captura). */
+function firstCapture(order: z.infer<typeof capturedOrderSchema>) {
+  return order.purchase_units[0]?.payments?.captures?.[0] ?? null;
+}
+
 const refundResponseSchema = z.object({ id: z.string(), status: z.string() });
 
 const webhookSchema = z.object({
@@ -396,45 +401,43 @@ export class PaypalPaymentProvider implements PaymentProvider {
     };
   }
 
+  /** Lee la orden en PayPal: su estado y las capturas que tenga. */
+  private async readOrder(paypalOrderId: string): Promise<z.infer<typeof capturedOrderSchema>> {
+    const result = await this.call(`/v2/checkout/orders/${encodeURIComponent(paypalOrderId)}`, {
+      method: 'GET',
+    });
+    if (!result.ok) this.fail('leer la orden', result);
+    return capturedOrderSchema.parse(result.json);
+  }
+
   /**
-   * Captura una orden aprobada. Si ya estaba capturada (reintento del webhook), devuelve null: el
-   * evento PAYMENT.CAPTURE.COMPLETED confirma el pago igual.
+   * Cobra la orden solo si PayPal la tiene aprobada. Antes se lee su estado: si ya está cobrada
+   * (llegó antes el webhook o la vuelta a la página) se devuelve esa captura, y si todavía no está
+   * aprobada no se intenta. Así PayPal no registra errores 422 (ORDER_ALREADY_CAPTURED,
+   * ORDER_NOT_APPROVED) en el panel. La clave de idempotencia hace que dos cobros simultáneos
+   * reciban la misma captura; si igual llega un 422 por una carrera, se vuelve a leer la orden.
    */
   private async capture(paypalOrderId: string): Promise<z.infer<typeof captureSchema> | null> {
+    const current = await this.readOrder(paypalOrderId);
+    if (current.status === 'COMPLETED') return firstCapture(current);
+    if (current.status !== 'APPROVED') return null;
     const result = await this.call(
       `/v2/checkout/orders/${encodeURIComponent(paypalOrderId)}/capture`,
-      {
-        // Sin PayPal-Request-Id: un intento antes de aprobar (ORDER_NOT_APPROVED) no debe quedar
-        // guardado como respuesta del reintento. Cobrar dos veces no pasa: PayPal contesta
-        // ORDER_ALREADY_CAPTURED.
-        method: 'POST',
-      },
+      { method: 'POST', headers: { 'PayPal-Request-Id': `capture-${paypalOrderId}` } },
     );
-    if (
-      result.status === 422 &&
-      (result.text.includes('ORDER_ALREADY_CAPTURED') || result.text.includes('ORDER_NOT_APPROVED'))
-    ) {
-      return null;
+    if (result.status === 422 && result.text.includes('ORDER_ALREADY_CAPTURED')) {
+      return firstCapture(await this.readOrder(paypalOrderId));
     }
     if (!result.ok) this.fail('capturar el pago', result);
-    const order = capturedOrderSchema.parse(result.json);
-    return order.purchase_units[0]?.payments?.captures?.[0] ?? null;
+    return firstCapture(capturedOrderSchema.parse(result.json));
   }
 
   /**
    * El comprador aprobó en nuestra página (botones de PayPal): se cobra ya, sin esperar el webhook.
-   * Si ya estaba cobrada (llegó antes el webhook), se lee la captura de la orden.
+   * Si ya estaba cobrada (llegó antes el webhook), se usa la captura que tiene la orden.
    */
   async confirm(sessionId: string, orderId: string): Promise<PaymentEvent | null> {
-    let capture = await this.capture(sessionId);
-    if (!capture) {
-      const result = await this.call(`/v2/checkout/orders/${encodeURIComponent(sessionId)}`, {
-        method: 'GET',
-      });
-      if (!result.ok) this.fail('leer la orden', result);
-      const order = capturedOrderSchema.parse(result.json);
-      capture = order.purchase_units[0]?.payments?.captures?.[0] ?? null;
-    }
+    const capture = await this.capture(sessionId);
     if (capture?.status !== 'COMPLETED') return null;
     return this.completed(`confirm-${capture.id}`, orderId, sessionId, capture);
   }

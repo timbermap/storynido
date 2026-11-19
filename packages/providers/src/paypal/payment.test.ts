@@ -11,7 +11,13 @@ interface Call {
 }
 
 /** Simula la API de PayPal: cada ruta responde lo que se le indique. */
-function fakePaypal(routes: Record<string, { status?: number; body: unknown }>) {
+interface Route {
+  status?: number;
+  body: unknown;
+}
+
+/** Cada ruta responde siempre lo mismo, o una lista en orden (la última se repite). */
+function fakePaypal(routes: Record<string, Route | Route[]>) {
   const calls: Call[] = [];
   const fetchImpl = ((url: string, init?: RequestInit) => {
     calls.push({ url, init });
@@ -21,7 +27,8 @@ function fakePaypal(routes: Record<string, { status?: number; body: unknown }>) 
         new Response(JSON.stringify({ access_token: 'tok', expires_in: 32400 }), { status: 200 }),
       );
     }
-    const route = routes[path];
+    const entry = routes[path];
+    const route = Array.isArray(entry) ? (entry.length > 1 ? entry.shift() : entry[0]) : entry;
     if (!route) return Promise.resolve(new Response('not found', { status: 404 }));
     return Promise.resolve(
       new Response(JSON.stringify(route.body), { status: route.status ?? 200 }),
@@ -31,6 +38,14 @@ function fakePaypal(routes: Record<string, { status?: number; body: unknown }>) 
 }
 
 /** Cuerpo enviado (siempre texto JSON en este proveedor). */
+const order = (status: string, captures: unknown[] = []) => ({
+  id: 'PP-ORDER-1',
+  status,
+  purchase_units: [{ payments: { captures } }],
+});
+const ORDER_PATH = '/v2/checkout/orders/PP-ORDER-1';
+const CAPTURE_PATH = '/v2/checkout/orders/PP-ORDER-1/capture';
+
 const bodyOf = (call: Call | undefined): string =>
   typeof call?.init?.body === 'string' ? call.init.body : '';
 
@@ -207,14 +222,8 @@ describe('PaypalPaymentProvider.parseWebhook', () => {
   it('orden aprobada: la captura y confirma el pago', async () => {
     const { calls, fetchImpl } = fakePaypal({
       ...verified,
-      '/v2/checkout/orders/PP-ORDER-1/capture': {
-        status: 201,
-        body: {
-          id: 'PP-ORDER-1',
-          status: 'COMPLETED',
-          purchase_units: [{ payments: { captures: [capture()] } }],
-        },
-      },
+      [ORDER_PATH]: { body: order('APPROVED') },
+      [CAPTURE_PATH]: { status: 201, body: order('COMPLETED', [capture()]) },
     });
     const result = await provider(fetchImpl).parseWebhook({
       rawBody: event('CHECKOUT.ORDER.APPROVED', {
@@ -231,19 +240,16 @@ describe('PaypalPaymentProvider.parseWebhook', () => {
       amountMinor: 1599,
     });
     const captureCall = calls.find((call) => call.url.endsWith('/capture'));
-    // Sin clave de idempotencia: un intento antes de aprobar no debe quedar guardado.
-    expect(
-      (captureCall?.init?.headers as Record<string, string>)['PayPal-Request-Id'],
-    ).toBeUndefined();
+    // Solo se cobra una orden aprobada, así que la clave de idempotencia es segura.
+    expect((captureCall?.init?.headers as Record<string, string>)['PayPal-Request-Id']).toBe(
+      'capture-PP-ORDER-1',
+    );
   });
 
-  it('orden ya capturada: se ignora (la confirma el evento de la captura)', async () => {
-    const { fetchImpl } = fakePaypal({
+  it('orden ya cobrada: usa su captura sin volver a cobrar (sin 422 en PayPal)', async () => {
+    const { calls, fetchImpl } = fakePaypal({
       ...verified,
-      '/v2/checkout/orders/PP-ORDER-1/capture': {
-        status: 422,
-        body: { name: 'UNPROCESSABLE_ENTITY', details: [{ issue: 'ORDER_ALREADY_CAPTURED' }] },
-      },
+      [ORDER_PATH]: { body: order('COMPLETED', [capture()]) },
     });
     await expect(
       provider(fetchImpl).parseWebhook({
@@ -253,19 +259,34 @@ describe('PaypalPaymentProvider.parseWebhook', () => {
         }),
         headers: signedHeaders,
       }),
-    ).resolves.toMatchObject({ type: 'ignored' });
+    ).resolves.toMatchObject({ type: 'checkout.completed', paymentId: 'CAP-1' });
+    expect(calls.some((call) => call.url.endsWith('/capture'))).toBe(false);
+  });
+
+  it('carrera: si otro cobro ganó (422), lee la captura de la orden', async () => {
+    const { fetchImpl } = fakePaypal({
+      ...verified,
+      [ORDER_PATH]: [{ body: order('APPROVED') }, { body: order('COMPLETED', [capture()]) }],
+      [CAPTURE_PATH]: { status: 422, body: { details: [{ issue: 'ORDER_ALREADY_CAPTURED' }] } },
+    });
+    await expect(
+      provider(fetchImpl).parseWebhook({
+        rawBody: event('CHECKOUT.ORDER.APPROVED', {
+          id: 'PP-ORDER-1',
+          purchase_units: [{ custom_id: 'ord_1' }],
+        }),
+        headers: signedHeaders,
+      }),
+    ).resolves.toMatchObject({ type: 'checkout.completed', paymentId: 'CAP-1' });
   });
 
   it('captura pendiente (revisión de PayPal): todavía no es pago', async () => {
     const { fetchImpl } = fakePaypal({
       ...verified,
-      '/v2/checkout/orders/PP-ORDER-1/capture': {
+      [ORDER_PATH]: { body: order('APPROVED') },
+      [CAPTURE_PATH]: {
         status: 201,
-        body: {
-          id: 'PP-ORDER-1',
-          status: 'COMPLETED',
-          purchase_units: [{ payments: { captures: [capture({ status: 'PENDING' })] } }],
-        },
+        body: order('COMPLETED', [capture({ status: 'PENDING' })]),
       },
     });
     await expect(
@@ -334,14 +355,8 @@ describe('PaypalPaymentProvider.parseWebhook', () => {
 describe('PaypalPaymentProvider.confirm', () => {
   it('aprobada en la página: la cobra y confirma el pago', async () => {
     const { fetchImpl } = fakePaypal({
-      '/v2/checkout/orders/PP-ORDER-1/capture': {
-        status: 201,
-        body: {
-          id: 'PP-ORDER-1',
-          status: 'COMPLETED',
-          purchase_units: [{ payments: { captures: [capture()] } }],
-        },
-      },
+      [ORDER_PATH]: { body: order('APPROVED') },
+      [CAPTURE_PATH]: { status: 201, body: order('COMPLETED', [capture()]) },
     });
     await expect(provider(fetchImpl).confirm('PP-ORDER-1', 'ord_1')).resolves.toMatchObject({
       type: 'checkout.completed',
@@ -353,37 +368,23 @@ describe('PaypalPaymentProvider.confirm', () => {
     });
   });
 
-  it('ya cobrada por el webhook: lee la captura de la orden', async () => {
-    const { fetchImpl } = fakePaypal({
-      '/v2/checkout/orders/PP-ORDER-1/capture': {
-        status: 422,
-        body: { details: [{ issue: 'ORDER_ALREADY_CAPTURED' }] },
-      },
-      '/v2/checkout/orders/PP-ORDER-1': {
-        body: {
-          id: 'PP-ORDER-1',
-          status: 'COMPLETED',
-          purchase_units: [{ payments: { captures: [capture()] } }],
-        },
-      },
+  it('ya cobrada por el webhook: usa la captura de la orden sin volver a cobrar', async () => {
+    const { calls, fetchImpl } = fakePaypal({
+      [ORDER_PATH]: { body: order('COMPLETED', [capture()]) },
     });
     await expect(provider(fetchImpl).confirm('PP-ORDER-1', 'ord_1')).resolves.toMatchObject({
       type: 'checkout.completed',
       paymentId: 'CAP-1',
     });
+    expect(calls.some((call) => call.url.endsWith('/capture'))).toBe(false);
   });
 
-  it('todavía sin aprobar: no hay nada que confirmar', async () => {
-    const { fetchImpl } = fakePaypal({
-      '/v2/checkout/orders/PP-ORDER-1/capture': {
-        status: 422,
-        body: { details: [{ issue: 'ORDER_NOT_APPROVED' }] },
-      },
-      '/v2/checkout/orders/PP-ORDER-1': {
-        body: { id: 'PP-ORDER-1', status: 'CREATED', purchase_units: [{}] },
-      },
+  it('todavía sin aprobar: no intenta cobrar (sin 422 en PayPal)', async () => {
+    const { calls, fetchImpl } = fakePaypal({
+      [ORDER_PATH]: { body: order('CREATED') },
     });
     await expect(provider(fetchImpl).confirm('PP-ORDER-1', 'ord_1')).resolves.toBeNull();
+    expect(calls.some((call) => call.url.endsWith('/capture'))).toBe(false);
   });
 });
 
