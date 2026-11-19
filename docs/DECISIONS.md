@@ -3041,6 +3041,7 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Tests:** `packages/providers/src/paypal/payment.test.ts` (orden ya cobrada sin llamada a `/capture`, sin aprobar sin llamada a `/capture`, carrera con 422).
 
 ## 291 — Colores suaves en todos los estilos y tipos; título sin tapar la cara
+
 - **Fecha:** 2026-11-19. Pedido por Sebas con el libro de Luli (Para colorear): colores chillones (verde lima, azul y rojo puros) y el título tapaba la cara en la tapa.
 - **Causa:** la regla de pintura de la tapa de colorear (DECISIONS 285) pedía «bright, cheerful flat colors» y su tope de saturación era 0,75; los demás estilos solo recibían la paleta suave en la dirección de arte, sin una regla al final del pedido ni un tope bajo. La franja del título se pedía en «el tercio de arriba», pero título y subtítulo ocupan cerca del 40%.
 - **Decisión:** `SOFT_COLOR_RULE` va al final de todo pedido a color (cualquier estilo y tipo de libro); la tapa de colorear se pinta con colores suaves y apagados, tope 0,5; topes de las fichas 0,7/0,62 → 0,6 (las muestras aprobadas llegan a 0,58). La zona del título pasa a ser el 40% de arriba, también en el control `title_zone` y en el segundo paso de la tapa.

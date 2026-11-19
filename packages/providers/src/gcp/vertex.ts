@@ -56,7 +56,7 @@ export const COLORING_COVER_RULE =
 
 /** Tapa (DECISIONS 283): el título va arriba, en su franja; nada importante debajo. */
 export const COVER_TITLE_RULE =
-  'COVER LAYOUT: the title (and subtitle) is printed over the top 40% of the image. Keep that top 40% as plain, calm background (sky, wall, soft color) with nothing important: no head, face, hair or hands in it; the whole head and face of the main character sit below that line, in the lower 60%.'
+  'COVER LAYOUT: the title (and subtitle) is printed over the top 40% of the image. Keep that top 40% as plain, calm background (sky, wall, soft color) with nothing important: no head, face, hair or hands in it; the whole head and face of the main character sit below that line, in the lower 60%.';
 
 /** Todas las ilustraciones a color (Sebas, 19 nov 2026): paleta suave en cualquier estilo y tipo de libro. */
 export const SOFT_COLOR_RULE =
