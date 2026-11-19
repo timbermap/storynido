@@ -33,11 +33,11 @@ import {
   type StoryRequest,
   type StoryReview,
   STORY_STRUCTURES,
-  isColoringStyle,
+  imageCheckFor,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
 
-import { COLORING_MAX_COLORFULNESS, colorfulness, toColoringPage } from '../images';
+import { failedCheck, toColoringPage } from '../images';
 
 /**
  * Página para colorear (Lu, 19 nov 2026): la foto, la ropa con colores de la ficha y la «luz
@@ -46,9 +46,6 @@ import { COLORING_MAX_COLORFULNESS, colorfulness, toColoringPage } from '../imag
  */
 export const COLORING_PAGE_RULE =
   'COLORING PAGE: pure black outlines on plain white paper, like a printed coloring book. No color at all, no gray, no shading, no filled or painted areas, no colored background. Colors named in the scene or for the character (hair, skin, clothes, objects) are NOT painted: they are only shapes and patterns left white for the child to color. Ignore the colors and the lighting of the photo and of the reference images; keep only their shapes.';
-
-const COLORING_RETRY_HINT =
-  'The previous attempt was painted in color. This time draw ONLY black line art on white: zero color, zero gray.';
 
 /**
  * Precios de lista estimados en USD por millón de tokens (revisar en la consola de Vertex).
@@ -1163,7 +1160,13 @@ export class VertexImageProvider implements AIImageProvider {
         `${label(next, request.references.length)} reference illustrations from this same book. Keep the main character identical to them (face, hair, age, proportions, outfit) and match their art style exactly (technique, line, texture and colors). Draw a completely NEW scene as described above: do not copy their composition, background, objects or pose.`,
       );
     }
-    const coloring = request.coloring ?? isColoringStyle(request.stylePrompt);
+    // La ficha del estilo trae su control (DECISIONS 282); colorear también tiene su regla final.
+    const check = imageCheckFor({
+      style: request.style,
+      stylePrompt: request.stylePrompt,
+      coloring: request.coloring,
+    });
+    const coloring = check.grayscale === true;
     const instructions = `Scene to draw: ${request.prompt}
 
 Art style: ${request.stylePrompt}
@@ -1173,13 +1176,10 @@ Children's picture book illustration, drawn only in the art style above. No text
     parts.push({ text: instructions });
 
     let lastUsage: AiUsage[] = [];
-    let painted: GeneratedImage | null = null;
-    // Un reintento si el modelo no devuelve imagen (p. ej. respondió solo texto) o, en un libro
-    // para colorear, si la devolvió pintada.
+    let offStyle: GeneratedImage | null = null;
+    // Un reintento si el modelo no devuelve imagen (p. ej. respondió solo texto) o si la imagen no
+    // pasa el control de la ficha del estilo (en colorear: si vino pintada).
     for (let attempt = 1; attempt <= 2; attempt += 1) {
-      if (attempt === 2 && painted) {
-        parts[parts.length - 1] = { text: `${instructions}\n${COLORING_RETRY_HINT}` };
-      }
       const { response, usage } = await this.client.generate(model, parts, {
         responseModalities: ['IMAGE'],
         imageConfig: { aspectRatio: request.aspectRatio, imageSize: request.resolution ?? '1K' },
@@ -1198,28 +1198,34 @@ Children's picture book illustration, drawn only in the art style above. No text
       )?.inlineData;
       if (inline) {
         const bytes = new Uint8Array(Buffer.from(inline.data, 'base64'));
-        if (!coloring) {
-          return { bytes, mimeType: inline.mimeType, usage: sumUsage(model, ...lastUsage) };
-        }
-        // Para colorear: si vino pintada se pide una vez más; la que quede se pasa a blanco y
-        // negro, así nunca llega una página a color.
-        const page = {
-          bytes: await toColoringPage(bytes),
-          mimeType: 'image/png',
-          usage: sumUsage(model, ...lastUsage),
-        };
-        if (attempt === 1 && (await colorfulness(bytes)) > COLORING_MAX_COLORFULNESS) {
-          painted = page;
+        const failure = await failedCheck(bytes, check);
+        // Colorear: la que quede se pasa a blanco y negro, así nunca llega una página a color.
+        const image = coloring
+          ? { bytes: await toColoringPage(bytes), mimeType: 'image/png' }
+          : { bytes, mimeType: inline.mimeType };
+        const result = { ...image, usage: sumUsage(model, ...lastUsage) };
+        if (attempt === 1 && failure) {
+          offStyle = result;
+          parts[parts.length - 1] = { text: `${instructions}\n${failure}` };
           continue;
         }
-        return page;
+        return result;
       }
     }
-    if (painted) return { ...painted, usage: sumUsage(model, ...lastUsage) };
+    // Si el segundo intento no devolvió imagen, queda la primera (ya en blanco y negro si es colorear).
+    if (offStyle) return { ...offStyle, usage: sumUsage(model, ...lastUsage) };
     throw new ProviderError('vertex', 'El modelo no devolvió ninguna imagen', true);
   }
 
-  async moderateImage(image: ImageData): Promise<ModerationResult> {
+  async moderateImage(
+    image: ImageData,
+    options: { style?: string | null } = {},
+  ): Promise<ModerationResult> {
+    // La técnica de la ficha del estilo (DECISIONS 282): solo se rechaza una técnica claramente
+    // distinta, no matices; va en la misma llamada, sin costo extra.
+    const style = options.style?.trim()
+      ? `\nThe chosen art style is: ${options.style.trim()}. Reject it (category "style") only if it is CLEARLY made in a different technique (for example a 3D render, a photo or a color painting when the style is a watercolor or a black and white coloring page); small variations of the same technique are fine.`
+      : '';
     return moderate(this.client, [
       imagePart(image),
       {
@@ -1227,7 +1233,7 @@ Children's picture book illustration, drawn only in the art style above. No text
 
 The image above is an illustration for the book. Also reject it (category "text") if it shows any
 readable words, letters or numbers (signs, labels, captions): the book's text is added separately.
-Reject it (category "deformed") if faces or hands are clearly malformed.`,
+Reject it (category "deformed") if faces or hands are clearly malformed.${style}`,
       },
     ]);
   }

@@ -69,6 +69,7 @@ import {
   acceptsChildPhotos,
   aiModelSchema,
   type PreviewFeedbackReason,
+  mediumFor,
 } from '@storynido/shared';
 import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
@@ -1033,6 +1034,7 @@ export class PreviewService {
       coloring: plan.contentType === 'coloring',
       style: style.slug,
       stylePrompt: style.promptModifier,
+      contentType: plan.contentType,
     });
 
     // El dibujo que el adulto aprobó en el perfil del personaje es la referencia de sus rasgos.
@@ -1099,6 +1101,7 @@ export class PreviewService {
                 direction,
               }),
               stylePrompt: style.promptModifier,
+              style: style.slug,
               character: { description, photo },
               references: [],
               traitReferences:
@@ -1267,7 +1270,13 @@ export class PreviewService {
           throw error;
         }
       },
-      async ({ image }) => track('moderation', await ai.image.moderateImage(image)),
+      async ({ image }) =>
+        track(
+          'moderation',
+          await ai.image.moderateImage(image, {
+            style: mediumFor({ style: request.style, stylePrompt: request.stylePrompt }),
+          }),
+        ),
       // Tres intentos: una página que falla el control no tiene que tirar toda la muestra.
       3,
     );
@@ -1483,6 +1492,7 @@ export class PreviewService {
                   direction: withCurrentGuards(preview.artDirection),
                 }),
                 stylePrompt: style.promptModifier,
+                style: style.slug,
                 character: { description: companionPlan.look, photo: null },
                 references: [lamina],
                 aspectRatio: '3:4',
@@ -1512,6 +1522,7 @@ export class PreviewService {
                   direction: withCurrentGuards(preview.artDirection),
                 }),
                 stylePrompt: style.promptModifier,
+                style: style.slug,
                 character: { description: castMemberSheet(castMember).look, photo: null },
                 references: [lamina],
                 aspectRatio: '3:4',
@@ -1532,6 +1543,7 @@ export class PreviewService {
             direction: withCurrentGuards(preview.artDirection),
           }),
           stylePrompt: style.promptModifier,
+          style: style.slug,
           character: { description, photo },
           references: [
             lamina,
@@ -1735,6 +1747,7 @@ export class PreviewService {
           direction: withCurrentGuards(preview.artDirection),
         }),
         stylePrompt: style.promptModifier,
+        style: style.slug,
         character: { description, photo },
         references: [],
         aspectRatio: '3:4',
@@ -1932,6 +1945,7 @@ export class PreviewService {
           direction: Number.isFinite(age) ? ageDirection(age) : null,
         }),
         stylePrompt: style.promptModifier,
+        style: style.slug,
         character: { description, photo },
         references: [],
         aspectRatio: '3:4',
@@ -2258,6 +2272,7 @@ export class PreviewService {
           direction: withCurrentGuards(preview.artDirection),
         }),
         stylePrompt: style.promptModifier,
+        style: style.slug,
         character: { description, photo },
         references: companionImage ? [reference, companionImage] : [reference],
         aspectRatio: '3:4',

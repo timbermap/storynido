@@ -2952,3 +2952,13 @@ Sebas, 18 nov 2026 («2 ok»): medir qué estilo eligen y cuál compran, para de
 - **Causa:** el pedido de imagen mezcla el estilo con la foto y la lámina a color, la ropa con colores de la ficha y la «luz cálida» de la plantilla; solo una frase defendía los contornos y nada revisaba el resultado.
 - **Regla:** cuando el estilo es el de colorear (o el pedido lo marca con `coloring`), el proveedor suma al final una regla de página para colorear (los colores nombrados son solo formas; se ignoran los colores de la foto y de las referencias). Si la imagen vuelve con color (colorfulness > 15), se pide una vez más; la que quede se pasa siempre a blanco y negro con fondo blanco limpio. Así nunca llega una página a color.
 - **Siguiente paso:** fichas por estilo y por tipo de libro, con un control automático propio de cada estilo (elegido por Sebas el mismo día).
+
+## 282 — Fichas de ilustración por estilo y por tipo de libro, con control automático
+
+- **Fecha:** 2026-11-19. Pedido por Sebas («Colorear ya + fichas para todos»), después de la página pintada del libro para colorear de Lu (DECISIONS 281): lo mismo podía pasar con cualquier estilo.
+- **Mesa:** no hacen falta skills de ilustradores para la generación (las imágenes las hace Gemini dentro del producto y un skill de Claude no llega ahí). Lo que sirve son fichas como datos en el código, combinadas en vez de escribir cada combinación.
+- **Fichas de estilo** (`packages/shared/src/models/style-sheets.ts`, una por cada uno de los 9 estilos): técnica, si usa la paleta de la historia, qué se toma de la foto y de las referencias, qué nunca hace y su control automático. La ficha manda sobre las reglas generales: colorear no tiene paleta y, para 0-2 años, la edad tampoco habla de colores.
+- **Fichas de tipo de libro** (cuento, cuento con actividades, actividades, colorear): cuánto detalle y qué composición. Los bebés siguen en la dirección por edad.
+- **Control automático de cada imagen**, en el proveedor (cubre muestra, pedido y scripts): píxeles (color mínimo para los estilos a color, color máximo para colorear, tope de saturación) y, en la misma llamada de moderación, rechazo si la técnica es claramente otra (categoría «style»). Si falla se pide una vez más con el motivo; la que quede se usa (colorear siempre en blanco y negro).
+- **Calibración y set fijo de pruebas:** los topes salen de las muestras aprobadas de cada estilo (estilos a color 33-60 de color y 0,16-0,58 de saturación; colorear 0,1). `style-checks.test.ts` corre cada muestra contra su ficha; `art-direction.test.ts` combina cada estilo con cada tipo de libro.
+- **Pendiente:** medir en el admin cuántas imágenes reintenta el control por estilo, para ajustar topes.
