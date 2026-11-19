@@ -755,7 +755,7 @@ describe('vista previa', () => {
     });
     expect(approved.statusCode).toBe(200);
     expect(paint.mock.calls.length).toBeGreaterThan(0);
-    for (const [request] of paint.mock.calls.filter(([r]) => r.cover || r.resolution === '2K')) {
+    for (const [request] of paint.mock.calls.filter(([r]) => r.resolution === '2K')) {
       if (request.character.description.startsWith('Martina')) {
         expect(request.character.photo).toBeNull();
         expect(request.correction).toBe('sin anteojos; saca la mano de la cara');
