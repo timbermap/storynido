@@ -98,6 +98,14 @@ export interface StoryPromptInput {
   plan?: Omit<StoryPlan, 'usage'> | null;
   /** Edades para las que se escribió la historia del catálogo (si el protagonista no entra, se adapta). */
   storyAges?: { min: number; max: number } | null;
+  /**
+   * La idea de la historia del catálogo (su resumen, en el idioma del libro): es lo que el adulto
+   * eligió y lo que promete la ficha. Sin esto, la IA solo veía el título y los gustos del chico
+   * («Buenas noches» con «gimnasia» salió un cuento de acrobacias en la cama).
+   */
+  premise?: string | null;
+  /** Cuento para dormir (etiqueta «dormir»): la energía baja y termina en la cama. */
+  bedtime?: boolean;
 }
 
 /**
@@ -147,6 +155,15 @@ export function buildStoryPrompt(input: StoryPromptInput): string {
     bestFriendName: input.bestFriendName,
     lessons: lessonsBlock(input.lessons),
   });
+  const premise = input.premise?.trim();
+  const premiseSection = premise
+    ? `
+
+Idea de esta historia (es lo que el adulto eligió en el catálogo y lo que le prometimos: respétala de
+principio a fin). Los gustos del protagonista se suman como detalles, nunca cambian la idea ni el
+tipo de cuento:
+${premise}`
+    : '';
   const memories = memoriesBlock(input.memories);
   const memoriesSection = memories
     ? `
@@ -207,7 +224,7 @@ ${input.plan.promises
           : ''
       }`
     : '';
-  return `${body}${memoriesSection}${eventSection}${goalSection}${planSection}
+  return `${body}${premiseSection}${memoriesSection}${eventSection}${goalSection}${planSection}
 
 Reglas obligatorias:
 - Escribe en ${language}.
@@ -296,14 +313,17 @@ export function formRules(age: number): string[] {
  * Las de cada público salen del pedido: eventos traen la fiesta; profesionales, el objetivo.
  */
 export function narrativeRules(
-  input: Pick<StoryPromptInput, 'childName' | 'event' | 'goal'> & { age?: number },
+  input: Pick<StoryPromptInput, 'childName' | 'event' | 'goal' | 'bedtime'> & { age?: number },
 ) {
   const rules = [
     `- ${input.childName} decide y resuelve: no mira la aventura, la protagoniza.`,
     '- La primera página tiene un gancho que invita a dar vuelta la hoja.',
-    '- Un objetivo claro y un desafío real para su edad, con un momento visual memorable.',
+    input.bedtime
+      ? '- Es un cuento para leer antes de dormir: la energía baja página a página; la segunda mitad es tranquila (rutina, abrazos, cosas que también se van a dormir) y la última página termina en la cama, en calma. Si hay un desafío, es pequeño y suave; nada de saltos, carreras ni acrobacias en la segunda mitad.'
+      : '- Un objetivo claro y un desafío real para su edad, con un momento visual memorable.',
     '- El final cierra con calidez y deja ganas de releerlo.',
-    '- Cada objeto o lugar importante se llama siempre igual y es el mismo en todas las páginas: una sola metáfora central, no varias.',
+    '- Cada objeto o lugar importante se llama siempre igual y es el mismo en todas las páginas: una sola metáfora central, no varias. Lo mismo con lo que lleva el protagonista: si son anteojos, siempre «anteojos» (o «glasses»), sin sinónimos para no repetir.',
+    '- El protagonista nunca hace como algo bueno lo que un chico podría imitar y lastimarse (saltar en la cama para alcanzar algo, trepar muebles o estantes, hacer la vertical contra la pared sin un adulto). Si el cuento lo muestra, es para que un adulto ayude o para buscar otra forma.',
   ];
   // Un primer añito o un bautizo es de un bebé: sin misión ni desafíos, la celebración es el cierre.
   const baby =

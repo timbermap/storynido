@@ -807,6 +807,9 @@ export class PreviewService {
       template: story.textPromptTemplate,
       // Historia de otra edad (Buenas noches, de 0 a 2, para una nena de 5): se adapta.
       storyAges: { min: story.ageMin, max: story.ageMax },
+      // La idea de la ficha manda sobre los gustos del chico (DECISIONS 277).
+      premise: story.summary[book.language] || null,
+      bedtime: story.tags.includes('dormir'),
       memories,
       event,
       goal,
@@ -821,11 +824,20 @@ export class PreviewService {
     });
     await track('story', { usage: planUsage });
     // Páginas sin texto (3 a 6 años, 1 o 2 en el clímax): se sanean y quedan en el plan.
-    const wordless = readerAge === null ? [] : wordlessPages(plannedStory.scenes, readerAge);
+    // Nunca en el libro mini (10 páginas: una página muda parece un error) ni en los cuentos para
+    // dormir, que se leen de corrido en voz baja (Sebas, DECISIONS 278).
+    const allowWordless = book.length !== 'mini' && !story.tags.includes('dormir');
+    const wordless =
+      readerAge === null || !allowWordless ? [] : wordlessPages(plannedStory.scenes, readerAge);
     const storyPlan = {
       ...plannedStory,
       scenes: plannedStory.scenes.map((scene) => ({
         ...scene,
+        // Una escena que el planificador dejó muda y acá lleva texto recupera su presupuesto.
+        wordBudget:
+          scene.wordless && !wordless.includes(scene.pageIndex) && scene.wordBudget <= 0
+            ? plan.words.min
+            : scene.wordBudget,
         wordless: wordless.includes(scene.pageIndex),
       })),
     };

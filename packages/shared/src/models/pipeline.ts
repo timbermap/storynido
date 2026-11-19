@@ -133,6 +133,8 @@ export const adminAlertSchema = z.object({
   message: z.string(),
   createdAt: z.date(),
   resolvedAt: z.date().nullable(),
+  /** 'system' cuando se cerró solo porque el pedido terminó bien. */
+  resolvedBy: z.string().optional(),
 });
 
 export type AdminAlert = z.infer<typeof adminAlertSchema>;
