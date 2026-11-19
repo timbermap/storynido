@@ -33,8 +33,22 @@ import {
   type StoryRequest,
   type StoryReview,
   STORY_STRUCTURES,
+  isColoringStyle,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
+
+import { COLORING_MAX_COLORFULNESS, colorfulness, toColoringPage } from '../images';
+
+/**
+ * Página para colorear (Lu, 19 nov 2026): la foto, la ropa con colores de la ficha y la «luz
+ * cálida» de la plantilla empujaban al modelo a pintar. Esta nota va al final, que es lo que más
+ * pesa, y los colores nombrados pasan a ser solo formas.
+ */
+export const COLORING_PAGE_RULE =
+  'COLORING PAGE: pure black outlines on plain white paper, like a printed coloring book. No color at all, no gray, no shading, no filled or painted areas, no colored background. Colors named in the scene or for the character (hair, skin, clothes, objects) are NOT painted: they are only shapes and patterns left white for the child to color. Ignore the colors and the lighting of the photo and of the reference images; keep only their shapes.';
+
+const COLORING_RETRY_HINT =
+  'The previous attempt was painted in color. This time draw ONLY black line art on white: zero color, zero gray.';
 
 /**
  * Precios de lista estimados en USD por millón de tokens (revisar en la consola de Vertex).
@@ -1149,18 +1163,23 @@ export class VertexImageProvider implements AIImageProvider {
         `${label(next, request.references.length)} reference illustrations from this same book. Keep the main character identical to them (face, hair, age, proportions, outfit) and match their art style exactly (technique, line, texture and colors). Draw a completely NEW scene as described above: do not copy their composition, background, objects or pose.`,
       );
     }
-    parts.push({
-      text: `Scene to draw: ${request.prompt}
+    const coloring = request.coloring ?? isColoringStyle(request.stylePrompt);
+    const instructions = `Scene to draw: ${request.prompt}
 
 Art style: ${request.stylePrompt}
 Main character: ${request.character.description}
 ${notes.join('\n')}
-Children's picture book illustration, drawn only in the art style above. No text, letters, numbers, logos or watermarks anywhere: book spines and covers, posters, signs, labels and clothing stay blank.`,
-    });
+Children's picture book illustration, drawn only in the art style above. No text, letters, numbers, logos or watermarks anywhere: book spines and covers, posters, signs, labels and clothing stay blank.${coloring ? `\n${COLORING_PAGE_RULE}` : ''}`;
+    parts.push({ text: instructions });
 
     let lastUsage: AiUsage[] = [];
-    // Un reintento si el modelo no devuelve imagen (p. ej. respondió solo texto).
+    let painted: GeneratedImage | null = null;
+    // Un reintento si el modelo no devuelve imagen (p. ej. respondió solo texto) o, en un libro
+    // para colorear, si la devolvió pintada.
     for (let attempt = 1; attempt <= 2; attempt += 1) {
+      if (attempt === 2 && painted) {
+        parts[parts.length - 1] = { text: `${instructions}\n${COLORING_RETRY_HINT}` };
+      }
       const { response, usage } = await this.client.generate(model, parts, {
         responseModalities: ['IMAGE'],
         imageConfig: { aspectRatio: request.aspectRatio, imageSize: request.resolution ?? '1K' },
@@ -1178,13 +1197,25 @@ Children's picture book illustration, drawn only in the art style above. No text
         (part) => part.inlineData,
       )?.inlineData;
       if (inline) {
-        return {
-          bytes: new Uint8Array(Buffer.from(inline.data, 'base64')),
-          mimeType: inline.mimeType,
+        const bytes = new Uint8Array(Buffer.from(inline.data, 'base64'));
+        if (!coloring) {
+          return { bytes, mimeType: inline.mimeType, usage: sumUsage(model, ...lastUsage) };
+        }
+        // Para colorear: si vino pintada se pide una vez más; la que quede se pasa a blanco y
+        // negro, así nunca llega una página a color.
+        const page = {
+          bytes: await toColoringPage(bytes),
+          mimeType: 'image/png',
           usage: sumUsage(model, ...lastUsage),
         };
+        if (attempt === 1 && (await colorfulness(bytes)) > COLORING_MAX_COLORFULNESS) {
+          painted = page;
+          continue;
+        }
+        return page;
       }
     }
+    if (painted) return { ...painted, usage: sumUsage(model, ...lastUsage) };
     throw new ProviderError('vertex', 'El modelo no devolvió ninguna imagen', true);
   }
 

@@ -185,7 +185,16 @@ export interface IllustrationRequest {
   resolution?: '1K' | '2K';
   /** Semilla para reproducibilidad, si el proveedor la soporta. */
   seed: number | null;
+  /**
+   * Libro para colorear: la imagen sale en blanco y negro, solo contornos. Si no se pasa, se deduce
+   * del estilo («coloring book line art»), así ningún llamador se olvida.
+   */
+  coloring?: boolean;
 }
+
+/** El estilo es el de los libros para colorear (contornos en blanco y negro). */
+export const isColoringStyle = (stylePrompt: string | null | undefined): boolean =>
+  /coloring (book|page) line art/i.test(stylePrompt ?? '');
 
 export interface GeneratedImage extends ImageData {
   usage: AiUsage;
