@@ -5,12 +5,23 @@ import {
   STORY_PALETTES,
   ageDirection,
   artDirection,
+  characterSheetDirection,
   mediumFor,
   withCurrentGuards,
 } from './art-direction';
 import { STYLE_SHEETS, bookTypeSheet, imageCheckFor } from './style-sheets';
 
 describe('dirección de arte de los libros', () => {
+  it('la lámina del personaje no lleva reglas de composición de página', () => {
+    const page = artDirection({ age: 7, channel: 'families' });
+    expect(page).toContain('the text is printed over one third');
+    const sheet = characterSheetDirection(page) ?? '';
+    expect(sheet).not.toContain('the text is printed over one third');
+    expect(sheet).not.toContain('wide establishing shot');
+    expect(sheet).not.toContain('diagonal dynamic compositions');
+    expect(sheet).toContain('Style lock');
+  });
+
   it('paleta de la historia o, si no tiene, la del público', () => {
     expect(artDirection({ age: 5, channel: 'families', palette: 'adventure' })).toContain(
       STORY_PALETTES.adventure.colors[0],

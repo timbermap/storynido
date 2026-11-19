@@ -727,6 +727,48 @@ describe('vista previa', () => {
     }
   });
 
+  it('ajustar el parecido edita la lámina actual, suma las notas y las lleva a las páginas', async () => {
+    await setAiConfig({ maxPreviewsPerUserPerDay: 10, maxRegenerationsPerBook: 5 });
+    await seedBook(providers, 'book-1');
+    const first = (await generate('book-1')).json<PublicPreview>();
+    const paint = vi.spyOn(providers.ai().image, 'generateIllustration');
+    const adjust = (note: string) =>
+      app.inject({
+        method: 'PUT',
+        url: '/v1/books/book-1/preview/character',
+        headers: auth(TOKEN),
+        payload: { traits: first.preview?.character?.traits, mustKeep: [], note },
+      });
+    expect((await adjust('sin anteojos')).statusCode).toBe(200);
+    expect((await adjust('saca la mano de la cara')).statusCode).toBe(200);
+    const last = paint.mock.calls.at(-1)?.[0];
+    expect(last?.editOf?.bytes.length).toBeGreaterThan(0);
+    expect(last?.correction).toBe('sin anteojos; saca la mano de la cara');
+    // La lámina no lleva las reglas de página (tercio para el texto).
+    expect(last?.prompt).not.toContain('the text is printed over one third');
+    // Aprobado: las páginas usan solo la lámina (sin la foto cruda) y la nota sigue.
+    paint.mockClear();
+    const approved = await app.inject({
+      method: 'POST',
+      url: '/v1/books/book-1/preview/character/approve',
+      headers: auth(TOKEN),
+    });
+    expect(approved.statusCode).toBe(200);
+    expect(paint.mock.calls.length).toBeGreaterThan(0);
+    for (const [request] of paint.mock.calls.filter(([r]) => r.cover || r.resolution === '2K')) {
+      if (request.character.description.startsWith('Martina')) {
+        expect(request.character.photo).toBeNull();
+        expect(request.correction).toBe('sin anteojos; saca la mano de la cara');
+      }
+    }
+    // Y queda en el personaje para su próximo cuento con esa foto.
+    const child = (await db.doc('children/book-1-child').get()).data() as {
+      correctedTraits?: { note?: string };
+    };
+    expect(child.correctedTraits?.note).toBe('sin anteojos; saca la mano de la cara');
+    paint.mockRestore();
+  });
+
   it('respeta el tope semanal con un aviso propio', async () => {
     await setAiConfig({ maxPreviewsPerUserPerDay: 5, maxPreviewsPerUserPerWeek: 1 });
     await seedBook(providers, 'book-1');

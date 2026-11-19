@@ -117,6 +117,25 @@ export const ONE_PROTAGONIST =
 export const TEXT_ZONE =
   'Compose for a printed page with text: the text is printed over one third of the image (the scene says which one, top or bottom); that third is plain, calm background such as sky, wall, floor or grass, and no face, head, hand or key action is ever in it.';
 
+/**
+ * Dirección de arte para la lámina del personaje: sin las reglas de composición de página (tercio
+ * libre para el texto, plano general, diagonales, encuadre de cine), que achicaban la cara y
+ * cambiaban la pose de una lámina que tiene que ser de frente y en calma (DECISIONS 288).
+ */
+export function characterSheetDirection(direction: string | null | undefined): string | null {
+  if (!direction) return direction ?? null;
+  return direction
+    .replace(TEXT_ZONE, '')
+    .replace(
+      'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
+      '',
+    )
+    .replace('diagonal dynamic compositions, the child in motion, ', '')
+    .replace('cinematic framing, ', '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 /** Técnica del estilo elegido; nunca el gouache de la casa si se eligió otro (DECISIONS 265). */
 export function mediumFor(input: {
   style?: string | null;

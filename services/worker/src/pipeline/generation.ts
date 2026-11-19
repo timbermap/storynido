@@ -171,7 +171,13 @@ export interface BookSnapshot {
   stylePrompt: string;
   /** Dirección de arte de la muestra (null en muestras anteriores a ella). */
   artDirection?: string | null;
-  character: { description: string; mustKeep: string[]; sheetPath: string };
+  character: {
+    description: string;
+    mustKeep: string[];
+    sheetPath: string;
+    /** Nota de «Ajustar el parecido» de la muestra: vale en cada página (DECISIONS 288). */
+    correction?: string | null;
+  };
   /** Acompañante que se repite, con su lámina aprobada en la muestra (DECISIONS 117). */
   companion?: { name: string; look: string; sheetPath: string } | null;
   /** Lámina de la persona del elenco que más se repite (ausente en los pedidos anteriores). */
@@ -628,6 +634,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         coloring: snapshot.contentType === 'coloring',
         ...(index === 0 ? { cover: true } : {}),
         character: { description: snapshot.character.description, photo: null },
+        correction: snapshot.character.correction ?? null,
         references,
         aspectRatio: '3:4',
         // Todo pedido se ilustra en 2K: ~220 dpi a 21×28 cm en el impreso (DECISIONS 069) y, en el
@@ -706,6 +713,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             traits: CharacterTraits;
             mustKeep: MustKeepTrait[];
             approvedAt: unknown;
+            correction?: string;
           };
           castSheet?: { role: string; imagePath: string } | null;
           plan?: {
@@ -866,6 +874,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           `outfit: ${sheet.clothing} (unless the page text says the character changes clothes)`,
         ],
         sheetPath,
+        ...(preview.character.correction ? { correction: preview.character.correction } : {}),
       },
       companion,
       // Solo si la muestra la trae: los libros anteriores conservan su huella.

@@ -47,7 +47,9 @@ export async function cropPortrait(
   width: number,
   height: number,
 ): Promise<Uint8Array> {
-  const size = Math.min(Math.round(Math.max(face.width, face.height) * 2.4), width, height);
+  // 1,8 veces la cara (antes 2,4): entran el pelo y el cuello, pero no las manos ni la pose, que
+  // el dibujo copiaba (mano en la cara; DECISIONS 288).
+  const size = Math.min(Math.round(Math.max(face.width, face.height) * 1.8), width, height);
   const centerX = face.left + face.width / 2;
   const centerY = face.top + face.height / 2.2;
   const left = Math.round(Math.min(Math.max(centerX - size / 2, 0), width - size));
