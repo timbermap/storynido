@@ -373,6 +373,9 @@ export interface EditorialPlan extends EditorialChoice {
   textBand?: AgeBand;
 }
 
+/** Palabras por página de un libro para colorear: una frase corta (DECISIONS 283). */
+export const COLORING_MAX_WORDS = 12;
+
 /**
  * Plan editorial del libro. Con la edad, las palabras salen de su franja (± un escalón por la
  * densidad); sin edad, de las densidades de siempre. Los libros anteriores (sin extensión)
@@ -395,7 +398,17 @@ export function editorialPlan(
           textBand: textBandFor(age, density),
         };
   const legacy = config.densities[density];
-  const words: WordRange = byAge?.words ?? { min: legacy.minWords, max: legacy.maxWords };
+  const base: WordRange = byAge?.words ?? { min: legacy.minWords, max: legacy.maxWords };
+  // Colorear: una frase corta como pie del dibujo, en su franja (DECISIONS 283). Los superventas
+  // para colorear casi no tienen texto.
+  const words: WordRange =
+    choice.contentType === 'coloring'
+      ? {
+          min: Math.min(base.min, COLORING_MAX_WORDS - 6),
+          max: COLORING_MAX_WORDS,
+          cap: COLORING_MAX_WORDS + 2,
+        }
+      : base;
   const level = config.levels[choice.readingLevel];
   const bands = byAge ? { ageBand: byAge.ageBand, textBand: byAge.textBand } : {};
   if (!choice.length) {

@@ -612,7 +612,7 @@ export const publicPreviewSchema = z.object({
           /** Armado de la página en el libro (page-layout.ts): el visor la muestra igual. */
           layout: z
             .object({
-              kind: z.enum(['facing', 'calm', 'vignette', 'overlay']),
+              kind: z.enum(['facing', 'calm', 'vignette', 'strip', 'overlay']),
               side: z.enum(['top', 'bottom']),
             })
             .optional(),

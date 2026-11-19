@@ -1823,7 +1823,8 @@
     "noDedication": "Aqui vai a sua dedicatória",
     "example": "Exemplo",
     "exampleLabel": "Exemplo do estilo · no seu livro, {name} será o protagonista",
-    "wordless": "Página sem texto: a ilustração conta este momento."
+    "wordless": "Página sem texto: a ilustração conta este momento.",
+    "coloringSeal": "Para colorir"
   },
   "Checkout": {
     "shippingEstimate": "Frete estimado para {country}: cerca de {price}, para um total de cerca de {total}. Chega em {min} a {max} dias úteis. Confirmado com o seu endereço.",

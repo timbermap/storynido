@@ -75,6 +75,7 @@ import {
   type PageLayout,
   withCurrentGuards,
   mediumFor,
+  onlySoftRejection,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
@@ -622,8 +623,10 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           direction: withCurrentGuards(snapshot.artDirection),
         }),
         stylePrompt: snapshot.stylePrompt,
-        // La ficha del estilo controla cada imagen (DECISIONS 282); colorear sale en blanco y negro.
+        // La ficha del estilo controla cada imagen (DECISIONS 282); colorear sale en blanco y negro
+        // salvo la tapa, que va a color y deja libre el tercio del título (DECISIONS 283).
         coloring: snapshot.contentType === 'coloring',
+        ...(index === 0 ? { cover: true } : {}),
         character: { description: snapshot.character.description, photo: null },
         references,
         aspectRatio: '3:4',
@@ -633,14 +636,19 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         seed: seed + attempt,
       });
       cost += await record(ctx, 'illustration', image.usage);
+      const coloring = snapshot.contentType === 'coloring';
       const verdict = await provider.image.moderateImage(image, {
-        style:
-          snapshot.contentType === 'coloring'
-            ? mediumFor({ coloring: true })
-            : snapshot.stylePrompt,
+        // La tapa de colorear va a color: no se controla contra la técnica de contornos.
+        style: coloring
+          ? index === 0
+            ? null
+            : mediumFor({ coloring: true })
+          : snapshot.stylePrompt,
+        ...(index === 0 ? { cover: true } : {}),
       });
       cost += await record(ctx, 'moderation', verdict.usage);
-      if (verdict.allowed) {
+      // Estilo o zona del título: se rehace una vez; en el segundo intento se acepta (DECISIONS 283).
+      if (verdict.allowed || (attempt === 1 && onlySoftRejection(verdict.categories))) {
         await storage().upload(
           { bucket: ASSETS, path },
           await encodeIllustration(image.bytes),

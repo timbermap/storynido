@@ -42,9 +42,15 @@ type Target = 'cover' | number;
 type PreviewData = NonNullable<PublicPreview['preview']>;
 
 /** Páginas del visor: portada, dedicatoria, el cuento completo y el cierre. */
-function viewerPages(preview: PreviewData): ViewerPage[] {
+function viewerPages(preview: PreviewData, seal?: string): ViewerPage[] {
   return [
-    { key: 'cover', kind: 'cover', imageUrl: preview.coverUrl, text: null },
+    {
+      key: 'cover',
+      kind: 'cover',
+      imageUrl: preview.coverUrl,
+      text: null,
+      ...(seal ? { seal } : {}),
+    },
     { key: 'dedication', kind: 'dedication', imageUrl: null, text: preview.dedication },
     ...preview.pages.map((page) => ({
       key: `page-${String(page.index)}`,
@@ -527,7 +533,10 @@ export function PreviewPanel({
             <BookViewer
               title={data.title}
               coverName={childName}
-              pages={viewerPages(data)}
+              pages={viewerPages(
+                data,
+                book.contentType === 'coloring' ? tViewer('coloringSeal') : undefined,
+              )}
               imageAlt={(page) =>
                 page.kind === 'cover'
                   ? t('coverAlt', { title: data.title })

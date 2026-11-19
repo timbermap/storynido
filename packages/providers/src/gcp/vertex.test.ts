@@ -542,6 +542,51 @@ describe('Vertex AI', () => {
     expect(await colorfulness(image.bytes)).toBeLessThan(1);
   });
 
+  it('la tapa de colorear va a color, sin pasar a blanco y negro, y deja libre el título', async () => {
+    const colored = await sharp({
+      create: { width: 16, height: 16, channels: 3, background: '#3a8fd2' },
+    })
+      .png()
+      .toBuffer();
+    const calls: { contents: { parts: { text?: string }[] }[] }[] = [];
+    const provider = new VertexImageProvider(
+      clientWith(
+        () => ({
+          status: 200,
+          json: {
+            candidates: [
+              {
+                content: {
+                  parts: [
+                    { inlineData: { mimeType: 'image/png', data: colored.toString('base64') } },
+                  ],
+                },
+              },
+            ],
+            usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 10 },
+          },
+        }),
+        calls,
+      ),
+    );
+    const image = await provider.generateIllustration({
+      prompt: 'Book cover: Lu in her cardboard rocket',
+      stylePrompt: 'black and white coloring book line art for children',
+      style: 'para-colorear',
+      character: { description: 'Lu: a 5-year-old child', photo: null },
+      references: [],
+      aspectRatio: '3:4',
+      seed: 1,
+      cover: true,
+    });
+    expect(calls).toHaveLength(1);
+    const text = String(calls[0]?.contents[0]?.parts.at(-1)?.text);
+    expect(text).toContain('COLORING BOOK COVER');
+    expect(text).toContain('COVER LAYOUT');
+    expect(text).not.toContain('COLORING PAGE:');
+    expect(await colorfulness(image.bytes)).toBeGreaterThan(15);
+  });
+
   it('reintenta ante un 429 y después responde', async () => {
     let attempts = 0;
     const provider = new VertexTextProvider(
