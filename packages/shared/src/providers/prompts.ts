@@ -309,6 +309,14 @@ export function formRules(age: number): string[] {
 }
 
 /**
+ * Contacto físico (DECISIONS 294, la mesa revisó un cuento con un abrazo apretado entre dos chicos):
+ * el consuelo y el vínculo se cuentan con palabras, presencia y objetos. Vale para todas las líneas
+ * y todos los tipos de libro.
+ */
+export const TOUCH_STORY_RULE =
+  '- Contacto físico: el protagonista no abraza, besa, carga, toma en brazos ni se sienta en el regazo de nadie que no sea de su familia directa (mamá, papá, abuelos, hermanos), y nadie fuera de la familia lo toca a él: ni amigos, compañeros, docentes, entrenadores, profesionales ni desconocidos. Con ellos el afecto y el consuelo se cuentan con palabras, mirada, estar al lado, un objeto compartido, chocar los cinco o chocar puños. Con la familia, un abrazo corto solo si el pedido lo pide (dormir, «te quiero») y como mucho uno en todo el libro (salvo que el tema del cuento sea el cariño de la familia), contado con lo que siente y no con el cuerpo («mamá lo envolvió con su calor»). Un chico que quiere un abrazo lo pide («¿me das un abrazo?») y el otro puede decir que no. Nunca besos en la boca, cosquillas ni secretos entre un adulto y el chico.';
+
+/**
  * Reglas narrativas (AUDITORIA-PRODUCTO §4): lo que separa un cuento memorable de uno genérico.
  * Las de cada público salen del pedido: eventos traen la fiesta; profesionales, el objetivo.
  */
@@ -319,9 +327,10 @@ export function narrativeRules(
     `- ${input.childName} decide y resuelve: no mira la aventura, la protagoniza.`,
     '- La primera página tiene un gancho que invita a dar vuelta la hoja.',
     input.bedtime
-      ? '- Es un cuento para leer antes de dormir: la energía baja página a página; la segunda mitad es tranquila (rutina, abrazos, cosas que también se van a dormir) y la última página termina en la cama, en calma. Si hay un desafío, es pequeño y suave; nada de saltos, carreras ni acrobacias en la segunda mitad.'
+      ? '- Es un cuento para leer antes de dormir: la energía baja página a página; la segunda mitad es tranquila (rutina, un último arrullo de mamá o papá con palabras, cosas que también se van a dormir) y la última página termina en la cama, en calma. Si hay un desafío, es pequeño y suave; nada de saltos, carreras ni acrobacias en la segunda mitad.'
       : '- Un objetivo claro y un desafío real para su edad, con un momento visual memorable.',
     '- El final cierra con calidez y deja ganas de releerlo.',
+    TOUCH_STORY_RULE,
     '- Cada objeto o lugar importante se llama siempre igual y es el mismo en todas las páginas: una sola metáfora central, no varias. Lo mismo con lo que lleva el protagonista: si son anteojos, siempre «anteojos» (o «glasses»), sin sinónimos para no repetir.',
     '- El protagonista nunca hace como algo bueno lo que un chico podría imitar y lastimarse (saltar en la cama para alcanzar algo, trepar muebles o estantes, hacer la vertical contra la pared sin un adulto). Si el cuento lo muestra, es para que un adulto ayude o para buscar otra forma.',
   ];

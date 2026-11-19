@@ -111,6 +111,13 @@ export const ONE_PROTAGONIST =
   "The main character appears exactly once in each image. Every other child or adult is a different person: different face, hair color and hairstyle, and different clothes; nobody in the background wears the main character's outfit or looks like a twin or clone.";
 
 /**
+ * Contacto físico en los dibujos (DECISIONS 294): un abrazo apretado entre dos chicos salió con los
+ * cuerpos fundidos y sin caras. Vale para todos los estilos, líneas y tipos de libro.
+ */
+export const BODY_CONTACT =
+  "Physical contact and clothing: characters keep a small personal distance, standing or sitting side by side, facing each other or looking at the same thing; no hugs, embraces, kisses, piggyback rides, laps, lying together, tangled limbs or hands on another person's body, between children or with adults outside the family. A soft side-view hug between the protagonist and a parent, grandparent or sibling, both faces visible, bodies clearly separate, only when the page text says so; never in bed. Allowed touch: a high five, a fist bump, or holding hands while walking side by side. Everyone is fully and modestly dressed (sportswear and gymnastics outfits are worn over shorts or leggings, no bare midriff); swimwear only in the water.";
+
+/**
  * La maquetación pone el texto en la región más calma de cada página: la imagen tiene que dejarle
  * lugar. Sin esto, el panel de texto tapaba caras (informe de Profesionales).
  */
@@ -194,6 +201,7 @@ export function artDirection(input: {
     sheet ? `${sheet.references} This style never uses: ${sheet.avoid}.` : '',
     HUMAN_CRAFT,
     SPORTS_GEAR,
+    BODY_CONTACT,
     threeD ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     ONE_PROTAGONIST,
@@ -236,7 +244,7 @@ export function withCurrentGuards(direction: string | null | undefined): string 
   for (const [legacy, current] of LEGACY_TECHNIQUE) {
     if (!direction.includes(current)) direction = direction.replace(legacy, current);
   }
-  const missing = [ONE_PROTAGONIST, TEXT_ZONE, SPORTS_GEAR].filter(
+  const missing = [ONE_PROTAGONIST, TEXT_ZONE, SPORTS_GEAR, BODY_CONTACT].filter(
     (rule) => !direction.includes(rule),
   );
   const medium =

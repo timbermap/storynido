@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { dialogueShare, moralPhrases, repeatedWords, storyCraftIssues } from './story-checks';
+import {
+  dialogueShare,
+  moralPhrases,
+  repeatedWords,
+  storyCraftIssues,
+  touchPages,
+} from './story-checks';
 
 const pages = (...texts: string[]) => texts.map((text) => ({ text }));
 
@@ -61,5 +67,17 @@ describe('controles del oficio del texto', () => {
     expect(check.morals).toBe(2);
     expect(check.issues.join('\n')).toContain('«perseverancia»');
     expect(check.issues.join('\n')).toContain('diálogo');
+  });
+});
+
+describe('contacto físico', () => {
+  it('marca un abrazo de un amigo y deja pasar el de la familia', () => {
+    expect(
+      touchPages([
+        { text: 'Un abrazo apretado de Santi terminó de enfriar el volcán.' },
+        { text: 'Mamá le dio un abrazo corto y apagó la luz.' },
+        { text: 'Luli giró en el aire.' },
+      ]),
+    ).toEqual([1]);
   });
 });
