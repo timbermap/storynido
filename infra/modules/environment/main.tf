@@ -276,6 +276,8 @@ locals {
     STORAGE_PROVIDER  = "gcs"
     PHOTO_ANALYZER    = var.photo_analyzer
     PRINT_PROVIDERS   = join(",", var.print_providers)
+    # Interruptor de la venta de impresos (DECISIONS 295): apagado por defecto.
+    PRINT_ENABLED     = var.print_enabled ? "true" : "false"
     GELATO_ORDER_TYPE = var.gelato_order_type
     # Lulu: solo producción usa la API real; el resto, el sandbox (DECISIONS 086).
     LULU_SANDBOX = var.environment == "production" ? "false" : "true"

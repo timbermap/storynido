@@ -39,6 +39,9 @@ module "environment" {
   # Lulu (DECISIONS 086) en sandbox: no imprime ni cobra.
   print_providers   = ["gelato", "cloudprinter", "lulu"]
   gelato_order_type = "draft"
+  # Impresos apagados (DECISIONS 295). Para la prueba de punta a punta con Lulu sandbox:
+  # print_enabled = true, terraform apply y, al terminar, volver a false (docs/IMPRESO-ACTIVACION.md).
+  print_enabled = false
   # Mails reales con Resend; el secreto de las bajas ya tiene valor (DECISIONS 078).
   email_provider           = "resend"
   email_link_secret_loaded = true

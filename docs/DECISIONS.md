@@ -3083,3 +3083,9 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Fecha:** 2026-11-19. Barrido de la mesa (legales, producto, marketing) tras DECISIONS 295.
 - **Cambios:** descripción de la web, pie, Familias, «Así lo recibes», Cómo funciona (se quita la fila de impresos y «Impreso: muy pronto»), FAQ del kit, kit y «El cuento grande del cumpleañero» ya no dicen impreso, tapa dura ni envío. En es, en, pt y voseo.
 - **Pendiente (Sebas / contenido):** términos, reembolsos, envíos y FAQ general viven en Firestore y siguen describiendo el impreso; es texto legal y se edita desde el admin, no desde código.
+
+## 298 — El interruptor del impreso entra en Terraform y se documenta cómo activarlo
+
+- **Fecha:** 2026-11-20. Sebas quiere salir con digital y tener el impreso listo para prender en pocos días.
+- **Cambio:** variable `print_enabled` (por defecto `false`) que fija `PRINT_ENABLED` en la API de cada ambiente; ya no hace falta tocar variables de Cloud Run a mano. Guía de activación y prueba de punta a punta en [`IMPRESO-ACTIVACION.md`](IMPRESO-ACTIVACION.md).
+- **Ojo:** producción tiene `print_providers = ["mock"]`; al activar hay que ponerle las imprentas reales y cargar los secretos de Lulu, Gelato y Cloudprinter.

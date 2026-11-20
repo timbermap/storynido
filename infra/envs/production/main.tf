@@ -41,6 +41,8 @@ module "environment" {
   # Nunca se despliega el código real con "mock": la API se niega a arrancar en producción.
   print_providers   = ["mock"]
   gelato_order_type = "order"
+  # Impresos apagados hasta cumplir docs/IMPRESO-ACTIVACION.md (DECISIONS 295).
+  print_enabled = false
   log_level         = "info"
   # Se suma el dominio del admin cuando exista.
   auth_authorized_domains = [
