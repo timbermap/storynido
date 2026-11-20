@@ -340,7 +340,7 @@ for (const testCase of cases) {
     mustInclude: [],
     spanishVoice: spanishVoiceFor('AR'),
   };
-  const event = testCase.event ? ({ ...EMPTY_BIRTHDAY, ...testCase.event }) : null;
+  const event = testCase.event ? { ...EMPTY_BIRTHDAY, ...testCase.event } : null;
   const input: StoryPromptInput = {
     ...request,
     template: story.textPromptTemplate,
