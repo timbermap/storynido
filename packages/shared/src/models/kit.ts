@@ -98,7 +98,7 @@ export const eventPricingSchema = z.object({
 export type EventPricing = z.infer<typeof eventPricingSchema>;
 
 /**
- * Piso de costo del kit de Celebraciones (DECISIONS 301): el diseño trae el mini cuento (IA por
+ * Piso de costo del kit de Celebraciones (DECISIONS 302): el diseño trae el mini cuento (IA por
  * las páginas del mini), así que no se cobra menos que ese costo + el margen neto mínimo del
  * ebook + la comisión de cobro, redondeado a ,99 hacia arriba. Si el precio cargado a mano es
  * menor, sube al piso; si es mayor, queda como está. Las piezas extra no cambian.

@@ -3128,7 +3128,7 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 
 **Pendiente de Sebas.** Activar «Transaction Search» y «Disputes» en la app de PayPal (sandbox ahora; en vivo cuando exista la app). Webhooks a suscribir: `CHECKOUT.ORDER.APPROVED`, `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.REFUNDED`, `CUSTOMER.DISPUTE.CREATED`.
 
-## 301 — El kit de Celebraciones tiene piso de costo (2026-11-20)
+## 302 — El kit de Celebraciones tiene piso de costo (2026-11-20)
 
 - **Decisión de Sebas (20 nov 2026):** el precio del kit sigue el costo + comisión como los libros, con la opción «piso por costo».
 - **Regla:** el diseño (trae el mini cuento y la invitación) no se cobra por debajo de IA del mini + margen neto mínimo del ebook + comisión del producto digital, redondeado a ,99 hacia arriba (`withKitCostFloor`, aplicada en las dos implementaciones del catálogo, así que la oferta, el checkout y la landing leen el mismo valor). El precio cargado a mano manda si es mayor; las piezas extra no cambian.
