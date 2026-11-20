@@ -170,6 +170,7 @@ function OrderDetail({ id }: { id: string }) {
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm tabular-nums">
             <Row label="Ingreso">{usd(order.costs.revenueUsd)}</Row>
             <Row label="Impuestos">{usd(order.costs.taxUsd)}</Row>
+            <Row label="Comisión de pago">{usd(order.costs.feeUsd)}</Row>
             <Row label="IA">{usd(order.costs.aiUsd)}</Row>
             <Row label="Impresión y envío">{usd(order.costs.printUsd)}</Row>
             <Row label="Margen">
@@ -177,7 +178,8 @@ function OrderDetail({ id }: { id: string }) {
             </Row>
           </dl>
           <p className="mt-2 text-xs text-muted-foreground">
-            Tipo de cambio del {order.costs.fxDate}. Sin comisiones de pago.
+            Tipo de cambio del {order.costs.fxDate}. La comisión es la real si el procesador la
+            informó; si no, una estimación.
           </p>
         </Card>
         <Card>

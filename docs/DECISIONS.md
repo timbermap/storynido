@@ -3157,3 +3157,8 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Arreglo:** el detalle usa el mayor entre `costsUsdMicros.ai` y la suma de `aiUsage` del pedido.
 - **Conclusión de costos:** ese pedido (2 de nov, pago simulado, revisión humana con reparaciones) gastó ~US$ 20 de IA, unas 4 veces lo previsto (US$ 0,15 × 30 páginas). Aun así no perdió: 63,05 − comisión 3,70 − IA 19,96 − imprenta y envío 35,81 = +3,58. Con las reglas de hoy el mismo libro costaría ~US$ 70,76 (39,99 + envío 31,77) y dejaría ~US$ 26 con IA prevista y ~US$ 11 con ese gasto atípico; el punto de equilibrio está en unos US$ 30 de IA.
 - **Corrección (20 Nov):** el primer despliegue leía las fuentes del disco con `import.meta.url`; el bundle de la API no incluye esos archivos y el comprobante daba error en staging. Ahora las fuentes van embebidas en el código.
+
+## 306 — El margen del detalle del pedido descuenta la comisión de pago (2026-11-20)
+
+- **Problema:** en el detalle de un pedido impreso de prueba el margen mostraba US$ 21,54 porque no restaba la comisión de PayPal (~2,94); el neto real era ~18,60. La portada «Hoy» y la tabla por producto ya restaban la comisión.
+- **Arreglo:** el detalle muestra «Comisión de pago» (la real si PayPal la informó, si no la estimada del proveedor) y el margen es ingreso − impuestos − comisión − IA − impresión y envío.

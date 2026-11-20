@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import {
+  estimatePaymentFeeUsd,
   COLLECTIONS,
   addressProblems,
   apiRoutes,
@@ -198,6 +199,12 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
     );
     const aiUsd = Math.max(costs.ai ?? 0, usageMicros) / 1_000_000;
     const printUsd = (routing?.totalCostUsdMinor ?? 0) / 100;
+    const payment = data.payment as { provider?: string; feeMinor?: number } | undefined;
+    // La comisión real si PayPal la informó; si no, la estimada, igual que el panel de márgenes.
+    const feeUsd =
+      typeof payment?.feeMinor === 'number'
+        ? payment.feeMinor / 100
+        : estimatePaymentFeeUsd(revenueUsd, payment?.provider);
     const round = (value: number) => Math.round(value * 100) / 100;
 
     const bookId = String(data.bookId);
@@ -346,7 +353,8 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
         taxUsd: round(taxUsd),
         aiUsd: round(aiUsd),
         printUsd: round(printUsd),
-        marginUsd: round(revenueUsd - taxUsd - aiUsd - printUsd),
+        feeUsd: round(feeUsd),
+        marginUsd: round(revenueUsd - taxUsd - feeUsd - aiUsd - printUsd),
         fxDate: fx.date,
       },
       qa: qa.docs.map((event) => ({

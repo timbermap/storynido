@@ -94,15 +94,23 @@ describe('admin: operación de pedidos', () => {
     await order('o1', { printRouting: { provider: 'mock', totalCostUsdMinor: 0, quotes: [] } });
     const detail = (await get('/v1/admin/orders/o1')).json<{
       customerEmail: string;
-      costs: { revenueUsd: number; taxUsd: number; aiUsd: number; marginUsd: number };
+      costs: {
+        revenueUsd: number;
+        taxUsd: number;
+        aiUsd: number;
+        feeUsd: number;
+        marginUsd: number;
+      };
     }>();
-    // 400 MXN a 20 por dólar = USD 20; impuesto 55,17 MXN = USD 2,76; IA USD 1,50.
+    // 400 MXN a 20 por dólar = USD 20; impuesto 55,17 MXN = USD 2,76; IA USD 1,50; comisión
+    // estimada de PayPal (5,4 % + 0,30) = USD 1,38.
     expect(detail.customerEmail).toBe('ana@storynido.test');
     expect(detail.costs).toMatchObject({
       revenueUsd: 20,
       taxUsd: 2.76,
       aiUsd: 1.5,
-      marginUsd: 15.74,
+      feeUsd: 1.38,
+      marginUsd: 14.36,
     });
   });
 
