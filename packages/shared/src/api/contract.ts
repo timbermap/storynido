@@ -223,6 +223,9 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
     taxUsd: z.number(),
     aiUsd: z.number(),
     printUsd: z.number(),
+    /** Comisión de pago: la real si el procesador la informó; si no, la estimada. */
+    feeUsd: z.number().default(0),
+    /** Ingreso − impuestos − comisión − IA − impresión y envío. */
     marginUsd: z.number(),
     fxDate: z.string(),
   }),
