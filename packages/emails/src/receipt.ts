@@ -391,7 +391,7 @@ export async function renderReceiptPdf(
     text(data.tax.amount, colAmount, y, medium, 11, NAVY, 'right');
     y -= 20;
   }
-  y -= 4;
+  y -= 14;
   page.drawRectangle({
     x: colQty - 110,
     y: y - 14,
