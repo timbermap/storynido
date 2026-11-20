@@ -3091,13 +3091,20 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Arreglo:** nuevo `ImageNotReturnedError` (vertex lo lanza al no haber imagen o bloquear la escena). `illustrate` lo cuenta como intento fallido, anota `image_not_returned` y el intento siguiente pide una escena más simple. Si no sale ninguno, rige lo de siempre: reparación → revisión humana de esa página (no del libro).
 - **Prevención:** prueba de emulador con reparaciones sin imagen.
 
+## 300 — Revisión de precios y márgenes de todo el sitio
+
+- **Revisado en staging:** API de oferta (AR, BR, CL, ES, MX, US, UY), Admin → Precios, Países y Kit, home, Familias, Profesionales, Celebraciones, Cómo funciona, historias, FAQ y legales. Los 16 precios de ebook (extensión × tipo) salen del mismo cálculo que el checkout y coinciden: mini 14,99, corto 16,99, clásico 22,99, gran aventura 24,99 (actividades y profesional más bajos, nunca debajo de 13,99). Ningún texto lleva un precio escrito a mano.
+- **Desajuste corregido:** la estimación de comisión del panel (contribución, «Hoy») no conocía PayPal y lo calculaba como Dodo (5,5 % + 0,40). Ahora PayPal 5,4 % + 0,30 y es el proveedor por defecto para `mock` y desconocidos.
+- **Prueba nueva:** `price-closes.test.ts` fija que cada precio de lista deja el margen objetivo después de la comisión, que el profesional no baja del margen neto mínimo ni de 13,99 y la tabla de listas.
+- **Abierto (decisión de Sebas):** IVA real por país (solo México cargado; ES, CL, CO, PE, BR, AR y UY figuran 0 % y el recibo dice «impuestos incluidos» sin monto); el kit de Celebraciones tiene precio manual, no derivado de costo + comisión.
+
 ## 299 — El interruptor del impreso entra en Terraform y se documenta cómo activarlo
 
 - **Fecha:** 2026-11-20. Sebas quiere salir con digital y tener el impreso listo para prender en pocos días.
 - **Cambio:** variable `print_enabled` (por defecto `false`) que fija `PRINT_ENABLED` en la API de cada ambiente; ya no hace falta tocar variables de Cloud Run a mano. Guía de activación y prueba de punta a punta en [`IMPRESO-ACTIVACION.md`](IMPRESO-ACTIVACION.md).
 - **Ojo:** producción tiene `print_providers = ["mock"]`; al activar hay que ponerle las imprentas reales y cargar los secretos de Lulu, Gelato y Cloudprinter.
 
-## 300 — Panel «Visitas y campañas» en el admin (contadores propios, sin cookies)
+## 301 — Panel «Visitas y campañas» en el admin (contadores propios, sin cookies)
 
 - **Fecha:** 2026-11-20. Sebas quiere ver, por cada página pública, de dónde llega la gente (redes, campañas), qué ve, de qué país es y qué termina en muestra o compra. La mesa (marketing, ventas, legales, diseño-ux) descartó la Data API de GA4 para esto: pide cuenta, propiedad y credenciales de Google (las crea Sebas), solo cuenta a quien aceptó cookies, y sus datos no se cruzan con nuestros pedidos. GA4 y Meta Pixel siguen igual (con consentimiento) para anuncios.
 - **Decisión:** contadores diarios propios en Firestore `trafficDaily/{día}` (un mapa por dimensión, como `loginMetrics`). **Sin cookies, sin IP, sin identificadores y sin guardar el navegador**: del navegador solo se saca celular/tableta/computadora y se descartan robots. Solo páginas públicas (nunca creador, cuenta ni pago) y respeta «No rastrear» y Global Privacy Control. País: el que ya detecta el sitio (cookie `sn_country`); **ciudad no**: con país alcanza y es más privado.
@@ -3106,3 +3113,17 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Dónde:** contrato `trafficHit` (público) y `adminTraffic` en `packages/shared`; API `services/api/src/routes/traffic.ts` y `traffic/`; web `apps/web/src/lib/traffic.ts` + `Analytics`; admin `/traffic` (área Marketing).
 - **Pendiente legal:** sumar una línea a la política de privacidad pública (en Firestore, se edita desde el admin): «Contamos visitas de forma agregada, sin cookies ni datos personales». Revisión del abogado junto con `docs/PRIVACY.md`.
 - **Fase 2 posible:** guardar el origen en el pedido para ver ingresos por campaña; alertas cuando una campaña convierte mal.
+
+## 300 — Seguimiento de PayPal en el admin («Cobros PayPal»), solo lectura
+
+**Qué.** Pantalla nueva en Administración con: cobrado, comisión real, neto, reembolsado; saldo de la billetera (disponible, retenido, total); conciliación pedido ↔ PayPal; cobros por pedido; disputas; reembolsos y retiros; todos los movimientos. Ruta `GET /v1/admin/paypal?days=7|30|90`.
+
+**Comisión real.** Al capturar, PayPal informa `seller_receivable_breakdown` (comisión y neto). Se guarda en el pedido (`payment.feeMinor`, `payment.netMinor`) y el dashboard «Hoy» usa esa comisión en vez de la estimada (METRICS_VERSION 4 recalcula los días guardados). Para los pedidos anteriores sin dato se estima con `PAYMENT_FEES.paypal` = 5,4 % + US$ 0,30 (cuenta de Argentina verificada el 19 nov 2026).
+
+**Lectura de PayPal.** `PaymentProvider.reporting` (opcional) con saldo (`/v1/reporting/balances`), movimientos (`/v1/reporting/transactions`, tramos de 30 días, hasta 90 días) y disputas (`/v1/customer/disputes`). Solo GET. Cada sección falla por separado y el error explica el permiso que falta (activar «Transaction Search» y «Disputes» en la app REST de PayPal).
+
+**Conciliación.** Se cruza por el ID de la captura (`payment.paymentId`). Marcas: coincide, no aparece en PayPal (solo si pasaron más de 3 h, el atraso de PayPal), otro importe, y cobros de PayPal sin pedido nuestro (webhook perdido).
+
+**Límites a propósito.** Desde el admin no se reembolsa ni se retira nada: el reembolso sigue en el detalle del pedido (con confirmación y auditoría) y los retiros se hacen en PayPal (en USD: convertir a pesos dentro de PayPal cuesta 3,5 % extra). El aviso de disputa ahora dice el monto en dólares y el pedido.
+
+**Pendiente de Sebas.** Activar «Transaction Search» y «Disputes» en la app de PayPal (sandbox ahora; en vivo cuando exista la app). Webhooks a suscribir: `CHECKOUT.ORDER.APPROVED`, `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.REFUNDED`, `CUSTOMER.DISPUTE.CREATED`.

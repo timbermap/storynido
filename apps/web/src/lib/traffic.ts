@@ -5,7 +5,7 @@ import { COUNTRY_COOKIE } from './country';
 import { api } from './api';
 
 /**
- * Panel de visitas propio (DECISIONS 300). Cuenta vistas de páginas públicas sin cookies,
+ * Panel de visitas propio (DECISIONS 301). Cuenta vistas de páginas públicas sin cookies,
  * sin identificadores y sin la dirección completa: solo ruta, idioma, país del sitio, red de
  * origen y campaña (UTM). Los pasos del embudo (empezó, muestra, pago, compra) salen solo con
  * consentimiento de analítica, porque usan el origen guardado en este navegador.

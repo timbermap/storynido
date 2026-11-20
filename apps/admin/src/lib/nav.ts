@@ -5,6 +5,7 @@ import {
   ClipboardCheck,
   MessageSquareQuote,
   Plug,
+  Wallet,
   ShieldUser,
   ShoppingBag,
   Users,
@@ -56,6 +57,7 @@ export interface NavItem {
     | '/countries'
     | '/prices'
     | '/print-options'
+    | '/paypal'
     | '/coupons'
     | '/promotions'
     | '/event-pricing'
@@ -149,6 +151,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: 'Precios y márgenes',
     keywords: 'productos formatos extensión pro margen costo',
     icon: Tag,
+  },
+  {
+    href: '/paypal',
+    area: 'Administración',
+    label: 'Cobros PayPal',
+    keywords:
+      'paypal pagos billetera wallet saldo comisión neto reembolsos disputas retiros conciliación',
+    icon: Wallet,
   },
   {
     href: '/print-options',

@@ -380,6 +380,99 @@ export const attentionItemSchema = z.object({
 
 export type AttentionItem = z.infer<typeof attentionItemSchema>;
 
+const paypalBalanceSchema = z.object({
+  currency: z.string(),
+  totalMinor: z.number().int(),
+  availableMinor: z.number().int(),
+  withheldMinor: z.number().int(),
+});
+
+const paypalTransactionSchema = z.object({
+  id: z.string(),
+  kind: z.enum(['payment', 'refund', 'withdrawal', 'dispute', 'other']),
+  code: z.string(),
+  status: z.string(),
+  at: z.iso.datetime(),
+  currency: z.string(),
+  grossMinor: z.number().int(),
+  feeMinor: z.number().int(),
+  orderId: z.string().nullable(),
+  relatedId: z.string().nullable(),
+});
+
+const paypalDisputeSchema = z.object({
+  id: z.string(),
+  status: z.string(),
+  reason: z.string(),
+  currency: z.string(),
+  amountMinor: z.number().int(),
+  createdAt: z.iso.datetime().nullable(),
+  updatedAt: z.iso.datetime().nullable(),
+  paymentId: z.string().nullable(),
+  orderId: z.string().nullable(),
+});
+
+/** Un cobro de PayPal visto desde el pedido (lo que guardamos al capturar). */
+const paypalOrderRowSchema = z.object({
+  orderId: z.string(),
+  status: orderStatusSchema,
+  paidAt: z.iso.datetime().nullable(),
+  /** Lo cobrado (USD, centavos). */
+  totalMinor: z.number().int(),
+  /** Comisión real guardada al cobrar; null en pedidos anteriores a este seguimiento. */
+  feeMinor: z.number().int().nullable(),
+  netMinor: z.number().int().nullable(),
+  paymentId: z.string().nullable(),
+  /** Contra PayPal: ok · falta (no aparece en PayPal) · monto (otro importe) · sin_datos. */
+  match: z.enum(['ok', 'falta', 'monto', 'sin_datos']),
+});
+
+export const adminPaypalResponseSchema = z.object({
+  /** Proveedor de pago activo en este entorno (el seguimiento solo tiene sentido con `paypal`). */
+  activeProvider: z.string(),
+  /** null cuando PayPal no está configurado en este entorno. */
+  environment: z.enum(['sandbox', 'live']).nullable(),
+  from: z.iso.datetime(),
+  to: z.iso.datetime(),
+  /** Nuestro lado: pedidos cobrados con PayPal. Sale de la base, siempre disponible. */
+  ours: z.object({
+    rows: z.array(paypalOrderRowSchema),
+    grossMinor: z.number().int(),
+    /** Suma de las comisiones conocidas y de cuántos cobros las tenemos. */
+    feeMinor: z.number().int(),
+    feeKnown: z.number().int(),
+    netMinor: z.number().int(),
+    refundedMinor: z.number().int(),
+    refundedCount: z.number().int(),
+  }),
+  /** Lo que informa PayPal (solo lectura). Cada sección trae su error si falló. */
+  live: z.object({
+    balances: z.array(paypalBalanceSchema).nullable(),
+    balancesError: z.string().nullable(),
+    transactions: z.array(paypalTransactionSchema).nullable(),
+    transactionsError: z.string().nullable(),
+    disputes: z.array(paypalDisputeSchema).nullable(),
+    disputesError: z.string().nullable(),
+  }),
+  /** Conciliación pedidos ↔ PayPal; null si no se pudieron leer los movimientos. */
+  reconciliation: z
+    .object({
+      matched: z.number().int(),
+      /** Cobrados en PayPal que no tienen pedido nuestro (¿webhook perdido?). */
+      paypalOnly: z.array(
+        z.object({
+          id: z.string(),
+          orderId: z.string().nullable(),
+          grossMinor: z.number().int(),
+          at: z.iso.datetime(),
+        }),
+      ),
+    })
+    .nullable(),
+});
+
+export type AdminPaypal = z.infer<typeof adminPaypalResponseSchema>;
+
 const costStatsSchema = z.object({
   count: z.number(),
   avgUsd: z.number(),
@@ -1273,6 +1366,15 @@ export const apiRoutes = {
     summary: 'Costo real de IA por muestra y por libro (promedio, p50 y p95) y por modelo',
     query: z.object({ days: z.coerce.number().int().min(1).max(366).default(30) }),
     response: aiCostReportSchema,
+  },
+  adminPaypal: {
+    method: 'GET',
+    path: '/v1/admin/paypal',
+    access: 'admin',
+    summary:
+      'Seguimiento de PayPal (solo lectura): cobros por pedido con comisión y neto, saldo, movimientos, disputas y conciliación',
+    query: z.object({ days: z.coerce.number().int().min(1).max(90).default(30) }),
+    response: adminPaypalResponseSchema,
   },
   adminOrders: {
     method: 'GET',

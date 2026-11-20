@@ -406,12 +406,12 @@ describe('admin: interruptor del sitio y auditoría', () => {
     expect(first.days[0]).toMatchObject({ revenueUsd: 20, previews: 2 });
     // 20 + 10 de ingresos; 2 de IA y 5 + 5 de impresión.
     expect(first.totals).toMatchObject({ orders: 2, revenueUsd: 30, marginUsd: 18 });
-    // Comisión estimada (Dodo: 5,5 % + 0,40): 1,50 + 0,95 de las ventas y 1,50 del reembolso.
+    // Comisión estimada (PayPal: 5,4 % + 0,30): 1,38 + 0,84 de las ventas y 1,38 del reembolso.
     expect(first.totals).toMatchObject({
-      paymentFeeUsd: 3.95,
+      paymentFeeUsd: 3.6,
       aiBooksUsd: 1.5,
       aiPreviewsUsd: 0.5,
-      contributionUsd: 14.05,
+      contributionUsd: 14.4,
     });
     // Ayer todavía puede cambiar (reembolsos, estados): no se congela hasta los 35 días.
     expect((await db.doc(`metricsDaily/${yesterday}`).get()).exists).toBe(false);

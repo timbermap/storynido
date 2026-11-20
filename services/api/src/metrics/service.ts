@@ -192,6 +192,9 @@ export class MetricsService {
           amounts: { totalMinor: amounts.totalMinor ?? 0, taxMinor: amounts.taxMinor ?? 0 },
           printCostUsdMinor: routing?.totalCostUsdMinor ?? null,
           paymentProvider: (data.payment as { provider?: string } | undefined)?.provider,
+          ...(typeof (data.payment as { feeMinor?: unknown } | undefined)?.feeMinor === 'number'
+            ? { paymentFeeUsdMinor: (data.payment as { feeMinor: number }).feeMinor }
+            : {}),
           product: metricsProductKey({
             channel,
             format:

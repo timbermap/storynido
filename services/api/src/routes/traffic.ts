@@ -18,7 +18,7 @@ type HitBody = z.output<(typeof apiRoutes)['trafficHit']['body']>;
 const dayOf = (date: Date) => date.toISOString().slice(0, 10);
 
 /**
- * Panel de visitas (DECISIONS 300): contadores diarios propios, sin cookies, sin IP y sin
+ * Panel de visitas (DECISIONS 301): contadores diarios propios, sin cookies, sin IP y sin
  * identificadores. El navegador no se guarda: solo se usa para saber si es celular, tableta o
  * computadora, y para no contar robots.
  */

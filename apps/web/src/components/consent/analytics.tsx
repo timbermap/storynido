@@ -39,7 +39,7 @@ export function Analytics() {
   const marketing = Boolean(PIXEL_ID && choice?.marketing);
   const privatePath = isPrivatePath(pathname);
 
-  // Panel de visitas propio: contador sin cookies ni identificadores (DECISIONS 300). La primera
+  // Panel de visitas propio: contador sin cookies ni identificadores (DECISIONS 301). La primera
   // página de la carga es la «entrada» y trae el origen (página de origen y UTM); las siguientes,
   // no. «No rastrear» y Global Privacy Control lo apagan. El origen se guarda en este navegador
   // para el embudo solo si aceptó la analítica.
