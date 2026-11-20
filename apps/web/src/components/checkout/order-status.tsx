@@ -4,7 +4,9 @@ import { ApiError, type BookFormat, type CountryCode, type PublicOrder } from '@
 import {
   BookHeart,
   BookOpen,
+  Check,
   CircleCheck,
+  Copy,
   Download,
   FileText,
   FlaskConical,
@@ -57,6 +59,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
   const [checkNow, setCheckNow] = useState(0);
   // El cobrador rechazó la tarjeta al cobrar: se ofrece volver a pagar con otra.
   const [declined, setDeclined] = useState(false);
+  const [copied, setCopied] = useState(false);
   const tKit = useTranslations('Checkout.kit');
   // Compra: cuando el pedido ya está pagado (una sola vez por pedido).
   const paidOrder = order && !UNPAID.has(order.status) ? order : null;
@@ -107,6 +110,17 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
       clearTimeout(timer);
     };
   }, [orderId, signedIn, t, checkNow]);
+
+  function copyTracking() {
+    const number = order?.tracking?.number;
+    if (!number) return;
+    void navigator.clipboard.writeText(number).then(() => {
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    });
+  }
 
   async function run(kind: 'payment' | 'print' | 'download' | 'receipt', file = 'book') {
     setBusy(kind === 'download' ? `download:${file}` : kind);
@@ -210,6 +224,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
             <OrderTimeline status={order.status} print={print} />
           </>
         )}
+        {finished && print && <OrderTimeline status={order.status} print compact />}
         {order.status === 'pending_payment' && declined && (
           <section
             role="alert"
@@ -235,9 +250,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
         )}
         {order.progress && <BookProgressView progress={order.progress} />}
 
-        {(order.canDownload ||
-          Boolean(order.tracking?.url) ||
-          GENERATED_STATUSES.has(order.status)) && (
+        {(order.canDownload || GENERATED_STATUSES.has(order.status)) && (
           <div className="flex flex-wrap gap-3">
             {order.canDownload && isKit && (
               <Button disabled={busy !== null} onClick={() => void run('download', 'kit_zip')}>
@@ -281,9 +294,14 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 {t('read')}
               </Link>
             )}
+          </div>
+        )}
+        {(order.canReceipt || (GENERATED_STATUSES.has(order.status) && (isKit || print))) && (
+          <div className="-mt-2 flex flex-wrap gap-x-1 gap-y-1">
             {order.canReceipt && (
               <Button
-                variant="outline"
+                variant="ghost"
+                size="sm"
                 disabled={busy !== null}
                 onClick={() => void run('receipt')}
               >
@@ -295,17 +313,6 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                 {t('receipt')}
               </Button>
             )}
-            {order.tracking?.url && (
-              <a
-                href={order.tracking.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={buttonVariants({ variant: 'outline' })}
-              >
-                <Truck aria-hidden="true" />
-                {t('track')}
-              </a>
-            )}
             {/* Otra copia solo de un libro impreso (el PDF ya lo tiene): un ebook se creó con
                 ilustraciones de pantalla y no se imprime. El kit no: la cantidad de copias de la
                 licencia no cambia el precio y volver a pedirlo cobraba el kit otra vez. */}
@@ -316,7 +323,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                   params: { bookId: order.bookId },
                   query: { reorder: order.orderId },
                 }}
-                className={buttonVariants({ variant: 'outline' })}
+                className={buttonVariants({ variant: 'ghost', size: 'sm' })}
               >
                 <RotateCcw aria-hidden="true" />
                 {t('reorder')}
@@ -333,7 +340,7 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
                     params: { bookId: order.bookId },
                     query: { cards: order.orderId },
                   }}
-                  className={buttonVariants({ variant: 'outline' })}
+                  className={buttonVariants({ variant: 'ghost', size: 'sm' })}
                 >
                   <Printer aria-hidden="true" />
                   {tKit('printCards.cta')}
@@ -389,13 +396,50 @@ export function OrderStatus({ orderId, country }: { orderId: string; country: Co
             </ul>
           </section>
         )}
+        {print && order.tracking && (order.tracking.number ?? order.tracking.url) && (
+          <section className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-2xl border bg-card p-5">
+            <div className="flex min-w-0 items-center gap-3">
+              <Truck className="size-5 shrink-0 text-primary" aria-hidden="true" />
+              <div className="grid min-w-0 gap-0.5">
+                <h2 className="text-sm font-semibold">{t('shipment.title')}</h2>
+                {order.tracking.number && (
+                  <p className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+                    <span>{t('shipment.number')}</span>
+                    <span className="font-semibold text-foreground tabular-nums">
+                      {order.tracking.number}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={copyTracking}
+                      className="inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-xs font-semibold text-primary hover:bg-lavender/50"
+                    >
+                      {copied ? (
+                        <Check className="size-3.5" aria-hidden="true" />
+                      ) : (
+                        <Copy className="size-3.5" aria-hidden="true" />
+                      )}
+                      <span aria-live="polite">
+                        {copied ? t('shipment.copied') : t('shipment.copy')}
+                      </span>
+                    </button>
+                  </p>
+                )}
+              </div>
+            </div>
+            {order.tracking.url && (
+              <a
+                href={order.tracking.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ variant: 'outline' })}
+              >
+                {t('track')}
+              </a>
+            )}
+          </section>
+        )}
         {/* Opinión del cliente (libro recibido o digital listo), una sola vez por pedido. */}
         {order.canReview && <OrderReview orderId={order.orderId} initial={order.review} />}
-        {order.tracking?.number && (
-          <p className="text-sm text-muted-foreground">
-            {t('trackingNumber', { number: order.tracking.number })}
-          </p>
-        )}
 
         {(order.canSimulatePayment || order.canSimulatePrint) && (
           <div className="rounded-2xl border border-dashed bg-card p-4">

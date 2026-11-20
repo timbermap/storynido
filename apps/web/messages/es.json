@@ -2016,8 +2016,13 @@
       "download": "Descargar el PDF",
       "receipt": "Descargar comprobante",
       "track": "Seguir el envío",
-      "reorder": "Pedir de nuevo",
-      "trackingNumber": "Número de seguimiento: {number}",
+      "reorder": "Pedir otra copia",
+      "shipment": {
+        "title": "Tu envío",
+        "number": "Número de seguimiento",
+        "copy": "Copiar",
+        "copied": "¡Copiado!"
+      },
       "simulatePrintText": "La imprenta es simulada en este ambiente: cada clic avanza un paso del envío.",
       "simulatePrint": "Avanzar la imprenta",
       "review": {

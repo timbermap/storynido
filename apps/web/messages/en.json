@@ -2016,8 +2016,13 @@
       "download": "Download the PDF",
       "receipt": "Download receipt",
       "track": "Track shipment",
-      "reorder": "Order again",
-      "trackingNumber": "Tracking number: {number}",
+      "reorder": "Order another copy",
+      "shipment": {
+        "title": "Your shipment",
+        "number": "Tracking number",
+        "copy": "Copy",
+        "copied": "Copied!"
+      },
       "simulatePrintText": "The printer is simulated in this environment: each click moves the shipment one step.",
       "simulatePrint": "Advance the printer",
       "review": {
