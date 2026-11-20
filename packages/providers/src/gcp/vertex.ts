@@ -865,7 +865,7 @@ Trees, plants, objects or animals that come alive or talk get a simple, gentle, 
 Clothes fit the place, weather, season and activity of the page: pyjamas in bed, a raincoat in the rain, a coat in the cold,
 swimwear in the water, sportswear for a sport; indoors at home, no jackets or outdoor shoes unless someone is arriving or leaving.${
             request.age !== undefined
-              ? ` The protagonist is ${String(request.age)} years old: what they hold, wear and do fits that age, and anything risky has an adult nearby.`
+              ? ` The protagonist is ${String(request.age)} years old: what they hold, wear and do fits that age, and anything risky has an adult nearby. Draw them with the body proportions of a ${String(request.age)}-year-old (rounder face, larger head, shorter limbs), never as a teenager or a small adult.`
               : ''
           }
 
