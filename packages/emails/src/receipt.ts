@@ -200,7 +200,6 @@ const NAVY = rgb(0x26 / 255, 0x32 / 255, 0x4a / 255);
 const MUTED = rgb(0x55 / 255, 0x5c / 255, 0x6e / 255);
 const PEACH = rgb(0xff / 255, 0xb6 / 255, 0xa7 / 255);
 const SAGE = rgb(0x8a / 255, 0xc8 / 255, 0xbc / 255);
-const LAVENDER = rgb(0xe6 / 255, 0xdd / 255, 0xf6 / 255);
 const CREAM = rgb(0xff / 255, 0xf8 / 255, 0xf1 / 255);
 const BORDER = rgb(0xef / 255, 0xe3 / 255, 0xd8 / 255);
 const CORAL = rgb(0xa3 / 255, 0x3f / 255, 0x33 / 255);
@@ -377,6 +376,8 @@ export async function renderReceiptPdf(
     ]);
   }
   if (data.shipping !== null) totals.push([copy.shipping, data.shipping]);
+  // Sin descuento ni envío, el subtotal repite el total: no se muestra.
+  if (totals.length === 1 && data.subtotal === data.total) totals.length = 0;
   for (const [label, value] of totals) {
     text(label, colQty - 90, y, medium, 11, MUTED);
     text(value, colAmount, y, medium, 11, NAVY, 'right');
@@ -402,22 +403,12 @@ export async function renderReceiptPdf(
   text(data.total, colAmount - 12, y - 2, bold, 15, NAVY, 'right');
   y -= 70;
 
-  // Aviso: no es una factura.
-  const noticeLines = wrap(copy.notInvoice, medium, 10.5, W - 2 * M - 40);
-  const noticeHeight = 46 + noticeLines.length * 15;
-  page.drawRectangle({
-    x: M,
-    y: y - noticeHeight + 20,
-    width: W - 2 * M,
-    height: noticeHeight,
-    color: LAVENDER,
-  });
-  let ny = y;
-  text(copy.notInvoiceTitle, M + 20, ny, bold, 12, rgb(0x5b / 255, 0x4a / 255, 0x99 / 255));
-  ny -= 22;
+  // Aviso discreto: no es una factura (línea chica y gris, pegada al pie).
+  const noticeLines = wrap(`${copy.notInvoiceTitle}. ${copy.notInvoice}`, medium, 7.5, W - 2 * M);
+  let ny = 108 + (noticeLines.length - 1) * 10;
   for (const part of noticeLines) {
-    text(part, M + 20, ny, medium, 10.5, NAVY);
-    ny -= 15;
+    text(part, M, ny, medium, 7.5, MUTED);
+    ny -= 10;
   }
 
   footer(page, { W, M, copy, brand, hand, medium, text, heart });
