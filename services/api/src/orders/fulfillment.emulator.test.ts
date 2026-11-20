@@ -306,4 +306,37 @@ describe('imprenta, descarga y cancelación (fase 12)', () => {
     });
     expect(unpaid.statusCode).toBe(404);
   });
+
+  it('comprobante de un impreso con descuento por volumen, envío y seguimiento simulado', async () => {
+    await seedOrder('delivered', true);
+    await db.doc('orders/o1').update({
+      bookTitle: 'Luli y el faro',
+      items: [{ piece: 'book', format: 'softcover', quantity: 3 }],
+      print: {
+        provider: 'mock',
+        externalOrderId: 'po_1',
+        trackingNumber: 'MOCK367438',
+        trackingUrl: null,
+      },
+      priceSnapshot: {
+        currency: 'USD',
+        components: [
+          { code: 'book', unitMinor: 1999, quantity: 1, totalMinor: 1999 },
+          { code: 'copy', unitMinor: 1999, quantity: 2, totalMinor: 3998 },
+        ],
+        subtotalMinor: 5997,
+        discount: { minor: 900, reason: 'bundle', label: null },
+        shipping: { minor: 2077, etaDaysMin: 5, etaDaysMax: 10, pending: false },
+        tax: { minor: 0, basisPoints: 0, included: false },
+        totalMinor: 7174,
+      },
+    });
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/orders/o1/receipt',
+      headers: auth('token-ana'),
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json<{ base64: string }>().base64.length).toBeGreaterThan(1000);
+  });
 });
