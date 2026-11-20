@@ -1,11 +1,15 @@
-import { readFileSync } from 'node:fs';
-
 import fontkit from '@pdf-lib/fontkit';
 import { LOCALES, type Locale } from '@storynido/shared';
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import { z } from 'zod';
 
 import { DEFAULT_BRAND, type EmailBrand } from './brand';
+import {
+  FONT_CAVEAT_BASE64,
+  FONT_LORA_BASE64,
+  FONT_QUICKSANDBOLD_BASE64,
+  FONT_QUICKSANDMEDIUM_BASE64,
+} from './receipt-fonts';
 
 /**
  * Comprobante de compra en PDF. NO es una factura ni un documento fiscal: así lo dice el propio
@@ -207,18 +211,14 @@ const CORAL = rgb(0xa3 / 255, 0x3f / 255, 0x33 / 255);
 const HEART =
   'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z';
 
-let fontFiles: Record<'quicksandMedium' | 'quicksandBold' | 'lora' | 'caveat', Uint8Array> | null =
-  null;
+const decode = (base64: string) => new Uint8Array(Buffer.from(base64, 'base64'));
 function loadFonts() {
-  const read = (name: string) =>
-    new Uint8Array(readFileSync(new URL(`../assets/fonts/${name}`, import.meta.url)));
-  fontFiles ??= {
-    quicksandMedium: read('Quicksand-Medium.ttf'),
-    quicksandBold: read('Quicksand-Bold.ttf'),
-    lora: read('Lora-Regular.ttf'),
-    caveat: read('Caveat-SemiBold.ttf'),
+  return {
+    quicksandMedium: decode(FONT_QUICKSANDMEDIUM_BASE64),
+    quicksandBold: decode(FONT_QUICKSANDBOLD_BASE64),
+    lora: decode(FONT_LORA_BASE64),
+    caveat: decode(FONT_CAVEAT_BASE64),
   };
-  return fontFiles;
 }
 
 function wrap(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
