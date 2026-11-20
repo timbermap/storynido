@@ -3163,7 +3163,15 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Problema:** en el detalle de un pedido impreso de prueba el margen mostraba US$ 21,54 porque no restaba la comisión de PayPal (~2,94); el neto real era ~18,60. La portada «Hoy» y la tabla por producto ya restaban la comisión.
 - **Arreglo:** el detalle muestra «Comisión de pago» (la real si PayPal la informó, si no la estimada del proveedor) y el margen es ingreso − impuestos − comisión − IA − impresión y envío.
 
-## 307 — Las direcciones de ejemplo llevan documento para cotizar con Lulu
+## 307 — El admin se organiza por áreas de trabajo (2026-11-20)
+
+- **Pedido de Sebas:** un menú superior con lo más importante y, al elegir una opción, el menú vertical de siempre con sus secciones, pensado por puestos operativos (CEO, marketing, operaciones, administración, usuarios).
+- **Cambio:** barra superior con 7 áreas: General (Hoy), Marketing (Visitas y campañas, Cupones, Promociones, Descuentos por volumen), Operaciones (Revisión manual, Calidad y canales, Imprentas, IA), Administración (Pedidos, Cobros PayPal, Precios y márgenes, Eventos, Países e impuestos), Usuarios (Clientes, Cotizaciones, Equipo del panel), Contenido (Historias, Colecciones, Estilos, Enseñanzas, Opciones editoriales, Textos del sitio) y Sistema (Sitio, Modelos de IA, Integraciones, Auditoría). El área sale de la ruta; General no muestra menú vertical porque solo tiene Hoy.
+- **Avisos:** cada área muestra un punto (rojo si hay urgentes) según `/v1/admin/attention`: pagos y disputas en Administración, revisión, atascados, impresión e IA en Operaciones, cotizaciones en Usuarios.
+- **Búsqueda:** pasó a la barra superior y recorre todo el panel, con el área de cada resultado. Imprentas pasó de Administración a Operaciones, y IA de Producción a Operaciones. Nada se borra; solo cambia dónde se ve.
+- **Portadas (paso 2):** cada área abre en «Resumen» (`/areas/<área>`) con avisos del área, cuatro números de los últimos 30 días, un gráfico de barras y las secciones: Marketing (tráfico y embudo), Operaciones (cola de revisión, IA de hoy, calidad, pedidos en proceso), Administración (ventas, comisión, contribución, reembolsos), Usuarios (clientes, cotizaciones, equipo), Contenido (catálogos) y Sistema (modo del sitio y últimos cambios). General sigue siendo Hoy. Solo lectura: usan rutas del admin que ya existían.
+
+## 308 — Las direcciones de ejemplo llevan documento para cotizar con Lulu
 
 - **Fecha:** 2026-11-20. En la prueba del impreso, la actualización diaria de costos de Lulu fallaba en Argentina, México y Brasil con `recipient_tax_id` requerido: las direcciones de ejemplo no tenían documento. El pago real ya lo pide (DECISIONS 233).
 - **Cambio:** `SAMPLE_PRINT_ADDRESSES` suma un documento de ejemplo válido en AR, MX, CL, PE y BR. Solo se usa para cotizar, nunca para pedidos.

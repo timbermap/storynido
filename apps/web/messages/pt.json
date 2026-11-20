@@ -2016,8 +2016,13 @@
       "download": "Baixar o PDF",
       "receipt": "Baixar comprovante",
       "track": "Acompanhar o envio",
-      "reorder": "Pedir de novo",
-      "trackingNumber": "Código de rastreio: {number}",
+      "reorder": "Pedir outra cópia",
+      "shipment": {
+        "title": "Seu envio",
+        "number": "Código de rastreio",
+        "copy": "Copiar",
+        "copied": "Copiado!"
+      },
       "simulatePrintText": "A gráfica é simulada neste ambiente: cada clique avança uma etapa do envio.",
       "simulatePrint": "Avançar a gráfica",
       "review": {
