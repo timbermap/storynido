@@ -62,6 +62,7 @@ test('un customer no entra al panel', async ({ page }) => {
 test('el modo del sitio cambia la web en segundos, sin redeploy', async ({ page }) => {
   await signIn(page, 'admin');
   await expectAccessible(page);
+  await page.getByRole('link', { name: /^Sistema/ }).click();
   await page.getByRole('link', { name: 'Sitio' }).click();
   await page.locator('label', { hasText: 'Solo vista previa' }).click();
   await page.getByRole('button', { name: 'Aplicar' }).click();
@@ -125,6 +126,7 @@ test('reembolso desde el detalle del pedido: confirmación, motivo y auditoría'
     timeout: 30_000,
   });
   await expect.poll(() => readField(`orders/${orderId}`, 'status')).toBe('refunded');
+  await page.getByRole('link', { name: /^Sistema/ }).click();
   await page.getByRole('link', { name: 'Auditoría' }).click();
   await expect(page.getByText('order.refund').first()).toBeVisible({ timeout: 30_000 });
 });
@@ -154,6 +156,7 @@ test('cola de revisión manual: el pedido aparece y "Aprobar páginas" lo devuel
     createdAt: new Date(),
   });
   await signIn(page, 'admin');
+  await page.getByRole('link', { name: /^Operaciones/ }).click();
   await page.getByRole('link', { name: 'Revisión manual' }).click();
   await page.getByRole('link', { name: orderId }).click();
   page.on('dialog', (dialog) => void dialog.accept());

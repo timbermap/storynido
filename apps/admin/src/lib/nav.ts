@@ -30,11 +30,11 @@ import {
 } from 'lucide-react';
 
 export const AREAS = [
-  'Producción',
-  'Logística',
-  'Atención',
+  'General',
   'Marketing',
+  'Operaciones',
   'Administración',
+  'Usuarios',
   'Contenido',
   'Sistema',
 ] as const;
@@ -72,8 +72,8 @@ export interface NavItem {
     | '/ai-models'
     | '/audit';
   label: string;
-  /** Área de trabajo: agrupa el menú por la pregunta que responde cada perfil. */
-  area: Area | null;
+  /** Área de trabajo: aparece en la barra superior; el menú vertical muestra solo las de esa área. */
+  area: Area;
   /** Palabras extra para la búsqueda. */
   keywords: string;
   icon: LucideIcon;
@@ -83,42 +83,42 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   {
     href: '/',
-    area: null,
+    area: 'General',
     label: 'Hoy',
     keywords: 'dashboard inicio resumen ventas contribución avisos',
     icon: Gauge,
   },
   {
     href: '/orders',
-    area: 'Logística',
+    area: 'Administración',
     label: 'Pedidos',
     keywords: 'compras reembolso imprenta pipeline',
     icon: ShoppingBag,
   },
   {
     href: '/review',
-    area: 'Producción',
+    area: 'Operaciones',
     label: 'Revisión manual',
     keywords: 'qa calidad cola aprobar',
     icon: ClipboardCheck,
   },
   {
     href: '/customers',
-    area: 'Atención',
+    area: 'Usuarios',
     label: 'Clientes',
     keywords: 'usuarios privacidad borrado pro',
     icon: Users,
   },
   {
     href: '/quotes',
-    area: 'Atención',
+    area: 'Usuarios',
     label: 'Cotizaciones',
     keywords: 'eventos impresos pedidos',
     icon: MessageSquareQuote,
   },
   {
     href: '/quality',
-    area: 'Producción',
+    area: 'Operaciones',
     label: 'Calidad y canales',
     keywords: 'métricas qa imprenta canales',
     icon: ChartColumn,
@@ -141,7 +141,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   {
     href: '/countries',
     area: 'Administración',
-    label: 'Países',
+    label: 'Países e impuestos',
     keywords: 'impuestos envío moneda idioma',
     icon: Globe,
   },
@@ -162,7 +162,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   },
   {
     href: '/print-options',
-    area: 'Administración',
+    area: 'Operaciones',
     label: 'Imprentas',
     keywords: 'costo producción imprenta gelato lulu cloudprinter plazo matriz',
     icon: Printer,
@@ -233,13 +233,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
   {
     href: '/content',
     area: 'Contenido',
-    label: 'Contenido',
+    label: 'Textos del sitio',
     keywords: 'legales faq banner textos',
     icon: FileText,
   },
   {
     href: '/ai',
-    area: 'Producción',
+    area: 'Operaciones',
     label: 'IA',
     keywords: 'modelos proveedor presupuesto regeneraciones',
     icon: Sparkles,
@@ -253,8 +253,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   },
   {
     href: '/staff',
-    area: 'Sistema',
-    label: 'Usuarios del panel',
+    area: 'Usuarios',
+    label: 'Equipo del panel',
     keywords: 'roles admin superadmin',
     icon: ShieldUser,
   },
@@ -273,6 +273,70 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: History,
   },
 ];
+
+/** Orden de las secciones dentro de cada área (el menú vertical). */
+const ORDER: readonly NavItem['href'][] = [
+  '/',
+  '/traffic',
+  '/coupons',
+  '/promotions',
+  '/pro-discounts',
+  '/review',
+  '/quality',
+  '/print-options',
+  '/ai',
+  '/orders',
+  '/paypal',
+  '/prices',
+  '/event-pricing',
+  '/countries',
+  '/customers',
+  '/quotes',
+  '/staff',
+  '/stories',
+  '/collections',
+  '/styles',
+  '/lessons',
+  '/editorial',
+  '/content',
+  '/site',
+  '/ai-models',
+  '/integrations',
+  '/audit',
+];
+
+export function itemsOfArea(area: Area): readonly NavItem[] {
+  return NAV_ITEMS.filter((item) => item.area === area).sort(
+    (a, b) => ORDER.indexOf(a.href) - ORDER.indexOf(b.href),
+  );
+}
+
+/** Pantallas de detalle que viven dentro de otra sección. */
+const DETAIL_PARENT: Record<string, NavItem['href']> = {
+  '/order': '/orders',
+  '/customer': '/customers',
+};
+
+export function areaOfPath(pathname: string): Area {
+  const path = pathname.replace(/\/$/, '') || '/';
+  const href = DETAIL_PARENT[path] ?? path;
+  return NAV_ITEMS.find((item) => item.href === href)?.area ?? 'General';
+}
+
+/** Área donde se muestra un aviso de la portada «Hoy». */
+export function areaOfAttention(kind: string): Area {
+  switch (kind) {
+    case 'payment_mismatch':
+    case 'payment_dispute':
+      return 'Administración';
+    case 'quote':
+      return 'Usuarios';
+    case 'alert':
+      return 'General';
+    default:
+      return 'Operaciones';
+  }
+}
 
 export function searchNav(query: string): readonly NavItem[] {
   const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
