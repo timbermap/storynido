@@ -983,6 +983,11 @@ Visual bible (English, fixed looks the illustrator repeats word for word):
   null for the everyday outfit) and shot (wide, medium, close-up or high angle, serving the beat; never the same shot three scenes in
   a row).
 notVisible of each scene lists every recurring character (companion and cast) who is not in that scene's place.
+State of objects, in positive visual words: write what the picture shows, never what is missing ("lantern dark and unlit, no glow", not
+"lantern off"; "empty table", not "no food"), because the illustrator draws what is named. When something must exist only once (a
+lighthouse, a ship, a tree), add "only one <thing> in the picture" to continuityFacts. Whenever the text or action of a scene involves
+special clothing (pajamas, swimwear, a coat, a costume), that outfit must exist in outfits and be set on the scene: never leave it only
+inside sceneGoal.
 
 Brief:
 ${request.prompt}${retryNote}`,
