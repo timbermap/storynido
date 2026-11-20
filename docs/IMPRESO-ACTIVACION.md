@@ -4,14 +4,14 @@ Hoy el impreso está apagado en todo el sitio (DECISIONS 295 y 297). Esta guía 
 
 ## Qué no depende de código
 
-| #   | Paso                                                                                                                                                                                                  | Quién |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| 1   | Prueba de punta a punta en **staging** (sección siguiente) con Lulu sandbox: pago PayPal sandbox, PDF de impresión, pedido a la imprenta, webhook de estado y reembolso                                | 🤝    |
-| 2   | PayPal en producción: app live y claves en Secret Manager (los físicos los acepta PayPal; el cobro es el mismo flujo)                                                                                 | 👤    |
-| 3   | Cuenta de Lulu de producción: clave y secreto (`lulu-client-key`, `lulu-client-secret` en `storynido-prod`) y webhook con `infra/scripts/lulu-webhook.sh production <api>`; método de pago de Lulu     | 👤    |
+| #   | Paso                                                                                                                                                                                                         | Quién |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| 1   | Prueba de punta a punta en **staging** (sección siguiente) con Lulu sandbox: pago PayPal sandbox, PDF de impresión, pedido a la imprenta, webhook de estado y reembolso                                      | 🤝    |
+| 2   | PayPal en producción: app live y claves en Secret Manager (los físicos los acepta PayPal; el cobro es el mismo flujo)                                                                                        | 👤    |
+| 3   | Cuenta de Lulu de producción: clave y secreto (`lulu-client-key`, `lulu-client-secret` en `storynido-prod`) y webhook con `infra/scripts/lulu-webhook.sh production <api>`; método de pago de Lulu           | 👤    |
 | 4   | **Muestra física** de cada formato que se venda (tapa blanda y tapa dura; grapado si se ofrece), pedida a una dirección propia. Si el archivo y la calidad están bien, `qaSamplePassed` en Admin → Impresión | 👤    |
-| 5   | Textos legales (términos, reembolsos, envíos, preguntas frecuentes) con la versión «impreso» (borrador en el doc del plan), revisados por Sebas y, de ser posible, un abogado                          | 👤    |
-| 6   | Precios: verificar en Admin → Precios la comisión de PayPal (5,4 % + US$0,30) en tapa blanda, tapa dura y grapado, y que cada país tenga IVA/impuestos cargados                                        | 👤    |
+| 5   | Textos legales (términos, reembolsos, envíos, preguntas frecuentes) con la versión «impreso» (borrador en el doc del plan), revisados por Sebas y, de ser posible, un abogado                                | 👤    |
+| 6   | Precios: verificar en Admin → Precios la comisión de PayPal (5,4 % + US$0,30) en tapa blanda, tapa dura y grapado, y que cada país tenga IVA/impuestos cargados                                              | 👤    |
 
 ## Qué cambia en código al activar
 
