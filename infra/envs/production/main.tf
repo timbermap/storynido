@@ -46,9 +46,8 @@ module "environment" {
   # Mails reales con Resend; el secreto de las bajas (email-link-secret) tiene valor propio de producción.
   email_provider           = "resend"
   email_link_secret_loaded = true
-  # Pagos en "mock" hasta cargar las credenciales live de PayPal y el webhook (paypal-webhook-id).
-  # Fase 2: payment_provider = "paypal" (PayPal live, DECISIONS).
-  payment_provider = "mock"
+  # PayPal live (DECISIONS).
+  payment_provider = "paypal"
   log_level        = "info"
   # Se suma el dominio del admin cuando exista.
   auth_authorized_domains = [

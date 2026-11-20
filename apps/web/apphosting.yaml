@@ -34,4 +34,17 @@ env:
   - variable: NEXT_TELEMETRY_DISABLED
     value: '1'
     availability: [BUILD]
-  # Fase 2 (PayPal live): agregar NEXT_PUBLIC_PAYPAL_CLIENT_ID con el client id live (público, como en staging).
+  # PayPal live: client id público (como en staging).
+  - variable: NEXT_PUBLIC_PAYPAL_CLIENT_ID
+    value: BAAhar0S7vHJKW6VT9u2Ix48R9ZG7kvcKV0ZT9TeMkZzPCcoZy4ijmkRnCGnym8vFpjT0GEBsQoaaP8fUQ
+    availability: [BUILD, RUNTIME]
+  # Redes del pie (una red sin URL no aparece).
+  - variable: NEXT_PUBLIC_SOCIAL_INSTAGRAM
+    value: https://www.instagram.com/storynido.redes/
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SOCIAL_TIKTOK
+    value: https://www.tiktok.com/@storynido.redes
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SOCIAL_PINTEREST
+    value: https://www.pinterest.com/storynido/
+    availability: [BUILD, RUNTIME]
