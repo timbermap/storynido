@@ -273,3 +273,24 @@ describe('fitToCap (DECISIONS 285)', () => {
     }
   });
 });
+
+describe('sin largo elegido', () => {
+  const choice = {
+    length: null,
+    textDensity: 'balanced',
+    readingLevel: 'developing',
+    contentType: 'story',
+  } as const;
+
+  it('un chico de 2 o 3 años no recibe un cuento de 26 páginas', () => {
+    const two = editorialPlan(choice, DEFAULT_EDITORIAL_CONFIG, 26, 2);
+    expect(two.narrativePages).toBe(DEFAULT_AGE_BANDS['0-2'].maxPages);
+    const three = editorialPlan(choice, DEFAULT_EDITORIAL_CONFIG, 26, 3);
+    expect(three.narrativePages).toBe(DEFAULT_AGE_BANDS['3-4'].maxPages);
+  });
+
+  it('sin edad o con una historia más corta que la franja, queda el largo de la historia', () => {
+    expect(editorialPlan(choice, DEFAULT_EDITORIAL_CONFIG, 26).narrativePages).toBe(26);
+    expect(editorialPlan(choice, DEFAULT_EDITORIAL_CONFIG, 10, 4).narrativePages).toBe(10);
+  });
+});

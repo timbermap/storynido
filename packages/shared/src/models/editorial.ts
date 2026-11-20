@@ -412,10 +412,15 @@ export function editorialPlan(
   const level = config.levels[choice.readingLevel];
   const bands = byAge ? { ageBand: byAge.ageBand, textBand: byAge.textBand } : {};
   if (!choice.length) {
+    // Sin largo elegido: las páginas de la historia, pero nunca más que lo que sugiere la franja de
+    // la edad (un cuento de 26 páginas para un chico de 2 o 3 años; mesa de prompts, 20 nov 2026).
+    const pages = byAge
+      ? Math.min(legacyPageCount, config.ageBands[byAge.ageBand].maxPages)
+      : legacyPageCount;
     return {
       ...choice,
-      interiorPages: legacyPageCount,
-      narrativePages: legacyPageCount,
+      interiorPages: pages,
+      narrativePages: pages,
       activityPages: 0,
       words,
       levelGuidance: level.guidance,
