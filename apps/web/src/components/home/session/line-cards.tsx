@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils';
 import { LINE_IMAGES, LineChip, cardClass, type LineCopy } from './parts';
 
 /**
- * «Crear algo nuevo»: las tres líneas. Sin nada pendiente, las tres llevan botón en el mismo
- * lugar y con la misma forma: la que manda, durazno y con borde; las otras, con contorno. Con algo pendiente o en modo Pro, las tres van
+ * «Crear algo nuevo»: las tres líneas. Sin nada pendiente, las tres llevan el mismo botón
+ * durazno, en el mismo lugar, sin destacar ninguna. Con algo pendiente o en modo Pro, las tres van
  * compactas (foto, título y enlace), sin botón.
  */
 export function LineCards({
@@ -71,7 +71,6 @@ export function LineCards({
                 className={cn(
                   cardClass,
                   'group grid h-full overflow-hidden transition-transform duration-150 hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0',
-                  isLead && 'border-2 border-foreground',
                   compact
                     ? 'grid-cols-[96px_minmax(0,1fr)]'
                     : 'grid-cols-[96px_minmax(0,1fr)] min-[421px]:grid-cols-[132px_minmax(0,1fr)] lg:grid-cols-1 lg:grid-rows-[auto_1fr]',
@@ -124,12 +123,12 @@ export function LineCards({
                     <span className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-2">
                       <span
                         className={cn(
-                          buttonVariants({ variant: isLead ? 'default' : 'outline' }),
+                          buttonVariants(),
                           'max-w-full px-5 text-center whitespace-normal',
                         )}
                       >
-                        {isLead ? (leadCta ?? t(`${line}.cta`)) : link}
-                        {!isLead && <ArrowRight className="size-4" aria-hidden="true" />}
+                        {isLead && leadCta ? leadCta : link}
+                        <ArrowRight className="size-4" aria-hidden="true" />
                       </span>
                       {!(isLead && leadCta) && !swap && (
                         <span className="text-[0.82rem] text-muted-foreground">
