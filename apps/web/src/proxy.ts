@@ -1,7 +1,7 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest } from 'next/server';
 
-import { isLocale, localeForCountry } from '@storynido/shared';
+import { isLocale, localeForCountry, localeFromAcceptLanguage } from '@storynido/shared';
 
 import { routing } from './i18n/routing';
 import {
@@ -15,6 +15,10 @@ import { LOCALE_CHOICE_COOKIE } from './lib/locale-choice';
 import { clientIp, countryFromIp } from './lib/server/geoip';
 
 const intl = createIntlMiddleware(routing);
+
+/** Buscadores y vistas previas al compartir: siempre reciben el idioma por defecto en `/`. */
+const CRAWLER =
+  /googlebot|bingbot|duckduckbot|yandex|baiduspider|facebookexternalhit|whatsapp|twitterbot|linkedinbot|pinterestbot/i;
 
 /**
  * Idioma en la URL (redirige / a /es, /en o /pt) y país detectado la primera vez. Sin idioma
@@ -33,7 +37,19 @@ export default function proxy(request: NextRequest) {
   const ipCountry =
     needsCountry || (needsLocale && !chosen) ? countryFromIp(clientIp(request.headers)) : null;
 
-  const ipLocale = needsLocale && !chosen ? localeForCountry(ipCountry) : null;
+  // Idioma por IP; si la IP daría inglés pero el navegador pide español o portugués (hispanos en
+  // EE. UU.), manda el navegador. Los rastreadores (Googlebot sale de EE. UU.) van a /es.
+  const browserLocale = localeFromAcceptLanguage(request.headers.get('accept-language'));
+  const byIp = needsLocale && !chosen ? localeForCountry(ipCountry) : null;
+  const isCrawler = CRAWLER.test(request.headers.get('user-agent') ?? '');
+  const ipLocale =
+    byIp === null
+      ? null
+      : isCrawler
+        ? routing.defaultLocale
+        : byIp === 'en' && (browserLocale === 'es' || browserLocale === 'pt')
+          ? browserLocale
+          : byIp;
   const target = needsLocale ? (chosen ?? ipLocale) : null;
   const response = intl(target ? withLanguage(request, target) : request);
 
