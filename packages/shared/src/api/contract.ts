@@ -881,6 +881,25 @@ export interface ApiRoute {
   response: z.ZodType;
 }
 
+/** Pasos del embudo público que cuenta el panel de visitas (solo con consentimiento de analítica). */
+export const TRAFFIC_EVENTS = [
+  'create_started',
+  'preview_created',
+  'begin_checkout',
+  'purchase',
+] as const;
+export type TrafficEvent = (typeof TRAFFIC_EVENTS)[number];
+
+const trafficRowSchema = z.object({ key: z.string(), views: z.number(), entries: z.number() });
+const trafficFunnelRowSchema = z.object({
+  key: z.string(),
+  entries: z.number(),
+  create_started: z.number(),
+  preview_created: z.number(),
+  begin_checkout: z.number(),
+  purchase: z.number(),
+});
+
 /** Contrato compartido entre la API (Fastify) y los clientes (web, admin). */
 export const apiRoutes = {
   health: {
@@ -1728,6 +1747,55 @@ export const apiRoutes = {
       browser: z.enum(['embedded', 'standard']),
     }),
     response: z.object({ ok: z.literal(true) }),
+  },
+  trafficHit: {
+    method: 'POST',
+    path: '/v1/events/traffic',
+    access: 'public',
+    summary:
+      'Cuenta una visita a una página pública o un paso del embudo (contadores diarios; sin cookies, sin IP ni identificadores)',
+    body: z.object({
+      /** Ruta pública sin idioma ni parámetros. */
+      path: z.string().max(120),
+      locale: localeSchema,
+      /** Visita nueva (llegó desde afuera o escribió la dirección) y no un cambio de página. */
+      entry: z.boolean().default(false),
+      /** Solo el dominio de la página de origen, nunca la dirección completa. */
+      referrer: z.string().max(120).nullable().default(null),
+      utmSource: z.string().max(60).nullable().default(null),
+      utmMedium: z.string().max(60).nullable().default(null),
+      utmCampaign: z.string().max(80).nullable().default(null),
+      /** País detectado por el sitio (ISO alfa-2). */
+      country: z.string().max(2).nullable().default(null),
+      /** Paso del embudo; sin esto es una vista de página. */
+      event: z.enum(TRAFFIC_EVENTS).nullable().default(null),
+      /** Origen guardado en este navegador (solo si aceptó la analítica). */
+      attrSource: z.string().max(60).nullable().default(null),
+      attrCampaign: z.string().max(140).nullable().default(null),
+    }),
+    response: z.object({ ok: z.literal(true) }),
+  },
+  adminTraffic: {
+    method: 'GET',
+    path: '/v1/admin/traffic',
+    access: 'admin',
+    summary:
+      'Visitas por página, fuente y red, campañas UTM, país, dispositivo y embudo hasta la compra',
+    query: z.object({ days: z.coerce.number().int().min(1).max(90).default(30) }),
+    response: z.object({
+      days: z.number(),
+      since: z.string(),
+      totals: z.object({ views: z.number(), entries: z.number(), campaignEntries: z.number() }),
+      daily: z.array(z.object({ day: z.string(), views: z.number(), entries: z.number() })),
+      pages: z.array(trafficRowSchema),
+      sources: z.array(trafficRowSchema),
+      campaigns: z.array(trafficRowSchema),
+      countries: z.array(trafficRowSchema),
+      devices: z.array(trafficRowSchema),
+      locales: z.array(trafficRowSchema),
+      funnelBySource: z.array(trafficFunnelRowSchema),
+      funnelByCampaign: z.array(trafficFunnelRowSchema),
+    }),
   },
   clientError: {
     method: 'POST',

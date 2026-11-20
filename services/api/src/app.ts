@@ -18,6 +18,7 @@ import { registerAiConfigRoutes } from './routes/ai-config';
 import { registerCatalogRoutes } from './routes/catalog';
 import { registerCheckoutRoutes } from './routes/checkout';
 import { registerContactRoutes } from './routes/contact';
+import { registerTrafficRoutes } from './routes/traffic';
 import { registerFulfillmentRoutes } from './routes/fulfillment';
 import { registerDevStorageRoutes } from './routes/dev-storage';
 import { registerOrderRoutes } from './routes/orders';
@@ -58,6 +59,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   registerV1Routes(app);
   registerEmailRoutes(app);
   registerContactRoutes(app);
+  registerTrafficRoutes(app);
   registerProRoutes(app, deps.pro);
   registerCatalogRoutes(
     app,

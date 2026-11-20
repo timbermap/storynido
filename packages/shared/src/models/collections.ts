@@ -20,6 +20,8 @@ export const COLLECTIONS = {
   adminAlerts: 'adminAlerts',
   /** loginMetrics/{AAAA-MM-DD}: contadores del login por navegador, método y vía. */
   loginMetrics: 'loginMetrics',
+  /** trafficDaily/{AAAA-MM-DD}: contadores diarios de visitas, fuentes, campañas y embudo (solo servidor). */
+  trafficDaily: 'trafficDaily',
   /** contactMessages/{id}: mensajes del formulario de contacto (solo el servidor y el admin). */
   contactMessages: 'contactMessages',
   /** contactLimits/{huella de IP y día}: tope de mensajes de contacto por conexión. */

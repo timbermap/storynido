@@ -2,10 +2,18 @@
 
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { CONVERSION_EVENT, type ConversionDetail } from '@/lib/conversions';
 import { channelForPath, isPrivatePath } from '@/lib/tracking';
+import {
+  readEntry,
+  saveAttribution,
+  sendFunnelEvent,
+  sendView,
+  trackingOptedOut,
+  type EntryInfo,
+} from '@/lib/traffic';
 
 import { useConsent } from './consent-provider';
 
@@ -31,6 +39,32 @@ export function Analytics() {
   const marketing = Boolean(PIXEL_ID && choice?.marketing);
   const privatePath = isPrivatePath(pathname);
 
+  // Panel de visitas propio: contador sin cookies ni identificadores (DECISIONS 300). La primera
+  // página de la carga es la «entrada» y trae el origen (página de origen y UTM); las siguientes,
+  // no. «No rastrear» y Global Privacy Control lo apagan. El origen se guarda en este navegador
+  // para el embudo solo si aceptó la analítica.
+  const consent = Boolean(choice?.analytics);
+  const originRef = useRef<EntryInfo | null>(null);
+  const entryRef = useRef<EntryInfo | null>(null);
+  useEffect(() => {
+    if (originRef.current) return;
+    originRef.current = readEntry(
+      window.location.search,
+      document.referrer,
+      window.location.hostname,
+    );
+    entryRef.current = originRef.current;
+  }, []);
+  useEffect(() => {
+    if (consent && originRef.current) saveAttribution(originRef.current);
+  }, [consent]);
+  useEffect(() => {
+    if (privatePath || trackingOptedOut()) return;
+    const entry = entryRef.current ?? null;
+    entryRef.current = null;
+    sendView(pathname, entry);
+  }, [pathname, privatePath]);
+
   useEffect(() => {
     const win = window as unknown as TrackingWindow;
     if (GA_ID) win[`ga-disable-${GA_ID}`] = privatePath;
@@ -54,10 +88,9 @@ export function Analytics() {
   // Eventos del embudo público: cualquier elemento con data-track="evento" (y data-track-*
   // como parámetros). Nunca datos del niño: solo público, historia, filtro o línea.
   useEffect(() => {
-    if (!analytics || privatePath) return;
+    if (!consent || privatePath) return;
     const onClick = (event: MouseEvent) => {
       const gtag = (window as unknown as TrackingWindow).gtag;
-      if (!gtag) return;
       const element = event.target as Element | null;
       // Cualquier enlace al creador cuenta como "empezó", con su línea.
       const create = element?.closest<HTMLAnchorElement>(
@@ -65,11 +98,12 @@ export function Analytics() {
       );
       if (create) {
         const line = new URL(create.href).searchParams.get('line') ?? 'families';
-        gtag('event', 'create_started', { line });
+        gtag?.('event', 'create_started', { line });
+        sendFunnelEvent('create_started', window.location.pathname);
         return;
       }
       const target = element?.closest<HTMLElement>('[data-track]');
-      if (!target) return;
+      if (!target || !gtag) return;
       const params: Record<string, string> = {};
       for (const [key, value] of Object.entries(target.dataset)) {
         if (key.startsWith('track') && key !== 'track' && value) {
@@ -82,7 +116,7 @@ export function Analytics() {
     return () => {
       document.removeEventListener('click', onClick, { capture: true });
     };
-  }, [analytics, privatePath]);
+  }, [consent, privatePath]);
 
   // Conversiones (vista previa, pago iniciado y compra): ocurren en rutas privadas, donde no corre
   // nada más. Salen solo con consentimiento, con valor y moneda, y sin la dirección de la página
@@ -92,6 +126,9 @@ export function Analytics() {
       const detail = (event as CustomEvent<ConversionDetail>).detail;
       const win = window as unknown as TrackingWindow;
       const site = window.location.origin;
+      // Panel de visitas propio: el paso del embudo con el origen guardado; sin la dirección
+      // de la página (lleva el id del libro o del pedido).
+      if (consent && !trackingOptedOut()) sendFunnelEvent(detail.name, '/');
       if (analytics && GA_ID && win.gtag) {
         // El bloqueo de las rutas privadas se levanta solo mientras sale este evento.
         win[`ga-disable-${GA_ID}`] = false;
@@ -119,7 +156,7 @@ export function Analytics() {
     return () => {
       window.removeEventListener(CONVERSION_EVENT, onConversion);
     };
-  }, [analytics, marketing]);
+  }, [analytics, marketing, consent]);
 
   useEffect(() => {
     const gtag = (window as unknown as { gtag?: Gtag }).gtag;
