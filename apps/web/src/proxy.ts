@@ -17,7 +17,8 @@ import { clientIp, countryFromIp } from './lib/server/geoip';
 const intl = createIntlMiddleware(routing);
 
 /** Buscadores y vistas previas al compartir: siempre reciben el idioma por defecto en `/`. */
-const CRAWLER = /googlebot|bingbot|duckduckbot|yandex|baiduspider|facebookexternalhit|whatsapp|twitterbot|linkedinbot|pinterestbot/i;
+const CRAWLER =
+  /googlebot|bingbot|duckduckbot|yandex|baiduspider|facebookexternalhit|whatsapp|twitterbot|linkedinbot|pinterestbot/i;
 
 /**
  * Idioma en la URL (redirige / a /es, /en o /pt) y país detectado la primera vez. Sin idioma
