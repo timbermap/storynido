@@ -3090,3 +3090,10 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Causa:** al reparar una página, `illustrate` dejaba subir el error del proveedor cuando el modelo respondía sin imagen (o bloqueaba la escena). Solo se capturaba el rechazo de la moderación, así que un único dibujo vacío tumbaba el paso entero, dos veces, en vez de afectar a una página.
 - **Arreglo:** nuevo `ImageNotReturnedError` (vertex lo lanza al no haber imagen o bloquear la escena). `illustrate` lo cuenta como intento fallido, anota `image_not_returned` y el intento siguiente pide una escena más simple. Si no sale ninguno, rige lo de siempre: reparación → revisión humana de esa página (no del libro).
 - **Prevención:** prueba de emulador con reparaciones sin imagen.
+
+### 300. Revisión de precios y márgenes de todo el sitio (2026-11-20)
+
+- **Revisado en staging:** API de oferta (AR, BR, CL, ES, MX, US, UY), Admin → Precios, Países y Kit, home, Familias, Profesionales, Celebraciones, Cómo funciona, historias, FAQ y legales. Los 16 precios de ebook (extensión × tipo) salen del mismo cálculo que el checkout y coinciden: mini 14,99, corto 16,99, clásico 22,99, gran aventura 24,99 (actividades y profesional más bajos, nunca debajo de 13,99). Ningún texto lleva un precio escrito a mano.
+- **Desajuste corregido:** la estimación de comisión del panel (contribución, «Hoy») no conocía PayPal y lo calculaba como Dodo (5,5 % + 0,40). Ahora PayPal 5,4 % + 0,30 y es el proveedor por defecto para `mock` y desconocidos.
+- **Prueba nueva:** `price-closes.test.ts` fija que cada precio de lista deja el margen objetivo después de la comisión, que el profesional no baja del margen neto mínimo ni de 13,99 y la tabla de listas.
+- **Abierto (decisión de Sebas):** IVA real por país (solo México cargado; ES, CL, CO, PE, BR, AR y UY figuran 0 % y el recibo dice «impuestos incluidos» sin monto); el kit de Celebraciones tiene precio manual, no derivado de costo + comisión.

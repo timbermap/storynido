@@ -44,10 +44,12 @@ export interface MetricsOrder {
 /**
  * Comisión de cada proveedor de pago con tarjeta no estadounidense, publicada al 16 nov 2026
  * (flaviocopes.com/payment-provider-fees). Es una estimación hasta guardar la comisión real de
- * cada cobro. `mock` y los desconocidos usan la del proveedor previsto (Dodo), para que la
+ * cada cobro. `mock` y los desconocidos usan la del proveedor en uso (PayPal), para que la
  * contribución de staging se parezca a la real.
  */
 export const PAYMENT_FEES: Record<string, { percent: number; fixedUsd: number }> = {
+  // PayPal Argentina, verificado en la cuenta de Sebas (19 nov 2026): 5,4 % + USD 0,30.
+  paypal: { percent: 5.4, fixedUsd: 0.3 },
   dodo: { percent: 5.5, fixedUsd: 0.4 },
   gumroad: { percent: 12.9, fixedUsd: 0.8 },
   creem: { percent: 3.9, fixedUsd: 0.4 },
@@ -55,7 +57,7 @@ export const PAYMENT_FEES: Record<string, { percent: number; fixedUsd: number }>
   polar: { percent: 6.5, fixedUsd: 0.5 },
 };
 
-export const DEFAULT_PAYMENT_PROVIDER = 'dodo';
+export const DEFAULT_PAYMENT_PROVIDER = 'paypal';
 
 /** Comisión estimada de un cobro (USD). Un reembolso no la devuelve. */
 export function estimatePaymentFeeUsd(totalUsd: number, provider?: string): number {

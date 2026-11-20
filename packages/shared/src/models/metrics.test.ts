@@ -103,7 +103,8 @@ describe('métricas del dashboard', () => {
   it('comisión estimada por proveedor; mock y desconocidos usan la de Dodo', () => {
     expect(estimatePaymentFeeUsd(21.99, 'dodo')).toBeCloseTo(1.61, 2);
     expect(estimatePaymentFeeUsd(21.99, 'gumroad')).toBeCloseTo(3.64, 2);
-    expect(estimatePaymentFeeUsd(21.99, 'mock')).toBeCloseTo(1.61, 2);
+    expect(estimatePaymentFeeUsd(21.99, 'paypal')).toBeCloseTo(1.49, 2);
+    expect(estimatePaymentFeeUsd(21.99, 'mock')).toBeCloseTo(1.49, 2);
     expect(estimatePaymentFeeUsd(0, 'dodo')).toBe(0);
   });
 
