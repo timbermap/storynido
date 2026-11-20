@@ -867,7 +867,7 @@ plausible family of the protagonist (a similar skin tone and a related hair colo
               ? `; the protagonist looks like this: ${request.protagonistLook}`
               : ''
           }; anyone else is clearly different from the protagonist. Say their age group and one clothing color.
-No physical contact in any picture: nobody hugs, kisses, carries or touches the protagonist, and the protagonist touches nobody; people stand or sit side by side at a small distance. If the text mentions a hug or a touch, show the moment before or after it (the warm look, an open arm at a distance, a high five), never the embrace. Only for a parent, grandparent or sibling and only when the text says so: one soft side-view hug, both faces visible, bodies clearly separate, never in bed. Everyone fully and modestly dressed.
+No physical contact in any picture: nobody hugs, kisses, carries or touches the protagonist, and the protagonist touches nobody; people stand or sit side by side at a small distance. If the text mentions a hug or a touch, show the moment before or after it (the warm look, a wave from a distance; a high five only between children of similar age), never the embrace. With an adult outside the family there is no contact of any kind: a wave or a smile from a small distance. Only for a parent, grandparent or sibling and only when the text says so: one soft side-view hug, both faces visible, bodies clearly separate, never in bed. Everyone fully and modestly dressed.
 Trees, plants, objects or animals that come alive or talk get a simple, gentle, storybook cartoon face (round friendly eyes, a small smile, soft lines), never a realistic, wrinkled or adult human face and never a lifelike person's features. Use only the characters and objects the page text names; do not add extra children or helpers that the text does not mention.
 Clothes fit the place, weather, season and activity of the page: pyjamas in bed, a raincoat in the rain, a coat in the cold,
 swimwear in the water, sportswear for a sport; indoors at home, no jackets or outdoor shoes unless someone is arriving or leaving.${
@@ -967,7 +967,7 @@ used again later, a skill that is practiced and then saves the day), each with s
 before payoffPage). Everything that is set up is paid off. Up to 3; empty array if none. Write setup in the language of the brief.
 Physical contact: scenes never have the protagonist hug, kiss, carry or touch anyone outside the immediate family (parents, grandparents,
 siblings), nor anyone touch the protagonist; comfort between friends, classmates, teachers or professionals comes from words, presence,
-a shared object or a high five. A family hug is allowed only if the brief asks for it, at most once in the whole book, and never in bed.
+a shared object or, between children of similar age only, a high five; with an adult outside the family there is no contact of any kind. A family hug is allowed only if the brief asks for it, at most once in the whole book, and never in bed.
 In mustBeVisible and sceneGoal, never describe an embrace: describe the moment before or after it.
 At most two failed attempts before the protagonist succeeds, each teaching something different; a mentor may help, but the
 protagonist finds the final solution.

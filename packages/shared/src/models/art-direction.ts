@@ -122,7 +122,7 @@ export const ONE_PROTAGONIST =
  * cuerpos fundidos y sin caras. Vale para todos los estilos, líneas y tipos de libro.
  */
 export const BODY_CONTACT =
-  "Physical contact and clothing: characters keep a small personal distance, standing or sitting side by side, facing each other or looking at the same thing; no hugs, embraces, kisses, piggyback rides, laps, lying together, tangled limbs or hands on another person's body, between children or with adults outside the family. A soft side-view hug between the protagonist and a parent, grandparent or sibling, both faces visible, bodies clearly separate, only when the page text says so; never in bed. Allowed touch: a high five, a fist bump, or holding hands while walking side by side. Everyone is fully and modestly dressed (sportswear and gymnastics outfits are worn over shorts or leggings, no bare midriff); swimwear only in the water.";
+  "Physical contact and clothing: characters keep a small personal distance, standing or sitting side by side, facing each other or looking at the same thing; no hugs, embraces, kisses, piggyback rides, laps, lying together, tangled limbs or hands on another person's body, between children or with adults outside the family. A soft side-view hug between the protagonist and a parent, grandparent or sibling, both faces visible, bodies clearly separate, only when the page text says so; never in bed. Allowed touch: a high five or a fist bump only between children of similar age, or holding hands while walking side by side with family; with an adult outside the family there is no contact of any kind (a wave, a nod or a smile from a small distance instead). Everyone is fully and modestly dressed (sportswear and gymnastics outfits are worn over shorts or leggings, no bare midriff); swimwear only in the water.";
 
 /**
  * La maquetación pone el texto en la región más calma de cada página: la imagen tiene que dejarle
@@ -221,6 +221,10 @@ export function artDirection(input: {
 
 /** Frases viejas de la dirección de arte que imponían una técnica (DECISIONS 265). */
 const LEGACY_TECHNIQUE: readonly (readonly [string, string])[] = [
+  [
+    'Allowed touch: a high five, a fist bump, or holding hands while walking side by side.',
+    'Allowed touch: a high five or a fist bump only between children of similar age, or holding hands while walking side by side with family; with an adult outside the family there is no contact of any kind (a wave, a nod or a smile from a small distance instead).',
+  ],
   [
     'every face is unique and resembles the reference photo (natural-sized eyes',
     "the main character's face resembles the reference photo or reference sheet, and every other face belongs to a different individual (natural-sized eyes",
