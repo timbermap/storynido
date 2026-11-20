@@ -293,9 +293,9 @@ export function ContributionWaterfall({ totals }: { totals: Totals }) {
         />
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        La comisión se estima por proveedor (PayPal 5,4 % + 0,30; Dodo 5,5 % + 0,40; Gumroad 12,9 % + 0,80) e incluye la
-        de los reembolsos, que no se devuelve. Reembolsado en el período: {usd(totals.refundedUsd)}{' '}
-        ({totals.refunds}), ya fuera de las ventas.
+        La comisión se estima por proveedor (PayPal 5,4 % + 0,30; Dodo 5,5 % + 0,40; Gumroad 12,9 %
+        + 0,80) e incluye la de los reembolsos, que no se devuelve. Reembolsado en el período:{' '}
+        {usd(totals.refundedUsd)} ({totals.refunds}), ya fuera de las ventas.
       </p>
     </Card>
   );
