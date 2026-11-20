@@ -861,6 +861,7 @@ plausible family of the protagonist (a similar skin tone and a related hair colo
               : ''
           }; anyone else is clearly different from the protagonist. Say their age group and one clothing color.
 No physical contact in any picture: nobody hugs, kisses, carries or touches the protagonist, and the protagonist touches nobody; people stand or sit side by side at a small distance. If the text mentions a hug or a touch, show the moment before or after it (the warm look, an open arm at a distance, a high five), never the embrace. Only for a parent, grandparent or sibling and only when the text says so: one soft side-view hug, both faces visible, bodies clearly separate, never in bed. Everyone fully and modestly dressed.
+Trees, plants, objects or animals that come alive or talk get a simple, gentle, storybook cartoon face (round friendly eyes, a small smile, soft lines), never a realistic, wrinkled or adult human face and never a lifelike person's features. Use only the characters and objects the page text names; do not add extra children or helpers that the text does not mention.
 Clothes fit the place, weather, season and activity of the page: pyjamas in bed, a raincoat in the rain, a coat in the cold,
 swimwear in the water, sportswear for a sport; indoors at home, no jackets or outdoor shoes unless someone is arriving or leaving.${
             request.age !== undefined

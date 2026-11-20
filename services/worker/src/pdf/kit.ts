@@ -624,7 +624,7 @@ function activities(book: KitBook, copies: number) {
         ),
     page(
       t(book, 'solutions'),
-      `<p class="hint">${t(book, 'solSearch')}</p>${wordSearchSvg(puzzle, true)}<p class="hint">${t(book, 'solSecret')}</p><p class="solved">${escapeHtml(plain(message).length > 0 ? message.replace(/[^\p{L} ]/gu, '') : message)}</p>${scrambleSolution}`,
+      `<p class="hint">${t(book, 'solSearch')}</p>${wordSearchSvg(puzzle, true)}<p class="hint">${t(book, 'solSecret')}</p><p class="solved">${escapeHtml(plain(message).length > 0 ? message.replace(/[^\p{L} ]/gu, '').toLocaleUpperCase() : message.toLocaleUpperCase())}</p>${scrambleSolution}`,
       5,
     ),
   );
