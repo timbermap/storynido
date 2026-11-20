@@ -472,3 +472,120 @@ describe('PaypalPaymentProvider.refund', () => {
     expect(JSON.parse(bodyOf(call))).toEqual({});
   });
 });
+
+describe('PayPal: comisión real y lectura de la billetera', () => {
+  it('la captura trae comisión y neto: el evento los lleva', async () => {
+    const { fetchImpl } = fakePaypal(verified);
+    const rawBody = JSON.stringify({
+      id: 'WH-EVT-1',
+      event_type: 'PAYMENT.CAPTURE.COMPLETED',
+      resource: capture({
+        seller_receivable_breakdown: {
+          gross_amount: { currency_code: 'USD', value: '15.99' },
+          paypal_fee: { currency_code: 'USD', value: '1.16' },
+          net_amount: { currency_code: 'USD', value: '14.83' },
+        },
+      }),
+    });
+    const result = await provider(fetchImpl).parseWebhook({
+      rawBody,
+      headers: signedHeaders,
+    });
+    expect(result).toMatchObject({ type: 'checkout.completed', feeMinor: 116, netMinor: 1483 });
+  });
+
+  it('saldo: total, disponible y retenido en centavos', async () => {
+    const { calls, fetchImpl } = fakePaypal({
+      '/v1/reporting/balances': {
+        body: {
+          balances: [
+            {
+              currency: 'USD',
+              total_balance: { currency_code: 'USD', value: '120.50' },
+              available_balance: { currency_code: 'USD', value: '100.00' },
+              withheld_balance: { currency_code: 'USD', value: '20.50' },
+            },
+          ],
+        },
+      },
+    });
+    const balances = await provider(fetchImpl).reporting.balances();
+    expect(balances).toEqual([
+      { currency: 'USD', totalMinor: 12050, availableMinor: 10000, withheldMinor: 2050 },
+    ]);
+    expect(
+      calls.every(
+        (call) => !call.init?.method || call.init.method === 'GET' || call.url.includes('oauth2'),
+      ),
+    ).toBe(true);
+  });
+
+  it('movimientos: tipos, importes con signo, pedido y paginado', async () => {
+    const info = (id: string, code: string, gross: string, fee: string, custom?: string) => ({
+      transaction_info: {
+        transaction_id: id,
+        transaction_event_code: code,
+        transaction_initiation_date: '2026-11-19T10:00:00+0000',
+        transaction_amount: { currency_code: 'USD', value: gross },
+        fee_amount: { currency_code: 'USD', value: fee },
+        transaction_status: 'S',
+        custom_field: custom,
+      },
+    });
+    const { fetchImpl } = fakePaypal({
+      '/v1/reporting/transactions': [
+        {
+          body: {
+            total_pages: 2,
+            transaction_details: [
+              info('CAP-1', 'T0006', '15.99', '-1.16', 'ord_1'),
+              info('REF-1', 'T1107', '-15.99', '1.16', 'ord_1'),
+            ],
+          },
+        },
+        {
+          body: { total_pages: 2, transaction_details: [info('WD-1', 'T0400', '-50.00', '0.00')] },
+        },
+      ],
+    });
+    const list = await provider(fetchImpl).reporting.transactions(
+      new Date('2026-11-01T00:00:00Z'),
+      NOW,
+    );
+    expect(list.map((tx) => [tx.id, tx.kind, tx.grossMinor, tx.feeMinor, tx.orderId])).toEqual([
+      ['CAP-1', 'payment', 1599, -116, 'ord_1'],
+      ['REF-1', 'refund', -1599, 116, 'ord_1'],
+      ['WD-1', 'withdrawal', -5000, 0, null],
+    ]);
+  });
+
+  it('permiso faltante: el error dice HTTP 403 para que el admin lo explique', async () => {
+    const { fetchImpl } = fakePaypal({
+      '/v1/reporting/transactions': { status: 403, body: { name: 'NOT_AUTHORIZED' } },
+    });
+    await expect(
+      provider(fetchImpl).reporting.transactions(new Date('2026-11-01T00:00:00Z'), NOW),
+    ).rejects.toThrow(/403/);
+  });
+
+  it('disputas: monto y cobro disputado', async () => {
+    const { fetchImpl } = fakePaypal({
+      '/v1/customer/disputes': {
+        body: {
+          items: [
+            {
+              dispute_id: 'PP-D-1',
+              status: 'OPEN',
+              reason: 'MERCHANDISE_OR_SERVICE_NOT_RECEIVED',
+              create_time: '2026-11-19T10:00:00.000Z',
+              dispute_amount: { currency_code: 'USD', value: '15.99' },
+              disputed_transactions: [{ seller_transaction_id: 'CAP-1' }],
+            },
+          ],
+        },
+      },
+    });
+    const [dispute] = await provider(fetchImpl).reporting.disputes();
+    expect(dispute).toMatchObject({ id: 'PP-D-1', amountMinor: 1599, paymentId: 'CAP-1' });
+  });
+});

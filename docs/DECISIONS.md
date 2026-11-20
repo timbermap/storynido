@@ -3103,3 +3103,17 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Fecha:** 2026-11-20. Sebas quiere salir con digital y tener el impreso listo para prender en pocos días.
 - **Cambio:** variable `print_enabled` (por defecto `false`) que fija `PRINT_ENABLED` en la API de cada ambiente; ya no hace falta tocar variables de Cloud Run a mano. Guía de activación y prueba de punta a punta en [`IMPRESO-ACTIVACION.md`](IMPRESO-ACTIVACION.md).
 - **Ojo:** producción tiene `print_providers = ["mock"]`; al activar hay que ponerle las imprentas reales y cargar los secretos de Lulu, Gelato y Cloudprinter.
+
+## 300 — Seguimiento de PayPal en el admin («Cobros PayPal»), solo lectura
+
+**Qué.** Pantalla nueva en Administración con: cobrado, comisión real, neto, reembolsado; saldo de la billetera (disponible, retenido, total); conciliación pedido ↔ PayPal; cobros por pedido; disputas; reembolsos y retiros; todos los movimientos. Ruta `GET /v1/admin/paypal?days=7|30|90`.
+
+**Comisión real.** Al capturar, PayPal informa `seller_receivable_breakdown` (comisión y neto). Se guarda en el pedido (`payment.feeMinor`, `payment.netMinor`) y el dashboard «Hoy» usa esa comisión en vez de la estimada (METRICS_VERSION 4 recalcula los días guardados). Para los pedidos anteriores sin dato se estima con `PAYMENT_FEES.paypal` = 5,4 % + US$ 0,30 (cuenta de Argentina verificada el 19 nov 2026).
+
+**Lectura de PayPal.** `PaymentProvider.reporting` (opcional) con saldo (`/v1/reporting/balances`), movimientos (`/v1/reporting/transactions`, tramos de 30 días, hasta 90 días) y disputas (`/v1/customer/disputes`). Solo GET. Cada sección falla por separado y el error explica el permiso que falta (activar «Transaction Search» y «Disputes» en la app REST de PayPal).
+
+**Conciliación.** Se cruza por el ID de la captura (`payment.paymentId`). Marcas: coincide, no aparece en PayPal (solo si pasaron más de 3 h, el atraso de PayPal), otro importe, y cobros de PayPal sin pedido nuestro (webhook perdido).
+
+**Límites a propósito.** Desde el admin no se reembolsa ni se retira nada: el reembolso sigue en el detalle del pedido (con confirmación y auditoría) y los retiros se hacen en PayPal (en USD: convertir a pesos dentro de PayPal cuesta 3,5 % extra). El aviso de disputa ahora dice el monto en dólares y el pedido.
+
+**Pendiente de Sebas.** Activar «Transaction Search» y «Disputes» en la app de PayPal (sandbox ahora; en vivo cuando exista la app). Webhooks a suscribir: `CHECKOUT.ORDER.APPROVED`, `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.REFUNDED`, `CUSTOMER.DISPUTE.CREATED`.

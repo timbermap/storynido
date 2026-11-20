@@ -33,6 +33,8 @@ export interface MetricsOrder {
   printCostUsdMinor: number | null;
   /** Proveedor de pago del pedido (`dodo`, `gumroad`, `mock`…). Sin él, el previsto. */
   paymentProvider?: string;
+  /** Comisión real del cobro (USD, centavos), si el procesador la informó (PayPal). */
+  paymentFeeUsdMinor?: number;
   /** Producto para la tabla por producto (`metricsProductKey`). */
   product?: string;
   /** IA gastada en este pedido (generación del libro), en millonésimas de USD. */
@@ -55,6 +57,8 @@ export const PAYMENT_FEES: Record<string, { percent: number; fixedUsd: number }>
   creem: { percent: 3.9, fixedUsd: 0.4 },
   paddle: { percent: 5, fixedUsd: 0.5 },
   polar: { percent: 6.5, fixedUsd: 0.5 },
+  // Cuenta de Argentina verificada por Sebas (19 nov 2026): 5,4 % + US$ 0,30.
+  paypal: { percent: 5.4, fixedUsd: 0.3 },
 };
 
 export const DEFAULT_PAYMENT_PROVIDER = 'paypal';
@@ -101,7 +105,7 @@ export interface ProductMetrics {
 }
 
 /** Sube cuando cambia el cálculo: los días guardados con otra versión se recalculan. */
-export const METRICS_VERSION = 3;
+export const METRICS_VERSION = 4;
 
 /** A los N días un día queda congelado (ya no se esperan reembolsos ni cambios). */
 export const METRICS_SETTLE_DAYS = 35;
@@ -210,6 +214,13 @@ export function toUsd(amountMinor: number, currency: Currency, fx: FxRates): num
   return amountMinor / 10 ** CURRENCY_MINOR_UNITS[currency] / rate;
 }
 
+/** Comisión real si el procesador la informó (PayPal); si no, la estimada por proveedor. */
+function orderFeeUsd(order: MetricsOrder, totalUsd: number): number {
+  return typeof order.paymentFeeUsdMinor === 'number'
+    ? order.paymentFeeUsdMinor / 100
+    : estimatePaymentFeeUsd(totalUsd, order.paymentProvider);
+}
+
 export function aggregateDay(input: {
   day: string;
   final: boolean;
@@ -235,7 +246,7 @@ export function aggregateDay(input: {
     const total = toUsd(order.amounts.totalMinor, order.currency, input.fx);
     const tax = toUsd(order.amounts.taxMinor, order.currency, input.fx);
     const print = (order.printCostUsdMinor ?? 0) / 100;
-    const fee = estimatePaymentFeeUsd(total, order.paymentProvider);
+    const fee = orderFeeUsd(order, total);
     revenueUsd += total;
     taxUsd += tax;
     printUsd += print;
@@ -268,7 +279,7 @@ export function aggregateDay(input: {
   for (const order of refunded) {
     const total = toUsd(order.amounts.totalMinor, order.currency, input.fx);
     refundedUsd += total;
-    feeUsd += estimatePaymentFeeUsd(total, order.paymentProvider);
+    feeUsd += orderFeeUsd(order, total);
   }
   const aiCostUsd = input.aiCostUsdMicros / 1_000_000;
   const aiBooksUsd = Math.min(aiCostUsd, (input.aiOrdersUsdMicros ?? 0) / 1_000_000);
