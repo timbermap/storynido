@@ -859,7 +859,7 @@ one or two sentences: who is in the picture and who is not (the protagonist ${re
           }), the place, the time of day, the key object, and ONE single moment of the page (never two actions in a row).
 Draw only what the text says or implies; follow mustBeVisible / notVisible when given. When a page has an emotion, show it in the
 protagonist's face and body (a specific expression and posture, never a generic smile), and when it has a camera, frame the page that way. A page with empty text: the moment the
-plan describes, told by the picture alone. No text, letters or signs in the image. Exactly ${String(request.pages.length)} prompts, in order.
+plan describes, told by the picture alone. No text, letters or signs in the image: banners, cake toppers, cards, balloons, posters, boards and screens are drawn blank. Exactly ${String(request.pages.length)} prompts, in order.
 People who are not recurring characters: a relative of the protagonist (mother, father, grandparent, sibling, cousin) looks like a
 plausible family of the protagonist (a similar skin tone and a related hair color, never a stereotype)${
             request.protagonistLook
