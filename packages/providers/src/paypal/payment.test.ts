@@ -568,6 +568,30 @@ describe('PayPal: comisión real y lectura de la billetera', () => {
     ).rejects.toThrow(/403/);
   });
 
+  it('403 al leer: pide un token nuevo y reintenta una vez', async () => {
+    const calls: string[] = [];
+    let reads = 0;
+    let tokens = 0;
+    const fetchImpl = ((url: string) => {
+      const path = new URL(url).pathname;
+      calls.push(path);
+      if (path === '/v1/oauth2/token') {
+        tokens += 1;
+        return Promise.resolve(
+          new Response(JSON.stringify({ access_token: `tok${String(tokens)}`, expires_in: 32400 })),
+        );
+      }
+      reads += 1;
+      return Promise.resolve(
+        reads === 1
+          ? new Response(JSON.stringify({ name: 'NOT_AUTHORIZED' }), { status: 403 })
+          : new Response(JSON.stringify({ balances: [] })),
+      );
+    }) as typeof fetch;
+    await expect(provider(fetchImpl).reporting.balances()).resolves.toEqual([]);
+    expect(tokens).toBe(2);
+  });
+
   it('disputas: monto y cobro disputado', async () => {
     const { fetchImpl } = fakePaypal({
       '/v1/customer/disputes': {
