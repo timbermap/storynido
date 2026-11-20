@@ -420,6 +420,11 @@ export interface PageReview {
   textInImage: boolean;
   /** Qué arreglar: el texto aprobado nunca se cambia sin el adulto. */
   repairTarget: 'illustration_only' | 'text_only' | 'none';
+  /**
+   * Cómo tiene que verse la página para pasar, en inglés y en positivo (qué se ve, no qué se evita).
+   * Es lo que se le pide al redibujar: sin esto el redibujo repite el mismo error.
+   */
+  repairInstructions?: string[];
   usage: AiUsage;
 }
 

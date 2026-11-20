@@ -521,6 +521,7 @@ const PAGE_REVIEW_SCHEMA = {
     imageTextMatches: { type: 'BOOLEAN' },
     textInImage: { type: 'BOOLEAN' },
     repairTarget: { type: 'STRING', enum: ['illustration_only', 'text_only', 'none'] },
+    repairInstructions: { type: 'ARRAY', items: { type: 'STRING' } },
   },
   required: [
     'status',
@@ -1083,6 +1084,10 @@ Status:
   different child standing in for the protagonist). repairTarget illustration_only. A new illustration fixes all of these.
 - human_review: only inappropriate content, sensitive data visible, or a problem in the text itself (repairTarget text_only — the
   approved text is never changed automatically). Do not use human_review for drawing mistakes: those are repair.
+For status repair, repairInstructions lists one short English instruction per critical issue, worded as what the new drawing must
+SHOW (positive, concrete, visible): "the lantern is dark and unlit, no glow, no beams", "only one lighthouse in the whole picture, no
+second tower outside the window", "the protagonist wears pajamas". Never repeat the mistake (do not write "no glow" without saying
+what is shown instead); never mention text or letters. Empty array when status is pass.
 
 Protagonist: ${request.character}
 Essential traits (must match in every illustration): ${request.mustKeep.join('; ') || 'none'}

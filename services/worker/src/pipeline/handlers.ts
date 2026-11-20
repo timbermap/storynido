@@ -55,6 +55,8 @@ export class HumanReviewError extends Error {
   constructor(
     readonly code: string,
     message: string,
+    /** Lo gastado en IA antes de derivar a una persona: se suma al costo del pedido. */
+    readonly costUsdMicros = 0,
   ) {
     super(message);
     this.name = 'HumanReviewError';

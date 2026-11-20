@@ -1246,10 +1246,15 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           .filter((check) => check.expected !== check.observed)
           .map((check) => `${check.trait} ${check.expected}`);
         const safe = isSafeRedraw(review);
+        // Lo que el revisor pide ver (en positivo) va primero: sin eso el redibujo repite el error.
+        const instructions = (review?.repairInstructions ?? [])
+          .map((item) => item.trim())
+          .filter(Boolean);
+        const fixes = [...instructions, ...expected];
         const hint = safe
           ? SAFE_SCENE_HINT
-          : expected.length > 0
-            ? expected.join(', ')
+          : fixes.length > 0
+            ? fixes.join('; ')
             : 'the scene matches the page';
         try {
           const spent = await illustrate(
@@ -1289,6 +1294,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
               `${page.index === 0 ? 'portada' : `página ${String(page.index)}`} (${page.reason})`,
           )
           .join(', ')}`.slice(0, 500),
+        cost,
       );
     }
 

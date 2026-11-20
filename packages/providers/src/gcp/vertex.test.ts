@@ -280,6 +280,9 @@ describe('Vertex AI', () => {
     expect(text).toContain('Continuity (must match');
     expect(text).toContain('the red lantern');
     expect(text).toContain('Fixed looks for this scene: Place: the beach');
+    // El revisor pide instrucciones de reparación en positivo (lo que se ve), no solo el error.
+    expect(text).toContain('repairInstructions');
+    expect(text).toContain('what the new drawing must');
   });
 
   it('revisión del libro entero: todas las miniaturas en una llamada y solo páginas que existen', async () => {
