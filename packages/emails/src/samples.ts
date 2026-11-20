@@ -25,6 +25,7 @@ export const SAMPLE_DATA: { [T in EmailTemplate]: EmailData<T> } = {
     url: order,
   },
   digital_ready: { bookTitle: 'La gran aventura espacial', url: order },
+  order_in_review: { bookTitle: 'La gran aventura espacial', url: order },
   print_sent: { bookTitle: 'La gran aventura espacial', url: order, etaDaysMin: 6, etaDaysMax: 8 },
   print_in_production: { bookTitle: 'La gran aventura espacial', url: order },
   shipped: {

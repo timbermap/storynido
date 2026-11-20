@@ -3127,3 +3127,9 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 **Límites a propósito.** Desde el admin no se reembolsa ni se retira nada: el reembolso sigue en el detalle del pedido (con confirmación y auditoría) y los retiros se hacen en PayPal (en USD: convertir a pesos dentro de PayPal cuesta 3,5 % extra). El aviso de disputa ahora dice el monto en dólares y el pedido.
 
 **Pendiente de Sebas.** Activar «Transaction Search» y «Disputes» en la app de PayPal (sandbox ahora; en vivo cuando exista la app). Webhooks a suscribir: `CHECKOUT.ORDER.APPROVED`, `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.REFUNDED`, `CUSTOMER.DISPUTE.CREATED`.
+
+## 301 — Mail al cliente cuando su pedido pasa a revisión manual
+
+- **Fecha:** 2026-11-20. La mesa (usuario eventos, producto) vio que «Tu pedido» promete «te avisamos por correo» cuando una persona revisa el libro, pero ese mail no existía: solo se avisaba al equipo.
+- **Decisión:** plantilla `order_in_review` (es/en/pt): «Estamos revisando tu pedido», sin plazos inventados, con el link al pedido. Sale una sola vez, cuando el pedido cae en `qa_failed` (`orderStatus`), y si el libro termina bien después llega el de «listo» como siempre.
+- **Queda para después (mesa):** entrega parcial de piezas listas, reembolso automático tras 24 h en revisión, alerta por tasa de `image_not_returned`.

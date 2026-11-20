@@ -609,6 +609,10 @@ export class Pipeline {
       'pipeline.error': error.slice(0, 500),
     });
     if (closed) {
+      // Quien pagó se entera de que una persona revisa su pedido (el mail sale una sola vez).
+      await this.notifier?.orderStatus(orderId, 'qa_failed').catch((error: unknown) => {
+        this.log.warn({ orderId, err: error }, 'in-review email not sent');
+      });
       await this.db.collection(COLLECTIONS.adminAlerts).add({
         kind: 'pipeline_failed',
         orderId,

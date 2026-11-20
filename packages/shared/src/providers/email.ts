@@ -6,6 +6,7 @@ export const EMAIL_TEMPLATES = [
   'draft_reminder',
   'payment_confirmed',
   'digital_ready',
+  'order_in_review',
   'print_sent',
   'print_in_production',
   'shipped',
