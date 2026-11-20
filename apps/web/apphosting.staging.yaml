@@ -38,3 +38,13 @@ env:
   - variable: NEXT_PUBLIC_PAYPAL_CLIENT_ID
     value: ARC3yzZAzV-SFzSFjpZ5xT7UPfm-WI-ag0YxvUqwtIIGQqkGicdQEWigIyQdTpM3DAmfuuEBYJwl1xYJ
     availability: [BUILD, RUNTIME]
+  # Redes sociales (se muestran en el footer; una red sin URL no aparece). DECISIONS: cuentas de la mesa redes, 20 nov 2026.
+  - variable: NEXT_PUBLIC_SOCIAL_INSTAGRAM
+    value: https://www.instagram.com/storynido.redes/
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SOCIAL_TIKTOK
+    value: https://www.tiktok.com/@storynido.redes
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SOCIAL_PINTEREST
+    value: https://www.pinterest.com/storynido/
+    availability: [BUILD, RUNTIME]
