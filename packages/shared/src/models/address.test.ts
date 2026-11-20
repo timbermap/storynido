@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { addressProblems, addressSchema } from './commerce';
+import { addressProblems, addressSchema, TAX_ID_REQUIRED_COUNTRIES } from './commerce';
+import { SAMPLE_PRINT_ADDRESSES } from './print-samples';
 
 const base = addressSchema.parse({
   name: 'Ana Pérez',
@@ -146,5 +147,16 @@ describe('teléfono de quien recibe', () => {
         taxId: '20-12345678-6',
       }),
     ).toEqual([]);
+  });
+});
+
+describe('direcciones de ejemplo para cotizar', () => {
+  it('llevan un documento válido en los países que lo exigen (Lulu rechaza la cotización sin él)', () => {
+    for (const country of TAX_ID_REQUIRED_COUNTRIES) {
+      const sample = SAMPLE_PRINT_ADDRESSES[country];
+      if (!sample) continue;
+      expect(sample.taxId, country).toBeTruthy();
+      expect(addressProblems({ ...sample, country }), country).not.toContain('taxId');
+    }
   });
 });
