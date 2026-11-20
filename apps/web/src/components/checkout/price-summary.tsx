@@ -90,8 +90,8 @@ export function PriceSummary({
           key={row.label}
           className={`flex justify-between gap-4 ${row.muted ? 'text-muted-foreground' : ''}`}
         >
-          <dt>{row.label}</dt>
-          <dd className="tabular-nums">{row.value}</dd>
+          <dt className="min-w-0 text-pretty">{row.label.replace(/ %/g, '\u00a0%')}</dt>
+          <dd className="shrink-0 whitespace-nowrap tabular-nums">{row.value}</dd>
         </div>
       ))}
       <div className="mt-2 flex justify-between gap-4 border-t pt-3 text-base font-bold">
