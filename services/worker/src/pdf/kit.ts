@@ -81,6 +81,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     tag: '¡Gracias por venir!',
     tagFor: 'Para {guest}',
     madeWith: 'Hecho con StoryNido · storynido.com',
+    rsvp: 'Se agradece confirmar la asistencia.',
     years: '¡{age} años!',
     activities: 'Actividades del cumple de {name}',
     maze: 'Ayuda a {name} a llegar a la torta',
@@ -121,6 +122,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     tag: 'Thanks for coming!',
     tagFor: 'For {guest}',
     madeWith: 'Made with StoryNido · storynido.com',
+    rsvp: 'Please let us know if you can come.',
     years: '{age} years old!',
     activities: '{name}’s birthday activities',
     maze: 'Help {name} get to the cake',
@@ -161,6 +163,7 @@ const STRINGS: Record<KitLang, Record<string, string>> = {
     tag: 'Obrigado por vir!',
     tagFor: 'Para {guest}',
     madeWith: 'Feito com StoryNido · storynido.com',
+    rsvp: 'Por favor, confirme a presença.',
     years: '{age} anos!',
     activities: 'Atividades do aniversário de {name}',
     maze: 'Ajude {name} a chegar ao bolo',
@@ -423,6 +426,7 @@ function cardSheet(book: KitBook, copies: number, front: string, back: string, p
 .card .back { position: absolute; inset: ${String(BLEED + 10)}mm; display: flex; flex-direction: column; justify-content: center; gap: 6mm; text-align: center; }
 .card .back h2 { font-size: 22pt; color: ${LAVENDER}; }
 .card .row { font-size: 12pt; }
+.card .rsvp { font-size: 10.5pt; color: #8a8090; }
 .card .row b { display: block; font-size: 9pt; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8090; }
 .card .made { position: absolute; left: 0; right: 0; bottom: 0; font-size: 7.5pt; color: #8a8090; letter-spacing: 0.04em; }
 .card .line { display: block; margin: 2mm auto 0; width: 70%; border-bottom: 0.4mm solid #c9bfcf; height: 6mm; }
@@ -439,7 +443,7 @@ function invitation(book: KitBook, copies: number, print = false) {
     book,
     copies,
     `<img class="art" src="${book.cover}" alt=""><div class="band"><h1 class="display">${book.occasion === 'birthday' && book.turningAge ? t(book, 'turning') : t(book, 'birthday')}</h1><p>${t(book, 'invite')}</p></div>`,
-    `<div class="back"><h2 class="display">${t(book, 'invite')}</h2>${field('when', date)}${book.invitation?.time ? field('time', book.invitation.time) : ''}${field('where', book.invitation?.place)}<p class="row">${t(book, 'waiting')}</p>${book.signature === false ? '' : `<p class="made">${t(book, 'madeWith')}</p>`}</div>`,
+    `<div class="back"><h2 class="display">${t(book, 'invite')}</h2>${field('when', date)}${book.invitation?.time ? field('time', book.invitation.time) : ''}${field('where', book.invitation?.place)}<p class="row">${t(book, 'waiting')}</p><p class="rsvp">${t(book, 'rsvp')}</p>${book.signature === false ? '' : `<p class="made">${t(book, 'madeWith')}</p>`}</div>`,
     print,
   );
 }
@@ -455,6 +459,8 @@ function thankYou(book: KitBook, copies: number, print = false) {
 }
 
 /** Ilustración de la pieza número `index`: la portada y las demás del cuento, en rotación. */
+const CAKE_GUIDE = `<svg viewBox="0 0 200 160" width="70%" style="display:block;margin:auto" fill="none" stroke="#d9cfe0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="100" cy="132" rx="80" ry="12"/><path d="M45 132V80h110v52"/><path d="M45 80c0-14 110-14 110 0"/><path d="M45 104c18 10 28-8 45 2s28-8 45 2 20 0 20-4"/><path d="M85 66V48M115 66V48" stroke-dasharray="1 8"/></svg>`;
+
 function artAt(book: KitBook, index: number): string {
   const all = [book.cover, ...(book.pictures ?? [])];
   return all[index % all.length] ?? book.cover;
@@ -474,12 +480,15 @@ function stickers(book: KitBook, copies: number) {
   const items = Array.from({ length: columns * rows }, (_, index) => {
     const left = gapX + (index % columns) * (size + gapX);
     const top = gapY + Math.floor(index / columns) * (size + gapY);
-    return `<div class="sticker" style="left:${String(left)}mm;top:${String(top)}mm"><img src="${artAt(book, index)}" alt=""><p><span class="display">${escapeHtml(book.childName)}</span>${book.turningAge ? `<small>${t(book, 'years')}</small>` : ''}</p></div>`;
+    return `<div class="sticker${index >= columns * (rows - 1) ? ' nameonly' : ''}" style="left:${String(left)}mm;top:${String(top)}mm">${index >= columns * (rows - 1) ? '' : `<img src="${artAt(book, index)}" alt="">`}<p><span class="display">${escapeHtml(book.childName)}</span>${book.turningAge ? `<small>${t(book, 'years')}</small>` : ''}</p></div>`;
   }).join('');
   const css = `
 .sticker { position: absolute; width: ${String(size)}mm; height: ${String(size)}mm; border-radius: 50%; overflow: hidden; border: 0.3mm dashed #b9acbf; }
 .sticker img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; }
 .sticker p { position: absolute; left: 0; right: 0; bottom: 0; height: 25%; padding: 1.2mm 0 0; background: rgba(255,250,243,0.94); text-align: center; line-height: 1.05; }
+.sticker.nameonly { background: #f1e8f6; }
+.sticker.nameonly p { top: 0; height: auto; display: flex; flex-direction: column; justify-content: center; background: transparent; padding: 0; }
+.sticker.nameonly p span { font-size: 20pt; }
 .sticker p span { display: block; font-size: 10.5pt; }
 .sticker p small { font-size: 7pt; font-weight: 700; color: ${LAVENDER}; }`;
   return {
@@ -515,7 +524,7 @@ function favorTags(book: KitBook, copies: number) {
         const left = gapX + (index % columns) * (tag.width + gapX);
         const top = gapY + Math.floor(index / columns) * (tag.height + gapY);
         const heading = guest === null ? t(book, 'tag') : t(book, 'tagFor', { guest });
-        return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><div class="strip"><span class="hole"></span></div><img src="${artAt(book, index + 1)}" alt=""><p class="display">${heading}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
+        return `<div class="tag" style="left:${String(left)}mm;top:${String(top)}mm"><div class="strip"><span class="hole"></span></div>${index >= perSheet - columns ? `<div class="nameart"></div>` : `<img src="${artAt(book, index + 1)}" alt="">`}<p class="display">${heading}</p><small>${escapeHtml(book.childName)}${book.turningAge ? ` · ${t(book, 'years')}` : ''}</small></div>`;
       })
       .join('');
     return `<section class="page" data-label="etiquetas">${items}<p class="license">${t(book, 'license', { copies })} · ${t(book, 'cut')}</p></section>`;
@@ -525,6 +534,7 @@ function favorTags(book: KitBook, copies: number) {
 .tag .strip { display: flex; align-items: center; justify-content: center; height: 10mm; background: ${PAPER}; }
 .tag .hole { width: 5mm; height: 5mm; border-radius: 50%; border: 0.3mm solid #b9acbf; background: #fff; }
 .tag img { display: block; width: 100%; height: 46mm; object-fit: cover; object-position: 50% 25%; }
+.tag .nameart { width: 100%; height: 46mm; background: #f1e8f6; }
 .tag p { margin: 3mm 3mm 1mm; font-size: 12pt; }
 .tag small { font-size: 8.5pt; font-weight: 700; color: ${LAVENDER}; }`;
   return { css, pages };
@@ -547,7 +557,7 @@ function activities(book: KitBook, copies: number) {
 .activity .kicker { font-size: 9pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: ${LAVENDER}; }
 .activity h2 { font-size: 24pt; }
 .activity svg { width: 100%; flex: 1; min-height: 0; }
-.activity .box { flex: 1; border: 0.6mm dashed #b9acbf; border-radius: 6mm; }
+.activity .box { display: flex; align-items: center; flex: 1; border: 0.6mm dashed #b9acbf; border-radius: 6mm; }
 .activity .hint { font-size: 12pt; color: #69616c; }
 .activity .words { display: flex; flex-wrap: wrap; gap: 3mm 8mm; font-size: 13pt; font-weight: 700; color: ${INK}; letter-spacing: 0.08em; }
 .activity .key { display: flex; flex-wrap: wrap; gap: 2mm; }
@@ -577,7 +587,7 @@ function activities(book: KitBook, copies: number) {
   if (level === 'little') {
     pages.push(
       page(t(book, 'dots'), `<p class="hint">${t(book, 'dotsHint')}</p>${dotsSvg()}`, 2),
-      page(t(book, 'draw'), `<p class="hint">${t(book, 'drawHint')}</p><div class="box"></div>`, 3),
+      page(t(book, 'draw'), `<p class="hint">${t(book, 'drawHint')}</p><div class="box">${book.occasion === 'birthday' ? CAKE_GUIDE : ''}</div>`, 3),
     );
     return { css, pages };
   }
@@ -619,7 +629,7 @@ function activities(book: KitBook, copies: number) {
       ? page(t(book, 'scramble'), scramblePage, 4)
       : page(
           t(book, 'draw'),
-          `<p class="hint">${t(book, 'drawHint')}</p><div class="box"></div>`,
+          `<p class="hint">${t(book, 'drawHint')}</p><div class="box">${book.occasion === 'birthday' ? CAKE_GUIDE : ''}</div>`,
           4,
         ),
     page(
@@ -658,6 +668,7 @@ export function invitationImageHtml(raw: KitBook): string {
       ? `<p><b>${t(book, 'where')}</b> ${escapeHtml(book.invitation.place)}</p>`
       : '',
   ].join('');
+  const rsvp = `<p class="rsvp">${t(book, 'rsvp')}</p>`;
   const signature = book.signature === false ? '' : `<p class="made">${t(book, 'madeWith')}</p>`;
   const { width, height } = INVITATION_IMAGE_SIZE;
   return `<!doctype html><html><head><meta charset="utf-8"><style>${fontFaces()}
@@ -670,8 +681,9 @@ h1 { font-size: 76px; line-height: 1.05; color: ${INK}; }
 .invite { font-size: 36px; font-weight: 700; color: ${LAVENDER}; }
 .details p { font-size: 32px; line-height: 1.35; }
 .details b { font-size: 22px; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8090; margin-right: 8px; }
+.rsvp { font-size: 26px; color: ${INK}; }
 .made { font-size: 22px; color: #8a8090; letter-spacing: 0.04em; }
-</style></head><body><img class="art" src="${book.cover}" alt=""><div class="text"><h1 class="display">${heading}</h1><p class="invite">${t(book, 'invite')}</p><div class="details">${details}</div>${signature}</div><script>document.fonts.ready.then(() => { window.__fitted = true; });</script></body></html>`;
+</style></head><body><img class="art" src="${book.cover}" alt=""><div class="text"><h1 class="display">${heading}</h1><p class="invite">${t(book, 'invite')}</p><div class="details">${details}</div>${rsvp}${signature}</div><script>document.fonts.ready.then(() => { window.__fitted = true; });</script></body></html>`;
 }
 
 export interface KitPieceDocument {
