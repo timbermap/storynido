@@ -185,7 +185,18 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
     const currency = String(data.currency) as Currency;
     const revenueUsd = toUsd(amounts.totalMinor, currency, fx);
     const taxUsd = toUsd(amounts.taxMinor, currency, fx);
-    const aiUsd = (costs.ai ?? 0) / 1_000_000;
+    // Lo que gastó la IA de verdad: cada llamada (también reparaciones y rehechos de página) queda
+    // en aiUsage con el pedido, igual que en la tabla de márgenes. `costsUsdMicros.ai` solo suma
+    // la primera pasada, así que el pedido mostraba menos que el panel.
+    const usageSnapshot = await db
+      .collection(COLLECTIONS.aiUsage)
+      .where('orderId', '==', orderId)
+      .get();
+    const usageMicros = usageSnapshot.docs.reduce(
+      (sum, item) => sum + Number(item.get('costUsdMicros') ?? 0),
+      0,
+    );
+    const aiUsd = Math.max(costs.ai ?? 0, usageMicros) / 1_000_000;
     const printUsd = (routing?.totalCostUsdMinor ?? 0) / 100;
     const round = (value: number) => Math.round(value * 100) / 100;
 

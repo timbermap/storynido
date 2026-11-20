@@ -3140,3 +3140,10 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Fecha:** 2026-11-20. La mesa (usuario eventos, producto) vio que «Tu pedido» promete «te avisamos por correo» cuando una persona revisa el libro, pero ese mail no existía: solo se avisaba al equipo.
 - **Decisión:** plantilla `order_in_review` (es/en/pt): «Estamos revisando tu pedido», sin plazos inventados, con el link al pedido. Sale una sola vez, cuando el pedido cae en `qa_failed` (`orderStatus`), y si el libro termina bien después llega el de «listo» como siempre.
 - **Queda para después (mesa):** entrega parcial de piezas listas, reembolso automático tras 24 h en revisión, alerta por tasa de `image_not_returned`.
+
+## 304 — El detalle del pedido muestra el costo de IA real (2026-11-20)
+
+- **Pregunta de Sebas:** en «Márgenes por producto» un Gran aventura en tapa blanda mostraba IA US$ 19,96 y margen por unidad US$ 3,58, mientras el detalle del pedido decía IA US$ 4,00.
+- **Causa:** el detalle sumaba `costsUsdMicros.ai` (solo la primera pasada de ilustraciones); la tabla suma `aiUsage` por pedido, que incluye reparaciones, revisión humana y rehechos de página. La tabla era la correcta.
+- **Arreglo:** el detalle usa el mayor entre `costsUsdMicros.ai` y la suma de `aiUsage` del pedido.
+- **Conclusión de costos:** ese pedido (2 de nov, pago simulado, revisión humana con reparaciones) gastó ~US$ 20 de IA, unas 4 veces lo previsto (US$ 0,15 × 30 páginas). Aun así no perdió: 63,05 − comisión 3,70 − IA 19,96 − imprenta y envío 35,81 = +3,58. Con las reglas de hoy el mismo libro costaría ~US$ 70,76 (39,99 + envío 31,77) y dejaría ~US$ 26 con IA prevista y ~US$ 11 con ese gasto atípico; el punto de equilibrio está en unos US$ 30 de IA.
