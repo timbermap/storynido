@@ -3104,6 +3104,16 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Cambio:** variable `print_enabled` (por defecto `false`) que fija `PRINT_ENABLED` en la API de cada ambiente; ya no hace falta tocar variables de Cloud Run a mano. Guía de activación y prueba de punta a punta en [`IMPRESO-ACTIVACION.md`](IMPRESO-ACTIVACION.md).
 - **Ojo:** producción tiene `print_providers = ["mock"]`; al activar hay que ponerle las imprentas reales y cargar los secretos de Lulu, Gelato y Cloudprinter.
 
+## 301 — Panel «Visitas y campañas» en el admin (contadores propios, sin cookies)
+
+- **Fecha:** 2026-11-20. Sebas quiere ver, por cada página pública, de dónde llega la gente (redes, campañas), qué ve, de qué país es y qué termina en muestra o compra. La mesa (marketing, ventas, legales, diseño-ux) descartó la Data API de GA4 para esto: pide cuenta, propiedad y credenciales de Google (las crea Sebas), solo cuenta a quien aceptó cookies, y sus datos no se cruzan con nuestros pedidos. GA4 y Meta Pixel siguen igual (con consentimiento) para anuncios.
+- **Decisión:** contadores diarios propios en Firestore `trafficDaily/{día}` (un mapa por dimensión, como `loginMetrics`). **Sin cookies, sin IP, sin identificadores y sin guardar el navegador**: del navegador solo se saca celular/tableta/computadora y se descartan robots. Solo páginas públicas (nunca creador, cuenta ni pago) y respeta «No rastrear» y Global Privacy Control. País: el que ya detecta el sitio (cookie `sn_country`); **ciudad no**: con país alcanza y es más privado.
+- **Qué cuenta:** vistas por ruta (sin idioma ni parámetros), «entradas» (la primera página de la visita, con dominio de la página de origen y UTM), país, dispositivo e idioma. Red de origen por `utm_source` o dominio (WhatsApp, Instagram, TikTok, Facebook, YouTube, X, Google…). WhatsApp e Instagram a veces no mandan origen y caen en «Directo»: por eso el panel trae un armador de enlaces con UTM.
+- **Embudo:** empezó, muestra, pago y compra (`create_started`, `preview_created`, `begin_checkout`, `purchase`) salen **solo con consentimiento de analítica**, porque usan el origen guardado en el navegador (`sn_attr`, 30 días). Sin consentimiento no se manda el paso. El panel lo aclara. La compra cuenta pedidos, no dinero: el dinero sigue en «Hoy».
+- **Dónde:** contrato `trafficHit` (público) y `adminTraffic` en `packages/shared`; API `services/api/src/routes/traffic.ts` y `traffic/`; web `apps/web/src/lib/traffic.ts` + `Analytics`; admin `/traffic` (área Marketing).
+- **Pendiente legal:** sumar una línea a la política de privacidad pública (en Firestore, se edita desde el admin): «Contamos visitas de forma agregada, sin cookies ni datos personales». Revisión del abogado junto con `docs/PRIVACY.md`.
+- **Fase 2 posible:** guardar el origen en el pedido para ver ingresos por campaña; alertas cuando una campaña convierte mal.
+
 ## 300 — Seguimiento de PayPal en el admin («Cobros PayPal»), solo lectura
 
 **Qué.** Pantalla nueva en Administración con: cobrado, comisión real, neto, reembolsado; saldo de la billetera (disponible, retenido, total); conciliación pedido ↔ PayPal; cobros por pedido; disputas; reembolsos y retiros; todos los movimientos. Ruta `GET /v1/admin/paypal?days=7|30|90`.

@@ -57,8 +57,6 @@ export const PAYMENT_FEES: Record<string, { percent: number; fixedUsd: number }>
   creem: { percent: 3.9, fixedUsd: 0.4 },
   paddle: { percent: 5, fixedUsd: 0.5 },
   polar: { percent: 6.5, fixedUsd: 0.5 },
-  // Cuenta de Argentina verificada por Sebas (19 nov 2026): 5,4 % + US$ 0,30.
-  paypal: { percent: 5.4, fixedUsd: 0.3 },
 };
 
 export const DEFAULT_PAYMENT_PROVIDER = 'paypal';

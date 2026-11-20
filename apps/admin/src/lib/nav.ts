@@ -1,6 +1,7 @@
 import {
   BadgePercent,
   ChartColumn,
+  Radar,
   ClipboardCheck,
   MessageSquareQuote,
   Plug,
@@ -49,6 +50,7 @@ export interface NavItem {
     | '/customer'
     | '/quotes'
     | '/quality'
+    | '/traffic'
     | '/staff'
     | '/integrations'
     | '/site'
@@ -120,6 +122,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: 'Calidad y canales',
     keywords: 'métricas qa imprenta canales',
     icon: ChartColumn,
+  },
+  {
+    href: '/traffic',
+    area: 'Marketing',
+    label: 'Visitas y campañas',
+    keywords:
+      'tráfico analítica utm redes whatsapp instagram tiktok facebook países embudo fuentes',
+    icon: Radar,
   },
   {
     href: '/site',
