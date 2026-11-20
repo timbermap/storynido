@@ -164,6 +164,12 @@ variable "print_providers" {
   }
 }
 
+variable "print_enabled" {
+  type        = bool
+  default     = false
+  description = "Vende libros impresos (PRINT_ENABLED de la API). Apagado, el sitio ofrece solo digital. Prender solo con imprentas reales en print_providers, muestra física aprobada, cobro de físicos y textos legales listos (docs/IMPRESO-ACTIVACION.md)."
+}
+
 variable "gelato_order_type" {
   type        = string
   default     = "draft"
