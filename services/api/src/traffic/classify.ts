@@ -97,9 +97,8 @@ export function classifyDevice(userAgent: string | undefined): Device | null {
 
 /** Ruta pública sin idioma ni parámetros: «/es/como-funciona» → «/como-funciona». */
 export function cleanPath(path: string): string {
-  const stripped =
-    path.toLowerCase().split(/[?#]/)[0] ??
-    ''.replace(/^\/(es|en|pt)(?=\/|$)/, '').replace(/\/+$/, '');
+  const withoutQuery = path.toLowerCase().split(/[?#]/)[0] ?? '';
+  const stripped = withoutQuery.replace(/^\/(es|en|pt)(?=\/|$)/, '').replace(/\/+$/, '');
   const safe = stripped.replace(/[^a-z0-9/_-]+/g, '-').slice(0, 80);
   return safe.startsWith('/') ? safe : `/${safe}`;
 }
