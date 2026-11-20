@@ -2,6 +2,13 @@ import { z } from 'zod';
 
 import { countryCodeSchema } from '../countries';
 import { currencySchema } from '../currency';
+import {
+  aiCostUsdMinor,
+  charmPrice,
+  minNetMarginUsdMinor,
+  withBookPaymentFee,
+  type ProductPricing,
+} from './product-pricing';
 
 /**
  * Piezas del kit de cumpleaños (fase 12b). Todas salen del mismo diseño aprobado (la lámina
@@ -89,3 +96,25 @@ export const eventPricingSchema = z.object({
 });
 
 export type EventPricing = z.infer<typeof eventPricingSchema>;
+
+/**
+ * Piso de costo del kit de Celebraciones (DECISIONS 301): el diseño trae el mini cuento (IA por
+ * las páginas del mini), así que no se cobra menos que ese costo + el margen neto mínimo del
+ * ebook + la comisión de cobro, redondeado a ,99 hacia arriba. Si el precio cargado a mano es
+ * menor, sube al piso; si es mayor, queda como está. Las piezas extra no cambian.
+ */
+export function withKitCostFloor(
+  pricing: EventPricing | null,
+  digital: ProductPricing | Omit<ProductPricing, 'updatedAt'>,
+  miniGeneratedPages: number,
+): EventPricing | null {
+  if (!pricing) return null;
+  const floor = charmPrice(
+    withBookPaymentFee(
+      digital,
+      aiCostUsdMinor(digital, miniGeneratedPages) + minNetMarginUsdMinor(digital),
+    ),
+    'USD',
+  );
+  return pricing.designMinor >= floor ? pricing : { ...pricing, designMinor: floor };
+}
