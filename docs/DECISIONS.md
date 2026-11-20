@@ -3084,7 +3084,14 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Cambios:** descripción de la web, pie, Familias, «Así lo recibes», Cómo funciona (se quita la fila de impresos y «Impreso: muy pronto»), FAQ del kit, kit y «El cuento grande del cumpleañero» ya no dicen impreso, tapa dura ni envío. En es, en, pt y voseo.
 - **Pendiente (Sebas / contenido):** términos, reembolsos, envíos y FAQ general viven en Firestore y siguen describiendo el impreso; es texto legal y se edita desde el admin, no desde código.
 
-## 298 — El interruptor del impreso entra en Terraform y se documenta cómo activarlo
+## 298 — Si el modelo no devuelve imagen al reparar una página, no se cae todo el control de calidad
+
+- **Fecha:** 2026-11-20. Pedido de staging `J6tlGKkq…` (kit Celebraciones, PayPal): `quality_check` falló con «[vertex] El modelo no devolvió ninguna imagen» (HTTP 500 de Vertex) y quedó «En revisión» con 24,99 US$ cobrados.
+- **Causa:** al reparar una página, `illustrate` dejaba subir el error del proveedor cuando el modelo respondía sin imagen (o bloqueaba la escena). Solo se capturaba el rechazo de la moderación, así que un único dibujo vacío tumbaba el paso entero, dos veces, en vez de afectar a una página.
+- **Arreglo:** nuevo `ImageNotReturnedError` (vertex lo lanza al no haber imagen o bloquear la escena). `illustrate` lo cuenta como intento fallido, anota `image_not_returned` y el intento siguiente pide una escena más simple. Si no sale ninguno, rige lo de siempre: reparación → revisión humana de esa página (no del libro).
+- **Prevención:** prueba de emulador con reparaciones sin imagen.
+
+## 299 — El interruptor del impreso entra en Terraform y se documenta cómo activarlo
 
 - **Fecha:** 2026-11-20. Sebas quiere salir con digital y tener el impreso listo para prender en pocos días.
 - **Cambio:** variable `print_enabled` (por defecto `false`) que fija `PRINT_ENABLED` en la API de cada ambiente; ya no hace falta tocar variables de Cloud Run a mano. Guía de activación y prueba de punta a punta en [`IMPRESO-ACTIVACION.md`](IMPRESO-ACTIVACION.md).

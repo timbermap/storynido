@@ -21,6 +21,7 @@ import {
   countWords,
   normalizeFirestoreData,
   ContentBlockedError,
+  ImageNotReturnedError,
   ProviderError,
   bookEventSchema,
   kitSelectionSchema,
@@ -618,30 +619,44 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         castSheet && withCast ? `${baseScene}${castSheetNote(castSheet)}` : baseScene,
         escalation,
       );
-      const image = await provider.image.generateIllustration({
-        prompt: buildIllustrationPrompt({
-          template: snapshot.imagePromptTemplate,
-          scene,
-          character: companion
-            ? `${snapshot.character.description}\n${companionNote(companion)}`
-            : snapshot.character.description,
-          style: snapshot.stylePrompt,
-          direction: withCurrentGuards(snapshot.artDirection),
-        }),
-        stylePrompt: snapshot.stylePrompt,
-        // La ficha del estilo controla cada imagen (DECISIONS 282); colorear sale en blanco y negro
-        // salvo la tapa, que va a color y deja libre el tercio del título (DECISIONS 283).
-        coloring: snapshot.contentType === 'coloring',
-        ...(index === 0 ? { cover: true } : {}),
-        character: { description: snapshot.character.description, photo: null },
-        correction: snapshot.character.correction ?? null,
-        references,
-        aspectRatio: '3:4',
-        // Todo pedido se ilustra en 2K: ~220 dpi a 21×28 cm en el impreso (DECISIONS 069) y, en el
-        // digital, la misma nitidez que las páginas de la muestra (antes 1K se veía borroso al lado).
-        resolution: '2K',
-        seed: seed + attempt,
-      });
+      let image: Awaited<ReturnType<typeof provider.image.generateIllustration>>;
+      try {
+        image = await provider.image.generateIllustration({
+          prompt: buildIllustrationPrompt({
+            template: snapshot.imagePromptTemplate,
+            scene,
+            character: companion
+              ? `${snapshot.character.description}\n${companionNote(companion)}`
+              : snapshot.character.description,
+            style: snapshot.stylePrompt,
+            direction: withCurrentGuards(snapshot.artDirection),
+          }),
+          stylePrompt: snapshot.stylePrompt,
+          // La ficha del estilo controla cada imagen (DECISIONS 282); colorear sale en blanco y negro
+          // salvo la tapa, que va a color y deja libre el tercio del título (DECISIONS 283).
+          coloring: snapshot.contentType === 'coloring',
+          ...(index === 0 ? { cover: true } : {}),
+          character: { description: snapshot.character.description, photo: null },
+          correction: snapshot.character.correction ?? null,
+          references,
+          aspectRatio: '3:4',
+          // Todo pedido se ilustra en 2K: ~220 dpi a 21×28 cm en el impreso (DECISIONS 069) y, en el
+          // digital, la misma nitidez que las páginas de la muestra (antes 1K se veía borroso al lado).
+          resolution: '2K',
+          seed: seed + attempt,
+        });
+      } catch (error) {
+        // El modelo no devolvió imagen (o bloqueó la escena): cuenta como intento fallido y el
+        // siguiente pide una escena más simple; si no sale ninguno, la página va a la cola de
+        // reparación / revisión humana en vez de tumbar todo el control (DECISIONS 298).
+        if (!(error instanceof ImageNotReturnedError)) throw error;
+        ctx.log.warn(
+          { orderId: ctx.order.id, index, attempt: attempt + 1, level: escalation, err: error },
+          'illustration not returned by the model',
+        );
+        await qaEvent(ctx, 'image_not_returned', { pageIndex: index, attempt: attempt + 1 });
+        continue;
+      }
       cost += await record(ctx, 'illustration', image.usage);
       const coloring = snapshot.contentType === 'coloring';
       const verdict = await provider.image.moderateImage(image, {

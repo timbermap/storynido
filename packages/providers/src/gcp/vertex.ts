@@ -1,6 +1,7 @@
 import {
   AVATAR_OPTIONS,
   ContentBlockedError,
+  ImageNotReturnedError,
   ProviderError,
   SHOT_TYPES,
   varyShots,
@@ -1264,10 +1265,9 @@ Children's picture book illustration, drawn only in the art style above. No text
       });
       lastUsage = [...lastUsage, usage];
       if (blocked(response)) {
-        throw new ProviderError(
+        throw new ImageNotReturnedError(
           'vertex',
           `Ilustración bloqueada por seguridad${blockDetail(response)}`,
-          true,
         );
       }
       const inline = response.candidates?.[0]?.content?.parts?.find(
@@ -1294,7 +1294,7 @@ Children's picture book illustration, drawn only in the art style above. No text
       const result = { ...offStyle, usage: sumUsage(model, ...lastUsage) };
       return coloringCover ? this.colorInCover(result, request, model, lastUsage) : result;
     }
-    throw new ProviderError('vertex', 'El modelo no devolvió ninguna imagen', true);
+    throw new ImageNotReturnedError('vertex', 'El modelo no devolvió ninguna imagen');
   }
 
   /**
