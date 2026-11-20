@@ -1468,7 +1468,7 @@
       "date": "Fecha",
       "dateHint": "Va en la invitación y nos sirve para avisarte los plazos de impresión.",
       "place": "Lugar",
-      "placePlaceholder": "Ej.: Salón Arcoíris o En casa",
+      "placePlaceholder": "Ej.: Salón Arcoíris, Av. Libertador 123, Rosario",
       "startTime": "Hora (opcional)",
       "endTime": "Hasta (opcional)",
       "timeHint": "Va en la invitación."

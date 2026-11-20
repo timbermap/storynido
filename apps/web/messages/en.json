@@ -1468,7 +1468,7 @@
       "date": "Date",
       "dateHint": "It goes on the invitation and helps us tell you the printing deadlines.",
       "place": "Place",
-      "placePlaceholder": "E.g.: Rainbow Hall or At home",
+      "placePlaceholder": "E.g.: Rainbow Hall, 123 Main St, Austin",
       "startTime": "Time (optional)",
       "endTime": "Until (optional)",
       "timeHint": "It goes on the invitation."
