@@ -12,7 +12,7 @@
  * Credenciales: token de gcloud con la configuración "storynido" (nunca la de Timbermap).
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -42,6 +42,8 @@ const { values } = parseArgs({
     variants: { type: 'string', default: 'base,t08,modelo' },
     budget: { type: 'string', default: '4' },
     judge: { type: 'string', default: 'gemini-3.5-flash' },
+    /** resultados.json de una corrida cortada: se saltean las corridas ya hechas y se suman a esa carpeta. */
+    resume: { type: 'string' },
     project: { type: 'string', default: 'storynido-staging' },
     out: { type: 'string', default: 'eval-reports' },
     yes: { type: 'boolean', default: false },
@@ -56,6 +58,8 @@ if (values.project.startsWith('timbermap')) {
 type Channel = 'families' | 'events' | 'professionals';
 interface GoldenCase {
   id: string;
+  /** Pronombre del protagonista inventado. */
+  he?: boolean;
   channel: Channel;
   slug: string;
   name: string;
@@ -79,6 +83,7 @@ const CASES: GoldenCase[] = [
     id: 'fam-espacial-6',
     channel: 'families',
     slug: 'aventura-espacial',
+    he: true,
     name: 'Mateo',
     age: 6,
     likes: ['dinosaurios', 'dibujar'],
@@ -95,6 +100,7 @@ const CASES: GoldenCase[] = [
     id: 'fam-dormir-2',
     channel: 'families',
     slug: 'buenas-noches',
+    he: true,
     name: 'Bruno',
     age: 2,
     likes: ['el osito', 'los camiones'],
@@ -111,6 +117,7 @@ const CASES: GoldenCase[] = [
     id: 'fam-diente-6',
     channel: 'families',
     slug: 'el-diente-que-se-cayo',
+    he: true,
     name: 'Lautaro',
     age: 6,
     likes: ['fútbol', 'los robots'],
@@ -127,6 +134,7 @@ const CASES: GoldenCase[] = [
     id: 'fam-navidad-4',
     channel: 'families',
     slug: 'la-navidad-de-nombre',
+    he: true,
     name: 'Thiago',
     age: 4,
     likes: ['los trenes', 'la nieve'],
@@ -143,6 +151,7 @@ const CASES: GoldenCase[] = [
     id: 'fam-detectives-10',
     channel: 'families',
     slug: 'el-club-de-detectives',
+    he: true,
     name: 'Facundo',
     age: 10,
     likes: ['ajedrez', 'los acertijos'],
@@ -160,6 +169,7 @@ const CASES: GoldenCase[] = [
     id: 'eve-cumple-6',
     channel: 'events',
     slug: 'el-cumpleanos-mas-magico',
+    he: true,
     name: 'Benjamín',
     age: 6,
     likes: ['dinosaurios'],
@@ -178,6 +188,7 @@ const CASES: GoldenCase[] = [
     id: 'eve-comunion-8',
     channel: 'events',
     slug: 'mi-primera-comunion',
+    he: true,
     name: 'Joaquín',
     age: 8,
     likes: ['su abuelo', 'andar en bici'],
@@ -196,6 +207,7 @@ const CASES: GoldenCase[] = [
     id: 'pro-dentista-5',
     channel: 'professionals',
     slug: 'mi-visita-al-dentista',
+    he: true,
     name: 'Gael',
     age: 5,
     likes: ['los autitos'],
@@ -214,6 +226,7 @@ const CASES: GoldenCase[] = [
     id: 'pro-triste-4',
     channel: 'professionals',
     slug: 'hoy-estoy-triste',
+    he: true,
     name: 'Santino',
     age: 4,
     likes: ['los dinosaurios'],
@@ -275,11 +288,21 @@ if (estimate > budget) {
   process.exit(1);
 }
 
-const token = execFileSync('gcloud', ['auth', 'print-access-token'], {
-  env: { ...process.env, CLOUDSDK_ACTIVE_CONFIG_NAME: 'storynido' },
-})
-  .toString()
-  .trim();
+/** El token de gcloud dura una hora: se renueva cada 20 minutos (la corrida anterior se cortó con 401). */
+let cachedToken = { value: '', at: 0 };
+const freshToken = () => {
+  if (!cachedToken.value || Date.now() - cachedToken.at > 20 * 60_000) {
+    cachedToken = {
+      value: execFileSync('gcloud', ['auth', 'print-access-token'], {
+        env: { ...process.env, CLOUDSDK_ACTIVE_CONFIG_NAME: 'storynido' },
+      })
+        .toString()
+        .trim(),
+      at: Date.now(),
+    };
+  }
+  return cachedToken.value;
+};
 
 /** Cliente que baja la temperatura del cuento (la llamada con 0,9) cuando la variante lo pide. */
 class TunedClient extends VertexClient {
@@ -298,7 +321,7 @@ class TunedClient extends VertexClient {
 const client = new TunedClient({
   projectId: values.project,
   models: () => ({ text: 'gemini-3.5-flash', image: 'gemini-3.1-flash-image' }),
-  getAccessToken: () => Promise.resolve(token),
+  getAccessToken: () => Promise.resolve(freshToken()),
 });
 const text = new VertexTextProvider(client);
 
@@ -328,7 +351,21 @@ interface Row {
   best: string;
   error?: string;
 }
-const rows: Row[] = [];
+const resumed: Row[] = values.resume
+  ? (JSON.parse(readFileSync(path.resolve(values.resume), 'utf8')) as Row[]).filter(
+      (row) => !row.error,
+    )
+  : [];
+const rows: Row[] = [...resumed];
+const outDir = values.resume
+  ? path.dirname(path.resolve(values.resume))
+  : path.resolve(values.out, `golden-${new Date().toISOString().replace(/[:.]/g, '-')}`);
+mkdirSync(outDir, { recursive: true });
+const save = () => {
+  writeFileSync(path.join(outDir, 'resultados.json'), JSON.stringify(rows, null, 2));
+};
+const done = (id: string, variant: string) =>
+  existsSync(outDir) && resumed.some((row) => row.id === id && row.variant === variant);
 
 for (const testCase of cases) {
   const story = stories.find((item) => item.slug === testCase.slug);
@@ -346,14 +383,15 @@ for (const testCase of cases) {
     language: 'es' as const,
     childName: testCase.name,
     age: testCase.age,
-    pronouns: 'she' as const,
+    pronouns: testCase.he ? ('he' as const) : ('she' as const),
     likes: testCase.likes,
     petName: null,
     bestFriendName: null,
     dedication: null,
     storyTitle: story.title.es,
     lessons: [],
-    pageCount: Math.max(plan.narrativePages, 4),
+    // Tope de 10 páginas: el largo real lo elige el cliente; acá importa comparar prompts, no el largo.
+    pageCount: Math.min(Math.max(plan.narrativePages, 4), 10),
     wordsPerPage: plan.words,
     mustInclude: [],
     spanishVoice: spanishVoiceFor('AR'),
@@ -368,6 +406,7 @@ for (const testCase of cases) {
   };
 
   for (const variant of variants) {
+    if (done(testCase.id, variant)) continue;
     const row: Row = {
       id: testCase.id,
       variant,
@@ -414,7 +453,7 @@ for (const testCase of cases) {
 ${CRITERIA.map((item, index) => `${String(index + 1)}. ${item}`).join('\n')}
 5 = ejemplar, 4 = bueno, 3 = correcto pero genérico, 2 = flojo, 1 = falla. Devolvé "scores" con siete enteros, "worst" con el problema más serio en una frase y "best" con lo mejor en una frase.
 
-Pedido: ${JSON.stringify({ gustos: testCase.likes, objetivo: testCase.goal ?? null, evento: event?.type ?? null })}
+Las páginas con texto vacío son intencionales (el dibujo cuenta solo): no las penalices.\n\nPedido: ${JSON.stringify({ gustos: testCase.likes, objetivo: testCase.goal ?? null, evento: event?.type ?? null })}
 Cuento (JSON): ${JSON.stringify({ title: written.title, pages: row.pages })}
 Escenas para ilustrar (en orden): ${JSON.stringify(row.scenes)}`,
           },
@@ -435,12 +474,11 @@ Escenas para ilustrar (en orden): ${JSON.stringify(row.scenes)}`,
       row.error = (error as Error).message.slice(0, 200);
       console.log(`✗ ${testCase.id} · ${variant}: ${row.error}`);
     }
+    save();
   }
 }
 
-const outDir = path.resolve(values.out, `golden-${new Date().toISOString().replace(/[:.]/g, '-')}`);
-mkdirSync(outDir, { recursive: true });
-writeFileSync(path.join(outDir, 'resultados.json'), JSON.stringify(rows, null, 2));
+save();
 
 const mean = (items: number[]) =>
   items.length ? items.reduce((sum, item) => sum + item, 0) / items.length : 0;
