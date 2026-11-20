@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils';
 import { LINE_IMAGES, LineChip, cardClass, type LineCopy } from './parts';
 
 /**
- * «Crear algo nuevo»: las tres líneas. Sin nada pendiente, la que manda lleva el borde
- * y el botón durazno, y las otras solo un enlace. Con algo pendiente o en modo Pro, las tres van
+ * «Crear algo nuevo»: las tres líneas. Sin nada pendiente, las tres llevan botón en el mismo
+ * lugar y con la misma forma: la que manda, durazno y con borde; las otras, con contorno. Con algo pendiente o en modo Pro, las tres van
  * compactas (foto, título y enlace), sin botón.
  */
 export function LineCards({
@@ -97,7 +97,7 @@ export function LineCards({
                 </span>
                 <span
                   className={cn(
-                    'grid content-start gap-2',
+                    'flex flex-col gap-2',
                     compact ? 'gap-1 px-3.5 py-3' : 'px-3.5 py-3 sm:px-4.5 sm:py-4',
                   )}
                 >
@@ -115,30 +115,29 @@ export function LineCards({
                       {lines[line].text}
                     </span>
                   )}
-                  <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-                    {isLead ? (
-                      <>
-                        <span
-                          className={cn(
-                            buttonVariants(),
-                            'max-w-full px-5 text-center whitespace-normal',
-                          )}
-                        >
-                          {leadCta ?? t(`${line}.cta`)}
-                        </span>
-                        {!leadCta && (
-                          <span className="text-[0.82rem] text-muted-foreground">
-                            {t(`${line}.fine`)}
-                          </span>
+                  {compact ? (
+                    <span className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 border-b-2 border-foreground/20 px-0.5 font-bold transition-colors group-hover:border-primary group-hover:text-primary">
+                      {link}
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </span>
+                  ) : (
+                    <span className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-2">
+                      <span
+                        className={cn(
+                          buttonVariants({ variant: isLead ? 'default' : 'outline' }),
+                          'max-w-full px-5 text-center whitespace-normal',
                         )}
-                      </>
-                    ) : (
-                      <span className="inline-flex min-h-11 w-fit items-center gap-1.5 border-b-2 border-foreground/20 px-0.5 font-bold transition-colors group-hover:border-primary group-hover:text-primary">
-                        {link}
-                        <ArrowRight className="size-4" aria-hidden="true" />
+                      >
+                        {isLead ? (leadCta ?? t(`${line}.cta`)) : link}
+                        {!isLead && <ArrowRight className="size-4" aria-hidden="true" />}
                       </span>
-                    )}
-                  </span>
+                      {!(isLead && leadCta) && !swap && (
+                        <span className="text-[0.82rem] text-muted-foreground">
+                          {t(`${line}.fine`)}
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </span>
               </Link>
             </li>
