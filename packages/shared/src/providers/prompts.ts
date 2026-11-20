@@ -332,7 +332,7 @@ export function narrativeRules(
     '- El final cierra con calidez y deja ganas de releerlo.',
     TOUCH_STORY_RULE,
     '- Cada objeto o lugar importante se llama siempre igual y es el mismo en todas las páginas: una sola metáfora central, no varias. Lo mismo con lo que lleva el protagonista: si son anteojos, siempre «anteojos» (o «glasses»), sin sinónimos para no repetir.',
-    '- El protagonista nunca hace como algo bueno lo que un chico podría imitar y lastimarse (saltar en la cama para alcanzar algo, pararse sobre una silla o un sillón, trepar muebles o estantes, hacer la vertical contra la pared sin un adulto, meterse en terrenos ajenos). Si el cuento lo muestra, es para que un adulto ayude o para buscar otra forma.',
+    '- El protagonista nunca hace como algo bueno lo que un chico podría imitar y lastimarse (saltar en la cama para alcanzar algo, pararse sobre una silla o un sillón, trepar muebles o estantes, hacer la vertical contra la pared sin un adulto, meterse en terrenos ajenos, saltar o lanzarse hacia una ventana, un balcón o una altura). Si el cuento lo muestra, es para que un adulto ayude o para buscar otra forma.',
   ];
   // Un primer añito o un bautizo es de un bebé: sin misión ni desafíos, la celebración es el cierre.
   const baby =
@@ -378,11 +378,13 @@ export function craftRules(childName: string, age: number | undefined, baby = fa
     '- Cada detalle personal aparece donde cambia algo en la escena, nunca de relleno.',
     '- La última página termina en una imagen o una frase que queda, nunca en una lección ni en una moraleja.',
   ];
+  rules.push(
+    `- Nunca narres en segunda persona: el narrador no le habla al lector ni a ${childName} (nada de «tú», «vos», «you», «mirá» ni imperativos fuera de un diálogo). Aunque el cuento sea para un bebé, narra en tercera persona o, si le queda bien, en primera con la voz de ${childName}.`,
+  );
   if (!baby) {
     rules.push(
       `- Como máximo dos intentos fallidos antes de lograrlo, y cada uno enseña algo distinto que ${childName} usa después.`,
       `- Si hay un mentor o un adulto, ayuda o da una pista, pero la solución final la encuentra ${childName}.`,
-      `- Nunca narres en segunda persona: el narrador no le habla al lector ni al protagonista (nada de «tú», «vos» ni «you» fuera de un diálogo). Narra en tercera persona o, si le queda bien al cuento, en primera con la voz de ${childName}.`,
       '- Si el protagonista hace algo que un chico podría imitar y tiene riesgo (agua, altura, velocidad, fuego), usa el equipo de seguridad que corresponde y un adulto sabe dónde está.',
     );
   }
