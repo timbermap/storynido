@@ -31,6 +31,12 @@ const SOCIAL_ICONS: Record<string, ReactNode> = {
       <path d="M13.5 3.5c.4 2.6 2.2 4.4 5 4.6" />
     </>
   ),
+  pinterest: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M11 8.5c-2.4.4-3 3-1.8 4.3M10.4 17l1.5-6.4c.7 1.7 3.3 1.6 3.3-.9 0-1.6-1.3-2.6-3-2.4" />
+    </>
+  ),
   youtube: (
     <>
       <rect x="2.5" y="5.5" width="19" height="13" rx="4" />
