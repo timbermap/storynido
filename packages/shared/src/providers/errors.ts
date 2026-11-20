@@ -24,6 +24,18 @@ export class ContentBlockedError extends ProviderError {
 }
 
 /**
+ * El modelo de imágenes no devolvió ninguna imagen (respondió solo texto, vacío o bloqueó la
+ * escena). No es una falla del servicio: otra escena, más simple, suele salir. Quien dibuja páginas
+ * lo trata como un intento fallido y no como un error del paso (DECISIONS 298).
+ */
+export class ImageNotReturnedError extends ProviderError {
+  constructor(provider: string, message: string) {
+    super(provider, message, true);
+    this.name = 'ImageNotReturnedError';
+  }
+}
+
+/**
  * El cobrador no pudo cobrar con el medio de pago elegido (tarjeta rechazada, sin fondos,
  * bloqueada). No es una falla del cobrador: el comprador tiene que probar otro medio.
  */

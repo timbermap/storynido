@@ -9,6 +9,7 @@ export const QA_CODES = [
   'length_trimmed',
   'moderation_text',
   'moderation_image',
+  'image_not_returned',
   'character_approved',
   'character_corrected',
   // Pipeline del libro (fase 09): cada uno con página, intento, costo de la reparación y estado final.

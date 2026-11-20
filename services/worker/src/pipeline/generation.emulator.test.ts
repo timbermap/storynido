@@ -12,6 +12,7 @@ import {
 } from '@storynido/providers';
 import {
   ContentBlockedError,
+  ImageNotReturnedError,
   ProviderError,
   STEP_POLICIES,
   type PageReview,
@@ -1176,6 +1177,33 @@ describe('generación del libro (fase 09)', () => {
     expect((await step('quality_check')).attempts).toBe(1);
     const codes = await qaCodes();
     expect(codes.filter((event) => event.code === 'moderation_image')).toHaveLength(4);
+    expect(codes.find((event) => event.code === 'page_human_review')?.detail).toMatchObject({
+      pageIndex: 2,
+      attemptCount: 2,
+    });
+  });
+
+  it('si el modelo no devuelve imagen al reparar, es un intento fallido de esa página, no un error del paso', async () => {
+    const providers = registry();
+    await seedBook(providers);
+    scriptReviews(providers, { 2: ['repair'] });
+    const image = providers.ai().image;
+    const original = image.generateIllustration.bind(image);
+    let calls = 0;
+    // Las 2 páginas nuevas se dibujan; todo lo que se pide después (la reparación) vuelve vacío.
+    vi.spyOn(image, 'generateIllustration').mockImplementation(async (request) => {
+      calls += 1;
+      if (calls <= 2) return original(request);
+      throw new ImageNotReturnedError('vertex', 'El modelo no devolvió ninguna imagen');
+    });
+    await setup(providers).run();
+
+    const failed = await order();
+    expect(failed.status).toBe('qa_failed');
+    expect((failed.pipeline as { error: string }).error).toContain('página 2');
+    expect((await step('quality_check')).attempts).toBe(1);
+    const codes = await qaCodes();
+    expect(codes.filter((event) => event.code === 'image_not_returned')).toHaveLength(4);
     expect(codes.find((event) => event.code === 'page_human_review')?.detail).toMatchObject({
       pageIndex: 2,
       attemptCount: 2,
