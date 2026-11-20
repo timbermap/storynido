@@ -18,7 +18,8 @@
     "seed": "pnpm --filter @storynido/firebase seed",
     "eval:character": "pnpm --filter @storynido/providers eval:character",
     "eval:preview": "pnpm --filter @storynido/providers eval:preview",
-    "eval:prompts": "pnpm --filter @storynido/providers eval:prompts"
+    "eval:prompts": "pnpm --filter @storynido/providers eval:prompts",
+    "eval:golden": "pnpm --filter @storynido/providers eval:golden"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
