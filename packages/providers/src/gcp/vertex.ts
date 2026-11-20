@@ -719,7 +719,7 @@ wearsGlasses is true only for clear prescription eyeglasses: sunglasses do not c
     const { response, usage } = await this.client.generate(
       this.model,
       [{ text: request.prompt }],
-      { temperature: 0.9, responseMimeType: 'application/json', responseSchema: STORY_SCHEMA },
+      { temperature: 0.8, responseMimeType: 'application/json', responseSchema: STORY_SCHEMA },
       { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
     );
     const story = parseJson(response, 'cuento') as {

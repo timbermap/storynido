@@ -332,7 +332,7 @@ export function narrativeRules(
     '- El final cierra con calidez y deja ganas de releerlo.',
     TOUCH_STORY_RULE,
     '- Cada objeto o lugar importante se llama siempre igual y es el mismo en todas las páginas: una sola metáfora central, no varias. Lo mismo con lo que lleva el protagonista: si son anteojos, siempre «anteojos» (o «glasses»), sin sinónimos para no repetir.',
-    '- El protagonista nunca hace como algo bueno lo que un chico podría imitar y lastimarse (saltar en la cama para alcanzar algo, trepar muebles o estantes, hacer la vertical contra la pared sin un adulto). Si el cuento lo muestra, es para que un adulto ayude o para buscar otra forma.',
+    '- El protagonista nunca hace como algo bueno lo que un chico podría imitar y lastimarse (saltar en la cama para alcanzar algo, pararse sobre una silla o un sillón, trepar muebles o estantes, hacer la vertical contra la pared sin un adulto, meterse en terrenos ajenos). Si el cuento lo muestra, es para que un adulto ayude o para buscar otra forma.',
   ];
   // Un primer añito o un bautizo es de un bebé: sin misión ni desafíos, la celebración es el cierre.
   const baby =
