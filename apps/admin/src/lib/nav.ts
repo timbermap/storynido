@@ -19,6 +19,7 @@ import {
   Palette,
   SlidersHorizontal,
   Gauge,
+  LayoutDashboard,
   Globe,
   History,
   Power,
@@ -43,6 +44,12 @@ export type Area = (typeof AREAS)[number];
 export interface NavItem {
   href:
     | '/'
+    | '/areas/marketing'
+    | '/areas/operaciones'
+    | '/areas/administracion'
+    | '/areas/usuarios'
+    | '/areas/contenido'
+    | '/areas/sistema'
     | '/orders'
     | '/order'
     | '/review'
@@ -81,6 +88,48 @@ export interface NavItem {
 
 /** Secciones del panel. Las de las etapas siguientes se suman acá. */
 export const NAV_ITEMS: readonly NavItem[] = [
+  {
+    href: '/areas/marketing',
+    area: 'Marketing',
+    label: 'Resumen',
+    keywords: 'portada resumen marketing números avisos',
+    icon: LayoutDashboard,
+  },
+  {
+    href: '/areas/operaciones',
+    area: 'Operaciones',
+    label: 'Resumen',
+    keywords: 'portada resumen operaciones números avisos',
+    icon: LayoutDashboard,
+  },
+  {
+    href: '/areas/administracion',
+    area: 'Administración',
+    label: 'Resumen',
+    keywords: 'portada resumen administración números avisos',
+    icon: LayoutDashboard,
+  },
+  {
+    href: '/areas/usuarios',
+    area: 'Usuarios',
+    label: 'Resumen',
+    keywords: 'portada resumen usuarios números avisos',
+    icon: LayoutDashboard,
+  },
+  {
+    href: '/areas/contenido',
+    area: 'Contenido',
+    label: 'Resumen',
+    keywords: 'portada resumen contenido números avisos',
+    icon: LayoutDashboard,
+  },
+  {
+    href: '/areas/sistema',
+    area: 'Sistema',
+    label: 'Resumen',
+    keywords: 'portada resumen sistema números avisos',
+    icon: LayoutDashboard,
+  },
   {
     href: '/',
     area: 'General',
@@ -277,28 +326,34 @@ export const NAV_ITEMS: readonly NavItem[] = [
 /** Orden de las secciones dentro de cada área (el menú vertical). */
 const ORDER: readonly NavItem['href'][] = [
   '/',
+  '/areas/marketing',
   '/traffic',
   '/coupons',
   '/promotions',
   '/pro-discounts',
+  '/areas/operaciones',
   '/review',
   '/quality',
   '/print-options',
   '/ai',
+  '/areas/administracion',
   '/orders',
   '/paypal',
   '/prices',
   '/event-pricing',
   '/countries',
+  '/areas/usuarios',
   '/customers',
   '/quotes',
   '/staff',
+  '/areas/contenido',
   '/stories',
   '/collections',
   '/styles',
   '/lessons',
   '/editorial',
   '/content',
+  '/areas/sistema',
   '/site',
   '/ai-models',
   '/integrations',
