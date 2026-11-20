@@ -3141,6 +3141,15 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Decisión:** plantilla `order_in_review` (es/en/pt): «Estamos revisando tu pedido», sin plazos inventados, con el link al pedido. Sale una sola vez, cuando el pedido cae en `qa_failed` (`orderStatus`), y si el libro termina bien después llega el de «listo» como siempre.
 - **Queda para después (mesa):** entrega parcial de piezas listas, reembolso automático tras 24 h en revisión, alerta por tasa de `image_not_returned`.
 
+## 305 — Reparaciones de ilustraciones: el redibujo sabe qué corregir y el gasto se cuenta
+
+- **Fecha:** 2026-11-20. Pedido de prueba OKeC6QiRy63O62IzPoY1 (Gran aventura, imprimible): el control de calidad redibujó varias páginas y terminó en revisión manual (luz del faro encendida cuando debía estar apagada, dos faros, ropa equivocada).
+- **Causa 1:** el redibujo solo recibía los rasgos de personaje que no coincidían (o «the scene matches the page»). El motivo real del fallo (luz, objeto duplicado, ropa) no llegaba al modelo, así que repetía el error y se gastaban los 2 intentos por página.
+- **Causa 2:** el gasto de las reparaciones de un QA que termina en revisión manual no se sumaba a `costsUsdMicros.ai` del pedido (solo se sumaba si el paso terminaba bien). El margen en el admin se veía mejor de lo real.
+- **Cambios:** `reviewPage` devuelve `repairInstructions` (instrucciones en positivo, lo que la nueva imagen debe mostrar) y el redibujo las usa primero; `HumanReviewError` lleva el costo gastado y el pipeline lo suma al pedido y al paso.
+- **No cambia:** topes de reparación (2 por página, 30 % del libro, US$1,50), reglas de estilo/contacto/colores.
+- **Pasa al hilo de prompts (planStory):** expresar estados como «linterna apagada» en mustBeVisible, un solo faro/edificio por escena, y ropa especial de la escena siempre en `outfits`.
+
 ## 304 — El detalle del pedido muestra el costo de IA real (2026-11-20)
 
 - **Pregunta de Sebas:** en «Márgenes por producto» un Gran aventura en tapa blanda mostraba IA US$ 19,96 y margen por unidad US$ 3,58, mientras el detalle del pedido decía IA US$ 4,00.

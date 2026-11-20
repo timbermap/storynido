@@ -354,13 +354,20 @@ export class Pipeline {
       );
       return { state: 'succeeded', output: result.output };
     } catch (error) {
+      // Lo gastado antes de derivar a una persona (reparaciones del control de calidad) también
+      // es costo del pedido: sin esto el margen se veía mejor de lo que fue.
+      const spent = error instanceof HumanReviewError ? error.costUsdMicros : 0;
       await stepRef.update({
         status: 'failed',
         error: message(error),
         finishedAt: new Date(),
         durationMs: Date.now() - claim.startedAt.getTime(),
         leaseUntil: null,
+        ...(spent > 0 ? { costUsdMicros: spent } : {}),
       });
+      if (spent > 0) {
+        await orderRef.update({ 'costsUsdMicros.ai': FieldValue.increment(spent) });
+      }
       this.log.warn(
         {
           ...orderLogFields(orderId, PROJECT_ID),
