@@ -557,8 +557,20 @@ export class PaypalPaymentProvider implements PaymentProvider {
   /** Lectura de la billetera para el admin: saldo, movimientos y disputas. Solo GET. */
   readonly reporting: PaymentReporting;
 
+  /**
+   * GET de lectura. El token se guarda ~9 h con los permisos que tenía al pedirse: si PayPal
+   * responde 401/403 se descarta y se pide uno nuevo una vez (por ejemplo, después de activar
+   * «Transaction Search» en la app).
+   */
+  private async readCall(path: string) {
+    const first = await this.call(path, { method: 'GET' });
+    if (first.status !== 401 && first.status !== 403) return first;
+    this.token = null;
+    return this.call(path, { method: 'GET' });
+  }
+
   private async readBalances(): Promise<ProviderBalance[]> {
-    const result = await this.call('/v1/reporting/balances?currency_code=ALL', { method: 'GET' });
+    const result = await this.readCall('/v1/reporting/balances?currency_code=ALL');
     if (!result.ok) this.fail('leer el saldo', result);
     return balancesSchema.parse(result.json).balances.map((balance) => ({
       currency: balance.currency,
@@ -579,9 +591,7 @@ export class PaypalPaymentProvider implements PaymentProvider {
         page_size: '100',
         page: String(page),
       });
-      const result = await this.call(`/v1/reporting/transactions?${query.toString()}`, {
-        method: 'GET',
-      });
+      const result = await this.readCall(`/v1/reporting/transactions?${query.toString()}`);
       if (!result.ok) this.fail('leer los movimientos', result);
       const data = transactionsSchema.parse(result.json);
       for (const { transaction_info: info } of data.transaction_details) {
@@ -605,7 +615,7 @@ export class PaypalPaymentProvider implements PaymentProvider {
   }
 
   private async readDisputes(): Promise<ProviderDispute[]> {
-    const result = await this.call('/v1/customer/disputes?page_size=50', { method: 'GET' });
+    const result = await this.readCall('/v1/customer/disputes?page_size=50');
     if (!result.ok) this.fail('leer las disputas', result);
     return disputesSchema.parse(result.json).items.map((item) => ({
       id: item.dispute_id,
