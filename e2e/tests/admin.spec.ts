@@ -63,7 +63,10 @@ test('el modo del sitio cambia la web en segundos, sin redeploy', async ({ page 
   await signIn(page, 'admin');
   await expectAccessible(page);
   await page.getByRole('link', { name: /^Sistema/ }).click();
-  await page.getByRole('link', { name: 'Sitio' }).click();
+  await page
+    .getByRole('navigation', { name: 'Sistema', exact: true })
+    .getByRole('link', { name: 'Sitio' })
+    .click();
   await page.locator('label', { hasText: 'Solo vista previa' }).click();
   await page.getByRole('button', { name: 'Aplicar' }).click();
   await expect(page.getByText('(actual)')).toBeVisible();
@@ -127,7 +130,10 @@ test('reembolso desde el detalle del pedido: confirmación, motivo y auditoría'
   });
   await expect.poll(() => readField(`orders/${orderId}`, 'status')).toBe('refunded');
   await page.getByRole('link', { name: /^Sistema/ }).click();
-  await page.getByRole('link', { name: 'Auditoría' }).click();
+  await page
+    .getByRole('navigation', { name: 'Sistema', exact: true })
+    .getByRole('link', { name: 'Auditoría' })
+    .click();
   await expect(page.getByText('order.refund').first()).toBeVisible({ timeout: 30_000 });
 });
 
@@ -157,7 +163,10 @@ test('cola de revisión manual: el pedido aparece y "Aprobar páginas" lo devuel
   });
   await signIn(page, 'admin');
   await page.getByRole('link', { name: /^Operaciones/ }).click();
-  await page.getByRole('link', { name: 'Revisión manual' }).click();
+  await page
+    .getByRole('navigation', { name: 'Operaciones', exact: true })
+    .getByRole('link', { name: 'Revisión manual' })
+    .click();
   await page.getByRole('link', { name: orderId }).click();
   page.on('dialog', (dialog) => void dialog.accept());
   await page.getByRole('button', { name: 'Aprobar páginas' }).click();
