@@ -20,6 +20,7 @@ export const EMAIL_DATA = {
     receipt: receiptSchema.optional(),
   }),
   digital_ready: z.object({ bookTitle: title, url }),
+  order_in_review: z.object({ bookTitle: title, url }),
   print_sent: z.object({
     bookTitle: title,
     url,

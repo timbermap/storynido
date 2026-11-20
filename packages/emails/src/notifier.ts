@@ -340,6 +340,9 @@ export class EmailNotifier {
           ...(receipt ? { receipt } : {}),
         });
       }
+      case 'qa_failed':
+        // La revisión manual de un pedido pagado: se le avisa a quien compró, sin prometer plazos.
+        return send('order_in_review', { bookTitle, url });
       case 'ready':
         // Un impreso avisa al ir a la imprenta (con el digital ya disponible).
         return print ? null : send('digital_ready', { bookTitle, url });

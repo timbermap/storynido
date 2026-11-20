@@ -596,7 +596,7 @@ describe('generación del libro (fase 09)', () => {
     expect(sent()[0]?.data.url).toBe('https://storynido.test/es/pedido/o1');
   });
 
-  it('mails: si queda en revisión manual, alerta al equipo y nada al cliente', async () => {
+  it('mails: si queda en revisión manual, avisa al cliente que lo revisa una persona y alerta al equipo', async () => {
     // Un impreso con imágenes de 1K: la maquetación lo frena.
     const providers = registry();
     await seedBook(providers, {}, { format: 'softcover', pages: 10 });
@@ -606,7 +606,10 @@ describe('generación del libro (fase 09)', () => {
         message.template,
         message.to,
       ]),
-    ).toEqual([['admin_alert', 'equipo@storynido.test']]);
+    ).toEqual([
+      ['order_in_review', 'ana@storynido.test'],
+      ['admin_alert', 'equipo@storynido.test'],
+    ]);
   });
 
   it('impreso con las imágenes aprobadas en 1K: la maquetación lo frena por resolución', async () => {

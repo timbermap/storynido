@@ -102,6 +102,15 @@ const es: LocaleCopy = {
       ],
       cta: cta('Descargar mi libro', d.url),
     }),
+    order_in_review: (d) => ({
+      subject: `Estamos revisando «${d.bookTitle}»`,
+      preview: 'Tu pedido está en revisión.',
+      heading: 'Estamos revisando tu pedido',
+      paragraphs: [
+        `Antes de entregarte «${d.bookTitle}» una persona de nuestro equipo está revisando algunos detalles para que quede como se merece. No tienes que hacer nada: te avisamos por correo apenas esté listo.`,
+      ],
+      cta: cta('Ver mi pedido', d.url),
+    }),
     print_sent: (d) => ({
       subject: `«${d.bookTitle}» ya está en la imprenta`,
       preview: 'Tu libro impreso está en camino a producción.',
@@ -272,6 +281,15 @@ const en: LocaleCopy = {
       ],
       cta: cta('Download my book', d.url),
     }),
+    order_in_review: (d) => ({
+      subject: `We’re reviewing “${d.bookTitle}”`,
+      preview: 'Your order is being reviewed.',
+      heading: 'We’re reviewing your order',
+      paragraphs: [
+        `Before we deliver “${d.bookTitle}”, someone on our team is checking a few details so it turns out the way it deserves. You don’t need to do anything: we’ll email you as soon as it’s ready.`,
+      ],
+      cta: cta('View my order', d.url),
+    }),
     print_sent: (d) => ({
       subject: `“${d.bookTitle}” is at the printer`,
       preview: 'Your printed book is heading into production.',
@@ -428,6 +446,15 @@ const pt: LocaleCopy = {
         `Terminamos “${d.bookTitle}”. Baixe pelo seu pedido quando quiser: o link de download é criado na hora, só para a sua conta.`,
       ],
       cta: cta('Baixar meu livro', d.url),
+    }),
+    order_in_review: (d) => ({
+      subject: `Estamos revisando “${d.bookTitle}”`,
+      preview: 'Seu pedido está em revisão.',
+      heading: 'Estamos revisando o seu pedido',
+      paragraphs: [
+        `Antes de entregar “${d.bookTitle}”, uma pessoa da nossa equipe está revisando alguns detalhes para que fique como merece. Você não precisa fazer nada: avisamos por e-mail assim que estiver pronto.`,
+      ],
+      cta: cta('Ver meu pedido', d.url),
     }),
     print_sent: (d) => ({
       subject: `“${d.bookTitle}” está na gráfica`,
