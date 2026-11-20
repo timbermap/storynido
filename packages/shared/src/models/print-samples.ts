@@ -4,7 +4,8 @@ import type { Address } from './commerce';
 /**
  * Direcciones de ejemplo (una por país) para cotizar con las imprentas antes de tener la
  * dirección real: el estimado de la muestra y las landings, y la actualización diaria de la
- * matriz de imprentas (DECISIONS 241).
+ * matriz de imprentas (DECISIONS 241). Donde la imprenta exige documento del destinatario (Lulu en
+ * AR, MX y BR) llevan uno de ejemplo con dígito verificador válido: sin él, la cotización falla.
  */
 export const SAMPLE_PRINT_ADDRESSES: Partial<Record<CountryCode, Omit<Address, 'country'>>> = {
   AR: {
@@ -15,7 +16,7 @@ export const SAMPLE_PRINT_ADDRESSES: Partial<Record<CountryCode, Omit<Address, '
     state: 'CABA',
     postalCode: 'C1059',
     phone: '+541150000000',
-    taxId: null,
+    taxId: '20-12345678-6',
   },
   MX: {
     name: 'Estimación',
@@ -25,7 +26,7 @@ export const SAMPLE_PRINT_ADDRESSES: Partial<Record<CountryCode, Omit<Address, '
     state: 'CDMX',
     postalCode: '06600',
     phone: '+525550000000',
-    taxId: null,
+    taxId: 'XAXX010101000',
   },
   US: {
     name: 'Estimación',
@@ -55,7 +56,7 @@ export const SAMPLE_PRINT_ADDRESSES: Partial<Record<CountryCode, Omit<Address, '
     state: 'RM',
     postalCode: '7500000',
     phone: '+56220000000',
-    taxId: null,
+    taxId: '12.345.678-5',
   },
   CO: {
     name: 'Estimación',
@@ -75,7 +76,7 @@ export const SAMPLE_PRINT_ADDRESSES: Partial<Record<CountryCode, Omit<Address, '
     state: 'Lima',
     postalCode: '15046',
     phone: '+5110000000',
-    taxId: null,
+    taxId: '12345678',
   },
   BR: {
     name: 'Estimação',
@@ -85,7 +86,7 @@ export const SAMPLE_PRINT_ADDRESSES: Partial<Record<CountryCode, Omit<Address, '
     state: 'SP',
     postalCode: '01310-100',
     phone: '+551130000000',
-    taxId: null,
+    taxId: '529.982.247-25',
   },
   UY: {
     name: 'Estimación',

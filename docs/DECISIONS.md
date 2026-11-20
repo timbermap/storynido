@@ -3162,3 +3162,8 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 
 - **Problema:** en el detalle de un pedido impreso de prueba el margen mostraba US$ 21,54 porque no restaba la comisión de PayPal (~2,94); el neto real era ~18,60. La portada «Hoy» y la tabla por producto ya restaban la comisión.
 - **Arreglo:** el detalle muestra «Comisión de pago» (la real si PayPal la informó, si no la estimada del proveedor) y el margen es ingreso − impuestos − comisión − IA − impresión y envío.
+
+## 307 — Las direcciones de ejemplo llevan documento para cotizar con Lulu
+
+- **Fecha:** 2026-11-20. En la prueba del impreso, la actualización diaria de costos de Lulu fallaba en Argentina, México y Brasil con `recipient_tax_id` requerido: las direcciones de ejemplo no tenían documento. El pago real ya lo pide (DECISIONS 233).
+- **Cambio:** `SAMPLE_PRINT_ADDRESSES` suma un documento de ejemplo válido en AR, MX, CL, PE y BR. Solo se usa para cotizar, nunca para pedidos.
