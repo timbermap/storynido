@@ -34,3 +34,4 @@ env:
   - variable: NEXT_TELEMETRY_DISABLED
     value: '1'
     availability: [BUILD]
+  # Fase 2 (PayPal live): agregar NEXT_PUBLIC_PAYPAL_CLIENT_ID con el client id live (público, como en staging).

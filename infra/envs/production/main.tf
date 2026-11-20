@@ -43,7 +43,13 @@ module "environment" {
   gelato_order_type = "order"
   # Impresos apagados hasta cumplir docs/IMPRESO-ACTIVACION.md (DECISIONS 295).
   print_enabled = false
-  log_level     = "info"
+  # Mails reales con Resend; el secreto de las bajas (email-link-secret) tiene valor propio de producción.
+  email_provider           = "resend"
+  email_link_secret_loaded = true
+  # Pagos en "mock" hasta cargar las credenciales live de PayPal y el webhook (paypal-webhook-id).
+  # Fase 2: payment_provider = "paypal" (PayPal live, DECISIONS).
+  payment_provider = "mock"
+  log_level        = "info"
   # Se suma el dominio del admin cuando exista.
   auth_authorized_domains = [
     "storynido.com",
