@@ -28,7 +28,12 @@ import {
   type StoryPromptInput,
 } from '@storynido/shared';
 
-import { SEED_NEW_STORIES, SEED_STORIES } from '../../../firebase/seed-data/catalog';
+import {
+  SEED_DRAFT_STORIES,
+  SEED_NEW_STORIES,
+  SEED_PRO_STORIES,
+  SEED_STORIES,
+} from '../../../firebase/seed-data/catalog';
 import { VertexClient, VertexTextProvider } from '../src/gcp/vertex';
 
 const { values } = parseArgs({
@@ -244,6 +249,16 @@ const CRITERIA = [
 const ids = values.only?.split(',');
 const cases = ids ? CASES.filter((item) => ids.includes(item.id)) : CASES;
 const variants = values.variants.split(',').map((item) => item.trim());
+const missing = cases.filter(
+  (item) =>
+    ![...SEED_STORIES, ...SEED_NEW_STORIES, ...SEED_PRO_STORIES, ...SEED_DRAFT_STORIES].some(
+      (story) => story.slug === item.slug,
+    ),
+);
+if (missing.length > 0) {
+  console.error(`Historias que no existen: ${missing.map((item) => item.slug).join(', ')}`);
+  process.exit(1);
+}
 const runs = cases.length * variants.length;
 const estimate = runs * 0.05;
 const budget = Number(values.budget);
@@ -298,7 +313,7 @@ const JUDGE_SCHEMA = {
 };
 
 let spent = 0;
-const stories = [...SEED_STORIES, ...SEED_NEW_STORIES];
+const stories = [...SEED_STORIES, ...SEED_NEW_STORIES, ...SEED_PRO_STORIES, ...SEED_DRAFT_STORIES];
 
 interface Row {
   id: string;
@@ -317,7 +332,10 @@ const rows: Row[] = [];
 
 for (const testCase of cases) {
   const story = stories.find((item) => item.slug === testCase.slug);
-  if (!story) throw new Error(`Historia desconocida: ${testCase.slug}`);
+  if (!story) {
+    console.log(`✗ ${testCase.id}: historia desconocida (${testCase.slug}), se saltea`);
+    continue;
+  }
   const plan = editorialPlan(
     { length: null, textDensity: 'balanced', readingLevel: 'developing', contentType: 'story' },
     DEFAULT_EDITORIAL_CONFIG,
