@@ -3090,3 +3090,17 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Causa:** al reparar una página, `illustrate` dejaba subir el error del proveedor cuando el modelo respondía sin imagen (o bloqueaba la escena). Solo se capturaba el rechazo de la moderación, así que un único dibujo vacío tumbaba el paso entero, dos veces, en vez de afectar a una página.
 - **Arreglo:** nuevo `ImageNotReturnedError` (vertex lo lanza al no haber imagen o bloquear la escena). `illustrate` lo cuenta como intento fallido, anota `image_not_returned` y el intento siguiente pide una escena más simple. Si no sale ninguno, rige lo de siempre: reparación → revisión humana de esa página (no del libro).
 - **Prevención:** prueba de emulador con reparaciones sin imagen.
+
+## 299 — Seguimiento de PayPal en el admin («Cobros PayPal»), solo lectura
+
+**Qué.** Pantalla nueva en Administración con: cobrado, comisión real, neto, reembolsado; saldo de la billetera (disponible, retenido, total); conciliación pedido ↔ PayPal; cobros por pedido; disputas; reembolsos y retiros; todos los movimientos. Ruta `GET /v1/admin/paypal?days=7|30|90`.
+
+**Comisión real.** Al capturar, PayPal informa `seller_receivable_breakdown` (comisión y neto). Se guarda en el pedido (`payment.feeMinor`, `payment.netMinor`) y el dashboard «Hoy» usa esa comisión en vez de la estimada (METRICS_VERSION 4 recalcula los días guardados). Para los pedidos anteriores sin dato se estima con `PAYMENT_FEES.paypal` = 5,4 % + US$ 0,30 (cuenta de Argentina verificada el 19 nov 2026).
+
+**Lectura de PayPal.** `PaymentProvider.reporting` (opcional) con saldo (`/v1/reporting/balances`), movimientos (`/v1/reporting/transactions`, tramos de 30 días, hasta 90 días) y disputas (`/v1/customer/disputes`). Solo GET. Cada sección falla por separado y el error explica el permiso que falta (activar «Transaction Search» y «Disputes» en la app REST de PayPal).
+
+**Conciliación.** Se cruza por el ID de la captura (`payment.paymentId`). Marcas: coincide, no aparece en PayPal (solo si pasaron más de 3 h, el atraso de PayPal), otro importe, y cobros de PayPal sin pedido nuestro (webhook perdido).
+
+**Límites a propósito.** Desde el admin no se reembolsa ni se retira nada: el reembolso sigue en el detalle del pedido (con confirmación y auditoría) y los retiros se hacen en PayPal (en USD: convertir a pesos dentro de PayPal cuesta 3,5 % extra). El aviso de disputa ahora dice el monto en dólares y el pedido.
+
+**Pendiente de Sebas.** Activar «Transaction Search» y «Disputes» en la app de PayPal (sandbox ahora; en vivo cuando exista la app). Webhooks a suscribir: `CHECKOUT.ORDER.APPROVED`, `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.REFUNDED`, `CUSTOMER.DISPUTE.CREATED`.

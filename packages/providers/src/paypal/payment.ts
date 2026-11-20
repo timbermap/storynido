@@ -7,6 +7,11 @@ import {
   type Locale,
   type PaymentEvent,
   type PaymentProvider,
+  type PaymentReporting,
+  type ProviderBalance,
+  type ProviderDispute,
+  type ProviderTransaction,
+  type ProviderTransactionKind,
   type Refund,
   type RefundRequest,
   type WebhookInput,
@@ -64,6 +69,13 @@ const captureSchema = z.object({
   amount: moneySchema,
   custom_id: z.string().nullish(),
   invoice_id: z.string().nullish(),
+  // Comisión y neto del cobro: PayPal los informa en la captura y en el webhook.
+  seller_receivable_breakdown: z
+    .object({
+      paypal_fee: moneySchema.nullish(),
+      net_amount: moneySchema.nullish(),
+    })
+    .nullish(),
   supplementary_data: z
     .object({ related_ids: z.object({ order_id: z.string().nullish() }).partial().nullish() })
     .partial()
@@ -128,6 +140,82 @@ export function paypalMinor(value: string): number {
   return Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
 }
 
+/** Como `paypalMinor`, pero acepta el signo ("-5.30" → -530): los movimientos traen negativos. */
+export function paypalSignedMinor(value: string | null | undefined): number {
+  if (!value) return 0;
+  const negative = value.startsWith('-');
+  const minor = paypalMinor(negative ? value.slice(1) : value);
+  return Number.isNaN(minor) ? 0 : negative ? -minor : minor;
+}
+
+const balanceAmount = z.object({ currency_code: z.string(), value: z.string() });
+
+const balancesSchema = z.object({
+  balances: z
+    .array(
+      z.object({
+        currency: z.string(),
+        total_balance: balanceAmount,
+        available_balance: balanceAmount.nullish(),
+        withheld_balance: balanceAmount.nullish(),
+      }),
+    )
+    .default([]),
+});
+
+const transactionsSchema = z.object({
+  transaction_details: z
+    .array(
+      z.object({
+        transaction_info: z.object({
+          transaction_id: z.string(),
+          paypal_reference_id: z.string().nullish(),
+          transaction_event_code: z.string().nullish(),
+          transaction_initiation_date: z.string(),
+          transaction_amount: balanceAmount,
+          fee_amount: balanceAmount.nullish(),
+          transaction_status: z.string().nullish(),
+          custom_field: z.string().nullish(),
+          invoice_id: z.string().nullish(),
+        }),
+      }),
+    )
+    .default([]),
+  total_pages: z.number().default(1),
+});
+
+const disputesSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        dispute_id: z.string(),
+        status: z.string().nullish(),
+        reason: z.string().nullish(),
+        create_time: z.string().nullish(),
+        update_time: z.string().nullish(),
+        dispute_amount: moneySchema.nullish(),
+        disputed_transactions: z
+          .array(z.object({ seller_transaction_id: z.string().nullish() }))
+          .nullish(),
+      }),
+    )
+    .default([]),
+});
+
+/** Tipo de movimiento según el código de evento de PayPal (Transaction Search). */
+export function paypalTransactionKind(code: string): ProviderTransactionKind {
+  if (code === 'T1107' || code === 'T1106') return 'refund';
+  if (code.startsWith('T04') || code === 'T0300' || code === 'T0301') return 'withdrawal';
+  if (code.startsWith('T11') || code.startsWith('T12')) return 'dispute';
+  if (code === 'T0006' || code === 'T0001' || code === 'T0000' || code === 'T0005') {
+    return 'payment';
+  }
+  return 'other';
+}
+
+/** Máximo de páginas de movimientos por consulta (100 por página): corta una lectura desbocada. */
+const MAX_TRANSACTION_PAGES = 10;
+
 function paypalValue(minor: number): string {
   return (minor / 100).toFixed(2);
 }
@@ -153,6 +241,12 @@ export class PaypalPaymentProvider implements PaymentProvider {
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.now = options.now ?? (() => new Date());
     this.baseUrl = BASE_URLS[options.environment ?? 'sandbox'];
+    this.reporting = {
+      environment: options.environment ?? 'sandbox',
+      balances: () => this.readBalances(),
+      transactions: (from, to) => this.readTransactions(from, to),
+      disputes: () => this.readDisputes(),
+    };
   }
 
   private async accessToken(): Promise<string> {
@@ -398,6 +492,9 @@ export class PaypalPaymentProvider implements PaymentProvider {
     if (capture.amount.currency_code !== 'USD') {
       throw new ProviderError(this.id, `Captura en ${capture.amount.currency_code}, no en USD`);
     }
+    const breakdown = capture.seller_receivable_breakdown;
+    const fee = breakdown?.paypal_fee;
+    const net = breakdown?.net_amount;
     return {
       type: 'checkout.completed',
       eventId,
@@ -407,6 +504,8 @@ export class PaypalPaymentProvider implements PaymentProvider {
       amountMinor: paypalMinor(capture.amount.value),
       currency: 'USD',
       taxMinor: null,
+      ...(fee?.currency_code === 'USD' ? { feeMinor: paypalMinor(fee.value) } : {}),
+      ...(net?.currency_code === 'USD' ? { netMinor: paypalMinor(net.value) } : {}),
     };
   }
 
@@ -453,6 +552,71 @@ export class PaypalPaymentProvider implements PaymentProvider {
     const capture = await this.capture(sessionId);
     if (capture?.status !== 'COMPLETED') return null;
     return this.completed(`confirm-${capture.id}`, orderId, sessionId, capture);
+  }
+
+  /** Lectura de la billetera para el admin: saldo, movimientos y disputas. Solo GET. */
+  readonly reporting: PaymentReporting;
+
+  private async readBalances(): Promise<ProviderBalance[]> {
+    const result = await this.call('/v1/reporting/balances?currency_code=ALL', { method: 'GET' });
+    if (!result.ok) this.fail('leer el saldo', result);
+    return balancesSchema.parse(result.json).balances.map((balance) => ({
+      currency: balance.currency,
+      totalMinor: paypalSignedMinor(balance.total_balance.value),
+      availableMinor: paypalSignedMinor(balance.available_balance?.value),
+      withheldMinor: paypalSignedMinor(balance.withheld_balance?.value),
+    }));
+  }
+
+  private async readTransactions(from: Date, to: Date): Promise<ProviderTransaction[]> {
+    const out: ProviderTransaction[] = [];
+    for (let page = 1; page <= MAX_TRANSACTION_PAGES; page += 1) {
+      const query = new URLSearchParams({
+        start_date: from.toISOString(),
+        end_date: to.toISOString(),
+        fields: 'transaction_info',
+        balance_affecting_records_only: 'Y',
+        page_size: '100',
+        page: String(page),
+      });
+      const result = await this.call(`/v1/reporting/transactions?${query.toString()}`, {
+        method: 'GET',
+      });
+      if (!result.ok) this.fail('leer los movimientos', result);
+      const data = transactionsSchema.parse(result.json);
+      for (const { transaction_info: info } of data.transaction_details) {
+        const code = info.transaction_event_code ?? '';
+        out.push({
+          id: info.transaction_id,
+          kind: paypalTransactionKind(code),
+          code,
+          status: info.transaction_status ?? '',
+          at: new Date(info.transaction_initiation_date),
+          currency: info.transaction_amount.currency_code,
+          grossMinor: paypalSignedMinor(info.transaction_amount.value),
+          feeMinor: paypalSignedMinor(info.fee_amount?.value),
+          orderId: info.custom_field ?? info.invoice_id ?? null,
+          relatedId: info.paypal_reference_id ?? null,
+        });
+      }
+      if (page >= data.total_pages) break;
+    }
+    return out;
+  }
+
+  private async readDisputes(): Promise<ProviderDispute[]> {
+    const result = await this.call('/v1/customer/disputes?page_size=50', { method: 'GET' });
+    if (!result.ok) this.fail('leer las disputas', result);
+    return disputesSchema.parse(result.json).items.map((item) => ({
+      id: item.dispute_id,
+      status: item.status ?? '',
+      reason: item.reason ?? '',
+      currency: item.dispute_amount?.currency_code ?? 'USD',
+      amountMinor: item.dispute_amount ? paypalSignedMinor(item.dispute_amount.value) : 0,
+      createdAt: item.create_time ? new Date(item.create_time) : null,
+      updatedAt: item.update_time ? new Date(item.update_time) : null,
+      paymentId: item.disputed_transactions?.[0]?.seller_transaction_id ?? null,
+    }));
   }
 
   async refund(request: RefundRequest): Promise<Refund> {

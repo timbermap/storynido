@@ -119,7 +119,13 @@ interface OrderDoc {
   priceSnapshot: PriceSnapshot | null;
   couponCode: string | null;
   analyticsConsent?: boolean;
-  payment: { provider: string; checkoutSessionId: string | null; paymentId: string | null };
+  payment: {
+    provider: string;
+    checkoutSessionId: string | null;
+    paymentId: string | null;
+    feeMinor?: number;
+    netMinor?: number;
+  };
   print?: {
     provider: string;
     externalOrderId: string | null;
@@ -1304,7 +1310,7 @@ export class CheckoutService {
           kind: 'payment_dispute',
           orderId: order?.id ?? null,
           step: null,
-          message: `Contracargo abierto por ${String(event.amountMinor)}.`,
+          message: `Disputa abierta en PayPal por US$ ${(event.amountMinor / 100).toFixed(2)}${order ? ` (pedido ${order.id})` : ''}. Respondela desde PayPal antes del plazo.`,
           createdAt: new Date(),
           resolvedAt: null,
         });
@@ -1338,6 +1344,9 @@ export class CheckoutService {
         ...(typeof event.taxMinor === 'number'
           ? { 'payment.taxMinor': event.taxMinor, 'amounts.taxMinor': event.taxMinor }
           : {}),
+        // Comisión real del procesador (PayPal): el admin concilia contra esto.
+        ...(typeof event.feeMinor === 'number' ? { 'payment.feeMinor': event.feeMinor } : {}),
+        ...(typeof event.netMinor === 'number' ? { 'payment.netMinor': event.netMinor } : {}),
         updatedAt: new Date(),
       });
       tx.update(this.db.collection(COLLECTIONS.books).doc(order.bookId), {

@@ -12,6 +12,14 @@ import { AiBudget } from '../ai/budget';
 import { AppError } from '../errors';
 import { InsightsService } from '../metrics/insights';
 import { addRoute } from '../plugins/route';
+import {
+  buildPaypalReport,
+  dateChunks,
+  mergeTransactions,
+  paypalReadError,
+  withOrderOnDispute,
+  type PaypalOrder,
+} from '../admin/paypal-report';
 
 type TestBody = z.output<(typeof apiRoutes)['adminTestIntegration']['body']>;
 type QuoteBody = z.output<(typeof apiRoutes)['adminUpdateQuoteRequest']['body']>;
@@ -295,5 +303,104 @@ export function registerAdminOpsRoutes(app: FastifyInstance): void {
   addRoute(app, apiRoutes.adminInsights, {}, async (request) => {
     const { days } = request.query as { days: number };
     return insights.report(days);
+  });
+
+  /**
+   * Seguimiento de PayPal: solo lectura. Nuestro lado sale de los pedidos; el de PayPal, de sus
+   * API de saldo, movimientos y disputas. Un error en una sección no tira las demás.
+   */
+  addRoute(app, apiRoutes.adminPaypal, {}, async (request) => {
+    const { days } = request.query as { days: number };
+    const to = new Date();
+    const from = new Date(to.getTime() - days * 24 * 3600 * 1000);
+    const payment = providers.payment();
+    const reporting = payment.id === 'paypal' ? (payment.reporting ?? null) : null;
+
+    const snap = await db
+      .collection(COLLECTIONS.orders)
+      .where('payment.provider', '==', 'paypal')
+      .limit(2000)
+      .get();
+    const orders: PaypalOrder[] = snap.docs.map((doc) => {
+      const data = normalizeFirestoreData(doc.data()) as Record<string, unknown>;
+      const pay = (data.payment ?? {}) as Record<string, unknown>;
+      const amounts = (data.amounts ?? {}) as { totalMinor?: number };
+      const num = (value: unknown) => (typeof value === 'number' ? value : null);
+      return {
+        orderId: doc.id,
+        status: data.status as PaypalOrder['status'],
+        paidAt: data.paidAt instanceof Date ? data.paidAt : null,
+        totalMinor: amounts.totalMinor ?? 0,
+        feeMinor: num(pay.feeMinor),
+        netMinor: num(pay.netMinor),
+        paymentId: typeof pay.paymentId === 'string' ? pay.paymentId : null,
+      };
+    });
+
+    const live = {
+      balances: null as Awaited<ReturnType<NonNullable<typeof reporting>['balances']>> | null,
+      balancesError: null as string | null,
+      transactions: null as Awaited<
+        ReturnType<NonNullable<typeof reporting>['transactions']>
+      > | null,
+      transactionsError: null as string | null,
+      disputes: null as ReturnType<typeof withOrderOnDispute> | null,
+      disputesError: null as string | null,
+    };
+    if (reporting) {
+      const orderByPayment = new Map(
+        orders.flatMap((order) => (order.paymentId ? [[order.paymentId, order.orderId]] : [])),
+      );
+      const [balances, transactions, disputes] = await Promise.allSettled([
+        reporting.balances(),
+        (async () =>
+          mergeTransactions(
+            // Un tramo por vez: la API de PayPal limita el ritmo de consultas.
+            await dateChunks(from, to).reduce<
+              Promise<Awaited<ReturnType<typeof reporting.transactions>>[]>
+            >(
+              async (previous, [start, end]) => [
+                ...(await previous),
+                await reporting.transactions(start, end),
+              ],
+              Promise.resolve([]),
+            ),
+          ))(),
+        reporting.disputes(),
+      ]);
+      if (balances.status === 'fulfilled') live.balances = balances.value;
+      else live.balancesError = paypalReadError(balances.reason);
+      if (transactions.status === 'fulfilled') live.transactions = transactions.value;
+      else live.transactionsError = paypalReadError(transactions.reason);
+      if (disputes.status === 'fulfilled') {
+        live.disputes = withOrderOnDispute(disputes.value, orderByPayment);
+      } else live.disputesError = paypalReadError(disputes.reason);
+    }
+
+    const report = buildPaypalReport({ orders, transactions: live.transactions, from, to });
+    return {
+      activeProvider: payment.id,
+      environment: reporting?.environment ?? null,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      ours: report.ours,
+      live: {
+        ...live,
+        transactions:
+          live.transactions?.map((tx) => ({
+            id: tx.id,
+            kind: tx.kind,
+            code: tx.code,
+            status: tx.status,
+            at: tx.at.toISOString(),
+            currency: tx.currency,
+            grossMinor: tx.grossMinor,
+            feeMinor: tx.feeMinor,
+            orderId: tx.orderId,
+            relatedId: tx.relatedId,
+          })) ?? null,
+      },
+      reconciliation: report.reconciliation,
+    };
   });
 }

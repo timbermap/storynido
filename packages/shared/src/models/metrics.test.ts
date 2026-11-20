@@ -72,6 +72,26 @@ describe('métricas del dashboard', () => {
     });
   });
 
+  it('con la comisión real del cobro (PayPal) no se estima', () => {
+    const base = {
+      day: '2026-11-19',
+      final: true,
+      previews: 0,
+      aiCostUsdMicros: 0,
+      fx,
+    };
+    const paypal = order({
+      currency: 'USD',
+      amounts: { totalMinor: 2199, taxMinor: 0 },
+      paymentProvider: 'paypal',
+    });
+    const estimated = aggregateDay({ ...base, orders: [paypal] });
+    // 5,4 % + US$ 0,30 sobre 21,99.
+    expect(estimated.paymentFeeUsd).toBeCloseTo(1.49, 2);
+    const real = aggregateDay({ ...base, orders: [{ ...paypal, paymentFeeUsdMinor: 141 }] });
+    expect(real.paymentFeeUsd).toBe(1.41);
+  });
+
   it('embudo del día: libros creados, etapas de la muestra, pagos iniciados y compras', () => {
     const day = aggregateDay({
       day: '2026-10-29',
