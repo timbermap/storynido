@@ -587,7 +587,11 @@ function activities(book: KitBook, copies: number) {
   if (level === 'little') {
     pages.push(
       page(t(book, 'dots'), `<p class="hint">${t(book, 'dotsHint')}</p>${dotsSvg()}`, 2),
-      page(t(book, 'draw'), `<p class="hint">${t(book, 'drawHint')}</p><div class="box">${book.occasion === 'birthday' ? CAKE_GUIDE : ''}</div>`, 3),
+      page(
+        t(book, 'draw'),
+        `<p class="hint">${t(book, 'drawHint')}</p><div class="box">${book.occasion === 'birthday' ? CAKE_GUIDE : ''}</div>`,
+        3,
+      ),
     );
     return { css, pages };
   }
