@@ -121,12 +121,15 @@ export function dateChunks(from: Date, to: Date, maxDays = 30): [Date, Date][] {
 /** Texto en castellano para un error de lectura de PayPal (la causa más común: falta el permiso). */
 export function paypalReadError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
+  // PayPal explica la causa en el cuerpo de la respuesta: se muestra para no adivinar.
+  const detail = message.slice(0, 300);
   if (/NOT_AUTHORIZED|HTTP 403|HTTP 401/.test(message)) {
-    return 'PayPal no deja leer esto con las credenciales actuales. En developer.paypal.com → Apps & Credentials → tu app → Features, activá «Transaction Search» (y «Disputes» para las disputas); los cambios tardan unos minutos.';
+    return `PayPal no deja leer esto con las credenciales actuales. En developer.paypal.com → Apps & Credentials → tu app → Features, activá «Transaction Search» (y «Disputes» para las disputas); los cambios tardan unos minutos. Detalle de PayPal: ${detail}`;
   }
-  if (message.includes('HTTP 429'))
+  if (message.includes('HTTP 429')) {
     return 'PayPal pidió esperar un momento. Probá de nuevo en un minuto.';
-  return message.slice(0, 240);
+  }
+  return detail;
 }
 
 export const withOrderOnDispute = (
