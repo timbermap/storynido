@@ -25,7 +25,7 @@ Protagonista: {{childName}}, {{age}} años (pronombre: {{pronouns}}). Le gusta: 
 Mascota: {{petName}}. Mejor amigo o amiga: {{bestFriendName}}.
 Enseñanzas para tejer en la trama:
 {{lessons}}
-Tono cálido y luminoso, un pequeño desafío y un final feliz.
+Tono cálido, un desafío a su medida que resuelve el protagonista y un final que cierra con una imagen para recordar.
 Cada página: su texto y la escena para ilustrar.`;
 
 /** El diente que se cae (ediciones locales, auditoría de historias): la tradición sigue al idioma del libro. */
@@ -36,7 +36,7 @@ Tradición del diente según el idioma del libro: en español, el Ratón Pérez 
 const CHRISTMAS_PROMPT = `${TEXT_PROMPT}
 Es una historia de Navidad. En español, puede incluir también la carta a los Reyes Magos y la noche del 5 de enero; en inglés y portugués, Christmas y Natal. Sin marcas ni personajes con derechos de autor.`;
 
-const IMAGE_PROMPT = `Children's picture book illustration: {{scene}}. Main character: {{character}}. Art style: {{style}}. Clear composition, warm light, no text in the image.`;
+const IMAGE_PROMPT = `Children's picture book illustration: {{scene}}. Main character: {{character}}. Art style: {{style}}. Clear composition with one focal point; the lighting and colors follow the art direction.`;
 
 /** Primera comunión: revisado con cuidado (Claude, 4 nov 2026). Respeto religioso sin doctrina. */
 const COMMUNION_PROMPT = `${TEXT_PROMPT}

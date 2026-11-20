@@ -14,30 +14,37 @@ import { STYLE_SHEETS, bookTypeSheet, styleSheetFor } from './style-sheets';
 export const STORY_PALETTES = {
   magic: {
     colors: ['#24404F', '#5E9C8F', '#D9A94F', '#D98A80', '#F5EBDA'],
+    names: 'deep teal, sage green, ochre gold, dusty coral and warm cream',
     mood: 'wonder, warmth, gentle fantasy and discovery; golden light against cool forest tones',
   },
   adventure: {
     colors: ['#2C3A63', '#6B5A94', '#4F98A0', '#D9A548', '#D97B5F'],
+    names: 'midnight blue, dusty violet, teal, ochre and terracotta',
     mood: 'discovery, excitement and invention; deep night blues with warm accents',
   },
   bedtime: {
     colors: ['#536987', '#A99CC4', '#E8CF9C', '#DDB3AE', '#FBF3E6'],
+    names: 'slate blue, soft lavender, pale gold, dusty rose and warm cream',
     mood: 'affection, calm and reassurance; soft twilight and moonlight',
   },
   nature: {
     colors: ['#3E6E5C', '#7FA88E', '#CF7F5A', '#DDB55A', '#F4E6CC'],
+    names: 'forest green, sage, terracotta, ochre and warm cream',
     mood: 'discovery, humor and energy; lush greens with warm sunlit accents',
   },
   celebration: {
     colors: ['#E07F73', '#E3B653', '#5FA6A3', '#9F8CC9', '#FBEFDC'],
+    names: 'coral, saffron yellow, teal, soft lilac and warm cream',
     mood: 'joy and celebration; festive energy from the characters, with confetti used sparingly',
   },
   explorer: {
     colors: ['#202D50', '#3A7591', '#6956A6', '#E9AE55', '#F3EBDD'],
+    names: 'deep navy, steel blue, plum, lantern amber and warm cream',
     mood: 'curiosity, suspense and independence for older readers; deep night blues with warm lantern light',
   },
   learning: {
     colors: ['#418D89', '#90B9D3', '#EAB39B', '#C1ADDF', '#F8F4EA'],
+    names: 'teal, sky blue, peach, soft lilac and warm cream',
     mood: 'calm, clarity and confidence; friendly, uncluttered and easy to read',
   },
 } as const;
@@ -90,7 +97,7 @@ const STYLE_MEDIUM: Record<string, string> = Object.fromEntries(
  * su acabado, pero no sus tics (sonrisas calcadas, brillos).
  */
 const HUMAN_CRAFT =
-  "Human craft: every face is unique and resembles the reference photo (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions and palette identical across pages. Clothing: the main character wears exactly the outfit of the reference sheet on every page, and changes it only when the page text explicitly says so or the action is impossible in it (swimming: swimwear; bedtime: pyjamas; rain: a raincoat and boots over the same outfit; cold or snow: a coat over the same outfit; sports: sportswear). Clothes always fit the place, weather and activity: indoors at home, no jackets or outdoor shoes unless arriving or leaving. Never winter clothes on a beach. Recurring objects (a lantern, a backpack, a pet's collar) keep the same shape, size and color on every page, and sports or hobby gear is drawn precisely as named (for example, a squash racket has a small round head and a long thin throat, not a tennis racket).";
+  "Human craft: the main character's face resembles the reference photo or reference sheet, and every other face belongs to a different individual (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions and palette identical across pages. Clothing: the main character wears exactly the outfit of the reference sheet on every page, and changes it only when the page text explicitly says so or the action is impossible in it (swimming: swimwear; bedtime: pyjamas; rain: a raincoat and boots over the same outfit; cold or snow: a coat over the same outfit; sports: sportswear). Clothes always fit the place, weather and activity: indoors at home, no jackets or outdoor shoes unless arriving or leaving. Never winter clothes on a beach. Recurring objects (a lantern, a backpack, a pet's collar) keep the same shape, size and color on every page, and sports or hobby gear is drawn precisely as named (for example, a squash racket has a small round head and a long thin throat, not a tennis racket).";
 /**
  * Ropa en deportes de agua o de riesgo (un cuento de kitesurf salió con jean y zapatillas en el
  * agua). Va aparte de HUMAN_CRAFT para sumarla también a los libros congelados antes.
@@ -122,7 +129,7 @@ export const BODY_CONTACT =
  * lugar. Sin esto, el panel de texto tapaba caras (informe de Profesionales).
  */
 export const TEXT_ZONE =
-  'Compose for a printed page with text: the text is printed over one third of the image (the scene says which one, top or bottom); that third is plain, calm background such as sky, wall, floor or grass, and no face, head, hand or key action is ever in it.';
+  'Compose for a printed page with text: when the scene note reserves one third of the image for the text (top or bottom), that third is plain, calm background such as sky, wall, floor or grass, and no face, head, hand or key action is ever in it; when the scene note says the text goes elsewhere, use the whole image.';
 
 /**
  * Dirección de arte para la lámina del personaje: sin las reglas de composición de página (tercio
@@ -189,7 +196,7 @@ export function artDirection(input: {
   const palette = STORY_PALETTES[key];
   const color = colorless
     ? 'Black line art only for coloring: clean closed outlines, no fills, no shading.'
-    : `Color palette: ${palette.colors.join(', ')} (${palette.mood}); warm and harmonious, slightly softened: one accent color per scene and the rest earthy and calm; no pure primaries, neon or candy colors, never washed-out pastels.`;
+    : `Color palette: ${palette.names} (${palette.colors.join(', ')}; ${palette.mood}); warm and harmonious, slightly softened: one accent color per scene and the rest earthy and calm; no pure primaries, neon or candy colors, never washed-out pastels.`;
   return [
     `Art direction: premium children's picture book, ${medium}, as if one artist made the whole book.`,
     styleLock(medium),
@@ -206,7 +213,7 @@ export function artDirection(input: {
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     ONE_PROTAGONIST,
     TEXT_ZONE,
-    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated colors or gradients, glossy highlights in the eyes, perfectly round blush circles, symmetrical doll-like faces, malformed anatomy, random decorative objects, a second copy, twin or look-alike of the main character anywhere in the image, any text, title, letters or signs in the image, clothing that changes between pages when the text does not say so, winter clothes on a beach, and any change of style between pages.`,
+    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated colors or gradients, glossy highlights in the eyes, perfectly round blush circles, symmetrical doll-like faces, malformed anatomy, random decorative objects and any change of style between pages.`,
   ]
     .filter(Boolean)
     .join(' ');
@@ -214,6 +221,14 @@ export function artDirection(input: {
 
 /** Frases viejas de la dirección de arte que imponían una técnica (DECISIONS 265). */
 const LEGACY_TECHNIQUE: readonly (readonly [string, string])[] = [
+  [
+    'every face is unique and resembles the reference photo (natural-sized eyes',
+    "the main character's face resembles the reference photo or reference sheet, and every other face belongs to a different individual (natural-sized eyes",
+  ],
+  [
+    'Compose for a printed page with text: the text is printed over one third of the image (the scene says which one, top or bottom); that third is plain, calm background such as sky, wall, floor or grass, and no face, head, hand or key action is ever in it.',
+    TEXT_ZONE,
+  ],
   [
     'hand-made outlines in dark warm brown, thin-to-thick, never a uniform black vector outline;',
     'if the art style uses outlines, they are hand-made in dark warm brown, thin-to-thick, never a uniform black vector outline;',

@@ -838,7 +838,12 @@ ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text }) => ({ t
         page: index + 1,
         text: page.text,
         ...(scene
-          ? { mustBeVisible: scene.mustBeVisible, notVisible: scene.notVisible }
+          ? {
+              mustBeVisible: scene.mustBeVisible,
+              notVisible: scene.notVisible,
+              emotion: scene.emotionalBeat,
+              ...(scene.shot ? { camera: scene.shot } : {}),
+            }
           : { previousScene: page.illustrationPrompt }),
       };
     });
@@ -852,7 +857,8 @@ one or two sentences: who is in the picture and who is not (the protagonist ${re
               ? `; recurring characters: ${request.recurring.join(', ')}`
               : ''
           }), the place, the time of day, the key object, and ONE single moment of the page (never two actions in a row).
-Draw only what the text says or implies; follow mustBeVisible / notVisible when given. A page with empty text: the moment the
+Draw only what the text says or implies; follow mustBeVisible / notVisible when given. When a page has an emotion, show it in the
+protagonist's face and body (a specific expression and posture, never a generic smile), and when it has a camera, frame the page that way. A page with empty text: the moment the
 plan describes, told by the picture alone. No text, letters or signs in the image. Exactly ${String(request.pages.length)} prompts, in order.
 People who are not recurring characters: a relative of the protagonist (mother, father, grandparent, sibling, cousin) looks like a
 plausible family of the protagonist (a similar skin tone and a related hair color, never a stereotype)${
@@ -1152,7 +1158,9 @@ ${request.bible || '(none)'}`,
 Use only these approved activity templates (kind and guidance), cycling through them; do not invent other kinds:
 ${request.templates.map((template) => `- ${template.kind}: ${template.guidance}`).join('\n')}
 ${request.goal ? `General goal chosen by the professional (educational, never clinical): ${request.goal}\n` : ''}Write title, instructions and items in ${request.language === 'es' ? 'Spanish' : request.language === 'pt' ? 'Portuguese' : 'English'};${voiceNote(request.language, request.spanishVoice)}
-items are characters, objects or words from the story. illustrationPrompt (English, simple outline scene, no text in the image) only if the
+items are characters, objects or words from the story. Instructions are one or two short sentences addressed to the child, in the
+reading level's vocabulary, that tell exactly what to do (for example "Circle every star" or "Draw a line from Rocco to his ball"); the
+whole activity fits one page and never needs reading the story again. illustrationPrompt (English, simple outline scene, no text in the image) only if the
 activity needs a picture, else null. No diagnoses, therapy language or cure promises.
 
 Story pages:

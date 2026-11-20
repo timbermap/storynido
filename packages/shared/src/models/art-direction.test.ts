@@ -14,9 +14,9 @@ import { STYLE_SHEETS, bookTypeSheet, imageCheckFor } from './style-sheets';
 describe('dirección de arte de los libros', () => {
   it('la lámina del personaje no lleva reglas de composición de página', () => {
     const page = artDirection({ age: 7, channel: 'families' });
-    expect(page).toContain('the text is printed over one third');
+    expect(page).toContain('reserves one third of the image for the text');
     const sheet = characterSheetDirection(page) ?? '';
-    expect(sheet).not.toContain('the text is printed over one third');
+    expect(sheet).not.toContain('reserves one third of the image for the text');
     expect(sheet).not.toContain('wide establishing shot');
     expect(sheet).not.toContain('diagonal dynamic compositions');
     expect(sheet).toContain('Style lock');
@@ -57,7 +57,7 @@ describe('dirección de arte de los libros', () => {
 
   it('deja lugar para el texto y dibuja al protagonista una sola vez', () => {
     const direction = artDirection({ age: 6, channel: 'professionals' });
-    expect(direction).toContain('the scene says which one, top or bottom');
+    expect(direction).toContain('the scene note says the text goes elsewhere');
     expect(direction).toContain('appears exactly once');
   });
 
@@ -65,7 +65,7 @@ describe('dirección de arte de los libros', () => {
     const old = "Art direction: premium children's picture book.";
     const updated = withCurrentGuards(old) ?? '';
     expect(updated).toContain('appears exactly once');
-    expect(updated).toContain('the scene says which one, top or bottom');
+    expect(updated).toContain('the scene note says the text goes elsewhere');
     expect(updated).toContain('never jeans, everyday clothes or shoes in the water');
     expect(withCurrentGuards(updated)).toBe(updated);
     expect(withCurrentGuards(null)).toBeNull();

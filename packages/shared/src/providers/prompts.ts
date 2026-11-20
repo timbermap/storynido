@@ -510,7 +510,7 @@ export function coverScene(
     : firstScene
       ? ` Story world, for the setting and mood only; do not copy this composition: ${firstScene.trim().replace(/\.+$/, '')}. Use only places from the story; never invent new landscapes.`
       : '';
-  return `Book cover illustration: the main character large and centered in one of the story's own places, caught in the middle of the story's central activity or its happiest moment, with genuine emotion and body language (never the stiff standing pose of the reference sheet), with a clear focal point and a different composition from the first page.${place}${concept} Draw it with exactly the same art technique, line, texture, color treatment and character proportions as the inside pages and the reference sheet: the cover is never more stylized, more inked or more dramatic than the pages. Keep the top third as calm, simple background with no lettering: the title is typeset later.`;
+  return `Book cover illustration: the main character large and centered in one of the story's own places, caught in the middle of the story's central activity or its happiest moment, with genuine emotion and body language (never the stiff standing pose of the reference sheet), with a clear focal point and a different composition from the first page.${place}${concept} Draw it with exactly the same art technique, line, texture, color treatment and character proportions as the inside pages and the reference sheet: the cover is never more stylized, more inked or more dramatic than the pages. Keep the top 40% as calm, simple background with no lettering and no head or face in it: the title is typeset there later.`;
 }
 
 /** Datos de ejemplo para probar una plantilla desde el admin (sin datos reales ni IA). */
