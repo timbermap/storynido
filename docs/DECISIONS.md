@@ -3170,3 +3170,8 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Avisos:** cada área muestra un punto (rojo si hay urgentes) según `/v1/admin/attention`: pagos y disputas en Administración, revisión, atascados, impresión e IA en Operaciones, cotizaciones en Usuarios.
 - **Búsqueda:** pasó a la barra superior y recorre todo el panel, con el área de cada resultado. Imprentas pasó de Administración a Operaciones, y IA de Producción a Operaciones. Nada se borra; solo cambia dónde se ve.
 - **Portadas (paso 2):** cada área abre en «Resumen» (`/areas/<área>`) con avisos del área, cuatro números de los últimos 30 días, un gráfico de barras y las secciones: Marketing (tráfico y embudo), Operaciones (cola de revisión, IA de hoy, calidad, pedidos en proceso), Administración (ventas, comisión, contribución, reembolsos), Usuarios (clientes, cotizaciones, equipo), Contenido (catálogos) y Sistema (modo del sitio y últimos cambios). General sigue siendo Hoy. Solo lectura: usan rutas del admin que ya existían.
+
+## 308 — Las direcciones de ejemplo llevan documento para cotizar con Lulu
+
+- **Fecha:** 2026-11-20. En la prueba del impreso, la actualización diaria de costos de Lulu fallaba en Argentina, México y Brasil con `recipient_tax_id` requerido: las direcciones de ejemplo no tenían documento. El pago real ya lo pide (DECISIONS 233).
+- **Cambio:** `SAMPLE_PRINT_ADDRESSES` suma un documento de ejemplo válido en AR, MX, CL, PE y BR. Solo se usa para cotizar, nunca para pedidos.
