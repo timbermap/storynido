@@ -3091,7 +3091,13 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Arreglo:** nuevo `ImageNotReturnedError` (vertex lo lanza al no haber imagen o bloquear la escena). `illustrate` lo cuenta como intento fallido, anota `image_not_returned` y el intento siguiente pide una escena más simple. Si no sale ninguno, rige lo de siempre: reparación → revisión humana de esa página (no del libro).
 - **Prevención:** prueba de emulador con reparaciones sin imagen.
 
-## 299 — Seguimiento de PayPal en el admin («Cobros PayPal»), solo lectura
+## 299 — El interruptor del impreso entra en Terraform y se documenta cómo activarlo
+
+- **Fecha:** 2026-11-20. Sebas quiere salir con digital y tener el impreso listo para prender en pocos días.
+- **Cambio:** variable `print_enabled` (por defecto `false`) que fija `PRINT_ENABLED` en la API de cada ambiente; ya no hace falta tocar variables de Cloud Run a mano. Guía de activación y prueba de punta a punta en [`IMPRESO-ACTIVACION.md`](IMPRESO-ACTIVACION.md).
+- **Ojo:** producción tiene `print_providers = ["mock"]`; al activar hay que ponerle las imprentas reales y cargar los secretos de Lulu, Gelato y Cloudprinter.
+
+## 300 — Seguimiento de PayPal en el admin («Cobros PayPal»), solo lectura
 
 **Qué.** Pantalla nueva en Administración con: cobrado, comisión real, neto, reembolsado; saldo de la billetera (disponible, retenido, total); conciliación pedido ↔ PayPal; cobros por pedido; disputas; reembolsos y retiros; todos los movimientos. Ruta `GET /v1/admin/paypal?days=7|30|90`.
 
