@@ -3091,7 +3091,7 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Arreglo:** nuevo `ImageNotReturnedError` (vertex lo lanza al no haber imagen o bloquear la escena). `illustrate` lo cuenta como intento fallido, anota `image_not_returned` y el intento siguiente pide una escena más simple. Si no sale ninguno, rige lo de siempre: reparación → revisión humana de esa página (no del libro).
 - **Prevención:** prueba de emulador con reparaciones sin imagen.
 
-### 300. Revisión de precios y márgenes de todo el sitio (2026-11-20)
+## 299 — Revisión de precios y márgenes de todo el sitio
 
 - **Revisado en staging:** API de oferta (AR, BR, CL, ES, MX, US, UY), Admin → Precios, Países y Kit, home, Familias, Profesionales, Celebraciones, Cómo funciona, historias, FAQ y legales. Los 16 precios de ebook (extensión × tipo) salen del mismo cálculo que el checkout y coinciden: mini 14,99, corto 16,99, clásico 22,99, gran aventura 24,99 (actividades y profesional más bajos, nunca debajo de 13,99). Ningún texto lleva un precio escrito a mano.
 - **Desajuste corregido:** la estimación de comisión del panel (contribución, «Hoy») no conocía PayPal y lo calculaba como Dodo (5,5 % + 0,40). Ahora PayPal 5,4 % + 0,30 y es el proveedor por defecto para `mock` y desconocidos.
