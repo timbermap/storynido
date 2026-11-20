@@ -3128,7 +3128,14 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 
 **Pendiente de Sebas.** Activar «Transaction Search» y «Disputes» en la app de PayPal (sandbox ahora; en vivo cuando exista la app). Webhooks a suscribir: `CHECKOUT.ORDER.APPROVED`, `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.REFUNDED`, `CUSTOMER.DISPUTE.CREATED`.
 
-## 301 — Mail al cliente cuando su pedido pasa a revisión manual
+## 302 — El kit de Celebraciones tiene piso de costo (2026-11-20)
+
+- **Decisión de Sebas (20 nov 2026):** el precio del kit sigue el costo + comisión como los libros, con la opción «piso por costo».
+- **Regla:** el diseño (trae el mini cuento y la invitación) no se cobra por debajo de IA del mini + margen neto mínimo del ebook + comisión del producto digital, redondeado a ,99 hacia arriba (`withKitCostFloor`, aplicada en las dos implementaciones del catálogo, así que la oferta, el checkout y la landing leen el mismo valor). El precio cargado a mano manda si es mayor; las piezas extra no cambian.
+- **Efecto con PayPal 5,4 % + 0,30:** diseño 9,99 → 10,99; invitación sola 10,99; kit completo 24,99 → 25,99. Antes la invitación sola dejaba ~7,65 netos, bajo el piso de 8.
+- **Pendiente de revisar:** el costo real de IA del kit (se supone el del mini; si hay contornos de colorear con IA, el piso sube).
+
+## 303 — Mail al cliente cuando su pedido pasa a revisión manual
 
 - **Fecha:** 2026-11-20. La mesa (usuario eventos, producto) vio que «Tu pedido» promete «te avisamos por correo» cuando una persona revisa el libro, pero ese mail no existía: solo se avisaba al equipo.
 - **Decisión:** plantilla `order_in_review` (es/en/pt): «Estamos revisando tu pedido», sin plazos inventados, con el link al pedido. Sale una sola vez, cuando el pedido cae en `qa_failed` (`orderStatus`), y si el libro termina bien después llega el de «listo» como siempre.

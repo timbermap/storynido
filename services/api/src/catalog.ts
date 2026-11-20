@@ -21,6 +21,8 @@ import {
   DEFAULT_PRO_DISCOUNTS,
   proDiscountConfigSchema,
   eventPricingSchema,
+  miniPricedPages,
+  withKitCostFloor,
   contentDocId,
   contentSchema,
   countrySchema,
@@ -320,7 +322,15 @@ export class FirestoreCatalog implements CatalogRepository {
         const parsed = data ? eventPricingSchema.safeParse(normalizeFirestoreData(data)) : null;
         return parsed?.success ? parsed.data : null;
       };
-      return usdEventPricing(await read(country), country === 'US' ? null : await read('US'));
+      const pricing = usdEventPricing(
+        await read(country),
+        country === 'US' ? null : await read('US'),
+      );
+      return withKitCostFloor(
+        pricing,
+        (await this.productPricing()).digital,
+        miniPricedPages(await this.editorial()),
+      );
     });
   }
 
@@ -439,10 +449,14 @@ export class InMemoryCatalog implements CatalogRepository {
     );
   }
 
-  eventPricing(country: CountryCode) {
+  async eventPricing(country: CountryCode) {
     const find = (code: CountryCode) =>
       (this.data.eventPricing ?? []).find((item) => item.country === code) ?? null;
-    return Promise.resolve(usdEventPricing(find(country), find('US')));
+    return withKitCostFloor(
+      usdEventPricing(find(country), find('US')),
+      (await this.productPricing()).digital,
+      miniPricedPages(await this.editorial()),
+    );
   }
 
   products() {
