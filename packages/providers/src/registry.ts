@@ -62,10 +62,22 @@ export type ProviderSettings = z.infer<typeof providerSettingsSchema>;
 
 const SIMULATED = new Set(['mock', 'mock_alt', 'local']);
 
+export interface SimulatedCheckOptions {
+  /** Con los impresos apagados (PRINT_ENABLED=false) no se vende ni se imprime: la lista de imprentas no cuenta. */
+  printEnabled?: boolean;
+  /** Tipos que este servicio no usa (el worker nunca cobra, así que ignora "payment"). */
+  ignore?: readonly ProviderKind[];
+}
+
 /** Proveedores simulados configurados (producción no puede usar ninguno). */
-export function simulatedProviders(settings: ProviderSettings): string[] {
-  return Object.values(settings)
-    .flat()
+export function simulatedProviders(
+  settings: ProviderSettings,
+  options: SimulatedCheckOptions = {},
+): string[] {
+  const { printEnabled = true, ignore = [] } = options;
+  return (Object.entries(settings) as [ProviderKind, string | string[]][])
+    .filter(([kind]) => !ignore.includes(kind) && (printEnabled || kind !== 'print'))
+    .flatMap(([, ids]) => ids)
     .filter((id) => SIMULATED.has(id));
 }
 

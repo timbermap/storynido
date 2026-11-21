@@ -225,3 +225,25 @@ variable "apphosting_ci_deploy" {
   default     = false
   description = "Deja que el deployer de GitHub Actions publique la web y el admin (App Hosting) en cada deploy. Requiere que los backends de App Hosting ya existan (DECISIONS 260)."
 }
+
+variable "ai_text_provider" {
+  type        = string
+  default     = "mock"
+  description = "Proveedor de IA de texto (AI_TEXT_PROVIDER). Producción: vertex (o anthropic con su clave cargada)."
+
+  validation {
+    condition     = contains(["mock", "vertex", "anthropic"], var.ai_text_provider)
+    error_message = "ai_text_provider debe ser mock, vertex o anthropic."
+  }
+}
+
+variable "ai_image_provider" {
+  type        = string
+  default     = "mock"
+  description = "Proveedor de IA de imágenes (AI_IMAGE_PROVIDER). Producción: vertex (o flux con su clave cargada)."
+
+  validation {
+    condition     = contains(["mock", "vertex", "flux"], var.ai_image_provider)
+    error_message = "ai_image_provider debe ser mock, vertex o flux."
+  }
+}

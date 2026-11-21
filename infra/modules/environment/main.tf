@@ -275,7 +275,10 @@ locals {
     # En la nube las fotos van a Cloud Storage (URLs firmadas v4).
     STORAGE_PROVIDER = "gcs"
     PHOTO_ANALYZER   = var.photo_analyzer
-    PRINT_PROVIDERS  = join(",", var.print_providers)
+    # IA: en producción tiene que ser real (Vertex usa la identidad del servicio, sin claves).
+    AI_TEXT_PROVIDER  = var.ai_text_provider
+    AI_IMAGE_PROVIDER = var.ai_image_provider
+    PRINT_PROVIDERS   = join(",", var.print_providers)
     # Interruptor de la venta de impresos (DECISIONS 295): apagado por defecto.
     PRINT_ENABLED     = var.print_enabled ? "true" : "false"
     GELATO_ORDER_TYPE = var.gelato_order_type

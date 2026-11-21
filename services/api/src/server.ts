@@ -39,7 +39,7 @@ const loggerOptions = cloudLoggingOptions('api', config.env.LOG_LEVEL, config.en
 const log = pino(loggerOptions);
 
 const settings = providerSettingsFromEnv(process.env);
-if (config.appEnv === 'production' && simulatedProviders(settings).length > 0) {
+if (config.appEnv === 'production' && simulatedProviders(settings, { printEnabled: config.printEnabled }).length > 0) {
   throw new Error(`Producción no puede usar proveedores simulados: ${JSON.stringify(settings)}`);
 }
 

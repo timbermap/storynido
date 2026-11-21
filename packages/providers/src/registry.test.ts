@@ -42,6 +42,28 @@ describe('ProviderRegistry', () => {
     expect(simulatedProviders(real)).toEqual(['mock_alt']);
   });
 
+  it('con los impresos apagados la imprenta simulada no cuenta, y se puede ignorar un tipo', () => {
+    const digital = providerSettingsFromEnv({
+      AI_TEXT_PROVIDER: 'vertex',
+      AI_IMAGE_PROVIDER: 'vertex',
+      PAYMENT_PROVIDER: 'paypal',
+      PRINT_PROVIDERS: 'mock',
+      EMAIL_PROVIDER: 'resend',
+      STORAGE_PROVIDER: 'gcs',
+      PHOTO_ANALYZER: 'vision',
+    });
+    expect(simulatedProviders(digital)).toEqual(['mock']);
+    expect(simulatedProviders(digital, { printEnabled: false })).toEqual([]);
+    const worker = providerSettingsFromEnv({ ...{ PRINT_PROVIDERS: 'mock' } });
+    expect(simulatedProviders(worker, { printEnabled: false, ignore: ['payment'] })).toEqual([
+      'mock',
+      'mock',
+      'mock',
+      'local',
+      'mock',
+    ]);
+  });
+
   it('varias imprentas activas a la vez', () => {
     const registry = createProviderRegistry({
       ...options,
