@@ -1,6 +1,7 @@
 import type { SpanSink } from '@storynido/shared/server';
 import type { EmailNotifier } from '@storynido/emails';
 import type { MetricsService } from './metrics/service';
+import type { SocialService } from './social/service';
 import type { ProService } from './pro/service';
 import type { ProviderRegistry } from '@storynido/providers';
 import type { SiteConfig } from '@storynido/shared';
@@ -54,6 +55,8 @@ export interface ApiDeps {
   pro: ProService;
   /** Dashboard del admin: métricas diarias y costo real de IA. */
   metrics: MetricsService;
+  /** Marketing: números de Pinterest, Instagram y TikTok leídos por sus APIs. */
+  social: SocialService;
   /** Mails al cliente y alertas al equipo (idempotentes). */
   notifier: EmailNotifier;
   /** Eventos del pipeline del pedido (worker directo en local, Pub/Sub en la nube). */

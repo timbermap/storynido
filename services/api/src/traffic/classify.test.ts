@@ -8,6 +8,7 @@ import {
   cleanCountry,
   cleanPath,
   decodeKey,
+  detailKey,
   encodeKey,
 } from './classify';
 
@@ -18,6 +19,13 @@ describe('classifySource', () => {
     expect(classifySource(null, 'wa.me')).toBe('whatsapp');
     expect(classifySource(null, 'www.google.com.ar')).toBe('google');
     expect(classifySource('newsletter', null)).toBe('email');
+  });
+  it('usa el identificador de clic solo si no hay una pista mejor', () => {
+    expect(classifySource(null, null, 'ttclid')).toBe('tiktok');
+    expect(classifySource(null, null, 'epik')).toBe('pinterest');
+    expect(classifySource(null, 'blog.ejemplo.com', 'fbclid')).toBe('facebook');
+    expect(classifySource('whatsapp', null, 'fbclid')).toBe('whatsapp');
+    expect(classifySource(null, 'l.instagram.com', 'fbclid')).toBe('instagram');
   });
   it('sin pista es directo, y un dominio desconocido queda como referente', () => {
     expect(classifySource(null, null)).toBe('direct');
@@ -37,6 +45,10 @@ describe('campaignKey y rutas', () => {
     expect(cleanPath('/es/como-funciona?utm_source=x')).toBe('/como-funciona');
     expect(cleanPath('/en')).toBe('/');
     expect(cleanPath('/pt/eventos/')).toBe('/eventos');
+  });
+  it('arma la clave de pieza y palabra', () => {
+    expect(detailKey('instagram', 'Reel Cumple 1')).toBe('instagram/reel-cumple-1');
+    expect(detailKey('instagram', null)).toBeNull();
   });
   it('codifica claves de mapa sin puntos ni barras', () => {
     expect(decodeKey(encodeKey('ref:a.b/c'))).toBe('ref:a.b/c');
@@ -69,6 +81,8 @@ describe('buildReport', () => {
       create_started: 2,
       purchase: 1,
     });
+    expect(report.contents[0]).toMatchObject({ key: 'instagram/reel-1', views: 2 });
+    expect(report.terms[0]?.key).toBe('instagram/cumple');
     expect(report.funnelByCampaign[0]?.key).toBe('instagram/social/verano');
   });
 });

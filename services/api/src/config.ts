@@ -59,6 +59,19 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   PAYPAL_CLIENT_SECRET: z.string().trim().optional(),
   PAYPAL_WEBHOOK_ID: z.string().trim().optional(),
   PAYPAL_ENV: z.enum(['sandbox', 'live']).default('sandbox'),
+  /**
+   * Redes sociales para el panel de Marketing (solo lectura). Cada red se activa sola cuando
+   * tiene sus claves; sin ellas el panel la muestra como «sin conectar» (DECISIONS 309).
+   */
+  PINTEREST_ACCESS_TOKEN: z.string().trim().optional(),
+  PINTEREST_REFRESH_TOKEN: z.string().trim().optional(),
+  PINTEREST_APP_ID: z.string().trim().optional(),
+  PINTEREST_APP_SECRET: z.string().trim().optional(),
+  INSTAGRAM_ACCESS_TOKEN: z.string().trim().optional(),
+  INSTAGRAM_USER_ID: z.string().trim().optional(),
+  TIKTOK_CLIENT_KEY: z.string().trim().optional(),
+  TIKTOK_CLIENT_SECRET: z.string().trim().optional(),
+  TIKTOK_REFRESH_TOKEN: z.string().trim().optional(),
   /** Resend: sin clave, los mails quedan en el proveedor simulado (EMAIL_PROVIDER=mock). */
   RESEND_API_KEY: z.string().trim().optional(),
   EMAIL_FROM: z.string().default('StoryNido <hola@storynido.com>'),

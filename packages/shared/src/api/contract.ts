@@ -986,6 +986,43 @@ export const TRAFFIC_EVENTS = [
 ] as const;
 export type TrafficEvent = (typeof TRAFFIC_EVENTS)[number];
 
+/** Redes sociales cuyos números lee el panel de Marketing (solo lectura, por sus APIs). */
+export const SOCIAL_NETWORKS = ['pinterest', 'instagram', 'tiktok'] as const;
+export type SocialNetwork = (typeof SOCIAL_NETWORKS)[number];
+/** Cuentas de StoryNido en cada red. */
+export const SOCIAL_HANDLES: Record<SocialNetwork, string> = {
+  pinterest: 'storynido',
+  instagram: 'storynido.redes',
+  tiktok: 'storynido.redes',
+};
+
+const socialDaySchema = z.object({
+  day: z.string(),
+  followers: z.number().nullable(),
+  impressions: z.number().nullable(),
+  reach: z.number().nullable(),
+  clicks: z.number().nullable(),
+});
+const socialNetworkSchema = z.object({
+  network: z.enum(SOCIAL_NETWORKS),
+  handle: z.string(),
+  /** Hay credenciales cargadas en el servidor para esta red. */
+  connected: z.boolean(),
+  lastRunAt: z.string().nullable(),
+  /** Mensaje del último error al leer la red (token vencido, permiso, etc.). */
+  error: z.string().nullable(),
+  followers: z.number().nullable(),
+  followersChange: z.number().nullable(),
+  /** Suma del período; null si la red nunca informó ese número. */
+  impressions: z.number().nullable(),
+  reach: z.number().nullable(),
+  clicks: z.number().nullable(),
+  profileVisits: z.number().nullable(),
+  /** TikTok: vistas acumuladas de los últimos videos (no es un número diario). */
+  videoViews: z.number().nullable(),
+  daily: z.array(socialDaySchema),
+});
+
 const trafficRowSchema = z.object({ key: z.string(), views: z.number(), entries: z.number() });
 const trafficFunnelRowSchema = z.object({
   key: z.string(),
@@ -1870,6 +1907,11 @@ export const apiRoutes = {
       utmSource: z.string().max(60).nullable().default(null),
       utmMedium: z.string().max(60).nullable().default(null),
       utmCampaign: z.string().max(80).nullable().default(null),
+      /** Qué pieza (utm_content) y qué palabra (utm_term) trajo la visita. */
+      utmContent: z.string().max(80).nullable().default(null),
+      utmTerm: z.string().max(80).nullable().default(null),
+      /** Qué identificador de clic traía el enlace (el valor nunca se envía). */
+      clickId: z.enum(['fbclid', 'ttclid', 'epik']).nullable().default(null),
       /** País detectado por el sitio (ISO alfa-2). */
       country: z.string().max(2).nullable().default(null),
       /** Paso del embudo; sin esto es una vista de página. */
@@ -1895,11 +1937,42 @@ export const apiRoutes = {
       pages: z.array(trafficRowSchema),
       sources: z.array(trafficRowSchema),
       campaigns: z.array(trafficRowSchema),
+      contents: z.array(trafficRowSchema),
+      terms: z.array(trafficRowSchema),
       countries: z.array(trafficRowSchema),
       devices: z.array(trafficRowSchema),
       locales: z.array(trafficRowSchema),
       funnelBySource: z.array(trafficFunnelRowSchema),
       funnelByCampaign: z.array(trafficFunnelRowSchema),
+    }),
+  },
+  adminSocial: {
+    method: 'GET',
+    path: '/v1/admin/social',
+    access: 'admin',
+    summary:
+      'Números de Pinterest, Instagram y TikTok leídos por sus APIs: seguidores, alcance, impresiones y clics',
+    query: z.object({ days: z.coerce.number().int().min(1).max(90).default(30) }),
+    response: z.object({
+      days: z.number(),
+      since: z.string(),
+      networks: z.array(socialNetworkSchema),
+    }),
+  },
+  adminSocialSync: {
+    method: 'POST',
+    path: '/v1/admin/social/sync',
+    access: 'admin',
+    summary: 'Lee ahora los números de las redes conectadas (además de la lectura diaria)',
+    body: z.object({ days: z.number().int().min(1).max(30).default(3) }),
+    response: z.object({
+      results: z.array(
+        z.object({
+          network: z.enum(SOCIAL_NETWORKS),
+          status: z.enum(['ok', 'error', 'not_connected']),
+          message: z.string().nullable(),
+        }),
+      ),
     }),
   },
   clientError: {

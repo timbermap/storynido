@@ -247,3 +247,14 @@ variable "ai_image_provider" {
     error_message = "ai_image_provider debe ser mock, vertex o flux."
   }
 }
+
+variable "social_networks" {
+  type        = list(string)
+  default     = []
+  description = "Redes que lee el panel de Marketing: pinterest (pinterest-app-id, pinterest-app-secret y pinterest-refresh-token; se renueva solo) o pinterest-token (solo pinterest-access-token, vence a los 30 días), instagram (instagram-access-token e instagram-user-id) o tiktok (tiktok-client-key, tiktok-client-secret y tiktok-refresh-token), con los secretos con valor."
+
+  validation {
+    condition     = alltrue([for n in var.social_networks : contains(["pinterest", "pinterest-token", "instagram", "tiktok"], n)])
+    error_message = "social_networks admite pinterest, pinterest-token, instagram y tiktok."
+  }
+}

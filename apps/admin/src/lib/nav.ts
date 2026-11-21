@@ -2,6 +2,7 @@ import {
   BadgePercent,
   ChartColumn,
   Radar,
+  Share2,
   ClipboardCheck,
   MessageSquareQuote,
   Plug,
@@ -58,6 +59,7 @@ export interface NavItem {
     | '/quotes'
     | '/quality'
     | '/traffic'
+    | '/social'
     | '/staff'
     | '/integrations'
     | '/site'
@@ -179,6 +181,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     keywords:
       'tráfico analítica utm redes whatsapp instagram tiktok facebook países embudo fuentes',
     icon: Radar,
+  },
+  {
+    href: '/social',
+    area: 'Marketing',
+    label: 'Redes sociales',
+    keywords:
+      'instagram tiktok pinterest seguidores alcance impresiones clics redes sociales estadísticas marketing',
+    icon: Share2,
   },
   {
     href: '/site',
@@ -328,6 +338,7 @@ const ORDER: readonly NavItem['href'][] = [
   '/',
   '/areas/marketing',
   '/traffic',
+  '/social',
   '/coupons',
   '/promotions',
   '/pro-discounts',

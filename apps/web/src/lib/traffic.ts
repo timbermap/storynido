@@ -10,6 +10,7 @@ import { api } from './api';
  * origen y campaña (UTM). Los pasos del embudo (empezó, muestra, pago, compra) salen solo con
  * consentimiento de analítica, porque usan el origen guardado en este navegador.
  */
+const CLICK_ID_NETWORK = { fbclid: 'facebook', ttclid: 'tiktok', epik: 'pinterest' } as const;
 export const ATTRIBUTION_KEY = 'sn_attr';
 const ATTRIBUTION_TTL_MS = 30 * 24 * 3600 * 1000;
 
@@ -18,6 +19,10 @@ export interface EntryInfo {
   utmSource: string | null;
   utmMedium: string | null;
   utmCampaign: string | null;
+  utmContent: string | null;
+  utmTerm: string | null;
+  /** Cuál identificador de clic traía el enlace; el valor no se guarda ni se envía. */
+  clickId: 'fbclid' | 'ttclid' | 'epik' | null;
 }
 
 /** De dónde llegó esta visita: dominio de la página de origen (si no es el propio sitio) y UTM. */
@@ -39,11 +44,19 @@ export function readEntry(search: string, referrer: string, ownHost: string): En
     utmSource: take('utm_source'),
     utmMedium: take('utm_medium'),
     utmCampaign: take('utm_campaign'),
+    utmContent: take('utm_content'),
+    utmTerm: take('utm_term'),
+    clickId: (['fbclid', 'ttclid', 'epik'] as const).find((key) => params.has(key)) ?? null,
   };
 }
 
 export function hasOrigin(entry: EntryInfo): boolean {
-  return entry.referrer !== null || entry.utmSource !== null || entry.utmCampaign !== null;
+  return (
+    entry.referrer !== null ||
+    entry.utmSource !== null ||
+    entry.utmCampaign !== null ||
+    entry.clickId !== null
+  );
 }
 
 export interface Attribution {
@@ -53,7 +66,12 @@ export interface Attribution {
 
 /** Origen para el embudo: «instagram» o «ref:dominio»; la campaña la arma el servidor igual. */
 export function attributionFor(entry: EntryInfo): Attribution {
-  const source = (entry.utmSource ?? (entry.referrer ? `ref:${entry.referrer}` : 'direct'))
+  const fromClickId = entry.clickId ? CLICK_ID_NETWORK[entry.clickId] : null;
+  const source = (
+    entry.utmSource ??
+    fromClickId ??
+    (entry.referrer ? `ref:${entry.referrer}` : 'direct')
+  )
     .toLowerCase()
     .slice(0, 60);
   const campaign = entry.utmCampaign

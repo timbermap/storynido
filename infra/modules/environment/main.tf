@@ -342,8 +342,30 @@ locals {
       PAYPAL_WEBHOOK_ID    = "paypal-webhook-id"
     } : {},
   )
+  # Redes sociales (DECISIONS 309): solo la API las lee, y solo las que están en social_networks
+  # (con sus secretos cargados). Sin la lista, el panel de Marketing las muestra «sin conectar».
+  social_secret_env = merge(
+    contains(var.social_networks, "pinterest") ? {
+      PINTEREST_REFRESH_TOKEN = "pinterest-refresh-token"
+      PINTEREST_APP_ID        = "pinterest-app-id"
+      PINTEREST_APP_SECRET    = "pinterest-app-secret"
+    } : {},
+    # Alternativa más simple: el token de acceso generado a mano (dura 30 días).
+    contains(var.social_networks, "pinterest-token") ? {
+      PINTEREST_ACCESS_TOKEN = "pinterest-access-token"
+    } : {},
+    contains(var.social_networks, "instagram") ? {
+      INSTAGRAM_ACCESS_TOKEN = "instagram-access-token"
+      INSTAGRAM_USER_ID      = "instagram-user-id"
+    } : {},
+    contains(var.social_networks, "tiktok") ? {
+      TIKTOK_CLIENT_KEY    = "tiktok-client-key"
+      TIKTOK_CLIENT_SECRET = "tiktok-client-secret"
+      TIKTOK_REFRESH_TOKEN = "tiktok-refresh-token"
+    } : {},
+  )
   service_secret_env = merge(local.print_secret_env, local.email_secret_env)
-  api_secret_env     = merge(local.service_secret_env, local.api_print_secret_env, local.payment_secret_env)
+  api_secret_env     = merge(local.service_secret_env, local.api_print_secret_env, local.payment_secret_env, local.social_secret_env)
 }
 
 module "worker" {
@@ -574,6 +596,33 @@ resource "google_cloud_scheduler_job" "preview_queue" {
   depends_on = [module.apis]
 }
 
+# Marketing: una vez al día lee Pinterest, Instagram y TikTok (solo lectura) y guarda los números.
+# Las redes sin credenciales se saltan solas. Mismo token OIDC que la fila de muestras.
+resource "google_cloud_scheduler_job" "social_sync" {
+  project          = var.project_id
+  region           = var.region
+  name             = "social-sync"
+  description      = "Lee los números de las redes sociales para el panel de Marketing del admin."
+  schedule         = "30 6 * * *"
+  time_zone        = "Etc/UTC"
+  attempt_deadline = "300s"
+
+  http_target {
+    http_method = "POST"
+    uri         = "${module.api.uri}/jobs/social-sync"
+    oidc_token {
+      service_account_email = local.sa["sn-invoker"]
+      audience              = local.jobs_audience
+    }
+  }
+
+  retry_config {
+    retry_count = 0
+  }
+
+  depends_on = [module.apis]
+}
+
 # Mantiene la API "tibia" con mínimo 0 instancias: Cloud Run conserva la instancia unos 15 minutos
 # después de cada pedido, así que un ping cada 10 evita casi todos los arranques en frío por
 # centavos (la alternativa, 1 instancia siempre encendida, cuesta unos USD 8-10 por mes).
@@ -634,6 +683,42 @@ module "secrets" {
     }
     paypal-webhook-id = {
       description = "PayPal: ID del webhook de la app (verifica la firma de los eventos)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    pinterest-access-token = {
+      description = "Pinterest: token de acceso de la API v5 (dura 30 días; mejor usar la renovación automática)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    pinterest-refresh-token = {
+      description = "Pinterest: token de renovación (el vigente se guarda en Firestore al rotar)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    pinterest-app-id = {
+      description = "Pinterest: ID de la app"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    pinterest-app-secret = {
+      description = "Pinterest: secret de la app"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    instagram-access-token = {
+      description = "Instagram: token de acceso de la Graph API (de usuario del sistema, sin vencimiento)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    instagram-user-id = {
+      description = "Instagram: ID de la cuenta profesional (instagram_business_account.id)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    tiktok-client-key = {
+      description = "TikTok: client key de la app"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    tiktok-client-secret = {
+      description = "TikTok: client secret de la app"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    tiktok-refresh-token = {
+      description = "TikTok: token de renovación inicial (el vigente se guarda en Firestore al rotar)"
       accessors   = { api = local.member["sn-api"] }
     }
     dodo-api-key = {
