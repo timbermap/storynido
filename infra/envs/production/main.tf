@@ -52,10 +52,10 @@ module "environment" {
   # PayPal live (DECISIONS).
   payment_provider = "paypal"
   log_level        = "info"
-  # Se suma el dominio del admin cuando exista.
   auth_authorized_domains = [
     "storynido.com",
     "www.storynido.com",
+    "admin.storynido.com",
     "${var.project_id}.firebaseapp.com",
     "${var.project_id}.web.app",
   ]
