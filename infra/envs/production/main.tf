@@ -21,7 +21,7 @@ module "environment" {
   firestore_location         = var.firestore_location
   public_domain              = "storynido.com"
   api_domain                 = var.api_domain
-  cors_origins               = ["https://storynido.com", "https://www.storynido.com"]
+  cors_origins               = ["https://storynido.com", "https://www.storynido.com", "https://admin.storynido.com"]
   github_repository          = "timbermap/storynido"
   github_repository_owner_id = "157223336"
   alert_email                = var.alert_email
