@@ -60,7 +60,14 @@ const app = buildApp({
 });
 
 const settings = providerSettingsFromEnv(process.env);
-if (env.APP_ENV === 'production' && simulatedProviders(settings).length > 0) {
+// El worker nunca cobra (payment no cuenta) y, con los impresos apagados, tampoco imprime.
+if (
+  env.APP_ENV === 'production' &&
+  simulatedProviders(settings, {
+    printEnabled: process.env.PRINT_ENABLED === 'true',
+    ignore: ['payment'],
+  }).length > 0
+) {
   throw new Error(`Producción no puede usar proveedores simulados: ${JSON.stringify(settings)}`);
 }
 const providers = createProviderRegistry({

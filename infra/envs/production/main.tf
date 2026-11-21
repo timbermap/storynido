@@ -35,6 +35,9 @@ module "environment" {
   worker_scaling      = { min = 0, max = 50 }
   deletion_protection = true
   photo_analyzer      = var.photo_analyzer
+  # IA real con Vertex (sin claves): la API y el worker no arrancan en producción con mocks.
+  ai_text_provider  = "vertex"
+  ai_image_provider = "vertex"
   # Etapa 1 (DECISIONS 100): infraestructura sin claves, con la imagen de ejemplo en Cloud Run.
   # Cloud Run no arranca si lee un secreto sin valor: con "mock" no lee ninguno. Etapa 2, con
   # los secretos cargados: ["gelato", "cloudprinter", "lulu"] y email_provider = "resend".

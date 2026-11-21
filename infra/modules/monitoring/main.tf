@@ -64,6 +64,12 @@ resource "google_monitoring_uptime_check_config" "api" {
       host       = var.api_host
     }
   }
+
+  # Al cambiar el host (api_domain) el check se reemplaza: primero el nuevo, así la
+  # política de alerta nunca queda apuntando a un check borrado.
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_monitoring_alert_policy" "api_down" {
