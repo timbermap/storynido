@@ -10,6 +10,7 @@ import {
   cleanCountry,
   cleanLabel,
   cleanPath,
+  detailKey,
 } from '../traffic/classify';
 import { buildReport, recordHit, type TrafficDay } from '../traffic/service';
 
@@ -29,7 +30,7 @@ export function registerTrafficRoutes(app: FastifyInstance): void {
     const body = request.body as HitBody;
     const device = classifyDevice(request.headers['user-agent']);
     if (!device) return { ok: true as const };
-    const source = classifySource(body.utmSource, body.referrer);
+    const source = classifySource(body.utmSource, body.referrer, body.clickId);
     await recordHit(db, {
       day: dayOf(new Date()),
       path: cleanPath(body.path),
@@ -37,6 +38,8 @@ export function registerTrafficRoutes(app: FastifyInstance): void {
       entry: body.entry,
       source,
       campaign: body.entry ? campaignKey(source, body.utmMedium, body.utmCampaign) : null,
+      content: body.entry ? detailKey(source, body.utmContent) : null,
+      term: body.entry ? detailKey(source, body.utmTerm) : null,
       country: cleanCountry(body.country),
       device,
       event: body.event,

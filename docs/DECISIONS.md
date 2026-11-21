@@ -3175,3 +3175,12 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 
 - **Fecha:** 2026-11-20. En la prueba del impreso, la actualización diaria de costos de Lulu fallaba en Argentina, México y Brasil con `recipient_tax_id` requerido: las direcciones de ejemplo no tenían documento. El pago real ya lo pide (DECISIONS 233).
 - **Cambio:** `SAMPLE_PRINT_ADDRESSES` suma un documento de ejemplo válido en AR, MX, CL, PE y BR. Solo se usa para cotizar, nunca para pedidos.
+
+## 309 — Marketing → Redes sociales y mejor atribución de visitas
+
+- **Fecha:** 2026-11-21. **Pedido de Sebas:** ver en el admin, dentro de Marketing, las estadísticas de Instagram, TikTok y Pinterest.
+- **Qué hace:** `Marketing → Redes sociales` (`/social`) muestra por red seguidores (y cuánto cambiaron), impresiones, alcance y clics, más las entradas al sitio, los cuentos empezados y las compras que cada red trajo (del panel «Visitas y campañas»). Una lectura diaria (Cloud Scheduler `social-sync`, 06:30 UTC → `POST /jobs/social-sync`) guarda los números en `socialDaily/{día}`; el botón «Actualizar ahora» la dispara a mano. Solo lectura: no publica nada en ninguna red.
+- **Por red:** Pinterest API v5 (`user_account` + `analytics`, días READY; token de renovación automático); Instagram Graph API (seguidores, `views`, `reach`, `website_clicks`, `profile_views`, cada uno aparte para que uno sin permiso no tire el resto); TikTok Display API (seguidores y vistas de los últimos 20 videos; no da números por día, el token dura 24 h y se renueva en cada lectura).
+- **Credenciales:** en Secret Manager y variables de la API (`PINTEREST_*`, `INSTAGRAM_*`, `TIKTOK_*`); Terraform las expone solo para las redes listadas en `social_networks` (por defecto ninguna). Cada red se activa sola cuando tiene sus claves; sin ellas el panel la muestra «sin conectar» con los pasos que faltan. Excepción: el token de renovación rotado de Pinterest y TikTok se guarda en `socialTokens/{red}` (solo servidor, sin reglas de lectura) porque una API no puede escribir en Secret Manager sin permisos nuevos.
+- **Atribución:** el panel de visitas ahora cuenta `utm_content` y `utm_term` (tablas «Piezas» y «Palabras») y reconoce el origen por identificador de clic (`fbclid` → Facebook/Meta, `ttclid` → TikTok, `epik` → Pinterest) cuando no hay UTM ni página de origen. Solo se envía cuál identificador traía el enlace, nunca su valor.
+- **Cuentas:** Instagram y TikTok @storynido.redes, Pinterest storynido.

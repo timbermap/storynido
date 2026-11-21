@@ -28,6 +28,15 @@ const NETWORKS: readonly { name: string; utm: readonly string[]; hosts: readonly
   { name: 'email', utm: ['email', 'mail', 'newsletter'], hosts: ['mail.google.com'] },
 ];
 
+/** Identificadores de clic que dejan las redes en el enlace: solo se usa cuál es, nunca su valor. */
+export const CLICK_IDS = ['fbclid', 'ttclid', 'epik'] as const;
+export type ClickId = (typeof CLICK_IDS)[number];
+const CLICK_ID_NETWORK: Record<ClickId, string> = {
+  fbclid: 'facebook',
+  ttclid: 'tiktok',
+  epik: 'pinterest',
+};
+
 /** Minúsculas y solo letras, números, guion y guion bajo; lo demás se vuelve guion. */
 export function cleanLabel(value: string | null | undefined, max = 40): string | null {
   const cleaned = (value ?? '')
@@ -58,16 +67,32 @@ function networkForHost(host: string): string | null {
   return null;
 }
 
-/** Red de origen: el utm_source manda; si no, el dominio de la página de origen; si no, directo. */
-export function classifySource(utmSource: string | null, referrer: string | null): string {
+/**
+ * Red de origen: el utm_source manda; si no, el dominio de una red conocida; si no, el
+ * identificador de clic (fbclid, ttclid, epik: las apps no siempre mandan la página de origen);
+ * si no, otro dominio; si no, directo.
+ */
+export function classifySource(
+  utmSource: string | null,
+  referrer: string | null,
+  clickId: ClickId | null = null,
+): string {
   const utm = cleanLabel(utmSource, 30);
   if (utm) {
     const known = NETWORKS.find((network) => network.utm.includes(utm));
     return known?.name ?? utm;
   }
   const host = hostOf(referrer);
-  if (!host) return 'direct';
-  return networkForHost(host) ?? `ref:${host.slice(0, 40)}`;
+  const network = host ? networkForHost(host) : null;
+  if (network) return network;
+  if (clickId) return CLICK_ID_NETWORK[clickId];
+  return host ? `ref:${host.slice(0, 40)}` : 'direct';
+}
+
+/** «red/contenido» o «red/término»: qué pieza o palabra trajo la visita; vacío sin dato. */
+export function detailKey(source: string, value: string | null): string | null {
+  const name = cleanLabel(value, 40);
+  return name ? `${source}/${name}` : null;
 }
 
 /** Clave de campaña: «red/medio/campaña»; vacía si la visita no trae campaña. */

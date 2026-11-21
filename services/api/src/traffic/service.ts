@@ -10,6 +10,9 @@ export interface HitRecord {
   entry: boolean;
   source: string;
   campaign: string | null;
+  /** «red/pieza» (utm_content) y «red/palabra» (utm_term) de la entrada. */
+  content: string | null;
+  term: string | null;
   country: string;
   device: string;
   event: TrafficEvent | null;
@@ -52,6 +55,8 @@ export async function recordHit(db: Firestore, hit: HitRecord): Promise<void> {
     // Páginas de aterrizaje: dónde empieza cada visita.
     update.landings = { [encodeKey(hit.path)]: inc() };
     if (hit.campaign) update.campaigns = { [encodeKey(hit.campaign)]: inc() };
+    if (hit.content) update.contents = { [encodeKey(hit.content)]: inc() };
+    if (hit.term) update.terms = { [encodeKey(hit.term)]: inc() };
   }
   await ref.set(update, { merge: true });
 }
@@ -65,6 +70,8 @@ export interface TrafficDay {
   landings?: CountMap;
   sources?: CountMap;
   campaigns?: CountMap;
+  contents?: CountMap;
+  terms?: CountMap;
   countries?: CountMap;
   devices?: CountMap;
   locales?: CountMap;
@@ -87,6 +94,8 @@ export function buildReport(docs: TrafficDay[], days: number, since: string) {
   const landings = new Map<string, number>();
   const sources = new Map<string, number>();
   const campaigns = new Map<string, number>();
+  const contents = new Map<string, number>();
+  const terms = new Map<string, number>();
   const countries = new Map<string, number>();
   const devices = new Map<string, number>();
   const locales = new Map<string, number>();
@@ -101,6 +110,8 @@ export function buildReport(docs: TrafficDay[], days: number, since: string) {
     merge(landings, doc.landings);
     merge(sources, doc.sources);
     merge(campaigns, doc.campaigns);
+    merge(contents, doc.contents);
+    merge(terms, doc.terms);
     merge(countries, doc.countries);
     merge(devices, doc.devices);
     merge(locales, doc.locales);
@@ -150,6 +161,16 @@ export function buildReport(docs: TrafficDay[], days: number, since: string) {
       entries: count,
     })),
     campaigns: top(campaigns, 25).map(([key, count]) => ({
+      key: decodeKey(key),
+      views: count,
+      entries: count,
+    })),
+    contents: top(contents, 25).map(([key, count]) => ({
+      key: decodeKey(key),
+      views: count,
+      entries: count,
+    })),
+    terms: top(terms, 25).map(([key, count]) => ({
       key: decodeKey(key),
       views: count,
       entries: count,

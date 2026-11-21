@@ -57,6 +57,12 @@ const campaignLabel = (key: string) => {
   return `${name.join('/')} · ${sourceLabel(source)}${medium && medium !== '-' ? ` / ${medium}` : ''}`;
 };
 
+/** «red/pieza» legible. */
+const detailLabel = (key: string) => {
+  const [source = '', ...name] = key.split('/');
+  return `${name.join('/')} · ${sourceLabel(source)}`;
+};
+
 function Kpi({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <Card>
@@ -416,6 +422,23 @@ export default function TrafficPage() {
               note="Solo entradas con utm_campaign. Armá los enlaces abajo."
               rows={data.campaigns}
               label={campaignLabel}
+              valueName="Entradas"
+            />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <BarTable
+              title="Piezas (utm_content)"
+              note="Qué publicación, pin o video trajo la visita: «red · pieza»."
+              rows={data.contents}
+              label={detailLabel}
+              valueName="Entradas"
+            />
+            <BarTable
+              title="Palabras (utm_term)"
+              note="Palabra o público de la campaña, si el enlace lo trae."
+              rows={data.terms}
+              label={detailLabel}
               valueName="Entradas"
             />
           </div>

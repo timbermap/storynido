@@ -22,6 +22,12 @@ export const COLLECTIONS = {
   loginMetrics: 'loginMetrics',
   /** trafficDaily/{AAAA-MM-DD}: contadores diarios de visitas, fuentes, campañas y embudo (solo servidor). */
   trafficDaily: 'trafficDaily',
+  /** socialDaily/{AAAA-MM-DD}: números diarios de cada red social, un mapa por red (solo servidor). */
+  socialDaily: 'socialDaily',
+  /** socialState/{red}: última lectura de la red (cuándo, si salió bien y el error). Solo servidor. */
+  socialState: 'socialState',
+  /** socialTokens/{red}: el token de renovación vigente de las redes que lo rotan (solo servidor). */
+  socialTokens: 'socialTokens',
   /** contactMessages/{id}: mensajes del formulario de contacto (solo el servidor y el admin). */
   contactMessages: 'contactMessages',
   /** contactLimits/{huella de IP y día}: tope de mensajes de contacto por conexión. */

@@ -12,6 +12,8 @@ export function buildReportForTest() {
       landings: { [encodeKey('/')]: 2 },
       sources: { instagram: 2 },
       campaigns: { [encodeKey('instagram/social/verano')]: 2 },
+      contents: { [encodeKey('instagram/reel-1')]: 2 },
+      terms: { [encodeKey('instagram/cumple')]: 1 },
       countries: { AR: 4 },
       devices: { mobile: 4 },
       locales: { es: 4 },
