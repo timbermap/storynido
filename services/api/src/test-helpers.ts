@@ -13,6 +13,7 @@ import { initFirebaseAdmin } from './firebase';
 import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { MetricsService } from './metrics/service';
+import { AnalyticsService } from './analytics/service';
 import { SocialService } from './social/service';
 import { ProService } from './pro/service';
 import { PreviewService } from './preview/service';
@@ -168,6 +169,7 @@ export async function createTestApp(
     // Tipo de cambio fijo en los tests (sin red).
     metrics: new MetricsService(db, () => Promise.resolve(TEST_FX.rates)),
     social: new SocialService(db, []),
+    analytics: new AnalyticsService(null),
     db,
     ...overrides,
   };

@@ -60,6 +60,7 @@ export interface NavItem {
     | '/quality'
     | '/traffic'
     | '/social'
+    | '/analytics'
     | '/staff'
     | '/integrations'
     | '/site'
@@ -189,6 +190,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     keywords:
       'instagram tiktok pinterest seguidores alcance impresiones clics redes sociales estadísticas marketing',
     icon: Share2,
+  },
+  {
+    href: '/analytics',
+    area: 'Marketing',
+    label: 'Google Analytics',
+    keywords: 'google analytics ga4 usuarios sesiones fuentes países embudo compras ingresos',
+    icon: ChartColumn,
   },
   {
     href: '/site',
@@ -339,6 +347,7 @@ const ORDER: readonly NavItem['href'][] = [
   '/areas/marketing',
   '/traffic',
   '/social',
+  '/analytics',
   '/coupons',
   '/promotions',
   '/pro-discounts',

@@ -293,6 +293,9 @@ locals {
     }, var.email_postal_address != "" ? {
     # Dirección postal al pie de los mails (CAN-SPAM la exige en los de marketing).
     EMAIL_POSTAL_ADDRESS = var.email_postal_address
+    }, var.ga4_property_id != "" ? {
+    # Panel Marketing → Google Analytics: la API lee la propiedad con su cuenta de servicio.
+    GA4_PROPERTY_ID = var.ga4_property_id
   } : {})
   # Claves de las imprentas activas (los valores se cargan con infra/scripts/set-secret.sh).
   print_secret_env = merge(

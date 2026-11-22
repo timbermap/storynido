@@ -103,6 +103,8 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   /** Conversiones del lado del servidor (opcionales; sin claves no se envían). */
   GA4_MEASUREMENT_ID: z.string().optional(),
   GA4_API_SECRET: z.string().optional(),
+  /** ID numérico de la propiedad GA4 (no el G-…): el admin la lee con la API de datos. */
+  GA4_PROPERTY_ID: z.string().regex(/^\d+$/).optional(),
   META_PIXEL_ID: z.string().optional(),
   META_CAPI_ACCESS_TOKEN: z.string().optional(),
 });

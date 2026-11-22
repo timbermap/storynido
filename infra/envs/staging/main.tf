@@ -53,6 +53,8 @@ module "environment" {
   log_level       = "debug"
   # Redes sociales conectadas (DECISIONS 309): cada red entra cuando sus secretos tienen valor.
   social_networks = ["instagram"]
+  # Google Analytics 4 (propiedad StoryNido): el admin la lee con la cuenta de servicio de la API.
+  ga4_property_id = "565435245"
   # Panel de admin: 2FA (TOTP) obligatorio desde Identity Platform (DECISIONS 092).
   admin_url          = "https://admin--storynido-staging.us-central1.hosted.app"
   admin_mfa_required = true

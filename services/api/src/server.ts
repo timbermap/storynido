@@ -19,6 +19,7 @@ import { AccountService } from './accounts/service';
 import { PhotoService } from './photos/service';
 import { PreviewService } from './preview/service';
 import { MetricsService } from './metrics/service';
+import { AnalyticsService, gaRunReport } from './analytics/service';
 import { FirestoreTokenStore, SocialService } from './social/service';
 import { socialProvidersFromEnv } from './social/from-env';
 import { ProService } from './pro/service';
@@ -153,6 +154,9 @@ const social = new SocialService(
   db,
   socialProvidersFromEnv(config.env, new FirestoreTokenStore(db)),
 );
+const analytics = new AnalyticsService(
+  config.env.GA4_PROPERTY_ID ? gaRunReport(config.env.GA4_PROPERTY_ID) : null,
+);
 const pipelineEvents =
   config.pipelineEvents === 'pubsub'
     ? new PubSubPublisher(config.projectId, config.env.ORDER_EVENTS_TOPIC)
@@ -228,6 +232,7 @@ const app = await buildApp({
     pro,
     metrics,
     social,
+    analytics,
     spans,
     // Cloud Scheduler (fila de muestras): solo si Terraform definió la cuenta invocadora.
     jobCaller: config.env.JOBS_INVOKER_EMAIL

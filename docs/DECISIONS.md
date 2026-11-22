@@ -3184,3 +3184,10 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Credenciales:** en Secret Manager y variables de la API (`PINTEREST_*`, `INSTAGRAM_*`, `TIKTOK_*`); Terraform las expone solo para las redes listadas en `social_networks` (por defecto ninguna). Cada red se activa sola cuando tiene sus claves; sin ellas el panel la muestra «sin conectar» con los pasos que faltan. Excepción: el token de renovación rotado de Pinterest y TikTok se guarda en `socialTokens/{red}` (solo servidor, sin reglas de lectura) porque una API no puede escribir en Secret Manager sin permisos nuevos.
 - **Atribución:** el panel de visitas ahora cuenta `utm_content` y `utm_term` (tablas «Piezas» y «Palabras») y reconoce el origen por identificador de clic (`fbclid` → Facebook/Meta, `ttclid` → TikTok, `epik` → Pinterest) cuando no hay UTM ni página de origen. Solo se envía cuál identificador traía el enlace, nunca su valor.
 - **Cuentas:** Instagram y TikTok @storynido.redes, Pinterest storynido.
+
+## 310 — Marketing → Google Analytics (lectura de GA4 en el admin)
+
+- **Fecha:** 2026-11-22. **Pedido de Sebas:** que los datos de Google Analytics lleguen a las estadísticas del admin.
+- **Qué hace:** `Marketing → Google Analytics` (`/analytics`) muestra usuarios, sesiones, vistas, compras e ingresos, usuarios por día, pasos del embudo (`create_started`, `preview_created`, `begin_checkout`, `purchase`), fuentes, países y páginas más vistas. Son solo las visitas de quienes aceptaron la analítica (por eso da menos que «Visitas y campañas», que cuenta sin cookies). Solo lectura.
+- **Cómo:** `GET /v1/admin/analytics` llama a la API de datos de GA4 (`runReport`) con la cuenta de servicio de la API (credenciales por defecto, sin claves nuevas) y guarda 10 minutos en memoria cada período. No se guarda nada en Firestore.
+- **Configuración:** `GA4_PROPERTY_ID` (ID numérico de la propiedad StoryNido, `565435245`; Terraform `ga4_property_id`). Hace falta activar la API «Google Analytics Data» en el proyecto y dar a la cuenta de servicio de la API acceso de **Lector** en la propiedad. Sin eso el panel avisa qué falta, sin romper nada.

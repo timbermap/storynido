@@ -19,6 +19,7 @@ import { registerCatalogRoutes } from './routes/catalog';
 import { registerCheckoutRoutes } from './routes/checkout';
 import { registerContactRoutes } from './routes/contact';
 import { registerTrafficRoutes } from './routes/traffic';
+import { registerAnalyticsRoutes } from './routes/analytics';
 import { registerSocialRoutes } from './routes/social';
 import { registerFulfillmentRoutes } from './routes/fulfillment';
 import { registerDevStorageRoutes } from './routes/dev-storage';
@@ -62,6 +63,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   registerContactRoutes(app);
   registerTrafficRoutes(app);
   registerSocialRoutes(app, deps.social);
+  registerAnalyticsRoutes(app, deps.analytics);
   registerProRoutes(app, deps.pro);
   registerCatalogRoutes(
     app,
