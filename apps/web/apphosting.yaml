@@ -44,6 +44,10 @@ env:
   - variable: NEXT_PUBLIC_PAYPAL_CLIENT_ID
     value: BAAhar0S7vHJKW6VT9u2Ix48R9ZG7kvcKV0ZT9TeMkZzPCcoZy4ijmkRnCGnym8vFpjT0GEBsQoaaP8fUQ
     availability: [BUILD, RUNTIME]
+  # Google Analytics 4 (propiedad StoryNido). Solo carga con consentimiento de analítica.
+  - variable: NEXT_PUBLIC_GA4_MEASUREMENT_ID
+    value: G-RYV5RCRTFC
+    availability: [BUILD, RUNTIME]
   # Redes del pie (una red sin URL no aparece).
   - variable: NEXT_PUBLIC_SOCIAL_INSTAGRAM
     value: https://www.instagram.com/storynido.redes/
