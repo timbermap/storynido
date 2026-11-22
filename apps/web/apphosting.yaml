@@ -28,6 +28,12 @@ env:
   - variable: NEXT_PUBLIC_API_URL
     value: https://api.storynido.com
     availability: [BUILD, RUNTIME]
+  # Dominio propio para el login con Google/Apple: con el de firebaseapp.com, Chrome y Safari del
+  # celular bloquean el almacenamiento entre dominios y la redirección no vuelve con la sesión.
+  # /__/auth/* se reenvía al handler de Firebase (ver next.config.ts).
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: storynido.com
+    availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_USE_FIREBASE_EMULATORS
     value: 'false'
     availability: [BUILD, RUNTIME]
