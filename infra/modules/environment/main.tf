@@ -293,9 +293,6 @@ locals {
     }, var.email_postal_address != "" ? {
     # Dirección postal al pie de los mails (CAN-SPAM la exige en los de marketing).
     EMAIL_POSTAL_ADDRESS = var.email_postal_address
-    }, var.ga4_property_id != "" ? {
-    # Panel Marketing → Google Analytics: la API lee la propiedad con su cuenta de servicio.
-    GA4_PROPERTY_ID = var.ga4_property_id
   } : {})
   # Claves de las imprentas activas (los valores se cargan con infra/scripts/set-secret.sh).
   print_secret_env = merge(
@@ -367,6 +364,8 @@ locals {
       TIKTOK_REFRESH_TOKEN = "tiktok-refresh-token"
     } : {},
   )
+  # Panel Marketing → Google Analytics: la API lee la propiedad GA4 con su cuenta de servicio.
+  ga4_env            = var.ga4_property_id != "" ? { GA4_PROPERTY_ID = var.ga4_property_id } : {}
   service_secret_env = merge(local.print_secret_env, local.email_secret_env)
   api_secret_env     = merge(local.service_secret_env, local.api_print_secret_env, local.payment_secret_env, local.social_secret_env)
 }
@@ -431,7 +430,7 @@ module "api" {
     # Rutas /jobs: solo Cloud Scheduler con un token OIDC de esta cuenta y esta audiencia.
     JOBS_INVOKER_EMAIL = local.sa["sn-invoker"]
     JOBS_AUDIENCE      = local.jobs_audience
-  }, local.payment_env)
+  }, local.payment_env, local.ga4_env)
   secret_env = local.api_secret_env
 
   # La API es pública: la autenticación la hacen Firebase Auth y App Check en la app.
