@@ -2,19 +2,9 @@ import { ImageResponse } from 'next/og';
 import { getTranslations } from 'next-intl/server';
 
 import { brand } from '@/lib/brand';
-import { routing } from '@/i18n/routing';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-
-/**
- * Se genera una sola vez por idioma al compilar. Antes se dibujaba en cada visita del
- * rastreador de Google y a veces el contenedor cortaba la conexión (503 en producción).
- */
-export const dynamic = 'force-static';
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
 
 /** Imagen al compartir el sitio en redes (se genera por idioma). */
 export default async function OpenGraphImage({ params }: { params: Promise<{ locale: string }> }) {
