@@ -2017,7 +2017,12 @@ export const apiRoutes = {
     path: '/v1/admin/social/tiktok/auth-url',
     access: 'admin',
     summary: 'Dirección de TikTok donde se autoriza la cuenta (Login Kit, solo lectura)',
-    query: z.object({ redirectUri: tiktokRedirectUri, state: z.string().min(8).max(100) }),
+    query: z.object({
+      redirectUri: tiktokRedirectUri,
+      state: z.string().min(8).max(100),
+      /** false = sin el permiso video.list (app en Sandbox). */
+      videos: z.enum(['1', '0']).default('1'),
+    }),
     response: z.object({ url: z.string() }),
   },
   adminSocialTiktokConnect: {

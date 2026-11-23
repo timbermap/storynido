@@ -146,8 +146,8 @@ export class SocialService {
   }
 
   /** Dirección de TikTok donde se autoriza la cuenta; `state` lo genera y verifica el admin. */
-  tiktokAuthorizeUrl(redirectUri: string, state: string): string {
-    return this.requireTikTok().authorizeUrl(redirectUri, state);
+  tiktokAuthorizeUrl(redirectUri: string, state: string, withVideos = true): string {
+    return this.requireTikTok().authorizeUrl(redirectUri, state, withVideos);
   }
 
   /** Cierra la autorización: guarda el token de renovación y lee TikTok una vez. */

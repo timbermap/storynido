@@ -150,13 +150,13 @@ export default function SocialPage() {
     })();
   }, [reload]);
 
-  const connectTikTok = async () => {
+  const connectTikTok = async (withVideos: boolean) => {
     setMessage(null);
     try {
       const state = crypto.randomUUID();
       window.sessionStorage.setItem(TIKTOK_STATE_KEY, state);
       const { url } = await api('adminSocialTiktokAuthUrl', {
-        query: { redirectUri: redirectUri(), state },
+        query: { redirectUri: redirectUri(), state, videos: withVideos ? '1' : '0' },
       });
       window.location.assign(url);
     } catch (caught) {
@@ -250,11 +250,23 @@ export default function SocialPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          void connectTikTok();
+                          void connectTikTok(true);
                         }}
                         className="h-7 rounded-md border px-2 text-xs text-foreground"
                       >
                         {network.connected ? 'Volver a conectar TikTok' : 'Conectar TikTok'}
+                      </button>
+                    )}
+                    {network.canAuthorize && (
+                      <button
+                        type="button"
+                        title="Para apps en Sandbox, que no tienen el permiso de videos"
+                        onClick={() => {
+                          void connectTikTok(false);
+                        }}
+                        className="h-7 rounded-md border px-2 text-xs text-foreground"
+                      >
+                        Conectar sin videos (Sandbox)
                       </button>
                     )}
                     {network.connected
