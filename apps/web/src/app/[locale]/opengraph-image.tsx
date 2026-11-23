@@ -33,6 +33,8 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ loc
         color: '#2b2233',
       }}
     >
+      {/* Un solo hijo de texto: satori exige display:flex si un div tiene varios hijos. El glifo ✦
+          se quitó porque obligaba a descargar una fuente en cada petición (y fallaba). */}
       <div style={{ fontSize: 40, fontWeight: 800, color: '#a33f33' }}>{brand.name}</div>
       <div
         style={{ fontSize: 76, fontWeight: 700, lineHeight: 1.05, marginTop: 24, maxWidth: 900 }}
