@@ -310,8 +310,8 @@ describe('precios claros: muestra = tarjeta = resumen', () => {
     expect(Math.min(...offer.proLengthPrices.map((item) => item.amountMinor))).toBe(1399);
     expect(pro('mini', 'story')).toBe(1399);
     expect(pro('mini', 'activities')).toBe(1399);
-    // Las extensiones largas conservan su descuento.
-    expect(pro('classic', 'story')).toBeLessThan(2199);
+    // Sin descuento base profesional (23 nov 2026): paga lo mismo que la lista.
+    expect(pro('classic', 'story')).toBe(2199);
     // El resumen cobra lo mismo que la tarjeta: 13,99 también para la cuenta profesional.
     const mini = DEFAULT_EDITORIAL_CONFIG.lengths.mini.interiorPages;
     expect(summary('AR', 'digital', mini, null, true).components[0]?.totalMinor).toBe(1399);
