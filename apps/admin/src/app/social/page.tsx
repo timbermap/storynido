@@ -1,7 +1,7 @@
 'use client';
 
 import { SOCIAL_NETWORKS, type SocialNetwork } from '@storynido/shared';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Card, Notice, PageHeader } from '@/components/ui/page-header';
 import { api } from '@/lib/api';
@@ -40,8 +40,8 @@ const SETUP: Record<SocialNetwork, string[]> = {
   ],
   tiktok: [
     'Registrar una app en developers.tiktok.com con Login Kit y los permisos user.info.stats y video.list.',
-    'Autorizar la cuenta @storynido.redes una vez para obtener el token de renovación.',
-    'Guardar client key, client secret y refresh token.',
+    'Guardar client key y client secret de la app en Secret Manager y sumar «tiktok» a social_networks.',
+    'Registrar https://admin.storynido.com/social como redirect URI y tocar «Conectar TikTok» arriba: se autoriza la cuenta @storynido.redes una vez y el token se guarda solo.',
   ],
 };
 
@@ -84,6 +84,11 @@ function Bars({
   );
 }
 
+const TIKTOK_STATE_KEY = 'storynido.tiktokOauthState';
+
+/** Dirección de vuelta que se registra en TikTok: la propia página, sin parámetros. */
+const redirectUri = () => `${window.location.origin}/social`;
+
 const when = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString('es', { dateStyle: 'short', timeStyle: 'short' }) : 'nunca';
 
@@ -102,6 +107,62 @@ export default function SocialPage() {
   );
   const { data, error, reload } = useApi(load);
   const [social, traffic] = data ?? [];
+
+  // Al volver de TikTok llegan ?code=…&state=…: se verifica el state y se guarda la conexión.
+  const handled = useRef(false);
+  useEffect(() => {
+    if (handled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const returned = params.get('state');
+    const denied = params.get('error');
+    if (!code && !denied) return;
+    handled.current = true;
+    const expected = window.sessionStorage.getItem(TIKTOK_STATE_KEY);
+    window.sessionStorage.removeItem(TIKTOK_STATE_KEY);
+    window.history.replaceState(null, '', '/social');
+    void (async () => {
+      if (denied) {
+        setMessage('TikTok: la autorización se canceló. Podés intentar de nuevo.');
+        return;
+      }
+      if (!code || !returned || returned !== expected) {
+        setMessage(
+          'TikTok: la respuesta no coincide con la que se pidió. Volvé a tocar «Conectar TikTok».',
+        );
+        return;
+      }
+      setSyncing(true);
+      try {
+        const { displayName } = await api('adminSocialTiktokConnect', {
+          body: { code, redirectUri: redirectUri() },
+        });
+        await api('adminSocialSync', { body: { days: 30 } });
+        setMessage(
+          `TikTok conectado${displayName ? `: ${displayName}` : ''}. Ya se leyeron los números.`,
+        );
+        await reload();
+      } catch (caught) {
+        setMessage(errorMessage(caught));
+      } finally {
+        setSyncing(false);
+      }
+    })();
+  }, [reload]);
+
+  const connectTikTok = async () => {
+    setMessage(null);
+    try {
+      const state = crypto.randomUUID();
+      window.sessionStorage.setItem(TIKTOK_STATE_KEY, state);
+      const { url } = await api('adminSocialTiktokAuthUrl', {
+        query: { redirectUri: redirectUri(), state },
+      });
+      window.location.assign(url);
+    } catch (caught) {
+      setMessage(errorMessage(caught));
+    }
+  };
 
   const syncNow = async () => {
     setSyncing(true);
@@ -184,7 +245,18 @@ export default function SocialPage() {
                       @{network.handle}
                     </a>
                   </h2>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                    {network.canAuthorize && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void connectTikTok();
+                        }}
+                        className="h-7 rounded-md border px-2 text-xs text-foreground"
+                      >
+                        {network.connected ? 'Volver a conectar TikTok' : 'Conectar TikTok'}
+                      </button>
+                    )}
                     {network.connected
                       ? `Última lectura: ${when(network.lastRunAt)}`
                       : 'Sin conectar'}
@@ -214,13 +286,65 @@ export default function SocialPage() {
                         <Kpi label="Visitas al perfil" value={num(network.profileVisits)} />
                       )}
                       {network.network === 'tiktok' && (
-                        <Kpi
-                          label="Vistas (últimos videos)"
-                          value={num(network.videoViews)}
-                          hint="Acumulado de los últimos 20"
-                        />
+                        <>
+                          <Kpi label="Me gusta" value={num(network.likes)} />
+                          <Kpi
+                            label="Videos"
+                            value={num(network.videos.length ? network.videos.length : null)}
+                            hint="Los últimos publicados"
+                          />
+                          <Kpi
+                            label="Vistas (últimos videos)"
+                            value={num(network.videoViews)}
+                            hint="Acumulado de los últimos 20"
+                          />
+                        </>
                       )}
                     </div>
+                    {network.videos.length > 0 && (
+                      <div className="mt-4 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="text-left text-xs text-muted-foreground">
+                            <tr>
+                              <th className="py-1 pr-3 font-normal">Video</th>
+                              <th className="px-2 font-normal">Vistas</th>
+                              <th className="px-2 font-normal">Me gusta</th>
+                              <th className="px-2 font-normal">Comentarios</th>
+                              <th className="px-2 font-normal">Compartidos</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {network.videos.map((video) => (
+                              <tr key={video.id} className="border-t">
+                                <td className="max-w-xs truncate py-1 pr-3">
+                                  {video.url ? (
+                                    <a
+                                      className="text-primary underline-offset-4 hover:underline"
+                                      href={video.url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                    >
+                                      {video.title || 'Sin título'}
+                                    </a>
+                                  ) : (
+                                    video.title || 'Sin título'
+                                  )}
+                                  {video.createdAt && (
+                                    <span className="ml-2 text-xs text-muted-foreground">
+                                      {when(video.createdAt)}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="px-2 tabular-nums">{num(video.views)}</td>
+                                <td className="px-2 tabular-nums">{num(video.likes)}</td>
+                                <td className="px-2 tabular-nums">{num(video.comments)}</td>
+                                <td className="px-2 tabular-nums">{num(video.shares)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                     <Bars
                       label="Impresiones por día"
                       values={network.daily.map((row) => ({

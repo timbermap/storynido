@@ -361,7 +361,6 @@ locals {
     contains(var.social_networks, "tiktok") ? {
       TIKTOK_CLIENT_KEY    = "tiktok-client-key"
       TIKTOK_CLIENT_SECRET = "tiktok-client-secret"
-      TIKTOK_REFRESH_TOKEN = "tiktok-refresh-token"
     } : {},
   )
   # Panel Marketing → Google Analytics: la API lee la propiedad GA4 con su cuenta de servicio.
