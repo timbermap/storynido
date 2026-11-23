@@ -78,11 +78,29 @@ export function bookPriceMinor(
   return charmPrice(
     Math.max(
       discounted,
+      proLadderMinor(pricing, gross, professional, minPages),
       bookFloorMinor(pricing, productionUsdMinor, aiPages),
       ebookMinimumMinor(pricing, minPages),
     ),
     CHARGE_CURRENCY,
   );
+}
+
+/**
+ * Escalera del precio profesional de un ebook: el descuento no puede dejar a una extensión más
+ * larga al mismo precio que la mini (con 10 % off, Corto caía al piso y salía igual que Mini).
+ * Mantiene la mitad del escalón de lista sobre el piso del mini. 0 si no es profesional, no es
+ * ebook o no hay `minPages`.
+ */
+export function proLadderMinor(
+  pricing: Pricing,
+  gross: number,
+  professional: boolean,
+  minPages?: number,
+): number {
+  if (!professional || pricing.product !== 'digital' || minPages === undefined) return 0;
+  const miniGross = withBookPaymentFee(pricing, unitPriceUsdMinor(pricing, 0, minPages));
+  return miniGross + Math.max(0, Math.round((gross - miniGross) / 2));
 }
 
 /**
