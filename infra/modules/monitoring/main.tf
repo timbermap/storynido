@@ -157,11 +157,11 @@ resource "google_logging_metric" "event" {
   }
 }
 
+# Se excluyen los errores esperados: 404 (bots y enlaces viejos) y 499 (el visitante cortó la carga).
 resource "google_logging_metric" "service_errors" {
   project     = var.project_id
   name        = "storynido/service_errors"
   description = "Logs de error de cada servicio (los mismos que llegan a Error Reporting)"
-  # Se excluyen los errores esperados: 404 (bots y enlaces viejos) y 499 (el visitante cortó la carga).
   filter      = "${local.run_logs} AND severity>=ERROR AND NOT (httpRequest.status=404 OR httpRequest.status=499)"
   metric_descriptor {
     metric_kind = "DELTA"
