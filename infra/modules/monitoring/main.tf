@@ -161,7 +161,8 @@ resource "google_logging_metric" "service_errors" {
   project     = var.project_id
   name        = "storynido/service_errors"
   description = "Logs de error de cada servicio (los mismos que llegan a Error Reporting)"
-  filter      = "${local.run_logs} AND severity>=ERROR"
+  # Se excluyen los errores esperados: 404 (bots y enlaces viejos) y 499 (el visitante cortó la carga).
+  filter      = "${local.run_logs} AND severity>=ERROR AND NOT (httpRequest.status=404 OR httpRequest.status=499)"
   metric_descriptor {
     metric_kind = "DELTA"
     value_type  = "INT64"
@@ -309,14 +310,14 @@ resource "google_monitoring_alert_policy" "service_errors" {
   notification_channels = [google_monitoring_notification_channel.email.id]
 
   conditions {
-    display_name = "Algún log de error en 5 minutos (ver Error Reporting)"
+    display_name = "Más de 2 logs de error en 15 minutos (ver Error Reporting)"
     condition_threshold {
       filter          = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.service_errors.name}\" AND resource.type=\"cloud_run_revision\""
       duration        = "0s"
       comparison      = "COMPARISON_GT"
-      threshold_value = 0
+      threshold_value = 2
       aggregations {
-        alignment_period     = "300s"
+        alignment_period     = "900s"
         per_series_aligner   = "ALIGN_SUM"
         cross_series_reducer = "REDUCE_SUM"
         group_by_fields      = ["metric.label.service"]
