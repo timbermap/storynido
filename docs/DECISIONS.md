@@ -3191,3 +3191,20 @@ Sebas vio en «Tu pedido» la portada sin título (la ilustración nunca lo trae
 - **Qué hace:** `Marketing → Google Analytics` (`/analytics`) muestra usuarios, sesiones, vistas, compras e ingresos, usuarios por día, pasos del embudo (`create_started`, `preview_created`, `begin_checkout`, `purchase`), fuentes, países y páginas más vistas. Son solo las visitas de quienes aceptaron la analítica (por eso da menos que «Visitas y campañas», que cuenta sin cookies). Solo lectura.
 - **Cómo:** `GET /v1/admin/analytics` llama a la API de datos de GA4 (`runReport`) con la cuenta de servicio de la API (credenciales por defecto, sin claves nuevas) y guarda 10 minutos en memoria cada período. No se guarda nada en Firestore.
 - **Configuración:** `GA4_PROPERTY_ID` (ID numérico de la propiedad StoryNido, `565435245`; Terraform `ga4_property_id`). Hace falta activar la API «Google Analytics Data» en el proyecto y dar a la cuenta de servicio de la API acceso de **Lector** en la propiedad. Sin eso el panel avisa qué falta, sin romper nada.
+
+## 311 — El texto se mide antes de elegir dónde va (sin tapar caras)
+
+Sebas (23 nov 2026, «Angelica y el secreto del fondo del mar» en staging): el texto en MAYÚSCULAS
+tapaba la cara de la nena. Causa: la zona calma (un tercio) se elegía por cantidad de palabras, pero
+la letra de 3-6 años es ancha y 20 palabras ocupan ~45 % de la hoja; el visor además mostraba la
+letra máxima sin achicarla (el PDF sí la achicaba), y la muestra no controlaba caras bajo el texto.
+
+- `page-layout.ts`: `textHeightPct` / `fitTextPt` estiman el alto del texto con la letra de la edad
+  (ancho por fuente, mayúsculas, alto de línea). `pageLayout` elige zona calma (30 %) si entra; si no,
+  papel fundido de 30, 40 o 45 % con la letra achicada hasta que entre (piso 85 % del mínimo).
+  La zona y la letra (`zonePct`, `fontPt`) viajan en el contrato y las usan la muestra, el visor y el PDF.
+- El prompt de la ilustración pide la zona completa (+5 % de margen) y el personaje entero en el resto.
+- Control automático (misma llamada de moderación, sin costo extra): categoría `text_zone`, blanda
+  como `title_zone`: se rehace y en el último intento se acepta. Rechaza caras o cabezas dentro de la zona.
+- No se tocó la tabla «Cuánto texto por edad»: con 3-4 años y 25 palabras el texto sigue ocupando
+  ~45 % aun con letra mínima. Propuesta pendiente de Sebas: bajar tope a 20 (3-4) y 32 (5-6).

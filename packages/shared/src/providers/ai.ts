@@ -236,10 +236,15 @@ export interface IllustrationRequest {
    * (DECISIONS 283).
    */
   cover?: boolean;
+  /**
+   * Zona de la página donde se imprime el texto (arriba o abajo, % del alto): el control rechaza
+   * la imagen si hay una cara, cabeza o manos adentro (categoría `text_zone`, DECISIONS 300).
+   */
+  textZone?: { side: 'top' | 'bottom'; pct: number };
 }
 
 /** Categorías de la moderación que piden rehacer la imagen pero no la descartan si no sale otra. */
-export const SOFT_IMAGE_CATEGORIES = /^(style|title_zone)$/i;
+export const SOFT_IMAGE_CATEGORIES = /^(style|title_zone|text_zone)$/i;
 
 /** El rechazo es solo de estilo o de la zona del título (no de seguridad ni de calidad). */
 export const onlySoftRejection = (categories: readonly string[]): boolean =>
@@ -508,7 +513,11 @@ export interface AIImageProvider {
    */
   moderateImage(
     image: ImageData,
-    options?: { style?: string | null; cover?: boolean },
+    options?: {
+      style?: string | null;
+      cover?: boolean;
+      textZone?: { side: 'top' | 'bottom'; pct: number };
+    },
   ): Promise<ModerationResult>;
 }
 

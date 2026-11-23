@@ -350,11 +350,12 @@ function storyPage(
     const inset = spec.bleedMm + spec.safeMm;
     if (kind === 'vignette') {
       // El texto, centrado en el tercio de papel donde se funde la ilustración.
-      const maxMm = (trimHeight * (100 - VIGNETTE_ART_PCT + 2)) / 100 - inset - 2;
+      const artPct = 100 - (page.layout?.zonePct ?? 100 - VIGNETTE_ART_PCT);
+      const maxMm = (trimHeight * (100 - artPct + 2)) / 100 - inset - 2;
       return [
         `<section class="page" ${label()}>
-  <img class="art vignette ${side}" src="${page.image}" alt="">
-  <div class="band ${side}"><div class="panel vignette ${side}" ${fit(maxMm)}>${story}</div></div>
+  <img class="art vignette ${side}" style="height:${String(artPct)}%" src="${page.image}" alt="">
+  <div class="band ${side}" style="height:${String(100 - artPct + 2)}%"><div class="panel vignette ${side}" ${fit(maxMm)}>${story}</div></div>
 </section>`,
       ];
     }

@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
   bookLayout,
+  fitTextPt,
+  textHeightPct,
+  textZoneOf,
   calmSideFor,
   layoutSceneNote,
   pageLayout,
@@ -60,10 +63,10 @@ describe('armado de página por edad', () => {
 
   it('el prompt pide el espacio que el armado necesita', () => {
     expect(layoutSceneNote({ kind: 'vignette', side: 'bottom' })).toContain(
-      'bottom third of the image as plain warm cream paper',
+      'bottom 35% of the image as plain warm cream paper',
     );
     expect(layoutSceneNote({ kind: 'facing', side: 'top' })).toContain('Full-page illustration');
-    expect(layoutSceneNote({ kind: 'calm', side: 'top' })).toContain('top third');
+    expect(layoutSceneNote({ kind: 'calm', side: 'top' })).toContain('top 35%');
   });
 });
 
@@ -77,5 +80,54 @@ describe('franja de colorear según el largo del pie (DECISIONS 285)', () => {
     expect(stripArtPct(words(20))).toBe(70);
     expect(stripArtPct(words(37))).toBe(62);
     expect(stripFontScale(words(37))).toBe(0.8);
+  });
+});
+
+describe('el texto se mide antes de elegir zona (DECISIONS 300)', () => {
+  const upper = { font: 'quicksand', minPt: 22, maxPt: 26, uppercase: true } as const;
+  // La página de «Angelica» (3-4 años, mayúsculas): 20 palabras tapaban casi la mitad de la hoja.
+  const burbuja =
+    'Una enorme burbuja rosa envuelve a Angelica con cuidado. ¡Ya puede flotar en el agua! ¡Plop, plop, a flotar!';
+  const layout = bookLayout(4, 'story');
+
+  it('estima que ese texto ocupa más de un tercio con la letra máxima', () => {
+    expect(textHeightPct(burbuja, 26, upper)).toBeGreaterThan(40);
+  });
+
+  it('ya no se arma como zona calma: pasa al papel fundido y baja la letra', () => {
+    const result = pageLayout({
+      layout,
+      words: 20,
+      pageIndex: 1,
+      text: burbuja,
+      typography: upper,
+    });
+    expect(result.kind).toBe('vignette');
+    expect(result.zonePct).toBe(40);
+    expect(result.fontPt).toBeLessThan(26);
+    expect(textHeightPct(burbuja, result.fontPt ?? 0, upper)).toBeLessThanOrEqual(42);
+  });
+
+  it('un texto corto sigue en la zona calma con la letra grande', () => {
+    const result = pageLayout({
+      layout,
+      words: 5,
+      pageIndex: 2,
+      text: 'Luna mira el mar.',
+      typography: upper,
+    });
+    expect(result).toMatchObject({ kind: 'calm', zonePct: 30, fontPt: 26 });
+  });
+
+  it('fitTextPt devuelve null si ni con la letra mínima entra', () => {
+    expect(fitTextPt(burbuja, upper, 20)).toBeNull();
+  });
+
+  it('el prompt pide la zona completa y el control vigila la misma', () => {
+    const tall = { kind: 'vignette', side: 'top', zonePct: 40 } as const;
+    expect(layoutSceneNote(tall)).toContain('top 45%');
+    expect(layoutSceneNote(tall)).toContain('lower 55%');
+    expect(textZoneOf(tall)).toEqual({ textZone: { side: 'top', pct: 40 } });
+    expect(textZoneOf({ kind: 'facing', side: 'top' })).toEqual({});
   });
 });

@@ -93,8 +93,8 @@ export type AgeBandWords = z.infer<typeof ageBandWordsSchema>;
 /** Tabla «Cuánto texto por edad» (docs «Cuentos que cuidan», 05/11). */
 export const DEFAULT_AGE_BANDS: Record<AgeBand, AgeBandWords> = {
   '0-2': { minWords: 0, maxWords: 8, capWords: 10, minPages: 10, maxPages: 12 },
-  '3-4': { minWords: 10, maxWords: 25, capWords: 30, minPages: 12, maxPages: 20 },
-  '5-6': { minWords: 20, maxWords: 40, capWords: 50, minPages: 16, maxPages: 24 },
+  '3-4': { minWords: 10, maxWords: 20, capWords: 24, minPages: 12, maxPages: 20 },
+  '5-6': { minWords: 18, maxWords: 32, capWords: 38, minPages: 16, maxPages: 24 },
   '7-8': { minWords: 40, maxWords: 70, capWords: 80, minPages: 20, maxPages: 26 },
   '9+': { minWords: 70, maxWords: 120, capWords: 140, minPages: 24, maxPages: 30 },
 };
