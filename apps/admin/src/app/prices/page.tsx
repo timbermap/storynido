@@ -54,7 +54,7 @@ export default function PricesPage() {
             minUsdMinor: 1150,
           },
           printMargin: { mode: 'percent_min', fixedUsdMinor: 800, percent: 30 },
-          proPercentOff: 10,
+          proPercentOff: 0,
           paymentFeePercent: 3.5,
           minNetMarginUsdMinor: 800,
           active: false,
@@ -155,16 +155,8 @@ export default function PricesPage() {
             kind: 'money',
             path: 'minNetMarginUsdMinor',
             label: 'Margen neto mínimo por libro (USD)',
-            hint: 'Ningún descuento (cupón, promoción, Profesionales, recurrencia) baja el margen de acá.',
+            hint: 'Ningún descuento (cupón, promoción, volumen) baja el margen de acá.',
             currencyPath: 'currency',
-          },
-          {
-            kind: 'number',
-            path: 'proPercentOff',
-            label: 'Descuento base Profesionales (%)',
-            hint: 'Aparte del descuento por compras (en Profesionales).',
-            min: 0,
-            max: 80,
           },
         ]}
         columns={[

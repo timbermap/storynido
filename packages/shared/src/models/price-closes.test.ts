@@ -65,18 +65,22 @@ describe('los precios de los ebooks cierran con la comisión de cobro', () => {
     expect(lengths.map(price)).toEqual([1499, 1699, 2299, 2499]);
   });
 
-  it('el precio profesional del cuento sube con cada extensión (Corto no iguala a Mini)', () => {
-    const pro = (length: BookLength) => {
-      const plan = editorialPlan(
-        { length, contentType: 'story', textDensity: 'balanced', readingLevel: 'developing' },
-        config,
-        config.lengths[length].interiorPages,
-      );
-      const pages = pricedPages(plan.narrativePages, config);
-      return bookPriceMinor(digital, 0, pages, true, miniPricedPages(config), pages);
-    };
-    const prices = lengths.map(pro);
-    expect(prices).toEqual([...prices].sort((a, b) => a - b));
-    expect(new Set(prices).size).toBe(prices.length);
+  it('el perfil profesional paga lo mismo que todos', () => {
+    for (const length of lengths) {
+      for (const contentType of types) {
+        const plan = editorialPlan(
+          { length, contentType, textDensity: 'balanced', readingLevel: 'developing' },
+          config,
+          config.lengths[length].interiorPages,
+        );
+        const pages = pricedPages(plan.narrativePages + plan.activityPages, config);
+        const aiPages = pricedPages(plan.narrativePages, config);
+        const args = [digital, 0, pages] as const;
+        const mini = miniPricedPages(config);
+        expect(bookPriceMinor(...args, true, mini, aiPages)).toBe(
+          bookPriceMinor(...args, false, mini, aiPages),
+        );
+      }
+    }
   });
 });

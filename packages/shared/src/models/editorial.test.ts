@@ -105,8 +105,8 @@ describe('franjas de edad', () => {
   it('la tabla de palabras por página de la edad', () => {
     expect(AGE_BANDS.map((band) => DEFAULT_AGE_BANDS[band])).toMatchObject([
       { minWords: 0, maxWords: 8, capWords: 10 },
-      { minWords: 10, maxWords: 25, capWords: 30 },
-      { minWords: 20, maxWords: 40, capWords: 50 },
+      { minWords: 10, maxWords: 20, capWords: 24 },
+      { minWords: 18, maxWords: 32, capWords: 38 },
       { minWords: 40, maxWords: 70, capWords: 80 },
       { minWords: 70, maxWords: 120, capWords: 140 },
     ]);
@@ -123,7 +123,7 @@ describe('franjas de edad', () => {
   it('con edad, las palabras salen de la franja; sin edad, de las densidades de siempre', () => {
     const choice = { ...story, length: 'classic' } as const;
     const withAge = editorialPlan(choice, DEFAULT_EDITORIAL_CONFIG, 12, 4);
-    expect(withAge.words).toEqual({ min: 10, max: 25, cap: 30 });
+    expect(withAge.words).toEqual({ min: 10, max: 20, cap: 24 });
     expect(withAge.ageBand).toBe('3-4');
     expect(withAge.textBand).toBe('3-4');
     const legacy = editorialPlan(choice, DEFAULT_EDITORIAL_CONFIG, 12);
@@ -168,9 +168,9 @@ describe('tope de palabras del mini cuento', () => {
     expect(withEventWordCap(rich, false)).toBe(rich);
     // Un cumple de 4 con «más texto» (franja 5-6) no pasa el tope de los 4 años.
     expect(withEventWordCap({ words: { min: 20, max: 40, cap: 50 } }, true, 4).words).toEqual({
-      min: 18,
-      max: 30,
-      cap: 30,
+      min: 14,
+      max: 24,
+      cap: 24,
     });
   });
 });

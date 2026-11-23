@@ -24,6 +24,12 @@ import {
 type Pricing = ProductPricing | Omit<ProductPricing, 'updatedAt'>;
 
 /**
+ * Descuento base del perfil profesional: apagado. Los profesionales pagan el mismo precio que
+ * todos (el campo `proPercentOff` del producto queda guardado, sin efecto).
+ */
+export const proBaseDiscounted = (usdMinor: number): number => usdMinor;
+
+/**
  * Costo de impresión de un ejemplar según la matriz (admin, actualizada a diario con las
  * cotizaciones de las imprentas): la imprenta habilitada más barata que puede imprimir ese
  * formato y esas páginas en el país. Es el respaldo cuando no hay cotización en vivo. Null si
@@ -72,35 +78,16 @@ export function bookPriceMinor(
     pricing,
     unitPriceUsdMinor(pricing, productionUsdMinor, pages, aiPages),
   );
-  const discounted = professional
-    ? Math.round((gross * (100 - pricing.proPercentOff)) / 100)
-    : gross;
+  // Todos pagan lo mismo (Sebas, 23 nov 2026): el perfil profesional ya no tiene descuento base.
+  const discounted = professional ? proBaseDiscounted(gross) : gross;
   return charmPrice(
     Math.max(
       discounted,
-      proLadderMinor(pricing, gross, professional, minPages),
       bookFloorMinor(pricing, productionUsdMinor, aiPages),
       ebookMinimumMinor(pricing, minPages),
     ),
     CHARGE_CURRENCY,
   );
-}
-
-/**
- * Escalera del precio profesional de un ebook: el descuento no puede dejar a una extensión más
- * larga al mismo precio que la mini (con 10 % off, Corto caía al piso y salía igual que Mini).
- * Mantiene la mitad del escalón de lista sobre el piso del mini. 0 si no es profesional, no es
- * ebook o no hay `minPages`.
- */
-export function proLadderMinor(
-  pricing: Pricing,
-  gross: number,
-  professional: boolean,
-  minPages?: number,
-): number {
-  if (!professional || pricing.product !== 'digital' || minPages === undefined) return 0;
-  const miniGross = withBookPaymentFee(pricing, unitPriceUsdMinor(pricing, 0, minPages));
-  return miniGross + Math.max(0, Math.round((gross - miniGross) / 2));
 }
 
 /**

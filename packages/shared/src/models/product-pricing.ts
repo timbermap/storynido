@@ -104,7 +104,7 @@ const product = (format: BookFormat, printMin = 800) => ({
   aiCostPerPageUsdMinor: 15,
   creationMargin: CREATION,
   printMargin: { ...PRINTING, fixedUsdMinor: printMin },
-  proPercentOff: 10,
+  proPercentOff: 0,
   paymentFeePercent: DEFAULT_PAYMENT_FEE_PERCENT,
   minNetMarginUsdMinor: format === 'digital' ? 800 : 1200,
   active: true,

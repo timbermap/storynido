@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { currencySchema, type Currency } from '../currency';
 import type { CountryConfig, Coupon, Promotion } from './commerce';
 import type { BookFormat } from './common';
-import { bookFloorMinor, bookPriceMinor, ebookMinimumMinor } from './book-price';
+import { bookFloorMinor, bookPriceMinor, ebookMinimumMinor, proBaseDiscounted } from './book-price';
 import { kitPieceSchema, type EventPricing, type KitSelection } from './kit';
 import type { FxRates } from './metrics';
 import {
@@ -211,8 +211,7 @@ export function quote(input: QuoteInput): QuoteResult {
   // La creación (IA + margen) se cobra una vez; cada ejemplar extra paga solo su impresión.
   const copyUsd = usd - unitPriceUsdMinor(pricing, 0, input.pages, aiPages);
   // Perfil profesional: descuento base del producto (además del de recurrencia, que es de todos).
-  const withBase = (value: number) =>
-    input.pro?.professional ? Math.round((value * (100 - pricing.proPercentOff)) / 100) : value;
+  const withBase = (value: number) => (input.pro?.professional ? proBaseDiscounted(value) : value);
   // El libro: el mismo cálculo que la barra de la muestra y las tarjetas del checkout.
   const unit = bookPriceMinor(
     pricing,

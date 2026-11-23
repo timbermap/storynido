@@ -721,6 +721,9 @@ export const publicPreviewSchema = z.object({
             .object({
               kind: z.enum(['facing', 'calm', 'vignette', 'strip', 'overlay']),
               side: z.enum(['top', 'bottom']),
+              /** Alto (%) de la zona libre para el texto y letra (pt) con que entra (DECISIONS 300). */
+              zonePct: z.number().optional(),
+              fontPt: z.number().optional(),
             })
             .optional()
             .catch(undefined),
