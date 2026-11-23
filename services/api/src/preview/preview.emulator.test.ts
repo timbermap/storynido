@@ -2329,7 +2329,8 @@ describe('checkout y pagos (fase 11)', () => {
       country: 'MX',
     });
     expect(activated.statusCode).toBe(200);
-    expect((await quoted()).components[0]?.unitMinor).toBe(3499);
+    // Sin descuento base: el profesional paga lo mismo que Familia.
+    expect((await quoted()).components[0]?.unitMinor).toBe(3899);
 
     // 5 compras elegibles en 90 días → 10 %. No cuentan: reembolsado, cancelado,
     // pendiente de pago ni una de hace 100 días.
@@ -2359,7 +2360,7 @@ describe('checkout y pagos (fase 11)', () => {
     }>().discount;
     expect(discount).toMatchObject({ purchases: 5, digitalPercent: 10, next: { purchases: 10 } });
     const pro = await quoted();
-    expect(pro.discount).toEqual({ minor: 350, reason: 'pro', label: '10 %' });
+    expect(pro.discount).toEqual({ minor: 390, reason: 'pro', label: '10 %' });
 
     // Otra cuenta (Familia) no ve el precio Pro.
     const other = await post(

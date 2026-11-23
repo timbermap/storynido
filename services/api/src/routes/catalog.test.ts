@@ -239,15 +239,14 @@ describe('catálogo', () => {
       proLengthPrices: { length: string; contentType?: string; amountMinor: number }[];
     }>();
     expect(offer.available).toBe(true);
-    // El precio de cada extensión en cuento, y el del perfil profesional (con su descuento base,
-    // menor salvo en el mini, que no baja de su precio de lista: DECISIONS 246).
+    // El precio de cada extensión en cuento, y el del perfil profesional: el mismo (sin
+    // descuento base desde el 23 nov 2026).
     const stories = offer.lengthPrices.filter((item) => item.contentType === 'story');
     const proStories = offer.proLengthPrices.filter((item) => item.contentType === 'story');
     expect(stories.map((item) => item.length)).toEqual(['mini', 'short', 'classic', 'epic']);
     expect(proStories).toHaveLength(4);
     for (const [index, item] of proStories.entries()) {
-      if (item.length === 'mini') expect(item.amountMinor).toBe(stories[index]?.amountMinor);
-      else expect(item.amountMinor).toBeLessThan(stories[index]?.amountMinor ?? 0);
+      expect(item.amountMinor).toBe(stories[index]?.amountMinor);
     }
     // Todo en dólares (DECISIONS 097); el peso va solo como referencia.
     expect(offer.currency).toBe('USD');
