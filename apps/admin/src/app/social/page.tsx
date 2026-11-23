@@ -34,7 +34,7 @@ const SETUP: Record<SocialNetwork, string[]> = {
     'Con los permisos user_accounts:read y pins:read, generar el token de renovación y guardar app id, app secret y refresh token.',
   ],
   instagram: [
-    'Pasar @storynido.redes a cuenta profesional (Creador o Empresa).',
+    'Pasar @storynido a cuenta profesional (Creador o Empresa).',
     'Vincularla a una página de Facebook de StoryNido.',
     'Crear una app de Meta con permisos instagram_basic y instagram_manage_insights, y generar un token de usuario del sistema (no vence) con el ID de la cuenta.',
   ],

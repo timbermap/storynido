@@ -992,7 +992,7 @@ export type SocialNetwork = (typeof SOCIAL_NETWORKS)[number];
 /** Cuentas de StoryNido en cada red. */
 export const SOCIAL_HANDLES: Record<SocialNetwork, string> = {
   pinterest: 'storynido',
-  instagram: 'storynido.redes',
+  instagram: 'storynido',
   tiktok: 'storynido.redes',
 };
 
