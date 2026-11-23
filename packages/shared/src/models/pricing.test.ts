@@ -365,19 +365,19 @@ describe('Profesionales: precio Pro y descuento por recurrencia', () => {
     expect(proPercent(25, DEFAULT_PRO_DISCOUNTS, 'hardcover')).toBe(15);
   });
 
-  it('descuento base Pro del producto y el del escalón; nunca suma con un cupón', () => {
+  it('sin descuento base Pro: solo el escalón por volumen; nunca suma con un cupón', () => {
     const family = quote(input({ pro: null }));
     const base = quote(input({ pro: pro(0) }));
     if (!family.ok || !base.ok) throw new Error('debería cotizar');
-    // 10 % menos antes del precio lindo: 42,71 → 38,44 → 38,99 USD.
-    expect(base.snapshot.components[0]).toMatchObject({ code: 'book', unitMinor: 3899 });
+    // Sin descuento base: el profesional paga lo mismo que todos.
+    expect(base.snapshot.components[0]).toMatchObject({ code: 'book', unitMinor: 4299 });
     expect(family.snapshot.components[0]).toMatchObject({ unitMinor: 4299 });
     expect(base.snapshot.discount.reason).toBeNull();
 
     const twelve = quote(input({ pro: pro(12) }));
     if (!twelve.ok) throw new Error('debería cotizar');
     // Tapa dura con 12 compras: 15 % (el tope de impresos también es 15).
-    expect(twelve.snapshot.discount).toEqual({ minor: 585, reason: 'pro', label: '15 %' });
+    expect(twelve.snapshot.discount).toEqual({ minor: 645, reason: 'pro', label: '15 %' });
 
     // Un cupón del 10 % no se suma: gana el mayor (15 % Pro).
     const both = quote(input({ pro: pro(12), coupon: coupon(), couponCode: 'BIENVENIDA' }));
