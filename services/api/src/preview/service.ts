@@ -11,6 +11,8 @@ import {
   editorialPlan,
   layoutSceneNote,
   pageLayout,
+  textZoneOf,
+  type PageLayout,
   scenesFor,
   withEventWordCap,
   nameIssues,
@@ -387,6 +389,12 @@ export class PreviewService {
               words: countWords(page.text),
               pageIndex: page.index,
               contentType: book.contentType ?? 'story',
+              // Se mide el texto con la letra de la edad: zona y tamaño para que no tape (DECISIONS 300).
+              text: page.text,
+              typography:
+                preview.ageBand && preview.textBand
+                  ? storyTypography(preview.ageBand, preview.textBand, book.language)
+                  : null,
             }),
           })),
         ),
@@ -1499,6 +1507,7 @@ export class PreviewService {
               ? null
               : mediumFor({ style: request.style, stylePrompt: request.stylePrompt }),
             ...(request.cover ? { cover: true } : {}),
+            ...(request.textZone ? { textZone: request.textZone } : {}),
           }),
         );
         // Estilo o zona del título: se rehace, pero en el último intento se acepta (no se pierde
@@ -1768,7 +1777,13 @@ export class PreviewService {
       const sceneCharacter = companion
         ? `${description}\n${companionNote(companion)}`
         : description;
-      const illustrate = (scene: string, seed: number, cast = false, cover = false) =>
+      const illustrate = (
+        scene: string,
+        seed: number,
+        cast = false,
+        cover = false,
+        zone: PageLayout | null = null,
+      ) =>
         this.illustration(ai, track, limits, {
           prompt: buildIllustrationPrompt({
             template: story.imagePromptTemplate,
@@ -1793,20 +1808,32 @@ export class PreviewService {
           resolution: '2K',
           seed,
           ...(cover ? { cover: true } : {}),
+          ...textZoneOf(zone),
         });
+      // Armado de cada página (mide el texto con la letra de la edad): pide la zona libre y después
+      // se controla que no haya caras debajo del texto (DECISIONS 300).
+      const typographyNow =
+        preview.ageBand && preview.textBand
+          ? storyTypography(preview.ageBand, preview.textBand, book.language)
+          : null;
+      const pageLayouts = preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map((page) =>
+        pageLayout({
+          layout: preview.pageLayout ?? null,
+          words: countWords(page.text),
+          pageIndex: page.index,
+          contentType: book.contentType ?? 'story',
+          text: page.text,
+          typography: typographyNow,
+        }),
+      );
       const pageScenes = [
         coverScene(preview.pages[0]?.illustrationPrompt, preview.title, coverSetting(preview.plan)),
         ...preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map(
-          (page) =>
+          (page, at) =>
             // Biblia visual (objetos, lugar, ropa especial y encuadre de la escena) y el espacio
             // para el texto según el armado (zona calma, papel fundido o entera).
             `${page.illustrationPrompt}${sceneVisuals(preview.plan, page.index)}${layoutSceneNote(
-              pageLayout({
-                layout: preview.pageLayout ?? null,
-                words: countWords(page.text),
-                pageIndex: page.index,
-                contentType: book.contentType ?? 'story',
-              }),
+              pageLayouts[at]!,
             )}`,
         ),
       ];
@@ -1821,6 +1848,7 @@ export class PreviewService {
             image === 0 ? 1 : (preview.pages[image - 1]?.index ?? 0) + 2,
             castOn(image),
             image === 0,
+            image === 0 ? null : (pageLayouts[image - 1] ?? null),
           ),
         ),
       );

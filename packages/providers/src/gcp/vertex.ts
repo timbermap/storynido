@@ -1398,13 +1398,21 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
 
   async moderateImage(
     image: ImageData,
-    options: { style?: string | null; cover?: boolean } = {},
+    options: {
+      style?: string | null;
+      cover?: boolean;
+      textZone?: { side: 'top' | 'bottom'; pct: number };
+    } = {},
   ): Promise<ModerationResult> {
     // La técnica de la ficha del estilo (DECISIONS 282): solo se rechaza una técnica claramente
     // distinta, no matices; va en la misma llamada, sin costo extra.
     // Tapa: ninguna cara debajo del título (DECISIONS 283).
     const titleZone = options.cover
       ? '\nThis image is a book cover and its title and subtitle are printed over the top 40%. Reject it (category "title_zone") if any part of a face or head is in that top 40%.'
+      : '';
+    // Página: el texto del libro se imprime en esa zona; no puede haber caras ni manos (DECISIONS 300).
+    const textZone = options.textZone
+      ? `\nThe book's text is printed over the ${options.textZone.side} ${String(Math.round(options.textZone.pct))}% of this image. Reject it (category "text_zone") if any part of a face or a head is inside that ${options.textZone.side} ${String(Math.round(options.textZone.pct))}%.`
       : '';
     const style = options.style?.trim()
       ? `\nThe chosen art style is: ${options.style.trim()}. Reject it (category "style") only if it is CLEARLY made in a different technique (for example a 3D render, a photo or a color painting when the style is a watercolor or a black and white coloring page); small variations of the same technique are fine.`
@@ -1416,7 +1424,7 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
 
 The image above is an illustration for the book. Also reject it (category "text") if it shows any
 readable words, letters or numbers (signs, labels, captions): the book's text is added separately.
-Reject it (category "deformed") if faces or hands are clearly malformed.${style}${titleZone}`,
+Reject it (category "deformed") if faces or hands are clearly malformed.${style}${titleZone}${textZone}`,
       },
     ]);
   }

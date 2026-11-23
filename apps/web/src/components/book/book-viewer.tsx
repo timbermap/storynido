@@ -28,6 +28,9 @@ export interface ViewerPage {
   layout?: {
     kind: 'facing' | 'calm' | 'vignette' | 'strip' | 'overlay';
     side: 'top' | 'bottom';
+    /** Alto (%) de la zona del texto y letra (pt) con que entra, medidos con el texto real. */
+    zonePct?: number;
+    fontPt?: number;
   };
 }
 
@@ -65,9 +68,14 @@ export function storyFontClass(typography: StoryTypography): string {
  * Tamaño en la página del visor, proporcional al ancho como en el PDF (la misma escala que el
  * armado por edad: 15,5 pt ≈ 3,9 % del ancho).
  */
-export function storyFontSize(typography: StoryTypography, caption = false): string {
+export function storyFontSize(
+  typography: StoryTypography,
+  caption = false,
+  /** Letra medida para que el texto entre en su zona (page-layout.ts); si no, la de la edad. */
+  fittedPt?: number,
+): string {
   // Pie de un dibujo para colorear: la letra mínima de la franja (DECISIONS 283).
-  const pt = caption ? typography.minPt : typography.maxPt;
+  const pt = fittedPt ?? (caption ? typography.minPt : typography.maxPt);
   const cqw = (pt * 0.25).toFixed(2);
   const max = (pt / 13).toFixed(2);
   return `clamp(0.8rem, ${cqw}cqw, ${max}rem)`;
@@ -397,7 +405,15 @@ function PageSpread({
   const text = typography ? (
     <p
       className={cn(storyFontClass(typography), 'leading-snug whitespace-pre-line')}
-      style={{ fontSize: storyFontSize(typography) }}
+      style={{
+        fontSize: storyFontSize(
+          typography,
+          false,
+          page.layout?.kind === 'calm' || page.layout?.kind === 'vignette'
+            ? page.layout.fontPt
+            : undefined,
+        ),
+      }}
     >
       {page.text}
     </p>
@@ -487,13 +503,17 @@ function PageSpread({
           'absolute inset-x-0',
           layout.kind === 'vignette' && hasText
             ? cn(
-                'h-[70%]',
                 top
                   ? 'bottom-0 [mask-image:linear-gradient(to_top,#000_70%,transparent)] [&_img]:object-bottom'
                   : 'top-0 [mask-image:linear-gradient(to_bottom,#000_70%,transparent)] [&_img]:object-top',
               )
             : 'inset-y-0',
         )}
+        style={
+          layout.kind === 'vignette' && hasText
+            ? { height: `${String(100 - (layout.zonePct ?? 30))}%` }
+            : undefined
+        }
       >
         {illustration}
       </div>

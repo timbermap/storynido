@@ -1,4 +1,5 @@
 import { countWords } from './editorial';
+import type { StoryTypography } from './typography';
 
 /**
  * Armado de cada página por edad (DECISIONS 232): la misma regla para el PDF, la vista previa y los
@@ -59,6 +60,76 @@ export type CalmSide = 'top' | 'bottom';
 export interface PageLayout {
   kind: PageLayoutKind;
   side: CalmSide;
+  /** Alto (%) de la zona libre para el texto, arriba o abajo (calm / vignette). Por defecto 30. */
+  zonePct?: number;
+  /** Tamaño de la letra (pt) con el que el texto entra en esa zona, si se conoce la tipografía. */
+  fontPt?: number;
+}
+
+/**
+ * Medida del texto en la página (DECISIONS 300): antes cada edad tenía un tope de palabras, pero la
+ * letra en MAYÚSCULAS de 3-6 años es muy ancha y 20 palabras ocupaban casi la mitad de la hoja,
+ * encima de la cara. Ahora se estima cuánto alto ocupa el texto y la página elige zona y tamaño.
+ */
+export const CALM_ZONE_PCT = 30;
+/** Zonas altas del papel fundido para los textos largos (la ilustración conserva el resto). */
+export const TALL_ZONE_PCT = 40;
+export const TALLEST_ZONE_PCT = 45;
+
+/** Ancho de un carácter en «em» (con la separación de las mayúsculas). */
+const CHAR_EM: Record<StoryTypography['font'], { upper: number; lower: number }> = {
+  quicksand: { upper: 0.74, lower: 0.56 },
+  andika: { upper: 0.72, lower: 0.56 },
+  fraunces: { upper: 0.7, lower: 0.52 },
+};
+/** Alto de línea (× tamaño) y proporción de la hoja (alto / ancho). */
+const LINE_HEIGHT = 1.375;
+const PAGE_ASPECT = 4 / 3;
+/** Ancho útil del texto (% del ancho de la hoja) y relleno vertical (% del alto) en la zona. */
+const TEXT_WIDTH_PCT = 80;
+const TEXT_PAD_PCT = 6;
+/** La letra no baja de este factor sobre el mínimo de la edad (la imprenta ya achica un poco). */
+const MIN_PT_FACTOR = 0.85;
+
+export type FitTypography = Pick<StoryTypography, 'font' | 'minPt' | 'maxPt' | 'uppercase'>;
+
+/** Alto estimado (% de la hoja) del texto con letra de `pt` puntos. */
+export function textHeightPct(
+  text: string | null | undefined,
+  pt: number,
+  typography: FitTypography,
+): number {
+  const words = (text ?? '').trim().split(/\s+/u).filter(Boolean);
+  if (words.length === 0) return 0;
+  const sizePct = pt * 0.25; // % del ancho de la hoja (15,5 pt ≈ 3,9 %)
+  const em = CHAR_EM[typography.font][typography.uppercase ? 'upper' : 'lower'];
+  const perLine = Math.max(4, Math.floor(TEXT_WIDTH_PCT / (sizePct * em)));
+  let lines = 1;
+  let used = 0;
+  for (const word of words) {
+    const len = word.length;
+    if (used === 0) used = len;
+    else if (used + 1 + len <= perLine) used += 1 + len;
+    else {
+      lines += 1;
+      used = len;
+    }
+    if (len > perLine) lines += Math.ceil(len / perLine) - 1;
+  }
+  return ((lines * sizePct * LINE_HEIGHT) / (PAGE_ASPECT * 100)) * 100 + TEXT_PAD_PCT;
+}
+
+/** La letra más grande (hasta el máximo de la edad) con la que el texto entra en la zona; null si no entra. */
+export function fitTextPt(
+  text: string | null | undefined,
+  typography: FitTypography,
+  zonePct: number,
+): number | null {
+  const floor = typography.minPt * MIN_PT_FACTOR;
+  for (let pt = typography.maxPt; pt >= floor - 1e-6; pt -= 0.5) {
+    if (textHeightPct(text, pt, typography) <= zonePct) return pt;
+  }
+  return null;
 }
 
 export interface PageLayoutConfig {
@@ -121,6 +192,9 @@ export function pageLayout(
     /** Índice de la escena en el plan (1, 2, ...). */
     pageIndex: number;
     contentType?: string;
+    /** El texto y la letra de la edad: con ellos la zona y el tamaño salen de medir el texto. */
+    text?: string | null;
+    typography?: FitTypography | null;
   },
   config: PageLayoutConfig = DEFAULT_PAGE_LAYOUT,
 ): PageLayout {
@@ -128,6 +202,28 @@ export function pageLayout(
   if (input.contentType === 'coloring') return { kind: 'strip', side: 'bottom' };
   if (!input.layout) return { kind: 'overlay', side };
   if (input.layout.facing) return { kind: 'facing', side };
+  const ty = input.typography;
+  if (ty && input.text !== undefined) {
+    // Se mide el texto: la zona calma (30 %) si entra con la letra de la edad; si no, el papel
+    // fundido; si el texto es largo, la zona alta (40 %) con la letra achicada hasta que entre.
+    if (input.layout.age <= config.calmMaxAge) {
+      const calm = fitTextPt(input.text, ty, CALM_ZONE_PCT);
+      if (calm !== null && input.words <= config.vignetteMinWords) {
+        return { kind: 'calm', side, zonePct: CALM_ZONE_PCT, fontPt: calm };
+      }
+    }
+    const short = fitTextPt(input.text, ty, CALM_ZONE_PCT + 2);
+    if (short !== null) return { kind: 'vignette', side, zonePct: CALM_ZONE_PCT, fontPt: short };
+    const tall = fitTextPt(input.text, ty, TALL_ZONE_PCT);
+    if (tall !== null) return { kind: 'vignette', side, zonePct: TALL_ZONE_PCT, fontPt: tall };
+    // Ni así entra (el máximo de palabras de la edad con letra mayúscula): zona más alta y letra mínima.
+    return {
+      kind: 'vignette',
+      side,
+      zonePct: TALLEST_ZONE_PCT,
+      fontPt: fitTextPt(input.text, ty, TALLEST_ZONE_PCT) ?? ty.minPt * MIN_PT_FACTOR,
+    };
+  }
   if (
     input.words > Math.min(config.vignetteMinWords, calmMaxWords(input.layout.age)) ||
     input.layout.age > config.calmMaxAge
@@ -141,18 +237,32 @@ export function pageLayout(
 export function layoutSceneNote(layout: PageLayout): string {
   const third = layout.side === 'top' ? 'top' : 'bottom';
   const other = layout.side === 'top' ? 'lower' : 'upper';
+  // Zona reservada: la del texto más un margen, así una cara no roza el borde del texto.
+  const zone = String((layout.zonePct ?? CALM_ZONE_PCT) + 5);
+  const rest = String(95 - (layout.zonePct ?? CALM_ZONE_PCT));
   switch (layout.kind) {
     case 'strip':
       return ' Full drawing for a coloring page: the text goes in a separate white band below the drawing, so no empty area for text is needed. Keep the main character whole and away from the edges.';
     case 'facing':
       return ' Full-page illustration with the whole scene: the text goes on the facing page, so no empty area for text is needed. Keep faces away from the edges.';
     case 'vignette':
-      return ` Keep the ${third} third of the image as plain warm cream paper (#fffaf3): the illustration fades softly into it with soft, painterly edges and no hard border, and nothing important (no faces, no hands, no key objects) is in that third; the main character and the action stay in the ${other} two thirds. The text is printed there.`;
+      return ` Keep the ${third} ${zone}% of the image as plain warm cream paper (#fffaf3): the illustration fades softly into it with soft, painterly edges and no hard border, and nothing important (no faces, no heads, no hands, no key objects, no part of the main character) is in that ${zone}%; the main character and the action stay entirely within the ${other} ${rest}%. The text is printed there.`;
     case 'calm':
-      return ` The text is printed over the ${third} third of the image: keep that third calm and simple (sky, wall, floor or grass, light and with little detail), and place the main character whole (head, face, hands and the main action) in the ${other} two thirds, never under the text.`;
+      return ` The text is printed over the ${third} ${zone}% of the image: keep that part calm and simple (sky, wall, floor or grass, light and with little detail), and place the main character whole (head, face, hands and the main action) entirely within the ${other} ${rest}%, never under the text.`;
     default:
       return layout.side === 'top'
         ? ' The text is printed over the top third: keep it calm and simple (sky, wall or soft background), with the main character, faces and the action in the lower two thirds.'
         : ' The text is printed over the bottom third: keep it calm and simple (floor, grass or soft background), with the main character, faces and the action in the upper two thirds.';
   }
+}
+
+/**
+ * Zona del texto que el control automático de la imagen vigila (sin cara ni cabeza adentro):
+ * solo en las páginas con el texto sobre o dentro de la ilustración. Vacío en el resto.
+ */
+export function textZoneOf(
+  layout: PageLayout | null | undefined,
+): { textZone: { side: CalmSide; pct: number } } | Record<string, never> {
+  if (!layout || (layout.kind !== 'calm' && layout.kind !== 'vignette')) return {};
+  return { textZone: { side: layout.side, pct: layout.zonePct ?? CALM_ZONE_PCT } };
 }

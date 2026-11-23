@@ -104,8 +104,8 @@ describe('caso Lu: portada en un lugar del cuento y con la técnica de las pági
 
 describe('caso Lu: zona del texto', () => {
   it('la página dice qué tercio lleva el texto y deja al personaje entero en los otros dos', () => {
-    expect(layoutSceneNote({ kind: 'calm', side: 'bottom' })).toContain('upper two thirds');
-    expect(layoutSceneNote({ kind: 'calm', side: 'top' })).toContain('lower two thirds');
+    expect(layoutSceneNote({ kind: 'calm', side: 'bottom' })).toContain('upper 65%');
+    expect(layoutSceneNote({ kind: 'calm', side: 'top' })).toContain('lower 65%');
     expect(layoutSceneNote({ kind: 'overlay', side: 'bottom' })).toContain('upper two thirds');
     // La regla general ya no deja que el modelo elija el tercio.
     expect(TEXT_ZONE).not.toContain('(or the top third)');

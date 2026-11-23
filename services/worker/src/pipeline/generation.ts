@@ -70,6 +70,7 @@ import {
   SAME_OUTFIT,
   calmSideFor,
   layoutSceneNote,
+  textZoneOf,
   pageLayout,
   pagesPerScene,
   type BookLayout,
@@ -298,12 +299,18 @@ export function calmSideOf(scene: ScenePlan | null | undefined): CalmSide | null
 
 /** Armado de la escena `index` (0 = primera) del libro congelado. */
 export function layoutOf(
-  snapshot: Pick<BookSnapshot, 'pageLayout' | 'pages' | 'scenes' | 'contentType'>,
+  snapshot: Pick<
+    BookSnapshot,
+    'pageLayout' | 'pages' | 'scenes' | 'contentType' | 'ageBand' | 'textBand' | 'language'
+  >,
   index: number,
 ): PageLayout {
   return pageLayout({
     layout: snapshot.pageLayout,
     words: countWords(snapshot.pages[index]?.text ?? ''),
+    // Mide el texto con la letra de la edad (zona y tamaño, DECISIONS 300): igual que la muestra.
+    text: snapshot.pages[index]?.text ?? '',
+    typography: typographyOf(snapshot),
     pageIndex: snapshot.scenes?.[index]?.pageIndex ?? snapshot.pages[index]?.index ?? index + 1,
     contentType: snapshot.contentType,
   });
@@ -314,7 +321,10 @@ export function layoutOf(
  * Sin armado por edad (pedidos anteriores) queda el panel de siempre: null.
  */
 export function placedLayout(
-  snapshot: Pick<BookSnapshot, 'pageLayout' | 'pages' | 'scenes' | 'contentType'>,
+  snapshot: Pick<
+    BookSnapshot,
+    'pageLayout' | 'pages' | 'scenes' | 'contentType' | 'ageBand' | 'textBand' | 'language'
+  >,
   index: number,
   placement: TextPlacement | undefined,
 ): PageLayout | null {
@@ -667,6 +677,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             : mediumFor({ coloring: true })
           : snapshot.stylePrompt,
         ...(index === 0 ? { cover: true } : {}),
+        // Sin caras bajo el texto de la página (DECISIONS 300).
+        ...(index > 0 && snapshot.pageLayout ? textZoneOf(layoutOf(snapshot, index - 1)) : {}),
       });
       cost += await record(ctx, 'moderation', verdict.usage);
       // Estilo o zona del título: se rehace una vez; en el segundo intento se acepta (DECISIONS 283).
