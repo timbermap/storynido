@@ -30,9 +30,13 @@ export function registerSocialRoutes(app: FastifyInstance, social: SocialService
   });
 
   addRoute(app, apiRoutes.adminSocialTiktokAuthUrl, {}, (request) => {
-    const { redirectUri, state } = request.query as { redirectUri: string; state: string };
+    const { redirectUri, state, videos } = request.query as {
+      redirectUri: string;
+      state: string;
+      videos: '1' | '0';
+    };
     return Promise.resolve({
-      url: asAppError(() => social.tiktokAuthorizeUrl(redirectUri, state)),
+      url: asAppError(() => social.tiktokAuthorizeUrl(redirectUri, state, videos === '1')),
     });
   });
 

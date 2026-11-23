@@ -280,10 +280,16 @@ export const TIKTOK_SCOPES = ['user.info.basic', 'user.info.stats', 'video.list'
 const TIKTOK_API = 'https://open.tiktokapis.com/v2';
 
 /** Pantalla de TikTok donde Sebas autoriza la cuenta (Login Kit, flujo web). */
-export function tiktokAuthorizeUrl(clientKey: string, redirectUri: string, state: string): string {
+export function tiktokAuthorizeUrl(
+  clientKey: string,
+  redirectUri: string,
+  state: string,
+  withVideos = true,
+): string {
   const query = new URLSearchParams({
     client_key: clientKey,
-    scope: TIKTOK_SCOPES.join(','),
+    // El Sandbox de TikTok no ofrece video.list: ahí se conecta sin videos.
+    scope: (withVideos ? TIKTOK_SCOPES : TIKTOK_SCOPES.filter((s) => s !== 'video.list')).join(','),
     response_type: 'code',
     redirect_uri: redirectUri,
     state,
@@ -292,7 +298,7 @@ export function tiktokAuthorizeUrl(clientKey: string, redirectUri: string, state
 }
 
 export interface TikTokAuth {
-  authorizeUrl(redirectUri: string, state: string): string;
+  authorizeUrl(redirectUri: string, state: string, withVideos?: boolean): string;
   /** Cambia el código de autorización por los tokens y guarda el de renovación. */
   connect(code: string, redirectUri: string): Promise<{ displayName: string | null }>;
 }
@@ -303,7 +309,8 @@ export function tiktokAuth(
   fetcher: Fetcher = fetch,
 ): TikTokAuth {
   return {
-    authorizeUrl: (redirectUri, state) => tiktokAuthorizeUrl(options.clientKey, redirectUri, state),
+    authorizeUrl: (redirectUri, state, withVideos) =>
+      tiktokAuthorizeUrl(options.clientKey, redirectUri, state, withVideos),
     async connect(code, redirectUri) {
       const body = await json(
         fetcher,
