@@ -1003,6 +1003,21 @@ const socialDaySchema = z.object({
   reach: z.number().nullable(),
   clicks: z.number().nullable(),
 });
+const socialVideoSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  createdAt: z.string().nullable(),
+  url: z.string().nullable(),
+  views: z.number().nullable(),
+  likes: z.number().nullable(),
+  comments: z.number().nullable(),
+  shares: z.number().nullable(),
+});
+/** Dirección de vuelta de TikTok: siempre /social del admin (https, o localhost en desarrollo). */
+const tiktokRedirectUri = z
+  .string()
+  .max(200)
+  .regex(/^(https:\/\/[a-z0-9.-]+|http:\/\/localhost:\d+)\/social$/);
 const socialNetworkSchema = z.object({
   network: z.enum(SOCIAL_NETWORKS),
   handle: z.string(),
@@ -1020,6 +1035,12 @@ const socialNetworkSchema = z.object({
   profileVisits: z.number().nullable(),
   /** TikTok: vistas acumuladas de los últimos videos (no es un número diario). */
   videoViews: z.number().nullable(),
+  /** TikTok: «me gusta» acumulados de la cuenta. */
+  likes: z.number().nullable(),
+  /** TikTok: los últimos videos con sus números. */
+  videos: z.array(socialVideoSchema),
+  /** El servidor tiene las claves de la app para mostrar «Conectar» (TikTok). */
+  canAuthorize: z.boolean(),
   daily: z.array(socialDaySchema),
 });
 
@@ -1990,6 +2011,22 @@ export const apiRoutes = {
       pages: z.array(z.object({ key: z.string(), views: z.number() })),
       events: z.array(z.object({ key: z.string(), count: z.number() })),
     }),
+  },
+  adminSocialTiktokAuthUrl: {
+    method: 'GET',
+    path: '/v1/admin/social/tiktok/auth-url',
+    access: 'admin',
+    summary: 'Dirección de TikTok donde se autoriza la cuenta (Login Kit, solo lectura)',
+    query: z.object({ redirectUri: tiktokRedirectUri, state: z.string().min(8).max(100) }),
+    response: z.object({ url: z.string() }),
+  },
+  adminSocialTiktokConnect: {
+    method: 'POST',
+    path: '/v1/admin/social/tiktok/connect',
+    access: 'admin',
+    summary: 'Cierra la autorización de TikTok: cambia el código por el token y lo guarda',
+    body: z.object({ code: z.string().min(1).max(2000), redirectUri: tiktokRedirectUri }),
+    response: z.object({ displayName: z.string().nullable() }),
   },
   adminSocialSync: {
     method: 'POST',

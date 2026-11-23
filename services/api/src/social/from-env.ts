@@ -3,7 +3,9 @@ import type { ApiEnv } from '../config';
 import {
   instagramProvider,
   pinterestProvider,
+  tiktokAuth,
   tiktokProvider,
+  type TikTokAuth,
   type SocialProvider,
   type TokenStore,
 } from './providers';
@@ -37,7 +39,7 @@ export function socialProvidersFromEnv(env: ApiEnv, tokens: TokenStore): SocialP
       instagramProvider({ accessToken: env.INSTAGRAM_ACCESS_TOKEN, userId: env.INSTAGRAM_USER_ID }),
     );
   }
-  if (env.TIKTOK_CLIENT_KEY && env.TIKTOK_CLIENT_SECRET && env.TIKTOK_REFRESH_TOKEN) {
+  if (env.TIKTOK_CLIENT_KEY && env.TIKTOK_CLIENT_SECRET) {
     providers.push(
       tiktokProvider(
         {
@@ -50,4 +52,13 @@ export function socialProvidersFromEnv(env: ApiEnv, tokens: TokenStore): SocialP
     );
   }
   return providers;
+}
+
+/** El «Conectar TikTok» del admin: solo existe si la app de TikTok tiene client key y secret. */
+export function tiktokAuthFromEnv(env: ApiEnv, tokens: TokenStore): TikTokAuth | null {
+  if (!env.TIKTOK_CLIENT_KEY || !env.TIKTOK_CLIENT_SECRET) return null;
+  return tiktokAuth(
+    { clientKey: env.TIKTOK_CLIENT_KEY, clientSecret: env.TIKTOK_CLIENT_SECRET },
+    tokens,
+  );
 }

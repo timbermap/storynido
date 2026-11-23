@@ -10,6 +10,25 @@ export interface SocialSnapshot {
   profileVisits: number | null;
   /** TikTok: vistas acumuladas de los últimos videos (nivel, no un número diario). */
   videoViews: number | null;
+  /** TikTok: «me gusta» acumulados de la cuenta (nivel, no un número diario). */
+  likes: number | null;
+}
+
+/** Un video publicado, con sus números (hoy solo TikTok). */
+export interface SocialVideo {
+  id: string;
+  title: string;
+  createdAt: string | null;
+  url: string | null;
+  views: number | null;
+  likes: number | null;
+  comments: number | null;
+  shares: number | null;
+}
+
+/** Datos extra que una lectura puede dejar además de los números por día. */
+export interface ReadExtras {
+  videos?: SocialVideo[];
 }
 
 /** Lo que devuelve una lectura: los números por día (AAAA-MM-DD, UTC). */
@@ -18,7 +37,9 @@ export type SocialReading = Record<string, Partial<SocialSnapshot>>;
 export interface SocialProvider {
   network: SocialNetwork;
   /** `days`: cuántos días hacia atrás leer (las redes que informan por día). */
-  read(days: number, today: string): Promise<SocialReading>;
+  read(days: number, today: string, extras?: ReadExtras): Promise<SocialReading>;
+  /** Falso si falta autorizar la cuenta (TikTok antes del primer «Conectar»). Sin definir = lista. */
+  hasCredentials?(): Promise<boolean>;
 }
 
 /** Donde se guarda el token de renovación vigente de las redes que lo rotan (no va en el código). */
@@ -245,12 +266,85 @@ export function instagramProvider(
   };
 }
 
-// --- TikTok (Display API: seguidores y vistas de los últimos videos) ---------------------------
+// --- TikTok (Login Kit + Display API: seguidores, me gusta y vistas por video) -----------------
 
 export interface TikTokOptions {
   clientKey: string;
   clientSecret: string;
-  refreshToken: string;
+  /** Opcional: el token de renovación normal se guarda al autorizar desde el admin. */
+  refreshToken?: string | undefined;
+}
+
+/** Permisos de solo lectura que pide el botón «Conectar TikTok». */
+export const TIKTOK_SCOPES = ['user.info.basic', 'user.info.stats', 'video.list'] as const;
+const TIKTOK_API = 'https://open.tiktokapis.com/v2';
+
+/** Pantalla de TikTok donde Sebas autoriza la cuenta (Login Kit, flujo web). */
+export function tiktokAuthorizeUrl(clientKey: string, redirectUri: string, state: string): string {
+  const query = new URLSearchParams({
+    client_key: clientKey,
+    scope: TIKTOK_SCOPES.join(','),
+    response_type: 'code',
+    redirect_uri: redirectUri,
+    state,
+  });
+  return `https://www.tiktok.com/v2/auth/authorize/?${query.toString()}`;
+}
+
+export interface TikTokAuth {
+  authorizeUrl(redirectUri: string, state: string): string;
+  /** Cambia el código de autorización por los tokens y guarda el de renovación. */
+  connect(code: string, redirectUri: string): Promise<{ displayName: string | null }>;
+}
+
+export function tiktokAuth(
+  options: Pick<TikTokOptions, 'clientKey' | 'clientSecret'>,
+  tokens: TokenStore,
+  fetcher: Fetcher = fetch,
+): TikTokAuth {
+  return {
+    authorizeUrl: (redirectUri, state) => tiktokAuthorizeUrl(options.clientKey, redirectUri, state),
+    async connect(code, redirectUri) {
+      const body = await json(
+        fetcher,
+        `${TIKTOK_API}/oauth/token/`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            client_key: options.clientKey,
+            client_secret: options.clientSecret,
+            code,
+            grant_type: 'authorization_code',
+            redirect_uri: redirectUri,
+          }),
+        },
+        'TikTok (autorizar)',
+      );
+      if (typeof body.refresh_token !== 'string' || typeof body.access_token !== 'string') {
+        const reason =
+          typeof body.error_description === 'string'
+            ? ` (${body.error_description.slice(0, 120)})`
+            : '';
+        throw new SocialError(`TikTok: no devolvió los tokens${reason}. Probá conectar de nuevo.`);
+      }
+      await tokens.set('tiktok', body.refresh_token);
+      let displayName: string | null = null;
+      try {
+        const info = await json(
+          fetcher,
+          `${TIKTOK_API}/user/info/?fields=display_name`,
+          { headers: { authorization: `Bearer ${body.access_token}` } },
+          'TikTok',
+        );
+        const user = (info.data as { user?: { display_name?: unknown } } | undefined)?.user;
+        displayName = typeof user?.display_name === 'string' ? user.display_name : null;
+      } catch {
+        // El nombre es solo para mostrar; la conexión ya quedó guardada.
+      }
+      return { displayName };
+    },
+  };
 }
 
 export function tiktokProvider(
@@ -258,12 +352,19 @@ export function tiktokProvider(
   tokens: TokenStore,
   fetcher: Fetcher = fetch,
 ): SocialProvider {
-  const base = 'https://open.tiktokapis.com/v2';
+  const base = TIKTOK_API;
+  const currentToken = async () => (await tokens.get('tiktok')) ?? options.refreshToken ?? null;
   return {
     network: 'tiktok',
-    async read(_days, today) {
+    async hasCredentials() {
+      return (await currentToken()) !== null;
+    },
+    async read(_days, today, extras) {
       // El token de acceso dura 24 h: se renueva en cada lectura y se guarda el de renovación.
-      const current = (await tokens.get('tiktok')) ?? options.refreshToken;
+      const current = await currentToken();
+      if (!current) {
+        throw new SocialError('TikTok: falta autorizar la cuenta. Tocá «Conectar TikTok».');
+      }
       const refreshed = await json(
         fetcher,
         `${base}/oauth/token/`,
@@ -300,22 +401,35 @@ export function tiktokProvider(
       const user = (info.data as { user?: Record<string, unknown> } | undefined)?.user ?? {};
       const snapshot: Partial<SocialSnapshot> = {
         followers: num(user.follower_count),
+        likes: num(user.likes_count),
         posts: num(user.video_count),
       };
       // Las vistas por video necesitan el permiso video.list; si falta, se muestran solo los seguidores.
       try {
         const list = await json(
           fetcher,
-          `${base}/video/list/?fields=id,view_count`,
+          `${base}/video/list/?fields=id,title,create_time,share_url,view_count,like_count,comment_count,share_count`,
           { method: 'POST', headers, body: JSON.stringify({ max_count: 20 }) },
           'TikTok (videos)',
         );
-        const videos = (list.data as { videos?: { view_count?: unknown }[] } | undefined)?.videos;
-        if (Array.isArray(videos)) {
-          snapshot.videoViews = videos.reduce(
-            (sum, video) => sum + (num(video.view_count) ?? 0),
-            0,
-          );
+        const raw = (list.data as { videos?: Record<string, unknown>[] } | undefined)?.videos;
+        if (Array.isArray(raw)) {
+          snapshot.videoViews = raw.reduce((sum, video) => sum + (num(video.view_count) ?? 0), 0);
+          if (extras) {
+            extras.videos = raw.map((video, index) => ({
+              id: typeof video.id === 'string' ? video.id : String(index),
+              title: typeof video.title === 'string' ? video.title.slice(0, 120) : '',
+              createdAt:
+                typeof video.create_time === 'number'
+                  ? new Date(video.create_time * 1000).toISOString()
+                  : null,
+              url: typeof video.share_url === 'string' ? video.share_url : null,
+              views: num(video.view_count),
+              likes: num(video.like_count),
+              comments: num(video.comment_count),
+              shares: num(video.share_count),
+            }));
+          }
         }
       } catch {
         // Sin el permiso de videos, solo seguidores.

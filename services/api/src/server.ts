@@ -21,7 +21,7 @@ import { PreviewService } from './preview/service';
 import { MetricsService } from './metrics/service';
 import { AnalyticsService, gaRunReport } from './analytics/service';
 import { FirestoreTokenStore, SocialService } from './social/service';
-import { socialProvidersFromEnv } from './social/from-env';
+import { socialProvidersFromEnv, tiktokAuthFromEnv } from './social/from-env';
 import { ProService } from './pro/service';
 import { CheckoutService } from './checkout/service';
 import { FulfillmentService } from './orders/fulfillment';
@@ -150,9 +150,12 @@ const notifier = new EmailNotifier(db, () => providers.email(), {
 const previews = new PreviewService(db, providers, catalog, log, notifier);
 const pro = new ProService(db, catalog);
 const metrics = new MetricsService(db);
+const socialTokens = new FirestoreTokenStore(db);
 const social = new SocialService(
   db,
-  socialProvidersFromEnv(config.env, new FirestoreTokenStore(db)),
+  socialProvidersFromEnv(config.env, socialTokens),
+  () => new Date(),
+  tiktokAuthFromEnv(config.env, socialTokens),
 );
 const analytics = new AnalyticsService(
   config.env.GA4_PROPERTY_ID ? gaRunReport(config.env.GA4_PROPERTY_ID) : null,

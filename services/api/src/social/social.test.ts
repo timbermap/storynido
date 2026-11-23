@@ -4,7 +4,10 @@ import { describe, expect, it } from 'vitest';
 import {
   instagramProvider,
   pinterestProvider,
+  type ReadExtras,
   SocialError,
+  tiktokAuth,
+  tiktokAuthorizeUrl,
   tiktokProvider,
   type SocialProvider,
   type TokenStore,
@@ -123,18 +126,44 @@ describe('tiktokProvider', () => {
         return Promise.resolve(reply({ access_token: 'a', refresh_token: 'rt-nuevo' }));
       }
       if (url.includes('/user/info')) {
-        return Promise.resolve(reply({ data: { user: { follower_count: 8, video_count: 3 } } }));
+        return Promise.resolve(
+          reply({ data: { user: { follower_count: 8, likes_count: 40, video_count: 3 } } }),
+        );
       }
-      return Promise.resolve(reply({ data: { videos: [{ view_count: 10 }, { view_count: 5 }] } }));
+      return Promise.resolve(
+        reply({
+          data: {
+            videos: [
+              {
+                id: 'v1',
+                title: 'Hola',
+                create_time: 1_700_000_000,
+                view_count: 10,
+                like_count: 2,
+              },
+              { id: 'v2', view_count: 5 },
+            ],
+          },
+        }),
+      );
     }) as unknown as typeof fetch;
     const provider = tiktokProvider(
       { clientKey: 'k', clientSecret: 's', refreshToken: 'rt' },
       tokens,
       fetcher,
     );
-    const reading = await provider.read(1, '2026-11-21');
-    expect(reading['2026-11-21']).toEqual({ followers: 8, posts: 3, videoViews: 15 });
+    const extras: ReadExtras = {};
+    const reading = await provider.read(1, '2026-11-21', extras);
+    expect(reading['2026-11-21']).toEqual({ followers: 8, likes: 40, posts: 3, videoViews: 15 });
     expect(tokens.saved.tiktok).toBe('rt-nuevo');
+    expect(extras.videos).toHaveLength(2);
+    expect(extras.videos?.[0]).toMatchObject({ id: 'v1', views: 10, likes: 2 });
+  });
+
+  it('sin autorizar la cuenta avisa que falta conectar', async () => {
+    const provider = tiktokProvider({ clientKey: 'k', clientSecret: 's' }, memoryTokens());
+    expect(await provider.hasCredentials?.()).toBe(false);
+    await expect(provider.read(1, '2026-11-21')).rejects.toThrow('Conectar TikTok');
   });
 
   it('sin permiso de videos igual informa los seguidores', async () => {
@@ -153,6 +182,44 @@ describe('tiktokProvider', () => {
     const reading = await provider.read(1, '2026-11-21');
     expect(reading['2026-11-21']?.followers).toBe(2);
     expect(reading['2026-11-21']?.videoViews).toBeUndefined();
+  });
+});
+
+describe('tiktokAuth', () => {
+  it('arma la dirección de autorización con los permisos de solo lectura', () => {
+    const url = new URL(
+      tiktokAuthorizeUrl('key', 'https://admin.storynido.com/social', 'estado-123'),
+    );
+    expect(url.origin + url.pathname).toBe('https://www.tiktok.com/v2/auth/authorize/');
+    expect(url.searchParams.get('scope')).toBe('user.info.basic,user.info.stats,video.list');
+    expect(url.searchParams.get('redirect_uri')).toBe('https://admin.storynido.com/social');
+    expect(url.searchParams.get('state')).toBe('estado-123');
+  });
+
+  it('cambia el código por tokens y guarda el de renovación', async () => {
+    const tokens = memoryTokens();
+    const fetcher = ((url: string) => {
+      if (url.includes('/oauth/token')) {
+        return Promise.resolve(reply({ access_token: 'a', refresh_token: 'rt-1' }));
+      }
+      return Promise.resolve(reply({ data: { user: { display_name: 'StoryNido' } } }));
+    }) as unknown as typeof fetch;
+    const auth = tiktokAuth({ clientKey: 'k', clientSecret: 's' }, tokens, fetcher);
+    expect(await auth.connect('codigo', 'https://admin.storynido.com/social')).toEqual({
+      displayName: 'StoryNido',
+    });
+    expect(tokens.saved.tiktok).toBe('rt-1');
+  });
+
+  it('si TikTok rechaza el código, no guarda nada', async () => {
+    const tokens = memoryTokens();
+    const fetcher = (() =>
+      Promise.resolve(reply({ error: 'invalid_grant' }, 400))) as unknown as typeof fetch;
+    const auth = tiktokAuth({ clientKey: 'k', clientSecret: 's' }, tokens, fetcher);
+    await expect(auth.connect('mal', 'https://admin.storynido.com/social')).rejects.toThrow(
+      SocialError,
+    );
+    expect(tokens.saved.tiktok).toBeUndefined();
   });
 });
 
