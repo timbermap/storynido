@@ -640,14 +640,14 @@ describe('vista previa', () => {
     await seedBook(providers, 'book-1', { length: 'short', textDensity: 'balanced' });
     expect((await generate('book-1')).statusCode).toBe(200);
     expect(rewrite).toHaveBeenCalled();
-    expect(rewrite.mock.calls[0]?.[0]).toMatchObject({ pageIndex: 0, words: { min: 20, max: 40 } });
+    expect(rewrite.mock.calls[0]?.[0]).toMatchObject({ pageIndex: 0, words: { min: 18, max: 32 } });
     const pages = (await db.doc('books/book-1').get()).get('preview.pages') as { text: string }[];
-    // 5 años: tope de 50 palabras.
-    expect(countWords(pages[0]?.text ?? '')).toBeLessThanOrEqual(50);
+    // 5 años: tope de 38 palabras.
+    expect(countWords(pages[0]?.text ?? '')).toBeLessThanOrEqual(38);
     expect((await db.doc('books/book-1').get()).get('preview.words')).toEqual({
-      min: 20,
-      max: 40,
-      cap: 50,
+      min: 18,
+      max: 32,
+      cap: 38,
     });
     const qa = await db.collection('books/book-1/qaEvents').get();
     expect(qa.docs.map((doc) => String(doc.get('code')))).toContain('length_rewritten');
