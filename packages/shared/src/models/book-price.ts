@@ -100,7 +100,10 @@ export function proLadderMinor(
 ): number {
   if (!professional || pricing.product !== 'digital' || minPages === undefined) return 0;
   const miniGross = withBookPaymentFee(pricing, unitPriceUsdMinor(pricing, 0, minPages));
-  return miniGross + Math.max(0, Math.round((gross - miniGross) / 2));
+  const half = miniGross + Math.max(0, Math.round((gross - miniGross) / 2));
+  // Si la lista ya es más cara que la del mini, el profesional también (al menos un escalón).
+  const miniList = charmPrice(miniGross, CHARGE_CURRENCY);
+  return charmPrice(gross, CHARGE_CURRENCY) > miniList ? Math.max(half, miniList + 1) : half;
 }
 
 /**

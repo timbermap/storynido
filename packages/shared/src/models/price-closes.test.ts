@@ -65,6 +65,24 @@ describe('los precios de los ebooks cierran con la comisión de cobro', () => {
     expect(lengths.map(price)).toEqual([1499, 1699, 2299, 2499]);
   });
 
+  it('el profesional de actividades también sube cuando la lista sube', () => {
+    const price = (length: BookLength, professional: boolean) => {
+      const plan = editorialPlan(
+        { length, contentType: 'activities', textDensity: 'balanced', readingLevel: 'developing' },
+        config,
+        config.lengths[length].interiorPages,
+      );
+      const pages = pricedPages(plan.narrativePages + plan.activityPages, config);
+      const aiPages = pricedPages(plan.narrativePages, config);
+      return bookPriceMinor(digital, 0, pages, professional, miniPricedPages(config), aiPages);
+    };
+    for (const length of lengths.slice(1)) {
+      if (price(length, false) > price('mini', false)) {
+        expect(price(length, true)).toBeGreaterThan(price('mini', true));
+      }
+    }
+  });
+
   it('el precio profesional del cuento sube con cada extensión (Corto no iguala a Mini)', () => {
     const pro = (length: BookLength) => {
       const plan = editorialPlan(
