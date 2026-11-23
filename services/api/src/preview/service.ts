@@ -1832,9 +1832,9 @@ export class PreviewService {
           (page, at) =>
             // Biblia visual (objetos, lugar, ropa especial y encuadre de la escena) y el espacio
             // para el texto según el armado (zona calma, papel fundido o entera).
-            `${page.illustrationPrompt}${sceneVisuals(preview.plan, page.index)}${layoutSceneNote(
-              pageLayouts[at]!,
-            )}`,
+            `${page.illustrationPrompt}${sceneVisuals(preview.plan, page.index)}${
+              pageLayouts[at] ? layoutSceneNote(pageLayouts[at]) : ''
+            }`,
         ),
       ];
       // Índice de cada imagen: 0 la portada, 1.. las páginas (como en el pedido).
