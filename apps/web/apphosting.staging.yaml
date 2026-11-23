@@ -40,7 +40,7 @@ env:
     availability: [BUILD, RUNTIME]
   # Redes sociales (se muestran en el footer; una red sin URL no aparece). DECISIONS: cuentas de la mesa redes, 20 nov 2026.
   - variable: NEXT_PUBLIC_SOCIAL_INSTAGRAM
-    value: https://www.instagram.com/storynido.redes/
+    value: https://www.instagram.com/storynido/
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_SOCIAL_TIKTOK
     value: https://www.tiktok.com/@storynido.redes
