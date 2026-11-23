@@ -20,6 +20,7 @@ module "environment" {
   region                     = var.region
   firestore_location         = var.firestore_location
   public_domain              = "storynido.com"
+  ga4_property_id            = "565435245"
   api_domain                 = var.api_domain
   cors_origins               = ["https://storynido.com", "https://www.storynido.com", "https://admin.storynido.com"]
   github_repository          = "timbermap/storynido"

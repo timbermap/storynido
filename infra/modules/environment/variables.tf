@@ -153,6 +153,12 @@ variable "admin_url" {
   description = "URL del panel de administración (enlace de las alertas por mail). Vacío: la web."
 }
 
+variable "ga4_property_id" {
+  type        = string
+  default     = ""
+  description = "ID numérico de la propiedad de Google Analytics 4 que lee el admin. Vacío: el panel muestra cómo conectarla."
+}
+
 variable "print_providers" {
   type        = list(string)
   default     = ["mock"]

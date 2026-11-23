@@ -1959,6 +1959,38 @@ export const apiRoutes = {
       networks: z.array(socialNetworkSchema),
     }),
   },
+  adminAnalytics: {
+    method: 'GET',
+    path: '/v1/admin/analytics',
+    access: 'admin',
+    summary:
+      'Visitas, fuentes, países, páginas y pasos del embudo medidos por Google Analytics 4 (solo quienes aceptaron la analítica)',
+    query: z.object({ days: z.coerce.number().int().min(1).max(90).default(30) }),
+    response: z.object({
+      connected: z.boolean(),
+      message: z.string().nullable(),
+      days: z.number(),
+      totals: z.object({
+        users: z.number(),
+        sessions: z.number(),
+        views: z.number(),
+        purchases: z.number(),
+        revenue: z.number(),
+      }),
+      daily: z.array(z.object({ day: z.string(), users: z.number(), sessions: z.number() })),
+      sources: z.array(
+        z.object({
+          key: z.string(),
+          users: z.number(),
+          sessions: z.number(),
+          purchases: z.number(),
+        }),
+      ),
+      countries: z.array(z.object({ key: z.string(), users: z.number() })),
+      pages: z.array(z.object({ key: z.string(), views: z.number() })),
+      events: z.array(z.object({ key: z.string(), count: z.number() })),
+    }),
+  },
   adminSocialSync: {
     method: 'POST',
     path: '/v1/admin/social/sync',
