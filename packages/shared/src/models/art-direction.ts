@@ -148,6 +148,8 @@ export function characterSheetDirection(direction: string | null | undefined): s
   if (!direction) return direction ?? null;
   return direction
     .replace(TEXT_ZONE, '')
+    // La lámina es de frente y en calma: las reglas de pose y encuadre de página no van acá.
+    .replace(BODY_POSE, '')
     .replace(
       'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
       '',

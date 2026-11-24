@@ -19,6 +19,8 @@ describe('dirección de arte de los libros', () => {
     expect(sheet).not.toContain('reserves one third of the image for the text');
     expect(sheet).not.toContain('wide establishing shot');
     expect(sheet).not.toContain('diagonal dynamic compositions');
+    expect(page).toContain('Poses and framing');
+    expect(sheet).not.toContain('Poses and framing');
     expect(sheet).toContain('Style lock');
   });
 
