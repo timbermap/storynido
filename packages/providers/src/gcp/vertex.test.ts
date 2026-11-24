@@ -699,7 +699,7 @@ describe('Vertex AI', () => {
       .png()
       .toBuffer();
     const fakeFetch = ((url: string | URL | Request) => {
-      urls.push(String(url));
+      urls.push(url as string);
       return Promise.resolve(
         new Response(
           JSON.stringify({
