@@ -106,6 +106,12 @@ describe('firma de la invitación', () => {
       kitPieceDocument({ ...book('birthday'), signature: false }, 'invitation', 20).html,
     ).not.toContain('Hecho con StoryNido');
   });
+
+  it('la firma del PDF enlaza a StoryNido con UTM y sin datos del niño', () => {
+    const html = kitPieceDocument(book('birthday'), 'invitation', 20).html;
+    expect(html).toContain('href="https://storynido.com/es/events?utm_source=invitacion');
+    expect(html).toContain('utm_campaign=hecho-con');
+  });
 });
 
 describe('invitación para WhatsApp', () => {

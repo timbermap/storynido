@@ -443,7 +443,7 @@ function invitation(book: KitBook, copies: number, print = false) {
     book,
     copies,
     `<img class="art" src="${book.cover}" alt=""><div class="band"><h1 class="display">${book.occasion === 'birthday' && book.turningAge ? t(book, 'turning') : t(book, 'birthday')}</h1><p>${t(book, 'invite')}</p></div>`,
-    `<div class="back"><h2 class="display">${t(book, 'invite')}</h2>${field('when', date)}${book.invitation?.time ? field('time', book.invitation.time) : ''}${field('where', book.invitation?.place)}<p class="row">${t(book, 'waiting')}</p><p class="rsvp">${t(book, 'rsvp')}</p>${book.signature === false ? '' : `<p class="made">${t(book, 'madeWith')}</p>`}</div>`,
+    `<div class="back"><h2 class="display">${t(book, 'invite')}</h2>${field('when', date)}${book.invitation?.time ? field('time', book.invitation.time) : ''}${field('where', book.invitation?.place)}<p class="row">${t(book, 'waiting')}</p><p class="rsvp">${t(book, 'rsvp')}</p>${book.signature === false ? '' : `<p class="made">${signatureLink(book)}</p>`}</div>`,
     print,
   );
 }
@@ -653,6 +653,12 @@ function storyWordsOf(book: KitBook, count: number, max: number): string[] {
     .map(plain)
     .filter((word) => word.length >= 4 && word.length <= max);
   return [...new Set([...own, ...fallback])].slice(0, count);
+}
+
+/** «Hecho con StoryNido» con enlace medible (solo en el PDF; la imagen de WhatsApp no tiene enlaces). */
+function signatureLink(book: KitBook): string {
+  const href = `https://storynido.com/${book.language}/events?utm_source=invitacion&utm_medium=kit&utm_campaign=hecho-con`;
+  return `<a href="${href}" style="color:inherit;text-decoration:none">${t(book, 'madeWith')}</a>`;
 }
 
 /** La invitación como imagen para WhatsApp (4:5, 1080×1350 px). */

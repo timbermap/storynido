@@ -1085,6 +1085,8 @@
     },
     "preview": {
       "badge": "Muestra de la historia",
+      "shareLead": "¿Conoces a otra familia a la que le gustaría? Cuéntales.",
+      "shareText": "Estoy probando StoryNido: un cuento ilustrado donde el niño es el protagonista, con su nombre y su cara. La vista previa es gratis:",
       "generatingTitle": "Estamos dibujando a {name}…",
       "generatingText": "Escribimos la historia y dibujamos a {name}. Esto lleva unos minutos, porque cuidamos que se parezca. Después tú lo revisas y, recién con tu OK, ilustramos la portada y las primeras páginas.",
       "cover": "Portada",

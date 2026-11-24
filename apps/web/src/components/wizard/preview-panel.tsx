@@ -22,7 +22,8 @@ import { useProStatus } from '@/components/pro/use-pro-status';
 import { BookViewer, type ViewerPage } from '@/components/book/book-viewer';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { GenerationProgress } from '@/components/ui/generation-progress';
-import { Link } from '@/i18n/navigation';
+import { ShareButton } from '@/components/share-button';
+import { Link, getPathname } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { trackConversion } from '@/lib/conversions';
 import { formatPrice } from '@/lib/format';
@@ -96,6 +97,7 @@ export function PreviewPanel({
   const tViewer = useTranslations('Viewer');
   const tBook = useTranslations('Wizard.book');
   const tParty = useTranslations('Wizard.partyPreview');
+  const tShare = useTranslations('Wizard.partyPreview.book');
   const isEvent = book.channel === 'events';
   const isPro = book.channel === 'professionals';
   // Profesionales: lo decide la cuenta (el checkout cobra su precio con el descuento base).
@@ -749,6 +751,21 @@ export function PreviewPanel({
       {ready && <div aria-hidden="true" className="h-28" />}
 
       {data?.stage === 'complete' && <PreviewFeedback bookId={book.id} />}
+
+      {/* Compartir la web, no esta muestra: el enlace es genérico (sin nombre ni datos del niño). */}
+      {data?.stage === 'complete' && !isEvent && !isPro && (
+        <div className="mt-8 flex flex-wrap items-center gap-3 border-t pt-4">
+          <p className="text-sm font-semibold">{t('shareLead')}</p>
+          <ShareButton
+            text={t('shareText')}
+            url={getPathname({ href: '/families', locale })}
+            campaign="preview"
+            label={tShare('share')}
+            copyLabel={tShare('copyLink')}
+            copiedLabel={tShare('copied')}
+          />
+        </div>
+      )}
 
       {data?.stage === 'complete' && user?.isAnonymous && (
         <section
