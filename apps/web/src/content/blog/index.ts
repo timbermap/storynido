@@ -20,6 +20,12 @@ const POSTS: Record<Locale, Record<string, () => Promise<PostModule>>> = {
     'cuentos-personalizados-y-lectura': () => import('./es/cuentos-personalizados-y-lectura.mdx'),
     'regalos-de-cumpleanos-con-significado': () =>
       import('./es/regalos-de-cumpleanos-con-significado.mdx'),
+    'cuento-personalizado-para-cumpleanos': () =>
+      import('./es/cuento-personalizado-para-cumpleanos.mdx'),
+    'cuento-para-dejar-el-panal': () => import('./es/cuento-para-dejar-el-panal.mdx'),
+    'cuento-primer-dia-de-clases': () => import('./es/cuento-primer-dia-de-clases.mdx'),
+    'regalo-dia-del-nino': () => import('./es/regalo-dia-del-nino.mdx'),
+    'cuento-de-navidad-personalizado': () => import('./es/cuento-de-navidad-personalizado.mdx'),
   },
   en: {
     'personalized-books-and-reading': () => import('./en/personalized-books-and-reading.mdx'),
