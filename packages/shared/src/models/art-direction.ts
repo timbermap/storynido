@@ -125,6 +125,14 @@ export const BODY_CONTACT =
   "Physical contact and clothing: characters keep a small personal distance, standing or sitting side by side, facing each other or looking at the same thing; no hugs, embraces, kisses, piggyback rides, laps, lying together, tangled limbs or hands on another person's body, between children or with adults outside the family. A soft side-view hug between the protagonist and a parent, grandparent or sibling, both faces visible, bodies clearly separate, only when the page text says so; never in bed. Allowed touch: a high five or a fist bump only between children of similar age, or holding hands while walking side by side with family; with an adult outside the family there is no contact of any kind (a wave, a nod or a smile from a small distance instead). Everyone is fully and modestly dressed (sportswear and gymnastics outfits are worn over shorts or leggings, no bare midriff); swimwear only in the water.";
 
 /**
+ * Poses y encuadre (DECISIONS 312, pedido de Angelica, 3 años, gusto «vertical puente»): salió una
+ * nena en puente con la cara dada vuelta y un plano bajo en malla. Vale para todos los estilos,
+ * líneas y tipos de libro.
+ */
+export const BODY_POSE =
+  'Poses and framing: no child is ever drawn upside down, in a backbend or bridge, in a handstand, cartwheel or somersault, or with the head below the hips; no pose a small child could copy and get hurt. Gymnastics, dance and sport are shown with a safe upright, kneeling or side-view pose (balancing on one foot, arms up, a ribbon, a stretch to the side). Children are always framed from eye level at medium or wide distance, the whole figure or from the waist up; never a low, from-below, from-behind-the-legs or close-up angle on the body, and never legs apart toward the viewer. Swimwear only in the water, at medium or wide distance.';
+
+/**
  * La maquetación pone el texto en la región más calma de cada página: la imagen tiene que dejarle
  * lugar. Sin esto, el panel de texto tapaba caras (informe de Profesionales).
  */
@@ -209,6 +217,7 @@ export function artDirection(input: {
     HUMAN_CRAFT,
     SPORTS_GEAR,
     BODY_CONTACT,
+    BODY_POSE,
     threeD ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     ONE_PROTAGONIST,
@@ -263,7 +272,7 @@ export function withCurrentGuards(direction: string | null | undefined): string 
   for (const [legacy, current] of LEGACY_TECHNIQUE) {
     if (!direction.includes(current)) direction = direction.replace(legacy, current);
   }
-  const missing = [ONE_PROTAGONIST, TEXT_ZONE, SPORTS_GEAR, BODY_CONTACT].filter(
+  const missing = [ONE_PROTAGONIST, TEXT_ZONE, SPORTS_GEAR, BODY_CONTACT, BODY_POSE].filter(
     (rule) => !direction.includes(rule),
   );
   const medium =

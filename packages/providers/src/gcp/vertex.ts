@@ -937,7 +937,7 @@ ${JSON.stringify(pages)}`,
           text: `You are a children's literature editor. Plan a warm, coherent personalized picture book that is fun to re-read.
 Respect the child: never ridicule appearance, abilities, origin or emotions. Do not invent biographical facts, diagnoses or relatives
 that were not provided. Before narrating, define beginning, motivation, an age-appropriate difficulty, the protagonist's own decisions,
-consequence and resolution. At least two personal details from the brief must change the action naturally (not just be mentioned).
+consequence and resolution. Personal details from the brief (likes, pet, friend) must change the action naturally, but each like appears in at most two scenes and never solves the main challenge; the story idea of the brief leads. With a single like, use it in one or two scenes only. Never plan a bridge, backbend, handstand, cartwheel, somersault or any upside-down pose, even if a like names it: turn it into a safe upright version.
 No two consecutive scenes may be nearly identical. Exactly ${String(request.pageCount)} scenes, one per narrative page.
 wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min)}-${String(request.wordsPerPage.max)} words${request.wordsPerPage.cap ? `, never more than ${String(request.wordsPerPage.cap)}` : ''}` : 'as the brief says'}.
 ${formPlanRules(request.age)}
@@ -1083,7 +1083,7 @@ page text, the scene plan and the approved character sheet. Look for: internal i
 incoherent clothing or accessories (or clothes that do not fit the place, weather or activity: a jacket in bed, street clothes in the water), relatives
 who look nothing like the protagonist's family, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
 below (a recurring object, place or outfit drawn differently is a repair), a hug, embrace, kiss, lap, carrying, lying together or hands on another person's body
-(except one soft side-view hug between the protagonist and a parent, grandparent or sibling when the page text says so), bare midriffs or revealing clothes, cropped heads, and any letters or
+(except one soft side-view hug between the protagonist and a parent, grandparent or sibling when the page text says so), bare midriffs or revealing clothes, cropped heads, a child upside down, in a backbend, bridge, handstand or cartwheel, or framed from a low angle or in close-up on the body (swimwear included), and any letters or
 words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks).
 Never claim to verify biometric identity or exact likeness to a real person; your evaluation is preliminary and may mark uncertainty.
 Do not invent evidence: anything you cannot evaluate without another reference must be status needs_reference.
@@ -1091,7 +1091,7 @@ Do not invent evidence: anything you cannot evaluate without another reference m
 Status:
 - pass: no critical issue.
 - repair: a critical issue that a new illustration of the same scene would fix (physical contact between people, missing essential trait, wrong anatomy, text in image,
-  image contradicts the text, a second figure in the background that duplicates, clones or looks like a twin of the protagonist, a
+  image contradicts the text, an upside-down, backbend, bridge or handstand pose, a low-angle or close-up body shot of a child, a second figure in the background that duplicates, clones or looks like a twin of the protagonist, a
   different child standing in for the protagonist). repairTarget illustration_only. A new illustration fixes all of these.
 - human_review: only inappropriate content, sensitive data visible, or a problem in the text itself (repairTarget text_only — the
   approved text is never changed automatically). Do not use human_review for drawing mistakes: those are repair.
