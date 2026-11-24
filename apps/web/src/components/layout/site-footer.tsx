@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import type { Locale } from '@storynido/shared';
 
