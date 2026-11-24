@@ -8,6 +8,7 @@ import {
   castNote,
   buildIllustrationPrompt,
   buildStoryPrompt,
+  coverOutfit,
   coverScene,
   describeCharacter,
   languageName,
@@ -503,5 +504,53 @@ describe('poses del cuento (DECISIONS 312)', () => {
     });
     expect(prompt).toContain('nunca pide ni cuenta puentes, verticales, volteretas');
     expect(prompt).toContain('nunca la herramienta que resuelve el desafío');
+  });
+});
+
+describe('ropa de la portada y fantasía (DECISIONS 315)', () => {
+  const scene = (outfit: string | null) =>
+    ({ outfit, place: null, mustBeVisible: [], notVisible: [] }) as never;
+  const outfits = [{ context: 'in the water', look: 'a yellow swimsuit with white daisies' }];
+
+  it('la portada lleva la ropa especial si vale para la mitad o más de las escenas', () => {
+    const plan = {
+      places: [],
+      outfits,
+      scenes: [scene('in the water'), scene('in the water'), scene(null)],
+    };
+    const outfit = coverOutfit(plan);
+    expect(outfit).toContain('yellow swimsuit');
+    expect(coverScene(undefined, 'T', null, outfit)).toContain(
+      'wears a yellow swimsuit with white daisies',
+    );
+  });
+
+  it('sin ropa especial dominante la portada usa la de la lámina', () => {
+    const plan = {
+      places: [],
+      outfits,
+      scenes: [scene('in the water'), scene(null), scene(null)],
+    };
+    expect(coverOutfit(plan)).toBeNull();
+    expect(coverOutfit(null)).toBeNull();
+    expect(coverScene(undefined, 'T', null, null)).not.toContain('Clothing:');
+  });
+
+  it('el cuento marca como magia los poderes peligrosos en la vida real', () => {
+    const prompt = buildStoryPrompt({
+      template: 'Cuento de {{pageCount}} páginas sobre {{childName}}.',
+      language: 'es',
+      pageCount: 10,
+      storyTitle: 'T',
+      childName: 'Angelica',
+      age: 3,
+      pronouns: 'she',
+      likes: [],
+      petName: null,
+      bestFriendName: null,
+      lessons: [],
+    });
+    expect(prompt).toContain('respirar bajo el agua, volar');
+    expect(prompt).toContain('vuelve a la vida real con un adulto cerca');
   });
 });

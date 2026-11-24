@@ -918,6 +918,7 @@
       "they": "Prefiero no especificar",
       "likes": "¿Qué le gusta?",
       "likesHint": "Hasta 10: dinosaurios, el espacio, pintar…",
+      "likesFew": "Con 2 o 3 gustos separados (Enter o coma) el cuento sale más variado. «Vertical puente», por ejemplo, son dos gustos: se cargan uno por uno.",
       "likesPlaceholder": "Escribe algo y presiona Enter",
       "addLike": "Agregar",
       "removeLike": "Quitar {like}",
@@ -925,6 +926,8 @@
       "friend": "Su mejor amigo o amiga (opcional)",
       "dedication": "Dedicatoria (opcional)",
       "dedicationPlaceholder": "Ej.: Para Martina, que cada noche sueña con las estrellas.",
+      "dedicationExampleLabel": "Usar un ejemplo",
+      "dedicationExample": "Para {name}, que cada día me enseña a jugar. Con todo mi cariño.",
       "dedicationLanguage": "Tu dedicatoria parece estar en {written, select, es {español} en {inglés} pt {portugués} other {otro idioma}} y el cuento va en {book, select, es {español} en {inglés} pt {portugués} other {otro idioma}}. Se imprime tal cual la escribes.",
       "required": "Escribe su nombre para continuar.",
       "event": {

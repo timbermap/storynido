@@ -965,6 +965,9 @@ thin throat", never just "a racket"). The protagonist keeps the same outfit in e
 promises: what the story sets up and later pays off (a mystery and the clue planted before it is solved, an important object that is
 used again later, a skill that is practiced and then saves the day), each with setupPage and payoffPage (1 = first page, setupPage
 before payoffPage). Everything that is set up is paid off. Up to 3; empty array if none. Write setup in the language of the brief.
+Fantasy: when the protagonist has a magic power that would be dangerous in real life (breathing underwater, flying, jumping from heights,
+resisting fire), the plan marks it as the story's magic (a magic bubble, "in this story") and the last scene returns to real life with an
+adult nearby; it is never shown as something a child can do alone.
 Physical contact: scenes never have the protagonist hug, kiss, carry or touch anyone outside the immediate family (parents, grandparents,
 siblings), nor anyone touch the protagonist; comfort between friends, classmates, teachers or professionals comes from words, presence,
 a shared object or, between children of similar age only, a high five; with an adult outside the family there is no contact of any kind. A family hug is allowed only if the brief asks for it, at most once in the whole book, and never in bed.
@@ -1085,6 +1088,7 @@ who look nothing like the protagonist's family, missing or mixed-up characters, 
 below (a recurring object, place or outfit drawn differently is a repair), a hug, embrace, kiss, lap, carrying, lying together or hands on another person's body
 (except one soft side-view hug between the protagonist and a parent, grandparent or sibling when the page text says so), bare midriffs or revealing clothes, cropped heads, a child upside down, in a backbend, bridge, handstand or cartwheel, or framed from a low angle or in close-up on the body (swimwear included), and any letters or
 words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks).
+Also check the protagonist's apparent age against the Protagonist line below: a child who looks two or more years older or younger than that age (an infant for a three-year-old, a schoolchild of 6 or 7 for a three-year-old, a teenager for a child), or whose face and body proportions differ clearly from the reference sheet, is a repair. And check the facial expression against the page text and the scene's emotion: an angry, scared or sad face on a cheerful page (or the reverse) is a repair; the new drawing must show the emotion the text describes.
 Never claim to verify biometric identity or exact likeness to a real person; your evaluation is preliminary and may mark uncertainty.
 Do not invent evidence: anything you cannot evaluate without another reference must be status needs_reference.
 
