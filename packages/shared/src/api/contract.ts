@@ -1935,7 +1935,7 @@ export const apiRoutes = {
       utmContent: z.string().max(80).nullable().default(null),
       utmTerm: z.string().max(80).nullable().default(null),
       /** Qué identificador de clic traía el enlace (el valor nunca se envía). */
-      clickId: z.enum(['fbclid', 'ttclid', 'epik']).nullable().default(null),
+      clickId: z.enum(['fbclid', 'ttclid', 'epik', 'gclid']).nullable().default(null),
       /** País detectado por el sitio (ISO alfa-2). */
       country: z.string().max(2).nullable().default(null),
       /** Paso del embudo; sin esto es una vista de página. */

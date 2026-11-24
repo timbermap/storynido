@@ -10,7 +10,12 @@ import { api } from './api';
  * origen y campaña (UTM). Los pasos del embudo (empezó, muestra, pago, compra) salen solo con
  * consentimiento de analítica, porque usan el origen guardado en este navegador.
  */
-const CLICK_ID_NETWORK = { fbclid: 'facebook', ttclid: 'tiktok', epik: 'pinterest' } as const;
+const CLICK_ID_NETWORK = {
+  fbclid: 'facebook',
+  ttclid: 'tiktok',
+  epik: 'pinterest',
+  gclid: 'google',
+} as const;
 export const ATTRIBUTION_KEY = 'sn_attr';
 const ATTRIBUTION_TTL_MS = 30 * 24 * 3600 * 1000;
 
@@ -22,7 +27,7 @@ export interface EntryInfo {
   utmContent: string | null;
   utmTerm: string | null;
   /** Cuál identificador de clic traía el enlace; el valor no se guarda ni se envía. */
-  clickId: 'fbclid' | 'ttclid' | 'epik' | null;
+  clickId: 'fbclid' | 'ttclid' | 'epik' | 'gclid' | null;
 }
 
 /** De dónde llegó esta visita: dominio de la página de origen (si no es el propio sitio) y UTM. */
@@ -46,7 +51,8 @@ export function readEntry(search: string, referrer: string, ownHost: string): En
     utmCampaign: take('utm_campaign'),
     utmContent: take('utm_content'),
     utmTerm: take('utm_term'),
-    clickId: (['fbclid', 'ttclid', 'epik'] as const).find((key) => params.has(key)) ?? null,
+    clickId:
+      (['fbclid', 'ttclid', 'epik', 'gclid'] as const).find((key) => params.has(key)) ?? null,
   };
 }
 

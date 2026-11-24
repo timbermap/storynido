@@ -23,6 +23,7 @@ describe('classifySource', () => {
   it('usa el identificador de clic solo si no hay una pista mejor', () => {
     expect(classifySource(null, null, 'ttclid')).toBe('tiktok');
     expect(classifySource(null, null, 'epik')).toBe('pinterest');
+    expect(classifySource(null, null, 'gclid')).toBe('google');
     expect(classifySource(null, 'blog.ejemplo.com', 'fbclid')).toBe('facebook');
     expect(classifySource('whatsapp', null, 'fbclid')).toBe('whatsapp');
     expect(classifySource(null, 'l.instagram.com', 'fbclid')).toBe('instagram');

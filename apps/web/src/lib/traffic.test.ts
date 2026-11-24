@@ -17,6 +17,12 @@ describe('readEntry', () => {
     });
     expect(JSON.stringify(entry)).not.toContain('ABC123');
   });
+  it('un enlace con solo gclid cuenta como Google (anuncios)', () => {
+    const entry = readEntry('?gclid=abc', '', 'storynido.com');
+    expect(entry.clickId).toBe('gclid');
+    expect(attributionFor(entry).source).toBe('google');
+    expect(JSON.stringify(entry)).not.toContain('abc');
+  });
   it('un enlace con solo ttclid ya tiene origen y cuenta como TikTok', () => {
     const entry = readEntry('?ttclid=xyz', '', 'storynido.com');
     expect(hasOrigin(entry)).toBe(true);
