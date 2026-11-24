@@ -484,3 +484,24 @@ describe('contacto físico (DECISIONS 294)', () => {
     );
   });
 });
+
+describe('poses del cuento (DECISIONS 312)', () => {
+  it('prohíbe puentes y verticales y acota el gusto a un detalle', () => {
+    const prompt = buildStoryPrompt({
+      template:
+        'Escribe un cuento de {{pageCount}} páginas sobre {{childName}}. Le gusta: {{likes}}.',
+      language: 'es',
+      pageCount: 10,
+      storyTitle: 'Angelica y el secreto del fondo del mar',
+      childName: 'Angelica',
+      age: 3,
+      pronouns: 'she',
+      likes: ['vertical puente'],
+      petName: null,
+      bestFriendName: null,
+      lessons: [],
+    });
+    expect(prompt).toContain('nunca pide ni cuenta puentes, verticales, volteretas');
+    expect(prompt).toContain('nunca la herramienta que resuelve el desafío');
+  });
+});

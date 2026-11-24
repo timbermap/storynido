@@ -71,6 +71,14 @@ describe('dirección de arte de los libros', () => {
     expect(withCurrentGuards(null)).toBeNull();
   });
 
+  it('sin poses invertidas ni planos bajos de chicos, también en libros congelados antes', () => {
+    const direction = artDirection({ age: 3, channel: 'families' });
+    expect(direction).toContain('no child is ever drawn upside down');
+    expect(direction).toContain('never a low, from-below');
+    const updated = withCurrentGuards("Art direction: premium children's picture book.") ?? '';
+    expect(updated).toContain('backbend or bridge');
+  });
+
   it('ropa de deportes de agua y, de 9 a 12, sin técnica que pelee con el estilo', () => {
     const older = artDirection({ age: 11, channel: 'families', style: 'lapices-de-colores' });
     expect(older).toContain('wetsuit or swimwear');

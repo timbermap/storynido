@@ -3208,3 +3208,22 @@ letra máxima sin achicarla (el PDF sí la achicaba), y la muestra no controlaba
   como `title_zone`: se rehace y en el último intento se acepta. Rechaza caras o cabezas dentro de la zona.
 - No se tocó la tabla «Cuánto texto por edad»: con 3-4 años y 25 palabras el texto sigue ocupando
   ~45 % aun con letra mínima. Propuesta pendiente de Sebas: bajar tope a 20 (3-4) y 32 (5-6).
+
+## 312 — Sin poses invertidas ni planos bajos de chicos (pedido de Angelica)
+
+Sebas (24 nov 2026): en «Angelica y el secreto del fondo del mar» (3 años, gusto «vertical puente») salió
+la nena en puente con la cara dada vuelta (páginas 3 y 8) y un plano bajo en malla. «Este tipo de cosas no
+pueden salir.» La mesa (producto, diseño, familia, legales, marketing y CEO) revisó el libro.
+
+- **Causa:** el planificador exigía «al menos dos detalles personales que cambien la acción»; con una sola
+  etiqueta la usó como herramienta para resolver la trama, y ninguna regla prohibía la pose ni el encuadre.
+- **Dibujo:** `BODY_POSE` en la dirección de arte (y en `withCurrentGuards`, así también en pedidos y
+  regeneraciones anteriores): nunca al revés, en puente, vertical, rueda o voltereta; siempre a la altura de
+  los ojos, a distancia media o larga, y nunca un plano bajo o de cerca al cuerpo; malla solo en el agua.
+- **Texto:** `POSE_STORY_RULE` (y la regla de imitación incluye puente, vertical y voltereta): la gimnasia
+  se cuenta de pie y con lo que siente; un gusto es un detalle en una o dos escenas, nunca la solución.
+- **Planificador:** cada gusto en como mucho dos escenas, la idea de la historia manda, y nunca planea poses
+  invertidas aunque el gusto las nombre.
+- **Revisión de páginas:** una pose invertida o un plano bajo/cerrado al cuerpo de un chico es `repair`.
+- **Pendiente (propuesto, sin hacer):** misma ropa en portada e interior, control de edad aparente y de
+  expresión contra el texto, aviso de fantasía de la burbuja, dedicatoria como paso con ejemplo.
