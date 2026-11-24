@@ -431,7 +431,8 @@
     "shareWhatsapp": "Enviar por WhatsApp",
     "shareCopy": "Copiar enlace",
     "shareCopied": "Enlace copiado",
-    "shareText": "Te comparto este artículo: {title}."
+    "shareText": "Te comparto este artículo: {title}.",
+    "followLead": "Más ideas y cuentos en nuestras redes"
   },
   "Consent": {
     "title": "Usamos cookies",

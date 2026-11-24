@@ -431,7 +431,8 @@
     "shareWhatsapp": "Enviar pelo WhatsApp",
     "shareCopy": "Copiar link",
     "shareCopied": "Link copiado",
-    "shareText": "Achei que você ia gostar deste artigo: {title}."
+    "shareText": "Achei que você ia gostar deste artigo: {title}.",
+    "followLead": "Mais ideias e histórias nas nossas redes"
   },
   "Consent": {
     "title": "Usamos cookies",

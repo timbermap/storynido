@@ -4,8 +4,10 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
+import { FollowUs } from '@/components/follow-us';
+import { ShareButton } from '@/components/share-button';
 import { listPosts } from '@/content/blog';
-import { Link } from '@/i18n/navigation';
+import { Link, getPathname } from '@/i18n/navigation';
 import { formatDate } from '@/lib/format';
 import { localizedAlternates } from '@/lib/seo';
 import { getDisplayCountry } from '@/lib/server/request-context';
@@ -26,8 +28,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPage({ params }: Props) {
   const locale = (await params).locale as Locale;
-  const [t, posts, display] = await Promise.all([
+  const [t, tFooter, posts, display] = await Promise.all([
     getTranslations('Blog'),
+    getTranslations('Footer'),
     listPosts(locale),
     getDisplayCountry(locale),
   ]);
@@ -60,10 +63,24 @@ export default async function BlogPage({ params }: Props) {
                 </Link>
               </h2>
               <p className="mt-2 text-muted-foreground">{post.description}</p>
+              <div className="mt-3">
+                <ShareButton
+                  text={t('shareText', { title: post.title })}
+                  url={getPathname({
+                    locale,
+                    href: { pathname: '/blog/[slug]', params: { slug: post.slug } },
+                  })}
+                  campaign={`blog-${post.slug}`}
+                  label={t('shareWhatsapp')}
+                  copyLabel={t('shareCopy')}
+                  copiedLabel={t('shareCopied')}
+                />
+              </div>
             </div>
           </li>
         ))}
       </ul>
+      <FollowUs lead={t('followLead')} newTab={tFooter('newTab')} />
     </div>
   );
 }
