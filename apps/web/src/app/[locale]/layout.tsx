@@ -82,6 +82,8 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
     },
     twitter: { card: 'summary_large_image', title, description, images: [image.url] },
     icons: { icon: '/icon.svg' },
+    // Reclamo del dominio en Pinterest (meta p:domain_verify).
+    other: { 'p:domain_verify': '62bccd44c7239b5894294b32aa5f0b11' },
   };
 }
 
