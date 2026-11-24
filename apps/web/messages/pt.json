@@ -426,7 +426,12 @@
     "subtitle": "Ideias para ler em família, presentear e acompanhar cada fase.",
     "readMore": "Ler artigo",
     "back": "Voltar ao blog",
-    "published": "Publicado em {date}"
+    "published": "Publicado em {date}",
+    "shareLead": "Conhece alguém a quem isso ajudaria? Compartilhe.",
+    "shareWhatsapp": "Enviar pelo WhatsApp",
+    "shareCopy": "Copiar link",
+    "shareCopied": "Link copiado",
+    "shareText": "Achei que você ia gostar deste artigo: {title}."
   },
   "Consent": {
     "title": "Usamos cookies",

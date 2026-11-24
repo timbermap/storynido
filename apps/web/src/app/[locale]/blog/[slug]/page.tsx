@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import type { Locale } from '@storynido/shared';
 
 import { JsonLd } from '@/components/json-ld';
+import { ShareButton } from '@/components/share-button';
 import { getPost } from '@/content/blog';
 import { Link, getPathname } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
@@ -87,6 +88,17 @@ export default async function BlogPostPage({ params }: Props) {
       />
       <div className="prose prose-lg mt-8 max-w-none prose-stone prose-headings:font-display prose-a:text-primary">
         <Content />
+      </div>
+      <div className="mt-10 grid gap-2 border-t pt-6">
+        <p className="text-sm font-semibold">{t('shareLead')}</p>
+        <ShareButton
+          text={t('shareText', { title: post.metadata.title })}
+          url={getPathname({ locale, href: { pathname: '/blog/[slug]', params: { slug } } })}
+          campaign={`blog-${slug}`}
+          label={t('shareWhatsapp')}
+          copyLabel={t('shareCopy')}
+          copiedLabel={t('shareCopied')}
+        />
       </div>
     </article>
   );

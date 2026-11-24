@@ -426,7 +426,12 @@
     "subtitle": "Ideas for reading together, gifting and every stage of childhood.",
     "readMore": "Read article",
     "back": "Back to the blog",
-    "published": "Published on {date}"
+    "published": "Published on {date}",
+    "shareLead": "Know someone this would help? Share it.",
+    "shareWhatsapp": "Send on WhatsApp",
+    "shareCopy": "Copy link",
+    "shareCopied": "Link copied",
+    "shareText": "Thought you might like this article: {title}."
   },
   "Consent": {
     "title": "We use cookies",

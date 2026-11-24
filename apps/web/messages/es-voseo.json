@@ -65,6 +65,10 @@
       "subtitle": "Lo recibís en digital, al instante."
     }
   },
+  "Blog": {
+    "shareLead": "¿Le sirve a alguien que conocés? Compartilo.",
+    "shareText": "Te comparto este artículo: {title}."
+  },
   "Stories": {
     "notAvailable": "Todavía no vendemos en {country}. Podés elegir otro país en Mi cuenta.",
     "error": "No pudimos cargar las historias. Intentalo de nuevo en unos minutos.",
