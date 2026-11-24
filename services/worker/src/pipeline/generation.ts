@@ -35,6 +35,7 @@ import {
   describeCharacter,
   nameIssues,
   pagesOutOfRange,
+  riskyPose,
   spanishVoiceFor,
   storyTypography,
   utcDay,
@@ -1008,9 +1009,77 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       const snapshot = await snapshotOf(ctx);
       return { output: { pages: snapshot.pages.length, reused: true } };
     }
-    const snapshot = await snapshotOf(ctx);
+    let snapshot = await snapshotOf(ctx);
     const provider = await ai();
     let cost = 0;
+
+    // Poses peligrosas (puente, vertical, cabeza abajo) en un texto ya aprobado: se reescribe la
+    // página y su escena antes de dibujar (DECISIONS 316). Si sigue pidiéndola, revisión manual.
+    const sceneRisk = (pageIndex: number): boolean => {
+      const scene = snapshot.scenes?.find((item) => item.pageIndex === pageIndex);
+      return (
+        !!scene &&
+        [scene.sceneGoal, ...scene.mustBeVisible, ...scene.continuityFacts].some(riskyPose)
+      );
+    };
+    const riskyPages = snapshot.pages.filter(
+      (page) => riskyPose(page.text) || riskyPose(page.illustrationPrompt) || sceneRisk(page.index),
+    );
+    if (riskyPages.length > 0) {
+      const fixed = new Map<number, string>();
+      for (const page of riskyPages) {
+        const at = snapshot.pages.indexOf(page);
+        const rewrite = await provider.text.rewritePage({
+          language: snapshot.language as 'es' | 'en' | 'pt',
+          childName: snapshot.childName,
+          age: snapshot.age,
+          storyTitle: snapshot.title,
+          pageIndex: page.index,
+          previous: snapshot.pages[at - 1]?.text ?? null,
+          next: snapshot.pages[at + 1]?.text ?? null,
+          text: page.text,
+          words: snapshot.words ?? { min: 8, max: 60 },
+          mustInclude: snapshot.requiredNames,
+          avoid: 'bridge, handstand, cartwheel, somersault, upside-down or arched-back poses',
+        });
+        cost += await record(ctx, 'review', rewrite.usage);
+        if (!rewrite.text || riskyPose(rewrite.text)) {
+          throw new HumanReviewError(
+            'risky_pose_text',
+            `La página ${String(page.index)} pide una pose peligrosa y no se pudo reescribir.`,
+            cost,
+          );
+        }
+        fixed.set(page.index, rewrite.text);
+      }
+      const { hash: _previous, ...rest } = snapshot;
+      const content: Omit<BookSnapshot, 'hash'> = {
+        ...rest,
+        pages: snapshot.pages.map((page) => {
+          const text = fixed.get(page.index);
+          return text === undefined
+            ? page
+            : { ...page, text, illustrationPrompt: `The scene of this page: ${text}` };
+        }),
+        scenes:
+          snapshot.scenes?.map((scene) =>
+            fixed.has(scene.pageIndex)
+              ? {
+                  ...scene,
+                  sceneGoal: fixed.get(scene.pageIndex) ?? scene.sceneGoal,
+                  mustBeVisible: scene.mustBeVisible.filter((item) => !riskyPose(item)),
+                  continuityFacts: scene.continuityFacts.filter((item) => !riskyPose(item)),
+                }
+              : scene,
+          ) ?? null,
+      };
+      snapshot = { ...content, hash: hashSnapshot(content) };
+      await db
+        .collection(COLLECTIONS.orders)
+        .doc(ctx.order.id)
+        .update({ snapshot, snapshotHash: snapshot.hash });
+      await qaEvent(ctx, 'pose_rewritten', { pages: fixed.size });
+    }
 
     const texts = [snapshot.title, ...snapshot.pages.map((page) => page.text)];
     // El texto es el que aprobó el adulto: si sacó el apodo, es su decisión (se registra). Un

@@ -110,6 +110,11 @@ export class MockAITextProvider implements AITextProvider {
 
   /** Recorta la página al máximo de palabras (sin IA): alcanza para probar la reescritura. */
   rewritePage(request: PageRewriteRequest): Promise<PageRewrite> {
+    if (request.avoid)
+      return Promise.resolve({
+        text: 'Se quedó de pie, tranquila, mirando el mar.',
+        usage: usage('mock-text'),
+      });
     const words = request.text.trim().split(/\s+/u);
     return Promise.resolve({
       text: words.slice(0, request.words.max).join(' '),

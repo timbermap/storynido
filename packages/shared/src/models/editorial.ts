@@ -504,6 +504,18 @@ export function pagesOutOfRange(
   });
 }
 
+/**
+ * Poses que un chico imita y se lastima (puente, vertical, voltereta, rueda, cabeza abajo). El
+ * texto aprobado de un pedido viejo puede traerlas aunque el redactor nuevo ya no las pida: se
+ * detectan antes de dibujar para reescribir la página (DECISIONS 316).
+ */
+const RISKY_POSE =
+  /\b(?:puente(?:s)?\s+(?:invertido|de\s+gimnasia|hacia\s+atr[aá]s)|(?:hac(?:e|er|ia|iendo|[ií]a)|hizo|armar?|arm[oó])\s+(?:un\s+|el\s+)?puente|(?:hac(?:e|er|iendo)|hizo)\s+(?:la\s+|una\s+)?(?:vertical|voltereta|rueda|acrobacia)|paradas?\s+de\s+manos|boca\s+abajo|cabeza\s+(?:hacia\s+)?abajo|patas\s+arriba|de\s+cabeza|upside[-\s]?down|bridge\s+pose|backbend|handstand|cartwheel|somersault|head\s+over\s+heels|de\s+cabe[cç]a\s+para\s+baixo|ponte\s+invertida)\b/iu;
+
+export function riskyPose(text: string): boolean {
+  return RISKY_POSE.test(text);
+}
+
 /** Páginas que pasan el tope duro de palabras: se reescriben (una vez) con el modelo. */
 export function pagesOverCap(pages: readonly { text: string }[], words: WordRange): number[] {
   const cap = wordCap(words);

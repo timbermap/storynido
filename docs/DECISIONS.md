@@ -3264,3 +3264,14 @@ la mesa, 2 mejorar, 3 con ejemplos similares, 4 y 5 ok».
 - **Gustos y dedicatoria (4 y 5):** el creador avisa que con un solo gusto el cuento se repite y que
   «vertical puente» son dos gustos; la dedicatoria tiene «Usar un ejemplo», que llena el campo con el nombre.
 - **Pendiente:** regenerar el libro de Angelica en staging para ver el antes y el después.
+
+## 316 — «Regenerar» ya no dibuja poses peligrosas que venían en el texto aprobado
+
+- **Causa (pedido de Angelica, generación 1):** «Regenerar libro» reutiliza el texto aprobado en la compra,
+  y ese texto pedía el «puente invertido». Los arreglos del redactor (312, 315) solo valen para cuentos
+  nuevos; el QA lo vio pero lo mandó a revisión manual porque el problema estaba en el texto.
+- **Qué hace ahora:** antes de dibujar, `generate_story` busca puentes, verticales, volteretas y poses con
+  la cabeza abajo en el texto, la escena y el prompt de cada página; reescribe esa página con algo seguro y
+  de pie, limpia la escena, guarda el libro congelado nuevo y registra `pose_rewritten`. Si la reescritura
+  sigue pidiéndola, va a revisión manual.
+- **Pendiente:** tapa nadando contra interior en burbuja (fantasía), y ropa en el agua.

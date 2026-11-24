@@ -788,7 +788,7 @@ ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrat
       [
         {
           text: `You are the editor of a personalized picture book for ${request.childName} (${String(request.age)} years old), "${request.storyTitle}".
-Page ${String(request.pageIndex + 1)} is too long for the reader's age. Rewrite ONLY this page in ${String(request.words.min)}-${String(request.words.max)} words,
+Page ${String(request.pageIndex + 1)} ${request.avoid ? `asks for something a child could imitate and get hurt (${request.avoid}). Rewrite ONLY this page, replacing that with a safe, standing, gentle action that keeps the same feeling and place, in ${String(request.words.min)}-${String(request.words.max)} words,` : `is too long for the reader's age. Rewrite ONLY this page in ${String(request.words.min)}-${String(request.words.max)} words,`}
 in the same language, voice and tone, keeping the same scene, events, names and any refrain or rhyme.${voiceNote(request.language, request.spanishVoice)}
 ${request.mustInclude.length ? `These names must appear exactly as written: ${request.mustInclude.join(', ')}.\n` : ''}Do not describe what the picture shows; keep what the character feels, says or decides.
 Previous page: ${request.previous ?? '(none: this is the first page)'}
