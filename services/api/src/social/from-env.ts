@@ -1,6 +1,7 @@
 import type { ApiEnv } from '../config';
 
 import {
+  facebookProvider,
   instagramProvider,
   pinterestProvider,
   tiktokAuth,
@@ -37,6 +38,13 @@ export function socialProvidersFromEnv(env: ApiEnv, tokens: TokenStore): SocialP
   if (env.INSTAGRAM_ACCESS_TOKEN && env.INSTAGRAM_USER_ID) {
     providers.push(
       instagramProvider({ accessToken: env.INSTAGRAM_ACCESS_TOKEN, userId: env.INSTAGRAM_USER_ID }),
+    );
+    // La página de Facebook se lee con el mismo token de Meta: no hace falta otro secreto.
+    providers.push(
+      facebookProvider({
+        accessToken: env.INSTAGRAM_ACCESS_TOKEN,
+        instagramUserId: env.INSTAGRAM_USER_ID,
+      }),
     );
   }
   if (env.TIKTOK_CLIENT_KEY && env.TIKTOK_CLIENT_SECRET) {

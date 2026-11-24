@@ -266,6 +266,102 @@ export function instagramProvider(
   };
 }
 
+// --- Facebook (página de StoryNido; mismo token de usuario del sistema que Instagram) -------
+
+export interface FacebookOptions {
+  /** El token del usuario del sistema de Meta (el mismo de Instagram). */
+  accessToken: string;
+  /** ID de la cuenta de Instagram: sirve para elegir la página vinculada a ella. */
+  instagramUserId?: string | undefined;
+}
+
+export function facebookProvider(
+  options: FacebookOptions,
+  fetcher: Fetcher = fetch,
+): SocialProvider {
+  const { accessToken } = options;
+  return {
+    network: 'facebook',
+    async read(days, today) {
+      // El token de usuario del sistema ve las páginas y entrega el token de cada una:
+      // las estadísticas de la página solo se leen con el token de la propia página.
+      const accounts = await json(
+        fetcher,
+        `${GRAPH}/me/accounts?${new URLSearchParams({ fields: 'id,name,access_token,instagram_business_account', access_token: accessToken }).toString()}`,
+        {},
+        'Facebook',
+      );
+      const pages = Array.isArray(accounts.data)
+        ? (accounts.data as Record<string, unknown>[])
+        : [];
+      const linked = pages.find(
+        (page) =>
+          options.instagramUserId !== undefined &&
+          (page.instagram_business_account as { id?: unknown } | undefined)?.id ===
+            options.instagramUserId,
+      );
+      const page = linked ?? pages[0];
+      if (!page || typeof page.id !== 'string') {
+        throw new SocialError('Facebook: el token no ve ninguna página.');
+      }
+      const pageToken = typeof page.access_token === 'string' ? page.access_token : accessToken;
+      const profile = await json(
+        fetcher,
+        `${GRAPH}/${page.id}?${new URLSearchParams({ fields: 'followers_count,fan_count', access_token: pageToken }).toString()}`,
+        {},
+        'Facebook',
+      );
+      const reading: SocialReading = {
+        [today]: { followers: num(profile.followers_count) ?? num(profile.fan_count) },
+      };
+      // Un día cerrado por vez; cada número va aparte para que uno sin permiso no tire el resto.
+      const metrics = {
+        page_media_view: 'impressions',
+        page_views_total: 'profileVisits',
+      } as const;
+      let failure: SocialError | null = null;
+      for (let back = 1; back <= days; back += 1) {
+        const day = addDays(today, -back);
+        const since = Math.floor(new Date(`${day}T00:00:00.000Z`).getTime() / 1000);
+        for (const [metric, field] of Object.entries(metrics) as [
+          keyof typeof metrics,
+          (typeof metrics)[keyof typeof metrics],
+        ][]) {
+          try {
+            const query = new URLSearchParams({
+              metric,
+              period: 'day',
+              since: String(since),
+              until: String(since + 86_400),
+              access_token: pageToken,
+            });
+            const body = await json(
+              fetcher,
+              `${GRAPH}/${page.id}/insights?${query.toString()}`,
+              {},
+              `Facebook (${metric})`,
+            );
+            const first = Array.isArray(body.data)
+              ? (body.data[0] as Record<string, unknown>)
+              : null;
+            const values = Array.isArray(first?.values)
+              ? (first.values as { value?: unknown }[])
+              : [];
+            const value = num(values[0]?.value);
+            if (value !== null) reading[day] = { ...reading[day], [field]: value };
+          } catch (error) {
+            if (error instanceof SocialError) failure = error;
+          }
+        }
+      }
+      // Si todas las lecturas fallaron (y ninguna vino vacía), que el error se vea.
+      const loadedAny = Object.keys(reading).some((day) => day !== today);
+      if (!loadedAny && failure && days > 0) throw failure;
+      return reading;
+    },
+  };
+}
+
 // --- TikTok (Login Kit + Display API: seguidores, me gusta y vistas por video) -----------------
 
 export interface TikTokOptions {
