@@ -324,6 +324,13 @@ export const POSE_STORY_RULE =
   '- Poses: el texto nunca pide ni cuenta puentes, verticales, volteretas, ruedas ni poses con la cabeza hacia abajo o el cuerpo arqueado. Si un gusto del protagonista es la gimnasia o el baile, se cuenta con lo que siente y con algo seguro y de pie (equilibrio en un pie, una cinta, estirarse a un costado, un salto corto). Un gusto es un detalle en una o dos escenas, nunca la herramienta que resuelve el desafío ni el centro de la trama.';
 
 /**
+ * Fantasía imitable (DECISIONS 315): «la burbuja que deja respirar bajo el agua» en un cuento para
+ * una nena de 3 años. Un chico chico puede tomar literal un poder mágico y querer probarlo.
+ */
+export const FANTASY_STORY_RULE =
+  '- Fantasía: si el protagonista tiene un poder mágico que en la vida real sería peligroso (respirar bajo el agua, volar, saltar desde alturas, no quemarse con el fuego, cruzar solo la calle, comer o probar cosas desconocidas, irse con un desconocido), el texto lo marca como magia del cuento («con la burbuja mágica», «en este cuento», «de mentira, jugando») y la última página vuelve a la vida real con un adulto cerca (en el agua, mamá o papá al lado). Nunca lo cuenta como algo que el chico pueda hacer solo.';
+
+/**
  * Reglas narrativas (AUDITORIA-PRODUCTO §4): lo que separa un cuento memorable de uno genérico.
  * Las de cada público salen del pedido: eventos traen la fiesta; profesionales, el objetivo.
  */
@@ -341,6 +348,7 @@ export function narrativeRules(
     '- Cada objeto o lugar importante se llama siempre igual y es el mismo en todas las páginas: una sola metáfora central, no varias. Lo mismo con lo que lleva el protagonista: si son anteojos, siempre «anteojos» (o «glasses»), sin sinónimos para no repetir.',
     '- El protagonista nunca hace como algo bueno lo que un chico podría imitar y lastimarse (saltar en la cama para alcanzar algo, pararse sobre una silla o un sillón, trepar muebles o estantes, hacer la vertical, el puente, la voltereta o cualquier pose invertida o de arqueo, meterse en terrenos ajenos, saltar o lanzarse hacia una ventana, un balcón o una altura). Si el cuento lo muestra, es para que un adulto ayude o para buscar otra forma.',
     POSE_STORY_RULE,
+    FANTASY_STORY_RULE,
   ];
   // Un primer añito o un bautizo es de un bebé: sin misión ni desafíos, la celebración es el cierre.
   const baby =
@@ -487,7 +495,8 @@ export function describeCharacter(
 }
 
 /** Lo mínimo del plan que necesita la portada: sus lugares y la escena de cada página. */
-export type CoverPlan = Pick<StoryPlan, 'places' | 'scenes'> | null | undefined;
+export type CoverPlan =
+  (Pick<StoryPlan, 'places' | 'scenes'> & Partial<Pick<StoryPlan, 'outfits'>>) | null | undefined;
 
 /**
  * Lugar de la portada: el lugar del cuento que más se repite, con su aspecto fijo. Sin plan con lugares, null.
@@ -502,6 +511,23 @@ export function coverSetting(plan: CoverPlan): string | null {
 }
 
 /**
+ * Ropa de la portada (DECISIONS 315, pedido de Angelica: la tapa con remera a rayas y las 10
+ * páginas con malla amarilla). Si la ropa especial del plan (en el agua, de noche) vale para la
+ * mitad o más de las escenas, la portada la lleva también: la nena es la misma de la tapa a la
+ * última página. Si no, la portada usa la ropa de la lámina como siempre (null).
+ */
+export function coverOutfit(plan: CoverPlan): string | null {
+  const scenes = plan?.scenes ?? [];
+  const outfits = (plan?.outfits ?? []).filter((item) => item.look.trim() && item.context.trim());
+  if (scenes.length === 0 || outfits.length === 0) return null;
+  const count = (context: string) =>
+    scenes.filter((scene) => scene.outfit && sameName(scene.outfit, context)).length;
+  const main = outfits.toSorted((a, b) => count(b.context) - count(a.context))[0];
+  if (!main || count(main.context) * 2 < scenes.length) return null;
+  return `${main.look} (${main.context}; the same look on every page in this context)`;
+}
+
+/**
  * Escena de la portada: el título va en la capa tipográfica, nunca dentro de la imagen. La portada
  * es una imagen propia (más amplia que una página), no la primera página repetida. Va en un lugar
  * del cuento y con la misma técnica que las páginas: el «más dramático» de antes la llevaba a tinta
@@ -511,7 +537,11 @@ export function coverScene(
   firstScene: string | undefined,
   title?: string,
   setting?: string | null,
+  outfit?: string | null,
 ): string {
+  const clothes = outfit
+    ? ` Clothing: the main character wears ${outfit} on the cover too, exactly as on the inside pages; this replaces the everyday outfit of the reference sheet.`
+    : '';
   const concept = title
     ? ` It should evoke the book's title (“${title}”) through the scene itself, as a picture only: never draw the title or any letters.`
     : '';
@@ -520,7 +550,7 @@ export function coverScene(
     : firstScene
       ? ` Story world, for the setting and mood only; do not copy this composition: ${firstScene.trim().replace(/\.+$/, '')}. Use only places from the story; never invent new landscapes.`
       : '';
-  return `Book cover illustration: the main character large and centered in one of the story's own places, caught in the middle of the story's central activity or its happiest moment, with genuine emotion and body language (never the stiff standing pose of the reference sheet), with a clear focal point and a different composition from the first page.${place}${concept} Draw it with exactly the same art technique, line, texture, color treatment and character proportions as the inside pages and the reference sheet: the cover is never more stylized, more inked or more dramatic than the pages. Keep the top 40% as calm, simple background with no lettering and no head or face in it: the title is typeset there later.`;
+  return `Book cover illustration: the main character large and centered in one of the story's own places, caught in the middle of the story's central activity or its happiest moment, with genuine emotion and body language (never the stiff standing pose of the reference sheet), with a clear focal point and a different composition from the first page.${place}${clothes}${concept} Draw it with exactly the same art technique, line, texture, color treatment and character proportions as the inside pages and the reference sheet: the cover is never more stylized, more inked or more dramatic than the pages. Keep the top 40% as calm, simple background with no lettering and no head or face in it: the title is typeset there later.`;
 }
 
 /** Datos de ejemplo para probar una plantilla desde el admin (sin datos reales ni IA). */

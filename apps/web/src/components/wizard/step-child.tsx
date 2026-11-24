@@ -361,6 +361,10 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
               labelClassName={labelClass}
               inputClassName={inputClass}
             />
+            {/* Un solo gusto se repite en toda la trama: con 2 o 3 el cuento sale más variado. */}
+            {!isPro && withPendingLike(likes, like).length <= 1 && (
+              <p className="-mt-3 text-sm text-muted-foreground">{t('likesFew')}</p>
+            )}
 
             {!isPro && (
               <div className="grid gap-6 sm:grid-cols-2 sm:items-end">
@@ -414,6 +418,17 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
               }}
               aria-describedby={dedicationLanguage ? 'child-dedication-language' : undefined}
             />
+            {dedication.trim() === '' && (
+              <button
+                type="button"
+                className="justify-self-start text-sm font-semibold text-primary underline underline-offset-2"
+                onClick={() => {
+                  setDedication(t('dedicationExample', { name: name.trim() || '…' }));
+                }}
+              >
+                {t('dedicationExampleLabel')}
+              </button>
+            )}
             {/* Se imprime tal cual: si está en otro idioma que el cuento, se avisa (no se cambia). */}
             {dedicationLanguage && (
               <p id="child-dedication-language" className="text-sm text-muted-foreground">

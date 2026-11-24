@@ -3245,3 +3245,22 @@ pueden salir.» La mesa (producto, diseño, familia, legales, marketing y CEO) r
 - **Contexto:** en la ficha (`/historias/[slug]`, las tres líneas) la columna izquierda quedaba vacía al bajar, el botón «Crear con esta historia» estaba al final de una lista larga y compartir al último.
 - **Decisión:** el botón principal sube justo debajo del título y el resumen, con una línea de apoyo; en el celular aparece además una barra fija abajo cuando el botón original sale de la pantalla (`StickyCta`). La portada queda fija en pantallas anchas. Al final, un bloque con WhatsApp, copiar enlace y los íconos de nuestras redes (Instagram, Pinterest, TikTok, Facebook; `NEXT_PUBLIC_SOCIAL_FACEBOOK` nueva, también se ve en el pie y el blog).
 - **Motivo:** un solo llamado claro y siempre a mano; las redes ayudan a seguirnos sin competir con el botón.
+
+## 315 — Misma ropa de la tapa a la última página, QA de edad y expresión, fantasía marcada y más gustos
+
+Sebas (24 nov 2026), después de la revisión de la mesa del libro de Angelica (3 años): «1 con lo que sugiere
+la mesa, 2 mejorar, 3 con ejemplos similares, 4 y 5 ok».
+
+- **Ropa (1):** `coverOutfit(plan)`: si la ropa especial del plan (en el agua, de noche) vale para la mitad o
+  más de las escenas, la portada la lleva también (`coverScene` recibe `outfit`). Si no, la portada sigue con
+  la ropa de la lámina. Antes: tapa con remera a rayas y 10 páginas con malla amarilla.
+- **QA (2):** la revisión de cada página pide `repair` si la edad aparente difiere dos o más años de la del
+  protagonista (bebé o escolar de 6–7 para una de 3) o si las proporciones no son las de la lámina, y si la
+  expresión de la cara contradice el texto o la emoción de la escena (cara enojada en una página alegre).
+- **Fantasía (3):** `FANTASY_STORY_RULE` y regla del planificador: un poder mágico peligroso en la vida real
+  (respirar bajo el agua, volar, saltar desde alturas, no quemarse, cruzar la calle solo, probar cosas
+  desconocidas, irse con un desconocido) se marca como magia del cuento y la última página vuelve a la vida
+  real con un adulto cerca.
+- **Gustos y dedicatoria (4 y 5):** el creador avisa que con un solo gusto el cuento se repite y que
+  «vertical puente» son dos gustos; la dedicatoria tiene «Usar un ejemplo», que llena el campo con el nombre.
+- **Pendiente:** regenerar el libro de Angelica en staging para ver el antes y el después.

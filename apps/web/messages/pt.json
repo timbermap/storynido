@@ -918,6 +918,7 @@
       "they": "Prefiro não especificar",
       "likes": "Do que ele gosta?",
       "likesHint": "Até 10: dinossauros, o espaço, pintar…",
+      "likesFew": "Com 2 ou 3 gostos separados (Enter ou vírgula) a história fica mais variada. “Ponte e parada de mão”, por exemplo, são dois gostos: adicione um por um.",
       "likesPlaceholder": "Escreva algo e pressione Enter",
       "addLike": "Adicionar",
       "removeLike": "Remover {like}",
@@ -925,6 +926,8 @@
       "friend": "Melhor amigo ou amiga (opcional)",
       "dedication": "Dedicatória (opcional)",
       "dedicationPlaceholder": "Ex.: Para Sofia, que toda noite sonha com as estrelas.",
+      "dedicationExampleLabel": "Usar um exemplo",
+      "dedicationExample": "Para {name}, que me ensina a brincar todo dia. Com todo o meu carinho.",
       "dedicationLanguage": "Sua dedicatória parece estar em {written, select, es {espanhol} en {inglês} pt {português} other {outro idioma}} e a história está em {book, select, es {espanhol} en {inglês} pt {português} other {outro idioma}}. Ela é impressa exatamente como você escreve.",
       "required": "Escreva o nome para continuar.",
       "event": {

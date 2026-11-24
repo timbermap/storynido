@@ -52,6 +52,7 @@ import {
   mainCastMember,
   sceneIncludes,
   visualBibleCheck,
+  coverOutfit,
   coverScene,
   describeCharacter,
   describeTraits,
@@ -1827,7 +1828,12 @@ export class PreviewService {
         }),
       );
       const pageScenes = [
-        coverScene(preview.pages[0]?.illustrationPrompt, preview.title, coverSetting(preview.plan)),
+        coverScene(
+          preview.pages[0]?.illustrationPrompt,
+          preview.title,
+          coverSetting(preview.plan),
+          coverOutfit(preview.plan),
+        ),
         ...preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map(
           (page, at) =>
             // Biblia visual (objetos, lugar, ropa especial y encuadre de la escena) y el espacio
@@ -2709,6 +2715,7 @@ export class PreviewService {
               preview.pages[0]?.illustrationPrompt,
               preview.title,
               coverSetting(preview.plan),
+              coverOutfit(preview.plan),
             )
           : (preview.pages[target]?.illustrationPrompt ?? '');
       const companion = preview.companion ?? null;

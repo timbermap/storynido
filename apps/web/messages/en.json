@@ -918,6 +918,7 @@
       "they": "Prefer not to say",
       "likes": "What do they love?",
       "likesHint": "Up to 10: dinosaurs, space, painting…",
+      "likesFew": "With 2 or 3 separate likes (Enter or comma) the story comes out more varied. “Gymnastics bridge”, for example, is two likes: add them one by one.",
       "likesPlaceholder": "Type something and press Enter",
       "addLike": "Add",
       "removeLike": "Remove {like}",
@@ -925,6 +926,8 @@
       "friend": "Their best friend (optional)",
       "dedication": "Dedication (optional)",
       "dedicationPlaceholder": "E.g. For Emma, who dreams of the stars every night.",
+      "dedicationExampleLabel": "Use an example",
+      "dedicationExample": "For {name}, who teaches me to play every day. With all my love.",
       "dedicationLanguage": "Your dedication seems to be in {written, select, es {Spanish} en {English} pt {Portuguese} other {another language}} and the story is in {book, select, es {Spanish} en {English} pt {Portuguese} other {another language}}. It is printed exactly as you write it.",
       "required": "Enter their name to continue.",
       "event": {
