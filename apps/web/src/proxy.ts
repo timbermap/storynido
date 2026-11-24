@@ -18,7 +18,7 @@ const intl = createIntlMiddleware(routing);
 
 /** Buscadores y vistas previas al compartir: siempre reciben el idioma por defecto en `/`. */
 const CRAWLER =
-  /googlebot|bingbot|duckduckbot|yandex|baiduspider|facebookexternalhit|whatsapp|twitterbot|linkedinbot|pinterestbot/i;
+  /googlebot|bingbot|duckduckbot|yandex|baiduspider|facebookexternalhit|facebot|meta-externalagent|meta-webindexer|whatsapp|twitterbot|linkedinbot|pinterest|telegrambot|slackbot|discordbot|applebot|skypeuripreview|bot\b|crawler|spider|preview/i;
 
 /**
  * Idioma en la URL (redirige / a /es, /en o /pt) y país detectado la primera vez. Sin idioma
