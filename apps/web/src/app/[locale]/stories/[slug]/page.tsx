@@ -16,6 +16,8 @@ import { AuthLink } from '@/components/auth/auth-link';
 import { FormatShowcase } from '@/components/formats/format-showcase';
 import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
 import { JsonLd } from '@/components/json-ld';
+import { FollowLinks } from '@/components/stories/follow-links';
+import { StickyCta } from '@/components/stories/sticky-cta';
 import { StoryCover } from '@/components/stories/story-cover';
 import { buttonVariants } from '@/components/ui/button';
 import { getPathname, Link } from '@/i18n/navigation';
@@ -64,16 +66,18 @@ export default async function StoryPage({ params, searchParams }: Props) {
   const locale = rawLocale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [story, offer, lessons, t, tLessons, tLengths, tFormats, editorial] = await Promise.all([
-    getStory(locale, slug),
-    getOffer(display.country, locale),
-    getLessons(locale).catch(() => []),
-    getTranslations('Stories'),
-    getTranslations('Lessons'),
-    getTranslations('Wizard.book.lengths'),
-    getTranslations('Formats'),
-    getEditorial(),
-  ]);
+  const [story, offer, lessons, t, tFooter, tLessons, tLengths, tFormats, editorial] =
+    await Promise.all([
+      getStory(locale, slug),
+      getOffer(display.country, locale),
+      getLessons(locale).catch(() => []),
+      getTranslations('Stories'),
+      getTranslations('Footer'),
+      getTranslations('Lessons'),
+      getTranslations('Wizard.book.lengths'),
+      getTranslations('Formats'),
+      getEditorial(),
+    ]);
   if (!story) notFound();
   // Enseñanza con la que se llegó o que se tocó acá: acompaña al usuario hasta el asistente.
   const chosenLesson = lessons.find((lesson) => lesson.slug === query?.lesson);
@@ -108,8 +112,21 @@ export default async function StoryPage({ params, searchParams }: Props) {
       };
     });
 
+  const createLink = {
+    href: {
+      pathname: '/create' as const,
+      query: {
+        story: story.slug,
+        ...(line ? { line } : {}),
+        ...(chosenLesson ? { lesson: chosenLesson.slug } : {}),
+      },
+    },
+    guest: line === 'events' ? t('createKitGuest') : t('createGuest'),
+    member: line === 'events' ? t('createKit') : t('create'),
+  };
+
   return (
-    <article className="container-page py-10 sm:py-14">
+    <article className="container-page py-8 pb-24 sm:py-14 md:pb-14">
       {offer?.available && amounts.length > 0 && (
         <JsonLd
           data={{
@@ -145,9 +162,9 @@ export default async function StoryPage({ params, searchParams }: Props) {
         {line ? t(`backTo.${line}`) : t('back')}
       </Link>
 
-      <div className="mt-6 grid gap-10 md:grid-cols-[2fr_3fr] md:gap-14">
-        <div>
-          <div className="mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl shadow-xl ring-1 ring-black/5">
+      <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr] md:gap-14">
+        <div className="md:sticky md:top-24 md:self-start">
+          <div className="mx-auto aspect-[3/4] w-full max-w-[14rem] overflow-hidden rounded-xl shadow-xl ring-1 ring-black/5 sm:max-w-sm">
             <StoryCover
               story={story}
               line={line}
@@ -167,6 +184,24 @@ export default async function StoryPage({ params, searchParams }: Props) {
             <h1 className="mt-2 text-4xl font-medium sm:text-5xl">{story.title}</h1>
             <p className="mt-4 text-lg text-muted-foreground">{story.summary}</p>
           </div>
+
+          <StickyCta
+            cta={
+              <div className="grid gap-2">
+                <AuthLink
+                  {...createLink}
+                  className={buttonVariants({ size: 'lg', className: 'w-full sm:w-fit' })}
+                />
+                <p className="text-sm text-muted-foreground">{t('createNote')}</p>
+              </div>
+            }
+            bar={
+              <AuthLink
+                {...createLink}
+                className={buttonVariants({ size: 'lg', className: 'w-full' })}
+              />
+            }
+          />
 
           <section aria-labelledby="sample" className="rounded-xl border bg-card p-6 shadow-sm">
             <h2
@@ -340,30 +375,22 @@ export default async function StoryPage({ params, searchParams }: Props) {
             <ChristmasDeadline offer={offer} country={display.country} locale={locale} />
           )}
 
-          <AuthLink
-            href={{
-              pathname: '/create',
-              query: {
-                story: story.slug,
-                ...(line ? { line } : {}),
-                ...(chosenLesson ? { lesson: chosenLesson.slug } : {}),
-              },
-            }}
-            guest={line === 'events' ? t('createKitGuest') : t('createGuest')}
-            member={line === 'events' ? t('createKit') : t('create')}
-            className={buttonVariants({ size: 'lg' })}
-          />
-
-          <div className="grid gap-2 border-t pt-5">
-            <p className="text-sm font-semibold">{t('shareLead')}</p>
-            <ShareButton
-              text={t('shareText', { title: story.title })}
-              url={getPathname({ href: { pathname: '/stories/[slug]', params: { slug } }, locale })}
-              campaign="cuento-catalogo"
-              label={t('shareWhatsapp')}
-              copyLabel={t('shareCopy')}
-              copiedLabel={t('shareCopied')}
-            />
+          <div className="grid gap-5 border-t pt-6">
+            <div className="grid gap-2">
+              <p className="text-sm font-semibold">{t('shareLead')}</p>
+              <ShareButton
+                text={t('shareText', { title: story.title })}
+                url={getPathname({
+                  href: { pathname: '/stories/[slug]', params: { slug } },
+                  locale,
+                })}
+                campaign="cuento-catalogo"
+                label={t('shareWhatsapp')}
+                copyLabel={t('shareCopy')}
+                copiedLabel={t('shareCopied')}
+              />
+            </div>
+            <FollowLinks lead={t('followLead')} newTab={tFooter('newTab')} />
           </div>
         </div>
       </div>

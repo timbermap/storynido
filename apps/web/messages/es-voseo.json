@@ -74,6 +74,8 @@
     "error": "No pudimos cargar las historias. Intentalo de nuevo en unos minutos.",
     "objectivesText": "Al crearlo elegís uno como objetivo principal y la historia gira en torno a él.",
     "christmasOpen": "Para Navidad en {country}: pedí el libro impreso antes del {date} y llega antes del 24 de diciembre. El digital está listo en minutos.",
+    "followLead": "Seguinos y descubrí más cuentos",
+    "createNote": "Elegís la extensión y el formato al crear.",
     "shareText": "Mirá este cuento en el que el niño es el protagonista, con su cara y su nombre: {title}.",
     "createGuest": "Iniciá sesión para crear",
     "createKitGuest": "Iniciá sesión para diseñar el kit",
