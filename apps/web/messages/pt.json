@@ -364,6 +364,11 @@
     "fewForAge": "Por enquanto há poucas histórias pensadas para {min} a {max} anos. Nelas, o texto e as ilustrações são escritos para a idade do seu filho.",
     "lengthFormats": "Formatos disponíveis",
     "shippingCalculated": "O frete do livro impresso é calculado com o seu endereço na hora de pagar.",
+    "shareLead": "Conhece alguém que ia adorar?",
+    "shareWhatsapp": "Enviar pelo WhatsApp",
+    "shareCopy": "Copiar link",
+    "shareCopied": "Link copiado",
+    "shareText": "Veja este conto em que a criança é a protagonista, com o rosto e o nome dela: {title}.",
     "createGuest": "Entre para criar",
     "createKitGuest": "Entre para montar o kit",
     "lengthsTitle": "Escolha a extensão",
@@ -421,7 +426,12 @@
     "subtitle": "Ideias para ler em família, presentear e acompanhar cada fase.",
     "readMore": "Ler artigo",
     "back": "Voltar ao blog",
-    "published": "Publicado em {date}"
+    "published": "Publicado em {date}",
+    "shareLead": "Conhece alguém a quem isso ajudaria? Compartilhe.",
+    "shareWhatsapp": "Enviar pelo WhatsApp",
+    "shareCopy": "Copiar link",
+    "shareCopied": "Link copiado",
+    "shareText": "Achei que você ia gostar deste artigo: {title}."
   },
   "Consent": {
     "title": "Usamos cookies",
@@ -1519,7 +1529,8 @@
         "pricePrinted": "a partir de {price}",
         "afterKit": "Anotado. Depois de pagar o kit, você cria o livro a partir do seu pedido, com o mesmo personagem.",
         "shareLead": "Avós e tios também podem presentear.",
-        "share": "Enviar o link para eles",
+        "share": "Enviar pelo WhatsApp",
+        "copyLink": "Copiar link",
         "copied": "Link copiado",
         "shareText": "Estamos preparando a festa de {name}. Se você quiser dar uma história em que seja protagonista, pode criar aqui:"
       },

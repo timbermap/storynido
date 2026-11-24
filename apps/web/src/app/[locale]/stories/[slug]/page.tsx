@@ -11,13 +11,14 @@ import {
   type Locale,
 } from '@storynido/shared';
 
+import { ShareButton } from '@/components/share-button';
 import { AuthLink } from '@/components/auth/auth-link';
 import { FormatShowcase } from '@/components/formats/format-showcase';
 import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
 import { JsonLd } from '@/components/json-ld';
 import { StoryCover } from '@/components/stories/story-cover';
 import { buttonVariants } from '@/components/ui/button';
-import { Link } from '@/i18n/navigation';
+import { getPathname, Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { formatPrice } from '@/lib/format';
 import { localizedAlternates } from '@/lib/seo';
@@ -352,6 +353,18 @@ export default async function StoryPage({ params, searchParams }: Props) {
             member={line === 'events' ? t('createKit') : t('create')}
             className={buttonVariants({ size: 'lg' })}
           />
+
+          <div className="grid gap-2 border-t pt-5">
+            <p className="text-sm font-semibold">{t('shareLead')}</p>
+            <ShareButton
+              text={t('shareText', { title: story.title })}
+              url={getPathname({ href: { pathname: '/stories/[slug]', params: { slug } }, locale })}
+              campaign="cuento-catalogo"
+              label={t('shareWhatsapp')}
+              copyLabel={t('shareCopy')}
+              copiedLabel={t('shareCopied')}
+            />
+          </div>
         </div>
       </div>
     </article>

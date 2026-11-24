@@ -105,7 +105,7 @@ test('Celebraciones: de la temática de la landing a la muestra y el pago del ki
   await expect(page.locator('label', { hasText: 'Ahora no' }).locator('input')).toBeChecked();
   await page.locator('label', { hasText: 'Libro impreso' }).click();
   await expect(page.locator('body')).toContainText('desde tu pedido creas su libro');
-  await expect(page.getByRole('button', { name: 'Enviarles el enlace' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Enviar por WhatsApp' })).toBeVisible();
   await expectAccessible(page);
   await expectNoHorizontalScroll(page);
   await shot(page, '4-vista-previa', isMobile);
