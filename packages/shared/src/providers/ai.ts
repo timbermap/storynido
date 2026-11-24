@@ -54,6 +54,8 @@ export interface PageRewriteRequest {
   words: { min: number; max: number };
   /** Nombres que tienen que quedar tal cual. */
   mustInclude: readonly string[];
+  /** Lo que la página no puede pedir ni contar (poses peligrosas): reescribe con algo seguro. */
+  avoid?: string;
 }
 
 export interface PageRewrite {

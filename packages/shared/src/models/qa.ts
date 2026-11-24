@@ -6,6 +6,8 @@ export const QA_CODES = [
   'length_out_of_range',
   /** Una página pasó el tope de palabras de la edad y se reescribió con el modelo. */
   'length_rewritten',
+  'pose_rewritten',
+  'text_review_rejected',
   'length_trimmed',
   'moderation_text',
   'moderation_image',

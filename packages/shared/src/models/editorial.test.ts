@@ -5,6 +5,7 @@ import {
   DEFAULT_AGE_BANDS,
   DEFAULT_EDITORIAL_CONFIG,
   READING_FORMATS,
+  riskyPose,
   ageBandOf,
   editorialConfigSchema,
   editorialPlan,
@@ -292,5 +293,16 @@ describe('sin largo elegido', () => {
   it('sin edad o con una historia más corta que la franja, queda el largo de la historia', () => {
     expect(editorialPlan(choice, DEFAULT_EDITORIAL_CONFIG, 26).narrativePages).toBe(26);
     expect(editorialPlan(choice, DEFAULT_EDITORIAL_CONFIG, 10, 4).narrativePages).toBe(10);
+  });
+});
+
+describe('riskyPose', () => {
+  it('detecta puentes, verticales y cabeza abajo en tres idiomas', () => {
+    expect(riskyPose('Angelica hizo un puente invertido en la arena.')).toBe(true);
+    expect(riskyPose('Hizo la vertical junto al mar.')).toBe(true);
+    expect(riskyPose('She did a handstand on the sand.')).toBe(true);
+    expect(riskyPose('Nadou de cabeça para baixo.')).toBe(true);
+    expect(riskyPose('Cruzaron el puente de piedra y rieron.')).toBe(false);
+    expect(riskyPose('Se quedó de pie, mirando el mar.')).toBe(false);
   });
 });
