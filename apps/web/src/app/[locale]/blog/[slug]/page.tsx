@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 
 import type { Locale } from '@storynido/shared';
 
+import { FollowUs } from '@/components/follow-us';
 import { JsonLd } from '@/components/json-ld';
 import { ShareButton } from '@/components/share-button';
 import { getPost } from '@/content/blog';
@@ -44,9 +45,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogPostPage({ params }: Props) {
   const { locale: rawLocale, slug } = await params;
   const locale = rawLocale as Locale;
-  const [post, t, display] = await Promise.all([
+  const [post, t, tFooter, display] = await Promise.all([
     getPost(locale, slug),
     getTranslations('Blog'),
+    getTranslations('Footer'),
     getDisplayCountry(locale),
   ]);
   if (!post) notFound();
@@ -100,6 +102,7 @@ export default async function BlogPostPage({ params }: Props) {
           copiedLabel={t('shareCopied')}
         />
       </div>
+      <FollowUs lead={t('followLead')} newTab={tFooter('newTab')} />
     </article>
   );
 }
