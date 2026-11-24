@@ -53,7 +53,9 @@ export function ShareButton({
     try {
       await navigator.clipboard.writeText(`${text} ${link()}`);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2500);
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2500);
     } catch {
       // Sin permiso para el portapapeles: queda el botón de WhatsApp.
     }
