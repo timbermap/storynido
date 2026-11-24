@@ -1033,6 +1033,12 @@ export class PreviewService {
               }),
             );
           }
+          if (!review.approved) {
+            // El motivo que dio el editor queda en los eventos de calidad (sin esto solo se ve «text»).
+            await this.qaEvent(bookId, 'text_review_rejected', {
+              issues: review.issues.slice(0, 4).join(' | ').slice(0, 300),
+            });
+          }
           return { title: fix(draft.title), pages, approved: review.approved };
         };
         // Densidad y nombres exactos: si algo no cumple, 1 reescritura.
