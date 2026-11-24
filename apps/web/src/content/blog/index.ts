@@ -7,6 +7,9 @@ export interface PostMeta {
   description: string;
   /** ISO (AAAA-MM-DD). */
   date: string;
+  /** Portada real del catálogo (ruta en /public) y su texto alternativo. */
+  image: string;
+  imageAlt: string;
 }
 
 interface PostModule {
