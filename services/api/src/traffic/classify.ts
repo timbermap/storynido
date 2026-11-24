@@ -29,12 +29,13 @@ const NETWORKS: readonly { name: string; utm: readonly string[]; hosts: readonly
 ];
 
 /** Identificadores de clic que dejan las redes en el enlace: solo se usa cuál es, nunca su valor. */
-export const CLICK_IDS = ['fbclid', 'ttclid', 'epik'] as const;
+export const CLICK_IDS = ['fbclid', 'ttclid', 'epik', 'gclid'] as const;
 export type ClickId = (typeof CLICK_IDS)[number];
 const CLICK_ID_NETWORK: Record<ClickId, string> = {
   fbclid: 'facebook',
   ttclid: 'tiktok',
   epik: 'pinterest',
+  gclid: 'google',
 };
 
 /** Minúsculas y solo letras, números, guion y guion bajo; lo demás se vuelve guion. */
