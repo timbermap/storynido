@@ -146,18 +146,20 @@ export const TEXT_ZONE =
  */
 export function characterSheetDirection(direction: string | null | undefined): string | null {
   if (!direction) return direction ?? null;
-  return direction
-    .replace(TEXT_ZONE, '')
-    // La lámina es de frente y en calma: las reglas de pose y encuadre de página no van acá.
-    .replace(BODY_POSE, '')
-    .replace(
-      'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
-      '',
-    )
-    .replace('diagonal dynamic compositions, the child in motion, ', '')
-    .replace('cinematic framing, ', '')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+  return (
+    direction
+      .replace(TEXT_ZONE, '')
+      // La lámina es de frente y en calma: las reglas de pose y encuadre de página no van acá.
+      .replace(BODY_POSE, '')
+      .replace(
+        'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
+        '',
+      )
+      .replace('diagonal dynamic compositions, the child in motion, ', '')
+      .replace('cinematic framing, ', '')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+  );
 }
 
 /** Técnica del estilo elegido; nunca el gouache de la casa si se eligió otro (DECISIONS 265). */
