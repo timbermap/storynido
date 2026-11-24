@@ -691,6 +691,57 @@ describe('Vertex AI', () => {
     expect(sent).toContain('sin anteojos');
   });
 
+  it('la tapa usa el modelo de tapa y las páginas el de imagen', async () => {
+    const urls: string[] = [];
+    const png = await sharp({
+      create: { width: 8, height: 8, channels: 3, background: '#eadcf2' },
+    })
+      .png()
+      .toBuffer();
+    const fakeFetch = ((url: string | URL | Request) => {
+      urls.push(url as string);
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            candidates: [
+              {
+                finishReason: 'STOP',
+                content: {
+                  parts: [{ inlineData: { mimeType: 'image/png', data: png.toString('base64') } }],
+                },
+              },
+            ],
+            usageMetadata: { promptTokenCount: 600, candidatesTokenCount: 1120 },
+          }),
+        ),
+      );
+    }) as typeof fetch;
+    const provider = new VertexImageProvider(
+      new VertexClient({
+        projectId: 'test-project',
+        models: () => ({
+          text: 'gemini-3.5-flash',
+          image: 'gemini-3.1-flash-image',
+          cover: 'gemini-3-pro-image',
+        }),
+        getAccessToken: () => Promise.resolve('test-token'),
+        fetch: fakeFetch,
+      }),
+    );
+    const base = {
+      prompt: 'Martina rides a cardboard rocket',
+      stylePrompt: 'soft watercolor',
+      character: { description: 'curly brown hair', photo: null },
+      references: [],
+      aspectRatio: '3:4' as const,
+      seed: 7,
+    };
+    await provider.generateIllustration({ ...base, cover: true });
+    await provider.generateIllustration(base);
+    expect(urls[0]).toContain('gemini-3-pro-image');
+    expect(urls[1]).toContain('gemini-3.1-flash-image');
+  });
+
   it('reintenta ante un 429 y después responde', async () => {
     let attempts = 0;
     const provider = new VertexTextProvider(
