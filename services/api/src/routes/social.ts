@@ -49,6 +49,11 @@ export function registerSocialRoutes(app: FastifyInstance, social: SocialService
     }
   });
 
+  addRoute(app, apiRoutes.adminSocialTiktokDisconnect, {}, async () => {
+    await social.disconnectTikTok();
+    return { ok: true as const };
+  });
+
   addRoute(app, apiRoutes.adminSocialSync, {}, async (request) => {
     const { days } = request.body as SyncBody;
     return { results: await social.sync(days) };
