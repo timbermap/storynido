@@ -156,6 +156,15 @@ export class SocialService {
     return { displayName };
   }
 
+  /** Borra el token guardado y los videos leídos: el panel vuelve a mostrar «Conectar TikTok». */
+  async disconnectTikTok(): Promise<void> {
+    await this.db.collection(COLLECTIONS.socialTokens).doc('tiktok').delete();
+    await this.db
+      .collection(COLLECTIONS.socialState)
+      .doc('tiktok')
+      .set({ lastRunAt: null, ok: true, error: null, videos: [] });
+  }
+
   private requireTikTok(): TikTokAuth {
     if (!this.tiktok) {
       throw new SocialError(

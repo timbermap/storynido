@@ -2036,6 +2036,15 @@ export const apiRoutes = {
     body: z.object({ code: z.string().min(1).max(2000), redirectUri: tiktokRedirectUri }),
     response: z.object({ displayName: z.string().nullable() }),
   },
+  adminSocialTiktokDisconnect: {
+    method: 'POST',
+    path: '/v1/admin/social/tiktok/disconnect',
+    access: 'admin',
+    summary:
+      'Desconecta TikTok del panel: borra el token guardado (la app se puede volver a autorizar)',
+    body: z.object({}),
+    response: z.object({ ok: z.literal(true) }),
+  },
   adminSocialSync: {
     method: 'POST',
     path: '/v1/admin/social/sync',

@@ -164,6 +164,17 @@ export default function SocialPage() {
     }
   };
 
+  const disconnectTikTok = async () => {
+    setMessage(null);
+    try {
+      await api('adminSocialTiktokDisconnect', { body: {} });
+      setMessage('TikTok desconectado. Podés volver a conectarlo cuando quieras.');
+      await reload();
+    } catch (caught) {
+      setMessage(errorMessage(caught));
+    }
+  };
+
   const syncNow = async () => {
     setSyncing(true);
     setMessage(null);
@@ -255,6 +266,17 @@ export default function SocialPage() {
                         className="h-7 rounded-md border px-2 text-xs text-foreground"
                       >
                         {network.connected ? 'Volver a conectar TikTok' : 'Conectar TikTok'}
+                      </button>
+                    )}
+                    {network.canAuthorize && network.connected && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void disconnectTikTok();
+                        }}
+                        className="h-7 rounded-md border px-2 text-xs text-foreground"
+                      >
+                        Desconectar TikTok
                       </button>
                     )}
                     {network.canAuthorize && (
