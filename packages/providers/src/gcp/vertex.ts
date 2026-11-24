@@ -164,7 +164,7 @@ export interface VertexOptions {
   /** "global" tiene los modelos más nuevos y mejor disponibilidad. */
   location?: string;
   /** Modelos vigentes (aiConfig puede cambiarlos sin redeploy). */
-  models: () => { text: string; image: string };
+  models: () => { text: string; image: string; cover?: string };
   /** Precios del catálogo del admin (aiModels), leídos en vivo. */
   prices?: ModelPriceLookup;
   /** Token alternativo (p. ej. el script de evaluación con gcloud). Si no, credenciales del entorno. */
@@ -1199,7 +1199,9 @@ export class VertexImageProvider implements AIImageProvider {
   constructor(private readonly client: VertexClient) {}
 
   async generateIllustration(request: IllustrationRequest): Promise<GeneratedImage> {
-    const model = this.client.options.models().image;
+    const models = this.client.options.models();
+    // La tapa es lo que decide la compra: usa el modelo fino si hay uno configurado (vacío = el de imagen).
+    const model = request.cover === true ? (models.cover ?? models.image) : models.image;
     const parts: Part[] = [];
     const notes: string[] = [];
     // Cada nota nombra sus imágenes por número: la foto, los dibujos de otro estilo (solo rasgos) y

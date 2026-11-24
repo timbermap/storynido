@@ -44,6 +44,8 @@ export const providerSettingsSchema = z.object({
 export const aiModelSettingsSchema = z.object({
   text: z.string().min(1).default('gemini-3.5-flash'),
   image: z.string().min(1).default('gemini-3.1-flash-image'),
+  /** Solo la tapa (cover: true): un modelo más fino. Igual al de imagen = apagado (AI_COVER_IMAGE_MODEL). */
+  cover: z.string().min(1).default('gemini-3-pro-image'),
 });
 
 export type AiModelSettings = z.infer<typeof aiModelSettingsSchema>;
@@ -55,6 +57,7 @@ export function aiModelSettingsFromEnv(
   return aiModelSettingsSchema.parse({
     text: value('AI_TEXT_MODEL'),
     image: value('AI_IMAGE_MODEL'),
+    cover: value('AI_COVER_IMAGE_MODEL'),
   });
 }
 
@@ -190,6 +193,7 @@ export class ProviderRegistry {
     return {
       text: this.aiOverride.textModel ?? this.defaultModels.text,
       image: this.aiOverride.imageModel ?? this.defaultModels.image,
+      cover: this.defaultModels.cover,
     };
   }
 
