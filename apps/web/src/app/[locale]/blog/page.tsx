@@ -50,21 +50,13 @@ export default async function BlogPage({ params }: Props) {
               sizes="96px"
               className="hidden h-32 w-24 shrink-0 rounded-md object-cover shadow-sm ring-1 ring-black/5 sm:block"
             />
-            <div className="min-w-0">
-              <p className="text-sm text-muted-foreground">
-                <time dateTime={post.date}>{formatDate(post.date, locale, display.country)}</time>
-              </p>
-              <h2 className="mt-1 text-2xl font-medium">
-                <Link
-                  href={{ pathname: '/blog/[slug]', params: { slug: post.slug } }}
-                  className="hover:underline"
-                >
-                  {post.title}
-                </Link>
-              </h2>
-              <p className="mt-2 text-muted-foreground">{post.description}</p>
-              <div className="mt-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">
+                  <time dateTime={post.date}>{formatDate(post.date, locale, display.country)}</time>
+                </p>
                 <ShareButton
+                  compact
                   text={t('shareText', { title: post.title })}
                   url={getPathname({
                     locale,
@@ -76,6 +68,15 @@ export default async function BlogPage({ params }: Props) {
                   copiedLabel={t('shareCopied')}
                 />
               </div>
+              <h2 className="mt-1 text-2xl font-medium">
+                <Link
+                  href={{ pathname: '/blog/[slug]', params: { slug: post.slug } }}
+                  className="hover:underline"
+                >
+                  {post.title}
+                </Link>
+              </h2>
+              <p className="mt-2 text-muted-foreground">{post.description}</p>
             </div>
           </li>
         ))}

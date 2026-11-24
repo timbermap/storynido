@@ -17,6 +17,7 @@ export function ShareButton({
   label,
   copyLabel,
   copiedLabel,
+  compact = false,
 }: {
   text: string;
   /** Ruta ya localizada, p. ej. `/es/families`. */
@@ -25,6 +26,8 @@ export function ShareButton({
   label: string;
   copyLabel: string;
   copiedLabel: string;
+  /** Solo íconos (con nombre accesible y tooltip), para tarjetas de listas. */
+  compact?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -59,6 +62,31 @@ export function ShareButton({
     } catch {
       // Sin permiso para el portapapeles: queda el botón de WhatsApp.
     }
+  }
+
+  if (compact) {
+    return (
+      <div className="-my-2 -mr-2 flex items-center">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={label}
+          title={label}
+          onClick={() => void share()}
+        >
+          <MessageCircle aria-hidden="true" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={copied ? copiedLabel : copyLabel}
+          title={copied ? copiedLabel : copyLabel}
+          onClick={() => void copy()}
+        >
+          {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+        </Button>
+      </div>
+    );
   }
 
   return (
