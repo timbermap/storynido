@@ -488,7 +488,8 @@ describe('contacto físico (DECISIONS 294)', () => {
 describe('poses del cuento (DECISIONS 312)', () => {
   it('prohíbe puentes y verticales y acota el gusto a un detalle', () => {
     const prompt = buildStoryPrompt({
-      template: 'Escribe un cuento de {{pageCount}} páginas sobre {{childName}}. Le gusta: {{likes}}.',
+      template:
+        'Escribe un cuento de {{pageCount}} páginas sobre {{childName}}. Le gusta: {{likes}}.',
       language: 'es',
       pageCount: 10,
       storyTitle: 'Angelica y el secreto del fondo del mar',

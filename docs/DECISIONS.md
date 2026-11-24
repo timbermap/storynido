@@ -3227,4 +3227,3 @@ pueden salir.» La mesa (producto, diseño, familia, legales, marketing y CEO) r
 - **Revisión de páginas:** una pose invertida o un plano bajo/cerrado al cuerpo de un chico es `repair`.
 - **Pendiente (propuesto, sin hacer):** misma ropa en portada e interior, control de edad aparente y de
   expresión contra el texto, aviso de fantasía de la burbuja, dedicatoria como paso con ejemplo.
-
