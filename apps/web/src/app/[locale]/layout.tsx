@@ -32,7 +32,7 @@ import { localizedAlternates } from '@/lib/seo';
 import { getSiteMode } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { SESSION_COOKIE } from '@/lib/session-hint';
-import { SITE_URL } from '@/lib/site';
+import { SITE_URL, absoluteUrl } from '@/lib/site';
 
 import { Providers } from './providers';
 
@@ -59,6 +59,13 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
   const t = await getTranslations({ locale, namespace: 'Meta' });
   const title = t('title', { brand: brand.name });
   const description = t('description');
+  // Imagen estática por idioma (1200x630, URL absoluta): no depende de generarla al compartir.
+  const image = {
+    url: absoluteUrl(`/og/home-${locale}.png`),
+    width: 1200,
+    height: 630,
+    alt: title,
+  };
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: title, template: `%s · ${brand.name}` },
@@ -71,8 +78,9 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
       title,
       description,
       locale: LOCALE_DEFINITIONS[locale].bcp47.replace('-', '_'),
+      images: [image],
     },
-    twitter: { card: 'summary_large_image', title, description },
+    twitter: { card: 'summary_large_image', title, description, images: [image.url] },
     icons: { icon: '/icon.svg' },
   };
 }
