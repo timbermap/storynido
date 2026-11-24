@@ -3227,3 +3227,13 @@ pueden salir.» La mesa (producto, diseño, familia, legales, marketing y CEO) r
 - **Revisión de páginas:** una pose invertida o un plano bajo/cerrado al cuerpo de un chico es `repair`.
 - **Pendiente (propuesto, sin hacer):** misma ropa en portada e interior, control de edad aparente y de
   expresión contra el texto, aviso de fantasía de la burbuja, dedicatoria como paso con ejemplo.
+
+## 313 — Marketing → Redes: se suma la página de Facebook
+
+- **Qué:** cuarta red del panel (`facebook`). Seguidores de la página «StoryNido · Cuentos para niños», vistas
+  (`page_media_view`) y visitas a la página (`page_views_total`) por día. Solo lectura.
+- **Cómo:** se usa el mismo token de usuario del sistema de Meta que Instagram, sin secretos ni variables
+  nuevos: `/me/accounts` entrega la página (la vinculada a la cuenta de Instagram) y su token, que es el único
+  que lee `/insights`. Se activa sola donde Instagram está conectado.
+- **Límites:** Meta no da alcance ni clics de la página con estos permisos (`page_impressions_unique` ya no
+  existe en v21), así que esos quedan en «—». Con 0 seguidores los días vienen vacíos, no es un error.

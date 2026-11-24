@@ -188,7 +188,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     area: 'Marketing',
     label: 'Redes sociales',
     keywords:
-      'instagram tiktok pinterest seguidores alcance impresiones clics redes sociales estadísticas marketing',
+      'instagram facebook tiktok pinterest seguidores alcance impresiones clics redes sociales estadísticas marketing',
     icon: Share2,
   },
   {

@@ -18,11 +18,13 @@ const pct = (part: number, whole: number) =>
 const LABELS: Record<SocialNetwork, string> = {
   pinterest: 'Pinterest',
   instagram: 'Instagram',
+  facebook: 'Facebook',
   tiktok: 'TikTok',
 };
 const PROFILE_URL: Record<SocialNetwork, (handle: string) => string> = {
   pinterest: (handle) => `https://www.pinterest.com/${handle}/`,
   instagram: (handle) => `https://www.instagram.com/${handle}/`,
+  facebook: () => 'https://www.facebook.com/profile.php?id=1470901449440182',
   tiktok: (handle) => `https://www.tiktok.com/@${handle}`,
 };
 
@@ -37,6 +39,10 @@ const SETUP: Record<SocialNetwork, string[]> = {
     'Pasar @storynido a cuenta profesional (Creador o Empresa).',
     'Vincularla a una página de Facebook de StoryNido.',
     'Crear una app de Meta con permisos instagram_basic y instagram_manage_insights, y generar un token de usuario del sistema (no vence) con el ID de la cuenta.',
+  ],
+  facebook: [
+    'Se lee con el mismo token de Meta que Instagram: se conecta sola cuando Instagram está conectado.',
+    'La página «StoryNido · Cuentos para niños» tiene que ser la vinculada a la cuenta de Instagram.',
   ],
   tiktok: [
     'Registrar una app en developers.tiktok.com con Login Kit y los permisos user.info.stats y video.list.',
@@ -205,7 +211,7 @@ export default function SocialPage() {
     <>
       <PageHeader
         title="Redes sociales"
-        text="Seguidores, alcance y clics de Instagram, TikTok y Pinterest, leídos por sus APIs una vez al día, y las visitas que cada red trae al sitio. Solo lectura: nada se publica desde acá."
+        text="Seguidores, alcance y clics de Instagram, Facebook, TikTok y Pinterest, leídos por sus APIs una vez al día, y las visitas que cada red trae al sitio. Solo lectura: nada se publica desde acá."
         actions={
           <div className="flex flex-wrap gap-2">
             <div className="flex gap-1" role="group" aria-label="Período">
@@ -253,7 +259,8 @@ export default function SocialPage() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      @{network.handle}
+                      {network.network === 'facebook' ? '' : '@'}
+                      {network.handle}
                     </a>
                   </h2>
                   <span className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -316,8 +323,15 @@ export default function SocialPage() {
                       <Kpi label="Impresiones" value={num(network.impressions)} />
                       <Kpi label="Alcance" value={num(network.reach)} />
                       <Kpi label="Clics al sitio" value={num(network.clicks)} />
-                      {network.network === 'instagram' && (
-                        <Kpi label="Visitas al perfil" value={num(network.profileVisits)} />
+                      {(network.network === 'instagram' || network.network === 'facebook') && (
+                        <Kpi
+                          label={
+                            network.network === 'facebook'
+                              ? 'Visitas a la página'
+                              : 'Visitas al perfil'
+                          }
+                          value={num(network.profileVisits)}
+                        />
                       )}
                       {network.network === 'tiktok' && (
                         <>
@@ -418,10 +432,10 @@ export default function SocialPage() {
             );
           })}
           <p className="text-xs text-muted-foreground">
-            Pinterest tarda hasta 48 h en cerrar cada día. Instagram informa el día anterior. TikTok
-            solo informa seguidores y las vistas de los últimos videos, no números por día. Las
-            visitas salen del panel «Visitas y campañas», que cuenta sin cookies; usá enlaces con
-            UTM en cada bio y publicación para que no caigan en «Directo».
+            Pinterest tarda hasta 48 h en cerrar cada día. Instagram y Facebook informan el día
+            anterior. TikTok solo informa seguidores y las vistas de los últimos videos, no números
+            por día. Las visitas salen del panel «Visitas y campañas», que cuenta sin cookies; usá
+            enlaces con UTM en cada bio y publicación para que no caigan en «Directo».
           </p>
         </div>
       )}

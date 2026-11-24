@@ -2,6 +2,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 import { describe, expect, it } from 'vitest';
 
 import {
+  facebookProvider,
   instagramProvider,
   pinterestProvider,
   type ReadExtras,
@@ -114,6 +115,57 @@ describe('instagramProvider', () => {
       )) as unknown as typeof fetch;
     await expect(
       instagramProvider({ accessToken: 't', userId: '1' }, fetcher).read(1, '2026-11-21'),
+    ).rejects.toBeInstanceOf(SocialError);
+  });
+});
+
+describe('facebookProvider', () => {
+  it('pide el token de la página vinculada a Instagram y lee con él', async () => {
+    const tokensSeen: string[] = [];
+    const fetcher = ((url: string) => {
+      const parsed = new URL(url);
+      tokensSeen.push(parsed.searchParams.get('access_token') ?? '');
+      if (parsed.pathname.endsWith('/me/accounts')) {
+        return Promise.resolve(
+          reply({
+            data: [
+              { id: 'otra', access_token: 'tok-otra' },
+              { id: 'p1', access_token: 'tok-p1', instagram_business_account: { id: 'ig1' } },
+            ],
+          }),
+        );
+      }
+      if (parsed.pathname.endsWith('/insights')) {
+        const metric = parsed.searchParams.get('metric');
+        if (metric === 'page_views_total')
+          return Promise.resolve(reply({ error: { message: 'no' } }, 400));
+        return Promise.resolve(reply({ data: [{ values: [{ value: 25 }] }] }));
+      }
+      expect(parsed.pathname.endsWith('/p1')).toBe(true);
+      return Promise.resolve(reply({ followers_count: 9, fan_count: 8 }));
+    }) as unknown as typeof fetch;
+    const provider = facebookProvider({ accessToken: 'sys', instagramUserId: 'ig1' }, fetcher);
+    const reading = await provider.read(1, '2026-11-21');
+    expect(reading['2026-11-21']).toEqual({ followers: 9 });
+    expect(reading['2026-11-20']).toEqual({ impressions: 25 });
+    expect(tokensSeen.slice(1).every((token) => token === 'tok-p1')).toBe(true);
+  });
+
+  it('sin números en el día (cuenta nueva) no es un error', async () => {
+    const fetcher = ((url: string) => {
+      const path = new URL(url).pathname;
+      if (path.endsWith('/me/accounts')) return Promise.resolve(reply({ data: [{ id: 'p1' }] }));
+      if (path.endsWith('/insights')) return Promise.resolve(reply({ data: [] }));
+      return Promise.resolve(reply({ followers_count: 0 }));
+    }) as unknown as typeof fetch;
+    const reading = await facebookProvider({ accessToken: 'sys' }, fetcher).read(2, '2026-11-21');
+    expect(reading['2026-11-21']).toEqual({ followers: 0 });
+  });
+
+  it('sin páginas visibles, avisa', async () => {
+    const fetcher = (() => Promise.resolve(reply({ data: [] }))) as unknown as typeof fetch;
+    await expect(
+      facebookProvider({ accessToken: 'sys' }, fetcher).read(1, '2026-11-21'),
     ).rejects.toBeInstanceOf(SocialError);
   });
 });
@@ -299,6 +351,7 @@ describe('SocialService', () => {
     expect(results).toEqual([
       { network: 'pinterest', status: 'ok', message: null },
       { network: 'instagram', status: 'error', message: 'Instagram: token vencido.' },
+      { network: 'facebook', status: 'not_connected', message: null },
       { network: 'tiktok', status: 'not_connected', message: null },
     ]);
     expect(data.get('socialDaily/2026-11-20')).toEqual({
