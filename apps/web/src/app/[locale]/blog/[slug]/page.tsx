@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
@@ -34,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: post.metadata.title,
       description: post.metadata.description,
       publishedTime: post.metadata.date,
+      images: [{ url: absoluteUrl(post.metadata.image), width: 1200, height: 1600 }],
     },
   };
 }
@@ -58,6 +60,7 @@ export default async function BlogPostPage({ params }: Props) {
           headline: post.metadata.title,
           description: post.metadata.description,
           datePublished: post.metadata.date,
+          image: absoluteUrl(post.metadata.image),
           inLanguage: locale,
           publisher: { '@type': 'Organization', name: brand.name },
         }}
@@ -73,6 +76,15 @@ export default async function BlogPostPage({ params }: Props) {
       <p className="mt-3 text-sm text-muted-foreground">
         {t('published', { date: formatDate(post.metadata.date, locale, display.country) })}
       </p>
+      <Image
+        src={post.metadata.image}
+        alt={post.metadata.imageAlt}
+        width={600}
+        height={800}
+        sizes="(min-width: 640px) 16rem, 60vw"
+        priority
+        className="mx-auto mt-8 h-auto w-3/5 max-w-64 rounded-lg shadow-lg ring-1 ring-black/5 sm:float-right sm:mt-2 sm:mb-4 sm:ml-8 sm:w-64"
+      />
       <div className="prose prose-lg mt-8 max-w-none prose-stone prose-headings:font-display prose-a:text-primary">
         <Content />
       </div>
