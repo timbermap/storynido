@@ -266,6 +266,88 @@ export function instagramProvider(
   };
 }
 
+// --- Facebook (página de StoryNido; mismo token de usuario del sistema que Instagram) -----------
+
+export interface FacebookOptions {
+  /** Token de usuario del sistema (el mismo de Instagram); de él sale el token de la página. */
+  accessToken: string;
+  /** ID de la página de Facebook. */
+  pageId: string;
+}
+
+export function facebookProvider(
+  options: FacebookOptions,
+  fetcher: Fetcher = fetch,
+): SocialProvider {
+  const { accessToken, pageId } = options;
+  return {
+    network: 'facebook',
+    async read(days, today) {
+      const page = await json(
+        fetcher,
+        `${GRAPH}/${pageId}?${new URLSearchParams({ fields: 'followers_count,fan_count,access_token', access_token: accessToken }).toString()}`,
+        {},
+        'Facebook',
+      );
+      const reading: SocialReading = {
+        [today]: { followers: num(page.followers_count) ?? num(page.fan_count) },
+      };
+      // Las métricas de la página piden el token de la propia página (sale del de usuario).
+      const pageToken = typeof page.access_token === 'string' ? page.access_token : null;
+      if (!pageToken) {
+        throw new SocialError(
+          'Facebook: el token no da acceso a la página. Revisá que la página esté asignada al usuario del sistema.',
+        );
+      }
+      // Cada métrica va aparte para que una sin permiso no tire el resto.
+      const metrics = {
+        page_media_view: 'impressions',
+        page_views_total: 'profileVisits',
+      } as const;
+      const since = Math.floor(new Date(`${addDays(today, -days)}T00:00:00.000Z`).getTime() / 1000);
+      const until = Math.floor(new Date(`${today}T00:00:00.000Z`).getTime() / 1000);
+      let failure: SocialError | null = null;
+      let loaded = 0;
+      for (const [metric, field] of Object.entries(metrics) as [
+        keyof typeof metrics,
+        (typeof metrics)[keyof typeof metrics],
+      ][]) {
+        try {
+          const query = new URLSearchParams({
+            metric,
+            period: 'day',
+            since: String(since),
+            until: String(until),
+            access_token: pageToken,
+          });
+          const body = await json(
+            fetcher,
+            `${GRAPH}/${pageId}/insights?${query.toString()}`,
+            {},
+            `Facebook (${metric})`,
+          );
+          const first = Array.isArray(body.data) ? (body.data[0] as Record<string, unknown>) : null;
+          const values = Array.isArray(first?.values)
+            ? (first.values as { value?: unknown; end_time?: unknown }[])
+            : [];
+          for (const entry of values) {
+            const value = num(entry.value);
+            if (value === null || typeof entry.end_time !== 'string') continue;
+            // end_time es el cierre del día (el día siguiente a las 08:00 UTC): el número es del día anterior.
+            const day = addDays(entry.end_time.slice(0, 10), -1);
+            reading[day] = { ...reading[day], [field]: value };
+            loaded += 1;
+          }
+        } catch (error) {
+          if (error instanceof SocialError) failure = error;
+        }
+      }
+      if (loaded === 0 && failure && days > 0) throw failure;
+      return reading;
+    },
+  };
+}
+
 // --- TikTok (Login Kit + Display API: seguidores, me gusta y vistas por video) -----------------
 
 export interface TikTokOptions {

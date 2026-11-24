@@ -1,6 +1,7 @@
 import type { ApiEnv } from '../config';
 
 import {
+  facebookProvider,
   instagramProvider,
   pinterestProvider,
   tiktokAuth,
@@ -37,6 +38,11 @@ export function socialProvidersFromEnv(env: ApiEnv, tokens: TokenStore): SocialP
   if (env.INSTAGRAM_ACCESS_TOKEN && env.INSTAGRAM_USER_ID) {
     providers.push(
       instagramProvider({ accessToken: env.INSTAGRAM_ACCESS_TOKEN, userId: env.INSTAGRAM_USER_ID }),
+    );
+  }
+  if (env.INSTAGRAM_ACCESS_TOKEN && env.FACEBOOK_PAGE_ID) {
+    providers.push(
+      facebookProvider({ accessToken: env.INSTAGRAM_ACCESS_TOKEN, pageId: env.FACEBOOK_PAGE_ID }),
     );
   }
   if (env.TIKTOK_CLIENT_KEY && env.TIKTOK_CLIENT_SECRET) {

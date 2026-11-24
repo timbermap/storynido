@@ -990,12 +990,14 @@ export const TRAFFIC_EVENTS = [
 export type TrafficEvent = (typeof TRAFFIC_EVENTS)[number];
 
 /** Redes sociales cuyos números lee el panel de Marketing (solo lectura, por sus APIs). */
-export const SOCIAL_NETWORKS = ['pinterest', 'instagram', 'tiktok'] as const;
+export const SOCIAL_NETWORKS = ['pinterest', 'instagram', 'facebook', 'tiktok'] as const;
 export type SocialNetwork = (typeof SOCIAL_NETWORKS)[number];
 /** Cuentas de StoryNido en cada red. */
 export const SOCIAL_HANDLES: Record<SocialNetwork, string> = {
   pinterest: 'storynido',
   instagram: 'storynido',
+  /** Id de la página «StoryNido · Cuentos para niños» (facebook.com/{id} abre la página). */
+  facebook: '1470901449440182',
   tiktok: 'storynido.redes',
 };
 

@@ -69,6 +69,7 @@ export const apiConfigSchema = serviceEnvSchema.extend({
   PINTEREST_APP_SECRET: z.string().trim().optional(),
   INSTAGRAM_ACCESS_TOKEN: z.string().trim().optional(),
   INSTAGRAM_USER_ID: z.string().trim().optional(),
+  FACEBOOK_PAGE_ID: z.string().trim().optional(),
   TIKTOK_CLIENT_KEY: z.string().trim().optional(),
   TIKTOK_CLIENT_SECRET: z.string().trim().optional(),
   TIKTOK_REFRESH_TOKEN: z.string().trim().optional(),

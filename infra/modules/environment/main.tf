@@ -358,6 +358,11 @@ locals {
       INSTAGRAM_ACCESS_TOKEN = "instagram-access-token"
       INSTAGRAM_USER_ID      = "instagram-user-id"
     } : {},
+    # Facebook: la página vinculada a Instagram, con el mismo token de usuario del sistema.
+    contains(var.social_networks, "facebook") ? {
+      INSTAGRAM_ACCESS_TOKEN = "instagram-access-token"
+      FACEBOOK_PAGE_ID       = "facebook-page-id"
+    } : {},
     contains(var.social_networks, "tiktok") ? {
       TIKTOK_CLIENT_KEY    = "tiktok-client-key"
       TIKTOK_CLIENT_SECRET = "tiktok-client-secret"
@@ -708,6 +713,10 @@ module "secrets" {
     }
     instagram-user-id = {
       description = "Instagram: ID de la cuenta profesional (instagram_business_account.id)"
+      accessors   = { api = local.member["sn-api"] }
+    }
+    facebook-page-id = {
+      description = "Facebook: ID de la página de StoryNido (no es secreto; se lee con el token de Instagram)"
       accessors   = { api = local.member["sn-api"] }
     }
     tiktok-client-key = {

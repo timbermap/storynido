@@ -2,6 +2,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 import { describe, expect, it } from 'vitest';
 
 import {
+  facebookProvider,
   instagramProvider,
   pinterestProvider,
   type ReadExtras,
@@ -114,6 +115,40 @@ describe('instagramProvider', () => {
       )) as unknown as typeof fetch;
     await expect(
       instagramProvider({ accessToken: 't', userId: '1' }, fetcher).read(1, '2026-11-21'),
+    ).rejects.toBeInstanceOf(SocialError);
+  });
+});
+
+describe('facebookProvider', () => {
+  it('lee seguidores y, con el token de la página, las métricas por día', async () => {
+    const auth: string[] = [];
+    const fetcher = ((url: string) => {
+      const query = new URL(url).searchParams;
+      auth.push(`${new URL(url).pathname}:${query.get('access_token')}`);
+      if (url.includes('/insights')) {
+        const metric = query.get('metric');
+        const value = metric === 'page_media_view' ? 120 : 9;
+        return Promise.resolve(
+          reply({ data: [{ values: [{ value, end_time: '2026-11-21T08:00:00+0000' }] }] }),
+        );
+      }
+      return Promise.resolve(reply({ followers_count: 5, access_token: 'page-tok' }));
+    }) as unknown as typeof fetch;
+    const reading = await facebookProvider({ accessToken: 'user-tok', pageId: '77' }, fetcher).read(
+      2,
+      '2026-11-22',
+    );
+    expect(reading['2026-11-22']).toMatchObject({ followers: 5 });
+    expect(reading['2026-11-20']).toEqual({ impressions: 120, profileVisits: 9 });
+    expect(auth[0]).toBe('/v21.0/77:user-tok');
+    expect(auth[1]).toBe('/v21.0/77/insights:page-tok');
+  });
+
+  it('si la página no entrega token, lo dice', async () => {
+    const fetcher = (() =>
+      Promise.resolve(reply({ followers_count: 1 }))) as unknown as typeof fetch;
+    await expect(
+      facebookProvider({ accessToken: 't', pageId: '1' }, fetcher).read(1, '2026-11-21'),
     ).rejects.toBeInstanceOf(SocialError);
   });
 });
@@ -299,6 +334,7 @@ describe('SocialService', () => {
     expect(results).toEqual([
       { network: 'pinterest', status: 'ok', message: null },
       { network: 'instagram', status: 'error', message: 'Instagram: token vencido.' },
+      { network: 'facebook', status: 'not_connected', message: null },
       { network: 'tiktok', status: 'not_connected', message: null },
     ]);
     expect(data.get('socialDaily/2026-11-20')).toEqual({
