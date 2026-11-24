@@ -1,6 +1,5 @@
 'use client';
 
-import { Check, Copy, Share2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -13,7 +12,7 @@ import {
   type Locale,
 } from '@storynido/shared';
 
-import { Button } from '@/components/ui/button';
+import { ShareButton } from '@/components/share-button';
 import { getPathname } from '@/i18n/navigation';
 import { getFirebaseDb } from '@/lib/firebase/client';
 import { updateBook } from '@/lib/firebase/drafts';
@@ -93,7 +92,6 @@ export function BirthdayBookOffer({
   const t = useTranslations('Wizard.partyPreview.book');
   const locale = useLocale() as Locale;
   const [choice, setChoice] = useState<BirthdayBookChoice>(book.event?.bookChoice ?? 'none');
-  const [copied, setCopied] = useState(false);
   const money = (minor: number | null | undefined) =>
     prices && minor != null ? formatPrice(minor, prices.currency, locale, prices.country) : null;
 
@@ -108,18 +106,6 @@ export function BirthdayBookOffer({
         }),
       )
       .catch(() => undefined);
-  }
-
-  // El enlace no lleva datos del niño: el mensaje con su nombre lo manda quien organiza.
-  async function share() {
-    const url = `${window.location.origin}${getPathname({ href: '/families', locale })}`;
-    const text = t('shareText', { name: childName });
-    if (typeof navigator.share === 'function') {
-      await navigator.share({ text, url }).catch(() => undefined);
-      return;
-    }
-    await navigator.clipboard.writeText(`${text} ${url}`);
-    setCopied(true);
   }
 
   const labels: Record<BirthdayBookChoice, { name: string; price: string | null }> = {
@@ -171,16 +157,14 @@ export function BirthdayBookOffer({
       )}
       <div className="flex flex-wrap items-center gap-3 border-t pt-4">
         <p className="text-sm font-semibold">{t('shareLead')}</p>
-        <Button variant="outline" size="sm" onClick={() => void share()}>
-          {copied ? (
-            <Check aria-hidden="true" />
-          ) : typeof navigator !== 'undefined' && 'share' in navigator ? (
-            <Share2 aria-hidden="true" />
-          ) : (
-            <Copy aria-hidden="true" />
-          )}
-          {copied ? t('copied') : t('share')}
-        </Button>
+        <ShareButton
+          text={t('shareText', { name: childName })}
+          url={getPathname({ href: '/families', locale })}
+          campaign="invitacion-fiesta"
+          label={t('share')}
+          copyLabel={t('copyLink')}
+          copiedLabel={t('copied')}
+        />
       </div>
     </section>
   );
