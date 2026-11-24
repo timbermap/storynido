@@ -58,3 +58,6 @@ env:
   - variable: NEXT_PUBLIC_SOCIAL_PINTEREST
     value: https://www.pinterest.com/storynido/
     availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SOCIAL_FACEBOOK
+    value: https://www.facebook.com/profile.php?id=1470901449440182
+    availability: [BUILD, RUNTIME]

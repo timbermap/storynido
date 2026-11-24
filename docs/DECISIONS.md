@@ -3237,3 +3237,11 @@ pueden salir.» La mesa (producto, diseño, familia, legales, marketing y CEO) r
   que lee `/insights`. Se activa sola donde Instagram está conectado.
 - **Límites:** Meta no da alcance ni clics de la página con estos permisos (`page_impressions_unique` ya no
   existe en v21), así que esos quedan en «—». Con 0 seguidores los días vienen vacíos, no es un error.
+
+---
+
+## 314 — Ficha de historia: llamado a crear arriba, portada fija, redes
+
+- **Contexto:** en la ficha (`/historias/[slug]`, las tres líneas) la columna izquierda quedaba vacía al bajar, el botón «Crear con esta historia» estaba al final de una lista larga y compartir al último.
+- **Decisión:** el botón principal sube justo debajo del título y el resumen, con una línea de apoyo; en el celular aparece además una barra fija abajo cuando el botón original sale de la pantalla (`StickyCta`). La portada queda fija en pantallas anchas. Al final, un bloque con WhatsApp, copiar enlace y los íconos de nuestras redes (Instagram, Pinterest, TikTok, Facebook; `NEXT_PUBLIC_SOCIAL_FACEBOOK` nueva, también se ve en el pie y el blog).
+- **Motivo:** un solo llamado claro y siempre a mano; las redes ayudan a seguirnos sin competir con el botón.
