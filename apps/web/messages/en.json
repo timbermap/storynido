@@ -1085,6 +1085,8 @@
     },
     "preview": {
       "badge": "Story sample",
+      "shareLead": "Know another family who would love this? Tell them.",
+      "shareText": "I am trying StoryNido: an illustrated story where the child is the hero, with their name and face. The preview is free:",
       "generatingTitle": "We are drawing {name}…",
       "generatingText": "We are writing the story and drawing {name}. This takes a few minutes because we make sure it looks like them. Then you review it and, only with your OK, we illustrate the cover and the first pages.",
       "cover": "Cover",
