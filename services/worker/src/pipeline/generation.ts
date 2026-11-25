@@ -114,6 +114,7 @@ import {
   DENSITY_LAYOUT,
   defaultCoverGeometry,
   digitalHtml,
+  needsEndpaper,
   interiorPages,
   printCoverHtml,
   printInteriorHtml,
@@ -1135,6 +1136,57 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       await qaEvent(ctx, 'pose_rewritten', { pages: fixed.size });
     }
 
+    // «vos» o «tú» según el país del pedido (Sebas, 25 nov 2026): la muestra se escribió con el país
+    // de la cuenta; si el pedido es de otro país con otro tratamiento, se cambia solo el tratamiento
+    // de cada página (libros de México y Chile salían en voseo porque la cuenta era de Argentina).
+    if (snapshot.language === 'es') {
+      const owner = (await db.collection(COLLECTIONS.users).doc(ctx.order.ownerUid).get()).data();
+      const written = spanishVoiceFor(owner?.country as string | undefined);
+      const target = spanishVoiceFor(ctx.order.country);
+      if (written !== target) {
+        const voiced = new Map<number, string>();
+        for (const [at, page] of snapshot.pages.entries()) {
+          if (!page.text.trim()) continue;
+          const rewrite = await provider.text.rewritePage({
+            language: 'es',
+            spanishVoice: target,
+            voiceOnly: true,
+            childName: snapshot.childName,
+            age: snapshot.age,
+            storyTitle: snapshot.title,
+            pageIndex: page.index,
+            previous: snapshot.pages[at - 1]?.text ?? null,
+            next: snapshot.pages[at + 1]?.text ?? null,
+            text: page.text,
+            words: snapshot.words ?? { min: 8, max: 60 },
+            mustInclude: snapshot.requiredNames,
+          });
+          cost += await record(ctx, 'review', rewrite.usage);
+          // Si la reescritura falla o pierde un nombre, la página queda como estaba.
+          const keepsNames = snapshot.requiredNames.every(
+            (name) => !page.text.includes(name) || rewrite.text.includes(name),
+          );
+          if (rewrite.text && keepsNames) voiced.set(page.index, rewrite.text);
+        }
+        if (voiced.size > 0) {
+          const { hash: _before, ...rest } = snapshot;
+          const content: Omit<BookSnapshot, 'hash'> = {
+            ...rest,
+            pages: snapshot.pages.map((page) => ({
+              ...page,
+              text: voiced.get(page.index) ?? page.text,
+            })),
+          };
+          snapshot = { ...content, hash: hashSnapshot(content) };
+          await db
+            .collection(COLLECTIONS.orders)
+            .doc(ctx.order.id)
+            .update({ snapshot, snapshotHash: snapshot.hash });
+        }
+        await qaEvent(ctx, 'voice_rewritten', { from: written, to: target, pages: voiced.size });
+      }
+    }
+
     // Ropa sin huecos (DECISIONS 318): una escena sin ropa especial entre dos con la misma la
     // hereda, también en libros ya aprobados que se regeneran.
     const gaps = fillOutfitGaps(snapshot.scenes ?? []);
@@ -1855,10 +1907,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             ? [
                 {
                   kind: 'book',
-                  html: digitalHtml(layout, spec),
+                  html: digitalHtml(layout, spec, format === 'digital' && needsEndpaper(layout)),
                   size,
                   bleedMm: spec.bleedMm,
-                  pages: interiorCount + 2,
+                  pages:
+                    interiorCount + 2 + (format === 'digital' && needsEndpaper(layout) ? 1 : 0),
                 },
               ]
             : [

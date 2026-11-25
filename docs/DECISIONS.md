@@ -3427,3 +3427,9 @@ La primera corrida pagada (`pnpm eval:pedidos --yes`, US$3,32, 8 pedidos) queda 
 - **Errores que cortaban el caso:** en el eval, una revisión bloqueada por el filtro de seguridad queda anotada «sin revisar» y el caso sigue (el worker ya redibuja esa página más pudorosa), y un dibujo que no responde se reintenta una vez. El informe guarda las escenas del plan y motivos más largos.
 - **Gente de más en el dibujo (real):** en manga y en Profesionales aparecían un clon del protagonista y personas de fondo (una enfermera, gente en el pasillo). `ONE_PROTAGONIST` ahora dice que solo se dibujan las personas que nombra la escena, sin chicos, adultos, personal ni transeúntes de fondo salvo que la escena pida un grupo.
 - Queda medido y abierto: el contacto en el texto del pedido del dentista, que la pasada de reparación no sacó.
+
+## 337 — «vos» o «tú» según el país del pedido y guarda en el digital de texto frente a lámina
+
+- **Tratamiento (Sebas, 25 nov):** la muestra se sigue escribiendo con el país de la cuenta, pero al generar el libro pagado, si `spanishVoiceFor(order.country)` es distinto, cada página se reescribe solo en el tratamiento (`rewritePage` con `voiceOnly`) y se registra `voice_rewritten`. Si una página pierde un nombre, queda como estaba. Los libros de México y Chile de una cuenta argentina salían en voseo.
+- **Láminas corridas (Sebas, 25 nov):** en el PDF digital con texto frente a lámina (9 años en adelante), la portada era la página 1 y cada ilustración quedaba frente al texto de la escena siguiente. Ahora va una guarda en blanco después de la portada (`needsEndpaper`), así cada texto queda a la izquierda y su lámina a la derecha. El grapado comparte el PDF pero va sin guarda: su cantidad de páginas la fija la imprenta.
+- **Pedido de prueba (staging):** `devPaidOrder` pasa el libro a `ordered` como el pago real, así Mis cuentos muestra la portada sin marca de agua.
