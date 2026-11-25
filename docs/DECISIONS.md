@@ -3286,3 +3286,9 @@ la mesa, 2 mejorar, 3 con ejemplos similares, 4 y 5 ok».
 - **Qué pasaba (Angelica regenerado, 25 nov):** el puente desapareció, pero las páginas 7, 8 y 10 la dibujaron con remera a rayas bajo el agua, entre páginas con la malla amarilla; el plan dejaba esas escenas sin ropa especial y el control no tenía con qué compararlas. La tapa la mostraba nadando libre y adentro iba siempre en una burbuja.
 - **Qué hace ahora:** una escena sin ropa especial entre dos con la misma ropa especial la hereda (también al regenerar un libro ya aprobado: se guarda el libro congelado nuevo y se registra `outfit_gap_filled`); así la página pide esa ropa y la revisión rechaza otra. Un objeto de la biblia visual que aparece en la mitad o más de las escenas va también en la tapa.
 - **Límite:** si la burbuja del cuento no quedó como objeto de la biblia visual, la tapa no la conoce; se ve al regenerar.
+
+## 319 — El libro sale en el idioma de la página si la cuenta no eligió otro
+
+- **Qué pasaba (Tino, 25 nov):** la muestra salió en inglés aunque Sebas estaba en `/es`. El libro nuevo tomaba el idioma guardado en la cuenta aunque nadie lo hubiera elegido: se guarda al crearla, deducido del navegador (en inglés).
+- **Qué hace ahora:** el idioma de la cuenta manda solo si la persona lo eligió en «Mi cuenta» (`localeChosen`, igual que al iniciar sesión). Si no, el libro sale en el idioma de la página. El selector «Idioma del cuento» del creador sigue permitiendo cambiarlo. Ajusta DECISIONS 264.
+- **Páginas (misma muestra):** «16 páginas» y «9 de 10» no se contradicen: de 9 años en adelante el texto va a doble página (texto a la izquierda, dibujo a la derecha), 7 escenas × 2 + 2 fijas = 16.

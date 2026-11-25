@@ -115,11 +115,13 @@ export async function updateMarketingOptIn(db: Firestore, uid: string, optIn: bo
 }
 
 /**
- * Idioma guardado en la cuenta, elegido o no: es el del libro nuevo (DECISIONS 264). Manda sobre
- * el de la URL y la IP, que pueden ser de un viaje o de un enlace en otro idioma.
+ * Idioma que la persona eligió en su cuenta: es el del libro nuevo y manda sobre el de la URL
+ * (DECISIONS 264). Si no lo eligió, null: el libro sale en el idioma de la página (DECISIONS 319).
  */
 export async function readProfileLocale(db: Firestore, uid: string): Promise<Locale | null> {
   const snapshot = await getDoc(doc(db, COLLECTIONS.users, uid));
   const locale = localeSchema.safeParse(snapshot.get('locale'));
-  return locale.success ? locale.data : null;
+  // Solo si la persona lo eligió en «Mi cuenta». El que se dedujo al crear la cuenta (idioma del
+  // navegador) no manda sobre la página en la que está: Tino salió en inglés desde /es (DECISIONS 319).
+  return locale.success && snapshot.get('localeChosen') === true ? locale.data : null;
 }
