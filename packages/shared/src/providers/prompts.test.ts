@@ -6,6 +6,8 @@ import { EMPTY_BIRTHDAY } from '../models/events';
 import { describeCharacterSheet } from './ai';
 import {
   castNote,
+  statedAge,
+  withStatedAge,
   recurringCast,
   buildIllustrationPrompt,
   buildStoryPrompt,
@@ -84,6 +86,8 @@ describe('plantillas de prompts', () => {
     expect(prompt).toContain('Detalles reales de la familia');
     expect(prompt).toContain('Quién lo acompaña en la aventura: Su abuela Rosa');
     expect(prompt).toContain('Cómo le dicen en casa: Tini');
+    // Los recuerdos se llevan al mundo de la historia (selva del 25 nov 2026, armada en un living).
+    expect(prompt).toContain('nunca cambies el escenario');
     expect(prompt).not.toContain('Un momento especial');
     expect(prompt).toContain('Exactamente 12 páginas');
   });
@@ -635,5 +639,31 @@ describe('Profesionales: práctica y familia (libro de Angélica, 25 nov 2026)',
     const prompt = buildStoryPrompt(base);
     expect(prompt).not.toContain('Sonido o palabras para practicar');
     expect(prompt).not.toContain('no aparecen mamá, papá');
+  });
+});
+
+describe('edad del acompañante que dio el pedido', () => {
+  it('la encuentra cerca del nombre y no se la da a otro', () => {
+    const sources = [
+      'Clara, su hermana de 7',
+      'Su perro Pancho y su hermana Clara, que tiene 7 años y le lee cuentos',
+    ];
+    expect(statedAge('Clara', sources)).toBe(7);
+    expect(statedAge('Clara', [sources[1]])).toBe(7);
+    expect(statedAge('Pancho', sources)).toBeNull();
+    expect(statedAge('Clara', ['Su abuela Rosa'])).toBeNull();
+    expect(statedAge(null, sources)).toBeNull();
+  });
+
+  it('reemplaza la edad o «teenager» del plan', () => {
+    const fixed = withStatedAge(
+      { name: 'Clara', look: 'a teenage girl about 13, long brown hair, yellow dress' },
+      7,
+    );
+    expect(fixed.look.startsWith('exactly 7 years old')).toBe(true);
+    expect(fixed.look).not.toMatch(/teenage girl|about 13/);
+    expect(fixed.look).toContain('never drawn as a teenager');
+    const same = { name: 'Pancho', look: 'a small brown dog' };
+    expect(withStatedAge(same, null)).toBe(same);
   });
 });

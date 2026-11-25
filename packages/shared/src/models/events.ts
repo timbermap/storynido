@@ -73,7 +73,8 @@ const religious = (
       },
       adventurous: {
         name: 'Emotivo',
-        invite: `Un día muy especial: acompáñame en mi ${what}`,
+        // Sin imperativo de «tú» («acompáñame»): sirve igual con voseo (AR y UY).
+        invite: `Un día muy especial: quiero que estés en mi ${what}`,
         waiting: 'Será un día para recordar',
       },
     },
@@ -121,7 +122,8 @@ export const INVITATION_TONE_COPY: Record<'es' | 'en' | 'pt', Record<EventType, 
       },
       adventurous: {
         name: 'Aventurero',
-        invite: '¡Súmate a la aventura de mi cumple!',
+        // Sin «Súmate»: se lee igual con «tú» y con voseo (AR y UY, 25 nov 2026).
+        invite: '¡Mi cumple es una aventura y te quiero ahí!',
         waiting: '¡La aventura empieza contigo!',
       },
     },

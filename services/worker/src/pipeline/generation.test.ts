@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { PUBLIC_BRAND_DOMAIN, calmSideOf, isContactIssue, typographyOf } from './generation';
+import {
+  PUBLIC_BRAND_DOMAIN,
+  calmSideOf,
+  isContactIssue,
+  onlyMissingContact,
+  typographyOf,
+} from './generation';
 
 const scene = (pageIndex: number) => ({
   pageIndex,
@@ -54,5 +60,19 @@ describe('contacto físico en la revisión de una página', () => {
     expect(isContactIssue(review('Two children hugging at the door'))).toBe(true);
     expect(isContactIssue(review('Readable text on the blackboard'))).toBe(false);
     expect(isContactIssue(null)).toBe(false);
+  });
+
+  it('un abrazo que el texto cuenta y el dibujo no muestra se arregla en el texto, no redibujando', () => {
+    const missing = review(
+      'The illustration does not show the father hugging Joaquín as described in the text.',
+    );
+    expect(onlyMissingContact(missing)).toBe(true);
+    expect(isContactIssue(missing)).toBe(false);
+    expect(onlyMissingContact(review('Two children hugging at the door'))).toBe(false);
+    expect(
+      onlyMissingContact(review('The kids are hugging, which is not allowed by the restriction')),
+    ).toBe(false);
+    expect(onlyMissingContact(review('Readable text on the blackboard'))).toBe(false);
+    expect(onlyMissingContact(null)).toBe(false);
   });
 });

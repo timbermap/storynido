@@ -952,6 +952,8 @@ ${formPlanRules(request.age)}
 mustBeVisible / notVisible / continuityFacts in short English phrases for the illustrator. Write theme, arc, sceneGoal and emotionalBeat
 in the language of the brief. companion: the one secondary character (relative, friend or pet from the brief) who appears in two or
 more scenes, with a fixed look in English (age, hair, skin tone, clothes and colors; species and fur for a pet); null if none recurs.
+When the brief gives a person's age ("su hermana de 7", "que tiene 7 años"), the look starts with exactly that age ("a 7-year-old
+girl"); a sibling or friend whose age the brief does not give is a child close to the protagonist's age, never a teenager or an adult.
 cast: every OTHER person who appears in two or more scenes (a teacher, a classmate, a neighbor), each with a fixed gender, a fixed
 look in English (age, hair, clothes and colors) and a name: every child or friend gets a short first name common in the brief's
 language and country (the text always calls them by it); null only for an adult the protagonist calls by role ("la seño", "el profe").
