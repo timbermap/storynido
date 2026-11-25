@@ -3327,3 +3327,10 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 - **Qué pasaba (Sebas, 25 nov):** el campo «CUPÓN» arriba de todo en el resumen del pago daba la sensación de que había un precio más bajo y mandaba a buscar códigos afuera (fuga clásica del campo de cupón).
 - **Qué hace ahora (la mesa: ventas, producto, diseño/UX, marketing, familia):** el resumen arranca con el precio. El cupón queda como un enlace chico «¿Tenés un código?» debajo del total, que abre el campo solo si alguien lo toca. Si la visita llegó con `?cupon=CODIGO` (también `coupon`/`cupom`) en cualquier página, se guarda en la pestaña (sessionStorage) y se aplica solo en el pago, mostrado como «Código X aplicado · Quitar». Igual en el kit de Celebraciones.
 - **Por qué no sacarlo del todo:** sirve para códigos de amigas/referidos, regalos de soporte y campañas orgánicas; sin campo, quien recibió un código no tendría dónde usarlo.
+
+## 325 — Plantillas de Profesionales por tipo de profesional
+
+- **Qué pasaba (Sebas, 25 nov):** /profesionales/plantillas solo ordenaba por objetivo y los títulos de las tapas del estante se leían de unos 8 px. Una odontopediatra tenía que recorrer seis tarjetas para encontrar el único cuento del dentista.
+- **Qué hace ahora (mesa completa):** arriba, «¿Cuál es tu trabajo?» con siete perfiles (Docentes, Psicopedagogía, Psicología infantil, Fonoaudiología, Terapia ocupacional, Pediatría, Odontopediatría). Cada perfil tiene su página `/profesionales/plantillas/<perfil>` (slug por idioma, en el sitemap y con hreflang) con sus historias en orden, tapa grande, título legible, edades, tres usos y chips a los otros perfiles. Las colecciones por objetivo siguen abajo («O buscá por objetivo») y el estante muestra el título legible debajo de cada tapa.
+- **Dónde se edita:** `apps/web/src/lib/professional-personas.ts` (qué historias y en qué orden) y `Landing.professionals.personas` en los mensajes. Una historia inactiva se saltea sola.
+- **Legales:** sin promesas clínicas; cada perfil aclara que acompaña el trabajo y no reemplaza una evaluación ni un tratamiento. Mismo precio para todos.

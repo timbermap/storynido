@@ -6,6 +6,7 @@ import type { Locale } from '@storynido/shared';
 import { LandingCollections } from '@/components/landing/sections';
 import { RememberChannel } from '@/components/landing/remember-channel';
 import { CatalogLineChips } from '@/components/layout/catalog-line-chips';
+import { PersonaGrid } from '@/components/professionals/personas';
 import { localizedAlternates } from '@/lib/seo';
 import { getCollections, getStories } from '@/lib/server/api';
 
@@ -42,7 +43,12 @@ export default async function ProfessionalsCatalogPage({ params }: Props) {
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{t('catalogSubtitle')}</p>
         <p className="mt-2 text-sm text-muted-foreground">{t('catalogNote')}</p>
       </div>
+      {/* Primero por tipo de profesional (mesa 25 Nov 2026); abajo, las colecciones por objetivo. */}
+      <PersonaGrid locale={locale} stories={stories} />
       <LandingCollections
+        title={t('byGoalTitle')}
+        continued
+        tone="cream"
         collections={collections}
         stories={stories}
         createLabel={t('viewStory')}
