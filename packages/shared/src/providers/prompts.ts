@@ -528,6 +528,49 @@ export function coverOutfit(plan: CoverPlan): string | null {
 }
 
 /**
+ * Ropa sin huecos (DECISIONS 318, Angelica: malla en las páginas 6 y 9 y remera a rayas en la 7 y
+ * la 8, bajo el agua). Una escena sin ropa especial entre dos escenas con la misma ropa especial la
+ * hereda: nadie se cambia y vuelve a cambiarse sin que el texto lo diga. Devuelve las escenas
+ * nuevas y las páginas que cambiaron.
+ */
+export function fillOutfitGaps<T extends { pageIndex: number; outfit?: string | null }>(
+  scenes: readonly T[],
+): { scenes: T[]; filled: number[] } {
+  const result = scenes.map((scene) => ({ ...scene }));
+  const filled: number[] = [];
+  for (let i = 0; i < result.length; i += 1) {
+    if (result[i]?.outfit) continue;
+    const before = result.slice(0, i).findLast((scene) => scene.outfit)?.outfit;
+    const after = result.slice(i + 1).find((scene) => scene.outfit)?.outfit;
+    if (before && after && sameName(before, after)) {
+      const scene = result[i];
+      if (scene) {
+        scene.outfit = before;
+        filled.push(scene.pageIndex);
+      }
+    }
+  }
+  return { scenes: result, filled };
+}
+
+/**
+ * Objetos de la portada (Angelica: la tapa nadando libre y el interior siempre dentro de una
+ * burbuja). Un objeto de la biblia visual que aparece en la mitad o más de las escenas va también
+ * en la tapa, igual que adentro. Null si ninguno se repite tanto.
+ */
+export function coverProps(
+  plan: (CoverPlan & Partial<Pick<StoryPlan, 'props'>>) | null | undefined,
+): string | null {
+  const scenes = plan?.scenes ?? [];
+  const props = (plan?.props ?? []).filter((item) => item.name.trim() && item.look.trim());
+  if (scenes.length === 0 || props.length === 0) return null;
+  const count = (name: string) =>
+    scenes.filter((scene) => (scene.props ?? []).some((item) => sameName(item, name))).length;
+  const main = props.filter((item) => count(item.name) * 2 >= scenes.length);
+  return main.length > 0 ? main.map((item) => `${item.name} (${item.look})`).join('; ') : null;
+}
+
+/**
  * Escena de la portada: el título va en la capa tipográfica, nunca dentro de la imagen. La portada
  * es una imagen propia (más amplia que una página), no la primera página repetida. Va en un lugar
  * del cuento y con la misma técnica que las páginas: el «más dramático» de antes la llevaba a tinta
@@ -538,7 +581,11 @@ export function coverScene(
   title?: string,
   setting?: string | null,
   outfit?: string | null,
+  props?: string | null,
 ): string {
+  const recurring = props
+    ? ` The cover shows the main character with ${props}, exactly as on most inside pages: the cover and the pages tell the same story.`
+    : '';
   const clothes = outfit
     ? ` Clothing: the main character wears ${outfit} on the cover too, exactly as on the inside pages; this replaces the everyday outfit of the reference sheet.`
     : '';
@@ -550,7 +597,7 @@ export function coverScene(
     : firstScene
       ? ` Story world, for the setting and mood only; do not copy this composition: ${firstScene.trim().replace(/\.+$/, '')}. Use only places from the story; never invent new landscapes.`
       : '';
-  return `Book cover illustration: the main character large and centered in one of the story's own places, caught in the middle of the story's central activity or its happiest moment, with genuine emotion and body language (never the stiff standing pose of the reference sheet), with a clear focal point and a different composition from the first page.${place}${clothes}${concept} Draw it with exactly the same art technique, line, texture, color treatment and character proportions as the inside pages and the reference sheet: the cover is never more stylized, more inked or more dramatic than the pages. Keep the top 40% as calm, simple background with no lettering and no head or face in it: the title is typeset there later.`;
+  return `Book cover illustration: the main character large and centered in one of the story's own places, caught in the middle of the story's central activity or its happiest moment, with genuine emotion and body language (never the stiff standing pose of the reference sheet), with a clear focal point and a different composition from the first page.${place}${clothes}${recurring}${concept} Draw it with exactly the same art technique, line, texture, color treatment and character proportions as the inside pages and the reference sheet: the cover is never more stylized, more inked or more dramatic than the pages. Keep the top 40% as calm, simple background with no lettering and no head or face in it: the title is typeset there later.`;
 }
 
 /** Datos de ejemplo para probar una plantilla desde el admin (sin datos reales ni IA). */

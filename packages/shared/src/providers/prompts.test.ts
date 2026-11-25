@@ -9,6 +9,8 @@ import {
   buildIllustrationPrompt,
   buildStoryPrompt,
   coverOutfit,
+  coverProps,
+  fillOutfitGaps,
   coverScene,
   describeCharacter,
   languageName,
@@ -552,5 +554,49 @@ describe('ropa de la portada y fantasía (DECISIONS 315)', () => {
     });
     expect(prompt).toContain('respirar bajo el agua, volar');
     expect(prompt).toContain('vuelve a la vida real con un adulto cerca');
+  });
+});
+
+describe('ropa sin huecos y objetos de la tapa (DECISIONS 318)', () => {
+  const at = (pageIndex: number, outfit: string | null, props: string[] = []) => ({
+    pageIndex,
+    outfit,
+    props,
+  });
+
+  it('una escena sin ropa especial entre dos con la misma la hereda', () => {
+    const water = 'in the water';
+    const { scenes, filled } = fillOutfitGaps([
+      at(1, null),
+      at(2, water),
+      at(3, null),
+      at(4, null),
+      at(5, water),
+      at(6, null),
+    ]);
+    expect(scenes.map((scene) => scene.outfit)).toEqual([null, water, water, water, water, null]);
+    expect(filled).toEqual([3, 4]);
+  });
+
+  it('no mezcla ropas distintas ni toca los extremos', () => {
+    const { filled } = fillOutfitGaps([at(1, 'in the water'), at(2, null), at(3, 'at night')]);
+    expect(filled).toEqual([]);
+  });
+
+  it('un objeto presente en la mitad o más de las escenas va en la tapa', () => {
+    const plan = {
+      places: [],
+      props: [{ name: 'magic bubble', look: 'a big clear bubble around the child' }],
+      scenes: [at(1, null, ['magic bubble']), at(2, null, ['magic bubble']), at(3, null)],
+    } as never;
+    const props = coverProps(plan);
+    expect(props).toContain('magic bubble');
+    expect(coverScene(undefined, 'T', null, null, props)).toContain('with magic bubble');
+    expect(
+      coverProps({
+        ...(plan as object),
+        scenes: [at(1, null, ['magic bubble']), at(2, null), at(3, null)],
+      } as never),
+    ).toBeNull();
   });
 });

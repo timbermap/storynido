@@ -38,6 +38,7 @@ import {
   STORY_STRUCTURES,
   COLORING_COVER_CHECK,
   imageCheckFor,
+  fillOutfitGaps,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
 
@@ -1040,24 +1041,27 @@ ${request.prompt}${retryNote}`,
       props,
       places,
       outfits,
-      scenes: varyShots(
-        plan.scenes.map((scene, pageIndex) => ({
-          ...scene,
-          pageIndex,
-          personalDetail: scene.personalDetail ?? null,
-          wordless: request.age >= 3 && young ? Boolean(scene.wordless) : false,
-          props: (scene.props ?? []).filter((name) => known(props, name)),
-          place: scene.place && known(places, scene.place) ? scene.place : null,
-          outfit:
-            scene.outfit &&
-            outfits.some(
-              (item) => item.context.trim().toLowerCase() === scene.outfit?.trim().toLowerCase(),
-            )
-              ? scene.outfit
-              : null,
-          shot: scene.shot && SHOT_TYPES.includes(scene.shot) ? scene.shot : null,
-        })),
-      ),
+      // Ropa sin huecos (DECISIONS 318).
+      scenes: fillOutfitGaps(
+        varyShots(
+          plan.scenes.map((scene, pageIndex) => ({
+            ...scene,
+            pageIndex,
+            personalDetail: scene.personalDetail ?? null,
+            wordless: request.age >= 3 && young ? Boolean(scene.wordless) : false,
+            props: (scene.props ?? []).filter((name) => known(props, name)),
+            place: scene.place && known(places, scene.place) ? scene.place : null,
+            outfit:
+              scene.outfit &&
+              outfits.some(
+                (item) => item.context.trim().toLowerCase() === scene.outfit?.trim().toLowerCase(),
+              )
+                ? scene.outfit
+                : null,
+            shot: scene.shot && SHOT_TYPES.includes(scene.shot) ? scene.shot : null,
+          })),
+        ),
+      ).scenes,
       usage,
     };
   }
