@@ -53,10 +53,16 @@ export async function OccasionGrid({
   locale,
   collections,
   stories,
+  id,
+  landing = false,
 }: {
   locale: Locale;
   collections: OccasionCollection[];
   stories: PublicStory[];
+  /** Ancla para llegar desde un botón del hero. */
+  id?: string;
+  /** En la landing de la línea: más aire arriba y un enlace a todas las temáticas al pie. */
+  landing?: boolean;
 }) {
   const t = await getTranslations('Landing.events');
   const cards = OCCASION_KEYS.map((key) => {
@@ -72,7 +78,13 @@ export async function OccasionGrid({
   }).filter((card) => card.themes.length > 0);
   if (cards.length === 0) return null;
   return (
-    <section className="container-page pt-10 pb-14 lg:pb-16">
+    <section
+      id={id}
+      className={cn(
+        'container-page scroll-mt-28 pb-14 lg:pb-16',
+        landing ? 'pt-20 lg:pt-24' : 'pt-10',
+      )}
+    >
       <h2 className="text-2xl leading-tight font-medium lg:text-3xl">{t('occasionsTitle')}</h2>
       <p className="mt-2 max-w-2xl text-lg text-muted-foreground">{t('occasionsSubtitle')}</p>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -123,6 +135,15 @@ export async function OccasionGrid({
           );
         })}
       </ul>
+      {landing && (
+        <Link
+          href="/events/themes"
+          className="mt-6 inline-flex min-h-11 items-center gap-2 font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          {t('occasionAll')}
+          <ArrowRight className="size-4" aria-hidden="true" />
+        </Link>
+      )}
     </section>
   );
 }

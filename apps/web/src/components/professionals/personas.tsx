@@ -83,10 +83,28 @@ export async function MadeToMeasureSteps({ className }: { className?: string }) 
  * «¿Cuál es tu trabajo?»: una tarjeta por tipo de profesional, con las tapas de sus primeras
  * historias. Cada una lleva a la página del perfil.
  */
-export async function PersonaGrid({ locale, stories }: { locale: Locale; stories: PublicStory[] }) {
+export async function PersonaGrid({
+  locale,
+  stories,
+  id,
+  landing = false,
+}: {
+  locale: Locale;
+  stories: PublicStory[];
+  /** Ancla para llegar desde un botón del hero. */
+  id?: string;
+  /** En la landing de la línea: más aire arriba y un enlace a todas las plantillas al pie. */
+  landing?: boolean;
+}) {
   const t = await getTranslations('Landing.professionals');
   return (
-    <section className="container-page pt-10 pb-14 lg:pb-16">
+    <section
+      id={id}
+      className={cn(
+        'container-page scroll-mt-28 pb-14 lg:pb-16',
+        landing ? 'pt-20 lg:pt-24' : 'pt-10',
+      )}
+    >
       <h2 className="text-2xl leading-tight font-medium lg:text-3xl">{t('personasTitle')}</h2>
       <p className="mt-2 max-w-2xl text-lg text-muted-foreground">{t('personasSubtitle')}</p>
       <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -131,6 +149,15 @@ export async function PersonaGrid({ locale, stories }: { locale: Locale; stories
           );
         })}
       </ul>
+      {landing && (
+        <Link
+          href="/professionals/templates"
+          className="mt-6 inline-flex min-h-11 items-center gap-2 font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          {t('personaAll')}
+          <ArrowRight className="size-4" aria-hidden="true" />
+        </Link>
+      )}
     </section>
   );
 }

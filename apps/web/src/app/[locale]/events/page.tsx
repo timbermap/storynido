@@ -6,7 +6,6 @@ import type { KIT_PIECES, Locale } from '@storynido/shared';
 import { JsonLd } from '@/components/json-ld';
 import { RememberChannel } from '@/components/landing/remember-channel';
 import {
-  LandingCollections,
   LandingFaq,
   LandingFinalCta,
   LandingHero,
@@ -15,6 +14,7 @@ import {
 } from '@/components/landing/sections';
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { HeroPhoto } from '@/components/home/hero-photo';
+import { OccasionGrid } from '@/components/events/occasions';
 import { PartyValue } from '@/components/events/party-value';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
@@ -176,15 +176,8 @@ export default async function EventsPage({ params }: Props) {
           text: t(`steps.${key}.text`),
         }))}
       />
-      <LandingCollections
-        tone="navy"
-        title={t('collectionsTitle')}
-        collections={collections}
-        stories={stories}
-        createLabel={t('viewStory')}
-        line="events"
-        start={{ label: t('collectionStart'), mode: 'theme' }}
-      />
+      {/* «¿Qué celebrás?» como en el catálogo (DECISIONS 331); las temáticas, en /eventos/tematicas. */}
+      <OccasionGrid locale={locale} collections={collections} stories={stories} landing />
       <PhotoPromise />
 
       <LandingFaq

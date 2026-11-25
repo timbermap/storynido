@@ -78,7 +78,8 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
   await page.goto(await magicLink(email));
   await expect(page).toHaveURL(/\/es$/, { timeout: 30_000 });
 
-  await page.goto('/es/eventos');
+  // Las temáticas con su botón están en el catálogo; la landing muestra «¿Qué celebrás?».
+  await page.goto('/es/eventos/tematicas');
   const start = page.locator('main a[data-track="collection_start"]').first();
   // El enlace pasa de "login" al creador cuando la web detecta la sesión.
   await expect(start).toHaveAttribute('href', /tema=/);
@@ -101,7 +102,8 @@ test('desde un tema de Celebraciones, el creador abre con la temática cargada',
 });
 
 test('sin sesión, el botón de un tema de Celebraciones lleva al login', async ({ page }) => {
-  await page.goto('/es/eventos');
+  // Las temáticas con su botón están en el catálogo; la landing muestra «¿Qué celebrás?».
+  await page.goto('/es/eventos/tematicas');
   await page.getByRole('button', { name: 'Solo las necesarias' }).click();
   await expect(page.locator('main a[data-track="collection_start"]').first()).toHaveAttribute(
     'href',
