@@ -1,7 +1,7 @@
 import type { EventType, Locale } from '@storynido/shared';
 
 /**
- * Celebraciones por ocasión (mesa 25 Nov 2026, DECISIONS 331): «¿Qué celebrás?» arriba de las
+ * Celebraciones por ocasión (mesa 25 Nov 2026, DECISIONS 333): «¿Qué celebrás?» arriba de las
  * temáticas, como las plantillas por profesional (DECISIONS 325). Cada ocasión tiene su página
  * (/eventos/tematicas/<ocasion>) con sus temáticas y cuentos. Las temáticas son las colecciones de
  * siempre: una ocasión solo las agrupa. Graduación va segunda porque fin de año es temporada de

@@ -167,6 +167,11 @@ const TOUCH_WORDS =
 const FAMILY_WORDS =
   /mama|papa|madre|padre|abuel|herman|\bmom|\bdad|mother|father|grand|sister|brother|\bmae\b|\bpai\b|\bavo|\bavos|irma|\bvovo/;
 
+/** ¿El texto cuenta contacto físico (abrazo, beso, brazos, regazo, cosquillas)? */
+export function hasTouch(text: string): boolean {
+  return TOUCH_WORDS.test(fold(text));
+}
+
 /** Páginas (1 = primera) con contacto físico donde no aparece nadie de la familia directa. */
 export function touchPages(pages: readonly CraftPage[]): number[] {
   const found: number[] = [];

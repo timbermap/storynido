@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Una ocasión de Celebraciones (mesa 25 Nov 2026, DECISIONS 331): sus temáticas con el botón para
+ * Una ocasión de Celebraciones (mesa 25 Nov 2026, DECISIONS 333): sus temáticas con el botón para
  * diseñar el kit, y después todos sus cuentos con el título legible.
  */
 export default async function EventsOccasionPage({ params }: Props) {
