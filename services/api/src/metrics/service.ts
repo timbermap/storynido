@@ -205,6 +205,9 @@ export class MetricsService {
             contentType: book?.contentType ?? null,
           }),
           aiCostUsdMicros: aiByOrder.get(doc.id) ?? 0,
+          ...(typeof (data.costsUsdMicros as { ai?: unknown } | undefined)?.ai === 'number'
+            ? { aiPipelineUsdMicros: (data.costsUsdMicros as { ai: number }).ai }
+            : {}),
           style: book?.style ?? null,
         };
       }),

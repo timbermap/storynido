@@ -430,7 +430,9 @@ export function ProductTable({ totals }: { totals: Totals }) {
       </h2>
       <p className="mt-1 text-xs text-muted-foreground">
         Contribución por unidad = precio − impuestos − comisión − IA del libro − impresión. No
-        incluye la IA de muestras que no se compraron.
+        incluye la IA de muestras que no se compraron ni la de páginas rehechas después de la
+        generación (columna Rehechos, que sí está en el total de IA). Los pagos simulados no
+        cuentan.
       </p>
       {rows.length === 0 ? (
         <p className="mt-3 text-sm text-muted-foreground">Sin ventas en el período.</p>
@@ -445,6 +447,9 @@ export function ProductTable({ totals }: { totals: Totals }) {
                 <th className="text-right">Precio medio</th>
                 <th className="text-right">Comisión</th>
                 <th className="text-right">IA</th>
+                <th className="text-right" title="Páginas rehechas después de la generación">
+                  Rehechos
+                </th>
                 <th className="text-right">Por unidad</th>
               </tr>
             </thead>
@@ -463,6 +468,9 @@ export function ProductTable({ totals }: { totals: Totals }) {
                   <td className="text-right">{usd(row.price)}</td>
                   <td className="text-right">{usd(row.units ? row.feeUsd / row.units : 0)}</td>
                   <td className="text-right">{usd(row.units ? row.aiUsd / row.units : 0)}</td>
+                  <td className="text-right text-muted-foreground">
+                    {row.aiRedoUsd ? usd(row.aiRedoUsd / row.units) : '—'}
+                  </td>
                   <td
                     className={`text-right font-semibold ${row.perUnit < FLOOR_USD ? 'text-red-700' : ''}`}
                   >
