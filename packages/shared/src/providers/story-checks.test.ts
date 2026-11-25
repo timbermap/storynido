@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   familyTouchPages,
+  foreignNames,
   refrainPages,
   adultWords,
   diaryHeadingIssues,
@@ -195,5 +196,32 @@ describe('libro de Angélica, «El sonido escondido» (25 nov 2026)', () => {
   it('con el abrazo pedido, uno solo está bien', () => {
     const check = storyCraftIssues({ pages, age: 3, language: 'es', familyHug: true });
     expect(check.issues.some((issue) => issue.includes('abraz'))).toBe(false);
+  });
+});
+
+describe('nombres de otros chicos de la cuenta', () => {
+  const pages = [
+    { text: 'Valentina corre a la plaza con su amiga Renata.' },
+    { text: 'Mostaza, el gato naranja, duerme. Mira la luna.' },
+  ];
+  it('marca los que el pedido no trae y deja pasar los que sí', () => {
+    expect(
+      foreignNames(pages, ['Joaquín', 'renata', 'Mostaza', 'Luna'], ['Valentina', 'Mi cumple']),
+    ).toEqual([
+      { name: 'Renata', pages: [1] },
+      { name: 'Mostaza', pages: [2] },
+    ]);
+    expect(foreignNames(pages, ['Renata, su amiga del jardín'], ['Su amiga Renata'])).toEqual([]);
+  });
+  it('entra en el control del oficio como un pedido de reescritura', () => {
+    const craft = storyCraftIssues({
+      pages,
+      age: 5,
+      language: 'es',
+      foreign: { candidates: ['Renata'], allowed: ['Valentina'] },
+    });
+    expect(
+      craft.issues.some((issue) => issue.includes('«Renata» (página 1) no es de este pedido')),
+    ).toBe(true);
   });
 });

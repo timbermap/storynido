@@ -118,7 +118,7 @@ export const SEED_LESSONS: SeedLesson[] = [
     ageMin: 4,
     ageMax: 12,
     name: {
-      es: 'Puedes lograr lo que te propongas',
+      es: 'Lograr lo que se propone',
       en: 'You can achieve anything you set your mind to',
       pt: 'Você pode conseguir o que quiser',
     },

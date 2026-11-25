@@ -9,6 +9,7 @@ import { roleFromClaims, type CountryCode, type Locale, type Role } from '@story
 import { COUNTRY_CHOICE_COOKIE, COUNTRY_CHOICE_MAX_AGE } from '@/lib/country';
 import { LOCALE_CHOICE_COOKIE } from '@/lib/locale-choice';
 import { hasSessionHint, setSessionHint } from '@/lib/session-hint';
+import { syncStepDraftOwner } from '@/lib/use-step-draft';
 
 interface AuthState {
   /** Usuario de Firebase, incluida la sesión anónima del creador. */
@@ -56,6 +57,8 @@ export function AuthProvider({
         router.refresh();
       };
       unsubscribe = onIdTokenChanged(getFirebaseAuth(), (user) => {
+        // Lo que se escribía en el creador no pasa de una cuenta a otra.
+        syncStepDraftOwner(user?.uid ?? null);
         if (!user) {
           syncHint(false);
           setState(LOGGED_OUT);

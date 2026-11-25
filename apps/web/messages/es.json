@@ -1220,7 +1220,7 @@
       "continueInvitation": "Quiero la invitación",
       "queued": {
         "title": "Estamos preparando la muestra de {name}",
-        "text": "Hay muchos cuentos creándose ahora mismo. La tuya ya está en camino: te avisamos por correo apenas esté lista, así que puedes cerrar esta página.",
+        "text": "Hay muchos cuentos creándose ahora mismo. Ya estamos trabajando en eso: te avisamos por correo apenas termine, así que puedes cerrar esta página.",
         "illustrationsTitle": "Estamos ilustrando el cuento de {name}",
         "back": "Ver mis cuentos"
       },

@@ -167,6 +167,40 @@ const TOUCH_WORDS =
 const FAMILY_WORDS =
   /mama|papa|madre|padre|abuel|herman|\bmom|\bdad|mother|father|grand|sister|brother|\bmae\b|\bpai\b|\bavo|\bavos|irma|\bvovo/;
 
+/** ¿El texto cuenta contacto físico (abrazo, beso, brazos, regazo, cosquillas)? */
+export function hasTouch(text: string): boolean {
+  return TOUCH_WORDS.test(fold(text));
+}
+
+/**
+ * Nombres de otros chicos de la misma cuenta (su nombre, mascota o amigo) que aparecen en el texto
+ * y que este pedido no trae (25 nov 2026: Renata y Mostaza, de Joaquín, en los libros de Valentina,
+ * Ximena y Benicio). `allowed` es todo lo que el pedido y la plantilla nombran: si el nombre está
+ * ahí (recuerdos, dedicatoria, plan), no cuenta. Se busca como palabra, con mayúscula, tal cual.
+ */
+export function foreignNames(
+  pages: readonly CraftPage[],
+  candidates: readonly string[],
+  allowed: readonly string[],
+): { name: string; pages: number[] }[] {
+  const known = fold(allowed.join(' \n '));
+  const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const seen = new Set<string>();
+  const found: { name: string; pages: number[] }[] = [];
+  for (const raw of candidates) {
+    // «Clara, su hermana de 7» → «Clara»; con mayúscula, como va en el texto.
+    const first = (raw.split(/[,;(]/)[0] ?? '').trim();
+    const name = first ? first.charAt(0).toLocaleUpperCase() + first.slice(1) : '';
+    if (name.length < 2 || seen.has(fold(name))) continue;
+    seen.add(fold(name));
+    if (new RegExp(`(^|[^\\p{L}])${escape(fold(name))}($|[^\\p{L}])`, 'u').test(known)) continue;
+    const word = new RegExp(`(^|[^\\p{L}])${escape(name)}($|[^\\p{L}])`, 'u');
+    const at = pages.flatMap((page, index) => (word.test(page.text) ? [index + 1] : []));
+    if (at.length > 0) found.push({ name, pages: at });
+  }
+  return found;
+}
+
 /** Páginas (1 = primera) con contacto físico donde no aparece nadie de la familia directa. */
 export function touchPages(pages: readonly CraftPage[]): number[] {
   const found: number[] = [];
@@ -425,8 +459,18 @@ export function storyCraftIssues(input: {
   diary?: boolean;
   /** El pedido pide un abrazo de la familia (cuento para dormir, de cariño): uno en todo el libro. */
   familyHug?: boolean;
+  /** Nombres de otros chicos de la cuenta y lo que el pedido nombra (ver {@link foreignNames}). */
+  foreign?: { candidates: readonly string[]; allowed: readonly string[] };
 }): CraftCheck {
   const issues: string[] = [];
+  const strangers = input.foreign
+    ? foreignNames(input.pages, input.foreign.candidates, input.foreign.allowed)
+    : [];
+  for (const item of strangers) {
+    issues.push(
+      `«${item.name}» (página ${item.pages.join(', ')}) no es de este pedido: sácalo y, si hace falta alguien, usa un personaje de la historia sin ese nombre.`,
+    );
+  }
   const share = dialogueShare(input.pages);
   const dialogue = input.age >= DIALOGUE_MIN_AGE && share < DIALOGUE_MIN_SHARE;
   if (dialogue) {
@@ -509,6 +553,7 @@ export function storyCraftIssues(input: {
     repeated: repeated.length,
     morals: morals.length,
     phrases:
+      strangers.length +
       family.length -
       Math.min(family.length, allowed) +
       (refrain && withRefrain.length < neededRefrain ? 1 : 0) +
