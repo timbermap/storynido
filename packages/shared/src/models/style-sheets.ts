@@ -117,6 +117,26 @@ export const STYLE_SHEETS: Record<string, StyleSheet> = {
     avoid: 'soft painted storybook look, watercolor, panels or speech bubbles',
     check: { minColorfulness: 15, maxSaturation: 0.6 },
   },
+  // Para 9-12 (DECISIONS 319): dibujos de cuaderno, como los diarios que leen a esa edad.
+  cuaderno: {
+    medium:
+      'school notebook doodle illustration for middle-grade readers: drawn with blue ballpoint pen and black felt-tip marker on cream lined notebook paper, loose confident sketchy lines, cross-hatching for shadows, flat highlights in two or three marker colors, a strip of washi tape or a sticky note as decoration; it looks hand-drawn by a talented young artist, never a polished painting; no written words, letters or numbers anywhere',
+    usesPalette: true,
+    references: KEEP_IDENTITY,
+    avoid:
+      'painted storybook look, watercolor washes, 3D render, glossy digital gradients, handwriting or any lettering',
+    check: { minColorfulness: 8, maxSaturation: 0.6 },
+  },
+  // Para 9-12 (DECISIONS 319): manga genérico, sin personajes ni marcas de nadie.
+  manga: {
+    medium:
+      'manga-inspired illustration for middle-grade readers: clean expressive ink linework with tapered strokes, cel shading with subtle screentone dot textures, large but natural expressive eyes, dynamic poses and bright clean colors; an original design that resembles no existing anime or manga character; one single full-page image, never panels or speech bubbles',
+    usesPalette: true,
+    references: KEEP_IDENTITY,
+    avoid:
+      'painted storybook look, watercolor, 3D render, chibi or babyish proportions, panels, speech bubbles, Japanese or any other lettering',
+    check: COLOR_STYLE_CHECK,
+  },
   'gouache-editorial': {
     medium:
       'traditional editorial gouache: matte pigment, irregular brush strokes, opaque layers and a controlled palette; faces slightly angular and individual, never overly round',

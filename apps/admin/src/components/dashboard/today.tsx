@@ -484,6 +484,8 @@ const STYLE_NAMES: Record<string, string> = {
   'minimalismo-grafico': 'Minimalismo gráfico',
   'cuento-clasico': 'Cuento clásico',
   'novela-grafica': 'Novela gráfica',
+  cuaderno: 'Cuaderno',
+  manga: 'Manga',
   'lapices-de-colores': 'Lápices de colores',
   acuarela: 'Acuarela',
   'cartoon-3d': 'Cartoon 3D',

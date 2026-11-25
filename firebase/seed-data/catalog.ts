@@ -36,6 +36,15 @@ Tradición del diente según el idioma del libro: en español, el Ratón Pérez 
 const CHRISTMAS_PROMPT = `${TEXT_PROMPT}
 Es una historia de Navidad. En español, puede incluir también la carta a los Reyes Magos y la noche del 5 de enero; en inglés y portugués, Christmas y Natal. Sin marcas ni personajes con derechos de autor.`;
 
+/** Diario (9 a 12): primera persona, entradas cortas, vida real (DECISIONS 319). */
+const DIARY_PROMPT = `${TEXT_PROMPT}
+Formato diario: el cuento es el diario personal del protagonista durante un año de escuela, narrado en primera persona con su propia voz (nunca en segunda persona). Cada página es una entrada que empieza con el día de la semana y un título corto con humor (por ejemplo «Lunes: el peor ensayo de la historia»), sin fechas ni estaciones del año. Tono de diario real: honesto, gracioso, con listas cortas y lo que piensa de verdad.
+Trama: amistades que se arman, se pelean y se arreglan; el protagonista arma con sus amigos un número para el festival de fin de año (una banda, un baile, una obra o un truco, según lo que le guste); el miedo a subir al escenario y el día del festival. Realista y cotidiano: sin magia, sin romance, sin redes sociales ni celulares como centro de la historia, sin burlas crueles que queden sin reparar. La familia acompaña; ningún adulto fuera de la familia abraza, besa ni alza al protagonista.`;
+
+/** Academia de dragones (9 a 12): fantasía en capítulos, sin violencia (DECISIONS 319). */
+const DRAGON_PROMPT = `${TEXT_PROMPT}
+Fantasía en capítulos para lectores grandes: el primer año del protagonista en una academia de dragoneros escondida entre montañas. Al llegar recibe un huevo que eclosiona; su dragón es chiquito, testarudo y no obedece. Aprenden juntos a confiar (cuidarlo, entenderlo, volar) hasta la prueba final de vuelo, que se gana con ingenio y trabajo en equipo, nunca peleando. Sin batallas, sin heridas y sin villanos que den miedo de verdad; los dragones no lastiman a nadie. Nada de personajes, escuelas, casas ni hechizos de libros, series o películas existentes. Los maestros de la academia enseñan a distancia; ningún adulto fuera de la familia abraza, besa ni alza al protagonista.`;
+
 const IMAGE_PROMPT = `Children's picture book illustration: {{scene}}. Main character: {{character}}. Art style: {{style}}. Clear composition with one focal point; the lighting and colors follow the art direction.`;
 
 /** Primera comunión: revisado con cuidado (Claude, 4 nov 2026). Respeto religioso sin doctrina. */
@@ -408,6 +417,8 @@ export const STORY_CAST: Record<string, string> = {
   'mi-bautizo': 'Lola',
   'el-misterio-del-faro': 'Alex',
   'un-lunes-al-reves': 'Alex',
+  'el-diario-de-nombre': 'Sofi',
+  'la-academia-de-dragones': 'Martina',
 };
 
 /** Portadas nuevas con el tercio superior vacío (el título se superpone). Se suman al instalarlas. */
@@ -436,6 +447,8 @@ export const NEW_COVER_SLUGS: string[] = [
   'las-tardes-con-los-abuelos',
   'un-lunes-al-reves',
   'el-misterio-del-faro',
+  'el-diario-de-nombre',
+  'la-academia-de-dragones',
   'el-cumpleanos-mas-magico',
   'unicornio-del-arcoiris',
   'mi-primera-comunion',
@@ -1472,6 +1485,69 @@ export const SEED_NEW_STORIES: SeedStory[] = [
     },
     coverImage: '/samples/un-lunes-al-reves.webp',
   },
+  // Dos géneros que faltaban en 9 a 12, con portada de una chica (DECISIONS 319).
+  {
+    ...BIG_READER_BASE,
+    slug: 'el-diario-de-nombre',
+    suggestedLessons: [
+      'amistad',
+      'calma-cuando-estoy-nervioso',
+      'ser-uno-mismo',
+      'equivocarse-esta-bien',
+    ],
+    palette: 'celebration',
+    order: 34,
+    tags: ['diario', 'escuela', 'amistad', 'humor', 'emociones'],
+    defaultStyle: 'cuaderno',
+    textPromptTemplate: DIARY_PROMPT,
+    title: {
+      es: 'El diario de [Nombre]',
+      en: "[Name]'s Diary",
+      pt: 'O diário de [Nome]',
+    },
+    summary: {
+      es: 'Un año de escuela contado por [Nombre] en su propio diario: amistades que se arman y se desarman, un número para el festival de fin de año y el miedo de subir al escenario. Con humor, en primera persona y con dibujos de cuaderno, como los diarios que se leen a esta edad.',
+      en: 'A school year told by [Name] in their own diary: friendships that come together and fall apart, an act for the end-of-year show and the fear of going on stage. Funny, in the first person and with notebook doodles, like the diaries kids read at this age.',
+      pt: 'Um ano de escola contado por [Nome] no seu próprio diário: amizades que se formam e se desfazem, uma apresentação para a festa de fim de ano e o medo de subir no palco. Com humor, em primeira pessoa e com desenhos de caderno, como os diários que se leem nessa idade.',
+    },
+    excerpt: {
+      es: 'Lunes: la peor noticia del año. La profe anunció que el festival es en seis semanas. Seis. Semanas. Valen quiere armar una banda, Tomi quiere hacer magia y yo, [Nombre], solo quiero que nadie me vea temblar arriba del escenario.',
+      en: 'Monday: the worst news of the year. Our teacher announced the show is in six weeks. Six. Weeks. Val wants to start a band, Tommy wants to do magic tricks and I, [Name], just want nobody to see me shaking on stage.',
+      pt: 'Segunda: a pior notícia do ano. A professora anunciou que a festa é daqui a seis semanas. Seis. Semanas. A Val quer montar uma banda, o Tomi quer fazer mágica e eu, [Nome], só quero que ninguém me veja tremendo no palco.',
+    },
+    coverImage: '/samples/el-diario-de-nombre.webp',
+  },
+  {
+    ...BIG_READER_BASE,
+    slug: 'la-academia-de-dragones',
+    suggestedLessons: [
+      'valentia',
+      'lograr-lo-que-te-propongas',
+      'amistad',
+      'respetar-las-diferencias',
+    ],
+    palette: 'magic',
+    order: 35,
+    tags: ['fantasía', 'dragones', 'aventura'],
+    defaultStyle: 'manga',
+    textPromptTemplate: DRAGON_PROMPT,
+    title: {
+      es: '[Nombre] y la academia de dragones',
+      en: '[Name] and the Dragon Academy',
+      pt: '[Nome] e a academia de dragões',
+    },
+    summary: {
+      es: 'El primer día en la academia de dragoneros, [Nombre] recibe un huevo. Lo que sale es un dragón chiquito, testarudo y que no le hace caso a nadie. Una fantasía en capítulos sobre confiar, aprender a volar y ganar la prueba final con ingenio, no a los golpes.',
+      en: 'On the first day at the dragon riders’ academy, [Name] is given an egg. What hatches is a tiny, stubborn dragon that listens to nobody. A fantasy in chapters about trust, learning to fly and winning the final trial with wits, not fists.',
+      pt: 'No primeiro dia na academia de dragoneiros, [Nome] recebe um ovo. O que nasce é um dragão pequenininho, teimoso e que não obedece ninguém. Uma fantasia em capítulos sobre confiar, aprender a voar e vencer a prova final com inteligência, não na força.',
+    },
+    excerpt: {
+      es: 'El huevo tembló, crujió y se partió en tres. Del medio salió un dragón del tamaño de un gato, que miró a [Nombre], estornudó una chispa y se dio vuelta. —Creo que no le caigo bien. —Todavía —contestó la maestra de vuelo.',
+      en: 'The egg trembled, cracked and split into three. Out came a dragon the size of a cat, which looked at [Name], sneezed a spark and turned away. "I don’t think it likes me." "Not yet," said the flight teacher.',
+      pt: 'O ovo tremeu, estalou e se partiu em três. Do meio saiu um dragão do tamanho de um gato, que olhou para [Nome], espirrou uma faísca e virou de costas. — Acho que ele não gosta de mim. — Ainda não — respondeu a professora de voo.',
+    },
+    coverImage: '/samples/la-academia-de-dragones.webp',
+  },
 ];
 
 /**
@@ -1984,6 +2060,28 @@ export const SEED_STYLES: SeedStyle[] = [
     promptModifier:
       'bold contemporary graphic novel art for middle-grade readers, thick confident black ink outlines, spotted solid blacks, flat color fields with hard-edged cel shadows, slightly stylized proportions, dynamic camera angles, clearly a comic-book look rather than a painted storybook, one single full-page image without panels or speech bubbles',
     sampleImage: '/styles/novela-grafica.webp',
+    contentTypes: ['story', 'activities', 'story_activities'],
+  },
+  {
+    // Para 9-12 (DECISIONS 319): dibujos de cuaderno, como los diarios que leen a esa edad.
+    slug: 'cuaderno',
+    active: true,
+    order: 10,
+    name: { es: 'Cuaderno', en: 'Notebook doodles', pt: 'Caderno' },
+    promptModifier:
+      'school notebook doodle illustration, blue ballpoint pen and black felt-tip lines on lined notebook paper, loose confident sketchy strokes, cross-hatched shadows, flat highlights in two or three marker colors, no written words',
+    sampleImage: '/styles/cuaderno.webp',
+    contentTypes: ['story', 'activities', 'story_activities'],
+  },
+  {
+    // Para 9-12 (DECISIONS 319): manga genérico, sin personajes existentes.
+    slug: 'manga',
+    active: true,
+    order: 11,
+    name: { es: 'Manga', en: 'Manga', pt: 'Mangá' },
+    promptModifier:
+      'manga-inspired illustration for middle-grade readers, clean expressive ink linework, cel shading with subtle screentone dots, large but natural expressive eyes, bright clean colors, original character design, one single image without panels or speech bubbles',
+    sampleImage: '/styles/manga.webp',
     contentTypes: ['story', 'activities', 'story_activities'],
   },
   {
