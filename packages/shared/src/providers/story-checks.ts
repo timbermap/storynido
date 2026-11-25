@@ -178,7 +178,7 @@ export function touchPages(pages: readonly CraftPage[]): number[] {
 }
 
 /**
- * Emociones que se repiten con la misma frase (DECISIONS 328: «alivio enorme» varias veces en el
+ * Emociones que se repiten con la misma frase (DECISIONS 329: «alivio enorme» varias veces en el
  * diario de Luli). Dos palabras seguidas con contenido, una de ellas de emoción o del cuerpo, en dos
  * páginas o más. No cuentan las de la frase que se repite a propósito (el estribillo).
  */
@@ -276,7 +276,7 @@ export function repeatedPhrases(
   return [...seen].filter(([, on]) => on.size >= 2).map(([phrase]) => phrase);
 }
 
-/** Palabras de adulto en un cuento para chicos (DECISIONS 328), en minúsculas y sin tildes. */
+/** Palabras de adulto en un cuento para chicos (DECISIONS 329), en minúsculas y sin tildes. */
 const ADULT_WORDS: Record<Locale, readonly string[]> = {
   es: [
     'vulnerabilidad',
@@ -326,7 +326,7 @@ export function adultWords(pages: readonly CraftPage[], language: Locale): strin
 }
 
 /**
- * Un amigo que vuelve sin nombre (DECISIONS 328): «mi compañero» o «el amigo» en dos páginas o más.
+ * Un amigo que vuelve sin nombre (DECISIONS 329): «mi compañero» o «el amigo» en dos páginas o más.
  */
 const UNNAMED_FRIEND: Record<Locale, RegExp> = {
   es: /(?:^|[^\p{L}])(?:[Mm]i|[Ee]l|[Ll]a|[Ss]u|[Tt]u) (?:amig[oa]|compañer[oa])(?![\p{L}])(?!,? (?:\p{Lu}|de |y ))/u,
@@ -348,7 +348,7 @@ export interface CraftCheck {
   dialogue: boolean;
   repeated: number;
   morals: number;
-  /** Frases de emoción repetidas, palabras de adulto y amigos sin nombre (DECISIONS 328). */
+  /** Frases de emoción repetidas, palabras de adulto y amigos sin nombre (DECISIONS 329). */
   phrases?: number;
 }
 

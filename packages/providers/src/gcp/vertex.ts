@@ -1273,7 +1273,7 @@ export class VertexImageProvider implements AIImageProvider {
     const coloringCover = request.cover === true && check.grayscale === true;
     const coloring = check.grayscale === true;
     // Un estilo con color y ojos propios (manga) usa su regla de color y su prioridad va última,
-    // también en libros con la dirección de arte congelada antes de este cambio (DECISIONS 328).
+    // también en libros con la dirección de arte congelada antes de este cambio (DECISIONS 329).
     const sheet = styleSheetFor({
       style: request.style,
       stylePrompt: request.stylePrompt,
@@ -1441,7 +1441,7 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
     const style = options.style?.trim()
       ? `\nThe chosen art style is: ${options.style.trim()}. Reject it (category "style") only if it is CLEARLY made in a different technique (for example a 3D render, a photo or a color painting when the style is a watercolor or a black and white coloring page); small variations of the same technique are fine.${
           /manga/i.test(options.style)
-            ? ' For manga, a western cartoon, a comic-book or a painted storybook look (natural-size eyes, no cel shading, no screentone) counts as a different technique (DECISIONS 328).'
+            ? ' For manga, a western cartoon, a comic-book or a painted storybook look (natural-size eyes, no cel shading, no screentone) counts as a different technique (DECISIONS 329).'
             : ''
         }`
       : '';

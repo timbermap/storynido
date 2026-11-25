@@ -602,7 +602,7 @@ describe('ropa sin huecos y objetos de la tapa (DECISIONS 318)', () => {
   });
 });
 
-describe('personajes que vuelven con nombre (DECISIONS 328)', () => {
+describe('personajes que vuelven con nombre (DECISIONS 329)', () => {
   it('el redactor recibe el acompañante y el elenco con sus nombres', () => {
     const text = recurringCast({
       companion: { name: 'Rocco', look: 'a small brown dog' },

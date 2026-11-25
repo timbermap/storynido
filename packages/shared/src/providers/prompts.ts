@@ -149,7 +149,7 @@ export function memoriesBlock(memories: Memories | null | undefined): string | n
 }
 
 /**
- * Quién vuelve en el libro según el plan, con su nombre (DECISIONS 328): sin esto el redactor no
+ * Quién vuelve en el libro según el plan, con su nombre (DECISIONS 329): sin esto el redactor no
  * sabía quién era el amigo del plan y lo llamaba «mi compañero» en varias páginas.
  */
 export function recurringCast(
@@ -422,7 +422,7 @@ export function craftRules(childName: string, age: number | undefined, baby = fa
     '- Todo lo que se plantea se paga: un misterio se resuelve con una pista plantada antes, y un objeto importante vuelve a servir más adelante.',
     '- Cada detalle personal aparece donde cambia algo en la escena, nunca de relleno.',
     '- La última página termina en una imagen o una frase que queda, nunca en una lección ni en una moraleja.',
-    // Revisión de «El diario de Luli» (DECISIONS 327): valen para todos los cuentos.
+    // Revisión de «El diario de Luli» (DECISIONS 328): valen para todos los cuentos.
     '- Todo personaje que aparece solo, por su cuenta, en más de una página tiene nombre propio y se lo llama por su nombre (nunca «mi compañero», «él» o «el amigo» en lugar del nombre); usa los nombres del plan. Un grupo («sus amigos», «los invitados») puede ir sin nombres.',
     '- Ninguna expresión se repite en el libro: cada emoción se cuenta con palabras distintas, y con el vocabulario de un chico de la edad del lector (nada de «vulnerabilidad», «euforia» ni «experimenté»).',
     '- Si el cuento avanza por días o momentos, cada página es un momento nuevo: no se repite el mismo día ni la misma escena en dos páginas seguidas.',

@@ -4,6 +4,7 @@ import type { MetadataRoute } from 'next';
 import { postSlugs } from '@/content/blog';
 import { getPathname } from '@/i18n/navigation';
 import { LEGAL_DOCUMENTS, LEGAL_SLUGS } from '@/lib/legal';
+import { PERSONA_KEYS, PERSONA_SLUGS } from '@/lib/professional-personas';
 import { getLessons, getStories } from '@/lib/server/api';
 import { absoluteUrl } from '@/lib/site';
 
@@ -50,6 +51,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...entry(() => '/how-it-works', 0.8),
     ...entry(() => '/events/themes', 0.8),
     ...entry(() => '/professionals/templates', 0.8),
+    ...PERSONA_KEYS.flatMap((key) =>
+      entry(
+        (locale) => ({
+          pathname: '/professionals/templates/[persona]',
+          params: { persona: PERSONA_SLUGS[locale][key] },
+        }),
+        0.8,
+      ),
+    ),
     ...entry(() => '/lessons', 0.8),
     ...stories.flatMap((story) =>
       entry(() => ({ pathname: '/stories/[slug]', params: { slug: story.slug } }), 0.8),

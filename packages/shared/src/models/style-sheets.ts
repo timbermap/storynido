@@ -32,7 +32,7 @@ export interface StyleSheet {
   check: ImageCheck;
   /**
    * Lo que este estilo hace distinto de las reglas generales de la casa (ojos, brillo, color,
-   * sombreado). Va último en cada pedido de imagen y gana sobre ellas (DECISIONS 328: el Manga de
+   * sombreado). Va último en cada pedido de imagen y gana sobre ellas (DECISIONS 329: el Manga de
    * Luli salió como cómic occidental porque la casa pedía ojos naturales, sin brillo y colores
    * apagados en cada página).
    */

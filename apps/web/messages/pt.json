@@ -1832,7 +1832,102 @@
       "catalogTitle": "Modelos de histórias por objetivo",
       "catalogMetaTitle": "Modelos de histórias por objetivo para professores e terapeutas",
       "catalogSubtitle": "Para antecipar situações, trabalhar emoções, rotinas, escola ou linguagem. Escolha o modelo, folheie um exemplo e ajuste o texto para cada criança.",
-      "catalogNote": "Você vê tudo sem conta. Só precisa dela para criar."
+      "catalogNote": "Você vê tudo sem conta. Só precisa dela para criar.",
+      "personasTitle": "Qual é o seu trabalho?",
+      "personasSubtitle": "Escolha seu perfil e veja primeiro as histórias mais usadas na sua sala de aula ou no seu consultório.",
+      "byGoalTitle": "Ou busque por objetivo",
+      "personaStoriesTitle": "As histórias que mais ajudam você",
+      "personaUsesTitle": "Como são usadas",
+      "personaOther": "Outros perfis",
+      "personaAll": "Todos os modelos",
+      "personaNote": "Cada história se ajusta à criança: nome ou apelido, nível de leitura e extensão. Acompanha o seu trabalho; não substitui uma avaliação nem um tratamento.",
+      "personaCount": "{count, plural, one {# história} other {# histórias}}",
+      "personas": {
+        "teachers": {
+          "name": "Professores",
+          "short": "Educação infantil e fundamental: primeiro dia, vez, letras e emoções na sala.",
+          "title": "Histórias personalizadas para professores",
+          "meta": "Histórias com cada aluno como protagonista para o primeiro dia de aula, esperar a vez, aprender as letras e nomear emoções.",
+          "intro": "Uma história com cada aluno como protagonista ajuda a antecipar o primeiro dia, praticar a vez e se aproximar das letras. Serve para a adaptação, o cantinho de leitura ou como presente de fim de ano.",
+          "uses": {
+            "1": "Adaptação: a história do primeiro dia, com o nome dele.",
+            "2": "Convivência: esperar a vez e errar sem medo.",
+            "3": "Leitura inicial: as letras do próprio nome."
+          }
+        },
+        "learning": {
+          "name": "Psicopedagogia",
+          "short": "Leitura e escrita, consciência fonológica e tolerância ao erro.",
+          "title": "Histórias para psicopedagogia",
+          "meta": "Histórias personalizadas para trabalhar leitura e escrita, consciência fonológica e motivação, no nível de leitura de cada criança.",
+          "intro": "Histórias para trabalhar a leitura e a escrita com a criança como protagonista, com o nível de leitura e a extensão ajustados a cada uma. Servem nas sessões de alfabetização e para manter a motivação quando fica difícil.",
+          "uses": {
+            "1": "Consciência fonológica: o som escondido e o detetive de palavras.",
+            "2": "Leitura inicial: as letras que dançam e as do nome dela.",
+            "3": "Motivação: errar, tentar de novo e ver o progresso."
+          }
+        },
+        "psychology": {
+          "name": "Psicologia infantil",
+          "short": "Emoções, raiva, tristeza, calma e mudanças na família.",
+          "title": "Histórias para psicologia infantil",
+          "meta": "Histórias personalizadas para reconhecer emoções, a raiva e a tristeza, aprender a se acalmar e atravessar mudanças na família.",
+          "intro": "Histórias para pôr em palavras o que se sente: a raiva, a tristeza, o que acontece no corpo e o que ajuda a se acalmar. A criança se vê atravessando a situação e encontrando recursos.",
+          "uses": {
+            "1": "Reconhecer emoções: o vulcão da raiva, hoje estou triste.",
+            "2": "Regulação: o termômetro de emoções, a respiração e o cantinho da calma.",
+            "3": "Mudanças na família: a chegada de um irmão."
+          }
+        },
+        "speech": {
+          "name": "Fonoaudiologia",
+          "short": "Sons, vocabulário e narração de rotinas.",
+          "title": "Histórias para fonoaudiologia",
+          "meta": "Histórias personalizadas para brincar com sons e palavras e narrar rotinas passo a passo, com frases curtas e o nome da criança.",
+          "intro": "Histórias para brincar com sons e palavras e para narrar rotinas passo a passo. Com frases curtas e o nome da criança, convidam a repetir, apontar e contar.",
+          "uses": {
+            "1": "Sons: encontrar o som escondido.",
+            "2": "Vocabulário: o detetive de palavras.",
+            "3": "Narração: contar em ordem o supermercado ou a rotina da manhã."
+          }
+        },
+        "occupational": {
+          "name": "Terapia ocupacional",
+          "short": "Histórias sociais: mudanças de plano, barulhos, sobrecarga sensorial e rotinas.",
+          "title": "Histórias sociais personalizadas",
+          "meta": "Histórias sociais personalizadas com frases curtas e em ordem para antecipar mudanças, lugares novos, barulhos fortes e rotinas.",
+          "intro": "Histórias sociais com frases curtas e em ordem para antecipar mudanças, lugares novos e barulhos fortes. Úteis com crianças que precisam saber o que vai acontecer, por exemplo no espectro autista ou com sensibilidade sensorial.",
+          "uses": {
+            "1": "Antecipar: quando o plano muda, ir ao supermercado.",
+            "2": "Sensorial: barulhos fortes e quando tudo é demais.",
+            "3": "Autonomia: a rotina da manhã e largar a fralda."
+          }
+        },
+        "pediatrics": {
+          "name": "Pediatria",
+          "short": "Vacinas, consultas, largar a fralda e a chegada de um irmão.",
+          "title": "Histórias para pediatras",
+          "meta": "Histórias personalizadas para antecipar a consulta e as vacinas e acompanhar etapas: largar a fralda, um irmão novo, as rotinas.",
+          "intro": "Histórias para que a consulta e as vacinas não sejam surpresa, e para acompanhar etapas que chegam ao consultório: largar a fralda, um irmão novo, as rotinas. Para recomendar às famílias ou presentear no consultório.",
+          "uses": {
+            "1": "Antes da consulta: vou ao médico e tomo vacina.",
+            "2": "Etapas: largar a fralda e ser irmão mais velho.",
+            "3": "Hábitos: a rotina da manhã."
+          }
+        },
+        "dentistry": {
+          "name": "Odontopediatria",
+          "short": "A primeira visita, os barulhos do consultório e respirar com calma.",
+          "title": "Histórias para odontopediatras",
+          "meta": "Uma história personalizada para antecipar a primeira visita ao dentista: o que vai ver, o que vai ouvir e como respirar se der medo.",
+          "intro": "Uma história para que a primeira visita ao dentista chegue antecipada: o que vai ver, o que vai ouvir e como respirar se der medo. Para enviar à família antes da consulta ou presentear no final.",
+          "uses": {
+            "1": "Antes da consulta: minha visita ao dentista, com o nome dela.",
+            "2": "Na cadeira: barulhos fortes e respirar como um balão.",
+            "3": "Na sala de espera: esperar a minha vez."
+          }
+        }
+      }
     }
   },
   "Viewer": {

@@ -1832,7 +1832,102 @@
       "catalogTitle": "Story templates by goal",
       "catalogMetaTitle": "Story templates by goal for teachers and therapists",
       "catalogSubtitle": "Prepare for new situations, work on emotions, routines, school or language. Pick a template, browse a sample and adjust the text for each child.",
-      "catalogNote": "Browse everything without an account. You only need one to create."
+      "catalogNote": "Browse everything without an account. You only need one to create.",
+      "personasTitle": "What do you do?",
+      "personasSubtitle": "Pick your profile and see first the stories most used in your classroom or practice.",
+      "byGoalTitle": "Or browse by goal",
+      "personaStoriesTitle": "The stories that help you most",
+      "personaUsesTitle": "How they are used",
+      "personaOther": "Other profiles",
+      "personaAll": "All templates",
+      "personaNote": "Each story is adjusted to the child: name or alias, reading level and length. It supports your work; it does not replace an assessment or a treatment.",
+      "personaCount": "{count, plural, one {# story} other {# stories}}",
+      "personas": {
+        "teachers": {
+          "name": "Teachers",
+          "short": "Preschool and primary: first day, taking turns, letters and feelings in class.",
+          "title": "Personalized stories for teachers",
+          "meta": "Stories starring each student for the first day of school, taking turns, learning letters and naming feelings.",
+          "intro": "A story starring each student helps them prepare for the first day, practice taking turns and get closer to letters. Use it while settling in, in the reading corner or as an end-of-year gift.",
+          "uses": {
+            "1": "Settling in: the first-day story, with their name.",
+            "2": "Getting along: waiting for your turn and making mistakes without fear.",
+            "3": "Early reading: the letters of their own name."
+          }
+        },
+        "learning": {
+          "name": "Learning specialists",
+          "short": "Reading and writing, phonological awareness and handling mistakes.",
+          "title": "Stories for learning specialists",
+          "meta": "Personalized stories to work on reading, writing, phonological awareness and motivation, at each child’s reading level.",
+          "intro": "Stories to work on reading and writing with the child as the hero, with the reading level and length adjusted to each one. Useful in literacy sessions and to keep motivation up when it gets hard.",
+          "uses": {
+            "1": "Phonological awareness: the hidden sound and the word detective.",
+            "2": "Early reading: dancing letters and the letters of their name.",
+            "3": "Motivation: making mistakes, trying again and seeing progress."
+          }
+        },
+        "psychology": {
+          "name": "Child psychologists",
+          "short": "Feelings, anger, sadness, calm and family changes.",
+          "title": "Stories for child psychologists",
+          "meta": "Personalized stories to recognize feelings, anger and sadness, learn to calm down and go through family changes.",
+          "intro": "Stories to put feelings into words: anger, sadness, what happens in the body and what helps to calm down. The child sees themselves going through the situation and finding tools.",
+          "uses": {
+            "1": "Recognizing feelings: the anger volcano, today I feel sad.",
+            "2": "Self-regulation: the feelings thermometer, breathing and the calm-down corner.",
+            "3": "Family changes: a new sibling."
+          }
+        },
+        "speech": {
+          "name": "Speech therapists",
+          "short": "Sounds, vocabulary and retelling routines.",
+          "title": "Stories for speech and language therapy",
+          "meta": "Personalized stories to play with sounds and words and retell routines step by step, with short sentences and the child’s name.",
+          "intro": "Stories to play with sounds and words and to retell routines step by step. With short sentences and the child’s name, they invite repeating, pointing and telling.",
+          "uses": {
+            "1": "Sounds: finding the hidden sound.",
+            "2": "Vocabulary: the word detective.",
+            "3": "Retelling: the supermarket or the morning routine, in order."
+          }
+        },
+        "occupational": {
+          "name": "Occupational therapists",
+          "short": "Social stories: changes of plan, loud noises, sensory overload and routines.",
+          "title": "Personalized social stories",
+          "meta": "Personalized social stories with short sentences in order to prepare for changes, new places, loud noises and routines.",
+          "intro": "Social stories with short sentences in order to prepare for changes, new places and loud noises. Useful with children who need to know what will happen, for example autistic children or children with sensory sensitivities.",
+          "uses": {
+            "1": "Preparing: when the plan changes, going to the supermarket.",
+            "2": "Sensory: loud noises and when everything is too much.",
+            "3": "Independence: the morning routine and potty training."
+          }
+        },
+        "pediatrics": {
+          "name": "Pediatricians",
+          "short": "Vaccines, check-ups, potty training and a new sibling.",
+          "title": "Stories for pediatricians",
+          "meta": "Personalized stories to prepare for check-ups and vaccines and support stages: potty training, a new sibling, routines.",
+          "intro": "Stories so check-ups and vaccines are not a surprise, and to support stages that come up at the office: potty training, a new sibling, routines. To recommend to families or give away at the office.",
+          "uses": {
+            "1": "Before the visit: I go to the doctor and get my shots.",
+            "2": "Stages: potty training and becoming a big brother or sister.",
+            "3": "Habits: the morning routine."
+          }
+        },
+        "dentistry": {
+          "name": "Pediatric dentists",
+          "short": "The first visit, office noises and breathing calmly.",
+          "title": "Stories for pediatric dentists",
+          "meta": "A personalized story to prepare for the first dental visit: what they will see, what they will hear and how to breathe if they feel scared.",
+          "intro": "A story so the first dental visit comes prepared: what they will see, what they will hear and how to breathe if it feels scary. Send it to the family before the appointment or give it away afterwards.",
+          "uses": {
+            "1": "Before the appointment: my visit to the dentist, with their name.",
+            "2": "In the chair: loud noises and breathing like a balloon.",
+            "3": "In the waiting room: waiting for my turn."
+          }
+        }
+      }
     }
   },
   "Viewer": {

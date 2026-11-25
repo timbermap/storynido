@@ -205,7 +205,7 @@ export function artDirection(input: {
   const colorless = input.coloring === true || sheet?.usesPalette === false;
   const threeD = input.style === 'cartoon-3d';
   // Un estilo con sus propios ojos, color y sombreado (manga) no recibe las reglas de la casa que
-  // los contradicen; su prioridad va al final (DECISIONS 328).
+  // los contradicen; su prioridad va al final (DECISIONS 329).
   const ownLook = Boolean(sheet?.overrides);
   const key = input.palette ?? DEFAULT_PALETTE[input.channel];
   const palette = STORY_PALETTES[key];

@@ -85,7 +85,7 @@ describe('contacto físico', () => {
   });
 });
 
-describe('revisión de «El diario de Luli» (DECISIONS 328)', () => {
+describe('revisión de «El diario de Luli» (DECISIONS 329)', () => {
   it('marca la mano de una amiga en el brazo, no la mano levantada en clase', () => {
     expect(
       touchPages([

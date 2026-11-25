@@ -32,6 +32,12 @@ export const routing = defineRouting({
       en: '/professionals/templates',
       pt: '/profissionais/modelos',
     },
+    // Plantillas por tipo de profesional (docentes, psicopedagogía, pediatría…): lib/professional-personas.
+    '/professionals/templates/[persona]': {
+      es: '/profesionales/plantillas/[persona]',
+      en: '/professionals/templates/[persona]',
+      pt: '/profissionais/modelos/[persona]',
+    },
     '/stories': { es: '/historias', en: '/stories', pt: '/historias' },
     '/stories/[slug]': { es: '/historias/[slug]', en: '/stories/[slug]', pt: '/historias/[slug]' },
     '/lessons': { es: '/ensenanzas', en: '/lessons', pt: '/licoes' },

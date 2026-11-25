@@ -329,7 +329,7 @@ export interface CastMember {
   /** Quién es (en inglés): «the teacher», «a classmate». */
   role: string;
   /**
-   * Nombre propio de la persona (DECISIONS 328: el amigo de Luli volvía en varias páginas como «mi
+   * Nombre propio de la persona (DECISIONS 329: el amigo de Luli volvía en varias páginas como «mi
    * compañero»). Null para un adulto que el chico llama por su rol («la seño», «el profe»).
    */
   name?: string | null;

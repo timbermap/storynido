@@ -3328,29 +3328,36 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 - **Qué hace ahora (la mesa: ventas, producto, diseño/UX, marketing, familia):** el resumen arranca con el precio. El cupón queda como un enlace chico «¿Tenés un código?» debajo del total, que abre el campo solo si alguien lo toca. Si la visita llegó con `?cupon=CODIGO` (también `coupon`/`cupom`) en cualquier página, se guarda en la pestaña (sessionStorage) y se aplica solo en el pago, mostrado como «Código X aplicado · Quitar». Igual en el kit de Celebraciones.
 - **Por qué no sacarlo del todo:** sirve para códigos de amigas/referidos, regalos de soporte y campañas orgánicas; sin campo, quien recibió un código no tendría dónde usarlo.
 
-## 325 — Un contacto físico en una página se repara solo
+## 325 — Plantillas de Profesionales por tipo de profesional
+
+- **Qué pasaba (Sebas, 25 nov):** /profesionales/plantillas solo ordenaba por objetivo y los títulos de las tapas del estante se leían de unos 8 px. Una odontopediatra tenía que recorrer seis tarjetas para encontrar el único cuento del dentista.
+- **Qué hace ahora (mesa completa):** arriba, «¿Cuál es tu trabajo?» con siete perfiles (Docentes, Psicopedagogía, Psicología infantil, Fonoaudiología, Terapia ocupacional, Pediatría, Odontopediatría). Cada perfil tiene su página `/profesionales/plantillas/<perfil>` (slug por idioma, en el sitemap y con hreflang) con sus historias en orden, tapa grande, título legible, edades, tres usos y chips a los otros perfiles. Las colecciones por objetivo siguen abajo («O buscá por objetivo») y el estante muestra el título legible debajo de cada tapa.
+- **Dónde se edita:** `apps/web/src/lib/professional-personas.ts` (qué historias y en qué orden) y `Landing.professionals.personas` en los mensajes. Una historia inactiva se saltea sola.
+- **Legales:** sin promesas clínicas; cada perfil aclara que acompaña el trabajo y no reemplaza una evaluación ni un tratamiento. Mismo precio para todos.
+
+## 326 — Un contacto físico en una página se repara solo
 
 - **Qué pasaba (El diario de Luli, staging, 25 nov):** la página 9 salió con la amiga apoyándole la mano en el brazo; la revisión lo marcó y el libro quedó en revisión manual.
 - **Qué hace ahora:** si la revisión de una página menciona contacto (abrazo, beso, mano sobre otra persona, a upa…), la página siempre se redibuja dentro de los topes de reparación, aunque la revisión pida revisión manual, y el redibujo empieza por `CONTACT_FIX_HINT` (misma escena, con aire entre las personas; la cercanía con miradas y objetos compartidos). Solo si fallan los redibujos va a revisión manual.
 - **Prevención:** el Diario pide amistad sin contacto (miradas, risas, compartir algo) y la Academia, festejos desde su lugar sin tocarse (puño en alto, un salto).
 
-## 326 — El Diario suena a 12 años y el Manga se ve manga
+## 327 — El Diario suena a 12 años y el Manga se ve manga
 
 Revisión con la mesa de «El diario de Luli» (staging, 25 nov): las páginas no se veían en el estilo elegido (Manga), el amigo no tenía nombre («mi compañero», «él»), el texto repetía expresiones («alivio enorme» tres veces) y nombraba emociones de adulto («mi vulnerabilidad era total»), y había dos entradas seguidas con «Sábado».
 
 - **Manga:** la ficha describe los rasgos que lo hacen reconocible (pelo en mechones con brillo, ojos grandes con brillo, sombreado de dos tonos con tramas) y evita el cómic occidental y el lápiz suave. La ficha manda sobre las reglas generales (ojos de tamaño natural).
 - **Diario:** la plantilla pide escribir como alguien de 11 o 12 años, emociones con el cuerpo y las acciones, sin repetir expresiones, nombre propio para todo amigo recurrente y días que avanzan.
 
-## 327 — Reglas de oficio para todos los cuentos (de la revisión del Diario)
+## 328 — Reglas de oficio para todos los cuentos (de la revisión del Diario)
 
 Sebas, 25 nov: «¿arreglás prompts de fondo? ¿este y otros?». Las fallas de texto de «El diario de Luli» pasan a ser reglas de `craftRules` para todas las historias: todo personaje recurrente con nombre propio; ninguna expresión repetida y emociones con el vocabulario de la edad del lector; nada de días o escenas repetidos en páginas seguidas; la ropa especial dicha en cada página donde se lleva (para que el plan la ponga en la escena).
 
-## 328 — La mesa completa revisa los prompts: el estilo manda y los personajes que vuelven tienen nombre
+## 329 — La mesa completa revisa los prompts: el estilo manda y los personajes que vuelven tienen nombre
 
-Sebas, 25 nov: «quiero que toda la mesa completa trabaje en los prompts». La revisión (sobre 325-327) encontró que casi todas las fallas de «El diario de Luli» venían de reglas de la casa que contradicen al estilo elegido o se contradicen entre sí, no de reglas que faltaran.
+Sebas, 25 nov: «quiero que toda la mesa completa trabaje en los prompts». La revisión (sobre 326-328) encontró que casi todas las fallas de «El diario de Luli» venían de reglas de la casa que contradicen al estilo elegido o se contradicen entre sí, no de reglas que faltaran.
 
 - **El estilo manda (Manga):** la dirección de arte de cada página pedía «ojos de tamaño natural», «sin brillo en los ojos», paleta apagada y piel con textura natural: lo opuesto al manga. Las fichas de estilo ahora pueden traer `overrides` (va al final de la dirección de arte y de cada pedido de imagen, también en libros con la dirección congelada) y `color` (reemplaza la paleta suave de la casa). El Manga los usa, y la dirección de arte deja de mandarle las reglas que lo contradicen. El control de la imagen trata un look de cómic occidental o de cuento pintado como «otra técnica» cuando el estilo es manga, y la revisión del libro entero ahora marca una página o una tapa dibujada en otra técnica (antes decía «ignorá la variación de estilo»).
-- **Personajes que vuelven con nombre:** el plan arma el elenco con un nombre propio para cada chico o amigo (null solo para un adulto que se llama por su rol), y el redactor recibe el acompañante y el elenco con esos nombres. En los libros de fiesta, los invitados siguen siendo un grupo sin nombre; solo el mejor amigo del pedido tiene nombre (antes «no nombres a los invitados» chocaba con la regla 327).
+- **Personajes que vuelven con nombre:** el plan arma el elenco con un nombre propio para cada chico o amigo (null solo para un adulto que se llama por su rol), y el redactor recibe el acompañante y el elenco con esos nombres. En los libros de fiesta, los invitados siguen siendo un grupo sin nombre; solo el mejor amigo del pedido tiene nombre (antes «no nombres a los invitados» chocaba con la regla 328).
 - **Controles nuevos del texto (sin IA):** frases de emoción repetidas en dos páginas o más («alivio enorme»), palabras de adulto («vulnerabilidad», «abrumada») y un amigo sin nombre que vuelve («mi compañero») pasan a la lista de problemas de la reescritura. El control de contacto suma manos, brazos y hombros («me tomó del brazo», «la mano en el hombro»).
 - **Ropa:** el dibujante nunca ve el texto, así que «la misma ropa salvo que el texto diga otra cosa» pasa a «salvo que la escena lo diga», y las escenas escriben la ropa que nombra el texto.
 - **Profesionales:** el ejemplo de emoción era «me siento abrumada» (vocabulario adulto); ahora es «estoy nerviosa».

@@ -205,7 +205,7 @@ describe('fichas de estilo y de tipo de libro (DECISIONS 282)', () => {
   });
 });
 
-describe('el estilo manda sobre las reglas de la casa (DECISIONS 328)', () => {
+describe('el estilo manda sobre las reglas de la casa (DECISIONS 329)', () => {
   it('el manga no recibe ojos naturales, ojos sin brillo ni paleta apagada, y su prioridad va al final', () => {
     const direction = artDirection({ age: 11, channel: 'families', style: 'manga' });
     expect(direction).not.toContain('natural-sized eyes');

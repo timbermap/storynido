@@ -373,6 +373,15 @@ export function LandingCollections({
                               sizes="(min-width: 1024px) 9.5rem, 25vw"
                             />
                           </div>
+                          {/* El título de la tapa se lee chico en el estante: lo repetimos legible. */}
+                          {line === 'professionals' && (
+                            <span
+                              aria-hidden="true"
+                              className="mt-2 line-clamp-2 block text-center text-sm leading-snug font-semibold text-foreground/85"
+                            >
+                              {story.titlePro ?? story.title}
+                            </span>
+                          )}
                         </Link>
                       </li>
                     ))}
