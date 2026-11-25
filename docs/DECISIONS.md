@@ -3462,3 +3462,13 @@ En el papel fundido, el dibujo se recortaba en la zona del texto y además se fu
 - **Armado (PDF y lector):** la caja del dibujo llega hasta la zona del texto y solo se funde en una franja de `VIGNETTE_FADE_PCT` (10 % de la hoja), dentro del margen libre que pide el prompt (`vignetteArtPct`, `vignetteMaskStop`). Lo que el dibujo pone fuera de la zona se ve entero.
 - **Control:** en el papel fundido, `textZoneOf` marca la zona como `whole` y la moderación rechaza cualquier persona, animal u objeto clave adentro, no solo caras. `text_zone` deja de ser blanda: un dibujo tapado nunca se acepta; se rehace y, si no sale, la página va a revisión.
 - **Contrato:** cláusula nueva `text_layout` («Texto o fundido que tapan el dibujo»), y el examen dibuja con el armado de cada página y la controla con la misma zona.
+
+## 341 — Juez comprador: el que paga mira las páginas armadas y dice si lo compraría (25 nov)
+
+Los jueces del contrato miran cada dibujo suelto contra una regla. Nadie miraba el libro como lo recibe el cliente, y así se escaparon el texto y el fundido que tapaban el dibujo (DECISIONS 340). Sebas: «que el comprador evalúe si esto es algo que compra».
+
+- **`reviewAsBuyer`** (vertex.ts): con la tapa, las páginas armadas, el texto completo y el pedido en palabras, una persona por línea (madre o padre en Familias, psicóloga o dentista en Profesionales, padre del cumpleañero en Celebraciones) responde compra 1-5, regalo 1-5, veredicto (`compra`, `duda`, `no`), lo que le encantó, lo que le haría pedir un reembolso y qué cambiaría para un 5. No corre en producción.
+- **`compose-page.ts`:** arma la página con la misma geometría que el PDF y el lector (zona calma con panel, papel fundido con la franja angosta), para que el juez y quien lea el informe vean lo que ve el cliente.
+- **En el golden set:** cada página se dibuja con su armado (`sceneNoteFor`), se controla la zona del texto como la moderación del worker (`textZoneOf`, un redibujo si falla, si no `text_layout` ✗), se guarda armada (`-armada.webp`) y el juez comprador da su veredicto por pedido. El resumen suma «lo compraría X/N» y el promedio. Caso fijo nuevo `pro-medico-4` (médico y vacuna, 4 años, texto largo en papel fundido).
+- **Sobre pedidos reales:** `pnpm --filter @storynido/providers judge:pedidos --project … --yes` pasa el juez por los últimos pedidos terminados. El informe queda en la Mac (tiene textos y dibujos de chicos reales) y a la mesa llega resumido sin nombres.
+- **Meta:** que el comprador diga «compra» en al menos 8 de cada 10 pedidos, y que ningún motivo de reembolso se repita entre pedidos. Cada motivo que se repite se convierte en cláusula, caso del golden set y test.

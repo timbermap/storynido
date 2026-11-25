@@ -544,6 +544,51 @@ const PAGE_REVIEW_SCHEMA = {
   ],
 };
 
+/** Quién compra, por línea, para el juez comprador. */
+const BUYER_PERSONA: Record<'families' | 'professionals' | 'events', string> = {
+  families:
+    'a mother or father in Latin America who ordered a personalized picture book starring their own child, to read together at home',
+  professionals:
+    'a child psychologist, speech therapist or pediatric dentist in Latin America who ordered this personalized book to use with a young patient',
+  events:
+    'a parent in Latin America who ordered a birthday kit with a mini story starring their child, to share at the party',
+};
+
+export interface BuyerReviewRequest {
+  channel: 'families' | 'professionals' | 'events';
+  priceUsd: number;
+  /** El pedido en palabras (formulario y plantilla), sin datos de un chico real. */
+  order: string;
+  title: string;
+  texts: string[];
+  cover: ImageData;
+  /** Páginas armadas (ilustración con el texto y el papel fundido), como las ve el cliente. */
+  pages: ImageData[];
+}
+
+export interface BuyerReview {
+  buy: number;
+  gift: number;
+  verdict: 'compra' | 'duda' | 'no';
+  loved: string[];
+  refund: string[];
+  fixes: string[];
+  usage: AiUsage;
+}
+
+const BUYER_REVIEW_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    buy: { type: 'INTEGER' },
+    gift: { type: 'INTEGER' },
+    verdict: { type: 'STRING', enum: ['compra', 'duda', 'no'] },
+    loved: { type: 'ARRAY', items: { type: 'STRING' } },
+    refund: { type: 'ARRAY', items: { type: 'STRING' } },
+    fixes: { type: 'ARRAY', items: { type: 'STRING' } },
+  },
+  required: ['buy', 'gift', 'verdict', 'loved', 'refund', 'fixes'],
+};
+
 const BOOK_REVIEW_SCHEMA = {
   type: 'OBJECT',
   properties: {
@@ -1160,6 +1205,50 @@ ${request.contract}`
    * Revisión del libro entero: las miniaturas de todas las páginas juntas, para ver lo que una
    * revisión página por página no ve (la tabla que cambia de forma, la playa que es otra).
    */
+  /**
+   * Juez comprador del golden set (25 nov 2026, Sebas: «que el comprador evalúe si esto es algo que
+   * compra»). Mira la tapa y las páginas armadas como las ve el cliente, con el pedido, y responde
+   * si lo compraría, si lo regalaría y qué le haría pedir un reembolso. No corre en producción.
+   */
+  async reviewAsBuyer(request: BuyerReviewRequest): Promise<BuyerReview> {
+    const parts: Part[] = [{ text: 'Cover:' }, imagePart(request.cover)];
+    request.pages.forEach((page, index) => {
+      parts.push({
+        text: `Page ${String(index + 1)} as printed (illustration and text together):`,
+      });
+      parts.push(imagePart(page));
+    });
+    parts.push({
+      text: `You are ${BUYER_PERSONA[request.channel]}. You just opened the book you paid for (about US$${String(request.priceUsd)}).
+Be the honest, demanding customer you really are: you compare it with Wonderbly, Hooray Heroes and the AI story apps, and you notice in
+five seconds what a parent notices (a face covered by text, a child who changes hair or clothes, a pet that changes color, a toy in the
+text that is not in the picture, letters or English words inside a drawing, a style that is not the one you chose, strangers touching the
+child, a flat story). Judge what you see on these pages and in the text below against what you ordered.
+
+What you ordered:
+${request.order}
+
+Title: ${request.title}
+Full text, page by page:
+${request.texts.map((text, index) => `${String(index + 1)}. ${text}`).join('\n')}
+
+Answer in Spanish, from your own point of view as this customer:
+- buy: 1 to 5, would you buy it again or recommend it (5 = yes without doubt).
+- gift: 1 to 5, would you give it as a present to another family.
+- verdict: "compra" (you are happy you paid), "duda" (you keep it but are disappointed) or "no" (you feel cheated or would ask for a refund).
+- loved: up to 3 short things you loved (concrete, with the page).
+- refund: up to 3 short things that would make you ask for a refund or never buy again (concrete, with the page). Empty if none.
+- fixes: up to 3 short changes that would turn this into a 5 (concrete).`,
+    });
+    const { response, usage } = await this.client.generate(this.model, parts, {
+      temperature: 0,
+      responseMimeType: 'application/json',
+      responseSchema: BUYER_REVIEW_SCHEMA,
+    });
+    const review = parseJson(response, 'juez comprador') as Omit<BuyerReview, 'usage'>;
+    return { ...review, usage };
+  }
+
   async reviewBook(request: BookReviewRequest): Promise<BookReview> {
     const parts: Part[] = [
       { text: 'Approved character reference sheet (the protagonist):' },

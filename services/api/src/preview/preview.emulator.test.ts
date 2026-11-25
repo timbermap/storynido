@@ -679,12 +679,10 @@ describe('vista previa', () => {
           ),
         };
       });
-    const rewrite = vi
-      .spyOn(text, 'rewritePage')
-      .mockResolvedValue({
-        text: 'La dentista le muestra el espejito.',
-        usage: { provider: 'mock', model: 'mock', costUsdMicros: 0 },
-      });
+    const rewrite = vi.spyOn(text, 'rewritePage').mockResolvedValue({
+      text: 'La dentista le muestra el espejito.',
+      usage: { provider: 'mock', model: 'mock', costUsdMicros: 0 },
+    });
     await seedBook(providers, 'book-1');
     expect((await generate('book-1')).statusCode).toBe(200);
     const call = rewrite.mock.calls.find(([request]) => request.avoid === TOUCH_FREE_REWRITE);
