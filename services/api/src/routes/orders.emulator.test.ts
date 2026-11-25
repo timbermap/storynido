@@ -164,6 +164,8 @@ describe('pipeline del pedido (API)', () => {
     expect(order.status).toBe('paid');
     expect(order.channel).toBe('events');
     expect(order.items).toEqual([{ piece: 'book', format: 'softcover', quantity: 20 }]);
+    // Como un pago real: el libro queda pedido (portada sin marca de agua en Mis cuentos).
+    expect((await db.collection(COLLECTIONS.books).doc('b1').get()).get('status')).toBe('ordered');
 
     // Otra persona no puede pagar un libro ajeno.
     const other = await app.inject({

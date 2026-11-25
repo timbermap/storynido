@@ -59,6 +59,11 @@ export interface PageRewriteRequest {
   avoid?: string;
   /** Estribillo del plan: si está en la página, queda letra por letra. */
   refrain?: string | null;
+  /**
+   * Solo cambia el tratamiento («vos» ↔ «tú») a `spanishVoice`: el pedido es de otro país que la
+   * cuenta con la que se hizo la muestra (25 nov 2026: libros de México y Chile en voseo).
+   */
+  voiceOnly?: boolean;
 }
 
 export interface PageRewrite {
