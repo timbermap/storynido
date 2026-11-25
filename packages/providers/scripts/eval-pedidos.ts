@@ -322,7 +322,9 @@ if (estimate > budget) {
 
 let cachedToken = { value: '', at: 0 };
 const freshToken = () => {
-  if (!cachedToken.value || Date.now() - cachedToken.at > 20 * 60_000) {
+  // gcloud puede devolver un token en caché que vence a los pocos minutos (ronda 3 del 25 nov: 12 de 16
+  // vueltas cayeron en 401). Se vuelve a pedir cada 2 minutos: gcloud lo renueva si ya venció.
+  if (!cachedToken.value || Date.now() - cachedToken.at > 2 * 60_000) {
     cachedToken = {
       value: execFileSync('gcloud', ['auth', 'print-access-token'], {
         env: { ...process.env, CLOUDSDK_ACTIVE_CONFIG_NAME: 'storynido' },
