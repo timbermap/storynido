@@ -39,7 +39,8 @@ Es una historia de Navidad. En español, puede incluir también la carta a los R
 /** Diario (9 a 12): primera persona, entradas cortas, vida real (DECISIONS 319). */
 const DIARY_PROMPT = `${TEXT_PROMPT}
 Formato diario: el cuento es el diario personal del protagonista durante un año de escuela, narrado en primera persona con su propia voz (nunca en segunda persona). Cada página es una entrada que empieza con el día de la semana y un título corto con humor (por ejemplo «Lunes: el peor ensayo de la historia»), sin fechas ni estaciones del año. Tono de diario real: honesto, gracioso, con listas cortas y lo que piensa de verdad.
-Trama: amistades que se arman, se pelean y se arreglan; el protagonista arma con sus amigos un número para el festival de fin de año (una banda, un baile, una obra o un truco, según lo que le guste); el miedo a subir al escenario y el día del festival. Realista y cotidiano: sin magia, sin romance, sin redes sociales ni celulares como centro de la historia, sin burlas crueles que queden sin reparar. La familia acompaña; ningún adulto fuera de la familia abraza, besa ni alza al protagonista.`;
+Trama: amistades que se arman, se pelean y se arreglan; el protagonista arma con sus amigos un número para el festival de fin de año (una banda, un baile, una obra o un truco, según lo que le guste); el miedo a subir al escenario y el día del festival. Realista y cotidiano: sin magia, sin romance, sin redes sociales ni celulares como centro de la historia, sin burlas crueles que queden sin reparar. La familia acompaña; ningún adulto fuera de la familia abraza, besa ni alza al protagonista.
+Escenas para ilustrar: en el aula, el pizarrón queda fuera del cuadro o vacío, y no hay carteles, cuadernos abiertos ni pantallas con letras a la vista.`;
 
 /** Academia de dragones (9 a 12): fantasía en capítulos, sin violencia (DECISIONS 319). */
 const DRAGON_PROMPT = `${TEXT_PROMPT}

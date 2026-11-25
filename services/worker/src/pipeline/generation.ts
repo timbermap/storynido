@@ -82,6 +82,7 @@ import {
   withCurrentGuards,
   mediumFor,
   onlySoftRejection,
+  NO_TEXT_OBJECTS_HINT,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
@@ -380,7 +381,7 @@ const ESCALATION = [
   ' IMPORTANT: draw NO readable text, letters or numbers anywhere (leave calendars, clocks, signs, labels, posters and book covers blank or abstract); keep hands simple and natural, partly hidden or in pockets if needed; faces calm and well formed.',
   // La moderación rechaza cualquier palabra, letra o número legible: se sacan solo los objetos que
   // suelen llevarlos. La escena (lugar, personajes, cantidad de gente) se mantiene tal cual.
-  ' NO TEXT-BEARING OBJECTS: keep the same place, the same people and the same action as described, but do not draw signs, posters, banners, blackboards or whiteboards, screens, maps, diagrams, labels, packaging with writing, books, notebooks or papers with visible writing, lockers or doors with numbers, clocks, calendars, license plates, or clothing with prints or lettering. Show those surfaces blank or leave those objects out. Keep hands simple and faces calm.',
+  ` ${NO_TEXT_OBJECTS_HINT}`,
   ' FINAL FALLBACK: keep the same place and the same characters (same gender, age and look as in the scene), as a simple medium shot with soft shapes for the background, with absolutely no signs, posters, boards, screens, notebooks, papers, numbers, letters or small props.',
 ] as const;
 
