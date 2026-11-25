@@ -47,7 +47,9 @@ export default defineConfig({
         {
           command: 'pnpm --filter @storynido/api exec tsx src/server.ts',
           url: 'http://localhost:8080/health',
-          env: { ...env, PORT: '8080' },
+          // La web arma las páginas públicas desde un solo IP: con el tope de 120 por minuto, las
+          // landings en tres idiomas corriendo en paralelo daban 429 y la página respondía 500.
+          env: { ...env, PORT: '8080', RATE_LIMIT_PER_MINUTE: '5000' },
           timeout: 120_000,
         },
         {
