@@ -86,6 +86,9 @@ const at = (name: keyof typeof KID, age: number) =>
 const BABY = `Picture-book illustration for babies and toddlers in matte editorial gouache. Warm, softened palette: deep muted navy, terracotta, ochre mustard, sage green, dusty coral and warm cream, with one accent color per image; no pure primary red, blue or yellow, no neon, no candy colors. Contrast comes from dark against light values (navy against cream), not from saturation. Very simple shapes, a single main element on a calm, slightly textured background, a large friendly face. Hand-made edges, visible brush texture and paper grain; line work in dark warm brown only where needed, thin-to-thick and uneven, never a uniform black vector outline. Toddler proportions (big head, short limbs). Individual face: small dark eyes without glossy highlights, natural cheeks, no perfect round blush circles.`;
 const READER = `Gouache editorial children's illustration with comic-book energy. Opaque matte paint with visible brush texture, limited palette of navy, coral, mustard, mint. Taller proportions (head about one fifth of the body), diagonal dynamic composition, the child in motion, humor, hand-drawn motion lines, no text or lettering of any kind. Expressive faces with character.`;
 const NOVEL = `Graphic-novel illustration for pre-teen readers. Firm black ink linework with flat color fills, deep navy and terracotta palette, realistic proportions (head about one sixth of the body), cinematic low-angle framing, suspense and intrigue. Nothing cute, nothing babyish, no rounded cartoon face.`;
+// 9-12, géneros nuevos (DECISIONS 319): la portada ya en el estilo recomendado de cada historia.
+const NOTEBOOK = `School notebook doodle illustration for pre-teen readers: blue ballpoint pen and black felt-tip marker lines on cream lined notebook paper, loose confident sketchy strokes, cross-hatched shadows, flat highlights in two or three marker colors (coral, mint, mustard), one strip of washi tape and one sticky note as decoration. Hand-drawn look, never a polished painting. Realistic pre-teen proportions (head about one sixth of the body), nothing cute or babyish.`;
+const MANGA = `Manga-inspired illustration for pre-teen readers: clean expressive ink linework with tapered strokes, cel shading with subtle screentone dot textures, large but natural expressive eyes, bright clean colors and a dynamic pose. Original character design that resembles no existing anime or manga character. One single image: no panels, no speech bubbles, no Japanese text.`;
 const GENERIC =
   'a child with short warm chestnut-brown hair (clearly a child, never grey or ash hair) and a plain t-shirt';
 
@@ -392,6 +395,18 @@ const JOBS: Job[] = [
     `${at('alex', 11)} seen from the side, stepping through a glowing flat doorway made of square pixel blocks into a blocky pixelated landscape; the controller dangles from one hand. No text, no UI, no numbers.`,
   ),
   cover(
+    'el-diario-de-nombre',
+    NOTEBOOK,
+    'cream',
+    `${at('sofi', 11)} in a mint hoodie sits cross-legged on her bed writing in a spiral notebook, a guitar leaning on the wall behind her and a few doodled stars and arrows around her like notebook sketches; she glances up at the viewer with a half smile. The notebook pages are blank: no writing, no letters, no numbers.`,
+  ),
+  cover(
+    'la-academia-de-dragones',
+    MANGA,
+    'coral',
+    `${at('martina', 11)} in a simple brown flight jacket stands on a stone ledge of a mountain academy, holding out her open hand to a small stubborn dragon the size of a cat (mint scales, tiny wings) perched on a rock, which turns its head away with a little puff of smoke; distant stone towers below the top third. No text.`,
+  ),
+  cover(
     'feliz-cumpleanos',
     GOUACHE,
     'coral',
@@ -631,6 +646,8 @@ const JOBS: Job[] = [
     'novela-grafica',
     'bold contemporary graphic novel art for middle-grade readers, thick confident black ink outlines, spotted solid blacks, flat color fields with hard-edged cel shadows, slightly stylized proportions, dynamic camera angles, clearly a comic-book look rather than a painted storybook, one single full-page image without panels or speech bubbles',
   ),
+  style('cuaderno', NOTEBOOK),
+  style('manga', MANGA),
   style(
     'lapices-de-colores',
     'colored pencil drawing, imperfect human lines, visible strokes, paper grain and deliberately incomplete coloring',

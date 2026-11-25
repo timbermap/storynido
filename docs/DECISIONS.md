@@ -3286,3 +3286,12 @@ la mesa, 2 mejorar, 3 con ejemplos similares, 4 y 5 ok».
 - **Qué pasaba (Angelica regenerado, 25 nov):** el puente desapareció, pero las páginas 7, 8 y 10 la dibujaron con remera a rayas bajo el agua, entre páginas con la malla amarilla; el plan dejaba esas escenas sin ropa especial y el control no tenía con qué compararlas. La tapa la mostraba nadando libre y adentro iba siempre en una burbuja.
 - **Qué hace ahora:** una escena sin ropa especial entre dos con la misma ropa especial la hereda (también al regenerar un libro ya aprobado: se guarda el libro congelado nuevo y se registra `outfit_gap_filled`); así la página pide esa ropa y la revisión rechaza otra. Un objeto de la biblia visual que aparece en la mitad o más de las escenas va también en la tapa.
 - **Límite:** si la burbuja del cuento no quedó como objeto de la biblia visual, la tapa no la conoce; se ve al regenerar.
+
+## 319 — Dos historias nuevas para 9 a 12 y dos estilos de su edad
+
+Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 12? otro estilo, alguno para chica?»), con la mesa (producto, familia, marketing, diseño):
+
+- **Qué había:** en «Para grandes lectores» quedaban activas solo dos historias de 9 a 12 (Faro y Videojuego; Invento y Mapa en pausa por DECISIONS 149, Lunes al revés es de 6 a 8). Las dos son de misterio o lógica y en las dos portadas hay un varón.
+- **Qué se suma:** *El diario de [Nombre]* (vida real de escuela en primera persona, formato diario; estilo recomendado **Cuaderno**) y *[Nombre] y la academia de dragones* (fantasía en capítulos sin violencia; estilo recomendado **Manga**, genérico y sin personajes existentes). Las dos portadas tienen a una chica del elenco (Sofi y Martina a los 11), sin clichés de color ni de tema: las dos historias sirven para cualquier chico o chica.
+- **Por qué esos géneros:** a esta edad se leen diarios ilustrados, fantasía y manga (MX, AR/UY e hispanos de EE. UU.); otra aventura de misterio no sumaba.
+- **Cómo:** cada historia trae su propio `textPromptTemplate` (formato y límites: sin romance, sin batallas, sin contacto físico de adultos fuera de la familia) y su `defaultStyle`. Los dos estilos tienen ficha propia (`style-sheets.ts`) y muestra del selector generada con el mismo prompt que los libros.
