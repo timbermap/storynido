@@ -261,6 +261,13 @@ describe('escena de la portada', () => {
 });
 
 describe('castNote', () => {
+  it('pide el mismo peinado y la misma ropa en cada página (la mamá de bata en vez de suéter)', () => {
+    const note = castNote([
+      { role: 'mother', gender: 'female', look: 'short curly hair, green sweater' },
+    ]);
+    expect(note).toContain('same gender, hairstyle, clothes and look');
+  });
+
   it('fija género y aspecto de las personas secundarias y solo las dibuja donde la escena las incluye', () => {
     const note = castNote([
       { role: 'the teacher', gender: 'male', look: 'about 40, short gray hair, green cardigan' },

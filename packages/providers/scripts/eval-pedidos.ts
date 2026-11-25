@@ -30,6 +30,7 @@ import {
   buildOrderContract,
   buildStoryPrompt,
   castNote,
+  companionNote,
   checkFormContract,
   checkPlanContract,
   checkTextContract,
@@ -72,6 +73,11 @@ const { values } = parseArgs({
     project: { type: 'string', default: 'storynido-staging' },
     out: { type: 'string', default: 'eval-reports' },
     yes: { type: 'boolean', default: false },
+    /** Vueltas por pedido: con 2, un fallo cuenta como real solo si se repite (el dibujo varía). */
+    runs: { type: 'string', default: '1' },
+    /** Como el worker: el dibujo que falla el contrato se redibuja una vez con la reparación. */
+    redraw: { type: 'boolean', default: true },
+    'no-redraw': { type: 'boolean', default: false },
   },
 });
 
@@ -287,13 +293,23 @@ if (unknown.length > 0) {
 
 const withImages = values.images && !values['no-images'];
 const pagesToDraw = Number(values.pages);
-// Imagen: ~1.300 tokens de salida a US$60/M más la entrada; texto y revisiones, unos centavos.
-const perImage = 0.085;
-const perCase = 0.06 + (withImages ? (2 + pagesToDraw) * perImage + (1 + pagesToDraw) * 0.006 : 0);
-const estimate = cases.length * perCase;
+const runs = Math.max(1, Math.floor(Number(values.runs)) || 1);
+const withRedraw = values.redraw && !values['no-redraw'];
+// Imagen: ~1.300 tokens de salida más la entrada (calibrado con la v2 del 25 nov: US$3,65 reales
+// contra 4,07 estimados); texto y revisiones, unos centavos.
+const perImage = 0.075;
+// El redibujo se estima para un tercio de los dibujos (en la v2 falló uno de cada tres).
+const perCase =
+  0.06 +
+  (withImages
+    ? (2 + pagesToDraw) * perImage +
+      (1 + pagesToDraw) * 0.006 +
+      (withRedraw ? (1 + pagesToDraw) * 0.35 * (perImage + 0.006) : 0)
+    : 0);
+const estimate = cases.length * runs * perCase;
 const budget = Number(values.budget);
 console.log(
-  `Plan: ${String(cases.length)} pedidos · ${withImages ? `lámina, tapa y ${String(pagesToDraw)} páginas` : 'solo texto'} · estimado USD ${estimate.toFixed(2)} · tope USD ${budget.toFixed(2)}`,
+  `Plan: ${String(cases.length)} pedidos × ${String(runs)} vuelta(s)${withRedraw ? ' con redibujo' : ''} · ${withImages ? `lámina, tapa y ${String(pagesToDraw)} páginas` : 'solo texto'} · estimado USD ${estimate.toFixed(2)} · tope USD ${budget.toFixed(2)}`,
 );
 if (!values.yes) {
   console.log('Sin --yes no se genera nada.');
@@ -335,6 +351,10 @@ const spend = (usage: { costUsdMicros: number }) => {
 type Verdict = 'pass' | 'fail' | 'repaired' | 'soft';
 interface Row {
   id: string;
+  /** Vuelta (1 si la corrida tiene una sola). */
+  run?: number;
+  /** Dibujos revisados y los que salieron limpios a la primera (sin redibujo). */
+  images?: { reviewed: number; cleanFirst: number; cleanFinal: number };
   covers: string;
   title: string;
   pages: string[];
@@ -357,13 +377,18 @@ const save = () => {
   writeFileSync(path.join(outDir, 'resultados.json'), JSON.stringify(rows, null, 2));
 };
 
-for (const testCase of cases) {
+for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index + 1).flatMap(
+  (run) => cases.map((item) => [run, item] as const),
+)) {
   const story = stories.find((item) => item.slug === testCase.story);
   const style = SEED_STYLES.find((item) => item.slug === testCase.style);
   if (!story || !style) continue;
   const before = spent;
+  const tag = runs > 1 ? `${testCase.id}-v${String(round)}` : testCase.id;
   const row: Row = {
     id: testCase.id,
+    run: round,
+    images: { reviewed: 0, cleanFirst: 0, cleanFinal: 0 },
     covers: testCase.covers,
     title: '',
     pages: [],
@@ -502,13 +527,13 @@ for (const testCase of cases) {
         palette: story.palette,
         style: style.slug,
       });
-      const description = describeCharacter(
+      const description = `${describeCharacter(
         testCase.name,
         testCase.age,
         testCase.sheet,
         testCase.traits,
         [],
-      );
+      )}${storyPlan.companion ? `\n${companionNote(storyPlan.companion)}` : ''}`;
       const draw = async (label: string, scene: string, references: ImageData[], seed: number) => {
         // Un dibujo que se cuelga no tumba el caso: un reintento, como el worker.
         const once = () =>
@@ -535,7 +560,7 @@ for (const testCase of cases) {
         spend(generated.usage);
         await sharp(generated.bytes)
           .webp({ quality: 82 })
-          .toFile(path.join(outDir, `${testCase.id}-${label}.webp`));
+          .toFile(path.join(outDir, `${tag}-${label}.webp`));
         return { bytes: generated.bytes, mimeType: generated.mimeType };
       };
       const lamina = await draw('lamina', CHARACTER_REFERENCE_SCENE, [], 0);
@@ -574,36 +599,81 @@ for (const testCase of cases) {
           // El worker redibuja la página más pudorosa si el filtro bloquea la revisión; acá queda
           // anotada sin revisar y el caso sigue.
           row.notes.push(`${label}: sin revisar (${(error as Error).message.slice(0, 120)})`);
-          return;
+          return null;
         }
         spend(verdict.usage);
-        for (const clause of verdict.contractClauses ?? []) {
-          mark(clause, 'fail');
-          row.notes.push(
-            `${label}: ${clause} (${verdict.criticalIssues.join('; ').slice(0, 400)})`,
-          );
-        }
-        if (verdict.textInImage) mark('no_text_in_image', 'fail');
+        const broken = new Set<ContractClauseId>(verdict.contractClauses ?? []);
+        if (verdict.textInImage) broken.add('no_text_in_image');
+        return { broken, issues: verdict.criticalIssues, fix: verdict.repairInstructions ?? [] };
       };
-      const cover = await draw(
+      /**
+       * Dibuja, revisa y, si falla el contrato, redibuja una vez con las instrucciones de la
+       * revisión (como el worker). Lo que el redibujo arregla queda ↻; lo que sigue, ✗.
+       */
+      const drawChecked = async (
+        label: string,
+        file: string,
+        scene: string,
+        seed: number,
+        index: number,
+        pageText: string | null,
+      ) => {
+        const first = await review(label, await draw(file, scene, [lamina], seed), index, pageText);
+        if (!first) return;
+        const images = row.images ?? { reviewed: 0, cleanFirst: 0, cleanFinal: 0 };
+        row.images = images;
+        images.reviewed += 1;
+        if (first.broken.size === 0) {
+          images.cleanFirst += 1;
+          images.cleanFinal += 1;
+          return;
+        }
+        let final = first;
+        if (withRedraw) {
+          const fix = first.fix.length > 0 ? first.fix : first.issues;
+          const again = await review(
+            `${label} (redibujo)`,
+            await draw(
+              `${file}-redibujo`,
+              `${scene} Repair: ${fix.join('; ')}.`,
+              [lamina],
+              seed + 100,
+            ),
+            index,
+            pageText,
+          );
+          if (again) final = again;
+        }
+        if (final.broken.size === 0) images.cleanFinal += 1;
+        for (const clause of first.broken) {
+          mark(clause, final.broken.has(clause) ? 'fail' : 'repaired');
+          row.notes.push(`${label}: ${clause} (${first.issues.join('; ').slice(0, 400)})`);
+        }
+        for (const clause of final.broken) {
+          mark(clause, 'fail');
+          if (final !== first) {
+            row.notes.push(
+              `${label} tras redibujo: ${clause} (${final.issues.join('; ').slice(0, 400)})`,
+            );
+          }
+        }
+      };
+      await drawChecked(
+        'tapa',
         'tapa',
         coverScene(draft.pages[0]?.illustrationPrompt, draft.title, coverSetting(storyPlan)),
-        [lamina],
         1,
+        0,
+        null,
       );
-      await review('tapa', cover, 0, null);
       for (const page of draft.pages.slice(0, pagesToDraw)) {
         const scene = storyPlan.scenes.find((item) => item.pageIndex === page.index);
         const bible = visualBibleCheck(storyPlan, scene);
-        const drawn = await draw(
+        await drawChecked(
+          `página ${String(page.index + 1)}`,
           `pagina-${String(page.index + 1)}`,
           `${page.illustrationPrompt}${bible ? ` ${bible}` : ''}${castNote(storyPlan.cast)}`,
-          [lamina],
           page.index + 2,
-        );
-        await review(
-          `página ${String(page.index + 1)}`,
-          drawn,
           page.index + 1,
           pages[page.index]?.text ?? null,
         );
@@ -617,11 +687,11 @@ for (const testCase of cases) {
       ] as const) {
         mark(clause, 'pass');
       }
-      console.log(`✓ ${testCase.id} · imágenes revisadas`);
+      console.log(`✓ ${tag} · imágenes revisadas`);
     }
   } catch (error) {
     row.error = (error as Error).message.slice(0, 200);
-    console.log(`✗ ${testCase.id}: ${row.error}`);
+    console.log(`✗ ${tag}: ${row.error}`);
   }
   row.costUsd = (spent - before) / 1_000_000;
   save();
@@ -633,13 +703,18 @@ const previous: Row[] = values.compare
   ? (JSON.parse(readFileSync(path.resolve(values.compare), 'utf8')) as Row[])
   : [];
 const regressions: string[] = [];
-for (const row of rows) {
-  const old = previous.find((item) => item.id === row.id);
-  if (!old) continue;
+// Con varias vueltas, una regresión es un fallo que se repite en todas y que antes pasaba en
+// alguna: un solo dibujo que sale mal puede ser azar.
+for (const id of new Set(rows.map((row) => row.id))) {
+  const now = rows.filter((row) => row.id === id);
+  const old = previous.filter((item) => item.id === id);
+  if (old.length === 0) continue;
   for (const clause of CONTRACT_CLAUSES) {
-    const was = old.clauses[clause];
-    if ((was === 'pass' || was === 'repaired') && row.clauses[clause] === 'fail') {
-      regressions.push(`${row.id} · ${clause}`);
+    const passedBefore = old.some(
+      (item) => item.clauses[clause] === 'pass' || item.clauses[clause] === 'repaired',
+    );
+    if (passedBefore && now.every((row) => row.clauses[clause] === 'fail')) {
+      regressions.push(`${id} · ${clause}`);
     }
   }
 }
@@ -649,15 +724,32 @@ const used = CONTRACT_CLAUSES.filter((clause) => rows.some((row) => row.clauses[
 const md = [
   `# Golden set de pedidos · ${new Date().toISOString().slice(0, 10)}`,
   '',
-  `Costo real: USD ${(spent / 1_000_000).toFixed(2)} · ${withImages ? `lámina, tapa y ${String(pagesToDraw)} páginas` : 'solo texto'}`,
+  `Costo real: USD ${(spent / 1_000_000).toFixed(2)} · ${withImages ? `lámina, tapa y ${String(pagesToDraw)} páginas` : 'solo texto'} · ${String(runs)} vuelta(s)${withRedraw ? ' con redibujo' : ''}`,
   '',
+  ...(withImages
+    ? [
+        (() => {
+          const total = rows.reduce((sum, row) => sum + (row.images?.reviewed ?? 0), 0);
+          const first = rows.reduce((sum, row) => sum + (row.images?.cleanFirst ?? 0), 0);
+          const final = rows.reduce((sum, row) => sum + (row.images?.cleanFinal ?? 0), 0);
+          const pct = (value: number) =>
+            total ? `${String(Math.round((100 * value) / total))}%` : '-';
+          const clean = rows.filter(
+            (row) =>
+              !row.error && Object.values(row.clauses).every((verdict) => verdict !== 'fail'),
+          ).length;
+          return `Dibujos limpios a la primera: ${String(first)}/${String(total)} (${pct(first)}) · después del redibujo: ${String(final)}/${String(total)} (${pct(final)}) · pedidos sin fallos duros al final: ${String(clean)}/${String(rows.length)}`;
+        })(),
+        '',
+      ]
+    : []),
   '✓ cumple · ↻ falló y se reparó solo · · blanda (se mide) · ✗ no cumple',
   '',
   `| Pedido | ${used.join(' | ')} | Costo |`,
   `| --- | ${used.map(() => '---').join(' | ')} | --- |`,
   ...rows.map(
     (row) =>
-      `| ${row.id}${row.error ? ' (error)' : ''} | ${used
+      `| ${row.id}${runs > 1 ? ` v${String(row.run ?? 1)}` : ''}${row.error ? ' (error)' : ''} | ${used
         .map((clause) => {
           const verdict = row.clauses[clause];
           return verdict ? symbol[verdict] : '';
@@ -674,7 +766,7 @@ const md = [
   '## Qué cubre y qué falló',
   ...rows.map(
     (row) =>
-      `- **${row.id}** (${row.covers}): ${row.error ?? (row.notes.join(' · ') || 'todo cumple')}`,
+      `- **${row.id}${runs > 1 ? ` v${String(row.run ?? 1)}` : ''}** (${row.covers}): ${row.error ?? (row.notes.join(' · ') || 'todo cumple')}`,
   ),
 ].join('\n');
 writeFileSync(path.join(outDir, 'resumen.md'), md);

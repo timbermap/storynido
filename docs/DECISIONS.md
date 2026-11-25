@@ -3433,3 +3433,15 @@ La primera corrida pagada (`pnpm eval:pedidos --yes`, US$3,32, 8 pedidos) queda 
 - **Tratamiento (Sebas, 25 nov):** la muestra se sigue escribiendo con el país de la cuenta, pero al generar el libro pagado, si `spanishVoiceFor(order.country)` es distinto, cada página se reescribe solo en el tratamiento (`rewritePage` con `voiceOnly`) y se registra `voice_rewritten`. Si una página pierde un nombre, queda como estaba. Los libros de México y Chile de una cuenta argentina salían en voseo.
 - **Láminas corridas (Sebas, 25 nov):** en el PDF digital con texto frente a lámina (9 años en adelante), la portada era la página 1 y cada ilustración quedaba frente al texto de la escena siguiente. Ahora va una guarda en blanco después de la portada (`needsEndpaper`), así cada texto queda a la izquierda y su lámina a la derecha. El grapado comparte el PDF pero va sin guarda: su cantidad de páginas la fija la imprenta.
 - **Pedido de prueba (staging):** `devPaidOrder` pasa el libro a `ordered` como el pago real, así Mis cuentos muestra la portada sin marca de agua.
+
+## 338 — Segunda corrida del golden set (25 nov): lo que se repite se cierra en la regla, y el examen mide lo que recibe el cliente
+
+La v2 (US$3,65) pasó de 1 a 3 pedidos limpios de 8 (69% de los dibujos limpios a la primera). Lo que falló en las dos corridas se cierra como regla, no dibujo por dibujo:
+
+- **Lugares con gente (aula, sala de espera, consultorio):** `ONE_PROTAGONIST` pide sillas y bancos vacíos en vez de compañeros o pacientes que la escena no nombra, y la tapa (`coverScene`) solo muestra al protagonista, al acompañante y a los personajes nombrados (en una fiesta, los invitados).
+- **El profesional que toca:** `BODY_CONTACT` dice que médicos, dentistas, enfermeras y terapeutas trabajan a un brazo de distancia con una herramienta y nunca apoyan la mano en la cara, la cabeza, los brazos o las piernas del chico. La reparación del texto (`no_touch`) dice lo mismo: quien atiende muestra, explica o alcanza una herramienta.
+- **Ropa de los secundarios:** `castNote` pide el mismo peinado y la misma ropa en todas las páginas, aunque el protagonista se cambie.
+- **Letras en objetos** (alfombra, panel, lomos): `PLAIN_SURFACES` en la dirección de arte, también sumada a las direcciones guardadas (`withCurrentGuards`).
+- **Mascota dibujada como un nene:** `companionNote` dice que el acompañante nunca cambia de especie ni de tamaño. El eval no le pasaba la nota del acompañante al dibujo y ahora sí.
+
+**El examen:** mide el primer dibujo y también el resultado después de un redibujo con las instrucciones de la revisión, como hace el worker (`--no-redraw` lo apaga). El resumen da dibujos limpios a la primera, después del redibujo y pedidos sin fallos duros. `--runs 2` corre cada pedido dos veces, y una regresión cuenta solo si falla en todas las vueltas y antes pasaba en alguna: un dibujo solo puede salir mal por azar. Meta: 90% de dibujos limpios a la primera y ningún fallo duro después del redibujo.
