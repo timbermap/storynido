@@ -3286,3 +3286,8 @@ la mesa, 2 mejorar, 3 con ejemplos similares, 4 y 5 ok».
 - **Qué pasaba (Angelica regenerado, 25 nov):** el puente desapareció, pero las páginas 7, 8 y 10 la dibujaron con remera a rayas bajo el agua, entre páginas con la malla amarilla; el plan dejaba esas escenas sin ropa especial y el control no tenía con qué compararlas. La tapa la mostraba nadando libre y adentro iba siempre en una burbuja.
 - **Qué hace ahora:** una escena sin ropa especial entre dos con la misma ropa especial la hereda (también al regenerar un libro ya aprobado: se guarda el libro congelado nuevo y se registra `outfit_gap_filled`); así la página pide esa ropa y la revisión rechaza otra. Un objeto de la biblia visual que aparece en la mitad o más de las escenas va también en la tapa.
 - **Límite:** si la burbuja del cuento no quedó como objeto de la biblia visual, la tapa no la conoce; se ve al regenerar.
+
+## 319 — El visor de la muestra cuenta páginas del libro, no pantallas
+
+- **Qué pasaba (Tino, 25 nov):** el libro de 16 páginas (9 años o más: texto y dibujo enfrentados, 7 escenas × 2 + dedicatoria + fin) mostraba «Fin · 10 de 10», y parecía que faltaban páginas.
+- **Qué hace ahora:** en la muestra el contador dice las páginas del libro: «Dedicatoria · Página 1 de 16», «Página 3 · Páginas 6 y 7 de 16», «Fin · Página 16 de 16»; la tapa no lleva número. Los demás visores siguen contando pantallas.

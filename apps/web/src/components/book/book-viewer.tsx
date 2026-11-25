@@ -109,6 +109,7 @@ export function BookViewer({
   onPageChange,
   examples,
   typography,
+  bookPages,
 }: {
   title: string;
   /** Nombre del protagonista: en la portada va grande, con letra a mano. */
@@ -125,6 +126,11 @@ export function BookViewer({
   examples?: ViewerExamples;
   /** Letra del cuento por edad (la del PDF); sin ella, la de siempre. */
   typography?: StoryTypography | null;
+  /**
+   * Páginas del libro terminado. Con ellas el contador cuenta páginas del libro y no pantallas:
+   * con texto y dibujo enfrentados una pantalla son dos páginas (16 páginas, «10 de 10»).
+   */
+  bookPages?: number;
 }) {
   const t = useTranslations('Viewer');
   const [index, setIndex] = useState(0);
@@ -154,6 +160,29 @@ export function BookViewer({
 
   if (!current) return null;
 
+  // Primera página del libro de cada pantalla (la tapa no cuenta): dedicatoria 1, cada escena una
+  // o dos (enfrentadas), el fin al final.
+  const firstPage = (position: number): number =>
+    pages
+      .slice(0, position)
+      .reduce(
+        (sum, page) =>
+          page.kind === 'cover'
+            ? sum
+            : sum + (page.kind === 'story' && page.layout?.kind === 'facing' ? 2 : 1),
+        1,
+      );
+  const counter = (page: ViewerPage, position: number): string => {
+    if (!bookPages) return t('counter', { current: position + 1, total });
+    if (page.kind === 'cover') return '';
+    const from = page.kind === 'end' ? bookPages : Math.min(firstPage(position), bookPages);
+    return page.kind === 'story' && page.layout?.kind === 'facing' && from < bookPages
+      ? t('bookPages', { from, to: from + 1, total: bookPages })
+      : t('bookPage', { page: from, total: bookPages });
+  };
+  const status = (page: ViewerPage, position: number): string =>
+    [label(page), counter(page, position)].filter(Boolean).join(' · ');
+
   const label = (page: ViewerPage) =>
     page.kind === 'cover'
       ? t('cover')
@@ -173,7 +202,7 @@ export function BookViewer({
         tabIndex={0}
         role="group"
         aria-roledescription="página"
-        aria-label={`${label(current)} · ${t('counter', { current: index + 1, total })}`}
+        aria-label={status(current, index)}
         onKeyDown={(event) => {
           if (event.key === 'ArrowRight') go(index + 1);
           if (event.key === 'ArrowLeft') go(index - 1);
@@ -228,7 +257,7 @@ export function BookViewer({
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <p aria-live="polite" className="text-sm font-bold text-muted-foreground">
-          {label(current)} · {t('counter', { current: index + 1, total })}
+          {status(current, index)}
         </p>
         {actions?.(current)}
       </div>

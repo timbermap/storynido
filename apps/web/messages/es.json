@@ -1837,6 +1837,8 @@
     "prev": "Página anterior",
     "next": "Página siguiente",
     "counter": "{current} de {total}",
+    "bookPage": "Página {page} de {total}",
+    "bookPages": "Páginas {from} y {to} de {total}",
     "cover": "Portada",
     "dedication": "Dedicatoria",
     "page": "Página {number}",

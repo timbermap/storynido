@@ -561,6 +561,7 @@ export function PreviewPanel({
               }
               lockedLabel={tViewer('locked')}
               typography={data.typography ?? null}
+              bookPages={data.totalPages}
               actions={actions}
               onPageChange={() => {
                 setEditing(null);
