@@ -430,10 +430,23 @@
           "text": "Ves la vista previa del cuento sin pagar y solo pagás si lo querés. Sin planes mensuales ni cuotas."
         }
       },
-      "catalogSubtitle": "Para anticipar situaciones, trabajar emociones, rutinas, escuela o lenguaje. Elegí la plantilla, hojeá un ejemplo y ajustá el texto para cada niño.",
+      "catalogSubtitle": "Elegís la historia, creás al niño como personaje con una foto o sin foto y ajustás el texto a su nivel. Las tapas que ves son ejemplos: cada cuento sale con su cara y su nombre o alias.",
       "catalogNote": "Ves todo sin cuenta. Solo la necesitás para crear.",
       "personasSubtitle": "Elegí tu perfil y mirá primero los cuentos que más se usan en tu aula o tu consultorio.",
-      "byGoalTitle": "O buscá por objetivo"
+      "byGoalTitle": "O buscá por objetivo",
+      "madeSteps": {
+        "1": {
+          "title": "Elegí la historia",
+          "text": "Por perfil o por objetivo. Podés hojear el ejemplo antes."
+        },
+        "2": {
+          "title": "Creá al protagonista"
+        },
+        "3": {
+          "title": "Ajustá y descargá",
+          "text": "Nivel de lectura, cantidad de texto y extensión para ese niño. Ves la vista previa gratis y pagás solo si te sirve."
+        }
+      }
     }
   },
   "Checkout": {

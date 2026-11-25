@@ -2,10 +2,12 @@ import type { Locale, PublicStory } from '@storynido/shared';
 import {
   ArrowRight,
   BookOpen,
+  Camera,
   GraduationCap,
   HeartHandshake,
   MessageCircle,
   Puzzle,
+  SlidersHorizontal,
   Smile,
   Stethoscope,
   type LucideIcon,
@@ -36,6 +38,46 @@ const personaHref = (locale: Locale, key: PersonaKey) => ({
   pathname: '/professionals/templates/[persona]' as const,
   params: { persona: PERSONA_SLUGS[locale][key] },
 });
+
+/**
+ * «Así se hace cada cuento a medida»: deja claro que no son cuentos ya hechos, sino que el niño
+ * (paciente o alumno) es el protagonista con su cara, con foto o sin foto (Sebas, 25 Nov 2026).
+ */
+export async function MadeToMeasureSteps({ className }: { className?: string }) {
+  const t = await getTranslations('Landing.professionals');
+  const steps = [
+    { key: '1', Icon: BookOpen },
+    { key: '2', Icon: Camera },
+    { key: '3', Icon: SlidersHorizontal },
+  ] as const;
+  return (
+    <section
+      aria-labelledby="made-to-measure"
+      className={cn('rounded-2xl bg-[#eee8fa] p-5 sm:p-6', className)}
+    >
+      <h2 id="made-to-measure" className="text-xl leading-tight font-semibold text-[#3f3270]">
+        {t('madeTitle')}
+      </h2>
+      <ol className="mt-4 grid gap-4 md:grid-cols-3">
+        {steps.map(({ key, Icon }) => (
+          <li key={key} className="flex gap-3 rounded-xl bg-card p-4">
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#eee8fa] text-[#5b4a99]">
+              <Icon className="size-5" aria-hidden="true" />
+            </span>
+            <span>
+              <span className="block font-semibold">
+                {key}. {t(`madeSteps.${key}.title`)}
+              </span>
+              <span className="mt-1 block text-sm text-muted-foreground">
+                {t(`madeSteps.${key}.text`)}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
 
 /**
  * «¿Cuál es tu trabajo?»: una tarjeta por tipo de profesional, con las tapas de sus primeras
