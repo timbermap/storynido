@@ -554,6 +554,11 @@ export type ImageContractClause = (typeof IMAGE_CONTRACT_CLAUSES)[number];
 export function imageContractNote(input: {
   companion?: { name: string; look: string } | null;
   cast?: readonly { role: string; name?: string | null }[];
+  /**
+   * Celebraciones: los invitados de la fiesta son un grupo sin nombre que el pedido permite
+   * (golden set, 25 nov: la tapa del cumpleaños con invitados salía como elenco roto).
+   */
+  partyGuests?: boolean;
 }): string {
   const allowed = [
     'the protagonist',
@@ -561,12 +566,15 @@ export function imageContractNote(input: {
     ...(input.cast ?? []).map((member) =>
       member.name ? `${member.name} (${member.role})` : member.role,
     ),
+    ...(input.partyGuests
+      ? ['an unnamed group of party guests (other children) in the party scenes and on the cover']
+      : []),
   ];
   return [
     `Characters the customer's order allows in this book: ${allowed.join('; ')}.`,
     'closed_cast: any other clearly visible person, above all a mother, father, grandparent, sibling, aunt or uncle who is not in that list, breaks the order (a faceless crowd far in the background is fine).',
     'no_touch: physical contact between people as described above.',
-    'same_outfit: the protagonist wears the outfit of the reference sheet unless the scene plan names another outfit for this scene.',
+    'same_outfit: the protagonist wears the outfit of the reference sheet unless the scene plan or the page text names other clothes for this scene (a helmet, a towel, pajamas).',
     'chosen_style: the illustration is drawn in the same art technique as the reference sheet.',
     'no_text_in_image: letters or words drawn in the image.',
   ].join('\n');

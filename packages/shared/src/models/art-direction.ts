@@ -115,7 +115,7 @@ const DEFAULT_MEDIUM =
  * profesional).
  */
 export const ONE_PROTAGONIST =
-  "The main character appears exactly once in each image. Every other child or adult is a different person: different face, hair color and hairstyle, and different clothes; nobody in the background wears the main character's outfit or looks like a twin or clone.";
+  "The main character appears exactly once in each image. Every other child or adult is a different person: different face, hair color and hairstyle, and different clothes; nobody in the background wears the main character's outfit or looks like a twin or clone. Only the people the scene names are drawn: no extra children, adults, staff or passers-by in the background unless the scene asks for a crowd or a group.";
 
 /**
  * Contacto físico en los dibujos (DECISIONS 294): un abrazo apretado entre dos chicos salió con los

@@ -1289,7 +1289,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
 
     // Contrato del pedido para el dibujo (DECISIONS 333): quién puede aparecer y las reglas que se
     // miran en cada página. Las cláusulas que falló cada página se registran al final.
-    const contract = imageContractNote({ companion: snapshot.companion, cast: snapshot.cast });
+    const contract = imageContractNote({
+      companion: snapshot.companion,
+      cast: snapshot.cast,
+      partyGuests: ctx.order.channel === 'events',
+    });
     const contractSeen = new Map<ImageContractClause, Set<number>>();
     const noteContract = (index: number, review: PageReview | null) => {
       for (const clause of review?.contractClauses ?? []) {

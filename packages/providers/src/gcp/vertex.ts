@@ -1149,7 +1149,10 @@ ${request.contract}`
       PageReview,
       'pageIndex' | 'usage'
     >;
-    return { ...review, pageIndex: request.pageIndex, usage };
+    // Una cláusula sin ningún problema crítico que la explique no es un hallazgo: el juez a veces
+    // marca todas las cláusulas con la lista de problemas vacía (golden set, 25 nov).
+    const contractClauses = review.criticalIssues.length > 0 ? review.contractClauses : [];
+    return { ...review, contractClauses, pageIndex: request.pageIndex, usage };
   }
 
   /**
