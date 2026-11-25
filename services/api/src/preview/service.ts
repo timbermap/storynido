@@ -53,6 +53,7 @@ import {
   sceneIncludes,
   visualBibleCheck,
   coverOutfit,
+  coverProps,
   coverScene,
   describeCharacter,
   describeTraits,
@@ -1861,6 +1862,7 @@ export class PreviewService {
           preview.title,
           coverSetting(preview.plan),
           coverOutfit(preview.plan),
+          coverProps(preview.plan),
         ),
         ...preview.pages.slice(0, PREVIEW_ILLUSTRATED_PAGES).map(
           (page, at) =>
@@ -2744,6 +2746,7 @@ export class PreviewService {
               preview.title,
               coverSetting(preview.plan),
               coverOutfit(preview.plan),
+              coverProps(preview.plan),
             )
           : (preview.pages[target]?.illustrationPrompt ?? '');
       const companion = preview.companion ?? null;

@@ -30,6 +30,8 @@ import {
   printRoutingSchema,
   printOptionSchema,
   coverOutfit,
+  coverProps,
+  fillOutfitGaps,
   coverScene,
   coverSetting,
   describeCharacter,
@@ -612,6 +614,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
                 scenes: snapshot.scenes ?? [],
                 outfits: snapshot.outfits ?? [],
               }),
+              coverProps({
+                places: snapshot.places ?? [],
+                scenes: snapshot.scenes ?? [],
+                props: snapshot.props ?? [],
+              }),
             ),
             null,
             hint,
@@ -1079,6 +1086,20 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         .doc(ctx.order.id)
         .update({ snapshot, snapshotHash: snapshot.hash });
       await qaEvent(ctx, 'pose_rewritten', { pages: fixed.size });
+    }
+
+    // Ropa sin huecos (DECISIONS 318): una escena sin ropa especial entre dos con la misma la
+    // hereda, también en libros ya aprobados que se regeneran.
+    const gaps = fillOutfitGaps(snapshot.scenes ?? []);
+    if (snapshot.scenes && gaps.filled.length > 0) {
+      const { hash: _old, ...rest } = snapshot;
+      const content: Omit<BookSnapshot, 'hash'> = { ...rest, scenes: gaps.scenes };
+      snapshot = { ...content, hash: hashSnapshot(content) };
+      await db
+        .collection(COLLECTIONS.orders)
+        .doc(ctx.order.id)
+        .update({ snapshot, snapshotHash: snapshot.hash });
+      await qaEvent(ctx, 'outfit_gap_filled', { pages: gaps.filled.length });
     }
 
     const texts = [snapshot.title, ...snapshot.pages.map((page) => page.text)];

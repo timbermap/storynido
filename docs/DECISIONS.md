@@ -3280,3 +3280,9 @@ la mesa, 2 mejorar, 3 con ejemplos similares, 4 y 5 ok».
 
 - **Qué pasaba:** en staging la muestra de un mismo borrador fallaba una y otra vez con «quality control rejected 3 attempts: text» al dibujar la hoja del personaje (probable causa: letras o estampados de la ropa de la foto que el modelo copia).
 - **Qué hace ahora:** el reintento pide ropa, mochila y zapatillas lisas, sin estampas ni letras aunque la foto las tenga, y la hoja admite un intento más (4). La imagen rechazada sigue guardándose en debug/rejected en staging.
+
+## 318 — La misma ropa entre páginas y la tapa con lo que se repite adentro
+
+- **Qué pasaba (Angelica regenerado, 25 nov):** el puente desapareció, pero las páginas 7, 8 y 10 la dibujaron con remera a rayas bajo el agua, entre páginas con la malla amarilla; el plan dejaba esas escenas sin ropa especial y el control no tenía con qué compararlas. La tapa la mostraba nadando libre y adentro iba siempre en una burbuja.
+- **Qué hace ahora:** una escena sin ropa especial entre dos con la misma ropa especial la hereda (también al regenerar un libro ya aprobado: se guarda el libro congelado nuevo y se registra `outfit_gap_filled`); así la página pide esa ropa y la revisión rechaza otra. Un objeto de la biblia visual que aparece en la mitad o más de las escenas va también en la tapa.
+- **Límite:** si la burbuja del cuento no quedó como objeto de la biblia visual, la tapa no la conoce; se ve al regenerar.
