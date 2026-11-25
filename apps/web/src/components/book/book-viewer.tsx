@@ -8,6 +8,8 @@ import {
   splitCoverTitle,
   stripArtPct,
   stripFontScale,
+  vignetteArtPct,
+  vignetteMaskStop,
   type StoryTypography,
 } from '@storynido/shared';
 
@@ -531,16 +533,23 @@ function PageSpread({
         className={cn(
           'absolute inset-x-0',
           layout.kind === 'vignette' && hasText
-            ? cn(
-                top
-                  ? 'bottom-0 [mask-image:linear-gradient(to_top,#000_70%,transparent)] [&_img]:object-bottom'
-                  : 'top-0 [mask-image:linear-gradient(to_bottom,#000_70%,transparent)] [&_img]:object-top',
-              )
+            ? top
+              ? 'bottom-0 [&_img]:object-bottom'
+              : 'top-0 [&_img]:object-top'
             : 'inset-y-0',
         )}
         style={
           layout.kind === 'vignette' && hasText
-            ? { height: `${String(100 - (layout.zonePct ?? 30))}%` }
+            ? (() => {
+                // Igual que el PDF: el dibujo llega hasta la zona del texto y solo se funde en una
+                // franja angosta, así nadie queda borrado debajo del texto (Benicio, 25 nov).
+                const mask = `linear-gradient(${top ? 'to top' : 'to bottom'}, #000 ${String(vignetteMaskStop(layout.zonePct))}%, transparent 100%)`;
+                return {
+                  height: `${String(vignetteArtPct(layout.zonePct))}%`,
+                  maskImage: mask,
+                  WebkitMaskImage: mask,
+                };
+              })()
             : undefined
         }
       >

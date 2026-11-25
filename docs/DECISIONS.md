@@ -3454,3 +3454,11 @@ La ronda 3 (código del #236, 2 vueltas con redibujo, US$8,52) dio 74% de dibujo
 - **Contacto que la pasada general deja igual** (dentista, manga): en la muestra, las páginas que siguen con contacto después de la reparación del contrato se reescriben una por una con `rewritePage` y `TOUCH_FREE_REWRITE`, y la reescritura queda solo si ya no hay contacto (`hasTouch`).
 - **Letras en bloques de juguete y tapas de cuadernos:** `PLAIN_SURFACES` los nombra.
 - **Bloqueo de moderación en una ilustración** (Diario, PROHIBITED_CONTENT): en el eval, el reintento saca los objetos con letras (`NO_TEXT_OBJECTS_HINT`), como el worker.
+
+## 340 — Texto y papel fundido que tapaban el dibujo (Benicio en el médico, 25 nov)
+
+En el papel fundido, el dibujo se recortaba en la zona del texto y además se fundía en el 30 % restante de su caja. La cabeza de la doctora (página 8) y los cuerpos de la página 9 quedaban borrados justo debajo de la zona que el prompt dejaba libre. El control de la zona solo buscaba caras, y como `text_zone` era una categoría blanda, el segundo intento se aceptaba igual.
+
+- **Armado (PDF y lector):** la caja del dibujo llega hasta la zona del texto y solo se funde en una franja de `VIGNETTE_FADE_PCT` (10 % de la hoja), dentro del margen libre que pide el prompt (`vignetteArtPct`, `vignetteMaskStop`). Lo que el dibujo pone fuera de la zona se ve entero.
+- **Control:** en el papel fundido, `textZoneOf` marca la zona como `whole` y la moderación rechaza cualquier persona, animal u objeto clave adentro, no solo caras. `text_zone` deja de ser blanda: un dibujo tapado nunca se acepta; se rehace y, si no sale, la página va a revisión.
+- **Contrato:** cláusula nueva `text_layout` («Texto o fundido que tapan el dibujo»), y el examen dibuja con el armado de cada página y la controla con la misma zona.

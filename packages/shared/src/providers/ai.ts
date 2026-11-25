@@ -250,11 +250,15 @@ export interface IllustrationRequest {
    * Zona de la página donde se imprime el texto (arriba o abajo, % del alto): el control rechaza
    * la imagen si hay una cara, cabeza o manos adentro (categoría `text_zone`, DECISIONS 300).
    */
-  textZone?: { side: 'top' | 'bottom'; pct: number };
+  textZone?: { side: 'top' | 'bottom'; pct: number; whole?: boolean };
 }
 
-/** Categorías de la moderación que piden rehacer la imagen pero no la descartan si no sale otra. */
-export const SOFT_IMAGE_CATEGORIES = /^(style|title_zone|text_zone)$/i;
+/**
+ * Categorías de la moderación que piden rehacer la imagen pero no la descartan si no sale otra. La
+ * zona del texto ya no es blanda (25 nov 2026): un dibujo con alguien debajo del texto o cortado por
+ * el papel fundido nunca se acepta; se rehace o la página va a revisión.
+ */
+export const SOFT_IMAGE_CATEGORIES = /^(style|title_zone)$/i;
 
 /** El rechazo es solo de estilo o de la zona del título (no de seguridad ni de calidad). */
 export const onlySoftRejection = (categories: readonly string[]): boolean =>
@@ -537,7 +541,7 @@ export interface AIImageProvider {
     options?: {
       style?: string | null;
       cover?: boolean;
-      textZone?: { side: 'top' | 'bottom'; pct: number };
+      textZone?: { side: 'top' | 'bottom'; pct: number; whole?: boolean };
     },
   ): Promise<ModerationResult>;
 }

@@ -1,5 +1,7 @@
 import {
   STRIP_ART_PCT,
+  vignetteArtPct,
+  vignetteMaskStop,
   stripArtPct,
   stripFontScale,
   letterJitter,
@@ -350,12 +352,18 @@ function storyPage(
     const inset = spec.bleedMm + spec.safeMm;
     if (kind === 'vignette') {
       // El texto, centrado en el tercio de papel donde se funde la ilustración.
-      const artPct = 100 - (page.layout?.zonePct ?? 100 - VIGNETTE_ART_PCT);
-      const maxMm = (trimHeight * (100 - artPct + 2)) / 100 - inset - 2;
+      // La caja del dibujo llega hasta la zona del texto y solo se funde en la franja de
+      // VIGNETTE_FADE_PCT: lo que el dibujo pone fuera de la zona se ve entero (Benicio, 25 nov).
+      const zonePct = page.layout?.zonePct ?? 100 - VIGNETTE_ART_PCT;
+      const artPct = vignetteArtPct(zonePct);
+      const stop = vignetteMaskStop(zonePct);
+      const toward = side === 'top' ? 'to top' : 'to bottom';
+      const mask = `linear-gradient(${toward}, #000 ${String(stop)}%, transparent 100%)`;
+      const maxMm = (trimHeight * (zonePct + 2)) / 100 - inset - 2;
       return [
         `<section class="page" ${label()}>
-  <img class="art vignette ${side}" style="height:${String(artPct)}%" src="${page.image}" alt="">
-  <div class="band ${side}" style="height:${String(100 - artPct + 2)}%"><div class="panel vignette ${side}" ${fit(maxMm)}>${story}</div></div>
+  <img class="art vignette ${side}" style="height:${String(artPct)}%;-webkit-mask-image:${mask};mask-image:${mask}" src="${page.image}" alt="">
+  <div class="band ${side}" style="height:${String(zonePct + 2)}%"><div class="panel vignette ${side}" ${fit(maxMm)}>${story}</div></div>
 </section>`,
       ];
     }

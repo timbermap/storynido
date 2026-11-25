@@ -6,6 +6,9 @@ import {
   fitTextPt,
   textHeightPct,
   textZoneOf,
+  VIGNETTE_FADE_PCT,
+  vignetteArtPct,
+  vignetteMaskStop,
   calmSideFor,
   layoutSceneNote,
   pageLayout,
@@ -130,8 +133,20 @@ describe('el texto se mide antes de elegir zona (DECISIONS 300)', () => {
     const tall = { kind: 'vignette', side: 'top', zonePct: 40 } as const;
     expect(layoutSceneNote(tall)).toContain('top 45%');
     expect(layoutSceneNote(tall)).toContain('lower 55%');
-    expect(textZoneOf(tall)).toEqual({ textZone: { side: 'top', pct: 40 } });
+    // En el papel fundido no puede haber nadie en la zona (Benicio, 25 nov); en la calma, sin caras.
+    expect(textZoneOf(tall)).toEqual({ textZone: { side: 'top', pct: 40, whole: true } });
+    expect(textZoneOf({ kind: 'calm', side: 'bottom', zonePct: 30 })).toEqual({
+      textZone: { side: 'bottom', pct: 30 },
+    });
     expect(textZoneOf({ kind: 'facing', side: 'top' })).toEqual({});
+  });
+
+  it('el papel fundido solo borra una franja angosta junto al texto', () => {
+    // Zona de 40 %: la caja del dibujo ocupa el 70 % y se funde en su último 14 %, dentro del
+    // margen libre de 45 % que pide el prompt.
+    expect(vignetteArtPct(40)).toBe(70);
+    expect(vignetteMaskStop(40)).toBe(86);
+    expect(100 - vignetteArtPct(40) + VIGNETTE_FADE_PCT).toBeLessThanOrEqual(45);
   });
 });
 

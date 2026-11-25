@@ -1461,7 +1461,7 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
     options: {
       style?: string | null;
       cover?: boolean;
-      textZone?: { side: 'top' | 'bottom'; pct: number };
+      textZone?: { side: 'top' | 'bottom'; pct: number; whole?: boolean };
     } = {},
   ): Promise<ModerationResult> {
     // La técnica de la ficha del estilo (DECISIONS 282): solo se rechaza una técnica claramente
@@ -1472,7 +1472,9 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
       : '';
     // Página: el texto del libro se imprime en esa zona; no puede haber caras ni manos (DECISIONS 300).
     const textZone = options.textZone
-      ? `\nThe book's text is printed over the ${options.textZone.side} ${String(Math.round(options.textZone.pct))}% of this image. Reject it (category "text_zone") if any part of a face or a head is inside that ${options.textZone.side} ${String(Math.round(options.textZone.pct))}%.`
+      ? options.textZone.whole
+        ? `\nThe ${options.textZone.side} ${String(Math.round(options.textZone.pct))}% of this image is cut away and faded into plain paper for the book's text. Reject it (category "text_zone") if any part of a person, an animal or the main action (a face, a head, a body, hands or a key object) is inside that ${options.textZone.side} ${String(Math.round(options.textZone.pct))}%, so nothing important is cut or faded.`
+        : `\nThe book's text is printed over the ${options.textZone.side} ${String(Math.round(options.textZone.pct))}% of this image. Reject it (category "text_zone") if any part of a face or a head is inside that ${options.textZone.side} ${String(Math.round(options.textZone.pct))}%.`
       : '';
     const style = options.style?.trim()
       ? `\nThe chosen art style is: ${options.style.trim()}. Reject it (category "style") only if it is CLEARLY made in a different technique (for example a 3D render, a photo or a color painting when the style is a watercolor or a black and white coloring page); small variations of the same technique are fine.${

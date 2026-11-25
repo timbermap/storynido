@@ -42,6 +42,11 @@ export const CONTRACT_CLAUSES = [
   'chosen_style',
   /** Sin letras dentro de la ilustración (revisión de página). */
   'no_text_in_image',
+  /**
+   * Nadie tapado por el texto ni cortado o borrado por el papel fundido (Benicio, 25 nov): lo
+   * controla la moderación con la zona del texto de cada página (`textZoneOf`).
+   */
+  'text_layout',
 ] as const;
 
 export type ContractClauseId = (typeof CONTRACT_CLAUSES)[number];
@@ -63,6 +68,7 @@ export const CONTRACT_CLAUSE_LABELS: Record<ContractClauseId, string> = {
   same_outfit: 'Ropa que cambia',
   chosen_style: 'Estilo distinto al elegido',
   no_text_in_image: 'Letras en el dibujo',
+  text_layout: 'Texto o fundido que tapan el dibujo',
 };
 
 export interface ContractClause {
@@ -250,6 +256,14 @@ export function buildOrderContract(input: OrderContractInput): OrderContract {
       checkedBy: 'judge',
       severity: 'hard',
       rule: 'Sin letras ni palabras dentro de la ilustración.',
+    },
+    {
+      id: 'text_layout',
+      source: 'house',
+      stages: ['image'],
+      checkedBy: 'judge',
+      severity: 'hard',
+      rule: 'Nadie queda debajo del texto ni cortado o borrado por el papel fundido.',
     },
   ];
   if (promises.length > 0) {
