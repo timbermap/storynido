@@ -23,6 +23,8 @@ import {
   checkPlanContract,
   checkTextContract,
   hardViolations,
+  hasTouch,
+  TOUCH_FREE_REWRITE,
   type ContractViolation,
   traitsKey,
   type CharacterTraits,
@@ -1061,11 +1063,9 @@ export class PreviewService {
     const allowWordless = book.length !== 'mini' && !story.tags.includes('dormir');
     const wordless =
       readerAge === null || !allowWordless ? [] : wordlessPages(plannedStory.scenes, readerAge);
-    // Abrazo de la familia solo si el pedido lo pide (DECISIONS 294): cuento para dormir, de
-    // cariño o un recuerdo que lo nombra. Si no, la escena del plan no lo describe.
-    const familyHug =
-      story.tags.some((tag) => /dormir|familia|cari[ñn]o|te quiero|amor/i.test(tag)) ||
-      /abraz|hug|abra[çc]/i.test(JSON.stringify(memories ?? {}));
+    // Cariño con la familia (DECISIONS 342, Sebas 25 nov 2026): permitido con la familia que nombra
+    // el pedido (formulario, recuerdos o plantilla). Sin familia en el pedido, la escena no lo cuenta.
+    const familyHug = contract.allowedFamily.length > 0;
     const storyPlan = {
       ...plannedStory,
       scenes: plannedStory.scenes.map((planned) => {
@@ -1249,6 +1249,47 @@ export class PreviewService {
               if (!(error instanceof ProviderError)) throw error;
               this.log.warn({ err: error, bookId }, 'contract repair failed; keeping the text');
             }
+          }
+          // El contacto que la pasada general no sacó (golden set, 25 nov: el dentista y el manga lo
+          // dejaban igual) se reescribe página por página, una vez, y solo queda si ya no hay contacto.
+          const touchLeft =
+            checkTextContract(contract, current.pages, storyPlan).find(
+              (violation) => violation.clause === 'no_touch' && violation.severity === 'hard',
+            )?.pages ?? [];
+          if (touchLeft.length > 0) {
+            const pages = current.pages.map((page) => ({ ...page }));
+            await Promise.all(
+              touchLeft.map(async (number) => {
+                const index = number - 1;
+                const page = pages[index];
+                if (!page?.text) return;
+                try {
+                  const rewrite = await track(
+                    'review',
+                    await ai.text.rewritePage({
+                      language: book.language,
+                      spanishVoice,
+                      childName: request.childName,
+                      age: readerAge ?? request.age,
+                      storyTitle: current.title,
+                      pageIndex: index,
+                      previous: pages[index - 1]?.text ?? null,
+                      next: pages[index + 1]?.text ?? null,
+                      text: page.text,
+                      words: { min: plan.words.min, max: plan.words.max },
+                      mustInclude: requiredNames,
+                      refrain: storyPlan.refrain ?? null,
+                      avoid: TOUCH_FREE_REWRITE,
+                    }),
+                  );
+                  const text = fix(rewrite.text);
+                  if (text && !hasTouch(text)) pages[index] = { ...page, text };
+                } catch (error) {
+                  if (!(error instanceof ProviderError)) throw error;
+                }
+              }),
+            );
+            current = { ...current, pages };
           }
           try {
             const proof = await track(

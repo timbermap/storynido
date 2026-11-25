@@ -8,6 +8,8 @@ import {
   splitCoverTitle,
   stripArtPct,
   stripFontScale,
+  vignetteArtPct,
+  vignetteMaskStop,
   type StoryTypography,
 } from '@storynido/shared';
 
@@ -462,10 +464,13 @@ function PageSpread({
           {layout && (
             <div
               aria-hidden="true"
-              className="mx-auto size-24 shrink-0 overflow-hidden rounded-full shadow-[0_0_0_4px_#fffaf5,0_0_0_5px_#d8c9b8] [&_img]:object-[50%_35%]"
+              className="relative mx-auto aspect-[3/2] w-[70%] shrink-0 overflow-hidden [mask-image:radial-gradient(ellipse_at_center,#000_55%,transparent_72%)] [&_img]:object-[50%_40%]"
             >
               {illustration}
             </div>
+          )}
+          {layout && (
+            <div aria-hidden="true" className="mx-auto h-0.5 w-12 shrink-0 rounded bg-[#d8c9b8]" />
           )}
           {layout ? (
             text
@@ -531,16 +536,23 @@ function PageSpread({
         className={cn(
           'absolute inset-x-0',
           layout.kind === 'vignette' && hasText
-            ? cn(
-                top
-                  ? 'bottom-0 [mask-image:linear-gradient(to_top,#000_70%,transparent)] [&_img]:object-bottom'
-                  : 'top-0 [mask-image:linear-gradient(to_bottom,#000_70%,transparent)] [&_img]:object-top',
-              )
+            ? top
+              ? 'bottom-0 [&_img]:object-bottom'
+              : 'top-0 [&_img]:object-top'
             : 'inset-y-0',
         )}
         style={
           layout.kind === 'vignette' && hasText
-            ? { height: `${String(100 - (layout.zonePct ?? 30))}%` }
+            ? (() => {
+                // Igual que el PDF: el dibujo llega hasta la zona del texto y solo se funde en una
+                // franja angosta, así nadie queda borrado debajo del texto (Benicio, 25 nov).
+                const mask = `linear-gradient(${top ? 'to top' : 'to bottom'}, #000 ${String(vignetteMaskStop(layout.zonePct))}%, transparent 100%)`;
+                return {
+                  height: `${String(vignetteArtPct(layout.zonePct))}%`,
+                  maskImage: mask,
+                  WebkitMaskImage: mask,
+                };
+              })()
             : undefined
         }
       >

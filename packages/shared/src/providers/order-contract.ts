@@ -42,6 +42,11 @@ export const CONTRACT_CLAUSES = [
   'chosen_style',
   /** Sin letras dentro de la ilustración (revisión de página). */
   'no_text_in_image',
+  /**
+   * Nadie tapado por el texto ni cortado o borrado por el papel fundido (Benicio, 25 nov): lo
+   * controla la moderación con la zona del texto de cada página (`textZoneOf`).
+   */
+  'text_layout',
 ] as const;
 
 export type ContractClauseId = (typeof CONTRACT_CLAUSES)[number];
@@ -63,6 +68,7 @@ export const CONTRACT_CLAUSE_LABELS: Record<ContractClauseId, string> = {
   same_outfit: 'Ropa que cambia',
   chosen_style: 'Estilo distinto al elegido',
   no_text_in_image: 'Letras en el dibujo',
+  text_layout: 'Texto o fundido que tapan el dibujo',
 };
 
 export interface ContractClause {
@@ -193,7 +199,7 @@ export function buildOrderContract(input: OrderContractInput): OrderContract {
       stages: ['text', 'image'],
       checkedBy: 'both',
       severity: 'hard',
-      rule: 'Sin abrazos, besos, brazos ni regazo; con la familia del pedido, solo un abrazo breve de costado.',
+      rule: 'Nadie fuera de la familia que nombra el pedido toca al chico; con esa familia, el cariño está permitido (Sebas, 25 nov 2026).',
     },
     {
       id: 'requested_names',
@@ -250,6 +256,14 @@ export function buildOrderContract(input: OrderContractInput): OrderContract {
       checkedBy: 'judge',
       severity: 'hard',
       rule: 'Sin letras ni palabras dentro de la ilustración.',
+    },
+    {
+      id: 'text_layout',
+      source: 'house',
+      stages: ['image'],
+      checkedBy: 'judge',
+      severity: 'hard',
+      rule: 'Nadie queda debajo del texto ni cortado o borrado por el papel fundido.',
     },
   ];
   if (promises.length > 0) {
@@ -535,6 +549,13 @@ export function practiceMissingPages(pages: readonly CraftPage[], practice: stri
 export const hardViolations = (violations: readonly ContractViolation[]) =>
   violations.filter((violation) => violation.severity === 'hard');
 
+/**
+ * Lo que la reescritura de una página con contacto tiene que evitar (golden set, 25 nov: la pasada
+ * general dejaba igual al dentista con la mano en el hombro y al amigo que la abrazaba).
+ */
+export const TOUCH_FREE_REWRITE =
+  'any physical contact between people: no hugs, holding, hands on shoulders, arms, head or face, lifting or carrying, and nobody touches the child. Comfort and help come through words, standing side by side, a smile or a shared object; a dentist, doctor or therapist shows, explains or hands over a tool without touching the child';
+
 /** Cláusulas que ve el juez de imagen (la revisión de cada página). */
 export const IMAGE_CONTRACT_CLAUSES = [
   'closed_cast',
@@ -573,7 +594,7 @@ export function imageContractNote(input: {
   return [
     `Characters the customer's order allows in this book: ${allowed.join('; ')}.`,
     'closed_cast: any other clearly visible person, above all a mother, father, grandparent, sibling, aunt or uncle who is not in that list, breaks the order (a faceless crowd far in the background is fine).',
-    'no_touch: physical contact between people as described above.',
+    "no_touch: anyone outside the protagonist's family in that list touching the protagonist, or the protagonist touching them (a doctor, dentist or therapist works at arm's length with a tool); affection with the family in that list (a hug, holding hands, being carried, a kiss on the forehead or cheek) is fine, never lying in bed together.",
     'same_outfit: the protagonist wears the outfit of the reference sheet unless the scene plan or the page text names other clothes for this scene (a helmet, a towel, pajamas).',
     'chosen_style: the illustration is drawn in the same art technique as the reference sheet.',
     'no_text_in_image: letters or words drawn in the image.',

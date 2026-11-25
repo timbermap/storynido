@@ -544,6 +544,51 @@ const PAGE_REVIEW_SCHEMA = {
   ],
 };
 
+/** Quién compra, por línea, para el juez comprador. */
+const BUYER_PERSONA: Record<'families' | 'professionals' | 'events', string> = {
+  families:
+    'a mother or father in Latin America who ordered a personalized picture book starring their own child, to read together at home',
+  professionals:
+    'a child psychologist, speech therapist or pediatric dentist in Latin America who ordered this personalized book to use with a young patient',
+  events:
+    'a parent in Latin America who ordered a birthday kit with a mini story starring their child, to share at the party',
+};
+
+export interface BuyerReviewRequest {
+  channel: 'families' | 'professionals' | 'events';
+  priceUsd: number;
+  /** El pedido en palabras (formulario y plantilla), sin datos de un chico real. */
+  order: string;
+  title: string;
+  texts: string[];
+  cover: ImageData;
+  /** Páginas armadas (ilustración con el texto y el papel fundido), como las ve el cliente. */
+  pages: ImageData[];
+}
+
+export interface BuyerReview {
+  buy: number;
+  gift: number;
+  verdict: 'compra' | 'duda' | 'no';
+  loved: string[];
+  refund: string[];
+  fixes: string[];
+  usage: AiUsage;
+}
+
+const BUYER_REVIEW_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    buy: { type: 'INTEGER' },
+    gift: { type: 'INTEGER' },
+    verdict: { type: 'STRING', enum: ['compra', 'duda', 'no'] },
+    loved: { type: 'ARRAY', items: { type: 'STRING' } },
+    refund: { type: 'ARRAY', items: { type: 'STRING' } },
+    fixes: { type: 'ARRAY', items: { type: 'STRING' } },
+  },
+  required: ['buy', 'gift', 'verdict', 'loved', 'refund', 'fixes'],
+};
+
 const BOOK_REVIEW_SCHEMA = {
   type: 'OBJECT',
   properties: {
@@ -768,7 +813,11 @@ ${options.issues.map((issue) => `- ${issue}`).join('\n')}
         {
           text: `You are the editor of a personalized children's book. Review the story below written for ${request.childName} (${String(request.age)} years old).
 Fix spelling, grammar, consistency of names and details, and anything not suitable for young children. Keep the language, tone, length and page count.
-Keep the lessons subtle (no explicit moral). Show, don't tell. Set approved=false only if it cannot be fixed. List the issues you found.${voiceNote(request.language, request.spanishVoice)}
+Keep the lessons subtle (no explicit moral). Show, don't tell. Set approved=false only if it cannot be fixed. List the issues you found.
+Read it aloud as the parent who paid for it and fix what breaks the spell: physical or size logic that contradicts itself (a huge castle
+that reaches the knees), events with no reason (a cold pizza nobody explains), anyone the story did not introduce (never add a parent,
+sibling or helper), a person called by a different gender on different pages (a woman doctor is «la doctora» on every page), and a flat
+ending: the last page closes with what the protagonist feels and a tender, concrete moment with whoever is with them.${voiceNote(request.language, request.spanishVoice)}
 Pages with an empty text are intentionally wordless (the picture tells it): keep them empty. Keep repeated refrains, rhymes and sound words.
 ${issues}
 Story (JSON):
@@ -877,7 +926,7 @@ plausible family of the protagonist (a similar skin tone and a related hair colo
               ? `; the protagonist looks like this: ${request.protagonistLook}`
               : ''
           }; anyone else is clearly different from the protagonist. Say their age group and one clothing color.
-No physical contact in any picture: nobody hugs, kisses, carries or touches the protagonist, and the protagonist touches nobody; people stand or sit side by side at a small distance. If the text mentions a hug or a touch, show the moment before or after it (the warm look, a wave from a distance; a high five only between children of similar age), never the embrace. With an adult outside the family there is no contact of any kind: a wave or a smile from a small distance. Only for a parent, grandparent or sibling and only when the text says so: one soft side-view hug, both faces visible, bodies clearly separate, never in bed. Everyone fully and modestly dressed.
+Physical contact: nobody outside the protagonist's family hugs, kisses, carries or touches the protagonist, and the protagonist touches nobody outside the family; friends, teachers, professionals and strangers stand or sit side by side at a small distance (a high five only between children of similar age; with an adult outside the family, a wave or a smile from a small distance). With the protagonist's own family that the order names (a parent, grandparent or sibling), warm affection is welcome when the page text tells it: a hug, holding hands, being carried or held on a lap for a story, a kiss on the forehead or cheek, leaning close; faces stay visible and everyone is fully dressed; at bedtime the adult sits beside the bed to tuck the child in, never lying in it. Everyone fully and modestly dressed.
 Trees, plants, objects or animals that come alive or talk get a simple, gentle, storybook cartoon face (round friendly eyes, a small smile, soft lines), never a realistic, wrinkled or adult human face and never a lifelike person's features. Use only the characters and objects the page text names; do not add extra children or helpers that the text does not mention.
 Clothes fit the place, weather, season and activity of the page: pyjamas in bed, a raincoat in the rain, a coat in the cold,
 swimwear in the water, sportswear for a sport; indoors at home, no jackets or outdoor shoes unless someone is arriving or leaving.
@@ -990,10 +1039,10 @@ Fantasy: when the protagonist has a magic power that would be dangerous in real 
 resisting fire), the plan marks it as the story's magic (a magic bubble, "in this story") and the last scene returns to real life with an
 adult nearby; it is never shown as something a child can do alone.
 Physical contact: scenes never have the protagonist hug, kiss, carry or touch anyone outside the immediate family (parents, grandparents,
-siblings), nor anyone touch the protagonist; comfort between friends, classmates, teachers or professionals comes from words, presence,
-a shared object or, between children of similar age only, a high five; with an adult outside the family there is no contact of any kind. A family hug is allowed only if the brief asks for it, at most once in the whole book, and never in bed;
-otherwise a happy ending with family is told side by side (walking home together, smiling, a wave).
-In mustBeVisible and sceneGoal, never describe an embrace: describe the moment before or after it.
+siblings), nor anyone outside the family touch the protagonist; comfort between friends, classmates, teachers or professionals comes from words, presence,
+a shared object or, between children of similar age only, a high five; with an adult outside the family there is no contact of any kind.
+With the family the brief names, affection is welcome and makes the book warm: a hug, holding hands, being carried, reading together on a lap,
+a kiss on the forehead; at bedtime the parent sits beside the bed. Never plan an embrace with anyone else, and never with family the brief does not name.
 At most two failed attempts before the protagonist succeeds, each teaching something different; a mentor may help, but the
 protagonist finds the final solution.
 Visual bible (English, fixed looks the illustrator repeats word for word):
@@ -1003,8 +1052,9 @@ Visual bible (English, fixed looks the illustrator repeats word for word):
 - places: up to 3 places where two or more scenes happen, each with a name and a fixed look. Empty array if none.
 - outfits: up to 3 special outfits of the protagonist, only for contexts where the everyday outfit of the reference sheet does not fit
   the place, weather or activity (in the water, in bed in pyjamas, in the rain, in the cold or snow, a sport, a costume or uniform the
-  story names), each with a context and a fixed look suited to the protagonist's age. Never describe the everyday outfit. Empty array
-  if none.
+  story names), each with a context and a fixed look suited to the protagonist's age. Never describe the everyday outfit, and never
+  invent a uniform, costume or gear for a place (an academy, a mission, a trip) unless the story text says the protagonist puts it on.
+  Empty array if none.
 - In each scene: props (names from props that appear in it), place (a name from places, or null), outfit (a context from outfits, or
   null for the everyday outfit) and shot (wide, medium, close-up or high angle, serving the beat; never the same shot three scenes in
   a row).
@@ -1111,7 +1161,7 @@ page text, the scene plan and the approved character sheet. Look for: internal i
 incoherent clothing or accessories (or clothes that do not fit the place, weather or activity: a jacket in bed, street clothes in the water), relatives
 who look nothing like the protagonist's family, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
 below (a recurring object, place or outfit drawn differently is a repair), a hug, embrace, kiss, lap, carrying, lying together or hands on another person's body
-(except one soft side-view hug between the protagonist and a parent, grandparent or sibling when the page text says so), bare midriffs or revealing clothes, cropped heads, a child upside down, in a backbend, bridge, handstand or cartwheel, or framed from a low angle or in close-up on the body (swimwear included), and any letters or
+(except affection between the protagonist and their own parent, grandparent or sibling when the page text tells it: a hug, holding hands, being carried, a kiss on the forehead or cheek, never lying in bed together), bare midriffs or revealing clothes, cropped heads, a child upside down, in a backbend, bridge, handstand or cartwheel, or framed from a low angle or in close-up on the body (swimwear included), and any letters or
 words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks).
 Also check the protagonist's apparent age against the Protagonist line below: a child who looks two or more years older or younger than that age (an infant for a three-year-old, a schoolchild of 6 or 7 for a three-year-old, a teenager for a child), or whose face and body proportions differ clearly from the reference sheet, is a repair. And check the facial expression against the page text and the scene's emotion: an angry, scared or sad face on a cheerful page (or the reverse) is a repair; the new drawing must show the emotion the text describes.
 Never claim to verify biometric identity or exact likeness to a real person; your evaluation is preliminary and may mark uncertainty.
@@ -1159,6 +1209,50 @@ ${request.contract}`
    * Revisión del libro entero: las miniaturas de todas las páginas juntas, para ver lo que una
    * revisión página por página no ve (la tabla que cambia de forma, la playa que es otra).
    */
+  /**
+   * Juez comprador del golden set (25 nov 2026, Sebas: «que el comprador evalúe si esto es algo que
+   * compra»). Mira la tapa y las páginas armadas como las ve el cliente, con el pedido, y responde
+   * si lo compraría, si lo regalaría y qué le haría pedir un reembolso. No corre en producción.
+   */
+  async reviewAsBuyer(request: BuyerReviewRequest): Promise<BuyerReview> {
+    const parts: Part[] = [{ text: 'Cover:' }, imagePart(request.cover)];
+    request.pages.forEach((page, index) => {
+      parts.push({
+        text: `Page ${String(index + 1)} as printed (illustration and text together):`,
+      });
+      parts.push(imagePart(page));
+    });
+    parts.push({
+      text: `You are ${BUYER_PERSONA[request.channel]}. You just opened the book you paid for (about US$${String(request.priceUsd)}).
+Be the honest, demanding customer you really are: you compare it with Wonderbly, Hooray Heroes and the AI story apps, and you notice in
+five seconds what a parent notices (a face covered by text, a child who changes hair or clothes, a pet that changes color, a toy in the
+text that is not in the picture, letters or English words inside a drawing, a style that is not the one you chose, strangers touching the
+child, a flat story). Judge what you see on these pages and in the text below against what you ordered.
+
+What you ordered:
+${request.order}
+
+Title: ${request.title}
+Full text, page by page:
+${request.texts.map((text, index) => `${String(index + 1)}. ${text}`).join('\n')}
+
+Answer in Spanish, from your own point of view as this customer:
+- buy: 1 to 5, would you buy it again or recommend it (5 = yes without doubt).
+- gift: 1 to 5, would you give it as a present to another family.
+- verdict: "compra" (you are happy you paid), "duda" (you keep it but are disappointed) or "no" (you feel cheated or would ask for a refund).
+- loved: up to 3 short things you loved (concrete, with the page).
+- refund: up to 3 short things that would make you ask for a refund or never buy again (concrete, with the page). Empty if none.
+- fixes: up to 3 short changes that would turn this into a 5 (concrete).`,
+    });
+    const { response, usage } = await this.client.generate(this.model, parts, {
+      temperature: 0,
+      responseMimeType: 'application/json',
+      responseSchema: BUYER_REVIEW_SCHEMA,
+    });
+    const review = parseJson(response, 'juez comprador') as Omit<BuyerReview, 'usage'>;
+    return { ...review, usage };
+  }
+
   async reviewBook(request: BookReviewRequest): Promise<BookReview> {
     const parts: Part[] = [
       { text: 'Approved character reference sheet (the protagonist):' },
@@ -1460,7 +1554,7 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
     options: {
       style?: string | null;
       cover?: boolean;
-      textZone?: { side: 'top' | 'bottom'; pct: number };
+      textZone?: { side: 'top' | 'bottom'; pct: number; whole?: boolean };
     } = {},
   ): Promise<ModerationResult> {
     // La técnica de la ficha del estilo (DECISIONS 282): solo se rechaza una técnica claramente
@@ -1471,7 +1565,9 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
       : '';
     // Página: el texto del libro se imprime en esa zona; no puede haber caras ni manos (DECISIONS 300).
     const textZone = options.textZone
-      ? `\nThe book's text is printed over the ${options.textZone.side} ${String(Math.round(options.textZone.pct))}% of this image. Reject it (category "text_zone") if any part of a face or a head is inside that ${options.textZone.side} ${String(Math.round(options.textZone.pct))}%.`
+      ? options.textZone.whole
+        ? `\nThe ${options.textZone.side} ${String(Math.round(options.textZone.pct))}% of this image is cut away and faded into plain paper for the book's text. Reject it (category "text_zone") if any part of a person, an animal or the main action (a face, a head, a body, hands or a key object) is inside that ${options.textZone.side} ${String(Math.round(options.textZone.pct))}%, so nothing important is cut or faded.`
+        : `\nThe book's text is printed over the ${options.textZone.side} ${String(Math.round(options.textZone.pct))}% of this image. Reject it (category "text_zone") if any part of a face or a head is inside that ${options.textZone.side} ${String(Math.round(options.textZone.pct))}%.`
       : '';
     const style = options.style?.trim()
       ? `\nThe chosen art style is: ${options.style.trim()}. Reject it (category "style") only if it is CLEARLY made in a different technique (for example a 3D render, a photo or a color painting when the style is a watercolor or a black and white coloring page); small variations of the same technique are fine.${

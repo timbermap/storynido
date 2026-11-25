@@ -79,6 +79,14 @@ describe('contrato del pedido', () => {
     });
     expect(contract.allowedFamily).toEqual(['mother']);
     expect(checkTextContract(contract, pages('Mamá la abraza de costado.'), null)).toEqual([]);
+    // Cariño con la familia del pedido (DECISIONS 342): abrazo, upa y beso en la frente.
+    expect(
+      checkTextContract(
+        contract,
+        pages('Mamá la abraza fuerte.', 'Mamá la alza a upa y le da un beso en la frente.'),
+        null,
+      ),
+    ).toEqual([]);
     // Pero no un abrazo con alguien de afuera de la familia.
     expect(
       checkTextContract(contract, pages('La maestra la abraza.'), null).map((item) => item.clause),

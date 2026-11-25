@@ -3445,3 +3445,38 @@ La v2 (US$3,65) pasó de 1 a 3 pedidos limpios de 8 (69% de los dibujos limpios 
 - **Mascota dibujada como un nene:** `companionNote` dice que el acompañante nunca cambia de especie ni de tamaño. El eval no le pasaba la nota del acompañante al dibujo y ahora sí.
 
 **El examen:** mide el primer dibujo y también el resultado después de un redibujo con las instrucciones de la revisión, como hace el worker (`--no-redraw` lo apaga). El resumen da dibujos limpios a la primera, después del redibujo y pedidos sin fallos duros. `--runs 2` corre cada pedido dos veces, y una regresión cuenta solo si falla en todas las vueltas y antes pasaba en alguna: un dibujo solo puede salir mal por azar. Meta: 90% de dibujos limpios a la primera y ningún fallo duro después del redibujo.
+
+## 339 — Tercera corrida del golden set (25 nov): ropa que inventa el plan, contacto que no se repara, letras en juguetes y bloqueo de moderación
+
+La ronda 3 (código del #236, 2 vueltas con redibujo, US$8,52) dio 74% de dibujos limpios a la primera y 90% después del redibujo. Lo que quedó abierto se cierra así:
+
+- **Ropa inventada por el plan** (túnica de academia, chaleco de explorador): el planificador no inventa uniformes ni equipo para un lugar si el texto no dice que el protagonista se lo pone. Cuando la escena sí tiene ropa especial, `sceneOutfit` dice que reemplaza a la de la lámina en esa página, así el dibujo y la revisión piden lo mismo.
+- **Contacto que la pasada general deja igual** (dentista, manga): en la muestra, las páginas que siguen con contacto después de la reparación del contrato se reescriben una por una con `rewritePage` y `TOUCH_FREE_REWRITE`, y la reescritura queda solo si ya no hay contacto (`hasTouch`).
+- **Letras en bloques de juguete y tapas de cuadernos:** `PLAIN_SURFACES` los nombra.
+- **Bloqueo de moderación en una ilustración** (Diario, PROHIBITED_CONTENT): en el eval, el reintento saca los objetos con letras (`NO_TEXT_OBJECTS_HINT`), como el worker.
+
+## 340 — Texto y papel fundido que tapaban el dibujo (Benicio en el médico, 25 nov)
+
+En el papel fundido, el dibujo se recortaba en la zona del texto y además se fundía en el 30 % restante de su caja. La cabeza de la doctora (página 8) y los cuerpos de la página 9 quedaban borrados justo debajo de la zona que el prompt dejaba libre. El control de la zona solo buscaba caras, y como `text_zone` era una categoría blanda, el segundo intento se aceptaba igual.
+
+- **Armado (PDF y lector):** la caja del dibujo llega hasta la zona del texto y solo se funde en una franja de `VIGNETTE_FADE_PCT` (10 % de la hoja), dentro del margen libre que pide el prompt (`vignetteArtPct`, `vignetteMaskStop`). Lo que el dibujo pone fuera de la zona se ve entero.
+- **Control:** en el papel fundido, `textZoneOf` marca la zona como `whole` y la moderación rechaza cualquier persona, animal u objeto clave adentro, no solo caras. `text_zone` deja de ser blanda: un dibujo tapado nunca se acepta; se rehace y, si no sale, la página va a revisión.
+- **Contrato:** cláusula nueva `text_layout` («Texto o fundido que tapan el dibujo»), y el examen dibuja con el armado de cada página y la controla con la misma zona.
+
+## 341 — Juez comprador: el que paga mira las páginas armadas y dice si lo compraría (25 nov)
+
+Los jueces del contrato miran cada dibujo suelto contra una regla. Nadie miraba el libro como lo recibe el cliente, y así se escaparon el texto y el fundido que tapaban el dibujo (DECISIONS 340). Sebas: «que el comprador evalúe si esto es algo que compra».
+
+- **`reviewAsBuyer`** (vertex.ts): con la tapa, las páginas armadas, el texto completo y el pedido en palabras, una persona por línea (madre o padre en Familias, psicóloga o dentista en Profesionales, padre del cumpleañero en Celebraciones) responde compra 1-5, regalo 1-5, veredicto (`compra`, `duda`, `no`), lo que le encantó, lo que le haría pedir un reembolso y qué cambiaría para un 5. No corre en producción.
+- **`compose-page.ts`:** arma la página con la misma geometría que el PDF y el lector (zona calma con panel, papel fundido con la franja angosta), para que el juez y quien lea el informe vean lo que ve el cliente.
+- **En el golden set:** cada página se dibuja con su armado (`sceneNoteFor`), se controla la zona del texto como la moderación del worker (`textZoneOf`, un redibujo si falla, si no `text_layout` ✗), se guarda armada (`-armada.webp`) y el juez comprador da su veredicto por pedido. El resumen suma «lo compraría X/N» y el promedio. Caso fijo nuevo `pro-medico-4` (médico y vacuna, 4 años, texto largo en papel fundido).
+- **Sobre pedidos reales:** `pnpm --filter @storynido/providers judge:pedidos --project … --yes` pasa el juez por los últimos pedidos terminados. El informe queda en la Mac (tiene textos y dibujos de chicos reales) y a la mesa llega resumido sin nombres.
+- **Meta:** que el comprador diga «compra» en al menos 8 de cada 10 pedidos, y que ningún motivo de reembolso se repita entre pedidos. Cada motivo que se repite se convierte en cláusula, caso del golden set y test.
+
+## 342 — Calidez: cariño con la familia pedida, lógica del texto y página de texto de 9 a 12 (25 nov)
+
+El juez comprador pasó por los 13 últimos libros de staging (promedio 3,3 sobre 5). Lo que más baja la nota es el armado, los secundarios que cambian, el texto con fallas de lógica y la falta de calidez; los mejores libros tienen afecto con la familia, un objeto querido que vuelve y un cierre tierno.
+
+- **Cariño con la familia que nombra el pedido** (Sebas, 25 nov 2026, reemplaza la regla de DECISIONS 294 de un solo abrazo breve de costado): abrazos, ir de la mano, upa, leer juntos, un beso en la frente o la mejilla, en el texto y en el dibujo. A la hora de dormir el adulto arropa sentado al lado de la cama. Sigue prohibido cualquier contacto con adultos inventados, profesionales, docentes, amigos y desconocidos, y un familiar que el pedido no nombra no aparece. En la muestra, `familyHug` es ahora «el pedido nombra familia» (`contract.allowedFamily`), y el control del oficio ya no cuenta abrazos con esa familia.
+- **Calidez y lógica en el cuento:** reglas nuevas de calidez (un vínculo, un objeto o gesto querido que vuelve, cierre tierno y concreto) y de lógica (sentido físico, nada sin motivo, el mismo género para cada persona). La revisión del cuento lo lee en voz alta como el padre que pagó y arregla lo que rompe el encanto.
+- **Página de texto de 9 a 12:** el detalle de la ilustración deja de ser un avatar redondo de 34 mm y pasa a una viñeta fundida de 66 × 44 mm con una línea debajo, en el PDF y en el lector.

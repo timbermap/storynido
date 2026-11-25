@@ -72,6 +72,22 @@ export interface PageLayout {
  * encima de la cara. Ahora se estima cuánto alto ocupa el texto y la página elige zona y tamaño.
  */
 export const CALM_ZONE_PCT = 30;
+/**
+ * Papel fundido (25 nov 2026, Benicio en el médico): el dibujo se recortaba en la zona del texto y
+ * además se fundía en el 30 % restante, así que la cabeza de la doctora quedaba borrada justo
+ * debajo de la zona que el prompt dejaba libre. Ahora el fundido ocupa solo esta franja, dentro
+ * del margen libre que pide el prompt, y lo que el dibujo pone fuera de la zona se ve entero.
+ */
+export const VIGNETTE_FADE_PCT = 10;
+
+/** Alto (% de la hoja) de la caja del dibujo en una página de papel fundido. */
+export const vignetteArtPct = (zonePct: number | undefined) =>
+  100 - (zonePct ?? CALM_ZONE_PCT) + VIGNETTE_FADE_PCT;
+
+/** Dónde empieza el fundido dentro de la caja del dibujo (% desde el lado opuesto al texto). */
+export const vignetteMaskStop = (zonePct: number | undefined) =>
+  Math.round(100 * (1 - VIGNETTE_FADE_PCT / vignetteArtPct(zonePct)));
+
 /** Zonas altas del papel fundido para los textos largos (la ilustración conserva el resto). */
 export const TALL_ZONE_PCT = 40;
 export const TALLEST_ZONE_PCT = 45;
@@ -279,10 +295,15 @@ export function textZoneOf(
   layout: PageLayout | null | undefined,
   /** El texto de la página: sin texto no hay zona que vigilar. */
   text?: string | null,
-): { textZone: { side: CalmSide; pct: number } } | Record<string, never> {
+): { textZone: { side: CalmSide; pct: number; whole?: boolean } } | Record<string, never> {
   if (!layout || (layout.kind !== 'calm' && layout.kind !== 'vignette')) return {};
   if (text !== undefined && !(text ?? '').trim()) return {};
-  return { textZone: { side: layout.side, pct: layout.zonePct ?? CALM_ZONE_PCT } };
+  const pct = layout.zonePct ?? CALM_ZONE_PCT;
+  // En el papel fundido esa franja se recorta o se funde: no puede haber nadie, ni siquiera un
+  // cuerpo cortado (Benicio, 25 nov). En la zona calma el texto va encima: sin caras ni cabezas.
+  return layout.kind === 'vignette'
+    ? { textZone: { side: layout.side, pct, whole: true } }
+    : { textZone: { side: layout.side, pct } };
 }
 
 /**

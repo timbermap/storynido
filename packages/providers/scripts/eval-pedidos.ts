@@ -3,7 +3,10 @@
  * cubren las tres líneas, las franjas de edad, los estilos y cada fallo real que ya tuvimos. Cada
  * caso escribe el texto como la muestra (plan saneado, cuento, revisión y reparación del contrato),
  * dibuja la lámina, la tapa y 3 páginas, y pasa cada dibujo por la revisión de página con el
- * contrato. El informe dice, cláusula por cláusula, qué casos cumplen el pedido.
+ * contrato. Cada página se dibuja con su armado (zona calma o papel fundido), se controla que nada
+ * importante quede bajo el texto y se arma como la ve el cliente; un juez comprador mira la tapa y
+ * las páginas armadas y dice si lo compraría (25 nov 2026). El informe dice, cláusula por cláusula,
+ * qué casos cumplen el pedido.
  *
  *   pnpm eval:pedidos                         # solo estima el costo
  *   pnpm eval:pedidos --yes                   # corre (gasta IA, tope US$8)
@@ -26,10 +29,17 @@ import {
   DEFAULT_EDITORIAL_CONFIG,
   EMPTY_BIRTHDAY,
   artDirection,
+  bookLayout,
+  countWords,
+  pageLayout,
+  sceneNoteFor,
+  storyTypography,
+  textZoneOf,
   buildIllustrationPrompt,
   buildOrderContract,
   buildStoryPrompt,
   castNote,
+  NO_TEXT_OBJECTS_HINT,
   companionNote,
   checkFormContract,
   checkPlanContract,
@@ -50,6 +60,7 @@ import {
   type ContractClauseId,
   type ImageData,
   type Memories,
+  type PageLayout,
 } from '@storynido/shared';
 import sharp from 'sharp';
 
@@ -60,7 +71,13 @@ import {
   SEED_STORIES,
   SEED_STYLES,
 } from '../../../firebase/seed-data/catalog';
-import { VertexClient, VertexImageProvider, VertexTextProvider } from '../src/gcp/vertex';
+import {
+  VertexClient,
+  VertexImageProvider,
+  VertexTextProvider,
+  type BuyerReview,
+} from '../src/gcp/vertex';
+import { composePage } from './compose-page';
 
 const { values } = parseArgs({
   options: {
@@ -263,6 +280,24 @@ const CASES: PedidoCase[] = [
     }),
   },
   {
+    id: 'pro-medico-4',
+    covers:
+      'Médico y vacuna (25 nov): texto largo de 3-4 años en papel fundido sin tapar caras ni manos; médico sin contacto',
+    channel: 'professionals',
+    story: 'voy-al-medico-y-me-vacunan',
+    style: 'acuarela',
+    name: 'Bruno',
+    he: true,
+    age: 4,
+    country: 'AR',
+    likes: ['los trenes'],
+    goal: 'anticipar una consulta y una vacuna',
+    ...kid('short curly light brown hair', 'fair skin', 'a green hoodie and grey pants', 4, {
+      hairType: 'curly',
+      hairColor: 'light-brown',
+    }),
+  },
+  {
     id: 'pro-dentista-5',
     covers: 'Profesionales: objetivo elegido, sin familia inventada, profesional sin contacto',
     channel: 'professionals',
@@ -277,6 +312,30 @@ const CASES: PedidoCase[] = [
     ...kid('short straight brown hair', 'olive skin', 'a striped blue sweater and khaki pants', 5),
   },
 ];
+
+/** El pedido en palabras, como lo llenó el comprador (chicos inventados, nunca datos reales). */
+function orderSummary(testCase: PedidoCase, storyTitle: string, styleName: string): string {
+  const line = {
+    families: 'Familias (libro personalizado)',
+    events: 'Celebraciones (kit de cumpleaños)',
+    professionals: 'Profesionales (libro para un paciente)',
+  }[testCase.channel];
+  return [
+    `Línea: ${line}`,
+    `Cuento elegido: ${storyTitle}`,
+    `Estilo elegido: ${styleName}`,
+    `Protagonista: ${testCase.name}, ${String(testCase.age)} años, ${testCase.he ? 'nene' : 'nena'}; ${testCase.sheet.hair}, ${testCase.sheet.skinTone}, ropa de siempre: ${testCase.sheet.clothing}`,
+    `Le gusta: ${testCase.likes.join(', ')}`,
+    testCase.petName ? `Mascota: ${testCase.petName}` : null,
+    testCase.bestFriendName ? `Mejor amigo: ${testCase.bestFriendName}` : null,
+    testCase.memories ? `Recuerdos: ${JSON.stringify(testCase.memories)}` : null,
+    testCase.event ? `Celebración: ${JSON.stringify(testCase.event)}` : null,
+    testCase.goal ? `Objetivo: ${testCase.goal}` : null,
+    testCase.practice ? `Sonido para practicar: ${testCase.practice}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
 
 const ids = values.only?.split(',');
 const cases = ids ? CASES.filter((item) => ids.includes(item.id)) : CASES;
@@ -304,7 +363,10 @@ const perCase =
   (withImages
     ? (2 + pagesToDraw) * perImage +
       (1 + pagesToDraw) * 0.006 +
-      (withRedraw ? (1 + pagesToDraw) * 0.35 * (perImage + 0.006) : 0)
+      (withRedraw ? (1 + pagesToDraw) * 0.35 * (perImage + 0.006) : 0) +
+      // Control de la zona del texto en cada página y el juez comprador (tapa y páginas armadas).
+      pagesToDraw * 0.003 +
+      0.02
     : 0);
 const estimate = cases.length * runs * perCase;
 const budget = Number(values.budget);
@@ -365,6 +427,8 @@ interface Row {
   notes: string[];
   /** Escenas del plan (ropa y lo que se ve), para poder leer un fallo después. */
   scenes?: unknown[];
+  /** Juez comprador: si lo compraría, mirando la tapa y las páginas armadas. */
+  buyer?: Omit<BuyerReview, 'usage'>;
   costUsd: number;
   error?: string;
 }
@@ -537,12 +601,14 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         [],
       )}${storyPlan.companion ? `\n${companionNote(storyPlan.companion)}` : ''}`;
       const draw = async (label: string, scene: string, references: ImageData[], seed: number) => {
-        // Un dibujo que se cuelga no tumba el caso: un reintento, como el worker.
-        const once = () =>
+        // Un dibujo que se cuelga o que la moderación bloquea no tumba el caso: un reintento, como el
+        // worker, que en el segundo intento saca los objetos con letras (Diario, 25 nov:
+        // PROHIBITED_CONTENT).
+        const once = (hint = '') =>
           image.generateIllustration({
             prompt: buildIllustrationPrompt({
               template: story.imagePromptTemplate,
-              scene,
+              scene: `${scene}${hint}`,
               character: description,
               style: style.promptModifier,
               direction,
@@ -557,7 +623,7 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
           });
         const generated = await once().catch((error: unknown) => {
           console.log(`  ${testCase.id} · ${label}: reintento (${(error as Error).message})`);
-          return once();
+          return once(` ${NO_TEXT_OBJECTS_HINT}`);
         });
         spend(generated.usage);
         await sharp(generated.bytes)
@@ -566,6 +632,19 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         return { bytes: generated.bytes, mimeType: generated.mimeType };
       };
       const lamina = await draw('lamina', CHARACTER_REFERENCE_SCENE, [], 0);
+      // Armado de cada página igual que la muestra y el worker: zona calma o papel fundido según la
+      // edad y lo que mide el texto (Benicio, 25 nov: el examen dibujaba sin armado y no lo vio).
+      const typography =
+        plan.ageBand && plan.textBand ? storyTypography(plan.ageBand, plan.textBand, 'es') : null;
+      const layoutFor = (index: number, sceneIndex: number): PageLayout =>
+        pageLayout({
+          layout: bookLayout(testCase.age, 'story'),
+          words: countWords(pages[index]?.text ?? ''),
+          text: pages[index]?.text ?? '',
+          typography,
+          pageIndex: sceneIndex,
+          contentType: 'story',
+        });
       const note = imageContractNote({
         companion: storyPlan.companion,
         cast: storyPlan.cast,
@@ -620,31 +699,31 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         index: number,
         pageText: string | null,
       ) => {
-        const first = await review(label, await draw(file, scene, [lamina], seed), index, pageText);
-        if (!first) return;
+        let finalImage = await draw(file, scene, [lamina], seed);
+        const first = await review(label, finalImage, index, pageText);
+        if (!first) return finalImage;
         const images = row.images ?? { reviewed: 0, cleanFirst: 0, cleanFinal: 0 };
         row.images = images;
         images.reviewed += 1;
         if (first.broken.size === 0) {
           images.cleanFirst += 1;
           images.cleanFinal += 1;
-          return;
+          return finalImage;
         }
         let final = first;
         if (withRedraw) {
           const fix = first.fix.length > 0 ? first.fix : first.issues;
-          const again = await review(
-            `${label} (redibujo)`,
-            await draw(
-              `${file}-redibujo`,
-              `${scene} Repair: ${fix.join('; ')}.`,
-              [lamina],
-              seed + 100,
-            ),
-            index,
-            pageText,
+          const redrawn = await draw(
+            `${file}-redibujo`,
+            `${scene} Repair: ${fix.join('; ')}.`,
+            [lamina],
+            seed + 100,
           );
-          if (again) final = again;
+          const again = await review(`${label} (redibujo)`, redrawn, index, pageText);
+          if (again) {
+            final = again;
+            finalImage = redrawn;
+          }
         }
         if (final.broken.size === 0) images.cleanFinal += 1;
         for (const clause of first.broken) {
@@ -659,8 +738,46 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
             );
           }
         }
+        return finalImage;
       };
-      await drawChecked(
+      /**
+       * Lo que el worker controla en la moderación: nada importante bajo el texto (en el papel
+       * fundido, nadie en la zona). Si falla, un redibujo como el worker; si sigue, ✗ text_layout.
+       */
+      const zoneChecked = async (
+        label: string,
+        file: string,
+        scene: string,
+        seed: number,
+        img: ImageData,
+        zone: ReturnType<typeof textZoneOf>,
+      ): Promise<ImageData> => {
+        if (!('textZone' in zone)) return img;
+        const check = async (candidate: ImageData) => {
+          const verdict = await image.moderateImage(candidate, zone);
+          if (verdict.usage) spend(verdict.usage);
+          return verdict.categories.some((item) => /text_zone/i.test(item));
+        };
+        if (!(await check(img))) return img;
+        const where = `${zone.textZone.side} ${String(zone.textZone.pct)}%`;
+        const redrawn = await draw(
+          `${file}-zona`,
+          `${scene} Repair: keep the ${where} of the image completely empty plain background; move every person, animal, hand and key object out of it.`,
+          [lamina],
+          seed + 200,
+        );
+        if (await check(redrawn)) {
+          mark('text_layout', 'fail');
+          row.notes.push(`${label}: text_layout (algo importante sigue en la zona ${where})`);
+          return redrawn;
+        }
+        mark('text_layout', 'repaired');
+        row.notes.push(
+          `${label}: text_layout (había algo en la zona ${where}; el redibujo lo sacó)`,
+        );
+        return redrawn;
+      };
+      const cover = await drawChecked(
         'tapa',
         'tapa',
         coverScene(draft.pages[0]?.illustrationPrompt, draft.title, coverSetting(storyPlan)),
@@ -668,17 +785,51 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         0,
         null,
       );
+      const composed: ImageData[] = [];
       for (const page of draft.pages.slice(0, pagesToDraw)) {
         const scene = storyPlan.scenes.find((item) => item.pageIndex === page.index);
         const bible = visualBibleCheck(storyPlan, scene);
-        await drawChecked(
-          `página ${String(page.index + 1)}`,
-          `pagina-${String(page.index + 1)}`,
-          `${page.illustrationPrompt}${bible ? ` ${bible}` : ''}${castNote(storyPlan.cast)}`,
+        const pageText = pages[page.index]?.text ?? '';
+        const layout = layoutFor(page.index, scene?.pageIndex ?? page.index + 1);
+        const label = `página ${String(page.index + 1)}`;
+        const file = `pagina-${String(page.index + 1)}`;
+        const sceneText = `${page.illustrationPrompt}${bible ? ` ${bible}` : ''}${castNote(storyPlan.cast)}${sceneNoteFor(layout, pageText)}`;
+        const drawn = await drawChecked(
+          label,
+          file,
+          sceneText,
           page.index + 2,
           page.index + 1,
-          pages[page.index]?.text ?? null,
+          pageText || null,
         );
+        const img = await zoneChecked(
+          label,
+          file,
+          sceneText,
+          page.index + 2,
+          drawn,
+          textZoneOf(layout, pageText),
+        );
+        // La página como la ve el cliente: dibujo, papel fundido y texto con la misma geometría.
+        const bytes = await composePage(img.bytes, layout, pageText, typography);
+        await sharp(bytes).toFile(path.join(outDir, `${tag}-${file}-armada.webp`));
+        composed.push({ bytes, mimeType: 'image/webp' });
+      }
+      // Juez comprador: el que paga mira la tapa y las páginas armadas con el pedido.
+      try {
+        const { usage: buyerUsage, ...buyer } = await text.reviewAsBuyer({
+          channel: testCase.channel,
+          priceUsd: testCase.channel === 'events' ? 11 : 15,
+          order: orderSummary(testCase, story.title.es, style.name.es),
+          title: draft.title,
+          texts: pages.map((page) => page.text),
+          cover,
+          pages: composed,
+        });
+        spend(buyerUsage);
+        row.buyer = buyer;
+      } catch (error) {
+        row.notes.push(`comprador: sin respuesta (${(error as Error).message.slice(0, 120)})`);
       }
       for (const clause of [
         'closed_cast',
@@ -686,6 +837,7 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         'same_outfit',
         'chosen_style',
         'no_text_in_image',
+        'text_layout',
       ] as const) {
         mark(clause, 'pass');
       }
@@ -743,6 +895,19 @@ const md = [
           return `Dibujos limpios a la primera: ${String(first)}/${String(total)} (${pct(first)}) · después del redibujo: ${String(final)}/${String(total)} (${pct(final)}) · pedidos sin fallos duros al final: ${String(clean)}/${String(rows.length)}`;
         })(),
         '',
+        (() => {
+          const judged = rows.filter((row) => row.buyer);
+          if (judged.length === 0) return 'Juez comprador: sin respuestas';
+          const count = (verdict: BuyerReview['verdict']) =>
+            judged.filter((row) => row.buyer?.verdict === verdict).length;
+          const avg = (pick: (buyer: Omit<BuyerReview, 'usage'>) => number) =>
+            (
+              judged.reduce((sum, row) => sum + (row.buyer ? pick(row.buyer) : 0), 0) /
+              judged.length
+            ).toFixed(1);
+          return `Juez comprador: lo compraría ${String(count('compra'))}/${String(judged.length)} · duda ${String(count('duda'))} · no ${String(count('no'))} · compra ${avg((buyer) => buyer.buy)}/5 · regalo ${avg((buyer) => buyer.gift)}/5`;
+        })(),
+        '',
       ]
     : []),
   '✓ cumple · ↻ falló y se reparó solo · · blanda (se mide) · ✗ no cumple',
@@ -765,6 +930,19 @@ const md = [
       ? '## Sin regresiones contra la corrida anterior'
       : '',
   '',
+  ...(rows.some((row) => row.buyer)
+    ? [
+        '## Qué dice el comprador',
+        ...rows.flatMap((row) => {
+          const buyer = row.buyer;
+          if (!buyer) return [];
+          return [
+            `- **${row.id}${runs > 1 ? ` v${String(row.run ?? 1)}` : ''}**: ${buyer.verdict} · compra ${String(buyer.buy)}/5 · regalo ${String(buyer.gift)}/5. Le encantó: ${buyer.loved.join('; ') || '-'}. Reembolso: ${buyer.refund.join('; ') || '-'}. Para un 5: ${buyer.fixes.join('; ') || '-'}.`,
+          ];
+        }),
+        '',
+      ]
+    : []),
   '## Qué cubre y qué falló',
   ...rows.map(
     (row) =>
