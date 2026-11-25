@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { ClientErrorReporter } from '@/components/client-error-reporter';
+import { RememberCoupon } from '@/components/checkout/coupon-field';
 import { Analytics } from '@/components/consent/analytics';
 import { ConsentBanner } from '@/components/consent/consent-banner';
 import { Maintenance, PreviewOnlyBanner } from '@/components/layout/maintenance';
@@ -136,6 +137,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             <NavigationSpinner />
             <ConsentBanner />
             <Analytics />
+            <RememberCoupon />
             <ClientErrorReporter />
           </Providers>
         </NextIntlClientProvider>

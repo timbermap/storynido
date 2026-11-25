@@ -1963,6 +1963,10 @@
     "summaryTitle": "Resumen",
     "coupon": "Cupón",
     "apply": "Aplicar",
+    "couponToggle": "¿Tienes un código?",
+    "couponPlaceholder": "Escribe tu código",
+    "couponApplied": "Código {code} aplicado",
+    "couponRemove": "Quitar",
     "calculating": "Calculando el precio…",
     "couponErrors": {
       "coupon_invalid": "Ese cupón no existe.",

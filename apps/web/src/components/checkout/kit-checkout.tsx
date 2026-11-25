@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 
 import { CountrySwitch } from './country-switch';
 import { usePaymentHandoff } from './payment-handoff';
+import { CouponField } from './coupon-field';
 import { PriceSummary } from './price-summary';
 
 type Pricing = NonNullable<Awaited<ReturnType<typeof api<'catalogEventPricing'>>>['pricing']>;
@@ -62,7 +63,6 @@ export function KitCheckout({
   const [place, setPlace] = useState('');
   const [guestsText, setGuestsText] = useState('');
   const [signature, setSignature] = useState(true);
-  const [couponInput, setCouponInput] = useState('');
   const [coupon, setCoupon] = useState<string | null>(null);
   const [quote, setQuote] = useState<{
     snapshot: PriceSnapshot;
@@ -355,38 +355,16 @@ export function KitCheckout({
 
       <aside className="grid content-start gap-5 self-start rounded-2xl border bg-card p-6 lg:sticky lg:top-24">
         <h2 className="text-xl font-medium">{t('summaryTitle')}</h2>
-        <form
-          className="flex gap-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setCoupon(couponInput.trim() ? couponInput.trim().toUpperCase() : null);
-          }}
-        >
-          <label htmlFor="kit-coupon" className="sr-only">
-            {t('coupon')}
-          </label>
-          <input
-            id="kit-coupon"
-            placeholder={t('coupon')}
-            value={couponInput}
-            onChange={(event) => {
-              setCouponInput(event.target.value);
-            }}
-            className="h-10 min-w-0 flex-1 rounded-xl border bg-background px-3 text-sm uppercase"
-          />
-          <Button type="submit" variant="outline" size="sm">
-            {t('apply')}
-          </Button>
-        </form>
-        {quote?.couponError && (
-          <p role="status" className="text-sm text-destructive">
-            {t(`couponErrors.${quote.couponError}`)}
-          </p>
-        )}
         {quote ? (
           <>
             <PriceSummary snapshot={quote.snapshot} country={country} />
             <CountrySwitch country={country} {...countryChoice} />
+            <CouponField
+              id="kit-coupon"
+              coupon={coupon}
+              error={quote.couponError}
+              onApply={setCoupon}
+            />
           </>
         ) : (
           <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">

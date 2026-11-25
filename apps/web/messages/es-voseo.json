@@ -517,7 +517,9 @@
       "failed": "No pudimos cargar el pago acá (a veces lo bloquea un bloqueador de anuncios). <link>Pagá en la página de PayPal</link> y volvés solo a StoryNido.",
       "error": "PayPal no pudo procesar el pago. Probá de nuevo o con otra tarjeta.",
       "declined": "Tu tarjeta fue rechazada. Elegí otra tarjeta o pagá con PayPal."
-    }
+    },
+    "couponToggle": "¿Tenés un código?",
+    "couponPlaceholder": "Escribí tu código"
   },
   "Pro": {
     "activation": {
