@@ -217,6 +217,8 @@ service cloud.firestore {
         && validMemories(d.get('memories', null))
         && validEvent(d.get('event', null))
         && optString(d.get('goal', null), 80)
+        // Profesionales: sonido o palabras para practicar (CHILD_LIMITS.practiceMaxLength).
+        && optString(d.get('practice', null), 60)
         // Opciones editoriales (BOOK_LENGTHS, TEXT_DENSITIES, READING_LEVELS, CONTENT_TYPES).
         && d.get('length', null) in [null, 'mini', 'short', 'classic', 'epic']
         && d.get('textDensity', 'balanced') in ['visual', 'balanced', 'rich']
@@ -241,7 +243,7 @@ service cloud.firestore {
 
       allow update: if ownsExisting()
         && resource.data.status in ['draft', 'preview_ready']
-        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'wizardStepKey', 'photoIds', 'characterMode', 'avatar', 'useDrawing', 'memories', 'event', 'goal', 'length', 'textDensity', 'readingLevel', 'contentType', 'updatedAt'])
+        && changesOnly(['childId', 'storyId', 'styleId', 'lessonIds', 'customLesson', 'language', 'dedication', 'wizardStep', 'wizardStepKey', 'photoIds', 'characterMode', 'avatar', 'useDrawing', 'memories', 'event', 'goal', 'practice', 'length', 'textDensity', 'readingLevel', 'contentType', 'updatedAt'])
         && isNow('updatedAt')
         && validBookEdits();
 

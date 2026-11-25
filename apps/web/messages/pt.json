@@ -1087,6 +1087,7 @@
       "kitTone": "Tom {tone}",
       "kitDedication": "Com dedicatória",
       "goal": "Objetivo",
+      "practice": "Para praticar",
       "alias": "Apelido",
       "dedicationLanguage": "A dedicatória parece estar em {written, select, es {espanhol} en {inglês} pt {português} other {outro idioma}}: é impressa como foi escrita, mesmo que a história esteja em outro idioma."
     },
@@ -1558,7 +1559,10 @@
       "recommended": "Ideal para a idade",
       "requiredCollection": "Escolha uma coleção para continuar.",
       "requiredGoal": "Escolha um objetivo para continuar.",
-      "requiredStory": "Escolha uma história base para continuar."
+      "requiredStory": "Escolha uma história base para continuar.",
+      "practice": "Som ou palavras para praticar (opcional)",
+      "practiceHint": "A história os repete em cada página e na frase que volta, para dizer em voz alta.",
+      "practicePlaceholder": "Ex.: o som rr, palavras com s"
     },
     "reading": {
       "title": "Como se lê",

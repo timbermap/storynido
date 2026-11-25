@@ -73,7 +73,7 @@ import {
   catalogPrices,
   SAME_OUTFIT,
   calmSideFor,
-  layoutSceneNote,
+  sceneNoteFor,
   textZoneOf,
   pageLayout,
   pagesPerScene,
@@ -349,6 +349,8 @@ function pageScene(
   hint?: string,
   layout?: PageLayout,
   bible?: Pick<BookSnapshot, 'props' | 'places' | 'outfits'>,
+  /** El texto de la página: sin texto la ilustración va entera (sin franja calma). */
+  text?: string | null,
 ): string {
   const visible = scene?.mustBeVisible.length
     ? ` Must be visible: ${scene.mustBeVisible.join(', ')}.`
@@ -370,7 +372,7 @@ function pageScene(
   // Espacio para el texto según el armado: se alterna arriba y abajo para que las páginas no
   // sean iguales (con páginas enfrentadas, la ilustración va entera).
   const calm = scene
-    ? layoutSceneNote(layout ?? { kind: 'overlay', side: calmSideFor(scene.pageIndex) })
+    ? sceneNoteFor(layout ?? { kind: 'overlay', side: calmSideFor(scene.pageIndex) }, text)
     : '';
   return `${prompt}${visible}${hidden}${continuity}${visuals}${outfit}${fix}${calm} No text, letters or words anywhere in the image.`;
 }
@@ -639,7 +641,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             null,
             hint,
           )
-        : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint, layoutOf(snapshot, index - 1), snapshot)}${castNote(snapshot.cast)}`;
+        : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint, layoutOf(snapshot, index - 1), snapshot, page?.text ?? null)}${castNote(snapshot.cast)}`;
     const reference = await load(snapshot.character.sheetPath);
     const companion = snapshot.companion ?? null;
     const references = companion ? [reference, await load(companion.sheetPath)] : [reference];
@@ -708,7 +710,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           : snapshot.stylePrompt,
         ...(index === 0 ? { cover: true } : {}),
         // Sin caras bajo el texto de la página (DECISIONS 300).
-        ...(index > 0 && snapshot.pageLayout ? textZoneOf(layoutOf(snapshot, index - 1)) : {}),
+        ...(index > 0 && snapshot.pageLayout
+          ? textZoneOf(layoutOf(snapshot, index - 1), page?.text ?? null)
+          : {}),
       });
       cost += await record(ctx, 'moderation', verdict.usage);
       // Estilo o zona del título: se rehace una vez; en el segundo intento se acepta (DECISIONS 283).

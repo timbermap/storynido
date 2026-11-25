@@ -95,6 +95,16 @@ export interface StoryPromptInput {
   event?: Pick<BookEvent, 'type' | 'date' | 'turningAge' | 'theme'> | null;
   /** Profesionales: objetivo general (guía narrativa, nunca clínica). */
   goal?: string | null;
+  /**
+   * Profesionales: sonido o palabras para practicar que eligió el profesional, ya moderado
+   * («el sonido escondido» prometía «el profesional elige el sonido» y no había dónde, 25 nov 2026).
+   */
+  practice?: string | null;
+  /**
+   * Profesionales: el profesional no conoce a la familia del chico. No entran mamá, papá ni
+   * hermanos que el pedido no nombra (el libro de Angélica sumó un papá que nadie pidió).
+   */
+  professional?: boolean;
   /** Densidad de texto (rango y tope de la franja de edad) y nivel de lectura (fase 07b). */
   wordsPerPage?: { min: number; max: number; cap?: number };
   /** Español: «vos» o «tú» según el país (por defecto «tú»). */
@@ -217,6 +227,20 @@ Objetivo general elegido por el profesional: «${input.goal}». Úsalo como guí
 (situaciones, emociones y un cierre que invite a conversar). Es un cuento educativo: no des
 indicaciones terapéuticas ni diagnósticos, y no menciones el objetivo de forma explícita.`
     : '';
+  const practice = input.practice?.trim();
+  const practiceSection = practice
+    ? `
+
+Sonido o palabras para practicar, elegidos por el profesional: «${practice}». Es el centro del cuento:
+- Cada página con texto trae 2 o 3 palabras que lo contienen (palabras simples para su edad), sin forzar la frase.
+- La frase que se repite lo contiene y es fácil de decir en voz alta; cuando algo suena (un animal, el viento, un motor), escríbelo como onomatopeya para repetir (por ejemplo «RRR, RRR»).
+- Nadie corrige, apura ni se burla de cómo lo dice el protagonista: se juega, se escucha y se repite.`
+    : '';
+  const professionalSection = input.professional
+    ? `
+
+Es un cuento que un profesional (docente, terapeuta) usa con un chico cuya familia no conoce: no aparecen mamá, papá, hermanos ni otros familiares que el pedido no nombra, salvo que la idea de la historia los necesite (un hermanito que llega). Si hace falta un adulto, es uno del cuento llamado por su rol (la seño, el guardabosque), sin contacto físico; la solución la encuentra el protagonista.`
+    : '';
   const planSection = input.plan
     ? `
 
@@ -230,7 +254,7 @@ Estructura de todo el libro: ${STRUCTURE_LABELS[input.plan.structure]}.`
       }${
         input.plan.refrain
           ? `
-Frase que se repite (al menos 3 veces, igual): «${input.plan.refrain}»`
+Frase que se repite (al menos 3 veces, letra por letra, sin sinónimos ni variantes): «${input.plan.refrain}»`
           : ''
       }
 ${input.plan.scenes
@@ -253,7 +277,7 @@ ${input.plan.promises
           : ''
       }`
     : '';
-  return `${body}${premiseSection}${memoriesSection}${eventSection}${goalSection}${planSection}
+  return `${body}${premiseSection}${memoriesSection}${eventSection}${goalSection}${practiceSection}${professionalSection}${planSection}
 
 Reglas obligatorias:
 - Escribe en ${language}.
@@ -322,8 +346,8 @@ export function formRules(age: number): string[] {
   if (age >= 7) return [];
   const rules = [
     `- Elige UNA estructura y respétala en todo el libro: ${Object.values(STRUCTURE_LABELS).join('; ')}.`,
-    '- Una frase corta, fácil de decir en voz alta, se repite igual al menos 3 veces (es la que el chico termina diciendo con el adulto).',
-    '- Usa onomatopeyas y sonidos (BRUM, PLAF, KIKIRIKÍ) cuando la escena lo permite.',
+    '- Una frase corta, fácil de decir en voz alta, se repite igual al menos 3 veces, letra por letra (es la que el chico termina diciendo con el adulto): nunca la cambies por una parecida («Oigo, oigo» no pasa a «Escucho, escucho»).',
+    '- Usa onomatopeyas y sonidos (BRUM, PLAF, KIKIRIKÍ) cuando la escena lo permite. Si un sonido mueve la historia (un silbido, un golpe, un canto), escríbelo como onomatopeya (FIU, FIU) cada vez que suena, siempre igual.',
     '- Humor absurdo y lógica de chico con detalles concretos y sensoriales (un helado de papas fritas, un perro que va a la escuela en la mochila). Nada de adjetivos genéricos como «mágico», «increíble» o «maravilloso».',
     '- El texto nunca describe lo que muestra el dibujo: si se ve el cohete, cuenta lo que siente, dice o decide el protagonista.',
     '- Al final, un giro o una sorpresa que invite a releerlo.',
@@ -331,7 +355,7 @@ export function formRules(age: number): string[] {
   ];
   if (age >= 3) {
     rules.push(
-      '- Las páginas que el plan marca SIN TEXTO llevan "text" vacío (""): en el clímax, el dibujo cuenta solo.',
+      '- Las páginas que el plan marca SIN TEXTO llevan "text" vacío (""): en el clímax, el dibujo cuenta solo. Todas las demás llevan texto, aunque el plan no lo haya escrito.',
     );
   }
   return rules;

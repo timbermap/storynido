@@ -13,6 +13,8 @@ import {
   scenesFor,
   stripArtPct,
   stripFontScale,
+  sceneNoteFor,
+  WORDLESS_SCENE_NOTE,
 } from './page-layout';
 
 const at = (age: number, words: number, pageIndex = 1, contentType = 'story') =>
@@ -139,5 +141,21 @@ describe('ilustraciones por largo (DECISIONS 321)', () => {
     expect(storyIllustrations(short, 11, 'story')).toBe(7);
     expect(storyIllustrations(short, 6, 'story')).toBe(14);
     expect(storyIllustrations(short, 11, 'coloring')).toBeNull();
+  });
+});
+
+describe('página sin texto (libro de Angélica, 25 nov 2026)', () => {
+  const calm = { kind: 'calm' as const, side: 'top' as const, zonePct: 30 };
+
+  it('sin texto, la ilustración va entera y no hay zona que vigilar', () => {
+    expect(sceneNoteFor(calm, '')).toBe(WORDLESS_SCENE_NOTE);
+    expect(sceneNoteFor(calm, '   ')).toBe(WORDLESS_SCENE_NOTE);
+    expect(textZoneOf(calm, '')).toEqual({});
+  });
+
+  it('con texto, pide la zona calma como siempre', () => {
+    expect(sceneNoteFor(calm, 'Entro al bosque.')).toBe(layoutSceneNote(calm));
+    expect(textZoneOf(calm, 'Entro al bosque.')).toEqual({ textZone: { side: 'top', pct: 30 } });
+    expect(textZoneOf(calm)).toEqual({ textZone: { side: 'top', pct: 30 } });
   });
 });

@@ -16,6 +16,8 @@ export const CHILD_LIMITS = {
   dedicationMaxLength: 500,
   /** Mensaje o enseñanza propia que escribe el adulto. */
   customLessonMaxLength: 150,
+  /** Profesionales: sonido o palabras para practicar. */
+  practiceMaxLength: 60,
   /** Enseñanzas por libro (el mensaje propio cuenta como una). Más de 2 diluye la historia. */
   maxLessons: 2,
 } as const;

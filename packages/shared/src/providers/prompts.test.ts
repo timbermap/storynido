@@ -621,3 +621,19 @@ describe('personajes que vuelven con nombre (DECISIONS 329)', () => {
     ).toContain('Mateo, a classmate: male, curly red hair');
   });
 });
+
+describe('Profesionales: práctica y familia (libro de Angélica, 25 nov 2026)', () => {
+  it('el sonido para practicar entra al prompt con sus reglas', () => {
+    const prompt = buildStoryPrompt({ ...base, practice: 'el sonido rr', professional: true });
+    expect(prompt).toContain(
+      'Sonido o palabras para practicar, elegidos por el profesional: «el sonido rr»',
+    );
+    expect(prompt).toContain('no aparecen mamá, papá, hermanos');
+  });
+
+  it('sin práctica ni Profesionales, nada de eso', () => {
+    const prompt = buildStoryPrompt(base);
+    expect(prompt).not.toContain('Sonido o palabras para practicar');
+    expect(prompt).not.toContain('no aparecen mamá, papá');
+  });
+});

@@ -125,6 +125,9 @@ export function StepReview({
         ]
       : []),
     ...(isPro ? [{ label: t('goal'), value: book.goal ?? '—', step: step('focus') }] : []),
+    ...(isPro && book.practice
+      ? [{ label: t('practice'), value: book.practice, step: step('focus') }]
+      : []),
     {
       label: t('adventure'),
       // En el idioma del libro, no en el del sitio: así se ve si el cuento va a salir en otro

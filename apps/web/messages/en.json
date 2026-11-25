@@ -1087,6 +1087,7 @@
       "kitTone": "{tone} tone",
       "kitDedication": "With dedication",
       "goal": "Goal",
+      "practice": "To practice",
       "alias": "Alias",
       "dedicationLanguage": "The dedication seems to be in {written, select, es {Spanish} en {English} pt {Portuguese} other {another language}}: it is printed as written, even if the story is in another language."
     },
@@ -1558,7 +1559,10 @@
       "recommended": "Right for their age",
       "requiredCollection": "Choose a collection to continue.",
       "requiredGoal": "Choose a goal to continue.",
-      "requiredStory": "Choose a base story to continue."
+      "requiredStory": "Choose a base story to continue.",
+      "practice": "Sound or words to practice (optional)",
+      "practiceHint": "The story repeats them on every page and in the returning phrase, to say them out loud.",
+      "practicePlaceholder": "E.g.: the r sound, words with s"
     },
     "reading": {
       "title": "How it reads",
