@@ -3333,3 +3333,10 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 - **Qué pasaba (El diario de Luli, staging, 25 nov):** la página 9 salió con la amiga apoyándole la mano en el brazo; la revisión lo marcó y el libro quedó en revisión manual.
 - **Qué hace ahora:** si la revisión de una página menciona contacto (abrazo, beso, mano sobre otra persona, a upa…), la página siempre se redibuja dentro de los topes de reparación, aunque la revisión pida revisión manual, y el redibujo empieza por `CONTACT_FIX_HINT` (misma escena, con aire entre las personas; la cercanía con miradas y objetos compartidos). Solo si fallan los redibujos va a revisión manual.
 - **Prevención:** el Diario pide amistad sin contacto (miradas, risas, compartir algo) y la Academia, festejos desde su lugar sin tocarse (puño en alto, un salto).
+
+## 326 — El Diario suena a 12 años y el Manga se ve manga
+
+Revisión con la mesa de «El diario de Luli» (staging, 25 nov): las páginas no se veían en el estilo elegido (Manga), el amigo no tenía nombre («mi compañero», «él»), el texto repetía expresiones («alivio enorme» tres veces) y nombraba emociones de adulto («mi vulnerabilidad era total»), y había dos entradas seguidas con «Sábado».
+
+- **Manga:** la ficha describe los rasgos que lo hacen reconocible (pelo en mechones con brillo, ojos grandes con brillo, sombreado de dos tonos con tramas) y evita el cómic occidental y el lápiz suave. La ficha manda sobre las reglas generales (ojos de tamaño natural).
+- **Diario:** la plantilla pide escribir como alguien de 11 o 12 años, emociones con el cuerpo y las acciones, sin repetir expresiones, nombre propio para todo amigo recurrente y días que avanzan.

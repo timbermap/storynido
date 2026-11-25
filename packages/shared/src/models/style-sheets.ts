@@ -130,11 +130,11 @@ export const STYLE_SHEETS: Record<string, StyleSheet> = {
   // Para 9-12 (DECISIONS 319): manga genérico, sin personajes ni marcas de nadie.
   manga: {
     medium:
-      'manga-inspired illustration for middle-grade readers: clean expressive ink linework with tapered strokes, cel shading with subtle screentone dot textures, large but natural expressive eyes, dynamic poses and bright clean colors; an original design that resembles no existing anime or manga character; one single full-page image, never panels or speech bubbles',
+      'Japanese manga illustration for middle-grade readers, unmistakably manga at first glance: crisp black ink lineart with tapered strokes, hair drawn in sharp separate clumps with a bright highlight band, eyes larger than natural with a big glossy highlight and detailed iris, a small simple nose and mouth, flat two-tone cel shading with screentone dot textures in the shadows, speed lines only in the background, bright clean colors; an original design that resembles no existing anime or manga character; one single full-page image, never panels or speech bubbles',
     usesPalette: true,
     references: KEEP_IDENTITY,
     avoid:
-      'painted storybook look, watercolor, 3D render, chibi or babyish proportions, panels, speech bubbles, Japanese or any other lettering',
+      'western cartoon or comic-book look, painted storybook look, soft colored-pencil shading, watercolor, 3D render, chibi or babyish proportions, panels, speech bubbles, Japanese or any other lettering',
     check: COLOR_STYLE_CHECK,
   },
   'gouache-editorial': {
