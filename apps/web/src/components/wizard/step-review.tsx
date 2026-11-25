@@ -8,6 +8,7 @@ import {
   LOCALE_DEFINITIONS,
   MEMORY_KEYS,
   dedicationLanguageMismatch,
+  invitationCopy,
   storyIllustrations,
 } from '@storynido/shared';
 
@@ -115,7 +116,9 @@ export function StepReview({
             label: t('kit'),
             value: [
               tKit(event.offer === 'invitation' ? 'invitationOnly' : 'fullKit'),
-              t('kitTone', { tone: tKit(`tones.${event.tone}.name`) }),
+              // El nombre del tono sale de la misma copia que muestra el paso del kit (no hay claves
+              // «tones» en los mensajes: se veía «Wizard.kit.tones.sweet.name»).
+              t('kitTone', { tone: invitationCopy(book.language, event.type, event.tone).name }),
               book.dedication && event.offer === 'full_kit' ? t('kitDedication') : null,
             ]
               .filter(Boolean)

@@ -84,7 +84,8 @@
     "visitorName": {
       "placeholder": "Escribí un nombre",
       "hint": "Escribí un nombre y verás todas las portadas con él."
-    }
+    },
+    "shareLead": "¿Conocés a alguien a quien le encantaría?"
   },
   "FormatShowcase": {
     "title": "Así lo recibís"
@@ -292,7 +293,7 @@
         }
       },
       "queued": {
-        "text": "Hay muchos cuentos creándose ahora mismo. La tuya ya está en camino: te avisamos por correo apenas esté lista, así que podés cerrar esta página."
+        "text": "Hay muchos cuentos creándose ahora mismo. Ya estamos trabajando en eso: te avisamos por correo apenas termine, así que podés cerrar esta página."
       },
       "wait": {
         "leaveTextReview": "Seguimos trabajando aunque salgas. Cuando vuelvas, lo encontrás listo para revisar en Mis cuentos, «En proceso».",
@@ -301,7 +302,8 @@
           "redraw": "si una ilustración no te convence, podés pedir otra.",
           "free": "la muestra es gratis. Pagás solo si querés el libro."
         }
-      }
+      },
+      "shareLead": "¿Conocés a otra familia a la que le gustaría? Contales."
     },
     "character": {
       "avatarText": "Elegís sus rasgos: piel, pelo, ojos y anteojos.",

@@ -37,6 +37,7 @@ import {
   describeCharacter,
   nameIssues,
   pagesOutOfRange,
+  hasTouch,
   riskyPose,
   spanishVoiceFor,
   storyTypography,
@@ -422,8 +423,32 @@ function safeRedrawReview(pageIndex: number): PageReview {
 const CONTACT_ISSUE =
   /\b(hug|hugs|hugging|embrac\w*|kiss\w*|touch\w*|lap|carr(?:y|ies|ying)|piggyback|holding hands|arm around|arms around|hand (?:on|resting|placed)|hands (?:on|resting|placed)|physical contact)\b/i;
 
+/**
+ * Al revés: el texto cuenta un abrazo y el dibujo no lo muestra (Joaquín, 25 nov 2026: «The
+ * illustration does not show the father hugging Joaquín»). Redibujar sin contacto nunca lo arregla:
+ * se reescribe el texto de la página y el dibujo queda.
+ */
+const MISSING_CONTACT =
+  /\b(?:does not|doesn't|do not|don't|did not|didn't|is not|isn't|are not|aren't|not|never|missing|absent|lacks?|lacking|without|fails? to|instead of)\b[^.;]{0,80}\b(?:hug|hugs|hugging|hugged|embrac\w*|kiss\w*|cuddl\w*|carr(?:y|ies|ying|ied)|holding|arms? around|lap)\b/i;
+/** Una revisión que marca el contacto como prohibido no es «falta el abrazo». */
+const CONTACT_VIOLATION =
+  /violat|not allowed|forbidden|prohibit|should(?:n't| not)|must not|inappropriate|restriction/i;
+
+function isMissingContact(issue: string): boolean {
+  return CONTACT_ISSUE.test(issue) && MISSING_CONTACT.test(issue) && !CONTACT_VIOLATION.test(issue);
+}
+
+/** Contacto que hay que sacar del dibujo (no cuenta el abrazo que el dibujo no muestra). */
 export function isContactIssue(review: PageReview | null): boolean {
-  return (review?.criticalIssues ?? []).some((issue) => CONTACT_ISSUE.test(issue));
+  return (review?.criticalIssues ?? []).some(
+    (issue) => CONTACT_ISSUE.test(issue) && !isMissingContact(issue),
+  );
+}
+
+/** Lo único que falla es un contacto que cuenta el texto y el dibujo (bien) no muestra. */
+export function onlyMissingContact(review: PageReview | null): boolean {
+  const issues = review?.criticalIssues ?? [];
+  return issues.length > 0 && issues.every(isMissingContact);
 }
 
 /** Redibujo de una página con contacto: la misma escena, con aire entre las personas. */
@@ -1259,6 +1284,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     let needsReference = 0;
     /** Páginas cuya revisión bloqueó el filtro de seguridad: se redibujan una vez, más pudorosas. */
     const reviewBlocked = new Set<number>();
+    /** Páginas cuyo texto se reescribió sin el contacto que el dibujo no muestra. */
+    const textFixes = new Map<number, string>();
 
     // Contrato del pedido para el dibujo (DECISIONS 333): quién puede aparecer y las reglas que se
     // miran en cada página. Las cláusulas que falló cada página se registran al final.
@@ -1357,6 +1384,40 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           return;
         }
 
+        // El texto cuenta un abrazo que el dibujo no muestra (y el dibujo sin contacto es lo que
+        // pedimos): se reescribe el texto de la página, una vez, y el dibujo queda (Joaquín, 25 nov).
+        const page = index > 0 ? snapshot.pages[index - 1] : undefined;
+        if (path && page?.text.trim() && onlyMissingContact(review) && !textFixes.has(index)) {
+          const at = index - 1;
+          const rewrite = await provider.text.rewritePage({
+            language: snapshot.language as 'es' | 'en' | 'pt',
+            spanishVoice: spanishVoiceFor(ctx.order.country),
+            childName: snapshot.childName,
+            age: snapshot.age,
+            storyTitle: snapshot.title,
+            pageIndex: page.index,
+            previous: snapshot.pages[at - 1]?.text ?? null,
+            next: snapshot.pages[at + 1]?.text ?? null,
+            text: page.text,
+            words: snapshot.words ?? { min: 8, max: 60 },
+            mustInclude: snapshot.requiredNames,
+            avoid:
+              'a hug, kiss, being carried or any physical contact: tell the closeness with words, a look, a smile or being side by side, without touching',
+          });
+          cost += await record(ctx, 'review', rewrite.usage);
+          const text = rewrite.text.trim();
+          if (text && !hasTouch(text)) {
+            textFixes.set(index, text);
+            await qaEvent(ctx, 'contact_text_rewritten', {
+              pageIndex: index,
+              attemptCount: attempts,
+              finalStatus: 'repaired',
+            });
+            finalImages.set(index, path);
+            return;
+          }
+        }
+
         // Un contacto físico siempre se intenta redibujar, aunque la revisión pida revisión manual.
         const contact = isContactIssue(review);
         const unfixable =
@@ -1442,6 +1503,23 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         }),
       ),
     );
+
+    // Los textos reescritos quedan en el libro congelado (la maqueta los lee de ahí).
+    if (textFixes.size > 0) {
+      const { hash: _old, ...rest } = snapshot;
+      const content: Omit<BookSnapshot, 'hash'> = {
+        ...rest,
+        pages: snapshot.pages.map((item, at) => {
+          const text = textFixes.get(at + 1);
+          return text === undefined ? item : { ...item, text };
+        }),
+      };
+      const fixed = { ...content, hash: hashSnapshot(content) };
+      await db
+        .collection(COLLECTIONS.orders)
+        .doc(ctx.order.id)
+        .update({ snapshot: fixed, snapshotHash: fixed.hash });
+    }
 
     if (blocked.length > 0) {
       log.warn({ orderId: ctx.order.id, pages: blocked.map((page) => page.index) }, 'qa blocked');

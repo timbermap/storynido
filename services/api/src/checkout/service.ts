@@ -1120,7 +1120,9 @@ export class CheckoutService {
       bookId: order.bookId,
       status: order.status,
       items: order.items.map((item) => ({ format: item.format, quantity: item.quantity })),
-      priceSnapshot: order.priceSnapshot,
+      // Los pedidos simulados de desarrollo (POST /v1/dev/books/:bookId/paid-order) no tienen
+      // precio congelado: sin el null, la respuesta no pasaba el esquema y devolvía 500.
+      priceSnapshot: order.priceSnapshot ?? null,
       createdAt: toIso(order.createdAt),
       canSimulatePayment:
         this.options.devToolsEnabled &&

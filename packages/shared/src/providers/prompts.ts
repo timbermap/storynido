@@ -200,7 +200,8 @@ export function buildStoryPrompt(input: StoryPromptInput): string {
 
 Idea de esta historia (es lo que el adulto eligió en el catálogo y lo que le prometimos: respétala de
 principio a fin). Los gustos del protagonista se suman como detalles, nunca cambian la idea ni el
-tipo de cuento:
+tipo de cuento. El lugar que nombran el título y esta idea (la selva, el mar, el espacio) es el
+escenario del libro y sus personajes son los de la historia:
 ${premise}`
     : '';
   const memories = memoriesBlock(input.memories);
@@ -209,7 +210,12 @@ ${premise}`
 
 Detalles reales de la familia (intégralos con naturalidad en escenas concretas; usa el apodo en
 los diálogos; si alguno no encaja, omítelo; nunca agregues datos personales que no estén acá):
-${memories}`
+${memories}
+Estos recuerdos pasan en la vida real (la casa, la bañera, el zoológico), pero el cuento pasa en el
+lugar y con los personajes de la historia elegida: llévalos a ese mundo, nunca cambies el escenario
+por el del recuerdo. Por ejemplo, en un cuento de la selva la espuma de la bañera se vuelve un
+chapuzón en el río y el «hola» a la jirafa del zoológico se lo dice a un animal de la selva. Ninguna
+página pasa en la casa salvo que la historia elegida pase ahí (o sea para dormir y termine en la cama).`
     : '';
   const event = input.event;
   const eventSection = event
@@ -706,6 +712,60 @@ export function samplePrompts(input: {
 /** Escena de la lámina del acompañante: cuerpo entero, fondo liso, sin nadie más. */
 export const companionReferenceScene = (companion: { name: string; look: string }) =>
   `Character reference sheet of ${companion.name}: ${companion.look}. Full body, neutral friendly pose, plain light background, nobody else in the image.`;
+
+const plainText = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+/**
+ * Edad que el pedido da para una persona (Clara, la hermana «de 7», salió de 14 en el libro de
+ * selva del 25 nov 2026): se busca cerca de su nombre en los campos del pedido. Sin número, null.
+ */
+export function statedAge(
+  name: string | null | undefined,
+  sources: readonly (string | null | undefined)[],
+): number | null {
+  const target = plainText(name?.trim() ?? '');
+  if (!target) return null;
+  for (const source of sources) {
+    const text = plainText(source ?? '');
+    const at = text.indexOf(target);
+    if (at < 0) continue;
+    // Hasta la próxima persona («Pancho y su hermana Clara, de 7»: los 7 no son del perro).
+    const near =
+      text
+        .slice(at + target.length, at + target.length + 60)
+        .split(/\s(?:y|e|and|con|with)\s|[.;]/)[0] ?? '';
+    const match =
+      /\b(\d{1,2})\s*(?:anos|anitos|years?|-year)/.exec(near) ?? /\bde (\d{1,2})\b/.exec(near);
+    const age = match ? Number(match[1]) : NaN;
+    if (Number.isFinite(age) && age >= 0 && age < 18) return age;
+  }
+  return null;
+}
+
+/**
+ * El aspecto fijo del acompañante con la edad que dio el pedido: reemplaza otra edad o
+ * «teenager» del plan y la deja al principio, para la lámina y cada página.
+ */
+export function withStatedAge<T extends { name: string; look: string }>(
+  companion: T,
+  age: number | null,
+): T {
+  if (age === null) return companion;
+  const years = String(age);
+  const look = companion.look
+    .replace(/\b\d{1,2}[- ]years?[- ]old\b/gi, `${years}-year-old`)
+    .replace(/\b(?:about|around|aged?) \d{1,2}\b/gi, `aged ${years}`)
+    .replace(/\bteen(?:age|ager)?s?\b/gi, 'child');
+  const child = age < 13 ? ', a child, never drawn as a teenager or an adult' : '';
+  return {
+    ...companion,
+    look: `exactly ${years} years old (the height, face and body proportions of that age${child}); ${look}`,
+  };
+}
 
 /** Lo que se suma a la descripción del personaje cuando el libro tiene acompañante. */
 export const companionNote = (companion: { name: string; look: string }) =>

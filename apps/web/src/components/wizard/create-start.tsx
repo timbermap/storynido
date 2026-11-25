@@ -85,13 +85,22 @@ export function CreateStart({
   const t = useTranslations('Wizard');
   const locale = useLocale() as Locale;
   const { user, signedIn, loading } = useAuth();
-  const [channel, setChannel] = useState<Channel>(channelParam ?? 'families');
+  // La línea de la historia elegida (?story=) cuando no es de Familias: el unicornio del arcoíris
+  // es solo de Celebraciones y abría «Un cuento para la familia» (25 nov 2026).
+  const storyChannels = storyId
+    ? (catalog.stories.find((item) => item.slug === storyId)?.channels ?? [])
+    : [];
+  const storyLine: Channel | null =
+    storyChannels.length > 0 && !storyChannels.includes('families')
+      ? (storyChannels[0] ?? null)
+      : null;
+  const [channel, setChannel] = useState<Channel>(channelParam ?? storyLine ?? 'families');
   useEffect(() => {
     // La línea recordada de la landing se lee después de montar (sessionStorage).
-    const remembered = channelParam ? null : rememberedChannel();
+    const remembered = channelParam || storyLine ? null : rememberedChannel();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (remembered) setChannel(remembered);
-  }, [channelParam]);
+  }, [channelParam, storyLine]);
   // Profesionales necesita además la cuenta Pro activa (perfil mínimo) antes del primer borrador.
   const professional = channel === 'professionals';
   const { status: pro, refresh: refreshPro } = useProStatus();
@@ -134,7 +143,10 @@ export function CreateStart({
     // Qué crear: la línea de la URL, la de la landing de la que viene, Familias si eligió una
     // historia, o la única que usó. Si no se sabe, se pregunta en /nuevo (DECISIONS 115).
     const line =
-      channelParam ?? rememberedChannel() ?? (storyId || lessonId ? 'families' : onlyLine(all));
+      channelParam ??
+      storyLine ??
+      rememberedChannel() ??
+      (storyId || lessonId ? 'families' : onlyLine(all));
     if (!line) {
       router.replace('/new');
       return;

@@ -429,7 +429,16 @@ export async function listSavedCharacters(db: Firestore, uid: string): Promise<S
       value && typeof value === 'object' && 'toMillis' in value
         ? (value as { toMillis: () => number }).toMillis()
         : 0;
-    if (!current || time(book.updatedAt) > time(current.updatedAt)) latest.set(book.childId, book);
+    // Manda el último cuento que tiene cómo dibujarlo (rasgos sin foto o fotos): el borrador nuevo
+    // que reutilizó al personaje todavía no tiene nada y lo devolvía a «Con su foto» sin rasgos.
+    const hasLook = (item: Book) =>
+      (item.characterMode === 'avatar' && Boolean(item.avatar)) || item.photoIds.length > 0;
+    const better = !current
+      ? true
+      : hasLook(book) !== hasLook(current)
+        ? hasLook(book)
+        : time(book.updatedAt) > time(current.updatedAt);
+    if (better) latest.set(book.childId, book);
   }
   // Perfiles repetidos (mismo nombre y edad, de borradores que no reutilizaron al personaje): se
   // muestra uno solo, el más completo: con dibujo aprobado, después con rasgos y, si no, el que

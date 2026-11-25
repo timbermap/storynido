@@ -53,6 +53,8 @@ import {
   buildIllustrationPrompt,
   companionNote,
   companionReferenceScene,
+  statedAge,
+  withStatedAge,
   castMemberSheet,
   castSheetNote,
   mainCastMember,
@@ -893,6 +895,23 @@ export class PreviewService {
       }
     }
 
+    // Nombres de los otros chicos de la cuenta (su nombre, mascota y amigo): si aparecen en el
+    // texto y este pedido no los trae, el control del oficio pide sacarlos (25 nov 2026: Renata y
+    // Mostaza, de Joaquín, en libros de otros chicos). Si la lectura falla, se sigue sin el control.
+    const otherNames = await this.db
+      .collection(COLLECTIONS.children)
+      .where('ownerUid', '==', uid)
+      .get()
+      .then((snap) =>
+        snap.docs
+          .filter((doc) => doc.id !== book.childId)
+          .flatMap((doc) =>
+            ['name', 'petName', 'bestFriendName'].map((field) => doc.get(field) as unknown),
+          )
+          .filter((value): value is string => typeof value === 'string' && value.trim() !== ''),
+      )
+      .catch(() => [] as string[]);
+
     // Profesionales: el objetivo tiene que ser uno de los temas de las colecciones de la
     // historia (así no entra texto libre al prompt).
     const goal = book.goal
@@ -948,14 +967,19 @@ export class PreviewService {
     // Armado por edad (page-layout.ts): se decide con la muestra y queda con ella. Con la misma
     // edad que la cantidad de texto y la letra (en un cumpleaños, la que cumple).
     const layout = bookLayout(readerAge ?? Number(child.age), plan.contentType);
+    // Mascota y mejor amigo: solo Familias los pide (sin línea, es Familias).
+    const familyFields = book.channel !== 'events' && book.channel !== 'professionals';
     const request = {
       language: book.language,
       childName: String(child.name),
       age: Number(child.age),
       pronouns: (child.pronouns ?? null) as 'she' | 'he' | 'they' | null,
-      likes: (child.likes ?? []) as string[],
-      petName: (child.petName ?? null) as string | null,
-      bestFriendName: (child.bestFriendName ?? null) as string | null,
+      // Solo lo que el creador de esta línea pide (25 nov 2026: el amigo, la mascota y los gustos
+      // de Joaquín llegaron a libros de Celebraciones y Profesionales, que no los piden): en
+      // Celebraciones no hay gustos, mascota ni amigo; en Profesionales, ni mascota ni amigo.
+      likes: (book.channel === 'events' ? [] : (child.likes ?? [])) as string[],
+      petName: (familyFields ? (child.petName ?? null) : null) as string | null,
+      bestFriendName: (familyFields ? (child.bestFriendName ?? null) : null) as string | null,
       dedication: null,
       // El nombre del niño en el título del catálogo ("[Nombre] y el valle…"), no la marca.
       storyTitle: withChildName(story.title[book.language], String(child.name)),
@@ -1156,6 +1180,23 @@ export class PreviewService {
             refrain: storyPlan.refrain ?? null,
             diary: story.tags.includes('diario'),
             familyHug,
+            foreign: {
+              candidates: otherNames,
+              // Lo que este pedido y su plantilla nombran: ahí un nombre repetido es legítimo.
+              allowed: [
+                ...requiredNames,
+                request.petName ?? '',
+                request.bestFriendName ?? '',
+                ...request.likes,
+                ...Object.values(memories ?? {}).map((value) => value ?? ''),
+                book.dedication ?? '',
+                storyPlan.companion?.name ?? '',
+                ...(storyPlan.cast ?? []).map((member) => member.name ?? ''),
+                story.textPromptTemplate,
+                story.title[book.language],
+                story.summary[book.language],
+              ],
+            },
           });
           if (craft.issues.length > 0) {
             await this.qaEvent(bookId, 'story_craft', {
@@ -1897,7 +1938,20 @@ export class PreviewService {
       };
       // Acompañante que se repite (abuela, mascota): su lámina, una vez y con el mismo estilo,
       // es la segunda referencia de cada ilustración (DECISIONS 117).
-      const companionPlan = preview.plan?.companion ?? null;
+      // Con la edad que dio el pedido («Clara, su hermana de 7»): el plan la dibujaba adolescente.
+      const plannedCompanion = preview.plan?.companion ?? null;
+      const companionPlan = plannedCompanion
+        ? withStatedAge(
+            plannedCompanion,
+            statedAge(plannedCompanion.name, [
+              book.channel === 'events' || book.channel === 'professionals'
+                ? null
+                : (child.bestFriendName as string | null | undefined),
+              book.memories?.companion,
+              book.memories?.moment,
+            ]),
+          )
+        : null;
       const companion = companionPlan
         ? {
             ...companionPlan,

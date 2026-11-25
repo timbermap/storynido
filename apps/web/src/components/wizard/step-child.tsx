@@ -63,6 +63,8 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
     setPetName(fields?.petName ?? '');
     setFriend(fields?.bestFriendName ?? '');
     setAlias(fields?.alias ?? fields?.name ?? '');
+    // «Alguien nuevo» empieza vacío: la dedicatoria escrita para otro chico no se hereda.
+    if (!character) setDedication('');
   }
   // Profesionales: el alias identifica el proyecto en la cuenta y es también el nombre del cuento.
   const isPro = book.channel === 'professionals';
@@ -146,6 +148,8 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
     setNameError(null);
     setError(null);
     const pending = withPendingLike(likes, like);
+    // El chico guardado que se reutiliza (o el de este libro): sus datos de los campos ocultos.
+    const kept = reuseNow?.fields ?? child;
     const ok = await nav.save(async () => {
       const db = await getFirebaseDb();
       // Primer guardado real: si el borrador estaba en memoria, se crea ahora.
@@ -160,9 +164,12 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
         ).slice(0, CHILD_LIMITS.nameMaxLength),
         age,
         pronouns,
-        likes: pending,
-        petName: blankToNull(petName),
-        bestFriendName: blankToNull(friend),
+        // Celebraciones no pide gustos, mascota ni amigo, y Profesionales no pide mascota ni amigo:
+        // lo oculto queda como estaba en ese chico (o vacío si es nuevo), nunca lo que quedó en el
+        // estado de otro (Valentina salió con «su amiga Renata», el amigo de Joaquín).
+        likes: isEvent ? (kept?.likes ?? []) : pending,
+        petName: isEvent || isPro ? (kept?.petName ?? null) : blankToNull(petName),
+        bestFriendName: isEvent || isPro ? (kept?.bestFriendName ?? null) : blankToNull(friend),
         ...(isPro ? { alias: blankToNull(alias.slice(0, CHILD_LIMITS.nameMaxLength)) } : {}),
       });
       await updateBook(db, id, {
@@ -218,6 +225,14 @@ export function StepChild({ nav, data }: { nav: StepNav; data: WizardData }) {
                       onChange={() => {
                         pick(character);
                         setChosenNew(character === null);
+                      }}
+                      // «Alguien nuevo» ya marcado (lo que se recuperó en pantalla no era de
+                      // nadie elegido): tocarlo igual vacía los campos.
+                      onClick={() => {
+                        if (character === null && active) {
+                          pick(null);
+                          setChosenNew(true);
+                        }
                       }}
                     />
                     {character

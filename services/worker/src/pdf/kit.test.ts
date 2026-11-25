@@ -65,7 +65,7 @@ describe('tono de la invitación', () => {
     expect(sweet).toContain('Me encantaría que me acompañes en mi bautismo');
     expect(sweet).toContain('Te esperamos con cariño');
     const heartfelt = doc('communion', 'adventurous');
-    expect(heartfelt).toContain('Un día muy especial: acompáñame en mi primera comunión');
+    expect(heartfelt).toContain('Un día muy especial: quiero que estés en mi primera comunión');
     expect(heartfelt).toContain('Será un día para recordar');
     expect(heartfelt.toLowerCase()).not.toContain('aventura');
     expect(doc('graduation', 'adventurous')).toContain(
