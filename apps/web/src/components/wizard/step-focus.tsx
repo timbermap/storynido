@@ -112,6 +112,18 @@ export function StepFocus({ nav, data }: { nav: StepNav; data: WizardData }) {
               ? tWizard('chosenLesson', { name: lesson.name })
               : (goal ?? collection?.name ?? null)
           }
+          notice={
+            // Plantilla elegida desde el catálogo para otra edad (Angélica, 3 años, con un cuento
+            // de 4 a 7, 25 nov 2026): se avisa antes de seguir; el cuento igual se adapta.
+            age !== undefined && !fits(draftStory.ageMin, draftStory.ageMax)
+              ? t('ageNotice', {
+                  name: child?.name ?? '',
+                  age,
+                  min: draftStory.ageMin,
+                  max: draftStory.ageMax,
+                })
+              : null
+          }
           onChange={() => {
             setExpanded(true);
           }}

@@ -946,6 +946,10 @@ that were not provided: a parent, sibling or grandparent appears only if the bri
 routine, a new baby). When someone must guide the protagonist, use a role from the story (a forest ranger, a teacher, a friendly
 animal), never an invented relative. Before narrating, define beginning, motivation, an age-appropriate difficulty, the protagonist's own decisions,
 consequence and resolution. Personal details from the brief (likes, pet, friend) must change the action naturally, but each like appears in at most two scenes and never solves the main challenge; the story idea of the brief leads. With a single like, use it in one or two scenes only. Never plan a bridge, backbend, handstand, cartwheel, somersault or any upside-down pose, even if a like names it: turn it into a safe upright version.
+A like is used as play the child really does in that scene (a physical like is a short, safe game: jumping in a puddle, dancing,
+reaching up tall), and the text names it in words that make sense for that action; never turn the like's label into a literal
+comparison that does not fit ("stretching up like a bridge" for a child who likes doing the bridge is wrong: say "stretching up
+tall like a giraffe").
 No two consecutive scenes may be nearly identical. Exactly ${String(request.pageCount)} scenes, one per narrative page.
 wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min)}-${String(request.wordsPerPage.max)} words${request.wordsPerPage.cap ? `, never more than ${String(request.wordsPerPage.cap)}` : ''}` : 'as the brief says'}.
 ${formPlanRules(request.age)}

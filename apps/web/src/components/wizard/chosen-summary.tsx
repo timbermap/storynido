@@ -13,12 +13,15 @@ export function ChosenSummary({
   story,
   title,
   detail,
+  notice,
   onChange,
 }: {
   story: PublicStory | undefined;
   title: string;
   /** Lo demás que viene elegido (la enseñanza, la colección). */
   detail?: string | null;
+  /** Un aviso para revisar antes de seguir (por ejemplo, un cuento pensado para otra edad). */
+  notice?: string | null;
   onChange: () => void;
 }) {
   const t = useTranslations('Wizard');
@@ -38,6 +41,11 @@ export function ChosenSummary({
         </p>
         <p className="font-display text-lg leading-snug font-semibold">{title}</p>
         {detail && <p className="text-sm text-muted-foreground">{detail}</p>}
+        {notice && (
+          <p role="note" className="text-sm font-semibold text-[#a33f33]">
+            {notice}
+          </p>
+        )}
       </div>
       <button
         type="button"

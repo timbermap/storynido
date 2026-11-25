@@ -1562,7 +1562,8 @@
       "requiredStory": "Choose a base story to continue.",
       "practice": "Sound or words to practice (optional)",
       "practiceHint": "The story repeats them on every page and in the returning phrase, to say them out loud.",
-      "practicePlaceholder": "E.g.: the r sound, words with s"
+      "practicePlaceholder": "E.g.: the r sound, words with s",
+      "ageNotice": "This story is meant for ages {min} to {max} and {name} is {age}: we adapt it to their age, but another one may suit them better (Change)."
     },
     "reading": {
       "title": "How it reads",
