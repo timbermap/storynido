@@ -448,3 +448,40 @@ export function checkTextContract(
 /** Solo las duras: las que se reparan antes de entregar. */
 export const hardViolations = (violations: readonly ContractViolation[]) =>
   violations.filter((violation) => violation.severity === 'hard');
+
+/** Cláusulas que ve el juez de imagen (la revisión de cada página). */
+export const IMAGE_CONTRACT_CLAUSES = [
+  'closed_cast',
+  'no_touch',
+  'same_outfit',
+  'chosen_style',
+  'no_text_in_image',
+] as const satisfies readonly ContractClauseId[];
+
+export type ImageContractClause = (typeof IMAGE_CONTRACT_CLAUSES)[number];
+
+/**
+ * El contrato en inglés para el juez de imagen (DECISIONS 333): quiénes pueden aparecer (el plan ya
+ * saneado contra el pedido en la muestra) y las reglas que se miran en el dibujo. Va en la misma
+ * revisión de página que ya corre, sin llamada nueva.
+ */
+export function imageContractNote(input: {
+  companion?: { name: string; look: string } | null;
+  cast?: readonly { role: string; name?: string | null }[];
+}): string {
+  const allowed = [
+    'the protagonist',
+    ...(input.companion ? [`${input.companion.name} (${input.companion.look})`] : []),
+    ...(input.cast ?? []).map((member) =>
+      member.name ? `${member.name} (${member.role})` : member.role,
+    ),
+  ];
+  return [
+    `Characters the customer's order allows in this book: ${allowed.join('; ')}.`,
+    'closed_cast: any other clearly visible person, above all a mother, father, grandparent, sibling, aunt or uncle who is not in that list, breaks the order (a faceless crowd far in the background is fine).',
+    'no_touch: physical contact between people as described above.',
+    'same_outfit: the protagonist wears the outfit of the reference sheet unless the scene plan names another outfit for this scene.',
+    'chosen_style: the illustration is drawn in the same art technique as the reference sheet.',
+    'no_text_in_image: letters or words drawn in the image.',
+  ].join('\n');
+}

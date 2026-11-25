@@ -7,6 +7,8 @@ import {
   checkTextContract,
   familyRolesIn,
   hardViolations,
+  IMAGE_CONTRACT_CLAUSES,
+  imageContractNote,
 } from './order-contract';
 
 const pages = (...texts: string[]) => texts.map((text) => ({ text }));
@@ -161,5 +163,16 @@ describe('contrato del pedido', () => {
     );
     expect(found.map((item) => item.clause)).toEqual(['template_promise']);
     expect(found[0]?.pages).toEqual([2]);
+  });
+});
+
+describe('imageContractNote', () => {
+  it('lista solo a quienes el pedido permite, con las cláusulas de imagen', () => {
+    const note = imageContractNote({
+      companion: { name: 'Tino', look: 'a small brown dog' },
+      cast: [{ role: 'the speech therapist', name: null }],
+    });
+    expect(note).toContain('the protagonist; Tino (a small brown dog); the speech therapist.');
+    for (const clause of IMAGE_CONTRACT_CLAUSES) expect(note).toContain(`${clause}:`);
   });
 });

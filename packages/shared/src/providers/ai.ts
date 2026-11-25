@@ -1,4 +1,5 @@
 import type { Avatar } from '../models/character';
+import type { ImageContractClause } from './order-contract';
 import type { Locale } from '../i18n';
 
 /** Costo de una llamada, en millonésimas de dólar (precisión suficiente para tokens e imágenes). */
@@ -387,6 +388,8 @@ export interface PageReviewRequest {
   scene: ScenePlan | null;
   /** Aspecto fijo de los objetos, el lugar y la ropa de esta escena (biblia visual), si hay. */
   visualBible?: string;
+  /** Contrato del pedido para el dibujo (`imageContractNote`, DECISIONS 333). */
+  contract?: string;
 }
 
 /** Revisión del libro entero (miniaturas de todas las páginas contra la biblia visual). */
@@ -399,6 +402,8 @@ export interface BookReviewRequest {
   character: string;
   /** Biblia visual del libro y qué tiene cada página (personajes, objetos, lugar, ropa). */
   bible: string;
+  /** Contrato del pedido para el dibujo (DECISIONS 333). */
+  contract?: string;
 }
 
 export interface BookDeviation {
@@ -437,6 +442,8 @@ export interface PageReview {
    * Es lo que se le pide al redibujar: sin esto el redibujo repite el mismo error.
    */
   repairInstructions?: string[];
+  /** Cláusulas del contrato del pedido que el dibujo no cumple (DECISIONS 333). */
+  contractClauses?: ImageContractClause[];
   usage: AiUsage;
 }
 
