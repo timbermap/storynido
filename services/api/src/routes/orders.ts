@@ -174,7 +174,10 @@ export function registerOrderRoutes(app: FastifyInstance): void {
     });
     // Como el pago real (checkout/service.ts): el libro pasa a «ordered» y se ve sin la marca de
     // agua de la muestra en Mis cuentos (25 nov 2026: los 6 libros de la prueba salían marcados).
-    await db.collection(COLLECTIONS.books).doc(bookId).update({ status: 'ordered', updatedAt: now });
+    await db
+      .collection(COLLECTIONS.books)
+      .doc(bookId)
+      .update({ status: 'ordered', updatedAt: now });
     // Clave determinística: el mismo pago no dispara dos pipelines.
     const requestId = `paid:${ref.id}:mock_${ref.id}`;
     await pipelineEvents.publish({ type: 'order.paid', orderId: ref.id, requestId });
