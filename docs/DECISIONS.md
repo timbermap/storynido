@@ -3300,3 +3300,8 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 
 - **Qué pasaba (Tino, 25 nov):** el libro de 16 páginas (9 años o más: texto y dibujo enfrentados, 7 escenas × 2 + dedicatoria + fin) mostraba «Fin · 10 de 10», y parecía que faltaban páginas.
 - **Qué hace ahora:** en la muestra el contador dice las páginas del libro: «Dedicatoria · Página 1 de 16», «Página 3 · Páginas 6 y 7 de 16», «Fin · Página 16 de 16»; la tapa no lleva número. Los demás visores siguen contando pantallas.
+
+## 321 — El largo dice cuántas ilustraciones trae
+
+- **Decisión (Sebas, 25 nov):** «16 páginas» son 16 páginas impresas, también de 9 años en adelante, donde texto y dibujo van enfrentados (7 escenas × 2 + dedicatoria + fin). Opciones descartadas: texto sobre el dibujo en las 16 (se lee peor con ~90 palabras) o 16 escenas a doble página (el doble de costo de IA y otro precio).
+- **Qué cambia:** el selector de largo, el paso de lectura y el resumen dicen «16 páginas · 7 ilustraciones» (o 14, para menores de 9) cuando se conoce la edad; colorear y actividades siguen solo con las páginas. Junto con el contador de la muestra en páginas del libro (DECISIONS 320).

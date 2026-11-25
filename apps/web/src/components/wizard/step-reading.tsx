@@ -9,6 +9,7 @@ import {
   TEXT_DENSITIES,
   suggestedReading,
   type BookLength,
+  storyIllustrations,
 } from '@storynido/shared';
 
 import { getFirebaseDb } from '@/lib/firebase/client';
@@ -64,7 +65,13 @@ export function StepReading({ nav, data }: { nav: StepNav; data: WizardData }) {
           values={lengths}
           selected={length}
           label={(value) => tBook(`lengths.${value}.name`)}
-          hint={(value) => tBook('pages', { count: editorial.lengths[value].interiorPages })}
+          hint={(value) => {
+            const config = editorial.lengths[value];
+            const art = child ? storyIllustrations(config, child.age, book.contentType) : null;
+            return art
+              ? tBook('pagesWithArt', { count: config.interiorPages, art })
+              : tBook('pages', { count: config.interiorPages });
+          }}
           onSelect={setLength}
         />
         <Chips
