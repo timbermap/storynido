@@ -1562,7 +1562,8 @@
       "requiredStory": "Elige un cuento base para continuar.",
       "practice": "Sonido o palabras para practicar (opcional)",
       "practiceHint": "El cuento los repite en cada página y en la frase que vuelve, para decirlos en voz alta.",
-      "practicePlaceholder": "Ej.: el sonido rr, palabras con s"
+      "practicePlaceholder": "Ej.: el sonido rr, palabras con s",
+      "ageNotice": "Este cuento está pensado para {min} a {max} años y {name} tiene {age}: lo adaptamos a su edad, pero quizás te sirva más otro (Cambiar)."
     },
     "reading": {
       "title": "Cómo se lee",

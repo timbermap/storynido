@@ -1562,7 +1562,8 @@
       "requiredStory": "Escolha uma história base para continuar.",
       "practice": "Som ou palavras para praticar (opcional)",
       "practiceHint": "A história os repete em cada página e na frase que volta, para dizer em voz alta.",
-      "practicePlaceholder": "Ex.: o som rr, palavras com s"
+      "practicePlaceholder": "Ex.: o som rr, palavras com s",
+      "ageNotice": "Esta história é pensada para {min} a {max} anos e {name} tem {age}: adaptamos à idade, mas talvez outra sirva melhor (Trocar)."
     },
     "reading": {
       "title": "Como se lê",

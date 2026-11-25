@@ -3389,3 +3389,8 @@ Prueba del 25 nov (golden set de main contra la rama en 14 casos, con muestras d
 - **Abrazo:** si el pedido no lo pide (cuento para dormir, de familia o un recuerdo que lo nombra), la escena del plan que lo describe pasa a «uno al lado del otro» (`withoutUnaskedHug`, `services/api/src/preview/plan-guards.ts`), y el control del oficio marca el abrazo con la familia en el texto (`familyTouchPages`).
 - **Estribillo:** el control del oficio cuenta las páginas con el estribillo letra por letra (`refrainPages`, mínimo `REFRAIN_MIN` = 3) y, si faltan, la revisión lo repone. La reescritura por largo recibe el estribillo para no cambiarlo.
 - **Página sin texto:** una escena que lleva texto ya no conserva «Texto: ''» del plan (`withTextGoal`). Si una página queda sin texto igual, la ilustración va entera, sin franja calma, y el control de la zona de texto no se aplica (`sceneNoteFor`, `textZoneOf(layout, text)`).
+
+## 334 — Plantilla para otra edad y un solo gusto físico (puntos F y G de la mesa del 25 nov)
+
+- **Edad (F):** cuando el cuento de Profesionales viene elegido desde el catálogo y la edad del chico no entra en la de la plantilla, el resumen del paso del objetivo avisa en rojo que está pensado para otra edad y que se adapta, con «Cambiar» al lado. Es solo un aviso para quien compra: el control que lo registra dentro del pedido es la cláusula de edad del contrato del pedido (PR #231).
+- **Gusto físico (G):** el planificador usa el gusto como un juego corto y seguro que el chico hace de verdad en esa escena, y el texto lo nombra con sentido para esa acción. Nunca convierte la etiqueta en una comparación literal que no encaja: «me estiro como un puente» para una nena a la que le gusta hacer el puente pasa a «me estiro alta como una jirafa».
