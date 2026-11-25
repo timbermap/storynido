@@ -14,7 +14,8 @@
     "eval:character": "tsx scripts/eval-character.ts",
     "eval:preview": "tsx scripts/eval-preview.ts",
     "eval:prompts": "tsx scripts/eval-prompts.ts",
-    "eval:golden": "tsx scripts/eval-golden.ts"
+    "eval:golden": "tsx scripts/eval-golden.ts",
+    "eval:pedidos": "tsx scripts/eval-pedidos.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "8.4.0",
