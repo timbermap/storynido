@@ -179,7 +179,7 @@ function toDate(value: unknown): Date | null {
 /** Resultado moderado con un reintento automático si la moderación lo rechaza. */
 /** Pedido extra en los reintentos de una ilustración rechazada por el control de calidad. */
 const RETRY_HINT =
-  'IMPORTANT: draw NO readable text, letters or numbers anywhere (leave calendars, clocks, signs, labels and book covers blank or abstract); keep hands simple and natural, partly hidden or in pockets if needed; faces calm and well formed.';
+  'IMPORTANT: draw NO readable text, letters or numbers anywhere (leave calendars, clocks, signs, labels and book covers blank or abstract; clothes, bags and shoes plain, with NO prints, logos, slogans or lettering, even if the reference photo has them); keep hands simple and natural, partly hidden or in pockets if needed; faces calm and well formed.';
 
 async function withModeratedRetry<T>(
   produce: (attempt: number) => Promise<T>,
@@ -601,7 +601,9 @@ export class PreviewService {
     const photos = request.character.photo
       ? [request.character.photo, ...(request.character.morePhotos ?? [])]
       : [];
-    const first = await this.illustration(ai, track, limits, request);
+    // La hoja es la base de todo el libro: un intento más antes de rendirse (estaba fallando
+    // por texto en la ropa de la foto).
+    const first = await this.illustration(ai, track, limits, request, 4);
     // Sin foto (rasgos elegidos) no hay con qué comparar.
     if (photos.length === 0) return first;
     const judge = async (image: ImageData) => {
@@ -1479,6 +1481,8 @@ export class PreviewService {
     ) => Promise<T>,
     limits: AiLimits,
     request: Parameters<AIProvider['image']['generateIllustration']>[0],
+    /** Intentos con el control de calidad (la hoja del personaje admite uno más). */
+    maxAttempts = 3,
   ): Promise<{ image: ImageData }> {
     // Una tapa a color de un libro para colorear no se controla contra la técnica de contornos.
     const coloringCover =
@@ -1542,7 +1546,7 @@ export class PreviewService {
           : verdict;
       },
       // Tres intentos: una página que falla el control no tiene que tirar toda la muestra.
-      3,
+      maxAttempts,
     );
   }
 

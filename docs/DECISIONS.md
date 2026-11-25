@@ -3275,3 +3275,8 @@ la mesa, 2 mejorar, 3 con ejemplos similares, 4 y 5 ok».
   de pie, limpia la escena, guarda el libro congelado nuevo y registra `pose_rewritten`. Si la reescritura
   sigue pidiéndola, va a revisión manual.
 - **Pendiente:** tapa nadando contra interior en burbuja (fantasía), y ropa en el agua.
+
+## 317 — La hoja del personaje no se cae por texto en la ropa
+
+- **Qué pasaba:** en staging la muestra de un mismo borrador fallaba una y otra vez con «quality control rejected 3 attempts: text» al dibujar la hoja del personaje (probable causa: letras o estampados de la ropa de la foto que el modelo copia).
+- **Qué hace ahora:** el reintento pide ropa, mochila y zapatillas lisas, sin estampas ni letras aunque la foto las tenga, y la hoja admite un intento más (4). La imagen rechazada sigue guardándose en debug/rejected en staging.
