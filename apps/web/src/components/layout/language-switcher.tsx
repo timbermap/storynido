@@ -9,6 +9,7 @@ import { LOCALES, LOCALE_DEFINITIONS, type Locale } from '@storynido/shared';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { LEGAL_SLUGS, legalDocumentFromSlug } from '@/lib/legal';
 import { rememberLocaleChoice } from '@/lib/locale-choice';
+import { PERSONA_SLUGS, personaFromSlug } from '@/lib/professional-personas';
 
 /**
  * Cambiar de idioma manteniendo la página (con su slug traducido). Recuerda la elección: desde
@@ -20,6 +21,7 @@ export function useLocaleSwitch() {
   const params = useParams<{
     slug?: string;
     document?: string;
+    persona?: string;
     bookId?: string;
     orderId?: string;
     childId?: string;
@@ -35,6 +37,15 @@ export function useLocaleSwitch() {
         router.replace(doc ? { pathname, params: { document: LEGAL_SLUGS[next][doc] } } : '/', {
           locale: next,
         });
+      } else if (pathname === '/professionals/templates/[persona]') {
+        // El perfil tiene un slug por idioma (docentes / teachers / professores).
+        const key = personaFromSlug(locale, params.persona ?? '');
+        router.replace(
+          key
+            ? { pathname, params: { persona: PERSONA_SLUGS[next][key] } }
+            : '/professionals/templates',
+          { locale: next },
+        );
       } else if (pathname === '/blog/[slug]') {
         // Los artículos no tienen el mismo slug en cada idioma: se va al índice del blog.
         router.replace('/blog', { locale: next });

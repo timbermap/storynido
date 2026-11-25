@@ -1832,7 +1832,102 @@
       "catalogTitle": "Plantillas de cuentos por objetivo",
       "catalogMetaTitle": "Plantillas de cuentos por objetivo para docentes y terapeutas",
       "catalogSubtitle": "Para anticipar situaciones, trabajar emociones, rutinas, escuela o lenguaje. Elige la plantilla, hojea un ejemplo y ajusta el texto para cada niño.",
-      "catalogNote": "Ves todo sin cuenta. Solo la necesitas para crear."
+      "catalogNote": "Ves todo sin cuenta. Solo la necesitas para crear.",
+      "personasTitle": "¿Cuál es tu trabajo?",
+      "personasSubtitle": "Elige tu perfil y mira primero los cuentos que más se usan en tu aula o tu consultorio.",
+      "byGoalTitle": "O busca por objetivo",
+      "personaStoriesTitle": "Los cuentos que más te sirven",
+      "personaUsesTitle": "Cómo se usan",
+      "personaOther": "Otros perfiles",
+      "personaAll": "Todas las plantillas",
+      "personaNote": "Cada cuento se ajusta al niño: nombre o alias, nivel de lectura y extensión. Acompaña tu trabajo; no reemplaza una evaluación ni un tratamiento.",
+      "personaCount": "{count, plural, one {# cuento} other {# cuentos}}",
+      "personas": {
+        "teachers": {
+          "name": "Docentes",
+          "short": "Inicial y primaria: primer día, turnos, letras y emociones en el aula.",
+          "title": "Cuentos personalizados para docentes",
+          "meta": "Cuentos con cada alumno como protagonista para el primer día de clases, esperar el turno, aprender las letras y nombrar emociones.",
+          "intro": "Un cuento con cada alumno como protagonista ayuda a anticipar el primer día, practicar turnos y acercarse a las letras. Sirve para el período de adaptación, el rincón de lectura o como regalo de fin de año.",
+          "uses": {
+            "1": "Período de adaptación: el cuento del primer día, con su nombre.",
+            "2": "Convivencia: esperar el turno y equivocarse sin miedo.",
+            "3": "Lectura inicial: las letras de su propio nombre."
+          }
+        },
+        "learning": {
+          "name": "Psicopedagogía",
+          "short": "Lectoescritura, conciencia fonológica y tolerancia al error.",
+          "title": "Cuentos para psicopedagogía",
+          "meta": "Cuentos personalizados para trabajar lectoescritura, conciencia fonológica y motivación, con el nivel de lectura de cada niño.",
+          "intro": "Cuentos para trabajar la lectura y la escritura con el niño como protagonista, con el nivel de lectura y la extensión ajustados a cada uno. Sirven en las sesiones de lectoescritura y para sostener la motivación cuando cuesta.",
+          "uses": {
+            "1": "Conciencia fonológica: el sonido escondido y el detective de palabras.",
+            "2": "Lectura inicial: las letras que bailan y las de su nombre.",
+            "3": "Motivación: equivocarse, volver a intentar y ver el progreso."
+          }
+        },
+        "psychology": {
+          "name": "Psicología infantil",
+          "short": "Emociones, enojo, tristeza, calma y cambios en la familia.",
+          "title": "Cuentos para psicología infantil",
+          "meta": "Cuentos personalizados para reconocer emociones, el enojo y la tristeza, aprender a calmarse y atravesar cambios en la familia.",
+          "intro": "Cuentos para poner en palabras lo que se siente: el enojo, la tristeza, lo que pasa en el cuerpo y qué ayuda a calmarse. El niño se ve a sí mismo atravesando la situación y encontrando recursos.",
+          "uses": {
+            "1": "Reconocer emociones: el volcán del enojo, hoy estoy triste.",
+            "2": "Regulación: el termómetro de emociones, la respiración y el rincón de la calma.",
+            "3": "Cambios en la familia: la llegada de un hermano."
+          }
+        },
+        "speech": {
+          "name": "Fonoaudiología",
+          "short": "Sonidos, vocabulario y narración de rutinas.",
+          "title": "Cuentos para fonoaudiología y terapia de lenguaje",
+          "meta": "Cuentos personalizados para jugar con sonidos y palabras y narrar rutinas paso a paso, con frases cortas y el nombre del niño.",
+          "intro": "Cuentos para jugar con sonidos y palabras y para narrar rutinas paso a paso. Con frases cortas y el nombre del niño, invitan a repetir, señalar y contar.",
+          "uses": {
+            "1": "Sonidos: encontrar el sonido escondido.",
+            "2": "Vocabulario: el detective de palabras.",
+            "3": "Narración: contar en orden el supermercado o la rutina de la mañana."
+          }
+        },
+        "occupational": {
+          "name": "Terapia ocupacional",
+          "short": "Historias sociales: cambios de plan, ruidos, sobrecarga sensorial y rutinas.",
+          "title": "Historias sociales personalizadas",
+          "meta": "Historias sociales personalizadas con frases cortas y en orden para anticipar cambios, lugares nuevos, ruidos fuertes y rutinas.",
+          "intro": "Historias sociales con frases cortas y en orden para anticipar cambios, lugares nuevos y ruidos fuertes. Útiles con niños que necesitan saber qué va a pasar, por ejemplo en el espectro autista o con sensibilidad sensorial.",
+          "uses": {
+            "1": "Anticipar: cuando cambia el plan, ir al supermercado.",
+            "2": "Sensorial: los ruidos fuertes y cuando todo es demasiado.",
+            "3": "Autonomía: la rutina de la mañana y dejar el pañal."
+          }
+        },
+        "pediatrics": {
+          "name": "Pediatría",
+          "short": "Vacunas, controles, dejar el pañal y la llegada de un hermano.",
+          "title": "Cuentos para pediatras",
+          "meta": "Cuentos personalizados para anticipar el control y las vacunas y acompañar etapas: dejar el pañal, un hermano nuevo, las rutinas.",
+          "intro": "Cuentos para que el control y las vacunas no sean una sorpresa, y para acompañar etapas que llegan a la consulta: dejar el pañal, un hermano nuevo, las rutinas. Para recomendar a las familias o regalar en el consultorio.",
+          "uses": {
+            "1": "Antes de la consulta: voy al médico y me vacunan.",
+            "2": "Etapas: dejar el pañal y ser hermano mayor.",
+            "3": "Hábitos: la rutina de la mañana."
+          }
+        },
+        "dentistry": {
+          "name": "Odontopediatría",
+          "short": "La primera visita, los ruidos del consultorio y respirar con calma.",
+          "title": "Cuentos para odontopediatras",
+          "meta": "Un cuento personalizado para anticipar la primera visita al dentista: qué va a ver, qué va a escuchar y cómo respirar si da miedo.",
+          "intro": "Un cuento para que la primera visita al dentista llegue anticipada: qué va a ver, qué va a escuchar y cómo respirar si da miedo. Para enviar a la familia antes del turno o regalar al terminar.",
+          "uses": {
+            "1": "Antes del turno: mi visita al dentista, con su nombre.",
+            "2": "En el sillón: los ruidos fuertes y respirar como un globo.",
+            "3": "En la sala de espera: esperar mi turno."
+          }
+        }
+      }
     }
   },
   "Viewer": {
