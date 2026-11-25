@@ -3295,3 +3295,8 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 - **Qué se suma:** _El diario de [Nombre]_ (vida real de escuela en primera persona, formato diario; estilo recomendado **Cuaderno**) y _[Nombre] y la academia de dragones_ (fantasía en capítulos sin violencia; estilo recomendado **Manga**, genérico y sin personajes existentes). Las dos portadas tienen a una chica del elenco (Sofi y Martina a los 11), sin clichés de color ni de tema: las dos historias sirven para cualquier chico o chica.
 - **Por qué esos géneros:** a esta edad se leen diarios ilustrados, fantasía y manga (MX, AR/UY e hispanos de EE. UU.); otra aventura de misterio no sumaba.
 - **Cómo:** cada historia trae su propio `textPromptTemplate` (formato y límites: sin romance, sin batallas, sin contacto físico de adultos fuera de la familia) y su `defaultStyle`. Los dos estilos tienen ficha propia (`style-sheets.ts`) y muestra del selector generada con el mismo prompt que los libros.
+
+## 320 — El visor de la muestra cuenta páginas del libro, no pantallas
+
+- **Qué pasaba (Tino, 25 nov):** el libro de 16 páginas (9 años o más: texto y dibujo enfrentados, 7 escenas × 2 + dedicatoria + fin) mostraba «Fin · 10 de 10», y parecía que faltaban páginas.
+- **Qué hace ahora:** en la muestra el contador dice las páginas del libro: «Dedicatoria · Página 1 de 16», «Página 3 · Páginas 6 y 7 de 16», «Fin · Página 16 de 16»; la tapa no lleva número. Los demás visores siguen contando pantallas.
