@@ -535,6 +535,13 @@ export function practiceMissingPages(pages: readonly CraftPage[], practice: stri
 export const hardViolations = (violations: readonly ContractViolation[]) =>
   violations.filter((violation) => violation.severity === 'hard');
 
+/**
+ * Lo que la reescritura de una página con contacto tiene que evitar (golden set, 25 nov: la pasada
+ * general dejaba igual al dentista con la mano en el hombro y al amigo que la abrazaba).
+ */
+export const TOUCH_FREE_REWRITE =
+  'any physical contact between people: no hugs, holding, hands on shoulders, arms, head or face, lifting or carrying, and nobody touches the child. Comfort and help come through words, standing side by side, a smile or a shared object; a dentist, doctor or therapist shows, explains or hands over a tool without touching the child';
+
 /** Cláusulas que ve el juez de imagen (la revisión de cada página). */
 export const IMAGE_CONTRACT_CLAUSES = [
   'closed_cast',

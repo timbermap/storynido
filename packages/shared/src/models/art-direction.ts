@@ -141,7 +141,7 @@ export const BODY_POSE =
  * los lomos de los libros. Las superficies que suelen llevar letras se dibujan lisas.
  */
 export const PLAIN_SURFACES =
-  'Surfaces that usually carry writing (book spines, rugs, signs, posters, control panels, screens, boxes, clothing) are drawn plain, with no letters, numbers or symbols.';
+  'Surfaces that usually carry writing (book spines, notebook and diary covers, toy blocks, rugs, signs, posters, control panels, screens, boxes, clothing) are drawn plain, with no letters, numbers or symbols.';
 
 export const TEXT_ZONE =
   'Compose for a printed page with text: when the scene note reserves one third of the image for the text (top or bottom), that third is plain, calm background such as sky, wall, floor or grass, and no face, head, hand or key action is ever in it; when the scene note says the text goes elsewhere, use the whole image.';

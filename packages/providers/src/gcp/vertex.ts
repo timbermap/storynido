@@ -1003,8 +1003,9 @@ Visual bible (English, fixed looks the illustrator repeats word for word):
 - places: up to 3 places where two or more scenes happen, each with a name and a fixed look. Empty array if none.
 - outfits: up to 3 special outfits of the protagonist, only for contexts where the everyday outfit of the reference sheet does not fit
   the place, weather or activity (in the water, in bed in pyjamas, in the rain, in the cold or snow, a sport, a costume or uniform the
-  story names), each with a context and a fixed look suited to the protagonist's age. Never describe the everyday outfit. Empty array
-  if none.
+  story names), each with a context and a fixed look suited to the protagonist's age. Never describe the everyday outfit, and never
+  invent a uniform, costume or gear for a place (an academy, a mission, a trip) unless the story text says the protagonist puts it on.
+  Empty array if none.
 - In each scene: props (names from props that appear in it), place (a name from places, or null), outfit (a context from outfits, or
   null for the everyday outfit) and shot (wide, medium, close-up or high angle, serving the beat; never the same shot three scenes in
   a row).

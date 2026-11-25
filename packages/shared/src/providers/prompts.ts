@@ -839,7 +839,7 @@ export function sceneOutfit(
     (item) => item.look.trim() && sameName(item.context, context),
   );
   return outfit
-    ? `${outfit.look} (${outfit.context}; the same look on every page in this context)`
+    ? `${outfit.look} (${outfit.context}; the same look on every page in this context; this replaces the everyday outfit of the reference sheet on this page)`
     : null;
 }
 

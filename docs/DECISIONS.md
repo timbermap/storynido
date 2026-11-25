@@ -3445,3 +3445,12 @@ La v2 (US$3,65) pasó de 1 a 3 pedidos limpios de 8 (69% de los dibujos limpios 
 - **Mascota dibujada como un nene:** `companionNote` dice que el acompañante nunca cambia de especie ni de tamaño. El eval no le pasaba la nota del acompañante al dibujo y ahora sí.
 
 **El examen:** mide el primer dibujo y también el resultado después de un redibujo con las instrucciones de la revisión, como hace el worker (`--no-redraw` lo apaga). El resumen da dibujos limpios a la primera, después del redibujo y pedidos sin fallos duros. `--runs 2` corre cada pedido dos veces, y una regresión cuenta solo si falla en todas las vueltas y antes pasaba en alguna: un dibujo solo puede salir mal por azar. Meta: 90% de dibujos limpios a la primera y ningún fallo duro después del redibujo.
+
+## 339 — Tercera corrida del golden set (25 nov): ropa que inventa el plan, contacto que no se repara, letras en juguetes y bloqueo de moderación
+
+La ronda 3 (código del #236, 2 vueltas con redibujo, US$8,52) dio 74% de dibujos limpios a la primera y 90% después del redibujo. Lo que quedó abierto se cierra así:
+
+- **Ropa inventada por el plan** (túnica de academia, chaleco de explorador): el planificador no inventa uniformes ni equipo para un lugar si el texto no dice que el protagonista se lo pone. Cuando la escena sí tiene ropa especial, `sceneOutfit` dice que reemplaza a la de la lámina en esa página, así el dibujo y la revisión piden lo mismo.
+- **Contacto que la pasada general deja igual** (dentista, manga): en la muestra, las páginas que siguen con contacto después de la reparación del contrato se reescriben una por una con `rewritePage` y `TOUCH_FREE_REWRITE`, y la reescritura queda solo si ya no hay contacto (`hasTouch`).
+- **Letras en bloques de juguete y tapas de cuadernos:** `PLAIN_SURFACES` los nombra.
+- **Bloqueo de moderación en una ilustración** (Diario, PROHIBITED_CONTENT): en el eval, el reintento saca los objetos con letras (`NO_TEXT_OBJECTS_HINT`), como el worker.

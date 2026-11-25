@@ -30,6 +30,7 @@ import {
   buildOrderContract,
   buildStoryPrompt,
   castNote,
+  NO_TEXT_OBJECTS_HINT,
   companionNote,
   checkFormContract,
   checkPlanContract,
@@ -537,12 +538,14 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         [],
       )}${storyPlan.companion ? `\n${companionNote(storyPlan.companion)}` : ''}`;
       const draw = async (label: string, scene: string, references: ImageData[], seed: number) => {
-        // Un dibujo que se cuelga no tumba el caso: un reintento, como el worker.
-        const once = () =>
+        // Un dibujo que se cuelga o que la moderación bloquea no tumba el caso: un reintento, como el
+        // worker, que en el segundo intento saca los objetos con letras (Diario, 25 nov:
+        // PROHIBITED_CONTENT).
+        const once = (hint = '') =>
           image.generateIllustration({
             prompt: buildIllustrationPrompt({
               template: story.imagePromptTemplate,
-              scene,
+              scene: `${scene}${hint}`,
               character: description,
               style: style.promptModifier,
               direction,
@@ -557,7 +560,7 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
           });
         const generated = await once().catch((error: unknown) => {
           console.log(`  ${testCase.id} · ${label}: reintento (${(error as Error).message})`);
-          return once();
+          return once(` ${NO_TEXT_OBJECTS_HINT}`);
         });
         spend(generated.usage);
         await sharp(generated.bytes)

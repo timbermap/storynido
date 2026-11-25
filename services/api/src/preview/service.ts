@@ -23,6 +23,8 @@ import {
   checkPlanContract,
   checkTextContract,
   hardViolations,
+  hasTouch,
+  TOUCH_FREE_REWRITE,
   type ContractViolation,
   traitsKey,
   type CharacterTraits,
@@ -1249,6 +1251,47 @@ export class PreviewService {
               if (!(error instanceof ProviderError)) throw error;
               this.log.warn({ err: error, bookId }, 'contract repair failed; keeping the text');
             }
+          }
+          // El contacto que la pasada general no sacó (golden set, 25 nov: el dentista y el manga lo
+          // dejaban igual) se reescribe página por página, una vez, y solo queda si ya no hay contacto.
+          const touchLeft =
+            checkTextContract(contract, current.pages, storyPlan).find(
+              (violation) => violation.clause === 'no_touch' && violation.severity === 'hard',
+            )?.pages ?? [];
+          if (touchLeft.length > 0) {
+            const pages = current.pages.map((page) => ({ ...page }));
+            await Promise.all(
+              touchLeft.map(async (number) => {
+                const index = number - 1;
+                const page = pages[index];
+                if (!page?.text) return;
+                try {
+                  const rewrite = await track(
+                    'review',
+                    await ai.text.rewritePage({
+                      language: book.language,
+                      spanishVoice,
+                      childName: request.childName,
+                      age: readerAge ?? request.age,
+                      storyTitle: current.title,
+                      pageIndex: index,
+                      previous: pages[index - 1]?.text ?? null,
+                      next: pages[index + 1]?.text ?? null,
+                      text: page.text,
+                      words: { min: plan.words.min, max: plan.words.max },
+                      mustInclude: requiredNames,
+                      refrain: storyPlan.refrain ?? null,
+                      avoid: TOUCH_FREE_REWRITE,
+                    }),
+                  );
+                  const text = fix(rewrite.text);
+                  if (text && !hasTouch(text)) pages[index] = { ...page, text };
+                } catch (error) {
+                  if (!(error instanceof ProviderError)) throw error;
+                }
+              }),
+            );
+            current = { ...current, pages };
           }
           try {
             const proof = await track(

@@ -11,6 +11,7 @@ import {
 } from '@storynido/providers';
 import {
   countWords,
+  TOUCH_FREE_REWRITE,
   utcDay,
   type CharacterTraits,
   type CountryConfig,
@@ -652,6 +653,46 @@ describe('vista previa', () => {
     const qa = await db.collection('books/book-1/qaEvents').get();
     expect(qa.docs.map((doc) => String(doc.get('code')))).toContain('length_rewritten');
     write.mockRestore();
+    rewrite.mockRestore();
+  });
+
+  it('el contacto que la pasada general no saca se reescribe en esa página (golden set, 25 nov)', async () => {
+    const text = providers.ai().text;
+    const original = text.generateStory.bind(text);
+    const touch = 'La dentista le pone la mano en el hombro.';
+    const write = vi.spyOn(text, 'generateStory').mockImplementation(async (request) => {
+      const story = await original(request);
+      const second = story.pages[1];
+      if (second) second.text = touch;
+      return story;
+    });
+    const reviewOriginal = text.reviewStory.bind(text);
+    const review = vi
+      .spyOn(text, 'reviewStory')
+      .mockImplementation(async (draft, request, extra) => {
+        const reviewed = await reviewOriginal(draft, request, extra);
+        // La pasada general deja el contacto igual, como pasó con el dentista.
+        return {
+          ...reviewed,
+          pages: reviewed.pages.map((page, index) =>
+            index === 1 ? { ...page, text: touch } : page,
+          ),
+        };
+      });
+    const rewrite = vi
+      .spyOn(text, 'rewritePage')
+      .mockResolvedValue({
+        text: 'La dentista le muestra el espejito.',
+        usage: { provider: 'mock', model: 'mock', costUsdMicros: 0 },
+      });
+    await seedBook(providers, 'book-1');
+    expect((await generate('book-1')).statusCode).toBe(200);
+    const call = rewrite.mock.calls.find(([request]) => request.avoid === TOUCH_FREE_REWRITE);
+    expect(call?.[0].pageIndex).toBe(1);
+    const pages = (await db.doc('books/book-1').get()).get('preview.pages') as { text: string }[];
+    expect(pages[1]?.text).toBe('La dentista le muestra el espejito.');
+    write.mockRestore();
+    review.mockRestore();
     rewrite.mockRestore();
   });
 
