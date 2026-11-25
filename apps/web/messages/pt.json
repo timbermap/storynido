@@ -1634,8 +1634,8 @@
       "viewStory": "Ver a história",
       "viewStoryLink": "Ver a história",
       "collectionStart": "Criar o kit",
-      "catalogTitle": "Temáticas de festa",
-      "catalogSubtitle": "Escolha a temática e monte o kit completo: convite, mini livro, adesivos e mais, com um só protagonista.",
+      "catalogTitle": "Celebrações com a sua própria história",
+      "catalogSubtitle": "Escolha o que vai comemorar e monte o kit completo: convite, mini livro, adesivos e mais, com um só protagonista.",
       "otherCelebrations": "Outras celebrações",
       "demo": {
         "youAreInvited": "Você está convidado!",
@@ -1728,7 +1728,61 @@
           "text": "O livro de Famílias do aniversariante, com preço de Famílias."
         }
       },
-      "packagesNote": "Preços em dólares (USD). As cópias que você imprime não mudam o preço."
+      "packagesNote": "Preços em dólares (USD). As cópias que você imprime não mudam o preço.",
+      "madeTitle": "Uma história feita sob medida, com seu filho como protagonista",
+      "made": {
+        "1": "Você envia uma foto ou escolhe as características (cabelo, olhos, pele) e desenhamos a criança como personagem.",
+        "2": "O mesmo personagem aparece no convite, na decoração e na história que cada convidado leva para casa.",
+        "3": "Você vê a amostra grátis antes de pagar. O nome nas capas é um exemplo: vai o nome do seu filho ou da sua filha."
+      },
+      "occasionsTitle": "O que você vai comemorar?",
+      "occasionsSubtitle": "Escolha a ocasião e veja os temas e as histórias.",
+      "occasionThemesCount": "{count, plural, one {# tema} other {# temas}}",
+      "occasionStoriesCount": "{count, plural, =0 {Ver a ocasião} one {Ver a história} other {Ver as # histórias}}",
+      "occasionOther": "Outras ocasiões",
+      "occasionAll": "Todos os temas",
+      "byThemeTitle": "Ou procure por tema",
+      "occasionPickTheme": "Escolha o tema da festa",
+      "occasionKitTitle": "O kit e a sua história",
+      "occasionStoriesTitle": "Ou procure por história",
+      "occasionNote": "Celebrações é 100% digital: você baixa os PDFs na hora e imprime em casa ou na gráfica que preferir, quantas cópias quiser.",
+      "occasions": {
+        "birthday": {
+          "name": "Aniversário",
+          "short": "Super-heróis, dinossauros, unicórnios, piratas e mais: escolha o tema da festa.",
+          "title": "Kit de aniversário com história personalizada",
+          "meta": "Convite para WhatsApp, decoração para imprimir e uma mini história para cada convidado, com seu filho como protagonista. Escolha entre super-heróis, dinossauros, unicórnios e mais.",
+          "intro": "Escolha o tema e montamos a festa com seu filho ou sua filha como personagem: o convite, a decoração e uma história de lembrança para cada convidado."
+        },
+        "graduation": {
+          "name": "Formatura",
+          "short": "Educação infantil ou ensino fundamental: um livrinho para cada colega no fim do ano.",
+          "title": "Lembrança de formatura com história personalizada",
+          "meta": "Um livrinho para cada colega no fim da educação infantil ou do ensino fundamental, com seu filho como protagonista. Com convite e decoração, em PDF.",
+          "intro": "Para fechar o ano da educação infantil ou do ensino fundamental: uma história com seu filho ou sua filha como protagonista para cada colega levar de lembrança, mais o convite e a decoração da festa."
+        },
+        "firstBirthday": {
+          "name": "Primeiro aninho",
+          "short": "Uma história curta para ler em voz alta e comemorar o primeiro ano.",
+          "title": "Kit de primeiro aninho com a história do bebê",
+          "meta": "Convite, decoração e uma história curta para cada convidado, com seu bebê como protagonista do primeiro aniversário.",
+          "intro": "Para comemorar o primeiro ano: uma história curta para ler em voz alta com seu bebê como protagonista, mais o convite e a decoração da festa."
+        },
+        "baptism": {
+          "name": "Batizado",
+          "short": "Uma lembrança para cada convidado do batizado.",
+          "title": "Lembrança de batizado com história personalizada",
+          "meta": "Uma história de lembrança para cada convidado do batizado, com seu bebê ou sua criança como protagonista. Com convite e decoração, em PDF.",
+          "intro": "Uma lembrança para cada convidado do batizado: uma história delicada com seu bebê ou sua criança como protagonista, mais o convite e a decoração."
+        },
+        "communion": {
+          "name": "Primeira comunhão",
+          "short": "Uma lembrança para cada convidado, com seu filho ou sua filha como protagonista do dia.",
+          "title": "Lembrança de primeira comunhão com história personalizada",
+          "meta": "Uma história de lembrança para cada convidado da primeira comunhão, com seu filho ou sua filha como protagonista. Com convite e decoração, em PDF.",
+          "intro": "Uma lembrança para cada convidado da primeira comunhão: uma história com seu filho ou sua filha como protagonista do dia, com a família e os padrinhos, mais o convite e a decoração."
+        }
+      }
     },
     "professionals": {
       "metaTitle": "Histórias personalizadas para psicopedagogos, professores e terapeutas",

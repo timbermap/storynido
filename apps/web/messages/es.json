@@ -1634,8 +1634,8 @@
       "viewStory": "Ver la historia",
       "viewStoryLink": "Ver el cuento",
       "collectionStart": "Diseñar el kit",
-      "catalogTitle": "Temáticas de fiesta",
-      "catalogSubtitle": "Elige la temática y arma el kit completo: invitación, mini cuento, stickers y más, con un mismo protagonista.",
+      "catalogTitle": "Celebraciones con su propio cuento",
+      "catalogSubtitle": "Elige qué celebras y arma el kit completo: invitación, mini cuento, stickers y más, con un mismo protagonista.",
       "otherCelebrations": "Otras celebraciones",
       "demo": {
         "youAreInvited": "¡Estás invitado!",
@@ -1728,7 +1728,61 @@
           "text": "El libro de Familias del festejado, con precio de Familias."
         }
       },
-      "packagesNote": "Precios en dólares (USD). Las copias que imprimes no cambian el precio."
+      "packagesNote": "Precios en dólares (USD). Las copias que imprimes no cambian el precio.",
+      "madeTitle": "Un cuento hecho a medida, con tu hijo como protagonista",
+      "made": {
+        "1": "Subes una foto o eliges sus rasgos (pelo, ojos, piel) y lo dibujamos como personaje.",
+        "2": "El mismo personaje va en la invitación, la decoración y el cuento que se lleva cada invitado.",
+        "3": "Ves la muestra gratis antes de pagar. El nombre de las tapas es un ejemplo: va el de tu hijo o tu hija."
+      },
+      "occasionsTitle": "¿Qué celebras?",
+      "occasionsSubtitle": "Elige la ocasión y mira sus temáticas y sus cuentos.",
+      "occasionThemesCount": "{count, plural, one {# temática} other {# temáticas}}",
+      "occasionStoriesCount": "{count, plural, =0 {Ver la ocasión} one {Ver el cuento} other {Ver los # cuentos}}",
+      "occasionOther": "Otras ocasiones",
+      "occasionAll": "Todas las temáticas",
+      "byThemeTitle": "O busca por temática",
+      "occasionPickTheme": "Elige la temática de la fiesta",
+      "occasionKitTitle": "El kit y su cuento",
+      "occasionStoriesTitle": "O busca por cuento",
+      "occasionNote": "Celebraciones es 100 % digital: descargas los PDF al instante e imprimes en casa o en la imprenta que prefieras, tantas copias como invitados.",
+      "occasions": {
+        "birthday": {
+          "name": "Cumpleaños",
+          "short": "Superhéroes, dinosaurios, unicornios, piratas y más: elige la temática de la fiesta.",
+          "title": "Kit de cumpleaños con cuento personalizado",
+          "meta": "Invitación para WhatsApp, decoración para imprimir y un mini cuento para cada invitado, con tu hijo como protagonista. Elige entre superhéroes, dinosaurios, unicornios y más.",
+          "intro": "Elige la temática y armamos la fiesta con tu hijo o tu hija como personaje: la invitación, la decoración y un cuento de recuerdo para cada invitado."
+        },
+        "graduation": {
+          "name": "Graduación",
+          "short": "Kínder, jardín o primaria: un librito para cada compañero al cerrar el año.",
+          "title": "Recuerdo de graduación con cuento personalizado",
+          "meta": "Un librito para cada compañero al terminar el kínder, el jardín o la primaria, con tu hijo como protagonista. Con invitación y decoración, en PDF.",
+          "intro": "Para cerrar el año del kínder, el jardín o la primaria: un cuento con tu hijo o tu hija como protagonista para que cada compañero se lleve un recuerdo, más la invitación y la decoración del festejo."
+        },
+        "firstBirthday": {
+          "name": "Primer añito",
+          "short": "Un cuento corto para leerle en voz alta y festejar su primer año.",
+          "title": "Kit para el primer añito con el cuento del bebé",
+          "meta": "Invitación, decoración y un cuento corto para cada invitado, con tu bebé como protagonista de su primer cumpleaños.",
+          "intro": "Para festejar el primer año: un cuento corto para leer en voz alta con tu bebé como protagonista, más la invitación y la decoración de la fiesta."
+        },
+        "baptism": {
+          "name": "Bautizo",
+          "short": "Un recuerdo para cada invitado del bautizo o la presentación.",
+          "title": "Recuerdo de bautizo con cuento personalizado",
+          "meta": "Un cuento de recuerdo para cada invitado del bautizo o la presentación, con tu bebé o tu hijo como protagonista. Con invitación y decoración, en PDF.",
+          "intro": "Un recuerdo para cada invitado del bautizo o la presentación: un cuento tierno con tu bebé o tu hijo como protagonista, más la invitación y la decoración."
+        },
+        "communion": {
+          "name": "Primera comunión",
+          "short": "Un recuerdo para cada invitado, con tu hijo o tu hija como protagonista del día.",
+          "title": "Recuerdo de primera comunión con cuento personalizado",
+          "meta": "Un cuento de recuerdo para cada invitado de la primera comunión, con tu hijo o tu hija como protagonista. Con invitación y decoración, en PDF.",
+          "intro": "Un recuerdo para cada invitado de la primera comunión: un cuento con tu hijo o tu hija como protagonista del día, con su familia y sus padrinos, más la invitación y la decoración."
+        }
+      }
     },
     "professionals": {
       "metaTitle": "Cuentos personalizados para psicopedagogos, docentes y terapeutas",
