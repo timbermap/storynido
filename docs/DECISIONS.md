@@ -3334,6 +3334,7 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 - **Qué hace ahora (mesa completa):** arriba, «¿Cuál es tu trabajo?» con siete perfiles (Docentes, Psicopedagogía, Psicología infantil, Fonoaudiología, Terapia ocupacional, Pediatría, Odontopediatría). Cada perfil tiene su página `/profesionales/plantillas/<perfil>` (slug por idioma, en el sitemap y con hreflang) con sus historias en orden, tapa grande, título legible, edades, tres usos y chips a los otros perfiles. Las colecciones por objetivo siguen abajo («O buscá por objetivo») y el estante muestra el título legible debajo de cada tapa.
 - **Dónde se edita:** `apps/web/src/lib/professional-personas.ts` (qué historias y en qué orden) y `Landing.professionals.personas` en los mensajes. Una historia inactiva se saltea sola.
 - **Legales:** sin promesas clínicas; cada perfil aclara que acompaña el trabajo y no reemplaza una evaluación ni un tratamiento. Mismo precio para todos.
+- **Cuento a medida (Sebas, mismo día):** la página parecía de cuentos ya armados. El H1 pasa a «Cuentos con tu paciente o alumno como protagonista» y, en la página general y en cada perfil, va la franja «Así se hace cada cuento a medida» (elegir historia → crear al protagonista con 1 a 3 fotos o sin foto, con alias y fotos borradas a los 30 días → ajustar y vista previa gratis). Sobre las tapas de cada perfil: «Son ejemplos».
 
 ## 326 — Un contacto físico en una página se repara solo
 

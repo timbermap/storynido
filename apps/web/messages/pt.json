@@ -1829,9 +1829,9 @@
         }
       },
       "pricingNote": "O desconto por volume é calculado com suas compras dos últimos dias; no impresso o teto é menor.",
-      "catalogTitle": "Modelos de histórias por objetivo",
+      "catalogTitle": "Histórias com o seu paciente ou aluno como protagonista",
       "catalogMetaTitle": "Modelos de histórias por objetivo para professores e terapeutas",
-      "catalogSubtitle": "Para antecipar situações, trabalhar emoções, rotinas, escola ou linguagem. Escolha o modelo, folheie um exemplo e ajuste o texto para cada criança.",
+      "catalogSubtitle": "Você escolhe a história, cria a criança como personagem com uma foto ou sem foto e ajusta o texto ao nível dela. As capas que você vê são exemplos: cada história sai com o rosto e o nome ou apelido dela.",
       "catalogNote": "Você vê tudo sem conta. Só precisa dela para criar.",
       "personasTitle": "Qual é o seu trabalho?",
       "personasSubtitle": "Escolha seu perfil e veja primeiro as histórias mais usadas na sua sala de aula ou no seu consultório.",
@@ -1927,7 +1927,23 @@
             "3": "Na sala de espera: esperar a minha vez."
           }
         }
-      }
+      },
+      "madeTitle": "Assim cada história é feita sob medida",
+      "madeSteps": {
+        "1": {
+          "title": "Escolha a história",
+          "text": "Por perfil ou por objetivo. Você pode folhear o exemplo antes."
+        },
+        "2": {
+          "title": "Crie o protagonista",
+          "text": "Com 1 a 3 fotos do seu paciente ou aluno, ou escolhendo os traços sem foto. Com apelido e sem dados clínicos; as fotos são apagadas sozinhas em 30 dias."
+        },
+        "3": {
+          "title": "Ajuste e baixe",
+          "text": "Nível de leitura, quantidade de texto e extensão para essa criança. Você vê a prévia grátis e paga só se servir."
+        }
+      },
+      "personaExamplesNote": "São exemplos: cada história sai com o rosto e o nome ou apelido do seu paciente ou aluno."
     }
   },
   "Viewer": {
