@@ -1293,7 +1293,7 @@ export class VertexImageProvider implements AIImageProvider {
 Art style: ${request.stylePrompt}
 Main character: ${request.character.description}
 ${notes.join('\n')}${correction}
-Children's picture book illustration, drawn only in the art style above. No text, letters, numbers, logos or watermarks anywhere: book spines and covers, posters, signs, labels and clothing stay blank.${rules.map((rule) => `\n${rule}`).join('')}`;
+${sheet?.overrides ? "Illustration for a children's book" : "Children's picture book illustration"}, drawn only in the art style above. No text, letters, numbers, logos or watermarks anywhere: book spines and covers, posters, signs, labels and clothing stay blank.${rules.map((rule) => `\n${rule}`).join('')}`;
     parts.push({ text: instructions });
 
     let lastUsage: AiUsage[] = [];
