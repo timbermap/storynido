@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@storynido/shared';
 
+import { MadeToMeasure, OccasionGrid } from '@/components/events/occasions';
 import { LandingCollections } from '@/components/landing/sections';
 import { RememberChannel } from '@/components/landing/remember-channel';
 import { CatalogLineChips } from '@/components/layout/catalog-line-chips';
@@ -23,7 +24,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** Catálogo de events (estudio de catálogo, DECISIONS 150): las temáticas de fiesta, cada una con su kit. */
+/**
+ * Catálogo de Celebraciones (DECISIONS 150, 331): arriba «¿Qué celebrás?» por ocasión y debajo las
+ * temáticas de fiesta, cada una con su kit.
+ */
 export default async function EventsCatalogPage({ params }: Props) {
   const locale = (await params).locale as Locale;
   const [t, collections, stories] = await Promise.all([
@@ -45,7 +49,15 @@ export default async function EventsCatalogPage({ params }: Props) {
         </h1>
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{t('catalogSubtitle')}</p>
       </div>
+      {/* Primero «¿Qué celebrás?» (mesa 25 Nov 2026, DECISIONS 331); abajo, todas las temáticas. */}
+      <OccasionGrid locale={locale} collections={collections} stories={stories} />
+      {/* Que quede claro que es a medida, antes de recorrer las temáticas. */}
+      <div className="container-page pb-14 lg:pb-16">
+        <MadeToMeasure className="max-w-4xl" />
+      </div>
       <LandingCollections
+        title={t('byThemeTitle')}
+        continued
         collections={birthdays}
         followed={occasions.length > 0}
         stories={stories}

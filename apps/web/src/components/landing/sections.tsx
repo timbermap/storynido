@@ -374,12 +374,14 @@ export function LandingCollections({
                             />
                           </div>
                           {/* El título de la tapa se lee chico en el estante: lo repetimos legible. */}
-                          {line === 'professionals' && (
+                          {(line === 'professionals' || line === 'events') && (
                             <span
                               aria-hidden="true"
                               className="mt-2 line-clamp-2 block text-center text-sm leading-snug font-semibold text-foreground/85"
                             >
-                              {story.titlePro ?? story.title}
+                              {line === 'professionals'
+                                ? (story.titlePro ?? story.title)
+                                : story.title}
                             </span>
                           )}
                         </Link>

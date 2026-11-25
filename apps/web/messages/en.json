@@ -1634,8 +1634,8 @@
       "viewStory": "See the story",
       "viewStoryLink": "See the story",
       "collectionStart": "Design the kit",
-      "catalogTitle": "Party themes",
-      "catalogSubtitle": "Pick the theme and build the full kit: invitation, mini story, stickers and more, with one hero.",
+      "catalogTitle": "Celebrations with their own story",
+      "catalogSubtitle": "Choose what you're celebrating and build the full kit: invitation, mini story, stickers and more, with one hero.",
       "otherCelebrations": "Other celebrations",
       "demo": {
         "youAreInvited": "You're invited!",
@@ -1728,7 +1728,61 @@
           "text": "The birthday child's Families book, at Families pricing."
         }
       },
-      "packagesNote": "Prices in US dollars (USD). The copies you print do not change the price."
+      "packagesNote": "Prices in US dollars (USD). The copies you print do not change the price.",
+      "madeTitle": "A made-to-order story starring your child",
+      "made": {
+        "1": "Upload a photo or choose their features (hair, eyes, skin) and we draw them as the character.",
+        "2": "The same character appears on the invitation, the decorations and the story every guest takes home.",
+        "3": "See the free sample before you pay. The name on the covers is just an example: your child's name goes there."
+      },
+      "occasionsTitle": "What are you celebrating?",
+      "occasionsSubtitle": "Choose the occasion and browse its themes and stories.",
+      "occasionThemesCount": "{count, plural, one {# theme} other {# themes}}",
+      "occasionStoriesCount": "{count, plural, =0 {See the occasion} one {See the story} other {See the # stories}}",
+      "occasionOther": "Other occasions",
+      "occasionAll": "All themes",
+      "byThemeTitle": "Or browse by theme",
+      "occasionPickTheme": "Choose the party theme",
+      "occasionKitTitle": "The kit and its story",
+      "occasionStoriesTitle": "Or browse by story",
+      "occasionNote": "Celebrations is 100% digital: download the PDFs instantly and print at home or at any print shop, as many copies as you have guests.",
+      "occasions": {
+        "birthday": {
+          "name": "Birthday",
+          "short": "Superheroes, dinosaurs, unicorns, pirates and more: pick the party theme.",
+          "title": "Birthday party kit with a personalized story",
+          "meta": "A WhatsApp invitation, printable decorations and a mini story for every guest, starring your child. Choose superheroes, dinosaurs, unicorns and more.",
+          "intro": "Pick the theme and we build the party around your child as the character: the invitation, the decorations and a keepsake story for every guest."
+        },
+        "graduation": {
+          "name": "Graduation",
+          "short": "Preschool, kindergarten or elementary: a little book for every classmate at the end of the year.",
+          "title": "Graduation keepsake with a personalized story",
+          "meta": "A little book for every classmate at the end of preschool, kindergarten or elementary school, starring your child. With invitation and decorations, as PDFs.",
+          "intro": "To close the year of preschool, kindergarten or elementary school: a story starring your child so every classmate takes home a keepsake, plus the invitation and decorations for the celebration."
+        },
+        "firstBirthday": {
+          "name": "First birthday",
+          "short": "A short read-aloud story to celebrate their first year.",
+          "title": "First birthday kit with baby's own story",
+          "meta": "An invitation, decorations and a short story for every guest, starring your baby on their first birthday.",
+          "intro": "To celebrate the first year: a short read-aloud story starring your baby, plus the invitation and decorations for the party."
+        },
+        "baptism": {
+          "name": "Baptism",
+          "short": "A keepsake for every guest at the baptism or presentation.",
+          "title": "Baptism keepsake with a personalized story",
+          "meta": "A keepsake story for every guest at the baptism or presentation, starring your baby or child. With invitation and decorations, as PDFs.",
+          "intro": "A keepsake for every guest at the baptism or presentation: a gentle story starring your baby or child, plus the invitation and decorations."
+        },
+        "communion": {
+          "name": "First Communion",
+          "short": "A keepsake for every guest, with your child as the star of the day.",
+          "title": "First Communion keepsake with a personalized story",
+          "meta": "A keepsake story for every First Communion guest, starring your child. With invitation and decorations, as PDFs.",
+          "intro": "A keepsake for every First Communion guest: a story with your child as the star of the day, with family and godparents, plus the invitation and decorations."
+        }
+      }
     },
     "professionals": {
       "metaTitle": "Personalized stories for educators, therapists and specialists",

@@ -27,6 +27,12 @@ export const routing = defineRouting({
       pt: '/familias/historias',
     },
     '/events/themes': { es: '/eventos/tematicas', en: '/events/themes', pt: '/eventos/temas' },
+    // Celebraciones por ocasión (cumpleaños, graduación, bautizo…): lib/event-occasions.
+    '/events/themes/[occasion]': {
+      es: '/eventos/tematicas/[occasion]',
+      en: '/events/themes/[occasion]',
+      pt: '/eventos/temas/[occasion]',
+    },
     '/professionals/templates': {
       es: '/profesionales/plantillas',
       en: '/professionals/templates',

@@ -369,7 +369,7 @@
           "a": "Como es digital, descargás los archivos al instante. Pedilo con unos días de margen para imprimir las piezas donde prefieras."
         }
       },
-      "catalogSubtitle": "Elegí la temática y armá el kit completo: invitación, mini cuento, stickers y más, con un mismo protagonista.",
+      "catalogSubtitle": "Elegí qué celebrás y armá el kit completo: invitación, mini cuento, stickers y más, con un mismo protagonista.",
       "hero": {
         "point3": "Elegís entre {count} temas de fiesta"
       },
@@ -378,7 +378,23 @@
           "text": "Un librito ilustrado con el personaje de tu hijo, en PDF. Lo imprimís una vez por invitado y cada uno se lleva su cuento de recuerdo."
         }
       },
-      "packagesNote": "Precios en dólares (USD). Las copias que imprimís no cambian el precio."
+      "packagesNote": "Precios en dólares (USD). Las copias que imprimís no cambian el precio.",
+      "made": {
+        "1": "Subís una foto o elegís sus rasgos (pelo, ojos, piel) y lo dibujamos como personaje."
+      },
+      "occasionsTitle": "¿Qué celebrás?",
+      "occasionsSubtitle": "Elegí la ocasión y mirá sus temáticas y sus cuentos.",
+      "byThemeTitle": "O buscá por temática",
+      "occasionPickTheme": "Elegí la temática de la fiesta",
+      "occasionStoriesTitle": "O buscá por cuento",
+      "occasionNote": "Celebraciones es 100 % digital: descargás los PDF al instante e imprimís en casa o en la imprenta que prefieras, tantas copias como invitados.",
+      "occasions": {
+        "birthday": {
+          "short": "Superhéroes, dinosaurios, unicornios, piratas y más: elegí la temática de la fiesta.",
+          "meta": "Invitación para WhatsApp, decoración para imprimir y un mini cuento para cada invitado, con tu hijo como protagonista. Elegí entre superhéroes, dinosaurios, unicornios y más.",
+          "intro": "Elegí la temática y armamos la fiesta con tu hijo o tu hija como personaje: la invitación, la decoración y un cuento de recuerdo para cada invitado."
+        }
+      }
     },
     "professionals": {
       "metaDescription": "Creá cuentos personalizados para cada niño que acompañás, con colecciones educativas y lectura a medida, desde una sola cuenta.",

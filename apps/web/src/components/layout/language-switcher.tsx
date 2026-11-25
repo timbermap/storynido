@@ -7,6 +7,7 @@ import { useTransition } from 'react';
 import { LOCALES, LOCALE_DEFINITIONS, type Locale } from '@storynido/shared';
 
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { OCCASION_SLUGS, occasionFromSlug } from '@/lib/event-occasions';
 import { LEGAL_SLUGS, legalDocumentFromSlug } from '@/lib/legal';
 import { rememberLocaleChoice } from '@/lib/locale-choice';
 import { PERSONA_SLUGS, personaFromSlug } from '@/lib/professional-personas';
@@ -22,6 +23,7 @@ export function useLocaleSwitch() {
     slug?: string;
     document?: string;
     persona?: string;
+    occasion?: string;
     bookId?: string;
     orderId?: string;
     childId?: string;
@@ -44,6 +46,13 @@ export function useLocaleSwitch() {
           key
             ? { pathname, params: { persona: PERSONA_SLUGS[next][key] } }
             : '/professionals/templates',
+          { locale: next },
+        );
+      } else if (pathname === '/events/themes/[occasion]') {
+        // La ocasión tiene un slug por idioma (cumpleanos / birthday / aniversario).
+        const key = occasionFromSlug(locale, params.occasion ?? '');
+        router.replace(
+          key ? { pathname, params: { occasion: OCCASION_SLUGS[next][key] } } : '/events/themes',
           { locale: next },
         );
       } else if (pathname === '/blog/[slug]') {
