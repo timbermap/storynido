@@ -1883,9 +1883,9 @@
         }
       },
       "pricingNote": "El descuento por volumen se calcula con tus compras de los últimos días; en el impreso el tope es menor.",
-      "catalogTitle": "Plantillas de cuentos por objetivo",
+      "catalogTitle": "Cuentos con tu paciente o alumno como protagonista",
       "catalogMetaTitle": "Plantillas de cuentos por objetivo para docentes y terapeutas",
-      "catalogSubtitle": "Para anticipar situaciones, trabajar emociones, rutinas, escuela o lenguaje. Elige la plantilla, hojea un ejemplo y ajusta el texto para cada niño.",
+      "catalogSubtitle": "Eliges la historia, creas al niño como personaje con una foto o sin foto y ajustas el texto a su nivel. Las tapas que ves son ejemplos: cada cuento sale con su cara y su nombre o alias.",
       "catalogNote": "Ves todo sin cuenta. Solo la necesitas para crear.",
       "personasTitle": "¿Cuál es tu trabajo?",
       "personasSubtitle": "Elige tu perfil y mira primero los cuentos que más se usan en tu aula o tu consultorio.",
@@ -1981,7 +1981,23 @@
             "3": "En la sala de espera: esperar mi turno."
           }
         }
-      }
+      },
+      "madeTitle": "Así se hace cada cuento a medida",
+      "madeSteps": {
+        "1": {
+          "title": "Elige la historia",
+          "text": "Por perfil o por objetivo. Puedes hojear el ejemplo antes."
+        },
+        "2": {
+          "title": "Crea al protagonista",
+          "text": "Con 1 a 3 fotos de tu paciente o alumno, o eligiendo sus rasgos sin foto. Con alias y sin datos clínicos; las fotos se borran solas a los 30 días."
+        },
+        "3": {
+          "title": "Ajusta y descarga",
+          "text": "Nivel de lectura, cantidad de texto y extensión para ese niño. Ves la vista previa gratis y pagas solo si te sirve."
+        }
+      },
+      "personaExamplesNote": "Son ejemplos: cada cuento sale con la cara y el nombre o alias de tu paciente o alumno."
     }
   },
   "Viewer": {

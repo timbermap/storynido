@@ -6,7 +6,12 @@ import type { Locale } from '@storynido/shared';
 
 import { RememberChannel } from '@/components/landing/remember-channel';
 import { CatalogLineChips } from '@/components/layout/catalog-line-chips';
-import { PERSONA_ICONS, PersonaChips, PersonaStoryGrid } from '@/components/professionals/personas';
+import {
+  MadeToMeasureSteps,
+  PERSONA_ICONS,
+  PersonaChips,
+  PersonaStoryGrid,
+} from '@/components/professionals/personas';
 import { PERSONA_SLUGS, personaFromSlug, personaStories } from '@/lib/professional-personas';
 import { localizedAlternates } from '@/lib/seo';
 import { getStories } from '@/lib/server/api';
@@ -64,10 +69,12 @@ export default async function ProfessionalPersonaPage({ params }: Props) {
             ))}
           </ul>
         </div>
+        <MadeToMeasureSteps className="mt-8" />
         <PersonaChips locale={locale} current={key} />
         <h2 className="mt-12 text-[clamp(1.6rem,2.6vw,2.2rem)] leading-tight font-medium">
           {t('personaStoriesTitle')}
         </h2>
+        <p className="mt-2 text-muted-foreground">{t('personaExamplesNote')}</p>
         <PersonaStoryGrid stories={stories} />
         <p className="mt-10 max-w-3xl text-sm text-muted-foreground">{t('personaNote')}</p>
       </div>

@@ -1883,9 +1883,9 @@
         }
       },
       "pricingNote": "The volume discount is based on your purchases over the last few days; for printed books the cap is lower.",
-      "catalogTitle": "Story templates by goal",
+      "catalogTitle": "Stories starring your patient or student",
       "catalogMetaTitle": "Story templates by goal for teachers and therapists",
-      "catalogSubtitle": "Prepare for new situations, work on emotions, routines, school or language. Pick a template, browse a sample and adjust the text for each child.",
+      "catalogSubtitle": "Pick the story, create the child as the character from a photo or without one, and adjust the text to their level. The covers you see are examples: each story comes with their face and their name or alias.",
       "catalogNote": "Browse everything without an account. You only need one to create.",
       "personasTitle": "What do you do?",
       "personasSubtitle": "Pick your profile and see first the stories most used in your classroom or practice.",
@@ -1981,7 +1981,23 @@
             "3": "In the waiting room: waiting for my turn."
           }
         }
-      }
+      },
+      "madeTitle": "How each story is made to measure",
+      "madeSteps": {
+        "1": {
+          "title": "Pick the story",
+          "text": "By profile or by goal. You can flip through the example first."
+        },
+        "2": {
+          "title": "Create the hero",
+          "text": "With 1 to 3 photos of your patient or student, or by choosing their features without a photo. With an alias and no clinical data; photos are deleted automatically after 30 days."
+        },
+        "3": {
+          "title": "Adjust and download",
+          "text": "Reading level, amount of text and length for that child. See the preview for free and pay only if it works for you."
+        }
+      },
+      "personaExamplesNote": "These are examples: each story comes with your patient’s or student’s face and name or alias."
     }
   },
   "Viewer": {

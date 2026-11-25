@@ -221,3 +221,13 @@ describe('el estilo manda sobre las reglas de la casa (DECISIONS 329)', () => {
     expect(direction).toContain('glossy highlights in the eyes');
   });
 });
+
+describe('proporciones del manga (DECISIONS 330)', () => {
+  it('9-12 en manga no pide proporciones realistas', () => {
+    const direction = artDirection({ age: 12, channel: 'families', style: 'manga' });
+    expect(direction).not.toContain('realistic proportions');
+    expect(artDirection({ age: 12, channel: 'families', style: 'gouache-editorial' })).toContain(
+      'realistic proportions',
+    );
+  });
+});
