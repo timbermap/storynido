@@ -3304,4 +3304,14 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 ## 321 — El largo dice cuántas ilustraciones trae
 
 - **Decisión (Sebas, 25 nov):** «16 páginas» son 16 páginas impresas, también de 9 años en adelante, donde texto y dibujo van enfrentados (7 escenas × 2 + dedicatoria + fin). Opciones descartadas: texto sobre el dibujo en las 16 (se lee peor con ~90 palabras) o 16 escenas a doble página (el doble de costo de IA y otro precio).
-- **Qué cambia:** el selector de largo, el paso de lectura y el resumen dicen «16 páginas · 7 ilustraciones» (o 14, para menores de 9) cuando se conoce la edad; colorear y actividades siguen solo con las páginas. Junto con el contador de la muestra en páginas del libro (DECISIONS 320).
+- **Qué cambia:** el selector de largo, el paso de lectura y el resumen dicen «16 páginas · 7 ilustraciones» (o 14, para menores de 9) cuando se conoce la edad; colorear y actividades siguen solo con las páginas. Junto con el contador de la muestra en páginas del libro (DECISIONS 322).
+
+## 322 — Marketing → Redes: «Conectar Pinterest» desde el admin
+
+- **Qué:** Pinterest aprobó la app «StoryNido SRL Stats Reader» (Trial, 25 nov). En vez de generar a mano un
+  token de renovación y cargarlo como secreto, el admin tiene «Conectar Pinterest» (OAuth, como TikTok): Sebas
+  autoriza la cuenta una vez y el token de renovación se guarda en Firestore (`socialTokens/pinterest`).
+- **Permisos:** solo lectura (`user_accounts:read`, `pins:read`, `boards:read`).
+- **Infra:** `social_networks = ["pinterest"]` ahora solo necesita `pinterest-app-id` y `pinterest-app-secret`.
+  La dirección de vuelta (`<admin>/social`) se registra en la app de Pinterest para cada admin.
+- También «Desconectar Pinterest», que borra el token guardado.

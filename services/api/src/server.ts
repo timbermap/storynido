@@ -21,7 +21,7 @@ import { PreviewService } from './preview/service';
 import { MetricsService } from './metrics/service';
 import { AnalyticsService, gaRunReport } from './analytics/service';
 import { FirestoreTokenStore, SocialService } from './social/service';
-import { socialProvidersFromEnv, tiktokAuthFromEnv } from './social/from-env';
+import { pinterestAuthFromEnv, socialProvidersFromEnv, tiktokAuthFromEnv } from './social/from-env';
 import { ProService } from './pro/service';
 import { CheckoutService } from './checkout/service';
 import { FulfillmentService } from './orders/fulfillment';
@@ -156,6 +156,7 @@ const social = new SocialService(
   socialProvidersFromEnv(config.env, socialTokens),
   () => new Date(),
   tiktokAuthFromEnv(config.env, socialTokens),
+  pinterestAuthFromEnv(config.env, socialTokens),
 );
 const analytics = new AnalyticsService(
   config.env.GA4_PROPERTY_ID ? gaRunReport(config.env.GA4_PROPERTY_ID) : null,

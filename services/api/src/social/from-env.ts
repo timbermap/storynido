@@ -3,6 +3,8 @@ import type { ApiEnv } from '../config';
 import {
   facebookProvider,
   instagramProvider,
+  pinterestAuth,
+  type PinterestAuth,
   pinterestProvider,
   tiktokAuth,
   tiktokProvider,
@@ -14,8 +16,8 @@ import {
 /** Las redes con credenciales cargadas; las demás quedan «sin conectar» en el panel. */
 export function socialProvidersFromEnv(env: ApiEnv, tokens: TokenStore): SocialProvider[] {
   const providers: SocialProvider[] = [];
-  const canRefresh =
-    env.PINTEREST_APP_ID && env.PINTEREST_APP_SECRET && env.PINTEREST_REFRESH_TOKEN;
+  // Con la app (id y secret) alcanza: el token de renovación se guarda al tocar «Conectar Pinterest».
+  const canRefresh = env.PINTEREST_APP_ID && env.PINTEREST_APP_SECRET;
   if (canRefresh || env.PINTEREST_ACCESS_TOKEN) {
     providers.push(
       pinterestProvider(
@@ -26,7 +28,7 @@ export function socialProvidersFromEnv(env: ApiEnv, tokens: TokenStore): SocialP
                 refresh: {
                   appId: env.PINTEREST_APP_ID ?? '',
                   appSecret: env.PINTEREST_APP_SECRET ?? '',
-                  refreshToken: env.PINTEREST_REFRESH_TOKEN ?? '',
+                  refreshToken: env.PINTEREST_REFRESH_TOKEN,
                 },
               }
             : {}),
@@ -67,6 +69,15 @@ export function tiktokAuthFromEnv(env: ApiEnv, tokens: TokenStore): TikTokAuth |
   if (!env.TIKTOK_CLIENT_KEY || !env.TIKTOK_CLIENT_SECRET) return null;
   return tiktokAuth(
     { clientKey: env.TIKTOK_CLIENT_KEY, clientSecret: env.TIKTOK_CLIENT_SECRET },
+    tokens,
+  );
+}
+
+/** El «Conectar Pinterest» del admin: solo existe si la app de Pinterest tiene id y secret. */
+export function pinterestAuthFromEnv(env: ApiEnv, tokens: TokenStore): PinterestAuth | null {
+  if (!env.PINTEREST_APP_ID || !env.PINTEREST_APP_SECRET) return null;
+  return pinterestAuth(
+    { appId: env.PINTEREST_APP_ID, appSecret: env.PINTEREST_APP_SECRET },
     tokens,
   );
 }

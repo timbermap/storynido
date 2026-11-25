@@ -257,7 +257,7 @@ variable "ai_image_provider" {
 variable "social_networks" {
   type        = list(string)
   default     = []
-  description = "Redes que lee el panel de Marketing: pinterest (pinterest-app-id, pinterest-app-secret y pinterest-refresh-token; se renueva solo) o pinterest-token (solo pinterest-access-token, vence a los 30 días), instagram (instagram-access-token e instagram-user-id) o tiktok (tiktok-client-key y tiktok-client-secret; el token de renovación se guarda en Firestore al tocar «Conectar TikTok» en el admin), con los secretos con valor."
+  description = "Redes que lee el panel de Marketing: pinterest (pinterest-app-id y pinterest-app-secret; el token de renovación se guarda en Firestore al tocar «Conectar Pinterest» en el admin) o pinterest-token (solo pinterest-access-token, vence a los 30 días), instagram (instagram-access-token e instagram-user-id) o tiktok (tiktok-client-key y tiktok-client-secret; el token de renovación se guarda en Firestore al tocar «Conectar TikTok» en el admin), con los secretos con valor."
 
   validation {
     condition     = alltrue([for n in var.social_networks : contains(["pinterest", "pinterest-token", "instagram", "tiktok"], n)])

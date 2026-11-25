@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest';
 import {
   facebookProvider,
   instagramProvider,
+  pinterestAuth,
+  pinterestAuthorizeUrl,
   pinterestProvider,
   type ReadExtras,
   SocialError,
@@ -85,6 +87,78 @@ describe('pinterestProvider', () => {
       Promise.resolve(reply({ message: 'expired' }, 401))) as unknown as typeof fetch;
     const provider = pinterestProvider({ accessToken: 'x' }, memoryTokens(), fetcher);
     await expect(provider.read(1, '2026-11-21')).rejects.toThrow(/Revisá el token/);
+  });
+});
+
+describe('pinterestAuth', () => {
+  it('arma la dirección de autorización con permisos de solo lectura', () => {
+    const url = new URL(
+      pinterestAuthorizeUrl('app1', 'https://admin.storynido.com/social', 'estado-123'),
+    );
+    expect(url.origin + url.pathname).toBe('https://www.pinterest.com/oauth/');
+    expect(url.searchParams.get('client_id')).toBe('app1');
+    expect(url.searchParams.get('scope')).toBe('user_accounts:read,pins:read,boards:read');
+    expect(url.searchParams.get('response_type')).toBe('code');
+    expect(url.searchParams.get('state')).toBe('estado-123');
+  });
+
+  it('cambia el código por los tokens y guarda el de renovación', async () => {
+    const tokens = memoryTokens();
+    const fetcher = ((url: string, init?: RequestInit) => {
+      if (url.endsWith('/oauth/token')) {
+        expect((init?.headers as Record<string, string>).authorization).toBe(
+          `Basic ${Buffer.from('app1:sec').toString('base64')}`,
+        );
+        const body = new URLSearchParams(init?.body as URLSearchParams);
+        expect(body.get('grant_type')).toBe('authorization_code');
+        expect(body.get('code')).toBe('c1');
+        return Promise.resolve(reply({ access_token: 'at', refresh_token: 'rt-1' }));
+      }
+      return Promise.resolve(reply({ username: 'storynido' }));
+    }) as unknown as typeof fetch;
+    const auth = pinterestAuth({ appId: 'app1', appSecret: 'sec' }, tokens, fetcher);
+    const result = await auth.connect('c1', 'https://admin.storynido.com/social');
+    expect(result).toEqual({ displayName: 'storynido' });
+    expect(tokens.saved.pinterest).toBe('rt-1');
+  });
+
+  it('sin tokens en la respuesta no guarda nada y avisa', async () => {
+    const tokens = memoryTokens();
+    const fetcher = (() => Promise.resolve(reply({}))) as unknown as typeof fetch;
+    const auth = pinterestAuth({ appId: 'a', appSecret: 's' }, tokens, fetcher);
+    await expect(auth.connect('c', 'https://admin.storynido.com/social')).rejects.toBeInstanceOf(
+      SocialError,
+    );
+    expect(tokens.saved.pinterest).toBeUndefined();
+  });
+
+  it('con la app pero sin autorizar, el proveedor figura sin conectar', async () => {
+    const provider = pinterestProvider({ refresh: { appId: 'a', appSecret: 's' } }, memoryTokens());
+    expect(await provider.hasCredentials?.()).toBe(false);
+    await expect(provider.read(1, '2026-11-21')).rejects.toThrow('Conectar Pinterest');
+  });
+
+  it('usa el token de renovación guardado al conectar', async () => {
+    const tokens = memoryTokens();
+    await tokens.set('pinterest', 'rt-guardado');
+    const fetcher = ((url: string, init?: RequestInit) => {
+      if (url.endsWith('/oauth/token')) {
+        expect(new URLSearchParams(init?.body as URLSearchParams).get('refresh_token')).toBe(
+          'rt-guardado',
+        );
+        return Promise.resolve(reply({ access_token: 'at' }));
+      }
+      if (url.includes('/analytics')) return Promise.resolve(reply({ all: { daily_metrics: [] } }));
+      return Promise.resolve(reply({ follower_count: 3, pin_count: 2 }));
+    }) as unknown as typeof fetch;
+    const provider = pinterestProvider(
+      { refresh: { appId: 'a', appSecret: 's' } },
+      tokens,
+      fetcher,
+    );
+    expect(await provider.hasCredentials?.()).toBe(true);
+    const reading = await provider.read(1, '2026-11-21');
+    expect(reading['2026-11-21']).toMatchObject({ followers: 3, posts: 2 });
   });
 });
 
