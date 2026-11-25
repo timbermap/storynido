@@ -1497,7 +1497,7 @@ export const SEED_NEW_STORIES: SeedStory[] = [
     ],
     palette: 'celebration',
     order: 34,
-    tags: ['diario', 'escuela', 'amistad', 'humor'],
+    tags: ['diario', 'escuela', 'amistad', 'humor', 'emociones'],
     defaultStyle: 'cuaderno',
     textPromptTemplate: DIARY_PROMPT,
     title: {
