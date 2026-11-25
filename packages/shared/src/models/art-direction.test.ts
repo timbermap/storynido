@@ -99,6 +99,8 @@ describe('dirección de arte de los libros', () => {
     'minimalismo-grafico',
     'gouache-editorial',
     'novela-grafica',
+    'cuaderno',
+    'manga',
   ];
   const FOREIGN_TECHNIQUE = [
     'comic-book touches',
