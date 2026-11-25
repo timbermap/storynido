@@ -661,7 +661,7 @@ export function coverScene(
     : firstScene
       ? ` Story world, for the setting and mood only; do not copy this composition: ${firstScene.trim().replace(/\.+$/, '')}. Use only places from the story; never invent new landscapes.`
       : '';
-  return `Book cover illustration: the main character large and centered in one of the story's own places, caught in the middle of the story's central activity or its happiest moment, with genuine emotion and body language (never the stiff standing pose of the reference sheet), with a clear focal point and a different composition from the first page.${place}${clothes}${recurring}${concept} Draw it with exactly the same art technique, line, texture, color treatment and character proportions as the inside pages and the reference sheet: the cover is never more stylized, more inked or more dramatic than the pages. Keep the top 40% as calm, simple background with no lettering and no head or face in it: the title is typeset there later.`;
+  return `Book cover illustration: the main character large and centered in one of the story's own places, caught in the middle of the story's central activity or its happiest moment, with genuine emotion and body language (never the stiff standing pose of the reference sheet), with a clear focal point and a different composition from the first page. Besides the main character, only the companion or the named characters of the story may appear (a party book may show its guests): no teachers, classmates, staff, crowds or passers-by who are not named.${place}${clothes}${recurring}${concept} Draw it with exactly the same art technique, line, texture, color treatment and character proportions as the inside pages and the reference sheet: the cover is never more stylized, more inked or more dramatic than the pages. Keep the top 40% as calm, simple background with no lettering and no head or face in it: the title is typeset there later.`;
 }
 
 /** Datos de ejemplo para probar una plantilla desde el admin (sin datos reales ni IA). */
@@ -769,7 +769,7 @@ export function withStatedAge<T extends { name: string; look: string }>(
 
 /** Lo que se suma a la descripción del personaje cuando el libro tiene acompañante. */
 export const companionNote = (companion: { name: string; look: string }) =>
-  `Recurring companion ${companion.name}: ${companion.look}. Whenever ${companion.name} appears, draw them identical to the second reference image.`;
+  `Recurring companion ${companion.name}: ${companion.look}. Whenever ${companion.name} appears, draw them identical to the second reference image, never changing their species, size or nature (an animal stays an animal, never a person).`;
 
 /**
  * Personas secundarias que se repiten, para la ilustración de cada página: mismo género y aspecto
@@ -783,7 +783,7 @@ export function castNote(cast: readonly CastMember[] | null | undefined): string
     const name = member.name?.trim() ? `${member.name.trim()}, ` : '';
     return `${name}${member.role}: ${gender}${member.look}`;
   });
-  return ` Recurring supporting characters (draw each one with exactly the same gender and look on every page where the scene includes them; never add them to scenes that do not include them): ${lines.join('; ')}.`;
+  return ` Recurring supporting characters (draw each one with exactly the same gender, hairstyle, clothes and look on every page where the scene includes them, even when the protagonist changes clothes; never add them to scenes that do not include them): ${lines.join('; ')}.`;
 }
 
 /** Biblia visual del libro (plan): objetos, lugares y ropa con aspecto fijo. */

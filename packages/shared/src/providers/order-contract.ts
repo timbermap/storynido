@@ -394,7 +394,7 @@ export function checkTextContract(
       stage: 'text',
       severity: severityOf(contract, 'no_touch'),
       pages: touch,
-      repair: `Contacto físico no pedido en la página ${touch.join(', ')}: reescribe sin tocarse; el consuelo va con palabras, estar al lado o un objeto compartido.`,
+      repair: `Contacto físico no pedido en la página ${touch.join(', ')}: reescribe sin tocarse; el consuelo va con palabras, estar al lado o un objeto compartido, y quien atiende (dentista, médica, terapeuta) muestra, explica o alcanza una herramienta sin poner las manos sobre el chico.`,
     });
   }
 

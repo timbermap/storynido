@@ -115,14 +115,14 @@ const DEFAULT_MEDIUM =
  * profesional).
  */
 export const ONE_PROTAGONIST =
-  "The main character appears exactly once in each image. Every other child or adult is a different person: different face, hair color and hairstyle, and different clothes; nobody in the background wears the main character's outfit or looks like a twin or clone. Only the people the scene names are drawn: no extra children, adults, staff or passers-by in the background unless the scene asks for a crowd or a group.";
+  "The main character appears exactly once in each image. Every other child or adult is a different person: different face, hair color and hairstyle, and different clothes; nobody in the background wears the main character's outfit or looks like a twin or clone. Only the people the scene names are drawn: no extra children, adults, staff or passers-by in the background unless the scene asks for a crowd or a group. A classroom, waiting room or clinic shows only the people the scene names, with empty chairs and desks instead of other classmates or patients.";
 
 /**
  * Contacto físico en los dibujos (DECISIONS 294): un abrazo apretado entre dos chicos salió con los
  * cuerpos fundidos y sin caras. Vale para todos los estilos, líneas y tipos de libro.
  */
 export const BODY_CONTACT =
-  "Physical contact and clothing: characters keep a small personal distance, standing or sitting side by side, facing each other or looking at the same thing; no hugs, embraces, kisses, piggyback rides, laps, lying together, tangled limbs or hands on another person's body, between children or with adults outside the family. A soft side-view hug between the protagonist and a parent, grandparent or sibling, both faces visible, bodies clearly separate, only when the page text says so; never in bed. Allowed touch: a high five or a fist bump only between children of similar age, or holding hands while walking side by side with family; with an adult outside the family there is no contact of any kind (a wave, a nod or a smile from a small distance instead). Everyone is fully and modestly dressed (sportswear and gymnastics outfits are worn over shorts or leggings, no bare midriff); swimwear only in the water.";
+  "Physical contact and clothing: characters keep a small personal distance, standing or sitting side by side, facing each other or looking at the same thing; no hugs, embraces, kisses, piggyback rides, laps, lying together, tangled limbs or hands on another person's body, between children or with adults outside the family. A soft side-view hug between the protagonist and a parent, grandparent or sibling, both faces visible, bodies clearly separate, only when the page text says so; never in bed. Allowed touch: a high five or a fist bump only between children of similar age, or holding hands while walking side by side with family; with an adult outside the family there is no contact of any kind (a wave, a nod or a smile from a small distance instead). A doctor, dentist, nurse or therapist works at arm's length with a tool held out (a small mirror, a toothbrush, a stethoscope, a picture card) and never rests a hand on the child's face, head, arms or legs. Everyone is fully and modestly dressed (sportswear and gymnastics outfits are worn over shorts or leggings, no bare midriff); swimwear only in the water.";
 
 /**
  * Poses y encuadre (DECISIONS 312, pedido de Angelica, 3 años, gusto «vertical puente»): salió una
@@ -136,6 +136,13 @@ export const BODY_POSE =
  * La maquetación pone el texto en la región más calma de cada página: la imagen tiene que dejarle
  * lugar. Sin esto, el panel de texto tapaba caras (informe de Profesionales).
  */
+/**
+ * Letras en objetos (golden set, 25 nov): salían en una alfombra, en el panel del dentista y en
+ * los lomos de los libros. Las superficies que suelen llevar letras se dibujan lisas.
+ */
+export const PLAIN_SURFACES =
+  'Surfaces that usually carry writing (book spines, rugs, signs, posters, control panels, screens, boxes, clothing) are drawn plain, with no letters, numbers or symbols.';
+
 export const TEXT_ZONE =
   'Compose for a printed page with text: when the scene note reserves one third of the image for the text (top or bottom), that third is plain, calm background such as sky, wall, floor or grass, and no face, head, hand or key action is ever in it; when the scene note says the text goes elsewhere, use the whole image.';
 
@@ -236,6 +243,7 @@ export function artDirection(input: {
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     ONE_PROTAGONIST,
     TEXT_ZONE,
+    PLAIN_SURFACES,
     `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated colors or gradients, ${ownLook ? '' : 'glossy highlights in the eyes, '}perfectly round blush circles, symmetrical doll-like faces, malformed anatomy, random decorative objects and any change of style between pages.`,
     sheet?.overrides ?? '',
   ]
@@ -287,9 +295,14 @@ export function withCurrentGuards(direction: string | null | undefined): string 
   for (const [legacy, current] of LEGACY_TECHNIQUE) {
     if (!direction.includes(current)) direction = direction.replace(legacy, current);
   }
-  const missing = [ONE_PROTAGONIST, TEXT_ZONE, SPORTS_GEAR, BODY_CONTACT, BODY_POSE].filter(
-    (rule) => !direction.includes(rule),
-  );
+  const missing = [
+    ONE_PROTAGONIST,
+    TEXT_ZONE,
+    PLAIN_SURFACES,
+    SPORTS_GEAR,
+    BODY_CONTACT,
+    BODY_POSE,
+  ].filter((rule) => !direction.includes(rule));
   const medium =
     /premium children's picture book, (.+?), as if one artist made the whole book\./.exec(
       direction,

@@ -3427,3 +3427,15 @@ La primera corrida pagada (`pnpm eval:pedidos --yes`, US$3,32, 8 pedidos) queda 
 - **Errores que cortaban el caso:** en el eval, una revisión bloqueada por el filtro de seguridad queda anotada «sin revisar» y el caso sigue (el worker ya redibuja esa página más pudorosa), y un dibujo que no responde se reintenta una vez. El informe guarda las escenas del plan y motivos más largos.
 - **Gente de más en el dibujo (real):** en manga y en Profesionales aparecían un clon del protagonista y personas de fondo (una enfermera, gente en el pasillo). `ONE_PROTAGONIST` ahora dice que solo se dibujan las personas que nombra la escena, sin chicos, adultos, personal ni transeúntes de fondo salvo que la escena pida un grupo.
 - Queda medido y abierto: el contacto en el texto del pedido del dentista, que la pasada de reparación no sacó.
+
+## 337 — Segunda corrida del golden set (25 nov): lo que se repite se cierra en la regla, y el examen mide lo que recibe el cliente
+
+La v2 (US$3,65) pasó de 1 a 3 pedidos limpios de 8 (69% de los dibujos limpios a la primera). Lo que falló en las dos corridas se cierra como regla, no dibujo por dibujo:
+
+- **Lugares con gente (aula, sala de espera, consultorio):** `ONE_PROTAGONIST` pide sillas y bancos vacíos en vez de compañeros o pacientes que la escena no nombra, y la tapa (`coverScene`) solo muestra al protagonista, al acompañante y a los personajes nombrados (en una fiesta, los invitados).
+- **El profesional que toca:** `BODY_CONTACT` dice que médicos, dentistas, enfermeras y terapeutas trabajan a un brazo de distancia con una herramienta y nunca apoyan la mano en la cara, la cabeza, los brazos o las piernas del chico. La reparación del texto (`no_touch`) dice lo mismo: quien atiende muestra, explica o alcanza una herramienta.
+- **Ropa de los secundarios:** `castNote` pide el mismo peinado y la misma ropa en todas las páginas, aunque el protagonista se cambie.
+- **Letras en objetos** (alfombra, panel, lomos): `PLAIN_SURFACES` en la dirección de arte, también sumada a las direcciones guardadas (`withCurrentGuards`).
+- **Mascota dibujada como un nene:** `companionNote` dice que el acompañante nunca cambia de especie ni de tamaño. El eval no le pasaba la nota del acompañante al dibujo y ahora sí.
+
+**El examen:** mide el primer dibujo y también el resultado después de un redibujo con las instrucciones de la revisión, como hace el worker (`--no-redraw` lo apaga). El resumen da dibujos limpios a la primera, después del redibujo y pedidos sin fallos duros. `--runs 2` corre cada pedido dos veces, y una regresión cuenta solo si falla en todas las vueltas y antes pasaba en alguna: un dibujo solo puede salir mal por azar. Meta: 90% de dibujos limpios a la primera y ningún fallo duro después del redibujo.
