@@ -3321,3 +3321,9 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 - **Qué pasaba (El diario de Luli, staging, 25 nov):** la página 1 era un aula y las tres imágenes salieron con pizarrón y carteles con pseudo-letras; el control las rechazó por «text» (bien) y la muestra entera falló, también al reintentar. El pedido completo ya tenía una escalera de reintentos que saca los objetos con letras; la muestra solo repetía «sin texto».
 - **Qué hace ahora:** el tercer intento de cada imagen de la muestra suma `NO_TEXT_OBJECTS_HINT` (compartido con el pedido): misma escena, sin pizarrón, carteles, pantallas ni papeles con letras. El Diario además pide en su plantilla que el pizarrón quede fuera de cuadro o vacío.
 - **El aviso de edad de la foto no frena:** solo avisa y se dibuja con la edad del cuento.
+
+## 324 — El cupón del pago es un enlace chico, y el código del enlace se aplica solo
+
+- **Qué pasaba (Sebas, 25 nov):** el campo «CUPÓN» arriba de todo en el resumen del pago daba la sensación de que había un precio más bajo y mandaba a buscar códigos afuera (fuga clásica del campo de cupón).
+- **Qué hace ahora (la mesa: ventas, producto, diseño/UX, marketing, familia):** el resumen arranca con el precio. El cupón queda como un enlace chico «¿Tenés un código?» debajo del total, que abre el campo solo si alguien lo toca. Si la visita llegó con `?cupon=CODIGO` (también `coupon`/`cupom`) en cualquier página, se guarda en la pestaña (sessionStorage) y se aplica solo en el pago, mostrado como «Código X aplicado · Quitar». Igual en el kit de Celebraciones.
+- **Por qué no sacarlo del todo:** sirve para códigos de amigas/referidos, regalos de soporte y campañas orgánicas; sin campo, quien recibió un código no tendría dónde usarlo.

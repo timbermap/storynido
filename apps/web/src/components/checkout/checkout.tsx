@@ -43,6 +43,7 @@ import { CheckoutBook } from './checkout-book';
 
 import { ChristmasNote, GiftDeadline } from './gift-deadline';
 import { CountrySwitch } from './country-switch';
+import { CouponField } from './coupon-field';
 import { PriceSummary } from './price-summary';
 
 type AddressDraft = Omit<Address, 'country' | 'placeId' | 'pin'>;
@@ -127,7 +128,6 @@ export function Checkout({
   );
   const [address, setAddress] = useState<AddressDraft>(EMPTY_ADDRESS);
   const [gift, setGift] = useState({ isGift: false, message: '' });
-  const [couponInput, setCouponInput] = useState('');
   const [coupon, setCoupon] = useState<string | null>(null);
   const [quote, setQuote] = useState<{
     snapshot: PriceSnapshot;
@@ -673,34 +673,6 @@ export function Checkout({
 
       <aside className="grid content-start gap-5 self-start rounded-2xl border bg-card p-6 lg:sticky lg:top-24">
         <h2 className="text-xl font-medium">{t('summaryTitle')}</h2>
-        <form
-          className="flex gap-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setCoupon(couponInput.trim() ? couponInput.trim().toUpperCase() : null);
-          }}
-        >
-          <label htmlFor="coupon" className="sr-only">
-            {t('coupon')}
-          </label>
-          <input
-            id="coupon"
-            placeholder={t('coupon')}
-            value={couponInput}
-            onChange={(event) => {
-              setCouponInput(event.target.value);
-            }}
-            className="h-10 min-w-0 flex-1 rounded-xl border bg-background px-3 text-sm uppercase"
-          />
-          <Button type="submit" variant="outline" size="sm">
-            {t('apply')}
-          </Button>
-        </form>
-        {quote?.couponError && (
-          <p role="status" className="text-sm text-destructive">
-            {t(`couponErrors.${quote.couponError}`)}
-          </p>
-        )}
         {quote ? (
           <>
             <PriceSummary
@@ -743,6 +715,9 @@ export function Checkout({
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             {t('calculating')}
           </p>
+        )}
+        {quote && (
+          <CouponField id="coupon" coupon={coupon} error={quote.couponError} onApply={setCoupon} />
         )}
         {error && (
           <p role="alert" className="text-sm font-semibold text-destructive">

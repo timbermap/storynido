@@ -150,9 +150,13 @@ test('familia en México: foto, muestra, cuenta, impreso con cupón, entrega, re
   await page.locator('#gift-date').fill('2099-12-31');
   await expect(page.locator('#gift-date-status')).toContainText('Llega a tiempo');
   await page.locator('label', { hasText: 'Es un regalo' }).locator('input').uncheck();
+  // El cupón es un enlace discreto debajo del total (DECISIONS 324).
+  await expect(page.locator('#coupon')).toHaveCount(0);
+  await page.getByRole('button', { name: /un código\?/ }).click();
   await page.locator('#coupon').fill('prueba10');
   await page.getByRole('button', { name: 'Aplicar' }).click();
   await expect(page.locator('aside dl')).toContainText('Cupón PRUEBA10');
+  await expect(page.locator('aside')).toContainText('Código PRUEBA10 aplicado');
   await expect(page.locator('aside dl')).toContainText('IVA incluido');
   await expectAccessible(page);
   await page.getByRole('button', { name: 'Pagar' }).click();
