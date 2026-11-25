@@ -79,6 +79,7 @@ import {
   mediumFor,
   imageCheckFor,
   onlySoftRejection,
+  NO_TEXT_OBJECTS_HINT,
 } from '@storynido/shared';
 import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
@@ -1500,7 +1501,17 @@ export class PreviewService {
           const generated = await track(
             'illustration',
             await ai.image.generateIllustration(
-              attempt === 1 ? request : { ...request, prompt: `${request.prompt} ${RETRY_HINT}` },
+              attempt === 1
+                ? request
+                : {
+                    ...request,
+                    // Tercer intento: sin objetos que llevan letras (un aula con pizarrón y
+                    // carteles fallaba los tres intentos por «text»; DECISIONS 323).
+                    prompt:
+                      attempt === 2
+                        ? `${request.prompt} ${RETRY_HINT}`
+                        : `${request.prompt} ${RETRY_HINT} ${NO_TEXT_OBJECTS_HINT}`,
+                  },
             ),
           );
           return { image: { bytes: generated.bytes, mimeType: generated.mimeType } };

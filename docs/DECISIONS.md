@@ -3315,3 +3315,9 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 - **Infra:** `social_networks = ["pinterest"]` ahora solo necesita `pinterest-app-id` y `pinterest-app-secret`.
   La dirección de vuelta (`<admin>/social`) se registra en la app de Pinterest para cada admin.
 - También «Desconectar Pinterest», que borra el token guardado.
+
+## 323 — La muestra no se cae por un aula con pizarrón
+
+- **Qué pasaba (El diario de Luli, staging, 25 nov):** la página 1 era un aula y las tres imágenes salieron con pizarrón y carteles con pseudo-letras; el control las rechazó por «text» (bien) y la muestra entera falló, también al reintentar. El pedido completo ya tenía una escalera de reintentos que saca los objetos con letras; la muestra solo repetía «sin texto».
+- **Qué hace ahora:** el tercer intento de cada imagen de la muestra suma `NO_TEXT_OBJECTS_HINT` (compartido con el pedido): misma escena, sin pizarrón, carteles, pantallas ni papeles con letras. El Diario además pide en su plantilla que el pizarrón quede fuera de cuadro o vacío.
+- **El aviso de edad de la foto no frena:** solo avisa y se dibuja con la edad del cuento.

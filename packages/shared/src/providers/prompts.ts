@@ -50,6 +50,14 @@ const PRONOUN_LABELS = { she: 'ella', he: 'él', they: 'elle' } as const;
  * Reemplaza {{variable}} por su valor. Las variables vacías o desconocidas quedan como "—"
  * para que una plantilla editada en el admin nunca mande llaves sueltas al modelo.
  */
+/**
+ * Tercer intento de una ilustración rechazada por texto (DECISIONS 323): se sacan los objetos que
+ * suelen llevar letras (pizarrón, carteles, pantallas) y se mantiene la escena. Lo usan el pedido
+ * y la muestra (antes la muestra solo repetía «sin texto» y un aula fallaba los tres intentos).
+ */
+export const NO_TEXT_OBJECTS_HINT =
+  'NO TEXT-BEARING OBJECTS: keep the same place, the same people and the same action as described, but do not draw signs, posters, banners, blackboards or whiteboards, screens, maps, diagrams, labels, packaging with writing, books, notebooks or papers with visible writing, lockers or doors with numbers, clocks, calendars, license plates, or clothing with prints or lettering. Show those surfaces blank or leave those objects out. Keep hands simple and faces calm.';
+
 export function renderTemplate(template: string, variables: TemplateVariables): string {
   return template.replace(/\{\{\s*([a-zA-Z]+)\s*\}\}/g, (_, name: string) => {
     const value = variables[name];
