@@ -412,7 +412,7 @@ function safeRedrawReview(pageIndex: number): PageReview {
 }
 
 /**
- * Contacto físico entre personajes (DECISIONS 324): siempre se repara con un redibujo, nunca va
+ * Contacto físico entre personajes (DECISIONS 325): siempre se repara con un redibujo, nunca va
  * directo a revisión manual (El diario de Luli: «la amiga le apoya la mano en el brazo»).
  */
 const CONTACT_ISSUE =
