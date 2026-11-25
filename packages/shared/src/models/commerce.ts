@@ -259,6 +259,7 @@ export const bookPreviewSchema = z.object({
         .array(
           z.object({
             role: z.string(),
+            name: z.string().nullable().optional(),
             gender: z.enum(['male', 'female', 'unspecified']),
             look: z.string(),
           }),

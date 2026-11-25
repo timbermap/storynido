@@ -1075,7 +1075,9 @@ export class PreviewService {
               request.petName ?? '',
               request.bestFriendName ?? '',
               storyPlan.companion?.name ?? '',
+              ...(storyPlan.cast ?? []).map((member) => member.name ?? ''),
             ],
+            refrain: storyPlan.refrain ?? null,
           });
           if (craft.issues.length > 0) {
             await this.qaEvent(bookId, 'story_craft', {
@@ -1124,7 +1126,9 @@ export class PreviewService {
                 scenes: storyPlan.scenes,
                 recurring: [
                   ...(storyPlan.companion ? [storyPlan.companion.name] : []),
-                  ...(storyPlan.cast ?? []).map((member) => member.role),
+                  ...(storyPlan.cast ?? []).map((member) =>
+                    member.name ? `${member.name} (${member.role})` : member.role,
+                  ),
                 ],
                 ...(request.protagonistLook ? { protagonistLook: request.protagonistLook } : {}),
                 age: request.age,

@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  adultWords,
   dialogueShare,
   moralPhrases,
+  repeatedPhrases,
   repeatedWords,
   storyCraftIssues,
   touchPages,
+  unnamedFriendPages,
 } from './story-checks';
 
 const pages = (...texts: string[]) => texts.map((text) => ({ text }));
@@ -79,5 +82,52 @@ describe('contacto físico', () => {
         { text: 'Luli giró en el aire.' },
       ]),
     ).toEqual([1]);
+  });
+});
+
+describe('revisión de «El diario de Luli» (DECISIONS 328)', () => {
+  it('marca la mano de una amiga en el brazo, no la mano levantada en clase', () => {
+    expect(
+      touchPages([
+        { text: 'Cata me puso la mano en el hombro y sonrió.' },
+        { text: 'Levanté la mano para contestar.' },
+        { text: 'Mateo me tomó del brazo para que no me cayera.' },
+      ]),
+    ).toEqual([1, 3]);
+  });
+
+  it('encuentra la misma frase de emoción en varias páginas y respeta el estribillo', () => {
+    const book = pages(
+      'Sentí un alivio enorme cuando terminó.',
+      'Otra vez ese alivio enorme en el pecho.',
+      '—¡Corazón valiente! —dijo Luli.',
+      '—¡Corazón valiente! —repitió Luli.',
+    );
+    expect(repeatedPhrases(book, { language: 'es', refrain: '¡Corazón valiente!' })).toEqual([
+      'alivio enorme',
+    ]);
+  });
+
+  it('marca palabras de adulto', () => {
+    expect(adultWords(pages('Mi vulnerabilidad era total.'), 'es')).toEqual(['vulnerabilidad']);
+    expect(adultWords(pages('Me temblaban las rodillas.'), 'es')).toEqual([]);
+  });
+
+  it('marca un amigo que vuelve sin nombre, no uno con nombre', () => {
+    expect(
+      unnamedFriendPages(
+        pages('Mi compañero me guiñó un ojo.', 'Hoy mi compañero llegó tarde.'),
+        'es',
+      ),
+    ).toEqual([1, 2]);
+    expect(
+      unnamedFriendPages(pages('Mi amigo Tomás trajo la guitarra.', 'Mi amiga Cata cantó.'), 'es'),
+    ).toEqual([]);
+    const check = storyCraftIssues({
+      pages: pages('Mi compañero rió.', 'Mi compañero cantó.'),
+      age: 11,
+      language: 'es',
+    });
+    expect(check.issues.join('\n')).toContain('sin nombre');
   });
 });

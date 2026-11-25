@@ -38,6 +38,7 @@ import {
   STORY_STRUCTURES,
   COLORING_COVER_CHECK,
   imageCheckFor,
+  styleSheetFor,
   fillOutfitGaps,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
@@ -439,6 +440,7 @@ const PLAN_SCHEMA = {
         type: 'OBJECT',
         properties: {
           role: { type: 'STRING' },
+          name: { type: 'STRING', nullable: true },
           gender: { type: 'STRING', enum: ['male', 'female', 'unspecified'] },
           look: { type: 'STRING' },
         },
@@ -871,7 +873,8 @@ plausible family of the protagonist (a similar skin tone and a related hair colo
 No physical contact in any picture: nobody hugs, kisses, carries or touches the protagonist, and the protagonist touches nobody; people stand or sit side by side at a small distance. If the text mentions a hug or a touch, show the moment before or after it (the warm look, a wave from a distance; a high five only between children of similar age), never the embrace. With an adult outside the family there is no contact of any kind: a wave or a smile from a small distance. Only for a parent, grandparent or sibling and only when the text says so: one soft side-view hug, both faces visible, bodies clearly separate, never in bed. Everyone fully and modestly dressed.
 Trees, plants, objects or animals that come alive or talk get a simple, gentle, storybook cartoon face (round friendly eyes, a small smile, soft lines), never a realistic, wrinkled or adult human face and never a lifelike person's features. Use only the characters and objects the page text names; do not add extra children or helpers that the text does not mention.
 Clothes fit the place, weather, season and activity of the page: pyjamas in bed, a raincoat in the rain, a coat in the cold,
-swimwear in the water, sportswear for a sport; indoors at home, no jackets or outdoor shoes unless someone is arriving or leaving.${
+swimwear in the water, sportswear for a sport; indoors at home, no jackets or outdoor shoes unless someone is arriving or leaving.
+When the page text names what the protagonist wears (a garment, a color, a costume), write it in the brief as "the protagonist wears ...": the illustrator never sees the text.${
             request.age !== undefined
               ? ` The protagonist is ${String(request.age)} years old: what they hold, wear and do fits that age, and anything risky has an adult nearby. Draw them with the body proportions of a ${String(request.age)}-year-old (rounder face, larger head, shorter limbs), never as a teenager or a small adult.`
               : ''
@@ -945,8 +948,10 @@ ${formPlanRules(request.age)}
 mustBeVisible / notVisible / continuityFacts in short English phrases for the illustrator. Write theme, arc, sceneGoal and emotionalBeat
 in the language of the brief. companion: the one secondary character (relative, friend or pet from the brief) who appears in two or
 more scenes, with a fixed look in English (age, hair, skin tone, clothes and colors; species and fur for a pet); null if none recurs.
-cast: every OTHER person who appears in two or more scenes (a teacher, a classmate, a neighbor), each with a fixed gender and a fixed
-look in English (age, hair, clothes and colors). Take the gender from the brief and the story (for example "el profe" or "he" means male,
+cast: every OTHER person who appears in two or more scenes (a teacher, a classmate, a neighbor), each with a fixed gender, a fixed
+look in English (age, hair, clothes and colors) and a name: every child or friend gets a short first name common in the brief's
+language and country (the text always calls them by it); null only for an adult the protagonist calls by role ("la seño", "el profe").
+In a party book (birthday, baptism, communion, graduation) the guests stay an unnamed group: only the friend named in the brief gets a name. Take the gender from the brief and the story (for example "el profe" or "he" means male,
 "la profe" means female); use unspecified only when nothing says it. In mustBeVisible, always name these people with that gender
 ("the male teacher") so every scene agrees. Empty array if nobody else recurs.
 Recurring characters must be told apart at a glance, even in silhouette, and each has a signature outfit color the protagonist never
@@ -1142,7 +1147,8 @@ order. Compare them with each other and with the visual bible below and find the
 a recurring object drawn with a different shape, size or color (or a different kind of object), a recurring place that looks like
 another place, the protagonist in a different outfit when the bible does not say so, a recurring character with a different gender,
 age, hair or clothes, a character who should not be on that page, or the protagonist not looking like the reference sheet.
-Only report clear deviations that a reader would notice; ignore style variation, camera angle and small details. Never report letters or
+Also report any page (the cover included) drawn in a clearly different art technique from the reference sheet and the other pages (for example a western cartoon among manga pages, or a painted cover among ink pages): expected says to redraw it in the technique of the reference sheet.
+Only report clear deviations that a reader would notice; ignore small style variation, camera angle and small details. Never report letters or
 text. For each deviation: pageIndex (0 = cover, otherwise the page number), issue (short English), and expected (how it must look,
 in short English, to redraw that page). Empty array if the book is consistent.
 
@@ -1266,9 +1272,17 @@ export class VertexImageProvider implements AIImageProvider {
     // una página más, con su franja de título, y después se pinta en un segundo pedido (DECISIONS 285).
     const coloringCover = request.cover === true && check.grayscale === true;
     const coloring = check.grayscale === true;
+    // Un estilo con color y ojos propios (manga) usa su regla de color y su prioridad va última,
+    // también en libros con la dirección de arte congelada antes de este cambio (DECISIONS 328).
+    const sheet = styleSheetFor({
+      style: request.style,
+      stylePrompt: request.stylePrompt,
+      coloring: request.coloring,
+    });
     const rules = [
-      coloring ? COLORING_PAGE_RULE : SOFT_COLOR_RULE,
+      coloring ? COLORING_PAGE_RULE : (sheet?.color ?? SOFT_COLOR_RULE),
       request.cover ? COVER_TITLE_RULE : '',
+      coloring ? '' : (sheet?.overrides ?? ''),
     ].filter(Boolean);
     // El pedido del adulto va último y explícito: manda sobre la foto y las referencias.
     const correction = request.correction?.trim()
@@ -1425,7 +1439,11 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
       ? `\nThe book's text is printed over the ${options.textZone.side} ${String(Math.round(options.textZone.pct))}% of this image. Reject it (category "text_zone") if any part of a face or a head is inside that ${options.textZone.side} ${String(Math.round(options.textZone.pct))}%.`
       : '';
     const style = options.style?.trim()
-      ? `\nThe chosen art style is: ${options.style.trim()}. Reject it (category "style") only if it is CLEARLY made in a different technique (for example a 3D render, a photo or a color painting when the style is a watercolor or a black and white coloring page); small variations of the same technique are fine.`
+      ? `\nThe chosen art style is: ${options.style.trim()}. Reject it (category "style") only if it is CLEARLY made in a different technique (for example a 3D render, a photo or a color painting when the style is a watercolor or a black and white coloring page); small variations of the same technique are fine.${
+          /manga/i.test(options.style)
+            ? ' For manga, a western cartoon, a comic-book or a painted storybook look (natural-size eyes, no cel shading, no screentone) counts as a different technique (DECISIONS 328).'
+            : ''
+        }`
       : '';
     return moderate(this.client, [
       imagePart(image),

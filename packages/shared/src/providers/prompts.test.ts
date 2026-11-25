@@ -6,6 +6,7 @@ import { EMPTY_BIRTHDAY } from '../models/events';
 import { describeCharacterSheet } from './ai';
 import {
   castNote,
+  recurringCast,
   buildIllustrationPrompt,
   buildStoryPrompt,
   coverOutfit,
@@ -96,7 +97,7 @@ describe('plantillas de prompts', () => {
     expect(prompt).toContain('cumple 6 años');
     expect(prompt).toContain('«dinosaurios»');
     expect(prompt).toContain('termina con la celebración');
-    expect(prompt).toContain('no nombres a los invitados');
+    expect(prompt).toContain('los invitados van en grupo y sin nombre');
   });
 
   it('objetivo (Profesionales): guía educativa, sin indicaciones terapéuticas', () => {
@@ -598,5 +599,25 @@ describe('ropa sin huecos y objetos de la tapa (DECISIONS 318)', () => {
         scenes: [at(1, null, ['magic bubble']), at(2, null), at(3, null)],
       } as never),
     ).toBeNull();
+  });
+});
+
+describe('personajes que vuelven con nombre (DECISIONS 328)', () => {
+  it('el redactor recibe el acompañante y el elenco con sus nombres', () => {
+    const text = recurringCast({
+      companion: { name: 'Rocco', look: 'a small brown dog' },
+      cast: [
+        { role: 'a classmate', name: 'Mateo', gender: 'male', look: 'curly red hair' },
+        { role: 'the teacher', name: null, gender: 'female', look: 'grey bun' },
+      ],
+    });
+    expect(text).toContain('Rocco; Mateo (a classmate); the teacher');
+    expect(recurringCast({ companion: null, cast: [] })).toBe('');
+  });
+
+  it('la nota del elenco para el dibujo lleva el nombre', () => {
+    expect(
+      castNote([{ role: 'a classmate', name: 'Mateo', gender: 'male', look: 'curly red hair' }]),
+    ).toContain('Mateo, a classmate: male, curly red hair');
   });
 });

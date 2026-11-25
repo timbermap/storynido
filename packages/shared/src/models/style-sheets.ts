@@ -30,6 +30,15 @@ export interface StyleSheet {
   /** Lo que este estilo nunca hace (se suma al «Avoid» general). */
   avoid: string;
   check: ImageCheck;
+  /**
+   * Lo que este estilo hace distinto de las reglas generales de la casa (ojos, brillo, color,
+   * sombreado). Va último en cada pedido de imagen y gana sobre ellas (DECISIONS 328: el Manga de
+   * Luli salió como cómic occidental porque la casa pedía ojos naturales, sin brillo y colores
+   * apagados en cada página).
+   */
+  overrides?: string;
+  /** Regla de color propia del estilo, en vez de la paleta suave de la casa. */
+  color?: string;
 }
 
 /**
@@ -136,6 +145,10 @@ export const STYLE_SHEETS: Record<string, StyleSheet> = {
     avoid:
       'western cartoon or comic-book look, painted storybook look, soft colored-pencil shading, watercolor, 3D render, chibi or babyish proportions, panels, speech bubbles, Japanese or any other lettering',
     check: COLOR_STYLE_CHECK,
+    overrides:
+      'STYLE PRIORITY (manga): this art style wins over every general rule above. Eyes are drawn the manga way, larger than natural with a big glossy highlight and a detailed iris, on every character; skin and clothes use flat two-tone cel shading with crisp shadow shapes, never painterly texture or soft pencil shading; lines are crisp black ink with tapered strokes; hair in sharp separate clumps with a highlight band. If this page starts to look like a western cartoon, a comic book or a painted storybook, redraw it as manga.',
+    color:
+      'COLOR: clean, bright manga cel colors, flat and crisp, with clear light and shadow shapes; one accent color per scene; never neon, highlighter or candy colors, never muddy or washed-out.',
   },
   'gouache-editorial': {
     medium:
