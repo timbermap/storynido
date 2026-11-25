@@ -183,7 +183,7 @@ export function describeCharacterSheet(sheet: CharacterSheet): string {
   const features = sheet.distinctiveFeatures.length
     ? `; distinctive features: ${sheet.distinctiveFeatures.join(', ')}`
     : '';
-  return `child (${sheet.apparentAge.replace(/^(a\s+)?child,?\s*/i, '')}); hair: ${sheet.hair}; eyes: ${sheet.eyes}; skin tone: ${sheet.skinTone}${features}; outfit: ${sheet.clothing} (the same outfit as in the reference sheet on every page, unless the page text explicitly says the character changes clothes or the action is impossible in it, such as swimming or sleeping)`;
+  return `child (${sheet.apparentAge.replace(/^(a\s+)?child,?\s*/i, '')}); hair: ${sheet.hair}; eyes: ${sheet.eyes}; skin tone: ${sheet.skinTone}${features}; outfit: ${sheet.clothing} (the same outfit as in the reference sheet on every page, unless the scene to draw says the character wears something else or the action is impossible in it, such as swimming or sleeping)`;
 }
 
 /** Referencia del protagonista para que se vea igual en todas las páginas. */
@@ -328,6 +328,11 @@ export interface CompanionPlan {
 export interface CastMember {
   /** Quién es (en inglés): «the teacher», «a classmate». */
   role: string;
+  /**
+   * Nombre propio de la persona (DECISIONS 329: el amigo de Luli volvía en varias páginas como «mi
+   * compañero»). Null para un adulto que el chico llama por su rol («la seño», «el profe»).
+   */
+  name?: string | null;
   gender: 'male' | 'female' | 'unspecified';
   /** Aspecto fijo, en inglés (edad, pelo, ropa y colores). */
   look: string;

@@ -30,6 +30,15 @@ export interface StyleSheet {
   /** Lo que este estilo nunca hace (se suma al «Avoid» general). */
   avoid: string;
   check: ImageCheck;
+  /**
+   * Lo que este estilo hace distinto de las reglas generales de la casa (ojos, brillo, color,
+   * sombreado). Va último en cada pedido de imagen y gana sobre ellas (DECISIONS 329: el Manga de
+   * Luli salió como cómic occidental porque la casa pedía ojos naturales, sin brillo y colores
+   * apagados en cada página).
+   */
+  overrides?: string;
+  /** Regla de color propia del estilo, en vez de la paleta suave de la casa. */
+  color?: string;
 }
 
 /**
@@ -130,12 +139,16 @@ export const STYLE_SHEETS: Record<string, StyleSheet> = {
   // Para 9-12 (DECISIONS 319): manga genérico, sin personajes ni marcas de nadie.
   manga: {
     medium:
-      'manga-inspired illustration for middle-grade readers: clean expressive ink linework with tapered strokes, cel shading with subtle screentone dot textures, large but natural expressive eyes, dynamic poses and bright clean colors; an original design that resembles no existing anime or manga character; one single full-page image, never panels or speech bubbles',
+      'Japanese manga illustration for middle-grade readers, unmistakably manga at first glance: crisp black ink lineart with tapered strokes, hair drawn in sharp separate clumps with a bright highlight band, eyes larger than natural with a big glossy highlight and detailed iris, a small simple nose and mouth, flat two-tone cel shading with screentone dot textures in the shadows, speed lines only in the background, bright clean colors; an original design that resembles no existing anime or manga character; one single full-page image, never panels or speech bubbles',
     usesPalette: true,
     references: KEEP_IDENTITY,
     avoid:
-      'painted storybook look, watercolor, 3D render, chibi or babyish proportions, panels, speech bubbles, Japanese or any other lettering',
+      'western cartoon or comic-book look, painted storybook look, soft colored-pencil shading, watercolor, 3D render, chibi or babyish proportions, panels, speech bubbles, Japanese or any other lettering',
     check: COLOR_STYLE_CHECK,
+    overrides:
+      'STYLE PRIORITY (manga): this art style wins over every general rule above. Eyes are drawn the manga way, larger than natural with a big glossy highlight and a detailed iris, on every character; skin and clothes use flat two-tone cel shading with crisp shadow shapes, never painterly texture or soft pencil shading; lines are crisp black ink with tapered strokes; hair in sharp separate clumps with a highlight band. If this page starts to look like a western cartoon, a comic book or a painted storybook, redraw it as manga.',
+    color:
+      'COLOR: clean, bright manga cel colors, flat and crisp, with clear light and shadow shapes; one accent color per scene; never neon, highlighter or candy colors, never muddy or washed-out.',
   },
   'gouache-editorial': {
     medium:

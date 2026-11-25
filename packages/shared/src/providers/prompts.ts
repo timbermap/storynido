@@ -148,6 +148,27 @@ export function memoriesBlock(memories: Memories | null | undefined): string | n
   return lines.length ? lines.join('\n') : null;
 }
 
+/**
+ * Quién vuelve en el libro según el plan, con su nombre (DECISIONS 329): sin esto el redactor no
+ * sabía quién era el amigo del plan y lo llamaba «mi compañero» en varias páginas.
+ */
+export function recurringCast(
+  plan: Pick<StoryPlan, 'companion' | 'cast'> | null | undefined,
+): string {
+  const people = [
+    ...(plan?.companion?.name.trim() ? [plan.companion.name.trim()] : []),
+    ...(plan?.cast ?? [])
+      .filter((member) => member.role.trim())
+      .map((member) =>
+        member.name?.trim() ? `${member.name.trim()} (${member.role.trim()})` : member.role.trim(),
+      ),
+  ];
+  return people.length
+    ? `
+Personajes que vuelven (llámalos siempre así, con el mismo nombre en todas las páginas): ${people.join('; ')}`
+    : '';
+}
+
 /** Prompt de texto con la plantilla de la historia y reglas fijas que el admin no puede quitar. */
 export function buildStoryPrompt(input: StoryPromptInput): string {
   const language = languageName(input.language, input.spanishVoice);
@@ -187,7 +208,7 @@ ${memories}`
 ${EVENT_STORY[event.type](input.childName, event.turningAge)}${
         event.theme ? ` La temática de la fiesta es «${event.theme}»: úsala en la aventura.` : ''
       }
-Que sea alegre, corta y fácil de leer en voz alta; no nombres a los invitados.`
+Que sea alegre, corta y fácil de leer en voz alta; los invitados van en grupo y sin nombre («sus amigos»): el único amigo con nombre es el mejor amigo del pedido, si lo hay.`
     : '';
   const goalSection = input.goal
     ? `
@@ -201,7 +222,7 @@ indicaciones terapéuticas ni diagnósticos, y no menciones el objetivo de forma
 
 Plan aprobado por el editor (síguelo página por página; no agregues personajes ni hechos fuera de él):
 Tema: ${input.plan.theme}
-Arco: ${input.plan.arc}${
+Arco: ${input.plan.arc}${recurringCast(input.plan)}${
         input.plan.structure
           ? `
 Estructura de todo el libro: ${STRUCTURE_LABELS[input.plan.structure]}.`
@@ -377,7 +398,7 @@ export function narrativeRules(
     rules.push(
       '- Un solo objetivo en todo el cuento, con una secuencia realista y paso a paso de lo que vive el protagonista.',
       '- Nombra lo que siente (nervios, miedo, frustración) y dile que está bien sentirlo; muestra qué lo ayuda a atravesarlo, paso a paso: la emoción no desaparece por arte de magia. Nunca prometas resultados clínicos.',
-      '- Nombra la emoción con una palabra y con una señal del cuerpo (por ejemplo, «me siento abrumada» y «el corazón me late rápido»).',
+      '- Nombra la emoción con una palabra simple de su edad y con una señal del cuerpo (por ejemplo, «estoy nerviosa» y «el corazón me late rápido»); nunca palabras de adulto como «abrumada», «ansiedad» o «alivio enorme».',
       '- Un adulto cercano valida lo que siente («está bien necesitar un rato») y lo acompaña sin resolverlo por el protagonista.',
       '- Si hay una técnica (respirar, contar, apretar un almohadón), descríbela en pasos concretos con conteo y un estribillo corto que se repite al menos dos veces.',
       '- Si hay un refugio o un rincón, es un lugar al que se va para volver: el final muestra que el protagonista regresa a lo que estaba haciendo.',
@@ -401,6 +422,11 @@ export function craftRules(childName: string, age: number | undefined, baby = fa
     '- Todo lo que se plantea se paga: un misterio se resuelve con una pista plantada antes, y un objeto importante vuelve a servir más adelante.',
     '- Cada detalle personal aparece donde cambia algo en la escena, nunca de relleno.',
     '- La última página termina en una imagen o una frase que queda, nunca en una lección ni en una moraleja.',
+    // Revisión de «El diario de Luli» (DECISIONS 328): valen para todos los cuentos.
+    '- Todo personaje que aparece solo, por su cuenta, en más de una página tiene nombre propio y se lo llama por su nombre (nunca «mi compañero», «él» o «el amigo» en lugar del nombre); usa los nombres del plan. Un grupo («sus amigos», «los invitados») puede ir sin nombres.',
+    '- Ninguna expresión se repite en el libro: cada emoción se cuenta con palabras distintas, y con el vocabulario de un chico de la edad del lector (nada de «vulnerabilidad», «euforia» ni «experimenté»).',
+    '- Si el cuento avanza por días o momentos, cada página es un momento nuevo: no se repite el mismo día ni la misma escena en dos páginas seguidas.',
+    '- Si el protagonista se pone ropa especial (una malla, un disfraz, un uniforme), el texto lo dice en cada página donde la lleva.',
   ];
   rules.push(
     `- Nunca narres en segunda persona: el narrador no le habla al lector ni a ${childName} (nada de «tú», «vos», «you», «mirá» ni imperativos fuera de un diálogo). Aunque el cuento sea para un bebé, narra en tercera persona o, si le queda bien, en primera con la voz de ${childName}.`,
@@ -455,7 +481,7 @@ export const CHARACTER_REFERENCE_SCENE =
  * traje espacial, short y mameluco). Solo si el texto lo dice o la acción lo exige.
  */
 export const SAME_OUTFIT =
-  'the same outfit as in the reference sheet on every page, unless the page text explicitly says the character changes clothes or the action is impossible in it, such as swimming or sleeping';
+  'the same outfit as in the reference sheet on every page, unless the scene to draw says the character wears something else or the action is impossible in it, such as swimming or sleeping';
 
 /** La edad en palabras para el modelo: bebé, chico, adolescente o adulto. */
 export function ageLabel(age: number): string {
@@ -670,7 +696,8 @@ export function castNote(cast: readonly CastMember[] | null | undefined): string
   if (members.length === 0) return '';
   const lines = members.map((member) => {
     const gender = member.gender === 'unspecified' ? '' : `${member.gender}, `;
-    return `${member.role}: ${gender}${member.look}`;
+    const name = member.name?.trim() ? `${member.name.trim()}, ` : '';
+    return `${name}${member.role}: ${gender}${member.look}`;
   });
   return ` Recurring supporting characters (draw each one with exactly the same gender and look on every page where the scene includes them; never add them to scenes that do not include them): ${lines.join('; ')}.`;
 }

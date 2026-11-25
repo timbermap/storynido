@@ -204,3 +204,20 @@ describe('fichas de estilo y de tipo de libro (DECISIONS 282)', () => {
     expect(imageCheckFor({ style: 'acuarela', coloring: true }).grayscale).toBe(true);
   });
 });
+
+describe('el estilo manda sobre las reglas de la casa (DECISIONS 329)', () => {
+  it('el manga no recibe ojos naturales, ojos sin brillo ni paleta apagada, y su prioridad va al final', () => {
+    const direction = artDirection({ age: 11, channel: 'families', style: 'manga' });
+    expect(direction).not.toContain('natural-sized eyes');
+    expect(direction).not.toContain('glossy highlights in the eyes');
+    expect(direction).not.toContain('slightly softened: one accent color');
+    expect(direction).not.toContain('Skin keeps natural variation');
+    expect(direction.endsWith(STYLE_SHEETS.manga?.overrides ?? '-')).toBe(true);
+  });
+
+  it('los demás estilos siguen con las reglas de la casa', () => {
+    const direction = artDirection({ age: 6, channel: 'families', style: 'gouache-editorial' });
+    expect(direction).toContain('natural-sized eyes');
+    expect(direction).toContain('glossy highlights in the eyes');
+  });
+});

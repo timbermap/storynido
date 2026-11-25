@@ -97,7 +97,7 @@ const STYLE_MEDIUM: Record<string, string> = Object.fromEntries(
  * su acabado, pero no sus tics (sonrisas calcadas, brillos).
  */
 const HUMAN_CRAFT =
-  "Human craft: the main character's face resembles the reference photo or reference sheet, and every other face belongs to a different individual (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions and palette identical across pages. Clothing: the main character wears exactly the outfit of the reference sheet on every page, and changes it only when the page text explicitly says so or the action is impossible in it (swimming: swimwear; bedtime: pyjamas; rain: a raincoat and boots over the same outfit; cold or snow: a coat over the same outfit; sports: sportswear). Clothes always fit the place, weather and activity: indoors at home, no jackets or outdoor shoes unless arriving or leaving. Never winter clothes on a beach. Recurring objects (a lantern, a backpack, a pet's collar) keep the same shape, size and color on every page, and sports or hobby gear is drawn precisely as named (for example, a squash racket has a small round head and a long thin throat, not a tennis racket).";
+  "Human craft: the main character's face resembles the reference photo or reference sheet, and every other face belongs to a different individual (natural-sized eyes, genuine varied expressions, never identical smiles); texture and brush or line work look intentional, never a uniform filter or noise; no sparkles, halos, lens flares, cinematic gradients or magic glows; keep the character's proportions and palette identical across pages. Clothing: the main character wears exactly the outfit of the reference sheet on every page, and changes it only when the scene to draw says so (it comes from the page text) or the action is impossible in it (swimming: swimwear; bedtime: pyjamas; rain: a raincoat and boots over the same outfit; cold or snow: a coat over the same outfit; sports: sportswear). Clothes always fit the place, weather and activity: indoors at home, no jackets or outdoor shoes unless arriving or leaving. Never winter clothes on a beach. Recurring objects (a lantern, a backpack, a pet's collar) keep the same shape, size and color on every page, and sports or hobby gear is drawn precisely as named (for example, a squash racket has a small round head and a long thin throat, not a tennis racket).";
 /**
  * Ropa en deportes de agua o de riesgo (un cuento de kitesurf salió con jean y zapatillas en el
  * agua). Va aparte de HUMAN_CRAFT para sumarla también a los libros congelados antes.
@@ -204,11 +204,16 @@ export function artDirection(input: {
   // La ficha del estilo manda: sin paleta, la edad tampoco habla de colores.
   const colorless = input.coloring === true || sheet?.usesPalette === false;
   const threeD = input.style === 'cartoon-3d';
+  // Un estilo con sus propios ojos, color y sombreado (manga) no recibe las reglas de la casa que
+  // los contradicen; su prioridad va al final (DECISIONS 329).
+  const ownLook = Boolean(sheet?.overrides);
   const key = input.palette ?? DEFAULT_PALETTE[input.channel];
   const palette = STORY_PALETTES[key];
   const color = colorless
     ? 'Black line art only for coloring: clean closed outlines, no fills, no shading.'
-    : `Color palette: ${palette.names} (${palette.colors.join(', ')}; ${palette.mood}); warm and harmonious, slightly softened: one accent color per scene and the rest earthy and calm; no pure primaries, neon or candy colors, never washed-out pastels.`;
+    : ownLook
+      ? `Color palette: ${palette.names} (${palette.colors.join(', ')}; ${palette.mood}), rendered the way the chosen art style colors things.`
+      : `Color palette: ${palette.names} (${palette.colors.join(', ')}; ${palette.mood}); warm and harmonious, slightly softened: one accent color per scene and the rest earthy and calm; no pure primaries, neon or candy colors, never washed-out pastels.`;
   return [
     `Art direction: premium children's picture book, ${medium}, as if one artist made the whole book.`,
     styleLock(medium),
@@ -218,15 +223,16 @@ export function artDirection(input: {
       : ageDirection(input.age),
     input.contentType || colorless ? bookTypeSheet(colorless ? 'coloring' : input.contentType) : '',
     sheet ? `${sheet.references} This style never uses: ${sheet.avoid}.` : '',
-    HUMAN_CRAFT,
+    ownLook ? HUMAN_CRAFT.replace('natural-sized eyes, ', '') : HUMAN_CRAFT,
     SPORTS_GEAR,
     BODY_CONTACT,
     BODY_POSE,
-    threeD ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
+    threeD || ownLook ? '' : 'Skin keeps natural variation, never airbrushed or perfectly smooth.',
     'Purposeful composition that serves the story beat (wide establishing shot, medium action, emotional close-up or character interaction); the main character is the clear focal point.',
     ONE_PROTAGONIST,
     TEXT_ZONE,
-    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated colors or gradients, glossy highlights in the eyes, perfectly round blush circles, symmetrical doll-like faces, malformed anatomy, random decorative objects and any change of style between pages.`,
+    `Avoid: photographic faces, ${threeD ? 'uncanny realistic skin, cheap toy-like plastic' : 'plastic skin, glossy generic 3D'}, excessive glow or bloom, oversaturated colors or gradients, ${ownLook ? '' : 'glossy highlights in the eyes, '}perfectly round blush circles, symmetrical doll-like faces, malformed anatomy, random decorative objects and any change of style between pages.`,
+    sheet?.overrides ?? '',
   ]
     .filter(Boolean)
     .join(' ');

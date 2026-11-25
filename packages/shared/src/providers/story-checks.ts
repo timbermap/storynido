@@ -162,7 +162,7 @@ export function moralPhrases(pages: readonly CraftPage[], language: Locale): str
 
 /** Contacto físico en el texto (DECISIONS 294): abrazos, besos, brazos, regazo, cosquillas. */
 const TOUCH_WORDS =
-  /abraz|abrac|besa|beso|beij|en brazos|regazo|cosquill|\bhug|\bkiss|cuddl|\blap\b|tickl|\bcolo\b|carregou/;
+  /abraz|abrac|besa|beso|beij|en brazos|regazo|cosquill|\bhug|\bkiss|cuddl|\blap\b|tickl|\bcolo\b|carregou|del brazo|de la mano|\bmanos? (en|sobre) (el|la|su|mi|tu) (hombro|brazo|espalda|cabeza)|palmad|palmeo|\bhand on (his|her|my|their|your) (shoulder|arm|back|head)|\bpatted\b|took (his|her|my|their) hand|pela mao|\bmaos? no (ombro|braco)/;
 /** Familia directa: con ellos un abrazo corto está permitido. */
 const FAMILY_WORDS =
   /mama|papa|madre|padre|abuel|herman|\bmom|\bdad|mother|father|grand|sister|brother|\bmae\b|\bpai\b|\bavo|\bavos|irma|\bvovo/;
@@ -177,12 +177,179 @@ export function touchPages(pages: readonly CraftPage[]): number[] {
   return found;
 }
 
+/**
+ * Emociones que se repiten con la misma frase (DECISIONS 329: «alivio enorme» varias veces en el
+ * diario de Luli). Dos palabras seguidas con contenido, una de ellas de emoción o del cuerpo, en dos
+ * páginas o más. No cuentan las de la frase que se repite a propósito (el estribillo).
+ */
+const EMOTION_STEMS: Record<Locale, readonly string[]> = {
+  es: [
+    'alivi',
+    'mied',
+    'nervi',
+    'corazon',
+    'rodill',
+    'estomag',
+    'panz',
+    'sonris',
+    'feliz',
+    'content',
+    'orgull',
+    'emocion',
+    'trist',
+    'enorme',
+    'gigant',
+    'temblab',
+    'latia',
+    'lagrim',
+    'verguenz',
+    'calor',
+    'cosquill',
+    'suspir',
+  ],
+  en: [
+    'relie',
+    'scare',
+    'afraid',
+    'nervous',
+    'heart',
+    'knees',
+    'stomach',
+    'tummy',
+    'smil',
+    'happy',
+    'proud',
+    'excit',
+    'sad',
+    'huge',
+    'giant',
+    'trembl',
+    'pound',
+    'tear',
+    'embarrass',
+    'sigh',
+  ],
+  pt: [
+    'alivi',
+    'medo',
+    'nervos',
+    'coracao',
+    'joelh',
+    'estomag',
+    'barrig',
+    'sorris',
+    'feliz',
+    'content',
+    'orgulh',
+    'emoc',
+    'trist',
+    'enorme',
+    'gigant',
+    'trem',
+    'lagrim',
+    'vergonh',
+    'suspir',
+  ],
+};
+
+export function repeatedPhrases(
+  pages: readonly CraftPage[],
+  options: { language: Locale; names?: readonly string[]; refrain?: string | null },
+): string[] {
+  const stop = new Set(STOPWORDS[options.language].map(fold));
+  const names = new Set((options.names ?? []).flatMap((name) => words(name)).map(fold));
+  const refrain = fold(options.refrain ?? '');
+  const stems = EMOTION_STEMS[options.language];
+  const content = (word: string) => word.length >= 3 && !stop.has(word) && !names.has(word);
+  const seen = new Map<string, Set<number>>();
+  pages.forEach((page, index) => {
+    const list = words(page.text).map(fold);
+    for (let i = 0; i + 1 < list.length; i += 1) {
+      const [a, b] = [list[i] ?? '', list[i + 1] ?? ''];
+      if (!content(a) || !content(b)) continue;
+      if (!stems.some((stem) => a.startsWith(stem) || b.startsWith(stem))) continue;
+      const phrase = `${a} ${b}`;
+      if (refrain.includes(phrase)) continue;
+      seen.set(phrase, (seen.get(phrase) ?? new Set()).add(index));
+    }
+  });
+  return [...seen].filter(([, on]) => on.size >= 2).map(([phrase]) => phrase);
+}
+
+/** Palabras de adulto en un cuento para chicos (DECISIONS 329), en minúsculas y sin tildes. */
+const ADULT_WORDS: Record<Locale, readonly string[]> = {
+  es: [
+    'vulnerabilidad',
+    'euforia',
+    'experimente',
+    'experimentaba',
+    'abrumad',
+    'melancol',
+    'nostalgia',
+    'inefable',
+    'efimer',
+    'sobremanera',
+    'sumamente',
+    'desasosiego',
+    'consternad',
+    'introspecc',
+  ],
+  en: [
+    'vulnerability',
+    'euphoria',
+    'overwhelmed',
+    'melanchol',
+    'nostalgi',
+    'ineffable',
+    'ephemeral',
+    'exceedingly',
+    'consternation',
+    'introspect',
+  ],
+  pt: [
+    'vulnerabilidade',
+    'euforia',
+    'experimentei',
+    'sobrecarregad',
+    'melancol',
+    'nostalgia',
+    'inefavel',
+    'efemer',
+    'sobremaneira',
+    'introspec',
+  ],
+};
+
+export function adultWords(pages: readonly CraftPage[], language: Locale): string[] {
+  const list = new Set(pages.flatMap((page) => words(page.text).map(fold)));
+  return ADULT_WORDS[language].filter((stem) => [...list].some((word) => word.startsWith(stem)));
+}
+
+/**
+ * Un amigo que vuelve sin nombre (DECISIONS 329): «mi compañero» o «el amigo» en dos páginas o más.
+ */
+const UNNAMED_FRIEND: Record<Locale, RegExp> = {
+  es: /(?:^|[^\p{L}])(?:[Mm]i|[Ee]l|[Ll]a|[Ss]u|[Tt]u) (?:amig[oa]|compañer[oa])(?![\p{L}])(?!,? (?:\p{Lu}|de |y ))/u,
+  en: /(?:^|[^\p{L}])(?:[Mm]y|[Tt]he|[Hh]is|[Hh]er|[Tt]heir) (?:new )?(?:friend|classmate)(?![\p{L}])(?!,? (?:\p{Lu}|and |of ))/u,
+  pt: /(?:^|[^\p{L}])(?:[Mm]eu|[Mm]inha|[Oo]|[Aa]|[Ss]eu|[Ss]ua) (?:amig[oa]|colega)(?![\p{L}])(?!,? (?:\p{Lu}|de |e ))/u,
+};
+
+export function unnamedFriendPages(pages: readonly CraftPage[], language: Locale): number[] {
+  const found: number[] = [];
+  pages.forEach((page, index) => {
+    if (UNNAMED_FRIEND[language].test(page.text)) found.push(index + 1);
+  });
+  return found.length >= 2 ? found : [];
+}
+
 export interface CraftCheck {
   /** Problemas concretos para la reescritura (en el idioma del equipo: español). */
   issues: string[];
   dialogue: boolean;
   repeated: number;
   morals: number;
+  /** Frases de emoción repetidas, palabras de adulto y amigos sin nombre (DECISIONS 329). */
+  phrases?: number;
 }
 
 /** Los tres controles juntos, con la lista de problemas para la revisión editorial. */
@@ -191,6 +358,8 @@ export function storyCraftIssues(input: {
   age: number;
   language: Locale;
   names?: readonly string[];
+  /** Estribillo del plan: se repite a propósito. */
+  refrain?: string | null;
 }): CraftCheck {
   const issues: string[] = [];
   const share = dialogueShare(input.pages);
@@ -220,5 +389,29 @@ export function storyCraftIssues(input: {
       `Moraleja explícita (${morals.map((phrase) => `«${phrase}»`).join(', ')}): sácala y muestra la enseñanza con lo que hacen los personajes; el final termina en una imagen o una frase, nunca en una lección.`,
     );
   }
-  return { issues, dialogue, repeated: repeated.length, morals: morals.length };
+  const phrases = repeatedPhrases(input.pages, input);
+  if (phrases.length > 0) {
+    issues.push(
+      `Frases repetidas en varias páginas (${phrases.map((phrase) => `«${phrase}»`).join(', ')}): cuenta cada emoción con palabras distintas y con lo que hace o nota el cuerpo.`,
+    );
+  }
+  const adult = adultWords(input.pages, input.language);
+  if (adult.length > 0) {
+    issues.push(
+      `Palabras de adulto (${adult.map((word) => `«${word}…»`).join(', ')}): cámbialas por palabras que usa un chico de ${String(input.age)} años.`,
+    );
+  }
+  const unnamed = unnamedFriendPages(input.pages, input.language);
+  if (unnamed.length > 0) {
+    issues.push(
+      `Un amigo o compañero sin nombre vuelve en las páginas ${unnamed.join(', ')}: dale un nombre propio (el del plan si lo tiene) y llámalo siempre así.`,
+    );
+  }
+  return {
+    issues,
+    dialogue,
+    repeated: repeated.length,
+    morals: morals.length,
+    phrases: phrases.length + adult.length + unnamed.length,
+  };
 }
