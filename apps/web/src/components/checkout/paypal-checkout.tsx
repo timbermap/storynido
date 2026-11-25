@@ -1,7 +1,7 @@
 'use client';
 
 import { ApiError } from '@storynido/shared';
-import { CreditCard, Lock, ReceiptText, X } from 'lucide-react';
+import { CreditCard, Loader2, Lock, ReceiptText, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -101,11 +101,16 @@ export function PaypalCheckoutDialog({
   const [error, setError] = useState<string | null>(null);
   const [cardEligible, setCardEligible] = useState(true);
   const token = paypalOrderId(checkoutUrl);
+  const confirming = state === 'confirming';
+  const confirmingRef = useRef(false);
+  useEffect(() => {
+    confirmingRef.current = confirming;
+  }, [confirming]);
 
   useEffect(() => {
     panel.current?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape' && !confirmingRef.current) onClose();
     };
     window.addEventListener('keydown', onKey);
     const overflow = document.body.style.overflow;
@@ -124,19 +129,23 @@ export function PaypalCheckoutDialog({
     const rendered: PaypalButtonsInstance[] = [];
 
     const approve = async (_data: unknown, actions: PaypalActions) => {
+      // Apenas PayPal aprueba se muestra «confirmando»: mientras la API cobra (unos segundos) no
+      // vuelven a verse los botones de PayPal y tarjeta, que hacían creer que el pago no salió.
+      setError(null);
+      setState('confirming');
       try {
         await api('confirmPayment', { params: { orderId } });
       } catch (caught) {
         if (caught instanceof ApiError && caught.code === 'payment_declined') {
           // La tarjeta se aprobó pero se rechazó al cobrar: PayPal deja elegir otra sobre la misma
           // orden (actions.restart); si no se puede, queda el aviso para volver a intentar.
+          setState('ready');
           setError(t('declined'));
           await actions.restart().catch(() => undefined);
           return;
         }
         // Otro fallo de la confirmación inmediata: el webhook la hace igual, la página espera.
       }
-      setState('confirming');
       router.push({ pathname: '/order/[orderId]', params: { orderId } });
     };
 
@@ -189,7 +198,7 @@ export function PaypalCheckoutDialog({
     <div
       className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-navy/40 p-4 backdrop-blur-[2px]"
       onClick={(event) => {
-        if (event.target === event.currentTarget && state !== 'confirming') onClose();
+        if (event.target === event.currentTarget && !confirming) onClose();
       }}
     >
       <div
@@ -200,7 +209,7 @@ export function PaypalCheckoutDialog({
         tabIndex={-1}
         className="relative my-auto grid w-full max-w-md gap-5 rounded-2xl bg-card p-6 shadow-[var(--shadow-card)] outline-none sm:p-7"
       >
-        {state !== 'confirming' && (
+        {!confirming && (
           <button
             type="button"
             onClick={onClose}
@@ -217,55 +226,60 @@ export function PaypalCheckoutDialog({
           <p className="mt-1 text-sm text-muted-foreground">{t('text')}</p>
         </div>
 
-        {state === 'confirming' ? (
-          <p role="status" className="rounded-xl bg-muted p-4 text-sm">
+        {confirming && (
+          <p role="status" className="flex items-start gap-3 rounded-xl bg-mint-soft p-4 text-sm">
+            <Loader2
+              className="mt-0.5 size-4 shrink-0 animate-spin text-primary"
+              aria-hidden="true"
+            />
             {t('confirming')}
           </p>
-        ) : (
-          <>
-            <ul className="grid gap-3 text-sm">
-              <li className="flex gap-3">
-                <CreditCard className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-                {cardEligible ? t('noAccount') : t('noAccountUnavailable')}
-              </li>
-              <li className="flex gap-3">
-                <Lock className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-                {t('secure')}
-              </li>
-              <li className="flex gap-3">
-                <ReceiptText className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-                {t('statement')}
-              </li>
-            </ul>
-
-            {state === 'loading' && (
-              <p role="status" className="text-sm text-muted-foreground">
-                {t('loading')}
-              </p>
-            )}
-            {state === 'failed' ? (
-              <p className="rounded-xl bg-muted p-4 text-sm">
-                {t.rich('failed', {
-                  link: (chunks) => (
-                    <a className="font-medium underline" href={checkoutUrl}>
-                      {chunks}
-                    </a>
-                  ),
-                })}
-              </p>
-            ) : (
-              <div className="grid gap-3">
-                <div ref={cardSlot} />
-                <div ref={paypalSlot} />
-              </div>
-            )}
-            {error && (
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-            )}
-          </>
         )}
+        {/* Los botones siguen montados (ocultos) al confirmar: si la tarjeta se rechaza, PayPal
+            los reusa para elegir otra. */}
+        <div className={confirming ? 'hidden' : 'contents'}>
+          <ul className="grid gap-3 text-sm">
+            <li className="flex gap-3">
+              <CreditCard className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              {cardEligible ? t('noAccount') : t('noAccountUnavailable')}
+            </li>
+            <li className="flex gap-3">
+              <Lock className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              {t('secure')}
+            </li>
+            <li className="flex gap-3">
+              <ReceiptText className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              {t('statement')}
+            </li>
+          </ul>
+
+          {state === 'loading' && (
+            <p role="status" className="text-sm text-muted-foreground">
+              {t('loading')}
+            </p>
+          )}
+          {state === 'failed' ? (
+            <p className="rounded-xl bg-muted p-4 text-sm">
+              {t.rich('failed', {
+                link: (chunks) => (
+                  <a className="font-medium underline" href={checkoutUrl}>
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </p>
+          ) : (
+            <div className="grid gap-3">
+              <div ref={cardSlot} />
+              <div ref={paypalSlot} />
+            </div>
+          )}
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </div>,
     document.body,
