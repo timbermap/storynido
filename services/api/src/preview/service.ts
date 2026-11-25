@@ -1078,6 +1078,7 @@ export class PreviewService {
               ...(storyPlan.cast ?? []).map((member) => member.name ?? ''),
             ],
             refrain: storyPlan.refrain ?? null,
+            diary: story.tags.includes('diario'),
           });
           if (craft.issues.length > 0) {
             await this.qaEvent(bookId, 'story_craft', {

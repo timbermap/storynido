@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   adultWords,
+  diaryHeadingIssues,
   dialogueShare,
   moralPhrases,
   repeatedPhrases,
@@ -129,5 +130,30 @@ describe('revisión de «El diario de Luli» (DECISIONS 329)', () => {
       language: 'es',
     });
     expect(check.issues.join('\n')).toContain('sin nombre');
+  });
+});
+
+describe('encabezados del diario (DECISIONS 330)', () => {
+  it('marca entradas sin encabezado y encabezados repetidos', () => {
+    const result = diaryHeadingIssues(
+      pages(
+        'Primer día de clases: el peor comienzo. Llegué tarde.',
+        'Hoy no pasó nada.',
+        'Semana 6, martes: el ensayo desastre. Mateo se olvidó la guitarra.',
+        'Semana 6, martes: otra vez. Ensayamos de nuevo.',
+      ),
+    );
+    expect(result.missing).toEqual([2]);
+    expect(result.repeated).toEqual(['semana 6, martes']);
+  });
+
+  it('solo se pide en los diarios', () => {
+    const book = pages('Hoy no pasó nada.', 'Mañana tampoco.');
+    expect(storyCraftIssues({ pages: book, age: 11, language: 'es' }).issues.join()).not.toContain(
+      'encabezado',
+    );
+    expect(
+      storyCraftIssues({ pages: book, age: 11, language: 'es', diary: true }).issues.join(),
+    ).toContain('sin encabezado');
   });
 });

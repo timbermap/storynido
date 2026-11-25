@@ -3362,3 +3362,10 @@ Sebas, 25 nov: «quiero que toda la mesa completa trabaje en los prompts». La r
 - **Ropa:** el dibujante nunca ve el texto, así que «la misma ropa salvo que el texto diga otra cosa» pasa a «salvo que la escena lo diga», y las escenas escriben la ropa que nombra el texto.
 - **Profesionales:** el ejemplo de emoción era «me siento abrumada» (vocabulario adulto); ahora es «estoy nerviosa».
 - **Diario:** solo con días de la semana y sin fechas, un año escolar repetía días a la fuerza. Las entradas empiezan por el momento del año («Primer día de clases», «Semana 6, martes», «Tres días antes del festival»), sin meses (el año escolar cambia por país), y ningún encabezado se repite. Cambia la plantilla del seed: en staging hay que actualizar el documento de la historia.
+
+## 330 — Lo que dejó la prueba paga de la revisión de prompts
+
+Prueba del 25 nov (golden set de main contra la rama en 14 casos, con muestras del Diario en Cuaderno y de Dragones en Manga, unos US$3,30). El texto empató (4,63 contra 4,61). Subió la coherencia de escenas (de 4,71 a 5,00) y bajó un poco lo concreto (de 4,21 a 3,86, a seguir con dos corridas por caso). En el Diario, los amigos con nombre y las emociones distintas salieron bien, pero las entradas salieron sin encabezado. En el Manga, la lámina salió manga, pero la tapa y las páginas quedaron a mitad de camino (sombreado suave, ojos medianos, dragón de película occidental).
+
+- **Encabezados del Diario:** control sin IA (`diaryHeadingIssues`) para las historias con la etiqueta «diario». Toda entrada empieza con «momento: título» y ningún encabezado se repite; si falta, va a la lista de la reescritura.
+- **Manga en páginas y tapa:** la prioridad del estilo pide que los animales y las criaturas también sean manga y que cada página tenga la técnica de la lámina aunque la escena tenga muchos elementos. En 9-12, la dirección por edad pide las proporciones del estilo en vez de «proporciones realistas». El cierre del pedido dice «illustration for a children's book» en lugar de «picture book», que tiraba al álbum occidental.

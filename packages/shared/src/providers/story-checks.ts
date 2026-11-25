@@ -342,6 +342,35 @@ export function unnamedFriendPages(pages: readonly CraftPage[], language: Locale
   return found.length >= 2 ? found : [];
 }
 
+/**
+ * Diario (DECISIONS 330): cada entrada empieza con su encabezado «momento: título» y ningún
+ * encabezado se repite. En la prueba del 25 nov las entradas salieron sin encabezado y nada lo
+ * marcaba. Devuelve las páginas sin encabezado y los encabezados repetidos.
+ */
+const DIARY_HEADING = /^\s*([^\n:—«»"]{3,60}):\s*\S/u;
+
+export function diaryHeadingIssues(pages: readonly CraftPage[]): {
+  missing: number[];
+  repeated: string[];
+} {
+  const missing: number[] = [];
+  const seen = new Map<string, number>();
+  pages.forEach((page, index) => {
+    if (page.text.trim() === '') return;
+    const heading = DIARY_HEADING.exec(page.text)?.[1];
+    if (!heading) {
+      missing.push(index + 1);
+      return;
+    }
+    const key = fold(heading).replace(/\s+/g, ' ').trim();
+    seen.set(key, (seen.get(key) ?? 0) + 1);
+  });
+  return {
+    missing,
+    repeated: [...seen].filter(([, count]) => count > 1).map(([heading]) => heading),
+  };
+}
+
 export interface CraftCheck {
   /** Problemas concretos para la reescritura (en el idioma del equipo: español). */
   issues: string[];
@@ -360,6 +389,8 @@ export function storyCraftIssues(input: {
   names?: readonly string[];
   /** Estribillo del plan: se repite a propósito. */
   refrain?: string | null;
+  /** Historia en formato diario (etiqueta «diario»): cada entrada con su encabezado. */
+  diary?: boolean;
 }): CraftCheck {
   const issues: string[] = [];
   const share = dialogueShare(input.pages);
@@ -407,11 +438,27 @@ export function storyCraftIssues(input: {
       `Un amigo o compañero sin nombre vuelve en las páginas ${unnamed.join(', ')}: dale un nombre propio (el del plan si lo tiene) y llámalo siempre así.`,
     );
   }
+  const headings = input.diary ? diaryHeadingIssues(input.pages) : { missing: [], repeated: [] };
+  if (headings.missing.length > 0) {
+    issues.push(
+      `Entradas del diario sin encabezado (páginas ${headings.missing.join(', ')}): cada entrada empieza con en qué momento del año está y un título corto con humor, separados por dos puntos (por ejemplo «Semana 6, martes: el ensayo desastre»).`,
+    );
+  }
+  if (headings.repeated.length > 0) {
+    issues.push(
+      `Encabezados repetidos en el diario (${headings.repeated.map((heading) => `«${heading}»`).join(', ')}): el año avanza, cada entrada es un momento nuevo con su propio encabezado.`,
+    );
+  }
   return {
     issues,
     dialogue,
     repeated: repeated.length,
     morals: morals.length,
-    phrases: phrases.length + adult.length + unnamed.length,
+    phrases:
+      phrases.length +
+      adult.length +
+      unnamed.length +
+      headings.missing.length +
+      headings.repeated.length,
   };
 }
