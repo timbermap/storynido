@@ -341,6 +341,8 @@ interface Row {
   /** Cláusula → resultado final (las que no aplican no están). */
   clauses: Partial<Record<ContractClauseId, Verdict>>;
   notes: string[];
+  /** Escenas del plan (ropa y lo que se ve), para poder leer un fallo después. */
+  scenes?: unknown[];
   costUsd: number;
   error?: string;
 }
@@ -490,6 +492,7 @@ for (const testCase of cases) {
     if (contract.promises.length > 0) mark('template_promise', 'pass');
     row.title = draft.title;
     row.pages = pages.map((page) => page.text);
+    row.scenes = storyPlan.scenes;
     console.log(`✓ ${testCase.id} · texto: ${draft.title}`);
 
     if (withImages) {
@@ -507,21 +510,27 @@ for (const testCase of cases) {
         [],
       );
       const draw = async (label: string, scene: string, references: ImageData[], seed: number) => {
-        const generated = await image.generateIllustration({
-          prompt: buildIllustrationPrompt({
-            template: story.imagePromptTemplate,
-            scene,
-            character: description,
-            style: style.promptModifier,
-            direction,
-          }),
-          stylePrompt: style.promptModifier,
-          character: { description, photo: null },
-          references,
-          traitReferences: [],
-          aspectRatio: '3:4',
-          resolution: '1K',
-          seed,
+        // Un dibujo que se cuelga no tumba el caso: un reintento, como el worker.
+        const once = () =>
+          image.generateIllustration({
+            prompt: buildIllustrationPrompt({
+              template: story.imagePromptTemplate,
+              scene,
+              character: description,
+              style: style.promptModifier,
+              direction,
+            }),
+            stylePrompt: style.promptModifier,
+            character: { description, photo: null },
+            references,
+            traitReferences: [],
+            aspectRatio: '3:4',
+            resolution: '1K',
+            seed,
+          });
+        const generated = await once().catch((error: unknown) => {
+          console.log(`  ${testCase.id} · ${label}: reintento (${(error as Error).message})`);
+          return once();
         });
         spend(generated.usage);
         await sharp(generated.bytes)
@@ -530,7 +539,11 @@ for (const testCase of cases) {
         return { bytes: generated.bytes, mimeType: generated.mimeType };
       };
       const lamina = await draw('lamina', CHARACTER_REFERENCE_SCENE, [], 0);
-      const note = imageContractNote({ companion: storyPlan.companion, cast: storyPlan.cast });
+      const note = imageContractNote({
+        companion: storyPlan.companion,
+        cast: storyPlan.cast,
+        partyGuests: testCase.channel === 'events',
+      });
       const review = async (
         label: string,
         img: ImageData,
@@ -541,21 +554,33 @@ for (const testCase of cases) {
           index === 0
             ? null
             : (storyPlan.scenes.find((item) => item.pageIndex === index - 1) ?? null);
-        const verdict = await text.reviewPage({
-          pageIndex: index,
-          text: pageText,
-          image: img,
-          reference: lamina,
-          character: description,
-          mustKeep: [`outfit: ${testCase.sheet.clothing}`],
-          scene,
-          contract: note,
-        });
+        let verdict;
+        try {
+          // Igual que el worker: la ropa de la lámina salvo que el texto la cambie, y la biblia.
+          verdict = await text.reviewPage({
+            pageIndex: index,
+            text: pageText,
+            image: img,
+            reference: lamina,
+            character: description,
+            mustKeep: [
+              `outfit: ${testCase.sheet.clothing} (unless the page text says the character changes clothes)`,
+            ],
+            scene,
+            visualBible: index === 0 ? '' : visualBibleCheck(storyPlan, scene),
+            contract: note,
+          });
+        } catch (error) {
+          // El worker redibuja la página más pudorosa si el filtro bloquea la revisión; acá queda
+          // anotada sin revisar y el caso sigue.
+          row.notes.push(`${label}: sin revisar (${(error as Error).message.slice(0, 120)})`);
+          return;
+        }
         spend(verdict.usage);
         for (const clause of verdict.contractClauses ?? []) {
           mark(clause, 'fail');
           row.notes.push(
-            `${label}: ${clause} (${verdict.criticalIssues.join('; ').slice(0, 160)})`,
+            `${label}: ${clause} (${verdict.criticalIssues.join('; ').slice(0, 400)})`,
           );
         }
         if (verdict.textInImage) mark('no_text_in_image', 'fail');

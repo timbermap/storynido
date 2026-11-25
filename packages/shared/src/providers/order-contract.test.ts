@@ -210,4 +210,13 @@ describe('imageContractNote', () => {
     expect(note).toContain('the protagonist; Tino (a small brown dog); the speech therapist.');
     for (const clause of IMAGE_CONTRACT_CLAUSES) expect(note).toContain(`${clause}:`);
   });
+
+  it('en Celebraciones los invitados de la fiesta están permitidos', () => {
+    expect(imageContractNote({ partyGuests: true })).toContain('party guests');
+    expect(imageContractNote({})).not.toContain('party guests');
+  });
+
+  it('la ropa puede cambiar si el texto de la página lo dice', () => {
+    expect(imageContractNote({})).toContain('or the page text names other clothes');
+  });
 });
