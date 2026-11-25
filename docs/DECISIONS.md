@@ -3340,3 +3340,7 @@ Revisión con la mesa de «El diario de Luli» (staging, 25 nov): las páginas n
 
 - **Manga:** la ficha describe los rasgos que lo hacen reconocible (pelo en mechones con brillo, ojos grandes con brillo, sombreado de dos tonos con tramas) y evita el cómic occidental y el lápiz suave. La ficha manda sobre las reglas generales (ojos de tamaño natural).
 - **Diario:** la plantilla pide escribir como alguien de 11 o 12 años, emociones con el cuerpo y las acciones, sin repetir expresiones, nombre propio para todo amigo recurrente y días que avanzan.
+
+## 327 — Reglas de oficio para todos los cuentos (de la revisión del Diario)
+
+Sebas, 25 nov: «¿arreglás prompts de fondo? ¿este y otros?». Las fallas de texto de «El diario de Luli» pasan a ser reglas de `craftRules` para todas las historias: todo personaje recurrente con nombre propio; ninguna expresión repetida y emociones con el vocabulario de la edad del lector; nada de días o escenas repetidos en páginas seguidas; la ropa especial dicha en cada página donde se lleva (para que el plan la ponga en la escena).
