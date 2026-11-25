@@ -39,6 +39,11 @@ export interface MetricsOrder {
   product?: string;
   /** IA gastada en este pedido (generación del libro), en millonésimas de USD. */
   aiCostUsdMicros?: number;
+  /**
+   * Parte de `aiCostUsdMicros` que gastó la generación (pasos del pipeline, con sus reparaciones
+   * automáticas): `costsUsdMicros.ai` del pedido. Lo que sobra son páginas rehechas después.
+   */
+  aiPipelineUsdMicros?: number;
   /** Estilo de ilustración del libro comprado (DECISIONS 268). */
   style?: string | null;
 }
@@ -99,11 +104,27 @@ export interface ProductMetrics {
   taxUsd: number;
   feeUsd: number;
   aiUsd: number;
+  /** IA de páginas rehechas después de la generación: aparte, no entra en la contribución. */
+  aiRedoUsd?: number;
   printUsd: number;
 }
 
+/** Pagos simulados (staging, pruebas): no son ventas y no entran en las métricas. */
+export const TEST_PAYMENT_PROVIDERS: readonly string[] = ['mock'];
+
+/**
+ * IA del libro y de páginas rehechas (USD). Sin el gasto del pipeline (pedidos viejos), todo
+ * cuenta como IA del libro.
+ */
+export function splitOrderAiUsd(order: MetricsOrder): { aiUsd: number; aiRedoUsd: number } {
+  const total = (order.aiCostUsdMicros ?? 0) / 1_000_000;
+  if (order.aiPipelineUsdMicros === undefined) return { aiUsd: total, aiRedoUsd: 0 };
+  const pipeline = order.aiPipelineUsdMicros / 1_000_000;
+  return { aiUsd: pipeline, aiRedoUsd: Math.max(0, total - pipeline) };
+}
+
 /** Sube cuando cambia el cálculo: los días guardados con otra versión se recalculan. */
-export const METRICS_VERSION = 4;
+export const METRICS_VERSION = 5;
 
 /** A los N días un día queda congelado (ya no se esperan reembolsos ni cambios). */
 export const METRICS_SETTLE_DAYS = 35;
@@ -231,7 +252,10 @@ export function aggregateDay(input: {
   /** Libros creados ese día. */
   books?: readonly FunnelBook[];
 }): DayMetrics {
-  const sold = input.orders.filter((order) => REVENUE_ORDER_STATUSES.includes(order.status));
+  const orders = input.orders.filter(
+    (order) => !TEST_PAYMENT_PROVIDERS.includes(order.paymentProvider ?? ''),
+  );
+  const sold = orders.filter((order) => REVENUE_ORDER_STATUSES.includes(order.status));
   const revenueByCurrency: Partial<Record<Currency, number>> = {};
   const revenueUsdByCountry: Record<string, number> = {};
   const ordersByChannel: Record<string, number> = {};
@@ -260,19 +284,22 @@ export function aggregateDay(input: {
       taxUsd: 0,
       feeUsd: 0,
       aiUsd: 0,
+      aiRedoUsd: 0,
       printUsd: 0,
     };
+    const ai = splitOrderAiUsd(order);
     products[key] = {
       units: current.units + 1,
       revenueUsd: round(current.revenueUsd + total),
       taxUsd: round(current.taxUsd + tax),
       feeUsd: round(current.feeUsd + fee),
-      aiUsd: round(current.aiUsd + (order.aiCostUsdMicros ?? 0) / 1_000_000),
+      aiUsd: round(current.aiUsd + ai.aiUsd),
+      aiRedoUsd: round((current.aiRedoUsd ?? 0) + ai.aiRedoUsd),
       printUsd: round(current.printUsd + print),
     };
   }
   // Un reembolso no devuelve la comisión: se resta igual.
-  const refunded = input.orders.filter((order) => order.status === 'refunded');
+  const refunded = orders.filter((order) => order.status === 'refunded');
   let refundedUsd = 0;
   for (const order of refunded) {
     const total = toUsd(order.amounts.totalMinor, order.currency, input.fx);
@@ -284,7 +311,7 @@ export function aggregateDay(input: {
   const netRevenueUsd = revenueUsd - taxUsd;
   const byChannel = (channel: string) => ({
     books: (input.books ?? []).filter((book) => (book.channel ?? 'families') === channel),
-    orders: input.orders.filter((order) => order.channel === channel),
+    orders: orders.filter((order) => order.channel === channel),
   });
   const funnelOf = (books: readonly FunnelBook[], orders: readonly MetricsOrder[]): Funnel => ({
     started: books.length,
@@ -342,7 +369,7 @@ export function aggregateDay(input: {
     fxDate: input.fx.date,
     ...(input.books
       ? {
-          funnel: funnelOf(input.books, input.orders),
+          funnel: funnelOf(input.books, orders),
           funnelByChannel: Object.fromEntries(
             CHANNELS.map((channel) => {
               const { books, orders } = byChannel(channel);
@@ -406,6 +433,7 @@ export function sumMetrics(days: readonly DayMetrics[]) {
             taxUsd: round(current.taxUsd + value.taxUsd),
             feeUsd: round(current.feeUsd + value.feeUsd),
             aiUsd: round(current.aiUsd + value.aiUsd),
+            aiRedoUsd: round((current.aiRedoUsd ?? 0) + (value.aiRedoUsd ?? 0)),
             printUsd: round(current.printUsd + value.printUsd),
           }
         : { ...value };

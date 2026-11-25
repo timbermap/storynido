@@ -286,6 +286,7 @@ const productMetricsSchema = z.object({
   taxUsd: z.number(),
   feeUsd: z.number(),
   aiUsd: z.number(),
+  aiRedoUsd: z.number().default(0),
   printUsd: z.number(),
 });
 

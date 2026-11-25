@@ -178,6 +178,33 @@ describe('métricas del dashboard', () => {
     expect(total.products.classic_digital?.units).toBe(2);
   });
 
+  it('los pagos simulados no son ventas; las páginas rehechas van aparte', () => {
+    const day = aggregateDay({
+      day: '2026-11-02',
+      final: false,
+      previews: 0,
+      aiCostUsdMicros: 24_000_000,
+      aiOrdersUsdMicros: 24_000_000,
+      fx,
+      orders: [
+        order({ paymentProvider: 'mock', product: 'big_softcover', aiCostUsdMicros: 19_960_000 }),
+        order({
+          currency: 'USD',
+          amounts: { totalMinor: 1999, taxMinor: 0 },
+          paymentProvider: 'paypal',
+          product: 'big_digital',
+          aiCostUsdMicros: 7_000_000,
+          aiPipelineUsdMicros: 4_000_000,
+        }),
+      ],
+    });
+    expect(day.orders).toBe(1);
+    expect(day.revenueUsd).toBe(19.99);
+    expect(day.products.big_softcover).toBeUndefined();
+    expect(day.products.big_digital).toMatchObject({ units: 1, aiUsd: 4, aiRedoUsd: 3 });
+    expect(sumMetrics([day, day]).products.big_digital?.aiRedoUsd).toBe(6);
+  });
+
   it('embudo por línea', () => {
     const day = aggregateDay({
       day: '2026-11-17',
