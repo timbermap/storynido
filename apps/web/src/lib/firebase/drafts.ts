@@ -46,6 +46,7 @@ export type BookEdits = Partial<
     | 'memories'
     | 'event'
     | 'goal'
+    | 'practice'
     | 'length'
     | 'textDensity'
     | 'readingLevel'

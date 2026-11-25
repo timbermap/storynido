@@ -9,7 +9,7 @@ import {
   bookLayout,
   countWords,
   editorialPlan,
-  layoutSceneNote,
+  sceneNoteFor,
   pageLayout,
   textZoneOf,
   type PageLayout,
@@ -81,6 +81,7 @@ import {
   onlySoftRejection,
   NO_TEXT_OBJECTS_HINT,
 } from '@storynido/shared';
+
 import type { EmailNotifier } from '@storynido/emails';
 import type { FastifyBaseLogger } from 'fastify';
 import {
@@ -94,6 +95,8 @@ import { GenerationTimings } from '../generation-times';
 import { AiBudget, isBudgetExceeded, type AiLimits, type UsageContext } from '../ai/budget';
 import type { CatalogRepository } from '../catalog';
 import { AppError } from '../errors';
+
+import { withoutUnaskedHug, withTextGoal } from './plan-guards';
 
 const IMAGE_URL_SECONDS = 30 * 60;
 /** Una generación "colgada" (instancia reiniciada a mitad de camino) se puede reintentar. */
@@ -142,6 +145,8 @@ interface BookData {
   event?: BookEvent | null;
   /** Profesionales (fase 12c): objetivo general de la colección. */
   goal?: string | null;
+  /** Profesionales: sonido o palabras para practicar (texto libre, se modera). */
+  practice?: string | null;
   dedication?: string | null;
   /** Rasgos confirmados por el adulto (fase 07d). */
   characterTraits?: CharacterTraits | null;
@@ -888,6 +893,20 @@ export class PreviewService {
       ? validGoal(book.goal, storyGoalOptions(story, await this.catalog.collections()))
       : null;
 
+    // Profesionales: el sonido o las palabras para practicar son texto libre: se moderan.
+    const practice =
+      book.channel === 'professionals' ? (book.practice?.trim() ?? '') || null : null;
+    if (practice) {
+      const verdict = await track('moderation', await ai.text.moderateText(practice));
+      if (!verdict.allowed) {
+        throw new AppError(
+          422,
+          'validation_failed',
+          'El sonido o las palabras para practicar no se pueden usar en un cuento infantil. Edítalos e intenta de nuevo.',
+        );
+      }
+    }
+
     // Eventos: la temática de la fiesta también se modera antes de entrar al prompt.
     const event = book.event ?? null;
     if (event?.theme) {
@@ -955,6 +974,8 @@ export class PreviewService {
       memories,
       event,
       goal,
+      practice,
+      professional: book.channel === 'professionals',
       levelGuidance: plan.levelGuidance,
       coloring: plan.contentType === 'coloring',
     };
@@ -971,17 +992,26 @@ export class PreviewService {
     const allowWordless = book.length !== 'mini' && !story.tags.includes('dormir');
     const wordless =
       readerAge === null || !allowWordless ? [] : wordlessPages(plannedStory.scenes, readerAge);
+    // Abrazo de la familia solo si el pedido lo pide (DECISIONS 294): cuento para dormir, de
+    // cariño o un recuerdo que lo nombra. Si no, la escena del plan no lo describe.
+    const familyHug =
+      story.tags.some((tag) => /dormir|familia|cari[ñn]o|te quiero|amor/i.test(tag)) ||
+      /abraz|hug|abra[çc]/i.test(JSON.stringify(memories ?? {}));
     const storyPlan = {
       ...plannedStory,
-      scenes: plannedStory.scenes.map((scene) => ({
-        ...scene,
-        // Una escena que el planificador dejó muda y acá lleva texto recupera su presupuesto.
-        wordBudget:
-          scene.wordless && !wordless.includes(scene.pageIndex) && scene.wordBudget <= 0
-            ? plan.words.min
-            : scene.wordBudget,
-        wordless: wordless.includes(scene.pageIndex),
-      })),
+      scenes: plannedStory.scenes.map((planned) => {
+        const scene = withoutUnaskedHug(planned, familyHug);
+        const mute = wordless.includes(scene.pageIndex);
+        return {
+          ...scene,
+          // Una página que lleva texto no conserva «Texto: ''» del plan: el redactor la dejaba
+          // vacía (libro de Angélica, 25 nov 2026).
+          sceneGoal: mute ? scene.sceneGoal : withTextGoal(scene.sceneGoal),
+          // Una escena que el planificador dejó muda y acá lleva texto recupera su presupuesto.
+          wordBudget: !mute && scene.wordBudget <= 0 ? plan.words.min : scene.wordBudget,
+          wordless: mute,
+        };
+      }),
     };
     const prompt = buildStoryPrompt({ ...promptInput, plan: storyPlan });
 
@@ -1027,6 +1057,7 @@ export class PreviewService {
                     text: page.text,
                     words: { min: plan.words.min, max: plan.words.max },
                     mustInclude: requiredNames,
+                    refrain: storyPlan.refrain ?? null,
                   }),
                 );
                 const text = fix(rewrite.text);
@@ -1079,6 +1110,7 @@ export class PreviewService {
             ],
             refrain: storyPlan.refrain ?? null,
             diary: story.tags.includes('diario'),
+            familyHug,
           });
           if (craft.issues.length > 0) {
             await this.qaEvent(bookId, 'story_craft', {
@@ -1885,7 +1917,7 @@ export class PreviewService {
             // Biblia visual (objetos, lugar, ropa especial y encuadre de la escena) y el espacio
             // para el texto según el armado (zona calma, papel fundido o entera).
             `${page.illustrationPrompt}${sceneVisuals(preview.plan, page.index)}${
-              pageLayouts[at] ? layoutSceneNote(pageLayouts[at]) : ''
+              pageLayouts[at] ? sceneNoteFor(pageLayouts[at], page.text) : ''
             }`,
         ),
       ];
@@ -1900,7 +1932,9 @@ export class PreviewService {
             image === 0 ? 1 : (preview.pages[image - 1]?.index ?? 0) + 2,
             castOn(image),
             image === 0,
-            image === 0 ? null : (pageLayouts[image - 1] ?? null),
+            image === 0 || !preview.pages[image - 1]?.text.trim()
+              ? null
+              : (pageLayouts[image - 1] ?? null),
           ),
         ),
       );
@@ -2880,6 +2914,8 @@ function inputsKey(book: BookData): string {
         book.event ?? null,
         book.goal ?? null,
         book.useDrawing ?? false,
+        // Solo si hay: los libros sin práctica conservan su clave (y su muestra).
+        ...(book.practice?.trim() ? [book.practice.trim()] : []),
       ]),
     )
     .digest('hex')

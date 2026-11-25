@@ -340,6 +340,11 @@ export const bookSchema = timestampsSchema
      * "reconocer emociones"). Guía la historia; nunca es una intervención clínica.
      */
     goal: z.string().trim().max(80).nullable().default(null),
+    /**
+     * Profesionales: sonido o palabras para practicar («el sonido rr», «palabras con s»). Lo elige
+     * el profesional en el paso del objetivo; se modera antes de entrar al prompt.
+     */
+    practice: z.string().trim().max(CHILD_LIMITS.practiceMaxLength).nullable().optional(),
     /** Solo servidor. */
     preview: bookPreviewSchema.nullable(),
     /** Solo servidor. */

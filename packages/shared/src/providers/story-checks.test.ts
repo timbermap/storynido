@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  familyTouchPages,
+  refrainPages,
   adultWords,
   diaryHeadingIssues,
   dialogueShare,
@@ -155,5 +157,43 @@ describe('encabezados del diario (DECISIONS 330)', () => {
     expect(
       storyCraftIssues({ pages: book, age: 11, language: 'es', diary: true }).issues.join(),
     ).toContain('sin encabezado');
+  });
+});
+
+describe('libro de Angélica, «El sonido escondido» (25 nov 2026)', () => {
+  const pages = [
+    { text: 'Entro al bosque con mi papá. Escucho, escucho, ¿quién será?' },
+    { text: 'Miro adentro de un tronco. Oigo, oigo, ¿quién será?' },
+    { text: '¡Ahí está! Presto oído, ¿quién será?' },
+    { text: 'Papá me abraza fuerte. Volvemos silbando a casa.' },
+  ];
+
+  it('el estribillo cambiado por otro parecido no cuenta', () => {
+    expect(refrainPages(pages, 'Oigo, oigo, ¿quién será?')).toEqual([2]);
+    const check = storyCraftIssues({
+      pages,
+      age: 3,
+      language: 'es',
+      refrain: 'Oigo, oigo, ¿quién será?',
+    });
+    expect(check.issues.some((issue) => issue.includes('letra por letra'))).toBe(true);
+  });
+
+  it('el estribillo igual en 3 páginas no da aviso (sin importar mayúsculas ni signos)', () => {
+    const fixed = pages.map((page, index) =>
+      index < 3 ? { text: `${page.text} OIGO, OIGO, ¿QUIÉN SERÁ?` } : page,
+    );
+    expect(refrainPages(fixed, 'Oigo, oigo, ¿quién será?')).toEqual([1, 2, 3]);
+  });
+
+  it('un abrazo de la familia que el pedido no pidió es un problema', () => {
+    expect(familyTouchPages(pages)).toEqual([4]);
+    const check = storyCraftIssues({ pages, age: 3, language: 'es' });
+    expect(check.issues.some((issue) => issue.includes('que el pedido no pidió'))).toBe(true);
+  });
+
+  it('con el abrazo pedido, uno solo está bien', () => {
+    const check = storyCraftIssues({ pages, age: 3, language: 'es', familyHug: true });
+    expect(check.issues.some((issue) => issue.includes('abraz'))).toBe(false);
   });
 });
