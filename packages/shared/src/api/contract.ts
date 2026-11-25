@@ -28,6 +28,7 @@ import { BOOK_PROGRESS_STAGES, GENERATION_KINDS } from '../models/generation-tim
 import { STORY_FONTS } from '../models/typography';
 import { QUOTE_ERRORS, priceSnapshotSchema } from '../models/pricing';
 import { priceTableRowSchema } from '../models/price-table';
+import { CONTRACT_CLAUSES } from '../providers/order-contract';
 import { PHOTO_STATUSES } from '../models/users';
 import { orderStatusSchema } from '../order-status';
 import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
@@ -1478,6 +1479,16 @@ export const apiRoutes = {
     params: z.object({ orderId: z.string() }),
     response: z.object({ accepted: z.literal(true), requestId: z.string() }),
   },
+  adminReportContractFailure: {
+    method: 'POST',
+    path: '/v1/admin/orders/:orderId/contract-report',
+    access: 'admin',
+    summary:
+      'Reporta a mano un fallo del libro contra el pedido (una cláusula del contrato, DECISIONS 333)',
+    params: z.object({ orderId: z.string() }),
+    body: z.object({ clause: z.enum(CONTRACT_CLAUSES) }),
+    response: z.object({ reported: z.literal(true) }),
+  },
   adminResendEmail: {
     method: 'POST',
     path: '/v1/admin/orders/:orderId/resend-email',
@@ -1627,6 +1638,17 @@ export const apiRoutes = {
         }),
       ),
       qaCodes: z.record(z.string(), z.number()),
+      /** Contrato del pedido por cláusula: encontradas, reparadas solas y reportadas a mano. */
+      contract: z
+        .array(
+          z.object({
+            clause: z.string(),
+            found: z.number(),
+            repaired: z.number(),
+            reported: z.number(),
+          }),
+        )
+        .default([]),
       print: z.array(
         z.object({
           provider: z.string(),

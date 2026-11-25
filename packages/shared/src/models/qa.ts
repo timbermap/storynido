@@ -30,6 +30,10 @@ export const QA_CODES = [
   'book_consistency',
   // Controles del oficio del texto (diálogo, repeticiones, moralejas): se pidió una reescritura.
   'story_craft',
+  // Contrato del pedido (DECISIONS 333): una cláusula no se cumplió (detail.clause, stage, repaired).
+  'contract_violation',
+  // Un admin reportó a mano un fallo del libro contra el pedido (detail.clause).
+  'contract_report',
   // Google no confirma la dirección o el pin está lejos: se frena antes de la imprenta.
   'address_review',
   // Revisión manual (fase 15): un admin aprobó las ilustraciones tal como estaban.

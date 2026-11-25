@@ -176,7 +176,7 @@ export default async function EventsPage({ params }: Props) {
           text: t(`steps.${key}.text`),
         }))}
       />
-      {/* «¿Qué celebrás?» como en el catálogo (DECISIONS 331); las temáticas, en /eventos/tematicas. */}
+      {/* «¿Qué celebrás?» como en el catálogo (DECISIONS 333); las temáticas, en /eventos/tematicas. */}
       <OccasionGrid locale={locale} collections={collections} stories={stories} landing />
       <PhotoPromise />
 

@@ -18,6 +18,12 @@ import {
   nameIssues,
   repairNameAccents,
   storyCraftIssues,
+  buildOrderContract,
+  checkFormContract,
+  checkPlanContract,
+  checkTextContract,
+  hardViolations,
+  type ContractViolation,
   traitsKey,
   type CharacterTraits,
   type MustKeepTrait,
@@ -1010,6 +1016,45 @@ export class PreviewService {
       prompt: buildStoryPrompt(promptInput),
     });
     await track('story', { usage: planUsage });
+    // Contrato del pedido (DECISIONS 333): lo que pidió el formulario, lo que promete la plantilla
+    // y las reglas fijas. Se controla después del plan, del texto y (en el pedido) de cada imagen.
+    const contract = buildOrderContract({
+      channel: book.channel ?? 'families',
+      language: book.language,
+      age: readerAge ?? request.age,
+      petName: request.petName,
+      bestFriendName: request.bestFriendName,
+      likes: request.likes,
+      practice,
+      storyAges: { min: story.ageMin, max: story.ageMax },
+      tags: story.tags,
+      requestedText: [
+        ...(memories ? Object.values(memories) : []),
+        book.customLesson,
+        story.textPromptTemplate,
+        story.summary[book.language],
+        event ? JSON.stringify(event) : null,
+        goal,
+      ],
+    });
+    const contractFound = new Map<string, ContractViolation>();
+    const noteViolations = (found: readonly ContractViolation[]) => {
+      for (const violation of found) {
+        const key = `${violation.clause}:${violation.stage}`;
+        if (!contractFound.has(key)) contractFound.set(key, violation);
+      }
+    };
+    noteViolations(
+      checkFormContract(contract, {
+        age: readerAge ?? request.age,
+        storyAges: { min: story.ageMin, max: story.ageMax },
+      }),
+    );
+    // Plan: un familiar que nadie pidió se saca acá, gratis, antes de escribir una sola página.
+    const planCheck = checkPlanContract(contract, plannedStory);
+    noteViolations(planCheck.violations);
+    plannedStory.companion = planCheck.plan.companion ?? null;
+    plannedStory.cast = planCheck.plan.cast ?? [];
     // Páginas sin texto (3 a 6 años, 1 o 2 en el clímax): se sanean y quedan en el plan.
     // Nunca en el libro mini (10 páginas: una página muda parece un error) ni en los cuentos para
     // dormir, que se leen de corrido en voz baja (Sebas, DECISIONS 278).
@@ -1176,6 +1221,35 @@ export class PreviewService {
             };
             if (safe(current, candidate)) current = candidate;
           }
+          // Contrato del texto (DECISIONS 333): lo que falla se arregla con una pasada concreta,
+          // antes de la ortografía y de las escenas, así el dibujo sale del texto ya arreglado.
+          const textCheck = checkTextContract(contract, current.pages, storyPlan);
+          noteViolations(textCheck);
+          const hard = hardViolations(textCheck);
+          if (hard.length > 0) {
+            try {
+              const rewrite = await track(
+                'review',
+                await ai.text.reviewStory(
+                  asStory(current),
+                  { ...request, prompt },
+                  { issues: hard.map((violation) => violation.repair) },
+                ),
+              );
+              const candidate = {
+                title: current.title,
+                pages: keepWordless(
+                  rewrite.pages.map((page) => ({ ...page, text: fix(page.text) })),
+                ),
+                approved: current.approved && rewrite.approved,
+              };
+              const after = hardViolations(checkTextContract(contract, candidate.pages, storyPlan));
+              if (safe(current, candidate) && after.length < hard.length) current = candidate;
+            } catch (error) {
+              if (!(error instanceof ProviderError)) throw error;
+              this.log.warn({ err: error, bookId }, 'contract repair failed; keeping the text');
+            }
+          }
           try {
             const proof = await track(
               'review',
@@ -1232,6 +1306,29 @@ export class PreviewService {
               ),
             };
           }
+          // Registro del contrato: cada cláusula que falló en algún paso, y si quedó reparada.
+          const remaining = new Set(
+            [
+              ...checkFormContract(contract, {
+                age: readerAge ?? request.age,
+                storyAges: { min: story.ageMin, max: story.ageMax },
+              }),
+              ...checkTextContract(contract, current.pages, storyPlan),
+            ].map((violation) => violation.clause),
+          );
+          await Promise.all(
+            [...contractFound.values()].map((violation) =>
+              this.qaEvent(bookId, 'contract_violation', {
+                clause: violation.clause,
+                stage: violation.stage,
+                severity: violation.severity,
+                pages: violation.pages.length,
+                // En el plan se sanea en código: queda reparada si el texto final ya no la tiene.
+                repaired: !remaining.has(violation.clause),
+              }),
+            ),
+          );
+          contractFound.clear();
           return current;
         };
         const first = await write();

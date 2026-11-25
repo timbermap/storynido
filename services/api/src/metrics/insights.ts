@@ -55,6 +55,20 @@ export class InsightsService {
       if (!booksWith.has(code)) booksWith.set(code, new Set());
       booksWith.get(code)?.add(bookId);
     }
+    // Contrato del pedido por cláusula (DECISIONS 333).
+    const contract = new Map<string, { found: number; repaired: number; reported: number }>();
+    for (const doc of qaSnap.docs) {
+      const code = String(doc.get('code'));
+      if (code !== 'contract_violation' && code !== 'contract_report') continue;
+      const clause = String(doc.get('detail.clause') ?? 'desconocida');
+      const entry = contract.get(clause) ?? { found: 0, repaired: 0, reported: 0 };
+      if (code === 'contract_report') entry.reported += 1;
+      else {
+        entry.found += 1;
+        if (doc.get('detail.repaired') === true) entry.repaired += 1;
+      }
+      contract.set(clause, entry);
+    }
     const withCode = (...codes: string[]) =>
       new Set(codes.flatMap((code) => [...(booksWith.get(code) ?? [])]));
 
@@ -74,6 +88,19 @@ export class InsightsService {
     const narrative = withCode('name_mismatch', 'length_out_of_range', 'layout_blocked');
     const mismatch = withCode('snapshot_mismatch');
     const edited = withCode('text_edited');
+    const contractOpen = new Set(
+      qaSnap.docs
+        .filter(
+          (doc) =>
+            doc.get('code') === 'contract_violation' &&
+            doc.get('detail.severity') === 'hard' &&
+            doc.get('detail.repaired') !== true,
+        )
+        .map((doc) => doc.ref.parent.parent?.id)
+        .filter((id): id is string => Boolean(id)),
+    );
+    const contractAny = withCode('contract_violation');
+    const reported = withCode('contract_report');
     const quality = [
       {
         metric: 'preview_character_approval_rate',
@@ -102,6 +129,30 @@ export class InsightsService {
         numerator: edited.size,
         denominator: approved.size,
         note: 'Muestras completas en las que el adulto editó al menos una página.',
+      },
+      {
+        metric: 'contract_clean_first_rate',
+        value: rate(
+          previews.size - [...contractAny].filter((id) => previews.has(id)).length,
+          previews.size,
+        ),
+        numerator: previews.size - [...contractAny].filter((id) => previews.has(id)).length,
+        denominator: previews.size,
+        note: 'Muestras que cumplieron el contrato del pedido a la primera (sin reparar nada).',
+      },
+      {
+        metric: 'contract_open_rate',
+        value: rate([...contractOpen].filter((id) => previews.has(id)).length, previews.size),
+        numerator: [...contractOpen].filter((id) => previews.has(id)).length,
+        denominator: previews.size,
+        note: 'Muestras con una cláusula dura del contrato que quedó sin reparar.',
+      },
+      {
+        metric: 'contract_escape_rate',
+        value: rate(inOrdered(reported), orderedBooks.size),
+        numerator: inOrdered(reported),
+        denominator: orderedBooks.size,
+        note: 'Libros pedidos con un fallo contra el pedido reportado a mano (se escapó).',
       },
       {
         metric: 'critical_visual_issue_rate',
@@ -209,6 +260,9 @@ export class InsightsService {
     return {
       quality,
       qaCodes,
+      contract: [...contract]
+        .map(([clause, entry]) => ({ clause, ...entry }))
+        .sort((a, b) => b.found + b.reported - (a.found + a.reported)),
       print: [...print.values()]
         .map((entry) => ({ ...entry, failureRate: rate(entry.failed, entry.orders) ?? 0 }))
         .sort((a, b) => b.orders - a.orders),

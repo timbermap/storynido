@@ -1,6 +1,13 @@
 'use client';
 
-import { PIPELINE_STEPS, type AdminOrderDetail, type PipelineStep } from '@storynido/shared';
+import {
+  CONTRACT_CLAUSES,
+  CONTRACT_CLAUSE_LABELS,
+  PIPELINE_STEPS,
+  type AdminOrderDetail,
+  type ContractClauseId,
+  type PipelineStep,
+} from '@storynido/shared';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useState } from 'react';
 
@@ -112,6 +119,7 @@ function OrderDetail({ id }: { id: string }) {
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
   const [fromStep, setFromStep] = useState<PipelineStep | ''>('');
   const [showPages, setShowPages] = useState(false);
+  const [clause, setClause] = useState<ContractClauseId | ''>('');
   const [editingAddress, setEditingAddress] = useState(false);
 
   async function act(question: string, run: () => Promise<string>) {
@@ -473,6 +481,40 @@ function OrderDetail({ id }: { id: string }) {
               Regenerar libro
             </Button>
           )}
+          <span className="flex items-center gap-1">
+            <select
+              aria-label="Fallo contra el pedido"
+              className="h-9 rounded-md border bg-background px-2 text-sm"
+              value={clause}
+              onChange={(event) => {
+                setClause(event.target.value as ContractClauseId | '');
+              }}
+            >
+              <option value="">Fallo contra el pedido…</option>
+              {CONTRACT_CLAUSES.map((id) => (
+                <option key={id} value={id}>
+                  {CONTRACT_CLAUSE_LABELS[id]}
+                </option>
+              ))}
+            </select>
+            <Button
+              variant="outline"
+              disabled={busy || !clause}
+              onClick={() =>
+                void act(
+                  '¿Registrar este fallo del libro contra el pedido? Cuenta en Calidad.',
+                  async () => {
+                    if (!clause) return 'Elegí la cláusula.';
+                    await api('adminReportContractFailure', { params, body: { clause } });
+                    setClause('');
+                    return 'Fallo registrado en Calidad.';
+                  },
+                )
+              }
+            >
+              Reportar fallo
+            </Button>
+          </span>
           <Button
             variant="outline"
             disabled={busy}
