@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   bookLayout,
+  storyIllustrations,
   fitTextPt,
   textHeightPct,
   textZoneOf,
@@ -129,5 +130,14 @@ describe('el texto se mide antes de elegir zona (DECISIONS 300)', () => {
     expect(layoutSceneNote(tall)).toContain('lower 55%');
     expect(textZoneOf(tall)).toEqual({ textZone: { side: 'top', pct: 40 } });
     expect(textZoneOf({ kind: 'facing', side: 'top' })).toEqual({});
+  });
+});
+
+describe('ilustraciones por largo (DECISIONS 321)', () => {
+  const short = { interiorPages: 16, fixedPages: 2, activityShare: 0.25 };
+  it('a doble página desde 9 años: 16 páginas son 7 ilustraciones', () => {
+    expect(storyIllustrations(short, 11, 'story')).toBe(7);
+    expect(storyIllustrations(short, 6, 'story')).toBe(14);
+    expect(storyIllustrations(short, 11, 'coloring')).toBeNull();
   });
 });

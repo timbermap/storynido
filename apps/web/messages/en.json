@@ -1314,6 +1314,7 @@
       "typeLegend": "What kind of book?",
       "lengthLegend": "Length",
       "pages": "{count} pages",
+      "pagesWithArt": "{count} pages · {art} illustrations",
       "adjust": "Adjust the reading",
       "suggested": "Suggested for {age, plural, one {# year} other {# years}}: {density} · {level}",
       "suggestedTag": "Suggested",

@@ -4,7 +4,12 @@ import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { LOCALE_DEFINITIONS, MEMORY_KEYS, dedicationLanguageMismatch } from '@storynido/shared';
+import {
+  LOCALE_DEFINITIONS,
+  MEMORY_KEYS,
+  dedicationLanguageMismatch,
+  storyIllustrations,
+} from '@storynido/shared';
 
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
@@ -42,6 +47,19 @@ export function StepReview({
     };
   }, [data.book.id]);
   const tBook = useTranslations('Wizard.book');
+  // «16 páginas · 7 ilustraciones»: con texto y dibujo enfrentados son menos dibujos (DECISIONS 321).
+  const lengthPages = (config: {
+    interiorPages: number;
+    fixedPages: number;
+    activityShare: number;
+  }) => {
+    const art = data.child
+      ? storyIllustrations(config, data.child.age, data.book.contentType)
+      : null;
+    return art
+      ? tBook('pagesWithArt', { count: config.interiorPages, art })
+      : tBook('pages', { count: config.interiorPages });
+  };
   const { book, child } = data;
   const story = data.stories.find((s) => s.slug === book.storyId);
   const chosen = book.lessonIds
@@ -125,7 +143,7 @@ export function StepReview({
       label: t('book'),
       value: [
         book.length
-          ? `${tBook(`lengths.${book.length}.name`)} · ${tBook('pages', { count: data.editorial.lengths[book.length].interiorPages })}`
+          ? `${tBook(`lengths.${book.length}.name`)} · ${lengthPages(data.editorial.lengths[book.length])}`
           : null,
         tBook(`types.${book.contentType}.name`),
         book.contentType === 'coloring' ? null : tBook(`densities.${book.textDensity}.name`),
