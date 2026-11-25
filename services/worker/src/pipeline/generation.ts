@@ -411,6 +411,21 @@ function safeRedrawReview(pageIndex: number): PageReview {
   };
 }
 
+/**
+ * Contacto físico entre personajes (DECISIONS 324): siempre se repara con un redibujo, nunca va
+ * directo a revisión manual (El diario de Luli: «la amiga le apoya la mano en el brazo»).
+ */
+const CONTACT_ISSUE =
+  /\b(hug|hugs|hugging|embrac\w*|kiss\w*|touch\w*|lap|carr(?:y|ies|ying)|piggyback|holding hands|arm around|arms around|hand (?:on|resting|placed)|hands (?:on|resting|placed)|physical contact)\b/i;
+
+export function isContactIssue(review: PageReview | null): boolean {
+  return (review?.criticalIssues ?? []).some((issue) => CONTACT_ISSUE.test(issue));
+}
+
+/** Redibujo de una página con contacto: la misma escena, con aire entre las personas. */
+export const CONTACT_FIX_HINT =
+  'NO PHYSICAL CONTACT: the same people, place and moment, but every person stands or sits clearly apart with visible space between their bodies; nobody touches anyone (no hand on an arm, shoulder or back, no hug, no arm around anyone); hands rest on their own body or hold their own objects; closeness is shown with looks, smiles and shared objects';
+
 function isSafeRedraw(review: PageReview | null): boolean {
   return review?.criticalIssues[0] === SAFE_REDRAW_MARK;
 }
@@ -1322,8 +1337,11 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           return;
         }
 
+        // Un contacto físico siempre se intenta redibujar, aunque la revisión pida revisión manual.
+        const contact = isContactIssue(review);
         const unfixable =
           review !== null &&
+          !contact &&
           (review.status === 'human_review' || review.repairTarget === 'text_only');
         const canRepair =
           !unfixable &&
@@ -1359,7 +1377,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         const instructions = (review?.repairInstructions ?? [])
           .map((item) => item.trim())
           .filter(Boolean);
-        const fixes = [...instructions, ...expected];
+        const fixes = [...(contact ? [CONTACT_FIX_HINT] : []), ...instructions, ...expected];
         const hint = safe
           ? SAFE_SCENE_HINT
           : fixes.length > 0

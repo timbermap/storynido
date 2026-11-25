@@ -3327,3 +3327,9 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 - **Qué pasaba (Sebas, 25 nov):** el campo «CUPÓN» arriba de todo en el resumen del pago daba la sensación de que había un precio más bajo y mandaba a buscar códigos afuera (fuga clásica del campo de cupón).
 - **Qué hace ahora (la mesa: ventas, producto, diseño/UX, marketing, familia):** el resumen arranca con el precio. El cupón queda como un enlace chico «¿Tenés un código?» debajo del total, que abre el campo solo si alguien lo toca. Si la visita llegó con `?cupon=CODIGO` (también `coupon`/`cupom`) en cualquier página, se guarda en la pestaña (sessionStorage) y se aplica solo en el pago, mostrado como «Código X aplicado · Quitar». Igual en el kit de Celebraciones.
 - **Por qué no sacarlo del todo:** sirve para códigos de amigas/referidos, regalos de soporte y campañas orgánicas; sin campo, quien recibió un código no tendría dónde usarlo.
+
+## 324 — Un contacto físico en una página se repara solo
+
+- **Qué pasaba (El diario de Luli, staging, 25 nov):** la página 9 salió con la amiga apoyándole la mano en el brazo; la revisión lo marcó y el libro quedó en revisión manual.
+- **Qué hace ahora:** si la revisión de una página menciona contacto (abrazo, beso, mano sobre otra persona, a upa…), la página siempre se redibuja dentro de los topes de reparación, aunque la revisión pida revisión manual, y el redibujo empieza por `CONTACT_FIX_HINT` (misma escena, con aire entre las personas; la cercanía con miradas y objetos compartidos). Solo si fallan los redibujos va a revisión manual.
+- **Prevención:** el Diario pide amistad sin contacto (miradas, risas, compartir algo) y la Academia, festejos con choque de manos o desde su lugar.

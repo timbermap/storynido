@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { PUBLIC_BRAND_DOMAIN, calmSideOf, typographyOf } from './generation';
+import { PUBLIC_BRAND_DOMAIN, calmSideOf, isContactIssue, typographyOf } from './generation';
 
 const scene = (pageIndex: number) => ({
   pageIndex,
@@ -37,5 +37,22 @@ describe('letra por edad del libro congelado', () => {
     expect(typographyOf({ language: 'en', ageBand: '3-4', textBand: '3-4' })?.uppercase).toBe(
       false,
     );
+  });
+});
+
+describe('contacto físico en la revisión de una página', () => {
+  const review = (issue: string) =>
+    ({ criticalIssues: [issue] }) as unknown as Parameters<typeof isContactIssue>[0];
+  it('se reconoce para repararlo en vez de mandarlo a revisión manual', () => {
+    expect(
+      isContactIssue(
+        review(
+          "The friend Sofía has her hand resting on Luli's arm, which violates the restriction",
+        ),
+      ),
+    ).toBe(true);
+    expect(isContactIssue(review('Two children hugging at the door'))).toBe(true);
+    expect(isContactIssue(review('Readable text on the blackboard'))).toBe(false);
+    expect(isContactIssue(null)).toBe(false);
   });
 });
