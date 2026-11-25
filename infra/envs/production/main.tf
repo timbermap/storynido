@@ -54,7 +54,7 @@ module "environment" {
   payment_provider = "paypal"
   log_level        = "info"
   # Redes que lee el panel de Marketing (DECISIONS 309): Instagram con token de usuario del sistema.
-  social_networks = ["instagram"]
+  social_networks = ["pinterest", "instagram"]
   auth_authorized_domains = [
     "storynido.com",
     "www.storynido.com",
