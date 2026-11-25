@@ -49,7 +49,7 @@ export default async function EventsCatalogPage({ params }: Props) {
         </h1>
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{t('catalogSubtitle')}</p>
       </div>
-      {/* Primero «¿Qué celebrás?» (mesa 25 Nov 2026, DECISIONS 331); abajo, todas las temáticas. */}
+      {/* Primero «¿Qué celebrás?» (mesa 25 Nov 2026, DECISIONS 333); abajo, todas las temáticas. */}
       <OccasionGrid locale={locale} collections={collections} stories={stories} />
       {/* Que quede claro que es a medida, antes de recorrer las temáticas. */}
       <div className="container-page pb-14 lg:pb-16">

@@ -40,6 +40,7 @@ import {
   imageCheckFor,
   styleSheetFor,
   fillOutfitGaps,
+  IMAGE_CONTRACT_CLAUSES,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
 
@@ -527,6 +528,10 @@ const PAGE_REVIEW_SCHEMA = {
     textInImage: { type: 'BOOLEAN' },
     repairTarget: { type: 'STRING', enum: ['illustration_only', 'text_only', 'none'] },
     repairInstructions: { type: 'ARRAY', items: { type: 'STRING' } },
+    contractClauses: {
+      type: 'ARRAY',
+      items: { type: 'STRING', enum: [...IMAGE_CONTRACT_CLAUSES] },
+    },
   },
   required: [
     'status',
@@ -1127,7 +1132,15 @@ what is shown instead); never mention text or letters. Empty array when status i
 Protagonist: ${request.character}
 Essential traits (must match in every illustration): ${request.mustKeep.join('; ') || 'none'}
 ${scene}
-Page text: ${request.text ?? '(cover: no text)'}`,
+Page text: ${request.text ?? '(cover: no text)'}${
+            request.contract
+              ? `
+
+Order contract (what the customer asked for; each broken clause is a repair, listed by id in contractClauses, with its
+repairInstructions; empty array when every clause holds):
+${request.contract}`
+              : ''
+          }`,
         },
       ],
       { temperature: 0, responseMimeType: 'application/json', responseSchema: PAGE_REVIEW_SCHEMA },
@@ -1136,7 +1149,10 @@ Page text: ${request.text ?? '(cover: no text)'}`,
       PageReview,
       'pageIndex' | 'usage'
     >;
-    return { ...review, pageIndex: request.pageIndex, usage };
+    // Una cláusula sin ningún problema crítico que la explique no es un hallazgo: el juez a veces
+    // marca todas las cláusulas con la lista de problemas vacía (golden set, 25 nov).
+    const contractClauses = review.criticalIssues.length > 0 ? review.contractClauses : [];
+    return { ...review, contractClauses, pageIndex: request.pageIndex, usage };
   }
 
   /**
@@ -1165,7 +1181,15 @@ in short English, to redraw that page). Empty array if the book is consistent.
 
 Protagonist: ${request.character}
 Visual bible:
-${request.bible || '(none)'}`,
+${request.bible || '(none)'}${
+        request.contract
+          ? `
+
+Order contract (what the customer asked for): also report a page that breaks it (a person who is not allowed, an outfit
+change, another technique), with expected saying how to redraw it.
+${request.contract}`
+          : ''
+      }`,
     });
     const { response, usage } = await this.client.generate(this.model, parts, {
       temperature: 0,

@@ -529,6 +529,34 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
     return { accepted: true as const, requestId };
   });
 
+  // Contrato del pedido (DECISIONS 333): un fallo que se escapó y vio una persona. Solo el código de
+  // la cláusula (nunca texto libre, que podría traer datos del niño); queda en auditoría.
+  addRoute(app, apiRoutes.adminReportContractFailure, {}, async (request) => {
+    const { orderId } = request.params as { orderId: string };
+    const { clause } = request.body as { clause: string };
+    const doc = await load(orderId);
+    const bookId = String(doc.get('bookId'));
+    const event = { code: 'contract_report', at: new Date(), detail: { clause } };
+    await auditedWrite(
+      db,
+      request.user,
+      {
+        action: 'order.contract_report',
+        entity: COLLECTIONS.orders,
+        entityId: orderId,
+        before: null,
+        after: { clause },
+      },
+      (batch) => {
+        batch.set(
+          db.collection(COLLECTIONS.books).doc(bookId).collection(COLLECTIONS.qaEvents).doc(),
+          event,
+        );
+      },
+    );
+    return { reported: true as const };
+  });
+
   addRoute(app, apiRoutes.adminResendEmail, {}, async (request) => {
     const { orderId } = request.params as { orderId: string };
     const doc = await load(orderId);

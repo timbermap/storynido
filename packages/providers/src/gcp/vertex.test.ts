@@ -285,6 +285,41 @@ describe('Vertex AI', () => {
     expect(text).toContain('what the new drawing must');
   });
 
+  it('una cláusula del contrato sin problema crítico que la explique no cuenta', async () => {
+    const image = { bytes: new Uint8Array([1]), mimeType: 'image/webp' };
+    const reply = (criticalIssues: string[]) =>
+      new VertexTextProvider(
+        clientWith(
+          () =>
+            jsonReply({
+              status: criticalIssues.length ? 'repair' : 'pass',
+              criticalIssues,
+              nonCriticalIssues: [],
+              continuityChecks: [],
+              imageTextMatches: true,
+              textInImage: false,
+              repairTarget: criticalIssues.length ? 'illustration_only' : 'none',
+              contractClauses: ['closed_cast', 'same_outfit'],
+            }),
+          [],
+        ),
+      ).reviewPage({
+        pageIndex: 1,
+        text: 'texto',
+        image,
+        reference: image,
+        character: 'Vale',
+        mustKeep: [],
+        scene: null,
+        contract: 'contrato',
+      });
+    expect((await reply([])).contractClauses).toEqual([]);
+    expect((await reply(['a nurse in the background'])).contractClauses).toEqual([
+      'closed_cast',
+      'same_outfit',
+    ]);
+  });
+
   it('revisión del libro entero: todas las miniaturas en una llamada y solo páginas que existen', async () => {
     const calls: { contents: { parts: Record<string, unknown>[] }[] }[] = [];
     const image = { bytes: new Uint8Array([1]), mimeType: 'image/jpeg' };

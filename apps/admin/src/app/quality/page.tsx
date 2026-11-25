@@ -1,5 +1,6 @@
 'use client';
 
+import { CONTRACT_CLAUSE_LABELS, type ContractClauseId } from '@storynido/shared';
 import { useCallback, useState } from 'react';
 
 import { Card, Notice, PageHeader } from '@/components/ui/page-header';
@@ -136,6 +137,39 @@ export default function QualityPage() {
                       <td>{row.failed}</td>
                       <td>{row.cancelled}</td>
                       <td>{row.failureRate} %</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </Card>
+          <Card>
+            <h2 className="mb-2 font-semibold">Contrato del pedido</h2>
+            {data.contract.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Sin fallos del contrato en el período.
+              </p>
+            ) : (
+              <table className="w-full text-sm tabular-nums">
+                <thead className="text-left text-xs text-muted-foreground">
+                  <tr>
+                    <th>Cláusula</th>
+                    <th>Encontradas</th>
+                    <th>Reparadas solas</th>
+                    <th>Reportadas a mano</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.contract.map((row) => (
+                    <tr key={row.clause} className="border-t">
+                      <td className="py-1">
+                        {row.clause in CONTRACT_CLAUSE_LABELS
+                          ? CONTRACT_CLAUSE_LABELS[row.clause as ContractClauseId]
+                          : row.clause}
+                      </td>
+                      <td>{row.found}</td>
+                      <td>{row.repaired}</td>
+                      <td>{row.reported}</td>
                     </tr>
                   ))}
                 </tbody>

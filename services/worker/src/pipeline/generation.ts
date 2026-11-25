@@ -55,6 +55,8 @@ import {
   type CharacterTraits,
   type ImageData,
   type MustKeepTrait,
+  imageContractNote,
+  type ImageContractClause,
   type PageReview,
   type QaCode,
   type BookDeviation,
@@ -1285,6 +1287,22 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
     /** Páginas cuyo texto se reescribió sin el contacto que el dibujo no muestra. */
     const textFixes = new Map<number, string>();
 
+    // Contrato del pedido para el dibujo (DECISIONS 333): quién puede aparecer y las reglas que se
+    // miran en cada página. Las cláusulas que falló cada página se registran al final.
+    const contract = imageContractNote({
+      companion: snapshot.companion,
+      cast: snapshot.cast,
+      partyGuests: ctx.order.channel === 'events',
+    });
+    const contractSeen = new Map<ImageContractClause, Set<number>>();
+    const noteContract = (index: number, review: PageReview | null) => {
+      for (const clause of review?.contractClauses ?? []) {
+        const pages = contractSeen.get(clause) ?? new Set<number>();
+        pages.add(index);
+        contractSeen.set(clause, pages);
+      }
+    };
+
     const reviewRequest = async (index: number, path: string) => ({
       pageIndex: index,
       text: index === 0 ? null : (snapshot.pages[index - 1]?.text ?? null),
@@ -1294,6 +1312,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       mustKeep: snapshot.character.mustKeep,
       scene: index === 0 ? null : (snapshot.scenes?.[index - 1] ?? null),
       visualBible: index === 0 ? '' : visualBibleCheck(snapshot, snapshot.scenes?.[index - 1]),
+      contract,
     });
 
     const indices = Array.from({ length: total }, (_, index) => index);
@@ -1344,6 +1363,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             return;
           }
           cost += await record(ctx, 'review', review.usage);
+          noteContract(index, review);
         } else if (!path) {
           await qaEvent(ctx, 'page_missing', { pageIndex: index });
         }
@@ -1475,6 +1495,19 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       }
     });
 
+    // Una cláusula queda reparada si todas sus páginas terminaron aprobadas.
+    await Promise.all(
+      [...contractSeen].map(([clause, pages]) =>
+        qaEvent(ctx, 'contract_violation', {
+          clause,
+          stage: 'image',
+          severity: 'hard',
+          pages: pages.size,
+          repaired: [...pages].every((index) => finalImages.has(index)),
+        }),
+      ),
+    );
+
     // Los textos reescritos quedan en el libro congelado (la maqueta los lee de ahí).
     if (textFixes.size > 0) {
       const { hash: _old, ...rest } = snapshot;
@@ -1540,6 +1573,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           reference,
           character: snapshot.character.description,
           bible: bookBibleSummary(snapshot),
+          contract,
         });
         cost += await record(ctx, 'review', verdict.usage);
         // Una por página (la primera que nombra cada una).
