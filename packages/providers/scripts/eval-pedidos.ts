@@ -99,6 +99,8 @@ interface PedidoCase {
   memories?: Partial<Memories>;
   event?: Partial<BookEvent>;
   goal?: string;
+  /** Profesionales: sonido para practicar (DECISIONS 332). */
+  practice?: string;
   sheet: CharacterSheet;
   traits: CharacterTraits;
 }
@@ -143,6 +145,7 @@ const CASES: PedidoCase[] = [
     age: 3,
     country: 'AR',
     likes: ['los pájaros'],
+    practice: 'la s',
     ...kid('short curly black hair', 'warm brown skin', 'a yellow raincoat and blue leggings', 3, {
       hairType: 'curly',
       hairColor: 'black',
@@ -410,6 +413,8 @@ for (const testCase of cases) {
       memories,
       event,
       goal: testCase.goal ?? null,
+      practice: testCase.practice ?? null,
+      professional: testCase.channel === 'professionals',
       levelGuidance: plan.levelGuidance,
     };
     const contract = buildOrderContract({
@@ -419,6 +424,7 @@ for (const testCase of cases) {
       petName: request.petName,
       bestFriendName: request.bestFriendName,
       likes: request.likes,
+      practice: testCase.practice ?? null,
       storyAges: { min: story.ageMin, max: story.ageMax },
       tags: story.tags,
       requestedText: [

@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import type { Locale } from '@storynido/shared';
+import { CHILD_LIMITS, type Locale } from '@storynido/shared';
 
 import { StoryCover } from '@/components/stories/story-cover';
 import { getFirebaseDb } from '@/lib/firebase/client';
@@ -21,6 +21,12 @@ import { WizardShell } from './wizard-shell';
 const chipClass =
   'flex cursor-pointer items-center rounded-full border-2 px-4 py-2 text-sm font-bold transition has-[:checked]:border-navy has-[:checked]:bg-navy has-[:checked]:text-white has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50';
 
+/** Cuentos de sonidos y palabras: el profesional puede elegir qué practicar (25 nov 2026). */
+const PRACTICE_TAGS = ['sonidos', 'lenguaje', 'fonoaudiología', 'vocabulario', 'letras'];
+export function practiceStory(tags: readonly string[]): boolean {
+  return tags.some((tag) => PRACTICE_TAGS.includes(tag));
+}
+
 /** Profesionales, etapa Aventura: se parte de la situación: colección, objetivo y cuento base. */
 export function StepFocus({ nav, data }: { nav: StepNav; data: WizardData }) {
   const t = useTranslations('Wizard.focus');
@@ -37,6 +43,7 @@ export function StepFocus({ nav, data }: { nav: StepNav; data: WizardData }) {
     book.goal && collection?.topics.includes(book.goal) ? book.goal : null,
   );
   const [storyId, setStoryId] = useState(collection ? (book.storyId ?? null) : null);
+  const [practice, setPractice] = useState(book.practice ?? '');
   const [error, setError] = useState<string | null>(null);
   const stories = collection ? baseStories(data.stories, collection.slug, age) : [];
   // Viene con el cuento base (y la enseñanza) elegidos desde las plantillas: resumen y «Cambiar».
@@ -68,6 +75,8 @@ export function StepFocus({ nav, data }: { nav: StepNav; data: WizardData }) {
       await updateBook(await getFirebaseDb(), await nav.ensureBook(), {
         storyId: story.slug,
         goal,
+        // Solo los cuentos de sonidos y palabras lo piden; en los demás no queda guardado.
+        practice: practiceStory(story.tags) && practice.trim() ? practice.trim() : null,
         styleId,
         ...fitToStory(
           {
@@ -199,6 +208,32 @@ export function StepFocus({ nav, data }: { nav: StepNav; data: WizardData }) {
               </div>
             </fieldset>
           )}
+        </div>
+      )}
+
+      {practiceStory(
+        (stories.find((item) => item.slug === storyId) ?? (!expanded ? draftStory : undefined))
+          ?.tags ?? [],
+      ) && (
+        <div className="mt-8 grid gap-2">
+          <label htmlFor="pro-practice" className="font-display text-xl font-semibold">
+            {t('practice')}
+          </label>
+          <p id="pro-practice-hint" className="text-sm text-muted-foreground">
+            {t('practiceHint')}
+          </p>
+          <input
+            id="pro-practice"
+            type="text"
+            value={practice}
+            maxLength={CHILD_LIMITS.practiceMaxLength}
+            placeholder={t('practicePlaceholder')}
+            onChange={(event) => {
+              setPractice(event.target.value);
+            }}
+            aria-describedby="pro-practice-hint"
+            className="h-11 w-full rounded-[0.75rem] border-[1.5px] border-[#b7bcc8] bg-card px-3.5 text-base focus:border-primary focus:outline-3 focus:outline-offset-1 focus:outline-[#d9cef0]"
+          />
         </div>
       )}
     </WizardShell>

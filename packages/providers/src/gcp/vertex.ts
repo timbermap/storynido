@@ -401,7 +401,9 @@ function formPlanRules(age: number): string {
       ? ' Mark wordless=true on 1 or 2 scenes at the climax (never the first or last page, never two in a row): the picture tells those pages alone, so their mustBeVisible must carry the whole moment. All other scenes wordless=false.'
       : ' wordless=false on every scene.';
   return `This reader is under 7: choose ONE structure for the whole book (${STORY_STRUCTURES.join(', ')}) and record it in structure;
-write in refrain a short phrase, easy to say aloud, that the text repeats at least 3 times (in the language of the brief).${wordless}`;
+write in refrain a short phrase, easy to say aloud, that the text repeats word for word at least 3 times (in the language of the brief);
+if the brief names a sound or words to practice, the refrain contains them. Every scene with wordless=false has text to write: never
+leave its text empty in sceneGoal.${wordless}`;
 }
 
 const PROOFREAD_SCHEMA = {
@@ -798,7 +800,7 @@ ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text, illustrat
           text: `You are the editor of a personalized picture book for ${request.childName} (${String(request.age)} years old), "${request.storyTitle}".
 Page ${String(request.pageIndex + 1)} ${request.avoid ? `asks for something a child could imitate and get hurt (${request.avoid}). Rewrite ONLY this page, replacing that with a safe, standing, gentle action that keeps the same feeling and place, in ${String(request.words.min)}-${String(request.words.max)} words,` : `is too long for the reader's age. Rewrite ONLY this page in ${String(request.words.min)}-${String(request.words.max)} words,`}
 in the same language, voice and tone, keeping the same scene, events, names and any refrain or rhyme.${voiceNote(request.language, request.spanishVoice)}
-${request.mustInclude.length ? `These names must appear exactly as written: ${request.mustInclude.join(', ')}.\n` : ''}Do not describe what the picture shows; keep what the character feels, says or decides.
+${request.refrain ? `If the page has the book's refrain «${request.refrain}», keep it letter by letter (no synonyms).\n` : ''}${request.mustInclude.length ? `These names must appear exactly as written: ${request.mustInclude.join(', ')}.\n` : ''}Do not describe what the picture shows; keep what the character feels, says or decides.
 Previous page: ${request.previous ?? '(none: this is the first page)'}
 Next page: ${request.next ?? '(none: this is the last page)'}
 Page to rewrite: ${request.text}`,
@@ -945,7 +947,9 @@ ${JSON.stringify(pages)}`,
         {
           text: `You are a children's literature editor. Plan a warm, coherent personalized picture book that is fun to re-read.
 Respect the child: never ridicule appearance, abilities, origin or emotions. Do not invent biographical facts, diagnoses or relatives
-that were not provided. Before narrating, define beginning, motivation, an age-appropriate difficulty, the protagonist's own decisions,
+that were not provided: a parent, sibling or grandparent appears only if the brief names one or the story idea needs one (a bedtime
+routine, a new baby). When someone must guide the protagonist, use a role from the story (a forest ranger, a teacher, a friendly
+animal), never an invented relative. Before narrating, define beginning, motivation, an age-appropriate difficulty, the protagonist's own decisions,
 consequence and resolution. Personal details from the brief (likes, pet, friend) must change the action naturally, but each like appears in at most two scenes and never solves the main challenge; the story idea of the brief leads. With a single like, use it in one or two scenes only. Never plan a bridge, backbend, handstand, cartwheel, somersault or any upside-down pose, even if a like names it: turn it into a safe upright version.
 No two consecutive scenes may be nearly identical. Exactly ${String(request.pageCount)} scenes, one per narrative page.
 wordBudget per page: ${request.wordsPerPage ? `${String(request.wordsPerPage.min)}-${String(request.wordsPerPage.max)} words${request.wordsPerPage.cap ? `, never more than ${String(request.wordsPerPage.cap)}` : ''}` : 'as the brief says'}.
@@ -981,7 +985,8 @@ resisting fire), the plan marks it as the story's magic (a magic bubble, "in thi
 adult nearby; it is never shown as something a child can do alone.
 Physical contact: scenes never have the protagonist hug, kiss, carry or touch anyone outside the immediate family (parents, grandparents,
 siblings), nor anyone touch the protagonist; comfort between friends, classmates, teachers or professionals comes from words, presence,
-a shared object or, between children of similar age only, a high five; with an adult outside the family there is no contact of any kind. A family hug is allowed only if the brief asks for it, at most once in the whole book, and never in bed.
+a shared object or, between children of similar age only, a high five; with an adult outside the family there is no contact of any kind. A family hug is allowed only if the brief asks for it, at most once in the whole book, and never in bed;
+otherwise a happy ending with family is told side by side (walking home together, smiling, a wave).
 In mustBeVisible and sceneGoal, never describe an embrace: describe the moment before or after it.
 At most two failed attempts before the protagonist succeeds, each teaching something different; a mentor may help, but the
 protagonist finds the final solution.

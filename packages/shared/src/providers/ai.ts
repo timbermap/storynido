@@ -57,6 +57,8 @@ export interface PageRewriteRequest {
   mustInclude: readonly string[];
   /** Lo que la página no puede pedir ni contar (poses peligrosas): reescribe con algo seguro. */
   avoid?: string;
+  /** Estribillo del plan: si está en la página, queda letra por letra. */
+  refrain?: string | null;
 }
 
 export interface PageRewrite {

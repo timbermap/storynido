@@ -183,6 +183,38 @@ export function touchPages(pages: readonly CraftPage[]): number[] {
 }
 
 /**
+ * Abrazos con la familia (DECISIONS 294): solo si el pedido lo pide y uno en todo el libro. El
+ * libro de Angélica (25 nov 2026) terminó con «Papá me abraza fuerte» sin que nadie lo pidiera.
+ */
+export function familyTouchPages(pages: readonly CraftPage[]): number[] {
+  const found: number[] = [];
+  pages.forEach((page, index) => {
+    const text = fold(page.text);
+    if (TOUCH_WORDS.test(text) && FAMILY_WORDS.test(text)) found.push(index + 1);
+  });
+  return found;
+}
+
+/** Texto sin tildes, signos ni mayúsculas, para comparar el estribillo letra por letra. */
+const plain = (value: string) => words(fold(value)).join(' ');
+
+/**
+ * Páginas (1 = primera) donde el estribillo del plan aparece igual. En el libro de Angélica la
+ * reescritura por largo lo cambió por «Escucho, escucho» y «Presto oído» (25 nov 2026).
+ */
+export function refrainPages(
+  pages: readonly CraftPage[],
+  refrain: string | null | undefined,
+): number[] {
+  const target = plain(refrain ?? '');
+  if (!target) return [];
+  return pages.flatMap((page, index) => (plain(page.text).includes(target) ? [index + 1] : []));
+}
+
+/** Veces que el estribillo tiene que aparecer igual (o en todas las páginas, si son menos). */
+export const REFRAIN_MIN = 3;
+
+/**
  * Emociones que se repiten con la misma frase (DECISIONS 329: «alivio enorme» varias veces en el
  * diario de Luli). Dos palabras seguidas con contenido, una de ellas de emoción o del cuerpo, en dos
  * páginas o más. No cuentan las de la frase que se repite a propósito (el estribillo).
@@ -396,6 +428,8 @@ export function storyCraftIssues(input: {
   refrain?: string | null;
   /** Historia en formato diario (etiqueta «diario»): cada entrada con su encabezado. */
   diary?: boolean;
+  /** El pedido pide un abrazo de la familia (cuento para dormir, de cariño): uno en todo el libro. */
+  familyHug?: boolean;
 }): CraftCheck {
   const issues: string[] = [];
   const share = dialogueShare(input.pages);
@@ -417,6 +451,26 @@ export function storyCraftIssues(input: {
   if (touch.length > 0) {
     issues.push(
       `Contacto físico en la página ${touch.join(', ')} (abrazo, beso, brazos, regazo o cosquillas con alguien que no es de la familia directa): reescribe sin tocarse; el consuelo va con palabras, estar al lado, un objeto compartido o chocar los cinco.`,
+    );
+  }
+  const family = familyTouchPages(input.pages);
+  const allowed = input.familyHug ? 1 : 0;
+  if (family.length > allowed) {
+    issues.push(
+      allowed
+        ? `Hay abrazos o contacto con la familia en las páginas ${family.join(', ')}: deja uno solo, corto y contado con lo que siente; en las otras van juntos, uno al lado del otro.`
+        : `Abrazo o contacto con la familia en la página ${family.join(', ')} que el pedido no pidió: cuéntalo sin tocarse (caminan juntos, se sonríen, se miran); nunca «me abraza».`,
+    );
+  }
+  const refrain = input.refrain?.trim() ?? '';
+  const withRefrain = refrainPages(input.pages, refrain);
+  const neededRefrain = Math.min(
+    REFRAIN_MIN,
+    input.pages.filter((page) => page.text.trim()).length,
+  );
+  if (refrain && withRefrain.length < neededRefrain) {
+    issues.push(
+      `La frase que se repite «${refrain}» aparece igual solo en ${String(withRefrain.length)} página(s): tiene que estar letra por letra en al menos ${String(neededRefrain)} (al principio, en el medio y al final). Donde se cambió por otra parecida, vuelve a la frase exacta.`,
     );
   }
   const morals = moralPhrases(input.pages, input.language);
@@ -460,6 +514,9 @@ export function storyCraftIssues(input: {
     repeated: repeated.length,
     morals: morals.length,
     phrases:
+      family.length -
+      Math.min(family.length, allowed) +
+      (refrain && withRefrain.length < neededRefrain ? 1 : 0) +
       phrases.length +
       adult.length +
       unnamed.length +

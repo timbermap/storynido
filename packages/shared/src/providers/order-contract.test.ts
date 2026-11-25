@@ -9,6 +9,7 @@ import {
   hardViolations,
   IMAGE_CONTRACT_CLAUSES,
   imageContractNote,
+  practiceMissingPages,
 } from './order-contract';
 
 const pages = (...texts: string[]) => texts.map((text) => ({ text }));
@@ -163,6 +164,40 @@ describe('contrato del pedido', () => {
     );
     expect(found.map((item) => item.clause)).toEqual(['template_promise']);
     expect(found[0]?.pages).toEqual([2]);
+  });
+});
+
+describe('sonido para practicar (Profesionales)', () => {
+  const contract = buildOrderContract({
+    channel: 'professionals',
+    language: 'es',
+    age: 4,
+    practice: 'la s',
+    requestedText: [],
+  });
+
+  it('el sonido elegido es una promesa de la plantilla', () => {
+    expect(contract.promises.map((promise) => promise.id)).toEqual(['practice_sound']);
+  });
+
+  it('falla si el sonido casi no aparece (el silbido de Angélica nunca se escribió)', () => {
+    const found = checkTextContract(
+      contract,
+      pages('Un ruido en el patio.', 'Miro debajo de la mesa.', 'Nada por acá.', 'Un pájaro.'),
+      null,
+    );
+    expect(found.map((item) => item.clause)).toEqual(['template_promise']);
+  });
+
+  it('pasa con palabras que lo tienen en la mitad de las páginas', () => {
+    const ok = pages(
+      'Sss, sss, suena la serpiente.',
+      'Sofía busca el sonido.',
+      'Un ruido en el patio.',
+      'Nada por acá.',
+    );
+    expect(checkTextContract(contract, ok, null)).toEqual([]);
+    expect(practiceMissingPages(ok, 'la s')).toEqual([3, 4]);
   });
 });
 

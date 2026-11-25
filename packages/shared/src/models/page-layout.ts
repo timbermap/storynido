@@ -257,13 +257,31 @@ export function layoutSceneNote(layout: PageLayout): string {
 }
 
 /**
+ * Página sin texto (25 nov 2026): el libro de Angélica tuvo una página vacía que no estaba marcada
+ * como muda, y la ilustración dejó la franja calma para un texto que no existía. Sin texto, la
+ * ilustración va entera.
+ */
+export const WORDLESS_SCENE_NOTE =
+  ' Full-page illustration with the whole scene: this page has no text, so no empty area for text is needed. Keep faces away from the edges.';
+
+/** El pedido de espacio para el texto, o la ilustración entera si la página no tiene texto. */
+export function sceneNoteFor(layout: PageLayout, text: string | null | undefined): string {
+  return layout.kind !== 'strip' && layout.kind !== 'facing' && !(text ?? '').trim()
+    ? WORDLESS_SCENE_NOTE
+    : layoutSceneNote(layout);
+}
+
+/**
  * Zona del texto que el control automático de la imagen vigila (sin cara ni cabeza adentro):
  * solo en las páginas con el texto sobre o dentro de la ilustración. Vacío en el resto.
  */
 export function textZoneOf(
   layout: PageLayout | null | undefined,
+  /** El texto de la página: sin texto no hay zona que vigilar. */
+  text?: string | null,
 ): { textZone: { side: CalmSide; pct: number } } | Record<string, never> {
   if (!layout || (layout.kind !== 'calm' && layout.kind !== 'vignette')) return {};
+  if (text !== undefined && !(text ?? '').trim()) return {};
   return { textZone: { side: layout.side, pct: layout.zonePct ?? CALM_ZONE_PCT } };
 }
 

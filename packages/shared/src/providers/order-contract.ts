@@ -13,7 +13,13 @@
 import type { Locale } from '../i18n';
 
 import type { StoryPlan } from './ai';
-import { diaryHeadingIssues, hasTouch, type CraftPage } from './story-checks';
+import {
+  REFRAIN_MIN,
+  diaryHeadingIssues,
+  hasTouch,
+  refrainPages,
+  type CraftPage,
+} from './story-checks';
 
 export const CONTRACT_CLAUSES = [
   /** Solo aparecen el protagonista y los personajes que el pedido nombra o la plantilla trae. */
@@ -73,8 +79,10 @@ export interface ContractClause {
 }
 
 export interface ContractTemplatePromise {
-  id: 'diary_headings';
+  id: 'diary_headings' | 'practice_sound';
   rule: string;
+  /** practice_sound: lo que eligió el profesional («rr», «la s», «palabras con m»). */
+  practice?: string;
 }
 
 export interface OrderContract {
@@ -95,6 +103,8 @@ export interface OrderContractInput {
   petName?: string | null;
   bestFriendName?: string | null;
   likes?: readonly string[];
+  /** Profesionales: el sonido o las palabras para practicar (DECISIONS 332, `book.practice`). */
+  practice?: string | null;
   /** Rango de edad de la plantilla. */
   storyAges?: { min: number; max: number } | null;
   tags?: readonly string[];
@@ -147,14 +157,21 @@ export function buildOrderContract(input: OrderContractInput): OrderContract {
     .map((name) => name?.trim() ?? '')
     .filter((name) => name.length > 0);
   const likes = (input.likes ?? []).map((like) => like.trim()).filter(Boolean);
-  const promises: ContractTemplatePromise[] = input.tags?.includes('diario')
-    ? [
-        {
-          id: 'diary_headings',
-          rule: 'Cada entrada del diario empieza con su encabezado propio (momento del año y título).',
-        },
-      ]
-    : [];
+  const promises: ContractTemplatePromise[] = [];
+  if (input.tags?.includes('diario')) {
+    promises.push({
+      id: 'diary_headings',
+      rule: 'Cada entrada del diario empieza con su encabezado propio (momento del año y título).',
+    });
+  }
+  const practice = input.practice?.trim();
+  if (practice) {
+    promises.push({
+      id: 'practice_sound',
+      rule: `El sonido para practicar («${practice}») aparece en palabras de al menos la mitad de las páginas con texto.`,
+      practice,
+    });
+  }
   // En un libro para un paciente o un alumno, un familiar inventado es un riesgo: el profesional
   // no sabe con quién vive el chico. En familias y celebraciones se registra para medirlo.
   const castSeverity: ContractSeverity = input.channel === 'professionals' ? 'hard' : 'soft';
@@ -336,9 +353,9 @@ export function checkPlanContract(
   };
 }
 
-/** Cuántas veces tiene que aparecer el estribillo idéntico. */
+/** Cuántas veces tiene que aparecer el estribillo idéntico (el mismo tope que la revisión, DEC 332). */
 export function refrainMinPages(textPages: number): number {
-  return textPages >= 6 ? 3 : 2;
+  return Math.min(REFRAIN_MIN, textPages);
 }
 
 /** El texto contra el contrato: todos los controles de código, sin IA. */
@@ -413,10 +430,9 @@ export function checkTextContract(
 
   const refrain = plan?.refrain?.trim() ?? '';
   if (refrain && plan?.structure === 'refrain' && textPages > 0) {
-    const target = bare(refrain);
-    const found = pages.filter((page) => bare(page.text).includes(target)).length;
-    const needed = Math.min(refrainMinPages(textPages), textPages);
-    if (target.length > 0 && found < needed) {
+    const found = refrainPages(pages, refrain).length;
+    const needed = refrainMinPages(textPages);
+    if (bare(refrain).length > 0 && found < needed) {
       violations.push({
         clause: 'exact_refrain',
         stage: 'text',
@@ -427,8 +443,21 @@ export function checkTextContract(
     }
   }
 
-  // Hoy la única promesa de plantilla es el Diario; el sonido objetivo se suma con el PR #230.
-  if (contract.promises.length > 0) {
+  const practice = contract.promises.find((promise) => promise.id === 'practice_sound')?.practice;
+  if (practice) {
+    const missing = practiceMissingPages(pages, practice);
+    const needed = Math.ceil(textPages / 2);
+    if (textPages > 0 && textPages - missing.length < needed) {
+      violations.push({
+        clause: 'template_promise',
+        stage: 'text',
+        severity: severityOf(contract, 'template_promise'),
+        pages: missing,
+        repair: `El sonido para practicar «${practice}» casi no aparece (faltan las páginas ${missing.join(', ')}): cada página con texto trae 2 o 3 palabras simples que lo contienen, y la frase que se repite también.`,
+      });
+    }
+  }
+  if (contract.promises.some((promise) => promise.id === 'diary_headings')) {
     const headings = diaryHeadingIssues(pages);
     const bad = [...headings.missing];
     if (bad.length > 0 || headings.repeated.length > 0) {
@@ -443,6 +472,63 @@ export function checkTextContract(
     }
   }
   return violations;
+}
+
+/** Palabras de relleno que se sacan de lo que escribe el profesional para quedarse con el sonido. */
+const PRACTICE_FILLER = new Set([
+  'sonido',
+  'sonidos',
+  'letra',
+  'letras',
+  'palabra',
+  'palabras',
+  'con',
+  'de',
+  'del',
+  'la',
+  'el',
+  'los',
+  'las',
+  'sound',
+  'sounds',
+  'letter',
+  'letters',
+  'word',
+  'words',
+  'with',
+  'the',
+  'som',
+  'sons',
+  'letra',
+  'palavras',
+  'com',
+  'o',
+  'a',
+  'os',
+  'as',
+  'y',
+  'e',
+  'and',
+]);
+
+/**
+ * Páginas con texto (1 = primera) donde no aparece el sonido. Con una sola letra («s»), la página
+ * necesita 2 palabras que la tengan; con más («rr», «tr», «mesa»), una que lo contenga.
+ */
+export function practiceMissingPages(pages: readonly CraftPage[], practice: string): number[] {
+  const tokens = bare(practice)
+    .split(' ')
+    .filter((token) => token && !PRACTICE_FILLER.has(token));
+  const target = tokens.sort((a, b) => b.length - a.length)[0] ?? '';
+  if (!target) return [];
+  const missing: number[] = [];
+  pages.forEach((page, index) => {
+    if (page.text.trim() === '') return;
+    const wordsIn = bare(page.text).split(' ');
+    const hits = wordsIn.filter((word) => word.includes(target)).length;
+    if (hits < (target.length === 1 ? 2 : 1)) missing.push(index + 1);
+  });
+  return missing;
 }
 
 /** Solo las duras: las que se reparan antes de entregar. */

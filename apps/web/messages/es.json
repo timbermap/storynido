@@ -1087,6 +1087,7 @@
       "kitTone": "Tono {tone}",
       "kitDedication": "Con dedicatoria",
       "goal": "Objetivo",
+      "practice": "Para practicar",
       "alias": "Alias",
       "dedicationLanguage": "La dedicatoria parece estar en {written, select, es {español} en {inglés} pt {portugués} other {otro idioma}}: se imprime tal cual, aunque el cuento vaya en otro idioma."
     },
@@ -1558,7 +1559,10 @@
       "recommended": "Ideal para su edad",
       "requiredCollection": "Elige una colección para continuar.",
       "requiredGoal": "Elige un objetivo para continuar.",
-      "requiredStory": "Elige un cuento base para continuar."
+      "requiredStory": "Elige un cuento base para continuar.",
+      "practice": "Sonido o palabras para practicar (opcional)",
+      "practiceHint": "El cuento los repite en cada página y en la frase que vuelve, para decirlos en voz alta.",
+      "practicePlaceholder": "Ej.: el sonido rr, palabras con s"
     },
     "reading": {
       "title": "Cómo se lee",
