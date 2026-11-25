@@ -212,7 +212,7 @@ export function touchPages(pages: readonly CraftPage[]): number[] {
 }
 
 /**
- * Abrazos con la familia (DECISIONS 294): solo si el pedido lo pide y uno en todo el libro. El
+ * Abrazos con la familia (DECISIONS 294, 342): permitidos con la familia que nombra el pedido. El
  * libro de Angélica (25 nov 2026) terminó con «Papá me abraza fuerte» sin que nadie lo pidiera.
  */
 export function familyTouchPages(pages: readonly CraftPage[]): number[] {
@@ -492,13 +492,12 @@ export function storyCraftIssues(input: {
       `Contacto físico en la página ${touch.join(', ')} (abrazo, beso, brazos, regazo o cosquillas con alguien que no es de la familia directa): reescribe sin tocarse; el consuelo va con palabras, estar al lado, un objeto compartido o chocar los cinco.`,
     );
   }
-  const family = familyTouchPages(input.pages);
-  const allowed = input.familyHug ? 1 : 0;
-  if (family.length > allowed) {
+  // Con la familia que nombra el pedido el cariño está permitido (Sebas, 25 nov 2026); sin familia
+  // en el pedido, el abrazo es con alguien que nadie pidió.
+  const family = input.familyHug ? [] : familyTouchPages(input.pages);
+  if (family.length > 0) {
     issues.push(
-      allowed
-        ? `Hay abrazos o contacto con la familia en las páginas ${family.join(', ')}: deja uno solo, corto y contado con lo que siente; en las otras van juntos, uno al lado del otro.`
-        : `Abrazo o contacto con la familia en la página ${family.join(', ')} que el pedido no pidió: cuéntalo sin tocarse (caminan juntos, se sonríen, se miran); nunca «me abraza».`,
+      `Abrazo o contacto con la familia en la página ${family.join(', ')} que el pedido no nombra: cuéntalo sin tocarse (caminan juntos, se sonríen, se miran); nunca «me abraza».`,
     );
   }
   const refrain = input.refrain?.trim() ?? '';
@@ -554,8 +553,7 @@ export function storyCraftIssues(input: {
     morals: morals.length,
     phrases:
       strangers.length +
-      family.length -
-      Math.min(family.length, allowed) +
+      family.length +
       (refrain && withRefrain.length < neededRefrain ? 1 : 0) +
       phrases.length +
       adult.length +

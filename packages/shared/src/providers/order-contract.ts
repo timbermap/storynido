@@ -199,7 +199,7 @@ export function buildOrderContract(input: OrderContractInput): OrderContract {
       stages: ['text', 'image'],
       checkedBy: 'both',
       severity: 'hard',
-      rule: 'Sin abrazos, besos, brazos ni regazo; con la familia del pedido, solo un abrazo breve de costado.',
+      rule: 'Nadie fuera de la familia que nombra el pedido toca al chico; con esa familia, el cariño está permitido (Sebas, 25 nov 2026).',
     },
     {
       id: 'requested_names',
@@ -594,7 +594,7 @@ export function imageContractNote(input: {
   return [
     `Characters the customer's order allows in this book: ${allowed.join('; ')}.`,
     'closed_cast: any other clearly visible person, above all a mother, father, grandparent, sibling, aunt or uncle who is not in that list, breaks the order (a faceless crowd far in the background is fine).',
-    'no_touch: physical contact between people as described above.',
+    "no_touch: anyone outside the protagonist's family in that list touching the protagonist, or the protagonist touching them (a doctor, dentist or therapist works at arm's length with a tool); affection with the family in that list (a hug, holding hands, being carried, a kiss on the forehead or cheek) is fine, never lying in bed together.",
     'same_outfit: the protagonist wears the outfit of the reference sheet unless the scene plan or the page text names other clothes for this scene (a helmet, a towel, pajamas).',
     'chosen_style: the illustration is drawn in the same art technique as the reference sheet.',
     'no_text_in_image: letters or words drawn in the image.',

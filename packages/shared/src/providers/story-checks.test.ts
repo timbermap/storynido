@@ -190,10 +190,10 @@ describe('libro de Angélica, «El sonido escondido» (25 nov 2026)', () => {
   it('un abrazo de la familia que el pedido no pidió es un problema', () => {
     expect(familyTouchPages(pages)).toEqual([4]);
     const check = storyCraftIssues({ pages, age: 3, language: 'es' });
-    expect(check.issues.some((issue) => issue.includes('que el pedido no pidió'))).toBe(true);
+    expect(check.issues.some((issue) => issue.includes('que el pedido no nombra'))).toBe(true);
   });
 
-  it('con el abrazo pedido, uno solo está bien', () => {
+  it('con la familia que nombra el pedido, el cariño está permitido (DECISIONS 342)', () => {
     const check = storyCraftIssues({ pages, age: 3, language: 'es', familyHug: true });
     expect(check.issues.some((issue) => issue.includes('abraz'))).toBe(false);
   });

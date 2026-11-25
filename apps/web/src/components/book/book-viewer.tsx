@@ -464,10 +464,13 @@ function PageSpread({
           {layout && (
             <div
               aria-hidden="true"
-              className="mx-auto size-24 shrink-0 overflow-hidden rounded-full shadow-[0_0_0_4px_#fffaf5,0_0_0_5px_#d8c9b8] [&_img]:object-[50%_35%]"
+              className="relative mx-auto aspect-[3/2] w-[70%] shrink-0 overflow-hidden [mask-image:radial-gradient(ellipse_at_center,#000_55%,transparent_72%)] [&_img]:object-[50%_40%]"
             >
               {illustration}
             </div>
+          )}
+          {layout && (
+            <div aria-hidden="true" className="mx-auto h-0.5 w-12 shrink-0 rounded bg-[#d8c9b8]" />
           )}
           {layout ? (
             text

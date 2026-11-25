@@ -1063,11 +1063,9 @@ export class PreviewService {
     const allowWordless = book.length !== 'mini' && !story.tags.includes('dormir');
     const wordless =
       readerAge === null || !allowWordless ? [] : wordlessPages(plannedStory.scenes, readerAge);
-    // Abrazo de la familia solo si el pedido lo pide (DECISIONS 294): cuento para dormir, de
-    // cariño o un recuerdo que lo nombra. Si no, la escena del plan no lo describe.
-    const familyHug =
-      story.tags.some((tag) => /dormir|familia|cari[ñn]o|te quiero|amor/i.test(tag)) ||
-      /abraz|hug|abra[çc]/i.test(JSON.stringify(memories ?? {}));
+    // Cariño con la familia (DECISIONS 342, Sebas 25 nov 2026): permitido con la familia que nombra
+    // el pedido (formulario, recuerdos o plantilla). Sin familia en el pedido, la escena no lo cuenta.
+    const familyHug = contract.allowedFamily.length > 0;
     const storyPlan = {
       ...plannedStory,
       scenes: plannedStory.scenes.map((planned) => {

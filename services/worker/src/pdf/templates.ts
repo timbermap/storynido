@@ -243,7 +243,8 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .panel.vignette, .panel.facing { position: static; background: none; border-radius: 0; padding: 0 4mm; }
 .facing-wrap { position: absolute; inset: ${String(inset + 6)}mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9mm; }
 .facing-wrap .panel { width: 100%; }
-.detail { width: 34mm; height: 34mm; flex: none; border-radius: 50%; object-fit: cover; object-position: 50% 35%; box-shadow: 0 0 0 1.2mm ${PAPER}, 0 0 0 1.6mm #d8c9b8; }`;
+.detail { width: 66mm; max-width: 70%; height: 44mm; flex: none; object-fit: cover; object-position: 50% 40%; -webkit-mask-image: radial-gradient(ellipse at center, #000 55%, transparent 72%); mask-image: radial-gradient(ellipse at center, #000 55%, transparent 72%); }
+.facing-wrap .rule { width: 18mm; height: 0.5mm; flex: none; border-radius: 0.5mm; background: #d8c9b8; }`;
 }
 
 /**
@@ -271,7 +272,9 @@ document.fonts.ready.then(() => {
 </script>`;
 
 /** Alto de la página de texto enfrentada que no es para el texto: el detalle y el espacio. */
-const FACING_RESERVED_MM = 34 + 9;
+// Viñeta fundida del detalle (44 mm), la línea y los dos espacios (juez comprador, 25 nov 2026:
+// el avatar redondo con dos tercios de hoja vacía «parecía un Word»).
+const FACING_RESERVED_MM = 44 + 9 + 0.5 + 9;
 
 function storyPage(
   book: LayoutBook,
@@ -337,7 +340,7 @@ function storyPage(
     const maxMm = trimHeight - 2 * (inset + 6) - FACING_RESERVED_MM;
     return [
       `<section class="page" ${label(' (texto)')}>
-  <div class="facing-wrap"><img class="detail" src="${page.image}" alt="">
+  <div class="facing-wrap"><img class="detail" src="${page.image}" alt=""><div class="rule"></div>
   <div class="panel facing" ${fit(maxMm, typography ? fontPt : Math.max(fontPt, 15 * scale))}>${story}</div></div>
 </section>`,
       `<section class="page" ${label(' (ilustración)')}>
