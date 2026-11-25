@@ -1517,6 +1517,24 @@ export class PreviewService {
             ...(request.textZone ? { textZone: request.textZone } : {}),
           }),
         );
+        if (!verdict.allowed) {
+          // Diagnóstico: el motivo y, fuera de producción, la imagen rechazada (sin esto la
+          // auditoría solo dice «text» y no hay forma de ver qué texto detectó el control).
+          const debugPath =
+            process.env.APP_ENV !== 'production'
+              ? `debug/rejected/${Date.now().toString(36)}-${String(checks)}.webp`
+              : null;
+          this.log.warn(
+            { categories: verdict.categories, attempt: checks, debugPath },
+            'image rejected by quality control',
+          );
+          if (debugPath) {
+            await this.providers
+              .storage()
+              .upload({ bucket: 'assets', path: debugPath }, image.bytes, image.mimeType)
+              .catch(() => undefined);
+          }
+        }
         // Estilo o zona del título: se rehace, pero en el último intento se acepta (no se pierde
         // la muestra por una cara un poco alta; DECISIONS 283).
         return checks >= 3 && !verdict.allowed && onlySoftRejection(verdict.categories)
