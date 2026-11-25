@@ -8,6 +8,7 @@ import {
   READING_LEVELS,
   TEXT_DENSITIES,
   readingFormatsFor,
+  storyIllustrations,
   suggestedReading,
   type BookLength,
   type ContentType,
@@ -243,7 +244,13 @@ export function BookOptions({
                     </span>
                   )}
                   <span className="text-sm font-bold text-primary">
-                    {t('pages', { count: config.interiorPages })}
+                    {(() => {
+                      const art =
+                        age === null ? null : storyIllustrations(config, age, value.contentType);
+                      return art
+                        ? t('pagesWithArt', { count: config.interiorPages, art })
+                        : t('pages', { count: config.interiorPages });
+                    })()}
                   </span>
                   <span className="text-sm leading-snug text-muted-foreground">
                     {t(`lengths.${length}.text`)}

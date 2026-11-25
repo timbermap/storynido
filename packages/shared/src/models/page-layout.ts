@@ -266,3 +266,24 @@ export function textZoneOf(
   if (!layout || (layout.kind !== 'calm' && layout.kind !== 'vignette')) return {};
   return { textZone: { side: layout.side, pct: layout.zonePct ?? CALM_ZONE_PCT } };
 }
+
+/**
+ * Ilustraciones del cuento (sin la tapa) para un largo, una edad y un tipo: con texto y dibujo
+ * enfrentados cada escena ocupa dos páginas. Así el selector dice «16 páginas · 7 ilustraciones»
+ * y nadie espera 16 dibujos (DECISIONS 321). Null para colorear y actividades.
+ */
+export function storyIllustrations(
+  length: { interiorPages: number; fixedPages: number; activityShare: number },
+  age: number,
+  contentType: string,
+  config: PageLayoutConfig = DEFAULT_PAGE_LAYOUT,
+): number | null {
+  if (contentType !== 'story' && contentType !== 'story_activities') return null;
+  const available = length.interiorPages - length.fixedPages;
+  const activities =
+    contentType === 'story_activities'
+      ? Math.max(1, Math.round(available * length.activityShare))
+      : 0;
+  const narrative = Math.max(2, available - activities);
+  return bookLayout(age, contentType, config).facing ? Math.floor(narrative / 2) : narrative;
+}
