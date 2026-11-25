@@ -33,7 +33,8 @@ const SETUP: Record<SocialNetwork, string[]> = {
   pinterest: [
     'Cuenta de Pinterest en modo empresa (ya es @storynido).',
     'Crear una app en developers.pinterest.com y pedir acceso (Trial alcanza para leer).',
-    'Con los permisos user_accounts:read y pins:read, generar el token de renovación y guardar app id, app secret y refresh token.',
+    'Guardar app id y app secret en Secret Manager y sumar «pinterest» a social_networks.',
+    'Registrar https://admin.storynido.com/social como redirect URI de la app y tocar «Conectar Pinterest» arriba: se autoriza la cuenta una vez y el token se guarda solo.',
   ],
   instagram: [
     'Pasar @storynido a cuenta profesional (Creador o Empresa).',
@@ -90,9 +91,12 @@ function Bars({
   );
 }
 
-const TIKTOK_STATE_KEY = 'storynido.tiktokOauthState';
+/** Qué red se está autorizando y su `state`, para verificarlo al volver («tiktok:uuid»). */
+const OAUTH_STATE_KEY = 'storynido.socialOauthState';
+type OAuthNetwork = 'tiktok' | 'pinterest';
+const OAUTH_LABEL: Record<OAuthNetwork, string> = { tiktok: 'TikTok', pinterest: 'Pinterest' };
 
-/** Dirección de vuelta que se registra en TikTok: la propia página, sin parámetros. */
+/** Dirección de vuelta que se registra en TikTok y Pinterest: la propia página, sin parámetros. */
 const redirectUri = () => `${window.location.origin}/social`;
 
 const when = (iso: string | null) =>
@@ -114,7 +118,7 @@ export default function SocialPage() {
   const { data, error, reload } = useApi(load);
   const [social, traffic] = data ?? [];
 
-  // Al volver de TikTok llegan ?code=…&state=…: se verifica el state y se guarda la conexión.
+  // Al volver de TikTok o Pinterest llegan ?code=…&state=…: se verifica el state y se guarda la conexión.
   const handled = useRef(false);
   useEffect(() => {
     if (handled.current) return;
@@ -124,28 +128,33 @@ export default function SocialPage() {
     const denied = params.get('error');
     if (!code && !denied) return;
     handled.current = true;
-    const expected = window.sessionStorage.getItem(TIKTOK_STATE_KEY);
-    window.sessionStorage.removeItem(TIKTOK_STATE_KEY);
+    const stored = window.sessionStorage.getItem(OAUTH_STATE_KEY) ?? '';
+    window.sessionStorage.removeItem(OAUTH_STATE_KEY);
     window.history.replaceState(null, '', '/social');
+    const [storedNetwork, expected] = stored.split(':');
+    const network: OAuthNetwork = storedNetwork === 'pinterest' ? 'pinterest' : 'tiktok';
+    const label = OAUTH_LABEL[network];
     void (async () => {
       if (denied) {
-        setMessage('TikTok: la autorización se canceló. Podés intentar de nuevo.');
+        setMessage(`${label}: la autorización se canceló. Podés intentar de nuevo.`);
         return;
       }
-      if (!code || !returned || returned !== expected) {
+      if (!code || !returned || !expected || returned !== expected) {
         setMessage(
-          'TikTok: la respuesta no coincide con la que se pidió. Volvé a tocar «Conectar TikTok».',
+          `${label}: la respuesta no coincide con la que se pidió. Volvé a tocar «Conectar ${label}».`,
         );
         return;
       }
       setSyncing(true);
       try {
-        const { displayName } = await api('adminSocialTiktokConnect', {
-          body: { code, redirectUri: redirectUri() },
-        });
+        const body = { code, redirectUri: redirectUri() };
+        const { displayName } =
+          network === 'pinterest'
+            ? await api('adminSocialPinterestConnect', { body })
+            : await api('adminSocialTiktokConnect', { body });
         await api('adminSocialSync', { body: { days: 30 } });
         setMessage(
-          `TikTok conectado${displayName ? `: ${displayName}` : ''}. Ya se leyeron los números.`,
+          `${label} conectado${displayName ? `: ${displayName}` : ''}. Ya se leyeron los números.`,
         );
         await reload();
       } catch (caught) {
@@ -160,7 +169,7 @@ export default function SocialPage() {
     setMessage(null);
     try {
       const state = crypto.randomUUID();
-      window.sessionStorage.setItem(TIKTOK_STATE_KEY, state);
+      window.sessionStorage.setItem(OAUTH_STATE_KEY, `tiktok:${state}`);
       const { url } = await api('adminSocialTiktokAuthUrl', {
         query: { redirectUri: redirectUri(), state, videos: withVideos ? '1' : '0' },
       });
@@ -175,6 +184,31 @@ export default function SocialPage() {
     try {
       await api('adminSocialTiktokDisconnect', { body: {} });
       setMessage('TikTok desconectado. Podés volver a conectarlo cuando quieras.');
+      await reload();
+    } catch (caught) {
+      setMessage(errorMessage(caught));
+    }
+  };
+
+  const connectPinterest = async () => {
+    setMessage(null);
+    try {
+      const state = crypto.randomUUID();
+      window.sessionStorage.setItem(OAUTH_STATE_KEY, `pinterest:${state}`);
+      const { url } = await api('adminSocialPinterestAuthUrl', {
+        query: { redirectUri: redirectUri(), state },
+      });
+      window.location.assign(url);
+    } catch (caught) {
+      setMessage(errorMessage(caught));
+    }
+  };
+
+  const disconnectPinterest = async () => {
+    setMessage(null);
+    try {
+      await api('adminSocialPinterestDisconnect', { body: {} });
+      setMessage('Pinterest desconectado. Podés volver a conectarlo cuando quieras.');
       await reload();
     } catch (caught) {
       setMessage(errorMessage(caught));
@@ -264,7 +298,31 @@ export default function SocialPage() {
                     </a>
                   </h2>
                   <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                    {network.canAuthorize && (
+                    {network.canAuthorize && network.network === 'pinterest' && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void connectPinterest();
+                          }}
+                          className="h-7 rounded-md border px-2 text-xs text-foreground"
+                        >
+                          {network.connected ? 'Volver a conectar Pinterest' : 'Conectar Pinterest'}
+                        </button>
+                        {network.connected && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void disconnectPinterest();
+                            }}
+                            className="h-7 rounded-md border px-2 text-xs text-foreground"
+                          >
+                            Desconectar Pinterest
+                          </button>
+                        )}
+                      </>
+                    )}
+                    {network.canAuthorize && network.network === 'tiktok' && (
                       <button
                         type="button"
                         onClick={() => {
@@ -275,7 +333,7 @@ export default function SocialPage() {
                         {network.connected ? 'Volver a conectar TikTok' : 'Conectar TikTok'}
                       </button>
                     )}
-                    {network.canAuthorize && network.connected && (
+                    {network.canAuthorize && network.network === 'tiktok' && network.connected && (
                       <button
                         type="button"
                         onClick={() => {
@@ -286,7 +344,7 @@ export default function SocialPage() {
                         Desconectar TikTok
                       </button>
                     )}
-                    {network.canAuthorize && (
+                    {network.canAuthorize && network.network === 'tiktok' && (
                       <button
                         type="button"
                         title="Para apps en Sandbox, que no tienen el permiso de videos"

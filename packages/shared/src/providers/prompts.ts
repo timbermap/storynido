@@ -51,7 +51,7 @@ const PRONOUN_LABELS = { she: 'ella', he: 'él', they: 'elle' } as const;
  * para que una plantilla editada en el admin nunca mande llaves sueltas al modelo.
  */
 /**
- * Tercer intento de una ilustración rechazada por texto (DECISIONS 320): se sacan los objetos que
+ * Tercer intento de una ilustración rechazada por texto (DECISIONS 323): se sacan los objetos que
  * suelen llevar letras (pizarrón, carteles, pantallas) y se mantiene la escena. Lo usan el pedido
  * y la muestra (antes la muestra solo repetía «sin texto» y un aula fallaba los tres intentos).
  */

@@ -1506,7 +1506,7 @@ export class PreviewService {
                 : {
                     ...request,
                     // Tercer intento: sin objetos que llevan letras (un aula con pizarrón y
-                    // carteles fallaba los tres intentos por «text»; DECISIONS 320).
+                    // carteles fallaba los tres intentos por «text»; DECISIONS 323).
                     prompt:
                       attempt === 2
                         ? `${request.prompt} ${RETRY_HINT}`

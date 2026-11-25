@@ -345,10 +345,10 @@ locals {
   # Redes sociales (DECISIONS 309): solo la API las lee, y solo las que están en social_networks
   # (con sus secretos cargados). Sin la lista, el panel de Marketing las muestra «sin conectar».
   social_secret_env = merge(
+    # El token de renovación se guarda en Firestore al tocar «Conectar Pinterest» en el admin.
     contains(var.social_networks, "pinterest") ? {
-      PINTEREST_REFRESH_TOKEN = "pinterest-refresh-token"
-      PINTEREST_APP_ID        = "pinterest-app-id"
-      PINTEREST_APP_SECRET    = "pinterest-app-secret"
+      PINTEREST_APP_ID     = "pinterest-app-id"
+      PINTEREST_APP_SECRET = "pinterest-app-secret"
     } : {},
     # Alternativa más simple: el token de acceso generado a mano (dura 30 días).
     contains(var.social_networks, "pinterest-token") ? {
@@ -691,7 +691,7 @@ module "secrets" {
       accessors   = { api = local.member["sn-api"] }
     }
     pinterest-refresh-token = {
-      description = "Pinterest: token de renovación (el vigente se guarda en Firestore al rotar)"
+      description = "Pinterest: token de renovación inicial (opcional; el vigente se guarda en Firestore al conectar)"
       accessors   = { api = local.member["sn-api"] }
     }
     pinterest-app-id = {

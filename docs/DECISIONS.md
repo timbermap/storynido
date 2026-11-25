@@ -3301,7 +3301,22 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 - **Qué pasaba (Tino, 25 nov):** el libro de 16 páginas (9 años o más: texto y dibujo enfrentados, 7 escenas × 2 + dedicatoria + fin) mostraba «Fin · 10 de 10», y parecía que faltaban páginas.
 - **Qué hace ahora:** en la muestra el contador dice las páginas del libro: «Dedicatoria · Página 1 de 16», «Página 3 · Páginas 6 y 7 de 16», «Fin · Página 16 de 16»; la tapa no lleva número. Los demás visores siguen contando pantallas.
 
-## 320 — La muestra no se cae por un aula con pizarrón
+## 321 — El largo dice cuántas ilustraciones trae
+
+- **Decisión (Sebas, 25 nov):** «16 páginas» son 16 páginas impresas, también de 9 años en adelante, donde texto y dibujo van enfrentados (7 escenas × 2 + dedicatoria + fin). Opciones descartadas: texto sobre el dibujo en las 16 (se lee peor con ~90 palabras) o 16 escenas a doble página (el doble de costo de IA y otro precio).
+- **Qué cambia:** el selector de largo, el paso de lectura y el resumen dicen «16 páginas · 7 ilustraciones» (o 14, para menores de 9) cuando se conoce la edad; colorear y actividades siguen solo con las páginas. Junto con el contador de la muestra en páginas del libro (DECISIONS 322).
+
+## 322 — Marketing → Redes: «Conectar Pinterest» desde el admin
+
+- **Qué:** Pinterest aprobó la app «StoryNido SRL Stats Reader» (Trial, 25 nov). En vez de generar a mano un
+  token de renovación y cargarlo como secreto, el admin tiene «Conectar Pinterest» (OAuth, como TikTok): Sebas
+  autoriza la cuenta una vez y el token de renovación se guarda en Firestore (`socialTokens/pinterest`).
+- **Permisos:** solo lectura (`user_accounts:read`, `pins:read`, `boards:read`).
+- **Infra:** `social_networks = ["pinterest"]` ahora solo necesita `pinterest-app-id` y `pinterest-app-secret`.
+  La dirección de vuelta (`<admin>/social`) se registra en la app de Pinterest para cada admin.
+- También «Desconectar Pinterest», que borra el token guardado.
+
+## 323 — La muestra no se cae por un aula con pizarrón
 
 - **Qué pasaba (El diario de Luli, staging, 25 nov):** la página 1 era un aula y las tres imágenes salieron con pizarrón y carteles con pseudo-letras; el control las rechazó por «text» (bien) y la muestra entera falló, también al reintentar. El pedido completo ya tenía una escalera de reintentos que saca los objetos con letras; la muestra solo repetía «sin texto».
 - **Qué hace ahora:** el tercer intento de cada imagen de la muestra suma `NO_TEXT_OBJECTS_HINT` (compartido con el pedido): misma escena, sin pizarrón, carteles, pantallas ni papeles con letras. El Diario además pide en su plantilla que el pizarrón quede fuera de cuadro o vacío.

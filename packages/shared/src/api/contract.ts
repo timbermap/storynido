@@ -1019,8 +1019,8 @@ const socialVideoSchema = z.object({
   comments: z.number().nullable(),
   shares: z.number().nullable(),
 });
-/** Dirección de vuelta de TikTok: siempre /social del admin (https, o localhost en desarrollo). */
-const tiktokRedirectUri = z
+/** Dirección de vuelta de TikTok y Pinterest: siempre /social del admin (https, o localhost en desarrollo). */
+const socialRedirectUri = z
   .string()
   .max(200)
   .regex(/^(https:\/\/[a-z0-9.-]+|http:\/\/localhost:\d+)\/social$/);
@@ -1045,7 +1045,7 @@ const socialNetworkSchema = z.object({
   likes: z.number().nullable(),
   /** TikTok: los últimos videos con sus números. */
   videos: z.array(socialVideoSchema),
-  /** El servidor tiene las claves de la app para mostrar «Conectar» (TikTok). */
+  /** El servidor tiene las claves de la app para mostrar «Conectar» (TikTok, Pinterest). */
   canAuthorize: z.boolean(),
   daily: z.array(socialDaySchema),
 });
@@ -2024,7 +2024,7 @@ export const apiRoutes = {
     access: 'admin',
     summary: 'Dirección de TikTok donde se autoriza la cuenta (Login Kit, solo lectura)',
     query: z.object({
-      redirectUri: tiktokRedirectUri,
+      redirectUri: socialRedirectUri,
       state: z.string().min(8).max(100),
       /** false = sin el permiso video.list (app en Sandbox). */
       videos: z.enum(['1', '0']).default('1'),
@@ -2036,7 +2036,7 @@ export const apiRoutes = {
     path: '/v1/admin/social/tiktok/connect',
     access: 'admin',
     summary: 'Cierra la autorización de TikTok: cambia el código por el token y lo guarda',
-    body: z.object({ code: z.string().min(1).max(2000), redirectUri: tiktokRedirectUri }),
+    body: z.object({ code: z.string().min(1).max(2000), redirectUri: socialRedirectUri }),
     response: z.object({ displayName: z.string().nullable() }),
   },
   adminSocialTiktokDisconnect: {
@@ -2045,6 +2045,30 @@ export const apiRoutes = {
     access: 'admin',
     summary:
       'Desconecta TikTok del panel: borra el token guardado (la app se puede volver a autorizar)',
+    body: z.object({}),
+    response: z.object({ ok: z.literal(true) }),
+  },
+  adminSocialPinterestAuthUrl: {
+    method: 'GET',
+    path: '/v1/admin/social/pinterest/auth-url',
+    access: 'admin',
+    summary: 'Dirección de Pinterest donde se autoriza la cuenta (OAuth, solo lectura)',
+    query: z.object({ redirectUri: socialRedirectUri, state: z.string().min(8).max(100) }),
+    response: z.object({ url: z.string() }),
+  },
+  adminSocialPinterestConnect: {
+    method: 'POST',
+    path: '/v1/admin/social/pinterest/connect',
+    access: 'admin',
+    summary: 'Cierra la autorización de Pinterest: cambia el código por el token y lo guarda',
+    body: z.object({ code: z.string().min(1).max(2000), redirectUri: socialRedirectUri }),
+    response: z.object({ displayName: z.string().nullable() }),
+  },
+  adminSocialPinterestDisconnect: {
+    method: 'POST',
+    path: '/v1/admin/social/pinterest/disconnect',
+    access: 'admin',
+    summary: 'Desconecta Pinterest del panel: borra el token guardado',
     body: z.object({}),
     response: z.object({ ok: z.literal(true) }),
   },
