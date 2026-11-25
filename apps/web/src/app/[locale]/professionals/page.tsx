@@ -9,7 +9,6 @@ import { JsonLd } from '@/components/json-ld';
 import { RememberChannel } from '@/components/landing/remember-channel';
 import {
   LandingChecklist,
-  LandingCollections,
   LandingFaq,
   LandingFinalCta,
   LandingHero,
@@ -17,10 +16,11 @@ import {
   ctaClass,
 } from '@/components/landing/sections';
 import { PhotoPromise } from '@/components/landing/photo-promise';
+import { PersonaGrid } from '@/components/professionals/personas';
 import { brand } from '@/lib/brand';
 import { localizedAlternates } from '@/lib/seo';
 import { lowestPrice } from '@/lib/offer';
-import { getCollections, getOffer, getStories } from '@/lib/server/api';
+import { getOffer, getStories } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
 
@@ -47,9 +47,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProfessionalsPage({ params }: Props) {
   const locale = (await params).locale as Locale;
   const display = await getDisplayCountry(locale);
-  const [t, collections, stories, offer] = await Promise.all([
+  const [t, stories, offer] = await Promise.all([
     getTranslations('Landing.professionals'),
-    getCollections(locale, 'professionals').catch(() => []),
     getStories(locale, undefined, { channel: 'professionals' }).catch(() => []),
     getOffer(display.country, locale),
   ]);
@@ -93,16 +92,8 @@ export default async function ProfessionalsPage({ params }: Props) {
           />
         }
       />
-      <LandingCollections
-        id="examples"
-        title={t('collectionsTitle')}
-        subtitle={t('collectionsSubtitle')}
-        collections={collections}
-        stories={stories}
-        createLabel={t('viewStory')}
-        line="professionals"
-        start={{ label: t('collectionStart'), mode: 'story' }}
-      />
+      {/* «¿Cuál es tu trabajo?» como en las plantillas (DECISIONS 325); los objetivos, allá. */}
+      <PersonaGrid id="examples" locale={locale} stories={stories} landing />
       {/* Precio a la vista y sin suscripción: se paga cada cuento, con descuento por volumen. */}
       <LandingChecklist
         tone="navy"

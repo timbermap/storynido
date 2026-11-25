@@ -136,11 +136,24 @@ test('catálogo: "Le encanta" filtra por temática y el buscador espera a tener 
 test('las historias de Eventos y Profesionales vuelven a su landing y crean en su línea', async ({
   page,
 }) => {
-  for (const [landing, line, back, create] of [
-    ['/es/eventos', 'events', 'Volver a celebraciones', 'Inicia sesión para diseñar el kit'],
-    ['/es/profesionales', 'professionals', 'Volver a profesionales', 'Inicia sesión para crear'],
+  // Las landings arrancan por ocasión y por perfil (DECISIONS 331): las tapas están en el catálogo.
+  for (const [start, landing, line, back, create] of [
+    [
+      '/es/eventos/tematicas',
+      '/es/eventos',
+      'events',
+      'Volver a celebraciones',
+      'Inicia sesión para diseñar el kit',
+    ],
+    [
+      '/es/profesionales/plantillas',
+      '/es/profesionales',
+      'professionals',
+      'Volver a profesionales',
+      'Inicia sesión para crear',
+    ],
   ] as const) {
-    await page.goto(landing);
+    await page.goto(start);
     await page.locator(`a[href*="line=${line}"][href*="/historias/"]`).first().click();
     // Sin sesión, el botón lleva al login (y de ahí a la home con sesión), no al formulario.
     await expect(page.getByRole('link', { name: create })).toHaveAttribute(
