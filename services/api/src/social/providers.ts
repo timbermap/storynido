@@ -105,8 +105,80 @@ const num = (value: unknown): number | null =>
 
 export interface PinterestOptions {
   accessToken?: string;
-  /** Con estos tres, el token de acceso (dura 30 días) se renueva solo en cada lectura. */
-  refresh?: { appId: string; appSecret: string; refreshToken: string };
+  /**
+   * Con la app (id y secret), el token de acceso (dura 30 días) se renueva solo en cada lectura.
+   * El token de renovación se guarda al tocar «Conectar Pinterest» en el admin; el de acá es opcional.
+   */
+  refresh?: { appId: string; appSecret: string; refreshToken?: string | undefined };
+}
+
+/** Permisos de solo lectura que pide el botón «Conectar Pinterest». */
+export const PINTEREST_SCOPES = ['user_accounts:read', 'pins:read', 'boards:read'] as const;
+
+/** Pantalla de Pinterest donde Sebas autoriza la cuenta (OAuth, flujo web). */
+export function pinterestAuthorizeUrl(appId: string, redirectUri: string, state: string): string {
+  const query = new URLSearchParams({
+    client_id: appId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: PINTEREST_SCOPES.join(','),
+    state,
+  });
+  return `https://www.pinterest.com/oauth/?${query.toString()}`;
+}
+
+export interface PinterestAuth {
+  authorizeUrl(redirectUri: string, state: string): string;
+  /** Cambia el código de autorización por los tokens y guarda el de renovación. */
+  connect(code: string, redirectUri: string): Promise<{ displayName: string | null }>;
+}
+
+export function pinterestAuth(
+  options: { appId: string; appSecret: string },
+  tokens: TokenStore,
+  fetcher: Fetcher = fetch,
+): PinterestAuth {
+  const base = 'https://api.pinterest.com/v5';
+  return {
+    authorizeUrl: (redirectUri, state) => pinterestAuthorizeUrl(options.appId, redirectUri, state),
+    async connect(code, redirectUri) {
+      const basic = Buffer.from(`${options.appId}:${options.appSecret}`).toString('base64');
+      const body = await json(
+        fetcher,
+        `${base}/oauth/token`,
+        {
+          method: 'POST',
+          headers: {
+            authorization: `Basic ${basic}`,
+            'content-type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'authorization_code',
+            code,
+            redirect_uri: redirectUri,
+          }),
+        },
+        'Pinterest (autorizar)',
+      );
+      if (typeof body.refresh_token !== 'string' || typeof body.access_token !== 'string') {
+        throw new SocialError('Pinterest: no devolvió los tokens. Probá conectar de nuevo.');
+      }
+      await tokens.set('pinterest', body.refresh_token);
+      let displayName: string | null = null;
+      try {
+        const account = await json(
+          fetcher,
+          `${base}/user_account`,
+          { headers: { authorization: `Bearer ${body.access_token}` } },
+          'Pinterest',
+        );
+        displayName = typeof account.username === 'string' ? account.username : null;
+      } catch {
+        // El nombre es solo para mostrar; la conexión ya quedó guardada.
+      }
+      return { displayName };
+    },
+  };
 }
 
 export function pinterestProvider(
@@ -115,13 +187,21 @@ export function pinterestProvider(
   fetcher: Fetcher = fetch,
 ): SocialProvider {
   const base = 'https://api.pinterest.com/v5';
+  const currentRefresh = async () =>
+    options.refresh
+      ? ((await tokens.get('pinterest')) ?? options.refresh.refreshToken ?? null)
+      : null;
   async function accessToken(): Promise<string> {
     const refresh = options.refresh;
-    if (!refresh) {
-      if (!options.accessToken) throw new SocialError('Pinterest: falta el token.');
-      return options.accessToken;
+    const current = await currentRefresh();
+    if (!refresh || !current) {
+      if (options.accessToken) return options.accessToken;
+      throw new SocialError(
+        refresh
+          ? 'Pinterest: falta autorizar la cuenta. Tocá «Conectar Pinterest».'
+          : 'Pinterest: falta el token.',
+      );
     }
-    const current = (await tokens.get('pinterest')) ?? refresh.refreshToken;
     const basic = Buffer.from(`${refresh.appId}:${refresh.appSecret}`).toString('base64');
     const body = await json(
       fetcher,
@@ -146,6 +226,9 @@ export function pinterestProvider(
   }
   return {
     network: 'pinterest',
+    async hasCredentials() {
+      return Boolean(options.accessToken) || (await currentRefresh()) !== null;
+    },
     async read(days, today) {
       const token = await accessToken();
       const headers = { authorization: `Bearer ${token}` };

@@ -54,6 +54,27 @@ export function registerSocialRoutes(app: FastifyInstance, social: SocialService
     return { ok: true as const };
   });
 
+  addRoute(app, apiRoutes.adminSocialPinterestAuthUrl, {}, (request) => {
+    const { redirectUri, state } = request.query as { redirectUri: string; state: string };
+    return Promise.resolve({
+      url: asAppError(() => social.pinterestAuthorizeUrl(redirectUri, state)),
+    });
+  });
+
+  addRoute(app, apiRoutes.adminSocialPinterestConnect, {}, async (request) => {
+    const { code, redirectUri } = request.body as { code: string; redirectUri: string };
+    try {
+      return await social.connectPinterest(code, redirectUri);
+    } catch (error) {
+      throw toAppError(error);
+    }
+  });
+
+  addRoute(app, apiRoutes.adminSocialPinterestDisconnect, {}, async () => {
+    await social.disconnectPinterest();
+    return { ok: true as const };
+  });
+
   addRoute(app, apiRoutes.adminSocialSync, {}, async (request) => {
     const { days } = request.body as SyncBody;
     return { results: await social.sync(days) };

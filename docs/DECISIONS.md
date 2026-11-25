@@ -3300,3 +3300,13 @@ Sebas, 25 nov 2026 («¿convendría tener 2 cuentos más para chicos grandes de 
 
 - **Qué pasaba (Tino, 25 nov):** el libro de 16 páginas (9 años o más: texto y dibujo enfrentados, 7 escenas × 2 + dedicatoria + fin) mostraba «Fin · 10 de 10», y parecía que faltaban páginas.
 - **Qué hace ahora:** en la muestra el contador dice las páginas del libro: «Dedicatoria · Página 1 de 16», «Página 3 · Páginas 6 y 7 de 16», «Fin · Página 16 de 16»; la tapa no lleva número. Los demás visores siguen contando pantallas.
+
+## 320 — Marketing → Redes: «Conectar Pinterest» desde el admin
+
+- **Qué:** Pinterest aprobó la app «StoryNido SRL Stats Reader» (Trial, 25 nov). En vez de generar a mano un
+  token de renovación y cargarlo como secreto, el admin tiene «Conectar Pinterest» (OAuth, como TikTok): Sebas
+  autoriza la cuenta una vez y el token de renovación se guarda en Firestore (`socialTokens/pinterest`).
+- **Permisos:** solo lectura (`user_accounts:read`, `pins:read`, `boards:read`).
+- **Infra:** `social_networks = ["pinterest"]` ahora solo necesita `pinterest-app-id` y `pinterest-app-secret`.
+  La dirección de vuelta (`<admin>/social`) se registra en la app de Pinterest para cada admin.
+- También «Desconectar Pinterest», que borra el token guardado.

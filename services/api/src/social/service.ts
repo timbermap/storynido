@@ -11,6 +11,7 @@ import {
   SocialError,
   type SocialProvider,
   type SocialSnapshot,
+  type PinterestAuth,
   type SocialVideo,
   type TikTokAuth,
   type TokenStore,
@@ -57,6 +58,7 @@ export class SocialService {
     providers: SocialProvider[],
     private readonly now: () => Date = () => new Date(),
     private readonly tiktok: TikTokAuth | null = null,
+    private readonly pinterest: PinterestAuth | null = null,
   ) {
     this.byNetwork = new Map(providers.map((provider) => [provider.network, provider]));
   }
@@ -137,7 +139,9 @@ export class SocialService {
           docs,
           {
             videos: connected ? (state?.videos ?? []) : [],
-            canAuthorize: network === 'tiktok' && this.tiktok !== null,
+            canAuthorize:
+              (network === 'tiktok' && this.tiktok !== null) ||
+              (network === 'pinterest' && this.pinterest !== null),
           },
         ),
       );
@@ -163,6 +167,33 @@ export class SocialService {
       .collection(COLLECTIONS.socialState)
       .doc('tiktok')
       .set({ lastRunAt: null, ok: true, error: null, videos: [] });
+  }
+
+  /** Dirección de Pinterest donde se autoriza la cuenta; `state` lo genera y verifica el admin. */
+  pinterestAuthorizeUrl(redirectUri: string, state: string): string {
+    return this.requirePinterest().authorizeUrl(redirectUri, state);
+  }
+
+  /** Cierra la autorización de Pinterest: guarda el token de renovación. */
+  async connectPinterest(code: string, redirectUri: string) {
+    const { displayName } = await this.requirePinterest().connect(code, redirectUri);
+    return { displayName };
+  }
+
+  /** Borra el token guardado de Pinterest: el panel vuelve a mostrar «Conectar Pinterest». */
+  async disconnectPinterest(): Promise<void> {
+    await this.db.collection(COLLECTIONS.socialTokens).doc('pinterest').delete();
+    await this.db
+      .collection(COLLECTIONS.socialState)
+      .doc('pinterest')
+      .set({ lastRunAt: null, ok: true, error: null });
+  }
+
+  private requirePinterest(): PinterestAuth {
+    if (!this.pinterest) {
+      throw new SocialError('Pinterest: faltan el id y el secret de la app en el servidor.');
+    }
+    return this.pinterest;
   }
 
   private requireTikTok(): TikTokAuth {
