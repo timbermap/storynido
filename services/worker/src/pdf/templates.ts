@@ -509,10 +509,25 @@ function document(
   return `<!doctype html><html><head><meta charset="utf-8"><style>${baseCss(spec, size)}</style></head><body>${pages.join('\n')}${FIT_SCRIPT}</body></html>`;
 }
 
+/**
+ * Texto frente a lámina (9 años en adelante): con la portada como página 1, cada ilustración caía
+ * frente al texto de la escena siguiente al ver el PDF a doble página (25 nov 2026). Una guarda en
+ * blanco después de la portada deja cada texto a la izquierda y su lámina a la derecha.
+ */
+export function needsEndpaper(book: LayoutBook): boolean {
+  return book.pages.some((page) => page.layout?.kind === 'facing');
+}
+
 /** Digital: portada, interior y contratapa en un solo PDF de pantalla. */
-export function digitalHtml(book: LayoutBook, spec: FormatSpec): string {
+export function digitalHtml(
+  book: LayoutBook,
+  spec: FormatSpec,
+  // El grapado comparte este PDF pero su cuenta de páginas la fija la imprenta: va sin guarda.
+  endpaper: boolean = needsEndpaper(book),
+): string {
   return document(spec, pageSizeMm(spec), [
     `<section class="page" data-label="portada">${coverFront(book, spec)}</section>`,
+    ...(endpaper ? ['<section class="page" data-label="guarda"></section>'] : []),
     ...interiorPages(book, spec),
     `<section class="page" data-label="contratapa">${backCover(book, false)}</section>`,
   ]);

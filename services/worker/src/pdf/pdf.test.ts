@@ -204,6 +204,26 @@ describe.skipIf(!chromePath())('PDF', () => {
     expect(fontPt(mini)).toBeGreaterThan(fontPt(regular));
   });
 
+  it('digital con texto frente a lámina: guarda en blanco para que cada texto quede frente a su lámina', () => {
+    const facingBook = book({
+      pages: [{ text: 'Hola', image, layout: { kind: 'facing', side: 'top' } as const }],
+    });
+    const labels = (html: string) => [...html.matchAll(/data-label="([^"]+)"/g)].map((m) => m[1]);
+    // Portada (1), guarda (2), dedicatoria (3): el texto cae en página par (4) y su lámina en la 5.
+    expect(labels(digitalHtml(facingBook, FORMAT_SPECS.digital)).slice(0, 5)).toEqual([
+      'portada',
+      'guarda',
+      'dedicatoria',
+      'página 1 (texto)',
+      'página 1 (ilustración)',
+    ]);
+    // El grapado no la lleva (su cuenta de páginas la fija la imprenta), ni el resto de los armados.
+    expect(digitalHtml(facingBook, FORMAT_SPECS.digital, false)).not.toContain(
+      'data-label="guarda"',
+    );
+    expect(digitalHtml(book(), FORMAT_SPECS.digital)).not.toContain('data-label="guarda"');
+  });
+
   it('armado por edad: enfrentadas (texto + ilustración), papel fundido y zona calma', () => {
     const spec = FORMAT_SPECS.softcover;
     const words = (count: number) => Array.from({ length: count }, () => 'palabra').join(' ');

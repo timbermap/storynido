@@ -9,6 +9,7 @@ export const QA_CODES = [
   'pose_rewritten',
   /** El texto contaba un abrazo que el dibujo no muestra: se reescribió la página (sin contacto). */
   'contact_text_rewritten',
+  'voice_rewritten',
   'outfit_gap_filled',
   'text_review_rejected',
   'length_trimmed',
