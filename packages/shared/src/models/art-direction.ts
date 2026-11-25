@@ -220,7 +220,12 @@ export function artDirection(input: {
     color,
     colorless && input.age <= 2
       ? 'For ages 0-2: very simple shapes, one single element per scene on a calm background, and a large friendly face in the upper half.'
-      : ageDirection(input.age),
+      : ownLook
+        ? ageDirection(input.age).replace(
+            'realistic proportions',
+            'the proportions of the chosen art style',
+          )
+        : ageDirection(input.age),
     input.contentType || colorless ? bookTypeSheet(colorless ? 'coloring' : input.contentType) : '',
     sheet ? `${sheet.references} This style never uses: ${sheet.avoid}.` : '',
     ownLook ? HUMAN_CRAFT.replace('natural-sized eyes, ', '') : HUMAN_CRAFT,
