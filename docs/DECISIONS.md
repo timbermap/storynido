@@ -3559,4 +3559,3 @@ Sebas, con la mesa 360 «libros siempre comprables»: el libro que la mesa no co
 - **Tope de 24 h:** el vigía (cada 30 minutos) entrega como está el libro frenado que nadie miró en 24 h, con `judgeApproval.by = 'tope-24h'`, y avisa al equipo para ofrecer rehacerlo.
 - **Dónde está encendido:** en staging por ambiente. En producción está apagado hasta calibrar a los jueces contra los veredictos de Sebas; se enciende sin deploy con `aiConfig.judgeGate = 'on'` (y `'off'` lo apaga en cualquier ambiente).
 - **Queda para después:** que el freno rehaga solo las páginas que marcan los jueces antes de pedir revisión. Hoy los arreglos de la mesa no traen página, salvo los de continuidad.
-
