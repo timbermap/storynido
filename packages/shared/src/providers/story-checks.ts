@@ -160,9 +160,12 @@ export function moralPhrases(pages: readonly CraftPage[], language: Locale): str
   return MORAL_PHRASES[language].filter((phrase) => text.includes(fold(phrase)));
 }
 
-/** Contacto físico en el texto (DECISIONS 294): abrazos, besos, brazos, regazo, cosquillas. */
+/**
+ * Contacto físico en el texto (DECISIONS 294): abrazos, besos, brazos, regazo, cosquillas. «Cosquillas»
+ * y no «cosquill-»: el cosquilleo en la panza es una emoción, no contacto (DECISIONS 352).
+ */
 const TOUCH_WORDS =
-  /abraz|abrac|besa|beso|beij|en brazos|regazo|cosquill|\bhug|\bkiss|cuddl|\blap\b|tickl|\bcolo\b|carregou|del brazo|de la mano|\bmanos? (en|sobre) (el|la|su|mi|tu) (hombro|brazo|espalda|cabeza)|palmad|palmeo|\bhand on (his|her|my|their|your) (shoulder|arm|back|head)|\bpatted\b|took (his|her|my|their) hand|pela mao|\bmaos? no (ombro|braco)/;
+  /abraz|abrac|besa|beso|beij|en brazos|regazo|cosquillas|\bhug|\bkiss|cuddl|\blap\b|tickl|\bcolo\b|carregou|del brazo|de la mano|choc\w* (los cinco|la mano|su mano|las manos)|high[- ]?five|\bmanos? (en|sobre) (el|la|su|mi|tu) (hombro|brazo|espalda|cabeza)|palmad|palmeo|\bhand on (his|her|my|their|your) (shoulder|arm|back|head)|\bpatted\b|took (his|her|my|their) hand|pela mao|\bmaos? no (ombro|braco)/;
 /** Familia directa: con ellos un abrazo corto está permitido. */
 const FAMILY_WORDS =
   /mama|papa|madre|padre|abuel|herman|\bmom|\bdad|mother|father|grand|sister|brother|\bmae\b|\bpai\b|\bavo|\bavos|irma|\bvovo/;

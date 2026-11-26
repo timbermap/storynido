@@ -39,7 +39,7 @@ export const QA_CODES = [
   'address_review',
   // Revisión manual (fase 15): un admin aprobó las ilustraciones tal como estaban.
   'human_approved',
-  // Freno de la mesa (DECISIONS 352): la mesa no lo compraría y el libro no se entregó solo.
+  // Freno de la mesa (DECISIONS 353): la mesa no lo compraría y el libro no se entregó solo.
   'judge_gate_blocked',
   // Alguien (o el tope de 24 h) dejó entregar un libro frenado por la mesa.
   'judge_gate_released',
