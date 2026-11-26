@@ -90,6 +90,30 @@ function reportLogin(
   }).catch(() => undefined);
 }
 
+/**
+ * Cuenta que alguien vio el panel de ingresar, una vez por pestaña: así se sabe cuántos llegan y no
+ * prueban ningún método.
+ */
+export function reportLoginView() {
+  try {
+    if (window.sessionStorage.getItem('storynido:loginViewed')) return;
+    window.sessionStorage.setItem('storynido:loginViewed', '1');
+  } catch {
+    // Sin storage se cuenta igual.
+  }
+  void api('loginEvent', {
+    body: {
+      stage: 'viewed',
+      method: 'none',
+      via: 'none',
+      browser: isEmbeddedBrowser() ? 'embedded' : 'standard',
+    },
+  }).catch(() => undefined);
+}
+
+/** Apple solo se muestra con el proveedor habilitado en Firebase (requiere Apple Developer). */
+export const appleSignInEnabled = process.env.NEXT_PUBLIC_AUTH_APPLE === 'true';
+
 /** Un error que no es un fracaso del login: falta el segundo factor (sigue en el panel). */
 const isMfaStep = (error: unknown) => errorCode(error) === 'auth/multi-factor-auth-required';
 

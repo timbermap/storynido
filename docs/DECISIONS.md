@@ -3549,7 +3549,16 @@ En la medición del 26 nov (ficha2) los dos libros tuvieron una falla dura de te
 - **Abrazar una cosa no es contacto:** «abraza fuerte a su almohada» y «abrazando mi guitarra» contaban como contacto físico no pedido. `hasTouch` y `touchPages` borran antes los abrazos a una cosa (almohada, peluche, libro, guitarra, manta, pelota…, en es, en y pt). Un abrazo a una persona en la misma página se sigue marcando: «Lucía y Mateo me abrazaron» sigue siendo una falla dura.
 - **La bañera:** con la ropa que inventaba el plan, el chico salía en el agua con la toalla con capucha o con la manga del pijama, y la revisión lo reprobaba. Cuando la escena pasa dentro de la bañera (la ropa del plan dice baño, o lo que tiene que verse lo pone dentro de la bañera), la ropa es siempre `BATH_OUTFIT`: sin ropa, sin pijama y sin toalla en el agua, tapado por la espuma hasta los hombros, a la altura de los ojos y nunca en primer plano del cuerpo. Manda sobre lo que diga el plan. Secarse con la toalla o estar en el baño fuera del agua no cuenta.
 
-## 350 — La mesa de jueces frena la entrega (26 nov)
+## 350 — Login: Apple oculto mientras no esté habilitado y aviso en los navegadores de apps (26 nov)
+
+Pedido por Sebas en el hilo «Lograr que los visitantes se registren». En producción (30 días) Google tuvo 7 intentos y 2 entradas, y «Continuar con Apple» respondía «Ese método de inicio de sesión todavía no está disponible».
+
+- **Apple:** el botón se muestra solo con `NEXT_PUBLIC_AUTH_APPLE=true` (`appleSignInEnabled`). Hoy no está en ningún entorno: el proveedor necesita la cuenta de Apple Developer (ver `docs/SETUP.md`).
+- **Navegadores de apps (Instagram, Facebook, TikTok…):** Google no permite su login dentro de ellos, ni con redirección. Ahí el panel oculta Google y muestra un aviso: en Android «Abrir en Chrome» (enlace `intent://`), en iPhone cómo abrir en Safari, «Copiar enlace» y el enlace por mail, que funciona en el mismo lugar.
+- **Medición:** `loginEvent` suma la etapa `viewed` (método y vía `none`), una vez por pestaña. El admin («Login por navegador») muestra cuántos vieron la página de ingresar, en apps y en navegadores comunes.
+- **Sin cambios por decisión de Sebas:** el texto de la página de ingresar y el login antes del creador (no se empieza sin cuenta).
+
+## 351 — La mesa de jueces frena la entrega (26 nov)
 
 Sebas, con la mesa 360 «libros siempre comprables»: el libro que la mesa no compraría no tiene que llegar solo a la familia. Hasta acá la mesa (DECISIONS 343) solo medía.
 

@@ -13,7 +13,7 @@ export interface PipelineOrder {
   sourceOrderId?: string | null;
   /** Revisión manual (fase 15): un admin aprobó las ilustraciones de esta generación. */
   humanApproval?: { generation: number; by: string | null } | null;
-  /** Freno de la mesa (DECISIONS 350): una persona (o el tope de 24 h) dejó entregar esta generación. */
+  /** Freno de la mesa (DECISIONS 351): una persona (o el tope de 24 h) dejó entregar esta generación. */
   judgeApproval?: { generation: number; by: string | null } | null;
   /** País del pedido: el español de las actividades usa «vos» en Argentina y Uruguay. */
   country?: string | null;

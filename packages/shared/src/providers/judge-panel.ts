@@ -10,7 +10,7 @@
  * La nota de la mesa es la del juez más bajo (un solo problema grave alcanza para que el padre no
  * vuelva) y los arreglos salen primero de los jueces que pusieron menos, con la parte del proceso
  * que los tiene que hacer. Corre al armar cada libro (worker), en el golden set y sobre los pedidos
- * terminados; el resultado queda en el pedido (admin). Desde DECISIONS 350 también puede frenar la
+ * terminados; el resultado queda en el pedido (admin). Desde DECISIONS 351 también puede frenar la
  * entrega (`judgeGate`).
  */
 import { z } from 'zod';
@@ -305,7 +305,7 @@ export function storedPanel(panel: Panel, costUsdMicros: number, at: Date): Stor
 }
 
 /**
- * Freno de la mesa (DECISIONS 350, Sebas 26 nov: «la mesa frena la entrega»). Un libro se entrega
+ * Freno de la mesa (DECISIONS 351, Sebas 26 nov: «la mesa frena la entrega»). Un libro se entrega
  * solo si la mesa le da 4 o más, el comprador no dice «no» y, en Profesionales, el profesional lo
  * usaría. Si la mesa no llegó a opinar (tiempo, error), no frena: un juez caído no puede dejar a
  * una familia sin su libro.

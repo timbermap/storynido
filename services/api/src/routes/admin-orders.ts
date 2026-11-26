@@ -500,7 +500,7 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
     const doc = await load(orderId);
     const status = doc.get('status') as OrderStatus;
     const failedStep = doc.get('pipeline.failedStep') as string | null | undefined;
-    // Freno de la mesa (DECISIONS 350): la maqueta frenó porque la mesa no lo compraría. Aprobar es
+    // Freno de la mesa (DECISIONS 351): la maqueta frenó porque la mesa no lo compraría. Aprobar es
     // «entregar igual» esta generación (para rehacerlo está «Regenerar»).
     const judgeGated =
       failedStep === 'layout_pdf' &&

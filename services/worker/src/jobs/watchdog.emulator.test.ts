@@ -50,7 +50,7 @@ describe('vigía del pipeline', () => {
     expect(sent).toHaveLength(1);
   });
 
-  it('entrega el libro que frenó la mesa si nadie lo miró en 24 h (DECISIONS 350)', async () => {
+  it('entrega el libro que frenó la mesa si nadie lo miró en 24 h (DECISIONS 351)', async () => {
     const now = new Date('2026-11-27T12:00:00Z');
     const gated = (
       id: string,

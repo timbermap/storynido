@@ -176,7 +176,7 @@ const pipeline = new Pipeline(
         providers,
         log: app.log,
         allowSimulated: env.APP_ENV === 'local' || env.APP_ENV === 'test',
-        // Freno de la mesa (DECISIONS 350): encendido en staging; en producción se prende desde
+        // Freno de la mesa (DECISIONS 351): encendido en staging; en producción se prende desde
         // Admin (aiConfig.judgeGate = 'on') cuando Sebas lo decida, sin deploy.
         qa: { judgeGate: env.APP_ENV === 'staging' },
         // En la nube, con la cuenta de servicio del worker (sin clave de API).
