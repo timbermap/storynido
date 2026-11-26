@@ -4,9 +4,10 @@
  * caso escribe el texto como la muestra (plan saneado, cuento, revisión y reparación del contrato),
  * dibuja la lámina, la tapa y 3 páginas, y pasa cada dibujo por la revisión de página con el
  * contrato. Cada página se dibuja con su armado (zona calma o papel fundido), se controla que nada
- * importante quede bajo el texto y se arma como la ve el cliente; un juez comprador mira la tapa y
- * las páginas armadas y dice si lo compraría (25 nov 2026). El informe dice, cláusula por cláusula,
- * qué casos cumplen el pedido.
+ * importante quede bajo el texto y se arma como la ve el cliente; la mesa de jueces (judge-panel.ts,
+ * 26 nov 2026: comprador con ventas y marketing, continuidad, el chico que escucha y el profesional)
+ * mira el libro y dice si lo compraría. El informe dice, cláusula por cláusula, qué casos cumplen el
+ * pedido. Para juzgar una corrida ya hecha sin volver a dibujar: judge-round.ts.
  *
  *   pnpm eval:pedidos                         # solo estima el costo
  *   pnpm eval:pedidos --yes                   # corre (gasta IA, tope US$8)
@@ -54,12 +55,13 @@ import {
   spanishVoiceFor,
   visualBibleCheck,
   withChildName,
-  type BookEvent,
-  type CharacterSheet,
-  type CharacterTraits,
   type ContractClauseId,
   type ImageData,
   type Memories,
+  panelLines,
+  panelSummary,
+  runPanel,
+  type Panel,
   type PageLayout,
 } from '@storynido/shared';
 import sharp from 'sharp';
@@ -71,13 +73,9 @@ import {
   SEED_STORIES,
   SEED_STYLES,
 } from '../../../firebase/seed-data/catalog';
-import {
-  VertexClient,
-  VertexImageProvider,
-  VertexTextProvider,
-  type BuyerReview,
-} from '../src/gcp/vertex';
-import { composePage } from './compose-page';
+import { VertexClient, VertexImageProvider, VertexTextProvider } from '../src/gcp/vertex';
+import { composePage } from '../src/compose-page';
+import { CASES, orderSummary } from './pedidos-cases';
 
 const { values } = parseArgs({
   options: {
@@ -101,240 +99,6 @@ const { values } = parseArgs({
 if (values.project.startsWith('timbermap')) {
   console.error('Este script nunca corre contra proyectos de Timbermap.');
   process.exit(1);
-}
-
-type Channel = 'families' | 'events' | 'professionals';
-
-interface PedidoCase {
-  id: string;
-  /** Qué fallo real cubre (o qué cubre del catálogo). */
-  covers: string;
-  channel: Channel;
-  story: string;
-  style: string;
-  name: string;
-  age: number;
-  he?: boolean;
-  country: string;
-  likes: string[];
-  petName?: string;
-  bestFriendName?: string;
-  memories?: Partial<Memories>;
-  event?: Partial<BookEvent>;
-  goal?: string;
-  /** Profesionales: sonido para practicar (DECISIONS 332). */
-  practice?: string;
-  sheet: CharacterSheet;
-  traits: CharacterTraits;
-}
-
-const kid = (
-  hair: string,
-  skin: string,
-  clothing: string,
-  age: number,
-  traits: Partial<CharacterTraits> = {},
-): Pick<PedidoCase, 'sheet' | 'traits'> => ({
-  sheet: {
-    apparentAge: `about ${String(age)} years old`,
-    hair,
-    eyes: 'dark brown eyes',
-    skinTone: skin,
-    distinctiveFeatures: [],
-    clothing,
-  },
-  traits: {
-    skinTone: 'tan',
-    hairColor: 'dark-brown',
-    hairLength: 'short',
-    hairType: 'straight',
-    eyeColor: 'brown',
-    glasses: false,
-    distinctive: null,
-    ...traits,
-  },
-});
-
-/** 8 pedidos: los fallos de noviembre y una muestra de cada línea. */
-const CASES: PedidoCase[] = [
-  {
-    id: 'pro-sonido-3',
-    covers:
-      'Angélica (25 nov): papá inventado, abrazo no pedido, estribillo reescrito, edad fuera de la plantilla',
-    channel: 'professionals',
-    story: 'el-sonido-escondido',
-    style: 'cuento-clasico',
-    name: 'Abril',
-    age: 3,
-    country: 'AR',
-    likes: ['los pájaros'],
-    practice: 'la s',
-    ...kid('short curly black hair', 'warm brown skin', 'a yellow raincoat and blue leggings', 3, {
-      hairType: 'curly',
-      hairColor: 'black',
-    }),
-  },
-  {
-    id: 'fam-mascota-6',
-    covers: 'mascota y mejor amigo del formulario con su nombre; ropa sin letras (remera de Tino)',
-    channel: 'families',
-    story: 'aventura-espacial',
-    style: 'gouache-editorial',
-    name: 'Bruno',
-    he: true,
-    age: 6,
-    country: 'MX',
-    likes: ['los cohetes', 'su perro'],
-    petName: 'Tino',
-    bestFriendName: 'Mía',
-    ...kid('short straight black hair', 'light brown skin', 'a plain green t-shirt and jeans', 6),
-  },
-  {
-    id: 'fam-mama-5',
-    covers: 'familia pedida en los recuerdos: la mamá puede aparecer, nadie más',
-    channel: 'families',
-    story: 'buenas-noches',
-    style: 'lapices-de-colores',
-    name: 'Lola',
-    age: 5,
-    country: 'UY',
-    likes: ['las estrellas'],
-    memories: { moment: 'Mamá le canta una canción inventada antes de dormir' },
-    ...kid('long wavy red hair', 'light skin with freckles', 'pale blue pajamas', 5, {
-      hairColor: 'red',
-      hairLength: 'long',
-      hairType: 'wavy',
-      skinTone: 'light',
-    }),
-  },
-  {
-    id: 'fam-estribillo-4',
-    covers: 'estructura con estribillo en menores de 7: idéntico en varias páginas',
-    channel: 'families',
-    story: 'aventura-espacial',
-    style: 'cuento-clasico',
-    name: 'Simón',
-    he: true,
-    age: 4,
-    country: 'AR',
-    likes: ['los dinosaurios'],
-    ...kid('short straight blond hair', 'light skin', 'red overalls and a white shirt', 4, {
-      hairColor: 'blond',
-      skinTone: 'light',
-    }),
-  },
-  {
-    id: 'diario-11',
-    covers: 'Diario: encabezado en cada entrada; personajes que vuelven con nombre (Luli)',
-    channel: 'families',
-    story: 'el-diario-de-nombre',
-    style: 'cuaderno',
-    name: 'Vale',
-    age: 11,
-    country: 'MX',
-    likes: ['la guitarra', 'dibujar'],
-    ...kid(
-      'long straight dark-brown hair in a low ponytail',
-      'medium tan skin',
-      'a mustard hoodie and dark jeans',
-      11,
-      { hairLength: 'long' },
-    ),
-  },
-  {
-    id: 'manga-12',
-    covers: 'Manga que no era manga en páginas y tapa',
-    channel: 'families',
-    story: 'la-academia-de-dragones',
-    style: 'manga',
-    name: 'Joaco',
-    he: true,
-    age: 12,
-    country: 'AR',
-    likes: ['los dragones', 'el fútbol'],
-    ...kid(
-      'short curly light-brown hair',
-      'light skin',
-      'a navy t-shirt and grey cargo trousers',
-      12,
-      {
-        hairType: 'curly',
-        hairColor: 'light-brown',
-        skinTone: 'light',
-      },
-    ),
-  },
-  {
-    id: 'eve-cumple-6',
-    covers: 'Celebraciones: cumpleaños con temática, invitados sin contacto',
-    channel: 'events',
-    story: 'el-cumpleanos-mas-magico',
-    style: 'gouache-editorial',
-    name: 'Martina',
-    age: 6,
-    country: 'MX',
-    likes: ['los dinosaurios'],
-    event: { type: 'birthday', turningAge: 6, theme: 'dinosaurios' },
-    ...kid('two short black braids', 'warm brown skin', 'an orange party dress', 6, {
-      hairColor: 'black',
-    }),
-  },
-  {
-    id: 'pro-medico-4',
-    covers:
-      'Médico y vacuna (25 nov): texto largo de 3-4 años en papel fundido sin tapar caras ni manos; médico sin contacto',
-    channel: 'professionals',
-    story: 'voy-al-medico-y-me-vacunan',
-    style: 'acuarela',
-    name: 'Bruno',
-    he: true,
-    age: 4,
-    country: 'AR',
-    likes: ['los trenes'],
-    goal: 'anticipar una consulta y una vacuna',
-    ...kid('short curly light brown hair', 'fair skin', 'a green hoodie and grey pants', 4, {
-      hairType: 'curly',
-      hairColor: 'light-brown',
-    }),
-  },
-  {
-    id: 'pro-dentista-5',
-    covers: 'Profesionales: objetivo elegido, sin familia inventada, profesional sin contacto',
-    channel: 'professionals',
-    story: 'mi-visita-al-dentista',
-    style: 'cuento-clasico',
-    name: 'Gael',
-    he: true,
-    age: 5,
-    country: 'AR',
-    likes: ['los autitos'],
-    goal: 'prepararse para la primera visita al dentista',
-    ...kid('short straight brown hair', 'olive skin', 'a striped blue sweater and khaki pants', 5),
-  },
-];
-
-/** El pedido en palabras, como lo llenó el comprador (chicos inventados, nunca datos reales). */
-function orderSummary(testCase: PedidoCase, storyTitle: string, styleName: string): string {
-  const line = {
-    families: 'Familias (libro personalizado)',
-    events: 'Celebraciones (kit de cumpleaños)',
-    professionals: 'Profesionales (libro para un paciente)',
-  }[testCase.channel];
-  return [
-    `Línea: ${line}`,
-    `Cuento elegido: ${storyTitle}`,
-    `Estilo elegido: ${styleName}`,
-    `Protagonista: ${testCase.name}, ${String(testCase.age)} años, ${testCase.he ? 'nene' : 'nena'}; ${testCase.sheet.hair}, ${testCase.sheet.skinTone}, ropa de siempre: ${testCase.sheet.clothing}`,
-    `Le gusta: ${testCase.likes.join(', ')}`,
-    testCase.petName ? `Mascota: ${testCase.petName}` : null,
-    testCase.bestFriendName ? `Mejor amigo: ${testCase.bestFriendName}` : null,
-    testCase.memories ? `Recuerdos: ${JSON.stringify(testCase.memories)}` : null,
-    testCase.event ? `Celebración: ${JSON.stringify(testCase.event)}` : null,
-    testCase.goal ? `Objetivo: ${testCase.goal}` : null,
-    testCase.practice ? `Sonido para practicar: ${testCase.practice}` : null,
-  ]
-    .filter(Boolean)
-    .join('\n');
 }
 
 const ids = values.only?.split(',');
@@ -427,8 +191,8 @@ interface Row {
   notes: string[];
   /** Escenas del plan (ropa y lo que se ve), para poder leer un fallo después. */
   scenes?: unknown[];
-  /** Juez comprador: si lo compraría, mirando la tapa y las páginas armadas. */
-  buyer?: Omit<BuyerReview, 'usage'>;
+  /** Mesa de jueces: comprador (con ventas y marketing), continuidad, el chico y el profesional. */
+  panel?: Panel;
   costUsd: number;
   error?: string;
 }
@@ -786,6 +550,7 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         null,
       );
       const composed: ImageData[] = [];
+      const drawnPages: ImageData[] = [];
       for (const page of draft.pages.slice(0, pagesToDraw)) {
         const scene = storyPlan.scenes.find((item) => item.pageIndex === page.index);
         const bible = visualBibleCheck(storyPlan, scene);
@@ -814,23 +579,31 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         const bytes = await composePage(img.bytes, layout, pageText, typography);
         await sharp(bytes).toFile(path.join(outDir, `${tag}-${file}-armada.webp`));
         composed.push({ bytes, mimeType: 'image/webp' });
+        drawnPages.push(img);
       }
-      // Juez comprador: el que paga mira la tapa y las páginas armadas con el pedido.
-      try {
-        const { usage: buyerUsage, ...buyer } = await text.reviewAsBuyer({
+      // Mesa de jueces: el que paga, la continuidad, el chico que escucha y, en Pro, el profesional.
+      row.panel = await runPanel(
+        text,
+        {
           channel: testCase.channel,
           priceUsd: testCase.channel === 'events' ? 11 : 15,
           order: orderSummary(testCase, story.title.es, style.name.es),
+          goal: testCase.goal ?? null,
           title: draft.title,
           texts: pages.map((page) => page.text),
+          age: testCase.age,
+          language: 'es',
+          refrain: storyPlan.structure === 'refrain' ? (storyPlan.refrain ?? null) : null,
+          style: `${style.name.es}: ${style.promptModifier.slice(0, 200)}`,
           cover,
-          pages: composed,
-        });
-        spend(buyerUsage);
-        row.buyer = buyer;
-      } catch (error) {
-        row.notes.push(`comprador: sin respuesta (${(error as Error).message.slice(0, 120)})`);
-      }
+          composed,
+          drawn: drawnPages,
+          reference: lamina,
+          companion: storyPlan.companion?.name ?? null,
+        },
+        spend,
+      );
+      for (const problem of row.panel.errors) row.notes.push(`mesa: ${problem}`);
       for (const clause of [
         'closed_cast',
         'no_touch',
@@ -896,16 +669,8 @@ const md = [
         })(),
         '',
         (() => {
-          const judged = rows.filter((row) => row.buyer);
-          if (judged.length === 0) return 'Juez comprador: sin respuestas';
-          const count = (verdict: BuyerReview['verdict']) =>
-            judged.filter((row) => row.buyer?.verdict === verdict).length;
-          const avg = (pick: (buyer: Omit<BuyerReview, 'usage'>) => number) =>
-            (
-              judged.reduce((sum, row) => sum + (row.buyer ? pick(row.buyer) : 0), 0) /
-              judged.length
-            ).toFixed(1);
-          return `Juez comprador: lo compraría ${String(count('compra'))}/${String(judged.length)} · duda ${String(count('duda'))} · no ${String(count('no'))} · compra ${avg((buyer) => buyer.buy)}/5 · regalo ${avg((buyer) => buyer.gift)}/5`;
+          const judged = rows.flatMap((row) => (row.panel ? [row.panel] : []));
+          return judged.length > 0 ? panelSummary(judged) : 'Mesa de jueces: sin respuestas';
         })(),
         '',
       ]
@@ -930,17 +695,17 @@ const md = [
       ? '## Sin regresiones contra la corrida anterior'
       : '',
   '',
-  ...(rows.some((row) => row.buyer)
+  ...(rows.some((row) => row.panel)
     ? [
-        '## Qué dice el comprador',
-        ...rows.flatMap((row) => {
-          const buyer = row.buyer;
-          if (!buyer) return [];
-          return [
-            `- **${row.id}${runs > 1 ? ` v${String(row.run ?? 1)}` : ''}**: ${buyer.verdict} · compra ${String(buyer.buy)}/5 · regalo ${String(buyer.gift)}/5. Le encantó: ${buyer.loved.join('; ') || '-'}. Reembolso: ${buyer.refund.join('; ') || '-'}. Para un 5: ${buyer.fixes.join('; ') || '-'}.`,
-          ];
-        }),
-        '',
+        '## Qué dice la mesa de jueces',
+        ...rows.flatMap((row) =>
+          row.panel
+            ? [
+                ...panelLines(`${row.id}${runs > 1 ? ` v${String(row.run ?? 1)}` : ''}`, row.panel),
+                '',
+              ]
+            : [],
+        ),
       ]
     : []),
   '## Qué cubre y qué falló',

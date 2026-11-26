@@ -6,6 +6,7 @@ import {
   PIPELINE_STEPS,
   type AdminOrderDetail,
   type ContractClauseId,
+  type StoredJudgePanel,
   type PipelineStep,
 } from '@storynido/shared';
 import { useSearchParams } from 'next/navigation';
@@ -29,6 +30,144 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
       <dt className="text-muted-foreground">{label}</dt>
       <dd>{children}</dd>
     </div>
+  );
+}
+
+const AREA_LABEL = { texto: 'Texto', dibujo: 'Dibujo', armado: 'Armado' } as const;
+const VERDICT_LABEL = { compra: 'lo compraría', duda: 'duda', no: 'no lo compraría' } as const;
+
+const scoreTone = (score: number | null) =>
+  score === null
+    ? 'text-muted-foreground'
+    : score >= 4
+      ? 'text-emerald-700'
+      : score === 3
+        ? 'text-amber-700'
+        : 'text-destructive';
+
+const joined = (items: string[]) => (items.length > 0 ? items.join(' · ') : '—');
+
+/**
+ * Mesa de jueces del libro (26 nov): comprador con ventas y marketing, continuidad, el chico que
+ * escucha y, en Profesionales, el profesional. La nota de la mesa es la del juez más bajo.
+ */
+function JudgePanelCard({ panel }: { panel: StoredJudgePanel | null | undefined }) {
+  if (!panel) {
+    return (
+      <Card className="mt-4">
+        <h2 className="mb-1 font-semibold">Mesa de jueces</h2>
+        <p className="text-sm text-muted-foreground">
+          Todavía no corrió para este pedido (corre al armar el PDF de cada libro nuevo).
+        </p>
+      </Card>
+    );
+  }
+  const { buyer, continuity, child, professional } = panel;
+  return (
+    <Card className="mt-4">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-semibold">
+          Mesa de jueces:{' '}
+          <span className={scoreTone(panel.score)}>
+            {panel.score === null ? '—' : `${String(panel.score)}/5`}
+          </span>
+          {panel.weakest && (
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              la baja el juez {panel.weakest}
+            </span>
+          )}
+        </h2>
+        <p className="text-xs text-muted-foreground tabular-nums">
+          {usd(panel.costUsdMicros / 1_000_000)}
+          {panel.at ? ` · ${new Date(panel.at).toLocaleString('es-AR')}` : ''}
+        </p>
+      </div>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+        {buyer && (
+          <>
+            <Row label="Comprador">
+              <span className={scoreTone(buyer.buy)}>{buyer.buy}/5</span> ·{' '}
+              {VERDICT_LABEL[buyer.verdict]} · regalo {buyer.gift}/5
+              <div className="text-xs text-muted-foreground">
+                Le encantó: {joined(buyer.loved)}
+                <br />
+                Reembolso: {joined(buyer.refund)}
+              </div>
+            </Row>
+            <Row label="Ventas (muestra)">
+              <span className={scoreTone(buyer.sample)}>{buyer.sample}/5</span>
+              <div className="text-xs text-muted-foreground">
+                Lo frenaría: {buyer.sampleObjection || '—'}
+              </div>
+            </Row>
+            <Row label="Marketing (compartir)">
+              <span className={scoreTone(buyer.share)}>{buyer.share}/5</span> ·{' '}
+              {buyer.sharePage < 0
+                ? 'ninguna página'
+                : buyer.sharePage === 0
+                  ? 'la tapa'
+                  : `página ${String(buyer.sharePage)}`}
+              <div className="text-xs text-muted-foreground">{buyer.shareWhy || '—'}</div>
+            </Row>
+          </>
+        )}
+        {continuity && (
+          <Row label="Continuidad">
+            <span className={scoreTone(continuity.score)}>{continuity.score}/5</span>
+            <div className="text-xs text-muted-foreground">
+              {joined(
+                continuity.issues.map(
+                  (issue) =>
+                    `${issue.page === 0 ? 'tapa' : `p. ${String(issue.page)}`} ${issue.who}: ${issue.what}`,
+                ),
+              )}
+            </div>
+          </Row>
+        )}
+        {child && (
+          <Row label="El chico">
+            <span className={scoreTone(child.score)}>{child.score}/5</span> · entiende{' '}
+            {child.understood}/5 · quiere más {child.wantsMore}/5
+            <div className="text-xs text-muted-foreground">
+              Palabras difíciles: {joined(child.hardWords)}
+              <br />
+              Se pierde en: {child.lostPages.length > 0 ? child.lostPages.join(', ') : '—'}
+              <br />
+              Lo que recordaría: {child.favorite || '—'}
+            </div>
+          </Row>
+        )}
+        {professional && (
+          <Row label="Profesional">
+            <span className={scoreTone(professional.score)}>{professional.score}/5</span> · objetivo{' '}
+            {professional.meetsGoal}/5 · {professional.wouldUse ? 'lo usaría' : 'no lo usaría así'}
+            <div className="text-xs text-muted-foreground">
+              Riesgos: {joined(professional.risks)}
+            </div>
+          </Row>
+        )}
+      </dl>
+      {panel.fixes.length > 0 && (
+        <div className="mt-3 border-t pt-3">
+          <h3 className="mb-1 text-sm font-medium">Para llegar a un 5</h3>
+          <ul className="space-y-1 text-sm">
+            {panel.fixes.map((fix, index) => (
+              <li key={index}>
+                <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-xs">
+                  {AREA_LABEL[fix.area]}
+                </span>
+                {fix.fix} <span className="text-xs text-muted-foreground">({fix.judge})</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {panel.errors.length > 0 && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Sin respuesta: {panel.errors.join(' · ')}
+        </p>
+      )}
+    </Card>
   );
 }
 
@@ -369,6 +508,8 @@ function OrderDetail({ id }: { id: string }) {
           )}
         </Card>
       </div>
+
+      <JudgePanelCard panel={order.judgePanel} />
 
       <Card className="mt-4">
         <h2 className="mb-3 font-semibold">Acciones</h2>

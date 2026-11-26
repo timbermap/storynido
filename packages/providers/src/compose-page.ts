@@ -1,5 +1,5 @@
 /**
- * Página armada para el golden set (25 nov 2026, Benicio en el médico): la ilustración con el texto
+ * Página armada para el golden set y la mesa de jueces (25 nov 2026, Benicio en el médico): la ilustración con el texto
  * y el papel fundido, con la misma geometría que el PDF y el lector (page-layout.ts). Así el examen
  * y el juez comprador miran lo que ve el cliente, no el dibujo suelto.
  */
