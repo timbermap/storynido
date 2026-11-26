@@ -434,6 +434,8 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
             reference: lamina,
             character: description,
             mustKeep: [
+              `hairstyle: ${testCase.sheet.hair} (as on the reference sheet)`,
+              `glasses: ${testCase.traits.glasses ? 'present' : 'absent'}`,
               `outfit: ${testCase.sheet.clothing} (unless the page text says the character changes clothes)`,
             ],
             scene,
@@ -449,7 +451,14 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         spend(verdict.usage);
         const broken = new Set<ContractClauseId>(verdict.contractClauses ?? []);
         if (verdict.textInImage) broken.add('no_text_in_image');
-        return { broken, issues: verdict.criticalIssues, fix: verdict.repairInstructions ?? [] };
+        // Igual que el worker: se redibuja con cualquier «repair», no solo con una cláusula del
+        // contrato (el examen daba por limpias páginas que la mesa reprobaba, ronda 3, DECISIONS 344).
+        return {
+          broken,
+          repair: verdict.status === 'repair' || broken.size > 0,
+          issues: verdict.criticalIssues,
+          fix: verdict.repairInstructions ?? [],
+        };
       };
       /**
        * Dibuja, revisa y, si falla el contrato, redibuja una vez con las instrucciones de la
@@ -469,7 +478,7 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         const images = row.images ?? { reviewed: 0, cleanFirst: 0, cleanFinal: 0 };
         row.images = images;
         images.reviewed += 1;
-        if (first.broken.size === 0) {
+        if (!first.repair) {
           images.cleanFirst += 1;
           images.cleanFinal += 1;
           return finalImage;
@@ -489,7 +498,12 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
             finalImage = redrawn;
           }
         }
-        if (final.broken.size === 0) images.cleanFinal += 1;
+        if (!final.repair) images.cleanFinal += 1;
+        if (first.broken.size === 0) {
+          row.notes.push(
+            `${label}: ${final.repair ? 'sigue mal' : 'arreglado'} (${first.issues.join('; ').slice(0, 400)})`,
+          );
+        }
         for (const clause of first.broken) {
           mark(clause, final.broken.has(clause) ? 'fail' : 'repaired');
           row.notes.push(`${label}: ${clause} (${first.issues.join('; ').slice(0, 400)})`);

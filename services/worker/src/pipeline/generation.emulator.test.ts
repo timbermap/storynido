@@ -318,6 +318,7 @@ describe('generación del libro (fase 09)', () => {
     expect(snapshot.character.mustKeep).toEqual([
       'hair: short curly black',
       'glasses: present',
+      'hairstyle: short, curly, black hair (as on the reference sheet)',
       'outfit: a comfortable colorful t-shirt (unless the page text says the character changes clothes)',
     ]);
     expect(Object.keys(snapshot.approved).sort()).toEqual(['0', '1', '2']);
