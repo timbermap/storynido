@@ -332,6 +332,19 @@ describe('books', () => {
     await assertFails(
       updateDoc(ref, { avatar: { ...avatar, extra: 'x' }, updatedAt: serverTimestamp() }),
     );
+    // Peinado opcional (DECISIONS 346): solo los de la lista.
+    await assertSucceeds(
+      updateDoc(ref, {
+        avatar: { ...avatar, hairStyle: 'two-braids' },
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(ref, {
+        avatar: { ...avatar, hairStyle: 'mohicano' },
+        updatedAt: serverTimestamp(),
+      }),
+    );
     const memories = {
       moment: null,
       companion: 'Su abuela Rosa',

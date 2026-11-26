@@ -20,6 +20,22 @@ export const AVATAR_OPTIONS = {
 
 export type AvatarTrait = keyof typeof AVATAR_OPTIONS;
 
+/**
+ * Peinado, opcional (DECISIONS 346): el formulario solo daba largo, tipo y color, y la lámina salía
+ * con el pelo suelto aunque el chico use colita o trenzas. Mantener sincronizado con firestore.rules.
+ */
+export const HAIR_STYLES = [
+  'loose',
+  'ponytail',
+  'pigtails',
+  'braid',
+  'two-braids',
+  'bun',
+  'bangs',
+] as const;
+
+export type HairStyle = (typeof HAIR_STYLES)[number];
+
 export const avatarSchema = z.object({
   skinTone: z.enum(AVATAR_OPTIONS.skinTone),
   hairColor: z.enum(AVATAR_OPTIONS.hairColor),
@@ -27,6 +43,7 @@ export const avatarSchema = z.object({
   hairType: z.enum(AVATAR_OPTIONS.hairType),
   eyeColor: z.enum(AVATAR_OPTIONS.eyeColor),
   glasses: z.boolean(),
+  hairStyle: z.enum(HAIR_STYLES).optional(),
 });
 
 export type Avatar = z.infer<typeof avatarSchema>;
@@ -47,11 +64,23 @@ const HAIR_LENGTH: Record<Avatar['hairLength'], string> = {
   long: 'long',
 };
 
+const HAIR_STYLE: Record<HairStyle, string> = {
+  loose: 'worn loose',
+  ponytail: 'tied in a ponytail',
+  pigtails: 'tied in two pigtails',
+  braid: 'in one braid',
+  'two-braids': 'in two braids',
+  bun: 'tied in a bun',
+  bangs: 'with a straight fringe (bangs)',
+};
+
 /** Ficha del personaje a partir de los rasgos elegidos (sin foto ni IA). */
 export function avatarToSheet(avatar: Avatar, age: number): CharacterSheet {
   return {
     apparentAge: `about ${String(age)} years old`,
-    hair: `${HAIR_LENGTH[avatar.hairLength]}, ${avatar.hairType}, ${avatar.hairColor.replace('-', ' ')} hair`,
+    hair: `${HAIR_LENGTH[avatar.hairLength]}, ${avatar.hairType}, ${avatar.hairColor.replace('-', ' ')} hair${
+      avatar.hairStyle ? ` ${HAIR_STYLE[avatar.hairStyle]}` : ''
+    }`,
     eyes: `${avatar.eyeColor} eyes`,
     skinTone: SKIN[avatar.skinTone],
     distinctiveFeatures: avatar.glasses ? ['round glasses'] : [],
@@ -99,7 +128,8 @@ export function ageMismatch(apparentAge: string, enteredAge: number): boolean {
 
 /** Clave estable de los rasgos, para saber si la muestra quedó desactualizada. */
 export function avatarKey(avatar: Avatar): string {
-  return `avatar:${(Object.keys(AVATAR_OPTIONS) as AvatarTrait[]).map((key) => avatar[key]).join('|')}|${String(avatar.glasses)}`;
+  // El peinado va al final y solo si está: las claves de antes no cambian (no desactualiza muestras).
+  return `avatar:${(Object.keys(AVATAR_OPTIONS) as AvatarTrait[]).map((key) => avatar[key]).join('|')}|${String(avatar.glasses)}${avatar.hairStyle ? `|${avatar.hairStyle}` : ''}`;
 }
 
 /** Recuerdos guiados: detalles reales de la familia, todos opcionales. */

@@ -55,6 +55,7 @@ import {
   type PrintFormat,
   type AiUsage,
   type Avatar,
+  type CharacterLook,
   type CharacterSheet,
   type CharacterTraits,
   type ImageData,
@@ -74,11 +75,12 @@ import {
   type OutfitPlan,
   type ScenePlan,
   type VisualBibleItem,
-  sceneOutfit,
+  pageOutfitNote,
+  describeLookCharacter,
+  lookMustKeep,
   visualBibleCheck,
   visualBibleNote,
   catalogPrices,
-  SAME_OUTFIT,
   calmSideFor,
   sceneNoteFor,
   textZoneOf,
@@ -192,6 +194,8 @@ export interface BookSnapshot {
     sheetPath: string;
     /** Nota de «Ajustar el parecido» de la muestra: vale en cada página (DECISIONS 288). */
     correction?: string | null;
+    /** Ficha visual fija de la lámina aprobada (DECISIONS 345); ausente en los pedidos anteriores. */
+    look?: CharacterLook | null;
   };
   /** Acompañante que se repite, con su lámina aprobada en la muestra (DECISIONS 117). */
   companion?: { name: string; look: string; sheetPath: string } | null;
@@ -367,6 +371,8 @@ function pageScene(
   bible?: Pick<BookSnapshot, 'props' | 'places' | 'outfits'>,
   /** El texto de la página: sin texto la ilustración va entera (sin franja calma). */
   text?: string | null,
+  /** Ficha visual fija de la lámina aprobada (DECISIONS 345); null en los pedidos anteriores. */
+  look?: CharacterLook | null,
 ): string {
   const visible = scene?.mustBeVisible.length
     ? ` Must be visible: ${scene.mustBeVisible.join(', ')}.`
@@ -376,10 +382,8 @@ function pageScene(
   const continuity = scene?.continuityFacts.length
     ? ` Keep consistent with the other pages, drawn exactly the same way: ${scene.continuityFacts.join('; ')}.`
     : '';
-  // Ropa especial del plan (en el agua, de noche) o la de la lámina.
-  const outfit = scene
-    ? ` The main character wears ${sceneOutfit(bible, scene) ?? SAME_OUTFIT}.`
-    : '';
+  // Ropa especial del plan (en el agua, de noche) o la de la lámina, en una sola frase (DECISIONS 345).
+  const outfit = scene ? pageOutfitNote(bible, scene, look) : '';
   // Objetos, lugar y encuadre con el aspecto fijo de la biblia visual (solo los de la escena).
   const visuals = visualBibleNote(bible, scene);
   const fix = hint
@@ -681,7 +685,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             null,
             hint,
           )
-        : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint, layoutOf(snapshot, index - 1), snapshot, page?.text ?? null)}${castNote(snapshot.cast)}`;
+        : `${pageScene(page?.illustrationPrompt ?? '', snapshot.scenes?.[index - 1], hint, layoutOf(snapshot, index - 1), snapshot, page?.text ?? null, snapshot.character.look ?? null)}${castNote(snapshot.cast)}`;
     const reference = await load(snapshot.character.sheetPath);
     const companion = snapshot.companion ?? null;
     const references = companion ? [reference, await load(companion.sheetPath)] : [reference];
@@ -816,6 +820,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             mustKeep: MustKeepTrait[];
             approvedAt: unknown;
             correction?: string;
+            look?: CharacterLook | null;
           };
           castSheet?: { role: string; imagePath: string } | null;
           plan?: {
@@ -930,6 +935,26 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       approved[String(index)] = to;
     }
 
+    // Ficha visual fija (DECISIONS 345): la muestra la toma de la lámina al aprobarla; una muestra
+    // anterior (o una que no pudo) la saca acá, una vez. Sin ficha, el libro se dibuja como antes.
+    let look = preview.character.look ?? null;
+    let lookCost = 0;
+    if (!look && !ctx.order.sourceOrderId) {
+      const provider = await ai();
+      if (provider.text.describeLook) {
+        try {
+          const result = await provider.text.describeLook({
+            sheet: await load(sheetPath),
+            requested: describeCharacter(name, storyAge, sheet, traits, mustKeep),
+          });
+          lookCost = await record(ctx, 'review', result.usage);
+          look = result.look;
+        } catch (error) {
+          ctx.log.warn({ orderId: ctx.order.id, err: error }, 'character look not described');
+        }
+      }
+    }
+
     const memories = book.memories as { nickname?: string | null } | null | undefined;
     const content: Omit<BookSnapshot, 'hash'> = {
       bookId: ctx.order.bookId,
@@ -967,20 +992,31 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       artDirection: preview.artDirection ?? null,
       // Armado por edad: solo si la muestra lo trae (las anteriores conservan su huella).
       ...(preview.pageLayout ? { pageLayout: preview.pageLayout } : {}),
-      character: {
-        // La edad del cuento, nunca la aparente de la foto (DECISIONS 264).
-        description: describeCharacter(name, storyAge, sheet, traits, mustKeep),
-        // La ropa de la lámina también se revisa en cada página (salvo que el texto la cambie).
-        mustKeep: [
-          ...mustKeepLabels(traits, mustKeep),
-          // El peinado de la lámina (trenzas, colita): la etiqueta del pelo solo dice largo, tipo y
-          // color, y la revisión aceptaba pelo suelto (Martina, ronda 3, 26 nov, DECISIONS 344).
-          ...(sheet.hair.trim() ? [`hairstyle: ${sheet.hair} (as on the reference sheet)`] : []),
-          `outfit: ${sheet.clothing} (unless the page text says the character changes clothes)`,
-        ],
-        sheetPath,
-        ...(preview.character.correction ? { correction: preview.character.correction } : {}),
-      },
+      character: look
+        ? {
+            // Una sola versión del personaje, la de la lámina aprobada, para el dibujo y la revisión.
+            description: describeLookCharacter(name, storyAge, look, traits),
+            mustKeep: lookMustKeep(look, traits),
+            look,
+            sheetPath,
+            ...(preview.character.correction ? { correction: preview.character.correction } : {}),
+          }
+        : {
+            // La edad del cuento, nunca la aparente de la foto (DECISIONS 264).
+            description: describeCharacter(name, storyAge, sheet, traits, mustKeep),
+            // La ropa de la lámina también se revisa en cada página (salvo que el texto la cambie).
+            mustKeep: [
+              ...mustKeepLabels(traits, mustKeep),
+              // El peinado de la lámina (trenzas, colita): la etiqueta del pelo solo dice largo, tipo
+              // y color, y la revisión aceptaba pelo suelto (Martina, ronda 3, DECISIONS 344).
+              ...(sheet.hair.trim()
+                ? [`hairstyle: ${sheet.hair} (as on the reference sheet)`]
+                : []),
+              `outfit: ${sheet.clothing} (unless the page text says the character changes clothes)`,
+            ],
+            sheetPath,
+            ...(preview.character.correction ? { correction: preview.character.correction } : {}),
+          },
       companion,
       // Solo si la muestra la trae: los libros anteriores conservan su huella.
       ...(castSheet ? { castSheet } : {}),
@@ -995,7 +1031,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         pages: snapshot.pages.length,
         approvedImages: Object.keys(approved).length,
       },
-      costUsdMicros: castCost,
+      costUsdMicros: castCost + lookCost,
     };
   }
 

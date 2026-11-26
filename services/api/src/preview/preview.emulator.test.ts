@@ -1100,9 +1100,22 @@ describe('vista previa', () => {
       regenerationsUsed: number;
       preview: {
         stage: string;
-        character: { imagePath: string; approvedAt: unknown; fromDrawing?: boolean };
+        character: {
+          imagePath: string;
+          approvedAt: unknown;
+          fromDrawing?: boolean;
+          look?: { hair: string; outfit: string[] } | null;
+        };
       };
     };
+    // Ficha visual fija leída de la lámina aprobada (DECISIONS 345): el pedido dibuja con ella.
+    expect(book.preview.character.look?.outfit).toEqual([
+      'yellow t-shirt',
+      'blue shorts',
+      'red sneakers',
+    ]);
+    const pagePrompt = paint.mock.calls[1]?.[0].prompt ?? '';
+    expect(pagePrompt).toContain('hair: short brown hair, loose');
     // Copiada al libro: si después se actualiza el dibujo del perfil, el cuento no cambia.
     expect(book.preview.character.imagePath).toMatch(/^previews\/.+\/book-1\/character-/);
     expect(book.preview.character.fromDrawing).toBe(true);

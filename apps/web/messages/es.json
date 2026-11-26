@@ -1255,6 +1255,8 @@
       "hairColor": "Color de pelo",
       "hairLength": "Largo del pelo",
       "hairType": "Tipo de pelo",
+      "hairStyle": "Peinado (opcional)",
+      "hairStyleHint": "Si suele llevar un peinado, lo dibujamos igual en todas las páginas.",
       "eyeColor": "Color de ojos",
       "glasses": "Usa anteojos",
       "required": "Elige todos los rasgos para continuar.",
@@ -1285,6 +1287,15 @@
           "wavy": "Ondulado",
           "curly": "Rizado",
           "coily": "Muy rizado"
+        },
+        "hairStyle": {
+          "loose": "Suelto",
+          "ponytail": "Colita",
+          "pigtails": "Dos colitas",
+          "braid": "Una trenza",
+          "two-braids": "Dos trenzas",
+          "bun": "Rodete",
+          "bangs": "Con flequillo"
         },
         "eyeColor": {
           "brown": "Marrones",

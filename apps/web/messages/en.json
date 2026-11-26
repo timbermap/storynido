@@ -1255,6 +1255,8 @@
       "hairColor": "Hair color",
       "hairLength": "Hair length",
       "hairType": "Hair type",
+      "hairStyle": "Hairstyle (optional)",
+      "hairStyleHint": "If they usually wear a hairstyle, we draw it the same on every page.",
       "eyeColor": "Eye color",
       "glasses": "Wears glasses",
       "required": "Choose every feature to continue.",
@@ -1285,6 +1287,15 @@
           "wavy": "Wavy",
           "curly": "Curly",
           "coily": "Coily"
+        },
+        "hairStyle": {
+          "loose": "Loose",
+          "ponytail": "Ponytail",
+          "pigtails": "Pigtails",
+          "braid": "One braid",
+          "two-braids": "Two braids",
+          "bun": "Bun",
+          "bangs": "With bangs"
         },
         "eyeColor": {
           "brown": "Brown",

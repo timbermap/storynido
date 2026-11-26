@@ -314,12 +314,18 @@ describe('generación del libro (fase 09)', () => {
     const snapshot = done.snapshot as BookSnapshot;
     expect(snapshot.hash).toMatch(/^[0-9a-f]{64}$/);
     expect(snapshot.pages.map((page) => page.text)).toEqual(PAGES);
-    // La ropa de la lámina también se revisa en cada página (Celebraciones, ola 1).
+    // Ficha visual fija (DECISIONS 345): se lee de la lámina aprobada y es la vara de cada página,
+    // ropa incluida (Celebraciones, ola 1); el formulario ya no contradice a la lámina.
+    expect(snapshot.character.look?.outfit).toEqual([
+      'yellow t-shirt',
+      'blue shorts',
+      'red sneakers',
+    ]);
     expect(snapshot.character.mustKeep).toEqual([
-      'hair: short curly black',
-      'glasses: present',
-      'hairstyle: short, curly, black hair (as on the reference sheet)',
-      'outfit: a comfortable colorful t-shirt (unless the page text says the character changes clothes)',
+      'hair and hairstyle: short brown hair, loose',
+      'skin tone: medium olive skin',
+      'glasses: absent',
+      'outfit: yellow t-shirt, blue shorts, red sneakers (unless the scene plan gives this page another outfit)',
     ]);
     expect(Object.keys(snapshot.approved).sort()).toEqual(['0', '1', '2']);
 
@@ -399,10 +405,10 @@ describe('generación del libro (fase 09)', () => {
     const fourth = prompts.find((prompt) => prompt.startsWith('scene 4')) ?? '';
     expect(third).toContain('arc-shaped orange kite on long lines; NO sail');
     expect(third).toContain('red lifeguard hut');
-    expect(third).toContain('The main character wears a blue wetsuit and a helmet');
+    expect(third).toContain('On this page the main character wears a blue wetsuit and a helmet');
     expect(third).toContain('Camera: wide shot.');
     expect(fourth).not.toContain('kite on long lines');
-    expect(fourth).toContain('the same outfit as in the reference sheet');
+    expect(fourth).toContain('exactly the everyday outfit of the reference sheet: yellow t-shirt');
     const thirdReview = reviews.mock.calls.find((call) => call[0].pageIndex === 3)?.[0];
     expect(thirdReview?.visualBible).toContain('red lifeguard hut');
     expect(thirdReview?.scene?.continuityFacts).toEqual(['the orange kite']);

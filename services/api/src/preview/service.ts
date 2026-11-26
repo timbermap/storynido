@@ -62,6 +62,11 @@ import {
   mainCastMember,
   sceneIncludes,
   visualBibleCheck,
+  sceneOutfit,
+  pageOutfitNote,
+  describeLookCharacter,
+  lookMustKeep,
+  type CharacterLook,
   coverOutfit,
   coverProps,
   coverScene,
@@ -236,6 +241,11 @@ async function withModeratedRetry<T>(
  */
 
 /** Lo que la biblia visual del plan fija para la escena `index` (vacío en planes anteriores). */
+/** La escena del plan de una página (por su índice). */
+function sceneFor(plan: BookPreview['plan'] | undefined, index: number) {
+  return plan?.scenes.find((scene) => scene.pageIndex === index);
+}
+
 function sceneVisuals(plan: BookPreview['plan'] | undefined, index: number): string {
   const note = visualBibleCheck(
     plan,
@@ -1971,12 +1981,21 @@ export class PreviewService {
       const track = this.tracker(uid, bookId, limits);
       const { sheet } = await this.characterOf(uid, book, Number(child.age), ai, track);
       const { traits, mustKeep } = preview.character;
-      const description = describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
+      const requested = describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
       const storage = this.providers.storage();
       const lamina: ImageData = {
         bytes: await storage.download({ bucket: 'assets', path: preview.character.imagePath }),
         mimeType: 'image/webp',
       };
+      // Ficha visual fija (DECISIONS 345): se lee la lámina aprobada una vez y desde ahí la tapa,
+      // las páginas, la revisión y el pedido dibujan lo que se ve en la lámina (≈ US$0,003).
+      // Si falla, se sigue como antes, con la descripción del pedido.
+      const look =
+        preview.character.look ?? (await this.lookOf(ai, track, lamina, requested, bookId));
+      const description = look
+        ? describeLookCharacter(String(child.name), imageAge, look, traits)
+        : requested;
+      const reviewMustKeep: readonly string[] = look ? lookMustKeep(look, traits) : mustKeep;
       // Acompañante que se repite (abuela, mascota): su lámina, una vez y con el mismo estilo,
       // es la segunda referencia de cada ilustración (DECISIONS 117).
       // Con la edad que dio el pedido («Clara, su hermana de 7»): el plan la dibujaba adolescente.
@@ -2109,8 +2128,10 @@ export class PreviewService {
             // Biblia visual (objetos, lugar, ropa especial y encuadre de la escena) y el espacio
             // para el texto según el armado (zona calma, papel fundido o entera).
             `${page.illustrationPrompt}${sceneVisuals(preview.plan, page.index)}${
-              pageLayouts[at] ? sceneNoteFor(pageLayouts[at], page.text) : ''
-            }`,
+              look && !sceneOutfit(preview.plan, sceneOf(page.index))
+                ? pageOutfitNote(preview.plan, sceneOf(page.index), look)
+                : ''
+            }${pageLayouts[at] ? sceneNoteFor(pageLayouts[at], page.text) : ''}`,
         ),
       ];
       // Índice de cada imagen: 0 la portada, 1.. las páginas (como en el pedido).
@@ -2147,7 +2168,7 @@ export class PreviewService {
                   image: result.image,
                   reference: lamina,
                   character: description,
-                  mustKeep,
+                  mustKeep: reviewMustKeep,
                   scene,
                   visualBible: scene ? visualBibleCheck(preview.plan, scene) : '',
                 }),
@@ -2205,6 +2226,7 @@ export class PreviewService {
         'preview.cover': { imagePath: coverPaths.clean, previewImagePath: coverPaths.preview },
         'preview.pages': pages,
         'preview.character.approvedAt': new Date(),
+        'preview.character.look': look,
         'preview.companion':
           companion && companionPaths
             ? { name: companion.name, look: companion.look, imagePath: companionPaths.clean }
@@ -2880,6 +2902,24 @@ export class PreviewService {
     };
   }
 
+  /** Ficha visual fija de la lámina aprobada (DECISIONS 345); null si el proveedor no la da o falla. */
+  private async lookOf(
+    ai: ReturnType<ProviderRegistry['ai']>,
+    track: ReturnType<PreviewService['tracker']>,
+    sheet: ImageData,
+    requested: string,
+    bookId: string,
+  ): Promise<CharacterLook | null> {
+    if (!ai.text.describeLook) return null;
+    try {
+      const { look } = await track('review', await ai.text.describeLook({ sheet, requested }));
+      return look.hair && look.outfit.length ? look : null;
+    } catch (error) {
+      this.log.warn({ err: error, bookId }, 'character look failed');
+      return null;
+    }
+  }
+
   /** Historia, estilo y protagonista con los que se generó la muestra. */
   private async context(
     uid: string,
@@ -2970,7 +3010,11 @@ export class PreviewService {
         ai,
         track,
       );
-      const description = describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
+      // Con ficha visual fija, la página rehecha se dibuja con ella, como las demás (DECISIONS 345).
+      const look = preview.character?.look ?? null;
+      const description = look
+        ? describeLookCharacter(String(child.name), imageAge, look, traits)
+        : describeCharacter(String(child.name), imageAge, sheet, traits, mustKeep);
       const storage = this.providers.storage();
       // Referencia: la lámina del personaje (las muestras anteriores a ella usan la portada).
       const reference: ImageData = {
@@ -2990,7 +3034,15 @@ export class PreviewService {
               coverOutfit(preview.plan),
               coverProps(preview.plan),
             )
-          : (preview.pages[target]?.illustrationPrompt ?? '');
+          : `${preview.pages[target]?.illustrationPrompt ?? ''}${
+              look
+                ? pageOutfitNote(
+                    preview.plan,
+                    sceneFor(preview.plan, preview.pages[target]?.index ?? -1),
+                    look,
+                  )
+                : ''
+            }`;
       const companion = preview.companion ?? null;
       const companionImage: ImageData | null = companion
         ? {

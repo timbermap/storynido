@@ -1255,6 +1255,8 @@
       "hairColor": "Cor do cabelo",
       "hairLength": "Comprimento do cabelo",
       "hairType": "Tipo de cabelo",
+      "hairStyle": "Penteado (opcional)",
+      "hairStyleHint": "Se costuma usar um penteado, desenhamos igual em todas as páginas.",
       "eyeColor": "Cor dos olhos",
       "glasses": "Usa óculos",
       "required": "Escolha todas as características para continuar.",
@@ -1285,6 +1287,15 @@
           "wavy": "Ondulado",
           "curly": "Cacheado",
           "coily": "Crespo"
+        },
+        "hairStyle": {
+          "loose": "Solto",
+          "ponytail": "Rabo de cavalo",
+          "pigtails": "Maria-chiquinha",
+          "braid": "Uma trança",
+          "two-braids": "Duas tranças",
+          "bun": "Coque",
+          "bangs": "Com franja"
         },
         "eyeColor": {
           "brown": "Castanhos",

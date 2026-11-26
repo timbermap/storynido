@@ -194,6 +194,20 @@ export const bookPreviewSchema = z.object({
       ageMismatch: z.object({ apparent: z.string(), entered: z.number() }).optional(),
       /** La nota de «Ajustar el parecido»: vale para la lámina y para cada página del libro. */
       correction: z.string().optional(),
+      /**
+       * Ficha visual fija leída de la lámina aprobada (DECISIONS 345): pelo y peinado, ropa prenda
+       * por prenda, anteojos y marcas. Las páginas y la revisión usan esto, no el formulario.
+       */
+      look: z
+        .object({
+          hair: z.string(),
+          outfit: z.array(z.string()),
+          glasses: z.boolean(),
+          marks: z.array(z.string()),
+          apparentAge: z.string(),
+        })
+        .nullable()
+        .optional(),
     })
     .optional(),
   /** Lámina del acompañante (abuela, mascota): segunda referencia de cada ilustración. */

@@ -13,6 +13,7 @@ import type {
   LikenessCheck,
   LikenessRequest,
   Locale,
+  LookResult,
   ModerationResult,
   PageReview,
   PageReviewRequest,
@@ -219,6 +220,20 @@ export class MockAITextProvider implements AITextProvider {
         };
       }),
       usage: usage('mock-text'),
+    });
+  }
+
+  /** Ficha visual fija, estable (DECISIONS 345): siempre la misma, para los tests. */
+  describeLook(): Promise<LookResult> {
+    return Promise.resolve({
+      look: {
+        hair: 'short brown hair, loose',
+        outfit: ['yellow t-shirt', 'blue shorts', 'red sneakers'],
+        glasses: false,
+        marks: [],
+        apparentAge: 'about 5 years old',
+      },
+      usage: usage('mock-review'),
     });
   }
 

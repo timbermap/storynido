@@ -186,6 +186,35 @@ export interface CharacterSheetResult {
   usage: AiUsage;
 }
 
+/**
+ * Ficha visual fija del protagonista, tomada de la lámina aprobada (DECISIONS 345): lo que se ve, no
+ * lo que dice el formulario. Es la única descripción del personaje en la tapa y en cada página, y la
+ * misma lista controla la revisión. En inglés, para los prompts de imagen.
+ */
+export interface CharacterLook {
+  /** Color, largo, textura y peinado («long dark brown hair in a low ponytail with a yellow tie»). */
+  hair: string;
+  /** Cada prenda y el calzado con su color, de arriba abajo («mustard hoodie», «dark blue jeans»). */
+  outfit: string[];
+  glasses: boolean;
+  /** Marcas que se ven (pecas, lunar, hoyuelos) y accesorios del personaje (un moño lila). */
+  marks: string[];
+  /** Edad aparente y proporciones («about 11, slim, long legs, head about a seventh of the height»). */
+  apparentAge: string;
+}
+
+export interface LookRequest {
+  /** La lámina aprobada. */
+  sheet: ImageData;
+  /** Lo que pidió el pedido, en inglés (la descripción con la que se dibujó la lámina). */
+  requested: string;
+}
+
+export interface LookResult {
+  look: CharacterLook;
+  usage: AiUsage;
+}
+
 /** Ficha en una frase, para incluir en los prompts de imagen. */
 export function describeCharacterSheet(sheet: CharacterSheet): string {
   const features = sheet.distinctiveFeatures.length
@@ -607,6 +636,8 @@ export interface AITextProvider {
   generateActivities(request: ActivityRequest): Promise<GeneratedActivities>;
   /** Extrae la ficha del personaje a partir de la foto procesada. */
   describeCharacter(photo: ImageData): Promise<CharacterSheetResult>;
+  /** Ficha visual fija tomada de la lámina aprobada (DECISIONS 345). Opcional: la simulada no la tiene. */
+  describeLook?(request: LookRequest): Promise<LookResult>;
   generateStory(request: StoryRequest): Promise<GeneratedStory>;
   /**
    * Revisión editorial. Con `issues` (controles deterministas que fallaron), además reescribe para
