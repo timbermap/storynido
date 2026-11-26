@@ -1,4 +1,5 @@
 import {
+  Award,
   BadgePercent,
   ChartColumn,
   Radar,
@@ -75,6 +76,7 @@ export interface NavItem {
     | '/stories'
     | '/collections'
     | '/styles'
+    | '/showcase'
     | '/lessons'
     | '/editorial'
     | '/content'
@@ -284,6 +286,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: Palette,
   },
   {
+    href: '/showcase',
+    area: 'Contenido',
+    label: 'Ejemplos de la mesa',
+    keywords: 'golden set jueces libro real muestra aprobar publicar',
+    icon: Award,
+  },
+  {
     href: '/lessons',
     area: 'Contenido',
     label: 'Enseñanzas',
@@ -370,6 +379,7 @@ const ORDER: readonly NavItem['href'][] = [
   '/stories',
   '/collections',
   '/styles',
+  '/showcase',
   '/lessons',
   '/editorial',
   '/content',

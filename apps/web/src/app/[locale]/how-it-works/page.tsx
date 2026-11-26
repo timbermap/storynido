@@ -7,13 +7,14 @@ import { BOOK_LENGTHS, type Locale } from '@storynido/shared';
 import { FormatImage } from '@/components/formats/format-showcase';
 import { LANDING_FORMAT_IMAGES } from '@/components/home/format-gallery';
 import { StartFreeLink } from '@/components/how-it-works/start-free-link';
+import { ShowcaseCover } from '@/components/stories/showcase-book';
 import { LandingFinalCta, ctaClass } from '@/components/landing/sections';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { formatPrice } from '@/lib/format';
 import { canOrderPrinted, printFormatsOnSale } from '@/lib/offer';
 import { localizedAlternates } from '@/lib/seo';
-import { getEventPricing, getOffer } from '@/lib/server/api';
+import { getEventPricing, getOffer, getShowcase } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 
 interface Props {
@@ -41,12 +42,14 @@ const PRINTED = ['softcover', 'hardcover', 'booklet'] as const;
 export default async function HowItWorksPage({ params }: Props) {
   const locale = (await params).locale as Locale;
   const display = await getDisplayCountry(locale);
-  const [t, tLengths, tFormats, offer, kitPricing] = await Promise.all([
+  const [t, tLengths, tFormats, offer, kitPricing, showcase, tShowcase] = await Promise.all([
     getTranslations('HowItWorks'),
     getTranslations('Wizard.book.lengths'),
     getTranslations('Home.formats'),
     getOffer(display.country, locale),
     getEventPricing(display.country),
+    getShowcase(locale),
+    getTranslations('Showcase'),
   ]);
 
   const money = (minor: number) =>
@@ -176,6 +179,42 @@ export default async function HowItWorksPage({ params }: Props) {
           </ol>
         </div>
       </section>
+
+      {/* Así queda un libro real (DECISIONS 348): solo cuando la mesa aprobó suficientes. */}
+      {showcase.length > 0 && (
+        <section aria-labelledby="ejemplos-title" className="bg-white">
+          <div className="container-page py-16 lg:py-20">
+            <h2
+              id="ejemplos-title"
+              className="text-center text-[clamp(1.8rem,3vw,2.5rem)] leading-[1.1] font-medium"
+            >
+              {tShowcase('title')}
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
+              {tShowcase('howText')}
+            </p>
+            <ul className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-5 md:grid-cols-4">
+              {showcase.slice(0, 4).map((book) => (
+                <li key={book.id}>
+                  <Link
+                    href={{
+                      pathname: '/stories/[slug]',
+                      params: { slug: book.storySlug },
+                      hash: 'asi-queda',
+                    }}
+                    className="group grid gap-2"
+                  >
+                    <ShowcaseCover book={book} />
+                    <span className="text-sm font-semibold text-primary group-hover:underline">
+                      {tShowcase('seeBook')}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* Qué recibes y cuánto cuesta: lo que hoy se vende, con el precio real del país. */}
       <section id="precios" aria-labelledby="precios-title" className="scroll-mt-28 bg-white">

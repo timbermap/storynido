@@ -26,6 +26,8 @@ export interface ViewerPage {
   number?: number;
   /** Sello de la tapa («Para colorear», DECISIONS 283). */
   seal?: string;
+  /** La imagen ya trae el texto armado (ejemplos de la mesa, DECISIONS 348): se muestra sola. */
+  composed?: boolean;
   /** Armado en el libro (page-layout.ts): la página se ve igual que en el PDF. */
   layout?: {
     kind: 'facing' | 'calm' | 'vignette' | 'strip' | 'overlay';
@@ -571,7 +573,7 @@ function PageSpread({
           {text}
         </div>
       )}
-      {!hasText && <span className="sr-only">{wordless}</span>}
+      {!hasText && !page.composed && <span className="sr-only">{wordless}</span>}
       {/* El rótulo va del lado opuesto al texto. */}
       {badge && (
         <div className={cn(!top && '[&>span]:top-3 [&>span]:bottom-auto')}>

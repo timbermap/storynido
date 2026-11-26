@@ -127,3 +127,26 @@ export async function getContent(
     throw error;
   }
 }
+
+/** URL pública de la API (la que ve el navegador), para las imágenes que sirve la API. */
+const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+
+/**
+ * Libros de ejemplo aprobados por la mesa (DECISIONS 348). Vacío mientras la sección esté cerrada
+ * (menos de SHOWCASE_MIN_BOOKS aprobados en el idioma) o si la API no responde.
+ */
+export async function getShowcase(locale: Locale) {
+  try {
+    const { open, books } = await catalogApi('catalogShowcase', { query: { locale } });
+    if (!open) return [];
+    return books.map((book) => ({
+      ...book,
+      cover: `${PUBLIC_API_URL}${book.cover}`,
+      pages: book.pages.map((page) => ({ ...page, image: `${PUBLIC_API_URL}${page.image}` })),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export type ShowcaseBookView = Awaited<ReturnType<typeof getShowcase>>[number];

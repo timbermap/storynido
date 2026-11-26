@@ -26,4 +26,6 @@ export const CLIENT_NAMESPACES = [
   'Reader',
   // Barra de avance y tiempo estimado de cada generación (components/ui/generation-progress).
   'Generation',
+  // Libros de ejemplo de la mesa en el visor (components/stories/showcase-book, DECISIONS 348).
+  'Showcase',
 ];
