@@ -23,6 +23,8 @@ import {
   checkPlanContract,
   checkTextContract,
   hardViolations,
+  hardWeight,
+  withRequestedMarks,
   hasTouch,
   TOUCH_FREE_REWRITE,
   type ContractViolation,
@@ -1255,8 +1257,8 @@ export class PreviewService {
                 ),
                 approved: current.approved && rewrite.approved,
               };
-              const after = hardViolations(checkTextContract(contract, candidate.pages, storyPlan));
-              if (safe(current, candidate) && after.length < hard.length) current = candidate;
+              const after = hardWeight(checkTextContract(contract, candidate.pages, storyPlan));
+              if (safe(current, candidate) && after < hardWeight(hard)) current = candidate;
             } catch (error) {
               if (!(error instanceof ProviderError)) throw error;
               this.log.warn({ err: error, bookId }, 'contract repair failed; keeping the text');
@@ -2918,7 +2920,13 @@ export class PreviewService {
     if (!ai.text.describeLook) return null;
     try {
       const { look } = await track('review', await ai.text.describeLook({ sheet, requested }));
-      return look.hair && look.outfit.length ? look : null;
+      if (!look.hair || look.outfit.length === 0) return null;
+      // La lámina sin una marca pedida (pecas...) no pasa en silencio (DECISIONS 351).
+      const marked = withRequestedMarks(look, requested);
+      if (marked.missing.length > 0) {
+        this.log.warn({ bookId, missing: marked.missing }, 'character sheet lacks requested marks');
+      }
+      return marked.look;
     } catch (error) {
       this.log.warn({ err: error, bookId }, 'character look failed');
       return null;

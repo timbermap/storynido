@@ -101,6 +101,13 @@ describe('contacto físico', () => {
     expect(hasTouch('Abraza fuerte a su almohada.')).toBe(false);
     expect(hasTouch('She hugged her teddy and fell asleep.')).toBe(false);
   });
+
+  it('el cosquilleo es una emoción; chocar los cinco sí es contacto (DECISIONS 351)', () => {
+    expect(hasTouch('Susurré, sintiendo un cosquilleo de emoción en el estómago.')).toBe(false);
+    expect(hasTouch('Le hizo cosquillas en la panza.')).toBe(true);
+    expect(hasTouch('Santi chocó su mano con la mía con una sonrisa.')).toBe(true);
+    expect(hasTouch('Nos quedamos parados, tomados de la mano.')).toBe(true);
+  });
 });
 
 describe('revisión de «El diario de Luli» (DECISIONS 329)', () => {

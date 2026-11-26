@@ -60,6 +60,10 @@ import {
   type CharacterLook,
   editorialPlan,
   hardViolations,
+  hardWeight,
+  withRequestedMarks,
+  hasTouch,
+  TOUCH_FREE_REWRITE,
   imageContractNote,
   spanishVoiceFor,
   visualBibleCheck,
@@ -402,8 +406,41 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
             { issues: hard.map((item) => item.repair) },
           );
           spend(repair.usage);
-          const after = hardViolations(checkTextContract(contract, repair.pages, storyPlan));
-          if (after.length < hard.length) pages = repair.pages.map((page) => ({ ...page }));
+          const after = hardWeight(checkTextContract(contract, repair.pages, storyPlan));
+          if (after < hardWeight(hard)) pages = repair.pages.map((page) => ({ ...page }));
+        }
+        // Igual que la muestra: el contacto que la pasada general no sacó se reescribe página por
+        // página, una vez, y solo queda si ya no hay contacto (DECISIONS 351; el examen no lo hacía y
+        // el abrazo de los amigos del diario quedaba como falla dura).
+        const touchLeft =
+          checkTextContract(contract, pages, storyPlan).find(
+            (violation) => violation.clause === 'no_touch' && violation.severity === 'hard',
+          )?.pages ?? [];
+        for (const number of touchLeft) {
+          const index = number - 1;
+          const page = pages[index];
+          if (!page?.text) continue;
+          const rewrite = await text
+            .rewritePage({
+              language: 'es',
+              spanishVoice: request.spanishVoice,
+              childName: request.childName,
+              age: request.age,
+              storyTitle: draft.title,
+              pageIndex: index,
+              previous: pages[index - 1]?.text ?? null,
+              next: pages[index + 1]?.text ?? null,
+              text: page.text,
+              words: { min: plan.words.min, max: plan.words.max },
+              mustInclude: contract.requiredNames,
+              refrain: storyPlan.refrain ?? null,
+              avoid: TOUCH_FREE_REWRITE,
+            })
+            .catch(() => null);
+          if (!rewrite) continue;
+          spend(rewrite.usage);
+          if (rewrite.text && !hasTouch(rewrite.text))
+            pages[index] = { ...page, text: rewrite.text };
         }
         const final = checkTextContract(contract, pages, storyPlan);
         const finalClauses = new Set(final.map((item) => item.clause));
@@ -519,7 +556,19 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
               })
           : null;
       }
-      const look = shared.look;
+      // Si la lámina salió sin una marca que el pedido trae (pecas...), se avisa y se suma a la
+      // ficha, así las páginas la siguen pidiendo (DECISIONS 351).
+      const marked = shared.look ? withRequestedMarks(shared.look, requested) : null;
+      if (
+        marked &&
+        marked.missing.length > 0 &&
+        !row.notes.some((note) => note.startsWith('ficha: la lámina'))
+      ) {
+        row.notes.push(
+          `ficha: la lámina no tiene ${marked.missing.join(', ')}, que el pedido trae`,
+        );
+      }
+      const look = marked?.look ?? null;
       if (look) row.look = look;
       if (arm === 'ficha' && look) {
         description = `${describeLookCharacter(testCase.name, testCase.age, look, testCase.traits)}${companionLine}`;

@@ -3557,3 +3557,12 @@ Pedido por Sebas en el hilo «Lograr que los visitantes se registren». En produ
 - **Navegadores de apps (Instagram, Facebook, TikTok…):** Google no permite su login dentro de ellos, ni con redirección. Ahí el panel oculta Google y muestra un aviso: en Android «Abrir en Chrome» (enlace `intent://`), en iPhone cómo abrir en Safari, «Copiar enlace» y el enlace por mail, que funciona en el mismo lugar.
 - **Medición:** `loginEvent` suma la etapa `viewed` (método y vía `none`), una vez por pestaña. El admin («Login por navegador») muestra cuántos vieron la página de ingresar, en apps y en navegadores comunes.
 - **Sin cambios por decisión de Sebas:** el texto de la página de ingresar y el login antes del creador (no se empieza sin cuenta).
+
+## 351 — Arreglos del paso 2: cosquilleo, bañera en el texto, reescrito de contacto y marcas pedidas (26 nov)
+
+El paso 2 de la medición del 26 nov (tapa y 3 páginas de fam-mama-5, diario-11 y eve-cumple-6) dejó cuatro cosas para arreglar sin gastar IA.
+
+- **«Cosquilleo» no es contacto:** el control buscaba «cosquill-» y marcaba «un cosquilleo de emoción en el estómago». Ahora busca «cosquillas», que sí es contacto. Además se suma chocar los cinco («chocó su mano con la mía», high five).
+- **El plan y el texto cuentan el mismo lugar:** el plan ponía la página 3 «en la bañera» y el texto ya la sacaba del agua, así que el dibujo y la revisión no coincidían. Cada página que el plan pone dentro de la bañera le llega al texto como «pasa DENTRO de la bañera: en esta página no sale del agua ni se seca». La ropa del plan se reconoce también con guiones bajos (bath_time).
+- **El reescrito de contacto:** el arreglo del texto se aceptaba solo si desaparecía una cláusula entera. Con dos páginas marcadas (una era el falso «cosquilleo»), sacar el abrazo de la otra no contaba y el arreglo se descartaba. Ahora se acepta si baja `hardWeight`, que cuenta cada página de cada cláusula dura. `eval:pedidos` suma la misma pasada página por página que ya hacía la muestra para el contacto que queda, así el examen mide lo mismo que el producto.
+- **Marcas pedidas que la lámina no tiene:** si el pedido trae pecas, hoyuelos, un lunar, una mancha de nacimiento o un diente de menos, y la ficha de la lámina no los anota, `withRequestedMarks` los suma a la ficha, así las páginas y la revisión los siguen pidiendo. Además queda un aviso en el log de la muestra y del pedido, y una nota en el examen. La lámina ya no se acepta en silencio sin esas marcas.

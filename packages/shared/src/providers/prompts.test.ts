@@ -33,6 +33,7 @@ import {
   sceneOutfit,
   varyShots,
   visualBibleCheck,
+  withRequestedMarks,
   visualBibleNote,
   spanishVoiceFor,
 } from './prompts';
@@ -787,6 +788,7 @@ describe('el baño (DECISIONS 349)', () => {
       isBathScene({ outfit: null, mustBeVisible: ['Lola brushes her teeth in the bathroom.'] }),
     ).toBe(false);
     expect(isBathScene({ outfit: 'in bed in pyjamas', mustBeVisible: [] })).toBe(false);
+    expect(isBathScene({ outfit: 'bath_time', mustBeVisible: [] })).toBe(true);
   });
 });
 
@@ -818,5 +820,55 @@ describe('peinado en el formulario (DECISIONS 346)', () => {
   it('sin peinado, la clave de los rasgos no cambia', () => {
     expect(avatarKey(avatar)).not.toContain('braids');
     expect(avatarKey({ ...avatar, hairStyle: 'bun' })).toBe(`${avatarKey(avatar)}|bun`);
+  });
+});
+
+describe('arreglos del paso 2 (DECISIONS 351)', () => {
+  it('el texto sabe que la página de la bañera pasa dentro del agua', () => {
+    const prompt = buildStoryPrompt({
+      ...base,
+      age: 5,
+      plan: {
+        theme: 'Dormir',
+        arc: 'Del baño a la cama',
+        scenes: [0, 1].map((pageIndex) => ({
+          pageIndex,
+          sceneGoal: `Escena ${String(pageIndex + 1)}`,
+          emotionalBeat: 'calma',
+          mustBeVisible: [],
+          notVisible: [],
+          continuityFacts: [],
+          wordBudget: 20,
+          personalDetail: null,
+          outfit: pageIndex === 0 ? 'bath_time' : null,
+        })),
+      },
+    });
+    expect(prompt).toContain(
+      'Página 1: Escena 1 (calma) · pasa DENTRO de la bañera: en esta página no sale del agua ni se seca',
+    );
+    expect(prompt).not.toContain('Página 2: Escena 2 (calma) · pasa DENTRO');
+  });
+
+  it('la marca pedida que la lámina no tiene se avisa y se suma a la ficha', () => {
+    const look = {
+      hair: 'long wavy red hair',
+      outfit: ['pale blue pajama top', 'pale blue pajama pants'],
+      glasses: false,
+      marks: [],
+      apparentAge: 'about 5 years old',
+    };
+    const marked = withRequestedMarks(
+      look,
+      'Lola, 5, light skin with freckles, long wavy red hair',
+    );
+    expect(marked.missing).toEqual(['freckles']);
+    expect(marked.look.marks).toEqual(['freckles']);
+    const kept = withRequestedMarks(
+      { ...look, marks: ['freckles across the nose'] },
+      'light skin with freckles',
+    );
+    expect(kept.missing).toEqual([]);
+    expect(withRequestedMarks(look, 'light skin').missing).toEqual([]);
   });
 });
