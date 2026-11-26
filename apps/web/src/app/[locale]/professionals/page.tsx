@@ -15,6 +15,7 @@ import {
   LandingSteps,
   ctaClass,
 } from '@/components/landing/sections';
+import { PROFESSIONAL_STEP_VISUALS } from '@/components/landing/step-visuals';
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { PersonaGrid } from '@/components/professionals/personas';
 import { brand } from '@/lib/brand';
@@ -127,6 +128,8 @@ export default async function ProfessionalsPage({ params }: Props) {
           title: t(`steps.${key}.title`),
           text: t(`steps.${key}.text`),
         }))}
+        visuals={PROFESSIONAL_STEP_VISUALS}
+        cta={cta}
       />
       <LandingChecklist
         title={t('benefitsTitle')}

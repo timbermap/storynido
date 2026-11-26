@@ -3558,7 +3558,15 @@ Pedido por Sebas en el hilo «Lograr que los visitantes se registren». En produ
 - **Medición:** `loginEvent` suma la etapa `viewed` (método y vía `none`), una vez por pestaña. El admin («Login por navegador») muestra cuántos vieron la página de ingresar, en apps y en navegadores comunes.
 - **Sin cambios por decisión de Sebas:** el texto de la página de ingresar y el login antes del creador (no se empieza sin cuenta).
 
-## 351 — Arreglos del paso 2: cosquilleo, bañera en el texto, reescrito de contacto y marcas pedidas (26 nov)
+## 351 — Las tarjetas de público y los pasos muestran personas y lo que pasa (26 nov)
+
+Sebas: hoy el primer desafío es que quien visita la página quiera entrar. La mesa (diseño/UX, marketing, producto) miró «¿Para quién es?» y los «Cómo funciona».
+
+- **«¿Para quién es?»:** cada tarjeta muestra a la persona que compra en su escena, no el producto (la primera maqueta con fotos de producto la rechazó Sebas): mamá e hija leyendo en la cama, el cumple con amigos y una maestra con una nena **sin contacto físico**. Acuarelas de muestra en `images/audiencias/` (dos generadas con gemini-3-pro-image, ~US$0,27, con referencias de estilo de marca; nunca libros de clientes). Escritorio: imagen arriba; celular: miniatura a la izquierda.
+- **Pasos con imagen:** `LandingSteps` acepta `visuals` (`StepVisual`: foto → personaje, abanico de 3 tapas que se abre al pasar el mouse, o una imagen) y se usa en la home, Familias, Cómo funciona, Celebraciones y Profesionales. Las imágenes de cada línea están en `landing/step-visuals.ts`. Sin carrusel automático: pesa en el celular y distrae.
+- **Botón debajo de los pasos:** `cta` pone «Empezar gratis» (o el de la línea) al final de los pasos: después de ver lo fácil que es, el paso siguiente queda a mano. Sin sesión lleva a ingresar y después al creador (DECISIONS 252).
+
+## 352 — Arreglos del paso 2: cosquilleo, bañera en el texto, reescrito de contacto y marcas pedidas (26 nov)
 
 El paso 2 de la medición del 26 nov (tapa y 3 páginas de fam-mama-5, diario-11 y eve-cumple-6) dejó cuatro cosas para arreglar sin gastar IA.
 

@@ -2921,7 +2921,7 @@ export class PreviewService {
     try {
       const { look } = await track('review', await ai.text.describeLook({ sheet, requested }));
       if (!look.hair || look.outfit.length === 0) return null;
-      // La lámina sin una marca pedida (pecas...) no pasa en silencio (DECISIONS 351).
+      // La lámina sin una marca pedida (pecas...) no pasa en silencio (DECISIONS 352).
       const marked = withRequestedMarks(look, requested);
       if (marked.missing.length > 0) {
         this.log.warn({ bookId, missing: marked.missing }, 'character sheet lacks requested marks');

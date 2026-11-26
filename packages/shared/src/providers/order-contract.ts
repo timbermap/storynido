@@ -552,7 +552,7 @@ export const hardViolations = (violations: readonly ContractViolation[]) =>
 /**
  * Cuánto falla un texto: cada página de cada cláusula dura cuenta una vez (una cláusula sin páginas
  * cuenta 1). El arreglo se acepta si baja este número, no solo si desaparece una cláusula entera
- * (DECISIONS 351, paso 2 del 26 nov: el reescrito sacaba el abrazo de la página 10 pero se
+ * (DECISIONS 352, paso 2 del 26 nov: el reescrito sacaba el abrazo de la página 10 pero se
  * descartaba porque la página 2 seguía marcada y la cuenta de cláusulas no bajaba).
  */
 export const hardWeight = (violations: readonly ContractViolation[]) =>

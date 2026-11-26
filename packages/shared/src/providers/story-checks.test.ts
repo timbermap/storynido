@@ -102,7 +102,7 @@ describe('contacto físico', () => {
     expect(hasTouch('She hugged her teddy and fell asleep.')).toBe(false);
   });
 
-  it('el cosquilleo es una emoción; chocar los cinco sí es contacto (DECISIONS 351)', () => {
+  it('el cosquilleo es una emoción; chocar los cinco sí es contacto (DECISIONS 352)', () => {
     expect(hasTouch('Susurré, sintiendo un cosquilleo de emoción en el estómago.')).toBe(false);
     expect(hasTouch('Le hizo cosquillas en la panza.')).toBe(true);
     expect(hasTouch('Santi chocó su mano con la mía con una sonrisa.')).toBe(true);

@@ -230,7 +230,7 @@ describe('imageContractNote', () => {
   });
 });
 
-describe('cuánto falla un texto (DECISIONS 351)', () => {
+describe('cuánto falla un texto (DECISIONS 352)', () => {
   it('cuenta cada página de cada cláusula dura, así un arreglo parcial también se acepta', () => {
     const touch = (pages: number[]) => ({
       clause: 'no_touch' as const,

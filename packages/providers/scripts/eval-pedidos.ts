@@ -410,7 +410,7 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
           if (after < hardWeight(hard)) pages = repair.pages.map((page) => ({ ...page }));
         }
         // Igual que la muestra: el contacto que la pasada general no sacó se reescribe página por
-        // página, una vez, y solo queda si ya no hay contacto (DECISIONS 351; el examen no lo hacía y
+        // página, una vez, y solo queda si ya no hay contacto (DECISIONS 352; el examen no lo hacía y
         // el abrazo de los amigos del diario quedaba como falla dura).
         const touchLeft =
           checkTextContract(contract, pages, storyPlan).find(
@@ -557,7 +557,7 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
           : null;
       }
       // Si la lámina salió sin una marca que el pedido trae (pecas...), se avisa y se suma a la
-      // ficha, así las páginas la siguen pidiendo (DECISIONS 351).
+      // ficha, así las páginas la siguen pidiendo (DECISIONS 352).
       const marked = shared.look ? withRequestedMarks(shared.look, requested) : null;
       if (
         marked &&

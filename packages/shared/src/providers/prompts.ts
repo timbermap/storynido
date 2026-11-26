@@ -273,7 +273,7 @@ ${input.plan.scenes
       `- Página ${String(scene.pageIndex + 1)}: ${scene.sceneGoal} (${scene.emotionalBeat})${
         scene.personalDetail ? ` · detalle personal: ${scene.personalDetail}` : ''
       }${
-        // El texto y el plan cuentan el mismo lugar (DECISIONS 351): si el plan pone la página
+        // El texto y el plan cuentan el mismo lugar (DECISIONS 352): si el plan pone la página
         // dentro de la bañera, el texto no la saca del agua en esa página.
         isBathScene(scene)
           ? ' · pasa DENTRO de la bañera: en esta página no sale del agua ni se seca'
@@ -636,7 +636,7 @@ const REQUESTED_MARKS: { mark: string; pattern: RegExp }[] = [
 ];
 
 /**
- * Las marcas que el pedido trae y la ficha de la lámina no (DECISIONS 351, paso 2 del 26 nov: el
+ * Las marcas que el pedido trae y la ficha de la lámina no (DECISIONS 352, paso 2 del 26 nov: el
  * pedido tenía pecas y la ficha decía «marks: []», así que ninguna página las dibujaba). Devuelve la
  * ficha con esas marcas sumadas, para que las páginas y la revisión las sigan pidiendo, y la lista
  * de las que faltaban, para avisar que la lámina salió sin ellas.

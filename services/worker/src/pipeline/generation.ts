@@ -950,7 +950,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
             requested,
           });
           lookCost = await record(ctx, 'review', result.usage);
-          // La lámina sin una marca pedida (pecas...) no pasa en silencio (DECISIONS 351).
+          // La lámina sin una marca pedida (pecas...) no pasa en silencio (DECISIONS 352).
           const marked = withRequestedMarks(result.look, requested);
           if (marked.missing.length > 0) {
             ctx.log.warn(

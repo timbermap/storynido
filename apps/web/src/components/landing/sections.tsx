@@ -7,6 +7,7 @@ import { FaqList, type FaqItem } from '@/components/home/faq-list';
 import { buttonVariants } from '@/components/ui/button';
 import { AuthLink } from '@/components/auth/auth-link';
 import { StoryCover } from '@/components/stories/story-cover';
+import { StepVisual, type StepVisualSpec } from '@/components/landing/step-visual';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
@@ -95,42 +96,75 @@ export function LandingHero({
   );
 }
 
+/**
+ * «Cómo funciona» en tres pasos, en todas las landings y la home. Con `visuals`, cada paso lleva
+ * su imagen (lo que pasa de verdad en ese paso) con el número encima; sin ellas, el número solo.
+ * `cta` pone el botón para empezar debajo de los pasos: después de ver lo fácil que es, el paso
+ * siguiente queda a mano.
+ */
 export function LandingSteps({
   title,
+  subtitle,
   steps,
+  visuals,
+  cta,
+  id,
   tone = 'cream',
 }: {
   title: string;
+  subtitle?: string;
   steps: { title: string; text: string }[];
+  visuals?: StepVisualSpec[];
+  cta?: ReactNode;
+  id?: string;
   tone?: SectionTone;
 }) {
   const tones = ['bg-secondary text-primary', 'bg-peach text-[#a33f33]', 'bg-mint text-success'];
   return (
-    <section className={BAND[tone]}>
+    <section id={id} className={`scroll-mt-28 ${BAND[tone]}`}>
       <div className="container-page py-20 lg:py-24">
-        <h2 className="text-center text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
-          {title}
-        </h2>
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">{title}</h2>
+          {subtitle && <p className="mt-3 text-lg text-muted-foreground">{subtitle}</p>}
+        </div>
         <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-6">
-          {steps.map((step, index) => (
-            <li key={step.title} className="relative flex flex-col items-center text-center">
-              <span
-                className={`grid size-14 place-items-center rounded-full font-display text-2xl font-bold ${tones[index % tones.length] ?? ''}`}
-              >
-                {index + 1}
-              </span>
-              {index < steps.length - 1 && (
-                <ArrowRight
-                  aria-hidden="true"
-                  className="absolute top-4 -right-5 hidden size-7 text-[#e7b9ad] md:block"
-                  strokeWidth={1.5}
-                />
-              )}
-              <h3 className="mt-5 text-2xl leading-tight font-medium">{step.title}</h3>
-              <p className="mt-2 max-w-xs text-muted-foreground">{step.text}</p>
-            </li>
-          ))}
+          {steps.map((step, index) => {
+            const visual = visuals?.[index];
+            const numberTone = tones[index % tones.length] ?? '';
+            return (
+              <li key={step.title} className="relative flex flex-col items-center text-center">
+                {visual ? (
+                  <div className="relative w-full">
+                    <StepVisual spec={visual} />
+                    <span
+                      className={`absolute -top-3 left-[max(0.25rem,calc(50%-10rem))] grid size-10 place-items-center rounded-full font-display text-lg font-bold shadow-[var(--shadow-card)] ${numberTone}`}
+                    >
+                      {index + 1}
+                    </span>
+                  </div>
+                ) : (
+                  <span
+                    className={`grid size-14 place-items-center rounded-full font-display text-2xl font-bold ${numberTone}`}
+                  >
+                    {index + 1}
+                  </span>
+                )}
+                {index < steps.length - 1 && (
+                  <ArrowRight
+                    aria-hidden="true"
+                    className={`absolute -right-5 hidden size-7 text-[#e7b9ad] md:block ${visual ? 'top-[28%]' : 'top-4'}`}
+                    strokeWidth={1.5}
+                  />
+                )}
+                <h3 className={`${visual ? 'mt-6' : 'mt-5'} text-2xl leading-tight font-medium`}>
+                  {step.title}
+                </h3>
+                <p className="mt-2 max-w-xs text-muted-foreground">{step.text}</p>
+              </li>
+            );
+          })}
         </ol>
+        {cta && <div className="mt-12 flex justify-center">{cta}</div>}
       </div>
     </section>
   );

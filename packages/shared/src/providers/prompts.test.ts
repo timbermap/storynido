@@ -823,7 +823,7 @@ describe('peinado en el formulario (DECISIONS 346)', () => {
   });
 });
 
-describe('arreglos del paso 2 (DECISIONS 351)', () => {
+describe('arreglos del paso 2 (DECISIONS 352)', () => {
   it('el texto sabe que la página de la bañera pasa dentro del agua', () => {
     const prompt = buildStoryPrompt({
       ...base,
