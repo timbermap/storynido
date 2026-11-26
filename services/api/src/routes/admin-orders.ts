@@ -6,6 +6,7 @@ import {
   addressProblems,
   apiRoutes,
   judgePanelSchema,
+  JUDGE_GATE_CODE,
   normalizeFirestoreData,
   toUsd,
   utcDay,
@@ -499,11 +500,16 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
     const doc = await load(orderId);
     const status = doc.get('status') as OrderStatus;
     const failedStep = doc.get('pipeline.failedStep') as string | null | undefined;
-    if (status !== 'qa_failed' || failedStep !== 'quality_check') {
+    // Freno de la mesa (DECISIONS 353): la maqueta frenó porque la mesa no lo compraría. Aprobar es
+    // «entregar igual» esta generación (para rehacerlo está «Regenerar»).
+    const judgeGated =
+      failedStep === 'layout_pdf' &&
+      String(doc.get('pipeline.error') ?? '').startsWith(JUDGE_GATE_CODE);
+    if (status !== 'qa_failed' || (failedStep !== 'quality_check' && !judgeGated)) {
       throw new AppError(
         409,
         'bad_request',
-        'Solo se aprueba un pedido que falló el control de calidad (si falló otro paso, reintenta o regenera).',
+        'Solo se aprueba un pedido que falló el control de calidad o que frenó la mesa (si falló otro paso, reintenta o regenera).',
       );
     }
     const generation = Number(doc.get('pipeline.generation') ?? 0);
@@ -517,15 +523,20 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
         entity: COLLECTIONS.orders,
         entityId: orderId,
         before: { status, failedStep },
-        after: { approvedGeneration: generation, requestId },
+        after: { approvedGeneration: generation, requestId, judgeGated },
       },
       (batch) => {
-        batch.update(orders.doc(orderId), { 'pipeline.humanApproval': { generation, by } });
+        batch.update(
+          orders.doc(orderId),
+          judgeGated
+            ? { 'pipeline.judgeApproval': { generation, by } }
+            : { 'pipeline.humanApproval': { generation, by } },
+        );
       },
     );
     await pipelineEvents.publish({
       type: 'order.retry_step',
-      fromStep: 'quality_check',
+      fromStep: judgeGated ? 'layout_pdf' : 'quality_check',
       orderId,
       requestId,
     });

@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
 import type { AITextProvider, AiUsage, ImageData } from './ai';
-import { hasJudgePanel, judgePanelSchema, runPanel, storedPanel } from './judge-panel';
+import {
+  hasJudgePanel,
+  JUDGE_GATE_CODE,
+  judgeGate,
+  judgeGateMessage,
+  judgePanelSchema,
+  runPanel,
+  storedPanel,
+} from './judge-panel';
 
 const usage: AiUsage = { provider: 'test', model: 'm', costUsdMicros: 1000 };
 const image: ImageData = { bytes: new Uint8Array([1]), mimeType: 'image/webp' };
@@ -113,5 +121,38 @@ describe('mesa de jueces', () => {
     expect(judgePanelSchema.parse(stored)).toEqual(stored);
     expect(stored.buyer).not.toHaveProperty('fixes');
     expect(stored.professional).toBeNull();
+  });
+});
+
+describe('judgeGate (DECISIONS 353)', () => {
+  const base = { score: 4, weakest: 'chico', buyer: null, professional: null };
+
+  it('deja pasar un 4 con el comprador que compra', () => {
+    expect(judgeGate({ ...base, buyer: { ...buyer, verdict: 'compra' } })).toEqual({
+      pass: true,
+      reasons: [],
+    });
+  });
+
+  it('frena por nota baja, comprador que no compra o profesional que no lo usaría', () => {
+    expect(judgeGate({ ...base, score: 3 }).reasons).toEqual(['mesa 3/5 (la baja chico)']);
+    expect(judgeGate({ ...base, buyer: { ...buyer, verdict: 'no' } }).pass).toBe(false);
+    expect(
+      judgeGate({
+        ...base,
+        professional: { score: 4, meetsGoal: 4, wouldUse: false, risks: [] },
+      }).reasons,
+    ).toEqual(['el profesional no lo usaría así']);
+  });
+
+  it('sin mesa no frena (un juez caído no deja a la familia sin libro)', () => {
+    expect(judgeGate(null).pass).toBe(true);
+    expect(judgeGate({ ...base, score: null }).pass).toBe(true);
+  });
+
+  it('el mensaje empieza con el código y entra en 500 caracteres', () => {
+    const message = judgeGateMessage(['mesa 2/5'], [{ area: 'dibujo', fix: 'x'.repeat(600) }]);
+    expect(message.startsWith(`${JUDGE_GATE_CODE}: `)).toBe(true);
+    expect(message.length).toBe(500);
   });
 });

@@ -143,6 +143,25 @@ describe('admin: operación de pedidos', () => {
     expect(audit.size).toBe(1);
   });
 
+  it('entregar igual un libro que frenó la mesa: vuelve a la maqueta con judgeApproval (DECISIONS 353)', async () => {
+    await order('o3', {
+      status: 'qa_failed',
+      pipeline: {
+        generation: 3,
+        failedStep: 'layout_pdf',
+        error: 'judge_panel_low: Mesa de jueces: mesa 3/5',
+      },
+    });
+    const ok = await post('/v1/admin/orders/o3/approve');
+    expect(ok.statusCode).toBe(200);
+    expect(events.events).toMatchObject([
+      { type: 'order.retry_step', fromStep: 'layout_pdf', orderId: 'o3' },
+    ]);
+    const pipeline = (await db.doc('orders/o3').get()).get('pipeline') as Record<string, unknown>;
+    expect(pipeline.judgeApproval).toEqual({ generation: 3, by: 'admin@storynido.test' });
+    expect(pipeline.humanApproval).toBeUndefined();
+  });
+
   it('reenviar el mail del estado actual queda en la auditoría', async () => {
     await order('o1', {
       priceSnapshot: { totalMinor: 40000, currency: 'MXN' },

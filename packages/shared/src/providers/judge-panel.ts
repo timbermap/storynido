@@ -9,8 +9,9 @@
  *
  * La nota de la mesa es la del juez más bajo (un solo problema grave alcanza para que el padre no
  * vuelva) y los arreglos salen primero de los jueces que pusieron menos, con la parte del proceso
- * que los tiene que hacer. Corre después de entregar cada libro (worker, nunca frena la entrega),
- * en el golden set y sobre los pedidos terminados; el resultado queda en el pedido (admin).
+ * que los tiene que hacer. Corre al armar cada libro (worker), en el golden set y sobre los pedidos
+ * terminados; el resultado queda en el pedido (admin). Desde DECISIONS 353 también puede frenar la
+ * entrega (`judgeGate`).
  */
 import { z } from 'zod';
 
@@ -301,4 +302,47 @@ export function storedPanel(panel: Panel, costUsdMicros: number, at: Date): Stor
     child: drop(panel.child),
     professional: drop(panel.professional),
   };
+}
+
+/**
+ * Freno de la mesa (DECISIONS 353, Sebas 26 nov: «la mesa frena la entrega»). Un libro se entrega
+ * solo si la mesa le da 4 o más, el comprador no dice «no» y, en Profesionales, el profesional lo
+ * usaría. Si la mesa no llegó a opinar (tiempo, error), no frena: un juez caído no puede dejar a
+ * una familia sin su libro.
+ */
+export const JUDGE_GATE_MIN_SCORE = 4;
+/** Código del freno en `pipeline.error` y en los avisos: así el admin y el vigía lo reconocen. */
+export const JUDGE_GATE_CODE = 'judge_panel_low';
+/** Tope de la revisión: pasado este tiempo sin que nadie mire, se entrega la versión que hay. */
+export const JUDGE_GATE_MAX_WAIT_MS = 24 * 3600 * 1000;
+
+type GatePanel = Pick<StoredJudgePanel, 'score' | 'weakest' | 'buyer' | 'professional'>;
+
+export function judgeGate(
+  panel: GatePanel | null | undefined,
+  minScore = JUDGE_GATE_MIN_SCORE,
+): { pass: boolean; reasons: string[] } {
+  if (panel?.score === undefined || panel.score === null) return { pass: true, reasons: [] };
+  const reasons: string[] = [];
+  if (panel.score < minScore) {
+    reasons.push(
+      `mesa ${String(panel.score)}/5${panel.weakest ? ` (la baja ${panel.weakest})` : ''}`,
+    );
+  }
+  if (panel.buyer?.verdict === 'no') reasons.push('el comprador no lo compraría');
+  if (panel.professional && !panel.professional.wouldUse) {
+    reasons.push('el profesional no lo usaría así');
+  }
+  return { pass: reasons.length === 0, reasons };
+}
+
+/** El mensaje del freno: empieza con el código y nombra los motivos y los arreglos de la mesa. */
+export function judgeGateMessage(
+  reasons: string[],
+  fixes: { area: string; fix: string }[] = [],
+): string {
+  const head = `${JUDGE_GATE_CODE}: Mesa de jueces: ${reasons.join(' · ')}`;
+  const tail =
+    fixes.length > 0 ? `. Arreglos: ${fixes.map((f) => `[${f.area}] ${f.fix}`).join('; ')}` : '';
+  return `${head}${tail}`.slice(0, 500);
 }

@@ -15,6 +15,10 @@ import {
   hasJudgePanel,
   runPanel,
   storedPanel,
+  judgeGate,
+  judgeGateMessage,
+  JUDGE_GATE_CODE,
+  type StoredJudgePanel,
   ANY_COUNTRY,
   COLLECTIONS,
   GLOBAL_DOC_ID,
@@ -220,8 +224,13 @@ export interface QaLimits {
   concurrency: number;
   /** Revisión del libro entero después de la de cada página (miniaturas contra la biblia visual). */
   bookReview: boolean;
-  /** Mesa de jueces al entregar (26 nov): solo mide y queda en el pedido; nunca frena la entrega. */
+  /** Mesa de jueces al entregar (26 nov): mide y queda en el pedido. */
   judgePanel: boolean;
+  /**
+   * Freno de la mesa (DECISIONS 353): con nota menor a 4 el libro no se entrega y va a revisión
+   * (tope de 24 h). Encendido por ambiente; `aiConfig.judgeGate` ('on' | 'off') lo pisa.
+   */
+  judgeGate: boolean;
 }
 
 export const DEFAULT_QA_LIMITS: QaLimits = {
@@ -232,6 +241,7 @@ export const DEFAULT_QA_LIMITS: QaLimits = {
   concurrency: 4,
   bookReview: true,
   judgePanel: true,
+  judgeGate: false,
 };
 
 /** Páginas armadas que mira la mesa de jueces (todas cuestan más y no cambian el veredicto). */
@@ -505,6 +515,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
   const limits = { ...DEFAULT_QA_LIMITS, ...deps.qa };
   const storage = () => providers.storage();
   let aiConfig: { loadedAt: number; ready: Promise<void> } | null = null;
+  /** `aiConfig.judgeGate` del admin: 'on' o 'off' pisan lo del ambiente. */
+  let judgeGateOverride: boolean | null = null;
 
   /** Lee aiConfig y aplica el proveedor y los modelos que eligió el admin (como la API). */
   async function loadAiConfig(): Promise<void> {
@@ -513,6 +525,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       const value: unknown = config?.[name];
       return typeof value === 'string' && value !== '' ? value : undefined;
     };
+    const gate = field('judgeGate');
+    judgeGateOverride = gate === 'on' ? true : gate === 'off' ? false : null;
     try {
       providers.setAiOverride({
         text: field('textProvider'),
@@ -2206,13 +2220,33 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       await browser.close();
     }
 
-    await judging;
+    const panel = await judging;
     if (problems.length > 0) {
       await qaEvent(ctx, 'layout_blocked', { problems: problems.length });
       throw new HumanReviewError(
         'layout_blocked',
         `Maquetación: ${problems.join(' · ')}`.slice(0, 500),
       );
+    }
+    // Freno de la mesa (DECISIONS 353): el libro que la mesa no compraría no se entrega solo.
+    // Una persona lo mira en el admin («Entregar igual» o «Regenerar»); si nadie lo mira en 24 h,
+    // el vigía lo entrega como está.
+    const gateOn = judgeGateOverride ?? limits.judgeGate;
+    const approval = ctx.order.judgeApproval;
+    if (gateOn && approval?.generation !== ctx.generation) {
+      const gate = judgeGate(panel);
+      if (!gate.pass) {
+        await qaEvent(ctx, 'judge_gate_blocked', {
+          score: panel?.score ?? 0,
+          reasons: gate.reasons.join(' · ').slice(0, 200),
+        });
+        throw new HumanReviewError(
+          JUDGE_GATE_CODE,
+          judgeGateMessage(gate.reasons, panel?.fixes ?? []),
+        );
+      }
+    } else if (gateOn && approval) {
+      await qaEvent(ctx, 'judge_gate_released', { by: approval.by ?? 'admin' });
     }
     return { output: { files, printEligible, preflight: 'passed', snapshotHash: hash } };
   }
@@ -2226,26 +2260,28 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
    * Mesa de jueces (26 nov 2026, Sebas: «por cada libro generado la mesa dé su feedback y quede
    * registrado en Operaciones»): comprador con ventas y marketing, continuidad contra las láminas,
    * el chico que escucha y, en Profesionales, el profesional. Queda en `judgePanel` del pedido. Nunca
-   * falla ni frena la entrega: si algo sale mal, el pedido sigue sin mesa.
+   * falla el paso: si algo sale mal, el pedido sigue sin mesa. El freno (DECISIONS 353) lo decide
+   * la maqueta con lo que devuelve.
    */
-  async function judgeBook(ctx: StepContext): Promise<void> {
-    if (!limits.judgePanel || ctx.order.sourceOrderId) return;
+  async function judgeBook(ctx: StepContext): Promise<StoredJudgePanel | null> {
+    if (!limits.judgePanel || ctx.order.sourceOrderId) return null;
     const orderRef = db.collection(COLLECTIONS.orders).doc(ctx.order.id);
     try {
       const data = (await orderRef.get()).data() ?? {};
-      const previous = data.judgePanel as { generation?: number } | undefined;
-      if (previous?.generation === ctx.generation) return;
+      const previous = data.judgePanel as (StoredJudgePanel & { generation?: number }) | undefined;
+      // Reintento de la maqueta (por ejemplo, después de la revisión): la mesa ya opinó.
+      if (previous?.generation === ctx.generation) return previous;
       const snapshot = data.snapshot as BookSnapshot | undefined;
-      if (!snapshot || snapshot.contentType === 'coloring') return;
+      if (!snapshot || snapshot.contentType === 'coloring') return null;
       const provider = await ai();
-      if (!hasJudgePanel(provider.text)) return;
+      if (!hasJudgePanel(provider.text)) return null;
       const images = new Map(
         ((ctx.outputs.quality_check?.images ?? []) as { index: number; imagePath: string }[]).map(
           (item) => [item.index, item.imagePath],
         ),
       );
       const coverPath = images.get(0);
-      if (!coverPath) return;
+      if (!coverPath) return null;
       const typography = typographyOf(snapshot);
       const composed: ImageData[] = [];
       const drawn: ImageData[] = [];
@@ -2312,11 +2348,10 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       clearTimeout(timer);
       if (!panel) {
         ctx.log.warn({ orderId: ctx.order.id }, 'judge panel timed out');
-        return;
+        return null;
       }
-      await orderRef.update({
-        judgePanel: { ...storedPanel(panel, cost, new Date()), generation: ctx.generation },
-      });
+      const stored = storedPanel(panel, cost, new Date());
+      await orderRef.update({ judgePanel: { ...stored, generation: ctx.generation } });
       ctx.log.info(
         {
           event: 'judge_panel',
@@ -2327,8 +2362,10 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         },
         'judge panel',
       );
+      return stored;
     } catch (error) {
       ctx.log.warn({ orderId: ctx.order.id, err: error }, 'judge panel failed');
+      return null;
     }
   }
 

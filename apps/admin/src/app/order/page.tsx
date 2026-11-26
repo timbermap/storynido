@@ -3,6 +3,7 @@
 import {
   CONTRACT_CLAUSES,
   CONTRACT_CLAUSE_LABELS,
+  JUDGE_GATE_CODE,
   PIPELINE_STEPS,
   type AdminOrderDetail,
   type ContractClauseId,
@@ -530,6 +531,24 @@ function OrderDetail({ id }: { id: string }) {
               Aprobar páginas
             </Button>
           )}
+          {order.status === 'qa_failed' &&
+            order.failedStep === 'layout_pdf' &&
+            (order.error ?? '').startsWith(JUDGE_GATE_CODE) && (
+              <Button
+                disabled={busy}
+                onClick={() =>
+                  void act(
+                    '¿Entregar el libro como está aunque la mesa no lo compraría? (Para rehacerlo usá «Regenerar».)',
+                    async () => {
+                      await api('adminApproveOrder', { params });
+                      return 'Liberado: el pedido sigue a la entrega.';
+                    },
+                  )
+                }
+              >
+                Entregar igual
+              </Button>
+            )}
           {order.shipping &&
             !order.shipping.hasPhone &&
             (order.status === 'qa_failed' || order.status === 'ready') && (

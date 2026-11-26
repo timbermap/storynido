@@ -161,6 +161,8 @@ const watchdog = new PipelineWatchdog(
   notifier,
   app.log,
   env.GCP_PROJECT_ID || 'demo-storynido',
+  // El pipeline se arma más abajo: se lo busca al momento de usarlo.
+  (event) => pipeline.handleEvent(event),
 );
 
 const gcp = { projectId: env.GCP_PROJECT_ID, region: env.GCP_REGION };
@@ -174,6 +176,9 @@ const pipeline = new Pipeline(
         providers,
         log: app.log,
         allowSimulated: env.APP_ENV === 'local' || env.APP_ENV === 'test',
+        // Freno de la mesa (DECISIONS 353): encendido en staging; en producción se prende desde
+        // Admin (aiConfig.judgeGate = 'on') cuando Sebas lo decida, sin deploy.
+        qa: { judgeGate: env.APP_ENV === 'staging' },
         // En la nube, con la cuenta de servicio del worker (sin clave de API).
         ...(cloud && env.GCP_PROJECT_ID
           ? { addressValidator: new GoogleAddressValidator({ projectId: env.GCP_PROJECT_ID }) }

@@ -97,6 +97,7 @@ interface OrderDoc {
     failedStep?: PipelineStep | null;
     startedAt?: unknown;
     humanApproval?: { generation: number; by: string | null } | null;
+    judgeApproval?: { generation: number; by: string | null } | null;
   };
 }
 
@@ -721,6 +722,7 @@ export class Pipeline {
       items: order.items ?? [],
       sourceOrderId: order.sourceOrderId ?? null,
       humanApproval: order.pipeline?.humanApproval ?? null,
+      judgeApproval: order.pipeline?.judgeApproval ?? null,
       country: order.country ?? null,
     };
   }
@@ -747,6 +749,7 @@ export class Pipeline {
         items: order.items ?? [],
         sourceOrderId: order.sourceOrderId ?? null,
         humanApproval: order.pipeline?.humanApproval ?? null,
+        judgeApproval: order.pipeline?.judgeApproval ?? null,
         country: order.country ?? null,
       },
       orderId,
