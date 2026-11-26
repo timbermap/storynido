@@ -226,7 +226,7 @@ export interface QaLimits {
   /** Mesa de jueces al entregar (26 nov): mide y queda en el pedido. */
   judgePanel: boolean;
   /**
-   * Freno de la mesa (DECISIONS 351): con nota menor a 4 el libro no se entrega y va a revisión
+   * Freno de la mesa (DECISIONS 352): con nota menor a 4 el libro no se entrega y va a revisión
    * (tope de 24 h). Encendido por ambiente; `aiConfig.judgeGate` ('on' | 'off') lo pisa.
    */
   judgeGate: boolean;
@@ -2218,7 +2218,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         `Maquetación: ${problems.join(' · ')}`.slice(0, 500),
       );
     }
-    // Freno de la mesa (DECISIONS 351): el libro que la mesa no compraría no se entrega solo.
+    // Freno de la mesa (DECISIONS 352): el libro que la mesa no compraría no se entrega solo.
     // Una persona lo mira en el admin («Entregar igual» o «Regenerar»); si nadie lo mira en 24 h,
     // el vigía lo entrega como está.
     const gateOn = judgeGateOverride ?? limits.judgeGate;
@@ -2250,7 +2250,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
    * Mesa de jueces (26 nov 2026, Sebas: «por cada libro generado la mesa dé su feedback y quede
    * registrado en Operaciones»): comprador con ventas y marketing, continuidad contra las láminas,
    * el chico que escucha y, en Profesionales, el profesional. Queda en `judgePanel` del pedido. Nunca
-   * falla el paso: si algo sale mal, el pedido sigue sin mesa. El freno (DECISIONS 351) lo decide
+   * falla el paso: si algo sale mal, el pedido sigue sin mesa. El freno (DECISIONS 352) lo decide
    * la maqueta con lo que devuelve.
    */
   async function judgeBook(ctx: StepContext): Promise<StoredJudgePanel | null> {

@@ -143,7 +143,7 @@ describe('admin: operación de pedidos', () => {
     expect(audit.size).toBe(1);
   });
 
-  it('entregar igual un libro que frenó la mesa: vuelve a la maqueta con judgeApproval (DECISIONS 351)', async () => {
+  it('entregar igual un libro que frenó la mesa: vuelve a la maqueta con judgeApproval (DECISIONS 352)', async () => {
     await order('o3', {
       status: 'qa_failed',
       pipeline: {

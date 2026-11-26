@@ -62,7 +62,7 @@ export class PipelineWatchdog {
   }
 
   /**
-   * Tope del freno de la mesa (DECISIONS 351): un libro frenado que nadie miró en 24 h se entrega
+   * Tope del freno de la mesa (DECISIONS 352): un libro frenado que nadie miró en 24 h se entrega
    * como está, para que la familia no se quede sin su libro. Queda registrado quién lo soltó.
    */
   private async releaseGated(now: Date): Promise<string[]> {

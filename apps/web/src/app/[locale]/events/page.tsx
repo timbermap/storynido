@@ -12,6 +12,7 @@ import {
   LandingSteps,
   ctaClass,
 } from '@/components/landing/sections';
+import { EVENT_STEP_VISUALS } from '@/components/landing/step-visuals';
 import { PhotoPromise } from '@/components/landing/photo-promise';
 import { HeroPhoto } from '@/components/home/hero-photo';
 import { OccasionGrid } from '@/components/events/occasions';
@@ -175,6 +176,8 @@ export default async function EventsPage({ params }: Props) {
           title: t(`steps.${key}.title`),
           text: t(`steps.${key}.text`),
         }))}
+        visuals={EVENT_STEP_VISUALS}
+        cta={cta}
       />
       {/* «¿Qué celebrás?» como en el catálogo (DECISIONS 333); las temáticas, en /eventos/tematicas. */}
       <OccasionGrid locale={locale} collections={collections} stories={stories} landing />

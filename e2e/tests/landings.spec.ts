@@ -289,10 +289,11 @@ test('Cómo funciona: página propia con precios del país, entrega y «Empezar 
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   // Los precios del ebook salen de la oferta del país, no del texto.
   await expect(page.locator('#precios dd').first()).toContainText(/\d/);
-  // Sin sesión, los dos «Empezar gratis» de la página llevan a ingresar y, después, al creador
+  // Sin sesión, los tres «Empezar gratis» de la página (arriba, debajo de los pasos y al final)
+  // llevan a ingresar y, después, al creador
   // (DECISIONS 252), igual que el resto.
   const starts = page.getByRole('main').getByRole('link', { name: /Empezar gratis/ });
-  await expect(starts).toHaveCount(2);
+  await expect(starts).toHaveCount(3);
   for (const start of await starts.all()) {
     await expect(start).toHaveAttribute('href', /\/es\/ingresar\?next=%2Fes%2Fcrear$/);
   }

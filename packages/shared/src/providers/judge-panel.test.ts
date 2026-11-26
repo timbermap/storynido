@@ -124,7 +124,7 @@ describe('mesa de jueces', () => {
   });
 });
 
-describe('judgeGate (DECISIONS 351)', () => {
+describe('judgeGate (DECISIONS 352)', () => {
   const base = { score: 4, weakest: 'chico', buyer: null, professional: null };
 
   it('deja pasar un 4 con el comprador que compra', () => {
