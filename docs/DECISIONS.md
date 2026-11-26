@@ -3553,7 +3553,7 @@ En la medición del 26 nov (ficha2) los dos libros tuvieron una falla dura de te
 
 Pedido por Sebas en el hilo «Lograr que los visitantes se registren». En producción (30 días) Google tuvo 7 intentos y 2 entradas, y «Continuar con Apple» respondía «Ese método de inicio de sesión todavía no está disponible».
 
-- **Apple:** el botón se muestra solo con `NEXT_PUBLIC_AUTH_APPLE=true` (`appleSignInEnabled`). Hoy no está en ningún entorno: el proveedor necesita la cuenta de Apple Developer (DECISIONS 041/`docs/SETUP.md`).
+- **Apple:** el botón se muestra solo con `NEXT_PUBLIC_AUTH_APPLE=true` (`appleSignInEnabled`). Hoy no está en ningún entorno: el proveedor necesita la cuenta de Apple Developer (ver `docs/SETUP.md`).
 - **Navegadores de apps (Instagram, Facebook, TikTok…):** Google no permite su login dentro de ellos, ni con redirección. Ahí el panel oculta Google y muestra un aviso: en Android «Abrir en Chrome» (enlace `intent://`), en iPhone cómo abrir en Safari, «Copiar enlace» y el enlace por mail, que funciona en el mismo lugar.
 - **Medición:** `loginEvent` suma la etapa `viewed` (método y vía `none`), una vez por pestaña. El admin («Login por navegador») muestra cuántos vieron la página de ingresar, en apps y en navegadores comunes.
 - **Sin cambios por decisión de Sebas:** el texto de la página de ingresar y el login antes del creador (no se empieza sin cuenta).
