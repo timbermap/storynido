@@ -3596,3 +3596,12 @@ Sebas: «el principal problema que veo continuamente es el texto sobre la imagen
 - **Tarjeta impresa del kit:** el frente pasa de franja degradé sobre la tapa a dibujo arriba (72 %, recorta la zona libre del título) y franja de papel abajo.
 - **Sin control `text_zone`:** las páginas `band` no tienen zona que vigilar, así que no hay rechazos ni reintentos por caras bajo el texto.
 - **Libros anteriores:** conservan su armado (`pageLayout` sin `band`). Aplica a muestras nuevas y a sus pedidos. La muestra, la página rehecha y el pedido piden la misma forma.
+
+## 355 — Calibración con los votos de Sebas: texto sobre el dibujo y situaciones peligrosas (26 nov)
+
+Sebas votó 10 libros del golden set (página de calibración, colección `calibracion`). Coincidió con la mesa en 6 de 10. El desacuerdo grave: un libro con 4 y «compra» de la mesa que Sebas no compraría por el texto encima del dibujo, su motivo en 5 de 10 notas. Otro «no» fue un biberón en la bañera.
+
+- El juez comprador ahora marca `textOverArt` (páginas con texto sobre la escena, también sobre una franja con degradé, o texto enorme o en mayúsculas) y `unsafe` (situaciones peligrosas para un chico).
+- `calibrateBuyerReview` (judge-panel.ts) aplica la regla en código: con texto sobre el dibujo, comprador máximo 3 y nunca «compra»; con algo peligroso, «no» y máximo 2. Así el freno (353) los detiene.
+- El armado del texto en su propia franja lo resuelve otro trabajo (opción B); esto solo hace que los jueces lo vean como lo ve Sebas.
+- Antes de encender el freno en producción: volver a juzgar los 10 libros y pedir al menos 8 de 10 de coincidencia con Sebas.

@@ -561,6 +561,10 @@ export interface BuyerReview {
   /** La página que compartiría (0 = tapa, -1 = ninguna) y por qué. */
   sharePage: number;
   shareWhy: string;
+  /** Páginas (0 = tapa) donde el texto tapa el dibujo o es demasiado grande (calibración 26 nov). */
+  textOverArt?: number[];
+  /** Situaciones peligrosas o raras para un chico que se ven o se leen (biberón en la bañera, ...). */
+  unsafe?: string[];
   usage: AiUsage;
 }
 
