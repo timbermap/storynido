@@ -11,6 +11,7 @@ import {
   repeatedPhrases,
   repeatedWords,
   storyCraftIssues,
+  hasTouch,
   touchPages,
   unnamedFriendPages,
 } from './story-checks';
@@ -86,6 +87,19 @@ describe('contacto físico', () => {
         { text: 'Luli giró en el aire.' },
       ]),
     ).toEqual([1]);
+  });
+
+  it('abrazar una cosa no es contacto (DECISIONS 349)', () => {
+    expect(
+      touchPages([
+        { text: 'Lola se mete bajo las sábanas. Abraza fuerte a su almohada suave.' },
+        { text: '—No creo que pueda salir —susurré, abrazando mi guitarra con fuerza.' },
+        { text: 'Lucía y Mateo me abrazaron con fuerza sobre el escenario.' },
+        { text: 'Abracé mi peluche y después Santi me abrazó.' },
+      ]),
+    ).toEqual([3, 4]);
+    expect(hasTouch('Abraza fuerte a su almohada.')).toBe(false);
+    expect(hasTouch('She hugged her teddy and fell asleep.')).toBe(false);
   });
 });
 
