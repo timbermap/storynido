@@ -19,3 +19,4 @@ export * from './mock/payment';
 export * from './mock/print';
 export * from './registry';
 export * from './gcp/address-validation';
+export * from './compose-page';

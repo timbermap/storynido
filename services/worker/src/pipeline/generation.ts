@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { zipSync } from 'fflate';
 
 import {
+  composePage,
   encodeIllustration,
   type AddressValidator,
   type ProviderRegistry,
@@ -11,6 +12,9 @@ import QRCode from 'qrcode';
 import sharp from 'sharp';
 import {
   formatEventTime,
+  hasJudgePanel,
+  runPanel,
+  storedPanel,
   ANY_COUNTRY,
   COLLECTIONS,
   GLOBAL_DOC_ID,
@@ -211,6 +215,8 @@ export interface QaLimits {
   concurrency: number;
   /** Revisión del libro entero después de la de cada página (miniaturas contra la biblia visual). */
   bookReview: boolean;
+  /** Mesa de jueces al entregar (26 nov): solo mide y queda en el pedido; nunca frena la entrega. */
+  judgePanel: boolean;
 }
 
 export const DEFAULT_QA_LIMITS: QaLimits = {
@@ -220,7 +226,13 @@ export const DEFAULT_QA_LIMITS: QaLimits = {
   repairBudgetUsdMicros: 1_500_000,
   concurrency: 4,
   bookReview: true,
+  judgePanel: true,
 };
+
+/** Páginas armadas que mira la mesa de jueces (todas cuestan más y no cambian el veredicto). */
+const JUDGE_PANEL_PAGES = 8;
+/** La mesa tiene este tiempo; si no llega, el libro se entrega igual y queda sin mesa. */
+const JUDGE_PANEL_TIMEOUT_MS = 120_000;
 
 /** Lado mayor de las miniaturas de la revisión del libro entero (todas entran en una llamada). */
 const BOOK_REVIEW_THUMB_PX = 384;
@@ -1736,6 +1748,8 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         'El libro congelado no coincide con el aprobado.',
       );
     }
+    // La mesa de jueces corre mientras se arma el PDF: no suma espera (y nunca falla el paso).
+    const judging = judgeBook(ctx);
     const images = new Map(
       ((ctx.outputs.quality_check?.images ?? []) as { index: number; imagePath: string }[]).map(
         (image) => [image.index, image.imagePath],
@@ -2143,6 +2157,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       await browser.close();
     }
 
+    await judging;
     if (problems.length > 0) {
       await qaEvent(ctx, 'layout_blocked', { problems: problems.length });
       throw new HumanReviewError(
@@ -2158,6 +2173,116 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
    * imprenta solo si el PDF es exactamente el maquetado del libro aprobado y la matriz lo
    * permite. El pedido de imprenta se crea una sola vez aunque el paso se reintente.
    */
+  /**
+   * Mesa de jueces (26 nov 2026, Sebas: «por cada libro generado la mesa dé su feedback y quede
+   * registrado en Operaciones»): comprador con ventas y marketing, continuidad contra las láminas,
+   * el chico que escucha y, en Profesionales, el profesional. Queda en `judgePanel` del pedido. Nunca
+   * falla ni frena la entrega: si algo sale mal, el pedido sigue sin mesa.
+   */
+  async function judgeBook(ctx: StepContext): Promise<void> {
+    if (!limits.judgePanel || ctx.order.sourceOrderId) return;
+    const orderRef = db.collection(COLLECTIONS.orders).doc(ctx.order.id);
+    try {
+      const data = (await orderRef.get()).data() ?? {};
+      const previous = data.judgePanel as { generation?: number } | undefined;
+      if (previous?.generation === ctx.generation) return;
+      const snapshot = data.snapshot as BookSnapshot | undefined;
+      if (!snapshot || snapshot.contentType === 'coloring') return;
+      const provider = await ai();
+      if (!hasJudgePanel(provider.text)) return;
+      const images = new Map(
+        ((ctx.outputs.quality_check?.images ?? []) as { index: number; imagePath: string }[]).map(
+          (item) => [item.index, item.imagePath],
+        ),
+      );
+      const coverPath = images.get(0);
+      if (!coverPath) return;
+      const typography = typographyOf(snapshot);
+      const composed: ImageData[] = [];
+      const drawn: ImageData[] = [];
+      for (const [index, page] of snapshot.pages.slice(0, JUDGE_PANEL_PAGES).entries()) {
+        const path = images.get(index + 1);
+        if (!path) continue;
+        const raw = await load(path);
+        drawn.push(raw);
+        composed.push({
+          bytes: await composePage(raw.bytes, layoutOf(snapshot, index), page.text, typography),
+          mimeType: 'image/webp',
+        });
+      }
+      const amounts = data.amounts as { totalMinor?: number } | undefined;
+      const channel = (
+        ['professionals', 'events'].includes(ctx.order.channel) ? ctx.order.channel : 'families'
+      ) as 'families' | 'professionals' | 'events';
+      let cost = 0;
+      const run = runPanel(
+        provider.text,
+        {
+          channel,
+          priceUsd:
+            data.currency === 'USD' && amounts?.totalMinor
+              ? amounts.totalMinor / 100
+              : channel === 'events'
+                ? 11
+                : 15,
+          order: [
+            `Libro: ${snapshot.title}`,
+            `Protagonista de ${String(snapshot.age)} años`,
+            snapshot.requiredNames.length > 0
+              ? `Nombres pedidos: ${snapshot.requiredNames.join(', ')}`
+              : null,
+            snapshot.companion ? `Acompañante pedido: ${snapshot.companion.name}` : null,
+            snapshot.dedication ? `Dedicatoria: ${snapshot.dedication}` : null,
+            snapshot.synopsis ? `De qué trata: ${snapshot.synopsis}` : null,
+          ]
+            .filter(Boolean)
+            .join('\n'),
+          title: snapshot.title,
+          texts: snapshot.pages.map((page) => page.text),
+          age: snapshot.age,
+          language: snapshot.language,
+          style: snapshot.stylePrompt.slice(0, 300),
+          cover: await load(coverPath),
+          composed,
+          drawn,
+          reference: await load(snapshot.character.sheetPath),
+          companionReference: snapshot.companion ? await load(snapshot.companion.sheetPath) : null,
+          companion: snapshot.companion?.name ?? null,
+        },
+        async (usage) => {
+          cost += await record(ctx, 'review', usage);
+        },
+      );
+      let timer: NodeJS.Timeout | undefined;
+      const timeout = new Promise<null>((resolve) => {
+        timer = setTimeout(() => {
+          resolve(null);
+        }, JUDGE_PANEL_TIMEOUT_MS);
+      });
+      const panel = await Promise.race([run, timeout]);
+      clearTimeout(timer);
+      if (!panel) {
+        ctx.log.warn({ orderId: ctx.order.id }, 'judge panel timed out');
+        return;
+      }
+      await orderRef.update({
+        judgePanel: { ...storedPanel(panel, cost, new Date()), generation: ctx.generation },
+      });
+      ctx.log.info(
+        {
+          event: 'judge_panel',
+          orderId: ctx.order.id,
+          score: panel.score,
+          weakest: panel.weakest,
+          costUsdMicros: cost,
+        },
+        'judge panel',
+      );
+    } catch (error) {
+      ctx.log.warn({ orderId: ctx.order.id, err: error }, 'judge panel failed');
+    }
+  }
+
   async function deliver(ctx: StepContext): Promise<StepResult> {
     const files = (ctx.outputs.layout_pdf?.files ?? []) as LayoutFile[];
     const digital = files.find((file) => file.format === 'digital');

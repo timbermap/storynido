@@ -5,6 +5,7 @@ import {
   COLLECTIONS,
   addressProblems,
   apiRoutes,
+  judgePanelSchema,
   normalizeFirestoreData,
   toUsd,
   utcDay,
@@ -302,10 +303,12 @@ export function registerAdminOrderRoutes(app: FastifyInstance): void {
           : null,
       };
     }
+    const panel = judgePanelSchema.safeParse(data.judgePanel);
     return {
       ...base,
       previewBook,
       reference,
+      judgePanel: panel.success ? panel.data : null,
       bookId,
       bookTitle: typeof data.bookTitle === 'string' ? data.bookTitle : null,
       ownerUid: String(data.ownerUid),

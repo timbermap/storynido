@@ -41,6 +41,15 @@ import {
   styleSheetFor,
   fillOutfitGaps,
   IMAGE_CONTRACT_CLAUSES,
+  PREVIEW_ILLUSTRATED_PAGES,
+  type BuyerReview,
+  type BuyerReviewRequest,
+  type ChildListenerRequest,
+  type ChildListenerReview,
+  type ContinuityReview,
+  type ContinuityReviewRequest,
+  type ProfessionalReview,
+  type ProfessionalReviewRequest,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
 
@@ -554,27 +563,20 @@ const BUYER_PERSONA: Record<'families' | 'professionals' | 'events', string> = {
     'a parent in Latin America who ordered a birthday kit with a mini story starring their child, to share at the party',
 };
 
-export interface BuyerReviewRequest {
-  channel: 'families' | 'professionals' | 'events';
-  priceUsd: number;
-  /** El pedido en palabras (formulario y plantilla), sin datos de un chico real. */
-  order: string;
-  title: string;
-  texts: string[];
-  cover: ImageData;
-  /** Páginas armadas (ilustración con el texto y el papel fundido), como las ve el cliente. */
-  pages: ImageData[];
-}
+const JUDGE_FIXES_SCHEMA = {
+  type: 'ARRAY',
+  items: {
+    type: 'OBJECT',
+    properties: {
+      area: { type: 'STRING', enum: ['texto', 'dibujo', 'armado'] },
+      fix: { type: 'STRING' },
+    },
+    required: ['area', 'fix'],
+  },
+};
 
-export interface BuyerReview {
-  buy: number;
-  gift: number;
-  verdict: 'compra' | 'duda' | 'no';
-  loved: string[];
-  refund: string[];
-  fixes: string[];
-  usage: AiUsage;
-}
+const FIXES_INSTRUCTION = `up to 3 short, concrete changes that would turn this into a 5, each with the part of the process that has
+  to make it: "texto" (the story text), "dibujo" (the illustrations) or "armado" (how text and picture sit on the page)`;
 
 const BUYER_REVIEW_SCHEMA = {
   type: 'OBJECT',
@@ -584,9 +586,73 @@ const BUYER_REVIEW_SCHEMA = {
     verdict: { type: 'STRING', enum: ['compra', 'duda', 'no'] },
     loved: { type: 'ARRAY', items: { type: 'STRING' } },
     refund: { type: 'ARRAY', items: { type: 'STRING' } },
-    fixes: { type: 'ARRAY', items: { type: 'STRING' } },
+    fixes: JUDGE_FIXES_SCHEMA,
+    sample: { type: 'INTEGER' },
+    sampleObjection: { type: 'STRING' },
+    share: { type: 'INTEGER' },
+    sharePage: { type: 'INTEGER' },
+    shareWhy: { type: 'STRING' },
   },
-  required: ['buy', 'gift', 'verdict', 'loved', 'refund', 'fixes'],
+  required: [
+    'buy',
+    'gift',
+    'verdict',
+    'loved',
+    'refund',
+    'fixes',
+    'sample',
+    'sampleObjection',
+    'share',
+    'sharePage',
+    'shareWhy',
+  ],
+};
+
+const CONTINUITY_REVIEW_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    score: { type: 'INTEGER' },
+    issues: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          page: { type: 'INTEGER' },
+          who: { type: 'STRING' },
+          what: { type: 'STRING' },
+        },
+        required: ['page', 'who', 'what'],
+      },
+    },
+    fixes: JUDGE_FIXES_SCHEMA,
+  },
+  required: ['score', 'issues', 'fixes'],
+};
+
+const CHILD_LISTENER_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    score: { type: 'INTEGER' },
+    understood: { type: 'INTEGER' },
+    wantsMore: { type: 'INTEGER' },
+    hardWords: { type: 'ARRAY', items: { type: 'STRING' } },
+    lostPages: { type: 'ARRAY', items: { type: 'INTEGER' } },
+    favorite: { type: 'STRING' },
+    fixes: JUDGE_FIXES_SCHEMA,
+  },
+  required: ['score', 'understood', 'wantsMore', 'hardWords', 'lostPages', 'favorite', 'fixes'],
+};
+
+const PROFESSIONAL_REVIEW_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    score: { type: 'INTEGER' },
+    meetsGoal: { type: 'INTEGER' },
+    wouldUse: { type: 'BOOLEAN' },
+    risks: { type: 'ARRAY', items: { type: 'STRING' } },
+    fixes: JUDGE_FIXES_SCHEMA,
+  },
+  required: ['score', 'meetsGoal', 'wouldUse', 'risks', 'fixes'],
 };
 
 const BOOK_REVIEW_SCHEMA = {
@@ -1242,7 +1308,15 @@ Answer in Spanish, from your own point of view as this customer:
 - verdict: "compra" (you are happy you paid), "duda" (you keep it but are disappointed) or "no" (you feel cheated or would ask for a refund).
 - loved: up to 3 short things you loved (concrete, with the page).
 - refund: up to 3 short things that would make you ask for a refund or never buy again (concrete, with the page). Empty if none.
-- fixes: up to 3 short changes that would turn this into a 5 (concrete).`,
+- fixes: ${FIXES_INSTRUCTION}.
+- sample: 1 to 5. Before paying you only saw a free preview: the cover and the first ${String(PREVIEW_ILLUSTRATED_PAGES)} illustrated pages. Judging only
+  those, how sure would you have been to pay the price (5 = paid at once, 1 = closed the tab)?
+- sampleObjection: the one concrete thing in that preview that would have stopped you from paying (the child does not look like yours,
+  the text feels generic, it does not look worth the price, ...). Empty if nothing.
+- share: 1 to 5, would you post a photo of this book in an Instagram story or send it by WhatsApp to the grandparents or other parents
+  (5 = right away, you are proud of it).
+- sharePage: the number of the one page you would share (0 = the cover, -1 = none).
+- shareWhy: in one short sentence, why that page (or why none) makes people want one for their own child.`,
     });
     const { response, usage } = await this.client.generate(this.model, parts, {
       temperature: 0,
@@ -1250,6 +1324,115 @@ Answer in Spanish, from your own point of view as this customer:
       responseSchema: BUYER_REVIEW_SCHEMA,
     });
     const review = parseJson(response, 'juez comprador') as Omit<BuyerReview, 'usage'>;
+    return { ...review, usage };
+  }
+
+  /**
+   * Juez de continuidad (mesa de jueces, 26 nov): mira todas las ilustraciones juntas contra las
+   * láminas y busca lo que cambia de una página a otra. No corre en producción.
+   */
+  async reviewContinuity(request: ContinuityReviewRequest): Promise<ContinuityReview> {
+    const parts: Part[] = [
+      { text: 'Approved reference sheet of the protagonist:' },
+      imagePart(request.reference),
+    ];
+    if (request.companionReference) {
+      parts.push({
+        text: `Approved reference sheet of the companion (${request.companion ?? ''}):`,
+      });
+      parts.push(imagePart(request.companionReference));
+    }
+    parts.push({ text: 'Cover (page 0):' }, imagePart(request.cover));
+    request.pages.forEach((page, index) => {
+      parts.push({ text: `Page ${String(index + 1)}: ${request.texts[index] ?? ''}` });
+      parts.push(imagePart(page));
+    });
+    parts.push({
+      text: `You are the art director of a children's picture book publisher doing the final continuity check before print.
+Compare every illustration with the reference sheets and with each other. Look only for things that CHANGE between pages and
+that a parent would notice: the protagonist's face, hair, skin tone, age or clothes (unless the text says they change clothes);
+a secondary person who changes gender, age, hair or clothes; the companion pet or toy that changes species, color, size or
+markings; a recurring object or place that changes; a page drawn in a different style than the chosen one (${request.style}).
+Do not report things that are only different camera angles or that the text explains.
+
+Answer in Spanish:
+- score: 1 to 5 (5 = a reader sees one consistent book; 3 = one noticeable change; 1 = the protagonist looks like a different
+  child or the style breaks).
+- issues: every change you see, with page (0 = cover), who (protagonist, the name or role of the person, the companion, the
+  object) and what changed (short). Empty if none.
+- fixes: ${FIXES_INSTRUCTION}.`,
+    });
+    const { response, usage } = await this.client.generate(this.model, parts, {
+      temperature: 0,
+      responseMimeType: 'application/json',
+      responseSchema: CONTINUITY_REVIEW_SCHEMA,
+    });
+    const review = parseJson(response, 'juez de continuidad') as Omit<ContinuityReview, 'usage'>;
+    return { ...review, usage };
+  }
+
+  /**
+   * Juez del chico que escucha (mesa de jueces, 26 nov): solo el texto, leído en voz alta a un chico
+   * de la edad del pedido. No corre en producción.
+   */
+  async reviewAsChildListener(request: ChildListenerRequest): Promise<ChildListenerReview> {
+    const prompt = `Imagine you are a ${String(request.age)}-year-old child in Latin America and a parent is reading this book aloud
+to you at bedtime, in ${request.language === 'es' ? 'Spanish' : request.language}. Then step out and report as a children's
+librarian who watched you listen.
+
+Title: ${request.title}
+${request.refrain ? `Refrain the order asked for: ${request.refrain}\n` : ''}Text, page by page:
+${request.texts.map((text, index) => `${String(index + 1)}. ${text}`).join('\n')}
+
+Answer in Spanish:
+- score: 1 to 5 (5 = the child follows everything, laughs or holds their breath somewhere and asks to read it again).
+- understood: 1 to 5, how much a child of exactly this age understands without the parent explaining.
+- wantsMore: 1 to 5, how much the child wants to turn the page (tension, surprise, repetition they can join in).
+- hardWords: words or phrases this child would not understand (up to 6). Empty if none.
+- lostPages: page numbers where the child gets lost, bored or confused (what happens does not follow, too many ideas, no action).
+- favorite: in one short sentence, the moment the child would remember tomorrow (or "ninguno").
+- fixes: ${FIXES_INSTRUCTION}.`;
+    const { response, usage } = await this.client.generate(this.model, [{ text: prompt }], {
+      temperature: 0,
+      responseMimeType: 'application/json',
+      responseSchema: CHILD_LISTENER_SCHEMA,
+    });
+    const review = parseJson(response, 'juez del chico') as Omit<ChildListenerReview, 'usage'>;
+    return { ...review, usage };
+  }
+
+  /**
+   * Juez profesional (mesa de jueces, 26 nov, solo línea Profesionales): ¿el libro cumple el objetivo
+   * con el que lo pidió el profesional, sin riesgos? Solo texto. No corre en producción.
+   */
+  async reviewAsProfessional(request: ProfessionalReviewRequest): Promise<ProfessionalReview> {
+    const prompt = `You are an experienced child psychologist who also works with pediatricians, dentists, speech therapists and
+teachers in Latin America. A colleague ordered this personalized book to use with a ${String(request.age)}-year-old patient or student.
+
+What they ordered:
+${request.order}
+${request.goal ? `Goal of the book: ${request.goal}\n` : ''}
+Title: ${request.title}
+Text, page by page:
+${request.texts.map((text, index) => `${String(index + 1)}. ${text}`).join('\n')}
+
+Judge it with professional criteria: does it model the situation in concrete, predictable steps the child will really live; does it
+name and validate the emotion without making it bigger; does it give the child a coping strategy they can use; is every fact true
+(no wrong medical, dental or therapy information, no false promise such as "it will not hurt at all"); does the adult act
+respectfully and at a professional distance; is anything frightening, shaming or moralizing.
+
+Answer in Spanish:
+- score: 1 to 5 (5 = you would use it tomorrow with your own patients).
+- meetsGoal: 1 to 5, how well it serves the goal.
+- wouldUse: true if you would use it with a child as it is.
+- risks: up to 3 concrete things that could backfire with a real child (with the page). Empty if none.
+- fixes: ${FIXES_INSTRUCTION}.`;
+    const { response, usage } = await this.client.generate(this.model, [{ text: prompt }], {
+      temperature: 0,
+      responseMimeType: 'application/json',
+      responseSchema: PROFESSIONAL_REVIEW_SCHEMA,
+    });
+    const review = parseJson(response, 'juez profesional') as Omit<ProfessionalReview, 'usage'>;
     return { ...review, usage };
   }
 

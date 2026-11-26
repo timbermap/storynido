@@ -10,6 +10,7 @@ import { BOOK_FORMATS, bookFormatSchema } from '../models/common';
 import { LESSON_GROUPS } from '../models/catalog';
 import { avatarSchema, characterTraitsSchema, mustKeepSchema } from '../models/character';
 import { channelSchema, personalizationSchema } from '../models/channels';
+import { judgePanelSchema } from '../providers/judge-panel';
 import { EVENT_TYPES } from '../models/events';
 import { CONTENT_KEYS, SITE_MODES, aiConfigSchema } from '../models/config';
 import {
@@ -240,6 +241,8 @@ export const adminOrderDetailSchema = adminOrderSummarySchema.extend({
     .object({ photos: z.array(z.string()), character: z.string().nullable() })
     .nullable()
     .optional(),
+  /** Mesa de jueces del libro entregado (26 nov); null si todavía no corrió o no aplica. */
+  judgePanel: judgePanelSchema.nullable().optional(),
   /** PDF de revisión del libro completo (enlace de 15 minutos); null si aún no se armó. */
   previewBook: z
     .object({

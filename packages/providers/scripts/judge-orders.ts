@@ -1,8 +1,9 @@
 /**
  * Juez comprador sobre los últimos pedidos reales (25 nov 2026, Sebas: «pasa el juez por todos los
  * últimos pedidos»). Lee los pedidos terminados de Firestore, baja la tapa y las páginas revisadas,
- * arma cada página como la ve el cliente (page-layout.ts, misma geometría que el PDF) y le pregunta
- * al comprador si lo compraría, si lo regalaría y qué le haría pedir un reembolso.
+ * arma cada página como la ve el cliente (page-layout.ts, misma geometría que el PDF) y la pasa por la
+ * mesa de jueces (judge-panel.ts, 26 nov): comprador con ventas y marketing, continuidad contra las
+ * láminas, el chico que escucha y, en Profesionales, el profesional.
  *
  *   pnpm judge:pedidos --project storynido-staging            # solo lista y estima
  *   pnpm judge:pedidos --project storynido-prod --limit 20 --yes
@@ -19,7 +20,11 @@ import { parseArgs } from 'node:util';
 import {
   countWords,
   pageLayout,
+  panelLines,
+  panelSummary,
+  runPanel,
   storyTypography,
+  type Panel,
   type AgeBand,
   type BookLayout,
   type ImageData,
@@ -27,8 +32,8 @@ import {
 } from '@storynido/shared';
 import sharp from 'sharp';
 
-import { VertexClient, VertexTextProvider, type BuyerReview } from '../src/gcp/vertex';
-import { composePage } from './compose-page';
+import { VertexClient, VertexTextProvider } from '../src/gcp/vertex';
+import { composePage } from '../src/compose-page';
 
 const { values } = parseArgs({
   options: {
@@ -128,7 +133,8 @@ interface Snapshot {
   pages: { index: number; text: string }[];
   scenes: { pageIndex: number }[] | null;
   stylePrompt: string;
-  companion?: { name: string } | null;
+  companion?: { name: string; sheetPath?: string } | null;
+  character?: { sheetPath?: string };
   pageLayout?: BookLayout | null;
 }
 
@@ -166,7 +172,7 @@ const orders = (query as { document?: { name: string; fields: Record<string, FsV
   .slice(0, Number(values.limit));
 
 const pagesToJudge = Number(values.pages);
-const estimate = orders.length * 0.025;
+const estimate = orders.length * 0.06;
 console.log(
   `${String(orders.length)} pedidos terminados en ${project} · estimado USD ${estimate.toFixed(2)} (tope ${values.budget})`,
 );
@@ -198,7 +204,7 @@ interface Row {
   id: string;
   channel: string;
   updatedAt: string;
-  buyer?: Omit<BuyerReview, 'usage'>;
+  panel?: Panel;
   error?: string;
 }
 const rows: Row[] = [];
@@ -224,6 +230,7 @@ for (const order of orders) {
         ? storyTypography(snapshot.ageBand, snapshot.textBand, snapshot.language as 'es')
         : null;
     const composed: ImageData[] = [];
+    const drawn: ImageData[] = [];
     for (const [index, page] of snapshot.pages.slice(0, pagesToJudge).entries()) {
       const imagePath = byIndex.get(index + 1);
       if (!imagePath) continue;
@@ -236,35 +243,53 @@ for (const order of orders) {
         pageIndex: snapshot.scenes?.[index]?.pageIndex ?? page.index,
         contentType: snapshot.contentType,
       });
-      const bytes = await composePage(await download(imagePath), layout, page.text, typography);
+      const raw = await download(imagePath);
+      drawn.push({ bytes: raw, mimeType: 'image/webp' });
+      const bytes = await composePage(raw, layout, page.text, typography);
       await sharp(bytes).toFile(path.join(outDir, `${order.id}-pagina-${String(index + 1)}.webp`));
       composed.push({ bytes, mimeType: 'image/webp' });
     }
     const totalUsd =
       order.currency === 'USD' && order.amounts?.totalMinor ? order.amounts.totalMinor / 100 : 15;
-    const { usage, ...buyer } = await text.reviewAsBuyer({
-      channel,
-      priceUsd: totalUsd,
-      order: [
-        `Libro: ${snapshot.title}`,
-        `Protagonista de ${String(snapshot.age)} años`,
-        snapshot.requiredNames.length > 0
-          ? `Nombres pedidos: ${snapshot.requiredNames.join(', ')}`
-          : null,
-        snapshot.companion ? `Acompañante pedido: ${snapshot.companion.name}` : null,
-        snapshot.dedication ? `Dedicatoria: ${snapshot.dedication}` : null,
-        `Estilo elegido: ${snapshot.stylePrompt.slice(0, 300)}`,
-      ]
-        .filter(Boolean)
-        .join('\n'),
-      title: snapshot.title,
-      texts: snapshot.pages.map((page) => page.text),
-      cover,
-      pages: composed,
-    });
-    spent += usage.costUsdMicros;
-    row.buyer = buyer;
-    console.log(`✓ ${order.id}: ${buyer.verdict} (compra ${String(buyer.buy)}/5)`);
+    const sheet = async (sheetPath: string | undefined): Promise<ImageData | null> =>
+      sheetPath ? { bytes: await download(sheetPath), mimeType: 'image/webp' } : null;
+    const panel = await runPanel(
+      text,
+      {
+        channel,
+        priceUsd: totalUsd,
+        order: [
+          `Libro: ${snapshot.title}`,
+          `Protagonista de ${String(snapshot.age)} años`,
+          snapshot.requiredNames.length > 0
+            ? `Nombres pedidos: ${snapshot.requiredNames.join(', ')}`
+            : null,
+          snapshot.companion ? `Acompañante pedido: ${snapshot.companion.name}` : null,
+          snapshot.dedication ? `Dedicatoria: ${snapshot.dedication}` : null,
+          `Estilo elegido: ${snapshot.stylePrompt.slice(0, 300)}`,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+        title: snapshot.title,
+        texts: snapshot.pages.map((page) => page.text),
+        age: snapshot.age,
+        language: snapshot.language,
+        style: snapshot.stylePrompt.slice(0, 300),
+        cover,
+        composed,
+        drawn,
+        reference: await sheet(snapshot.character?.sheetPath),
+        companionReference: await sheet(snapshot.companion?.sheetPath),
+        companion: snapshot.companion?.name ?? null,
+      },
+      (usage) => {
+        spent += usage.costUsdMicros;
+      },
+    );
+    row.panel = panel;
+    console.log(
+      `✓ ${order.id}: mesa ${String(panel.score ?? '-')}/5 (la baja ${panel.weakest ?? '-'})`,
+    );
   } catch (error) {
     row.error = (error as Error).message.slice(0, 200);
     console.log(`✗ ${order.id}: ${row.error}`);
@@ -276,24 +301,16 @@ for (const order of orders) {
   }
 }
 
-const judged = rows.filter((row) => row.buyer);
-const count = (verdict: BuyerReview['verdict']) =>
-  judged.filter((row) => row.buyer?.verdict === verdict).length;
-const avg = (pick: (buyer: Omit<BuyerReview, 'usage'>) => number) =>
-  judged.length
-    ? (
-        judged.reduce((sum, row) => sum + (row.buyer ? pick(row.buyer) : 0), 0) / judged.length
-      ).toFixed(1)
-    : '-';
+const panels = rows.flatMap((row) => (row.panel ? [row.panel] : []));
 const md = [
-  `# Juez comprador · ${project} · ${new Date().toISOString().slice(0, 10)}`,
+  `# Mesa de jueces · ${project} · ${new Date().toISOString().slice(0, 10)}`,
   '',
-  `Costo: USD ${(spent / 1_000_000).toFixed(2)} · lo compraría ${String(count('compra'))}/${String(judged.length)} · duda ${String(count('duda'))} · no ${String(count('no'))} · compra ${avg((buyer) => buyer.buy)}/5 · regalo ${avg((buyer) => buyer.gift)}/5`,
+  `Costo: USD ${(spent / 1_000_000).toFixed(2)} · ${panels.length > 0 ? panelSummary(panels) : 'sin respuestas'}`,
   '',
-  ...rows.map((row) =>
-    row.buyer
-      ? `- **${row.id}** (${row.channel}, ${row.updatedAt.slice(0, 10)}): ${row.buyer.verdict} · compra ${String(row.buyer.buy)}/5 · regalo ${String(row.buyer.gift)}/5. Le encantó: ${row.buyer.loved.join('; ') || '-'}. Reembolso: ${row.buyer.refund.join('; ') || '-'}. Para un 5: ${row.buyer.fixes.join('; ') || '-'}.`
-      : `- **${row.id}**: sin juzgar (${row.error ?? '-'})`,
+  ...rows.flatMap((row) =>
+    row.panel
+      ? [...panelLines(`${row.id} (${row.channel}, ${row.updatedAt.slice(0, 10)})`, row.panel), '']
+      : [`- **${row.id}**: sin juzgar (${row.error ?? '-'})`],
   ),
 ].join('\n');
 writeFileSync(path.join(outDir, 'resumen.md'), md);

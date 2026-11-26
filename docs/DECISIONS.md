@@ -3480,3 +3480,18 @@ El juez comprador pasó por los 13 últimos libros de staging (promedio 3,3 sobr
 - **Cariño con la familia que nombra el pedido** (Sebas, 25 nov 2026, reemplaza la regla de DECISIONS 294 de un solo abrazo breve de costado): abrazos, ir de la mano, upa, leer juntos, un beso en la frente o la mejilla, en el texto y en el dibujo. A la hora de dormir el adulto arropa sentado al lado de la cama. Sigue prohibido cualquier contacto con adultos inventados, profesionales, docentes, amigos y desconocidos, y un familiar que el pedido no nombra no aparece. En la muestra, `familyHug` es ahora «el pedido nombra familia» (`contract.allowedFamily`), y el control del oficio ya no cuenta abrazos con esa familia.
 - **Calidez y lógica en el cuento:** reglas nuevas de calidez (un vínculo, un objeto o gesto querido que vuelve, cierre tierno y concreto) y de lógica (sentido físico, nada sin motivo, el mismo género para cada persona). La revisión del cuento lo lee en voz alta como el padre que pagó y arregla lo que rompe el encanto.
 - **Página de texto de 9 a 12:** el detalle de la ilustración deja de ser un avatar redondo de 34 mm y pasa a una viñeta fundida de 66 × 44 mm con una línea debajo, en el PDF y en el lector.
+
+## 343 — Mesa de jueces: cada libro entregado queda juzgado en el pedido (26 nov)
+
+Sebas pidió que, además del juez comprador, el libro lo miren ventas y marketing, y que la mesa dé su opinión sobre cada libro generado y quede registrada en Operaciones. La mesa (`judge-panel.ts` en shared) junta cuatro jueces:
+
+- **Comprador**, que ahora suma ventas y marketing. La nota de la **muestra gratis** responde si habría pagado viendo solo la tapa y las primeras `PREVIEW_ILLUSTRATED_PAGES` páginas, y qué lo frenaría. La nota de **compartir** responde si lo subiría a una historia o lo mandaría por WhatsApp, y qué página compartiría.
+- **Continuidad**: todas las ilustraciones juntas contra las láminas (protagonista, secundarios, acompañante, objetos, estilo elegido).
+- **El chico que escucha**: solo el texto, leído en voz alta a un chico de la edad del pedido (qué entiende, si quiere dar vuelta la página, palabras difíciles, dónde se pierde).
+- **Profesional**, solo en Profesionales: si cumple el objetivo con pasos concretos, sin datos falsos ni promesas como «no va a doler», y si lo usaría.
+
+La nota de la mesa es la del juez más bajo, porque un problema grave alcanza para que el padre no vuelva. Los tres arreglos más importantes salen primero de los jueces que pusieron menos, y cada uno dice si lo arregla el texto, el dibujo o el armado.
+
+- **En cada libro:** el worker corre la mesa mientras arma el PDF, así no suma espera. Tiene un tope de 2 minutos, nunca falla el paso y no corre en recompras ni en libros para colorear. Queda en `orders/{id}.judgePanel` y el admin la muestra en el detalle del pedido. Cuesta unos centavos por libro (8 páginas armadas) y se anota como IA de revisión.
+- **En el examen:** `eval:pedidos` y `judge:pedidos` usan la misma mesa. `judge:ronda --dir …` juzga una corrida ya hecha del golden set sin volver a dibujar.
+- **Todavía no frena entregas:** primero se mide. Cuando la mesa esté calibrada con familias reales, la misma nota puede ser el filtro antes de entregar.

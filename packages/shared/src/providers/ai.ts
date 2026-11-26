@@ -489,6 +489,104 @@ export interface GeneratedActivities {
   usage: AiUsage;
 }
 
+/* Mesa de jueces (26 nov 2026): miran el libro terminado; no frenan la entrega. */
+
+/** Un arreglo de un juez de la mesa, con la parte del proceso que lo tiene que hacer. */
+export interface JudgeFix {
+  area: 'texto' | 'dibujo' | 'armado';
+  fix: string;
+}
+
+export interface BuyerReviewRequest {
+  channel: 'families' | 'professionals' | 'events';
+  priceUsd: number;
+  /** El pedido en palabras (formulario y plantilla), sin datos de un chico real. */
+  order: string;
+  title: string;
+  texts: string[];
+  cover: ImageData;
+  /** Páginas armadas (ilustración con el texto y el papel fundido), como las ve el cliente. */
+  pages: ImageData[];
+}
+
+export interface BuyerReview {
+  buy: number;
+  gift: number;
+  verdict: 'compra' | 'duda' | 'no';
+  loved: string[];
+  refund: string[];
+  fixes: JudgeFix[];
+  /** Ventas: solo con la tapa y las primeras páginas de la muestra gratis, ¿habría pagado? (1 a 5). */
+  sample: number;
+  /** Lo que lo frenaría a pagar después de la muestra; vacío si nada. */
+  sampleObjection: string;
+  /** Marketing: ¿lo subiría a una historia o lo mandaría por WhatsApp? (1 a 5). */
+  share: number;
+  /** La página que compartiría (0 = tapa, -1 = ninguna) y por qué. */
+  sharePage: number;
+  shareWhy: string;
+  usage: AiUsage;
+}
+
+export interface ContinuityReviewRequest {
+  /** Lámina aprobada del protagonista. */
+  reference: ImageData;
+  /** Lámina del acompañante (mascota o juguete), si el pedido tiene uno. */
+  companionReference?: ImageData | null;
+  companion?: string | null;
+  /** El estilo que eligió el cliente, en palabras. */
+  style: string;
+  cover: ImageData;
+  /** Ilustraciones sin texto, en orden. */
+  pages: ImageData[];
+  texts: string[];
+}
+
+export interface ContinuityReview {
+  score: number;
+  issues: { page: number; who: string; what: string }[];
+  fixes: JudgeFix[];
+  usage: AiUsage;
+}
+
+export interface ChildListenerRequest {
+  age: number;
+  language: string;
+  title: string;
+  texts: string[];
+  /** Estribillo pedido, si hay. */
+  refrain?: string | null;
+}
+
+export interface ChildListenerReview {
+  score: number;
+  understood: number;
+  wantsMore: number;
+  hardWords: string[];
+  lostPages: number[];
+  favorite: string;
+  fixes: JudgeFix[];
+  usage: AiUsage;
+}
+
+export interface ProfessionalReviewRequest {
+  age: number;
+  /** El pedido en palabras, con el objetivo del profesional si lo tiene. */
+  order: string;
+  goal?: string | null;
+  title: string;
+  texts: string[];
+}
+
+export interface ProfessionalReview {
+  score: number;
+  meetsGoal: number;
+  wouldUse: boolean;
+  risks: string[];
+  fixes: JudgeFix[];
+  usage: AiUsage;
+}
+
 export interface AITextProvider {
   readonly id: string;
   /** Plan editorial por página antes de escribir (guía A). */
@@ -497,6 +595,14 @@ export interface AITextProvider {
   reviewPage(request: PageReviewRequest): Promise<PageReview>;
   /** Revisión del libro entero: qué páginas se apartan de las demás (objetos, lugares, ropa). */
   reviewBook(request: BookReviewRequest): Promise<BookReview>;
+  /** Mesa de jueces: el que paga (con ventas y marketing). Opcional: la IA simulada no la tiene. */
+  reviewAsBuyer?(request: BuyerReviewRequest): Promise<BuyerReview>;
+  /** Mesa de jueces: lo que cambia entre páginas contra las láminas. */
+  reviewContinuity?(request: ContinuityReviewRequest): Promise<ContinuityReview>;
+  /** Mesa de jueces: el texto leído en voz alta a un chico de la edad del pedido. */
+  reviewAsChildListener?(request: ChildListenerRequest): Promise<ChildListenerReview>;
+  /** Mesa de jueces, línea Profesionales: si cumple el objetivo sin riesgos. */
+  reviewAsProfessional?(request: ProfessionalReviewRequest): Promise<ProfessionalReview>;
   /** Actividades a partir de plantillas aprobadas. */
   generateActivities(request: ActivityRequest): Promise<GeneratedActivities>;
   /** Extrae la ficha del personaje a partir de la foto procesada. */
