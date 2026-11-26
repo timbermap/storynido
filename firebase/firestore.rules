@@ -439,6 +439,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Libros de ejemplo de la mesa (DECISIONS 348): los escribe el script del golden set y los
+    // aprueba el admin por la API; la web los lee por la API.
+    match /showcaseBooks/{id} {
+      allow read, write: if false;
+    }
+
     // Contadores anti abuso (por usuario y por hash de IP): nadie los lee desde el cliente.
     match /previewQuota/{id} {
       allow read, write: if false;

@@ -17,7 +17,8 @@
     "eval:golden": "tsx scripts/eval-golden.ts",
     "eval:pedidos": "tsx scripts/eval-pedidos.ts",
     "judge:pedidos": "tsx scripts/judge-orders.ts",
-    "judge:ronda": "tsx scripts/judge-round.ts"
+    "judge:ronda": "tsx scripts/judge-round.ts",
+    "showcase:import": "tsx scripts/showcase-import.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "8.4.0",

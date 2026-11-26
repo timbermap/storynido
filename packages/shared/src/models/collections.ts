@@ -70,6 +70,8 @@ export const COLLECTIONS = {
   aiBudget: 'aiBudget',
   /** generationTimings/{tipo}: últimas duraciones de cada tipo de generación (solo servidor). */
   generationTimings: 'generationTimings',
+  /** showcaseBooks/{id}: libros del golden set candidatos a ejemplo público (DECISIONS 348, solo servidor). */
+  showcaseBooks: 'showcaseBooks',
   /** previewQuota/{uid_AAAA-MM-DD} y previewQuota/ip_{ip}_{AAAA-MM-DD}: vistas previas del día. */
   previewQuota: 'previewQuota',
   content: 'content',

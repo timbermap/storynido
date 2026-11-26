@@ -29,6 +29,7 @@ import { registerJobRoutes } from './routes/jobs';
 import { registerPreviewRoutes } from './routes/previews';
 import { registerEmailRoutes } from './routes/email';
 import { registerProRoutes } from './routes/pro';
+import { registerShowcaseRoutes } from './routes/showcase';
 import { registerV1Routes } from './routes/v1';
 import './types';
 
@@ -77,6 +78,7 @@ export async function buildApp({ deps, logger = false, extend }: AppOptions) {
   registerJobRoutes(app, deps.previews, deps.social, deps.jobCaller);
   registerAiConfigRoutes(app, deps.db);
   registerAdminRoutes(app, deps.db);
+  registerShowcaseRoutes(app);
   registerAdminOrderRoutes(app);
   registerAdminPeopleRoutes(app);
   registerAdminOpsRoutes(app);

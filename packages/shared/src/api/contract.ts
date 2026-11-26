@@ -34,6 +34,7 @@ import { PHOTO_STATUSES } from '../models/users';
 import { orderStatusSchema } from '../order-status';
 import { PHOTO_RULES, photoRejectionReasonSchema } from '../providers/photo';
 import { roleSchema } from '../roles';
+import { showcasePanelSchema, showcaseStatusSchema } from '../models/showcase';
 
 /** Etapas del login que se cuentan (analítica propia: en el login no corre Google Analytics). */
 export const LOGIN_STAGES = ['started', 'succeeded', 'failed'] as const;
@@ -822,6 +823,49 @@ export const publicLessonSchema = z.object({
 
 export type PublicLesson = z.infer<typeof publicLessonSchema>;
 
+/** Libro de ejemplo aprobado por la mesa, como lo ve la web (DECISIONS 348). */
+export const publicShowcaseBookSchema = z.object({
+  id: z.string(),
+  storySlug: z.string(),
+  channel: channelSchema,
+  title: z.string(),
+  childName: z.string(),
+  age: z.number().int(),
+  styleSlug: z.string(),
+  /** Rutas de la API (relativas): la tapa y las páginas armadas, tal cual salieron. */
+  cover: z.string(),
+  pages: z.array(z.object({ image: z.string(), text: z.string() })),
+});
+export type PublicShowcaseBook = z.infer<typeof publicShowcaseBookSchema>;
+
+export const adminShowcaseBookSchema = z.object({
+  id: z.string(),
+  storySlug: z.string(),
+  channel: channelSchema,
+  locale: localeSchema,
+  title: z.string(),
+  childName: z.string(),
+  age: z.number().int(),
+  styleSlug: z.string(),
+  /** URLs firmadas de corta duración para revisar el libro antes de aprobarlo. */
+  cover: z.string().nullable(),
+  pages: z.array(z.object({ image: z.string().nullable(), text: z.string() })),
+  panel: showcasePanelSchema,
+  source: z.object({
+    report: z.string(),
+    caseId: z.string(),
+    run: z.number().int(),
+    arm: z.string().nullable(),
+  }),
+  eligible: z.boolean(),
+  reasons: z.array(z.string()),
+  status: showcaseStatusSchema,
+  reviewedBy: z.string().nullable(),
+  reviewedAt: z.string().nullable(),
+  createdAt: z.string().nullable(),
+});
+export type AdminShowcaseBook = z.infer<typeof adminShowcaseBookSchema>;
+
 export const publicStyleSchema = z.object({
   slug: z.string(),
   name: z.string(),
@@ -1130,6 +1174,15 @@ export const apiRoutes = {
     summary: 'Estilos de ilustración activos',
     query: localeQuerySchema,
     response: z.object({ styles: z.array(publicStyleSchema) }),
+  },
+  catalogShowcase: {
+    method: 'GET',
+    path: '/v1/catalog/showcase',
+    access: 'public',
+    summary:
+      'Libros de ejemplo aprobados por la mesa; la sección se abre con SHOWCASE_MIN_BOOKS en el idioma',
+    query: localeQuerySchema,
+    response: z.object({ open: z.boolean(), books: z.array(publicShowcaseBookSchema) }),
   },
   catalogCollections: {
     method: 'GET',
@@ -1499,6 +1552,26 @@ export const apiRoutes = {
     summary: 'Vuelve a mandar el mail del estado actual del pedido (queda en auditoría)',
     params: z.object({ orderId: z.string() }),
     response: z.object({ sent: z.boolean(), detail: z.string() }),
+  },
+  adminShowcase: {
+    method: 'GET',
+    path: '/v1/admin/showcase',
+    access: 'admin',
+    summary: 'Libros del golden set candidatos a ejemplo público y si la sección ya se abre',
+    response: z.object({
+      minBooks: z.number().int(),
+      approvedByLocale: z.record(z.string(), z.number().int()),
+      books: z.array(adminShowcaseBookSchema),
+    }),
+  },
+  adminSetShowcaseStatus: {
+    method: 'PUT',
+    path: '/v1/admin/showcase/:id/status',
+    access: 'admin',
+    summary: 'Aprueba, rechaza o retira un libro de ejemplo (solo los que califican se aprueban)',
+    params: z.object({ id: z.string().min(1).max(120) }),
+    body: z.object({ status: showcaseStatusSchema }),
+    response: adminShowcaseBookSchema,
   },
   adminReviewQueue: {
     method: 'GET',

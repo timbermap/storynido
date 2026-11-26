@@ -403,6 +403,17 @@
       "hint": "Escribe un nombre y verás todas las portadas con él."
     }
   },
+  "Showcase": {
+    "title": "Así queda un libro real",
+    "text": "Un pedido de prueba con un niño inventado ({name}, {age} años), de principio a fin. Lo mostramos tal cual salió, sin retoques.",
+    "note": "Pasó todos nuestros controles de calidad y lo aprobamos antes de mostrarlo.",
+    "otherStory": "Este ejemplo es «{title}», otra historia del catálogo. Pasó todos nuestros controles de calidad y lo aprobamos antes de mostrarlo.",
+    "badge": "Libro real",
+    "coverAlt": "Tapa de «{title}»",
+    "pageAlt": "Página {number}: {text}",
+    "howText": "Pedidos de prueba con niños inventados, tal cual salieron, sin retoques. Pasaron todos nuestros controles de calidad.",
+    "seeBook": "Ver el libro completo"
+  },
   "Formats": {
     "digital": "Ebook (PDF)",
     "softcover": "Tapa blanda",

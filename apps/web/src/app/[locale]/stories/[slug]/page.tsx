@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, Check, Truck } from 'lucide-react';
+import { ArrowLeft, BookOpen, Check, ShieldCheck, Truck } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -18,13 +18,21 @@ import { ChristmasDeadline } from '@/components/stories/christmas-deadline';
 import { JsonLd } from '@/components/json-ld';
 import { FollowLinks } from '@/components/stories/follow-links';
 import { StickyCta } from '@/components/stories/sticky-cta';
+import { ShowcaseViewer } from '@/components/stories/showcase-book';
 import { StoryCover } from '@/components/stories/story-cover';
 import { buttonVariants } from '@/components/ui/button';
 import { getPathname, Link } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { formatPrice } from '@/lib/format';
 import { localizedAlternates } from '@/lib/seo';
-import { getEditorial, getEventPricing, getLessons, getOffer, getStory } from '@/lib/server/api';
+import {
+  getEditorial,
+  getEventPricing,
+  getLessons,
+  getOffer,
+  getShowcase,
+  getStory,
+} from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
 import { absoluteUrl } from '@/lib/site';
 
@@ -66,18 +74,31 @@ export default async function StoryPage({ params, searchParams }: Props) {
   const locale = rawLocale as Locale;
 
   const display = await getDisplayCountry(locale);
-  const [story, offer, lessons, t, tFooter, tLessons, tLengths, tFormats, editorial] =
-    await Promise.all([
-      getStory(locale, slug),
-      getOffer(display.country, locale),
-      getLessons(locale).catch(() => []),
-      getTranslations('Stories'),
-      getTranslations('Footer'),
-      getTranslations('Lessons'),
-      getTranslations('Wizard.book.lengths'),
-      getTranslations('Formats'),
-      getEditorial(),
-    ]);
+  const [
+    story,
+    offer,
+    lessons,
+    t,
+    tFooter,
+    tLessons,
+    tLengths,
+    tFormats,
+    editorial,
+    showcase,
+    tShowcase,
+  ] = await Promise.all([
+    getStory(locale, slug),
+    getOffer(display.country, locale),
+    getLessons(locale).catch(() => []),
+    getTranslations('Stories'),
+    getTranslations('Footer'),
+    getTranslations('Lessons'),
+    getTranslations('Wizard.book.lengths'),
+    getTranslations('Formats'),
+    getEditorial(),
+    getShowcase(locale),
+    getTranslations('Showcase'),
+  ]);
   if (!story) notFound();
   // Enseñanza con la que se llegó o que se tocó acá: acompaña al usuario hasta el asistente.
   const chosenLesson = lessons.find((lesson) => lesson.slug === query?.lesson);
@@ -90,6 +111,12 @@ export default async function StoryPage({ params, searchParams }: Props) {
   // Celebraciones: la ficha vende el kit (piezas y precio del país), no el libro individual.
   const kitPricing = line === 'events' ? await getEventPricing(display.country) : null;
   const tKit = await getTranslations('Checkout.kit');
+
+  // Así queda un libro real (DECISIONS 348): el de esta historia; si no hay, uno de la misma línea.
+  const example =
+    showcase.find((book) => book.storySlug === story.slug) ??
+    showcase.find((book) => book.channel === (line ?? 'families')) ??
+    showcase[0];
 
   const amounts = offer?.formats.map((f) => f.amountMinor) ?? [];
   // Comparador: cada extensión que admite la historia, con sus páginas y en qué formatos sale.
@@ -216,6 +243,30 @@ export default async function StoryPage({ params, searchParams }: Props) {
             </blockquote>
             <p className="mt-3 text-sm text-muted-foreground">{t('sampleNote')}</p>
           </section>
+
+          {example && (
+            <section
+              id="asi-queda"
+              aria-labelledby="showcase-title"
+              className="grid scroll-mt-28 gap-3"
+            >
+              <div>
+                <h2 id="showcase-title" className="text-xl font-medium">
+                  {tShowcase('title')}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {tShowcase('text', { name: example.childName, age: example.age })}
+                </p>
+              </div>
+              <ShowcaseViewer book={example} />
+              <p className="flex items-start gap-2 text-sm text-muted-foreground">
+                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+                {example.storySlug === story.slug
+                  ? tShowcase('note')
+                  : tShowcase('otherStory', { title: example.title })}
+              </p>
+            </section>
+          )}
 
           {/* Historia con propósito propio (Profesionales): sus objetivos, no enseñanzas generales. */}
           {story.objectives?.length ? (

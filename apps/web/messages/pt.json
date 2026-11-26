@@ -403,6 +403,17 @@
       "hint": "Digite um nome e veja todas as capas com ele."
     }
   },
+  "Showcase": {
+    "title": "Assim fica um livro de verdade",
+    "text": "Um pedido de teste com uma criança inventada ({name}, {age} anos), do começo ao fim. Mostramos exatamente como saiu, sem retoques.",
+    "note": "Passou por todos os nossos controles de qualidade e o aprovamos antes de mostrar.",
+    "otherStory": "Este exemplo é «{title}», outra história do catálogo. Passou por todos os nossos controles de qualidade e o aprovamos antes de mostrar.",
+    "badge": "Livro de verdade",
+    "coverAlt": "Capa de «{title}»",
+    "pageAlt": "Página {number}: {text}",
+    "howText": "Pedidos de teste com crianças inventadas, exatamente como saíram, sem retoques. Passaram por todos os nossos controles de qualidade.",
+    "seeBook": "Ver o livro completo"
+  },
   "Formats": {
     "digital": "Ebook (PDF)",
     "softcover": "Capa mole",

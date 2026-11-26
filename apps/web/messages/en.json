@@ -403,6 +403,17 @@
       "hint": "Type a name and see every cover with it."
     }
   },
+  "Showcase": {
+    "title": "What a real book looks like",
+    "text": "A test order with a made-up child ({name}, {age}), from start to finish. We show it exactly as it came out, no touch-ups.",
+    "note": "It passed all our quality checks and we approved it before showing it.",
+    "otherStory": "This example is “{title}”, another story from the catalog. It passed all our quality checks and we approved it before showing it.",
+    "badge": "Real book",
+    "coverAlt": "Cover of “{title}”",
+    "pageAlt": "Page {number}: {text}",
+    "howText": "Test orders with made-up children, exactly as they came out, no touch-ups. They passed all our quality checks.",
+    "seeBook": "See the whole book"
+  },
   "Formats": {
     "digital": "Ebook (PDF)",
     "softcover": "Softcover",

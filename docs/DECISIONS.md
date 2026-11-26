@@ -3531,3 +3531,13 @@ En la prueba A/B de la ficha (US$3,20), el cuento de mamá cambiaba el pijama ce
 - **Texto:** si nombra la ropa, usa esas mismas prendas y colores. No inventa prendas, colores ni estampados, y solo cambia de ropa si la historia lo pide.
 - **Plan:** esa ropa se usa donde encaje (si ya es un pijama, sirve para la cama). Las ropas especiales llevan colores fijos y coinciden con el texto.
 - **Escenas:** nunca describen esa ropa con otros colores.
+
+## 348 — Libros de ejemplo aprobados por la mesa: «Así queda un libro real» (26 nov)
+
+Sebas: «los cuentos que pasan la mesa, convendría ponerlos en algún lugar de ejemplo?». Un libro completo, como lo recibe el cliente, convence más que el fragmento de texto de la ficha.
+
+- **Qué se puede mostrar:** solo libros del golden set (`eval:pedidos`, chicos inventados, nunca fotos ni pedidos reales y nunca el libro de Angelica, DECISIONS 253), con nota de la mesa 4 o más, el comprador lo compraría (`compra`) y sin fallas duras del contrato del pedido. La regla vive en `showcaseReasons` (shared/models/showcase.ts).
+- **Tal cual salió:** la tapa y las páginas armadas de la corrida, sin retoques. `pnpm --filter @storynido/providers showcase:import <corrida> --yes` las sube a Storage (assets/showcase/…) y a `showcaseBooks` como «por aprobar». Sin `--yes` solo lista qué califica.
+- **Sebas aprueba cada uno** en el admin (Contenido → Ejemplos de la mesa). El admin no deja aprobar uno que no califica y puede retirarlo de la web. Cada cambio queda en auditLog.
+- **Dónde se ve:** en la ficha de cada cuento (el de esa historia; si no hay, uno de la misma línea) y en «Cómo funciona» (hasta 4 tapas). Las imágenes las sirve la API (`/v1/catalog/showcase/:id/:file`) solo mientras el libro está aprobado.
+- **Sección oculta hasta tener 3 aprobados en el idioma** (`SHOWCASE_MIN_BOOKS`). Con uno solo no se abre: un único ejemplo parece elegido a mano.
