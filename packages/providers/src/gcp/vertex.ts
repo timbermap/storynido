@@ -21,6 +21,8 @@ import {
   type ImageData,
   type LikenessCheck,
   type LikenessRequest,
+  type LookRequest,
+  type LookResult,
   type ModerationResult,
   type PageReview,
   type PageReviewRequest,
@@ -723,6 +725,18 @@ const LIKENESS_SCHEMA = {
   required: ['score', 'apparentAge', 'glasses', 'fix'],
 };
 
+const LOOK_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    hair: { type: 'STRING' },
+    outfit: { type: 'ARRAY', items: { type: 'STRING' } },
+    glasses: { type: 'BOOLEAN' },
+    marks: { type: 'ARRAY', items: { type: 'STRING' } },
+    apparentAge: { type: 'STRING' },
+  },
+  required: ['hair', 'outfit', 'glasses', 'marks', 'apparentAge'],
+};
+
 const CHARACTER_SCHEMA = {
   type: 'OBJECT',
   properties: {
@@ -812,7 +826,7 @@ export class VertexTextProvider implements AITextProvider {
         imagePart(photo),
         {
           text: `Describe only the visible physical traits of the main person in this photo (a child or an adult: the character can be anyone in the family) so an illustrator can draw them consistently.
-Use short English phrases. Do not guess identity, ethnicity, name or location. Hair: color, length and texture.
+Use short English phrases. Do not guess identity, ethnicity, name or location. Hair: color, length, texture and hairstyle as worn in the photo (e.g. two braids, high ponytail, bun, straight fringe, loose).
 Distinctive features only if clearly visible (freckles, dimples, missing teeth...); never accessories such as sunglasses or hats.
 wearsGlasses is true only for clear prescription eyeglasses: sunglasses do not count.`,
         },
@@ -971,6 +985,55 @@ ${JSON.stringify({ title: story.title, pages: story.pages.map(({ text }) => ({ t
   }
 
   /** La escena de cada página, escrita desde el texto final (quién está y quién no, lugar, hora). */
+  /**
+   * Ficha visual fija (DECISIONS 345): se lee una sola vez la lámina aprobada y desde ahí las
+   * páginas y la revisión usan lo que se ve en la lámina, no el formulario. ≈ US$0,003.
+   */
+  async describeLook(request: LookRequest): Promise<LookResult> {
+    const { response, usage } = await this.client.generate(
+      VERTEX_DEFAULT_MODELS.moderation,
+      [
+        imagePart(request.sheet),
+        {
+          text: `This image is the approved character reference sheet of a children's picture book. Describe exactly what is drawn, so every page can copy it. Short English phrases, colors always named.
+hair: color, length, texture AND hairstyle exactly as drawn (e.g. "long straight black hair in two braids with red ribbons").
+outfit: each visible clothing item with its color and pattern, top to bottom, shoes included (e.g. "yellow t-shirt with a white star", "denim shorts", "red sneakers").
+glasses: true only if the character wears eyeglasses.
+marks: small permanent marks that are drawn (freckles, dimples, a missing tooth, a birthmark); empty if none.
+apparentAge: how old the character looks, e.g. "about 5 years old".
+For reference, the order asked for: ${request.requested}
+Describe the drawing, not the order: if they differ, the drawing wins.`,
+        },
+      ],
+      { temperature: 0, responseMimeType: 'application/json', responseSchema: LOOK_SCHEMA },
+      { safety: 'onlyHigh' },
+    );
+    const raw = parseJson(response, 'ficha visual') as {
+      hair?: unknown;
+      outfit?: unknown;
+      glasses?: unknown;
+      marks?: unknown;
+      apparentAge?: unknown;
+    };
+    const list = (value: unknown, max: number): string[] =>
+      (Array.isArray(value) ? value : [])
+        .filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+        .map((item) => item.trim().slice(0, 120))
+        .slice(0, max);
+    return {
+      look: {
+        hair: (typeof raw.hair === 'string' ? raw.hair : '').trim().slice(0, 200),
+        outfit: list(raw.outfit, 8),
+        glasses: raw.glasses === true,
+        marks: list(raw.marks, 5),
+        apparentAge: (typeof raw.apparentAge === 'string' ? raw.apparentAge : '')
+          .trim()
+          .slice(0, 60),
+      },
+      usage,
+    };
+  }
+
   async describeScenes(request: SceneRequest): Promise<SceneDescriptions> {
     const pages = request.pages.map((page, index) => {
       const scene = request.scenes?.find((item) => item.pageIndex === index);

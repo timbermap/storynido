@@ -17,10 +17,14 @@
  * con error y no se pasa a producción. Opciones: --only caso,caso · --pages 3 · --no-images.
  * Credenciales: token de gcloud con la configuración "storynido" (nunca la de Timbermap).
  *
+ * Ficha visual fija (DECISIONS 345): --arms base,ficha dibuja cada pedido con y sin la ficha, con el
+ * mismo texto, la misma lámina y las mismas semillas; --laminas <carpeta> reusa las láminas de una
+ * corrida anterior (`<caso>-v1-lamina.webp`) y no las vuelve a dibujar.
+ *
  * Regla de la mesa: cada fallo nuevo que se escapa suma un caso acá, una cláusula y un test.
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -48,7 +52,12 @@ import {
   coverScene,
   coverSetting,
   describeCharacter,
+  describeLookCharacter,
   describeTraits,
+  lookMustKeep,
+  pageOutfitNote,
+  sceneOutfit,
+  type CharacterLook,
   editorialPlan,
   hardViolations,
   imageContractNote,
@@ -63,6 +72,7 @@ import {
   runPanel,
   type Panel,
   type PageLayout,
+  type StoryPlan,
 } from '@storynido/shared';
 import sharp from 'sharp';
 
@@ -93,6 +103,10 @@ const { values } = parseArgs({
     /** Como el worker: el dibujo que falla el contrato se redibuja una vez con la reparación. */
     redraw: { type: 'boolean', default: true },
     'no-redraw': { type: 'boolean', default: false },
+    /** Brazos de la prueba A/B (DECISIONS 345): base (descripción del pedido) y ficha (fija). */
+    arms: { type: 'string', default: 'base' },
+    /** Carpeta de una corrida anterior: sus láminas se reusan (no se gastan ni cambian). */
+    laminas: { type: 'string' },
   },
 });
 
@@ -118,6 +132,27 @@ const withImages = values.images && !values['no-images'];
 const pagesToDraw = Number(values.pages);
 const runs = Math.max(1, Math.floor(Number(values.runs)) || 1);
 const withRedraw = values.redraw && !values['no-redraw'];
+const ARMS = ['base', 'ficha'] as const;
+type Arm = (typeof ARMS)[number];
+const arms = [...new Set(values.arms.split(',').map((item) => item.trim()))] as Arm[];
+if (arms.length === 0 || arms.some((arm) => !ARMS.includes(arm))) {
+  console.error(`--arms acepta: ${ARMS.join(', ')}`);
+  process.exit(1);
+}
+const laminasDir = values.laminas ? path.resolve(values.laminas) : null;
+/** Lámina de una corrida anterior para este pedido (null si no hay). */
+const fixedLamina = (id: string, round: number): ImageData | null => {
+  if (!laminasDir) return null;
+  for (const name of [
+    `${id}-v${String(round)}-lamina.webp`,
+    `${id}-v1-lamina.webp`,
+    `${id}-lamina.webp`,
+  ]) {
+    const file = path.join(laminasDir, name);
+    if (existsSync(file)) return { bytes: readFileSync(file), mimeType: 'image/webp' };
+  }
+  return null;
+};
 // Imagen: ~1.300 tokens de salida más la entrada (calibrado con la v2 del 25 nov: US$3,65 reales
 // contra 4,07 estimados); texto y revisiones, unos centavos.
 const perImage = 0.075;
@@ -132,7 +167,12 @@ const perCase =
       pagesToDraw * 0.003 +
       0.02
     : 0);
-const estimate = cases.length * runs * perCase;
+// Ronda 4 (26 nov): con las reglas 344 cada vuelta costó ~0,69 contra 0,60 estimados: +15 %.
+// El texto y la lámina se comparten entre brazos; cada brazo extra suma tapa, páginas y mesa.
+const shared =
+  0.06 + (withImages && !laminasDir ? perImage : 0) + (arms.includes('ficha') ? 0.003 : 0);
+const perArm = Math.max(0, perCase - 0.06 - (withImages ? perImage : 0));
+const estimate = cases.length * runs * (shared + arms.length * perArm) * 1.15;
 const budget = Number(values.budget);
 console.log(
   `Plan: ${String(cases.length)} pedidos × ${String(runs)} vuelta(s)${withRedraw ? ' con redibujo' : ''} · ${withImages ? `lámina, tapa y ${String(pagesToDraw)} páginas` : 'solo texto'} · estimado USD ${estimate.toFixed(2)} · tope USD ${budget.toFixed(2)}`,
@@ -181,8 +221,15 @@ interface Row {
   id: string;
   /** Vuelta (1 si la corrida tiene una sola). */
   run?: number;
-  /** Dibujos revisados y los que salieron limpios a la primera (sin redibujo). */
-  images?: { reviewed: number; cleanFirst: number; cleanFinal: number };
+  /** Brazo de la prueba A/B (DECISIONS 345). */
+  arm?: Arm;
+  /** Ficha visual fija leída de la lámina (si el brazo ficha corrió). */
+  look?: CharacterLook;
+  /**
+   * Dibujos revisados y los que salieron limpios a la primera (sin redibujo). `faithfulFirst`:
+   * a la primera, pelo, peinado, ropa y anteojos iguales a la ficha de la lámina (si la hay).
+   */
+  images?: { reviewed: number; cleanFirst: number; cleanFinal: number; faithfulFirst?: number };
   covers: string;
   title: string;
   pages: string[];
@@ -207,18 +254,34 @@ const save = () => {
   writeFileSync(path.join(outDir, 'resultados.json'), JSON.stringify(rows, null, 2));
 };
 
-for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index + 1).flatMap(
-  (run) => cases.map((item) => [run, item] as const),
+/** Lo que comparten los brazos de un mismo pedido y vuelta: texto, lámina y ficha (DECISIONS 345). */
+interface Written {
+  plan: ReturnType<typeof editorialPlan>;
+  storyPlan: Omit<StoryPlan, 'usage'>;
+  draft: Awaited<ReturnType<typeof text.generateStory>>;
+  pages: Awaited<ReturnType<typeof text.generateStory>>['pages'];
+  clauses: Row['clauses'];
+  notes: string[];
+  lamina?: ImageData;
+  look?: CharacterLook | null;
+}
+const written = new Map<string, Written>();
+
+for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => index + 1).flatMap(
+  (run) => cases.flatMap((item) => arms.map((one) => [run, item, one] as const)),
 )) {
   const story = stories.find((item) => item.slug === testCase.story);
   const style = SEED_STYLES.find((item) => item.slug === testCase.style);
   if (!story || !style) continue;
   const before = spent;
-  const tag = runs > 1 ? `${testCase.id}-v${String(round)}` : testCase.id;
+  const baseTag = runs > 1 ? `${testCase.id}-v${String(round)}` : testCase.id;
+  const tag = arms.length > 1 ? `${baseTag}-${arm}` : baseTag;
+  const key = `${String(round)}:${testCase.id}`;
   const row: Row = {
     id: testCase.id,
     run: round,
-    images: { reviewed: 0, cleanFirst: 0, cleanFinal: 0 },
+    arm,
+    images: { reviewed: 0, cleanFirst: 0, cleanFinal: 0, faithfulFirst: 0 },
     covers: testCase.covers,
     title: '',
     pages: [],
@@ -234,121 +297,148 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
     if (!now || rank[verdict] > rank[now]) row.clauses[clause] = verdict;
   };
   try {
-    const plan = editorialPlan(
-      { length: 'mini', textDensity: 'balanced', readingLevel: 'developing', contentType: 'story' },
-      DEFAULT_EDITORIAL_CONFIG,
-      story.pageCount,
-      testCase.age,
-    );
-    const memories: Memories | null = testCase.memories
-      ? { moment: null, companion: null, nickname: null, favorite: null, ...testCase.memories }
-      : null;
-    const event = testCase.event ? { ...EMPTY_BIRTHDAY, ...testCase.event } : null;
-    const request = {
-      language: 'es' as const,
-      childName: testCase.name,
-      age: testCase.age,
-      pronouns: testCase.he ? ('he' as const) : ('she' as const),
-      likes: testCase.likes,
-      petName: testCase.petName ?? null,
-      bestFriendName: testCase.bestFriendName ?? null,
-      dedication: null,
-      storyTitle: withChildName(story.title.es, testCase.name),
-      lessons: [],
-      pageCount: Math.min(Math.max(plan.narrativePages, 4), 10),
-      wordsPerPage: plan.words,
-      mustInclude: [],
-      spanishVoice: spanishVoiceFor(testCase.country),
-      protagonistLook: describeTraits(testCase.traits, []),
-    };
-    const promptInput = {
-      ...request,
-      template: story.textPromptTemplate,
-      storyAges: { min: story.ageMin, max: story.ageMax },
-      premise: story.summary.es || null,
-      bedtime: story.tags.includes('dormir'),
-      memories,
-      event,
-      goal: testCase.goal ?? null,
-      practice: testCase.practice ?? null,
-      professional: testCase.channel === 'professionals',
-      levelGuidance: plan.levelGuidance,
-    };
-    const contract = buildOrderContract({
-      channel: testCase.channel,
-      language: 'es',
-      age: testCase.age,
-      petName: request.petName,
-      bestFriendName: request.bestFriendName,
-      likes: request.likes,
-      practice: testCase.practice ?? null,
-      storyAges: { min: story.ageMin, max: story.ageMax },
-      tags: story.tags,
-      requestedText: [
-        ...(memories ? Object.values(memories) : []),
-        story.textPromptTemplate,
-        story.summary.es,
-        event ? JSON.stringify(event) : null,
-        testCase.goal,
-      ],
-    });
-    for (const violation of checkFormContract(contract, {
-      age: testCase.age,
-      storyAges: { min: story.ageMin, max: story.ageMax },
-    })) {
-      mark(violation.clause, violation.severity === 'soft' ? 'soft' : 'fail');
+    const cached = written.get(key);
+    if (cached) {
+      row.clauses = { ...cached.clauses };
+      row.notes = [...cached.notes];
     }
+    const shared: Written =
+      cached ??
+      (await (async (): Promise<Written> => {
+        const plan = editorialPlan(
+          {
+            length: 'mini',
+            textDensity: 'balanced',
+            readingLevel: 'developing',
+            contentType: 'story',
+          },
+          DEFAULT_EDITORIAL_CONFIG,
+          story.pageCount,
+          testCase.age,
+        );
+        const memories: Memories | null = testCase.memories
+          ? { moment: null, companion: null, nickname: null, favorite: null, ...testCase.memories }
+          : null;
+        const event = testCase.event ? { ...EMPTY_BIRTHDAY, ...testCase.event } : null;
+        const request = {
+          language: 'es' as const,
+          childName: testCase.name,
+          age: testCase.age,
+          pronouns: testCase.he ? ('he' as const) : ('she' as const),
+          likes: testCase.likes,
+          petName: testCase.petName ?? null,
+          bestFriendName: testCase.bestFriendName ?? null,
+          dedication: null,
+          storyTitle: withChildName(story.title.es, testCase.name),
+          lessons: [],
+          pageCount: Math.min(Math.max(plan.narrativePages, 4), 10),
+          wordsPerPage: plan.words,
+          mustInclude: [],
+          spanishVoice: spanishVoiceFor(testCase.country),
+          protagonistLook: describeTraits(testCase.traits, []),
+        };
+        const promptInput = {
+          ...request,
+          template: story.textPromptTemplate,
+          storyAges: { min: story.ageMin, max: story.ageMax },
+          premise: story.summary.es || null,
+          bedtime: story.tags.includes('dormir'),
+          memories,
+          event,
+          goal: testCase.goal ?? null,
+          practice: testCase.practice ?? null,
+          professional: testCase.channel === 'professionals',
+          levelGuidance: plan.levelGuidance,
+        };
+        const contract = buildOrderContract({
+          channel: testCase.channel,
+          language: 'es',
+          age: testCase.age,
+          petName: request.petName,
+          bestFriendName: request.bestFriendName,
+          likes: request.likes,
+          practice: testCase.practice ?? null,
+          storyAges: { min: story.ageMin, max: story.ageMax },
+          tags: story.tags,
+          requestedText: [
+            ...(memories ? Object.values(memories) : []),
+            story.textPromptTemplate,
+            story.summary.es,
+            event ? JSON.stringify(event) : null,
+            testCase.goal,
+          ],
+        });
+        for (const violation of checkFormContract(contract, {
+          age: testCase.age,
+          storyAges: { min: story.ageMin, max: story.ageMax },
+        })) {
+          mark(violation.clause, violation.severity === 'soft' ? 'soft' : 'fail');
+        }
 
-    // Texto como la muestra: plan saneado, cuento, revisión y una reparación del contrato.
-    const { usage: planUsage, ...planned } = await text.planStory({
-      ...request,
-      prompt: buildStoryPrompt(promptInput),
-    });
-    spend(planUsage);
-    const sanitized = checkPlanContract(contract, planned);
-    if (sanitized.violations.length > 0) {
-      row.notes.push(`plan: ${sanitized.violations.map((item) => item.repair).join(' ')}`);
-    }
-    const storyPlan = { ...planned, ...sanitized.plan };
-    const prompt = buildStoryPrompt({ ...promptInput, plan: storyPlan });
-    const draft = await text.generateStory({ ...request, prompt });
-    spend(draft.usage);
-    const reviewed = await text.reviewStory(draft, { ...request, prompt });
-    spend(reviewed.usage);
-    let pages = reviewed.pages.map((page) => ({ ...page }));
-    const first = checkTextContract(contract, pages, storyPlan);
-    const hard = hardViolations(first);
-    if (hard.length > 0) {
-      const repair = await text.reviewStory(
-        { title: draft.title, pages, usage: draft.usage },
-        { ...request, prompt },
-        { issues: hard.map((item) => item.repair) },
-      );
-      spend(repair.usage);
-      const after = hardViolations(checkTextContract(contract, repair.pages, storyPlan));
-      if (after.length < hard.length) pages = repair.pages.map((page) => ({ ...page }));
-    }
-    const final = checkTextContract(contract, pages, storyPlan);
-    const finalClauses = new Set(final.map((item) => item.clause));
-    for (const violation of first) {
-      if (violation.severity === 'soft') mark(violation.clause, 'soft');
-      else mark(violation.clause, finalClauses.has(violation.clause) ? 'fail' : 'repaired');
-    }
-    for (const violation of final) {
-      if (violation.severity === 'hard') {
-        mark(violation.clause, 'fail');
-        row.notes.push(`texto: ${violation.repair}`);
-      }
-    }
-    mark('closed_cast', 'pass');
-    mark('no_touch', 'pass');
-    if (contract.requiredNames.length > 0) mark('requested_names', 'pass');
-    if (storyPlan.structure === 'refrain' && storyPlan.refrain) mark('exact_refrain', 'pass');
-    if (contract.promises.length > 0) mark('template_promise', 'pass');
+        // Texto como la muestra: plan saneado, cuento, revisión y una reparación del contrato.
+        const { usage: planUsage, ...planned } = await text.planStory({
+          ...request,
+          prompt: buildStoryPrompt(promptInput),
+        });
+        spend(planUsage);
+        const sanitized = checkPlanContract(contract, planned);
+        if (sanitized.violations.length > 0) {
+          row.notes.push(`plan: ${sanitized.violations.map((item) => item.repair).join(' ')}`);
+        }
+        const storyPlan = { ...planned, ...sanitized.plan };
+        const prompt = buildStoryPrompt({ ...promptInput, plan: storyPlan });
+        const draft = await text.generateStory({ ...request, prompt });
+        spend(draft.usage);
+        const reviewed = await text.reviewStory(draft, { ...request, prompt });
+        spend(reviewed.usage);
+        let pages = reviewed.pages.map((page) => ({ ...page }));
+        const first = checkTextContract(contract, pages, storyPlan);
+        const hard = hardViolations(first);
+        if (hard.length > 0) {
+          const repair = await text.reviewStory(
+            { title: draft.title, pages, usage: draft.usage },
+            { ...request, prompt },
+            { issues: hard.map((item) => item.repair) },
+          );
+          spend(repair.usage);
+          const after = hardViolations(checkTextContract(contract, repair.pages, storyPlan));
+          if (after.length < hard.length) pages = repair.pages.map((page) => ({ ...page }));
+        }
+        const final = checkTextContract(contract, pages, storyPlan);
+        const finalClauses = new Set(final.map((item) => item.clause));
+        for (const violation of first) {
+          if (violation.severity === 'soft') mark(violation.clause, 'soft');
+          else mark(violation.clause, finalClauses.has(violation.clause) ? 'fail' : 'repaired');
+        }
+        for (const violation of final) {
+          if (violation.severity === 'hard') {
+            mark(violation.clause, 'fail');
+            row.notes.push(`texto: ${violation.repair}`);
+          }
+        }
+        mark('closed_cast', 'pass');
+        mark('no_touch', 'pass');
+        if (contract.requiredNames.length > 0) mark('requested_names', 'pass');
+        if (storyPlan.structure === 'refrain' && storyPlan.refrain) mark('exact_refrain', 'pass');
+        if (contract.promises.length > 0) mark('template_promise', 'pass');
+        row.title = draft.title;
+        row.pages = pages.map((page) => page.text);
+        row.scenes = storyPlan.scenes;
+        console.log(`✓ ${testCase.id} · texto: ${draft.title}`);
+        return {
+          plan,
+          storyPlan,
+          draft,
+          pages,
+          clauses: { ...row.clauses },
+          notes: [...row.notes],
+        };
+      })());
+    written.set(key, shared);
+    const { plan, storyPlan, draft, pages } = shared;
     row.title = draft.title;
     row.pages = pages.map((page) => page.text);
     row.scenes = storyPlan.scenes;
-    console.log(`✓ ${testCase.id} · texto: ${draft.title}`);
 
     if (withImages) {
       const direction = artDirection({
@@ -357,13 +447,17 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         palette: story.palette,
         style: style.slug,
       });
-      const description = `${describeCharacter(
+      const companionLine = storyPlan.companion ? `\n${companionNote(storyPlan.companion)}` : '';
+      const requested = describeCharacter(
         testCase.name,
         testCase.age,
         testCase.sheet,
         testCase.traits,
         [],
-      )}${storyPlan.companion ? `\n${companionNote(storyPlan.companion)}` : ''}`;
+      );
+      // El brazo base dibuja con la descripción del pedido; el brazo ficha, con la ficha visual
+      // fija leída de la lámina (DECISIONS 345). Se define abajo, una vez que hay lámina.
+      let description = `${requested}${companionLine}`;
       const draw = async (label: string, scene: string, references: ImageData[], seed: number) => {
         // Un dibujo que se cuelga o que la moderación bloquea no tumba el caso: un reintento, como el
         // worker, que en el segundo intento saca los objetos con letras (Diario, 25 nov:
@@ -395,7 +489,51 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
           .toFile(path.join(outDir, `${tag}-${label}.webp`));
         return { bytes: generated.bytes, mimeType: generated.mimeType };
       };
-      const lamina = await draw('lamina', CHARACTER_REFERENCE_SCENE, [], 0);
+      // La misma lámina para los dos brazos: la de una corrida anterior (--laminas) o una nueva.
+      const lamina =
+        shared.lamina ??
+        fixedLamina(testCase.id, round) ??
+        (await draw('lamina', CHARACTER_REFERENCE_SCENE, [], 0));
+      shared.lamina = lamina;
+      if (laminasDir || shared.look !== undefined) {
+        await sharp(lamina.bytes)
+          .webp({ quality: 82 })
+          .toFile(path.join(outDir, `${tag}-lamina.webp`));
+      }
+      // La ficha se lee una vez por pedido y es la vara de los dos brazos: así «fiel a la ficha»
+      // mide lo mismo con y sin ella.
+      if (shared.look === undefined) {
+        shared.look = arms.includes('ficha')
+          ? await text
+              .describeLook({ sheet: lamina, requested })
+              .then((result) => {
+                spend(result.usage);
+                return result.look;
+              })
+              .catch((error: unknown) => {
+                row.notes.push(
+                  `ficha: no se pudo leer (${(error as Error).message.slice(0, 120)})`,
+                );
+                return null;
+              })
+          : null;
+      }
+      const look = shared.look;
+      if (look) row.look = look;
+      if (arm === 'ficha' && look) {
+        description = `${describeLookCharacter(testCase.name, testCase.age, look, testCase.traits)}${companionLine}`;
+      }
+      const reviewCharacter = look
+        ? `${describeLookCharacter(testCase.name, testCase.age, look, testCase.traits)}${companionLine}`
+        : description;
+      const reviewKeep = look
+        ? lookMustKeep(look, testCase.traits)
+        : [
+            `hairstyle: ${testCase.sheet.hair} (as on the reference sheet)`,
+            `glasses: ${testCase.traits.glasses ? 'present' : 'absent'}`,
+            `outfit: ${testCase.sheet.clothing} (unless the page text says the character changes clothes)`,
+          ];
+      const FICHA_TRAITS = /hair|outfit|cloth|glasses|freckle|mark|shoe|shirt|dress/i;
       // Armado de cada página igual que la muestra y el worker: zona calma o papel fundido según la
       // edad y lo que mide el texto (Benicio, 25 nov: el examen dibujaba sin armado y no lo vio).
       const typography =
@@ -432,12 +570,8 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
             text: pageText,
             image: img,
             reference: lamina,
-            character: description,
-            mustKeep: [
-              `hairstyle: ${testCase.sheet.hair} (as on the reference sheet)`,
-              `glasses: ${testCase.traits.glasses ? 'present' : 'absent'}`,
-              `outfit: ${testCase.sheet.clothing} (unless the page text says the character changes clothes)`,
-            ],
+            character: reviewCharacter,
+            mustKeep: reviewKeep,
             scene,
             visualBible: index === 0 ? '' : visualBibleCheck(storyPlan, scene),
             contract: note,
@@ -453,8 +587,20 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         if (verdict.textInImage) broken.add('no_text_in_image');
         // Igual que el worker: se redibuja con cualquier «repair», no solo con una cláusula del
         // contrato (el examen daba por limpias páginas que la mesa reprobaba, ronda 3, DECISIONS 344).
+        const near = (a: string, b: string) => {
+          const x = a.trim().toLowerCase();
+          const y = b.trim().toLowerCase();
+          return x === y || x.includes(y) || y.includes(x);
+        };
+        const faithful = verdict.continuityChecks.every(
+          (check) =>
+            !FICHA_TRAITS.test(check.trait) ||
+            check.confidence === 'low' ||
+            near(check.expected, check.observed),
+        );
         return {
           broken,
+          faithful,
           repair: verdict.status === 'repair' || broken.size > 0,
           issues: verdict.criticalIssues,
           fix: verdict.repairInstructions ?? [],
@@ -478,6 +624,7 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         const images = row.images ?? { reviewed: 0, cleanFirst: 0, cleanFinal: 0 };
         row.images = images;
         images.reviewed += 1;
+        if (look && first.faithful) images.faithfulFirst = (images.faithfulFirst ?? 0) + 1;
         if (!first.repair) {
           images.cleanFirst += 1;
           images.cleanFinal += 1;
@@ -572,7 +719,12 @@ for (const [round, testCase] of Array.from({ length: runs }, (_, index) => index
         const layout = layoutFor(page.index, scene?.pageIndex ?? page.index + 1);
         const label = `página ${String(page.index + 1)}`;
         const file = `pagina-${String(page.index + 1)}`;
-        const sceneText = `${page.illustrationPrompt}${bible ? ` ${bible}` : ''}${castNote(storyPlan.cast)}${sceneNoteFor(layout, pageText)}`;
+        // Brazo ficha: una sola ropa por página, sin «salvo que» (DECISIONS 345).
+        const outfit =
+          arm === 'ficha' && look && !sceneOutfit(storyPlan, scene)
+            ? pageOutfitNote(storyPlan, scene, look)
+            : '';
+        const sceneText = `${page.illustrationPrompt}${bible ? ` ${bible}` : ''}${outfit}${castNote(storyPlan.cast)}${sceneNoteFor(layout, pageText)}`;
         const drawn = await drawChecked(
           label,
           file,
@@ -661,6 +813,21 @@ for (const id of new Set(rows.map((row) => row.id))) {
 }
 
 const symbol: Record<Verdict, string> = { pass: '✓', repaired: '↻', soft: '·', fail: '✗' };
+const label = (row: Row) =>
+  `${row.id}${runs > 1 ? ` v${String(row.run ?? 1)}` : ''}${arms.length > 1 ? ` · ${row.arm ?? 'base'}` : ''}`;
+/** Dibujos limpios y fieles a la ficha de un grupo de filas (un brazo o todas). */
+const imageLine = (group: Row[]) => {
+  const total = group.reduce((sum, row) => sum + (row.images?.reviewed ?? 0), 0);
+  const first = group.reduce((sum, row) => sum + (row.images?.cleanFirst ?? 0), 0);
+  const final = group.reduce((sum, row) => sum + (row.images?.cleanFinal ?? 0), 0);
+  const faithful = group.reduce((sum, row) => sum + (row.images?.faithfulFirst ?? 0), 0);
+  const pct = (value: number) => (total ? `${String(Math.round((100 * value) / total))}%` : '-');
+  const clean = group.filter(
+    (row) => !row.error && Object.values(row.clauses).every((verdict) => verdict !== 'fail'),
+  ).length;
+  const withLook = group.some((row) => row.look);
+  return `Dibujos limpios a la primera: ${String(first)}/${String(total)} (${pct(first)}) · después del redibujo: ${String(final)}/${String(total)} (${pct(final)})${withLook ? ` · fieles a la ficha a la primera: ${String(faithful)}/${String(total)} (${pct(faithful)})` : ''} · pedidos sin fallos duros al final: ${String(clean)}/${String(group.length)}`;
+};
 const used = CONTRACT_CLAUSES.filter((clause) => rows.some((row) => row.clauses[clause]));
 const md = [
   `# Golden set de pedidos · ${new Date().toISOString().slice(0, 10)}`,
@@ -669,19 +836,20 @@ const md = [
   '',
   ...(withImages
     ? [
-        (() => {
-          const total = rows.reduce((sum, row) => sum + (row.images?.reviewed ?? 0), 0);
-          const first = rows.reduce((sum, row) => sum + (row.images?.cleanFirst ?? 0), 0);
-          const final = rows.reduce((sum, row) => sum + (row.images?.cleanFinal ?? 0), 0);
-          const pct = (value: number) =>
-            total ? `${String(Math.round((100 * value) / total))}%` : '-';
-          const clean = rows.filter(
-            (row) =>
-              !row.error && Object.values(row.clauses).every((verdict) => verdict !== 'fail'),
-          ).length;
-          return `Dibujos limpios a la primera: ${String(first)}/${String(total)} (${pct(first)}) · después del redibujo: ${String(final)}/${String(total)} (${pct(final)}) · pedidos sin fallos duros al final: ${String(clean)}/${String(rows.length)}`;
-        })(),
-        '',
+        ...(arms.length > 1
+          ? arms.flatMap((one) => {
+              const group = rows.filter((row) => (row.arm ?? 'base') === one);
+              const judged = group.flatMap((row) => (row.panel ? [row.panel] : []));
+              return [
+                `### Brazo ${one}`,
+                '',
+                imageLine(group),
+                '',
+                judged.length > 0 ? panelSummary(judged) : 'Mesa de jueces: sin respuestas',
+                '',
+              ];
+            })
+          : [imageLine(rows), '']),
         (() => {
           const judged = rows.flatMap((row) => (row.panel ? [row.panel] : []));
           return judged.length > 0 ? panelSummary(judged) : 'Mesa de jueces: sin respuestas';
@@ -695,7 +863,7 @@ const md = [
   `| --- | ${used.map(() => '---').join(' | ')} | --- |`,
   ...rows.map(
     (row) =>
-      `| ${row.id}${runs > 1 ? ` v${String(row.run ?? 1)}` : ''}${row.error ? ' (error)' : ''} | ${used
+      `| ${label(row)}${row.error ? ' (error)' : ''} | ${used
         .map((clause) => {
           const verdict = row.clauses[clause];
           return verdict ? symbol[verdict] : '';
@@ -712,20 +880,13 @@ const md = [
   ...(rows.some((row) => row.panel)
     ? [
         '## Qué dice la mesa de jueces',
-        ...rows.flatMap((row) =>
-          row.panel
-            ? [
-                ...panelLines(`${row.id}${runs > 1 ? ` v${String(row.run ?? 1)}` : ''}`, row.panel),
-                '',
-              ]
-            : [],
-        ),
+        ...rows.flatMap((row) => (row.panel ? [...panelLines(label(row), row.panel), ''] : [])),
       ]
     : []),
   '## Qué cubre y qué falló',
   ...rows.map(
     (row) =>
-      `- **${row.id}${runs > 1 ? ` v${String(row.run ?? 1)}` : ''}** (${row.covers}): ${row.error ?? (row.notes.join(' · ') || 'todo cumple')}`,
+      `- **${label(row)}** (${row.covers}): ${row.error ?? (row.notes.join(' · ') || 'todo cumple')}`,
   ),
 ].join('\n');
 writeFileSync(path.join(outDir, 'resumen.md'), md);

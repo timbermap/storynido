@@ -1,6 +1,7 @@
 import type { BookEvent } from '../models/events';
 import type { Locale } from '../i18n';
 import {
+  avatarToSheet,
   describeTraits,
   type CharacterTraits,
   type Memories,
@@ -9,6 +10,7 @@ import {
 import {
   SHOT_TYPES,
   type CastMember,
+  type CharacterLook,
   type CharacterSheet,
   type LessonPrompt,
   type ScenePlan,
@@ -558,7 +560,86 @@ export function describeCharacter(
 ): string {
   const features = identityFeatures(sheet.distinctiveFeatures);
   const extras = features.length ? `; also: ${features.join(', ')}` : '';
-  return `${name}: ${ageLabel(age)} (${storyAgeRule(age)}); ${describeTraits(traits, mustKeep)}; outfit: ${ageLabel(age)}'s version of ${sheet.clothing} (${SAME_OUTFIT}); ${NO_PHOTO_ACCESSORIES}${extras}`;
+  // El peinado de la ficha (trenzas, colita, rodete): el formulario solo da largo, tipo y color, y
+  // la lámina salía con el pelo suelto (diario, ronda 4, 26 nov, DECISIONS 345).
+  const hairstyle = hairstyleOf(sheet.hair);
+  const style = hairstyle ? `; hairstyle: ${hairstyle} (draw exactly this hairstyle)` : '';
+  return `${name}: ${ageLabel(age)} (${storyAgeRule(age)}); ${describeTraits(traits, mustKeep)}${style}; outfit: ${ageLabel(age)}'s version of ${sheet.clothing} (${SAME_OUTFIT}); ${NO_PHOTO_ACCESSORIES}${extras}`;
+}
+
+/** Palabras de un peinado (no de largo, tipo o color, que ya da el formulario). */
+const HAIRSTYLE_WORDS =
+  /braid|plait|ponytail|pony tail|pigtail|bun\b|buns\b|top ?knot|chignon|fringe|bangs|side part|parted|afro puff|cornrow|dreadlock|locs\b|bob\b|pixie|mohawk|undercut|tied|clip|headband|bow\b|ribbon|scrunchie/i;
+
+/** La ficha del pelo si dice un peinado; null si solo repite largo, tipo y color. */
+export function hairstyleOf(hair: string): string | null {
+  const text = hair.trim();
+  return text && HAIRSTYLE_WORDS.test(text) ? text : null;
+}
+
+/**
+ * Protagonista desde la ficha visual fija tomada de la lámina aprobada (DECISIONS 345). Reemplaza a
+ * `describeCharacter` en la tapa y las páginas: una sola versión del personaje, la que se ve, sin el
+ * pelo del formulario que contradecía a la lámina. Piel y ojos siguen del formulario confirmado.
+ */
+export function describeLookCharacter(
+  name: string,
+  age: number,
+  look: CharacterLook,
+  traits: CharacterTraits,
+): string {
+  const confirmed = avatarToSheet(traits, age);
+  const marks = look.marks.filter((mark) => mark.trim());
+  return [
+    `${name}: ${ageLabel(age)} (${storyAgeRule(age)}; on the reference sheet: ${look.apparentAge})`,
+    `hair: ${look.hair}`,
+    `skin tone: ${confirmed.skinTone}`,
+    `eyes: ${confirmed.eyes}`,
+    look.glasses ? 'wears clear prescription glasses (never sunglasses)' : 'no glasses',
+    marks.length ? `always visible: ${marks.join(', ')}` : '',
+    `everyday outfit (exactly as on the reference sheet): ${everydayOutfit(look)}`,
+    NO_PHOTO_ACCESSORIES,
+  ]
+    .filter(Boolean)
+    .join('; ');
+}
+
+/** La ropa de todos los días de la ficha, prenda por prenda. */
+export function everydayOutfit(look: CharacterLook): string {
+  return look.outfit
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join(', ');
+}
+
+/** Lo que la revisión de cada página compara con la ficha visual fija (las mismas palabras). */
+export function lookMustKeep(look: CharacterLook, traits: CharacterTraits): string[] {
+  const confirmed = avatarToSheet(traits, 0);
+  return [
+    `hair and hairstyle: ${look.hair}`,
+    `skin tone: ${confirmed.skinTone}`,
+    `glasses: ${look.glasses ? 'present' : 'absent'}`,
+    ...look.marks.filter((mark) => mark.trim()).map((mark) => `always visible: ${mark}`),
+    `outfit: ${everydayOutfit(look)} (unless the scene plan gives this page another outfit)`,
+  ];
+}
+
+/**
+ * La ropa de UNA página, en una sola frase y sin «salvo que» (DECISIONS 345): la especial del plan
+ * (en el agua, en el espacio) o, si no hay, exactamente la de la ficha. Con «salvo que» el modelo
+ * cambiaba la ropa sin motivo en 5 de 8 libros (ronda 4, 26 nov).
+ */
+export function pageOutfitNote(
+  bible: VisualBible | null | undefined,
+  scene: ScenePlan | null | undefined,
+  look: CharacterLook | null | undefined,
+): string {
+  const special = sceneOutfit(bible, scene);
+  if (special) return ` On this page the main character wears ${special}.`;
+  if (look) {
+    return ` On this page the main character wears exactly the everyday outfit of the reference sheet: ${everydayOutfit(look)}; no other clothes, no extra layers.`;
+  }
+  return ` The main character wears ${SAME_OUTFIT}.`;
 }
 
 /** Lo mínimo del plan que necesita la portada: sus lugares y la escena de cada página. */

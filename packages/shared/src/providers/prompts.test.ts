@@ -16,6 +16,10 @@ import {
   fillOutfitGaps,
   coverScene,
   describeCharacter,
+  describeLookCharacter,
+  hairstyleOf,
+  lookMustKeep,
+  pageOutfitNote,
   languageName,
   lessonsBlock,
   craftRules,
@@ -672,5 +676,64 @@ describe('edad del acompañante que dio el pedido', () => {
     expect(fixed.look).toContain('never drawn as a teenager');
     const same = { name: 'Pancho', look: 'a small brown dog' };
     expect(withStatedAge(same, null)).toBe(same);
+  });
+});
+
+describe('ficha visual fija (DECISIONS 345)', () => {
+  const traits = {
+    skinTone: 'light',
+    hairColor: 'black',
+    hairLength: 'long',
+    hairType: 'straight',
+    eyeColor: 'brown',
+    glasses: false,
+    distinctive: null,
+  } as const;
+  const look = {
+    hair: 'long straight black hair in a high ponytail with a red scrunchie',
+    outfit: ['yellow t-shirt with a white star', 'denim shorts', 'red sneakers'],
+    glasses: false,
+    marks: ['freckles on the nose'],
+    apparentAge: 'about 6 years old',
+  };
+
+  it('el peinado pedido llega a la lámina', () => {
+    expect(hairstyleOf('long black hair in two braids')).toBe('long black hair in two braids');
+    expect(hairstyleOf('short curly brown hair')).toBeNull();
+    const sheet = { ...avatarToSheet(traits, 6), hair: 'long black hair in a ponytail' };
+    expect(describeCharacter('Ana', 6, sheet, traits, [])).toContain(
+      'hairstyle: long black hair in a ponytail (draw exactly this hairstyle)',
+    );
+  });
+
+  it('las páginas dibujan lo que se ve en la lámina, no el formulario', () => {
+    const description = describeLookCharacter('Ana', 6, look, traits);
+    expect(description).toContain(`hair: ${look.hair}`);
+    expect(description).toContain('always visible: freckles on the nose');
+    expect(description).toContain(
+      'everyday outfit (exactly as on the reference sheet): yellow t-shirt with a white star, denim shorts, red sneakers',
+    );
+    expect(description).toContain('no glasses');
+  });
+
+  it('la revisión compara con las mismas palabras de la ficha', () => {
+    const keep = lookMustKeep(look, traits);
+    expect(keep).toContain(`hair and hairstyle: ${look.hair}`);
+    expect(keep).toContain('glasses: absent');
+    expect(keep).toContain('always visible: freckles on the nose');
+  });
+
+  it('una sola ropa por página, sin «salvo que»', () => {
+    const note = pageOutfitNote(null, null, look);
+    expect(note).toContain('exactly the everyday outfit of the reference sheet');
+    expect(note).not.toContain('unless');
+    const bible = {
+      objects: [],
+      places: [],
+      outfits: [{ context: 'bath', look: 'bare shoulders in bubbles' }],
+    };
+    const special = pageOutfitNote(bible, { pageIndex: 3, outfit: 'bath' } as never, look);
+    expect(special).toContain('bare shoulders in bubbles');
+    expect(special).not.toContain('yellow t-shirt');
   });
 });
