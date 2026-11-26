@@ -6,9 +6,10 @@ import { Link } from '@/i18n/navigation';
 
 /**
  * "¿Para quién es?": la puerta de entrada a la landing de cada público (Familias, Cumpleaños y
- * Profesionales). Cada tarjeta lleva la misma imagen que la home con sesión de ese público (fotos
- * de muestra, nunca libros de clientes): arriba en escritorio y miniatura a la izquierda en el
- * celular para no alargar la página. Son decorativas (alt vacío): el título ya dice a dónde lleva.
+ * Profesionales). Cada tarjeta muestra a la persona que compra en su escena (acuarelas de muestra,
+ * nunca libros de clientes; Profesionales sin contacto físico con el niño): arriba en escritorio
+ * y miniatura a la izquierda en el celular. Son decorativas (alt vacío): el título ya dice a dónde
+ * lleva.
  */
 export async function AudienceSelector() {
   const t = await getTranslations('Home.audience');
@@ -16,15 +17,15 @@ export async function AudienceSelector() {
     {
       key: 'families',
       href: '/families',
-      image: '/images/heroes/familias-pagina.webp',
-      focus: 'object-[50%_25%]',
+      image: '/images/audiencias/familias.webp',
+      focus: 'object-[60%_40%]',
       card: 'bg-[#e4f3ef]',
       ring: 'border-[#2f6f66]/30 text-[#2f6f66]',
     },
     {
       key: 'events',
       href: '/events',
-      image: '/images/heroes/kit-completo.webp',
+      image: '/images/audiencias/celebraciones.webp',
       focus: 'object-center',
       card: 'bg-[#ffe7df]',
       ring: 'border-[#a33f33]/30 text-[#a33f33]',
@@ -32,8 +33,8 @@ export async function AudienceSelector() {
     {
       key: 'professionals',
       href: '/professionals',
-      image: '/images/heroes/pro-mesa.webp',
-      focus: 'object-[50%_60%]',
+      image: '/images/audiencias/profesionales.webp',
+      focus: 'object-[50%_45%]',
       card: 'bg-[#eee8fa]',
       ring: 'border-[#5b4a99]/30 text-[#5b4a99]',
     },
@@ -65,13 +66,13 @@ export async function AudienceSelector() {
                   data-track-persona={key}
                   className={`group flex h-full items-center gap-4 rounded-[1.75rem] p-3 pr-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] md:flex-wrap md:items-start md:gap-y-5 md:pb-6 ${card}`}
                 >
-                  <span className="relative size-24 shrink-0 overflow-hidden rounded-[1.15rem] shadow-[0_10px_20px_-10px_rgb(38_50_74/0.4)] md:aspect-[16/10] md:size-auto md:w-full md:basis-full md:rounded-[1.25rem]">
+                  <span className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-[1.15rem] shadow-[0_10px_20px_-10px_rgb(38_50_74/0.4)] md:aspect-[16/10] md:w-full md:basis-full md:rounded-[1.25rem]">
                     <Image
                       src={image}
                       alt=""
                       fill
                       unoptimized
-                      sizes="(min-width: 768px) 400px, 96px"
+                      sizes="(min-width: 768px) 400px, 112px"
                       className={`object-cover transition duration-500 group-hover:scale-[1.03] ${focus}`}
                     />
                   </span>
