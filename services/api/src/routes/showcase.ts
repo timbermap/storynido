@@ -21,8 +21,7 @@ import { addRoute } from '../plugins/route';
 const iso = (value: unknown) => (value instanceof Date ? value.toISOString() : null);
 
 /** El documento como lo guardó el script del golden set, con las fechas normalizadas. */
-const read = (doc: DocumentSnapshot) =>
-  normalizeFirestoreData(doc.data() ?? {}) as ShowcaseBook;
+const read = (doc: DocumentSnapshot) => normalizeFirestoreData(doc.data() ?? {}) as ShowcaseBook;
 
 const imagePath = (id: string, file: string) => `/v1/catalog/showcase/${id}/${file}`;
 
