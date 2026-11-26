@@ -3062,20 +3062,19 @@ export class PreviewService {
       // Dibujo arriba y texto abajo (DECISIONS 354): la página rehecha se pide con la misma forma y
       // sin huecos, como las demás. Los armados anteriores siguen como estaban.
       const regenPage = target === 'cover' ? null : (preview.pages[target] ?? null);
-      const regenLayout =
-        regenPage?.text.trim()
-          ? pageLayout({
-              layout: preview.pageLayout ?? null,
-              words: countWords(regenPage.text),
-              pageIndex: regenPage.index,
-              contentType: book.contentType ?? 'story',
-              text: regenPage.text,
-              typography:
-                preview.ageBand && preview.textBand
-                  ? storyTypography(preview.ageBand, preview.textBand, book.language)
-                  : null,
-            })
-          : null;
+      const regenLayout = regenPage?.text.trim()
+        ? pageLayout({
+            layout: preview.pageLayout ?? null,
+            words: countWords(regenPage.text),
+            pageIndex: regenPage.index,
+            contentType: book.contentType ?? 'story',
+            text: regenPage.text,
+            typography:
+              preview.ageBand && preview.textBand
+                ? storyTypography(preview.ageBand, preview.textBand, book.language)
+                : null,
+          })
+        : null;
       const bandLayoutNow = regenLayout?.kind === 'band' ? regenLayout : null;
       const companion = preview.companion ?? null;
       const companionImage: ImageData | null = companion
