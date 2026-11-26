@@ -167,9 +167,21 @@ const TOUCH_WORDS =
 const FAMILY_WORDS =
   /mama|papa|madre|padre|abuel|herman|\bmom|\bdad|mother|father|grand|sister|brother|\bmae\b|\bpai\b|\bavo|\bavos|irma|\bvovo/;
 
+/**
+ * Abrazar una cosa no es contacto entre personas (DECISIONS 349, medición del 26 nov: «abraza fuerte
+ * a su almohada» y «abrazando mi guitarra» daban falla dura). Se borra antes de buscar contacto; un
+ * abrazo a una persona en la misma página se sigue marcando.
+ */
+const OBJECT_HUG =
+  /\b(?:abraz|abrac|hug|cuddl)\p{L}*(?:\s+(?:fuerte|fuertemente|con fuerza|muy fuerte|bien fuerte|tight|tightly|forte))?\s+(?:a\s+|al\s+|o\s+)?(?:su|sus|mi|mis|tu|tus|el|la|los|las|un|una|his|her|my|their|your|the|a|seu|sua|meu|minha|o)\s+(?:\p{L}+\s+)?(?:almohad\p{L}*|cojin\p{L}*|peluch\p{L}*|osit\p{L}*|oso de peluche|munec\p{L}*|mochila|libro|diario|cuaderno|guitarra|ukelele|manta|frazada|sabana|pelota|juguete|tambor|pillow|teddy|stuffed|plush|doll|book|diary|notebook|blanket|guitar|backpack|toy|ball|travesseir\p{L}*|ursinho|pelucia|boneca|livro|violao|cobertor)\b/gu;
+
 /** ¿El texto cuenta contacto físico (abrazo, beso, brazos, regazo, cosquillas)? */
 export function hasTouch(text: string): boolean {
-  return TOUCH_WORDS.test(fold(text));
+  return TOUCH_WORDS.test(withoutObjectHugs(fold(text)));
+}
+
+function withoutObjectHugs(folded: string): string {
+  return folded.replace(OBJECT_HUG, ' ');
 }
 
 /**
@@ -205,7 +217,7 @@ export function foreignNames(
 export function touchPages(pages: readonly CraftPage[]): number[] {
   const found: number[] = [];
   pages.forEach((page, index) => {
-    const text = fold(page.text);
+    const text = withoutObjectHugs(fold(page.text));
     if (TOUCH_WORDS.test(text) && !FAMILY_WORDS.test(text)) found.push(index + 1);
   });
   return found;

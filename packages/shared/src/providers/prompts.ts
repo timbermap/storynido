@@ -884,6 +884,44 @@ export type VisualBible = Pick<StoryPlan, 'props' | 'places' | 'outfits'>;
 const sameName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
 /**
+ * El baño (DECISIONS 349, medición del 26 nov): con la ropa del plan el chico salía en la bañera con
+ * la toalla con capucha o con la manga del pijama, y la revisión lo reprobaba. En el agua va sin ropa
+ * y sin toalla, tapado por la espuma hasta los hombros, a la altura de los ojos y sin primer plano
+ * del cuerpo (las mismas reglas de pudor que el resto del libro).
+ */
+export const BATH_OUTFIT =
+  'nothing but the bath foam: sitting in the bathtub with thick white foam up to the shoulders, only the head, shoulders and arms above the bubbles; no clothes, no pajamas and no towel in the water (bath; drawn at eye level from a normal distance, never a close-up of the body; this replaces the everyday outfit of the reference sheet on this page)';
+
+/** Palabras de estar dentro del agua del baño (no «ir al baño»). */
+const BATH_WORDS =
+  /\b(bath|bathtub|bathtime|bubble bath|banera|banadera|tina|banheira|banho)\b|\bin the tub\b/;
+
+const foldText = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+
+/**
+ * ¿La escena pasa dentro de la bañera? Se mira la ropa que pidió el plan y lo que tiene que verse;
+ * «bathroom» y «baño» solos no cuentan (secarse o lavarse los dientes no es estar en el agua).
+ */
+export function isBathScene(
+  scene: Pick<ScenePlan, 'outfit' | 'mustBeVisible'> | null | undefined,
+): boolean {
+  if (!scene) return false;
+  if (scene.outfit && BATH_WORDS.test(foldText(scene.outfit))) return true;
+  return scene.mustBeVisible.some((item) => {
+    const text = foldText(item);
+    return (
+      BATH_WORDS.test(text) &&
+      /\b(in|inside|en|dentro|na|no)\b/.test(text) &&
+      !/\b(towel|toalla|toalha|dried|drying|secand|secarse|out of|sale de|saiu)\b/.test(text)
+    );
+  });
+}
+
+/**
  * Objetos, lugar y encuadre de una escena, con el aspecto fijo de la biblia visual. Solo entra lo
  * que la escena incluye: un objeto que no está en la escena no se nombra (si se nombra, se dibuja).
  * Los planes anteriores a la biblia no traen nada y el prompt queda como antes.
@@ -925,6 +963,8 @@ export function sceneOutfit(
   bible: VisualBible | null | undefined,
   scene: ScenePlan | null | undefined,
 ): string | null {
+  // En la bañera la ropa es siempre la misma y no la inventa el plan (DECISIONS 349).
+  if (isBathScene(scene)) return BATH_OUTFIT;
   const context = scene?.outfit;
   if (!context) return null;
   const outfit = (bible?.outfits ?? []).find(

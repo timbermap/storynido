@@ -3541,3 +3541,10 @@ Sebas: «los cuentos que pasan la mesa, convendría ponerlos en algún lugar de 
 - **Sebas aprueba cada uno** en el admin (Contenido → Ejemplos de la mesa). El admin no deja aprobar uno que no califica y puede retirarlo de la web. Cada cambio queda en auditLog.
 - **Dónde se ve:** en la ficha de cada cuento (el de esa historia; si no hay, uno de la misma línea) y en «Cómo funciona» (hasta 4 tapas). Las imágenes las sirve la API (`/v1/catalog/showcase/:id/:file`) solo mientras el libro está aprobado.
 - **Sección oculta hasta tener 3 aprobados en el idioma** (`SHOWCASE_MIN_BOOKS`). Con uno solo no se abre: un único ejemplo parece elegido a mano.
+
+## 349 — Abrazar una cosa no es contacto, y en la bañera va sin ropa ni toalla (26 nov)
+
+En la medición del 26 nov (ficha2) los dos libros tuvieron una falla dura de texto y fam-mama-5 se reprobó por el baño.
+
+- **Abrazar una cosa no es contacto:** «abraza fuerte a su almohada» y «abrazando mi guitarra» contaban como contacto físico no pedido. `hasTouch` y `touchPages` borran antes los abrazos a una cosa (almohada, peluche, libro, guitarra, manta, pelota…, en es, en y pt). Un abrazo a una persona en la misma página se sigue marcando: «Lucía y Mateo me abrazaron» sigue siendo una falla dura.
+- **La bañera:** con la ropa que inventaba el plan, el chico salía en el agua con la toalla con capucha o con la manga del pijama, y la revisión lo reprobaba. Cuando la escena pasa dentro de la bañera (la ropa del plan dice baño, o lo que tiene que verse lo pone dentro de la bañera), la ropa es siempre `BATH_OUTFIT`: sin ropa, sin pijama y sin toalla en el agua, tapado por la espuma hasta los hombros, a la altura de los ojos y nunca en primer plano del cuerpo. Manda sobre lo que diga el plan. Secarse con la toalla o estar en el baño fuera del agua no cuenta.

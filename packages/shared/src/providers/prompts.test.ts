@@ -19,6 +19,7 @@ import {
   describeLookCharacter,
   hairstyleOf,
   lookMustKeep,
+  isBathScene,
   pageOutfitNote,
   languageName,
   lessonsBlock,
@@ -740,8 +741,52 @@ describe('ficha visual fija (DECISIONS 345)', () => {
       outfits: [{ context: 'bath', look: 'bare shoulders in bubbles' }],
     };
     const special = pageOutfitNote(bible, { pageIndex: 3, outfit: 'bath' } as never, look);
-    expect(special).toContain('bare shoulders in bubbles');
+    expect(special).toContain('thick white foam up to the shoulders');
     expect(special).not.toContain('yellow t-shirt');
+  });
+});
+
+describe('el baño (DECISIONS 349)', () => {
+  const base = {
+    pageIndex: 2,
+    sceneGoal: '',
+    emotionalBeat: '',
+    notVisible: [],
+    continuityFacts: [],
+    wordBudget: 30,
+    personalDetail: null,
+  };
+
+  it('en la bañera va sin ropa ni toalla, tapado por la espuma, aunque el plan diga otra cosa', () => {
+    const bible = {
+      props: [],
+      places: [],
+      outfits: [{ context: 'bath', look: 'an orange hooded towel' }],
+    };
+    const scene = { ...base, mustBeVisible: [], outfit: 'bath' };
+    const outfit = sceneOutfit(bible, scene);
+    expect(outfit).toContain('no clothes, no pajamas and no towel in the water');
+    expect(outfit).not.toContain('orange hooded towel');
+    expect(visualBibleCheck(bible, scene)).toContain('never a close-up of the body');
+  });
+
+  it('reconoce la bañera por lo que tiene que verse, no por el baño', () => {
+    expect(
+      isBathScene({
+        outfit: null,
+        mustBeVisible: ['Lola is playing in a white bathtub filled with bubbles.'],
+      }),
+    ).toBe(true);
+    expect(
+      isBathScene({
+        outfit: null,
+        mustBeVisible: ['Lola is wrapped in a yellow towel next to the bathtub.'],
+      }),
+    ).toBe(false);
+    expect(
+      isBathScene({ outfit: null, mustBeVisible: ['Lola brushes her teeth in the bathroom.'] }),
+    ).toBe(false);
+    expect(isBathScene({ outfit: 'in bed in pyjamas', mustBeVisible: [] })).toBe(false);
   });
 });
 
