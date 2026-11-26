@@ -90,6 +90,7 @@ import {
   sceneNoteFor,
   textZoneOf,
   pageLayout,
+  artAspectOf,
   pagesPerScene,
   type BookLayout,
   type PageLayout,
@@ -740,7 +741,12 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           character: { description: snapshot.character.description, photo: null },
           correction: snapshot.character.correction ?? null,
           references,
-          aspectRatio: '3:4',
+          // Con dibujo arriba y texto abajo, la ilustración se pide con su forma real (apaisada o
+          // cuadrada), entera y sin huecos para el texto (DECISIONS 354).
+          aspectRatio:
+            index > 0 && snapshot.pageLayout
+              ? artAspectOf(layoutOf(snapshot, index - 1), page?.text ?? null)
+              : '3:4',
           // Todo pedido se ilustra en 2K: ~220 dpi a 21×28 cm en el impreso (DECISIONS 069) y, en el
           // digital, la misma nitidez que las páginas de la muestra (antes 1K se veía borroso al lado).
           resolution: '2K',

@@ -18,10 +18,19 @@ import {
   stripFontScale,
   sceneNoteFor,
   WORDLESS_SCENE_NOTE,
+  artAspectOf,
+  bandArtPct,
+  bandLayout,
 } from './page-layout';
 
+/** Armado de un libro congelado antes de `band` (DECISIONS 354): zona calma y papel fundido. */
+const legacy = (age: number, contentType = 'story') => {
+  const { band: _band, ...rest } = bookLayout(age, contentType);
+  return rest;
+};
+
 const at = (age: number, words: number, pageIndex = 1, contentType = 'story') =>
-  pageLayout({ layout: bookLayout(age, contentType), words, pageIndex, contentType });
+  pageLayout({ layout: legacy(age, contentType), words, pageIndex, contentType });
 
 describe('armado de página por edad', () => {
   it('hasta 6 años el texto va en la zona calma; si es largo, sobre el papel fundido', () => {
@@ -94,7 +103,7 @@ describe('el texto se mide antes de elegir zona (DECISIONS 300)', () => {
   // La página de «Angelica» (3-4 años, mayúsculas): 20 palabras tapaban casi la mitad de la hoja.
   const burbuja =
     'Una enorme burbuja rosa envuelve a Angelica con cuidado. ¡Ya puede flotar en el agua! ¡Plop, plop, a flotar!';
-  const layout = bookLayout(4, 'story');
+  const layout = legacy(4);
 
   it('estima que ese texto ocupa más de un tercio con la letra máxima', () => {
     expect(textHeightPct(burbuja, 26, upper)).toBeGreaterThan(40);
@@ -172,5 +181,94 @@ describe('página sin texto (libro de Angélica, 25 nov 2026)', () => {
     expect(sceneNoteFor(calm, 'Entro al bosque.')).toBe(layoutSceneNote(calm));
     expect(textZoneOf(calm, 'Entro al bosque.')).toEqual({ textZone: { side: 'top', pct: 30 } });
     expect(textZoneOf(calm)).toEqual({ textZone: { side: 'top', pct: 30 } });
+  });
+});
+
+describe('dibujo arriba, texto abajo (DECISIONS 354)', () => {
+  const ages = {
+    '0-2': { font: 'quicksand', minPt: 30, maxPt: 36, uppercase: true },
+    '3-4': { font: 'quicksand', minPt: 22, maxPt: 26, uppercase: true },
+    '5-6': { font: 'quicksand', minPt: 18, maxPt: 22, uppercase: true },
+    '7-8': { font: 'andika', minPt: 15, maxPt: 17, uppercase: false },
+    '9+': { font: 'fraunces', minPt: 13, maxPt: 15, uppercase: false },
+  } as const;
+  const sample =
+    'el zorrito salta de piedra en piedra y tomi lo sigue riendo mientras el agua fría le moja los pies descalzos cuando llegan a la otra orilla encuentran una caja vieja con un mapa dibujado a mano'.split(
+      ' ',
+    );
+  const words = (count: number) =>
+    Array.from({ length: count }, (_, index) => sample[index % sample.length]).join(' ');
+
+  it('los libros nuevos de hasta 8 años usan la franja; de 9 en adelante, páginas enfrentadas', () => {
+    expect(bookLayout(4, 'story')).toMatchObject({ facing: false, band: true });
+    expect(bookLayout(8, 'story_activities')).toMatchObject({ band: true });
+    expect(bookLayout(10, 'story')).toMatchObject({ facing: true, band: false });
+    expect(bookLayout(4, 'coloring').band).toBe(false);
+    expect(
+      pageLayout({
+        layout: bookLayout(4, 'coloring'),
+        words: 5,
+        pageIndex: 1,
+        contentType: 'coloring',
+      }).kind,
+    ).toBe('strip');
+  });
+
+  it('el texto nunca va sobre el dibujo y la ilustración se pide con su forma', () => {
+    const layout = pageLayout({
+      layout: bookLayout(4, 'story'),
+      words: 20,
+      pageIndex: 1,
+      text: words(20),
+      typography: ages['3-4'],
+    });
+    expect(layout).toMatchObject({ kind: 'band', side: 'bottom', art: '4:3', zonePct: 44 });
+    expect(artAspectOf(layout, words(20))).toBe('4:3');
+    expect(textZoneOf(layout, words(20))).toEqual({});
+    expect(sceneNoteFor(layout, words(20))).toContain('never over it');
+    // Sin texto, la ilustración va entera.
+    expect(artAspectOf(layout, '')).toBe('3:4');
+    expect(sceneNoteFor(layout, '')).toBe(WORDLESS_SCENE_NOTE);
+  });
+
+  it('los bebés llevan el dibujo cuadrado', () => {
+    const layout = pageLayout({
+      layout: bookLayout(2, 'story'),
+      words: 8,
+      pageIndex: 1,
+      text: words(8),
+      typography: ages['0-2'],
+    });
+    expect(layout).toMatchObject({ kind: 'band', art: '1:1', zonePct: 25 });
+    expect(artAspectOf(layout)).toBe('1:1');
+  });
+
+  // Cada edad con su letra (tipo por la edad, tamaño por la franja de texto, que la densidad
+  // corre un escalón) y el tope de palabras de esa franja: el texto entra con la letra completa.
+  it.each([
+    ['0-2', '0-2', 10],
+    ['0-2', '3-4', 24],
+    ['3-4', '0-2', 10],
+    ['3-4', '3-4', 24],
+    ['3-4', '5-6', 38],
+    ['5-6', '3-4', 24],
+    ['5-6', '5-6', 38],
+    ['5-6', '7-8', 80],
+    ['7-8', '5-6', 38],
+    ['7-8', '7-8', 80],
+    ['7-8', '9+', 140],
+  ] as const)(
+    '%s años, letra de %s, %i palabras: entra con la letra completa',
+    (age, band, count) => {
+      const ty = { ...ages[band], font: ages[age].font, uppercase: ages[age].uppercase };
+      const layout = bandLayout(words(count), ty);
+      expect(layout.kind).toBe('band');
+      expect(layout.fontPt).toBe(ty.maxPt);
+      expect(bandArtPct(layout.art) + (layout.zonePct ?? 0)).toBeCloseTo(100, 0);
+    },
+  );
+
+  it('en el A5 grapado la franja es un poco más alta', () => {
+    expect(bandArtPct('4:3', 210 / 148)).toBeLessThan(bandArtPct('4:3'));
   });
 });

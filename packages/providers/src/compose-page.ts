@@ -5,6 +5,7 @@
  */
 import {
   CALM_ZONE_PCT,
+  bandArtRatio,
   vignetteArtPct,
   vignetteMaskStop,
   type PageLayout,
@@ -43,11 +44,13 @@ function textSvg(
   typography: Pick<StoryTypography, 'uppercase'> | null,
   fontPt: number | undefined,
   panel: boolean,
+  /** pt → % del ancho de la hoja: 0,25 en los armados sobre el dibujo; la medida física en `band`. */
+  ptWidthPct = 0.25,
 ): Buffer {
   const uppercase = typography?.uppercase ?? false;
   const shown = uppercase ? text.toLocaleUpperCase('es') : text;
   // pt → % del ancho de la hoja (15,5 pt ≈ 3,9 %), igual que textHeightPct.
-  const fontPx = Math.round(((fontPt ?? 16) * 0.25 * WIDTH) / 100);
+  const fontPx = Math.round(((fontPt ?? 16) * ptWidthPct * WIDTH) / 100);
   const lines = wrap(shown, fontPx, WIDTH * 0.8, uppercase);
   const lineHeight = fontPx * 1.375;
   const blockHeight = lines.length * lineHeight;
@@ -78,6 +81,22 @@ export async function composePage(
   typography: Pick<StoryTypography, 'uppercase'> | null,
 ): Promise<Buffer> {
   const hasText = Boolean(text.trim());
+  if (hasText && layout.kind === 'band') {
+    // Dibujo arriba con su forma (apaisado o cuadrado) y el texto en la franja de papel de abajo
+    // (DECISIONS 354), con la letra en su medida física, como el PDF.
+    const artHeight = Math.round(WIDTH * bandArtRatio(layout.art));
+    const art = await sharp(image).resize(WIDTH, artHeight, { fit: 'cover' }).png().toBuffer();
+    const zone = { top: artHeight, height: HEIGHT - artHeight };
+    return sharp({ create: { width: WIDTH, height: HEIGHT, channels: 4, background: PAPER } })
+      .composite([
+        { input: art, top: 0, left: 0 },
+        {
+          input: textSvg(text, zone, typography, layout.fontPt, false, (0.3528 / 210) * 100),
+        },
+      ])
+      .webp({ quality: 82 })
+      .toBuffer();
+  }
   if (!hasText || (layout.kind !== 'vignette' && layout.kind !== 'calm')) {
     return sharp(image).resize(WIDTH, HEIGHT, { fit: 'cover' }).webp({ quality: 82 }).toBuffer();
   }

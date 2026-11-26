@@ -3586,6 +3586,17 @@ Sebas, con la mesa 360 «libros siempre comprables»: el libro que la mesa no co
 - **Dónde está encendido:** en staging por ambiente. En producción está apagado hasta calibrar a los jueces contra los veredictos de Sebas; se enciende sin deploy con `aiConfig.judgeGate = 'on'` (y `'off'` lo apaga en cualquier ambiente).
 - **Queda para después:** que el freno rehaga solo las páginas que marcan los jueces antes de pedir revisión. Hoy los arreglos de la mesa no traen página, salvo los de continuidad.
 
+## 354 — Dibujo arriba, texto abajo: el texto no va más sobre la ilustración (26 nov)
+
+Sebas: «el principal problema que veo continuamente es el texto sobre la imagen» y pidió arreglarlo de fondo, en todos los formatos y con cualquier cantidad de texto. Eligió la opción B de la maqueta de la mesa (auditorias/texto-fuera-del-dibujo-2026-11-26.html).
+
+- **Causa:** la zona calma y el papel fundido (DECISIONS 300, 311) pedían a la IA que dejara una parte del dibujo libre para poner el texto encima. La IA no siempre la deja, y con la letra de cada edad el texto ocupa del 25 % al 45 % de la hoja (medido en las 5 edades × 3 densidades × 21×28 y A5), más que el 30 % de la zona.
+- **Armado nuevo `band`:** en los cuentos de hasta 8 años (también con actividades y el librito de Celebraciones), el dibujo va arriba, a sangre y con su forma real, y el texto debajo en su franja de papel. La forma se pide al modelo: apaisada 4:3 (franja de 44 % en 21×28, 47 % en A5) o cuadrada cuando la letra es la de bebés (30-36 pt). El prompt ya no pide huecos: pide la escena entera, de borde a borde, con el protagonista en plano medio. Con la medida física de la letra, el texto entra en todas las combinaciones sin achicarse; el PDF igual ajusta midiendo.
+- **Sin cambios:** 9-12 años (texto en la página de enfrente), colorear (franja), páginas sin texto (dibujo entero, 3:4), tapa (título arriba) e invitación digital.
+- **Tarjeta impresa del kit:** el frente pasa de franja degradé sobre la tapa a dibujo arriba (72 %, recorta la zona libre del título) y franja de papel abajo.
+- **Sin control `text_zone`:** las páginas `band` no tienen zona que vigilar, así que no hay rechazos ni reintentos por caras bajo el texto.
+- **Libros anteriores:** conservan su armado (`pageLayout` sin `band`). Aplica a muestras nuevas y a sus pedidos. La muestra, la página rehecha y el pedido piden la misma forma.
+
 ## 355 — Calibración con los votos de Sebas: texto sobre el dibujo y situaciones peligrosas (26 nov)
 
 Sebas votó 10 libros del golden set (página de calibración, colección `calibracion`). Coincidió con la mesa en 6 de 10. El desacuerdo grave: un libro con 4 y «compra» de la mesa que Sebas no compraría por el texto encima del dibujo, su motivo en 5 de 10 notas. Otro «no» fue un biberón en la bañera.

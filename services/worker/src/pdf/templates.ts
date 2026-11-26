@@ -3,6 +3,7 @@ import {
   vignetteArtPct,
   vignetteMaskStop,
   stripArtPct,
+  bandArtRatio,
   stripFontScale,
   letterJitter,
   splitCoverTitle,
@@ -241,6 +242,10 @@ body { font-family: 'Nunito Sans', sans-serif; color: ${INK}; -webkit-print-colo
 .band.top { top: 0; padding-top: ${String(inset)}mm; }
 .band.bottom { bottom: 0; padding-bottom: ${String(inset)}mm; }
 .panel.vignette, .panel.facing { position: static; background: none; border-radius: 0; padding: 0 4mm; }
+.art.band-art { top: 0; bottom: auto; }
+.band-text { position: absolute; left: 0; right: 0; bottom: 0; padding: 5mm ${String(inset + 4)}mm ${String(inset)}mm; display: flex; align-items: center; justify-content: center; text-align: center; }
+.panel.band-panel { position: static; background: none; border-radius: 0; padding: 0; width: 100%; }
+.band-text .story:not(.upper) { text-align: left; }
 .facing-wrap { position: absolute; inset: ${String(inset + 6)}mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9mm; }
 .facing-wrap .panel { width: 100%; }
 .detail { width: 66mm; max-width: 70%; height: 44mm; flex: none; object-fit: cover; object-position: 50% 40%; -webkit-mask-image: radial-gradient(ellipse at center, #000 55%, transparent 72%); mask-image: radial-gradient(ellipse at center, #000 55%, transparent 72%); }
@@ -330,6 +335,23 @@ function storyPage(
       `<section class="page coloring" ${label()}>
   <img class="art strip" src="${page.image}" alt=""${sized}>
   <div class="strip-band"${band}><div class="panel strip" ${fit(maxMm, captionPt)}>${story}</div></div>
+</section>`,
+    ];
+  }
+
+  if (kind === 'band') {
+    // Dibujo arriba, entero y con su forma (apaisado o cuadrado), y el texto debajo en su franja de
+    // papel: nunca encima de la ilustración (DECISIONS 354). El dibujo va a sangre arriba y a los
+    // costados; la caja tiene la misma proporción que la imagen, así no se recorta.
+    const size = pageSizeMm(spec);
+    const artMm = size.width * bandArtRatio(page.layout?.art);
+    const inset = spec.bleedMm + spec.safeMm;
+    const bandMm = height - artMm;
+    const maxMm = bandMm - inset - 5;
+    return [
+      `<section class="page" ${label()} data-layout="band">
+  <img class="art band-art" style="height:${artMm.toFixed(2)}mm" src="${page.image}" alt="">
+  <div class="band-text" style="height:${bandMm.toFixed(2)}mm"><div class="panel band-panel" ${fit(maxMm)}>${story}</div></div>
 </section>`,
     ];
   }

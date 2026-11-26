@@ -419,8 +419,10 @@ function cardSheet(book: KitBook, copies: number, front: string, back: string, p
 </section>`;
   const css = `
 .card { position: absolute; width: ${String(CARD.width + 2 * BLEED)}mm; height: ${String(CARD.height + 2 * BLEED)}mm; overflow: hidden; background: ${PAPER}; }
-.card .art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.card .band { position: absolute; left: 0; right: 0; bottom: 0; padding: 8mm 10mm 12mm; background: linear-gradient(to top, rgba(255,250,243,0.97) 70%, rgba(255,250,243,0)); text-align: center; }
+/* Frente: el dibujo arriba y el texto en su franja de papel, nunca encima (DECISIONS 354). Se
+   recorta la parte de arriba de la tapa, que es la zona libre que el dibujo deja para el título. */
+.card .art { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 72%; object-fit: cover; object-position: 50% 80%; }
+.card .band { position: absolute; left: 0; right: 0; bottom: 0; height: 28%; padding: 4mm 10mm ${String(BLEED + 6)}mm; display: flex; flex-direction: column; justify-content: center; background: ${PAPER}; text-align: center; }
 .card .band h1 { font-size: 24pt; color: ${INK}; }
 .card .band p { margin-top: 2mm; font-size: 12pt; color: ${LAVENDER}; font-weight: 700; }
 .card .back { position: absolute; inset: ${String(BLEED + 10)}mm; display: flex; flex-direction: column; justify-content: center; gap: 6mm; text-align: center; }
