@@ -3495,3 +3495,13 @@ La nota de la mesa es la del juez más bajo, porque un problema grave alcanza pa
 - **En cada libro:** el worker corre la mesa mientras arma el PDF, así no suma espera. Tiene un tope de 2 minutos, nunca falla el paso y no corre en recompras ni en libros para colorear. Queda en `orders/{id}.judgePanel` y el admin la muestra en el detalle del pedido. Cuesta unos centavos por libro (8 páginas armadas) y se anota como IA de revisión.
 - **En el examen:** `eval:pedidos` y `judge:pedidos` usan la misma mesa. `judge:ronda --dir …` juzga una corrida ya hecha del golden set sin volver a dibujar.
 - **Todavía no frena entregas:** primero se mide. Cuando la mesa esté calibrada con familias reales, la misma nota puede ser el filtro antes de entregar.
+
+## 344 — Lo que la mesa encontró en la ronda 3 pasa a reglas del dibujo (26 nov)
+
+La mesa juzgó los 11 libros de la ronda 3 (US$0,26). Las notas fueron de 1,7 y 2,8 sobre 5, el comprador no compraría ninguno, y casi todos los arreglos eran de dibujo. Sebas dio el OK para convertirlos en reglas y medirlos en la ronda 4.
+
+- **El personaje respeta lo pedido:** la revisión de cada página solo conocía el largo, el tipo y el color del pelo. Ahora también recibe el **peinado de la lámina** (trenzas, colita, rodete). Si aparece pelo suelto en lugar de trenzas, la página se redibuja.
+- **Lo que dice el texto está dibujado, y a tiempo:** la escena para el ilustrador nombra cada persona, animal y objeto que el texto dice que está, con el color o rasgo que el texto le da, y nada que todavía no apareció en la historia (antes de que el huevo se rompa, solo el huevo). La revisión de cada página lee el texto frase por frase contra el dibujo. Si falta algo, si un color no coincide o si se adelanta algo, la página se redibuja.
+- **El texto no tapa caras:** el control de la zona del texto ahora recibe además **la franja recortada** con un margen del 5 %. Sobre la imagen entera, el modelo adivinaba mal el porcentaje.
+- **El examen hace lo mismo que el worker:** se redibuja con cualquier «repair» de la revisión, no solo cuando falla una cláusula del contrato. Antes el examen daba por limpias páginas que la mesa después reprobaba.
+- **La página muda no es una página vacía:** los jueces leían la página sin texto del clímax como «página 8 vacía». Ahora se les aclara que es a propósito. Si solo ven algunas ilustraciones, se les avisa que el resto lo juzguen por el texto.

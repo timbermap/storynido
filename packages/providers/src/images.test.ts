@@ -2,7 +2,7 @@ import { evaluatePhoto } from '@storynido/shared';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { cropPortrait, imageQuality, normalizeImage } from './images';
+import { cropPortrait, imageQuality, normalizeImage, zoneStrip } from './images';
 import { MockPhotoAnalyzer } from './mock/photo';
 import { testImage } from './test-images';
 
@@ -72,5 +72,19 @@ describe('MockPhotoAnalyzer + evaluatePhoto', () => {
     const image = await testImage({ width: 1200, height: 1600 });
     const noFace = new MockPhotoAnalyzer({ faces: () => [] });
     expect(evaluatePhoto(await noFace.analyze(image))).toEqual(['no_face']);
+  });
+});
+
+describe('franja del texto', () => {
+  it('recorta abajo o arriba la zona del texto con 5 puntos de margen', async () => {
+    const page = new Uint8Array(
+      await sharp({ create: { width: 300, height: 400, channels: 3, background: '#fff' } })
+        .png()
+        .toBuffer(),
+    );
+    const bottom = await sharp(await zoneStrip(page, 'bottom', 30)).metadata();
+    expect([bottom.width, bottom.height]).toEqual([300, 140]);
+    const whole = await sharp(await zoneStrip(page, 'top', 100)).metadata();
+    expect(whole.height).toBe(400);
   });
 });

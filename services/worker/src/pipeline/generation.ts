@@ -973,6 +973,9 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
         // La ropa de la lámina también se revisa en cada página (salvo que el texto la cambie).
         mustKeep: [
           ...mustKeepLabels(traits, mustKeep),
+          // El peinado de la lámina (trenzas, colita): la etiqueta del pelo solo dice largo, tipo y
+          // color, y la revisión aceptaba pelo suelto (Martina, ronda 3, 26 nov, DECISIONS 344).
+          ...(sheet.hair.trim() ? [`hairstyle: ${sheet.hair} (as on the reference sheet)`] : []),
           `outfit: ${sheet.clothing} (unless the page text says the character changes clothes)`,
         ],
         sheetPath,

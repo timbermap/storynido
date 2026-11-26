@@ -53,7 +53,7 @@ import {
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
 
-import { failedCheck, toColoringPage } from '../images';
+import { failedCheck, toColoringPage, zoneStrip } from '../images';
 
 /**
  * Página para colorear (Lu, 19 nov 2026): la foto, la ropa con colores de la ficha y la «luz
@@ -563,6 +563,20 @@ const BUYER_PERSONA: Record<'families' | 'professionals' | 'events', string> = {
     'a parent in Latin America who ordered a birthday kit with a mini story starring their child, to share at the party',
 };
 
+/**
+ * Texto de una página para los jueces. Una página sin texto es la del clímax que el plan deja muda
+ * (3 a 6 años): sin esta aclaración la mesa la juzgaba «vacía» (ronda 3, 26 nov, DECISIONS 344).
+ */
+function pageText(text: string | undefined): string {
+  return text?.trim()
+    ? text
+    : '(wordless page on purpose: the illustration alone tells this moment; this is not a missing page)';
+}
+
+function pageLines(texts: readonly string[]): string {
+  return texts.map((text, index) => `${String(index + 1)}. ${pageText(text)}`).join('\n');
+}
+
 const JUDGE_FIXES_SCHEMA = {
   type: 'ARRAY',
   items: {
@@ -983,7 +997,10 @@ one or two sentences: who is in the picture and who is not (the protagonist ${re
               ? `; recurring characters: ${request.recurring.join(', ')}`
               : ''
           }), the place, the time of day, the key object, and ONE single moment of the page (never two actions in a row).
-Draw only what the text says or implies; follow mustBeVisible / notVisible when given. When a page has an emotion, show it in the
+Draw only what the text says or implies; follow mustBeVisible / notVisible when given. Name in the brief every person, animal and
+object the page text says is there (the dog barking beside the child, the rubber duck in the bath) with the color or feature the text gives
+it (a dragon with lime green scales, a friend with glasses), and never one that has not appeared yet in the story at that moment (before
+the egg hatches, only the egg). When a page has an emotion, show it in the
 protagonist's face and body (a specific expression and posture, never a generic smile), and when it has a camera, frame the page that way. A page with empty text: the moment the
 plan describes, told by the picture alone. No text, letters or signs in the image: banners, cake toppers, cards, balloons, posters, boards and screens are drawn blank. Exactly ${String(request.pages.length)} prompts, in order.
 People who are not recurring characters: a relative of the protagonist (mother, father, grandparent, sibling, cousin) looks like a
@@ -1228,7 +1245,13 @@ incoherent clothing or accessories (or clothes that do not fit the place, weathe
 who look nothing like the protagonist's family, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
 below (a recurring object, place or outfit drawn differently is a repair), a hug, embrace, kiss, lap, carrying, lying together or hands on another person's body
 (except affection between the protagonist and their own parent, grandparent or sibling when the page text tells it: a hug, holding hands, being carried, a kiss on the forehead or cheek, never lying in bed together), bare midriffs or revealing clothes, cropped heads, a child upside down, in a backbend, bridge, handstand or cartwheel, or framed from a low angle or in close-up on the body (swimwear included), and any letters or
-words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks).
+words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks); the hairstyle
+counts as a trait: braids, a ponytail, buns or a fringe on the reference sheet must be drawn the same (loose hair instead of braids is a repair).
+Then read the page text as the parent will, sentence by sentence, and compare it with the picture: every person, animal and object
+the text says is here now must be visible (a dog that barks next to the child, the rubber duck in the bath, the friend who wears glasses); the
+colors, clothes and features the text gives anyone or anything must be the ones drawn (a dragon with lime green scales is not red); and what the
+text says has not happened yet must not be drawn already (an egg that has not hatched yet means no baby dragon anywhere, a guest who has not
+arrived is not in the room).
 Also check the protagonist's apparent age against the Protagonist line below: a child who looks two or more years older or younger than that age (an infant for a three-year-old, a schoolchild of 6 or 7 for a three-year-old, a teenager for a child), or whose face and body proportions differ clearly from the reference sheet, is a repair. And check the facial expression against the page text and the scene's emotion: an angry, scared or sad face on a cheerful page (or the reverse) is a repair; the new drawing must show the emotion the text describes.
 Never claim to verify biometric identity or exact likeness to a real person; your evaluation is preliminary and may mark uncertainty.
 Do not invent evidence: anything you cannot evaluate without another reference must be status needs_reference.
@@ -1236,7 +1259,8 @@ Do not invent evidence: anything you cannot evaluate without another reference m
 Status:
 - pass: no critical issue.
 - repair: a critical issue that a new illustration of the same scene would fix (physical contact between people, missing essential trait, wrong anatomy, text in image,
-  image contradicts the text, an upside-down, backbend, bridge or handstand pose, a low-angle or close-up body shot of a child, a second figure in the background that duplicates, clones or looks like a twin of the protagonist, a
+  image contradicts the text, someone or something the text says is here is missing, a color or feature the text names is drawn
+  differently, something the text says has not happened yet is already drawn, a hairstyle that differs from the reference sheet, an upside-down, backbend, bridge or handstand pose, a low-angle or close-up body shot of a child, a second figure in the background that duplicates, clones or looks like a twin of the protagonist, a
   different child standing in for the protagonist). repairTarget illustration_only. A new illustration fixes all of these.
 - human_review: only inappropriate content, sensitive data visible, or a problem in the text itself (repairTarget text_only — the
   approved text is never changed automatically). Do not use human_review for drawing mistakes: those are repair.
@@ -1300,7 +1324,11 @@ ${request.order}
 
 Title: ${request.title}
 Full text, page by page:
-${request.texts.map((text, index) => `${String(index + 1)}. ${text}`).join('\n')}
+${pageLines(request.texts)}${
+        request.pages.length < request.texts.length
+          ? `\nYou were shown the illustrations of the first ${String(request.pages.length)} pages only, to save time: judge the rest by its text and never report its illustrations as missing or empty.`
+          : ''
+      }
 
 Answer in Spanish, from your own point of view as this customer:
 - buy: 1 to 5, would you buy it again or recommend it (5 = yes without doubt).
@@ -1344,7 +1372,7 @@ Answer in Spanish, from your own point of view as this customer:
     }
     parts.push({ text: 'Cover (page 0):' }, imagePart(request.cover));
     request.pages.forEach((page, index) => {
-      parts.push({ text: `Page ${String(index + 1)}: ${request.texts[index] ?? ''}` });
+      parts.push({ text: `Page ${String(index + 1)}: ${pageText(request.texts[index])}` });
       parts.push(imagePart(page));
     });
     parts.push({
@@ -1382,7 +1410,7 @@ librarian who watched you listen.
 
 Title: ${request.title}
 ${request.refrain ? `Refrain the order asked for: ${request.refrain}\n` : ''}Text, page by page:
-${request.texts.map((text, index) => `${String(index + 1)}. ${text}`).join('\n')}
+${pageLines(request.texts)}
 
 Answer in Spanish:
 - score: 1 to 5 (5 = the child follows everything, laughs or holds their breath somewhere and asks to read it again).
@@ -1414,7 +1442,7 @@ ${request.order}
 ${request.goal ? `Goal of the book: ${request.goal}\n` : ''}
 Title: ${request.title}
 Text, page by page:
-${request.texts.map((text, index) => `${String(index + 1)}. ${text}`).join('\n')}
+${pageLines(request.texts)}
 
 Judge it with professional criteria: does it model the situation in concrete, predictable steps the child will really live; does it
 name and validate the emotion without making it bigger; does it give the child a coping strategy they can use; is every fact true
@@ -1747,6 +1775,17 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
       ? '\nThis image is a book cover and its title and subtitle are printed over the top 40%. Reject it (category "title_zone") if any part of a face or head is in that top 40%.'
       : '';
     // Página: el texto del libro se imprime en esa zona; no puede haber caras ni manos (DECISIONS 300).
+    // La franja recortada aparte (DECISIONS 344): sobre la imagen entera el juez adivinaba mal el
+    // porcentaje y pasaban caras bajo el texto. Si no se puede recortar, queda la consigna sola.
+    const zone = options.textZone;
+    const strip = zone ? await zoneStrip(image.bytes, zone.side, zone.pct).catch(() => null) : null;
+    const stripNote = strip
+      ? ` The second image is that ${zone?.side ?? ''} strip cut out on its own, with a small margin: look at it, and reject (category "text_zone") if it shows ${
+          zone?.whole
+            ? 'any part of a person or an animal, or a key object'
+            : 'any part of a face or a head, even half of one'
+        }.`
+      : '';
     const textZone = options.textZone
       ? options.textZone.whole
         ? `\nThe ${options.textZone.side} ${String(Math.round(options.textZone.pct))}% of this image is cut away and faded into plain paper for the book's text. Reject it (category "text_zone") if any part of a person, an animal or the main action (a face, a head, a body, hands or a key object) is inside that ${options.textZone.side} ${String(Math.round(options.textZone.pct))}%, so nothing important is cut or faded.`
@@ -1761,12 +1800,13 @@ fix: if score < 4, the 2 or 3 most important concrete changes to make the drawin
       : '';
     return moderate(this.client, [
       imagePart(image),
+      ...(strip ? [imagePart({ bytes: strip, mimeType: 'image/jpeg' })] : []),
       {
         text: `${MODERATION_RULES}
 
-The image above is an illustration for the book. Also reject it (category "text") if it shows any
+The ${strip ? 'first ' : ''}image above is an illustration for the book. Also reject it (category "text") if it shows any
 readable words, letters or numbers (signs, labels, captions): the book's text is added separately.
-Reject it (category "deformed") if faces or hands are clearly malformed.${style}${titleZone}${textZone}`,
+Reject it (category "deformed") if faces or hands are clearly malformed.${style}${titleZone}${textZone}${stripNote}`,
       },
     ]);
   }

@@ -222,3 +222,33 @@ export async function toColoringPage(input: Uint8Array): Promise<Uint8Array> {
     .toBuffer();
   return new Uint8Array(data);
 }
+
+/**
+ * La franja de la ilustración donde va el texto (arriba o abajo, `pct` por ciento del alto) con un
+ * margen, recortada aparte. El juez de moderación adivinaba mal los porcentajes sobre la imagen
+ * entera y dejaba pasar caras bajo el texto; sobre la franja sola solo tiene que decir si hay una
+ * cara (ronda 3, 26 nov, DECISIONS 344). JPEG.
+ */
+export async function zoneStrip(
+  input: Uint8Array,
+  side: 'top' | 'bottom',
+  pct: number,
+  marginPct = 5,
+): Promise<Uint8Array> {
+  const image = sharp(input);
+  const { width, height } = await image.metadata();
+  const stripHeight = Math.max(
+    1,
+    Math.min(height, Math.round((height * Math.min(100, pct + marginPct)) / 100)),
+  );
+  const data = await image
+    .extract({
+      left: 0,
+      top: side === 'top' ? 0 : height - stripHeight,
+      width,
+      height: stripHeight,
+    })
+    .jpeg({ quality: 85 })
+    .toBuffer();
+  return new Uint8Array(data);
+}
