@@ -336,6 +336,7 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
           mustInclude: [],
           spanishVoice: spanishVoiceFor(testCase.country),
           protagonistLook: describeTraits(testCase.traits, []),
+          protagonistOutfit: testCase.sheet.clothing,
         };
         const promptInput = {
           ...request,

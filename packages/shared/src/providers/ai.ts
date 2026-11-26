@@ -35,6 +35,11 @@ export interface StoryRequest {
    * (DECISIONS 264).
    */
   protagonistLook?: string;
+  /**
+   * Ropa de todos los días del protagonista (la de la lámina, en inglés): el plan y el texto no
+   * inventan otra ni le cambian colores (DECISIONS 347).
+   */
+  protagonistOutfit?: string;
 }
 
 /** Tratamiento en español: voseo rioplatense o tuteo neutro. */
@@ -118,6 +123,8 @@ export interface SceneRequest {
    * (DECISIONS 267).
    */
   protagonistLook?: string;
+  /** Ropa de todos los días del protagonista (DECISIONS 347). */
+  protagonistOutfit?: string;
   /** Edad del protagonista en el cuento, para la ropa y lo que puede hacer. */
   age?: number;
 }

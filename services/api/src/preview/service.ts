@@ -1004,6 +1004,8 @@ export class PreviewService {
       spanishVoice,
       // La familia que el adulto no describió se parece al protagonista (DECISIONS 264).
       protagonistLook: describeTraits(traits, []),
+      // La ropa de la lámina: el plan y el texto no inventan otra (DECISIONS 347).
+      ...(sheet.clothing.trim() ? { protagonistOutfit: sheet.clothing.trim() } : {}),
     };
     const promptInput = {
       ...request,
@@ -1330,6 +1332,9 @@ export class PreviewService {
                   ),
                 ],
                 ...(request.protagonistLook ? { protagonistLook: request.protagonistLook } : {}),
+                ...(request.protagonistOutfit
+                  ? { protagonistOutfit: request.protagonistOutfit }
+                  : {}),
                 age: request.age,
               }),
             );

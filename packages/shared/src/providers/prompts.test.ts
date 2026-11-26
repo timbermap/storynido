@@ -81,6 +81,13 @@ describe('plantillas de prompts', () => {
     expect(prompt).toContain('saltar en la cama');
   });
 
+  it('el texto usa la ropa del dibujo y no inventa otra (DECISIONS 347)', () => {
+    expect(buildStoryPrompt(base)).not.toContain('La ropa de');
+    const prompt = buildStoryPrompt({ ...base, protagonistOutfit: 'pale blue pajamas' });
+    expect(prompt).toContain('es la de su dibujo: pale blue pajamas');
+    expect(prompt).toContain('nunca inventes otra prenda, color ni estampado');
+  });
+
   it('agrega los recuerdos de la familia solo si hay alguno', () => {
     expect(buildStoryPrompt(base)).not.toContain('Detalles reales de la familia');
     const prompt = buildStoryPrompt({

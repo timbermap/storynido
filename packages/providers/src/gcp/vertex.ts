@@ -1074,7 +1074,12 @@ plausible family of the protagonist (a similar skin tone and a related hair colo
           }; anyone else is clearly different from the protagonist. Say their age group and one clothing color.
 Physical contact: nobody outside the protagonist's family hugs, kisses, carries or touches the protagonist, and the protagonist touches nobody outside the family; friends, teachers, professionals and strangers stand or sit side by side at a small distance (a high five only between children of similar age; with an adult outside the family, a wave or a smile from a small distance). With the protagonist's own family that the order names (a parent, grandparent or sibling), warm affection is welcome when the page text tells it: a hug, holding hands, being carried or held on a lap for a story, a kiss on the forehead or cheek, leaning close; faces stay visible and everyone is fully dressed; at bedtime the adult sits beside the bed to tuck the child in, never lying in it. Everyone fully and modestly dressed.
 Trees, plants, objects or animals that come alive or talk get a simple, gentle, storybook cartoon face (round friendly eyes, a small smile, soft lines), never a realistic, wrinkled or adult human face and never a lifelike person's features. Use only the characters and objects the page text names; do not add extra children or helpers that the text does not mention.
-Clothes fit the place, weather, season and activity of the page: pyjamas in bed, a raincoat in the rain, a coat in the cold,
+${
+  request.protagonistOutfit
+    ? `The protagonist's everyday outfit (the reference sheet) is ${request.protagonistOutfit}; never describe it with other colors or patterns.
+`
+    : ''
+}Clothes fit the place, weather, season and activity of the page: pyjamas in bed, a raincoat in the rain, a coat in the cold,
 swimwear in the water, sportswear for a sport; indoors at home, no jackets or outdoor shoes unless someone is arriving or leaving.
 When the page text names what the protagonist wears (a garment, a color, a costume), write it in the brief as "the protagonist wears ...": the illustrator never sees the text.${
             request.age !== undefined
@@ -1172,6 +1177,13 @@ hair color and style, skin tone or build.${
             request.protagonistLook
               ? `
 Protagonist's look, for family resemblance: ${request.protagonistLook}.`
+              : ''
+          }${
+            request.protagonistOutfit
+              ? `
+Protagonist's everyday outfit (the reference sheet): ${request.protagonistOutfit}. It is what the protagonist wears wherever it
+fits; plan a special outfit only where it does not fit (if it is already sleepwear, it fits bed and bedtime). Give every special
+outfit fixed colors and keep the text, the scenes and the outfits list in agreement.`
               : ''
           } One central place or object that recurs (a shelter, a ship, a lantern) is described once in continuityFacts with a fixed
 look, is always called by the same name, and is drawn the same way in every scene; repeat that fixed look word for word in the
