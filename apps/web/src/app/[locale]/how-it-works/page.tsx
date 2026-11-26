@@ -8,7 +8,8 @@ import { FormatImage } from '@/components/formats/format-showcase';
 import { LANDING_FORMAT_IMAGES } from '@/components/home/format-gallery';
 import { StartFreeLink } from '@/components/how-it-works/start-free-link';
 import { ShowcaseCover } from '@/components/stories/showcase-book';
-import { LandingFinalCta, ctaClass } from '@/components/landing/sections';
+import { LandingFinalCta, LandingSteps, ctaClass } from '@/components/landing/sections';
+import { FAMILY_STEP_VISUALS } from '@/components/landing/step-visuals';
 import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { formatPrice } from '@/lib/format';
@@ -87,9 +88,9 @@ export default async function HowItWorksPage({ params }: Props) {
   );
 
   const steps = [
-    { title: t('steps.1.title'), text: t('steps.1.text'), tone: 'bg-secondary text-primary' },
-    { title: t('steps.2.title'), text: t('steps.2.text'), tone: 'bg-peach text-[#a33f33]' },
-    { title: t('steps.3.title'), text: t('steps.3.text'), tone: 'bg-mint text-success' },
+    { title: t('steps.1.title'), text: t('steps.1.text') },
+    { title: t('steps.2.title'), text: t('steps.2.text') },
+    { title: t('steps.3.title'), text: t('steps.3.text') },
   ];
 
   const delivery = [
@@ -151,34 +152,14 @@ export default async function HowItWorksPage({ params }: Props) {
         </div>
       </section>
 
-      {/* Los tres pasos */}
-      <section className="bg-mint-soft">
-        <div className="container-page py-16 lg:py-20">
-          <h2 className="text-center text-[clamp(1.8rem,3vw,2.5rem)] leading-[1.1] font-medium">
-            {t('stepsTitle')}
-          </h2>
-          <ol className="mt-10 grid gap-10 md:grid-cols-3 md:gap-6">
-            {steps.map((step, index) => (
-              <li key={step.title} className="relative flex flex-col items-center text-center">
-                <span
-                  className={`grid size-14 place-items-center rounded-full font-display text-2xl font-bold ${step.tone}`}
-                >
-                  {index + 1}
-                </span>
-                {index < steps.length - 1 && (
-                  <ArrowRight
-                    aria-hidden="true"
-                    className="absolute top-4 -right-5 hidden size-7 text-[#e7b9ad] md:block"
-                    strokeWidth={1.5}
-                  />
-                )}
-                <h3 className="mt-5 text-2xl leading-tight font-medium">{step.title}</h3>
-                <p className="mt-2 max-w-xs text-muted-foreground">{step.text}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+      {/* Los tres pasos, con su imagen y el botón para empezar debajo. */}
+      <LandingSteps
+        tone="mint"
+        title={t('stepsTitle')}
+        steps={steps}
+        visuals={FAMILY_STEP_VISUALS}
+        cta={cta('how_cta_steps')}
+      />
 
       {/* Así queda un libro real (DECISIONS 348): solo cuando la mesa aprobó suficientes. */}
       {showcase.length > 0 && (

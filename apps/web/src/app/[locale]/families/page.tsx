@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Map, Tablet, UserRound } from 'lucide-react';
+import { ArrowRight, BookOpen, Tablet } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
@@ -16,7 +16,8 @@ import { FAQ_ID, HOW_IT_WORKS_ID } from '@/components/layout/site-header';
 import { AgeTabs } from '@/components/stories/age-tabs';
 import { StoryCard } from '@/components/stories/story-card';
 import { PhotoPromise } from '@/components/landing/photo-promise';
-import { LandingFinalCta, ctaClass } from '@/components/landing/sections';
+import { LandingFinalCta, LandingSteps, ctaClass } from '@/components/landing/sections';
+import { FAMILY_STEP_VISUALS } from '@/components/landing/step-visuals';
 import { buttonVariants } from '@/components/ui/button';
 import { AuthLink } from '@/components/auth/auth-link';
 import { Link } from '@/i18n/navigation';
@@ -81,25 +82,19 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
   // Solo las destacadas: todas las preguntas y el contacto están en /faq.
   const faqItems = faq ? faqHighlights(parseFaqGroups(faq.body)) : [];
 
-  // Cada paso con su color pastel (número e ícono).
+  // Los tres pasos (la imagen de cada uno está en FAMILY_STEP_VISUALS).
   const steps = [
     {
-      icon: UserRound,
       title: t('how.step1Title'),
       text: t('how.step1Text'),
-      tone: 'bg-secondary text-primary',
     },
     {
-      icon: Map,
       title: t('how.step2Title'),
       text: t('how.step2Text'),
-      tone: 'bg-peach text-[#a33f33]',
     },
     {
-      icon: BookOpen,
       title: t('how.step3Title'),
       text: printAvailable ? t('how.step3Text') : t('how.step3TextDigital'),
-      tone: 'bg-mint text-success',
     },
   ];
 
@@ -175,46 +170,24 @@ export default async function FamiliesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
-      {/* Cómo funciona */}
-      <section id={HOW_IT_WORKS_ID} className="scroll-mt-28 bg-white">
-        <div className="container-page py-20 lg:py-24">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-[clamp(1.9rem,3.3vw,2.85rem)] leading-[1.1] font-medium">
-              {t('how.title')}
-            </h2>
-            <p className="mt-3 text-lg text-muted-foreground">{t('how.subtitle')}</p>
-          </div>
-          <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-6">
-            {steps.map(({ icon: Icon, title, text, tone }, index) => (
-              <li key={title} className="relative flex flex-col items-center text-center">
-                <div className="relative">
-                  <span className="grid size-28 place-items-center rounded-full bg-card shadow-[var(--shadow-card)]">
-                    <Icon
-                      className="size-11 text-primary/80"
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <span
-                    className={`absolute -top-1 -left-1 grid size-10 place-items-center rounded-full font-display text-lg font-bold ${tone}`}
-                  >
-                    {index + 1}
-                  </span>
-                </div>
-                {index < steps.length - 1 && (
-                  <ArrowRight
-                    aria-hidden="true"
-                    className="absolute top-12 -right-5 hidden size-7 text-[#e7b9ad] md:block"
-                    strokeWidth={1.5}
-                  />
-                )}
-                <h3 className="mt-6 text-2xl leading-tight font-medium">{title}</h3>
-                <p className="mt-2 max-w-xs text-muted-foreground">{text}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+      {/* Cómo funciona: cada paso con su imagen y, debajo, el botón para empezar. */}
+      <LandingSteps
+        id={HOW_IT_WORKS_ID}
+        tone="white"
+        title={t('how.title')}
+        subtitle={t('how.subtitle')}
+        steps={steps}
+        visuals={FAMILY_STEP_VISUALS}
+        cta={
+          <AuthLink
+            href="/create"
+            startFree
+            guest={t('cta.button')}
+            member={t('cta.button')}
+            className={ctaClass}
+          />
+        }
+      />
 
       <PhotoToStory />
 
