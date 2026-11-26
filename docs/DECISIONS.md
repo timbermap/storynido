@@ -3522,3 +3522,12 @@ Sebas aprobó sumar el peinado. El formulario daba solo largo, tipo y color del 
 - **Campo opcional «Peinado»** junto a los rasgos del pelo: suelto, colita, dos colitas, una trenza, dos trenzas, rodete o con flequillo. Aparece al elegir los rasgos sin foto, en el perfil del personaje y en «no se parece → el pelo».
 - **Va a la ficha** (`avatarToSheet`): «long, straight, black hair in two braids». Si el adulto lo eligió, manda sobre el peinado que se leyó de la foto.
 - **No desactualiza muestras viejas:** la clave de los rasgos suma el peinado solo si está. Las reglas de Firestore aceptan solo los valores de la lista.
+
+## 347 — El plan y el texto usan la ropa del dibujo (26 nov)
+
+En la prueba A/B de la ficha (US$3,20), el cuento de mamá cambiaba el pijama celeste por uno «azul con estrellas» en el texto de la p. 3, y el comprador lo marcó como motivo de reembolso con y sin ficha. El plan y el texto no sabían qué ropa tiene el protagonista en su lámina.
+
+- El pedido le pasa al plan, al texto y a las escenas la ropa de todos los días del protagonista (`protagonistOutfit`, la de la ficha de la foto o de los rasgos).
+- **Texto:** si nombra la ropa, usa esas mismas prendas y colores. No inventa prendas, colores ni estampados, y solo cambia de ropa si la historia lo pide.
+- **Plan:** esa ropa se usa donde encaje (si ya es un pijama, sirve para la cama). Las ropas especiales llevan colores fijos y coinciden con el texto.
+- **Escenas:** nunca describen esa ropa con otros colores.
