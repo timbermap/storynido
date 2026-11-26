@@ -217,12 +217,26 @@ function LoginCard({ logins }: { logins: Record<string, number> }) {
     }),
   );
   const used = rows.filter((row) => row.started > 0 || row.succeeded > 0);
+  // Cuántos vieron el panel de ingresar (una vez por pestaña), por tipo de navegador.
+  const viewed = (['embedded', 'standard'] as const).map((browser) => ({
+    browser,
+    count: logins[`${browser}_none_none_viewed`] ?? 0,
+  }));
   return (
     <Card>
       <h2 className="font-semibold">Login por navegador</h2>
       <p className="mt-1 text-xs text-muted-foreground">
         Contadores del servidor (en el login no corre Google Analytics). &quot;En apps&quot; son los
         navegadores de Instagram, Facebook, WhatsApp y TikTok.
+      </p>
+      <p className="mt-3 text-sm">
+        Vieron la página de ingresar:{' '}
+        {viewed
+          .map(
+            ({ browser, count }) =>
+              `${browser === 'embedded' ? 'en apps' : 'común'} ${String(count)}`,
+          )
+          .join(' · ')}
       </p>
       {used.length === 0 ? (
         <p className="mt-3 text-sm text-muted-foreground">Sin logins en el período.</p>

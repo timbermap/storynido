@@ -109,7 +109,12 @@
       "generic": "No pudimos iniciar sesión. Intentalo de nuevo en unos minutos.",
       "mfaInvalid": "El código no es válido o venció. Probá con el siguiente."
     },
-    "mfaText": "Escribí el código de 6 dígitos de tu app autenticadora."
+    "mfaText": "Escribí el código de 6 dígitos de tu app autenticadora.",
+    "inApp": {
+      "textIos": "Google no deja entrar desde acá. Tocá ··· o el ícono de compartir y elegí «Abrir en el navegador», o copiá el enlace y pegalo en Safari.",
+      "textAndroid": "Google no deja entrar desde acá. Abrilo en Chrome para entrar con Google.",
+      "orEmail": "O entrá con tu email: funciona acá mismo."
+    }
   },
   "Account": {
     "languageNote": "Lo detectamos por tu ubicación; si preferís otro, elegilo aquí y lo recordamos. También podés cambiarlo en el pie de página.",
