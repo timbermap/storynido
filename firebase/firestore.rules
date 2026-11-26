@@ -157,13 +157,14 @@ service cloud.firestore {
     // Rasgos del modo sin foto (AVATAR_OPTIONS en packages/shared/src/models/character.ts).
     function validAvatar(a) {
       return a == null || (a is map
-        && a.keys().hasOnly(['skinTone', 'hairColor', 'hairLength', 'hairType', 'eyeColor', 'glasses'])
+        && a.keys().hasOnly(['skinTone', 'hairColor', 'hairLength', 'hairType', 'eyeColor', 'glasses', 'hairStyle'])
         && a.skinTone in ['very-light', 'light', 'medium', 'tan', 'brown', 'deep']
         && a.hairColor in ['black', 'dark-brown', 'light-brown', 'blond', 'red']
         && a.hairLength in ['very-short', 'short', 'medium', 'long']
         && a.hairType in ['straight', 'wavy', 'curly', 'coily']
         && a.eyeColor in ['brown', 'hazel', 'green', 'blue', 'gray']
-        && a.glasses is bool);
+        && a.glasses is bool
+        && a.get('hairStyle', 'loose') in ['loose', 'ponytail', 'pigtails', 'braid', 'two-braids', 'bun', 'bangs']);
     }
 
     // Recuerdos guiados: todos opcionales, 150 caracteres como máximo.

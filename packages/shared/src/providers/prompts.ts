@@ -562,7 +562,8 @@ export function describeCharacter(
   const extras = features.length ? `; also: ${features.join(', ')}` : '';
   // El peinado de la ficha (trenzas, colita, rodete): el formulario solo da largo, tipo y color, y
   // la lámina salía con el pelo suelto (diario, ronda 4, 26 nov, DECISIONS 345).
-  const hairstyle = hairstyleOf(sheet.hair);
+  // Si el adulto eligió un peinado en el formulario, ese manda (ya viene en el pelo de los rasgos).
+  const hairstyle = traits.hairStyle ? null : hairstyleOf(sheet.hair);
   const style = hairstyle ? `; hairstyle: ${hairstyle} (draw exactly this hairstyle)` : '';
   return `${name}: ${ageLabel(age)} (${storyAgeRule(age)}); ${describeTraits(traits, mustKeep)}${style}; outfit: ${ageLabel(age)}'s version of ${sheet.clothing} (${SAME_OUTFIT}); ${NO_PHOTO_ACCESSORIES}${extras}`;
 }

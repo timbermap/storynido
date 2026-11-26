@@ -737,3 +737,34 @@ describe('ficha visual fija (DECISIONS 345)', () => {
     expect(special).not.toContain('yellow t-shirt');
   });
 });
+
+describe('peinado en el formulario (DECISIONS 346)', () => {
+  const avatar: Avatar = {
+    skinTone: 'light',
+    hairColor: 'black',
+    hairLength: 'long',
+    hairType: 'straight',
+    eyeColor: 'brown',
+    glasses: false,
+  };
+
+  it('el peinado elegido llega a la ficha y manda sobre el de la foto', () => {
+    const withStyle = { ...avatar, hairStyle: 'two-braids' as const };
+    expect(avatarToSheet(withStyle, 6).hair).toBe('long, straight, black hair in two braids');
+    const photoSheet = { ...avatarToSheet(avatar, 6), hair: 'long black hair in a ponytail' };
+    const description = describeCharacter(
+      'Ana',
+      6,
+      photoSheet,
+      { ...withStyle, distinctive: null },
+      [],
+    );
+    expect(description).toContain('in two braids');
+    expect(description).not.toContain('ponytail');
+  });
+
+  it('sin peinado, la clave de los rasgos no cambia', () => {
+    expect(avatarKey(avatar)).not.toContain('braids');
+    expect(avatarKey({ ...avatar, hairStyle: 'bun' })).toBe(`${avatarKey(avatar)}|bun`);
+  });
+});

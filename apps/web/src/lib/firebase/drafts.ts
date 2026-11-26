@@ -408,9 +408,17 @@ export interface SavedCharacter {
 /** Los rasgos del dibujo aprobado como rasgos del modo sin foto (si están todos). */
 function avatarFrom(traits: Partial<Avatar> | null | undefined): Avatar | null {
   if (!traits) return null;
-  const { skinTone, hairColor, hairLength, hairType, eyeColor, glasses } = traits;
+  const { skinTone, hairColor, hairLength, hairType, eyeColor, glasses, hairStyle } = traits;
   return skinTone && hairColor && hairLength && hairType && eyeColor
-    ? { skinTone, hairColor, hairLength, hairType, eyeColor, glasses: glasses ?? false }
+    ? {
+        skinTone,
+        hairColor,
+        hairLength,
+        hairType,
+        eyeColor,
+        glasses: glasses ?? false,
+        ...(hairStyle ? { hairStyle } : {}),
+      }
     : null;
 }
 

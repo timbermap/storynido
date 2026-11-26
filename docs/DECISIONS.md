@@ -3514,4 +3514,11 @@ En la ronda 4 las páginas copiaron bien el pelo de la lámina, pero la lámina 
 - **Ficha visual fija:** cuando se aprueba la lámina, un modelo barato (≈ US$0,003, `describeLook`) la lee una sola vez y anota el pelo con su peinado, cada prenda con su color, los anteojos, las marcas (pecas, un diente menos) y la edad aparente. Queda en `preview.character.look` y en el snapshot del pedido. Desde ahí, la tapa, las páginas de la muestra, las del pedido y «rehacer página» se dibujan con `describeLookCharacter`, y la revisión de cada página compara con `lookMustKeep` usando las mismas palabras. La piel y los ojos siguen saliendo del formulario confirmado. Si la lectura falla, todo sigue como antes.
 - **Una sola ropa por página:** cada página dice exactamente qué lleva el protagonista, sin «salvo que». Es la ropa especial del plan (en el agua, en el espacio) o, si no hay, la de la ficha prenda por prenda, «sin otra ropa ni capas».
 - **Prueba A/B en el examen:** `eval:pedidos --arms base,ficha --laminas <carpeta>` dibuja cada pedido con y sin la ficha, con el mismo texto, la misma lámina (la de una corrida anterior) y las mismas semillas. La revisión usa la ficha como vara en los dos brazos y el informe agrega «fieles a la ficha a la primera». El estimador sube un 15 % por las reglas 344 (ronda 4: 0,69 reales contra 0,60 estimados).
-- **Pendiente:** un campo opcional «peinado» en el formulario (Sebas dijo que sí), para los pedidos sin foto.
+
+## 346 — Peinado opcional en el formulario (26 nov)
+
+Sebas aprobó sumar el peinado. El formulario daba solo largo, tipo y color del pelo, y un chico con colita o trenzas salía con el pelo suelto, sobre todo en los pedidos sin foto.
+
+- **Campo opcional «Peinado»** junto a los rasgos del pelo: suelto, colita, dos colitas, una trenza, dos trenzas, rodete o con flequillo. Aparece al elegir los rasgos sin foto, en el perfil del personaje y en «no se parece → el pelo».
+- **Va a la ficha** (`avatarToSheet`): «long, straight, black hair in two braids». Si el adulto lo eligió, manda sobre el peinado que se leyó de la foto.
+- **No desactualiza muestras viejas:** la clave de los rasgos suma el peinado solo si está. Las reglas de Firestore aceptan solo los valores de la lista.

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { AVATAR_OPTIONS, type Avatar, type AvatarTrait } from '@storynido/shared';
+import { AVATAR_OPTIONS, HAIR_STYLES, type Avatar, type AvatarTrait } from '@storynido/shared';
 
 import { cn } from '@/lib/utils';
 
@@ -93,6 +93,40 @@ export function TraitPicker({
           </div>
         </fieldset>
       ))}
+
+      {/* Peinado, opcional (DECISIONS 346): junto al pelo, también en la corrección del pelo. */}
+      {(!only || only.includes('hairType')) && (
+        <fieldset>
+          <legend className="mb-1 font-bold">{t('hairStyle')}</legend>
+          <p className="mb-3 text-sm text-muted-foreground">{t('hairStyleHint')}</p>
+          <div className="flex flex-wrap gap-2">
+            {HAIR_STYLES.map((option) => {
+              const checked = value.hairStyle === option;
+              return (
+                <label
+                  key={option}
+                  className={cn(
+                    'inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-2 bg-card px-4 text-sm font-bold transition has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50',
+                    checked ? 'border-navy bg-card' : 'border-border hover:border-primary/40',
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name={`${idPrefix}-hairStyle`}
+                    value={option}
+                    checked={checked}
+                    onChange={() => {
+                      onChange({ ...value, hairStyle: option });
+                    }}
+                    className="sr-only"
+                  />
+                  {t(`options.hairStyle.${option}`)}
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+      )}
 
       {showGlasses && (
         <label className="inline-flex items-center gap-3 font-bold">
