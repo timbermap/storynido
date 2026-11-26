@@ -272,6 +272,12 @@ ${input.plan.scenes
     (scene) =>
       `- Página ${String(scene.pageIndex + 1)}: ${scene.sceneGoal} (${scene.emotionalBeat})${
         scene.personalDetail ? ` · detalle personal: ${scene.personalDetail}` : ''
+      }${
+        // El texto y el plan cuentan el mismo lugar (DECISIONS 352): si el plan pone la página
+        // dentro de la bañera, el texto no la saca del agua en esa página.
+        isBathScene(scene)
+          ? ' · pasa DENTRO de la bañera: en esta página no sale del agua ni se seca'
+          : ''
       }${scene.wordless ? ' · SIN TEXTO: "text" vacío (""), el dibujo cuenta solo' : ''}`,
   )
   .join('\n')}${
@@ -620,6 +626,34 @@ export function everydayOutfit(look: CharacterLook): string {
     .join(', ');
 }
 
+/** Marcas que se pueden pedir y cómo se reconocen en la ficha (en inglés, como la escribe el modelo). */
+const REQUESTED_MARKS: { mark: string; pattern: RegExp }[] = [
+  { mark: 'freckles', pattern: /freckle/i },
+  { mark: 'dimples', pattern: /dimple/i },
+  { mark: 'a mole', pattern: /\bmole\b|beauty mark/i },
+  { mark: 'a birthmark', pattern: /birthmark/i },
+  { mark: 'a missing front tooth', pattern: /missing (front )?tooth|gap[- ]toothed|tooth gap/i },
+];
+
+/**
+ * Las marcas que el pedido trae y la ficha de la lámina no (DECISIONS 352, paso 2 del 26 nov: el
+ * pedido tenía pecas y la ficha decía «marks: []», así que ninguna página las dibujaba). Devuelve la
+ * ficha con esas marcas sumadas, para que las páginas y la revisión las sigan pidiendo, y la lista
+ * de las que faltaban, para avisar que la lámina salió sin ellas.
+ */
+export function withRequestedMarks(
+  look: CharacterLook,
+  requested: string,
+): { look: CharacterLook; missing: string[] } {
+  const seen = look.marks.join(' ');
+  const missing = REQUESTED_MARKS.filter(
+    ({ pattern }) => pattern.test(requested) && !pattern.test(seen),
+  ).map(({ mark }) => mark);
+  return missing.length === 0
+    ? { look, missing }
+    : { look: { ...look, marks: [...look.marks, ...missing] }, missing };
+}
+
 /** Lo que la revisión de cada página compara con la ficha visual fija (las mismas palabras). */
 export function lookMustKeep(look: CharacterLook, traits: CharacterTraits): string[] {
   const confirmed = avatarToSheet(traits, 0);
@@ -900,6 +934,7 @@ const foldText = (value: string) =>
   value
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
+    .replace(/[_-]+/g, ' ')
     .toLowerCase();
 
 /**

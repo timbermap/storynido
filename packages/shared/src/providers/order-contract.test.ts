@@ -7,6 +7,7 @@ import {
   checkTextContract,
   familyRolesIn,
   hardViolations,
+  hardWeight,
   IMAGE_CONTRACT_CLAUSES,
   imageContractNote,
   practiceMissingPages,
@@ -226,5 +227,23 @@ describe('imageContractNote', () => {
 
   it('la ropa puede cambiar si el texto de la página lo dice', () => {
     expect(imageContractNote({})).toContain('or the page text names other clothes');
+  });
+});
+
+describe('cuánto falla un texto (DECISIONS 352)', () => {
+  it('cuenta cada página de cada cláusula dura, así un arreglo parcial también se acepta', () => {
+    const touch = (pages: number[]) => ({
+      clause: 'no_touch' as const,
+      stage: 'text' as const,
+      severity: 'hard' as const,
+      pages,
+      repair: '',
+    });
+    const soft = { ...touch([1]), severity: 'soft' as const };
+    expect(hardWeight([touch([2, 10])])).toBe(2);
+    expect(hardWeight([touch([2])])).toBe(1);
+    expect(hardWeight([touch([])])).toBe(1);
+    expect(hardWeight([soft])).toBe(0);
+    expect(hardWeight([touch([2])]) < hardWeight([touch([2, 10])])).toBe(true);
   });
 });

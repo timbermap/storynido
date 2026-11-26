@@ -39,6 +39,7 @@ import {
   coverScene,
   coverSetting,
   describeCharacter,
+  withRequestedMarks,
   nameIssues,
   pagesOutOfRange,
   hasTouch,
@@ -943,12 +944,21 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       const provider = await ai();
       if (provider.text.describeLook) {
         try {
+          const requested = describeCharacter(name, storyAge, sheet, traits, mustKeep);
           const result = await provider.text.describeLook({
             sheet: await load(sheetPath),
-            requested: describeCharacter(name, storyAge, sheet, traits, mustKeep),
+            requested,
           });
           lookCost = await record(ctx, 'review', result.usage);
-          look = result.look;
+          // La lámina sin una marca pedida (pecas...) no pasa en silencio (DECISIONS 352).
+          const marked = withRequestedMarks(result.look, requested);
+          if (marked.missing.length > 0) {
+            ctx.log.warn(
+              { orderId: ctx.order.id, missing: marked.missing },
+              'character sheet lacks requested marks',
+            );
+          }
+          look = marked.look;
         } catch (error) {
           ctx.log.warn({ orderId: ctx.order.id, err: error }, 'character look not described');
         }

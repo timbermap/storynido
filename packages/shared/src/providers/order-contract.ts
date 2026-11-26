@@ -550,6 +550,18 @@ export const hardViolations = (violations: readonly ContractViolation[]) =>
   violations.filter((violation) => violation.severity === 'hard');
 
 /**
+ * Cuánto falla un texto: cada página de cada cláusula dura cuenta una vez (una cláusula sin páginas
+ * cuenta 1). El arreglo se acepta si baja este número, no solo si desaparece una cláusula entera
+ * (DECISIONS 352, paso 2 del 26 nov: el reescrito sacaba el abrazo de la página 10 pero se
+ * descartaba porque la página 2 seguía marcada y la cuenta de cláusulas no bajaba).
+ */
+export const hardWeight = (violations: readonly ContractViolation[]) =>
+  hardViolations(violations).reduce(
+    (total, violation) => total + Math.max(1, violation.pages.length),
+    0,
+  );
+
+/**
  * Lo que la reescritura de una página con contacto tiene que evitar (golden set, 25 nov: la pasada
  * general dejaba igual al dentista con la mano en el hombro y al amigo que la abrazaba).
  */
