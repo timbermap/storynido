@@ -52,6 +52,7 @@ import {
   type ContinuityReviewRequest,
   type ProfessionalReview,
   type ProfessionalReviewRequest,
+  calibrateBuyerReview,
 } from '@storynido/shared';
 import { GoogleAuth } from 'google-auth-library';
 
@@ -608,6 +609,8 @@ const BUYER_REVIEW_SCHEMA = {
     share: { type: 'INTEGER' },
     sharePage: { type: 'INTEGER' },
     shareWhy: { type: 'STRING' },
+    textOverArt: { type: 'ARRAY', items: { type: 'INTEGER' } },
+    unsafe: { type: 'ARRAY', items: { type: 'STRING' } },
   },
   required: [
     'buy',
@@ -621,6 +624,8 @@ const BUYER_REVIEW_SCHEMA = {
     'share',
     'sharePage',
     'shareWhy',
+    'textOverArt',
+    'unsafe',
   ],
 };
 
@@ -1419,7 +1424,13 @@ Answer in Spanish, from your own point of view as this customer:
 - share: 1 to 5, would you post a photo of this book in an Instagram story or send it by WhatsApp to the grandparents or other parents
   (5 = right away, you are proud of it).
 - sharePage: the number of the one page you would share (0 = the cover, -1 = none).
-- shareWhy: in one short sentence, why that page (or why none) makes people want one for their own child.`,
+- shareWhy: in one short sentence, why that page (or why none) makes people want one for their own child.
+- textOverArt: the pages (0 = the cover title is fine, list 0 only if the cover title covers a face) where the text sits ON TOP of the
+  drawing: over the scene, over a character or object, or on a fade, gradient or translucent band laid over the scene. Text on its own
+  clear area (a plain margin, a solid band or a white page next to the picture) is fine. Also list pages whose text is far too big for a
+  picture book page or is all in capital letters. Real parents ask for refunds over this, so look at every page. Empty if none.
+- unsafe: things in the drawings or the text that are dangerous or wrong for a young child and a parent would reject (a baby bottle in
+  the bathtub, a child alone near water, fire or a road, choking hazards for a baby, medicine as a toy, ...). Short, with the page. Empty if none.`,
     });
     const { response, usage } = await this.client.generate(this.model, parts, {
       temperature: 0,
@@ -1427,7 +1438,7 @@ Answer in Spanish, from your own point of view as this customer:
       responseSchema: BUYER_REVIEW_SCHEMA,
     });
     const review = parseJson(response, 'juez comprador') as Omit<BuyerReview, 'usage'>;
-    return { ...review, usage };
+    return { ...calibrateBuyerReview(review), usage };
   }
 
   /**

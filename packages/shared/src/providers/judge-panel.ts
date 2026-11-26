@@ -253,6 +253,8 @@ export const judgePanelSchema = z.object({
       share: z.number(),
       sharePage: z.number(),
       shareWhy: z.string(),
+      textOverArt: z.array(z.number()).optional(),
+      unsafe: z.array(z.string()).optional(),
     })
     .nullable(),
   continuity: z
@@ -345,4 +347,34 @@ export function judgeGateMessage(
   const tail =
     fixes.length > 0 ? `. Arreglos: ${fixes.map((f) => `[${f.area}] ${f.fix}`).join('; ')}` : '';
   return `${head}${tail}`.slice(0, 500);
+}
+
+/** Nota máxima del comprador si el texto tapa el dibujo o es enorme (calibración de Sebas, 26 nov). */
+export const BUYER_TEXT_OVER_ART_MAX = 3;
+
+/**
+ * Calibración con los votos de Sebas (26 nov): el texto sobre el dibujo o demasiado grande fue su
+ * motivo en 5 de 10 libros, y la mesa le había dado «compra» a uno así. Con texto encima del dibujo
+ * el comprador no pasa de 3 ni de «duda»; con una situación peligrosa, «no».
+ */
+export function calibrateBuyerReview<
+  T extends Pick<BuyerReview, 'buy' | 'verdict' | 'refund' | 'textOverArt' | 'unsafe'>,
+>(review: T): T {
+  const out = { ...review, refund: [...review.refund] };
+  const covered = review.textOverArt ?? [];
+  if (covered.length > 0) {
+    out.buy = Math.min(out.buy, BUYER_TEXT_OVER_ART_MAX);
+    if (out.verdict === 'compra') out.verdict = 'duda';
+    const where = covered
+      .map((page) => (page === 0 ? 'la tapa' : `pág. ${String(page)}`))
+      .join(', ');
+    out.refund.push(`Texto encima del dibujo o demasiado grande (${where})`);
+  }
+  const unsafe = review.unsafe ?? [];
+  if (unsafe.length > 0) {
+    out.buy = Math.min(out.buy, 2);
+    out.verdict = 'no';
+    out.refund.push(...unsafe.map((what) => `Situación peligrosa: ${what}`));
+  }
+  return out;
 }
