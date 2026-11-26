@@ -39,6 +39,10 @@ export const QA_CODES = [
   'address_review',
   // Revisión manual (fase 15): un admin aprobó las ilustraciones tal como estaban.
   'human_approved',
+  // Freno de la mesa (DECISIONS 350): la mesa no lo compraría y el libro no se entregó solo.
+  'judge_gate_blocked',
+  // Alguien (o el tope de 24 h) dejó entregar un libro frenado por la mesa.
+  'judge_gate_released',
   // El adulto editó el texto de una página de la muestra (métrica story_edit_rate).
   'text_edited',
   // "¿Qué mejorarías?" después de la muestra (AUDITORIA-PRODUCTO §1.12): un código por motivo.

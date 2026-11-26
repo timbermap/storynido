@@ -3548,3 +3548,15 @@ En la medición del 26 nov (ficha2) los dos libros tuvieron una falla dura de te
 
 - **Abrazar una cosa no es contacto:** «abraza fuerte a su almohada» y «abrazando mi guitarra» contaban como contacto físico no pedido. `hasTouch` y `touchPages` borran antes los abrazos a una cosa (almohada, peluche, libro, guitarra, manta, pelota…, en es, en y pt). Un abrazo a una persona en la misma página se sigue marcando: «Lucía y Mateo me abrazaron» sigue siendo una falla dura.
 - **La bañera:** con la ropa que inventaba el plan, el chico salía en el agua con la toalla con capucha o con la manga del pijama, y la revisión lo reprobaba. Cuando la escena pasa dentro de la bañera (la ropa del plan dice baño, o lo que tiene que verse lo pone dentro de la bañera), la ropa es siempre `BATH_OUTFIT`: sin ropa, sin pijama y sin toalla en el agua, tapado por la espuma hasta los hombros, a la altura de los ojos y nunca en primer plano del cuerpo. Manda sobre lo que diga el plan. Secarse con la toalla o estar en el baño fuera del agua no cuenta.
+
+## 350 — La mesa de jueces frena la entrega (26 nov)
+
+Sebas, con la mesa 360 «libros siempre comprables»: el libro que la mesa no compraría no tiene que llegar solo a la familia. Hasta acá la mesa (DECISIONS 343) solo medía.
+
+- **Cuándo frena:** al armar el PDF, si la mesa da menos de 4, si el comprador dice «no» o si, en Profesionales, el profesional no lo usaría (`judgeGate` en judge-panel.ts). Si la mesa no llegó a opinar (tiempo o error), no frena: un juez caído no puede dejar a una familia sin su libro.
+- **Qué pasa:** el pedido queda en revisión (`qa_failed`, paso `layout_pdf`, error que empieza con `judge_panel_low` y nombra los motivos y los arreglos de la mesa). Sale el aviso de siempre al equipo y el correo de «estamos revisando» a quien pagó. Queda el evento `judge_gate_blocked`.
+- **En el admin:** «Entregar igual» (el mismo endpoint de aprobar, que con el freno guarda `pipeline.judgeApproval` y vuelve a correr desde la maqueta sin volver a juzgar) o «Regenerar» para rehacerlo. Al soltarlo queda `judge_gate_released`.
+- **Tope de 24 h:** el vigía (cada 30 minutos) entrega como está el libro frenado que nadie miró en 24 h, con `judgeApproval.by = 'tope-24h'`, y avisa al equipo para ofrecer rehacerlo.
+- **Dónde está encendido:** en staging por ambiente. En producción está apagado hasta calibrar a los jueces contra los veredictos de Sebas; se enciende sin deploy con `aiConfig.judgeGate = 'on'` (y `'off'` lo apaga en cualquier ambiente).
+- **Queda para después:** que el freno rehaga solo las páginas que marcan los jueces antes de pedir revisión. Hoy los arreglos de la mesa no traen página, salvo los de continuidad.
+
