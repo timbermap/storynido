@@ -3548,3 +3548,11 @@ En la medición del 26 nov (ficha2) los dos libros tuvieron una falla dura de te
 
 - **Abrazar una cosa no es contacto:** «abraza fuerte a su almohada» y «abrazando mi guitarra» contaban como contacto físico no pedido. `hasTouch` y `touchPages` borran antes los abrazos a una cosa (almohada, peluche, libro, guitarra, manta, pelota…, en es, en y pt). Un abrazo a una persona en la misma página se sigue marcando: «Lucía y Mateo me abrazaron» sigue siendo una falla dura.
 - **La bañera:** con la ropa que inventaba el plan, el chico salía en el agua con la toalla con capucha o con la manga del pijama, y la revisión lo reprobaba. Cuando la escena pasa dentro de la bañera (la ropa del plan dice baño, o lo que tiene que verse lo pone dentro de la bañera), la ropa es siempre `BATH_OUTFIT`: sin ropa, sin pijama y sin toalla en el agua, tapado por la espuma hasta los hombros, a la altura de los ojos y nunca en primer plano del cuerpo. Manda sobre lo que diga el plan. Secarse con la toalla o estar en el baño fuera del agua no cuenta.
+
+## 350 — Las tarjetas de público y los pasos muestran personas y lo que pasa (26 nov)
+
+Sebas: hoy el primer desafío es que quien visita la página quiera entrar. La mesa (diseño/UX, marketing, producto) miró «¿Para quién es?» y los «Cómo funciona».
+
+- **«¿Para quién es?»:** cada tarjeta muestra a la persona que compra en su escena, no el producto (la primera maqueta con fotos de producto la rechazó Sebas): mamá e hija leyendo en la cama, el cumple con amigos y una maestra con una nena **sin contacto físico**. Acuarelas de muestra en `images/audiencias/` (dos generadas con gemini-3-pro-image, ~US$0,27, con referencias de estilo de marca; nunca libros de clientes). Escritorio: imagen arriba; celular: miniatura a la izquierda.
+- **Pasos con imagen:** `LandingSteps` acepta `visuals` (`StepVisual`: foto → personaje, abanico de 3 tapas que se abre al pasar el mouse, o una imagen) y se usa en la home, Familias, Cómo funciona, Celebraciones y Profesionales. Las imágenes de cada línea están en `landing/step-visuals.ts`. Sin carrusel automático: pesa en el celular y distrae.
+- **Botón debajo de los pasos:** `cta` pone «Empezar gratis» (o el de la línea) al final de los pasos: después de ver lo fácil que es, el paso siguiente queda a mano. Sin sesión lleva a ingresar y después al creador (DECISIONS 252).
