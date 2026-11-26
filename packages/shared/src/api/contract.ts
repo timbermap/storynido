@@ -37,7 +37,8 @@ import { roleSchema } from '../roles';
 import { showcasePanelSchema, showcaseStatusSchema } from '../models/showcase';
 
 /** Etapas del login que se cuentan (analítica propia: en el login no corre Google Analytics). */
-export const LOGIN_STAGES = ['started', 'succeeded', 'failed'] as const;
+/** `viewed`: alguien vio el panel de ingresar (sin método ni vía: `none`). */
+export const LOGIN_STAGES = ['viewed', 'started', 'succeeded', 'failed'] as const;
 
 /** Temas del formulario de contacto. */
 export const CONTACT_TOPICS = [
@@ -2009,8 +2010,8 @@ export const apiRoutes = {
       'Cuenta un paso del login por método, vía y tipo de navegador (contadores diarios, sin datos personales)',
     body: z.object({
       stage: z.enum(LOGIN_STAGES),
-      method: z.enum(['google', 'apple', 'email']),
-      via: z.enum(['popup', 'redirect', 'link']),
+      method: z.enum(['google', 'apple', 'email', 'none']),
+      via: z.enum(['popup', 'redirect', 'link', 'none']),
       browser: z.enum(['embedded', 'standard']),
     }),
     response: z.object({ ok: z.literal(true) }),
