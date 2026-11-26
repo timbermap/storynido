@@ -726,11 +726,13 @@ export const publicPreviewSchema = z.object({
            */
           layout: z
             .object({
-              kind: z.enum(['facing', 'calm', 'vignette', 'strip', 'overlay']),
+              kind: z.enum(['facing', 'band', 'calm', 'vignette', 'strip', 'overlay']),
               side: z.enum(['top', 'bottom']),
               /** Alto (%) de la zona libre para el texto y letra (pt) con que entra (DECISIONS 300). */
               zonePct: z.number().optional(),
               fontPt: z.number().optional(),
+              /** Forma del dibujo de una página `band` (DECISIONS 354). */
+              art: z.enum(['4:3', '1:1']).optional(),
             })
             .optional()
             .catch(undefined),

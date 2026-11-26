@@ -13,10 +13,31 @@ import type { StoryTypography } from './typography';
  *   papel crema arriba o abajo y el texto va ahí, sin taparla.
  * - `strip` (libros para colorear, DECISIONS 283): el dibujo arriba y, debajo, una franja blanca
  *   con el texto como pie. El texto nunca tapa lo que se pinta.
+ * - `band` (hasta 8 años, libros nuevos desde DECISIONS 354): el dibujo arriba, entero y con su
+ *   forma real (apaisado 4:3, o cuadrado para los bebés), y el texto debajo en su franja de papel.
+ *   El texto nunca va sobre la ilustración: no depende de que la IA deje un hueco.
+ * - `calm` / `vignette`: los armados anteriores (texto sobre la zona calma o el papel fundido), que
+ *   conservan los libros congelados antes de `band`.
  * - `overlay`: el panel sobre la ilustración de siempre (libros congelados antes de esto).
  */
 
-export type PageLayoutKind = 'facing' | 'calm' | 'vignette' | 'strip' | 'overlay';
+export type PageLayoutKind = 'facing' | 'band' | 'calm' | 'vignette' | 'strip' | 'overlay';
+
+/** Forma de la ilustración de una página `band` (ancho:alto). */
+export type BandArt = '4:3' | '1:1';
+
+/** Forma con que se pide cada imagen al modelo. */
+export type ArtAspect = '3:4' | BandArt;
+
+/** Alto del dibujo de una página `band` sobre el ancho de la hoja (4:3 → 0,75). */
+export const bandArtRatio = (art: BandArt | undefined) => (art === '1:1' ? 1 : 0.75);
+
+/**
+ * Alto (% de la hoja) del dibujo de una página `band`, según la proporción de la hoja (alto/ancho):
+ * 21×28 → 56 % (4:3) o 75 % (1:1); el A5 grapado, 53 % o 70 %.
+ */
+export const bandArtPct = (art: BandArt | undefined, pageAspect = 4 / 3) =>
+  (100 * bandArtRatio(art)) / pageAspect;
 
 /** Alto del dibujo en una página `strip` (%): el resto es la franja blanca del texto. */
 export const STRIP_ART_PCT = 80;
@@ -64,6 +85,8 @@ export interface PageLayout {
   zonePct?: number;
   /** Tamaño de la letra (pt) con el que el texto entra en esa zona, si se conoce la tipografía. */
   fontPt?: number;
+  /** Forma del dibujo en una página `band`. */
+  art?: BandArt;
 }
 
 /**
@@ -109,15 +132,24 @@ const MIN_PT_FACTOR = 0.85;
 
 export type FitTypography = Pick<StoryTypography, 'font' | 'minPt' | 'maxPt' | 'uppercase'>;
 
+/**
+ * Ancho de 1 pt en % del ancho de la hoja. Los armados sobre el dibujo usan un margen holgado
+ * (0,25); la franja `band` usa la medida física (1 pt = 0,3528 mm sobre 210 mm), porque ahí el PDF
+ * ajusta la letra midiendo el texto real y no hace falta achicarla de antemano.
+ */
+const PT_WIDTH_PCT = 0.25;
+const PT_WIDTH_PCT_PHYSICAL = (0.3528 / 210) * 100;
+
 /** Alto estimado (% de la hoja) del texto con letra de `pt` puntos. */
 export function textHeightPct(
   text: string | null | undefined,
   pt: number,
   typography: FitTypography,
+  ptWidthPct = PT_WIDTH_PCT,
 ): number {
   const words = (text ?? '').trim().split(/\s+/u).filter(Boolean);
   if (words.length === 0) return 0;
-  const sizePct = pt * 0.25; // % del ancho de la hoja (15,5 pt ≈ 3,9 %)
+  const sizePct = pt * ptWidthPct; // % del ancho de la hoja
   const em = CHAR_EM[typography.font][typography.uppercase ? 'upper' : 'lower'];
   const perLine = Math.max(4, Math.floor(TEXT_WIDTH_PCT / (sizePct * em)));
   let lines = 1;
@@ -140,10 +172,11 @@ export function fitTextPt(
   text: string | null | undefined,
   typography: FitTypography,
   zonePct: number,
+  ptWidthPct = PT_WIDTH_PCT,
 ): number | null {
   const floor = typography.minPt * MIN_PT_FACTOR;
   for (let pt = typography.maxPt; pt >= floor - 1e-6; pt -= 0.5) {
-    if (textHeightPct(text, pt, typography) <= zonePct) return pt;
+    if (textHeightPct(text, pt, typography, ptWidthPct) <= zonePct) return pt;
   }
   return null;
 }
@@ -169,6 +202,11 @@ export const DEFAULT_PAGE_LAYOUT: PageLayoutConfig = {
  */
 export interface BookLayout {
   facing: boolean;
+  /**
+   * Dibujo arriba y texto abajo (DECISIONS 354). Falta en los libros congelados antes: siguen con
+   * la zona calma o el papel fundido.
+   */
+  band?: boolean;
   /** Edad con la que se decidió (la del protagonista). */
   age: number;
 }
@@ -180,7 +218,8 @@ export function bookLayout(
 ): BookLayout {
   // Colorear y actividades conservan su armado propio.
   const story = contentType === 'story' || contentType === 'story_activities';
-  return { facing: story && age >= config.facingMinAge, age };
+  const facing = story && age >= config.facingMinAge;
+  return { facing, band: story && !facing, age };
 }
 
 /**
@@ -219,6 +258,7 @@ export function pageLayout(
   if (!input.layout) return { kind: 'overlay', side };
   if (input.layout.facing) return { kind: 'facing', side };
   const ty = input.typography;
+  if (input.layout.band) return bandLayout(input.text, ty);
   if (ty && input.text !== undefined) {
     // Se mide el texto: la zona calma (30 %) si entra con la letra de la edad; si no, el papel
     // fundido; si el texto es largo, la zona alta (40 %) con la letra achicada hasta que entre.
@@ -249,6 +289,34 @@ export function pageLayout(
   return { kind: 'calm', side };
 }
 
+/**
+ * Página `band`: los bebés (letra de 30-36 pt, una línea corta) llevan el dibujo cuadrado, más
+ * grande; el resto, apaisado 4:3, que deja 44 % de la hoja para el texto. Medido con la letra
+ * completa de cada edad y el máximo de palabras de cada densidad, el texto entra siempre.
+ */
+export function bandLayout(
+  text: string | null | undefined,
+  typography: FitTypography | null | undefined,
+  pageAspect = PAGE_ASPECT,
+): PageLayout {
+  const art: BandArt = typography && typography.minPt >= 30 ? '1:1' : '4:3';
+  if (!typography) return { kind: 'band', side: 'bottom', art };
+  const zonePct = 100 - bandArtPct(art, pageAspect);
+  const fontPt =
+    fitTextPt(text, typography, zonePct, PT_WIDTH_PCT_PHYSICAL) ?? typography.minPt * MIN_PT_FACTOR;
+  return { kind: 'band', side: 'bottom', art, zonePct: Math.round(zonePct), fontPt };
+}
+
+/** Forma con que se pide la ilustración de la página (la de una página sin texto va entera). */
+export function artAspectOf(
+  layout: PageLayout | null | undefined,
+  text?: string | null,
+): ArtAspect {
+  if (layout?.kind !== 'band') return '3:4';
+  if (text !== undefined && !(text ?? '').trim()) return '3:4';
+  return layout.art ?? '4:3';
+}
+
 /** Lo que el prompt de la ilustración pide según el armado (en inglés, para el modelo). */
 export function layoutSceneNote(layout: PageLayout): string {
   const third = layout.side === 'top' ? 'top' : 'bottom';
@@ -259,6 +327,10 @@ export function layoutSceneNote(layout: PageLayout): string {
   switch (layout.kind) {
     case 'strip':
       return ' Full drawing for a coloring page: the text goes in a separate white band below the drawing, so no empty area for text is needed. Keep the main character whole and away from the edges.';
+    case 'band': {
+      const frame = layout.art === '1:1' ? 'square' : 'landscape';
+      return ` The text is printed on plain paper below the picture, never over it: fill the whole ${frame} frame with the scene, edge to edge, with no empty or plain area reserved for text. Show the protagonist whole and clearly, in a medium shot (never tiny in the distance), with faces and hands away from the edges.`;
+    }
     case 'facing':
       return ' Full-page illustration with the whole scene: the text goes on the facing page, so no empty area for text is needed. Keep faces away from the edges.';
     case 'vignette':

@@ -251,7 +251,10 @@ export const bookPreviewSchema = z.object({
    * Armado por edad (page-layout.ts): con `facing`, cada escena es página de texto + ilustración.
    * Ausente en las muestras anteriores (siguen con el panel sobre la ilustración).
    */
-  pageLayout: z.object({ facing: z.boolean(), age: z.number() }).nullable().optional(),
+  pageLayout: z
+    .object({ facing: z.boolean(), band: z.boolean().optional(), age: z.number() })
+    .nullable()
+    .optional(),
   /** Plan del planificador editorial: qué se ve y qué no en cada página (fase 09). */
   plan: z
     .object({

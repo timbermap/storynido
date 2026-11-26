@@ -38,6 +38,8 @@ import {
   countWords,
   pageLayout,
   sceneNoteFor,
+  artAspectOf,
+  type ArtAspect,
   storyTypography,
   textZoneOf,
   buildIllustrationPrompt,
@@ -496,7 +498,13 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
       // El brazo base dibuja con la descripción del pedido; el brazo ficha, con la ficha visual
       // fija leída de la lámina (DECISIONS 345). Se define abajo, una vez que hay lámina.
       let description = `${requested}${companionLine}`;
-      const draw = async (label: string, scene: string, references: ImageData[], seed: number) => {
+      const draw = async (
+        label: string,
+        scene: string,
+        references: ImageData[],
+        seed: number,
+        aspect: ArtAspect = '3:4',
+      ) => {
         // Un dibujo que se cuelga o que la moderación bloquea no tumba el caso: un reintento, como el
         // worker, que en el segundo intento saca los objetos con letras (Diario, 25 nov:
         // PROHIBITED_CONTENT).
@@ -513,7 +521,7 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
             character: { description, photo: null },
             references,
             traitReferences: [],
-            aspectRatio: '3:4',
+            aspectRatio: aspect,
             resolution: '1K',
             seed,
           });
@@ -667,8 +675,9 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
         seed: number,
         index: number,
         pageText: string | null,
+        aspect: ArtAspect = '3:4',
       ) => {
-        let finalImage = await draw(file, scene, [lamina], seed);
+        let finalImage = await draw(file, scene, [lamina], seed, aspect);
         const first = await review(label, finalImage, index, pageText);
         if (!first) return finalImage;
         const images = row.images ?? { reviewed: 0, cleanFirst: 0, cleanFinal: 0 };
@@ -688,6 +697,7 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
             `${scene} Repair: ${fix.join('; ')}.`,
             [lamina],
             seed + 100,
+            aspect,
           );
           const again = await review(`${label} (redibujo)`, redrawn, index, pageText);
           if (again) {
@@ -782,6 +792,7 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
           page.index + 2,
           page.index + 1,
           pageText || null,
+          artAspectOf(layout, pageText),
         );
         const img = await zoneChecked(
           label,

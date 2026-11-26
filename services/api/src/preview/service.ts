@@ -12,6 +12,7 @@ import {
   sceneNoteFor,
   pageLayout,
   textZoneOf,
+  artAspectOf,
   type PageLayout,
   scenesFor,
   withEventWordCap,
@@ -2099,7 +2100,8 @@ export class PreviewService {
             ...(companion ? [companion.image] : []),
             ...(cast && castImage ? [castImage] : []),
           ],
-          aspectRatio: '3:4',
+          // Dibujo arriba y texto abajo: la ilustración con su forma real (DECISIONS 354).
+          aspectRatio: artAspectOf(zone),
           // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
           resolution: '2K',
           seed,
@@ -2194,6 +2196,7 @@ export class PreviewService {
               100 + image,
               castOn(image),
               image === 0,
+              image === 0 || !page?.text.trim() ? null : (pageLayouts[image - 1] ?? null),
             );
             await this.qaEvent(bookId, 'page_repair', {
               pageIndex: image,
@@ -3056,6 +3059,24 @@ export class PreviewService {
                   )
                 : ''
             }`;
+      // Dibujo arriba y texto abajo (DECISIONS 354): la página rehecha se pide con la misma forma y
+      // sin huecos, como las demás. Los armados anteriores siguen como estaban.
+      const regenPage = target === 'cover' ? null : (preview.pages[target] ?? null);
+      const regenLayout =
+        regenPage?.text.trim()
+          ? pageLayout({
+              layout: preview.pageLayout ?? null,
+              words: countWords(regenPage.text),
+              pageIndex: regenPage.index,
+              contentType: book.contentType ?? 'story',
+              text: regenPage.text,
+              typography:
+                preview.ageBand && preview.textBand
+                  ? storyTypography(preview.ageBand, preview.textBand, book.language)
+                  : null,
+            })
+          : null;
+      const bandLayoutNow = regenLayout?.kind === 'band' ? regenLayout : null;
       const companion = preview.companion ?? null;
       const companionImage: ImageData | null = companion
         ? {
@@ -3066,7 +3087,7 @@ export class PreviewService {
       const { image } = await this.illustration(ai, track, limits, {
         prompt: buildIllustrationPrompt({
           template: story.imagePromptTemplate,
-          scene,
+          scene: bandLayoutNow ? `${scene}${sceneNoteFor(bandLayoutNow, regenPage?.text)}` : scene,
           character: companion ? `${description}\n${companionNote(companion)}` : description,
           style: style.promptModifier,
           direction: withCurrentGuards(preview.artDirection),
@@ -3078,7 +3099,7 @@ export class PreviewService {
         character: { description, photo: preview.character ? null : photo },
         correction: preview.character?.correction ?? null,
         references: companionImage ? [reference, companionImage] : [reference],
-        aspectRatio: '3:4',
+        aspectRatio: artAspectOf(bandLayoutNow),
         // La portada y las páginas pueden ir a imprenta: 2K (~220 dpi a 21×28; DECISIONS 071).
         resolution: '2K',
         seed: Date.now() % 100_000,

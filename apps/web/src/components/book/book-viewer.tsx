@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import {
+  bandArtRatio,
   splitCoverTitle,
   stripArtPct,
   stripFontScale,
@@ -30,11 +31,13 @@ export interface ViewerPage {
   composed?: boolean;
   /** Armado en el libro (page-layout.ts): la página se ve igual que en el PDF. */
   layout?: {
-    kind: 'facing' | 'calm' | 'vignette' | 'strip' | 'overlay';
+    kind: 'facing' | 'band' | 'calm' | 'vignette' | 'strip' | 'overlay';
     side: 'top' | 'bottom';
     /** Alto (%) de la zona del texto y letra (pt) con que entra, medidos con el texto real. */
     zonePct?: number;
     fontPt?: number;
+    /** Forma del dibujo de una página `band` (DECISIONS 354). */
+    art?: '4:3' | '1:1';
   };
 }
 
@@ -486,6 +489,50 @@ function PageSpread({
         </div>
       </div>
     );
+  }
+
+  // Dibujo arriba y texto abajo (DECISIONS 354), igual que el PDF: la ilustración entera con su
+  // forma (apaisada o cuadrada) y el texto en su franja de papel, nunca encima. La letra va en la
+  // misma proporción que en la hoja impresa (1 pt = 0,168 % del ancho de 21 cm).
+  if (layout.kind === 'band') {
+    const hasText = Boolean(page.text?.trim());
+    if (hasText) {
+      const pt = layout.fontPt ?? typography?.maxPt;
+      return (
+        <div className="[container-type:inline-size] relative mx-auto flex aspect-[3/4] w-full max-w-md flex-col overflow-hidden rounded-xl bg-[#fffaf3] shadow-[0_17px_45px_rgb(80_52_84/0.18)]">
+          <div
+            className="relative w-full shrink-0"
+            style={{ aspectRatio: bandArtRatio(layout.art) === 1 ? '1 / 1' : '4 / 3' }}
+          >
+            {illustration}
+          </div>
+          <div
+            className={cn(
+              'flex flex-1 items-center justify-center px-[8%] pt-[3%] pb-[6%]',
+              typography?.uppercase === false ? 'text-left' : 'text-center',
+            )}
+          >
+            {typography && pt ? (
+              <p
+                className={cn(storyFontClass(typography), 'leading-snug whitespace-pre-line')}
+                style={{
+                  fontSize: `clamp(0.7rem, ${(pt * 0.168).toFixed(2)}cqw, ${(pt / 13).toFixed(2)}rem)`,
+                }}
+              >
+                {page.text}
+              </p>
+            ) : (
+              text
+            )}
+          </div>
+          {badge && (
+            <div className="[&>span]:top-3 [&>span]:bottom-auto">
+              <Badge>{badge}</Badge>
+            </div>
+          )}
+        </div>
+      );
+    }
   }
 
   // Colorear (DECISIONS 283): el dibujo arriba y el texto en su franja blanca debajo, como en el
