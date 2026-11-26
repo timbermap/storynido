@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState, type SubmitEvent } from 'react';
+import { useEffect, useState, useSyncExternalStore, type SubmitEvent } from 'react';
 
 import type { Locale } from '@storynido/shared';
 
@@ -10,15 +10,21 @@ import { getPathname } from '@/i18n/navigation';
 import type { MultiFactorResolver } from 'firebase/auth';
 
 import {
+  appleSignInEnabled,
   authErrorKey,
   completeRedirectSignIn,
+  isEmbeddedBrowser,
   multiFactorResolver,
+  reportLoginView,
   resolveWithTotp,
   sendMagicLink,
   signInWithApple,
   signInWithGoogle,
   type AuthErrorKey,
 } from '@/lib/firebase/auth-actions';
+
+/** El tipo de navegador no cambia: no hay a qué suscribirse. */
+const noSubscribe = () => () => undefined;
 
 type Status =
   | { kind: 'idle' }
@@ -34,6 +40,16 @@ export function SignInPanel() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const busy = status.kind === 'busy';
+  // Navegador de Instagram, Facebook o TikTok: Google no deja entrar desde ahí (solo se sabe en el
+  // navegador, así que el primer pintado es el de siempre).
+  const embedded = useSyncExternalStore(
+    noSubscribe,
+    () => isEmbeddedBrowser(),
+    () => false,
+  );
+  useEffect(() => {
+    reportLoginView();
+  }, []);
 
   // Al volver de un login por redirección (navegadores integrados): termina acá, con el
   // segundo factor si la cuenta lo tiene.
@@ -90,7 +106,8 @@ export function SignInPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-3">
+      {embedded && <OpenInBrowser />}
+      <div className={embedded ? 'hidden' : 'grid gap-3'}>
         <Button
           variant="outline"
           size="lg"
@@ -99,17 +116,22 @@ export function SignInPanel() {
         >
           {t('google')}
         </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          disabled={busy}
-          onClick={() => void run(signInWithApple)}
-        >
-          {t('apple')}
-        </Button>
+        {appleSignInEnabled && (
+          <Button
+            variant="outline"
+            size="lg"
+            disabled={busy}
+            onClick={() => void run(signInWithApple)}
+          >
+            {t('apple')}
+          </Button>
+        )}
       </div>
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground" aria-hidden="true">
+      <div
+        className={embedded ? 'hidden' : 'flex items-center gap-3 text-xs text-muted-foreground'}
+        aria-hidden="true"
+      >
         <span className="h-px flex-1 bg-border" />
         {t('or')}
         <span className="h-px flex-1 bg-border" />
@@ -143,6 +165,51 @@ export function SignInPanel() {
           {t(`errors.${status.key}`)}
         </p>
       )}
+    </div>
+  );
+}
+
+/**
+ * Dentro de Instagram, Facebook o TikTok Google bloquea su login (no lo permite en navegadores
+ * integrados). Se ofrece abrir la página en el navegador del teléfono o entrar con el email.
+ */
+function OpenInBrowser() {
+  const t = useTranslations('Auth.inApp');
+  const [copied, setCopied] = useState(false);
+  const android = /Android/i.test(navigator.userAgent);
+  const href = window.location.href;
+  // En Android, un enlace intent abre la misma página en Chrome.
+  const chromeIntent = `intent://${href.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-peach bg-peach/30 p-4 text-sm" role="note">
+      <p className="font-semibold">{t('title')}</p>
+      <p className="text-muted-foreground">{android ? t('textAndroid') : t('textIos')}</p>
+      <div className="flex flex-wrap gap-2">
+        {android && (
+          <a
+            href={chromeIntent}
+            className="inline-flex min-h-11 items-center rounded-full bg-primary px-4 font-semibold text-primary-foreground"
+          >
+            {t('openChrome')}
+          </a>
+        )}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            void navigator.clipboard
+              .writeText(href)
+              .then(() => {
+                setCopied(true);
+              })
+              .catch(() => undefined);
+          }}
+        >
+          {copied ? t('copied') : t('copyLink')}
+        </Button>
+      </div>
+      <p className="text-muted-foreground">{t('orEmail')}</p>
     </div>
   );
 }

@@ -495,7 +495,16 @@
     },
     "mfaTitle": "Verificação em duas etapas",
     "mfaText": "Digite o código de 6 dígitos do seu app autenticador.",
-    "mfaVerify": "Verificar"
+    "mfaVerify": "Verificar",
+    "inApp": {
+      "title": "Você está no navegador de um app",
+      "textIos": "O Google não deixa entrar aqui. Toque em ··· ou no ícone de compartilhar e escolha «Abrir no navegador», ou copie o link e cole no Safari.",
+      "textAndroid": "O Google não deixa entrar aqui. Abra no Chrome para entrar com o Google.",
+      "openChrome": "Abrir no Chrome",
+      "copyLink": "Copiar link",
+      "copied": "Link copiado",
+      "orEmail": "Ou entre com seu email: funciona aqui mesmo."
+    }
   },
   "Account": {
     "title": "Minha conta",

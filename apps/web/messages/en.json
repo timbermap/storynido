@@ -495,7 +495,16 @@
     },
     "mfaTitle": "Two-step verification",
     "mfaText": "Enter the 6-digit code from your authenticator app.",
-    "mfaVerify": "Verify"
+    "mfaVerify": "Verify",
+    "inApp": {
+      "title": "You're in an app's browser",
+      "textIos": "Google doesn't allow sign-in here. Tap ··· or the share icon and choose \"Open in browser\", or copy the link and paste it in Safari.",
+      "textAndroid": "Google doesn't allow sign-in here. Open it in Chrome to continue with Google.",
+      "openChrome": "Open in Chrome",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "orEmail": "Or sign in with your email: it works right here."
+    }
   },
   "Account": {
     "title": "My account",
