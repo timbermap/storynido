@@ -3586,7 +3586,7 @@ Sebas, con la mesa 360 «libros siempre comprables»: el libro que la mesa no co
 - **Dónde está encendido:** en staging por ambiente. En producción está apagado hasta calibrar a los jueces contra los veredictos de Sebas; se enciende sin deploy con `aiConfig.judgeGate = 'on'` (y `'off'` lo apaga en cualquier ambiente).
 - **Queda para después:** que el freno rehaga solo las páginas que marcan los jueces antes de pedir revisión. Hoy los arreglos de la mesa no traen página, salvo los de continuidad.
 
-## 354 — Calibración con los votos de Sebas: texto sobre el dibujo y situaciones peligrosas (26 nov)
+## 355 — Calibración con los votos de Sebas: texto sobre el dibujo y situaciones peligrosas (26 nov)
 
 Sebas votó 10 libros del golden set (página de calibración, colección `calibracion`). Coincidió con la mesa en 6 de 10. El desacuerdo grave: un libro con 4 y «compra» de la mesa que Sebas no compraría por el texto encima del dibujo, su motivo en 5 de 10 notas. Otro «no» fue un biberón en la bañera.
 
