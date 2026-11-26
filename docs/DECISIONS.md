@@ -3585,3 +3585,12 @@ Sebas, con la mesa 360 «libros siempre comprables»: el libro que la mesa no co
 - **Tope de 24 h:** el vigía (cada 30 minutos) entrega como está el libro frenado que nadie miró en 24 h, con `judgeApproval.by = 'tope-24h'`, y avisa al equipo para ofrecer rehacerlo.
 - **Dónde está encendido:** en staging por ambiente. En producción está apagado hasta calibrar a los jueces contra los veredictos de Sebas; se enciende sin deploy con `aiConfig.judgeGate = 'on'` (y `'off'` lo apaga en cualquier ambiente).
 - **Queda para después:** que el freno rehaga solo las páginas que marcan los jueces antes de pedir revisión. Hoy los arreglos de la mesa no traen página, salvo los de continuidad.
+
+## 354 — Calibración con los votos de Sebas: texto sobre el dibujo y situaciones peligrosas (26 nov)
+
+Sebas votó 10 libros del golden set (página de calibración, colección `calibracion`). Coincidió con la mesa en 6 de 10. El desacuerdo grave: un libro con 4 y «compra» de la mesa que Sebas no compraría por el texto encima del dibujo, su motivo en 5 de 10 notas. Otro «no» fue un biberón en la bañera.
+
+- El juez comprador ahora marca `textOverArt` (páginas con texto sobre la escena, también sobre una franja con degradé, o texto enorme o en mayúsculas) y `unsafe` (situaciones peligrosas para un chico).
+- `calibrateBuyerReview` (judge-panel.ts) aplica la regla en código: con texto sobre el dibujo, comprador máximo 3 y nunca «compra»; con algo peligroso, «no» y máximo 2. Así el freno (353) los detiene.
+- El armado del texto en su propia franja lo resuelve otro trabajo (opción B); esto solo hace que los jueces lo vean como lo ve Sebas.
+- Antes de encender el freno en producción: volver a juzgar los 10 libros y pedir al menos 8 de 10 de coincidencia con Sebas.

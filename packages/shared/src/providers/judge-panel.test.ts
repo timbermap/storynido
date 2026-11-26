@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { AITextProvider, AiUsage, ImageData } from './ai';
 import {
+  calibrateBuyerReview,
   hasJudgePanel,
   JUDGE_GATE_CODE,
   judgeGate,
@@ -154,5 +155,32 @@ describe('judgeGate (DECISIONS 353)', () => {
     const message = judgeGateMessage(['mesa 2/5'], [{ area: 'dibujo', fix: 'x'.repeat(600) }]);
     expect(message.startsWith(`${JUDGE_GATE_CODE}: `)).toBe(true);
     expect(message.length).toBe(500);
+  });
+});
+
+describe('calibrateBuyerReview (votos de Sebas, 26 nov)', () => {
+  const base = { buy: 4, verdict: 'compra' as const, refund: [] as string[] };
+  it('texto encima del dibujo: máximo 3 y duda', () => {
+    const out = calibrateBuyerReview({ ...base, textOverArt: [1, 3], unsafe: [] });
+    expect(out.buy).toBe(3);
+    expect(out.verdict).toBe('duda');
+    expect(out.refund[0]).toContain('pág. 1, pág. 3');
+    expect(judgeGate({ score: out.buy, weakest: 'buyer', buyer: out } as never).pass).toBe(false);
+  });
+  it('situación peligrosa: no', () => {
+    const out = calibrateBuyerReview({
+      ...base,
+      textOverArt: [],
+      unsafe: ['pág. 2: biberón en la bañera'],
+    });
+    expect(out.verdict).toBe('no');
+    expect(out.buy).toBe(2);
+  });
+  it('sin problemas no cambia nada', () => {
+    expect(calibrateBuyerReview({ ...base, textOverArt: [], unsafe: [] })).toEqual({
+      ...base,
+      textOverArt: [],
+      unsafe: [],
+    });
   });
 });
