@@ -15,7 +15,7 @@ export type LineCopy = Record<HomeChannel, { chip: string; text: string }>;
 /** Foto de cada línea (la misma de su landing). */
 export const LINE_IMAGES: Record<HomeChannel, string> = {
   families: '/images/heroes/familias-pagina.webp',
-  events: '/images/heroes/kit-completo.webp',
+  events: '/images/formatos/landing-kit.webp',
   professionals: '/images/heroes/pro-mesa.webp',
 };
 

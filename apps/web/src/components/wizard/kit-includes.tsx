@@ -12,7 +12,8 @@ export const KIT_INCLUDES = ['invitation', 'decoration', 'keepsake', 'activities
 
 type KitPiece = (typeof KIT_INCLUDES)[number];
 
-/** Una imagen por pieza, hecha con lo que entregó un kit real de staging (DECISIONS 248). */
+/** Una imagen por pieza, hecha con lo que entregó un kit real de staging (DECISIONS 248). El cuento
+ * de recuerdo se muestra en un celular: el kit es 100 % digital, sin libritos impresos. */
 const IMAGES: Record<KitPiece, string> = {
   invitation: '/images/formatos/kit-invitacion.webp',
   decoration: '/images/formatos/kit-decoracion.webp',

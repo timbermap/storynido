@@ -1538,7 +1538,7 @@
       "includes": {
         "invitation": "Invitación para WhatsApp y PDF",
         "decoration": "Decoración: etiquetas, stickers y agradecimiento",
-        "keepsake": "Un cuento de recuerdo por invitado, el mismo para todos",
+        "keepsake": "Un cuento de recuerdo digital por invitado, el mismo para todos",
         "activities": "Actividades para imprimir"
       },
       "dedication": "Dedicatoria del cuento de recuerdo (opcional)",
@@ -1552,7 +1552,7 @@
       "pieceAlt": {
         "invitation": "La invitación del cumpleaños con el personaje",
         "decoration": "Una hoja de stickers redondos con el personaje y su nombre",
-        "keepsake": "La portada del cuento de recuerdo",
+        "keepsake": "El cuento de recuerdo abierto en un celular",
         "activities": "Un laberinto para imprimir con el personaje"
       }
     },

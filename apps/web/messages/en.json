@@ -1538,7 +1538,7 @@
       "includes": {
         "invitation": "WhatsApp and PDF invitation",
         "decoration": "Decorations: tags, stickers and thank-you card",
-        "keepsake": "A keepsake story for each guest, the same for everyone",
+        "keepsake": "A digital keepsake story for each guest, the same for everyone",
         "activities": "Printable activities"
       },
       "dedication": "Keepsake story dedication (optional)",
@@ -1552,7 +1552,7 @@
       "pieceAlt": {
         "invitation": "The birthday invitation with the character",
         "decoration": "A sheet of round stickers with the character and name",
-        "keepsake": "The cover of the keepsake story",
+        "keepsake": "The keepsake story open on a phone",
         "activities": "A printable maze with the character"
       }
     },
