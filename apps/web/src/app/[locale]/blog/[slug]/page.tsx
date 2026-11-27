@@ -9,8 +9,8 @@ import type { Locale } from '@storynido/shared';
 import { FollowUs } from '@/components/follow-us';
 import { JsonLd } from '@/components/json-ld';
 import { ShareButton } from '@/components/share-button';
-import { getPost } from '@/content/blog';
-import { Link, getPathname } from '@/i18n/navigation';
+import { getPost, postLocale } from '@/content/blog';
+import { Link, getPathname, permanentRedirect } from '@/i18n/navigation';
 import { brand } from '@/lib/brand';
 import { formatDate } from '@/lib/format';
 import { getDisplayCountry } from '@/lib/server/request-context';
@@ -51,7 +51,15 @@ export default async function BlogPostPage({ params }: Props) {
     getTranslations('Footer'),
     getDisplayCountry(locale),
   ]);
-  if (!post) notFound();
+  if (!post) {
+    // El artículo existe en otro idioma (/es/blog/<slug-en-inglés>): se va a ese.
+    const other = postLocale(slug);
+    if (!other) notFound();
+    return permanentRedirect({
+      href: { pathname: '/blog/[slug]', params: { slug } },
+      locale: other,
+    });
+  }
   const Content = post.default;
 
   return (

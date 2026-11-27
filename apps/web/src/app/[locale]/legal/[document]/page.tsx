@@ -6,9 +6,10 @@ import type { Locale } from '@storynido/shared';
 
 import { Markdown } from '@/components/markdown';
 import { ShipToSelect } from '@/components/stories/ship-to-select';
+import { permanentRedirect } from '@/i18n/navigation';
 import { countryName } from '@/lib/country-names';
 import { formatDate } from '@/lib/format';
-import { LEGAL_SLUGS, legalDocumentFromSlug } from '@/lib/legal';
+import { LEGAL_SLUGS, legalDocumentFromAnySlug, legalDocumentFromSlug } from '@/lib/legal';
 import { localizedAlternates } from '@/lib/seo';
 import { getActiveCountries, getContent, getOffer } from '@/lib/server/api';
 import { getDisplayCountry } from '@/lib/server/request-context';
@@ -37,7 +38,15 @@ export default async function LegalPage({ params }: Props) {
   const { locale: rawLocale, document } = await params;
   const locale = rawLocale as Locale;
   const doc = legalDocumentFromSlug(locale, document);
-  if (!doc) notFound();
+  if (!doc) {
+    // Slug de otro idioma (/es/legal/privacy): al mismo documento en el idioma de la URL.
+    const other = legalDocumentFromAnySlug(document);
+    if (!other) notFound();
+    return permanentRedirect({
+      href: { pathname: '/legal/[document]', params: { document: LEGAL_SLUGS[locale][other] } },
+      locale,
+    });
+  }
 
   const [content, t, display] = await Promise.all([
     getContent(doc, locale),

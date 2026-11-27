@@ -32,3 +32,15 @@ export const LEGAL_SLUGS: Record<Locale, Record<LegalDocument, string>> = {
 export function legalDocumentFromSlug(locale: Locale, slug: string): LegalDocument | null {
   return LEGAL_DOCUMENTS.find((doc) => LEGAL_SLUGS[locale][doc] === slug) ?? null;
 }
+
+/**
+ * El documento de un slug de cualquier idioma (/es/legal/privacy, /en/legal/termos...). Google
+ * llegó a esas mezclas y daban 404: la página redirige al slug del idioma de la URL.
+ */
+export function legalDocumentFromAnySlug(slug: string): LegalDocument | null {
+  for (const slugs of Object.values(LEGAL_SLUGS)) {
+    const doc = LEGAL_DOCUMENTS.find((key) => slugs[key] === slug);
+    if (doc) return doc;
+  }
+  return null;
+}
