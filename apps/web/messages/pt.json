@@ -1538,7 +1538,7 @@
       "includes": {
         "invitation": "Convite para WhatsApp e PDF",
         "decoration": "Decoração: etiquetas, adesivos e agradecimento",
-        "keepsake": "Uma história de lembrança por convidado, a mesma para todos",
+        "keepsake": "Uma história de lembrança digital por convidado, a mesma para todos",
         "activities": "Atividades para imprimir"
       },
       "dedication": "Dedicatória da história de lembrança (opcional)",
@@ -1552,7 +1552,7 @@
       "pieceAlt": {
         "invitation": "O convite de aniversário com o personagem",
         "decoration": "Uma folha de adesivos redondos com o personagem e o nome",
-        "keepsake": "A capa da história de lembrança",
+        "keepsake": "A história de lembrança aberta num celular",
         "activities": "Um labirinto para imprimir com o personagem"
       }
     },
