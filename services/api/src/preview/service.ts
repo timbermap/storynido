@@ -395,6 +395,11 @@ export class PreviewService {
         stage,
         title: preview.title,
         coverUrl: preview.cover ? await url(shown(preview.cover)) : null,
+        // La invitación gratis de WhatsApp lleva la portada sin mosaico: la marca va en la franja.
+        invitationArtUrl:
+          book.channel === 'events' && preview.cover?.imagePath
+            ? await url(preview.cover.imagePath)
+            : null,
         character: preview.character
           ? {
               imageUrl: await url(shown(preview.character)),

@@ -338,7 +338,12 @@
         "afterKit": "Anotado. Después de pagar el kit, desde tu pedido creás su libro con el mismo personaje.",
         "shareText": "Estamos preparando la fiesta de {name}. Si querés regalarle un cuento donde sea protagonista, podés crearlo aquí:"
       },
-      "differencesEdit": "Podés editar los textos y volver a cambiar la temática o la foto."
+      "differencesEdit": "Podés editar los textos y volver a cambiar la temática o la foto.",
+      "free": {
+        "lead": "Mandala ya por WhatsApp, gratis: lleva una franja de StoryNido abajo. Al pagar, sale sin la franja.",
+        "error": "No pudimos armar la imagen. Probá de nuevo en un momento.",
+        "brand": "Invitación gratis · hacé la tuya en storynido.com"
+      }
     },
     "focus": {
       "title": "¿Qué querés trabajar?",
