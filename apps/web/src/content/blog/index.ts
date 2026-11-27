@@ -62,3 +62,12 @@ export async function getPost(
 export function postSlugs(locale: Locale): string[] {
   return Object.keys(POSTS[locale]);
 }
+
+/**
+ * El idioma en el que existe un artículo (cada uno está en un solo idioma). Sirve para redirigir
+ * /es/blog/<slug-en-portugués> al artículo real en vez de dar 404.
+ */
+export function postLocale(slug: string): Locale | null {
+  const found = (Object.keys(POSTS) as Locale[]).find((locale) => slug in POSTS[locale]);
+  return found ?? null;
+}
