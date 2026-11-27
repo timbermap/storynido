@@ -69,7 +69,7 @@ test('Celebraciones: de la temática de la landing a la muestra y el pago del ki
   const kit = page.locator('label', { hasText: 'Kit digital completo' });
   await expect(kit.locator('input')).toBeChecked();
   await expect(kit).toContainText(/24[.,]99/);
-  await expect(page.locator('label', { hasText: 'Solo la invitación' })).toContainText(/9[.,]99/);
+  await expect(page.locator('label', { hasText: 'Invitación sin marca' })).toContainText(/9[.,]99/);
   await page.locator('#kit-dedication').fill('Gracias por venir a mi fiesta.');
   await page.locator('label', { hasText: 'Tierno' }).click();
   await expectAccessible(page);
@@ -151,7 +151,7 @@ test('Celebraciones: solo la invitación llega así al pago', async ({ page, isM
   await expect(tones).toContainText('Un día muy especial: quiero que estés en mi bautismo');
   await expect(tones).not.toContainText(/cumple|Aventurero/);
   await shot(page, '4-tono-bautismo', isMobile);
-  await page.locator('label', { hasText: 'Solo la invitación' }).click();
+  await page.locator('label', { hasText: 'Invitación sin marca' }).click();
   await expect(page.locator('#kit-dedication')).toHaveCount(0);
   await page.getByRole('button', { name: 'Continuar a mi muestra' }).click();
   await heading(page, '¡Todo listo para la vista previa!');
@@ -160,7 +160,7 @@ test('Celebraciones: solo la invitación llega así al pago', async ({ page, isM
   await expect(page.getByRole('link', { name: 'Quiero la invitación' })).toBeVisible({
     timeout: 120_000,
   });
-  await expect(page.locator('body')).toContainText('Solo la invitación');
+  await expect(page.locator('body')).toContainText('Invitación sin marca y mini cuento');
   // Solo la invitación: lo que trae es eso, sin stickers ni actividades.
   await expect(page.getByRole('heading', { name: 'Qué trae tu invitación' })).toBeVisible();
   await expect(page.locator('body')).not.toContainText('Actividades para imprimir');

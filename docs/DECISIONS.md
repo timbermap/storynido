@@ -3605,3 +3605,10 @@ Sebas votó 10 libros del golden set (página de calibración, colección `calib
 - `calibrateBuyerReview` (judge-panel.ts) aplica la regla en código: con texto sobre el dibujo, comprador máximo 3 y nunca «compra»; con algo peligroso, «no» y máximo 2. Así el freno (353) los detiene.
 - El armado del texto en su propia franja lo resuelve otro trabajo (opción B); esto solo hace que los jueces lo vean como lo ve Sebas.
 - Antes de encender el freno en producción: volver a juzgar los 10 libros y pedir al menos 8 de 10 de coincidencia con Sebas.
+
+## 356 — La invitación de WhatsApp es gratis con una franja de StoryNido; al pagar, sin marca (27 nov)
+
+- **Qué pasaba:** en la muestra de Celebraciones la invitación se veía pero no se podía mandar; la imagen de WhatsApp (DECISIONS 168) salía solo al pagar (invitación sola 10,99, kit 25,99).
+- **Decisión de Sebas (27 nov, con la mesa: marketing, adquisición, producto, legales y usuario eventos):** la invitación es el gancho gratis. Cada una llega a 15 a 30 familias con chicos de esa edad. En vez del mosaico «StoryNido ✦» sobre la cara (los padres no lo mandan al grupo o lo recortan), lleva abajo una **franja de marca** coral (`#A33F33`) con la fecha, la hora y el lugar adentro y «✦ StoryNido · Invitación gratis · creá la tuya en storynido.com»: recortar la marca es perder los datos de la fiesta.
+- **Cómo:** la API devuelve `preview.invitationArtUrl` (portada limpia, solo Celebraciones). El navegador arma la imagen 1080×1350 en un canvas (`free-invitation.ts`, sin IA ni servidor; el bucket de ilustraciones ya tiene CORS para la web) y en el celular abre el menú de compartir con la imagen; en la compu la descarga. Va solo el dibujo, nunca la foto ni el apellido.
+- **Al pagar:** la invitación del kit (PNG y PDF del worker) sigue saliendo sin franja. «Solo la invitación» pasa a llamarse «Invitación sin marca» (con el mini cuento, como antes); la landing dice que la invitación con franja es gratis.

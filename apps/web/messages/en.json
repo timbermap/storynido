@@ -1532,8 +1532,8 @@
       "next": "Continue to my sample",
       "recommended": "Recommended",
       "fullKit": "Full digital kit",
-      "invitationOnly": "Just the invitation",
-      "invitationOnlyText": "WhatsApp image and printable PDF, with their character.",
+      "invitationOnly": "Unbranded invitation",
+      "invitationOnlyText": "Without the StoryNido band: WhatsApp image and printable PDF, plus the mini story.",
       "copiesNote": "The number of copies you print doesn’t change the price.",
       "includes": {
         "invitation": "WhatsApp and PDF invitation",
@@ -1561,7 +1561,7 @@
       "keepsakeTitle": "Mini keepsake story · {pages} pages",
       "turning": "{name} is turning {age}!",
       "priceKit": "Full digital kit: {price}",
-      "priceInvitation": "Just the invitation: {price}",
+      "priceInvitation": "Unbranded invitation and mini story: {price}",
       "book": {
         "title": "And a book just for {name}?",
         "text": "The full Families story, with its own plot and {pages} pages, for them to keep. Bought separately, after the kit.",
@@ -1578,7 +1578,17 @@
         "shareText": "We’re getting {name}’s party ready. If you’d like to give a story that stars them, you can create it here:"
       },
       "differencesEdit": "You can edit the text and change the theme or the photo again.",
-      "keepsakeText": "The same story for every guest."
+      "keepsakeText": "The same story for every guest.",
+      "free": {
+        "lead": "Send it on WhatsApp now, for free: it has a StoryNido band at the bottom. Once you pay, it comes without the band.",
+        "share": "Send on WhatsApp",
+        "download": "Download image",
+        "error": "We couldn't create the image. Please try again in a moment.",
+        "when": "When",
+        "time": "Time",
+        "where": "Where",
+        "brand": "Free invitation · make yours at storynido.com"
+      }
     },
     "focus": {
       "title": "What do you want to work on?",
@@ -1713,7 +1723,7 @@
         "badge": "Sample photo of the kit"
       },
       "productsTitle": "Four gifts, one star",
-      "productsSubtitle": "Two ways to buy: the invitation alone, or the complete digital kit, which already includes the invitation and a story for every guest. The birthday child's book is bought separately.",
+      "productsSubtitle": "The WhatsApp invitation is free, with a StoryNido band. To get it unbranded there are two ways: the invitation alone, or the complete digital kit, which includes it along with a story for every guest. The birthday child's book is bought separately.",
       "products": {
         "1": {
           "name": "The invitation",

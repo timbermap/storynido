@@ -31,7 +31,7 @@ import { bookPrices } from '@/lib/offer';
 
 import { CharacterReview } from './character-review';
 import { KitIncludes } from './kit-includes';
-import { BirthdayBookOffer, InvitationPreview } from './party-preview';
+import { BirthdayBookOffer, FreeInvitationShare, InvitationPreview } from './party-preview';
 import { cn } from '@/lib/utils';
 
 import { previewErrorKey, withOneRetry } from './preview-errors';
@@ -532,6 +532,13 @@ export function PreviewPanel({
                   imageUrl={data.coverUrl ?? data.character?.imageUrl ?? null}
                 />
               </div>
+              {data.invitationArtUrl && !data.stale && (
+                <FreeInvitationShare
+                  book={book}
+                  childName={childName}
+                  artUrl={data.invitationArtUrl}
+                />
+              )}
             </section>
           )}
           <div className="grid gap-4 [&>*]:min-w-0">

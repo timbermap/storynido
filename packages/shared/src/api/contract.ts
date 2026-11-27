@@ -696,6 +696,11 @@ export const publicPreviewSchema = z.object({
       stage: z.enum(['character', 'complete']),
       title: z.string(),
       coverUrl: z.string().nullable(),
+      /**
+       * Celebraciones: la portada limpia, para la invitación gratis de WhatsApp que arma el navegador
+       * con la franja de StoryNido (al pagar sale sin franja). Falta en las otras líneas.
+       */
+      invitationArtUrl: z.string().nullable().optional(),
       character: z
         .object({
           imageUrl: z.string(),

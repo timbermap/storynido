@@ -1532,8 +1532,8 @@
       "next": "Continuar para a minha amostra",
       "recommended": "Recomendado",
       "fullKit": "Kit digital completo",
-      "invitationOnly": "Só o convite",
-      "invitationOnlyText": "Imagem para WhatsApp e PDF para imprimir, com o personagem.",
+      "invitationOnly": "Convite sem marca",
+      "invitationOnlyText": "Sem a faixa da StoryNido: imagem para WhatsApp e PDF para imprimir, com a mini história.",
       "copiesNote": "As cópias que você imprimir não mudam o preço.",
       "includes": {
         "invitation": "Convite para WhatsApp e PDF",
@@ -1561,7 +1561,7 @@
       "keepsakeTitle": "Mini história de lembrança · {pages} páginas",
       "turning": "{name} faz {age}!",
       "priceKit": "Kit digital completo: {price}",
-      "priceInvitation": "Só o convite: {price}",
+      "priceInvitation": "Convite sem marca e mini história: {price}",
       "book": {
         "title": "E um livro só para {name}?",
         "text": "A história completa de Famílias, com enredo próprio e {pages} páginas, para guardar. Comprado à parte, depois do kit.",
@@ -1578,7 +1578,17 @@
         "shareText": "Estamos preparando a festa de {name}. Se você quiser dar uma história em que seja protagonista, pode criar aqui:"
       },
       "differencesEdit": "Você pode editar os textos e mudar de novo o tema ou a foto.",
-      "keepsakeText": "A mesma história para cada convidado."
+      "keepsakeText": "A mesma história para cada convidado.",
+      "free": {
+        "lead": "Envie já pelo WhatsApp, grátis: ele leva uma faixa da StoryNido embaixo. Depois de pagar, sai sem a faixa.",
+        "share": "Enviar pelo WhatsApp",
+        "download": "Baixar imagem",
+        "error": "Não conseguimos montar a imagem. Tente de novo em instantes.",
+        "when": "Quando",
+        "time": "Horário",
+        "where": "Onde",
+        "brand": "Convite grátis · crie o seu em storynido.com"
+      }
     },
     "focus": {
       "title": "O que você quer trabalhar?",
@@ -1713,7 +1723,7 @@
         "badge": "Foto de exemplo do kit"
       },
       "productsTitle": "Quatro presentes, um mesmo protagonista",
-      "productsSubtitle": "Há duas formas de comprar: só o convite, ou o kit digital completo, que já inclui o convite e uma história para cada convidado. O livro do aniversariante é comprado à parte.",
+      "productsSubtitle": "O convite para WhatsApp é grátis, com uma faixa da StoryNido. Para tê-lo sem marca há duas formas: só o convite, ou o kit digital completo, que já o inclui junto com uma história para cada convidado. O livro do aniversariante é comprado à parte.",
       "products": {
         "1": {
           "name": "O convite",
