@@ -7,6 +7,8 @@
  *   pnpm showcase:import eval-reports/pedidos-…               # solo lista qué califica
  *   pnpm showcase:import eval-reports/pedidos-… --yes         # sube a storynido-staging
  *   pnpm showcase:import eval-reports/pedidos-… --only pro-sonido-3 --project storynido-prod --yes
+ *   pnpm showcase:import eval-reports/pedidos-… --yes --para-revisar  # también los que no califican,
+ *     para mirarlos en el admin con sus motivos (no se pueden aprobar)
  *
  * Solo chicos inventados del golden set: nunca pedidos reales ni fotos. No cuesta IA.
  * Credenciales: gcloud con la configuración "storynido".
@@ -32,6 +34,11 @@ const { values, positionals } = parseArgs({
     project: { type: 'string', default: 'storynido-staging' },
     only: { type: 'string' },
     yes: { type: 'boolean', default: false },
+    /**
+     * Sube también los que no califican, marcados como tales: así Sebas los mira en el admin
+     * (con los motivos) aunque no se puedan aprobar ni publicar.
+     */
+    'para-revisar': { type: 'boolean', default: false },
   },
 });
 
@@ -97,6 +104,19 @@ for (const { tag, row, reasons } of candidates) {
   );
 }
 const ready = candidates.filter((item) => item.reasons.length === 0);
+// Con imágenes completas: lo que se sube con --para-revisar (sin páginas no hay nada que mirar).
+const toUpload = values['para-revisar']
+  ? candidates.filter(
+      // Nunca un libro fuera del golden set o que nombra a una persona real, ni para revisar.
+      (item) =>
+        !item.reasons.some(
+          (reason) =>
+            reason.startsWith('faltan ') ||
+            reason === 'no es del golden set' ||
+            reason.includes('persona real'),
+        ),
+    )
+  : ready;
 console.log(`\n${String(ready.length)} de ${String(candidates.length)} califican.`);
 if (!values.yes) {
   console.log('Nada subido. Con --yes se suben como «por aprobar» al admin.');
@@ -146,7 +166,7 @@ async function upload(name: string, file: string) {
   if (!response.ok) throw new Error(`Storage ${String(response.status)}: ${await response.text()}`);
 }
 
-for (const { row, tag, files } of ready) {
+for (const { row, tag, files, reasons } of toUpload) {
   const testCase = CASES.find((item) => item.id === row.id);
   const panel = row.panel;
   if (!testCase || !panel) continue;
@@ -185,8 +205,8 @@ for (const { row, tag, files } of ready) {
       loved: panel.buyer?.loved ?? [],
     },
     source: { report, caseId: row.id, run: row.run ?? 1, arm: row.arm ?? null },
-    eligible: true,
-    reasons: [],
+    eligible: reasons.length === 0,
+    reasons,
     status: 'pending',
     reviewedBy: null,
     reviewedAt: null,
