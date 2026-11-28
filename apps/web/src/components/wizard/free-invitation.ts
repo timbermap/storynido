@@ -1,5 +1,5 @@
 /**
- * La invitación gratis para WhatsApp (DECISIONS 359): la misma imagen 4:5 de 1080×1350 que trae el
+ * La invitación gratis para WhatsApp (DECISIONS 356): la misma imagen 4:5 de 1080×1350 que trae el
  * kit, armada en el navegador con la portada aprobada. Abajo lleva una franja de StoryNido con la
  * fecha, la hora y el lugar adentro, así no se puede recortar la marca sin perder los datos de la
  * fiesta. Al pagar, la invitación del kit sale limpia (la arma el worker, sin franja).
