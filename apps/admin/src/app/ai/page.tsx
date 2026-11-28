@@ -173,6 +173,23 @@ export default function AiPage() {
             />
             Ilustrar la muestra pide cuenta (la etapa 1 sigue sin cuenta)
           </label>
+          <Field
+            label="Freno de la mesa de jueces"
+            hint="Encendido, un libro con nota menor a 4 o que el comprador no compraría queda en revisión (Entregar igual o Regenerar; sale solo a las 24 h)."
+          >
+            <select
+              className={inputClass}
+              disabled={!canEdit}
+              value={value.judgeGate}
+              onChange={(event) => {
+                set('judgeGate', event.target.value as Editable['judgeGate']);
+              }}
+            >
+              <option value="auto">Según el ambiente (encendido en staging)</option>
+              <option value="on">Encendido</option>
+              <option value="off">Apagado</option>
+            </select>
+          </Field>
         </Card>
         {canEdit && (
           <div className="flex items-center gap-3">

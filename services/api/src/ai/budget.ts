@@ -24,6 +24,7 @@ export const AI_CONFIG_DEFAULTS: Omit<AiConfig, 'updatedAt' | 'updatedBy'> = {
   maxPreviewsPerBook: 2,
   illustrationsRequireAccount: true,
   reviewPreviews: false,
+  judgeGate: 'auto',
   dailyBudgetUsd: 5,
   budgetAlertPercent: 80,
 };

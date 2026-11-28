@@ -3627,3 +3627,4 @@ La ronda de 6 libros con el armado band (US$3,93) mostró que el texto ya no cae
 - La letra demasiado grande va a `textTooBig` y solo se anota en los reembolsos. Las mayúsculas son elección editorial para lectores chicos y el juez no las cuenta.
 - Comprador y continuidad (muchas imágenes) usan el tiempo largo con un reintento, y un corte de red («fetch failed») se reintenta hasta 3 veces: en la ronda se perdieron 5 juicios por eso.
 - Siguen reales y fuera de este cambio: texto pintado dentro del dibujo que `no_text_in_image` no detectó (4 de 18 páginas) y dos situaciones peligrosas (borde de piscina vacía, irse de la mano con una desconocida).
+- El freno se maneja desde Admin → IA («Freno de la mesa de jueces»: según el ambiente, encendido o apagado), con auditoría como el resto de la configuración de IA. Sebas pidió encenderlo en producción el 28 nov con estos arreglos.
