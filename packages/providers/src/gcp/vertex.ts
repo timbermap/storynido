@@ -256,6 +256,12 @@ export class VertexClient {
           timedOut = true;
           continue;
         }
+        // Corte de red («fetch failed»): hasta 3 intentos con espera, como un 5xx (ronda del 27 nov).
+        const isNetwork = error instanceof TypeError;
+        if (isNetwork && attempt < 3) {
+          await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** attempt));
+          continue;
+        }
         throw error;
       }
       if (res.ok) {
@@ -610,6 +616,7 @@ const BUYER_REVIEW_SCHEMA = {
     sharePage: { type: 'INTEGER' },
     shareWhy: { type: 'STRING' },
     textOverArt: { type: 'ARRAY', items: { type: 'INTEGER' } },
+    textTooBig: { type: 'ARRAY', items: { type: 'INTEGER' } },
     unsafe: { type: 'ARRAY', items: { type: 'STRING' } },
   },
   required: [
@@ -625,6 +632,7 @@ const BUYER_REVIEW_SCHEMA = {
     'sharePage',
     'shareWhy',
     'textOverArt',
+    'textTooBig',
     'unsafe',
   ],
 };
@@ -1325,7 +1333,8 @@ incoherent clothing or accessories (or clothes that do not fit the place, weathe
 who look nothing like the protagonist's family, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
 below (a recurring object, place or outfit drawn differently is a repair), a hug, embrace, kiss, lap, carrying, lying together or hands on another person's body
 (except affection between the protagonist and their own parent, grandparent or sibling when the page text tells it: a hug, holding hands, being carried, a kiss on the forehead or cheek, never lying in bed together), bare midriffs or revealing clothes, cropped heads, a child upside down, in a backbend, bridge, handstand or cartwheel, or framed from a low angle or in close-up on the body (swimwear included), and any letters or
-words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks); the hairstyle
+words drawn inside the image (textInImage), in any language, including a caption strip, banner, label or block of text painted
+along the top or bottom of the picture. Check each essential trait below against what you observe (continuityChecks); the hairstyle
 counts as a trait: braids, a ponytail, buns or a fringe on the reference sheet must be drawn the same (loose hair instead of braids is a repair).
 Then read the page text as the parent will, sentence by sentence, and compare it with the picture: every person, animal and object
 the text says is here now must be visible (a dog that barks next to the child, the rubber duck in the bath, the friend who wears glasses); the
@@ -1427,18 +1436,29 @@ Answer in Spanish, from your own point of view as this customer:
 - shareWhy: in one short sentence, why that page (or why none) makes people want one for their own child.
 - textOverArt: the pages (0 = the cover title is fine, list 0 only if the cover title covers a face) where the text sits ON TOP of the
   drawing: over the scene, over a character or object, or on a fade, gradient or translucent band laid over the scene. Text on its own
-  clear area (a plain margin, a solid band or a white page next to the picture) is fine. Also list pages whose text is far too big for a
-  picture book page or is all in capital letters. Real parents ask for refunds over this, so look at every page. Empty if none.
+  clear area (a plain paper margin or strip below the picture, or a page next to it) is fine and must NOT be listed. Only the position
+  counts here, not the size or the letters. Real parents ask for refunds over this, so look at every page. Empty if none.${
+    request.textOwnBand
+      ? '\n  In this book the text is printed on its own paper strip below each picture by design.'
+      : ''
+  }
+- textTooBig: the pages whose letters are clearly too big for the page. Capital letters are a deliberate choice for early readers of
+  this age, so never list a page only because it is in capitals. Empty if none.
 - unsafe: things in the drawings or the text that are dangerous or wrong for a young child and a parent would reject (a baby bottle in
   the bathtub, a child alone near water, fire or a road, choking hazards for a baby, medicine as a toy, ...). Short, with the page. Empty if none.`,
     });
-    const { response, usage } = await this.client.generate(this.model, parts, {
-      temperature: 0,
-      responseMimeType: 'application/json',
-      responseSchema: BUYER_REVIEW_SCHEMA,
-    });
+    const { response, usage } = await this.client.generate(
+      this.model,
+      parts,
+      {
+        temperature: 0,
+        responseMimeType: 'application/json',
+        responseSchema: BUYER_REVIEW_SCHEMA,
+      },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
+    );
     const review = parseJson(response, 'juez comprador') as Omit<BuyerReview, 'usage'>;
-    return { ...calibrateBuyerReview(review), usage };
+    return { ...calibrateBuyerReview(review, { textOwnBand: request.textOwnBand }), usage };
   }
 
   /**
@@ -1476,11 +1496,16 @@ Answer in Spanish:
   object) and what changed (short). Empty if none.
 - fixes: ${FIXES_INSTRUCTION}.`,
     });
-    const { response, usage } = await this.client.generate(this.model, parts, {
-      temperature: 0,
-      responseMimeType: 'application/json',
-      responseSchema: CONTINUITY_REVIEW_SCHEMA,
-    });
+    const { response, usage } = await this.client.generate(
+      this.model,
+      parts,
+      {
+        temperature: 0,
+        responseMimeType: 'application/json',
+        responseSchema: CONTINUITY_REVIEW_SCHEMA,
+      },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
+    );
     const review = parseJson(response, 'juez de continuidad') as Omit<ContinuityReview, 'usage'>;
     return { ...review, usage };
   }

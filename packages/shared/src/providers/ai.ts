@@ -543,6 +543,11 @@ export interface BuyerReviewRequest {
   cover: ImageData;
   /** Páginas armadas (ilustración con el texto y el papel fundido), como las ve el cliente. */
   pages: ImageData[];
+  /**
+   * El texto va por diseño en su propia franja de papel o en la página de enfrente (armado band o
+   * facing, DECISIONS 354): el texto no puede tapar el dibujo y el juez no lo marca.
+   */
+  textOwnBand?: boolean;
 }
 
 export interface BuyerReview {
@@ -563,6 +568,8 @@ export interface BuyerReview {
   shareWhy: string;
   /** Páginas (0 = tapa) donde el texto tapa el dibujo o es demasiado grande (calibración 26 nov). */
   textOverArt?: number[];
+  /** Páginas con letra demasiado grande para la página (solo se anota, no baja la nota). */
+  textTooBig?: number[];
   /** Situaciones peligrosas o raras para un chico que se ven o se leen (biberón en la bañera, ...). */
   unsafe?: string[];
   usage: AiUsage;

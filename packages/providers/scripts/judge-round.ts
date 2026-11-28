@@ -26,6 +26,7 @@ import {
   storyTypography,
   type ImageData,
   type Panel,
+  textOwnBandLayout,
 } from '@storynido/shared';
 
 import {
@@ -138,6 +139,7 @@ for (const row of rows) {
   const typography =
     plan.ageBand && plan.textBand ? storyTypography(plan.ageBand, plan.textBand, 'es') : null;
   const composed: ImageData[] = [];
+  let textOwnBand = true;
   const drawn: ImageData[] = [];
   for (const [index, pageText] of row.pages.entries()) {
     const img = finalImage(tag, `pagina-${String(index + 1)}`);
@@ -151,6 +153,7 @@ for (const row of rows) {
       contentType: 'story',
     });
     drawn.push(img);
+    if (!textOwnBandLayout(layout.kind)) textOwnBand = false;
     composed.push({
       bytes: await composePage(img.bytes, layout, pageText, typography),
       mimeType: 'image/webp',
@@ -171,6 +174,7 @@ for (const row of rows) {
         style: `${style.name.es}: ${style.promptModifier.slice(0, 200)}`,
         cover,
         composed,
+        textOwnBand: composed.length > 0 && textOwnBand,
         drawn,
         reference,
       },

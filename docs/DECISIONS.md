@@ -3618,3 +3618,13 @@ Sebas votó 10 libros del golden set (página de calibración, colección `calib
 - **Qué pasaba:** Search Console (27 nov) marcaba 10 páginas «no encontradas»: `/es/legal/privacy`, `/en/legal/termos`, `/pt/legal/privacy`, `/es/blog/personalized-books-and-reading`, `/blog/livros-personalizados-e-leitura`… Son slugs válidos en un idioma pegados a otro (los rastreadores sin idioma van a `/es`).
 - **Cómo:** la página legal busca el slug en todos los idiomas y redirige (308) al mismo documento con el slug del idioma de la URL; el artículo del blog redirige al idioma donde existe (cada uno está en uno solo). Un slug que no existe en ningún idioma sigue dando 404.
 - **Lo demás del informe es normal:** páginas con `?lesson=` / `?line=` (canónica sin parámetros), `/crear` y `/ingresar` con noindex, `/mis-cuentos`, admin y staging bloqueados en robots, y redirecciones de rutas sin idioma o de `www`/`http`.
+
+## 358 — Ronda band del 27 nov: el comprador no marca texto encima cuando va en su franja (27 nov)
+
+La ronda de 6 libros con el armado band (US$3,93) mostró que el texto ya no cae sobre el dibujo en ninguna de las 18 páginas, pero el comprador igual marcaba «texto encima» en todas y bajaba la nota: la regla de 355 mezclaba posición con tamaño y mayúsculas.
+
+- `textOverArt` ahora es solo posición. Con armado band o facing (`textOwnBandLayout`), la mesa recibe `textOwnBand` y `calibrateBuyerReview` descarta esa marca: el armado no deja que el texto tape el dibujo.
+- La letra demasiado grande va a `textTooBig` y solo se anota en los reembolsos. Las mayúsculas son elección editorial para lectores chicos y el juez no las cuenta.
+- Comprador y continuidad (muchas imágenes) usan el tiempo largo con un reintento, y un corte de red («fetch failed») se reintenta hasta 3 veces: en la ronda se perdieron 5 juicios por eso.
+- Siguen reales y fuera de este cambio: texto pintado dentro del dibujo que `no_text_in_image` no detectó (4 de 18 páginas) y dos situaciones peligrosas (borde de piscina vacía, irse de la mano con una desconocida).
+- El freno se maneja desde Admin → IA («Freno de la mesa de jueces»: según el ambiente, encendido o apagado), con auditoría como el resto de la configuración de IA. Sebas pidió encenderlo en producción el 28 nov con estos arreglos.

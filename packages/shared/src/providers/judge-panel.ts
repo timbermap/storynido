@@ -44,6 +44,8 @@ export interface PanelInput {
   cover: ImageData;
   /** Páginas armadas (dibujo con texto), como las ve el cliente. */
   composed: ImageData[];
+  /** Todas las páginas armadas llevan el texto en su propia franja o enfrente (band o facing). */
+  textOwnBand?: boolean;
   /** Las mismas ilustraciones sin texto, para la continuidad. */
   drawn: ImageData[];
   /** Lámina del protagonista; sin ella no corre la continuidad. */
@@ -99,6 +101,7 @@ export async function runPanel(
       texts: input.texts,
       cover: input.cover,
       pages: input.composed,
+      textOwnBand: input.textOwnBand,
     }),
     child: text.reviewAsChildListener?.({
       age: input.age,
@@ -254,6 +257,7 @@ export const judgePanelSchema = z.object({
       sharePage: z.number(),
       shareWhy: z.string(),
       textOverArt: z.array(z.number()).optional(),
+      textTooBig: z.array(z.number()).optional(),
       unsafe: z.array(z.string()).optional(),
     })
     .nullable(),
@@ -349,27 +353,39 @@ export function judgeGateMessage(
   return `${head}${tail}`.slice(0, 500);
 }
 
-/** Nota máxima del comprador si el texto tapa el dibujo o es enorme (calibración de Sebas, 26 nov). */
+/** Nota máxima del comprador si el texto tapa el dibujo (calibración de Sebas, 26 nov). */
 export const BUYER_TEXT_OVER_ART_MAX = 3;
 
+/** Armados en los que el texto nunca va sobre el dibujo (DECISIONS 354). */
+export const textOwnBandLayout = (kind: string | undefined): boolean =>
+  kind === 'band' || kind === 'facing';
+
 /**
- * Calibración con los votos de Sebas (26 nov): el texto sobre el dibujo o demasiado grande fue su
- * motivo en 5 de 10 libros, y la mesa le había dado «compra» a uno así. Con texto encima del dibujo
- * el comprador no pasa de 3 ni de «duda»; con una situación peligrosa, «no».
+ * Calibración con los votos de Sebas (26 nov): el texto sobre el dibujo fue su motivo en 5 de 10
+ * libros, y la mesa le había dado «compra» a uno así. Con texto encima del dibujo el comprador no
+ * pasa de 3 ni de «duda»; con una situación peligrosa, «no». Si el armado pone el texto en su propia
+ * franja (band o facing), la marca de texto encima se descarta: en la ronda del 27 nov el juez la
+ * ponía en todas las páginas band aunque el texto no tocaba el dibujo (DECISIONS 358). La letra
+ * demasiado grande solo se anota en los reembolsos.
  */
 export function calibrateBuyerReview<
-  T extends Pick<BuyerReview, 'buy' | 'verdict' | 'refund' | 'textOverArt' | 'unsafe'>,
->(review: T): T {
+  T extends Pick<
+    BuyerReview,
+    'buy' | 'verdict' | 'refund' | 'textOverArt' | 'unsafe' | 'textTooBig'
+  >,
+>(review: T, options: { textOwnBand?: boolean } = {}): T {
   const out = { ...review, refund: [...review.refund] };
-  const covered = review.textOverArt ?? [];
+  const where = (pages: number[]) =>
+    pages.map((page) => (page === 0 ? 'la tapa' : `pág. ${String(page)}`)).join(', ');
+  if (options.textOwnBand) out.textOverArt = [];
+  const covered = out.textOverArt ?? [];
   if (covered.length > 0) {
     out.buy = Math.min(out.buy, BUYER_TEXT_OVER_ART_MAX);
     if (out.verdict === 'compra') out.verdict = 'duda';
-    const where = covered
-      .map((page) => (page === 0 ? 'la tapa' : `pág. ${String(page)}`))
-      .join(', ');
-    out.refund.push(`Texto encima del dibujo o demasiado grande (${where})`);
+    out.refund.push(`Texto encima del dibujo (${where(covered)})`);
   }
+  const big = review.textTooBig ?? [];
+  if (big.length > 0) out.refund.push(`Letra demasiado grande (${where(big)})`);
   const unsafe = review.unsafe ?? [];
   if (unsafe.length > 0) {
     out.buy = Math.min(out.buy, 2);
