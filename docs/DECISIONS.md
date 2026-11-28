@@ -3596,6 +3596,7 @@ Sebas: «el principal problema que veo continuamente es el texto sobre la imagen
 - **Tarjeta impresa del kit:** el frente pasa de franja degradé sobre la tapa a dibujo arriba (72 %, recorta la zona libre del título) y franja de papel abajo.
 - **Sin control `text_zone`:** las páginas `band` no tienen zona que vigilar, así que no hay rechazos ni reintentos por caras bajo el texto.
 - **Libros anteriores:** conservan su armado (`pageLayout` sin `band`). Aplica a muestras nuevas y a sus pedidos. La muestra, la página rehecha y el pedido piden la misma forma.
+- **27 nov, ronda band (6 casos, 18 páginas):** el texto no tocó el dibujo en ninguna. Pero 4 dibujos traían un pie pintado adentro (la escena en inglés), porque el prompt decía «el texto va impreso debajo». Ahora el pedido no menciona el texto: pide una ilustración a sangre, sin marco, pie, franja en blanco ni letras.
 
 ## 355 — Calibración con los votos de Sebas: texto sobre el dibujo y situaciones peligrosas (26 nov)
 

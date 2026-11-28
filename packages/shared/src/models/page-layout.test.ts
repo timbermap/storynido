@@ -225,7 +225,8 @@ describe('dibujo arriba, texto abajo (DECISIONS 354)', () => {
     expect(layout).toMatchObject({ kind: 'band', side: 'bottom', art: '4:3', zonePct: 44 });
     expect(artAspectOf(layout, words(20))).toBe('4:3');
     expect(textZoneOf(layout, words(20))).toEqual({});
-    expect(sceneNoteFor(layout, words(20))).toContain('never over it');
+    expect(sceneNoteFor(layout, words(20))).toContain('no caption');
+    expect(sceneNoteFor(layout, words(20))).not.toMatch(/text/i);
     // Sin texto, la ilustración va entera.
     expect(artAspectOf(layout, '')).toBe('3:4');
     expect(sceneNoteFor(layout, '')).toBe(WORDLESS_SCENE_NOTE);
