@@ -1333,7 +1333,8 @@ incoherent clothing or accessories (or clothes that do not fit the place, weathe
 who look nothing like the protagonist's family, missing or mixed-up characters, objects that contradict the text or the continuity and fixed looks
 below (a recurring object, place or outfit drawn differently is a repair), a hug, embrace, kiss, lap, carrying, lying together or hands on another person's body
 (except affection between the protagonist and their own parent, grandparent or sibling when the page text tells it: a hug, holding hands, being carried, a kiss on the forehead or cheek, never lying in bed together), bare midriffs or revealing clothes, cropped heads, a child upside down, in a backbend, bridge, handstand or cartwheel, or framed from a low angle or in close-up on the body (swimwear included), and any letters or
-words drawn inside the image (textInImage). Check each essential trait below against what you observe (continuityChecks); the hairstyle
+words drawn inside the image (textInImage), in any language, including a caption strip, banner, label or block of text painted
+along the top or bottom of the picture. Check each essential trait below against what you observe (continuityChecks); the hairstyle
 counts as a trait: braids, a ponytail, buns or a fringe on the reference sheet must be drawn the same (loose hair instead of braids is a repair).
 Then read the page text as the parent will, sentence by sentence, and compare it with the picture: every person, animal and object
 the text says is here now must be visible (a dog that barks next to the child, the rubber duck in the bath, the friend who wears glasses); the
