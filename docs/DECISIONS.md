@@ -3619,3 +3619,7 @@ Sebas votó 10 libros del golden set (página de calibración, colección `calib
 - **Qué pasaba:** Search Console (27 nov) marcaba 10 páginas «no encontradas»: `/es/legal/privacy`, `/en/legal/termos`, `/pt/legal/privacy`, `/es/blog/personalized-books-and-reading`, `/blog/livros-personalizados-e-leitura`… Son slugs válidos en un idioma pegados a otro (los rastreadores sin idioma van a `/es`).
 - **Cómo:** la página legal busca el slug en todos los idiomas y redirige (308) al mismo documento con el slug del idioma de la URL; el artículo del blog redirige al idioma donde existe (cada uno está en uno solo). Un slug que no existe en ningún idioma sigue dando 404.
 - **Lo demás del informe es normal:** páginas con `?lesson=` / `?line=` (canónica sin parámetros), `/crear` y `/ingresar` con noindex, `/mis-cuentos`, admin y staging bloqueados en robots, y redirecciones de rutas sin idioma o de `www`/`http`.
+
+## 356 — MAYÚSCULAS solo de 5 a 6 años (28 nov)
+
+En la ronda band del 27 nov, el juez comprador se quejó de que todo el texto salía en MAYÚSCULAS en 3 de los 6 libros. Sebas eligió MAYÚSCULAS solo de 5 a 6 años (español y portugués), porque a esa edad el chico empieza a leer solo con la imprenta mayúscula. De 0 a 4 años lee el adulto: el texto va en mayúscula y minúscula, que se lee mejor y ocupa menos. Sigue Quicksand de 0 a 6. Reemplaza el punto de mayúsculas de la tipografía por edad (de 0 a 6). Aplica a muestras y pedidos nuevos; los ya generados toman la letra de su franja al rearmar el PDF.
