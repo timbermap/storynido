@@ -36,10 +36,12 @@ describe('QR de la contratapa', () => {
 describe('letra por edad del libro congelado', () => {
   it('los libros anteriores a las franjas se arman como siempre (sin letra por edad)', () => {
     expect(typographyOf({ language: 'es' })).toBeNull();
+    // MAYÚSCULAS solo de 5 a 6 (DECISIONS 356).
     expect(typographyOf({ language: 'es', ageBand: '3-4', textBand: '3-4' })).toMatchObject({
       font: 'quicksand',
-      uppercase: true,
+      uppercase: false,
     });
+    expect(typographyOf({ language: 'es', ageBand: '5-6', textBand: '5-6' })?.uppercase).toBe(true);
     expect(typographyOf({ language: 'en', ageBand: '3-4', textBand: '3-4' })?.uppercase).toBe(
       false,
     );
