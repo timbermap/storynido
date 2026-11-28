@@ -3596,6 +3596,7 @@ Sebas: «el principal problema que veo continuamente es el texto sobre la imagen
 - **Tarjeta impresa del kit:** el frente pasa de franja degradé sobre la tapa a dibujo arriba (72 %, recorta la zona libre del título) y franja de papel abajo.
 - **Sin control `text_zone`:** las páginas `band` no tienen zona que vigilar, así que no hay rechazos ni reintentos por caras bajo el texto.
 - **Libros anteriores:** conservan su armado (`pageLayout` sin `band`). Aplica a muestras nuevas y a sus pedidos. La muestra, la página rehecha y el pedido piden la misma forma.
+- **27 nov, ronda band (6 casos, 18 páginas):** el texto no tocó el dibujo en ninguna. Pero 4 dibujos traían un pie pintado adentro (la escena en inglés), porque el prompt decía «el texto va impreso debajo». Ahora el pedido no menciona el texto: pide una ilustración a sangre, sin marco, pie, franja en blanco ni letras.
 
 ## 355 — Calibración con los votos de Sebas: texto sobre el dibujo y situaciones peligrosas (26 nov)
 
@@ -3628,3 +3629,7 @@ La ronda de 6 libros con el armado band (US$3,93) mostró que el texto ya no cae
 - Comprador y continuidad (muchas imágenes) usan el tiempo largo con un reintento, y un corte de red («fetch failed») se reintenta hasta 3 veces: en la ronda se perdieron 5 juicios por eso.
 - Siguen reales y fuera de este cambio: texto pintado dentro del dibujo que `no_text_in_image` no detectó (4 de 18 páginas) y dos situaciones peligrosas (borde de piscina vacía, irse de la mano con una desconocida).
 - El freno se maneja desde Admin → IA («Freno de la mesa de jueces»: según el ambiente, encendido o apagado), con auditoría como el resto de la configuración de IA. Sebas pidió encenderlo en producción el 28 nov con estos arreglos.
+
+## 359 — MAYÚSCULAS solo de 5 a 6 años (28 nov)
+
+En la ronda band del 27 nov, el juez comprador se quejó de que todo el texto salía en MAYÚSCULAS en 3 de los 6 libros. Sebas eligió MAYÚSCULAS solo de 5 a 6 años (español y portugués), porque a esa edad el chico empieza a leer solo con la imprenta mayúscula. De 0 a 4 años lee el adulto: el texto va en mayúscula y minúscula, que se lee mejor y ocupa menos. Sigue Quicksand de 0 a 6. Reemplaza el punto de mayúsculas de la tipografía por edad (de 0 a 6). Aplica a muestras y pedidos nuevos; los ya generados toman la letra de su franja al rearmar el PDF.

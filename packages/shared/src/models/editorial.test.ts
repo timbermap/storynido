@@ -210,14 +210,16 @@ describe('páginas sin texto', () => {
 });
 
 describe('tipografía por edad', () => {
-  it('de 0 a 6, Quicksand en MAYÚSCULAS en español y portugués; en inglés no', () => {
+  it('de 0 a 6, Quicksand; MAYÚSCULAS solo de 5 a 6 en español y portugués (DECISIONS 359)', () => {
     expect(storyTypography('3-4', '3-4', 'es')).toEqual({
       font: 'quicksand',
       minPt: 22,
       maxPt: 26,
-      uppercase: true,
+      uppercase: false,
     });
-    expect(storyTypography('0-2', '0-2', 'pt').uppercase).toBe(true);
+    expect(storyTypography('0-2', '0-2', 'pt').uppercase).toBe(false);
+    expect(storyTypography('5-6', '5-6', 'es').uppercase).toBe(true);
+    expect(storyTypography('5-6', '3-4', 'pt').uppercase).toBe(true);
     expect(storyTypography('5-6', '5-6', 'en').uppercase).toBe(false);
   });
 
@@ -230,7 +232,7 @@ describe('tipografía por edad', () => {
     expect(storyTypography('3-4', '5-6', 'es')).toMatchObject({
       font: 'quicksand',
       maxPt: 22,
-      uppercase: true,
+      uppercase: false,
     });
   });
 });

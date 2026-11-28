@@ -329,7 +329,9 @@ export function layoutSceneNote(layout: PageLayout): string {
       return ' Full drawing for a coloring page: the text goes in a separate white band below the drawing, so no empty area for text is needed. Keep the main character whole and away from the edges.';
     case 'band': {
       const frame = layout.art === '1:1' ? 'square' : 'landscape';
-      return ` The text is printed on plain paper below the picture, never over it: fill the whole ${frame} frame with the scene, edge to edge, with no empty or plain area reserved for text. Show the protagonist whole and clearly, in a medium shot (never tiny in the distance), with faces and hands away from the edges.`;
+      // Sin mencionar el texto: «el texto va debajo» hacía que el modelo pintara un pie con la
+      // escena en inglés dentro de la imagen (ronda band, 27 nov: 4 de 18 páginas).
+      return ` A full-bleed ${frame} illustration: the scene fills the whole frame, edge to edge, with no border, no frame, no caption, no blank strip and no lettering of any kind. Show the protagonist whole and clearly, in a medium shot (never tiny in the distance), with faces and hands away from the edges.`;
     }
     case 'facing':
       return ' Full-page illustration with the whole scene: the text goes on the facing page, so no empty area for text is needed. Keep faces away from the edges.';

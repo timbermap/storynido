@@ -286,12 +286,15 @@ describe.skipIf(!chromePath())('PDF', () => {
     expect(result.overflow).toEqual([]);
   }, 30_000);
 
-  it('letra por edad: Quicksand en MAYÚSCULAS de 0 a 6 (es), Andika de 7 a 8; sin ella, como siempre', () => {
+  it('letra por edad: Quicksand de 0 a 6 (MAYÚSCULAS solo 5-6 en es), Andika de 7 a 8; sin ella, como siempre', () => {
     const small = digitalHtml(
       book({ typography: storyTypography('3-4', '3-4', 'es') }),
       FORMAT_SPECS.digital,
     );
-    expect(small).toContain('class="story f-quicksand upper"');
+    expect(small).toContain('class="story f-quicksand"');
+    expect(
+      digitalHtml(book({ typography: storyTypography('5-6', '5-6', 'es') }), FORMAT_SPECS.digital),
+    ).toContain('class="story f-quicksand upper"');
     expect(small).toContain("font-family:'Quicksand'");
     expect(small).toContain('data-font-pt="26.00"');
     // El tamaño de la franja reemplaza la escala por nivel y la del mini cuento.
