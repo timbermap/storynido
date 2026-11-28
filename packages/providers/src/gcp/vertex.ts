@@ -256,6 +256,12 @@ export class VertexClient {
           timedOut = true;
           continue;
         }
+        // Corte de red («fetch failed»): hasta 3 intentos con espera, como un 5xx (ronda del 27 nov).
+        const isNetwork = error instanceof TypeError;
+        if (isNetwork && attempt < 3) {
+          await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** attempt));
+          continue;
+        }
         throw error;
       }
       if (res.ok) {
@@ -610,6 +616,7 @@ const BUYER_REVIEW_SCHEMA = {
     sharePage: { type: 'INTEGER' },
     shareWhy: { type: 'STRING' },
     textOverArt: { type: 'ARRAY', items: { type: 'INTEGER' } },
+    textTooBig: { type: 'ARRAY', items: { type: 'INTEGER' } },
     unsafe: { type: 'ARRAY', items: { type: 'STRING' } },
   },
   required: [
@@ -625,6 +632,7 @@ const BUYER_REVIEW_SCHEMA = {
     'sharePage',
     'shareWhy',
     'textOverArt',
+    'textTooBig',
     'unsafe',
   ],
 };
@@ -1427,18 +1435,29 @@ Answer in Spanish, from your own point of view as this customer:
 - shareWhy: in one short sentence, why that page (or why none) makes people want one for their own child.
 - textOverArt: the pages (0 = the cover title is fine, list 0 only if the cover title covers a face) where the text sits ON TOP of the
   drawing: over the scene, over a character or object, or on a fade, gradient or translucent band laid over the scene. Text on its own
-  clear area (a plain margin, a solid band or a white page next to the picture) is fine. Also list pages whose text is far too big for a
-  picture book page or is all in capital letters. Real parents ask for refunds over this, so look at every page. Empty if none.
+  clear area (a plain paper margin or strip below the picture, or a page next to it) is fine and must NOT be listed. Only the position
+  counts here, not the size or the letters. Real parents ask for refunds over this, so look at every page. Empty if none.${
+    request.textOwnBand
+      ? '\n  In this book the text is printed on its own paper strip below each picture by design.'
+      : ''
+  }
+- textTooBig: the pages whose letters are clearly too big for the page. Capital letters are a deliberate choice for early readers of
+  this age, so never list a page only because it is in capitals. Empty if none.
 - unsafe: things in the drawings or the text that are dangerous or wrong for a young child and a parent would reject (a baby bottle in
   the bathtub, a child alone near water, fire or a road, choking hazards for a baby, medicine as a toy, ...). Short, with the page. Empty if none.`,
     });
-    const { response, usage } = await this.client.generate(this.model, parts, {
-      temperature: 0,
-      responseMimeType: 'application/json',
-      responseSchema: BUYER_REVIEW_SCHEMA,
-    });
+    const { response, usage } = await this.client.generate(
+      this.model,
+      parts,
+      {
+        temperature: 0,
+        responseMimeType: 'application/json',
+        responseSchema: BUYER_REVIEW_SCHEMA,
+      },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
+    );
     const review = parseJson(response, 'juez comprador') as Omit<BuyerReview, 'usage'>;
-    return { ...calibrateBuyerReview(review), usage };
+    return { ...calibrateBuyerReview(review, { textOwnBand: request.textOwnBand }), usage };
   }
 
   /**
@@ -1476,11 +1495,16 @@ Answer in Spanish:
   object) and what changed (short). Empty if none.
 - fixes: ${FIXES_INSTRUCTION}.`,
     });
-    const { response, usage } = await this.client.generate(this.model, parts, {
-      temperature: 0,
-      responseMimeType: 'application/json',
-      responseSchema: CONTINUITY_REVIEW_SCHEMA,
-    });
+    const { response, usage } = await this.client.generate(
+      this.model,
+      parts,
+      {
+        temperature: 0,
+        responseMimeType: 'application/json',
+        responseSchema: CONTINUITY_REVIEW_SCHEMA,
+      },
+      { timeoutMs: LONG_TEXT_TIMEOUT_MS, budgetMs: LONG_TEXT_BUDGET_MS },
+    );
     const review = parseJson(response, 'juez de continuidad') as Omit<ContinuityReview, 'usage'>;
     return { ...review, usage };
   }

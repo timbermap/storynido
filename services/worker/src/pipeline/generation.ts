@@ -98,6 +98,7 @@ import {
   mediumFor,
   onlySoftRejection,
   NO_TEXT_OBJECTS_HINT,
+  textOwnBandLayout,
 } from '@storynido/shared';
 import { previewFingerprint } from '@storynido/shared/server';
 import type { FastifyBaseLogger } from 'fastify';
@@ -2291,13 +2292,16 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
       const typography = typographyOf(snapshot);
       const composed: ImageData[] = [];
       const drawn: ImageData[] = [];
+      let textOwnBand = true;
       for (const [index, page] of snapshot.pages.slice(0, JUDGE_PANEL_PAGES).entries()) {
         const path = images.get(index + 1);
         if (!path) continue;
         const raw = await load(path);
         drawn.push(raw);
+        const layout = layoutOf(snapshot, index);
+        if (!textOwnBandLayout(layout.kind)) textOwnBand = false;
         composed.push({
-          bytes: await composePage(raw.bytes, layoutOf(snapshot, index), page.text, typography),
+          bytes: await composePage(raw.bytes, layout, page.text, typography),
           mimeType: 'image/webp',
         });
       }
@@ -2335,6 +2339,7 @@ export function generationHandlers(deps: Deps): PipelineHandlers {
           style: snapshot.stylePrompt.slice(0, 300),
           cover: await load(coverPath),
           composed,
+          textOwnBand: composed.length > 0 && textOwnBand,
           drawn,
           reference: await load(snapshot.character.sheetPath),
           companionReference: snapshot.companion ? await load(snapshot.companion.sheetPath) : null,
