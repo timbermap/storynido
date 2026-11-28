@@ -102,7 +102,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
- * La invitación gratis para WhatsApp (DECISIONS 356): la imagen 4:5 con la franja de StoryNido, armada
+ * La invitación gratis para WhatsApp (DECISIONS 359): la imagen 4:5 con la franja de StoryNido, armada
  * en el navegador (sin IA ni servidor). En el celular abre el menú de compartir con la imagen; en la
  * compu la descarga. Al pagar, la del kit sale sin franja.
  */

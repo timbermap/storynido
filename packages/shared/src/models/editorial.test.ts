@@ -210,7 +210,7 @@ describe('páginas sin texto', () => {
 });
 
 describe('tipografía por edad', () => {
-  it('de 0 a 6, Quicksand; MAYÚSCULAS solo de 5 a 6 en español y portugués (DECISIONS 356)', () => {
+  it('de 0 a 6, Quicksand; MAYÚSCULAS solo de 5 a 6 en español y portugués (DECISIONS 359)', () => {
     expect(storyTypography('3-4', '3-4', 'es')).toEqual({
       font: 'quicksand',
       minPt: 22,

@@ -44,6 +44,11 @@ export const aiConfigSchema = z.object({
    * veces, una imagen más, también en muestras que nunca se compran.
    */
   reviewPreviews: z.boolean().default(false),
+  /**
+   * Freno de la mesa de jueces (DECISIONS 353): «auto» sigue el ambiente (encendido en staging),
+   * «on» lo enciende y «off» lo apaga. Lo lee el worker en cada pedido.
+   */
+  judgeGate: z.enum(['auto', 'on', 'off']).default('auto'),
   dailyBudgetUsd: z.number().nonnegative(),
   budgetAlertPercent: z.number().int().min(1).max(100),
   updatedAt: z.date(),

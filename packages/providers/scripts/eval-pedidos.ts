@@ -79,6 +79,7 @@ import {
   type Panel,
   type PageLayout,
   type StoryPlan,
+  textOwnBandLayout,
 } from '@storynido/shared';
 import sharp from 'sharp';
 
@@ -772,6 +773,7 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
       );
       const composed: ImageData[] = [];
       const drawnPages: ImageData[] = [];
+      let textOwnBand = true;
       for (const page of draft.pages.slice(0, pagesToDraw)) {
         const scene = storyPlan.scenes.find((item) => item.pageIndex === page.index);
         const bible = visualBibleCheck(storyPlan, scene);
@@ -804,6 +806,7 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
         );
         // La página como la ve el cliente: dibujo, papel fundido y texto con la misma geometría.
         const bytes = await composePage(img.bytes, layout, pageText, typography);
+        if (!textOwnBandLayout(layout.kind)) textOwnBand = false;
         await sharp(bytes).toFile(path.join(outDir, `${tag}-${file}-armada.webp`));
         composed.push({ bytes, mimeType: 'image/webp' });
         drawnPages.push(img);
@@ -824,6 +827,7 @@ for (const [round, testCase, arm] of Array.from({ length: runs }, (_, index) => 
           style: `${style.name.es}: ${style.promptModifier.slice(0, 200)}`,
           cover,
           composed,
+          textOwnBand: composed.length > 0 && textOwnBand,
           drawn: drawnPages,
           reference: lamina,
           companion: storyPlan.companion?.name ?? null,

@@ -3620,6 +3620,16 @@ Sebas votó 10 libros del golden set (página de calibración, colección `calib
 - **Cómo:** la página legal busca el slug en todos los idiomas y redirige (308) al mismo documento con el slug del idioma de la URL; el artículo del blog redirige al idioma donde existe (cada uno está en uno solo). Un slug que no existe en ningún idioma sigue dando 404.
 - **Lo demás del informe es normal:** páginas con `?lesson=` / `?line=` (canónica sin parámetros), `/crear` y `/ingresar` con noindex, `/mis-cuentos`, admin y staging bloqueados en robots, y redirecciones de rutas sin idioma o de `www`/`http`.
 
-## 356 — MAYÚSCULAS solo de 5 a 6 años (28 nov)
+## 358 — Ronda band del 27 nov: el comprador no marca texto encima cuando va en su franja (27 nov)
+
+La ronda de 6 libros con el armado band (US$3,93) mostró que el texto ya no cae sobre el dibujo en ninguna de las 18 páginas, pero el comprador igual marcaba «texto encima» en todas y bajaba la nota: la regla de 355 mezclaba posición con tamaño y mayúsculas.
+
+- `textOverArt` ahora es solo posición. Con armado band o facing (`textOwnBandLayout`), la mesa recibe `textOwnBand` y `calibrateBuyerReview` descarta esa marca: el armado no deja que el texto tape el dibujo.
+- La letra demasiado grande va a `textTooBig` y solo se anota en los reembolsos. Las mayúsculas son elección editorial para lectores chicos y el juez no las cuenta.
+- Comprador y continuidad (muchas imágenes) usan el tiempo largo con un reintento, y un corte de red («fetch failed») se reintenta hasta 3 veces: en la ronda se perdieron 5 juicios por eso.
+- Siguen reales y fuera de este cambio: texto pintado dentro del dibujo que `no_text_in_image` no detectó (4 de 18 páginas) y dos situaciones peligrosas (borde de piscina vacía, irse de la mano con una desconocida).
+- El freno se maneja desde Admin → IA («Freno de la mesa de jueces»: según el ambiente, encendido o apagado), con auditoría como el resto de la configuración de IA. Sebas pidió encenderlo en producción el 28 nov con estos arreglos.
+
+## 359 — MAYÚSCULAS solo de 5 a 6 años (28 nov)
 
 En la ronda band del 27 nov, el juez comprador se quejó de que todo el texto salía en MAYÚSCULAS en 3 de los 6 libros. Sebas eligió MAYÚSCULAS solo de 5 a 6 años (español y portugués), porque a esa edad el chico empieza a leer solo con la imprenta mayúscula. De 0 a 4 años lee el adulto: el texto va en mayúscula y minúscula, que se lee mejor y ocupa menos. Sigue Quicksand de 0 a 6. Reemplaza el punto de mayúsculas de la tipografía por edad (de 0 a 6). Aplica a muestras y pedidos nuevos; los ya generados toman la letra de su franja al rearmar el PDF.

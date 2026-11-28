@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { AITextProvider, AiUsage, ImageData } from './ai';
 import {
   calibrateBuyerReview,
+  textOwnBandLayout,
   hasJudgePanel,
   JUDGE_GATE_CODE,
   judgeGate,
@@ -182,5 +183,25 @@ describe('calibrateBuyerReview (votos de Sebas, 26 nov)', () => {
       textOverArt: [],
       unsafe: [],
     });
+  });
+});
+
+describe('calibrateBuyerReview con texto en su franja (ronda band, 27 nov)', () => {
+  const base = { buy: 4, verdict: 'compra' as const, refund: [] as string[], unsafe: [] };
+  it('descarta la marca de texto encima si el armado es band', () => {
+    const out = calibrateBuyerReview({ ...base, textOverArt: [1, 2, 3] }, { textOwnBand: true });
+    expect(out.buy).toBe(4);
+    expect(out.verdict).toBe('compra');
+    expect(out.textOverArt).toEqual([]);
+  });
+  it('la letra grande solo se anota', () => {
+    const out = calibrateBuyerReview({ ...base, textOverArt: [], textTooBig: [2] });
+    expect(out.buy).toBe(4);
+    expect(out.refund).toEqual(['Letra demasiado grande (pág. 2)']);
+  });
+  it('band o facing', () => {
+    expect(textOwnBandLayout('band')).toBe(true);
+    expect(textOwnBandLayout('facing')).toBe(true);
+    expect(textOwnBandLayout('calm')).toBe(false);
   });
 });

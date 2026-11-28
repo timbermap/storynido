@@ -21,7 +21,7 @@ export const AGE_TYPOGRAPHY: Record<AgeBand, { font: StoryFont; minPt: number; m
 /**
  * Franjas en MAYÚSCULAS: solo 5-6 años, cuando el chico empieza a leer y la imprenta mayúscula es
  * la primera letra que aprende. De 0 a 4 lee el adulto: mayúscula y minúscula, que se lee mejor y
- * ocupa menos (Sebas, 28 nov 2026, DECISIONS 356; antes, de 0 a 6).
+ * ocupa menos (Sebas, 28 nov 2026, DECISIONS 359; antes, de 0 a 6).
  */
 const UPPERCASE_BANDS: readonly AgeBand[] = ['5-6'];
 

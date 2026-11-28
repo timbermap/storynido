@@ -609,6 +609,6 @@ export function imageContractNote(input: {
     "no_touch: anyone outside the protagonist's family in that list touching the protagonist, or the protagonist touching them (a doctor, dentist or therapist works at arm's length with a tool); affection with the family in that list (a hug, holding hands, being carried, a kiss on the forehead or cheek) is fine, never lying in bed together.",
     'same_outfit: the protagonist wears the outfit of the reference sheet unless the scene plan or the page text names other clothes for this scene (a helmet, a towel, pajamas).',
     'chosen_style: the illustration is drawn in the same art technique as the reference sheet.',
-    'no_text_in_image: letters or words drawn in the image.',
+    'no_text_in_image: letters or words drawn in the image, in any language, including a caption strip, banner or block of text painted along the top or bottom of the picture.',
   ].join('\n');
 }
